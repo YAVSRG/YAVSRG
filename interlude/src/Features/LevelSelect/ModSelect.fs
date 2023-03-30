@@ -42,10 +42,10 @@ type private ModSelectPage(onClose) as this =
                 Setting.make (fun _ -> Setting.app (ModState.cycleState id) selectedMods) (fun _ -> selectedMods.Value.ContainsKey id))
         mods
         |+ Dummy()
-        |+ ModCard(L"options.gameplay.pacemaker.enable.name", L"options.gameplay.pacemaker.enable.tooltip",
+        |+ ModCard(L"gameplay.pacemaker.enable.name", L"gameplay.pacemaker.enable.tooltip",
             Setting.make (fun _ -> enablePacemaker <- not enablePacemaker) (fun _ -> enablePacemaker))
         |* PrettyButton("gameplay.pacemaker", fun () -> PacemakerPage().Show())
-            .Tooltip(Tooltip.Info("options.gameplay.pacemaker"))
+            .Tooltip(Tooltip.Info("gameplay.pacemaker"))
 
     do
         this.Content(
@@ -53,7 +53,7 @@ type private ModSelectPage(onClose) as this =
             |+ mods
         )
 
-    override this.Title = L"options.mods.name"
+    override this.Title = L"mods.name"
     override this.OnClose() = onClose()
 
 type ModSelect(onClose) =

@@ -40,7 +40,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                     if CollectionManager.remove_from(name, Library.collections.Get(name).Value, cc, context) then Menu.Back()
                 ),
                 Icon = Icons.remove_from_collection,
-                Text = Localisation.localiseWith [name] "options.chart.remove_from_collection.name"
+                Text = Localisation.localiseWith [name] "chart.remove_from_collection.name"
             )
         | LibraryContext.Table lvl ->
             content
@@ -50,7 +50,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                     if CollectionManager.remove_from(lvl, Level (Table.current().Value.TryLevel(lvl).Value), cc, context) then Menu.Back()
                 ),
                 Icon = Icons.remove_from_collection,
-                Text = Localisation.localiseWith [options.Table.Value.Value] "options.chart.remove_from_collection.name"
+                Text = Localisation.localiseWith [options.Table.Value.Value] "chart.remove_from_collection.name"
             )
 
         if options.EnableTableEdit.Value then
@@ -63,7 +63,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                         "chart.add_to_table",
                         (fun () -> SelectTableLevelPage(fun level -> if CollectionManager.add_to(level.Name, Level level, cc) then Menu.Back()).Show()),
                         Icon = Icons.add_to_collection,
-                        Text = Localisation.localiseWith [table.Name] "options.chart.add_to_table.name"
+                        Text = Localisation.localiseWith [table.Name] "chart.add_to_table.name"
                     )
             | None -> ()
 
@@ -89,6 +89,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         let content = 
             FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
             |+ PrettyButton("group.delete", (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)), Icon = Icons.delete)
+                .Tooltip(Tooltip.Info("group.delete"))
         this.Content content
 
     override this.Title = name

@@ -32,9 +32,9 @@ type ThemesPage() as this =
         let ns = Noteskins.Current.instance
         match ns.Source with
         | Zip (_, Some file) ->
-            ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractzip", Noteskins.extractCurrent).Show()
+            ConfirmPage(Localisation.localiseWith [ns.Config.Name] "themes.confirmextractzip", Noteskins.extractCurrent).Show()
         | Zip (_, None) ->
-            ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractdefault", Noteskins.extractCurrent).Show()
+            ConfirmPage(Localisation.localiseWith [ns.Config.Name] "themes.confirmextractdefault", Noteskins.extractCurrent).Show()
         | Folder _ -> Menu.ShowPage EditNoteskinPage
 
     let tryEditTheme() =
@@ -42,7 +42,7 @@ type ThemesPage() as this =
         match theme.Source with
         | Zip (_, None) ->
             ConfirmPage(
-                Localisation.localiseWith [theme.Config.Name] "options.themes.confirmextractdefault",
+                Localisation.localiseWith [theme.Config.Name] "themes.confirmextractdefault",
                 (fun () -> Themes.createNew(System.Guid.NewGuid().ToString()))
             ).Show()
         | Folder _ -> EditThemePage().Show()
@@ -55,27 +55,27 @@ type ThemesPage() as this =
             column()
             |+ themes
                 .Pos(200.0f)
-                .Tooltip(Tooltip.Info("options.themes.theme"))
+                .Tooltip(Tooltip.Info("themes.theme"))
             |+ PrettyButton("themes.edittheme", tryEditTheme)
                 .Pos(270.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme"))
+                .Tooltip(Tooltip.Info("themes.edittheme"))
             |+ PrettyButton("themes.showthemesfolder", fun () -> openDirectory (getDataPath "Themes"))
                 .Pos(340.0f)
-                .Tooltip(Tooltip.Info("options.themes.showthemesfolder"))
+                .Tooltip(Tooltip.Info("themes.showthemesfolder"))
 
             |+ noteskins
                 .Pos(500.0f)
-                .Tooltip(Tooltip.Info("options.themes.noteskin"))
+                .Tooltip(Tooltip.Info("themes.noteskin"))
             |+ PrettyButton("themes.editnoteskin", tryEditNoteskin)
                 .Pos(570.0f)
-                .Tooltip(Tooltip.Info("options.themes.editnoteskin"))
+                .Tooltip(Tooltip.Info("themes.editnoteskin"))
             |+ PrettyButton("themes.shownoteskinsfolder", fun () -> openDirectory (getDataPath "Noteskins"))
                 .Pos(640.0f)
-                .Tooltip(Tooltip.Info("options.themes.shownoteskinsfolder"))
+                .Tooltip(Tooltip.Info("themes.shownoteskinsfolder"))
             |+ preview
         )
 
     override this.OnClose() = ()
     override this.OnDestroy() = preview.Destroy()
     override this.OnReturnTo() = refresh()
-    override this.Title = L"options.themes.name"
+    override this.Title = L"themes.name"

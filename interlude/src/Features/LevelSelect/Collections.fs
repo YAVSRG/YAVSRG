@@ -96,7 +96,7 @@ type private CreateFolderPage() as this =
                 (fun () -> if collections.CreateFolder(new_name.Value, icon.Value).IsSome then Collections.select new_name.Value; Menu.Back() )).Pos(400.0f)
         )
 
-    override this.Title = L"options.collections.create_folder.name"
+    override this.Title = L"collections.create_folder.name"
     override this.OnClose() = ()
 
     static member Icons = 
@@ -124,7 +124,7 @@ type private CreatePlaylistPage() as this =
                 (fun () -> if collections.CreatePlaylist(new_name.Value, icon.Value).IsSome then Collections.select new_name.Value; Menu.Back() )).Pos(400.0f)
         )
 
-    override this.Title = L"options.collections.create_playlist.name"
+    override this.Title = L"collections.create_playlist.name"
     override this.OnClose() = ()
 
     static member Icons =
@@ -161,7 +161,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
             |+ PrettyButton("collections.edit.select", 
                 (fun () -> Collections.select name; Menu.Back()) )
                 .Pos(500.0f)
-                .Tooltip(Tooltip.Info("options.collections.edit.select"))
+                .Tooltip(Tooltip.Info("collections.edit.select"))
 
             |+ if options.Collection.Value = ActiveCollection.Collection name then
                 Text(L"collections.selected.this",
@@ -211,7 +211,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
             |+ PrettyButton("collections.edit.select", 
                 (fun () -> Collections.select name; Menu.Back()) )
                 .Pos(500.0f)
-                .Tooltip(Tooltip.Info("options.collections.edit.select"))
+                .Tooltip(Tooltip.Info("collections.edit.select"))
             
             |+ if options.Collection.Value = ActiveCollection.Collection name then
                 Text(L"collections.selected.this",
@@ -264,9 +264,9 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
         container.Clear()
         container
         |+ PrettyButton("collections.create_folder", (fun () -> Menu.ShowPage CreateFolderPage))
-            .Tooltip(Tooltip.Info("options.collections.create_folder"))
+            .Tooltip(Tooltip.Info("collections.create_folder"))
         |+ PrettyButton("collections.create_playlist", (fun () -> Menu.ShowPage CreatePlaylistPage))
-            .Tooltip(Tooltip.Info("options.collections.create_playlist"))
+            .Tooltip(Tooltip.Info("collections.create_playlist"))
         |* Dummy()
         for name, collection in collections.List do
             match collection with
@@ -290,7 +290,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
 
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
 
-    override this.Title = L"options.collections.name"
+    override this.Title = L"collections.name"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh()
 

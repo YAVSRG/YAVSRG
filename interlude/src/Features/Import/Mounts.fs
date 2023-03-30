@@ -32,14 +32,14 @@ module Mounts =
                 column()
                 |+ PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup)
                     .Pos(200.0f)
-                    .Tooltip(Tooltip.Info("options.mount.importatstartup"))
+                    .Tooltip(Tooltip.Info("mount.importatstartup"))
                 |+ PrettyButton.Once(
                         "mount.import",
                         fun () -> 
                             import <- true
                             Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "") )
                     .Pos(300.0f)
-                    .Tooltip(Tooltip.Info("options.mount.import"))
+                    .Tooltip(Tooltip.Info("mount.import"))
                 |+ PrettyButton.Once(
                         "mount.importall",
                         fun () -> 
@@ -47,10 +47,10 @@ module Mounts =
                             mount.LastImported <- System.DateTime.UnixEpoch
                             Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "") )
                     .Pos(400.0f)
-                    .Tooltip(Tooltip.Info("options.mount.importall"))
+                    .Tooltip(Tooltip.Info("mount.importall"))
             )
 
-        override this.Title = L"options.mount.name"
+        override this.Title = L"mount.name"
         override this.OnClose() =
             setting.Value <- Some { mount with ImportOnStartup = importOnStartup.Value }
             if import then import_mounted_source.Request(setting.Value.Value, ignore)

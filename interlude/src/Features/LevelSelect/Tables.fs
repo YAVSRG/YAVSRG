@@ -30,7 +30,7 @@ type private CreateTablePage() as this =
                 (fun () -> if Table.create(new_name.Value, int keymode.Value, Rulesets.current) then options.Table.Set (Some new_name.Value); Menu.Back() )).Pos(400.0f)
         )
 
-    override this.Title = L"options.tables.create.name"
+    override this.Title = L"tables.create.name"
     override this.OnClose() = ()
     
 type private CreateLevelPage() as this =
@@ -48,7 +48,7 @@ type private CreateLevelPage() as this =
                 .Pos(300.0f)
         )
     
-    override this.Title = L"options.tables.create.name"
+    override this.Title = L"tables.create.name"
     override this.OnClose() = ()
 
 type private EditLevelPage(level: Level) as this =
@@ -76,7 +76,7 @@ type private EditLevelPage(level: Level) as this =
             |+ PrettyButton("collections.edit.select", 
                 (fun () -> Collections.select_level level.Name; Menu.Back()) )
                 .Pos(500.0f)
-                .Tooltip(Tooltip.Info("options.collections.edit.select"))
+                .Tooltip(Tooltip.Info("collections.edit.select"))
 
         this.Content content
 
@@ -174,7 +174,7 @@ type ManageTablesPage() as this =
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
         this |* WIP()
 
-    override this.Title = L"options.table.name"
+    override this.Title = L"table.name"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh()
 
@@ -201,6 +201,6 @@ type SelectTableLevelPage(action: Level -> unit) as this =
 
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
 
-    override this.Title = L"options.table.name"
+    override this.Title = L"table.name"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh()

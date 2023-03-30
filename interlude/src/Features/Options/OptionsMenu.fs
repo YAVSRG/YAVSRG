@@ -28,21 +28,21 @@ module OptionsMenuRoot =
             GoodButton(
                 Callout.Normal
                     .Icon(Icons.system)
-                    .Title(L"options.system.name"),
+                    .Title(L"system.name"),
                 fun () -> Menu.ShowPage System.SystemPage)
 
         let gameplay =
             GoodButton(
                 Callout.Normal
                     .Icon(Icons.gameplay)
-                    .Title(L"options.gameplay.name"),
+                    .Title(L"gameplay.name"),
                 fun () -> Menu.ShowPage Gameplay.GameplayPage)
                 
         let themes =
             GoodButton(
                 Callout.Normal
                     .Icon(Icons.themes)
-                    .Title(L"options.themes.name"),
+                    .Title(L"themes.name"),
                 fun () -> Menu.ShowPage Themes.ThemesPage)
 
         do

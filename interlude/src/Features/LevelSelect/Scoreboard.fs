@@ -36,7 +36,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
                 Icon = Icons.goal,
                 Enabled = Network.lobby.IsNone)
                 .Pos(340.0f)
-                .Tooltip(Tooltip.Info("options.score.challenge"))
+                .Tooltip(Tooltip.Info("score.challenge"))
         )
     override this.Title = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
     override this.OnClose() = ()

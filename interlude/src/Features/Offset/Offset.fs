@@ -279,5 +279,5 @@ type OffsetPage(chart: Chart) as this =
             |+ Conditional((fun () -> tab = 2), AudioSync(chart, fun () -> tab <- 0), Position = Position.TrimTop(60.0f + height))
         )
 
-    override this.Title = L"options.offset.name"
+    override this.Title = L"offset.name"
     override this.OnClose() = ()

@@ -61,7 +61,7 @@ module Rulesets =
 
             this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 150.0f)) )
 
-        override this.Title = L"options.gameplay.rulesets.name"
+        override this.Title = L"gameplay.rulesets.name"
         override this.OnClose() = ()
     
     type QuickSwitcher(setting: Setting<string>) =
@@ -138,17 +138,19 @@ type PacemakerPage() as this =
             |> Array.map (fun (i, l) -> (i, l.Name))
         this.Content(
             column()
-            |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace).Pos(200.0f)
+            |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace)
+                .Pos(200.0f)
+                .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
             |+ CaseSelector("gameplay.pacemaker.type", 
-                [|L"options.gameplay.pacemaker.accuracy.name"; L"options.gameplay.pacemaker.lamp.name"|],
+                [|L"gameplay.pacemaker.accuracy.name"; L"gameplay.pacemaker.lamp.name"|],
                 [|
-                    [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(380.0f) |]
-                    [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(380.0f) |]
+                    [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(370.0f) |]
+                    [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(370.0f) |]
                 |], utype).Pos(300.0f)
-            |+ Text(L"options.gameplay.pacemaker.hint", Align = Alignment.CENTER, Position = Position.SliceBottom(100.0f).TrimBottom(40.0f))
+            |+ Text(L"gameplay.pacemaker.hint", Align = Alignment.CENTER, Position = Position.SliceBottom(100.0f).TrimBottom(40.0f))
         )
 
-    override this.Title = L"options.gameplay.pacemaker.name"
+    override this.Title = L"gameplay.pacemaker.name"
     override this.OnClose() = 
         match utype.Value with
         | 0 -> options.Pacemakers.[rulesetId] <- Pacemaker.Accuracy accuracy.Value

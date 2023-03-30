@@ -22,7 +22,7 @@ module Debug =
                             Library.recache_service.Request((), fun () -> Notifications.task_feedback(Icons.folder, L"notification.recache_complete", ""))
                             Notifications.action_feedback(Icons.folder, L"notification.recache", "") )
                     .Pos(200.0f)
-                    .Tooltip(Tooltip.Info("options.debug.rebuildcache"))
+                    .Tooltip(Tooltip.Info("debug.rebuildcache"))
                 |+ PrettyButton.Once(
                         "debug.downloadupdate",
                         ( fun () ->
@@ -34,7 +34,7 @@ module Debug =
                     .Pos(300.0f)
                 |+ PrettySetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole)
                     .Pos(400.0f)
-                    .Tooltip(Tooltip.Info("options.debug.enableconsole"))
+                    .Tooltip(Tooltip.Info("debug.enableconsole"))
             )
-        override this.Title = L"options.debug.name"
+        override this.Title = L"debug.name"
         override this.OnClose() = ()

@@ -41,16 +41,16 @@ module Check =
                     found.Add m
 
                 for m in matches """ PrettySetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do
-                    found.Add (sprintf "options.%s.name" m)
+                    found.Add (sprintf "%s.name" m)
 
                 for m in matches """ PrettyButton\(\s*"([a-z\-_\.]*)" """ file_contents do
-                    found.Add (sprintf "options.%s.name" m)
+                    found.Add (sprintf "%s.name" m)
 
                 for m in matches """ CaseSelector\(\s*"([a-z\-_\.]*)" """ file_contents do
-                    found.Add (sprintf "options.%s.name" m)
+                    found.Add (sprintf "%s.name" m)
                     
                 for m in matches """ PrettyButton.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
-                    found.Add (sprintf "options.%s.name" m)
+                    found.Add (sprintf "%s.name" m)
 
                 for m in matches """ Tooltip.Info\("([a-z\-_\.]*)" """ file_contents do
                     found.Add (sprintf "%s.name" m)
@@ -63,8 +63,8 @@ module Check =
                     found.Add m
 
                 for m in Seq.append ["exit"; "select"; "up"; "down"; "left"; "right"] (matches """ Hotkeys.register "([a-z\-_\.]*)" """ file_contents) do
-                    found.Add (sprintf "options.hotkeys.%s.name" m)
-                    found.Add (sprintf "options.hotkeys.%s.tooltip" m)
+                    found.Add (sprintf "hotkeys.%s.name" m)
+                    found.Add (sprintf "hotkeys.%s.tooltip" m)
 
                 for m in Seq.append ["auto"] Prelude.Gameplay.Mods.modList.Keys do
                     found.Add (sprintf "mod.%s.name" m)

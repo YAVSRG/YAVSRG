@@ -148,7 +148,7 @@ type ConfirmPage(prompt: string, yes: unit -> unit) as this =
             |+ PrettyButton.Once( "confirm.no", Menu.Back ).Pos(400.0f)
             |+ Text(prompt, Position = Position.Row(100.0f, PRETTYHEIGHT))
         )
-    override this.Title = L"options.confirm"
+    override this.Title = L"confirm"
     override this.OnClose() = ()
 
 type Page with

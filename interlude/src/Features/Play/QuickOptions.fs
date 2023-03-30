@@ -52,7 +52,7 @@ module QuickOptions =
                 |+ PrettySetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Pos(540.0f)
             )
 
-        override this.Title = L"options.quick.name"
+        override this.Title = L"quick.name"
         override this.OnClose() = callback()
 
     let show(scoring, callback) = QuickOptionsPage(scoring, callback).Show()

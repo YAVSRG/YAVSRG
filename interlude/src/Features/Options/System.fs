@@ -62,15 +62,15 @@ module System =
 
             container.Add(PrettyButton(
                 "system.hotkeys.reset",
-                (fun () -> ConfirmPage(L"options.system.hotkeys.reset.confirm", Hotkeys.reset_all).Show()),
+                (fun () -> ConfirmPage(L"system.hotkeys.reset.confirm", Hotkeys.reset_all).Show()),
                 Icon = Icons.reset))
 
             for hk in Hotkeys.hotkeys.Keys do
                 if hk <> "none" then
-                    container.Add( PrettySetting("hotkeys." + hk, hotkeyEditor hk).Tooltip(Tooltip.Info(sprintf "options.hotkeys.%s" hk)) )
+                    container.Add( PrettySetting(sprintf "hotkeys.%s" hk, hotkeyEditor hk).Tooltip(Tooltip.Info(sprintf "hotkeys.%s" hk)) )
             this.Content scrollContainer
 
-        override this.Title = L"options.system.hotkeys.name"
+        override this.Title = L"system.hotkeys.name"
         override this.OnClose() = ()
 
     type SystemPage() as this =
@@ -81,40 +81,40 @@ module System =
                 column()
                 |+ PrettySetting("system.windowmode", Selector.FromEnum config.WindowMode)
                     .Pos(200.0f)
-                    .Tooltip(Tooltip.Info("options.system.windowmode"))
+                    .Tooltip(Tooltip.Info("system.windowmode"))
 
                 |+ PrettySetting("system.framelimit", Selector.FromEnum config.FrameLimit)
                     .Pos(270.0f)
-                    .Tooltip(Tooltip.Info("options.system.framelimit"))
+                    .Tooltip(Tooltip.Info("system.framelimit"))
 
                 |+ PrettySetting("system.audiovolume",
                     Slider<_>.Percent(options.AudioVolume |> Setting.trigger Devices.changeVolume, 0.01f) )
                     .Pos(360.0f)
-                    .Tooltip(Tooltip.Info("options.system.audiovolume"))
+                    .Tooltip(Tooltip.Info("system.audiovolume"))
 
                 |+ PrettySetting("system.audiodevice",
                     Selector(Array.ofSeq(Devices.list()), Setting.trigger Devices.change config.AudioDevice) )
                     .Pos(430.0f, 1700.0f)
-                    .Tooltip(Tooltip.Info("options.system.audiodevice"))
+                    .Tooltip(Tooltip.Info("system.audiodevice"))
 
                 |+ PrettySetting("system.audiooffset",
                         { new Slider<float>(options.AudioOffset, 0.01f)
                             with override this.OnDeselected() = base.OnDeselected(); Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>) } )
                     .Pos(500.0f)
-                    .Tooltip(Tooltip.Info("options.system.audiooffset"))
+                    .Tooltip(Tooltip.Info("system.audiooffset"))
 
                 |+ PrettySetting("system.visualoffset", Slider<float>(options.VisualOffset, 0.01f))
                     .Pos(590.0f)
-                    .Tooltip(Tooltip.Info("options.system.visualoffset"))
+                    .Tooltip(Tooltip.Info("system.visualoffset"))
                 // todo: way to edit resolution settings?
                 |+ PrettySetting("system.monitor", Selector(Window.monitors, config.Display))
                     .Pos(660.0f)
-                    .Tooltip(Tooltip.Info("options.system.monitor"))
+                    .Tooltip(Tooltip.Info("system.monitor"))
                 
                 |+ PrettyButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
                     .Pos(760.0f)
-                    .Tooltip(Tooltip.Info("options.system.hotkeys"))
+                    .Tooltip(Tooltip.Info("system.hotkeys"))
             )
 
         override this.OnClose() = Window.apply_config <- Some config
-        override this.Title = L"options.system.name"
+        override this.Title = L"system.name"

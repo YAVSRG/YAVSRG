@@ -28,11 +28,14 @@ type LoginPage() as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("login.username", TextEntry(username, "none")).Pos(200.0f)
-            |+ PrettyButton("confirm.yes", login).Pos(300.0f)
+            |+ PrettySetting("login.username", TextEntry(username, "none"))
+                .Pos(200.0f)
+                .Tooltip(Tooltip.Info("login.username"))
+            |+ PrettyButton("confirm.yes", login)
+                .Pos(300.0f)
         )
 
-    override this.Title = L"options.login.name"
+    override this.Title = L"login.name"
     override this.OnClose() = handler.Dispose()
 
 type NetworkStatus() =

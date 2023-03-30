@@ -25,13 +25,13 @@ type LobbySettingsPage(settings: LobbySettings) as this =
                 .Pos(200.0f)
             |+ PrettySetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation))
                 .Pos(300.0f)
-                .Tooltip(Tooltip.Info("options.lobby.host_rotation"))
+                .Tooltip(Tooltip.Info("lobby.host_rotation"))
             |+ PrettySetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown))
                 .Pos(370.0f)
-                .Tooltip(Tooltip.Info("options.lobby.auto_countdown"))
+                .Tooltip(Tooltip.Info("lobby.auto_countdown"))
         )
     
-    override this.Title = L"options.lobby.name"
+    override this.Title = L"lobby.name"
     override this.OnClose() = 
         Lobby.settings 
             { settings with 
@@ -54,7 +54,7 @@ type InvitePlayerPage() as this =
             |+ submit_button.Pos(300.0f)
         )
     
-    override this.Title = L"options.invite_to_lobby.name"
+    override this.Title = L"invite_to_lobby.name"
     override this.OnClose() = ()
 
 type Lobby() =

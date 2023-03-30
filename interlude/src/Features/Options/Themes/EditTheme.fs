@@ -52,7 +52,7 @@ module private Helpers =
                 Setting.make (fun v -> setting.Set { setting.Value with Float = v } ) (fun () -> setting.Value.Float)
             ) )
             .Pos(170.0f)
-            .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.generic.float"))
+            .Tooltip(Tooltip.Info("themes.edittheme.gameplay.generic.float"))
 
         |+ PrettySetting(
             "themes.edittheme.gameplay.generic.move",
@@ -79,7 +79,7 @@ module private Helpers =
                     } |> setting.Set
             } )
             .Pos(240.0f)
-            .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.generic.move"))
+            .Tooltip(Tooltip.Info("themes.edittheme.gameplay.generic.move"))
         
         |+ PrettySetting(
             "themes.edittheme.gameplay.generic.grow",
@@ -102,7 +102,7 @@ module private Helpers =
                     } |> setting.Set
             } )
             .Pos(310.0f)
-            .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.generic.grow"))
+            .Tooltip(Tooltip.Info("themes.edittheme.gameplay.generic.grow"))
 
         |+ PrettySetting(
             "themes.edittheme.gameplay.generic.shrink",
@@ -125,14 +125,14 @@ module private Helpers =
                     } |> setting.Set
             } )
             .Pos(380.0f)
-            .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.generic.shrink"))
+            .Tooltip(Tooltip.Info("themes.edittheme.gameplay.generic.shrink"))
         
         |+ PrettyButton(
             "themes.edittheme.gameplay.generic.reset",
             fun () -> setting.Value <- { default_pos with Enabled = setting.Value.Enabled }
            )
            .Pos(450.0f)
-           .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.generic.reset"))
+           .Tooltip(Tooltip.Info("themes.edittheme.gameplay.generic.reset"))
 
 type EditAccuracyMeterPage() as this =
     inherit Page()
@@ -159,16 +159,16 @@ type EditAccuracyMeterPage() as this =
                 "themes.edittheme.gameplay.accuracymeter.gradecolors",
                 Selector<_>.FromBool grade_colors )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.accuracymeter.gradecolors"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.accuracymeter.gradecolors"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.accuracymeter.showname",
                 Selector<_>.FromBool show_name )
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.accuracymeter.showname"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.accuracymeter.showname"))
             |+ preview
         )
 
-    override this.Title = L"options.themes.edittheme.gameplay.accuracymeter.name"
+    override this.Title = L"themes.edittheme.gameplay.accuracymeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<AccuracyMeter>
@@ -207,31 +207,31 @@ type EditHitMeterPage() as this =
                 "themes.edittheme.gameplay.hitmeter.showguide",
                 Selector<_>.FromBool show_guide )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.hitmeter.showguide"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.hitmeter.showguide"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.hitmeter.shownonjudgements",
                 Selector<_>.FromBool show_non_judgements )
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.hitmeter.shownonjudgements"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.hitmeter.shownonjudgements"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.hitmeter.thickness",
                 Slider<float32>(thickness, 0.1f) )
                 .Pos(690.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.hitmeter.thickness"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.hitmeter.thickness"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.hitmeter.releasesextraheight",
                 Slider<float32>(release_thickness, 0.1f) )
                 .Pos(760.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.hitmeter.releasesextraheight"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.hitmeter.releasesextraheight"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.hitmeter.animationtime",
                 Slider<float32>(animation_time, 0.1f) )
                 .Pos(830.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.hitmeter.animationtime"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.hitmeter.animationtime"))
             |+ preview
         )
 
-    override this.Title = L"options.themes.edittheme.gameplay.hitmeter.name"
+    override this.Title = L"themes.edittheme.gameplay.hitmeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<HitMeter>
@@ -275,26 +275,26 @@ type EditLifeMeterPage() as this =
                 "themes.edittheme.gameplay.lifemeter.horizontal",
                 Selector<_>.FromBool horizontal )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.lifemeter.horizontal"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.lifemeter.horizontal"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.lifemeter.fullcolor",
                 ColorPicker(full_color, false) )
                 .Pos(620.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.lifemeter.fullcolor"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.lifemeter.fullcolor"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.lifemeter.emptycolor",
                 ColorPicker(empty_color, false) )
                 .Pos(725.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.lifemeter.emptycolor"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.lifemeter.emptycolor"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.lifemeter.tipcolor",
                 ColorPicker(tip_color, true) )
                 .Pos(830.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.lifemeter.tipcolor"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.lifemeter.tipcolor"))
             |+ preview
         )
 
-    override this.Title = L"options.themes.edittheme.gameplay.lifemeter.name"
+    override this.Title = L"themes.edittheme.gameplay.lifemeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<LifeMeter>
@@ -331,21 +331,21 @@ type EditComboMeterPage() as this =
                 "themes.edittheme.gameplay.combo.lampcolors",
                 Selector<_>.FromBool lamp_colors )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.combo.lampcolors"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.combo.lampcolors"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.combo.pop",
                 Slider(pop_amount, 0.1f) )
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.combo.pop"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.combo.pop"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.combo.growth",
                 Slider(growth_amount, 0.2f) )
                 .Pos(690.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.combo.growth"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.combo.growth"))
             |+ preview
         )
 
-    override this.Title = L"options.themes.edittheme.gameplay.combo.name"
+    override this.Title = L"themes.edittheme.gameplay.combo.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<Combo>
@@ -377,7 +377,7 @@ type EditSkipButtonPage() as this =
             |+ preview
         )
 
-    override this.Title = L"options.themes.edittheme.gameplay.skipbutton.name"
+    override this.Title = L"themes.edittheme.gameplay.skipbutton.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<SkipButton>
@@ -411,26 +411,26 @@ type EditProgressMeterPage() as this =
                 "themes.edittheme.gameplay.progressmeter.barheight",
                 Slider(bar_height, 0.1f))
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.progressmeter.barheight"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.progressmeter.barheight"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.progressmeter.barcolor",
                 ColorPicker(bar_color, true) )
                 .Pos(620.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.progressmeter.barcolor"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.progressmeter.barcolor"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.progressmeter.glowsize",
                 Slider(glow_size, 0.1f) )
                 .Pos(725.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.progressmeter.glowsize"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.progressmeter.glowsize"))
             |+ PrettySetting(
                 "themes.edittheme.gameplay.progressmeter.glowcolor",
                 ColorPicker(glow_color, true) )
                 .Pos(830.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.progressmeter.glowcolor"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.progressmeter.glowcolor"))
             |+ preview
         )
 
-    override this.Title = L"options.themes.edittheme.gameplay.progressmeter.name"
+    override this.Title = L"themes.edittheme.gameplay.progressmeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<ProgressMeter>
@@ -462,7 +462,7 @@ type EditPacemakerPage() as this =
             |+ preview
         )
 
-    override this.Title = L"options.themes.edittheme.gameplay.pacemaker.name"
+    override this.Title = L"themes.edittheme.gameplay.pacemaker.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<Pacemaker>
@@ -491,11 +491,11 @@ type EditJudgementCountsPage() as this =
                 "themes.edittheme.gameplay.judgementcounts.animationtime",
                 Slider<float>(animation_time, 0.1f) )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.judgementcounts.animationtime"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.judgementcounts.animationtime"))
             |+ preview
         )
             
-    override this.Title = L"options.themes.edittheme.gameplay.judgementcounts.name"
+    override this.Title = L"themes.edittheme.gameplay.judgementcounts.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<JudgementCounts>
@@ -509,31 +509,31 @@ type EditGameplayConfigPage() as this =
             column()
             |+ PrettyButton("themes.edittheme.gameplay.accuracymeter", fun () -> Menu.ShowPage EditAccuracyMeterPage)
                 .Pos(200.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.accuracymeter"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.accuracymeter"))
             |+ PrettyButton("themes.edittheme.gameplay.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage)
                 .Pos(270.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.hitmeter"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.hitmeter"))
             |+ PrettyButton("themes.edittheme.gameplay.lifemeter", fun () -> Menu.ShowPage EditLifeMeterPage)
                 .Pos(340.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.lifemeter"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.lifemeter"))
             |+ PrettyButton("themes.edittheme.gameplay.combo", fun () -> Menu.ShowPage EditComboMeterPage)
                 .Pos(410.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.combo"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.combo"))
             |+ PrettyButton("themes.edittheme.gameplay.skipbutton", fun () -> Menu.ShowPage EditSkipButtonPage)
                 .Pos(480.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.skipbutton"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.skipbutton"))
             |+ PrettyButton("themes.edittheme.gameplay.progressmeter", fun () -> Menu.ShowPage EditProgressMeterPage)
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.progressmeter"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.progressmeter"))
             |+ PrettyButton("themes.edittheme.gameplay.pacemaker", fun () -> Menu.ShowPage EditPacemakerPage)
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.pacemaker"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.pacemaker"))
             |+ PrettyButton("themes.edittheme.gameplay.judgementcounts", fun () -> Menu.ShowPage EditJudgementCountsPage)
                 .Pos(690.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay.judgementcounts"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay.judgementcounts"))
         )
 
-    override this.Title = L"options.themes.edittheme.gameplay.name"
+    override this.Title = L"themes.edittheme.gameplay.name"
     override this.OnClose() = ()
 
 type EditThemePage() as this =
@@ -548,10 +548,9 @@ type EditThemePage() as this =
             column()
             |+ PrettySetting("themes.edittheme.themename", TextEntry(name, "none"))
                 .Pos(200.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.themename"))
             |+ PrettyButton("themes.edittheme.gameplay", fun () -> Menu.ShowPage EditGameplayConfigPage)
                 .Pos(300.0f)
-                .Tooltip(Tooltip.Info("options.themes.edittheme.gameplay"))
+                .Tooltip(Tooltip.Info("themes.edittheme.gameplay"))
         )
 
     override this.Title = data.Name

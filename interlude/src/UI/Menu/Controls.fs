@@ -43,7 +43,7 @@ type PrettySetting(name, widget: Widget) as this =
     override this.Init(parent) =
         this
         |* Text(
-            K (L (sprintf "options.%s.name" name) + ":"),
+            K (L (sprintf "%s.name" name) + ":"),
             Color = (fun () -> (if this.Focused then Colors.text_yellow_2 else Colors.text)),
             Align = Alignment.LEFT,
             Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH - 10.0f, PRETTYHEIGHT).Margin(Style.padding))
@@ -65,7 +65,7 @@ type PrettyButton(name, action) as this =
     inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then action()))
 
     member val Icon = "" with get, set
-    member val Text = L (sprintf "options.%s.name" name) with get, set
+    member val Text = L (sprintf "%s.name" name) with get, set
 
     override this.Init(parent: Widget) =
         this
