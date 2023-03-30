@@ -144,8 +144,8 @@ type ConfirmPage(prompt: string, yes: unit -> unit) as this =
     do
         this.Content(
             column()
-            |+ PrettyButton.Once( "confirm.yes", F yes Menu.Back ).Pos(300.0f)
-            |+ PrettyButton.Once( "confirm.no", Menu.Back ).Pos(400.0f)
+            |+ PageButton.Once( "confirm.yes", F yes Menu.Back ).Pos(300.0f)
+            |+ PageButton.Once( "confirm.no", Menu.Back ).Pos(400.0f)
             |+ Text(prompt, Position = Position.Row(100.0f, PRETTYHEIGHT))
         )
     override this.Title = L"confirm"

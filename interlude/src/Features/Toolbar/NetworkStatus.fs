@@ -28,10 +28,10 @@ type LoginPage() as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("login.username", TextEntry(username, "none"))
+            |+ PageSetting("login.username", TextEntry(username, "none"))
                 .Pos(200.0f)
                 .Tooltip(Tooltip.Info("login.username"))
-            |+ PrettyButton("confirm.yes", login)
+            |+ PageButton("confirm.yes", login)
                 .Pos(300.0f)
         )
 

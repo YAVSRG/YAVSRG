@@ -21,12 +21,12 @@ type LobbySettingsPage(settings: LobbySettings) as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("lobby.name", TextEntry(name, "none"))
+            |+ PageSetting("lobby.name", TextEntry(name, "none"))
                 .Pos(200.0f)
-            |+ PrettySetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation))
+            |+ PageSetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation))
                 .Pos(300.0f)
                 .Tooltip(Tooltip.Info("lobby.host_rotation"))
-            |+ PrettySetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown))
+            |+ PageSetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown))
                 .Pos(370.0f)
                 .Tooltip(Tooltip.Info("lobby.auto_countdown"))
         )
@@ -45,12 +45,12 @@ type InvitePlayerPage() as this =
     
     let value = Setting.simple ""
     let submit() = Lobby.invite value.Value
-    let submit_button = PrettyButton("confirm.yes", (fun () -> submit(); Menu.Back()), Enabled = false)
+    let submit_button = PageButton("confirm.yes", (fun () -> submit(); Menu.Back()), Enabled = false)
     
     do
         this.Content(
             column()
-            |+ PrettySetting("invite_to_lobby.username", TextEntry(value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0), "none")).Pos(200.0f)
+            |+ PageSetting("invite_to_lobby.username", TextEntry(value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0), "none")).Pos(200.0f)
             |+ submit_button.Pos(300.0f)
         )
     

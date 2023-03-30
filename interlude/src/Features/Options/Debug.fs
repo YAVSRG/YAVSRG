@@ -16,14 +16,14 @@ module Debug =
         do
             this.Content(
                 column()
-                |+ PrettyButton.Once(
+                |+ PageButton.Once(
                         "debug.rebuildcache",
                         fun () -> 
                             Library.recache_service.Request((), fun () -> Notifications.task_feedback(Icons.folder, L"notification.recache_complete", ""))
                             Notifications.action_feedback(Icons.folder, L"notification.recache", "") )
                     .Pos(200.0f)
                     .Tooltip(Tooltip.Info("debug.rebuildcache"))
-                |+ PrettyButton.Once(
+                |+ PageButton.Once(
                         "debug.downloadupdate",
                         ( fun () ->
                             if AutoUpdate.updateAvailable then
@@ -32,7 +32,7 @@ module Debug =
                         ),
                         Enabled = (AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded) )
                     .Pos(300.0f)
-                |+ PrettySetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole)
+                |+ PageSetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole)
                     .Pos(400.0f)
                     .Tooltip(Tooltip.Info("debug.enableconsole"))
             )

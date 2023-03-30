@@ -16,9 +16,9 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     do
         let content = 
             FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
-            |+ PrettyButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.delete)
+            |+ PageButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.delete)
 
-            |+ PrettyButton(
+            |+ PageButton(
                 "chart.add_to_collection",
                 (fun () -> 
                     SelectCollectionPage(
@@ -34,7 +34,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
         | LibraryContext.Folder name
         | LibraryContext.Playlist (_, name, _) ->
             content
-            |* PrettyButton(
+            |* PageButton(
                 "chart.remove_from_collection",
                 (fun () -> 
                     if CollectionManager.remove_from(name, Library.collections.Get(name).Value, cc, context) then Menu.Back()
@@ -44,7 +44,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             )
         | LibraryContext.Table lvl ->
             content
-            |* PrettyButton(
+            |* PageButton(
                 "chart.remove_from_collection",
                 (fun () -> 
                     if CollectionManager.remove_from(lvl, Level (Table.current().Value.TryLevel(lvl).Value), cc, context) then Menu.Back()
@@ -59,7 +59,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             | Some table -> 
                 if not (table.Contains(cc: CachedChart)) then
                     content
-                    |* PrettyButton(
+                    |* PageButton(
                         "chart.add_to_table",
                         (fun () -> SelectTableLevelPage(fun level -> if CollectionManager.add_to(level.Name, Level level, cc) then Menu.Back()).Show()),
                         Icon = Icons.add_to_collection,
@@ -88,7 +88,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
     do
         let content = 
             FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
-            |+ PrettyButton("group.delete", (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)), Icon = Icons.delete)
+            |+ PageButton("group.delete", (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)), Icon = Icons.delete)
                 .Tooltip(Tooltip.Info("group.delete"))
         this.Content content
 

@@ -18,7 +18,7 @@ type Divider() =
     override this.Draw() =
         Draw.quad (Quad.ofRect this.Bounds) (struct(Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White)) Sprite.DefaultQuad
 
-type PrettySetting(name, widget: Widget) as this =
+type PageSetting(name, widget: Widget) as this =
     inherit StaticContainer(NodeType.Switch (fun _ -> this.Child))
 
     let mutable widget = widget
@@ -52,8 +52,8 @@ type PrettySetting(name, widget: Widget) as this =
         widget.Init this
 
     override this.Draw() =
-        if widget.Selected then Draw.rect this.Bounds Colors.pink_accent.O2
-        elif widget.Focused then Draw.rect this.Bounds Colors.yellow_accent.O1
+        if widget.Selected then Draw.rect widget.Bounds Colors.pink_accent.O2
+        elif widget.Focused then Draw.rect widget.Bounds Colors.yellow_accent.O1
         base.Draw()
         widget.Draw()
     
@@ -61,7 +61,7 @@ type PrettySetting(name, widget: Widget) as this =
         base.Update(elapsedTime, moved)
         widget.Update(elapsedTime, moved)
 
-type PrettyButton(name, action) as this =
+type PageButton(name, action) as this =
     inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then action()))
 
     member val Icon = "" with get, set
@@ -94,8 +94,8 @@ type PrettyButton(name, action) as this =
     member val Enabled = true with get, set
     
     static member Once(name, action) =
-        let mutable ref = Unchecked.defaultof<PrettyButton>
-        let button = PrettyButton(name, fun () ->
+        let mutable ref = Unchecked.defaultof<PageButton>
+        let button = PageButton(name, fun () ->
                 if ref.Enabled then action()
                 ref.Enabled <- false
             )
@@ -105,7 +105,7 @@ type PrettyButton(name, action) as this =
 type CaseSelector(name: string, cases: string array, controls: Widget array array, setting: Setting<int>) as this =
     inherit StaticWidget(NodeType.Switch(fun _ -> this._selector()))
 
-    let selector = PrettySetting(name, Selector<int>(Array.indexed cases, setting)).Pos(200.0f)
+    let selector = PageSetting(name, Selector<int>(Array.indexed cases, setting)).Pos(200.0f)
 
     member this._selector() = selector
 

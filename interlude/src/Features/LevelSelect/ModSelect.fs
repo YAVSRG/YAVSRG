@@ -44,7 +44,7 @@ type private ModSelectPage(onClose) as this =
         |+ Dummy()
         |+ ModCard(L"gameplay.pacemaker.enable.name", L"gameplay.pacemaker.enable.tooltip",
             Setting.make (fun _ -> enablePacemaker <- not enablePacemaker) (fun _ -> enablePacemaker))
-        |* PrettyButton("gameplay.pacemaker", fun () -> PacemakerPage().Show())
+        |* PageButton("gameplay.pacemaker", fun () -> PacemakerPage().Show())
             .Tooltip(Tooltip.Info("gameplay.pacemaker"))
 
     do

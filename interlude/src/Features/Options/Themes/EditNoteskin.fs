@@ -70,24 +70,24 @@ type EditNoteskinPage() as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("themes.editnoteskin.noteskinname", TextEntry(name, "none"))
+            |+ PageSetting("themes.editnoteskin.noteskinname", TextEntry(name, "none"))
                 .Pos(100.0f)
-            |+ PrettySetting("themes.editnoteskin.holdnotetrim", Slider(holdNoteTrim, 0.05f))
+            |+ PageSetting("themes.editnoteskin.holdnotetrim", Slider(holdNoteTrim, 0.05f))
                 .Pos(170.0f)
                 .Tooltip(Tooltip.Info("themes.editnoteskin.holdnotetrim"))
-            |+ PrettySetting("themes.editnoteskin.enablecolumnlight", Selector<_>.FromBool enableColumnLight)
+            |+ PageSetting("themes.editnoteskin.enablecolumnlight", Selector<_>.FromBool enableColumnLight)
                 .Pos(240.0f)
                 .Tooltip(Tooltip.Info("themes.editnoteskin.enablecolumnlight"))
-            |+ PrettySetting("themes.editnoteskin.columnwidth", Slider(columnWidth, 0.05f))
+            |+ PageSetting("themes.editnoteskin.columnwidth", Slider(columnWidth, 0.05f))
                 .Pos(310.0f)
                 .Tooltip(Tooltip.Info("themes.editnoteskin.columnwidth"))
-            |+ PrettySetting("themes.editnoteskin.columnspacing",Slider(columnSpacing, 0.05f))
+            |+ PageSetting("themes.editnoteskin.columnspacing",Slider(columnSpacing, 0.05f))
                 .Pos(390.0f)
                 .Tooltip(Tooltip.Info("themes.editnoteskin.columnspacing"))
-            |+ PrettySetting("generic.keymode",
+            |+ PageSetting("generic.keymode",
                     Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors)) )
                 .Pos(490.0f)
-            |+ PrettySetting("themes.editnoteskin.globalcolors",
+            |+ PageSetting("themes.editnoteskin.globalcolors",
                     Selector<_>.FromBool(
                         Setting.make
                             (fun v -> noteColors <- { noteColors with UseGlobalColors = v })
@@ -95,7 +95,7 @@ type EditNoteskinPage() as this =
                         |> Setting.trigger (ignore >> refreshColors)) )
                 .Pos(560.0f)
                 .Tooltip(Tooltip.Info("themes.editnoteskin.globalcolors"))
-            |+ PrettySetting("themes.editnoteskin.colorstyle",
+            |+ PageSetting("themes.editnoteskin.colorstyle",
                     Selector.FromEnum(
                         Setting.make
                             (fun v -> noteColors <- { noteColors with Style = v })
@@ -103,10 +103,10 @@ type EditNoteskinPage() as this =
                         |> Setting.trigger (ignore >> refreshColors)) )
                 .Pos(630.0f)
                 .Tooltip(Tooltip.Info("themes.editnoteskin.colorstyle"))
-            |+ PrettySetting("themes.editnoteskin.notecolors", colors)
+            |+ PageSetting("themes.editnoteskin.notecolors", colors)
                 .Pos(700.0f, Viewport.vwidth - 200.0f, 120.0f)
                 .Tooltip(Tooltip.Info("themes.editnoteskin.notecolors"))
-            |+ PrettyButton.Once("themes.editnoteskin.export", Noteskins.exportCurrent)
+            |+ PageButton.Once("themes.editnoteskin.export", Noteskins.exportCurrent)
                 .Pos(820.0f)
                 .Tooltip(Tooltip.Info("themes.editnoteskin.export"))
         )

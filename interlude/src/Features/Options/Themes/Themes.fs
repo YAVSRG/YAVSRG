@@ -14,8 +14,8 @@ type ThemesPage() as this =
 
     let preview = NoteskinPreview 0.5f
 
-    let noteskins = PrettySetting("themes.noteskin", Dummy())
-    let themes = PrettySetting("themes.theme", Dummy())
+    let noteskins = PageSetting("themes.noteskin", Dummy())
+    let themes = PageSetting("themes.theme", Dummy())
 
     let refresh() =
 
@@ -56,20 +56,20 @@ type ThemesPage() as this =
             |+ themes
                 .Pos(200.0f)
                 .Tooltip(Tooltip.Info("themes.theme"))
-            |+ PrettyButton("themes.edittheme", tryEditTheme)
+            |+ PageButton("themes.edittheme", tryEditTheme)
                 .Pos(270.0f)
                 .Tooltip(Tooltip.Info("themes.edittheme"))
-            |+ PrettyButton("themes.showthemesfolder", fun () -> openDirectory (getDataPath "Themes"))
+            |+ PageButton("themes.showthemesfolder", fun () -> openDirectory (getDataPath "Themes"))
                 .Pos(340.0f)
                 .Tooltip(Tooltip.Info("themes.showthemesfolder"))
 
             |+ noteskins
                 .Pos(500.0f)
                 .Tooltip(Tooltip.Info("themes.noteskin"))
-            |+ PrettyButton("themes.editnoteskin", tryEditNoteskin)
+            |+ PageButton("themes.editnoteskin", tryEditNoteskin)
                 .Pos(570.0f)
                 .Tooltip(Tooltip.Info("themes.editnoteskin"))
-            |+ PrettyButton("themes.shownoteskinsfolder", fun () -> openDirectory (getDataPath "Noteskins"))
+            |+ PageButton("themes.shownoteskinsfolder", fun () -> openDirectory (getDataPath "Noteskins"))
                 .Pos(640.0f)
                 .Tooltip(Tooltip.Info("themes.shownoteskinsfolder"))
             |+ preview

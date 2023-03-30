@@ -16,12 +16,12 @@ type CreateLobbyPage() as this =
 
     let value = Setting.simple (Network.username + "'s Lobby")
     let submit() = Lobby.create value.Value
-    let submit_button = PrettyButton("confirm.yes", (fun () -> submit(); Menu.Back()))
+    let submit_button = PageButton("confirm.yes", (fun () -> submit(); Menu.Back()))
     
     do
         this.Content(
             column()
-            |+ PrettySetting("create_lobby.name", TextEntry(value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0), "none")).Pos(200.0f)
+            |+ PageSetting("create_lobby.name", TextEntry(value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0), "none")).Pos(200.0f)
             |+ submit_button.Pos(300.0f)
         )
     

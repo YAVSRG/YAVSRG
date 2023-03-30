@@ -138,14 +138,14 @@ type PacemakerPage() as this =
             |> Array.map (fun (i, l) -> (i, l.Name))
         this.Content(
             column()
-            |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace)
+            |+ PageSetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace)
                 .Pos(200.0f)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
             |+ CaseSelector("gameplay.pacemaker.type", 
                 [|L"gameplay.pacemaker.accuracy.name"; L"gameplay.pacemaker.lamp.name"|],
                 [|
-                    [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(370.0f) |]
-                    [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(370.0f) |]
+                    [| PageSetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(370.0f) |]
+                    [| PageSetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(370.0f) |]
                 |], utype).Pos(300.0f)
             |+ Text(L"gameplay.pacemaker.hint", Align = Alignment.CENTER, Position = Position.SliceBottom(100.0f).TrimBottom(40.0f))
         )

@@ -30,17 +30,17 @@ module Mounts =
         do
             this.Content(
                 column()
-                |+ PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup)
+                |+ PageSetting("mount.importatstartup", Selector<_>.FromBool importOnStartup)
                     .Pos(200.0f)
                     .Tooltip(Tooltip.Info("mount.importatstartup"))
-                |+ PrettyButton.Once(
+                |+ PageButton.Once(
                         "mount.import",
                         fun () -> 
                             import <- true
                             Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "") )
                     .Pos(300.0f)
                     .Tooltip(Tooltip.Info("mount.import"))
-                |+ PrettyButton.Once(
+                |+ PageButton.Once(
                         "mount.importall",
                         fun () -> 
                             import <- true

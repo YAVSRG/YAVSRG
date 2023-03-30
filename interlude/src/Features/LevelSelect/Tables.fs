@@ -24,9 +24,9 @@ type private CreateTablePage() as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("table.name", TextEntry(new_name, "none")).Pos(200.0f)
-            |+ PrettySetting("generic.keymode", Selector<_>.FromEnum keymode).Pos(300.0f)
-            |+ PrettyButton("confirm.yes", 
+            |+ PageSetting("table.name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PageSetting("generic.keymode", Selector<_>.FromEnum keymode).Pos(300.0f)
+            |+ PageButton("confirm.yes", 
                 (fun () -> if Table.create(new_name.Value, int keymode.Value, Rulesets.current) then options.Table.Set (Some new_name.Value); Menu.Back() )).Pos(400.0f)
         )
 
@@ -41,9 +41,9 @@ type private CreateLevelPage() as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("table.level_name", TextEntry(new_name, "none"))
+            |+ PageSetting("table.level_name", TextEntry(new_name, "none"))
                 .Pos(200.0f)
-            |+ PrettyButton("confirm.yes", 
+            |+ PageButton("confirm.yes", 
                 (fun () -> if Table.current().Value.AddLevel new_name.Value then Menu.Back() ))
                 .Pos(300.0f)
         )
@@ -59,9 +59,9 @@ type private EditLevelPage(level: Level) as this =
     do
         let content =
             column()
-            |+ PrettySetting("table.level_name", TextEntry(new_name, "none"))
+            |+ PageSetting("table.level_name", TextEntry(new_name, "none"))
                 .Pos(200.0f)
-            |+ PrettyButton("collections.edit.delete", 
+            |+ PageButton("collections.edit.delete", 
                 (fun () -> 
                     ConfirmPage(Localisation.localiseWith [level.Name] "misc.confirmdelete", 
                         fun () -> 
@@ -73,7 +73,7 @@ type private EditLevelPage(level: Level) as this =
                 ),
                 Icon = Icons.delete)
                 .Pos(400.0f)
-            |+ PrettyButton("collections.edit.select", 
+            |+ PageButton("collections.edit.select", 
                 (fun () -> Collections.select_level level.Name; Menu.Back()) )
                 .Pos(500.0f)
                 .Tooltip(Tooltip.Info("collections.edit.select"))
@@ -140,7 +140,7 @@ type ManageTablesPage() as this =
         container.Clear()
 
         container
-        |+ PrettyButton("tables.install", ignore, Icon = Icons.download)
+        |+ PageButton("tables.install", ignore, Icon = Icons.download)
         |* Dummy()
 
         for name in Table.list() do
@@ -155,8 +155,8 @@ type ManageTablesPage() as this =
             
             container
             |+ Dummy()
-            |+ PrettyButton("tables.create", (fun () -> Menu.ShowPage CreateTablePage), Icon = Icons.add)
-            |* PrettyButton("tables.create_level", (fun () -> Menu.ShowPage CreateLevelPage), Icon = Icons.add_to_collection)
+            |+ PageButton("tables.create", (fun () -> Menu.ShowPage CreateTablePage), Icon = Icons.add)
+            |* PageButton("tables.create_level", (fun () -> Menu.ShowPage CreateLevelPage), Icon = Icons.add_to_collection)
 
             match Table.current() with
             | Some t ->
@@ -185,7 +185,7 @@ type SelectTableLevelPage(action: Level -> unit) as this =
     let refresh() =
         container.Clear()
         container
-        |* PrettyButton("tables.create_level", (fun () -> Menu.ShowPage CreateLevelPage), Icon = Icons.add_to_collection)
+        |* PageButton("tables.create_level", (fun () -> Menu.ShowPage CreateLevelPage), Icon = Icons.add_to_collection)
 
         match Table.current() with
         | Some t ->

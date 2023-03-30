@@ -83,7 +83,7 @@ type GlobalSync(chart: Chart, when_done: Time -> unit) =
     let waveform = WaveformRender(waveform_fade, Position = { Position.Default with Top = 0.5f %- 100.0f; Bottom = 0.5f %+ 100.0f })
     let offset_changer =
         Conditional((fun () -> step = 3),
-            PrettySetting(
+            PageSetting(
                 "system.audiooffset",
                 Slider(options.AudioOffset |> Setting.trigger (fun v -> Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>)), 0.001f)
             ).Pos(700.0f)
