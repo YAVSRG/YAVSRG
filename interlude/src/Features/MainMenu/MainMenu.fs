@@ -45,9 +45,9 @@ type MainMenuScreen() as this =
         Logo.moveOffscreen()
         Screen.change Screen.Type.LevelSelect Transitions.Flags.UnderLogo
 
-    let play = MenuButton (playFunc, L"menu.play", Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f))
-    let options = MenuButton (OptionsMenuRoot.show, L"menu.options", Position.Box(0.0f, 0.5f, -100.0f, -50.0f, 1230.0f, 100.0f))
-    let quit = MenuButton ((fun () -> Screen.back Transitions.Flags.UnderLogo), L"menu.quit", Position.Box(0.0f, 0.5f, -100.0f, 100.0f, 1160.0f, 100.0f))
+    let play = MenuButton (playFunc, L"menu.play.name", Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f))
+    let options = MenuButton (OptionsMenuRoot.show, L"menu.options.name", Position.Box(0.0f, 0.5f, -100.0f, -50.0f, 1230.0f, 100.0f))
+    let quit = MenuButton ((fun () -> Screen.back Transitions.Flags.UnderLogo), L"menu.quit.name", Position.Box(0.0f, 0.5f, -100.0f, 100.0f, 1160.0f, 100.0f))
 
     let newSplash =
         randomSplash "MenuSplashes.txt"

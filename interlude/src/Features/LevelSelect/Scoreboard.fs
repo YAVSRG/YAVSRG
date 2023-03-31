@@ -83,8 +83,8 @@ module Scoreboard =
             ignore data.Physical
             ignore data.Lamp
 
-            let text_color = fun () -> let a = fade.Alpha in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
-            let text_subcolor = fun () -> (Color.FromArgb(int (fade.Value * 200.0f), Color.FromArgb(230, 230, 230)), Color.FromArgb(fade.Alpha, Color.Black))
+            let text_color = fun () -> let a = fade.Alpha in (Colors.white.O4a a, Colors.shadow_1.O4a a)
+            let text_subcolor = fun () -> let a = fade.Alpha in (Colors.grey_1.O4a a, Colors.shadow_2.O4a a)
 
             this
             |+ Text(

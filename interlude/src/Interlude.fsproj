@@ -50,8 +50,7 @@
     <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Style.fs" />
     <Compile Include="UI\Callouts.fs" />
-    <Compile Include="UI\Components\Controls.fs" />
-    <Compile Include="UI\Components\Tabs.fs" />
+    <Compile Include="UI\Components\Common.fs" />
     <Compile Include="UI\Components\Dropdown.fs" />
     <Compile Include="UI\Menu\Helpers.fs" />
     <Compile Include="UI\Menu\Controls.fs" />

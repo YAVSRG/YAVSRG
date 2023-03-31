@@ -45,7 +45,7 @@ module Gameplay =
         do
             this
             |+ Text((fun () -> text),
-                Color = (fun () -> (if this.Selected then Style.color(255, 1.0f, 0.5f) else Color.White), Color.Black),
+                Color = (fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1),
                 Align = Alignment.LEFT)
             |* Clickable((fun () -> if not this.Selected then this.Select()),
                 OnHover = fun b -> if b then this.Focus())
@@ -102,7 +102,7 @@ module Gameplay =
                 |+ PageSetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f))
                     .Pos(200.0f)
                     .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
-                |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f))
+                |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, 0.001f))
                     .Pos(270.0f)
                     .Tooltip(Tooltip.Info("gameplay.hitposition"))
                 |+ PageSetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll)

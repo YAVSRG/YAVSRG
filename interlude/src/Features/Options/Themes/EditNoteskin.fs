@@ -9,6 +9,7 @@ open Prelude.Common
 open Prelude.Data.Themes
 open Interlude.Content
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
 
@@ -27,8 +28,8 @@ type NoteColorPicker(color: Setting<byte>) as this =
     
     override this.Draw() =
         base.Draw()
-        if this.Selected then Draw.rect this.Bounds (!*Palette.SELECTED)
-        elif this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+        if this.Selected then Draw.rect this.Bounds Colors.pink_accent.O2
+        elif this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O2
         Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
     
     override this.Update(elapsedTime, moved) =

@@ -49,7 +49,7 @@ type LevelSelectScreen() =
             Position = { Left = 0.0f %+ 30.0f; Top = 0.0f %+ 90.0f; Right = 0.4f %- 30.0f; Bottom = 0.0f %+ 140.0f })
 
         |+ SearchBox(searchText, (fun f -> Tree.filter <- f; refresh()),
-            Position = { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f })
+            Position = { Left = 1.0f %- 580.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- (30.0f + Style.padding); Bottom = 0.0f %+ 90.0f })
             .Tooltip(Tooltip.Info("levelselect.search", "search"))
 
         |+ LibraryModeSettings()
@@ -92,7 +92,7 @@ type LevelSelectScreen() =
         Draw.quad
             ( Quad.create <| Vector2(left, top) <| Vector2(left + w + 85.0f, top) <| Vector2(left + w, top + 170.0f) <| Vector2(left, top + 170.0f) )
             (Quad.colorOf (Style.color (120, 0.6f, 0.0f))) Sprite.DefaultQuad
-        Draw.rect (this.Bounds.SliceTop(170.0f).SliceLeft(w).Shrink(20.0f)) (System.Drawing.Color.FromArgb(100, 0, 0, 0))
+        Draw.rect (this.Bounds.SliceTop(170.0f).SliceLeft(w).Shrink(20.0f)) (Colors.shadow_1.O2)
 
         Draw.quad
             ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )

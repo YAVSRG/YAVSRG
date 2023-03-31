@@ -62,7 +62,7 @@ type NetworkStatus() =
         if Screen.currentType <> Screen.Type.Lobby && Network.lobby.IsSome then
             let area = area.Translate(-300.0f, 0.0f)
             Draw.rect area (Colors.shadow_1.O2)
-            Text.drawFillB(Style.baseFont, Icons.multiplayer + "  In a lobby", area.Shrink(10.0f, 5.0f), Colors.text, Alignment.CENTER)
+            Text.drawFillB(Style.baseFont, Icons.multiplayer + "  In a lobby", area.Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.CENTER)
 
         match this.Dropdown with
         | Some d -> d.Draw()

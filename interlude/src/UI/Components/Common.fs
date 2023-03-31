@@ -19,7 +19,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
     let toggle() = if this.Selected then this.Focus() else this.Select()
 
     member val Clickable = true with get, set
-    member val ColorFunc = fun () -> Colors.white, (if this.Selected then Colors.pink_accent elif this.Focused then Colors.yellow_accent else Colors.shadow_1) with get, set
+    member val ColorFunc = fun () -> Colors.white, (if this.Selected then Colors.pink_accent else Colors.shadow_1) with get, set
 
     override this.Init(parent) =
         base.Init parent
@@ -165,4 +165,3 @@ type GoodButton(content: Callout, action) as this =
     override this.Draw() =
         base.Draw()
         Callout.draw(this.Bounds.Left, this.Bounds.Top + 20.0f, height, (if this.Focused then Colors.text_yellow_2 else Colors.text), content)
-        
