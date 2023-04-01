@@ -11,7 +11,7 @@ module Style =
     let mutable padding = 5.0f
     let mutable baseFont = Unchecked.defaultof<SpriteFont>
     let accentColor = Animation.Color Color.Blue
-    let changePrimaryColor col = accentColor.SetColor col
+    let changePrimaryColor col = accentColor.Target <- col
 
     let text : unit -> Color * Color = K (Color.White, Color.Black)
     let text_subheading : unit -> Color * Color = K (Color.FromArgb(200, 230, 230, 230), Color.Black)

@@ -49,27 +49,26 @@ module Animation =
         let r = Fade(float32 color.R)
         let g = Fade(float32 color.G)
         let b = Fade(float32 color.B)
-
-        member this.SetColor(color: Drawing.Color) =
-            r.Target <- float32 color.R; g.Target <- float32 color.G; b.Target <- float32 color.B
-        member this.GetColor(alpha) = Color.FromArgb(alpha, int r.Value, int g.Value, int b.Value)
+        let a = Fade(float32 color.A)
 
         member this.Target
-            with get() = Color.FromArgb(int r.Target, int g.Target, int b.Target)
+            with get() = Color.FromArgb(int a.Value, int r.Target, int g.Target, int b.Target)
             and set(color: Drawing.Color) = 
                 r.Target <- float32 color.R
                 g.Target <- float32 color.G
                 b.Target <- float32 color.B
+                a.Target <- float32 color.A
 
         member this.Value
-            with get() = Color.FromArgb(int r.Value, int g.Value, int b.Value)
+            with get() = Color.FromArgb(int a.Value, int r.Value, int g.Value, int b.Value)
             and set(color: Drawing.Color) = 
                 r.Value <- float32 color.R
                 g.Value <- float32 color.G
                 b.Value <- float32 color.B
+                a.Value <- float32 color.A
 
         override this.Update(t) =
-            r.Update t; g.Update t; b.Update t
+            r.Update t; g.Update t; b.Update t; a.Update t
 
         override this.Complete = false
     
