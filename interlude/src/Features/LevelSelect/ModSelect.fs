@@ -4,6 +4,7 @@ open System.Drawing
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude.Gameplay.Mods
 open Interlude.Features
 open Interlude.UI
@@ -12,6 +13,49 @@ open Interlude.UI.Menu
 open Interlude.Utils
 open Interlude.Features.Gameplay
 
+type private ModSelector(id, states: string[], current_state: unit -> int, action: unit -> unit) =
+    inherit StaticContainer(NodeType.Button action)
+
+    let fill = Animation.Color(Colors.grey_2.O4a 0)
+    let selected = Animation.Fade(0.0f)
+
+    override this.Init(parent) =
+        this
+        |+ Clickable.Focus this
+        |+ Text(
+            ModState.getModName id,
+            Color = (fun () -> (if this.Focused then Colors.yellow_accent else Colors.white), Colors.shadow_1),
+            Position = Position.SliceTop(50.0f),
+            Align = Alignment.CENTER)
+        |* Text(
+            ModState.getModDesc id,
+            Color = (fun () -> (if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2),
+            Position = Position.TrimTop(40.0f).TrimBottom(30.0f),
+            Align = Alignment.CENTER)
+        base.Init parent
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        let state = current_state()
+        if state >= 0 then 
+            selected.Target <- 1.0f
+            fill.Target <- Colors.shadow_2.O3
+        else 
+            selected.Target <- 0.0f
+            if this.Focused then fill.Target <- Colors.grey_2.O1
+            else fill.Target <- Colors.grey_2.O4a 0
+        fill.Update elapsedTime
+        selected.Update elapsedTime
+
+    override this.Draw() =
+        Draw.rect this.Bounds fill.Value
+        let bottom_edge = this.Bounds.Expand(0.0f, Style.padding).SliceBottom(Style.padding)
+        Draw.rect bottom_edge (if this.Focused then Colors.yellow_accent.O2 else Colors.grey_2.O1)
+        Draw.rect (Rect.Create(bottom_edge.CenterX - 100.0f - 150.0f * selected.Value, bottom_edge.Top, bottom_edge.CenterX + 100.0f + 150.0f * selected.Value, bottom_edge.Bottom)) (if this.Focused then Colors.yellow_accent.O2 else Colors.grey_2.O1)
+        let state = current_state()
+        if state >= 0 then Text.drawFillB(Style.baseFont, states.[state], this.Bounds.SliceBottom(40.0f), Colors.text, Alignment.CENTER)
+        base.Draw()
+
 type private ModCard(name: string, desc: string, enabled: Setting<bool>) as this =
     inherit Frame(
         NodeType.Button(fun () -> this.ToggleMod()),
@@ -19,11 +63,15 @@ type private ModCard(name: string, desc: string, enabled: Setting<bool>) as this
         Fill = fun () -> if this.ModEnabled then !*Palette.BASE else !*Palette.DARK
     )
 
+    let callout = Callout.Normal.Title(name).Body(desc)
+    let _, height = Callout.measure callout
+
     do
-        this
-        |+ Text(name, Position = Position.SliceTop(50.0f).TrimLeft(5.0f))
-        |+ Text(desc, Position = Position.TrimTop(50.0f).TrimLeft(5.0f))
-        |* Clickable.Focus this
+        this |* Clickable.Focus this
+
+    override this.Draw() =
+        base.Draw()
+        Callout.draw(this.Bounds.Left, this.Bounds.Top + 20.0f, this.Bounds.Top + (this.Bounds.Height - height) * 0.5f, (if this.Focused then Colors.text_yellow_2 else Colors.text), callout)
 
     member this.ModEnabled = enabled.Value
     member this.ToggleMod() = enabled.Set true
@@ -31,16 +79,23 @@ type private ModCard(name: string, desc: string, enabled: Setting<bool>) as this
 type private ModSelectPage(onClose) as this =
     inherit Page()
 
-    let mods = FlowContainer.Vertical<Widget>(PRETTYHEIGHT, Spacing = 15.0f, Position = { Position.Default with Right = 0.5f %+ 0.0f }.Margin(150.0f, 200.0f))
+    let flow = FlowContainer.Vertical<Widget>(100.0f, Spacing = Style.padding, Position = Position.TrimTop(100.0f))
+
     do 
-        mods
-        |* ModCard(ModState.getModName "auto", ModState.getModDesc "auto",
-            Setting.make (fun _ -> autoplay <- not autoplay) (fun _ -> autoplay))
+        flow
+        |* ModSelector("auto",
+            [|Icons.check|],
+            (fun _ -> if autoplay then 0 else -1),
+            (fun _ -> autoplay <- not autoplay))
+
         for id in modList.Keys do
-            mods
-            |* ModCard(ModState.getModName id, ModState.getModDesc id,
-                Setting.make (fun _ -> Setting.app (ModState.cycleState id) selectedMods) (fun _ -> selectedMods.Value.ContainsKey id))
-        mods
+            flow
+            |* ModSelector(id,
+                [|Icons.check|],
+                (fun _ -> if selectedMods.Value.ContainsKey id then selectedMods.Value.[id] else -1),
+                (fun _ -> Setting.app (ModState.cycleState id) selectedMods))
+
+        flow
         |+ Dummy()
         |+ ModCard(L"gameplay.pacemaker.enable.name", L"gameplay.pacemaker.enable.tooltip",
             Setting.make (fun _ -> enablePacemaker <- not enablePacemaker) (fun _ -> enablePacemaker))
@@ -50,7 +105,7 @@ type private ModSelectPage(onClose) as this =
     do
         this.Content(
             SwitchContainer.Row<Widget>()
-            |+ mods
+            |+ flow
         )
 
     override this.Title = L"mods.name"

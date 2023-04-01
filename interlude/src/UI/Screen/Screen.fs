@@ -85,7 +85,7 @@ module Screen =
             if Viewport.vwidth > 0.0f then
                 let x, y = Mouse.pos()
                 Background.setParallaxPos(x / Viewport.vwidth, y / Viewport.vheight)
-            Style.accentColor.SetColor Content.accentColor
+            Style.accentColor.Target <- Content.accentColor
             Dialog.display.Update (elapsedTime, moved)
 
             toolbar.Update (elapsedTime, moved)

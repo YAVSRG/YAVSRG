@@ -52,7 +52,7 @@ module GameplayWidgets =
             if conf.GradeColors then
                 state.OnHit.Add
                     ( fun _ ->
-                        Grade.calculate grades state.Scoring.State |> state.Ruleset.GradeColor |> color.SetColor
+                        color.Target <- Grade.calculate grades state.Scoring.State |> state.Ruleset.GradeColor
                     )
 
             this
@@ -157,9 +157,9 @@ module GameplayWidgets =
                 fun _ ->
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
-                        Lamp.calculate state.Ruleset.Grading.Lamps state.Scoring.State
-                        |> state.Ruleset.LampColor
-                        |> color.SetColor
+                        color.Target <-
+                            Lamp.calculate state.Ruleset.Grading.Lamps state.Scoring.State
+                            |> state.Ruleset.LampColor
                     popAnimation.Value <- conf.Pop)
 
         override this.Update(elapsedTime, moved) =
@@ -222,7 +222,7 @@ module GameplayWidgets =
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
             slider.Target <- float32 state.HP.State.Health
-            color.SetColor(Color.FromArgb(
+            color.Target <- (Color.FromArgb(
                 Percyqaz.Flux.Utils.lerp (float32 state.HP.State.Health) (float32 conf.EmptyColor.R) (float32 conf.FullColor.R) |> int,
                 Percyqaz.Flux.Utils.lerp (float32 state.HP.State.Health) (float32 conf.EmptyColor.G) (float32 conf.FullColor.G) |> int,
                 Percyqaz.Flux.Utils.lerp (float32 state.HP.State.Health) (float32 conf.EmptyColor.B) (float32 conf.FullColor.B) |> int
@@ -264,10 +264,10 @@ module GameplayWidgets =
             | PacemakerInfo.Accuracy _
             | PacemakerInfo.Replay _ -> ()
             | PacemakerInfo.Judgement (judgement, _) -> 
-                if judgement = -1 then 
-                    Rulesets.current.Judgements.[Rulesets.current.Judgements.Length - 1].Color
-                else Rulesets.current.Judgements.[judgement].Color
-                |> color.SetColor
+                color.Target <-
+                    if judgement = -1 then 
+                        Rulesets.current.Judgements.[Rulesets.current.Judgements.Length - 1].Color
+                    else Rulesets.current.Judgements.[judgement].Color
             
 
         override this.Update(elapsedTime, moved) =

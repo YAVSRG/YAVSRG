@@ -246,7 +246,7 @@ type Scoreboard() as this =
         |+ HotkeyAction("scoreboard", fun () -> if flowContainer.Focused then Selection.clear() else flowContainer.Focus())
         |* Text( (let noLocalScores = L"levelselect.scoreboard.empty" in (fun () -> if count = 0 then noLocalScores else "")),
             Align = Alignment.CENTER,
-            Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f })
+            Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.3f %+ 80.0f })
 
     member this.Refresh() =
         let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""
