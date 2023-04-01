@@ -107,7 +107,10 @@ module Screen =
             if currentType <> Type.Play || Dialog.exists() then 
                 Notifications.display.Draw()
                 let x, y = Mouse.pos()
-                Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.color(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
+                Draw.sprite 
+                    (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize))
+                    (if Notifications.tooltip_available then Colors.white else Style.color(255, 1.0f, 0.5f))
+                    (Content.getTexture "cursor")
 
         override this.Init() =
             base.Init()

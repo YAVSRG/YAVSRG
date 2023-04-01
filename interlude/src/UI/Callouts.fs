@@ -119,6 +119,7 @@ module Notifications =
 
     let mutable private current_tooltip : Tooltip option = None
     let private items = ResizeArray<Notification>()
+    let mutable tooltip_available = false
 
     type Display() =
         inherit Overlay(NodeType.None)
@@ -139,6 +140,8 @@ module Notifications =
                 if i.Fade.Target <> 0.0f then
                     if i.Duration <= 0.0 then i.Fade.Target <- 0.0f
                 elif i.Fade.Value < 0.01f then sync(fun () -> items.Remove i |> ignore)
+
+            tooltip_available <- false
 
         override this.Draw() =
             match current_tooltip with
