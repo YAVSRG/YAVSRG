@@ -39,47 +39,29 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
         let state = current_state()
         if state >= 0 then 
             selected.Target <- 1.0f
-            fill.Target <- Colors.shadow_2.O3
+            fill.Target <- Colors.pink_shadow.O2
         else 
             selected.Target <- 0.0f
-            if this.Focused then fill.Target <- Colors.grey_2.O1
+            if this.Focused then fill.Target <- Colors.yellow_accent.O1
             else fill.Target <- Colors.grey_2.O4a 0
         fill.Update elapsedTime
         selected.Update elapsedTime
 
     override this.Draw() =
         Draw.rect this.Bounds fill.Value
-        let bottom_edge = this.Bounds.Expand(0.0f, Style.padding).SliceBottom(Style.padding)
-        Draw.rect bottom_edge (if this.Focused then Colors.yellow_accent.O2 else Colors.grey_2.O1)
-        Draw.rect (Rect.Create(bottom_edge.CenterX - 100.0f - 150.0f * selected.Value, bottom_edge.Top, bottom_edge.CenterX + 100.0f + 150.0f * selected.Value, bottom_edge.Bottom)) (if this.Focused then Colors.yellow_accent.O2 else Colors.grey_2.O1)
         let state = current_state()
+        let edgeColor = if this.Focused then Colors.yellow_accent.O2 elif state >= 0 then Colors.pink_accent.O2 else Colors.grey_2.O1
+        let bottom_edge = this.Bounds.Expand(0.0f, Style.padding).SliceBottom(Style.padding)
+        Draw.rect bottom_edge edgeColor
+        Draw.rect (Rect.Create(bottom_edge.CenterX - 100.0f - 150.0f * selected.Value, bottom_edge.Top, bottom_edge.CenterX + 100.0f + 150.0f * selected.Value, bottom_edge.Bottom)) edgeColor
+
         if state >= 0 then Text.drawFillB(Style.baseFont, states.[state], this.Bounds.SliceBottom(40.0f), Colors.text, Alignment.CENTER)
         base.Draw()
-
-type private ModCard(name: string, desc: string, enabled: Setting<bool>) as this =
-    inherit Frame(
-        NodeType.Button(fun () -> this.ToggleMod()),
-        Border = (fun () -> if this.Focused then Color.White elif this.ModEnabled then Style.highlight 100 () else Color.Transparent),
-        Fill = fun () -> if this.ModEnabled then !*Palette.BASE else !*Palette.DARK
-    )
-
-    let callout = Callout.Normal.Title(name).Body(desc)
-    let _, height = Callout.measure callout
-
-    do
-        this |* Clickable.Focus this
-
-    override this.Draw() =
-        base.Draw()
-        Callout.draw(this.Bounds.Left, this.Bounds.Top + 20.0f, this.Bounds.Top + (this.Bounds.Height - height) * 0.5f, (if this.Focused then Colors.text_yellow_2 else Colors.text), callout)
-
-    member this.ModEnabled = enabled.Value
-    member this.ToggleMod() = enabled.Set true
 
 type private ModSelectPage(onClose) as this =
     inherit Page()
 
-    let flow = FlowContainer.Vertical<Widget>(100.0f, Spacing = Style.padding, Position = Position.TrimTop(100.0f))
+    let flow = FlowContainer.Vertical<Widget>(100.0f, Spacing = 5f, Position = Position.TrimTop(100.0f))
 
     do 
         flow
@@ -96,11 +78,15 @@ type private ModSelectPage(onClose) as this =
                 (fun _ -> Setting.app (ModState.cycleState id) selectedMods))
 
         flow
-        |+ Dummy()
-        |+ ModCard(L"gameplay.pacemaker.enable.name", L"gameplay.pacemaker.enable.tooltip",
-            Setting.make (fun _ -> enablePacemaker <- not enablePacemaker) (fun _ -> enablePacemaker))
-        |* PageButton("gameplay.pacemaker", fun () -> PacemakerPage().Show())
-            .Tooltip(Tooltip.Info("gameplay.pacemaker"))
+        |+ ModSelector("pacemaker",
+            [|Icons.check|],
+            (fun _ -> if enablePacemaker then 0 else -1),
+            (fun _ -> enablePacemaker <- not enablePacemaker))
+        |* SwapContainer(Current =
+                PageButton("gameplay.pacemaker", fun () -> PacemakerPage().Show())
+                .Pos(15.0f)
+                .Tooltip(Tooltip.Info("gameplay.pacemaker"))
+            )
 
     do
         this.Content(

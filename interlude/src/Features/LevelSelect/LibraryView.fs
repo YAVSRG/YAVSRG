@@ -67,7 +67,7 @@ type LibraryModeSettings() =
             options.ChartGroupMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
             options.ChartGroupReverse |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
             "group_mode"
-        ).Tooltip(Tooltip.Info("levelselect.groupby", "group_mode"))
+        ).Tooltip(Tooltip.Info("levelselect.groupby", "group_mode").Hotkey(L"levelselect.groupby.reverse_hint", "reverse_group_mode"))
 
     let manage_collections =
         StylishButton(
@@ -117,7 +117,7 @@ type LibraryModeSettings() =
             options.ChartSortReverse |> Setting.map not not |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
             "sort_mode",
             Position = { Left = 0.6f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.8f %- 25.0f; Bottom = 0.0f %+ 170.0f })
-            .Tooltip(Tooltip.Info("levelselect.sortby", "sort_mode"))
+            .Tooltip(Tooltip.Info("levelselect.sortby", "sort_mode").Hotkey(L"levelselect.sortby.reverse_hint", "reverse_sort_mode"))
         
         |* swap
 
