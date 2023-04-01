@@ -40,16 +40,16 @@ module Check =
                 for m in matches """ L"([a-z\-_\.]*)" """ file_contents do
                     found.Add m
 
-                for m in matches """ PrettySetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do
+                for m in matches """ PageSetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do
                     found.Add (sprintf "%s.name" m)
 
-                for m in matches """ PrettyButton\(\s*"([a-z\-_\.]*)" """ file_contents do
+                for m in matches """ PageButton\(\s*"([a-z\-_\.]*)" """ file_contents do
                     found.Add (sprintf "%s.name" m)
 
                 for m in matches """ CaseSelector\(\s*"([a-z\-_\.]*)" """ file_contents do
                     found.Add (sprintf "%s.name" m)
                     
-                for m in matches """ PrettyButton.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
+                for m in matches """ PageButton.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
                     found.Add (sprintf "%s.name" m)
 
                 for m in matches """ Tooltip.Info\("([a-z\-_\.]*)" """ file_contents do
@@ -66,7 +66,7 @@ module Check =
                     found.Add (sprintf "hotkeys.%s.name" m)
                     found.Add (sprintf "hotkeys.%s.tooltip" m)
 
-                for m in Seq.append ["auto"] Prelude.Gameplay.Mods.modList.Keys do
+                for m in Seq.append ["auto"; "pacemaker"] Prelude.Gameplay.Mods.modList.Keys do
                     found.Add (sprintf "mod.%s.name" m)
                     found.Add (sprintf "mod.%s.desc" m)
 

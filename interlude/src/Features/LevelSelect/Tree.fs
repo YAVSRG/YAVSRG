@@ -15,9 +15,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Library
-open Prelude.Data.Charts.Suggestions
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
@@ -80,7 +78,7 @@ module Tree =
         if r1 < rate.Value then ( p2, r2, if r2 < rate.Value then Color.FromArgb(127, Color.White) else colorFunc p2 )
         else ( p1, r1, colorFunc p1 )
     
-    let private switchChart(cc, context, groupName) =
+    let switchChart(cc, context, groupName) =
         match Library.load cc with
         | Some c ->
             Chart.change(cc, context, c)
@@ -441,10 +439,6 @@ module Tree =
         if (!|"down").Tapped() && expandedGroup = "" && selectedGroup <> "" then
             expandedGroup <- selectedGroup
             scrollTo <- ScrollTo.Pack expandedGroup
-        elif (!|"random_chart").Tapped() then
-            match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value filter Rulesets.current_hash with
-            | Some c -> switchChart(c, LibraryContext.None, ""); refresh()
-            | None -> ()
         elif (!|"context_menu").Tapped() && Chart.cacheInfo.IsSome then
             ChartContextMenu(Chart.cacheInfo.Value, Chart.context).Show()
 

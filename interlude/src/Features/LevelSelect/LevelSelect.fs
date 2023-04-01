@@ -8,8 +8,10 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
+open Prelude.Data.Charts.Collections
+open Prelude.Data.Charts.Suggestions
+open Interlude.Content
 open Interlude.Options
-open Interlude.Utils
 open Interlude.Features.Gameplay
 open Interlude.UI
 open Interlude.UI.Components
@@ -31,6 +33,11 @@ type LevelSelectScreen() =
         Tree.updateDisplay()
         infoPanel.Refresh()
 
+    let random_chart() =
+        match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value Tree.filter Rulesets.current_hash with
+        | Some c -> Tree.switchChart(c, LibraryContext.None, ""); refresh()
+        | None -> ()
+
     override this.Init(parent: Widget) =
         base.Init parent
 
@@ -51,6 +58,8 @@ type LevelSelectScreen() =
         |+ SearchBox(searchText, (fun f -> Tree.filter <- f; refresh()),
             Position = { Left = 1.0f %- 580.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- (30.0f + Style.padding); Bottom = 0.0f %+ 90.0f })
             .Tooltip(Tooltip.Info("levelselect.search", "search"))
+
+        |+ ActionBar(random_chart, Position = { Left = 1.0f %- 735.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 605.0f; Bottom = 0.0f %+ 90.0f })
 
         |+ LibraryModeSettings()
 
@@ -91,12 +100,12 @@ type LevelSelectScreen() =
         let { Rect.Left = left; Top = top; Right = right } = this.Bounds
         Draw.quad
             ( Quad.create <| Vector2(left, top) <| Vector2(left + w + 85.0f, top) <| Vector2(left + w, top + 170.0f) <| Vector2(left, top + 170.0f) )
-            (Quad.colorOf (Style.color (120, 0.6f, 0.0f))) Sprite.DefaultQuad
-        Draw.rect (this.Bounds.SliceTop(170.0f).SliceLeft(w).Shrink(20.0f)) (Colors.shadow_1.O2)
+            (Quad.colorOf (Style.dark 120 ())) Sprite.DefaultQuad
+        Draw.rect (this.Bounds.SliceTop(170.0f).SliceLeft(w).Shrink(20.0f)) (Colors.shadow_2.O2)
 
         Draw.quad
             ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )
-            (Quad.colorOf (Style.color (120, 0.1f, 0.0f))) Sprite.DefaultQuad
+            (Quad.colorOf (Colors.shadow_2.O2)) Sprite.DefaultQuad
         Draw.rect ( this.Bounds.SliceTop(175.0f).SliceBottom(5.0f) ) (Style.color (255, 0.8f, 0.0f))
 
         base.Draw()

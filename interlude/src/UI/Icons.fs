@@ -19,6 +19,8 @@ module Icons =
     let folder = Feather.folder
     let play = Feather.play
     let bookmark = Feather.bookmark
+    let show = Feather.eye
+    let hide = Feather.eye_off
 
     let edit = Feather.edit_2
     let add = Feather.plus_circle
