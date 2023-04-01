@@ -50,10 +50,20 @@ type ChartInfo() as this =
             Align = Alignment.RIGHT,
             Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 100.0f; Right = 1.0f %- 17.0f; Bottom = 1.0f %- 60.0f })
 
-        |+ Text(
+        |+ (
+            StaticContainer(NodeType.None, 
+                Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 100.0f; Right = 0.5f %- 10.0f; Bottom = 1.0f %- 60.0f })
+            |+ Text(
             (fun () -> getModString(rate.Value, selectedMods.Value, autoplay)),
-            Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 100.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 60.0f })
+            Align = Alignment.LEFT)
+           )
+           .Tooltip(
+            Tooltip.Info("levelselect.selected_mods")
+                .Hotkey(L"levelselect.selected_mods.mods.hint", "mods")
+                .Body(L"levelselect.selected_mods.rate.hint")
+                .Hotkey(L"levelselect.selected_mods.uprate.hint", "uprate")
+                .Hotkey(L"levelselect.selected_mods.downrate.hint", "downrate")
+           )
             
         |+ StylishButton(
             (fun () -> match Chart.current with Some c -> Preview(c).Show() | None -> ()),
