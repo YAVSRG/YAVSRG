@@ -178,15 +178,21 @@ module Notifications =
                 Callout.draw (calloutBounds.Left, calloutBounds.Top + 30.0f, height, (Colors.white.O4a t.Fade.Alpha, Colors.shadow_1.O4a t.Fade.Alpha), t.Data)
 
             let padding = 20.0f
-            let mutable y = this.Bounds.Top + 70.0f
+            let mutable y = this.Bounds.Top + 80.0f
             for i in items do
                 let width, height = i.Size
                 let accent, body = i.FillColor
-                let bounds = Rect.Box(this.Bounds.Right - width * i.Fade.Value, y, width, height + padding * 2.0f)
-                Draw.rect (bounds.Expand(5.0f, 0.0f).SliceLeft(5.0f)) (accent.O4a i.Fade.Alpha)
+                let bounds = Rect.Box(this.Bounds.Right - width - 10.0f, y, width, height + padding * 2.0f)
+                let border = bounds.Expand(5.0f)
+                Draw.rect (border.SliceLeft(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (border.SliceTop(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (border.SliceRight(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (border.SliceBottom(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect bounds (Colors.shadow_2.O2a i.Fade.Alpha)
                 Draw.rect bounds (body.O3a i.Fade.Alpha)
-                Callout.draw (bounds.Left, bounds.Top + padding, height, i.ContentColor, i.Data)
-                y <- y + (height + padding * 2.0f) * i.Fade.Value
+                Callout.draw (bounds.Left, bounds.Top + padding, height,
+                    ((fst i.ContentColor).O4a i.Fade.Alpha, (snd i.ContentColor).O4a i.Fade.Alpha), i.Data)
+                y <- y + (height + padding * 2.0f + 15.0f) * i.Fade.Value
 
     let display = Display()
 
