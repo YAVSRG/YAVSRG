@@ -127,22 +127,24 @@ module Analysis =
         let notecounts = Array.zeroCreate samples
         let rowcounts = Array.zeroCreate samples
 
-        for t, row in chart.Notes.Data do
-            let mutable is_empty = true
-            for nt in row do
-                if nt = NoteType.NORMAL || nt = NoteType.HOLDHEAD then 
-                    is_empty <- false
-                    notes <- notes + 1
-            if not is_empty then rows <- rows + 1
-            while t - start >= interval * float32 (i + 1) do
-                notecounts.[i] <- notes - last_sample
-                rowcounts.[i] <- rows - last_sample_rows
-                last_sample <- notes
-                last_sample_rows <- rows
-                i <- i + 1
-        if i <> samples then 
-            notecounts.[samples - 1] <- notes - last_sample
-            rowcounts.[samples - 1] <- rows - last_sample_rows
+        if length > 0.0f<ms> then 
+
+            for t, row in chart.Notes.Data do
+                let mutable is_empty = true
+                for nt in row do
+                    if nt = NoteType.NORMAL || nt = NoteType.HOLDHEAD then 
+                        is_empty <- false
+                        notes <- notes + 1
+                if not is_empty then rows <- rows + 1
+                while t - start >= interval * float32 (i + 1) do
+                    notecounts.[i] <- notes - last_sample
+                    rowcounts.[i] <- rows - last_sample_rows
+                    last_sample <- notes
+                    last_sample_rows <- rows
+                    i <- i + 1
+            if i <> samples then 
+                notecounts.[samples - 1] <- notes - last_sample
+                rowcounts.[samples - 1] <- rows - last_sample_rows
 
         notecounts, rowcounts
 
