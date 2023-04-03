@@ -5,13 +5,38 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Charts
+open Prelude.Data.Charts.Caching
 open Prelude.Gameplay.Mods
 open Interlude.Web.Shared
 open Interlude.Utils
 open Interlude.UI
+open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Features.Gameplay
+open Interlude.Features.LevelSelect
 open Interlude.Features.Online
+
+type ContextMenu(cc: CachedChart) as this =
+    inherit Page()
+
+    do
+        let content = 
+            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
+
+            |+ PageButton(
+                "chart.add_to_collection",
+                (fun () -> 
+                    SelectCollectionPage(
+                        fun (name, collection) ->
+                            if CollectionManager.add_to(name, collection, cc) then Menu.Back()
+                    ).Show()
+                ),
+                Icon = Icons.add_to_collection
+            )
+        this.Content content
+
+    override this.Title = cc.Title
+    override this.OnClose() = ()
 
 module SelectedChart =
 
@@ -79,6 +104,19 @@ type SelectedChart() =
                 Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f }
             )
         )
+
+        |+ Conditional(
+            (fun () -> Network.lobby.IsSome && not Network.lobby.Value.YouAreHost && SelectedChart.chart.IsSome && SelectedChart.found),
+            StylishButton(
+                (fun () -> Preview(Chart.current.Value).Show()),
+                K (sprintf "%s %s" Icons.preview (L"levelselect.preview.name")),
+                Style.dark 100,
+                TiltRight = false,
+                Hotkey = "preview",
+                Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f }
+            ).Tooltip(Tooltip.Info("levelselect.preview"))
+        )
+
         |* Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.Ready),
             StylishButton(
