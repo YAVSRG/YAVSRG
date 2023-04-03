@@ -66,12 +66,14 @@
     <Compile Include="Features\Rulesets.fs" />
     <Compile Include="Features\Online\Network.fs" />
     <Compile Include="Features\Gameplay.fs" />
-    <Compile Include="Features\Offset\AudioSync.fs" />
-    <Compile Include="Features\Offset\Offset.fs" />
     <Compile Include="Features\Score\Util.fs" />
     <Compile Include="Features\Score\Graph.fs" />
     <Compile Include="Features\Score\Components.fs" />
     <Compile Include="Features\Score\Score.fs" />
+    <Compile Include="Features\Offset\VisualSync.fs" />
+    <Compile Include="Features\Offset\GlobalSync.fs" />
+    <Compile Include="Features\Offset\AudioSync.fs" />
+    <Compile Include="Features\Offset\Offset.fs" />
     <Compile Include="Features\Play\QuickOptions.fs" />
     <Compile Include="Features\Play\Playfield.fs" />
     <Compile Include="Features\Play\GameplayWidgets.fs" />

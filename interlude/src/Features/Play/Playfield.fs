@@ -17,12 +17,6 @@ open Interlude.Features
 //  COLUMN INDEPENDENT SV
 //  FIX HOLD TAIL CLIPPING
 
-module Playfield =
-
-    let noteRotation keys =
-        let rotations = if Content.noteskinConfig().UseRotation then Content.noteskinConfig().Rotations.[keys - 3] else Array.zeroCreate keys
-        fun k -> Quad.rotateDeg (rotations.[k])
-
 type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
     inherit StaticContainer(NodeType.None)
 
@@ -54,6 +48,8 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
     let hold_pos = Array.create keys 0.0f
     let hold_colors = Array.create keys 0
     let hold_index = Array.create keys -1
+
+    let rotation = Content.Noteskins.noteRotation keys
 
     let mutable time = -Time.infinity
     let reset() =
@@ -124,7 +120,7 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
                     Rect.Box(left + columnPositions.[k], hitposition, column_width, noteHeight)
                     |> scrollDirectionPos bottom
                     |> Quad.ofRect
-                    |> Playfield.noteRotation keys k
+                    |> rotation k
                 )
                 (Color.White |> Quad.colorOf)
                 (Sprite.gridUV (animation.Loops, if (scoring.KeyState |> Bitmap.hasBit k) then 1 else 0) (Content.getTexture "receptor"))
@@ -157,7 +153,7 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
                                 Rect.Box(left + columnPositions.[k], column_pos.[k], column_width, noteHeight)
                                 |> scrollDirectionPos bottom
                             )
-                            |> Playfield.noteRotation keys k
+                            |> rotation k
                         )
                         (Quad.colorOf Color.White)
                         (Sprite.gridUV (animation.Loops, int color.[k]) (Content.getTexture "note"))
@@ -191,7 +187,7 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
                                 Rect.Box(left + columnPositions.[k], headpos, column_width, noteHeight)
                                 |> scrollDirectionPos bottom
                             )
-                            |> Playfield.noteRotation keys k
+                            |> rotation k
                         )
                         (Quad.colorOf tint)
                         (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
@@ -221,7 +217,7 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
                             Rect.Box(left + columnPositions.[k], headpos, column_width, noteHeight)
                             |> scrollDirectionPos bottom
                         )
-                        |> Playfield.noteRotation keys k
+                        |> rotation k
                     )
                     (Quad.colorOf tint)
                     (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))

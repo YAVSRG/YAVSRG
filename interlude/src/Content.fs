@@ -315,6 +315,10 @@ module Content =
                 result
             | Unknown -> false
 
+        let noteRotation keys =
+            let rotations = if Current.config.UseRotation then Current.config.Rotations.[keys - 3] else Array.zeroCreate keys
+            fun k -> Quad.rotateDeg (rotations.[k])
+
     let init (themeId: string) (noteskinId: string) =
         Themes.Current.id <- themeId
         Noteskins.Current.id <- noteskinId

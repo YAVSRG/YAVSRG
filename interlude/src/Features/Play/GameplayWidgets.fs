@@ -64,7 +64,7 @@ module GameplayWidgets =
             if conf.ShowName then
                 this
                 |* Text(state.Scoring.Name,
-                    Color = Utils.K (Color.White, Color.Transparent),
+                    Color = K (Color.White, Color.Transparent),
                     Align = Alignment.CENTER,
                     Position = { Position.Default with Top = 0.6f %+ 0.0f })
 
@@ -415,6 +415,7 @@ module GameplayWidgets =
         let holding = Array.create keys false
         let explodeTime = Math.Min(0.99f, ns.Explosions.FadeTime)
         let animation = Animation.Counter ns.Explosions.AnimationFrameTime
+        let rotation = Noteskins.noteRotation keys
 
         let handleEvent (ev: HitEvent<HitEventGuts>) =
             match ev.Guts with
@@ -466,7 +467,7 @@ module GameplayWidgets =
                             else match e.Judgement with Some j -> int j | None -> 0
                         let frame = (state.CurrentChartTime() - timers.[k]) / toTime ns.Explosions.AnimationFrameTime |> int
                         Draw.quad
-                            (box |> Quad.ofRect |> Playfield.noteRotation keys k)
+                            (box |> Quad.ofRect |> rotation k)
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))
                             (Sprite.gridUV (frame, color) (Content.getTexture (if e.IsHold then "holdexplosion" else "noteexplosion")))
                     | _ -> ()
