@@ -35,6 +35,14 @@ module OptionsMenuRoot =
     type OptionsPage() as this =
         inherit Page()
 
+        let tooltip_hint = 
+            Callout.Normal
+                .Icon(Icons.info)
+                .Title("Ingame help")
+                .Body("Press ? (by default) to see detailed info on the thing below your cursor\nAlso works on places outside of the options menu!\nYour cursor will turn white if you are hovering over something with info available.")
+                .Hotkey("tooltip")
+        let _, tooltip_hint_size = Callout.measure tooltip_hint
+
         let system =
             TileButton(
                 Callout.Normal
@@ -63,6 +71,10 @@ module OptionsMenuRoot =
                     .Title(L"debug.name"),
                 fun () -> Menu.ShowPage Debug.DebugPage)
 
+        let callout_frame =
+            Frame(NodeType.None, Fill = K Colors.blue.O3, Border = K Colors.blue_accent, 
+                Position = Position.SliceBottom(600.0f).SliceTop(tooltip_hint_size + 40.0f).Margin(200.0f, 0.0f))
+
         do
             this.Content(
                 GridContainer(1, 4,
@@ -73,6 +85,12 @@ module OptionsMenuRoot =
                 |+ themes
                 |+ debug
             )
+            this.Add callout_frame
+
+        override this.Draw() =
+            base.Draw()
+            Callout.draw(callout_frame.Bounds.Left, callout_frame.Bounds.Top + 20.0f, tooltip_hint_size, Colors.text, tooltip_hint)
+
         override this.Title = L"options.name"
         override this.OnClose() = LevelSelect.refresh <- true
 
