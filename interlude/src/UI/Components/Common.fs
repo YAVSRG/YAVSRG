@@ -147,21 +147,3 @@ type WIP() as this =
             Draw.rect (Rect.Box (this.Bounds.Left + w * float32 i, this.Bounds.Top, w, 10.0f)) (if i % 2 = 0 then Color.Yellow else Color.Black)
             Draw.rect (Rect.Box (this.Bounds.Left + w * float32 i, this.Bounds.Bottom - 10.0f, w, 10.0f)) (if i % 2 = 1 then Color.Yellow else Color.Black)
         Text.drawFillB(Style.baseFont, text, this.Bounds.Shrink(20.0f), Style.text(), Alignment.CENTER)
-
-type GoodButton(content: Callout, action) as this =
-    inherit Frame(NodeType.Button action)
-
-    let width, height = Callout.measure content
-
-    do
-        this.Fill <- fun () -> if this.Focused then Colors.pink.O3 else Colors.cyan.O3
-        this.Border <- fun () -> if this.Focused then Colors.pink_accent else Colors.cyan_accent
-
-        this |* Clickable.Focus this
-
-    member this.Width = width
-    member this.Height = height + 40.0f
-
-    override this.Draw() =
-        base.Draw()
-        Callout.draw(this.Bounds.Left, this.Bounds.Top + 20.0f, height, (if this.Focused then Colors.text_yellow_2 else Colors.text), content)

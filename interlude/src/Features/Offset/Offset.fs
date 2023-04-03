@@ -8,7 +8,7 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
-type TileButton(body: Callout, onclick: unit -> unit, is_selected: unit -> bool) =
+type private TileButton(body: Callout, onclick: unit -> unit, is_selected: unit -> bool) =
     inherit StaticContainer(NodeType.Button (onclick))
 
     let body_height = snd <| Callout.measure body

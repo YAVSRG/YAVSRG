@@ -2,57 +2,76 @@
 
 open System.Drawing
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.LevelSelect
 
 module OptionsMenuRoot =
 
-    type private BigButton(label: string, icon: string, onClick) as this =
-        inherit Frame(NodeType.Button onClick)
-
-        do
-            this.Fill <- fun () -> Style.color(180, 0.9f, 0.0f)
-            this.Border <- fun () -> if this.Focused then Color.White else Color.Transparent
-            this
-            |+ Text(icon, Position = { Left = Position.min; Top = 0.05f %+ 0.0f; Right = Position.max; Bottom = 0.7f %+ 0.0f })
-            |+ Text(label, Position = { Left = Position.min; Top = 0.65f %+ 0.0f; Right = Position.max; Bottom = 0.9f %+ 0.0f })
-            |* Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
-
+    type private TileButton(body: Callout, onclick: unit -> unit) =
+        inherit StaticContainer(NodeType.Button (onclick))
+    
+        let body_height = snd <| Callout.measure body
+    
+        member val Disabled = false with get, set
+        member val Margin = (0.0f, 20.0f) with get, set
+        member this.Height = body_height + snd this.Margin * 2.0f
+    
+        override this.Init(parent) =
+            this |* Clickable.Focus(this)
+            base.Init(parent)
+    
+        override this.Draw() =
+            let color, dark = 
+                if this.Disabled then Colors.shadow_1, false
+                elif this.Focused then Colors.pink_accent, false
+                else Colors.shadow_1, false
+            Draw.rect this.Bounds (Color.FromArgb(180, color))
+            Draw.rect (this.Bounds.Expand(0.0f, 5.0f).SliceBottom(5.0f)) color
+            Callout.draw (this.Bounds.Left + fst this.Margin, this.Bounds.Top + snd this.Margin, body_height, Colors.text, body)
+    
     type OptionsPage() as this =
         inherit Page()
 
         let system =
-            GoodButton(
+            TileButton(
                 Callout.Normal
                     .Icon(Icons.system)
                     .Title(L"system.name"),
                 fun () -> Menu.ShowPage System.SystemPage)
 
         let gameplay =
-            GoodButton(
+            TileButton(
                 Callout.Normal
                     .Icon(Icons.gameplay)
                     .Title(L"gameplay.name"),
                 fun () -> Menu.ShowPage Gameplay.GameplayPage)
                 
         let themes =
-            GoodButton(
+            TileButton(
                 Callout.Normal
                     .Icon(Icons.themes)
                     .Title(L"themes.name"),
                 fun () -> Menu.ShowPage Themes.ThemesPage)
+                
+        let debug =
+            TileButton(
+                Callout.Normal
+                    .Icon(Icons.debug)
+                    .Title(L"debug.name"),
+                fun () -> Menu.ShowPage Debug.DebugPage)
 
         do
             this.Content(
-                GridContainer(1, 3,
+                GridContainer(1, 4,
                     Spacing = (50.0f, 0.0f),
-                    Position = Position.SliceTop(300.0f).SliceBottom(system.Height).Margin(100.0f, 0.0f))
+                    Position = Position.SliceTop(400.0f).SliceBottom(system.Height).Margin(200.0f, 0.0f))
                 |+ system
                 |+ gameplay
                 |+ themes
+                |+ debug
             )
         override this.Title = L"options.name"
         override this.OnClose() = LevelSelect.refresh <- true
