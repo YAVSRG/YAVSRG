@@ -259,6 +259,13 @@ module Options =
             Directory.SetCurrentDirectory newPath
             Logging.Info(sprintf "DEV MODE MULTIPLE INSTANCE: %s" (Directory.GetCurrentDirectory()))
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) true
+        
+        Directory.CreateDirectory (getDataPath "Songs") |> ignore
+        File.WriteAllText(Path.Combine(getDataPath "Songs", "HOW_TO_ADD_SONGS.txt"),
+            "Dragging and dropping things into this folder won't work.\n" +
+            "Instead, drag and drop things onto the *game window* while it's open and it will import.\n" +
+            "Does this folder have stuff in, but they don't work in game?\n" +
+            "Check they are .yav files, and then go to Options > Debug > Rebuild cache and let that run.")
 
     let save() =
         try
