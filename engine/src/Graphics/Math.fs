@@ -86,6 +86,10 @@ module Quad =
 
     let map f (struct (c1, c2, c3, c4): Quad) : Quad = struct (f c1, f c2, f c3, f c4)
 
+    let translate (x, y) (struct (c1, c2, c3, c4): Quad) : Quad =
+        let v = new Vector2(x, y)
+        struct (c1 + v, c2 + v, c3 + v, c4 + v)
+
     let rotateDeg degrees (struct (c1, c2, c3, c4): Quad) : Quad =
         let centre = (c1 + c2 + c3 + c4) * 0.25f
         let mat = Matrix2.CreateRotation(-(float32(degrees / 180.0 * Math.PI)))
