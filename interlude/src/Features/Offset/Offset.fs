@@ -70,6 +70,7 @@ type OffsetPage(chart: Chart) as this =
             )
             |+ Conditional((fun () -> tab = 1), GlobalSync(chart, fun s -> tab <- 0), Position = Position.TrimTop(60.0f + height))
             |+ Conditional((fun () -> tab = 2), AudioSync(chart, fun () -> tab <- 0), Position = Position.TrimTop(60.0f + height))
+            //|+ Conditional((fun () -> tab = 3), VisualSync(fun () -> tab <- 0))
         )
 
     override this.Title = L"offset.name"

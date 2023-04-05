@@ -9,7 +9,22 @@ open Prelude.Common
 open Interlude.Options
 open Interlude
 open Interlude.UI
+open Interlude.UI.Menu
+open Interlude.Utils
 open Interlude.Features
+
+type VisualOffsetPart2() =
+    inherit Page()
+
+    override this.Init(parent) =
+        this.Content (
+            column()
+            //|+ PageButton("offset.visualoffset.")
+        )
+        base.Init parent
+
+    override this.OnClose() = ()
+    override this.Title = L"offset.visualoffset.result"
 
 type FakePlayfield() =
     inherit StaticWidget(NodeType.None)
@@ -28,6 +43,18 @@ type FakePlayfield() =
     let scrollDirectionPos bottom : Rect -> Rect =
         if options.Upscroll.Value then id 
         else fun (r: Rect) -> { r with Top = bottom - r.Bottom; Bottom = bottom - r.Top }
+
+    override this.Init parent =
+        let width = Array.mapi (fun i n -> n + column_width) columnPositions |> Array.max
+        let (screenAlign, columnAlign) = Content.noteskinConfig().PlayfieldAlignment
+        this.Position <-
+            { 
+                Left = screenAlign %- (width * columnAlign)
+                Top = Position.min
+                Right = screenAlign %+ (width * (1.0f - columnAlign))
+                Bottom = Position.max
+            }
+        base.Init parent
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
@@ -51,19 +78,28 @@ type FakePlayfield() =
                 (Color.White |> Quad.colorOf)
                 (Sprite.gridUV (animation.Loops, 0) (Content.getTexture "receptor"))
 
-        //note in column 0
-        Draw.quad // normal note
-            (
-                Rect.Box(this.Bounds.Left + columnPositions.[0], hitposition, column_width, column_width)
-                |> scrollDirectionPos this.Bounds.Bottom
-                |> Quad.ofRect
-                |> rotation 0
-            )
-            (Quad.colorOf Color.White)
-            (Sprite.gridUV (animation.Loops, 0) (Content.getTexture "note"))
+        let mutable y = hitposition + scale * 1.0f<ms> * (500.0f - float32 timer.Time)
+        while y < this.Bounds.Height do
+            //note in column 0
+            Draw.quad // normal note
+                (
+                    Rect.Box(this.Bounds.Left + columnPositions.[0], y, column_width, column_width)
+                    |> scrollDirectionPos this.Bounds.Bottom
+                    |> Quad.ofRect
+                    |> rotation 0
+                )
+                (Quad.colorOf Color.White)
+                (Sprite.gridUV (animation.Loops, 0) (Content.getTexture "note"))
+            y <- y + scale * 500.0f<ms>
 
-type VisualSync(when_done: unit -> unit) =
-    inherit StaticContainer(NodeType.Leaf)
+    member this.OffsetOfTap : Time =
+        let x = 500.0f<ms> - float32 timer.Time * 1.0f<ms>
+        if x > 250.0f<ms> then x - 500.0f<ms> else x
+
+type VisualSyncPart1() =
+    inherit Menu.Page()
+
+    let fake_playfield = FakePlayfield()
 
     let taps = ResizeArray<Time>()
     let mutable variance_of_mean = infinityf * 1.0f<ms^2>
@@ -86,13 +122,13 @@ type VisualSync(when_done: unit -> unit) =
                 "Done",
                 Icons.ready,
                 80.0f,
-                when_done,
+                ignore,
                 Position = Position.Row(700.0f, 80.0f).TrimRight(200.0f).SliceRight(250.0f))
         )
 
     override this.Init(parent) =
         this 
-        |+ FakePlayfield()
+        |+ fake_playfield
         |* done_button
 
         base.Init(parent)
@@ -122,27 +158,26 @@ type VisualSync(when_done: unit -> unit) =
         base.Update(elapsedTime, moved)
         tap_fade.Update elapsedTime
     
-        //if complete then ()
-        //else
-        //match Input.consumeAny InputEvType.Press with
-        //| ValueSome (Key _, t) ->
-        //    let raw_song_time = (t - 1.0f<ms> * float32 options.AudioOffset.Value * rate - Song.localOffset)
-        //    let offset = (raw_song_time % chart_mspb) - chart_por
-        //    taps.Add offset
-        //    tap_fade.Value <- 1.0f
+        if complete then ()
+        else
+        match Input.consumeAny InputEvType.Press with
+        | ValueSome (Key _, t) ->
+            let offset = fake_playfield.OffsetOfTap
+            taps.Add offset
+            tap_fade.Value <- 1.0f
 
-        //    if taps.Count > 4 then
-        //        let mean = Seq.average taps
-        //        variance_of_mean <- 
-        //            let sum_of_squares = taps |> Seq.sumBy (fun x -> (x - mean) * (x - mean)) in
-        //            sum_of_squares / float32 (taps.Count - 1) / float32 taps.Count
-        //        if variance_of_mean < threshold then
-        //            printfn "Chart: %f You: %f" chart_por mean
-        //            next_rate mean
-        //        else 
-        //            printfn "%f, mean %f" offset mean
-        //            printfn "%f > %f" variance_of_mean threshold
-        //        if taps.Count > 16 then
-        //            for t in taps do
-        //                if abs (t - mean) > 10.0f<ms> then sync(fun () -> taps.Remove t |> ignore)
-        //| _ -> ()
+            if taps.Count > 4 then
+                let mean = Seq.average taps
+                variance_of_mean <- 
+                    let sum_of_squares = taps |> Seq.sumBy (fun x -> (x - mean) * (x - mean)) in
+                    sum_of_squares / float32 (taps.Count - 1) / float32 taps.Count
+                if variance_of_mean < threshold then
+                    printfn "Chart: 0 You: %f" mean
+                    finish mean
+                if taps.Count > 16 then
+                    for t in taps do
+                        if abs (t - mean) > 10.0f<ms> then sync(fun () -> taps.Remove t |> ignore)
+        | _ -> ()
+
+    override this.Title = ""
+    override this.OnClose() = ()

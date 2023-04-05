@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI
 
+open System
 open OpenTK.Mathematics
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
@@ -23,45 +24,90 @@ module Logo =
         override this.Draw() =
             base.Draw()
             let w = this.Bounds.Width
-            let { Rect.Left = l; Top = t; Right = r; Bottom = b } = this.Bounds
+
+            let breathe_1 = float32 (Math.Sin(counter.Time / 3500.0 * Math.PI) * 0.01) * w
+            let breathe_2 = float32 (Math.Cos(counter.Time / 8000.0 * Math.PI) * 0.018 + 0.018) * w
+
+            let breathe_bounds = this.Bounds.Translate(0.0f, breathe_1)
+            let { Rect.Left = l; Top = t; Right = r; Bottom = b } = breathe_bounds
 
             if r > 2.0f then
 
                 Draw.quad
-                    (Quad.create(new Vector2(l + 0.08f * w, t + 0.09f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(r - 0.08f * w, t + 0.09f * w)))
-                    (Quad.colorOf(Colors.blue))
+                    (
+                        Quad.createv 
+                            (l + 0.08f * w, t + 0.09f * w)
+                            (l + 0.5f * w, t + 0.76875f * w)
+                            (l + 0.5f * w, t + 0.76875f * w)
+                            (r - 0.08f * w, t + 0.09f * w)
+                    )
+                    (Quad.colorOf Colors.blue)
                     Sprite.DefaultQuad
                 Draw.quad
-                    (Quad.create(new Vector2(l + 0.08f * w, t + 0.29f * w)) (new Vector2(l + 0.22f * w, t + 0.29f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.96875f * w)))
-                    (Quad.colorOf(Colors.blue))
+                    (
+                        Quad.createv 
+                            (l + 0.08f * w, t + 0.29f * w)
+                            (l + 0.22f * w, t + 0.29f * w) // todo: 0.22 is too far. go and work out the right number
+                            (l + 0.5f * w, t + 0.75f * w)
+                            (l + 0.5f * w, t + 0.96875f * w)
+                        |> Quad.translate (0.0f, breathe_2)
+                    )
+                    (Quad.colorOf Colors.blue)
                     Sprite.DefaultQuad
                 Draw.quad
-                    (Quad.create(new Vector2(r - 0.08f * w, t + 0.29f * w)) (new Vector2(r - 0.22f * w, t + 0.29f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.96875f * w)))
-                    (Quad.colorOf(Colors.blue))
+                    (
+                        Quad.createv 
+                            (r - 0.08f * w, t + 0.29f * w)
+                            (r - 0.22f * w, t + 0.29f * w)
+                            (l + 0.5f * w, t + 0.75f * w)
+                            (l + 0.5f * w, t + 0.96875f * w)
+                        |> Quad.translate (0.0f, breathe_2)
+                    )
+                    (Quad.colorOf Colors.blue)
                     Sprite.DefaultQuad
 
                 Stencil.create(true)
                 Draw.quad
-                    (Quad.create(new Vector2(l + 0.1f * w, t + 0.1f * w)) (new Vector2(l + 0.5f * w, t + 0.75f * w)) (new Vector2(l + 0.5f * w, t + 0.75f * w)) (new Vector2(r - 0.1f * w, t + 0.1f * w)))
-                    (Quad.colorOf(Colors.cyan_accent))
+                    (
+                        Quad.createv 
+                            (l + 0.1f * w, t + 0.1f * w)
+                            (l + 0.5f * w, t + 0.75f * w)
+                            (l + 0.5f * w, t + 0.75f * w)
+                            (r - 0.1f * w, t + 0.1f * w)
+                    )
+                    (Quad.colorOf Colors.cyan_accent)
                     Sprite.DefaultQuad
                 Draw.quad
-                    (Quad.create(new Vector2(l + 0.1f * w, t + 0.3f * w)) (new Vector2(l + 0.2075f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.77f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
-                    (Quad.colorOf(Colors.cyan_accent))
+                    (
+                        Quad.createv 
+                            (l + 0.1f * w, t + 0.3f * w)
+                            (l + 0.2075f * w, t + 0.3f * w)
+                            (l + 0.5f * w, t + 0.77f * w)
+                            (l + 0.5f * w, t + 0.95f * w)
+                        |> Quad.translate (0.0f, breathe_2)
+                    )
+                    (Quad.colorOf Colors.cyan_accent)
                     Sprite.DefaultQuad
                 Draw.quad
-                    (Quad.create(new Vector2(r - 0.1f * w, t + 0.3f * w)) (new Vector2(r - 0.2075f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.77f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
-                    (Quad.colorOf(Colors.cyan_accent))
+                    (
+                        Quad.createv 
+                            (r - 0.1f * w, t + 0.3f * w)
+                            (r - 0.2075f * w, t + 0.3f * w)
+                            (l + 0.5f * w, t + 0.77f * w)
+                            (l + 0.5f * w, t + 0.95f * w)
+                        |> Quad.translate (0.0f, breathe_2)
+                    )
+                    (Quad.colorOf Colors.cyan_accent)
                     Sprite.DefaultQuad
-                Draw.sprite this.Bounds Colors.white (Content.getTexture "logo")
+                Draw.sprite breathe_bounds Colors.white (Content.getTexture "logo")
 
                 Stencil.draw()
                 //chart background
-                Draw.rect this.Bounds Colors.cyan_accent
+                Draw.rect breathe_bounds Colors.cyan_accent
                 let rain = Content.getTexture "rain"
                 let v = float32 counter.Time
-                let q = Quad.ofRect this.Bounds
-                Draw.quad <| q <| Quad.colorOf (Colors.blue.O2)  <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f) rain q)
+                let q = Quad.ofRect breathe_bounds
+                Draw.quad <| q <| Quad.colorOf (Colors.blue.O2) <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f) rain q)
                 Draw.quad <| q <| Quad.colorOf (Colors.blue.O3) <| rain.WithUV(Sprite.tilingUV(1.0f, v * 0.1f, v * 0.11f) rain q)
                 Draw.quad <| q <| Quad.colorOf (Colors.blue) <| rain.WithUV(Sprite.tilingUV(1.5625f, v * 0.15f, v * 0.16f) rain q)
 
@@ -80,7 +126,7 @@ module Logo =
                     prev <- level
 
                 Stencil.finish()
-                Draw.sprite this.Bounds Colors.white (Content.getTexture "logo")
+                Draw.sprite breathe_bounds Colors.white (Content.getTexture "logo")
 
         member this.Move (l, t, r, b) = this.Position <- { Left = 0.5f %+ l; Top = 0.5f %+ t; Right = 0.5f %+ r; Bottom = 0.5f %+ b }
 
