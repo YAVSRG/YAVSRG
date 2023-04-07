@@ -108,7 +108,7 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
         Selector(Array.zip values names, setting)
 
     static member FromBool(setting: Setting<bool>) =
-        Selector<bool>([|false, Icons.selected; true, Icons.unselected|], setting)
+        Selector<bool>([|false, Icons.unselected; true, Icons.selected|], setting)
 
 type Divider() =
     inherit StaticWidget(NodeType.None)
