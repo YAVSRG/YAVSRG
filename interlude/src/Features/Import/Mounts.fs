@@ -104,7 +104,10 @@ module Mounts =
                     | Game.Stepmania, _ -> Notifications.error (L"imports.mount.create.stepmania.error", "")
                     | Game.Etterna, _ -> Notifications.error (L"imports.mount.create.etterna.error", "")
                     | _ -> failwith "impossible"
-                    if setting.Value.IsSome then this.Close()
+                    if setting.Value.IsSome then 
+                        import_mounted_source.Request(setting.Value.Value, ignore)
+                        Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "")
+                        this.Close()
                 |> Some
 
         override this.Update(elapsedTime, bounds) =
