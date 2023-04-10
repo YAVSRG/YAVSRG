@@ -92,6 +92,6 @@ module OptionsMenuRoot =
             Callout.draw(callout_frame.Bounds.Left, callout_frame.Bounds.Top + 20.0f, tooltip_hint_size, Colors.text, tooltip_hint)
 
         override this.Title = L"options.name"
-        override this.OnClose() = LevelSelect.refresh <- true
+        override this.OnClose() = LevelSelect.refresh_all()
 
     let show() = Menu.ShowPage OptionsPage

@@ -305,8 +305,6 @@ module Tree =
     let mutable private groups: GroupItem list = []
     let mutable private lastItem : ChartItem option = None
 
-    let updateDisplay() = cacheFlag <- cacheFlag + 1
-
     let refresh() =
         // fetch groups
         let library_groups =
@@ -348,6 +346,10 @@ module Tree =
         cacheFlag <- 0
         expandedGroup <- selectedGroup
         scrollTo <- ScrollTo.Chart
+
+    do 
+        LevelSelect.on_refresh_all.Add refresh
+        LevelSelect.on_refresh_details.Add (fun () -> cacheFlag <- cacheFlag + 1)
 
     let previous() =
         match lastItem with
@@ -417,7 +419,6 @@ module Tree =
         else finish_dragScroll()
 
     let update(origin: float32, originB: float32, elapsedTime: float) =
-        if LevelSelect.minorRefresh then LevelSelect.minorRefresh <- false; updateDisplay()
         scrollPos.Update(elapsedTime) |> ignore
         
         let bottomEdge =

@@ -66,7 +66,7 @@ type private EditLevelPage(level: Level) as this =
                     ConfirmPage(Localisation.localiseWith [level.Name] "misc.confirmdelete", 
                         fun () -> 
                             if Table.current().Value.RemoveLevel level.Name then 
-                                if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh <- true
+                                if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh_all()
                                 if ActiveCollection.Level level.Name = options.Collection.Value then Collections.unselect()
                                 Menu.Back()
                     ).Show()
@@ -148,7 +148,7 @@ type ManageTablesPage() as this =
                 options.Table.Set (Some name)
                 Table.load name
                 match options.Collection.Value with ActiveCollection.Level _ -> Collections.unselect() | _ -> ()
-                if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+                if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh_all() else LevelSelect.refresh_details()
                 sync refresh)
 
         if options.EnableTableEdit.Value then

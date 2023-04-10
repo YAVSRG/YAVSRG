@@ -1,10 +1,9 @@
 ﻿namespace Interlude.Features.LevelSelect
 
-open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude.Common
-open Prelude.Data.Charts.Caching
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Charts.Formats.Interlude
@@ -23,6 +22,10 @@ type ChartInfo() as this =
     let mutable length = ""
     let mutable bpm = ""
     let mutable notecounts = ""
+    
+    let changeRate v = 
+        rate.Value <- rate.Value + v
+        LevelSelect.refresh_details()
 
     do
         this
@@ -66,7 +69,7 @@ type ChartInfo() as this =
            )
             
         |+ StylishButton(
-            (fun () -> match Chart.current with Some c -> Preview(c).Show() | None -> ()),
+            (fun () -> match Chart.current with Some c -> Preview(c, changeRate).Show() | None -> ()),
             K (Icons.preview + " " + L"levelselect.preview.name"),
             Style.main 100,
             Hotkey = "preview",
@@ -79,12 +82,25 @@ type ChartInfo() as this =
             .Tooltip(Tooltip.Info("levelselect.mods", "mods"))
         
         |* Rulesets.QuickSwitcher(
-            options.SelectedRuleset |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
+            options.SelectedRuleset |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             Position = { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f })
             .Tooltip(Tooltip.Info("levelselect.rulesets", "ruleset_switch").Hotkey(L"levelselect.rulesets.picker_hint", "ruleset_picker"))
+
+        LevelSelect.on_refresh_all.Add this.Refresh
+        LevelSelect.on_refresh_details.Add this.Refresh
 
     member this.Refresh() =
         length <- Chart.format_duration()
         bpm <- Chart.format_bpm()
         notecounts <- Chart.format_notecounts()
         scores.Refresh()
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+
+        if (!|"uprate_small").Tapped() then changeRate(0.01f)
+        elif (!|"uprate_half").Tapped() then changeRate(0.05f)
+        elif (!|"uprate").Tapped() then changeRate(0.1f)
+        elif (!|"downrate_small").Tapped() then changeRate(-0.01f)
+        elif (!|"downrate_half").Tapped() then changeRate(-0.05f)
+        elif (!|"downrate").Tapped() then changeRate(-0.1f)

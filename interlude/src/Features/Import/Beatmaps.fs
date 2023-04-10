@@ -55,7 +55,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
                 fun completed ->
                     if completed then Library.Imports.auto_convert.Request(target,
                         fun b ->
-                            LevelSelect.refresh <- LevelSelect.refresh || b
+                            if b then LevelSelect.refresh_all()
                             Notifications.task_feedback (Icons.download, L"notification.install_song", data.title)
                             File.Delete target
                             status <- if b then Installed else DownloadFailed

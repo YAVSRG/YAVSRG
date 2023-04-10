@@ -47,7 +47,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
             Localisation.localiseWith [scoreName] "misc.confirmdelete",
             fun () ->
                 Chart.saveData.Value.Scores.Remove score.ScoreInfo |> ignore
-                LevelSelect.refresh <- true
+                LevelSelect.refresh_all()
                 Notifications.action_feedback (Icons.delete, Localisation.localiseWith [scoreName] "notification.deleted", "")
                 if is_submenu then Menu.Back()
         ).Show()
@@ -161,8 +161,11 @@ module Scoreboard =
                         | None -> ()
                         | Some b ->
                             sync( fun () -> 
-                                if not (req.ChartSaveData.Value.Bests.ContainsKey req.RulesetId) || b <> req.ChartSaveData.Value.Bests[req.RulesetId] then
-                                    Tree.updateDisplay()
+                                if 
+                                    not (req.ChartSaveData.Value.Bests.ContainsKey req.RulesetId) 
+                                    || b <> req.ChartSaveData.Value.Bests[req.RulesetId] 
+                                then
+                                    LevelSelect.refresh_details()
                                 req.ChartSaveData.Value.Bests[req.RulesetId] <- b
                             )
                 }

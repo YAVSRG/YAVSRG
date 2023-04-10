@@ -52,7 +52,7 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
                 fun completed ->
                     if completed then Library.Imports.auto_convert.Request(target,
                         fun b ->
-                            LevelSelect.refresh <- LevelSelect.refresh || b
+                            if b then LevelSelect.refresh_all()
                             Notifications.task_feedback (Icons.download, L"notification.install_pack", data.name)
                             File.Delete target
                             status <- if b then Installed else DownloadFailed

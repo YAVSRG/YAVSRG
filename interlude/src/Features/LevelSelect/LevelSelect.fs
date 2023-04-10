@@ -28,11 +28,6 @@ type LevelSelectScreen() =
         infoPanel.Refresh()
         Tree.refresh()
 
-    let changeRate v = 
-        rate.Value <- rate.Value + v
-        Tree.updateDisplay()
-        infoPanel.Refresh()
-
     let random_chart() =
         match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value Tree.filter Rulesets.current_hash with
         | Some c -> Tree.switchChart(c, LibraryContext.None, ""); refresh()
@@ -68,20 +63,14 @@ type LevelSelectScreen() =
         Chart.onChange.Add infoPanel.Refresh
         Comments.init this
 
+        LevelSelect.on_refresh_all.Add refresh
+
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
-        if LevelSelect.refresh then refresh(); LevelSelect.refresh <- false
 
         Comments.update(elapsedTime, moved)
 
         if (!|"select").Tapped() then Tree.play()
-
-        elif (!|"uprate_small").Tapped() then changeRate(0.01f)
-        elif (!|"uprate_half").Tapped() then changeRate(0.05f)
-        elif (!|"uprate").Tapped() then changeRate(0.1f)
-        elif (!|"downrate_small").Tapped() then changeRate(-0.01f)
-        elif (!|"downrate_half").Tapped() then changeRate(-0.05f)
-        elif (!|"downrate").Tapped() then changeRate(-0.1f)
 
         elif (!|"next").Tapped() then Tree.next()
         elif (!|"previous").Tapped() then Tree.previous()

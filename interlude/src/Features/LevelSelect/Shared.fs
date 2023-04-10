@@ -1,15 +1,14 @@
 ﻿namespace Interlude.Features.LevelSelect
 
-open System
-open Prelude.Common
-open Prelude.Charts.Formats.Interlude
-open Interlude.Features.Gameplay
-open Interlude.UI
+open Percyqaz.Flux.UI
 
 module LevelSelect =
 
-    /// Set this to true to have level select "consume" it and refresh on the next update frame
-    let mutable refresh = false
+    let private refresh_all_event = Event<unit>()
+    let private refresh_details_event = Event<unit>()
 
-    /// Same as above, but just refresh minor info like pbs, whether charts are in collections or not, etc
-    let mutable minorRefresh = false
+    let refresh_all() = sync(refresh_all_event.Trigger)
+    let refresh_details() = sync(refresh_details_event.Trigger)
+
+    let on_refresh_all = refresh_all_event.Publish
+    let on_refresh_details = refresh_details_event.Publish

@@ -27,7 +27,7 @@ module Comments =
             override this.OnDeselected() =
                 base.OnDeselected()
                 match Chart.saveData with Some d -> d.Comment <- d.Comment.Trim() | _ -> ()
-                LevelSelect.minorRefresh <- true
+                LevelSelect.refresh_details()
         }
 
     let editor =

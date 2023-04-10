@@ -108,7 +108,7 @@ type SelectedChart() =
         |+ Conditional(
             (fun () -> Network.lobby.IsSome && not Network.lobby.Value.YouAreHost && SelectedChart.chart.IsSome && SelectedChart.found),
             StylishButton(
-                (fun () -> Preview(Chart.current.Value).Show()),
+                (fun () -> Preview(Chart.current.Value, ignore).Show()),
                 K (sprintf "%s %s" Icons.preview (L"levelselect.preview.name")),
                 Style.dark 100,
                 TiltRight = false,

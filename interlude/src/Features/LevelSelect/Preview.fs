@@ -10,7 +10,7 @@ open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools.Patterns
 open Interlude.Features.Play
 
-type Preview(chart: Chart) =
+type Preview(chart: Chart, changeRate: float32 -> unit) =
     inherit Dialog()
 
     let density_graph_1, density_graph_2 = Analysis.density 100 chart
@@ -74,3 +74,9 @@ type Preview(chart: Chart) =
             Song.seek newTime
         if (!|"preview").Tapped() || (!|"exit").Tapped() then
             this.Close()
+        elif (!|"uprate_small").Tapped() then changeRate(0.01f)
+        elif (!|"uprate_half").Tapped() then changeRate(0.05f)
+        elif (!|"uprate").Tapped() then changeRate(0.1f)
+        elif (!|"downrate_small").Tapped() then changeRate(-0.01f)
+        elif (!|"downrate_half").Tapped() then changeRate(-0.05f)
+        elif (!|"downrate").Tapped() then changeRate(-0.1f)

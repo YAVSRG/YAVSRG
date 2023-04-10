@@ -64,8 +64,8 @@ type LibraryModeSettings() =
             groupBy.Keys
             |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.groupby." + id))),
             "Group",
-            options.ChartGroupMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
-            options.ChartGroupReverse |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
+            options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
+            options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             "group_mode"
         ).Tooltip(Tooltip.Info("levelselect.groupby", "group_mode").Hotkey(L"levelselect.groupby.reverse_hint", "reverse_group_mode"))
 
@@ -103,7 +103,7 @@ type LibraryModeSettings() =
                 LibraryMode.Collections, L"levelselect.librarymode.collections"
                 LibraryMode.Table, L"levelselect.librarymode.table"
             |],
-            options.LibraryMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true; update_swap()),
+            options.LibraryMode |> Setting.trigger (fun _ -> LevelSelect.refresh_all(); update_swap()),
             Style.dark 100,
             Hotkey = "library_mode",
             Position = { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f })
@@ -113,8 +113,8 @@ type LibraryModeSettings() =
             sortBy.Keys
             |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.sortby." + id))),
             "Sort",
-            options.ChartSortMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
-            options.ChartSortReverse |> Setting.map not not |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
+            options.ChartSortMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
+            options.ChartSortReverse |> Setting.map not not |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             "sort_mode",
             Position = { Left = 0.6f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.8f %- 25.0f; Bottom = 0.0f %+ 170.0f })
             .Tooltip(Tooltip.Info("levelselect.sortby", "sort_mode").Hotkey(L"levelselect.sortby.reverse_hint", "reverse_sort_mode"))
@@ -139,7 +139,7 @@ type LibraryModeSettings() =
             elif (!|"table").Tapped() then Menu.ShowPage ManageTablesPage
             elif (!|"reverse_sort_mode").Tapped() then 
                 Setting.app not options.ChartSortReverse
-                LevelSelect.refresh <- true
+                LevelSelect.refresh_all()
             elif (!|"reverse_group_mode").Tapped() then 
                 Setting.app not options.ChartGroupReverse
-                LevelSelect.refresh <- true
+                LevelSelect.refresh_all()

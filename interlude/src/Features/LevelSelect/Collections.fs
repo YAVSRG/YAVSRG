@@ -25,7 +25,7 @@ module CollectionManager =
             | Playlist p -> p.Add (cc, rate.Value, selectedMods.Value)
             | Level lvl -> Table.current().Value.AddChart(lvl.Name, Table.generate_cid cc, cc)
         then
-            if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+            if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh_all() else LevelSelect.refresh_details()
             Notifications.action_feedback (Icons.add_to_collection, Localisation.localiseWith [cc.Title; name] "collections.added", "")
             true
         else false
@@ -40,7 +40,7 @@ module CollectionManager =
                 | _ -> p.RemoveSingle cc
             | Level _ -> Table.current().Value.RemoveChart cc
         then
-            if options.LibraryMode.Value <> LibraryMode.All then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+            if options.LibraryMode.Value <> LibraryMode.All then LevelSelect.refresh_all() else LevelSelect.refresh_details()
             Notifications.action_feedback (Icons.remove_from_collection, Localisation.localiseWith [cc.Title; name] "collections.removed", "")
             if Some cc = Chart.cacheInfo then Chart.context <- LibraryContext.None
             true
@@ -70,7 +70,7 @@ module CollectionManager =
             | LibraryContext.Playlist (index, id, _) ->
                 collections.GetPlaylist(id).Value.MoveChartUp index
             | _ -> false
-        then LevelSelect.refresh <- true
+        then LevelSelect.refresh_all()
 
     let reorder_down (context: LibraryContext) =
         if
@@ -78,7 +78,7 @@ module CollectionManager =
             | LibraryContext.Playlist (index, id, _) ->
                 collections.GetPlaylist(id).Value.MoveChartDown index
             | _ -> false
-        then LevelSelect.refresh <- true
+        then LevelSelect.refresh_all()
 
 type private CreateFolderPage() as this =
     inherit Page()
@@ -153,7 +153,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                     ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", 
                         fun () ->
                             if collections.Delete name then 
-                                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true
+                                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh_all()
                                 if ActiveCollection.Collection name = options.Collection.Value then Collections.unselect()
                                 Menu.Back()
                     ).Show()
@@ -202,7 +202,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                     ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", 
                         fun () -> 
                             if collections.Delete name then 
-                                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true
+                                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh_all()
                                 if ActiveCollection.Collection name = options.Collection.Value then Collections.unselect()
                                 Menu.Back()
                     ).Show()

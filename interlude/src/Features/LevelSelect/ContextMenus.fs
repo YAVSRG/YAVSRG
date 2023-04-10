@@ -78,7 +78,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             Localisation.localiseWith [chartName] "misc.confirmdelete",
             fun () ->
                 Library.delete cc
-                LevelSelect.refresh <- true
+                LevelSelect.refresh_all()
                 if is_submenu then Menu.Back()
         ).Show()
 
@@ -101,7 +101,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
             Localisation.localiseWith [groupName] "misc.confirmdelete",
             fun () ->
                 Library.deleteMany charts
-                LevelSelect.refresh <- true
+                LevelSelect.refresh_all()
                 if is_submenu then Menu.Back()
         ).Show()
 
