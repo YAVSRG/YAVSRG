@@ -19,6 +19,7 @@ Come join [the discord](https://discord.gg/tA22tWR) -- I need YOUR help particul
 ## 🤖 Building it yourself
 
 You shouldn't need to do this. Download the latest release [here](https://github.com/YAVSRG/Interlude/releases) instead
+
 Want to run it on Linux or MacOS just for a laugh? Use [Mono](https://www.mono-project.com/download/stable) for the time being
 
 I have proven cross platform builds as a concept, but will only bother to add them to the releases system if I have the time and reason to do it
