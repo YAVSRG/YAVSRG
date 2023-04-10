@@ -38,8 +38,8 @@ module OptionsMenuRoot =
         let tooltip_hint = 
             Callout.Normal
                 .Icon(Icons.info)
-                .Title("Ingame help")
-                .Body("Press ? (by default) to see detailed info on the thing below your cursor\nAlso works on places outside of the options menu!\nYour cursor will turn white if you are hovering over something with info available.")
+                .Title(L"options.ingame_help.name")
+                .Body(L"options.ingame_help.hint")
                 .Hotkey("tooltip")
         let _, tooltip_hint_size = Callout.measure tooltip_hint
 
@@ -72,7 +72,7 @@ module OptionsMenuRoot =
                 fun () -> Menu.ShowPage Debug.DebugPage)
 
         let callout_frame =
-            Frame(NodeType.None, Fill = K Colors.blue.O3, Border = K Colors.blue_accent, 
+            Frame(NodeType.None, Fill = K Colors.cyan.O3, Border = K Colors.cyan_accent, 
                 Position = Position.SliceBottom(600.0f).SliceTop(tooltip_hint_size + 40.0f).Margin(200.0f, 0.0f))
 
         do
