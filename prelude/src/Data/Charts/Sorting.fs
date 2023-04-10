@@ -60,7 +60,6 @@ module Sorting =
 
     type GroupMethod = CachedChart * GroupContext -> int * string
     let groupBy : IDictionary<string, GroupMethod> = dict [
-            "level", fun (c, _) -> let lvl = int (c.Physical * 5.0) in lvl, sprintf "Level %i" lvl
             "pack", fun (c, _) -> 0, c.Pack
             "date_played", dateLastPlayed
             "grade", gradeAchieved
