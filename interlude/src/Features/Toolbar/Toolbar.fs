@@ -62,20 +62,20 @@ type Toolbar() =
                 ( fun () -> if shown() && Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ),
                 Icons.options,
                 Hotkey = "options")
-                .Tooltip(Tooltip.Info("menu.options"))
+                .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
             |+ ToolbarButton(
                 L"menu.import.name",
                 ( fun () -> if shown() then Screen.change Screen.Type.Import Transitions.Flags.Default ),
                 Icons.import,
                 Hotkey = "import")
-                .Tooltip(Tooltip.Info("menu.import"))
+                .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
             |+ ToolbarButton(
                 L"menu.wiki.name",
                 ( fun () -> if shown() then Wiki.show() ),
                 Icons.wiki,
                 HoverIcon = Icons.wiki2,
                 Hotkey = "wiki")
-                .Tooltip(Tooltip.Info("menu.wiki"))
+                .Tooltip(Tooltip.Info("menu.wiki").Hotkey("wiki"))
             )
         |+ if Interlude.Options.options.EnableConsole.Value then NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f)) :> Widget else Dummy()
         |+ HotkeyAction("screenshot", fun () ->
