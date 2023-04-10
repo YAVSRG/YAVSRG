@@ -47,7 +47,7 @@ type ScoreScreenStats =
                 else
                     if not e.Missed then inc notesHit
                     inc notesCount
-                if e.Judgement.IsSome then
+                if e.Judgement.IsSome && not e.Missed then
                     if e.Delta < 0.0f<ms> then
                         earlySum ++ e.Delta
                         inc earlyHitCount
@@ -60,7 +60,7 @@ type ScoreScreenStats =
             | Release e ->
                 if not e.Missed then inc releasesReleased
                 inc releasesCount
-                if e.Judgement.IsSome then
+                if e.Judgement.IsSome && not e.Missed then
                     if e.Delta < 0.0f<ms> then
                         earlySum ++ e.Delta
                         inc earlyHitCount
@@ -71,7 +71,7 @@ type ScoreScreenStats =
                     sumOfSq ++ e.Delta * float32 e.Delta
                     inc judgementCount
 
-        let judgementCount = match judgementCount.Value with 0 -> 1 | n -> n
+        let judgementCount = max 1 judgementCount.Value
         let mean = sum.Value / float32 judgementCount
         {
             Notes = notesHit.Value, notesCount.Value
@@ -79,8 +79,8 @@ type ScoreScreenStats =
             Releases = releasesReleased.Value, releasesCount.Value
 
             Mean = mean
-            EarlyMean = earlySum.Value / float32 earlyHitCount.Value
-            LateMean = lateSum.Value / float32 lateHitCount.Value
+            EarlyMean = earlySum.Value / (max 1.0f (float32 earlyHitCount.Value))
+            LateMean = lateSum.Value / (max 1.0f (float32 lateHitCount.Value))
             StandardDeviation = System.MathF.Sqrt( ((sumOfSq.Value / float32 judgementCount * 1.0f<ms>) - mean * mean) |> float32 ) * 1.0f<ms>
 
             JudgementCount = judgementCount
