@@ -110,16 +110,8 @@ module Render =
         rheight <- height
         GL.Viewport(new Rectangle(0, 0, width, height))
         let width, height = float32 width, float32 height
-        
-        let (width, height) =
-            if (width < 1920.0f || height < 1000.0f) then
-                let r = Math.Max(1920.0f / width, 1000.0f / height);
-                (width * r, height * r)
-            else (width, height)
-        vwidth <- MathF.Round width
-        vheight <- MathF.Round height
-        //vwidth <- (width / height) * 1000.0f
-        //vheight <- 1000.0f
+        vwidth <- (width / height) * 1080.0f
+        vheight <- 1080.0f
 
         Shader.setUniformMat4 ("uProjection", createProjection true) Shader.main
 
