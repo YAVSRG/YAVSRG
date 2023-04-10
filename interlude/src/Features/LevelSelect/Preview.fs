@@ -40,6 +40,7 @@ type Preview(chart: Chart) =
         playfield.Draw()
 
         let b = this.Bounds.Shrink(10.0f, 20.0f)
+        let start = chart.FirstNote - Song.LEADIN_TIME
 
         let w = b.Width / float32 density_graph_1.Length
         for i = 0 to density_graph_1.Length - 1 do
@@ -48,7 +49,7 @@ type Preview(chart: Chart) =
             Draw.rect (Rect.Box(b.Left + float32 i * w, b.Bottom - h, w, h - 5.0f)) (Color.FromArgb(120, Color.White))
             Draw.rect (Rect.Box(b.Left + float32 i * w, b.Bottom - h2, w, h2 - 5.0f)) (Style.color(80, 1.0f, 0.0f))
 
-        let percent = (Song.time() - chart.FirstNote) / (chart.LastNote - chart.FirstNote) 
+        let percent = (Song.time() - start) / (chart.LastNote - start) 
         Draw.rect (b.SliceBottom(5.0f)) (Color.FromArgb(160, Color.White))
         let x = b.Width * percent
         Draw.rect (b.SliceBottom(5.0f).SliceLeft x) (Style.color(255, 1.0f, 0.0f))
@@ -58,7 +59,7 @@ type Preview(chart: Chart) =
         //    for t, bpm in data do
         //        let color, lo, hi = Patterns.display.[pattern]
         //        let a = System.Math.Clamp((float32 bpm - float32 lo) / float32 (hi - lo), 0.0f, 1.0f)
-        //        let percent = (t - chart.FirstNote) / (chart.LastNote - chart.FirstNote)
+        //        let percent = (t - start) / (chart.LastNote - start)
         //        Draw.rect (Rect.Box(b.Left + b.Width * percent, y, 20.0f, 30.0f * a)) (Color.FromArgb(int (80.0f * a), color))
         //    Text.draw(Style.baseFont, pattern, 20.0f, b.Left, y, Color.White)
         //    y <- y + 40.0f
@@ -68,7 +69,8 @@ type Preview(chart: Chart) =
         playfield.Update(elapsedTime, moved)
         if this.Bounds.Bottom - Mouse.y() < 200.0f && Mouse.leftClick() then
             let percent = Mouse.x() / Viewport.vwidth
-            let newTime = chart.FirstNote + (chart.LastNote - chart.FirstNote) * percent
+            let start = chart.FirstNote - Song.LEADIN_TIME
+            let newTime = start + (chart.LastNote - start) * percent
             Song.seek newTime
         if (!|"preview").Tapped() || (!|"exit").Tapped() then
             this.Close()
