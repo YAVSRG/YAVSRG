@@ -19,11 +19,9 @@ module Utils =
     /// Full version string e.g. "Interlude 0.5.16 (20220722)"
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
-        let v2 = Path.Combine(getInterludeLocation(), "Interlude.exe") |> FileVersionInfo.GetVersionInfo
         if DEV_MODE then
-            sprintf "%s %s (%s Dev)" v.Name smallVersion v2.ProductVersion
-        else
-            sprintf "%s %s (%s)" v.Name smallVersion v2.ProductVersion
+            sprintf "%s %s (dev build)" v.Name smallVersion
+        else sprintf "%s %s" v.Name smallVersion
 
     /// K for Konst/Kestrel -- K x is shorthand for a function that ignores its input and returns x
     /// Named after the FP combinator
