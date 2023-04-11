@@ -28,7 +28,15 @@ module Window =
     let onFileDrop = WindowEvents.onFileDrop.Publish
     let onResize = WindowEvents.onResize.Publish
 
-    let mutable apply_config = None
+    let lockObj = obj()
+    let mutable action_queue = []
+
+    type WindowAction =
+        | ApplyConfig of Config
+        | EnableResize of callback: ((int * int) -> unit)
+        | DisableResize
+
+    let sync (a: WindowAction) = lock (lockObj) (fun () -> action_queue <- action_queue @ [a])
     let mutable monitors = [||]
 
 [<Sealed>]
@@ -36,6 +44,8 @@ type Window(config: Config, title: string, root: Root) as this =
     inherit NativeWindow(NativeWindowSettings(StartVisible = false, NumberOfSamples = 24))
 
     let renderThread = RenderThread(this, config.AudioDevice.Value, root, WindowEvents.afterInit.Trigger)
+
+    let mutable resize_callback = fun (w, h) -> ()
 
     do
         base.Title <- title
@@ -65,8 +75,8 @@ type Window(config: Config, title: string, root: Root) as this =
 
         | WindowType.Windowed ->
             base.WindowState <- WindowState.Normal
-            let width, height, resizable = config.Resolution.Value.Dimensions
-            base.WindowBorder <- if resizable then WindowBorder.Resizable else WindowBorder.Fixed
+            let width, height = config.WindowResolution.Value
+            base.WindowBorder <- WindowBorder.Fixed
             base.ClientRectangle <- new Box2i(monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y, width, height)
             base.CenterWindow()
 
@@ -87,10 +97,25 @@ type Window(config: Config, title: string, root: Root) as this =
 
         | _ -> Logging.Error "Tried to change to invalid window mode"
 
+    member this.EnableResize(callback) =
+        if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Fixed then
+            base.WindowBorder <- WindowBorder.Resizable
+        else Logging.Error "Tried to enable resize while not in windowed mode?"
+            
+        resize_callback <- callback
+
+    member this.DisableResize() =
+        if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Resizable then
+            base.WindowBorder <- WindowBorder.Fixed
+        else Logging.Error "Tried to disable resize while not in windowed mode?"
+
     override this.OnResize e =
         base.OnResize e
         if e.Height <> 0 then
-            sync ( fun () -> renderThread.OnResize this.ClientSize )
+            sync ( fun () -> 
+                if this.WindowBorder = WindowBorder.Resizable then resize_callback(this.ClientSize.X, this.ClientSize.Y)
+                renderThread.OnResize this.ClientSize
+            )
 
     override this.OnFileDrop e =
         Array.iter WindowEvents.onFileDrop.Trigger e.FileNames
@@ -103,9 +128,14 @@ type Window(config: Config, title: string, root: Root) as this =
         renderThread.Start()
 
         while not (GLFW.WindowShouldClose this.WindowPtr) do
-            if Window.apply_config.IsSome then
-                this.ApplyConfig Window.apply_config.Value
-                Window.apply_config <- None
+            lock (Window.lockObj) (fun () ->
+                for a in Window.action_queue do
+                    match a with
+                    | Window.ApplyConfig c -> this.ApplyConfig c
+                    | Window.EnableResize c -> this.EnableResize c
+                    | Window.DisableResize -> this.DisableResize()
+                Window.action_queue <- []
+            )
             this.ProcessInputEvents()
             GLFW.PollEvents()
             InputThread.poll(this.KeyboardState, this.MouseState)
