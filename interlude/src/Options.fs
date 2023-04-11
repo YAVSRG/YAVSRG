@@ -179,7 +179,6 @@ module Options =
     do 
         // Register decoding rules for Percyqaz.Flux config
         JSON.WithAutoCodec<Percyqaz.Flux.Windowing.Config>(false)
-            .WithAutoCodec<Percyqaz.Flux.Windowing.WindowResolution>()
             .WithAutoCodec<Percyqaz.Flux.Input.Bind>() |> ignore
 
     let mutable options : GameOptions = Unchecked.defaultof<_>

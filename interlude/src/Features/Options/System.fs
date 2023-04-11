@@ -77,6 +77,10 @@ module System =
                 |+ PageSetting("system.windowmode", Selector.FromEnum config.WindowMode)
                     .Pos(200.0f)
                     .Tooltip(Tooltip.Info("system.windowmode"))
+                // todo: way to edit resolution settings?
+                |+ PageSetting("system.monitor", Selector(Window.monitors, config.Display))
+                    .Pos(660.0f)
+                    .Tooltip(Tooltip.Info("system.monitor"))
 
                 |+ PageSetting("system.framelimit", Selector.FromEnum config.FrameLimit)
                     .Pos(270.0f)
@@ -101,15 +105,11 @@ module System =
                 |+ PageSetting("system.visualoffset", Slider<float>(options.VisualOffset, 0.01f))
                     .Pos(590.0f)
                     .Tooltip(Tooltip.Info("system.visualoffset"))
-                // todo: way to edit resolution settings?
-                |+ PageSetting("system.monitor", Selector(Window.monitors, config.Display))
-                    .Pos(660.0f)
-                    .Tooltip(Tooltip.Info("system.monitor"))
                 
                 |+ PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
                     .Pos(760.0f)
                     .Tooltip(Tooltip.Info("system.hotkeys"))
             )
 
-        override this.OnClose() = Window.apply_config <- Some config
+        override this.OnClose() = Window.sync (Window.ApplyConfig config)
         override this.Title = L"system.name"
