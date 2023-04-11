@@ -11,6 +11,7 @@ open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.UI.Components
 
 module System =
 
@@ -68,48 +69,101 @@ module System =
         override this.Title = L"system.hotkeys.name"
         override this.OnClose() = ()
 
+    type Resolution(setting: Setting<int * int>) as this =
+        inherit StaticContainer(NodeType.Button(fun () -> this.ToggleDropdown()))
+        
+        override this.Init(parent) =
+            this
+            |+ Text(
+                (fun () -> let w, h = setting.Value in sprintf "%ix%i" w h),
+                Align = Alignment.LEFT)
+            |* Clickable.Focus this
+            base.Init parent
+
+        member this.ToggleDropdown() =
+            match this.Dropdown with
+            | Some _ -> this.Dropdown <- None
+            | _ ->
+                let d = Dropdown.Selector WindowResolution.presets (fun (w, h) -> sprintf "%ix%i" w h) setting.Set (fun () -> this.Dropdown <- None)
+                d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
+                d.Init this
+                this.Dropdown <- Some d
+
+        member val Dropdown : Dropdown option = None with get, set
+
+        override this.Draw() =
+            base.Draw()
+            match this.Dropdown with
+            | Some d -> d.Draw()
+            | None -> ()
+
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            match this.Dropdown with
+            | Some d -> d.Update(elapsedTime, moved)
+            | None -> ()
+
     type SystemPage() as this =
         inherit Page()
 
+        let monitor_select = 
+            PageSetting("system.monitor", Selector(Window.monitors, config.Display))
+                .Pos(270.0f)
+                .Tooltip(Tooltip.Info("system.monitor"))
+        
+        let resolution_select = 
+            PageSetting("system.windowresolution", Resolution(config.WindowResolution))
+                .Pos(270.0f)
+                .Tooltip(Tooltip.Info("system.windowresolution"))
+
+        let swap = SwapContainer()
+
         do
+            Window.sync (Window.EnableResize config.WindowResolution.Set)
+            swap.Current <- if config.WindowMode.Value = WindowType.Windowed then resolution_select else monitor_select
+
             this.Content(
                 column()
-                |+ PageSetting("system.windowmode", Selector.FromEnum config.WindowMode)
-                    .Pos(200.0f)
-                    .Tooltip(Tooltip.Info("system.windowmode"))
-                // todo: way to edit resolution settings?
-                |+ PageSetting("system.monitor", Selector(Window.monitors, config.Display))
-                    .Pos(660.0f)
-                    .Tooltip(Tooltip.Info("system.monitor"))
 
                 |+ PageSetting("system.framelimit", Selector.FromEnum config.FrameLimit)
-                    .Pos(270.0f)
+                    .Pos(340.0f)
                     .Tooltip(Tooltip.Info("system.framelimit"))
 
                 |+ PageSetting("system.audiovolume",
                     Slider<_>.Percent(options.AudioVolume |> Setting.trigger Devices.changeVolume, 0.01f) )
-                    .Pos(360.0f)
+                    .Pos(430.0f)
                     .Tooltip(Tooltip.Info("system.audiovolume"))
 
                 |+ PageSetting("system.audiodevice",
                     Selector(Array.ofSeq(Devices.list()), Setting.trigger Devices.change config.AudioDevice) )
-                    .Pos(430.0f, 1700.0f)
+                    .Pos(500.0f, 1700.0f)
                     .Tooltip(Tooltip.Info("system.audiodevice"))
 
                 |+ PageSetting("system.audiooffset",
                         { new Slider<float>(options.AudioOffset, 0.01f)
                             with override this.OnDeselected() = base.OnDeselected(); Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>) } )
-                    .Pos(500.0f)
+                    .Pos(570.0f)
                     .Tooltip(Tooltip.Info("system.audiooffset"))
 
                 |+ PageSetting("system.visualoffset", Slider<float>(options.VisualOffset, 0.01f))
-                    .Pos(590.0f)
+                    .Pos(640.0f)
                     .Tooltip(Tooltip.Info("system.visualoffset"))
                 
                 |+ PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-                    .Pos(760.0f)
+                    .Pos(730.0f)
                     .Tooltip(Tooltip.Info("system.hotkeys"))
+
+                |+ PageSetting("system.windowmode", 
+                    Selector.FromEnum (
+                        config.WindowMode 
+                        |> Setting.trigger (fun wm -> swap.Current <- if wm = WindowType.Windowed then resolution_select else monitor_select)
+                        ))
+                    .Pos(200.0f)
+                    .Tooltip(Tooltip.Info("system.windowmode"))
+                |+ swap
             )
 
-        override this.OnClose() = Window.sync (Window.ApplyConfig config)
+        override this.OnClose() = 
+            Window.sync (Window.DisableResize)
+            Window.sync (Window.ApplyConfig config)
         override this.Title = L"system.name"

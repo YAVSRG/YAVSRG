@@ -480,3 +480,5 @@ wiki.downloadupdate=Install update
 wiki.openinbrowser=Open in browser
 options.ingame_help.hint=Press / (by default) to see detailed info on the thing below your cursor\nAlso works on places outside of the options menu!\nYour cursor will turn white if you are hovering over something with info available.
 options.ingame_help.name=Ingame help
+system.windowresolution.name=Window size
+system.windowresolution.tooltip=Controls the size of the game window when in windowed mode.\nYou can choose from a list of presets, or just resize the window yourself.
