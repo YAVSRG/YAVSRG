@@ -73,6 +73,25 @@ module Screen =
         override this.Draw() = current.Draw()
 
     let screenContainer = ScreenContainer()
+    
+    let changeNew (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
+        if (screenType <> currentType || screenType = Type.Play) then
+            Transitions.tryStart((fun () -> 
+                let s = thunk()
+                current.OnExit screenType
+                if not s.Initialised then s.Init screenContainer else s.Update(0.0, true)
+                s.OnEnter currentType
+                currentType <- screenType
+                current <- s
+            ), flags)
+            |> globalAnimation.Add
+    
+    let change (screenType: Type) (flags: Transitions.Flags) = changeNew (K screens.[int screenType]) screenType flags
+    
+    let back (flags: Transitions.Flags) =
+        match current.OnBack() with
+        | Some t -> change t flags
+        | None -> ()
 
     type ScreenRoot(toolbar: Widget) =
         inherit Root()
@@ -92,6 +111,7 @@ module Screen =
             globalAnimation.Update elapsedTime
             logo.Update (elapsedTime, moved)
             screenContainer.Update (elapsedTime, moved)
+            if (!|"exit").Tapped() then back Transitions.Flags.UnderLogo
 
             if exit then this.ShouldExit <- true
     
@@ -121,24 +141,5 @@ module Screen =
             Dialog.display.Init this
             screenContainer.Init this
             current.OnEnter Type.SplashScreen
-    
-    let changeNew (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
-        if (screenType <> currentType || screenType = Type.Play) then
-            Transitions.tryStart((fun () -> 
-                let s = thunk()
-                current.OnExit screenType
-                if not s.Initialised then s.Init screenContainer else s.Update(0.0, true)
-                s.OnEnter currentType
-                currentType <- screenType
-                current <- s
-            ), flags)
-            |> globalAnimation.Add
-    
-    let change (screenType: Type) (flags: Transitions.Flags) = changeNew (K screens.[int screenType]) screenType flags
-    
-    let back (flags: Transitions.Flags) =
-        match current.OnBack() with
-        | Some t -> change t flags
-        | None -> ()
 
 type Screen = Screen.T

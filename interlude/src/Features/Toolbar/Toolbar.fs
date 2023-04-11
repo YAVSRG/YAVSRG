@@ -53,7 +53,6 @@ type Toolbar() =
         |+ IconButton(L"menu.back",
             Icons.back, HEIGHT,
             (fun () -> Screen.back Transitions.Flags.UnderLogo),
-            Hotkey = "exit",
             Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 160.0f, HEIGHT - 10.0f))
         |+ (
             FlowContainer.LeftToRight(180.0f, Spacing = 10.0f, AllowNavigation = false, Position = Position.SliceTop(HEIGHT).TrimLeft(20.0f))

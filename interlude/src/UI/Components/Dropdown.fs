@@ -36,7 +36,7 @@ type Dropdown(items: (string * (unit -> unit)) seq, onclose: unit -> unit) as th
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         this.VisibleBounds <- Viewport.bounds
-        if not this.Focused || Mouse.leftClick() || Mouse.rightClick() then this.Close()
+        if (!|"exit").Tapped() || not this.Focused || Mouse.leftClick() || Mouse.rightClick() then this.Close()
         if Mouse.hover this.Bounds then Input.finish_frame_events()
 
     override this.Init(parent: Widget) =
