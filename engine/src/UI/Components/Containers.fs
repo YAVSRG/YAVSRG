@@ -91,13 +91,14 @@ module FlowContainer =
                 item_size <- value
                 refresh <- true
 
+        member val Floating = false with get, set
         member val AllowNavigation = true with get, set
                 
         member this.Clear() = children.Clear()
 
         override this.Draw() =
             for { Widget = c; Visible = visible } in children do
-                if visible && c.VisibleBounds.Visible then c.Draw()
+                if visible && (this.Floating || c.VisibleBounds.Visible) then c.Draw()
         
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved || refresh)
@@ -110,7 +111,7 @@ module FlowContainer =
                 else moved
 
             for { Widget = c; Visible = visible } in children do
-                if visible && (moved || c.VisibleBounds.Visible) then
+                if visible && (moved || this.Floating || c.VisibleBounds.Visible) then
                     c.Update(elapsedTime, moved)
 
             if this.AllowNavigation && this.Focused then this.Navigate()

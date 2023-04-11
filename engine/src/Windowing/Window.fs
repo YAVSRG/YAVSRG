@@ -100,14 +100,11 @@ type Window(config: Config, title: string, root: Root) as this =
     member this.EnableResize(callback) =
         if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Fixed then
             base.WindowBorder <- WindowBorder.Resizable
-        else Logging.Error "Tried to enable resize while not in windowed mode?"
-            
         resize_callback <- callback
 
     member this.DisableResize() =
         if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Resizable then
             base.WindowBorder <- WindowBorder.Fixed
-        else Logging.Error "Tried to disable resize while not in windowed mode?"
 
     override this.OnResize e =
         base.OnResize e
