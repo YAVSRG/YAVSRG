@@ -63,11 +63,13 @@ type Window(config: Config, title: string, root: Root) as this =
             |> Array.ofSeq
 
         let monitor =
-            try
-                monitor_list.[config.Display.Value]
-            with err ->
-                Logging.Error (sprintf "Failed to get display info for monitor %i" config.Display.Value)
-                Monitors.GetMonitorFromWindow(this)
+            if config.WindowMode.Value <> WindowType.Windowed then
+                try
+                    monitor_list.[config.Display.Value]
+                with err ->
+                    Logging.Error (sprintf "Failed to get display info for monitor %i" config.Display.Value)
+                    Monitors.GetMonitorFromWindow(this)
+            else Monitors.GetMonitorFromWindow(this)
 
         renderThread.RenderFrequency <- float config.FrameLimit.Value
 
@@ -77,7 +79,7 @@ type Window(config: Config, title: string, root: Root) as this =
             base.WindowState <- WindowState.Normal
             let width, height = config.WindowResolution.Value
             base.WindowBorder <- WindowBorder.Fixed
-            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y, width, height)
+            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y, monitor.ClientArea.Min.X + width, monitor.ClientArea.Min.Y + height)
             base.CenterWindow()
 
         | WindowType.Borderless ->

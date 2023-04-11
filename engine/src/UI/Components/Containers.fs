@@ -346,7 +346,8 @@ module SwitchContainer =
     
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
-            for c in children do c.Update(elapsedTime, moved)
+            for i = children.Count - 1 downto 0 do
+                children.[i].Update(elapsedTime, moved)
             if this.Focused then this.Navigate()
     
         member this.Add(child: 'T) =
