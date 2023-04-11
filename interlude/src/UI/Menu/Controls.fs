@@ -37,7 +37,6 @@ type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
         |* Clickable(
             (fun () -> this.Select(); dragging <- true),
             OnHover = (fun b -> if b && not this.Focused then this.Focus()))
-        this.Position <- Position.SliceLeft 100.0f
 
     member val Format = (fun x -> x.ToString()) with get, set
 

@@ -13,7 +13,7 @@ module private Dropdown =
 
         do
             this
-            |+ Clickable.Focus this
+            |+ Clickable(this.Select, OnHover = (fun b -> if b && not this.Focused then this.Focus()), Floating = true)
             |* Text(label,
                 Align = Alignment.LEFT,
                 Position = Position.Margin(10.0f, 5.0f))
@@ -26,22 +26,20 @@ type Dropdown(items: (string * (unit -> unit)) seq, onclose: unit -> unit) as th
     inherit Frame(NodeType.Switch (fun _ -> this.Items),
         Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
-    let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE)
+    let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 
     do
         for (label, action) in items do
             flow |* Dropdown.Item(label, fun () -> action(); this.Close())
         this.Add flow
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        this.VisibleBounds <- Viewport.bounds
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
         if (!|"exit").Tapped() || not this.Focused || Mouse.leftClick() || Mouse.rightClick() then this.Close()
         if Mouse.hover this.Bounds then Input.finish_frame_events()
 
     override this.Init(parent: Widget) =
         base.Init parent
-        this.VisibleBounds <- Viewport.bounds
         this.Focus()
 
     member this.Close() = onclose()
