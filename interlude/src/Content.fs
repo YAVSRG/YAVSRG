@@ -193,13 +193,16 @@ module Content =
 
         let list() = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 
-        let createNew (id: string) =
+        let createNew (id: string) : bool =
              let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
              let target = Path.Combine(getDataPath "Themes", id)
-             if id <> "" && not (Directory.Exists target) then defaultTheme.ExtractToFolder(Path.Combine(getDataPath "Themes", id))
-             load()
-             Current.switch id
-             Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
+             if id <> "" && not (Directory.Exists target) then 
+                 defaultTheme.ExtractToFolder(target)
+                 load()
+                 Current.switch id
+                 Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
+                 true
+             else false
 
         let clearToColor (cleared: bool) = Current.config.ClearColors |> (if cleared then fst else snd)
 
@@ -271,12 +274,17 @@ module Content =
         /// Returns id * Display name pairs
         let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 
-        let extractCurrent() =
-            let id = Guid.NewGuid().ToString()
-            Current.instance.ExtractToFolder(Path.Combine(getDataPath "Noteskins", id))
-            load()
-            Current.switch id
-            Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
+        let extractCurrent() : bool =
+            let id = Current.config.Name + "_extracted"
+            let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
+            let target = Path.Combine(getDataPath "Noteskins", id)
+            if id <> "" && not (Directory.Exists target) then
+                Current.instance.ExtractToFolder(target)
+                load()
+                Current.switch id
+                Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
+                true
+            else false
 
         let exportCurrent() =
             match Current.instance.Source with
