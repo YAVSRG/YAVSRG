@@ -106,26 +106,41 @@ module System =
     type SystemPage() as this =
         inherit Page()
 
+        let mutable has_changed = false
+        let mark_changed = fun (_ : 'T) -> has_changed <- true
+
         let monitor_select = 
-            PageSetting("system.monitor", Selector(Window.monitors, config.Display))
+            PageSetting("system.monitor", Selector(Window.monitors, config.Display |> Setting.trigger mark_changed))
                 .Pos(270.0f)
                 .Tooltip(Tooltip.Info("system.monitor"))
         
         let resolution_select = 
-            PageSetting("system.windowresolution", Resolution(config.WindowResolution))
+            PageSetting("system.windowresolution", Resolution(config.WindowResolution |> Setting.trigger mark_changed))
                 .Pos(270.0f)
                 .Tooltip(Tooltip.Info("system.windowresolution"))
 
         let swap = SwapContainer()
+        let wm_change(wm) =
+            if wm = WindowType.Windowed then
+                swap.Current <- resolution_select
+                Window.sync (Window.EnableResize config.WindowResolution.Set)
+            else
+                swap.Current <- monitor_select
+                Window.sync (Window.DisableResize)
+
+        let change_callout = Callout.Small.Icon(Icons.system).Title(L"system.window_changes_hint")
+        let change_callout_w, change_callout_h = Callout.measure change_callout
+        let callout_frame =
+            Frame(NodeType.None, Fill = K Colors.cyan.O3, Border = K Colors.cyan_accent, 
+                Position = Position.SliceTop(change_callout_h + 40.0f + 40.0f).SliceRight(change_callout_w + 40.0f).Margin(20.0f, 20.0f))
 
         do
-            Window.sync (Window.EnableResize config.WindowResolution.Set)
-            swap.Current <- if config.WindowMode.Value = WindowType.Windowed then resolution_select else monitor_select
+            wm_change(config.WindowMode.Value)
 
             this.Content(
                 column()
 
-                |+ PageSetting("system.framelimit", Selector.FromEnum config.FrameLimit)
+                |+ PageSetting("system.framelimit", Selector.FromEnum (config.FrameLimit |> Setting.trigger mark_changed))
                     .Pos(340.0f)
                     .Tooltip(Tooltip.Info("system.framelimit"))
 
@@ -154,14 +169,16 @@ module System =
                     .Tooltip(Tooltip.Info("system.hotkeys"))
 
                 |+ PageSetting("system.windowmode", 
-                    Selector.FromEnum (
-                        config.WindowMode 
-                        |> Setting.trigger (fun wm -> swap.Current <- if wm = WindowType.Windowed then resolution_select else monitor_select)
-                        ))
+                    Selector.FromEnum (config.WindowMode |> Setting.trigger wm_change |> Setting.trigger mark_changed))
                     .Pos(200.0f)
                     .Tooltip(Tooltip.Info("system.windowmode"))
                 |+ swap
             )
+            this.Add (Conditional((fun () -> has_changed), callout_frame))
+
+        override this.Draw() =
+            base.Draw()
+            if has_changed then Callout.draw(callout_frame.Bounds.Left, callout_frame.Bounds.Top + 20.0f, change_callout_h, Colors.text, change_callout)
 
         override this.OnClose() = 
             Window.sync (Window.DisableResize)
