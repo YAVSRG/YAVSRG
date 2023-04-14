@@ -56,7 +56,7 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
             Position = { Left = 0.55f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.7f %- 25.0f; Bottom = 1.0f %- 0.0f })
         |+ StylishButton(
             (fun () -> ScoreScreenHelpers.watchReplay (data.ModChart, data.ScoreInfo.rate, data.ReplayData)),
-            sprintf "%s %s" Icons.preview (L"score.watch_replay") |> K,
+            sprintf "%s %s" Icons.watch (L"score.watch_replay.name") |> K,
             Style.dark 100,
             Position = { Left = 0.7f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.85f %- 25.0f; Bottom = 1.0f %- 0.0f })
         |* Rulesets.QuickSwitcher(

@@ -74,6 +74,9 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
 
     new (scoring: IScoreMetric) = Playfield(Gameplay.Chart.colored(), scoring)
 
+    member this.ColumnWidth = column_width
+    member this.ColumnPositions = columnPositions
+
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         animation.Update elapsedTime

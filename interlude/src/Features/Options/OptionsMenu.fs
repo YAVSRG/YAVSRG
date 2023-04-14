@@ -24,11 +24,11 @@ module OptionsMenuRoot =
             base.Init(parent)
     
         override this.Draw() =
-            let color, dark = 
-                if this.Disabled then Colors.shadow_1, false
-                elif this.Focused then Colors.pink_accent, false
-                else Colors.shadow_1, false
-            Draw.rect this.Bounds (Color.FromArgb(180, color))
+            let color = 
+                if this.Disabled then Colors.shadow_1
+                elif this.Focused then Colors.pink_accent
+                else Colors.shadow_1
+            Draw.rect this.Bounds color.O3
             Draw.rect (this.Bounds.Expand(0.0f, 5.0f).SliceBottom(5.0f)) color
             Callout.draw (this.Bounds.Left + fst this.Margin, this.Bounds.Top + snd this.Margin, body_height, Colors.text, body)
     

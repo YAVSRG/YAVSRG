@@ -43,6 +43,7 @@ module Icons =
     let filter = Feather.filter
     let preview = Feather.eye
     let table = Feather.sidebar
+    let watch = Feather.film
 
     let options = Feather.settings
     let import = Feather.download

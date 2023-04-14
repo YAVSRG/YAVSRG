@@ -27,9 +27,9 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
             column()
             |+ PageButton("score.delete", (fun () -> ScoreContextMenu.ConfirmDeleteScore(score, true)), Icon = Icons.delete)
                 .Pos(200.0f)
-            |+ PageButton("score.watchreplay", 
+            |+ PageButton("score.watch_replay", 
                 (fun () -> ScoreScreenHelpers.watchReplay(score.ModChart, score.ScoreInfo.rate, score.ReplayData); Menu.Back()),
-                Icon = Icons.preview, Enabled = Network.lobby.IsNone)
+                Icon = Icons.watch, Enabled = Network.lobby.IsNone)
                 .Pos(270.0f)
             |+ PageButton("score.challenge",
                 (fun () -> Tree.challengeScore(score.ScoreInfo.rate, score.ReplayData); Menu.Back()),
