@@ -73,7 +73,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
         Background.dim (float32 options.BackgroundDim.Value)
         Screen.Toolbar.hide()
         Song.changeRate Gameplay.rate.Value
-        Song.changeGlobalOffset (toTime options.AudioOffset.Value)
+        Song.changeGlobalOffset (options.AudioOffset.Value * 1.0f<ms>)
         Song.onFinish <- SongFinishAction.Wait
         Song.playLeadIn()
         Input.removeInputMethod()

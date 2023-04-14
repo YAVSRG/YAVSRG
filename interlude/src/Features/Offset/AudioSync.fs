@@ -110,7 +110,7 @@ type AudioSync(chart: Chart, when_done: unit -> unit) =
         else
         match Input.consumeAny InputEvType.Press with
         | ValueSome (Key _, t) ->
-            let raw_song_time = (t - 1.0f<ms> * float32 options.AudioOffset.Value * rate - Song.localOffset)
+            let raw_song_time = (t - 1.0f<ms> * options.AudioOffset.Value * rate - Song.localOffset)
             let offset = (raw_song_time % chart_mspb) - chart_por
             taps.Add offset
             tap_fade.Value <- 1.0f

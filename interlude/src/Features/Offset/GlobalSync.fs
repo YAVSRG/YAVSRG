@@ -52,7 +52,7 @@ type WaveformRender(fade: Animation.Fade) =
             x <- x + waveform.MsPerPoint * scale
         Draw.rect (this.Bounds.TrimRight(this.Bounds.Width * 0.25f).SliceRight(5.0f)) (Color.FromArgb(fade.Alpha, Color.White))
         let rel = this.Bounds.Width * 0.75f
-        let mutable por = (this.PointOfReference + 1.0f<ms> * float32 options.AudioOffset.Value / Gameplay.rate.Value)
+        let mutable por = (this.PointOfReference + 1.0f<ms> * options.AudioOffset.Value / Gameplay.rate.Value)
         let left = time - rel / scale
         let right = time + (rel / 3.0f) / scale
         por <- por + this.MsPerBeat * ceil ((left - por) / this.MsPerBeat)
@@ -85,7 +85,7 @@ type GlobalSync(chart: Chart, when_done: Time -> unit) =
         Conditional((fun () -> step = 3),
             PageSetting(
                 "system.audiooffset",
-                Slider(options.AudioOffset |> Setting.trigger (fun v -> Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>)), 0.001f)
+                Slider(options.AudioOffset |> Setting.trigger (fun v -> Song.changeGlobalOffset (options.AudioOffset.Value * 1.0f<ms>)), 0.001f)
             ).Pos(700.0f)
         )
     let done_button =
@@ -185,7 +185,7 @@ type GlobalSync(chart: Chart, when_done: Time -> unit) =
         else
         match Input.consumeAny InputEvType.Press with
         | ValueSome (Key _, t) ->
-            let raw_song_time = (t - 1.0f<ms> * float32 options.AudioOffset.Value / Gameplay.rate.Value - Song.localOffset)
+            let raw_song_time = (t - 1.0f<ms> * options.AudioOffset.Value / Gameplay.rate.Value - Song.localOffset)
             taps.Add raw_song_time
             tap_fade.Value <- 1.0f
 

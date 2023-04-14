@@ -155,12 +155,12 @@ module System =
                     .Tooltip(Tooltip.Info("system.audiodevice"))
 
                 |+ PageSetting("system.audiooffset",
-                        { new Slider<float>(options.AudioOffset, 0.01f)
-                            with override this.OnDeselected() = base.OnDeselected(); Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>) } )
+                        { new Slider<float32>(options.AudioOffset, 0.01f)
+                            with override this.OnDeselected() = base.OnDeselected(); Song.changeGlobalOffset (options.AudioOffset.Value * 1.0f<ms>) } )
                     .Pos(570.0f)
                     .Tooltip(Tooltip.Info("system.audiooffset"))
 
-                |+ PageSetting("system.visualoffset", Slider<float>(options.VisualOffset, 0.01f))
+                |+ PageSetting("system.visualoffset", Slider<float32>(options.VisualOffset, 0.01f))
                     .Pos(640.0f)
                     .Tooltip(Tooltip.Info("system.visualoffset"))
                 

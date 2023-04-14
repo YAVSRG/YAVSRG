@@ -31,11 +31,11 @@ module QuickOptions =
             let firstNote = Gameplay.Chart.current.Value.FirstNote
             let offset = 
                 Setting.make
-                    (fun v -> Gameplay.Chart.saveData.Value.Offset <- toTime v + firstNote; Song.changeLocalOffset(toTime v))
-                    (fun () -> float (Gameplay.Chart.saveData.Value.Offset - firstNote))
-                |> Setting.bound -200.0 200.0
-                |> Setting.round 0
-            let recommendedOffset = float (Gameplay.Chart.saveData.Value.Offset - firstNote - mean)
+                    (fun v -> Gameplay.Chart.saveData.Value.Offset <- v * 1.0f<ms> + firstNote; Song.changeLocalOffset(v * 1.0f<ms>))
+                    (fun () -> (Gameplay.Chart.saveData.Value.Offset - firstNote) / 1.0f<ms>)
+                |> Setting.bound -200.0f 200.0f
+                |> Setting.roundf 0
+            let recommendedOffset = Gameplay.Chart.saveData.Value.Offset - firstNote - mean
 
             this.Content(
                 column()
@@ -45,7 +45,7 @@ module QuickOptions =
                         Align = Alignment.RIGHT,
                         Position = Position.Box(1.0f, 0.0f, -600.0f, 200.0f, 550.0f, PRETTYHEIGHT)
                     )
-                |+ PageButton("quick.applyoffset", fun () -> offset.Value <- recommendedOffset).Pos(280f)
+                |+ PageButton("quick.applyoffset", fun () -> offset.Value <- recommendedOffset / 1.0f<ms>).Pos(280f)
 
                 |+ PageSetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Pos(380.0f)
                 |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f)).Pos(460.0f)

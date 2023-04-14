@@ -65,18 +65,17 @@ module Options =
     [<Json.AutoCodec(false)>]
     type GameOptions =
         {
-            VisualOffset: Setting.Bounded<float>
-            AudioOffset: Setting.Bounded<float>
+            VisualOffset: Setting.Bounded<float32>
+            AudioOffset: Setting.Bounded<float32>
             AudioVolume: Setting.Bounded<float>
             CurrentChart: Setting<string>
             Theme: Setting<string>
 
-            ScrollSpeed: Setting.Bounded<float>
+            ScrollSpeed: Setting.Bounded<float32>
             HitPosition: Setting.Bounded<int>
             HitLighting: Setting<bool>
             Upscroll: Setting<bool>
-            BackgroundDim: Setting.Bounded<float>
-            PerspectiveTilt: Setting.Bounded<float>
+            BackgroundDim: Setting.Bounded<float32>
             LaneCover: LaneCoverOptions
             KeymodePreference: Setting<Keymode>
             UseKeymodePreference: Setting<bool>
@@ -109,18 +108,17 @@ module Options =
             Hotkeys: Dictionary<Hotkey, Bind>
         }
         static member Default = {
-            VisualOffset = Setting.bounded 0.0 -500.0 500.0 |> Setting.round 0
-            AudioOffset = Setting.bounded 0.0 -500.0 500.0 |> Setting.round 0
+            VisualOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
+            AudioOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
             AudioVolume = Setting.percent 0.05
             CurrentChart = Setting.simple ""
             Theme = Setting.simple "*default"
 
-            ScrollSpeed = Setting.bounded 2.05 1.0 5.0 |> Setting.round 2
+            ScrollSpeed = Setting.bounded 2.05f 1.0f 5.0f |> Setting.roundf 2
             HitPosition = Setting.bounded 0 -300 600
             HitLighting = Setting.simple false
             Upscroll = Setting.simple false
-            BackgroundDim = Setting.percent 0.5
-            PerspectiveTilt = Setting.bounded 0.0 -1.0 1.0 |> Setting.round 2
+            BackgroundDim = Setting.percentf 0.5f
             LaneCover = 
                 { 
                     Enabled = Setting.simple false
