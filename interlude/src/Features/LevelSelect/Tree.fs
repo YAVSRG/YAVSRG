@@ -421,6 +421,8 @@ module Tree =
     let update(origin: float32, originB: float32, elapsedTime: float) =
         scrollPos.Update(elapsedTime) |> ignore
         
+        if Dialog.exists() then () else
+
         let bottomEdge =
             List.fold
                 (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsedTime))
