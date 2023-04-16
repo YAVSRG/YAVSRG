@@ -18,7 +18,7 @@ type NoteskinPreview(scale: float32) as this =
     let createRenderer() =
         match Gameplay.Chart.current with
         | Some chart -> 
-            let playfield = Playfield(Metrics.createDummyMetric chart)
+            let playfield = Playfield (PlayState.Dummy chart)
             playfield.Add(GameplayWidgets.LaneCover())
             if this.Initialised then playfield.Init this
             playfield :> Widget

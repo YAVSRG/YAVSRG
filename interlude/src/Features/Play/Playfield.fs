@@ -17,11 +17,10 @@ open Interlude.Features
 //  COLUMN INDEPENDENT SV
 //  FIX HOLD TAIL CLIPPING
 
-type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
+type Playfield(chart: ColorizedChart, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
 
-    //constants
-    let (keys, notes, bpm, sv) = (chart.Keys, chart.Notes, chart.BPM, chart.SV) // todo: at some point refactor this out
+    let keys = chart.Keys
 
     let column_width = Content.noteskinConfig().ColumnWidth
     let column_spacing = Content.noteskinConfig().ColumnSpacing
@@ -38,7 +37,7 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
     // arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection
     let mutable note_seek = 0 // see comments for sv_seek and sv_peek. same role but for index of next row
     let mutable note_peek = note_seek
-    let sv = Array.init (keys + 1) (fun i -> sv.GetChannelData(i - 1).Data)
+    let sv = Array.init (keys + 1) (fun i -> chart.SV.GetChannelData(i - 1).Data)
     let sv_seek = Array.create (keys + 1) 0 // index of next appearing SV point for each channel; = number of SV points if there are no more
     let sv_peek = Array.create (keys + 1) 0 // same as sv_seek, but sv_seek stores the relevant point for t = now (according to music) and this stores t > now
     let sv_value = Array.create (keys + 1) 1.0f // value of the most recent sv point per channel, equal to the sv value at index (sv_peek - 1), or 1 if that point doesn't exist
@@ -72,7 +71,7 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
                 Bottom = Position.max
             }
 
-    new (scoring: IScoreMetric) = Playfield(Gameplay.Chart.colored(), scoring)
+    new (state: PlayState) = Playfield(Gameplay.Chart.colored(), state)
 
     member this.ColumnWidth = column_width
     member this.ColumnPositions = columnPositions
@@ -95,8 +94,8 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
 
         // seek to appropriate sv and note locations in data.
         // bit of a mess here. see comments on the variables for more on whats going on
-        while note_seek < notes.Data.Count && (offsetOf notes.Data.[note_seek]) < now do
-            let _, struct (nr, _) = notes.Data.[note_seek]
+        while note_seek < chart.Notes.Data.Count && (offsetOf chart.Notes.Data.[note_seek]) < now do
+            let _, struct (nr, _) = chart.Notes.Data.[note_seek]
             for k = 0 to keys - 1 do
                 if nr.[k] = NoteType.HOLDHEAD then hold_index.[k] <- note_seek
             note_seek <- note_seek + 1
@@ -114,7 +113,7 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
             hold_pos.[k] <- hitposition
             hold_presence.[k] <-
                 if note_seek > 0 then
-                    let (_, struct (nr, c)) = notes.Data.[note_seek - 1] in
+                    let (_, struct (nr, c)) = chart.Notes.Data.[note_seek - 1] in
                     hold_colors.[k] <- int c.[k]
                     (nr.[k] = NoteType.HOLDHEAD || nr.[k] = NoteType.HOLDBODY)
                 else false
@@ -126,13 +125,13 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
                     |> rotation k
                 )
                 (Color.White |> Quad.colorOf)
-                (Sprite.gridUV (animation.Loops, if (scoring.KeyState |> Bitmap.hasBit k) then 1 else 0) (Content.getTexture "receptor"))
+                (Sprite.gridUV (animation.Loops, if (state.Scoring.KeyState |> Bitmap.hasBit k) then 1 else 0) (Content.getTexture "receptor"))
 
         // main render loop - until the last note rendered in every column appears off screen
         let mutable min = hitposition
-        while min < playfieldHeight && note_peek < notes.Data.Count do
+        while min < playfieldHeight && note_peek < chart.Notes.Data.Count do
             min <- playfieldHeight
-            let (t, struct (nd, color)) = notes.Data.[note_peek]
+            let (t, struct (nd, color)) = chart.Notes.Data.[note_peek]
             // until no sv adjustments needed...
             // update main sv
             while (sv_peek.[0] < sv.[0].Count && offsetOf sv.[0].[sv_peek.[0]] < t) do
@@ -166,7 +165,7 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
                     hold_presence.[k] <- true
                 elif nd.[k] = NoteType.HOLDTAIL then
                     let headpos = hold_pos.[k]
-                    let tint = if hold_pos.[k] = hitposition && scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
+                    let tint = if hold_pos.[k] = hitposition && state.Scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
                     let pos = column_pos.[k] - holdnoteTrim
                     if headpos < pos then
                         Draw.quad // body of ln
@@ -200,7 +199,7 @@ type Playfield(chart: ColorizedChart, scoring: IScoreMetric) as this =
         for k in 0 .. (keys - 1) do
             if hold_presence.[k] then
                 let headpos = hold_pos.[k]
-                let tint = if hold_pos.[k] = hitposition && scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
+                let tint = if hold_pos.[k] = hitposition && state.Scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
                 Draw.quad // body of ln, tail is offscreen
                     (
                         Quad.ofRect ( 

@@ -119,8 +119,6 @@ module ReplayScreen =
                 |+ InputOverlay(chart.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, show_input_overlay)
                 |* IconButton("Toggle input overlay", Icons.preview, 50.0f, (fun () -> show_input_overlay.Set (not show_input_overlay.Value)),
                     Position = Position.TrimTop(90.0f).SliceTop(90.0f).Margin(20.0f, 20.0f).SliceLeft(360.0f))
-                //|* Frame(NodeType.None, Fill = K Colors.shadow_2.O3, Border = K Colors.grey_2,
-                //    Position = Position.SliceLeft(400.0f).SliceTop(600.0f).Margin(20.0f, 100.0f))
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)

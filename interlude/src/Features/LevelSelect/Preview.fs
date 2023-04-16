@@ -29,7 +29,7 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
     //        )
 
     let playfield =
-        Playfield(Metrics.createDummyMetric chart)
+        Playfield(PlayState.Dummy chart)
         |+ GameplayWidgets.LaneCover()
 
     override this.Init(parent: Widget) =

@@ -75,6 +75,7 @@
     <Compile Include="Features\Offset\AudioSync.fs" />
     <Compile Include="Features\Offset\Offset.fs" />
     <Compile Include="Features\Play\QuickOptions.fs" />
+    <Compile Include="Features\Play\State.fs" />
     <Compile Include="Features\Play\Playfield.fs" />
     <Compile Include="Features\Play\GameplayWidgets.fs" />
     <Compile Include="Features\Play\Shared.fs" />

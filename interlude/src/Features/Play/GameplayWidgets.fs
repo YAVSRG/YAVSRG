@@ -25,22 +25,6 @@ open Interlude.Utils
 *)
 
 module GameplayWidgets =
-
-    [<RequireQualifiedAccess>]
-    type PacemakerInfo =
-        | None
-        | Accuracy of float
-        | Replay of IScoreMetric
-        | Judgement of target: JudgementId * max_count: int
-
-    type PlayState = {
-        Ruleset: Ruleset
-        Scoring: IScoreMetric
-        HP: HealthBarMetric
-        OnHit: IEvent<HitEvent<HitEventGuts>>
-        CurrentChartTime: unit -> ChartTime
-        Pacemaker: PacemakerInfo
-    }
     
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, state) as this =
         inherit StaticContainer(NodeType.None)
@@ -50,7 +34,7 @@ module GameplayWidgets =
 
         do
             if conf.GradeColors then
-                state.OnHit.Add
+                state.Scoring.OnHit.Add
                     ( fun _ ->
                         color.Target <- Grade.calculate grades state.Scoring.State |> state.Ruleset.GradeColor
                     )
@@ -81,7 +65,7 @@ module GameplayWidgets =
         let mutable w = 0.0f
 
         do
-            state.OnHit.Add(fun ev ->
+            state.Scoring.OnHit.Add(fun ev ->
                 match ev.Guts with
                 | Hit e ->
                     hits.Add { Time = ev.Time; Position = e.Delta / state.Scoring.MissWindow * w * 0.5f; IsRelease = false; Judgement = e.Judgement }
@@ -153,7 +137,7 @@ module GameplayWidgets =
         let mutable hits = 0
 
         do
-            state.OnHit.Add(
+            state.Scoring.OnHit.Add(
                 fun _ ->
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
@@ -217,15 +201,15 @@ module GameplayWidgets =
         inherit StaticWidget(NodeType.None)
 
         let color = Animation.Color conf.FullColor
-        let slider = Animation.Fade(float32 state.HP.State.Health)
+        let slider = Animation.Fade(float32 state.Scoring.HP.State.Health)
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
-            slider.Target <- float32 state.HP.State.Health
+            slider.Target <- float32 state.Scoring.HP.State.Health
             color.Target <- (Color.FromArgb(
-                Percyqaz.Flux.Utils.lerp (float32 state.HP.State.Health) (float32 conf.EmptyColor.R) (float32 conf.FullColor.R) |> int,
-                Percyqaz.Flux.Utils.lerp (float32 state.HP.State.Health) (float32 conf.EmptyColor.G) (float32 conf.FullColor.G) |> int,
-                Percyqaz.Flux.Utils.lerp (float32 state.HP.State.Health) (float32 conf.EmptyColor.B) (float32 conf.FullColor.B) |> int
+                Percyqaz.Flux.Utils.lerp (float32 state.Scoring.HP.State.Health) (float32 conf.EmptyColor.R) (float32 conf.FullColor.R) |> int,
+                Percyqaz.Flux.Utils.lerp (float32 state.Scoring.HP.State.Health) (float32 conf.EmptyColor.G) (float32 conf.FullColor.G) |> int,
+                Percyqaz.Flux.Utils.lerp (float32 state.Scoring.HP.State.Health) (float32 conf.EmptyColor.B) (float32 conf.FullColor.B) |> int
                 ))
             color.Update elapsedTime
             slider.Update elapsedTime
@@ -325,7 +309,7 @@ module GameplayWidgets =
         let judgementAnimations = Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(conf.AnimationTime))
 
         do
-            state.OnHit.Add (
+            state.Scoring.OnHit.Add (
                 fun h -> 
                     match h.Guts with 
                     | Hit x -> if x.Judgement.IsSome then judgementAnimations[x.Judgement.Value].Reset()
@@ -434,7 +418,7 @@ module GameplayWidgets =
         do
             let hitpos = float32 options.HitPosition.Value
             this.Position <- { Position.Default with Top = 0.0f %+ hitpos; Bottom = 1.0f %- hitpos }
-            state.OnHit.Add handleEvent
+            state.Scoring.OnHit.Add handleEvent
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)

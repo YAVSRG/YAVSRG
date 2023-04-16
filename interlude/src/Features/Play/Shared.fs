@@ -33,19 +33,15 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
     
     let firstNote = offsetOf chart.Notes.First.Value
 
-    let onHit = new Event<HitEvent<HitEventGuts>>()
-
     let state: PlayState =
         {
             Ruleset = ruleset
             Scoring = scoring
-            HP = scoring.HP
-            OnHit = onHit.Publish
             CurrentChartTime = fun () -> Song.timeWithOffset() - firstNote
             Pacemaker = pacemakerInfo
         }
 
-    let playfield = Playfield scoring
+    let playfield = Playfield state
 
     do
         this.Add playfield
@@ -59,8 +55,6 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
         playfield.Add(LaneCover())
 
         this.AddWidgets()
-
-        scoring.SetHitCallback onHit.Trigger
 
     abstract member AddWidgets : unit -> unit
 
