@@ -37,6 +37,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
         {
             Ruleset = ruleset
             Scoring = scoring
+            ScoringChanged = Event<unit>()
             CurrentChartTime = fun () -> Song.timeWithOffset() - firstNote
             Pacemaker = pacemakerInfo
         }

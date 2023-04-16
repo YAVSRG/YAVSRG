@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Features.Play
 
-open Interlude.Content
+open System
 open Prelude.Scoring
 
 [<RequireQualifiedAccess>]
@@ -13,7 +13,8 @@ type PacemakerInfo =
 type PlayState =
     {
         Ruleset: Ruleset
-        Scoring: IScoreMetric
+        mutable Scoring: IScoreMetric
+        ScoringChanged: Event<unit>
         CurrentChartTime: unit -> ChartTime
         Pacemaker: PacemakerInfo
     }
@@ -22,6 +23,17 @@ type PlayState =
         {
             Ruleset = Unchecked.defaultof<_>
             Scoring = s
+            ScoringChanged = Event<unit>()
             CurrentChartTime = Unchecked.defaultof<_>
             Pacemaker = PacemakerInfo.None
         }
+    member this.SubscribeToHits(handler: HitEvent<HitEventGuts> -> unit) =
+        let mutable obj : IDisposable = this.Scoring.OnHit.Subscribe handler
+        this.ScoringChanged.Publish.Add(
+            fun () ->
+                obj.Dispose()
+                obj <- this.Scoring.OnHit.Subscribe handler
+        )
+    member this.ChangeScoring(scoring) =
+        this.Scoring <- scoring
+        this.ScoringChanged.Trigger()

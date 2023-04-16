@@ -97,7 +97,7 @@ module PlayScreen =
                     liveplay.Add(now, inputKeyState)
                     QuickOptions.show(this.State.Scoring, fun () -> Screen.changeNew (fun () -> play_screen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default)
 
-                if (!|"retry").Pressed() then
+                if (!|"retry").Tapped() then
                     Screen.changeNew (fun () -> play_screen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
                 
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then

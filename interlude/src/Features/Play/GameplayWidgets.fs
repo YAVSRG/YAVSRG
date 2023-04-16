@@ -34,20 +34,20 @@ module GameplayWidgets =
 
         do
             if conf.GradeColors then
-                state.Scoring.OnHit.Add
+                state.SubscribeToHits
                     ( fun _ ->
                         color.Target <- Grade.calculate grades state.Scoring.State |> state.Ruleset.GradeColor
                     )
 
             this
             |* Text(
-                state.Scoring.FormatAccuracy,
+                (fun () -> state.Scoring.FormatAccuracy()),
                 Color = (fun () -> color.Value, Color.Transparent),
                 Align = Alignment.CENTER,
                 Position = { Position.Default with Bottom = 0.7f %+ 0.0f })
             if conf.ShowName then
                 this
-                |* Text(state.Scoring.Name,
+                |* Text((fun () -> state.Scoring.Name),
                     Color = K (Color.White, Color.Transparent),
                     Align = Alignment.CENTER,
                     Position = { Position.Default with Top = 0.6f %+ 0.0f })
@@ -59,13 +59,13 @@ module GameplayWidgets =
     [<Struct>]
     type private HitMeterHit = { Time: Time; Position: float32; IsRelease: bool; Judgement: JudgementId option }
 
-    type HitMeter(conf: WidgetConfig.HitMeter, state) =
+    type HitMeter(conf: WidgetConfig.HitMeter, state: PlayState) =
         inherit StaticWidget(NodeType.None)
         let hits = ResizeArray<HitMeterHit>()
         let mutable w = 0.0f
 
         do
-            state.Scoring.OnHit.Add(fun ev ->
+            state.SubscribeToHits(fun ev ->
                 match ev.Guts with
                 | Hit e ->
                     hits.Add { Time = ev.Time; Position = e.Delta / state.Scoring.MissWindow * w * 0.5f; IsRelease = false; Judgement = e.Judgement }
@@ -130,14 +130,14 @@ module GameplayWidgets =
     //            let a = 255 - Math.Clamp(255.0f * (helper.CurrentChartTime() - time) / atime |> int, 0, 255)
     //            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
 
-    type ComboMeter(conf: WidgetConfig.Combo, state) =
+    type ComboMeter(conf: WidgetConfig.Combo, state: PlayState) =
         inherit StaticWidget(NodeType.None)
         let popAnimation = Animation.Fade(0.0f)
         let color = Animation.Color(Color.White)
         let mutable hits = 0
 
         do
-            state.Scoring.OnHit.Add(
+            state.SubscribeToHits(
                 fun _ ->
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
@@ -309,7 +309,7 @@ module GameplayWidgets =
         let judgementAnimations = Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(conf.AnimationTime))
 
         do
-            state.Scoring.OnHit.Add (
+            state.SubscribeToHits (
                 fun h -> 
                     match h.Guts with 
                     | Hit x -> if x.Judgement.IsSome then judgementAnimations[x.Judgement.Value].Reset()
@@ -390,7 +390,7 @@ module GameplayWidgets =
                         sprite
             Array.iteri f sliders
 
-    type Explosions(keys, ns: NoteskinConfig, state) as this =
+    type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
         inherit StaticWidget(NodeType.None)
 
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
@@ -418,7 +418,7 @@ module GameplayWidgets =
         do
             let hitpos = float32 options.HitPosition.Value
             this.Position <- { Position.Default with Top = 0.0f %+ hitpos; Bottom = 1.0f %- hitpos }
-            state.Scoring.OnHit.Add handleEvent
+            state.SubscribeToHits handleEvent
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
