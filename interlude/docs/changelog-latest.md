@@ -1,36 +1,27 @@
-0.6.11
+0.6.12
 ====
 
-UI and UX improvement update!
+More UX improvements
+Special thanks to Eliminate for playtesting the game while sat next to me, I got a TON of useful info out of that
 
-## Bug fixes:
-- Fixed issue with multiplayer chat not scrolling properly
-- Fixed rare crash when previewing certain charts
+# New features
+- You can now choose your windowed resolution properly ingame via the System settings
+- While watching a replay, can now turn on Input Overlay to see the raw inputs
+- Can now change song rate while previewing a chart
 
-## UI changes and improvements:
-- Tooltips now look fancier (and I've updated them with better information)
-- Cursor turns white if tooltip information is available
-- Options menu has been redesigned a little (still more to do)
-	- Gameplay binds are now under Gameplay
-	- Hotkey binds are now under System
-	- Keybinds menu has been removed
-- Lots of UI changes, mainly color scheme stuff (let me know what you think)
-	- Notifications
-	- Mod select
-	- Toolbar buttons
-- Most of the UI changes are geared at making it easy for players to naturally discover/stumble upon the features they need
-	
-## Feature re-releases
-The "Random chart" and "Comments" features have existed for a little while, but noone knows they exist
-This is my fault for not making it easy to discover the features, so now there are visible buttons on the level select screen
-Consider them re-released
+## Improvements
+- The songs folder now has a "HOW_TO_ADD_SONGS.txt" to help confused users
+- Pressing ESC now closes the comment UI/open dropdowns instead of leaving the level select screen
+- Extracted themes/noteskins now have a real folder name instead of nonsense
+- Improved performance of level select screen when other menus are overlaid on it (preview should lag less when 10000 charts are visible)
+- Logo now has a "breathing" effect
 
-Comments = You can write arbitrary notes on your charts and search through them
-Random chart = Not actually random, it uses the first draft of a suggestions algorithm to recommend you a similar chart. Try it out! I need feedback
-
-I won't say more than that as hopefully the new UI stuff ingame lets you find out how these work fully on your own, we'll see
-
-## New stuff
-- You can preview charts while in a lobby
-- You can add charts to collections while in a lobby
+## Fixes
+- Fixed checkbox options having their icons the wrong way round
+- Fixed chart preview not including some leadin time before the first note
+- Fixed audio position skipping around when changing rates (now it should be seamless)
+- Fixed mean/standard deviation on score screen treating misses as +180ms
+- Fixed linking to another game's song library not instantly importing it
+- Fixed some missing hotkeys from tooltips
+- Fixed dropdowns turning blank when the window is resized
 
