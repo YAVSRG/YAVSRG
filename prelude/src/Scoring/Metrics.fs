@@ -150,7 +150,10 @@ type IScoreMetric
     let hitData = InternalScore.createDefault ruleset.Accuracy.MissWindow keys notes
     let hitEvents = ResizeArray<HitEvent<HitEventGuts>>()
 
-    let mutable hitCallback = fun ev -> ()
+    let onHit = Event<HitEvent<HitEventGuts>>()
+    let onHit_Published = onHit.Publish
+
+    member this.OnHit = onHit_Published
 
     member val State =
         {
@@ -179,8 +182,6 @@ type IScoreMetric
         | _ -> false
 
     member this.HitData = hitData
-
-    member this.SetHitCallback (func: HitEvent<HitEventGuts> -> unit) = hitCallback <- func
 
     member this.Finished = noteSeekPassive = hitData.Length
 
@@ -305,7 +306,7 @@ type IScoreMetric
     member private this._HandleEvent ev =
         let ev = this.HandleEvent ev
         hitEvents.Add ev
-        hitCallback ev
+        onHit.Trigger ev
         healthBar.HandleEvent ev
 
 module Helpers =
