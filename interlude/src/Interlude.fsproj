@@ -36,8 +36,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\icon.ico" />
-    <EmbeddedResource Include="Resources\shader.vert" />
-    <EmbeddedResource Include="Resources\shader.frag" />
     <EmbeddedResource Include="Resources\defaultArrow.isk" />
     <EmbeddedResource Include="Resources\defaultBar.isk" />
     <EmbeddedResource Include="Resources\defaultOrb.isk" />
