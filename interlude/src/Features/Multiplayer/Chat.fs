@@ -23,8 +23,8 @@ type Chat() =
     let chat_msg(sender: string, message: string) =
         let w = Text.measure(Style.baseFont, sender) * 0.6f * MESSAGE_HEIGHT
         StaticContainer(NodeType.None)
-        |+ Text(sender, Color = Style.text_subheading, Position = Position.SliceLeft w, Align = Alignment.RIGHT)
-        |+ Text(": " + message, Position = Position.TrimLeft w, Align = Alignment.LEFT)
+        |+ Text(sender, Color = K Colors.text_subheading, Position = Position.SliceLeft w, Align = Alignment.RIGHT)
+        |+ Text(": " + message, Color = K Colors.text, Position = Position.TrimLeft w, Align = Alignment.LEFT)
 
     let messages = FlowContainer.Vertical<Widget>(MESSAGE_HEIGHT, Spacing = 2.0f)
     let message_box = ScrollContainer.Flow(messages, Position = Position.TrimBottom(60.0f).Margin(5.0f))
@@ -42,7 +42,7 @@ type Chat() =
 
     let game_end_report() =
         if Online.Multiplayer.replays.Keys.Count > 0 then
-            add_msg (Text(sprintf "== Results for %s ==" SelectedChart.chart.Value.Title, Color = Style.text, Align = Alignment.CENTER))
+            add_msg (Text(sprintf "== Results for %s ==" SelectedChart.chart.Value.Title, Color = K Colors.text, Align = Alignment.CENTER))
             let scores = 
                 Online.Multiplayer.replays.Keys
                 |> Seq.map (fun username ->
@@ -64,10 +64,10 @@ type Chat() =
                     let lamp = Lamp.calculate score.Ruleset.Grading.Lamps score.State
                     let grade = Grade.calculate score.Ruleset.Grading.Grades score.State
                     StaticContainer(NodeType.None)
-                    |+ Text(sprintf "%i. %s" place username, Color = K (color, Color.Black), Align = Alignment.LEFT)
-                    |+ Text(sprintf "%s" (score.FormatAccuracy()), Color = K (score.Ruleset.GradeColor grade, Color.Black), Align = Alignment.CENTER)
-                    |+ Text(score.Ruleset.LampName lamp, Color = K (score.Ruleset.LampColor lamp, Color.Black), Align = 0.75f)
-                    |+ Text(sprintf "%ix" (score.State.BestCombo), Color = K (score.Ruleset.LampColor lamp, Color.Black), Align = Alignment.RIGHT)
+                    |+ Text(sprintf "%i. %s" place username, Color = K (color, Colors.shadow_1), Align = Alignment.LEFT)
+                    |+ Text(sprintf "%s" (score.FormatAccuracy()), Color = K (score.Ruleset.GradeColor grade, Colors.shadow_1), Align = Alignment.CENTER)
+                    |+ Text(score.Ruleset.LampName lamp, Color = K (score.Ruleset.LampColor lamp, Colors.shadow_1), Align = 0.75f)
+                    |+ Text(sprintf "%ix" (score.State.BestCombo), Color = K (score.Ruleset.LampColor lamp, Colors.shadow_1), Align = Alignment.RIGHT)
                 add_msg cmp
 
     let countdown(reason, seconds) =
@@ -78,14 +78,14 @@ type Chat() =
         StaticContainer(NodeType.None)
         |+ Text(
             (fun () -> sprintf "%s %s: %i" Icons.countdown reason (seconds_left())),
-            Color = (fun () -> if seconds_left() > 0 then (Color.Lime, Color.Black) else (Color.Silver, Color.Black)),
+            Color = (fun () -> if seconds_left() > 0 then Colors.text_green_2 else Colors.text_greyout),
             Align = Alignment.CENTER)
         |> add_msg
 
     override this.Init(parent) =
         this
         |+ chatline
-        |+ Text((fun () -> if current_message.Value = "" then "Press ENTER to chat" else ""), Color = Style.text_subheading, Position = Position.SliceBottom(50.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Text((fun () -> if current_message.Value = "" then "Press ENTER to chat" else ""), Color = K Colors.text_subheading, Position = Position.SliceBottom(50.0f).Margin(5.0f), Align = Alignment.LEFT)
         |* message_box
 
         Network.Events.chat_message.Add (chat_msg >> add_msg)
@@ -93,15 +93,15 @@ type Chat() =
         Network.Events.lobby_event.Add (fun (kind, data) ->
             let text, color =
                 match (kind, data) with
-                | LobbyEvent.Join, who -> sprintf "%s %s joined" Icons.login who, Color.Lime
-                | LobbyEvent.Leave, who -> sprintf "%s %s left" Icons.logout who, Color.PaleVioletRed
-                | LobbyEvent.Host, who -> sprintf "%s %s is now host" Icons.star who, Color.Gold
-                | LobbyEvent.Ready, who -> sprintf "%s %s is ready" Icons.ready who, Color.PaleGreen
-                | LobbyEvent.NotReady, who -> sprintf "%s %s is not ready" Icons.not_ready who, Color.DeepPink
-                | LobbyEvent.Invite, who -> sprintf "%s %s invited" Icons.invite who, Color.PaleTurquoise
-                | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.info msg, Color.WhiteSmoke
-                | _, msg -> msg, Color.White
-            add_msg (Text(text, Color = (fun () -> color, Color.Black), Align = Alignment.CENTER))
+                | LobbyEvent.Join, who -> sprintf "%s %s joined" Icons.login who, Colors.green_accent
+                | LobbyEvent.Leave, who -> sprintf "%s %s left" Icons.logout who, Colors.red_accent
+                | LobbyEvent.Host, who -> sprintf "%s %s is now host" Icons.star who, Colors.yellow_accent
+                | LobbyEvent.Ready, who -> sprintf "%s %s is ready" Icons.ready who, Colors.green
+                | LobbyEvent.NotReady, who -> sprintf "%s %s is not ready" Icons.not_ready who, Colors.pink
+                | LobbyEvent.Invite, who -> sprintf "%s %s invited" Icons.invite who, Colors.cyan_accent
+                | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.info msg, Colors.grey_1
+                | _, msg -> msg, Colors.white
+            add_msg (Text(text, Color = (fun () -> color, Colors.shadow_1), Align = Alignment.CENTER))
             )
         Network.Events.game_end.Add game_end_report
         Network.Events.join_lobby.Add (fun () -> messages.Clear())
@@ -110,8 +110,8 @@ type Chat() =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect(this.Bounds.TrimBottom 60.0f) (Color.FromArgb(180, 0, 0, 0))
-        Draw.rect(this.Bounds.SliceBottom 50.0f) (Color.FromArgb(180, 0, 0, 0))
+        Draw.rect(this.Bounds.TrimBottom 60.0f) Colors.shadow_2.O3
+        Draw.rect(this.Bounds.SliceBottom 50.0f) Colors.shadow_2.O3
         base.Draw()
 
     override this.Update(elapsedTime, moved) =

@@ -21,6 +21,7 @@ module Colors =
     let green = Color.FromArgb 0xFF_1d9d4b
     let green_shadow = Color.FromArgb 0xFF_0c4b24
     let text_green = green_accent, green_shadow
+    let text_green_2 = green_accent, shadow_1
 
     let cyan_accent = Color.FromArgb 0xFF_43e0ef
     let cyan = Color.FromArgb 0xFF_1d869d

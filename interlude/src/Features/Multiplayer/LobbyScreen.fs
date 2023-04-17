@@ -40,23 +40,6 @@ type LobbySettingsPage(settings: LobbySettings) as this =
                 AutomaticRoundCountdown = auto_countdown.Value
             }
 
-type InvitePlayerPage() as this =
-    inherit Page()
-    
-    let value = Setting.simple ""
-    let submit() = Lobby.invite value.Value
-    let submit_button = PageButton("confirm.yes", (fun () -> submit(); Menu.Back()), Enabled = false)
-    
-    do
-        this.Content(
-            column()
-            |+ PageSetting("invite_to_lobby.username", TextEntry(value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0), "none")).Pos(200.0f)
-            |+ submit_button.Pos(300.0f)
-        )
-    
-    override this.Title = L"invite_to_lobby.name"
-    override this.OnClose() = ()
-
 type Lobby() =
     inherit StaticContainer(NodeType.None)
 
@@ -72,30 +55,17 @@ type Lobby() =
         |+ Text(
             (fun () -> lobby_title),
             Align = Alignment.CENTER,
-            Position = { Position.SliceTop(90.0f).Margin(10.0f) with Right = 0.5f %- 0.0f })
-        |+ PlayerList(Position = { Left = 0.0f %+ 150.0f; Right = 0.5f %- 150.0f; Top = 0.0f %+ 100.0f; Bottom = 1.0f %- 100.0f })
-        |+ StylishButton(
-            Lobby.leave,
-            K (sprintf "%s %s" Icons.logout (L"lobby.leave")),
-            Style.main 100,
-            TiltLeft = false,
-            Position = { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = (0.5f / 3f) %- 25.0f; Bottom = 1.0f %- 0.0f }
-            )
-        |+ StylishButton(
-            (fun () -> Menu.ShowPage InvitePlayerPage),
-            K (sprintf "%s %s" Icons.invite (L"lobby.send_invite")),
-            Style.dark 100,
-            Position = { Left = (0.5f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = (1.0f / 3f) %- 25.0f; Bottom = 1.0f %- 0.0f }
-            )
+            Position = { Position.SliceTop(90.0f).Margin(10.0f) with Right = 0.4f %- 0.0f })
+        |+ PlayerList(Position = { Left = 0.0f %+ 50.0f; Right = 0.4f %- 50.0f; Top = 0.0f %+ 100.0f; Bottom = 1.0f %- 100.0f })
         |+ StylishButton(
             (fun () -> Network.lobby.Value.Ready <- SelectedChart.found && not Network.lobby.Value.Ready; Lobby.set_ready Network.lobby.Value.Ready),
             (fun () -> match Network.lobby with Some l -> (if l.Ready then (sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")) else (sprintf "%s %s" Icons.ready (L"lobby.ready"))) | None -> "!"),
             Style.main 100,
             TiltRight = false,
-            Position = { Left = (1.0f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.5f %- 0.0f; Bottom = 1.0f %- 0.0f }
+            Position = { Left = (0.4f / 1.5f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.4f %- 0.0f; Bottom = 1.0f %- 0.0f }
             )
         |+ SelectedChart(Position = { Left = 0.5f %+ 20.0f; Top = 0.0f %+ 100.0f; Right = 1.0f %- 20.0f; Bottom = 0.5f %- 0.0f } )
-        |* Chat(Position = { Position.Margin(20.0f) with Left = 0.5f %+ 20.0f; Top = 0.5f %+ 0.0f } )
+        |* Chat(Position = { Position.Margin(20.0f) with Left = 0.4f %+ 20.0f; Top = 0.5f %+ 0.0f } )
         
         base.Init parent
 
