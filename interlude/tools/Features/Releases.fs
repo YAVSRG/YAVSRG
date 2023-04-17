@@ -50,7 +50,7 @@ module Releases =
         Directory.SetCurrentDirectory(INTERLUDE_SOURCE_PATH)
 
         let build_dir = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net7.0", "win-x64")
-        let clean_dir = Path.Combine(YAVSRG_PATH, "Interlude", "releases", sprintf "Interlude.%s-win64" current_version)
+        let clean_dir = Path.Combine(YAVSRG_PATH, "Interlude", "releases", "Interlude-win64")
 
         try Directory.Delete(build_dir, true) with _ -> ()
         try Directory.Delete(clean_dir, true) with _ -> ()
@@ -75,6 +75,7 @@ module Releases =
         copy (Path.Combine(build_dir, "Locale")) (Path.Combine(clean_dir, "Locale"))
 
         printfn "Outputted to: %s" clean_dir
+        if File.Exists(clean_dir + ".zip") then File.Delete(clean_dir + ".zip")
         ZipFile.CreateFromDirectory(clean_dir, clean_dir + ".zip")
         printfn "Zipped to: %s.zip" clean_dir
 
