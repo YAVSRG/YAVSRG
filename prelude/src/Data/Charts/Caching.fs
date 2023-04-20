@@ -1,14 +1,9 @@
 ﻿namespace Prelude.Data.Charts
 
-open System
-open System.Collections.Generic
 open Percyqaz.Json
-open Percyqaz.Common
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.Conversions
-open Prelude.Scoring
-open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Layout
 open Prelude.Gameplay.Difficulty
 
