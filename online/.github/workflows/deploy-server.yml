@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-        repository: percyqaz/Percyqaz.Common
-        path: Percyqaz.Common
+          repository: percyqaz/Percyqaz.Common
+          path: Percyqaz.Common
         
       - uses: actions/checkout@v3
         with:
