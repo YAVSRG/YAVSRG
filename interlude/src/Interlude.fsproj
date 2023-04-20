@@ -9,7 +9,7 @@
     <FileVersion>0.6.12</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
@@ -127,13 +127,6 @@
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="7.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\LICENSE.txt">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
