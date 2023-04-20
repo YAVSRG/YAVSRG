@@ -1,0 +1,57 @@
+name: Noteskins
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: "Noteskins/**"
+  workflow_dispatch:
+  # for debug purposes
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: percyqaz/Percyqaz.Common
+        path: Percyqaz.Common
+        
+    - uses: actions/checkout@v3
+      with:
+        repository: YAVSRG/Prelude
+        path: Prelude
+        
+    - uses: actions/checkout@v3
+      with:
+        path: Interlude.Noteskins
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+      
+    - name: Run Noteskin Tool
+      run: cd Interlude.Noteskins/Tools && dotnet run
+      
+    - name: Read changelog contents
+      id: read_file
+      uses: andstor/file-reader-action@v1
+      with:
+        path: "Interlude.Noteskins/new.txt"
+        
+    - name: Post changes to webhook
+      uses: tsickert/discord-webhook@v5.3.0
+      if: ${{ steps.read_file.outputs.contents != '' }}
+      with:
+        webhook-url: ${{ secrets.CONTENT_WEBHOOK_URL }}
+        content: ${{ steps.read_file.outputs.contents }}
+        
+    - name: Commit changed files
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        repository: Interlude.Noteskins
+        commit_message: <💚> Update Noteskin Index
+        skip_checkout: true
+        skip_fetch: true
