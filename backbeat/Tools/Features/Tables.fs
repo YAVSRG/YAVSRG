@@ -1,4 +1,4 @@
-﻿namespace Interlude.Charts
+﻿namespace Backbeat.Features
 
 open System.IO
 open System.IO.Compression
@@ -11,9 +11,9 @@ open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Caching
-open Utils
+open Backbeat.Utils
 
-module Features =
+module Tables =
 
     // Editing/suggestion phase
 
@@ -128,8 +128,6 @@ module Features =
         printfn "Saved table additions."
         collections |> JSON.ToFile(INTERLUDE_COLLECTIONS_FILE, true)
         printfn "Saved collections."
-
-        
 
     // Commit phase
 
