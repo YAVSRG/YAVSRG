@@ -33,11 +33,15 @@ module Utils =
     let TABLES_PATH = Path.Combine(REPO_PATH, "Tables")
     let CHARTS_PATH = Path.Combine(REPO_PATH, "Charts")
     let PACKS_PATH = Path.Combine(REPO_PATH, "Packs")
-    let ARCHIVE_PATH = Path.Combine(REPO_PATH, "Archive")
+    let ARCHIVE_PATH = Path.Combine(REPO_PATH, "archive")
     let INTERLUDE_TABLES_PATH = Path.Combine(config.InterludePath, "Data", "Tables")
     let INTERLUDE_COLLECTIONS_FILE = Path.Combine(config.InterludePath, "Data", "collections.json")
 
     let init() =
         JSON.ToFile (SETTINGS_FILE, true) config
         Directory.CreateDirectory TABLES_PATH |> ignore
+        
+        Logging.Subscribe
+            ( fun (level, main, details) ->
+                if level = LoggingLevel.ERROR then printfn "%s" details )
     

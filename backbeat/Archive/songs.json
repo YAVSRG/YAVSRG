@@ -1,3 +1,389 @@
 {
-    
+    "anamanagucprom-night#3571": {
+        "AlternativeTitles": [], 
+        "Artists": ["Anamanaguchi"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Prom Night"
+    }, 
+    "arai-masahanime-jana#7291": {
+        "AlternativeTitles": [], 
+        "Artists": ["Arai Masahito"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Anime Janai - Yume wo Wasureta Furui Chikyuujin"
+    }, 
+    "aural-vampshonan-zok# 547": {
+        "AlternativeTitles": [], 
+        "Artists": ["Aural Vampire"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Shonan Zoku -Cannibal Coast-"
+    }, 
+    "avivagrrrls#7747": {
+        "AlternativeTitles": [], 
+        "Artists": ["AViVA"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "GRRRLS"
+    }, 
+    "bibicutie-pant#1126": {
+        "AlternativeTitles": [], 
+        "Artists": ["BiBi"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Cutie Panther (Momora EUROBEAT Remix)"
+    }, 
+    "black-flagtv-party#9962": {
+        "AlternativeTitles": [], 
+        "Artists": ["Black Flag"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "TV Party"
+    }, 
+    "camelliachirality#7520": {
+        "AlternativeTitles": [], 
+        "Artists": ["Camellia"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Chirality"
+    }, 
+    "charli-xcxout-of-my-#5327": {
+        "AlternativeTitles": [], 
+        "Artists": ["Charli XCX"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Out of my Head"
+    }, 
+    "clioeyes#8616": {
+        "AlternativeTitles": [], 
+        "Artists": ["Clio"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Eyes"
+    }, 
+    "clippingwriggle#3328": {
+        "AlternativeTitles": [], 
+        "Artists": ["clipping."], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Wriggle"
+    }, 
+    "crimewaveyou-are-al#8855": {
+        "AlternativeTitles": [], 
+        "Artists": ["CRIMEWAVE"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "YOU ARE ALREADY DEAD (PROD. GHOSTIE)"
+    }, 
+    "demetoriheartfelt-#3710": {
+        "AlternativeTitles": [], 
+        "Artists": ["Demetori"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Heartfelt Fancy ~ Prie a Dieu"
+    }, 
+    "dj-sharpnecyber-indu#1782": {
+        "AlternativeTitles": [], 
+        "Artists": ["DJ Sharpnel"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Cyber Inductance"
+    }, 
+    "earl-sweatbalance# 960": {
+        "AlternativeTitles": [], 
+        "Artists": ["Earl Sweatshirt ft. Knxwledge"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Balance"
+    }, 
+    "ece-emerypapaya-son# 353": {
+        "AlternativeTitles": [], 
+        "Artists": ["ece emery"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "papaya song for farming motivation"
+    }, 
+    "emily-hainplanets#  19": {
+        "AlternativeTitles": [], 
+        "Artists": ["Emily Haines And The Soft Skeleton"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Planets"
+    }, 
+    "evanescenclithium#4823": {
+        "AlternativeTitles": [], 
+        "Artists": ["Evanescence"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Lithium"
+    }, 
+    "flatbush-zfuckanime#2813": {
+        "AlternativeTitles": [], 
+        "Artists": ["Flatbush Zombies"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "FUCKANIME"
+    }, 
+    "garbage-botkks-op#5685": {
+        "AlternativeTitles": [], 
+        "Artists": ["garbage boosted lem korean"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "tkk's OP"
+    }, 
+    "getterhead-split#1865": {
+        "AlternativeTitles": [], 
+        "Artists": ["Getter"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Head Splitter"
+    }, 
+    "itsuegoodbye-ma#1160": {
+        "AlternativeTitles": [], 
+        "Artists": ["Itsue"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Goodbye, Maboroshi"
+    }, 
+    "jewfyu-can-run-#7145": {
+        "AlternativeTitles": [], 
+        "Artists": ["JEWFY"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "U CAN RUN BUT U CANT HIDE"
+    }, 
+    "jindoukaisei-jos#5366": {
+        "AlternativeTitles": [], 
+        "Artists": ["JINDOU."], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Kaisei Joshou Hallelujah"
+    }, 
+    "jojii-dont-wan#8717": {
+        "AlternativeTitles": [], 
+        "Artists": ["joji"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "i dont wanna waste my time"
+    }, 
+    "keigo-hoasemil---des#2244": {
+        "AlternativeTitles": [], 
+        "Artists": ["Keigo Hoashi & Kakeru Ishihama (MONACA)"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Emil - Despair"
+    }, 
+    "knxwledgeorleavemea# 976": {
+        "AlternativeTitles": [], 
+        "Artists": ["Knxwledge"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "orleavemealone_"
+    }, 
+    "krauspitch-fuck#5008": {
+        "AlternativeTitles": [], 
+        "Artists": ["Kraus"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Pitch Fucker"
+    }, 
+    "m83solitude#4340": {
+        "AlternativeTitles": [], 
+        "Artists": ["M83"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Solitude"
+    }, 
+    "macrossaogashima-#7322": {
+        "AlternativeTitles": [], 
+        "Artists": ["MACROSS"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Aogashima Island !"
+    }, 
+    "miapaper-plan#3257": {
+        "AlternativeTitles": [], 
+        "Artists": ["M.I.A."], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Paper Planes"
+    }, 
+    "mothicaout-of-it-#3047": {
+        "AlternativeTitles": [], 
+        "Artists": ["Mothica"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Out of It (Phizicist Remix)"
+    }, 
+    "night-tempnemure#7408": {
+        "AlternativeTitles": [], 
+        "Artists": ["Night Tempo"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Nemure"
+    }, 
+    "odeszasun-models#7812": {
+        "AlternativeTitles": [], 
+        "Artists": ["ODESZA"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Sun Models"
+    }, 
+    "seek-n-deswrap-stars#5344": {
+        "AlternativeTitles": [], 
+        "Artists": ["Seek N Destroy"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Wrap Stars (Original Mix)"
+    }, 
+    "shakirahips-dont-#4511": {
+        "AlternativeTitles": [], 
+        "Artists": ["Shakira"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Hips Don't Lie"
+    }, 
+    "shoji-meguwake-up-ge#1181": {
+        "AlternativeTitles": [], 
+        "Artists": ["Shoji Meguro"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Wake Up, Get Up, Get Out There"
+    }, 
+    "susboybuckwild#5225": {
+        "AlternativeTitles": [], 
+        "Artists": ["susboy"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "BUCKWILD"
+    }, 
+    "the-prodigomen#7786": {
+        "AlternativeTitles": [], 
+        "Artists": ["The Prodigy"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Omen"
+    }, 
+    "the-usedpretty-han#1161": {
+        "AlternativeTitles": [], 
+        "Artists": ["The Used"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Pretty Handsome Awkward"
+    }, 
+    "trevor-somin-my-syst#8507": {
+        "AlternativeTitles": [], 
+        "Artists": ["Trevor Something"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "In My System"
+    }, 
+    "uicideboykill-yours#1000": {
+        "AlternativeTitles": [], 
+        "Artists": ["$UICIDEBOY$"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "KILL YOURSELF (PART III)"
+    }, 
+    "yaejidrink-im-s#4355": {
+        "AlternativeTitles": [], 
+        "Artists": ["Yaeji"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "drink i'm sippin on"
+    }, 
+    "yokaievening-a-#4302": {
+        "AlternativeTitles": [], 
+        "Artists": ["Yokai"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "evening (a prelude)"
+    }
 }

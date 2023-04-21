@@ -7,8 +7,8 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
+    <Compile Include="Features\Archive\Archive.fs" />
     <Compile Include="Features\Tables.fs" />
-    <Compile Include="Features\Archive.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
