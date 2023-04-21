@@ -152,7 +152,7 @@ module Conversions =
             svData.SetChannelData(-1, listToDotNet sv)
             (TimeData(listToDotNet bpm), svData)
 
-        let private rateRegex = Regex("""[0-2][,.][1-9][1-9]?x|x[0-2][,.][1-9][1-9]?|(^|\s)[0-2][,.][1-9][1-9]?($|\s)""");
+        let private rateRegex = Regex("""((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)x)""");
         let looks_like_a_rate (b: Beatmap) : bool = rateRegex.IsMatch b.Metadata.Version
 
         let convert (b: Beatmap) (action: ConversionAction) : Chart =
@@ -163,16 +163,23 @@ module Conversions =
                 | _ :: es -> findBackgroundFile es
                 | [] -> ""
             let header =
-                { ChartHeader.Default with
-                    Title = b.Metadata.Title
-                    Artist = b.Metadata.Artist
+                {
+                    Title = b.Metadata.Title.Trim()
+                    TitleNative = let t = b.Metadata.TitleUnicode.Trim() in if t.Length > 0 && t <> b.Metadata.Title.Trim() then Some t else None
+                    Artist = b.Metadata.Artist.Trim()
+                    ArtistNative = let t = b.Metadata.ArtistUnicode.Trim() in if t.Length > 0 && t <> b.Metadata.Artist.Trim() then Some t else None
                     Creator = b.Metadata.Creator
-                    SourcePack = "osu!"
-                    ChartSource = Osu (b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
                     DiffName = b.Metadata.Version
+                    Subtitle = None
+                    Source = let t = b.Metadata.Source.Trim() in if t.Length > 0 then Some t else None
+                    Tags = b.Metadata.Tags
+
                     PreviewTime = b.General.PreviewTime
                     BackgroundFile = findBackgroundFile b.Events |> Relative
                     AudioFile = b.General.AudioFilename |> Relative
+
+                    SourcePack = "osu!"
+                    ChartSource = Osu (b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
                 }
             let snaps = convertHitObjects b.Objects keys
             let (bpm, sv) = (convertTimingPoints b.Timing keys (offsetOf (snaps.GetPointAt Time.infinity)))
@@ -247,8 +254,14 @@ module Conversions =
             let rec metadataFallback x =
                 match x with
                 | "" :: xs -> metadataFallback xs
-                | s :: xs -> s
+                | s :: _ -> s.Trim()
                 | [] -> ""
+
+            let rec metadataFallbackOpt x =
+                match x with
+                | "" :: xs -> metadataFallbackOpt xs
+                | s :: _ -> Some (s.Trim())
+                | [] -> None
 
             let findBackground () : string =
                 let guess = sm.TITLE + "-bg.jpg"
@@ -274,18 +287,28 @@ module Conversions =
         
             let convert_difficulty (i: int) (diff: ChartData) : Chart = 
                 let keys = keyCount diff.STEPSTYPE
-                let header = {
-                    ChartHeader.Default with
-                        Title = metadataFallback [sm.TITLETRANSLIT; sm.TITLE]
-                        Artist = metadataFallback [sm.ARTISTTRANSLIT; sm.ARTIST]
+                let title = metadataFallback [sm.TITLETRANSLIT; sm.TITLE]
+                let artist = metadataFallback [sm.ARTISTTRANSLIT; sm.ARTIST]
+                let header = 
+                    {
+                        Title = title
+                        TitleNative = match metadataFallbackOpt [sm.TITLETRANSLIT] with Some t when t = title -> None | x -> x
+                        Artist = artist
+                        ArtistNative = match metadataFallbackOpt [sm.ARTISTTRANSLIT] with Some t when t = artist -> None | x -> x
                         Creator = metadataFallback [findAuthor(); sm.CREDIT; diff.CREDIT]
-                        SourcePack = "Singles"
                         DiffName = metadataFallback [sm.SUBTITLETRANSLIT; sm.SUBTITLE;
                             diff.CHARTNAME; diff.DESCRIPTION; diff.CHARTSTYLE; diff.STEPSTYPE.ToString() + " " + diff.METER.ToString()]
+                        Subtitle = metadataFallbackOpt [sm.SUBTITLETRANSLIT; sm.SUBTITLE]
+                        Tags = sm.GENRE.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
+                        Source = None
+
                         PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
                         AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"] |> Relative
                         BackgroundFile = metadataFallback [(if File.Exists (Path.Combine (path, sm.BACKGROUND)) then sm.BACKGROUND else ""); findBackground ()] |> Relative
-                }
+
+                        SourcePack = "Singles"
+                        ChartSource = Unknown
+                    }
                 let filepath = Path.Combine (path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
                 let (notes, bpm) = convert_measures keys diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)
                 Chart(keys, header, notes, bpm, new MultiTimeData<float32>(keys), filepath)

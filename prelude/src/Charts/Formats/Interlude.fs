@@ -265,25 +265,39 @@ module Interlude =
     type ChartHeader =
         { 
             Title: string
+            TitleNative: string option
             Artist: string
+            ArtistNative: string option
             Creator: string
             DiffName: string
+            Subtitle: string option
+            Source: string option
+            Tags: string list
+
             PreviewTime: Time
-            SourcePack: string
             BackgroundFile: MediaPath
             AudioFile: MediaPath
+
+            SourcePack: string
             ChartSource: ChartSource
         }
         static member Default =
             {
                 Title = "Untitled Chart"
+                TitleNative = None
                 Artist = ""
+                ArtistNative = None
                 Creator = ""
                 DiffName = ""
+                Subtitle = None
+                Source = None
+                Tags = []
+
                 PreviewTime = 0.0f<ms>
-                SourcePack = "Unknown"
                 BackgroundFile = Relative ""
                 AudioFile = Relative "audio.mp3"
+
+                SourcePack = "Unknown"
                 ChartSource = Unknown
             }
 
