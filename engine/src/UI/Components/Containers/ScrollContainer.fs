@@ -23,6 +23,11 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
         let sc = ScrollContainer(child, 0.0f)
         child.ContentHeightChanged.Add(sc.set_ContentHeight)
         sc
+        
+    static member Grid(child: GridContainer<'T>) =
+        let sc = ScrollContainer(child, 0.0f)
+        child.ContentHeightChanged.Add(sc.set_ContentHeight)
+        sc
 
     member val Margin = 0.0f with get, set
     member this.ContentHeight with set(value) = contentHeight <- value; refresh <- true
