@@ -68,7 +68,7 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
         base.Update(elapsedTime, moved)
         playfield.Update(elapsedTime, moved)
         if this.Bounds.Bottom - Mouse.y() < 200.0f && Mouse.leftClick() then
-            let percent = Mouse.x() / Viewport.vwidth
+            let percent = (Mouse.x() - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
             let start = chart.FirstNote - Song.LEADIN_TIME
             let newTime = start + (chart.LastNote - start) * percent
             Song.seek newTime
