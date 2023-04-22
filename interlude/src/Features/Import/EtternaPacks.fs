@@ -48,7 +48,7 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
     let download() =
         if status = NotDownloaded || status = DownloadFailed then
             let target = Path.Combine(getDataPath "Downloads", System.Guid.NewGuid().ToString() + ".zip")
-            WebServices.download_file.Request((data.mirror, target, fun p -> progress <- p),
+            WebServices.download_file.Request((data.download, target, fun p -> progress <- p),
                 fun completed ->
                     if completed then Library.Imports.auto_convert.Request(target,
                         fun b ->

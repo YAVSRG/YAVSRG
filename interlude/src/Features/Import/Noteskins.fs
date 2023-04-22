@@ -97,7 +97,7 @@ module Noteskins =
     type NoteskinSearch() as this =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
     
-        let grid = GridContainer<Widget>(380.0f, 2, Spacing = (15.0f, 15.0f))
+        let grid = GridContainer<Widget>(380.0f, 3, Spacing = (15.0f, 15.0f))
         let scroll = ScrollContainer.Grid(grid, Margin = Style.padding, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
         let mutable failed = false
     

@@ -79,7 +79,7 @@ type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Servi
 type ImportScreen() as this =
     inherit Screen()
 
-    let container = SwapContainer(Position = Position.TrimLeft(400.0f).Margin(200.0f, 20.0f), Current = Mounts.tab)
+    let container = SwapContainer(Position = Position.TrimLeft(400.0f).Margin(50.0f, 20.0f), Current = Mounts.tab)
     let tabs = 
         FlowContainer.Vertical<Widget>(80.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
         |+ TabButton(Icons.import_local, "Local imports", container, Mounts.tab)
