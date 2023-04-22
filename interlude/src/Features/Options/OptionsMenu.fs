@@ -77,7 +77,7 @@ module OptionsMenuRoot =
 
         do
             this.Content(
-                GridContainer(1, 4,
+                GridContainer(system.Height, 4,
                     Spacing = (50.0f, 0.0f),
                     Position = Position.SliceTop(400.0f).SliceBottom(system.Height).Margin(200.0f, 0.0f))
                 |+ system

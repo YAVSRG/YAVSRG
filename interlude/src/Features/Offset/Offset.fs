@@ -63,7 +63,7 @@ type OffsetPage(chart: Chart) as this =
         this.Content(
             StaticContainer(NodeType.Leaf)
             |+ (
-                GridContainer(1, 3, Spacing = (100.0f, 0.0f), Position = Position.Row(60.0f, height).Margin(150.0f, 0.0f))
+                GridContainer(height, 3, Spacing = (100.0f, 0.0f), Position = Position.Row(60.0f, height).Margin(150.0f, 0.0f))
                 |+ global_offset_tile
                 |+ local_offset_tile
                 |+ visual_offset_tile
