@@ -35,7 +35,7 @@ and SearchContainer(populate: PopulateFunc, handleFilter: FilterFunc, itemheight
 
     member this.Items = flow
 
-type private DLStatus =
+type DownloadStatus =
     | NotDownloaded
     | Downloading
     | Installed
