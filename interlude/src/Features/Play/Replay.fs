@@ -40,7 +40,7 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
         Draw.rect playfield.Bounds Colors.shadow_2.O2
 
         let draw_press(k, now: ChartTime, start: ChartTime, finish: ChartTime) =
-            let y t = float32 options.HitPosition.Value + float32 (t - now) * options.ScrollSpeed.Value + playfield.ColumnWidth * 0.5f
+            let y t = float32 options.HitPosition.Value + float32 (t - now) * (options.ScrollSpeed.Value / Gameplay.rate.Value) + playfield.ColumnWidth * 0.5f
             Rect.Create(playfield.Bounds.Left + playfield.ColumnPositions.[k] + 5.0f, y start, playfield.Bounds.Left + playfield.ColumnPositions.[k] + playfield.ColumnWidth - 5.0f, y finish)
             |> scrollDirectionPos playfield.Bounds.Bottom
             |> fun a -> Draw.rect a Colors.grey_2.O2
@@ -49,7 +49,7 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
         while replayData.Length - 1 > seek && let struct (t, _) = replayData.[seek + 1] in t < now - 100.0f<ms> do
             seek <- seek + 1
 
-        let timeTarget = now + 1080.0f<ms> / options.ScrollSpeed.Value
+        let timeTarget = now + 1080.0f<ms> / (options.ScrollSpeed.Value / Gameplay.rate.Value)
         let mutable peek = seek
         let struct (t, b) = replayData.[peek]
         for k = 0 to keys - 1 do
