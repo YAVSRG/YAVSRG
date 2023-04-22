@@ -190,6 +190,7 @@ imports.mount.edit=Manage
 imports.mount.lastimported=Last import: %0
 imports.mount.notlinked=Not linked
 imports.mount=Link to other game's chart libraries
+imports.noteskins.hint=Have a noteskin you want listed here? Send it in the discord!
 invite_to_lobby.name=Invite to lobby
 invite_to_lobby.username.name=Username
 levelselect.collections.name=Manage collections

@@ -18,7 +18,8 @@ type NoteskinCard(data: RepoEntry) as this =
         Fill = (fun () -> if this.Focused then Colors.pink.O2 else Colors.shadow_2.O2),
         Border = (fun () -> if this.Focused then Colors.pink_accent else Colors.grey_2.O3))
             
-    let mutable downloaded = Noteskins.list() |> Array.map snd |> Array.contains data.Name
+    let mutable status = 
+        if Noteskins.list() |> Array.map snd |> Array.contains data.Name then Installed else NotDownloaded
 
     let mutable preview : Sprite option = None
     let imgFade = Animation.Fade 0.0f
@@ -30,14 +31,17 @@ type NoteskinCard(data: RepoEntry) as this =
         |* Clickable.Focus this
 
     member this.Download() =
-        let target = Path.Combine(getDataPath "Noteskins", System.Guid.NewGuid().ToString() + ".isk")
-        WebServices.download_file.Request((data.Download, target, ignore), 
-            fun success -> 
-                if success then 
-                    sync Noteskins.load
-                    Notifications.task_feedback (Icons.download, L"notification.install_noteskin", data.Name)
-        )
-        downloaded <- true
+        if status = NotDownloaded || status = DownloadFailed then
+            status <- Downloading
+            let target = Path.Combine(getDataPath "Noteskins", System.Guid.NewGuid().ToString() + ".isk")
+            WebServices.download_file.Request((data.Download, target, ignore), 
+                fun success -> 
+                    if success then 
+                        sync Noteskins.load
+                        Notifications.task_feedback (Icons.download, L"notification.install_noteskin", data.Name)
+                        status <- Installed
+                    else status <- DownloadFailed
+            )
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
@@ -53,9 +57,21 @@ type NoteskinCard(data: RepoEntry) as this =
         | None -> ()
         Text.drawFillB(
             Style.baseFont, 
-            (if downloaded then Icons.check + " Downloaded" else Icons.download + " Download"),
+            (
+                match status with
+                | NotDownloaded -> Icons.download + " Download"
+                | Downloading -> Icons.download + " Downloading .."
+                | DownloadFailed -> Icons.x + " Error"
+                | Installed -> Icons.check + " Downloaded"
+            ),
             this.Bounds.SliceBottom(60.0f).Shrink(Style.padding),
-            (if downloaded then Colors.text_green else Colors.text),
+            (
+                match status with
+                | NotDownloaded -> Colors.text
+                | Downloading -> Colors.text_yellow_2
+                | DownloadFailed -> Colors.text_red
+                | Installed -> Colors.text_green
+            ),
             Alignment.CENTER)
 
     member this.LoadPreview(img: Bitmap) =
@@ -63,7 +79,6 @@ type NoteskinCard(data: RepoEntry) as this =
         imgFade.Target <- 1.0f
 
     member this.Name = data.Name
-    member this.Downloaded = downloaded
 
     static member Filter(filter: Filter) =
         fun (c: Widget) ->
@@ -83,7 +98,7 @@ module Noteskins =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
     
         let grid = GridContainer<Widget>(380.0f, 2, Spacing = (15.0f, 15.0f))
-        let scroll = ScrollContainer.Grid(grid, Margin = Style.padding, Position = Position.TrimTop 70.0f)
+        let scroll = ScrollContainer.Grid(grid, Margin = Style.padding, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
         let mutable failed = false
     
         do
@@ -101,8 +116,10 @@ module Noteskins =
             )
             this
             |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> grid.Filter <- NoteskinCard.Filter f), Position = Position.SliceTop 60.0f ))
+            |+ Text(L"imports.noteskins.hint", Position = Position.SliceBottom 55.0f)
             |* scroll
     
         member this.Items = grid
 
-    let tab = NoteskinSearch()
+    let tab = 
+        NoteskinSearch()
