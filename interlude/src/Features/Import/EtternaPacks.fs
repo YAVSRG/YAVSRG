@@ -142,4 +142,4 @@ module EtternaPacks =
             )
         StaticContainer(NodeType.Switch(K searchContainer))
         |+ searchContainer
-        |+ Text(L"imports.disclaimer.etterna", Position = Position.SliceBottom(60.0f))
+        |+ Text(L"imports.disclaimer.etterna", Position = Position.SliceBottom(55.0f))

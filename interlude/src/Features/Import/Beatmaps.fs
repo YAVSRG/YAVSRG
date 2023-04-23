@@ -78,23 +78,12 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     do
 
         this
-        |+ Frame(NodeType.None, Fill = (fun () -> if this.Focused then fill.O3 else Colors.shadow_2.O2), Border = fun () -> if this.Focused then Colors.white else border.O2)
+        |+ Frame(NodeType.None, Fill = (fun () -> if this.Focused then fill.O3 else fill.O2), Border = fun () -> if this.Focused then Colors.white else border.O2)
         |* Clickable.Focus this
-        //|+ Text(data.artist + " - " + data.title,
-        //    Align = Alignment.LEFT,
-        //    Position = { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 400.0f; Bottom = 1.0f %- 30.0f })
-        //|+ Text("Created by " + data.mapper,
-        //    Align = Alignment.LEFT,
-        //    Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 40.0f; Right = Position.max; Bottom = Position.max })
-        //|+ Text(sprintf "%.2f*   %iBPM   %iK" data.difficulty data.bpm (int data.difficulty_cs),
-        //    Align = Alignment.RIGHT,
-        //    Position = Position.TrimRight(160.0f).Margin(5.0f, 20.0f))
         //|+ Button(Icons.open_in_browser,
         //    fun () -> openUrl(sprintf "https://osu.ppy.sh/beatmapsets/%i" data.beatmapset_id)
         //    ,
         //    Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
-        //|* Button(Icons.download, download,
-        //    Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
 
     override this.Draw() =
         base.Draw()
@@ -103,23 +92,23 @@ type private BeatmapImportCard(data: BeatmapData) as this =
         | Downloading -> Draw.rect (this.Bounds.SliceLeft(this.Bounds.Width * progress)) Colors.white.O1
         | _ -> ()
 
-        Text.drawFillB(Style.baseFont, data.title, this.Bounds.SliceTop(50.0f).Shrink(5.0f, 0.0f), Colors.text, Alignment.LEFT)
-        Text.drawFillB(Style.baseFont, data.artist + "  •  " + data.mapper, this.Bounds.TrimTop(45.0f).SliceTop(35.0f).Shrink(5.0f, 0.0f), Colors.text_subheading, Alignment.LEFT)
+        Text.drawFillB(Style.baseFont, data.title, this.Bounds.SliceTop(50.0f).Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
+        Text.drawFillB(Style.baseFont, data.artist + "  •  " + data.mapper, this.Bounds.SliceBottom(45.0f).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.LEFT)
 
-        let status_bounds = this.Bounds.SliceBottom(45.0f).SliceLeft(150.0f).Shrink(5.0f, 0.0f)
+        let status_bounds = this.Bounds.SliceBottom(40.0f).SliceRight(150.0f).Shrink(5.0f, 0.0f)
         Draw.rect status_bounds Colors.shadow_2.O2
         Text.drawFillB(Style.baseFont, ranked_status, status_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), (border, Colors.shadow_2), Alignment.CENTER)
 
         let stat x text =
-            let stat_bounds = this.Bounds.SliceBottom(45.0f).TrimLeft(x).SliceLeft(145.0f)
+            let stat_bounds = this.Bounds.SliceBottom(40.0f).TrimRight(x).SliceRight(145.0f)
             Draw.rect stat_bounds Colors.shadow_2.O2
-            Text.drawFillB(Style.baseFont, text, stat_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), Colors.text, Alignment.CENTER)
+            Text.drawFillB(Style.baseFont, text, stat_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), Colors.text_subheading, Alignment.CENTER)
 
         stat 150.0f (sprintf "%s %i" Icons.heart data.favorites)
         stat 300.0f (sprintf "%s %i" Icons.play data.play_count)
         stat 450.0f (sprintf "%iK" (int data.difficulty_cs))
 
-        let download_bounds = this.Bounds.SliceBottom(45.0f).SliceRight(300.0f).Shrink(5.0f, 0.0f)
+        let download_bounds = this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(5.0f, 0.0f)
         Draw.rect download_bounds Colors.shadow_2.O2
         Text.drawFillB(
             Style.baseFont, 
@@ -133,7 +122,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             download_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f),
             (
                 match status with
-                | NotDownloaded -> Colors.text
+                | NotDownloaded -> if this.Focused then Colors.text_yellow_2 else Colors.text
                 | Downloading -> Colors.text_yellow_2
                 | DownloadFailed -> Colors.text_red
                 | Installed -> Colors.text_green
@@ -189,9 +178,9 @@ module Beatmaps =
             SearchContainer(
                 (search [] 0),
                 (fun searchContainer filter -> searchContainer.Items.Clear(); searchContainer.Items.Add(new SearchContainerLoader(search filter 0 searchContainer))),
-                130.0f,
+                85.0f,
                 Position = Position.TrimBottom(60.0f)
             )
         StaticContainer(NodeType.Switch(K searchContainer))
         |+ searchContainer
-        |+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom(60.0f))
+        |+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom(55.0f))
