@@ -76,8 +76,9 @@ module Sprite =
     let DefaultQuad : SpriteQuad = struct (Default, Quad.ofRect Rect.ONE)
 
     let destroy (sprite: Sprite) =
-        texUnit_inUse.[sprite.TextureUnit] <- false
-        GL.DeleteTexture sprite.ID
+        if sprite.ID <> Default.ID then
+            texUnit_inUse.[sprite.TextureUnit] <- false
+            GL.DeleteTexture sprite.ID
 
     let gridUV (x, y) (sprite: Sprite) =
         let x = float32 x
