@@ -231,10 +231,9 @@ module Content =
                 for id in Storage.noteskinTextures do
                     match instance.GetTexture id with
                     | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
-                    | None ->
-                        match loaded.["*defaultBar.isk"].GetTexture id with
-                        | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
-                        | None -> failwith "defaultBar doesnt have this texture!!"
+                    | None -> 
+                        Logging.Warn(sprintf "Noteskin texture '%s' didn't load properly, so it will appear as a white square ingame." id)
+                        Sprite.Default |> Sprites.add id
 
             let switch (new_id: string) =
                 let new_id = if loaded.ContainsKey id then new_id else Logging.Warn("Noteskin '" + new_id + "' not found, switching to default"); "*defaultBar.isk"
