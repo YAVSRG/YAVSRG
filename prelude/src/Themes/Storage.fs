@@ -46,6 +46,9 @@ type Storage(storage: StorageType) =
         with
         | :? FileNotFoundException | :? DirectoryNotFoundException // File doesnt exist in folder storage
         | :? NullReferenceException -> None // File doesnt exist in zip storage
+        | :? IOException as err -> 
+            Logging.Error (sprintf "IO error reading '%s' in: %O\n  This is unusual, maybe you still have the file open in another program?" (String.concat "/" path) storage, err)
+            reraise()
         | _ -> reraise()
     
     /// Returns string names of files in the requested folder
@@ -168,7 +171,7 @@ type Storage(storage: StorageType) =
                         function
                         | Ok v -> v, false
                         | Error err -> 
-                            Logging.Error (sprintf "Error loading %s in: %O (Will use default values)" (String.concat "/" path) storage, err)
+                            Logging.Error (sprintf "JSON error reading '%s' in: %O\n  Data was wrong or not formatted properly (Check you aren't missing a comma)\n  Using default values instead" (String.concat "/" path) storage, err)
                             JSON.Default<'T>(), true
                 stream.Dispose()
                 result
