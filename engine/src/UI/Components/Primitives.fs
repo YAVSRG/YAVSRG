@@ -42,7 +42,7 @@ type [<Sealed>] Clickable(onLeftClick) =
         let was_hovering = hover
         hover <- Mouse.hover (if this.Floating then this.Bounds else this.VisibleBounds)
         if was_hovering && not hover then this.OnHover false
-        elif not was_hovering && hover && ((not moved) || Mouse.moved()) then this.OnHover true
+        elif not was_hovering && hover then this.OnHover true
         elif hover then
             if Mouse.leftClick() then this.OnLeftClick()
             if Mouse.rightClick() then this.OnRightClick()
@@ -50,7 +50,7 @@ type [<Sealed>] Clickable(onLeftClick) =
     override this.Draw() = ()
 
     static member Focus(w: Widget) =
-        Clickable(w.Select, OnHover = fun b -> if b && not w.Focused then w.Focus())
+        Clickable(w.Select, OnHover = fun b -> if b then w.Focus())
     
 type [<Sealed>] HotkeyAction(hotkey: Hotkey, action) =
     inherit StaticWidget(NodeType.None)
