@@ -35,10 +35,11 @@
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\NoteColors.fs" />
     <Compile Include="Gameplay\Difficulty.fs" />
-    <Compile Include="Themes\Storage.fs" />
-    <Compile Include="Themes\Themes.fs" />
-    <Compile Include="Themes\Noteskins.fs" />
-    <Compile Include="Themes\Conversions.fs" />
+    <Compile Include="Content\Storage.fs" />
+    <Compile Include="Content\Themes.fs" />
+    <Compile Include="Content\HUD.fs" />
+    <Compile Include="Content\Noteskins.fs" />
+    <Compile Include="Content\NoteskinConverter.fs" />
     <Compile Include="Data\Web.fs" />
     <Compile Include="Data\Scores.fs" />
     <Compile Include="Data\Charts\Caching.fs" />

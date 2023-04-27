@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Themes
+﻿namespace Prelude.Data.Content
 
 open System.IO
 open SixLabors.ImageSharp
@@ -6,7 +6,6 @@ open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Prelude.Common
 open Prelude.Gameplay.NoteColors
-open Prelude.Data.Themes
 
 
 //https://osu.ppy.sh/wiki/no/Skinning/skin.ini#[mania]
