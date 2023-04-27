@@ -246,6 +246,51 @@ module Options =
     let private configPath = Path.GetFullPath "config.json"
     let firstLaunch = not (File.Exists configPath)
 
+    module HUDOptions =
+        
+        open Prelude.Data.Content.HUD
+        
+        let private cache = Dictionary<string, obj>()
+        
+        let private load_id<'T>() =
+            let id = typeof<'T>.Name
+            cache.Remove(id) |> ignore
+
+            let path = Path.Combine(getDataPath "Data", "HUD", id + ".json")
+            if File.Exists path then
+                match JSON.FromFile<'T>(path) with
+                | Ok v -> cache.Add(id, v)
+                | Error e ->
+                    Logging.Error(sprintf "Error while loading config for gameplay widget '%s'\n  If you edited the file manually, you may have made a mistake or need to close the file in your text editor" id)
+                    cache.Add(id, JSON.Default<'T>())
+            else 
+                let default_value = JSON.Default<'T>()
+                JSON.ToFile(path, true) default_value
+                cache.Add(id, default_value)
+        
+        let load() =
+            Directory.CreateDirectory(Path.Combine(getDataPath "Data", "HUD")) |> ignore
+
+            load_id<AccuracyMeter>()
+            load_id<HitMeter>()
+            load_id<LifeMeter>()
+            load_id<Combo>()
+            load_id<SkipButton>()
+            load_id<ProgressMeter>()
+            load_id<Pacemaker>()
+            load_id<JudgementCounts>()
+                    
+        let get<'T>() = 
+            let id = typeof<'T>.Name
+            if cache.ContainsKey id then
+                cache.[id] :?> 'T
+            else failwithf "config not loaded: %s" id
+        
+        let set<'T>(value: 'T) =
+            let id = typeof<'T>.Name
+            cache.[id] <- value
+            JSON.ToFile(Path.Combine(getDataPath "Data", "HUD", id + ".json"), true) value
+
     let load(instance: int) =
         config <- loadImportantJsonFile "Config" configPath true
         Localisation.loadFile config.Locale
@@ -263,6 +308,8 @@ module Options =
             "Instead, drag and drop things onto the *game window* while it's open and it will import.\n" +
             "Does this folder have stuff in, but they don't work in game?\n" +
             "Check they are .yav files, and then go to Options > Debug > Rebuild cache and let that run.")
+
+        HUDOptions.load()
 
     let save() =
         try

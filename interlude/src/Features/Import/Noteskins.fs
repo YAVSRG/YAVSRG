@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
-open Prelude.Data.Themes.Noteskin
+open Prelude.Data.Content.Noteskin
 open Prelude.Data
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
@@ -105,7 +105,7 @@ module Noteskins =
             WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Interlude.Noteskins/main/index.json",
                 fun data ->
                 match data with
-                | Some (d: Themes.Noteskin.Repo) -> 
+                | Some (d: Content.Noteskin.Repo) -> 
                     sync( fun () -> 
                         for ns in d.Noteskins do
                             let nc = NoteskinCard ns

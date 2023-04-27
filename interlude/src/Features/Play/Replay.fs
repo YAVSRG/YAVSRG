@@ -15,7 +15,7 @@ open Interlude.UI
 open Interlude.Options
 open Interlude.Utils
 open Interlude.Features
-open Interlude.Features.Play.GameplayWidgets
+open Interlude.Features.Play.HUD
 
 [<RequireQualifiedAccess>]
 type ReplayMode =

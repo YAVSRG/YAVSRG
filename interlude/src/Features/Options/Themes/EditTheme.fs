@@ -5,11 +5,11 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Prelude.Data.Themes
-open Prelude.Data.Themes.WidgetConfig
+open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Utils
 open Interlude.UI
+open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.UI.Components
 
@@ -40,7 +40,7 @@ module private Helpers =
         abstract member Left : unit -> unit
         abstract member Right : unit -> unit
      
-    let positionEditor (setting: Setting<WidgetConfig>) (default_pos: WidgetConfig) =
+    let positionEditor (setting: Setting<WidgetPosition>) (default_pos: WidgetPosition) =
         column()
         |+ PageSetting(
             "themes.edittheme.gameplay.generic.enable",
@@ -138,10 +138,10 @@ module private Helpers =
 type EditAccuracyMeterPage() as this =
     inherit Page()
 
-    let data = Themes.Current.GameplayConfig.get<AccuracyMeter>()
+    let data = HUDOptions.get<HUD.AccuracyMeter>()
 
     let pos = Setting.simple data.Position
-    let default_pos = AccuracyMeter.Default.Position
+    let default_pos = HUD.AccuracyMeter.Default.Position
 
     let grade_colors = Setting.simple data.GradeColors
     let show_name = Setting.simple data.ShowName
@@ -172,7 +172,7 @@ type EditAccuracyMeterPage() as this =
     override this.Title = L"themes.edittheme.gameplay.accuracymeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
-        Themes.Current.GameplayConfig.set<AccuracyMeter>
+        HUDOptions.set<HUD.AccuracyMeter>
             { data with
                 Position = pos.Value
                 GradeColors = grade_colors.Value
@@ -182,10 +182,10 @@ type EditAccuracyMeterPage() as this =
 type EditHitMeterPage() as this =
     inherit Page()
 
-    let data = Themes.Current.GameplayConfig.get<HitMeter>()
+    let data = HUDOptions.get<HUD.HitMeter>()
 
     let pos = Setting.simple data.Position
-    let default_pos = HitMeter.Default.Position
+    let default_pos = HUD.HitMeter.Default.Position
 
     let show_guide = Setting.simple data.ShowGuide
     let show_non_judgements = Setting.simple data.ShowNonJudgements
@@ -235,7 +235,7 @@ type EditHitMeterPage() as this =
     override this.Title = L"themes.edittheme.gameplay.hitmeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
-        Themes.Current.GameplayConfig.set<HitMeter>
+        HUDOptions.set<HUD.HitMeter>
             { data with
                 Position = pos.Value
                 ShowGuide = show_guide.Value
@@ -248,10 +248,10 @@ type EditHitMeterPage() as this =
 type EditLifeMeterPage() as this =
     inherit Page()
 
-    let data = Themes.Current.GameplayConfig.get<LifeMeter>()
+    let data = HUDOptions.get<HUD.LifeMeter>()
 
     let pos = Setting.simple data.Position
-    let default_pos = LifeMeter.Default.Position
+    let default_pos = HUD.LifeMeter.Default.Position
 
     let horizontal = Setting.simple data.Horizontal
     let empty_color = Setting.simple data.EmptyColor
@@ -298,7 +298,7 @@ type EditLifeMeterPage() as this =
     override this.Title = L"themes.edittheme.gameplay.lifemeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
-        Themes.Current.GameplayConfig.set<LifeMeter>
+        HUDOptions.set<HUD.LifeMeter>
             { data with
                 Position = pos.Value
                 Horizontal = horizontal.Value
@@ -310,10 +310,10 @@ type EditLifeMeterPage() as this =
 type EditComboMeterPage() as this =
     inherit Page()
 
-    let data = Themes.Current.GameplayConfig.get<Combo>()
+    let data = HUDOptions.get<HUD.Combo>()
 
     let pos = Setting.simple data.Position
-    let default_pos = Combo.Default.Position
+    let default_pos = HUD.Combo.Default.Position
 
     let lamp_colors = Setting.simple data.LampColors
     let pop_amount = Setting.simple data.Pop |> Setting.bound 0.0f 20.0f
@@ -349,7 +349,7 @@ type EditComboMeterPage() as this =
     override this.Title = L"themes.edittheme.gameplay.combo.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
-        Themes.Current.GameplayConfig.set<Combo>
+        HUDOptions.set<HUD.Combo>
             { data with
                 Position = pos.Value
                 LampColors = lamp_colors.Value
@@ -360,10 +360,10 @@ type EditComboMeterPage() as this =
 type EditSkipButtonPage() as this =
     inherit Page()
 
-    let data = Themes.Current.GameplayConfig.get<SkipButton>()
+    let data = HUDOptions.get<HUD.SkipButton>()
 
     let pos = Setting.simple data.Position
-    let default_pos = SkipButton.Default.Position
+    let default_pos = HUD.SkipButton.Default.Position
 
     let preview_text = Localisation.localiseWith [(!|"skip").ToString()] "play.skiphint"
     let preview = 
@@ -381,16 +381,16 @@ type EditSkipButtonPage() as this =
     override this.Title = L"themes.edittheme.gameplay.skipbutton.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
-        Themes.Current.GameplayConfig.set<SkipButton>
+        HUDOptions.set<HUD.SkipButton>
             { data with Position = pos.Value }
 
 type EditProgressMeterPage() as this =
     inherit Page()
 
-    let data = Themes.Current.GameplayConfig.get<ProgressMeter>()
+    let data = HUDOptions.get<HUD.ProgressMeter>()
 
     let pos = Setting.simple data.Position
-    let default_pos = ProgressMeter.Default.Position
+    let default_pos = HUD.ProgressMeter.Default.Position
 
     let bar_color = Setting.simple data.BarColor
     let glow_color = Setting.simple data.GlowColor
@@ -434,7 +434,7 @@ type EditProgressMeterPage() as this =
     override this.Title = L"themes.edittheme.gameplay.progressmeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
-        Themes.Current.GameplayConfig.set<ProgressMeter>
+        HUDOptions.set<HUD.ProgressMeter>
             { data with
                 Position = pos.Value
                 BarHeight = bar_height.Value
@@ -446,10 +446,10 @@ type EditProgressMeterPage() as this =
 type EditPacemakerPage() as this =
     inherit Page()
 
-    let data = Themes.Current.GameplayConfig.get<Pacemaker>()
+    let data = HUDOptions.get<HUD.Pacemaker>()
 
     let pos = Setting.simple data.Position
-    let default_pos = Pacemaker.Default.Position
+    let default_pos = HUD.Pacemaker.Default.Position
 
     let preview = 
         { new ConfigPreview(0.5f, pos) with
@@ -466,16 +466,16 @@ type EditPacemakerPage() as this =
     override this.Title = L"themes.edittheme.gameplay.pacemaker.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
-        Themes.Current.GameplayConfig.set<Pacemaker>
+        HUDOptions.set<HUD.Pacemaker>
             { data with Position = pos.Value }
             
 type EditJudgementCountsPage() as this =
     inherit Page()
             
-    let data = Themes.Current.GameplayConfig.get<JudgementCounts>()
+    let data = HUDOptions.get<HUD.JudgementCounts>()
             
     let pos = Setting.simple data.Position
-    let default_pos = JudgementCounts.Default.Position
+    let default_pos = HUD.JudgementCounts.Default.Position
 
     let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0 1000.0
             
@@ -499,7 +499,7 @@ type EditJudgementCountsPage() as this =
     override this.Title = L"themes.edittheme.gameplay.judgementcounts.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
-        Themes.Current.GameplayConfig.set<JudgementCounts>
+        HUDOptions.set<HUD.JudgementCounts>
             { data with Position = pos.Value; AnimationTime = animation_time.Value }
 
 type EditGameplayConfigPage() as this =

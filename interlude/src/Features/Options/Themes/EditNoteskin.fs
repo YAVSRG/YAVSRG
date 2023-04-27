@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
-open Prelude.Data.Themes
+open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI

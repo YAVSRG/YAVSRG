@@ -4,8 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Prelude.Scoring
-open Prelude.Data.Themes
+open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Play
@@ -19,7 +18,7 @@ type NoteskinPreview(scale: float32) as this =
         match Gameplay.Chart.current with
         | Some chart -> 
             let playfield = Playfield (PlayState.Dummy chart)
-            playfield.Add(GameplayWidgets.LaneCover())
+            playfield.Add(LaneCover())
             if this.Initialised then playfield.Init this
             playfield :> Widget
         | None -> new Dummy()
@@ -63,7 +62,7 @@ type NoteskinPreview(scale: float32) as this =
         fbo.Dispose()
 
 [<AbstractClass>]
-type ConfigPreview(scale: float32, config: Setting<WidgetConfig>) =
+type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
     inherit NoteskinPreview(scale)
 
     override this.Draw() =

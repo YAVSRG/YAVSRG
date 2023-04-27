@@ -9,9 +9,8 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Scoring
-open Prelude.Data
-open Prelude.Data.Themes
-open Prelude.Data.Themes.Noteskin
+open Prelude.Data.Content
+open Prelude.Data.Content.Noteskin
 
 module Content =
 
@@ -101,38 +100,6 @@ module Content =
             let mutable instance = defaultTheme
             let mutable config = instance.Config
 
-            module GameplayConfig =
-
-                open WidgetConfig
-
-                let private cache = Dictionary<string, obj>()
-
-                let private load<'T>() =
-                    let id = typeof<'T>.Name
-                    cache.Remove(id) |> ignore
-                    cache.Add(id, instance.GetGameplayConfig<'T> id)
-
-                let reload() =
-                    load<AccuracyMeter>()
-                    load<HitMeter>()
-                    load<LifeMeter>()
-                    load<Combo>()
-                    load<SkipButton>()
-                    load<ProgressMeter>()
-                    load<Pacemaker>()
-                    load<JudgementCounts>()
-            
-                let get<'T>() = 
-                    let id = typeof<'T>.Name
-                    if cache.ContainsKey id then
-                        cache.[id] :?> 'T
-                    else failwithf "config not loaded: %s" id
-
-                let set<'T>(value: 'T) =
-                    let id = typeof<'T>.Name
-                    cache.[id] <- value
-                    instance.SetGameplayConfig<'T>(id, value)
-
             let changeConfig(new_config: ThemeConfig) =
                 instance.Config <- new_config
                 config <- instance.Config
@@ -161,8 +128,6 @@ module Content =
                         match loaded.["*default"].GetSound id with
                         | Some stream -> SoundEffect.FromStream (id, stream) |> Sounds.add id
                         | None -> failwithf "Failed to load sound %s from *default" id
-
-                GameplayConfig.reload()
                 Rulesets.load_from_theme(instance)
 
             let switch (new_id: string) =
@@ -334,7 +299,6 @@ module Content =
         Themes.load()
         first_init <- false
 
-    let inline getGameplayConfig<'T>() = Themes.Current.GameplayConfig.get<'T>()
     let inline getTexture (id: string) = Sprites.getTexture id
     let inline noteskinConfig() = Noteskins.Current.config
     let inline themeConfig() = Themes.Current.config

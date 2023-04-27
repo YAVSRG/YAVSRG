@@ -6,9 +6,8 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
-open Prelude.Scoring
 open Prelude.Gameplay.NoteColors
-open Prelude.Data.Themes
+open Prelude.Data.Content
 open Interlude
 open Interlude.Options
 open Interlude.Features

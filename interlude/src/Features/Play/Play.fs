@@ -13,7 +13,7 @@ open Interlude.UI
 open Interlude.Web.Shared
 open Interlude.Features
 open Interlude.Features.Online
-open Interlude.Features.Play.GameplayWidgets
+open Interlude.Features.Play.HUD
 open Interlude.Features.Score
 
 [<RequireQualifiedAccess>]

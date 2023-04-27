@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Prelude.Common
-open Prelude.Scoring
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools.Patterns
 open Interlude.Features.Play
@@ -30,7 +29,7 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
 
     let playfield =
         Playfield(PlayState.Dummy chart)
-        |+ GameplayWidgets.LaneCover()
+        |+ LaneCover()
 
     override this.Init(parent: Widget) =
         base.Init parent
