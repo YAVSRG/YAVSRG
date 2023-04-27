@@ -1,7 +1,7 @@
 ﻿// load all noteskins in folders
 
 open System.IO
-open Prelude.Data.Themes
+open Prelude.Data.Content
 open Prelude.Common
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
