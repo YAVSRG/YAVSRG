@@ -173,9 +173,6 @@ type Grade(grade: Grade.GradeResult ref, lamp: Lamp.LampResult ref, data: ScoreI
         // grade stuff
         let gradeBounds = Rect.Box(x - 270.0f, y - 270.0f, 540.0f, 540.0f)
         Text.drawFill(Style.baseFont, data.Ruleset.GradeName (!grade).Grade, gradeBounds.Shrink 100.0f, data.Ruleset.GradeColor (!grade).Grade, 0.5f)
-        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, (!grade).Grade) <| getTexture "grade-base")
-        if (!lamp).Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, (!lamp).Lamp) <| getTexture "grade-lamp-overlay")
-        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, (!grade).Grade) <| getTexture "grade-overlay")
         
 type InfoBar(color: unit -> System.Drawing.Color, label: string, text: unit -> string, pb: unit -> PersonalBestType, hint: unit -> string, existingPb: unit -> string) =
     inherit StaticWidget(NodeType.None)

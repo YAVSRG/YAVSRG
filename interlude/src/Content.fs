@@ -64,21 +64,12 @@ module Content =
                     yield (k, loaded.[k])
             }
 
-        let private reload() =
-            let sourceTheme = if id.StartsWith('*') then defaultTheme else _theme
-            for id in Storage.rulesetTextures do
-                let fileid = current.TextureNamePrefix + id 
-                let img, config = sourceTheme.GetRulesetTexture fileid
-                Sprite.upload(img, config.Rows, config.Columns, true)
-                |> Sprite.cache id |> Sprites.add id
-
         let switch (new_id: string) (themeChanged: bool) =
             let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Ruleset '" + new_id + "' not found, switching to default"); DEFAULT
             if new_id <> id || themeChanged then
                 id <- new_id
                 current <- loaded.[id]
                 current_hash <- Ruleset.hash current
-                reload()
 
         let load_from_theme (theme: Theme) =
             _theme <- theme
