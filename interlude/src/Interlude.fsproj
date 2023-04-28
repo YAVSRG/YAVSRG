@@ -5,8 +5,8 @@
     <TargetFramework>net7.0</TargetFramework>
     <RepositoryUrl>https://github.com/YAVSRG/Interlude</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.6.12</AssemblyVersion>
-    <FileVersion>0.6.12</FileVersion>
+    <AssemblyVersion>0.6.13</AssemblyVersion>
+    <FileVersion>0.6.13</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
