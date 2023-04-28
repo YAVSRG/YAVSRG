@@ -238,5 +238,4 @@ module Storage =
     
     let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "receptorlighting"|]
     let themeTextures = [|"background"; "rain"; "logo"; "cursor"|]
-    let rulesetTextures = [|"judgement"; "grade-base"; "grade-lamp-overlay"; "grade-overlay"|]
     let themeSounds = [|"click"; "hello"|]
