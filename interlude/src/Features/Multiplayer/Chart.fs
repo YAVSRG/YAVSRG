@@ -112,10 +112,12 @@ type SelectedChart() =
                 K (sprintf "%s %s" Icons.preview (L"levelselect.preview.name")),
                 Style.dark 100,
                 TiltRight = false,
-                Hotkey = "preview",
                 Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f }
             ).Tooltip(Tooltip.Info("levelselect.preview"))
         )
+
+        |+ HotkeyAction("preview", fun () -> 
+            if Network.lobby.IsSome && SelectedChart.chart.IsSome && SelectedChart.found then Preview(Chart.current.Value, ignore).Show())
 
         |* Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.Ready),

@@ -44,11 +44,11 @@ type Player(name: string, player: Network.LobbyPlayer) =
             | _ -> "", Colors.grey_1, Colors.grey_1
 
         let b = this.Bounds.Expand(Style.padding)
-        Draw.rect (b.SliceTop Style.padding) border.O2
-        Draw.rect (b.SliceBottom Style.padding) border.O2
+        Draw.rect (b.SliceTop Style.padding) border.O3
+        Draw.rect (b.SliceBottom Style.padding) border.O3
         let b2 = this.Bounds.Expand(Style.padding, 0.0f)
-        Draw.rect (b2.SliceRight Style.padding) border.O2
-        Draw.rect (b2.SliceLeft Style.padding) border.O2
+        Draw.rect (b2.SliceRight Style.padding) border.O3
+        Draw.rect (b2.SliceLeft Style.padding) border.O3
 
         Draw.rect this.Bounds fill.O3
 
@@ -96,11 +96,11 @@ type PlayerList() =
         let user_bounds = this.Bounds.SliceTop(55.0f)
         
         let b = user_bounds.Expand(Style.padding)
-        Draw.rect (b.SliceTop Style.padding) border.O2
-        Draw.rect (b.SliceBottom Style.padding) border.O2
+        Draw.rect (b.SliceTop Style.padding) border.O3
+        Draw.rect (b.SliceBottom Style.padding) border.O3
         let b2 = user_bounds.Expand(Style.padding, 0.0f)
-        Draw.rect (b2.SliceRight Style.padding) border.O2
-        Draw.rect (b2.SliceLeft Style.padding) border.O2
+        Draw.rect (b2.SliceRight Style.padding) border.O3
+        Draw.rect (b2.SliceLeft Style.padding) border.O3
 
         Draw.rect user_bounds fill.O3
 
