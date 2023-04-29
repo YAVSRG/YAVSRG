@@ -101,6 +101,7 @@
     <Compile Include="Features\Import\EtternaPacks.fs" />
     <Compile Include="Features\Import\Beatmaps.fs" />
     <Compile Include="Features\Import\Noteskins.fs" />
+    <Compile Include="Features\Import\Rulesets.fs" />
     <Compile Include="Features\Import\Import.fs" />
     <Compile Include="Features\Options\System.fs" />
     <Compile Include="Features\Options\Themes\Preview.fs" />

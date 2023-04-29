@@ -71,6 +71,10 @@ module Content =
                 current <- loaded.[id]
                 current_hash <- Ruleset.hash current
 
+        let install(id, ruleset) =
+            loaded.Add(id, ruleset)
+            JSON.ToFile (Path.Combine(getDataPath "Rulesets", id + ".ruleset"), true) ruleset
+
         let load() =
             loaded.Clear()
 

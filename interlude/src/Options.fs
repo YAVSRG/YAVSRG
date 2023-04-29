@@ -301,6 +301,7 @@ module Options =
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) true
         
         Directory.CreateDirectory (getDataPath "Songs") |> ignore
+        // todo: similar how tos in Rulesets, Themes, Noteskins
         File.WriteAllText(Path.Combine(getDataPath "Songs", "HOW_TO_ADD_SONGS.txt"),
             "Dragging and dropping things into this folder won't work.\n" +
             "Instead, drag and drop things onto the *game window* while it's open and it will import.\n" +

@@ -67,7 +67,7 @@ type NoteskinCard(data: RepoEntry) as this =
             this.Bounds.SliceBottom(60.0f).Shrink(Style.padding),
             (
                 match status with
-                | NotDownloaded -> Colors.text
+                | NotDownloaded -> if this.Focused then Colors.text_yellow_2 else Colors.text
                 | Downloading -> Colors.text_yellow_2
                 | DownloadFailed -> Colors.text_red
                 | Installed -> Colors.text_green
@@ -81,23 +81,20 @@ type NoteskinCard(data: RepoEntry) as this =
     member this.Name = data.Name
 
     static member Filter(filter: Filter) =
-        fun (c: Widget) ->
-            match c with
-            | :? NoteskinCard as c ->
-                List.forall (
-                    function
-                    | Impossible -> false
-                    | String str -> c.Name.ToLower().Contains(str)
-                    | _ -> true
-                ) filter
-            | _ -> true
+        fun (c: NoteskinCard) ->
+            List.forall (
+                function
+                | Impossible -> false
+                | String str -> c.Name.ToLower().Contains(str)
+                | _ -> true
+            ) filter
         
 module Noteskins =
 
     type NoteskinSearch() as this =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
     
-        let grid = GridContainer<Widget>(380.0f, 3, Spacing = (15.0f, 15.0f))
+        let grid = GridContainer<NoteskinCard>(380.0f, 3, Spacing = (15.0f, 15.0f))
         let scroll = ScrollContainer.Grid(grid, Margin = Style.padding, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
         let mutable failed = false
     
