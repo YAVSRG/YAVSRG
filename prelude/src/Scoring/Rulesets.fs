@@ -422,8 +422,9 @@ module PrefabRulesets =
                             [|
                                 { Name = "SDCB"; Judgement = -1; JudgementThreshold = 9; Color = Color.FromArgb(255, 160, 160) }
                                 { Name = "FC"; Judgement = -1; JudgementThreshold = 0; Color = Color.FromArgb(0, 255, 160) }
-                                { Name = "PFC"; Judgement = 3; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 160) }
-                                { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
+                                { Name = "SDG"; Judgement = 3; JudgementThreshold = 9; Color = Color.FromArgb(160, 255, 160) }
+                                { Name = "PERF"; Judgement = 3; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 160) }
+                                { Name = "1KK"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
                             |]
                     }
             }
