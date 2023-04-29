@@ -421,9 +421,12 @@ module PrefabRulesets =
                         Lamps =
                             [|
                                 { Name = "SDCB"; Judgement = -1; JudgementThreshold = 9; Color = Color.FromArgb(255, 160, 160) }
+                                { Name = "1CB"; Judgement = -1; JudgementThreshold = 1; Color = Color.FromArgb(160, 160, 160) }
                                 { Name = "FC"; Judgement = -1; JudgementThreshold = 0; Color = Color.FromArgb(0, 255, 160) }
-                                { Name = "SDG"; Judgement = 3; JudgementThreshold = 9; Color = Color.FromArgb(160, 255, 160) }
                                 { Name = "PERF"; Judgement = 3; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 160) }
+                                { Name = "SDG"; Judgement = 2; JudgementThreshold = 9; Color = Color.FromArgb(160, 255, 160) }
+                                { Name = "1G"; Judgement = 2; JudgementThreshold = 1; Color = Color.FromArgb(200, 160, 255) }
+                                { Name = "SS"; Judgement = 2; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 160) }
                                 { Name = "1KK"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
                             |]
                     }
