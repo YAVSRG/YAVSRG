@@ -34,6 +34,7 @@ module Utils =
     let CHARTS_PATH = Path.Combine(REPO_PATH, "tables", "charts")
     let PACKS_PATH = Path.Combine(REPO_PATH, "tables", "release")
     let ARCHIVE_PATH = Path.Combine(REPO_PATH, "archive")
+    let RULESETS_PATH = Path.Combine(REPO_PATH, "rulesets")
     let INTERLUDE_TABLES_PATH = Path.Combine(config.InterludePath, "Data", "Tables")
     let INTERLUDE_COLLECTIONS_FILE = Path.Combine(config.InterludePath, "Data", "collections.json")
 

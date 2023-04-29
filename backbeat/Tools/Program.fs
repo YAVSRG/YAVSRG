@@ -1,9 +1,11 @@
 ﻿open Percyqaz.Shell
+open Backbeat.Features
 
 let ctx =
     Context.Empty
-    |> Backbeat.Features.Tables.register
-    |> Backbeat.Features.Archive.register
+    |> Tables.register
+    |> Archive.register
+    |> Rulesets.register
 
 [<EntryPoint>]
 let main argv =
