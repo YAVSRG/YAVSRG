@@ -36,41 +36,39 @@ module Rulesets =
             if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
             base.Draw()
 
-    type FavouritesPage() as this =
-        inherit Page()
+    //type FavouritesPage() as this =
+    //    inherit Page()
 
-        let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
-        let rec refresh() =
-            container.Clear()
+    //    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    //    let rec refresh() =
+    //        container.Clear()
 
-            for id, rs in Rulesets.list() do
-                let selected = List.contains id options.FavouriteRulesets.Value
-                container 
-                |* RulesetButton(id, rs.Name, 
-                    List.contains id options.FavouriteRulesets.Value,
-                    (fun () -> 
-                        if selected then Setting.app (List.except [id]) options.FavouriteRulesets
-                        else Setting.app (fun l -> id :: l) options.FavouriteRulesets
-                        sync refresh
-                    ) )
+    //        for id, rs in Rulesets.list() do
+    //            let selected = List.contains id options.FavouriteRulesets.Value
+    //            container 
+    //            |* RulesetButton(id, rs.Name, 
+    //                List.contains id options.FavouriteRulesets.Value,
+    //                (fun () -> 
+    //                    if selected then Setting.app (List.except [id]) options.FavouriteRulesets
+    //                    else Setting.app (fun l -> id :: l) options.FavouriteRulesets
+    //                    sync refresh
+    //                ) )
 
-            if container.Focused then container.Focus()
+    //        if container.Focused then container.Focus()
 
-        do
-            refresh()
+    //    do
+    //        refresh()
 
-            this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 150.0f)) )
+    //        this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 150.0f)) )
 
-        override this.Title = L"gameplay.rulesets.name"
-        override this.OnClose() = ()
+    //    override this.Title = L"gameplay.rulesets.name"
+    //    override this.OnClose() = ()
     
     type QuickSwitcher(setting: Setting<string>) =
         inherit StaticContainer(NodeType.None)
     
         override this.Init(parent: Widget) =
             this
-            |+ Clickable(ignore, OnRightClick = fun () -> Menu.ShowPage FavouritesPage)
-            |+ HotkeyAction("ruleset_picker", fun () -> Menu.ShowPage FavouritesPage)
             |* StylishButton(
                 ( fun () -> this.ToggleDropdown() ),
                 ( fun () -> Rulesets.current.Name ),
@@ -83,12 +81,8 @@ module Rulesets =
             match this.Dropdown with
             | Some _ -> this.Dropdown <- None
             | _ ->
-                let rulesets = Rulesets.list() |> Map.ofSeq
-                let favouriteRulesets = 
-                    options.FavouriteRulesets.Value
-                    |> List.choose (fun id -> match rulesets.TryFind id with Some rs -> Some id | None -> None)
-                    |> function [] -> [Rulesets.DEFAULT] | xs -> xs
-                let d = Dropdown.Selector favouriteRulesets (fun id -> rulesets.[id].Name) (fun id -> setting.Set id) (fun () -> this.Dropdown <- None)
+                let rulesets = Rulesets.list()
+                let d = Dropdown.Selector rulesets (fun (id, rs) -> rs.Name) (fun (id, rs) -> setting.Set id) (fun () -> this.Dropdown <- None)
                 d.Position <- Position.SliceBottom(d.Height + 60.0f).TrimBottom(60.0f).Margin(Style.padding, 0.0f)
                 d.Init this
                 this.Dropdown <- Some d

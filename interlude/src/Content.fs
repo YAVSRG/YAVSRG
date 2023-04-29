@@ -50,12 +50,12 @@ module Content =
 
     module Rulesets =
 
-        let DEFAULT = "*sc-j4"
+        let DEFAULT_ID = "sc-j4"
+        let private DEFAULT_RULESET = PrefabRulesets.SC.create 4
        
-        let private loaded = let x = Dictionary<string, Ruleset>() in (for name, rs in defaultTheme.GetRulesets() do x.Add("*" + name, rs)); x
-        let mutable private _theme : Theme = Unchecked.defaultof<_>
-        let mutable private id = DEFAULT
-        let mutable current = loaded.[DEFAULT]
+        let private loaded = Dictionary<string, Ruleset>()
+        let mutable private id = DEFAULT_ID
+        let mutable current = DEFAULT_RULESET
         let mutable current_hash = Ruleset.hash current
 
         let list() = 
@@ -64,20 +64,29 @@ module Content =
                     yield (k, loaded.[k])
             }
 
-        let switch (new_id: string) (themeChanged: bool) =
-            let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Ruleset '" + new_id + "' not found, switching to default"); DEFAULT
-            if new_id <> id || themeChanged then
+        let switch (new_id: string) =
+            let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Ruleset '" + new_id + "' not found, switching to default"); DEFAULT_ID
+            if new_id <> id then
                 id <- new_id
                 current <- loaded.[id]
                 current_hash <- Ruleset.hash current
 
-        let load_from_theme (theme: Theme) =
-            _theme <- theme
+        let load() =
             loaded.Clear()
-            for name, rs in defaultTheme.GetRulesets() do loaded.Add("*" + name, rs)
-            if _theme <> defaultTheme then
-                for name, rs in _theme.GetRulesets() do loaded.Add(name, rs)
-            switch id true
+
+            let path = getDataPath "Rulesets"
+            let default_path = Path.Combine(path, DEFAULT_ID + ".ruleset")
+
+            if not (File.Exists default_path) then JSON.ToFile (default_path, true) DEFAULT_RULESET
+
+            for f in Directory.GetFiles(path) do
+                if Path.GetExtension(f).ToLower() = ".ruleset" then
+                    let id = Path.GetFileNameWithoutExtension(f)
+                    match JSON.FromFile<Ruleset>(f) with
+                    | Ok rs -> loaded.Add(id, rs.Validate)
+                    | Error e -> Logging.Error(sprintf "Error loading ruleset '%s'" id, e)
+
+            if not (loaded.ContainsKey DEFAULT_ID) then loaded.Add(DEFAULT_ID, DEFAULT_RULESET)
 
         let exists = loaded.ContainsKey
 
@@ -119,7 +128,6 @@ module Content =
                         match loaded.["*default"].GetSound id with
                         | Some stream -> SoundEffect.FromStream (id, stream) |> Sounds.add id
                         | None -> failwithf "Failed to load sound %s from *default" id
-                Rulesets.load_from_theme(instance)
 
             let switch (new_id: string) =
                 let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Theme '" + new_id + "' not found, switching to default"); "*default"
@@ -288,6 +296,7 @@ module Content =
         Logging.Info "===== Loading game content ====="
         Noteskins.load()
         Themes.load()
+        Rulesets.load()
         first_init <- false
 
     let inline getTexture (id: string) = Sprites.getTexture id

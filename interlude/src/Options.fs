@@ -83,7 +83,6 @@ module Options =
 
             Playstyles: Layout array
             SelectedRuleset: Setting<string>
-            FavouriteRulesets: Setting<string list>
             FailCondition: Setting<FailType>
             Pacemakers: Dictionary<string, Pacemaker>
             SaveScoreIfUnderPace: Setting<bool>
@@ -133,12 +132,11 @@ module Options =
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
             SelectedRuleset = 
-                Setting.simple Content.Rulesets.DEFAULT
+                Setting.simple Content.Rulesets.DEFAULT_ID
                 |> Setting.trigger (fun t -> 
-                    if Content.first_init then Percyqaz.Flux.UI.Root.sync(fun () -> Content.Rulesets.switch t false)
-                    else Content.Rulesets.switch t false
+                    if Content.first_init then Percyqaz.Flux.UI.Root.sync(fun () -> Content.Rulesets.switch t)
+                    else Content.Rulesets.switch t
                 )
-            FavouriteRulesets = Setting.simple [Content.Rulesets.DEFAULT]
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemakers = Dictionary<string, Pacemaker>()
             SaveScoreIfUnderPace = Setting.simple true
