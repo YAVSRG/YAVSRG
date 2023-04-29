@@ -131,7 +131,7 @@ type AccuracyConfig =
 type Ruleset =
     {
         Name: string
-        TextureNamePrefix: string
+        Description: string
 
         Judgements: Judgement array
         Accuracy: AccuracyConfig
@@ -207,7 +207,74 @@ module Ruleset =
             |> BitConverter.ToString
         config.Name.Replace(" ", "") + s.Replace("-", "").Substring(0, 6)
 
-module Rulesets =
+module RulesetUtils =
+    
+    // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
+    let wife_curve (judge: int) (delta: Time) =
+        let erf = 
+            // was this really necessary
+            let a1 =  0.254829592
+            let a2 = -0.284496736
+            let a3 =  1.421413741
+            let a4 = -1.453152027
+            let a5 =  1.061405429
+            let p  =  0.3275911
+            fun (x: float) ->
+                let sign = if x < 0.0 then -1.0 else 1.0
+                let x = Math.Abs x
+                let t = 1.0 / (1.0 + p * x)
+                let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.Exp(-x * x)
+                sign * y
+
+        let delta = float delta |> Math.Abs
+
+        let scale = (10.0 - float judge) / 6.0
+        let miss_weight = -2.75
+        let ridic = 5.0 * scale
+        let boo_window = 180.0 * scale
+        let ts_pow = 0.75
+        let zero = 65.0 * Math.Pow(scale, ts_pow)
+        let dev = 22.7 * Math.Pow(scale, ts_pow)
+
+        if delta <= ridic then 1.0
+        elif delta <= zero then erf ((zero - delta) / dev)
+        elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
+        else miss_weight
+
+    let osu_ln_judgement (od: float32) (headDelta: Time) (endDelta: Time) (overhold: bool) (dropped: bool) : JudgementId =
+        let absolute = Time.Abs endDelta * 0.5f
+        let headDelta = Time.Abs headDelta
+
+        if
+            absolute < 16.5f<ms> * 1.2f &&
+            absolute + headDelta < 16.5f<ms> * 2.4f &&
+            headDelta < 151.5f<ms> - od * 3.0f<ms> &&
+            not dropped
+        then 0 // 300g
+        elif
+            absolute < (64.5f<ms> - od * 3.0f<ms>) * 1.1f &&
+            absolute + headDelta < (64.5f<ms> - od * 3.0f<ms>) * 2.2f &&
+            headDelta < 151.5f<ms> - od * 3.0f<ms> &&
+            not dropped
+        then 1 // 300
+        elif 
+            ((absolute < 97.5f<ms> - od * 3.0f<ms> &&
+            absolute + headDelta < (97.5f<ms> - od * 3.0f<ms>) * 2.0f &&
+            headDelta < 151.5f<ms> - od * 3.0f<ms>) || overhold) &&
+            not dropped
+        then 2 // 200
+        elif
+            absolute < 127.5f<ms> - od * 3.0f<ms> &&
+            absolute + headDelta < (127.5f<ms> - od * 3.0f<ms>) * 2.0f &&
+            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
+            not dropped
+        then 3 // 100
+        elif
+            overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>
+        then 4 // 50
+        else 5 // MISS
+
+module PrefabRulesets =
 
     module DP =
 
@@ -233,43 +300,11 @@ module Rulesets =
                 ]
 
     module Wife =
-    
-        // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
-        let wife_curve (judge: int) (delta: Time) =
-            let erf = 
-                // was this really necessary
-                let a1 =  0.254829592
-                let a2 = -0.284496736
-                let a3 =  1.421413741
-                let a4 = -1.453152027
-                let a5 =  1.061405429
-                let p  =  0.3275911
-                fun (x: float) ->
-                    let sign = if x < 0.0 then -1.0 else 1.0
-                    let x = Math.Abs x
-                    let t = 1.0 / (1.0 + p * x)
-                    let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.Exp(-x * x)
-                    sign * y
-
-            let delta = float delta |> Math.Abs
-
-            let scale = (10.0 - float judge) / 6.0
-            let miss_weight = -2.75
-            let ridic = 5.0 * scale
-            let boo_window = 180.0 * scale
-            let ts_pow = 0.75
-            let zero = 65.0 * Math.Pow(scale, ts_pow)
-            let dev = 22.7 * Math.Pow(scale, ts_pow)
-
-            if delta <= ridic then 1.0
-            elif delta <= zero then erf ((zero - delta) / dev)
-            elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
-            else miss_weight
 
         let create (judge: int) =
             {
                 Name = if judge = 9 then "Wife3 JUSTICE" else sprintf "Wife3 (J%i)" judge
-                TextureNamePrefix = "wife-"
+                Description = "Simulates Etterna's scoring system, Wife3"
                 Judgements =
                     [|
                         { Name = "Marvellous"; Color = Color.Aqua; BreaksCombo = false }
@@ -331,39 +366,6 @@ module Rulesets =
             }
 
     module Osu =
-    
-        let ln_judgement (od: float32) (headDelta: Time) (endDelta: Time) (overhold: bool) (dropped: bool) : JudgementId =
-            let absolute = Time.Abs endDelta * 0.5f
-            let headDelta = Time.Abs headDelta
-
-            if
-                absolute < 16.5f<ms> * 1.2f &&
-                absolute + headDelta < 16.5f<ms> * 2.4f &&
-                headDelta < 151.5f<ms> - od * 3.0f<ms> &&
-                not dropped
-            then 0 // 300g
-            elif
-                absolute < (64.5f<ms> - od * 3.0f<ms>) * 1.1f &&
-                absolute + headDelta < (64.5f<ms> - od * 3.0f<ms>) * 2.2f &&
-                headDelta < 151.5f<ms> - od * 3.0f<ms> &&
-                not dropped
-            then 1 // 300
-            elif 
-                ((absolute < 97.5f<ms> - od * 3.0f<ms> &&
-                absolute + headDelta < (97.5f<ms> - od * 3.0f<ms>) * 2.0f &&
-                headDelta < 151.5f<ms> - od * 3.0f<ms>) || overhold) &&
-                not dropped
-            then 2 // 200
-            elif
-                absolute < 127.5f<ms> - od * 3.0f<ms> &&
-                absolute + headDelta < (127.5f<ms> - od * 3.0f<ms>) * 2.0f &&
-                (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
-                not dropped
-            then 3 // 100
-            elif
-                overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>
-            then 4 // 50
-            else 5 // MISS
 
         let windows od =
             let ma = 16.5f<ms>
@@ -379,7 +381,7 @@ module Rulesets =
         let create (od: float32) : Ruleset =
             {
                 Name = sprintf "osu! (OD%.1f)" od
-                TextureNamePrefix = "osu-"
+                Description = "Simulates osu!'s scoring system"
                 Judgements =
                     [|
                         { Name = "300g"; Color = Color.Aqua; BreaksCombo = false }
@@ -443,7 +445,7 @@ module Rulesets =
         let create (judge: int) =
             {
                 Name = sprintf "SC (J%i)" judge
-                TextureNamePrefix = "sc-"
+                Description = "The 'official' scoring system of Interlude, fine tuned for maximum fun"
                 Judgements =
                     [|
                         { Name = "Marvellous"; Color = Color.Aqua; BreaksCombo = false }
@@ -509,9 +511,9 @@ module Rulesets =
                 MissWindow: Time
             }
 
-        let sdvx : Type =
+        let mizu : Type =
             {
-                Name = "SDVX"
+                Name = "Mizu"
                 Critical = 45.0f<ms>
                 Near = 150.0f<ms>
                 MissWindow = 150.0f<ms>
@@ -520,7 +522,7 @@ module Rulesets =
         let create (data: Type) =
             {
                 Name = sprintf "EXSCORE (%s)" data.Name
-                TextureNamePrefix = "xs-"
+                Description = "EXSCORE-based score system designed by qqp"
                 Judgements =
                     [|
                         { Name = "CRITICAL"; Color = Color.Aqua; BreaksCombo = false }
@@ -569,3 +571,9 @@ module Rulesets =
                             |]
                     }
             }
+
+    [<Json.AutoCodec>]
+    type Repo =
+        {
+            Rulesets: Collections.Generic.Dictionary<string, Ruleset>
+        }

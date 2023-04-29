@@ -321,12 +321,12 @@ module Helpers =
 
     let points (conf: Ruleset) (delta: Time) (judge: JudgementId) : float =
         match conf.Accuracy.Points with
-        | AccuracyPoints.WifeCurve j -> Rulesets.Wife.wife_curve j delta
+        | AccuracyPoints.WifeCurve j -> RulesetUtils.wife_curve j delta
         | AccuracyPoints.Weights (maxweight, weights) -> weights.[judge] / maxweight
 
 // Concrete implementation of rulesets
 
-type CustomScoring(config: Ruleset, keys, replay, notes, rate) =
+type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
     inherit IScoreMetric(config, HealthBarMetric(config.Health), keys, replay, notes, rate)
 
     let headJudgements = Array.create keys config.DefaultJudgement
@@ -368,7 +368,7 @@ type CustomScoring(config: Ruleset, keys, replay, notes, rate) =
 
                     match config.Accuracy.HoldNoteBehaviour with
                     | HoldNoteBehaviour.Osu od ->
-                        let judgement = Rulesets.Osu.ln_judgement od headDeltas.[ev.Column] delta overhold dropped
+                        let judgement = RulesetUtils.osu_ln_judgement od headDeltas.[ev.Column] delta overhold dropped
                         this.State.Add(point_func delta judgement, 1.0, judgement)
                         if config.Judgements.[judgement].BreaksCombo then this.State.BreakCombo true else this.State.IncrCombo()
                         Release {| Judgement = Some judgement; Missed = missed; Delta = delta; Overhold = overhold; Dropped = dropped |}
@@ -401,8 +401,8 @@ type CustomScoring(config: Ruleset, keys, replay, notes, rate) =
 
 module Metrics =
     
-    let createScoreMetric config keys (replay: IReplayProvider) notes rate : IScoreMetric =
-        CustomScoring(config, keys, replay, notes, rate)
+    let createScoreMetric ruleset keys (replay: IReplayProvider) notes rate : IScoreMetric =
+        ScoreMetric(ruleset, keys, replay, notes, rate)
 
     let createDummyMetric (chart: Chart) : IScoreMetric =
-        createScoreMetric (Rulesets.SC.create 4) chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f
+        createScoreMetric (PrefabRulesets.SC.create 4) chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f

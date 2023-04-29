@@ -73,20 +73,6 @@ type Theme(storage) as this =
 
     member this.GetSound (name: string) : Stream option =
         this.TryReadFile("Sounds", name + ".wav")
-            
-    member this.GetRulesetTexture (name: string) : (Bitmap * TextureConfig) =
-        match this.LoadTexture (name, "Rulesets") with
-        | Ok (Some res) -> res
-        | _ -> new Bitmap(1, 1), TextureConfig.Default // swallow error or missing file
-
-    member this.GetRulesets() =
-        seq {
-            for config in this.GetFiles "Rulesets" do
-                if Path.GetExtension(config).ToLower() = ".ruleset" then
-                    match this.TryGetJson<Ruleset>(true, "Rulesets", config) with
-                    | Some data -> yield Path.GetFileNameWithoutExtension config, data.Validate
-                    | None -> () // Error has already been logged when this happens
-        }
 
     member this.GetFonts() =
         seq {
