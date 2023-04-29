@@ -22,7 +22,9 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
         Border = (fun () -> if this.Focused then Colors.pink_accent else Colors.grey_2.O3))
             
     let mutable status = 
-        if Rulesets.list() |> Seq.map fst |> Seq.contains id then UpToDate else NotInstalled
+        if Rulesets.list() |> Seq.map fst |> Seq.contains id then
+            if Ruleset.hash (Rulesets.get_by_id id) <> Ruleset.hash ruleset then UpdateAvailable else UpToDate
+        else NotInstalled
 
     do
         this
@@ -37,12 +39,12 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
     member this.Install() =
         match status with
         | UpToDate -> ()
-        | UpdateAvailable -> Logging.Debug("Updating not yet implemented. Delete the ruleset and then install again (and make sure you want to discard any edits)")
+        | UpdateAvailable -> Menu.ConfirmPage("Update this ruleset? (If you made changes yourself, they will be lost)", fun () -> Rulesets.install(id, ruleset); status <- UpToDate).Show()
         | NotInstalled -> Rulesets.install(id, ruleset); status <- UpToDate
 
     override this.Draw() =
         base.Draw()
-        Draw.rect (this.Bounds.SliceTop(40.0f).SliceRight(200.0f).Shrink(20.0f, 0.0f)) Colors.shadow_2.O2
+        Draw.rect (this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(20.0f, 0.0f)) Colors.shadow_2.O2
         Text.drawFillB(
             Style.baseFont, 
             (
@@ -51,7 +53,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
                 | UpdateAvailable -> Icons.download + " Update available"
                 | UpToDate -> Icons.check + " Installed"
             ),
-            this.Bounds.SliceTop(40.0f).SliceRight(200.0f).Shrink(25.0f, Style.padding),
+            this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.padding),
             (
                 match status with
                 | NotInstalled -> if this.Focused then Colors.text_yellow_2 else Colors.text

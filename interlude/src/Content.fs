@@ -58,6 +58,13 @@ module Content =
         let mutable current = DEFAULT_RULESET
         let mutable current_hash = Ruleset.hash current
 
+        let get_by_id(id) =
+            loaded.[id]
+
+        let try_get_by_hash(hash) =
+            loaded.Values
+            |> Seq.tryFind (fun rs -> Ruleset.hash rs = hash)
+
         let list() = 
             seq {
                 for k in loaded.Keys do
@@ -71,9 +78,13 @@ module Content =
                 current <- loaded.[id]
                 current_hash <- Ruleset.hash current
 
-        let install(id, ruleset) =
-            loaded.Add(id, ruleset)
-            JSON.ToFile (Path.Combine(getDataPath "Rulesets", id + ".ruleset"), true) ruleset
+        let install(new_id, ruleset) =
+            loaded.Remove new_id |> ignore
+            loaded.Add(new_id, ruleset)
+            if id = new_id then 
+                current <- ruleset
+                current_hash <- Ruleset.hash current
+            JSON.ToFile (Path.Combine(getDataPath "Rulesets", new_id + ".ruleset"), true) ruleset
 
         let load() =
             loaded.Clear()
