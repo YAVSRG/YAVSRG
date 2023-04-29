@@ -14,61 +14,48 @@ module Rulesets = Interlude.Content.Rulesets
 
 module Rulesets = 
 
-    type private RulesetButton(id: string, name, selected, action) =
-        inherit StaticContainer(NodeType.Button (fun _ -> action()))
+    type private RulesetButton(id: string, ruleset: Prelude.Scoring.Ruleset) =
+        inherit StaticContainer(NodeType.Button (fun _ -> options.SelectedRuleset.Set id))
             
         override this.Init(parent: Widget) =
             this
             |+ Text(
-                K (sprintf "%s  %s" name (if selected then Icons.selected else "")),
+                (fun () -> sprintf "%s  %s" ruleset.Name (if options.SelectedRuleset.Value = id then Icons.selected else "")),
                 Color = ( 
-                    fun () -> ( 
-                        (if this.Focused <> (id.StartsWith '*') then Style.color(255, 1.0f, 0.5f) else Color.White),
-                        Color.Black
-                    )
+                    fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text
                 ),
                 Align = Alignment.LEFT,
-                Position = Position.Margin Style.padding)
+                Position = Position.SliceTop(PRETTYHEIGHT).Margin Style.padding)
+            |+ Text(
+                ruleset.Description,
+                Color = K Colors.text,
+                Align = Alignment.LEFT,
+                Position = Position.TrimTop(PRETTYHEIGHT - 10.0f).Margin Style.padding)
             |* Clickable.Focus this
             base.Init parent
             
         override this.Draw() =
-            if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+            if this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O1
             base.Draw()
 
-    //type FavouritesPage() as this =
-    //    inherit Page()
+    type FavouritesPage() as this =
+        inherit Page()
 
-    //    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
-    //    let rec refresh() =
-    //        container.Clear()
+        do
+            let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT * 1.5f)
+            for id, rs in Rulesets.list() do
+                container |* RulesetButton(id, rs)
+            this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 150.0f)) )
 
-    //        for id, rs in Rulesets.list() do
-    //            let selected = List.contains id options.FavouriteRulesets.Value
-    //            container 
-    //            |* RulesetButton(id, rs.Name, 
-    //                List.contains id options.FavouriteRulesets.Value,
-    //                (fun () -> 
-    //                    if selected then Setting.app (List.except [id]) options.FavouriteRulesets
-    //                    else Setting.app (fun l -> id :: l) options.FavouriteRulesets
-    //                    sync refresh
-    //                ) )
-
-    //        if container.Focused then container.Focus()
-
-    //    do
-    //        refresh()
-
-    //        this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 150.0f)) )
-
-    //    override this.Title = L"gameplay.rulesets.name"
-    //    override this.OnClose() = ()
+        override this.Title = L"gameplay.rulesets.name"
+        override this.OnClose() = ()
     
     type QuickSwitcher(setting: Setting<string>) =
         inherit StaticContainer(NodeType.None)
     
         override this.Init(parent: Widget) =
             this
+            |+ HotkeyAction("ruleset_picker", fun () -> Menu.ShowPage FavouritesPage)
             |* StylishButton(
                 ( fun () -> this.ToggleDropdown() ),
                 ( fun () -> Rulesets.current.Name ),
