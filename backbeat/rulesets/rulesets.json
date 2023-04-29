@@ -45,20 +45,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -144,20 +159,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -243,20 +273,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -342,20 +387,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -441,20 +501,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -540,20 +615,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -639,20 +729,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -738,20 +843,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -837,20 +957,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -936,20 +1071,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
@@ -1035,20 +1185,35 @@
                     "JudgementThreshold": 9, 
                     "Name": "SDCB"
                 }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
                     "Color": [255, 0, 255, 160], 
                     "Judgement": -1, 
                     "JudgementThreshold": 0, 
                     "Name": "FC"
                 }, {
-                    "Color": [255, 160, 255, 160], 
-                    "Judgement": 3, 
-                    "JudgementThreshold": 9, 
-                    "Name": "SDG"
-                }, {
                     "Color": [255, 255, 255, 160], 
                     "Judgement": 3, 
                     "JudgementThreshold": 0, 
                     "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
                 }, {
                     "Color": [255, 160, 255, 255], 
                     "Judgement": 1, 
