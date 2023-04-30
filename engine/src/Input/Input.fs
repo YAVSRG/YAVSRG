@@ -12,14 +12,12 @@ type Bind =
     | Dummy
     | Key of Keys * modifiers: (bool * bool * bool)
     | Mouse of MouseButton
-    | Joystick of NYI
 
     override this.ToString() =
         match this with
         | Dummy -> "NONE"
         | Key (k, m) -> Bind.ModifierString m + Bind.FormatKey k
         | Mouse b -> "M" + b.ToString()
-        | Joystick _ -> "nyi"
 
     static member private FormatKey (k: Keys) : string =
         match k with
@@ -123,8 +121,6 @@ module internal InputThread =
                     struct(enum b |> Mouse, InputEvType.Press, now) |> add
             elif mouse.WasButtonDown(enum b) then
                 struct(enum b |> Mouse, InputEvType.Release, now) |> add
-    
-        // joystick stuff NYI
 
     let mutable internal gw : NativeWindow = null
     
@@ -256,7 +252,6 @@ module Input =
         | Key (k, m) -> this_frame.KeyboardState.[k] && m = (this_frame.Ctrl, this_frame.Alt, this_frame.Shift)
         | Mouse m -> this_frame.MouseState.[m]
         | Dummy -> false
-        | Joystick _ -> false
     
     let init (win: NativeWindow) =
         gw <- win
