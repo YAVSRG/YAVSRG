@@ -134,6 +134,7 @@ module Interlude =
         member this.Data = data.AsReadOnly()
 
         new() = TimeData<'t>(new List<TimeDataItem<'t>>())
+        new(data: TimeDataItem<'t> seq) = TimeData<'t>(new List<TimeDataItem<'t>>(data))
 
         member this.Count = data.Count
 
