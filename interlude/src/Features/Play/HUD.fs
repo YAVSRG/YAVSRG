@@ -62,6 +62,8 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
     let hits = ResizeArray<HitMeterHit>()
     let mutable w = 0.0f
 
+    let mutable last_seen_time = -Time.infinity
+
     do
         state.SubscribeToHits(fun ev ->
             match ev.Guts with
@@ -75,6 +77,8 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
         base.Update(elapsedTime, moved)
         if w = 0.0f then w <- this.Bounds.Width
         let now = state.CurrentChartTime()
+        if now < last_seen_time then hits.Clear()
+        last_seen_time <- now
         while hits.Count > 0 && hits.[0].Time + conf.AnimationTime * 1.0f<ms> < now do
             hits.RemoveAt(0)
 

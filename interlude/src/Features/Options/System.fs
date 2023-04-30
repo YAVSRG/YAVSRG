@@ -128,12 +128,6 @@ module System =
                 swap.Current <- monitor_select
                 Window.sync (Window.DisableResize)
 
-        let change_callout = Callout.Small.Icon(Icons.system).Title(L"system.window_changes_hint")
-        let change_callout_w, change_callout_h = Callout.measure change_callout
-        let callout_frame =
-            Frame(NodeType.None, Fill = K Colors.cyan.O3, Border = K Colors.cyan_accent, 
-                Position = Position.SliceTop(change_callout_h + 40.0f + 40.0f).SliceRight(change_callout_w + 40.0f).Margin(20.0f, 20.0f))
-
         do
             wm_change(config.WindowMode.Value)
 
@@ -174,11 +168,10 @@ module System =
                     .Tooltip(Tooltip.Info("system.windowmode"))
                 |+ swap
             )
-            this.Add (Conditional((fun () -> has_changed), callout_frame))
-
-        override this.Draw() =
-            base.Draw()
-            if has_changed then Callout.draw(callout_frame.Bounds.Left, callout_frame.Bounds.Top + 20.0f, change_callout_h, Colors.text, change_callout)
+            this.Add (Conditional((fun () -> has_changed),
+                Callout.frame (Callout.Small.Icon(Icons.system).Title(L"system.window_changes_hint")) 
+                    ( fun (w, h) -> Position.SliceTop(h + 40.0f + 40.0f).SliceRight(w + 40.0f).Margin(20.0f, 20.0f) )
+                ))
 
         override this.OnClose() = 
             Window.sync (Window.DisableResize)

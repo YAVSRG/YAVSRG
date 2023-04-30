@@ -18,8 +18,9 @@ module Screen =
         | Lobby = 3
         | LevelSelect = 4
         | Play = 5
-        | Replay = 6
-        | Score = 7
+        | Practice = 6
+        | Replay = 7
+        | Score = 8
 
     [<AbstractClass>]
     type T() =

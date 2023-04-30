@@ -163,7 +163,7 @@ module Utils =
 type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
     inherit Screen()
     
-    let firstNote = offsetOf chart.Notes.First.Value
+    let mutable firstNote = offsetOf chart.Notes.First.Value
 
     let state: PlayState =
         {
@@ -191,6 +191,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
 
     abstract member AddWidgets : unit -> unit
 
+    member this.FirstNote with set(value) = firstNote <- value
     member this.Playfield = playfield
     member this.State = state
     member this.Chart = chart

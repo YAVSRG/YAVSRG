@@ -40,7 +40,6 @@ module OptionsMenuRoot =
                 .Title(L"options.ingame_help.name")
                 .Body(L"options.ingame_help.hint")
                 .Hotkey("tooltip")
-        let _, tooltip_hint_size = Callout.measure tooltip_hint
 
         let system =
             TileButton(
@@ -70,10 +69,6 @@ module OptionsMenuRoot =
                     .Title(L"debug.name"),
                 fun () -> Menu.ShowPage Debug.DebugPage)
 
-        let callout_frame =
-            Frame(NodeType.None, Fill = K Colors.cyan.O3, Border = K Colors.cyan_accent, 
-                Position = Position.SliceBottom(600.0f).SliceTop(tooltip_hint_size + 40.0f).Margin(200.0f, 0.0f))
-
         do
             this.Content(
                 GridContainer(system.Height, 4,
@@ -84,11 +79,8 @@ module OptionsMenuRoot =
                 |+ themes
                 |+ debug
             )
-            this.Add callout_frame
-
-        override this.Draw() =
-            base.Draw()
-            Callout.draw(callout_frame.Bounds.Left, callout_frame.Bounds.Top + 20.0f, tooltip_hint_size, Colors.text, tooltip_hint)
+            this |* Callout.frame (tooltip_hint) 
+                ( fun (w, h) -> Position.SliceBottom(600.0f).SliceTop(h + 40.0f).Margin(200.0f, 0.0f) )
 
         override this.Title = L"options.name"
         override this.OnClose() = LevelSelect.refresh_all()
