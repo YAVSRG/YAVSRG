@@ -85,7 +85,7 @@ type GlobalSync(chart: Chart, when_done: Time -> unit) =
         Conditional((fun () -> step = 3),
             PageSetting(
                 "system.audiooffset",
-                Slider(options.AudioOffset |> Setting.trigger (fun v -> Song.changeGlobalOffset (options.AudioOffset.Value * 1.0f<ms>)), 0.001f)
+                Slider(options.AudioOffset |> Setting.trigger (fun v -> Song.changeGlobalOffset (options.AudioOffset.Value * 1.0f<ms>)), Step = 1.0f)
             ).Pos(700.0f)
         )
     let done_button =

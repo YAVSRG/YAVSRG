@@ -10,24 +10,25 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 
-type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
+type Slider(setting: Setting.Bounded<float32>) as this =
     inherit StaticContainer(NodeType.Leaf)
 
     let TEXTWIDTH = 130.0f
     let mutable dragging = false
+
+    let mutable decimal_places = 2
+    let mutable step = 0.01f
         
     let get_percent () =
         let (Setting.Bounds (lo, hi)) = setting.Config
-        let (lo, hi) = (Convert.ToSingle lo, Convert.ToSingle hi)
-        let value = Convert.ToSingle setting.Value
-        (value - lo) / (hi - lo)
+        (setting.Value - lo) / (hi - lo)
 
     let set_percent (v: float32) =
         let (Setting.Bounds (lo, hi)) = setting.Config
-        let (lo, hi) = (Convert.ToSingle lo, Convert.ToSingle hi)
-        setting.Value <- Convert.ChangeType(MathF.Round((hi - lo) * v + lo, 2), typeof<'T>) :?> 'T
+        setting.Value <- MathF.Round((hi - lo) * v + lo, decimal_places)
 
-    let add_percent v = set_percent (get_percent () + v)
+    let add(v) = setting.Value <- MathF.Round(setting.Value + v, decimal_places)
+
     do
         this
         |+ Text(
@@ -38,27 +39,30 @@ type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
             (fun () -> this.Select(); dragging <- true),
             OnHover = (fun b -> if b && not this.Focused then this.Focus()))
 
+    member this.Step with get() = step and set(value) = step <- value; decimal_places <- max 0 (int (MathF.Ceiling(-MathF.Log10(step))))
+
     member val Format = (fun x -> x.ToString()) with get, set
 
-    static member Percent(setting, incr) = Slider<float>(setting, incr, Format = fun x -> sprintf "%.0f%%" (x * 100.0))
-    static member Percent(setting, incr) = Slider<float32>(setting, incr, Format = fun x -> sprintf "%.0f%%" (x * 100.0f))
+    static member Percent(setting) = Slider(setting, Format = fun x -> sprintf "%.0f%%" (x * 100.0f))
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let bounds = this.Bounds.TrimLeft TEXTWIDTH
         if this.Selected || Mouse.hover this.Bounds then
-            add_percent(stepPercentage * Mouse.scroll())
+            let s = Mouse.scroll()
+            if s > 0.0f then setting.Value <- setting.Value + step
+            elif s < 0.0f then setting.Value <- setting.Value - step
         if this.Selected then
             if (Mouse.held Mouse.LEFT && dragging) then
-                let l, r = (*if Input.this_frame.Shift then 0.0f, Viewport.vwidth else*) bounds.Left, bounds.Right
+                let l, r = bounds.Left, bounds.Right
                 let amt = (Mouse.x() - l) / (r - l)
                 set_percent amt
             else dragging <- false
 
-            if (!|"left").Tapped() then add_percent -stepPercentage
-            elif (!|"right").Tapped() then add_percent stepPercentage
-            elif (!|"up").Tapped() then add_percent (stepPercentage * 5.0f)
-            elif (!|"down").Tapped() then add_percent (-stepPercentage * 5.0f)
+            if (!|"left").Tapped() then add (-step)
+            elif (!|"right").Tapped() then add (step)
+            elif (!|"up").Tapped() then add (step * 5.0f)
+            elif (!|"down").Tapped() then add (-step * 5.0f)
 
     override this.Draw() =
         let v = get_percent()

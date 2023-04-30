@@ -125,7 +125,7 @@ type PacemakerPage() as this =
             |+ CaseSelector("gameplay.pacemaker.type", 
                 [|L"gameplay.pacemaker.accuracy.name"; L"gameplay.pacemaker.lamp.name"|],
                 [|
-                    [| PageSetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(370.0f) |]
+                    [| PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)).Pos(370.0f) |]
                     [| PageSetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(370.0f) |]
                 |], utype).Pos(300.0f)
             |+ Text(L"gameplay.pacemaker.hint", Align = Alignment.CENTER, Position = Position.SliceBottom(100.0f).TrimBottom(40.0f))

@@ -217,17 +217,17 @@ type EditHitMeterPage() as this =
                 .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.shownonjudgements"))
             |+ PageSetting(
                 "gameplay.hud.hitmeter.thickness",
-                Slider<float32>(thickness, 0.1f) )
+                Slider(thickness, Step = 1f) )
                 .Pos(690.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.thickness"))
             |+ PageSetting(
                 "gameplay.hud.hitmeter.releasesextraheight",
-                Slider<float32>(release_thickness, 0.1f) )
+                Slider(release_thickness, Step = 1f) )
                 .Pos(760.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.releasesextraheight"))
             |+ PageSetting(
                 "gameplay.hud.hitmeter.animationtime",
-                Slider<float32>(animation_time, 0.1f) )
+                Slider(animation_time, Step = 5f) )
                 .Pos(830.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.animationtime"))
             |+ preview
@@ -336,12 +336,12 @@ type EditComboMeterPage() as this =
                 .Tooltip(Tooltip.Info("gameplay.hud.combo.lampcolors"))
             |+ PageSetting(
                 "gameplay.hud.combo.pop",
-                Slider(pop_amount, 0.1f) )
+                Slider(pop_amount, Step = 1f) )
                 .Pos(620.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.combo.pop"))
             |+ PageSetting(
                 "gameplay.hud.combo.growth",
-                Slider(growth_amount, 0.2f) )
+                Slider(growth_amount) )
                 .Pos(690.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.combo.growth"))
             |+ preview
@@ -411,7 +411,7 @@ type EditProgressMeterPage() as this =
             positionEditor pos default_pos
             |+ PageSetting(
                 "gameplay.hud.progressmeter.barheight",
-                Slider(bar_height, 0.1f))
+                Slider(bar_height, Step = 1f))
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.progressmeter.barheight"))
             |+ PageSetting(
@@ -421,7 +421,7 @@ type EditProgressMeterPage() as this =
                 .Tooltip(Tooltip.Info("gameplay.hud.progressmeter.barcolor"))
             |+ PageSetting(
                 "gameplay.hud.progressmeter.glowsize",
-                Slider(glow_size, 0.1f) )
+                Slider(glow_size, Step = 1f) )
                 .Pos(725.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.progressmeter.glowsize"))
             |+ PageSetting(
@@ -491,7 +491,7 @@ type EditJudgementCountsPage() as this =
             positionEditor pos default_pos
             |+ PageSetting(
                 "gameplay.hud.judgementcounts.animationtime",
-                Slider<float>(animation_time, 0.1f) )
+                Slider(animation_time |> Setting.f32, Step = 5f) )
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.judgementcounts.animationtime"))
             |+ preview

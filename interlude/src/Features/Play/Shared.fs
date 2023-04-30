@@ -126,7 +126,7 @@ type LaneCover() =
         if options.LaneCover.Enabled.Value then
 
             let bounds = this.Bounds.Expand(0.0f, 2.0f)
-            let fadeLength = float32 options.LaneCover.FadeLength.Value
+            let fadeLength = options.LaneCover.FadeLength.Value
             let upper (amount: float32) =
                 Draw.rect (bounds.SliceTop(amount - fadeLength)) options.LaneCover.Color.Value
                 Draw.quad
@@ -142,8 +142,8 @@ type LaneCover() =
 
             let height = bounds.Height
 
-            let sudden = float32 options.LaneCover.Sudden.Value * height
-            let hidden = float32 options.LaneCover.Hidden.Value * height
+            let sudden = options.LaneCover.Sudden.Value * height
+            let hidden = options.LaneCover.Hidden.Value * height
 
             if options.Upscroll.Value then upper hidden; lower sudden
             else lower hidden; upper sudden

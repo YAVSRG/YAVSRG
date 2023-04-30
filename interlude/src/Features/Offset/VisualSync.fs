@@ -30,7 +30,7 @@ type VisualSyncPart2(offset) =
     let target_reading_buffer_ms = current_reading_buffer_ms - offset
     let recommended_scrollspeed = (1080.0f * 0.6f) / target_reading_buffer_ms
 
-    let recommended_hitposition = float32 options.HitPosition.Value - offset * options.ScrollSpeed.Value |> int
+    let recommended_hitposition = float32 options.HitPosition.Value - offset * options.ScrollSpeed.Value
 
     let recommended_visualoffset = -offset
 
@@ -40,19 +40,19 @@ type VisualSyncPart2(offset) =
             |+ PageButton("offset.visualoffset.suggested_scrollspeed", 
                 fun () -> options.ScrollSpeed.Value <- recommended_scrollspeed)
                 .Pos(200.0f)
-            |+ PageSetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f))
+            |+ PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
                 .Pos(270.0f)
                 .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
             |+ PageButton("offset.visualoffset.suggested_hitposition", 
                 fun () -> options.HitPosition.Value <- recommended_hitposition)
                 .Pos(360.0f)
-            |+ PageSetting("gameplay.hitposition", Slider<int>(options.HitPosition, 0.001f))
+            |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
                 .Pos(430.0f)
                 .Tooltip(Tooltip.Info("gameplay.hitposition"))
             |+ PageButton("offset.visualoffset.suggested_visualoffset", 
                 fun () -> options.VisualOffset.Value <- recommended_visualoffset)
                 .Pos(520.0f)
-            |+ PageSetting("system.visualoffset", Slider<float32>(options.VisualOffset, 0.01f))
+            |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
                 .Pos(590.0f)
                 .Tooltip(Tooltip.Info("system.visualoffset"))
         )

@@ -56,9 +56,9 @@ module Options =
     type LaneCoverOptions =
         {
             Enabled: Setting<bool>
-            Sudden: Setting.Bounded<float>
-            Hidden: Setting.Bounded<float>
-            FadeLength: Setting.Bounded<int>
+            Sudden: Setting.Bounded<float32>
+            Hidden: Setting.Bounded<float32>
+            FadeLength: Setting.Bounded<float32>
             Color: Setting<Color>
         }
 
@@ -72,7 +72,7 @@ module Options =
             Theme: Setting<string>
 
             ScrollSpeed: Setting.Bounded<float32>
-            HitPosition: Setting.Bounded<int>
+            HitPosition: Setting.Bounded<float32>
             HitLighting: Setting<bool>
             Upscroll: Setting<bool>
             BackgroundDim: Setting.Bounded<float32>
@@ -114,16 +114,16 @@ module Options =
             Theme = Setting.simple "*default"
 
             ScrollSpeed = Setting.bounded 2.05f 1.0f 5.0f |> Setting.roundf 2
-            HitPosition = Setting.bounded 0 -300 600
+            HitPosition = Setting.bounded 0.0f -300.0f 600.0f
             HitLighting = Setting.simple false
             Upscroll = Setting.simple false
             BackgroundDim = Setting.percentf 0.5f
             LaneCover = 
                 { 
                     Enabled = Setting.simple false
-                    Sudden = Setting.percent 0.0
-                    Hidden = Setting.percent 0.45
-                    FadeLength = Setting.bounded 200 0 500
+                    Sudden = Setting.percentf 0.0f
+                    Hidden = Setting.percentf 0.45f
+                    FadeLength = Setting.bounded 200f 0f 500f
                     Color = Setting.simple Color.Black
                 }
             Noteskin = Setting.simple "*defaultBar.isk"

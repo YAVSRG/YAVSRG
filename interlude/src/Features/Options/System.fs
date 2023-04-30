@@ -139,7 +139,7 @@ module System =
                     .Tooltip(Tooltip.Info("system.framelimit"))
 
                 |+ PageSetting("system.audiovolume",
-                    Slider<_>.Percent(options.AudioVolume |> Setting.trigger Devices.changeVolume, 0.01f) )
+                    Slider.Percent(options.AudioVolume |> Setting.trigger Devices.changeVolume |> Setting.f32) )
                     .Pos(430.0f)
                     .Tooltip(Tooltip.Info("system.audiovolume"))
 
@@ -149,12 +149,12 @@ module System =
                     .Tooltip(Tooltip.Info("system.audiodevice"))
 
                 |+ PageSetting("system.audiooffset",
-                        { new Slider<float32>(options.AudioOffset, 0.01f)
+                        { new Slider(options.AudioOffset, Step = 1f)
                             with override this.OnDeselected() = base.OnDeselected(); Song.changeGlobalOffset (options.AudioOffset.Value * 1.0f<ms>) } )
                     .Pos(570.0f)
                     .Tooltip(Tooltip.Info("system.audiooffset"))
 
-                |+ PageSetting("system.visualoffset", Slider<float32>(options.VisualOffset, 0.01f))
+                |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
                     .Pos(640.0f)
                     .Tooltip(Tooltip.Info("system.visualoffset"))
                 

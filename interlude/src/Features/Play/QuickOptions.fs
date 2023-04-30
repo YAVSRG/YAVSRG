@@ -39,7 +39,7 @@ module QuickOptions =
 
             this.Content(
                 column()
-                |+ PageSetting("quick.localoffset", Slider(offset, 0.0025f)).Pos(200f)
+                |+ PageSetting("quick.localoffset", Slider(offset, Step = 1f)).Pos(200f)
                 |+ Text(
                         sprintf "Suggested: %.0f" recommendedOffset,
                         Align = Alignment.RIGHT,
@@ -47,8 +47,8 @@ module QuickOptions =
                     )
                 |+ PageButton("quick.applyoffset", fun () -> offset.Value <- recommendedOffset / 1.0f<ms>).Pos(280f)
 
-                |+ PageSetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Pos(380.0f)
-                |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f)).Pos(460.0f)
+                |+ PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed)).Pos(380.0f)
+                |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f)).Pos(460.0f)
                 |+ PageSetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Pos(540.0f)
             )
 

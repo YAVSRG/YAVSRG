@@ -55,7 +55,7 @@ module PracticeScreen =
             .Body("Practise a particular section of a chart by setting the marker in the timeline, and then press play")
             .Hotkey("Play", "skip")
             .Hotkey("Restart", "retry")
-            .Hotkey("Show options", "options")
+            .Hotkey("Show options", "exit")
     
     let rec practice_screen (practice_point: Time) =
 
@@ -119,7 +119,9 @@ module PracticeScreen =
                     pause(this)
                     inputKeyState <- 0us
                     None
-                else base.OnBack()
+                else 
+                    Song.resume()
+                    base.OnBack()
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
@@ -145,9 +147,6 @@ module PracticeScreen =
 
     // ui in OPTIONS MODE:
     // show cursor
-    // audio is paused for now
-    // timeline in the bottom with density graph
-    // timeline seeking sets starting point
     // sync tools: when audio is muted
     // scroll speed
     // hit position
@@ -155,9 +154,4 @@ module PracticeScreen =
     // sync tools: when audio is on
     // local offset
     // global offset
-
-    // top left: box explaining stuff
-    
-    // ui in PLAY MODE:
-    // 
     
