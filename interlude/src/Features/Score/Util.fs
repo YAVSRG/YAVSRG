@@ -47,29 +47,31 @@ type ScoreScreenStats =
                 else
                     if not e.Missed then inc notesHit
                     inc notesCount
-                if e.Judgement.IsSome && not e.Missed then
-                    if e.Delta < 0.0f<ms> then
-                        earlySum ++ e.Delta
-                        inc earlyHitCount
-                    else
-                        lateSum ++ e.Delta
-                        inc lateHitCount
-                    sum ++ e.Delta
-                    sumOfSq ++ e.Delta * float32 e.Delta
+                if e.Judgement.IsSome then
                     inc judgementCount
+                    if not e.Missed then
+                        if e.Delta < 0.0f<ms> then
+                            earlySum ++ e.Delta
+                            inc earlyHitCount
+                        else
+                            lateSum ++ e.Delta
+                            inc lateHitCount
+                        sum ++ e.Delta
+                        sumOfSq ++ e.Delta * float32 e.Delta
             | Release e ->
                 if not e.Missed then inc releasesReleased
                 inc releasesCount
-                if e.Judgement.IsSome && not e.Missed then
-                    if e.Delta < 0.0f<ms> then
-                        earlySum ++ e.Delta
-                        inc earlyHitCount
-                    else
-                        lateSum ++ e.Delta
-                        inc lateHitCount
-                    sum ++ e.Delta
-                    sumOfSq ++ e.Delta * float32 e.Delta
+                if e.Judgement.IsSome then
                     inc judgementCount
+                    if not e.Missed then
+                        if e.Delta < 0.0f<ms> then
+                            earlySum ++ e.Delta
+                            inc earlyHitCount
+                        else
+                            lateSum ++ e.Delta
+                            inc lateHitCount
+                        sum ++ e.Delta
+                        sumOfSq ++ e.Delta * float32 e.Delta
 
         let judgementCount = max 1 judgementCount.Value
         let mean = sum.Value / float32 judgementCount
