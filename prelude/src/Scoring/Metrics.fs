@@ -401,8 +401,8 @@ type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
 
 module Metrics =
     
-    let createScoreMetric ruleset keys (replay: IReplayProvider) notes rate : IScoreMetric =
+    let createScoreMetric ruleset keys (replay: IReplayProvider) notes rate : ScoreMetric =
         ScoreMetric(ruleset, keys, replay, notes, rate)
 
-    let createDummyMetric (chart: Chart) : IScoreMetric =
+    let createDummyMetric (chart: Chart) : ScoreMetric =
         createScoreMetric (PrefabRulesets.SC.create 4) chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f
