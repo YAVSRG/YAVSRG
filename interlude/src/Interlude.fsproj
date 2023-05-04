@@ -105,10 +105,9 @@
     <Compile Include="Features\Import\Rulesets.fs" />
     <Compile Include="Features\Import\Import.fs" />
     <Compile Include="Features\Options\System.fs" />
-    <Compile Include="Features\Options\Themes\Preview.fs" />
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
-    <Compile Include="Features\Options\Themes\EditNoteskin.fs" />
-    <Compile Include="Features\Options\Themes\Themes.fs" />
+    <Compile Include="Features\Options\Gameplay\Preview.fs" />
+    <Compile Include="Features\Options\Gameplay\Noteskins.fs" />
     <Compile Include="Features\Options\Gameplay\HUD.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
     <Compile Include="Features\Options\Debug.fs" />

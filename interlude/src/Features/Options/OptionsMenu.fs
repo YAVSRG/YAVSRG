@@ -55,13 +55,6 @@ module OptionsMenuRoot =
                     .Title(L"gameplay.name"),
                 fun () -> Menu.ShowPage Gameplay.GameplayPage)
                 
-        let themes =
-            TileButton(
-                Callout.Normal
-                    .Icon(Icons.themes)
-                    .Title(L"themes.name"),
-                fun () -> Menu.ShowPage Themes.ThemesPage)
-                
         let debug =
             TileButton(
                 Callout.Normal
@@ -71,12 +64,11 @@ module OptionsMenuRoot =
 
         do
             this.Content(
-                GridContainer(system.Height, 4,
+                GridContainer(system.Height, 3,
                     Spacing = (50.0f, 0.0f),
                     Position = Position.SliceTop(400.0f).SliceBottom(system.Height).Margin(200.0f, 0.0f))
                 |+ system
                 |+ gameplay
-                |+ themes
                 |+ debug
             )
             this |* Callout.frame (tooltip_hint) 

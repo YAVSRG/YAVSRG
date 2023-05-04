@@ -6,6 +6,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Scoring
+open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
@@ -94,6 +95,7 @@ type GameplayPage() as this =
 
     let keycount = Setting.simple options.KeymodePreference.Value
     let binds = GameplayKeybinder(keycount)
+    let preview = NoteskinPreview 0.35f
 
     do
         this.Content(
@@ -129,6 +131,11 @@ type GameplayPage() as this =
             |+ PageButton("gameplay.hud", fun () -> Menu.ShowPage EditHUDPage)
                 .Pos(790.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud"))
+            |+ PageButton("gameplay.noteskins", fun () -> Menu.ShowPage { new NoteskinsPage() with override this.OnClose() = base.OnClose(); preview.Refresh() })
+                .Pos(860.0f)
+                .Tooltip(Tooltip.Info("gameplay.noteskins"))
+            |+ preview
         )
     override this.Title = L"gameplay.name"
+    override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = ()

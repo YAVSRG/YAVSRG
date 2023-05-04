@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Themes
+﻿namespace Interlude.Features.OptionsMenu.Gameplay
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
