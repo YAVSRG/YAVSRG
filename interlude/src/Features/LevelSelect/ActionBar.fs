@@ -90,10 +90,11 @@ type ActionBar(random_chart) =
         this
         |+ ActionButton(Icons.practice,
             (fun () ->
-            Screen.changeNew 
-                (fun () -> PracticeScreen.practice_screen(Song.time()))
-                Screen.Type.Practice
-                Transitions.Flags.Default),
+            if Chart.current.IsSome then
+                Screen.changeNew 
+                    (fun () -> PracticeScreen.practice_screen(Song.time()))
+                    Screen.Type.Practice
+                    Transitions.Flags.Default),
             (K false),
             Hotkey = "practice_mode",
             Position = Position.Column(0.0f, 60.0f))
