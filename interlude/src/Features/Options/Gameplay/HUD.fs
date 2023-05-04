@@ -21,6 +21,11 @@ module private Helpers =
     type PositionEditor(icon: string) =
         inherit StaticContainer(NodeType.Leaf)
 
+        let mutable repeat = -1
+        let mutable time = 0.0
+        let REPEAT_DELAY = 400.0
+        let REPEAT_INTERVAL = 40.0
+
         override this.Init(parent) =
             base.Init parent
             this
@@ -31,10 +36,34 @@ module private Helpers =
             base.Update(elapsedTime, moved)
 
             if this.Selected then
-                if (!|"up").Tapped() then this.Up()
-                elif (!|"down").Tapped() then this.Down()
-                elif (!|"left").Tapped() then this.Left()
-                elif (!|"right").Tapped() then this.Right()
+                let u = (!|"up").Tapped()
+                let d = (!|"down").Tapped()
+                let l = (!|"left").Tapped()
+                let r = (!|"right").Tapped()
+
+                if u || d || l || r then
+                    repeat <- 0
+                    time <- 0
+                    if u then this.Up()
+                    if d then this.Down()
+                    if l then this.Left()
+                    if r then this.Right()
+
+                if repeat >= 0 then
+                    let u = (!|"up").Pressed()
+                    let d = (!|"down").Pressed()
+                    let l = (!|"left").Pressed()
+                    let r = (!|"right").Pressed()
+
+                    time <- time + elapsedTime
+                    if (float repeat * REPEAT_INTERVAL + REPEAT_DELAY < time) then
+                        repeat <- repeat + 1
+                        if u then this.Up()
+                        if d then this.Down()
+                        if l then this.Left()
+                        if r then this.Right()
+                    
+                    if not (u || d || l || r) then repeat <- -1
         
         abstract member Up : unit -> unit
         abstract member Down : unit -> unit
