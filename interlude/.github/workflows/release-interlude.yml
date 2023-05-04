@@ -78,4 +78,4 @@ jobs:
           ```
           ${{ steps.read_file.outputs.contents }}
           ```
-          Update ingame or download Interlude here: <https://github.com/YAVSRG/Interlude/releases>
+          Update ingame or download Interlude here: <https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip>
