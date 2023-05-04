@@ -76,7 +76,7 @@ type Toolbar() =
                 Hotkey = "wiki")
                 .Tooltip(Tooltip.Info("menu.wiki").Hotkey("wiki"))
             )
-        |+ if Interlude.Options.options.EnableConsole.Value then NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f)) :> Widget else Dummy()
+        |+ NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
         |+ HotkeyAction("screenshot", fun () ->
             let id =  DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
             let path = Path.Combine(getDataPath "Screenshots", id)

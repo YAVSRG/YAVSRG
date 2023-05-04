@@ -13,6 +13,7 @@ open Prelude.Scoring.Metrics
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
+open Interlude.Utils
 open Interlude.Features
 open Interlude.Features.Play.HUD
 
@@ -22,21 +23,19 @@ module PracticeScreen =
 
         [<RequireQualifiedAccess>]
         type Mode =
-            | NONE
             | HIT_POSITION
             | SCROLL_SPEED
             | VISUAL_OFFSET
             | AUDIO_OFFSET
             member this.Audio =
                 match this with
-                | NONE
                 | HIT_POSITION
                 | SCROLL_SPEED
                 | VISUAL_OFFSET -> false
                 | AUDIO_OFFSET -> true
 
-        let mutable mode = Mode.NONE
-        let mutable automatic_adjust = false
+        let mutable suggested = false
+        let mutable mode = Mode.AUDIO_OFFSET
         let mutable mean = 0.0f<ms>
 
         let update_mean(scoring: ScoreMetric) =
@@ -49,6 +48,7 @@ module PracticeScreen =
                     count <- count + 1.0f
                 | _ -> ()
             mean <- sum / count * Gameplay.rate.Value
+            suggested <- true
 
         type Panel(content: Widget) =
             inherit StaticContainer(NodeType.Switch(fun () -> content))
@@ -62,8 +62,8 @@ module PracticeScreen =
                 Draw.rect (this.Bounds.Expand(0.0f, Style.padding).SliceBottom(Style.padding)) Colors.shadow_2.O3
                 base.Draw()
         
-        type ModeButton(label: string, m: Mode) =
-            inherit StaticContainer(NodeType.Button(fun () -> mode <- m))
+        type ModeButton(label: string, m: Mode, apply_suggestion: unit -> unit) =
+            inherit StaticContainer(NodeType.Button(fun () -> if mode = m then apply_suggestion() else mode <- m))
 
             let requires_audio = m.Audio
 
@@ -88,13 +88,6 @@ module PracticeScreen =
                 if this.Focused && not this.Selected && (!|"right").Tapped() then this.Select()
                 elif this.Selected && (!|"left").Tapped() then this.Focus()
 
-        type AdjustButton() =
-            inherit Button("Automatically adjust", fun () -> automatic_adjust <- not automatic_adjust)
-
-            override this.Draw() =
-                if automatic_adjust then Draw.rect this.Bounds Colors.pink_accent.O2
-                base.Draw()
-
         type UI() =
             inherit StaticContainer(NodeType.None)
 
@@ -115,61 +108,96 @@ module PracticeScreen =
 
             let hit_position = options.HitPosition |> Setting.roundf 0
             let mutable hit_position_suggestion = hit_position.Value
-            
-            let update_suggestion() =
-                match mode with
-                | Mode.NONE -> ()
-                | Mode.HIT_POSITION -> hit_position_suggestion <- hit_position.Value - mean * options.ScrollSpeed.Value * 1.0f</ms>
-                | Mode.SCROLL_SPEED -> 
-                    let expected_pixels = (1080.0f - options.HitPosition.Value) * 0.6f
-                    let current_lead_time = expected_pixels / (options.ScrollSpeed.Value * 1.0f</ms>)
-                    let desired_lead_time = current_lead_time - mean
-                    scroll_speed_suggestion <- expected_pixels / float32 desired_lead_time
-                | Mode.VISUAL_OFFSET -> visual_offset_suggestion <- visual_offset.Value + mean / 1.0f<ms>
-                | Mode.AUDIO_OFFSET -> local_audio_offset_suggestion <- local_audio_offset.Value - mean
 
-            let apply_suggestion() =
+            let accept_suggestion_hint = Localisation.localiseWith [(!|"accept_suggestion").ToString()] "practice.suggestions.accepthint"
+            let about_right_hint = Icons.check + " " + L"practice.suggestions.aboutright"
+            let suggestion_text() = Text(fun () -> 
+                if not suggested then L"practice.suggestions.hint" 
+                elif mean < 5.0f<ms> && mean > -5.0f<ms> then about_right_hint 
+                else accept_suggestion_hint)
+
+            member this.UpdateSuggestions() =
+                hit_position_suggestion <- hit_position.Value - mean * options.ScrollSpeed.Value * 1.0f</ms>
+
+                let expected_pixels = (1080.0f - options.HitPosition.Value) * 0.6f
+                let current_lead_time = expected_pixels / (options.ScrollSpeed.Value * 1.0f</ms>)
+                let desired_lead_time = current_lead_time - mean
+                scroll_speed_suggestion <- expected_pixels / float32 desired_lead_time
+
+                visual_offset_suggestion <- visual_offset.Value + mean / 1.0f<ms>
+                local_audio_offset_suggestion <- local_audio_offset.Value - mean
+
+            member this.AcceptSuggestion() =
                 match mode with
-                | Mode.NONE -> ()
                 | Mode.HIT_POSITION -> hit_position.Set hit_position_suggestion
                 | Mode.SCROLL_SPEED -> scroll_speed.Set scroll_speed_suggestion
                 | Mode.VISUAL_OFFSET -> visual_offset.Set visual_offset_suggestion
                 | Mode.AUDIO_OFFSET -> local_audio_offset.Set local_audio_offset_suggestion
-
-            member this.Suggest() = update_suggestion()
+                hit_position_suggestion <- hit_position.Value
+                scroll_speed_suggestion <- scroll_speed.Value
+                visual_offset_suggestion <- visual_offset.Value
+                local_audio_offset_suggestion <- local_audio_offset.Value
 
             override this.Init(parent) =
                 this
                 |+
                     Panel(
                         FlowContainer.Vertical<ModeButton>(50.0f, Spacing = 10.0f)
-                        |+ ModeButton("Hit position", Mode.HIT_POSITION)
-                        |+ ModeButton("Scroll speed", Mode.SCROLL_SPEED)
-                        |+ ModeButton("Visual offset", Mode.VISUAL_OFFSET)
-                        |+ ModeButton("Audio offset", Mode.AUDIO_OFFSET)
+                        |+ ModeButton(L"gameplay.hitposition.name", Mode.HIT_POSITION, this.AcceptSuggestion)
+                        |+ ModeButton(L"gameplay.scrollspeed.name", Mode.SCROLL_SPEED, this.AcceptSuggestion)
+                        |+ ModeButton(L"system.visualoffset.name", Mode.VISUAL_OFFSET, this.AcceptSuggestion)
+                        |+ ModeButton(L"quick.localoffset.name", Mode.AUDIO_OFFSET, this.AcceptSuggestion)
                         ,
-                        Position = Position.Box(0.0f, 0.0f, 20.0f, 250.0f, 300.0f, 230.0f)
+                        Position = Position.Box(0.0f, 0.0f, 20.0f, 350.0f, 300.0f, 230.0f)
                     )
-                |+ Conditional((fun () -> mode = Mode.HIT_POSITION),
+                |+ Conditional((fun () -> not mode.Audio && options.AudioVolume.Value > 0.0),
+                        Callout.frame
+                            (Callout.Small.Icon(Icons.audio_mute).Title(L"practice.mute_hint"))
+                            (fun (w, h) -> Position.Box(0.0f, 0.0f, 20.0f, 650.0f, w, h + 40.0f))
+                    )
+                |+ Conditional((fun () -> mode.Audio && options.AudioVolume.Value = 0.0),
+                        Callout.frame
+                            (Callout.Small.Icon(Icons.audio_on).Title(L"practice.unmute_hint"))
+                            (fun (w, h) -> Position.Box(0.0f, 0.0f, 20.0f, 650.0f, w, h + 40.0f))
+                    )
+                |+ Conditional((fun () -> mode = Mode.HIT_POSITION && options.AudioVolume.Value = 0.0),
                         Panel(
                             FlowContainer.Vertical<Widget>(50.0f, Spacing = 10.0f)
                             |+ Text(fun () -> sprintf "Current: %.0f" hit_position.Value)
                             |+ Text(fun () -> sprintf "Suggested: %.0f" hit_position_suggestion)
-                            |+ Button("Apply suggestion", apply_suggestion)
-                            |+ AdjustButton()
+                            |+ suggestion_text() 
                             ,
-                            Position = Position.Box(0.0f, 0.0f, 20.0f, 550.0f, 300.0f, 230.0f)
+                            Position = Position.Box(0.0f, 0.0f, 20.0f, 650.0f, 500.0f, 170.0f)
                         )
                     )
-                |* Conditional((fun () -> mode = Mode.SCROLL_SPEED),
+                |+ Conditional((fun () -> mode = Mode.SCROLL_SPEED && options.AudioVolume.Value = 0.0),
                         Panel(
                             FlowContainer.Vertical<Widget>(50.0f, Spacing = 10.0f)
                             |+ Text(fun () -> sprintf "Current: %.0f%%" (100.0f * scroll_speed.Value))
                             |+ Text(fun () -> sprintf "Suggested: %.0f%%" (100.0f * scroll_speed_suggestion))
-                            |+ Button("Apply suggestion", apply_suggestion)
-                            |+ AdjustButton()
+                            |+ suggestion_text() 
                             ,
-                            Position = Position.Box(0.0f, 0.0f, 20.0f, 550.0f, 300.0f, 230.0f)
+                            Position = Position.Box(0.0f, 0.0f, 20.0f, 650.0f, 500.0f, 170.0f)
+                        )
+                    )
+                |+ Conditional((fun () -> mode = Mode.VISUAL_OFFSET && options.AudioVolume.Value = 0.0),
+                        Panel(
+                            FlowContainer.Vertical<Widget>(50.0f, Spacing = 10.0f)
+                            |+ Text(fun () -> sprintf "Current: %.0f" visual_offset.Value)
+                            |+ Text(fun () -> sprintf "Suggested: %.0f" visual_offset_suggestion)
+                            |+ suggestion_text() 
+                            ,
+                            Position = Position.Box(0.0f, 0.0f, 20.0f, 650.0f, 500.0f, 170.0f)
+                        )
+                    )
+                |* Conditional((fun () -> mode = Mode.AUDIO_OFFSET && options.AudioVolume.Value > 0.0),
+                        Panel(
+                            FlowContainer.Vertical<Widget>(50.0f, Spacing = 10.0f)
+                            |+ Text(fun () -> sprintf "Current: %.0f" local_audio_offset.Value)
+                            |+ Text(fun () -> sprintf "Suggested: %.0f" local_audio_offset_suggestion)
+                            |+ suggestion_text() 
+                            ,
+                            Position = Position.Box(0.0f, 0.0f, 20.0f, 650.0f, 500.0f, 170.0f)
                         )
                     )
                 base.Init parent
@@ -207,12 +235,14 @@ module PracticeScreen =
 
     let info_callout = 
         Callout.Small
-            .Title("Practice mode")
-            .Icon(Icons.goal)
-            .Body("Practise a particular section of a chart by setting the marker in the timeline, and then press play")
-            .Hotkey("Play", "skip")
-            .Hotkey("Restart", "retry")
-            .Hotkey("Show options", "exit")
+            .Icon(Icons.practice)
+            .Title(L"practice.info.title")
+            .Body(L"practice.info.desc")
+            .Hotkey(L"practice.info.play", "skip")
+            .Hotkey(L"practice.info.restart", "retry")
+            .Hotkey(L"practice.info.options", "exit")
+            .Body(L"practice.info.sync")
+            .Hotkey(L"practice.info.accept_suggestion", "accept_suggestion")
     
     let rec practice_screen (practice_point: Time) =
 
@@ -249,7 +279,7 @@ module PracticeScreen =
         let pause(screen: IPlayScreen) =
             Song.pause()
             Sync.update_mean scoring
-            sync_ui.Suggest()
+            sync_ui.UpdateSuggestions()
             options_mode <- true
 
         let options_ui =
@@ -300,20 +330,14 @@ module PracticeScreen =
                 if (!|"retry").Tapped() then
                     if options_mode then play(this) else restart(this)
 
+                elif (!|"accept_suggestion").Tapped() then
+                    if options_mode then sync_ui.AcceptSuggestion()
+                    else pause(this); sync_ui.AcceptSuggestion(); play(this)
+
                 elif options_mode && (!|"skip").Tapped() then
                     play(this)
 
                 if this.State.Scoring.Finished && not options_mode then
                     pause(this)
         }
-
-    // ui in OPTIONS MODE:
-    // show cursor
-    // sync tools: when audio is muted
-    // scroll speed
-    // hit position
-    // visual offset
-    // sync tools: when audio is on
-    // local offset
-    // global offset
     

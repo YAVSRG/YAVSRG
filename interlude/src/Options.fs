@@ -212,6 +212,8 @@ module Options =
             Hotkeys.register "comment" (mk Keys.F)
             Hotkeys.register "show_comments" (shift Keys.F)
             Hotkeys.register "context_menu" (mk Keys.Period)
+            Hotkeys.register "practice_mode" (mk Keys.V)
+            Hotkeys.register "accept_suggestion" (mk Keys.Tab)
 
             Hotkeys.register "uprate" (mk Keys.Equal)
             Hotkeys.register "downrate" (mk Keys.Minus)
@@ -238,6 +240,7 @@ module Options =
 
             Hotkeys.register "skip" (mk Keys.Space)
             Hotkeys.register "retry" (ctrl Keys.R)
+
 
             options <- { options with Hotkeys = Hotkeys.import d }
 

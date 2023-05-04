@@ -73,6 +73,10 @@ module Icons =
     let alert = Feather.alert_circle
     let system_notification = Feather.alert_octagon
 
+    let practice = Feather.target
+    let audio_mute = Feather.volume_x
+    let audio_on = Feather.volume_2
+
     let connected = Feather.globe
     let connecting = Feather.globe
     let connection_failed = Feather.slash

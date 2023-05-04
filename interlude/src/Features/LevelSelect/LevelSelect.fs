@@ -54,7 +54,7 @@ type LevelSelectScreen() =
             Position = { Left = 1.0f %- 580.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- (30.0f + Style.padding); Bottom = 0.0f %+ 90.0f })
             .Tooltip(Tooltip.Info("levelselect.search", "search"))
 
-        |+ ActionBar(random_chart, Position = { Left = 1.0f %- 735.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 605.0f; Bottom = 0.0f %+ 90.0f })
+        |+ ActionBar(random_chart, Position = { Left = 1.0f %- 805.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 605.0f; Bottom = 0.0f %+ 90.0f })
 
         |+ LibraryModeSettings()
 

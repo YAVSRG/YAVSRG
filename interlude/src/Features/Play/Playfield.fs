@@ -31,7 +31,6 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
 
     let tailsprite = Content.getTexture(if Content.noteskinConfig().UseHoldTailTexture then "holdtail" else "holdhead")
     let animation = Animation.Counter (Content.noteskinConfig().AnimationFrameTime)
-    let visualOffset = options.VisualOffset.Value * 1.0f<ms>
 
     // arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection
     let mutable note_seek = 0 // see comments for sv_seek and sv_peek. same role but for index of next row
@@ -89,7 +88,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
         let hitposition = float32 options.HitPosition.Value
 
         let playfieldHeight = bottom - top + holdnoteTrim
-        let now = Song.timeWithOffset() + visualOffset * Gameplay.rate.Value
+        let now = Song.timeWithOffset() + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
 
         // seek to appropriate sv and note locations in data.
         // bit of a mess here. see comments on the variables for more on whats going on

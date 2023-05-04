@@ -4,13 +4,15 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Data.Scores
-open Interlude.Features.Gameplay
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
+open Interlude.Features.Gameplay
+open Interlude.Features.Play
 
 module Comments =
     
@@ -39,7 +41,7 @@ module Comments =
                 Position = Position.Default.Margin(200.0f, 0.0f).TrimBottom(15.0f).TrimTop(60.0f))
             |+ textEntry
            )
-        |+ Text((fun () -> match Chart.current with Some c -> sprintf "Editing comment for %s" c.Header.Title | _ -> ""),
+        |+ Text((fun () -> match Chart.current with Some c -> Localisation.localiseWith [c.Header.Title] "levelselect.comments.label" | _ -> ""),
             Color = K Colors.text,
             Align = Alignment.CENTER,
             Position = Position.SliceTop 55.0f)
@@ -86,17 +88,27 @@ type ActionBar(random_chart) =
 
     override this.Init parent =
         this
+        |+ ActionButton(Icons.practice,
+            (fun () ->
+            Screen.changeNew 
+                (fun () -> PracticeScreen.practice_screen(Song.time()))
+                Screen.Type.Practice
+                Transitions.Flags.Default),
+            (K false),
+            Hotkey = "practice_mode",
+            Position = Position.Column(0.0f, 60.0f))
+            .Tooltip(Tooltip.Info("levelselect.practice_mode").Hotkey("practice_mode"))
         |+ ActionButton(Icons.reset,
             random_chart,
             (K false),
             Hotkey = "random_chart",
-            Position = Position.Column(0.0f, 60.0f))
+            Position = Position.Column(70.0f, 60.0f))
             .Tooltip(Tooltip.Info("levelselect.random_chart").Hotkey("random_chart"))
         |* ActionButton(Icons.comment,
             (fun () -> Comments.fade.Target <- 1.0f - Comments.fade.Target),
             (fun () -> Comments.fade.Target = 1.0f),
             Hotkey = "show_comments",
-            Position = Position.Column(70.0f, 60.0f))
+            Position = Position.Column(140.0f, 60.0f))
             .Tooltip(Tooltip.Info("levelselect.show_comments").Hotkey("show_comments").Hotkey(L"levelselect.show_comments.hint", "comment"))
         base.Init parent
 
