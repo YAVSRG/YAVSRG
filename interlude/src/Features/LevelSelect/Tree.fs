@@ -178,7 +178,7 @@ module Tree =
             Draw.rect bounds (if this.Selected then Style.main 80 () else Colors.shadow_1.O2)
             let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
             Draw.quad
-                (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength * 0.9f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
+                (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
                 (struct(accent, Color.Transparent, Color.Transparent, accent))
                 Sprite.DefaultQuad
 
@@ -263,20 +263,16 @@ module Tree =
         member this.SelectLast() = items.Last().Select()
 
         member private this.OnDraw(bounds: Rect) =
-            let borderb = bounds.Expand(5.0f)
-            let colorb = if this.Selected then Style.color(200, 1.0f, 0.5f) else Style.color(100, 0.7f, 0.0f)
-            Draw.rect (borderb.SliceLeft 5.0f) colorb
-            Draw.rect (borderb.SliceRight 5.0f) colorb
-            Draw.rect (borderb.SliceTop 5.0f) colorb
-            Draw.rect (borderb.SliceBottom 5.0f) colorb
-            Draw.rect bounds (if this.Selected then Style.color(127, 1.0f, 0.2f) else Style.color(127, 0.3f, 0.0f))
-            Text.drawFillB(Style.baseFont, name, bounds.Shrink 5.0f, (Color.White, Color.Black), 0.5f)
+            Draw.rect (bounds.Translate(10.0f, 10.0f)) (Style.color(255, 0.2f, 0.0f))
+            Background.draw (bounds, (Color.FromArgb(40, 40, 40)), 1.5f)
+            Draw.rect bounds (if this.Selected then Style.color(120, 1.0f, 0.2f) else Style.color(100, 0.7f, 0.0f))
+            Text.drawFillB(Style.baseFont, name, bounds.Shrink 5.0f, Colors.text, 0.5f)
 
         member this.Draw(top, origin, originB) =
             let b = this.CheckBounds(top, origin, originB, this.OnDraw)
             if this.Expanded then
                 let b2 = List.fold (fun t (i: ChartItem) -> i.Draw(t, origin, originB)) b items
-                if b < origin && b2 > origin then Text.drawJustB(Style.baseFont, name, 20.0f, Viewport.vwidth - 20f, origin + 10.0f, (Color.White, Color.Black), 1.0f)
+                if b < origin && b2 > origin then Text.drawJustB(Style.baseFont, name, 20.0f, Viewport.vwidth - 20f, origin + 10.0f, Colors.text, 1.0f)
                 b2
             else b
 
