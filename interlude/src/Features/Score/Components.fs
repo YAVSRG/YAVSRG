@@ -111,7 +111,7 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
 
     override this.Draw() =
         Draw.rect (this.Bounds.Expand(5.0f, -10.0f)) Colors.white.O2
-        Background.draw (this.Bounds, (Color.FromArgb(80, 80, 80)), 2.0f)
+        Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
 
         let title = this.Bounds.SliceTop(100.0f).Shrink(5.0f, 20.0f)
         Draw.rect title Colors.shadow_2.O2
@@ -138,24 +138,30 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
 type Grade(grade: Grade.GradeResult ref, data: ScoreInfoProvider) =
     inherit StaticContainer(NodeType.None)
 
+    let LOWER_SIZE = 40.0f
+
     override this.Init(parent) =
         this
-        |+ Frame(NodeType.None, 
-            Fill = (fun () -> (data.Ruleset.GradeColor (!grade).Grade).O1),
-            Border = (fun () -> data.Ruleset.GradeColor (!grade).Grade))
         |* Text((fun () -> data.Ruleset.GradeName (!grade).Grade),
             Color = (fun () -> (data.Ruleset.GradeColor (!grade).Grade, Colors.black)),
-            Position = Position.Margin(-10.0f))
+            Position = Position.Margin(-10.0f).TrimBottom(LOWER_SIZE))
         base.Init parent
 
     override this.Draw() =
+        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw (this.Bounds, (Color.FromArgb(80, 80, 80)), 2.0f)
+        let grade_color = data.Ruleset.GradeColor (!grade).Grade
+        Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) grade_color.O1
+        let clear_color = Themes.clearToColor (not data.HP.Failed)
+        Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) grade_color.O2
+        Text.drawFillB(Style.baseFont, (if data.HP.Failed then "FAILED" else "CLEAR"), this.Bounds.Shrink(10.0f, 0.0f).SliceBottom(LOWER_SIZE), (clear_color, Colors.black), Alignment.CENTER)
         base.Draw()
 
 type Accuracy(grade: Grade.GradeResult ref, improvements: ImprovementFlags ref, previous_personal_bests: Bests option ref, data: ScoreInfoProvider) =
     inherit StaticContainer(NodeType.None)
 
     let LOWER_SIZE = 40.0f
+    let new_record = sprintf "%s %s" Icons.sparkle (L"score.new_record")
 
     override this.Init(parent) =
         this
@@ -173,18 +179,34 @@ type Accuracy(grade: Grade.GradeResult ref, improvements: ImprovementFlags ref, 
         Text.drawFillB(Style.baseFont, data.Scoring.FormatAccuracy(), this.Bounds.Shrink(10.0f, 0.0f).TrimBottom(LOWER_SIZE), (grade_color, Colors.black), Alignment.CENTER)
         let text, color =
             match (!improvements).Accuracy with
-            | Improvement.New -> sprintf "%s %s " Icons.sparkle (L"score.new_record"), (Colors.text_yellow_2)
-            | Improvement.Faster r -> sprintf "%s %s   %s %.2fx" Icons.sparkle (L"score.new_record") Icons.order_ascending r, (Colors.text_cyan)
-            | Improvement.Better acc -> sprintf "%s %s   %s %.2f%%" Icons.sparkle (L"score.new_record") Icons.order_ascending (acc * 100.0), (Colors.text_green_2)
-            | Improvement.FasterBetter (r, acc) -> sprintf "%s %s   %s %.2f%%, %.2fx" Icons.sparkle (L"score.new_record") Icons.order_ascending (acc * 100.0) r, (Colors.text_pink)
-            | Improvement.None -> "--", (Colors.grey_2.O2, Colors.black)
+            | Improvement.New -> new_record, (Colors.text_yellow_2)
+            | Improvement.Faster _ -> new_record, (Colors.text_cyan)
+            | Improvement.Better _ -> new_record, (Colors.text_green_2)
+            | Improvement.FasterBetter _ -> new_record, (Colors.text_pink)
+            | Improvement.None ->
+                match (!previous_personal_bests) with
+                | Some pbs -> 
+                    let rb, r = pbs.Accuracy.Fastest
+                    let summary, distance_from_pb = 
+                        if r < data.ScoreInfo.rate then sprintf "%.2f%% (%.2fx)" (rb * 100.0) r, (rb - data.Scoring.Value)
+                        elif r = data.ScoreInfo.rate then sprintf "%.2f%%" (rb * 100.0), (rb - data.Scoring.Value)
+                        else 
+                            let rb, r = pbs.Accuracy.Best
+                            if r <> data.ScoreInfo.rate then sprintf "%.2f%% (%.2fx)" (rb * 100.0) r, (rb - data.Scoring.Value)
+                            else sprintf "%.2f%%" (rb * 100.0), (rb - data.Scoring.Value)
+                    if distance_from_pb < 0.001 then
+                        sprintf "Your record: %s" summary, (Colors.grey_2.O2, Colors.black)
+                    else
+                        sprintf "%.2f%% from record: %s" (distance_from_pb * 100.0) summary, (Colors.grey_2.O2, Colors.black)
+                | None -> "--", (Colors.grey_2.O2, Colors.black)
         Text.drawFillB(Style.baseFont, text, this.Bounds.Shrink(10.0f, 0.0f).SliceBottom(LOWER_SIZE), color, Alignment.CENTER)
         base.Draw()
 
-type Lamp(lamp: Lamp.LampResult ref, data: ScoreInfoProvider) =
+type Lamp(lamp: Lamp.LampResult ref, improvements: ImprovementFlags ref, previous_personal_bests: Bests option ref, data: ScoreInfoProvider) =
     inherit StaticContainer(NodeType.None)
 
     let LOWER_SIZE = 40.0f
+    let new_record = sprintf "%s %s" Icons.sparkle (L"score.new_record")
 
     override this.Init(parent) =
         this
@@ -198,37 +220,35 @@ type Lamp(lamp: Lamp.LampResult ref, data: ScoreInfoProvider) =
         Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
         Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) (data.Ruleset.LampColor (!lamp).Lamp).O1
         Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) (data.Ruleset.LampColor (!lamp).Lamp).O2
+        let text, color =
+            match (!improvements).Accuracy with
+            | Improvement.New -> new_record, (Colors.text_yellow_2)
+            | Improvement.Faster _ -> new_record, (Colors.text_cyan)
+            | Improvement.Better _ -> new_record, (Colors.text_green_2)
+            | Improvement.FasterBetter _ -> new_record, (Colors.text_pink)
+            | Improvement.None ->
+                match (!previous_personal_bests) with
+                | Some pbs -> 
+                    let rb, r = pbs.Lamp.Fastest
+                    let summary = 
+                        if r < data.ScoreInfo.rate then sprintf "%s (%.2fx)" (data.Ruleset.LampName rb) r
+                        elif r = data.ScoreInfo.rate then data.Ruleset.LampName rb
+                        else 
+                            let rb, r = pbs.Lamp.Best
+                            if r <> data.ScoreInfo.rate then sprintf "%s (%.2fx)" (data.Ruleset.LampName rb) r
+                            else data.Ruleset.LampName rb
+                    sprintf "Your record: %s" summary, (Colors.grey_2.O2, Colors.black)
+                | None -> "--", (Colors.grey_2.O2, Colors.black)
+        Text.drawFillB(Style.baseFont, text, this.Bounds.Shrink(10.0f, 0.0f).SliceBottom(LOWER_SIZE), color, Alignment.CENTER)
         base.Draw()
         
-type InfoBar(color: unit -> System.Drawing.Color, label: string, text: unit -> string, pb: unit -> int, hint: unit -> string, existingPb: unit -> string) =
-    inherit StaticWidget(NodeType.None)
-
-    override this.Draw() =
-        let color = color()
-        let pb = pb()
-        let header = this.Bounds.SliceLeft (this.Bounds.Width * 0.25f)
-        let body = this.Bounds.TrimLeft (this.Bounds.Width * 0.25f)
-        Draw.rect this.Bounds (Color.FromArgb(80, color))
-        let header_card = header.SliceBottom (header.Height * 0.35f)
-        Draw.rect header_card (Color.FromArgb(80, color))
-        Draw.rect (body.SliceBottom 5.0f) (Color.FromArgb(80, color))
-        Text.drawFillB(Style.baseFont, label, header.TrimBottom (header.Height * 0.35f), (Color.White, Color.Black), 0.5f)
-        Text.drawFillB(Style.baseFont, text(), body.TrimLeft(10.0f).TrimBottom(header.Height * 0.3f), (color, Color.Black), 0.0f)
-        Text.drawFillB(Style.baseFont, hint(), body.TrimLeft(10.0f).SliceBottom(header.Height * 0.35f).TrimBottom(5.0f), (Color.White, Color.Black), 0.0f)
-        if pb = 0 then // improvement.none
-            Text.drawFillB(Style.baseFont, existingPb(), header_card, (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
-        else
-            Text.drawFillB(Style.baseFont, sprintf "%s %s " Icons.sparkle (L"score.new_record"), header_card, (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
-
 type Stuff(grade, lamp, improvements, previous_personal_bests, scoreData) =
     inherit StaticContainer(NodeType.None)
 
     override this.Init(parent) =
         this
         |+ Grade(grade, scoreData, 
-            Position = Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f))
-        |+ Frame(NodeType.None,
-            Position = Position.Box(0.0f, 0.0f, 40.0f, 205.0f, 160.0f, 40.0f))
+            Position = Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 200.0f))
         |+ Accuracy(grade, improvements, previous_personal_bests, scoreData,
             Position = {
                 Left = 0.0f %+ 200.0f ^+ 40.0f
@@ -236,7 +256,7 @@ type Stuff(grade, lamp, improvements, previous_personal_bests, scoreData) =
                 Top = 0.0f %+ 40.0f
                 Bottom = 0.0f %+ 200.0f
             })
-        |* Lamp(lamp, scoreData,
+        |* Lamp(lamp, improvements, previous_personal_bests, scoreData,
             Position = {
                 Left = 0.5f %+ 100.0f ^+ 20.0f
                 Right = 1.0f %- 40.0f
