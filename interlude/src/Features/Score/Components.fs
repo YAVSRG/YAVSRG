@@ -221,7 +221,7 @@ type Lamp(lamp: Lamp.LampResult ref, improvements: ImprovementFlags ref, previou
         Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) (data.Ruleset.LampColor (!lamp).Lamp).O1
         Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) (data.Ruleset.LampColor (!lamp).Lamp).O2
         let text, color =
-            match (!improvements).Accuracy with
+            match (!improvements).Lamp with
             | Improvement.New -> new_record, (Colors.text_yellow_2)
             | Improvement.Faster _ -> new_record, (Colors.text_cyan)
             | Improvement.Better _ -> new_record, (Colors.text_green_2)
