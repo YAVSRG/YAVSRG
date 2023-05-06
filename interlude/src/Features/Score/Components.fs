@@ -21,19 +21,19 @@ type TopBanner(data: ScoreInfoProvider) as this =
         this
         |+ Text(data.Chart.Header.Artist + " - " + data.Chart.Header.Title,
             Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 100.0f })
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 85.0f })
         |+ Text(data.Chart.Header.DiffName,
             Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 145.0f })
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 75.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 130.0f })
         |+ Text(sprintf "From %s" data.Chart.Header.SourcePack,
             Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 180.0f })
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 125.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 165.0f })
         |+ Text(data.ScoreInfo.time.ToString(),
             Align = Alignment.RIGHT,
-            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f })
+            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 75.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 130.0f })
         |* Text((fun () -> "Current session: " + Stats.session_length()),
             Align = Alignment.RIGHT,
-            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 180.0f })
+            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 125.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 165.0f })
 
     override this.Draw() =
 
@@ -67,7 +67,7 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
     override this.Draw() =
 
         Draw.rect (this.Bounds.TrimTop 5.0f) (Style.color(127, 0.5f, 0.0f))
-        Draw.rect (this.Bounds.SliceTop 5.0f) (Color.FromArgb(127, Color.White))
+        Draw.rect (this.Bounds.SliceTop 5.0f) Colors.white.O2
         
         // stats
         let spacing = (this.Bounds.Height - 40.0f - 180.0f) / 2.0f
@@ -75,30 +75,30 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
         let l = b.SliceLeft(b.Width * 0.5f).Shrink(5.0f, 20.0f)
         let r = b.SliceRight(b.Width * 0.5f).Shrink(5.0f, 20.0f)
 
-        Draw.rect l (Color.FromArgb(127, Color.Black))
+        Draw.rect l Colors.shadow_2.O2
         let hit, total = (!stats).Notes
-        Text.drawFillB(Style.baseFont, sprintf "Notes: %i/%i" hit total, l.Shrink(5.0f), (Color.White, Color.Black), Alignment.CENTER)
+        Text.drawFillB(Style.baseFont, sprintf "Notes: %i/%i" hit total, l.Shrink(5.0f), Colors.text, Alignment.CENTER)
 
         let l = l.Translate(0.0f, 60.0f + spacing)
-        Draw.rect l (Color.FromArgb(127, Color.Black))
+        Draw.rect l Colors.shadow_2.O2
         let hit, total = (!stats).Holds
-        Text.drawFillB(Style.baseFont, sprintf "Holds: %i/%i" hit total, l.Shrink(5.0f), (Color.White, Color.Black), Alignment.CENTER)
+        Text.drawFillB(Style.baseFont, sprintf "Holds: %i/%i" hit total, l.Shrink(5.0f), Colors.text, Alignment.CENTER)
         
         let l = l.Translate(0.0f, 60.0f + spacing)
-        Draw.rect l (Color.FromArgb(127, Color.Black))
+        Draw.rect l Colors.shadow_2.O2
         let hit, total = (!stats).Releases
-        Text.drawFillB(Style.baseFont, sprintf "Releases: %i/%i" hit total, l.Shrink(5.0f), (Color.White, Color.Black), Alignment.CENTER)
+        Text.drawFillB(Style.baseFont, sprintf "Releases: %i/%i" hit total, l.Shrink(5.0f), Colors.text, Alignment.CENTER)
 
-        Draw.rect r (Color.FromArgb(127, Color.Black))
-        Text.drawFillB(Style.baseFont, sprintf "Combo: %ix" data.Scoring.State.BestCombo, r.Shrink(5.0f), (Color.White, Color.Black), Alignment.CENTER)
+        Draw.rect r Colors.shadow_2.O2
+        Text.drawFillB(Style.baseFont, sprintf "Combo: %ix" data.Scoring.State.BestCombo, r.Shrink(5.0f), Colors.text, Alignment.CENTER)
         
         let r = r.Translate(0.0f, 60.0f + spacing)
-        Draw.rect r (Color.FromArgb(127, Color.Black))
-        Text.drawFillB(Style.baseFont, sprintf "Mean: %.1fms (%.1f - %.1f)" (!stats).Mean (!stats).EarlyMean (!stats).LateMean, r.Shrink(5.0f), (Color.White, Color.Black), Alignment.CENTER)
+        Draw.rect r Colors.shadow_2.O2
+        Text.drawFillB(Style.baseFont, sprintf "Mean: %.1fms (%.1f - %.1f)" (!stats).Mean (!stats).EarlyMean (!stats).LateMean, r.Shrink(5.0f),Colors.text, Alignment.CENTER)
                 
         let r = r.Translate(0.0f, 60.0f + spacing)
-        Draw.rect r (Color.FromArgb(127, Color.Black))
-        Text.drawFillB(Style.baseFont, sprintf "Stdev: %.1fms" (!stats).StandardDeviation, r.Shrink(5.0f), (Color.White, Color.Black), Alignment.CENTER)
+        Draw.rect r Colors.shadow_2.O2
+        Text.drawFillB(Style.baseFont, sprintf "Stdev: %.1fms" (!stats).StandardDeviation, r.Shrink(5.0f), Colors.text, Alignment.CENTER)
 
         // graph background
         Draw.rect (graph.Bounds.Expand(5.0f, 5.0f)) Color.White
@@ -110,15 +110,15 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
     inherit StaticWidget(NodeType.None)
 
     override this.Draw() =
-        Draw.rect (this.Bounds.Expand(5.0f, 0.0f)) (Color.FromArgb(127, Color.White))
+        Draw.rect (this.Bounds.Expand(5.0f, -10.0f)) Colors.white.O2
         Background.draw (this.Bounds, (Color.FromArgb(80, 80, 80)), 2.0f)
 
         let title = this.Bounds.SliceTop(100.0f).Shrink(5.0f, 20.0f)
-        Draw.rect title (Color.FromArgb(127, Color.Black))
-        Text.drawFillB(Style.baseFont, sprintf "%iK Results  •  %s" data.Chart.Keys data.Ruleset.Name, title, (Color.White, Color.Black), Alignment.CENTER)
+        Draw.rect title Colors.shadow_2.O2
+        Text.drawFillB(Style.baseFont, sprintf "%iK Results  •  %s" data.Chart.Keys data.Ruleset.Name, title, Colors.text, Alignment.CENTER)
         let mods = title.Translate(0.0f, 70.0f)
-        Draw.rect mods (Color.FromArgb(127, Color.Black))
-        Text.drawFillB(Style.baseFont, data.Mods, mods, (Color.White, Color.Black), Alignment.CENTER)
+        Draw.rect mods Colors.shadow_2.O2
+        Text.drawFillB(Style.baseFont, data.Mods, mods, Colors.text, Alignment.CENTER)
 
         // accuracy info
         let counters = Rect.Box(this.Bounds.Left + 5.0f, this.Bounds.Top + 160.0f, this.Bounds.Width - 10.0f, 350.0f)
@@ -132,49 +132,75 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
             let b = Rect.Create(counters.Left + 10.0f, y, counters.Right - 10.0f, y + h)
             Draw.rect b (Color.FromArgb(40, j.Color))
             Draw.rect (b.SliceLeft((counters.Width - 20.0f) * (float32 judgeCounts.[i] / float32 (!stats).JudgementCount))) (Color.FromArgb(127, j.Color))
-            Text.drawFill(Style.baseFont, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Color.White, 0.0f)
+            Text.drawFillB(Style.baseFont, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Colors.text, 0.0f)
             y <- y + h
         
-type Grade(grade: Grade.GradeResult ref, lamp: Lamp.LampResult ref, data: ScoreInfoProvider) =
-    inherit StaticWidget(NodeType.None)
+type Grade(grade: Grade.GradeResult ref, data: ScoreInfoProvider) =
+    inherit StaticContainer(NodeType.None)
+
+    override this.Init(parent) =
+        this
+        |+ Frame(NodeType.None, 
+            Fill = (fun () -> (data.Ruleset.GradeColor (!grade).Grade).O1),
+            Border = (fun () -> data.Ruleset.GradeColor (!grade).Grade))
+        |* Text((fun () -> data.Ruleset.GradeName (!grade).Grade),
+            Color = (fun () -> (data.Ruleset.GradeColor (!grade).Grade, Colors.black)),
+            Position = Position.Margin(-10.0f))
+        base.Init parent
 
     override this.Draw() =
-        let x = this.Bounds.CenterX
-        let y = this.Bounds.CenterY - 35.0f
-        let size = (min this.Bounds.Height this.Bounds.Width) * 0.5f - 50.0f
-        let borderSize = size + 15.0f
-        Draw.quad
-            ( Quad.createv
-                (x, y - borderSize)
-                (x + borderSize, y)
-                (x, y + borderSize)
-                (x - borderSize, y)
-            )
-            (Quad.colorOf (data.Ruleset.GradeColor (!grade).Grade))
-            Sprite.DefaultQuad
-        Background.drawq ( 
-            ( Quad.createv
-                (x, y - size)
-                (x + size, y)
-                (x, y + size)
-                (x - size, y)
-            ), Color.FromArgb(60, 60, 60), 2.0f
-        )
-        Draw.quad
-            ( Quad.createv
-                (x, y - size)
-                (x + size, y)
-                (x, y + size)
-                (x - size, y)
-            )
-            (Quad.colorOf (Color.FromArgb(40, (data.Ruleset.GradeColor (!grade).Grade))))
-            Sprite.DefaultQuad
+        Background.draw (this.Bounds, (Color.FromArgb(80, 80, 80)), 2.0f)
+        base.Draw()
 
-        // grade stuff
-        let gradeBounds = Rect.Box(x - 270.0f, y - 270.0f, 540.0f, 540.0f)
-        Text.drawFill(Style.baseFont, data.Ruleset.GradeName (!grade).Grade, gradeBounds.Shrink 100.0f, data.Ruleset.GradeColor (!grade).Grade, 0.5f)
+type Accuracy(grade: Grade.GradeResult ref, improvements: ImprovementFlags ref, previous_personal_bests: Bests option ref, data: ScoreInfoProvider) =
+    inherit StaticContainer(NodeType.None)
+
+    let LOWER_SIZE = 40.0f
+
+    override this.Init(parent) =
+        this
+        |* Text((fun () -> data.Scoring.FormatAccuracy()),
+            Color = (fun () -> (data.Ruleset.GradeColor (!grade).Grade, Colors.black)),
+            Position = Position.Margin(10.0f, 0.0f).TrimBottom(LOWER_SIZE))
+        base.Init parent
+
+    override this.Draw() =
+        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
+        Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
+        let grade_color = data.Ruleset.GradeColor (!grade).Grade
+        Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) grade_color.O1
+        Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) grade_color.O2
+        Text.drawFillB(Style.baseFont, data.Scoring.FormatAccuracy(), this.Bounds.Shrink(10.0f, 0.0f).TrimBottom(LOWER_SIZE), (grade_color, Colors.black), Alignment.CENTER)
+        let text, color =
+            match (!improvements).Accuracy with
+            | Improvement.New -> sprintf "%s %s " Icons.sparkle (L"score.new_record"), (Colors.text_yellow_2)
+            | Improvement.Faster r -> sprintf "%s %s   %s %.2fx" Icons.sparkle (L"score.new_record") Icons.order_ascending r, (Colors.text_cyan)
+            | Improvement.Better acc -> sprintf "%s %s   %s %.2f%%" Icons.sparkle (L"score.new_record") Icons.order_ascending (acc * 100.0), (Colors.text_green_2)
+            | Improvement.FasterBetter (r, acc) -> sprintf "%s %s   %s %.2f%%, %.2fx" Icons.sparkle (L"score.new_record") Icons.order_ascending (acc * 100.0) r, (Colors.text_pink)
+            | Improvement.None -> "--", (Colors.grey_2.O2, Colors.black)
+        Text.drawFillB(Style.baseFont, text, this.Bounds.Shrink(10.0f, 0.0f).SliceBottom(LOWER_SIZE), color, Alignment.CENTER)
+        base.Draw()
+
+type Lamp(lamp: Lamp.LampResult ref, data: ScoreInfoProvider) =
+    inherit StaticContainer(NodeType.None)
+
+    let LOWER_SIZE = 40.0f
+
+    override this.Init(parent) =
+        this
+        |* Text((fun () -> data.Ruleset.LampName (!lamp).Lamp),
+            Color = (fun () -> (data.Ruleset.LampColor (!lamp).Lamp, Colors.black)),
+            Position = Position.Margin(10.0f, 0.0f).TrimBottom(LOWER_SIZE))
+        base.Init parent
+
+    override this.Draw() =
+        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
+        Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
+        Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) (data.Ruleset.LampColor (!lamp).Lamp).O1
+        Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) (data.Ruleset.LampColor (!lamp).Lamp).O2
+        base.Draw()
         
-type InfoBar(color: unit -> System.Drawing.Color, label: string, text: unit -> string, pb: unit -> PersonalBestType, hint: unit -> string, existingPb: unit -> string) =
+type InfoBar(color: unit -> System.Drawing.Color, label: string, text: unit -> string, pb: unit -> int, hint: unit -> string, existingPb: unit -> string) =
     inherit StaticWidget(NodeType.None)
 
     override this.Draw() =
@@ -189,7 +215,37 @@ type InfoBar(color: unit -> System.Drawing.Color, label: string, text: unit -> s
         Text.drawFillB(Style.baseFont, label, header.TrimBottom (header.Height * 0.35f), (Color.White, Color.Black), 0.5f)
         Text.drawFillB(Style.baseFont, text(), body.TrimLeft(10.0f).TrimBottom(header.Height * 0.3f), (color, Color.Black), 0.0f)
         Text.drawFillB(Style.baseFont, hint(), body.TrimLeft(10.0f).SliceBottom(header.Height * 0.35f).TrimBottom(5.0f), (Color.White, Color.Black), 0.0f)
-        if pb = PersonalBestType.None then
+        if pb = 0 then // improvement.none
             Text.drawFillB(Style.baseFont, existingPb(), header_card, (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
         else
             Text.drawFillB(Style.baseFont, sprintf "%s %s " Icons.sparkle (L"score.new_record"), header_card, (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
+
+type Stuff(grade, lamp, improvements, previous_personal_bests, scoreData) =
+    inherit StaticContainer(NodeType.None)
+
+    override this.Init(parent) =
+        this
+        |+ Grade(grade, scoreData, 
+            Position = Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f))
+        |+ Frame(NodeType.None,
+            Position = Position.Box(0.0f, 0.0f, 40.0f, 205.0f, 160.0f, 40.0f))
+        |+ Accuracy(grade, improvements, previous_personal_bests, scoreData,
+            Position = {
+                Left = 0.0f %+ 200.0f ^+ 40.0f
+                Right = 0.5f %+ 100.0f ^- 20.0f
+                Top = 0.0f %+ 40.0f
+                Bottom = 0.0f %+ 200.0f
+            })
+        |* Lamp(lamp, scoreData,
+            Position = {
+                Left = 0.5f %+ 100.0f ^+ 20.0f
+                Right = 1.0f %- 40.0f
+                Top = 0.0f %+ 40.0f
+                Bottom = 0.0f %+ 200.0f
+            })
+        base.Init parent
+
+    override this.Draw() =
+        Draw.rect (this.Bounds.SliceTop(160.0f)) Colors.shadow_2.O2
+        Draw.rect (this.Bounds.TrimTop(160.0f).SliceTop(5.0f)) Colors.white
+        base.Draw()

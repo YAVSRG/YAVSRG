@@ -69,7 +69,7 @@ module Scoreboard =
     type ScoreCard(data: ScoreInfoProvider) as this =
         inherit Frame(NodeType.Button((fun () -> 
             Screen.changeNew 
-                (fun () -> new ScoreScreen(data, BestFlags.Default) :> Screen)
+                (fun () -> new ScoreScreen(data, ImprovementFlags.Default) :> Screen)
                 Screen.Type.Score
                 Transitions.Flags.Default)))
 

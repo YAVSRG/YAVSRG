@@ -205,7 +205,7 @@ module Gameplay =
             keycount = keys
         }
 
-    let setScore (pacemakerMet: bool) (data: ScoreInfoProvider) : BestFlags =
+    let setScore (pacemakerMet: bool) (data: ScoreInfoProvider) : ImprovementFlags =
         if data.ModStatus < ModStatus.Unstored &&
            (options.SaveScoreIfUnderPace.Value || pacemakerMet)
         then
@@ -214,8 +214,8 @@ module Gameplay =
                 Scores.saveScoreWithPbs Chart.saveData.Value Content.Rulesets.current_hash data
             else
                 Scores.saveScore Chart.saveData.Value data
-                BestFlags.Default
-        else BestFlags.Default
+                ImprovementFlags.Default
+        else ImprovementFlags.Default
 
     let save() =
         Table.save()
