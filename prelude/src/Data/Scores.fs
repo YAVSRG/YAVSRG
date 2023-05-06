@@ -136,32 +136,35 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
         modstatus.Value
 
 [<Json.AutoCodec>]
-type BestFlags =
+type ImprovementFlags =
     {
         // future: marker of if you beat a bucket score/goals achieved etc
-        Lamp: PersonalBestType
-        Accuracy: PersonalBestType
-        Grade: PersonalBestType
-        Clear: PersonalBestType
+        Lamp: Improvement<int>
+        Accuracy: Improvement<float>
+        Grade: Improvement<int>
+        Clear: Improvement<bool>
     }
     static member Default = 
         {
-            Lamp = PersonalBestType.None
-            Accuracy = PersonalBestType.None
-            Grade = PersonalBestType.None
-            Clear = PersonalBestType.None
+            Lamp = Improvement.None
+            Accuracy = Improvement.None
+            Grade = Improvement.None
+            Clear = Improvement.None
         }
 
 module Bests =
 
-    let update (score: ScoreInfoProvider) (existing: Bests) : Bests * BestFlags =
+    let private btoi = function true -> 1 | _ -> 0
+    let private itob = fun x -> x > 0
+
+    let update (score: ScoreInfoProvider) (existing: Bests) : Bests * ImprovementFlags =
         let l, lp = PersonalBests.update (score.Lamp, score.ScoreInfo.rate) existing.Lamp
         let a, ap = PersonalBests.update (score.Scoring.Value, score.ScoreInfo.rate) existing.Accuracy
         let g, gp = PersonalBests.update (score.Grade, score.ScoreInfo.rate) existing.Grade
-        let c, cp = PersonalBests.update (not score.HP.Failed, score.ScoreInfo.rate) existing.Clear
+        let c, cp = PersonalBests.update (not score.HP.Failed |> btoi, score.ScoreInfo.rate) (existing.Clear |> PersonalBests.map btoi)
         
-        { Lamp = l; Accuracy = a; Grade = g; Clear = c },
-        { Lamp = lp; Accuracy = ap; Grade = gp; Clear = cp }
+        { Lamp = l; Accuracy = a; Grade = g; Clear = c |> PersonalBests.map itob },
+        { Lamp = lp; Accuracy = ap; Grade = gp; Clear = cp |> Improvement.map itob }
 
     let create (score: ScoreInfoProvider) : Bests =
         {
@@ -201,7 +204,7 @@ module Scores =
         d.Scores.Add score.ScoreInfo
         save()
 
-    let saveScoreWithPbs (d: ChartSaveData) (rulesetId: string) (score: ScoreInfoProvider) : BestFlags =
+    let saveScoreWithPbs (d: ChartSaveData) (rulesetId: string) (score: ScoreInfoProvider) : ImprovementFlags =
         saveScore d score
 
         if d.Bests.ContainsKey rulesetId then
@@ -210,4 +213,4 @@ module Scores =
             flags
         else
             d.Bests.Add(rulesetId, Bests.create score)
-            { Lamp = PersonalBestType.Faster; Accuracy = PersonalBestType.Faster; Grade = PersonalBestType.Faster; Clear = PersonalBestType.Faster }
+            { Lamp = Improvement.New; Accuracy = Improvement.New; Grade = Improvement.New; Clear = Improvement.New }
