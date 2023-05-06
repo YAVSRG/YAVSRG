@@ -40,8 +40,9 @@ type NoteskinPreview(scale: float32) as this =
     member this.PreviewBounds = bounds_placeholder.Bounds
 
     member this.Refresh() =
-        Gameplay.Chart.recolor()
-        renderer <- createRenderer()
+        if Gameplay.Chart.current.IsSome then
+            Gameplay.Chart.recolor()
+            renderer <- createRenderer()
 
     override this.Update(elapsedTime, moved) =
         renderer.Update(elapsedTime, moved)
@@ -72,7 +73,7 @@ type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
             if config.Value.Float then this.PreviewBounds
             else
                 let cfg = Noteskins.Current.config
-                let width = cfg.ColumnWidth * float32 (Gameplay.Chart.colored().Keys) * scale
+                let width = cfg.ColumnWidth * float32 (match Gameplay.Chart.current with Some c -> c.Keys | None -> 4) * scale
                 let (screenAlign, columnAlign) = cfg.PlayfieldAlignment
 
                 Rect.Box(this.PreviewBounds.Left + this.PreviewBounds.Width * screenAlign, this.PreviewBounds.Top, width, this.PreviewBounds.Height)
