@@ -45,11 +45,11 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
 
     do
         this
-        |+ Stuff(grade, lamp, personal_bests, previous_personal_bests, scoreData, 
-            Position = { Position.Default with Left = 0.35f %+ 0.0f; Top = 0.0f %+ 175.0f; Bottom = 0.75f %+ 0.0f })
         |+ Sidebar(stats, scoreData, Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 175.0f; Right = 0.35f %- 0.0f; Bottom = 0.75f %+ 5.0f})
         |+ TopBanner(scoreData, Position = Position.SliceTop(180.0f))
-        |* BottomBanner(stats, scoreData, graph, refresh, Position = { Position.Default with Top = 0.75f %- 0.0f })
+        |+ BottomBanner(stats, scoreData, graph, refresh, Position = { Position.Default with Top = 0.75f %- 0.0f })
+        |* Results(grade, lamp, personal_bests, previous_personal_bests, scoreData, 
+            Position = { Position.Default with Left = 0.35f %+ 0.0f; Top = 0.0f %+ 175.0f; Bottom = 0.75f %+ 0.0f })
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
