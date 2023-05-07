@@ -127,7 +127,7 @@ type EditNoteskinPage() as this =
             }
 
 type private NoteskinButton(id: string, name: string, on_switch: unit -> unit) =
-    inherit StaticContainer(NodeType.Button (fun _ -> if Noteskins.Current.id <> id then Noteskins.Current.switch id; on_switch()))
+    inherit StaticContainer(NodeType.Button (fun _ -> if Noteskins.Current.id <> id then Noteskins.Current.switch id; options.Noteskin.Set id; on_switch()))
 
     member this.IsCurrent = Noteskins.Current.id = id
         
