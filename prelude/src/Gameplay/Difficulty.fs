@@ -281,28 +281,3 @@ module Difficulty =
             tv <- tv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(t / tv)))
         
         (Math.Pow(pv, 0.6) * 2.5), (tv)
-
-// Experimental chart FFT calculation (I just wanted to see what numbers it gives)
-module FFT =
-    
-    let fft (x: float) (data: TimeData<NoteRow>) =
-        let mutable sum = 0.0
-        let mutable count = 0.0
-        let start, _ = data.First.Value
-        for (time, d) in data.Data do
-            
-            let mutable row_count = 0.0
-            for nt in d do if nt = NoteType.NORMAL || nt = NoteType.HOLDHEAD then row_count <- row_count + 1.0
-            let offset = float (time - start)
-            sum <- sum + Math.Cos ( x * offset ) * row_count
-            count <- count + row_count
-
-        sum / count
-
-    let ffts (data: TimeData<NoteRow>) =
-        seq {
-            for step = 0 to 255 do
-                let target_ms_per_beat = float step / 256.0 * 1000.0
-                let wind_amount = Math.PI * 2.0 / target_ms_per_beat
-                yield (target_ms_per_beat, fft wind_amount data)
-        }

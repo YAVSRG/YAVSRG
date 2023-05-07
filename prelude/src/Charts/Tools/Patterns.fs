@@ -5,11 +5,6 @@ open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 
 (*
-    This file is a WIP, will change significantly before it is used
-*)
-
-
-// Leaving this here as a reminder of the original idea but it would be foolish to build all of this in one
 
 type Primitives =
     | Stream of
@@ -42,6 +37,8 @@ type Primitives =
         // length of trill in rows, 3 - 10
         length: int
     | Release
+
+*)
 
 [<RequireQualifiedAccess>]
 type Direction =
@@ -106,7 +103,11 @@ module Analysis =
                                 else Direction.None
                         Roll = pmin > cmax || pmax < cmin
                         Time = t
-                        BPM = (0.25f<beat> * (60000.0f<ms/minute> / (t - previous_time)))
+                        BPM = 
+                            float (15000.0<ms/minute> / float (t - previous_time))
+                            |> round
+                            |> float32
+                            |> fun x -> x * 1.0f<beat/minute>
                     }
 
                     previous_row <- current_row
@@ -388,3 +389,35 @@ module Patterns =
         if chart.Keys = 4 then matches analysis_4k data
         elif chart.Keys = 7 then matches analysis_7k data
         else matches analysis_generic data
+
+    let pattern_coverage (rate: float32) (patterns: (string * (Time * float32<beat/minute>)) seq) =
+        let PATTERN_DURATION = 1000.0f<ms> * rate
+
+        let groups =
+            patterns
+            |> Seq.groupBy fst
+            |> Array.ofSeq
+            |> Array.map (fun (pattern, data) -> 
+                    pattern, 
+                    Seq.map snd data 
+                    |> Seq.map (fun (t, bpm) -> (t, bpm * rate |> int))
+                    |> Seq.filter (fun (t, bpm) -> bpm >= 100)
+                    |> Array.ofSeq
+                )
+        let coverage = Dictionary<string * int, Time>()
+        for pattern_name, data in groups do
+            let add_coverage pattern bpm duration =
+                let key = (pattern, bpm)
+                if coverage.ContainsKey(key) then
+                    coverage.[key] <- coverage.[key] + duration
+                else coverage.Add(key, duration)
+
+            let mutable last_time = fst data.[0]
+            let mutable last_bpm = snd data.[0]
+            for (t, bpm) in data do
+                add_coverage pattern_name last_bpm (min t (last_time + PATTERN_DURATION) - last_time)
+                last_time <- t
+                last_bpm <- bpm
+            add_coverage pattern_name last_bpm PATTERN_DURATION
+
+        coverage
