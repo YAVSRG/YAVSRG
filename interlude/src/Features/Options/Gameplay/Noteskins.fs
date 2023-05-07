@@ -109,7 +109,7 @@ type EditNoteskinPage() as this =
             |+ PageSetting("gameplay.noteskins.edit.notecolors", colors)
                 .Pos(700.0f, Viewport.vwidth - 200.0f, 120.0f)
                 .Tooltip(Tooltip.Info("gameplay.noteskins.edit.notecolors"))
-            |+ PageButton.Once("gameplay.noteskins.edit.export", Noteskins.exportCurrent)
+            |+ PageButton.Once("gameplay.noteskins.edit.export", fun () -> if not (Noteskins.exportCurrent()) then Notifications.error(L"notification.export_noteskin_failure.title", L"notification.export_noteskin_failure.body"))
                 .Pos(820.0f)
                 .Tooltip(Tooltip.Info("gameplay.noteskins.edit.export"))
         )

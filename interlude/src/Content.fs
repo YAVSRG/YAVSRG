@@ -269,14 +269,17 @@ module Content =
             | Folder f ->
                 let name = Path.GetFileName f
                 let target = Path.Combine(getDataPath "Exports", name + ".isk")
-                Current.instance.CompressToZip target
-                Utils.openDirectory(getDataPath "Exports")
+                if Current.instance.CompressToZip target then
+                    Utils.openDirectory(getDataPath "Exports")
+                    true
+                else false
             | Zip (z, Some source) ->
                 let name = Path.GetFileName source
                 let target = Path.Combine(getDataPath "Exports", name)
                 File.Copy(source, target)
                 Utils.openDirectory(getDataPath "Exports")
-            | Zip (z, None) -> Logging.Error "Cannot export embedded skin"
+                true
+            | Zip (z, None) -> Logging.Error "Cannot export embedded skin"; false
 
         let rec tryImport (path: string) (keymodes: int list) : bool =
             match path with

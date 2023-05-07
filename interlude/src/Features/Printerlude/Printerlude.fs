@@ -93,7 +93,6 @@ module Printerlude =
                 .WithCommand("exit", Command.create "Exits the game" [] (Impl.Create (fun () -> UI.Screen.exit <- true)))
                 .WithCommand("clear", Command.create "Clears the terminal" [] (Impl.Create Terminal.Log.clear))
                 .WithCommand("export_osz", Command.create "Export current chart as osz" [] (Impl.Create export_osz))
-                .WithCommand("export_isk", Command.create "Export current noteskin as isk" [] (Impl.Create Content.Noteskins.exportCurrent))
                 .WithCommand("patterns", Command.create "Experimental" [] (Impl.Create analyse_patterns))
                 .WithCommand("local_server", Command.create "Switch to local development server" ["flag"] (Impl.Create (Types.bool, fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); Logging.Info("Restart your game to apply server change."))))
 
