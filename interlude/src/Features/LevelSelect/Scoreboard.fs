@@ -147,10 +147,11 @@ module Scoreboard =
                             seq { 
                                 for score in d.Scores do
                                     let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
-                                    req.NewBests <- Some (
-                                        match req.NewBests with
-                                        | None -> Bests.create s
-                                        | Some b -> fst(Bests.update s b))
+                                    if s.ModStatus = Prelude.Gameplay.Mods.ModStatus.Ranked then
+                                        req.NewBests <- Some (
+                                            match req.NewBests with
+                                            | None -> Bests.create s
+                                            | Some b -> fst(Bests.update s b))
                                     yield s
                             }
                     member this.Callback(score: ScoreInfoProvider) =
