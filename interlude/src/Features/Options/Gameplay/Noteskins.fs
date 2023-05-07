@@ -127,7 +127,7 @@ type EditNoteskinPage() as this =
             }
 
 type private NoteskinButton(id: string, name: string, on_switch: unit -> unit) =
-    inherit StaticContainer(NodeType.Button (fun _ -> Noteskins.Current.switch id; on_switch()))
+    inherit StaticContainer(NodeType.Button (fun _ -> if Noteskins.Current.id <> id then Noteskins.Current.switch id; on_switch()))
 
     member this.IsCurrent = Noteskins.Current.id = id
         
@@ -155,29 +155,29 @@ type NoteskinsPage() as this =
     inherit Page()
 
     let preview = NoteskinPreview 0.5f
+    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    
+    let rec tryEditNoteskin() =
+        let ns = Noteskins.Current.instance
+        match ns.Source with
+        | Zip (_, Some file) ->
+            ConfirmPage(
+                Localisation.localiseWith [ns.Config.Name] "gameplay.noteskins.confirm_extract_zip",
+                (fun () -> 
+                    if Noteskins.extractCurrent() then refresh()
+                    else Logging.Error "Noteskin folder already exists"
+                )).Show()
+        | Zip (_, None) ->
+            ConfirmPage(
+                Localisation.localiseWith [ns.Config.Name] "gameplay.noteskins.confirm_extract_default", 
+                (fun () -> 
+                    if Noteskins.extractCurrent() then refresh()
+                    else Logging.Error "Noteskin folder already exists"
+                )).Show()
+        | Folder _ -> Menu.ShowPage { new EditNoteskinPage() with override this.OnClose() = base.OnClose(); refresh() }
 
-    do
-        let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
-
-        let tryEditNoteskin() =
-            let ns = Noteskins.Current.instance
-            match ns.Source with
-            | Zip (_, Some file) ->
-                ConfirmPage(
-                    Localisation.localiseWith [ns.Config.Name] "gameplay.noteskins.confirm_extract_zip",
-                    (fun () -> 
-                        if Noteskins.extractCurrent() then ()
-                        else Logging.Error "Noteskin folder already exists"
-                    )).Show()
-            | Zip (_, None) ->
-                ConfirmPage(
-                    Localisation.localiseWith [ns.Config.Name] "gameplay.noteskins.confirm_extract_default", 
-                    (fun () -> 
-                        if Noteskins.extractCurrent() then ()
-                        else Logging.Error "Noteskin folder already exists"
-                    )).Show()
-            | Folder _ -> Menu.ShowPage EditNoteskinPage
-
+    and refresh() =
+        container.Clear()
         container
         |+ PageButton("gameplay.noteskins.edit", tryEditNoteskin)
             .Pos(570.0f)
@@ -189,6 +189,10 @@ type NoteskinsPage() as this =
 
         for id, name in Noteskins.list() do
             container |* NoteskinButton(id, name, preview.Refresh)
+
+    do
+
+        refresh()
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 150.0f)) )
         this |* preview
 
