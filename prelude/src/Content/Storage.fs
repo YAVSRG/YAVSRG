@@ -228,11 +228,18 @@ type Storage(storage: StorageType) =
         | Zip (z, _) -> z.ExtractToDirectory targetPath
         | Folder f -> failwith "Can only extract zip to folder"
         
-    member this.CompressToZip target =
+    member this.CompressToZip target : bool =
         if File.Exists target then File.Delete target
         match storage with
-        | Zip (z, _) -> failwith "nyi"
-        | Folder f -> ZipFile.CreateFromDirectory(f, target)
+        | Zip (z, _) -> Logging.Error("Exporting already zipped content as an archive is not implemented"); false
+        | Folder f -> 
+            try 
+                ZipFile.CreateFromDirectory(f, target)
+                true
+            with
+            | :? DirectoryNotFoundException as e -> Logging.Error("Couldn't export archive because the folder moved. Did you move it while the game was open?", e); false
+            | :? IOException as e -> Logging.Error("IO exception while exporting archive", e); false
+            | _ -> reraise()
 
 module Storage =
     
