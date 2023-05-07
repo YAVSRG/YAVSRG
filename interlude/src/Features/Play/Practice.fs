@@ -316,16 +316,8 @@ module PracticeScreen =
                     base.OnBack()
 
             override this.Update(elapsedTime, bounds) =
-                base.Update(elapsedTime, bounds)
                 let now = Song.timeWithOffset()
                 let chartTime = now - firstNote
-
-                if not (liveplay :> IReplayProvider).Finished then
-                    Input.consumeGameplay(binds, fun column time isRelease ->
-                        if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
-                        else inputKeyState <- Bitmap.setBit column inputKeyState
-                        liveplay.Add(time, inputKeyState) )
-                    this.State.Scoring.Update chartTime
 
                 if (!|"retry").Tapped() then
                     if options_mode then play(this) else restart(this)
@@ -336,6 +328,15 @@ module PracticeScreen =
 
                 elif options_mode && (!|"skip").Tapped() then
                     play(this)
+
+                if not (liveplay :> IReplayProvider).Finished then
+                    Input.consumeGameplay(binds, fun column time isRelease ->
+                        if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
+                        else inputKeyState <- Bitmap.setBit column inputKeyState
+                        liveplay.Add(time, inputKeyState) )
+                    this.State.Scoring.Update chartTime
+
+                base.Update(elapsedTime, bounds)
 
                 if this.State.Scoring.Finished && not options_mode then
                     pause(this)
