@@ -47,12 +47,17 @@ module Printerlude =
             ctx.WriteLine(sprintf "You are running %s" Utils.version)
             ctx.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latestVersionName)
 
-        let fft() =
+        let analyse_patterns() =
             match Gameplay.Chart.current with
-            | Some c -> 
-                for (v, v2) in Prelude.Gameplay.FFT.ffts c.Notes do
-                    ctx.WriteLine(sprintf "%.2f :: %.3f" v v2)
-            | None -> ()
+            | None -> failwith "No chart to analyze"
+            | Some c ->
+                let duration = Gameplay.Chart.cacheInfo.Value.Length
+                let data = 
+                    Prelude.Charts.Tools.Patterns.Patterns.analyse c
+                    |> Prelude.Charts.Tools.Patterns.Patterns.pattern_coverage Gameplay.rate.Value
+                for (p, bpm) in data.Keys do
+                    let percent = data.[(p, bpm)] / duration * 100.0f
+                    if percent > 0.1f then ctx.WriteLine(sprintf "%iBPM %s: %.2f%%" bpm p percent)
 
         let export_osz() =
             match Gameplay.Chart.current with
@@ -89,7 +94,7 @@ module Printerlude =
                 .WithCommand("clear", Command.create "Clears the terminal" [] (Impl.Create Terminal.Log.clear))
                 .WithCommand("export_osz", Command.create "Export current chart as osz" [] (Impl.Create export_osz))
                 .WithCommand("export_isk", Command.create "Export current noteskin as isk" [] (Impl.Create Content.Noteskins.exportCurrent))
-                .WithCommand("fft", Command.create "Experimental" [] (Impl.Create fft))
+                .WithCommand("patterns", Command.create "Experimental" [] (Impl.Create analyse_patterns))
                 .WithCommand("local_server", Command.create "Switch to local development server" ["flag"] (Impl.Create (Types.bool, fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); Logging.Info("Restart your game to apply server change."))))
 
     let private ms = new MemoryStream()
