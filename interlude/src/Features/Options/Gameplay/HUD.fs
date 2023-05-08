@@ -532,6 +532,43 @@ type EditJudgementCountsPage() as this =
         HUDOptions.set<HUD.JudgementCounts>
             { data with Position = pos.Value; AnimationTime = animation_time.Value }
 
+type EditJudgementMeterPage() as this =
+    inherit Page()
+
+    let data = HUDOptions.get<HUD.JudgementMeter>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = HUD.JudgementMeter.Default.Position
+
+    let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
+    let rs = Rulesets.current
+
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.drawFillB(Style.baseFont, rs.JudgementName 0, bounds, (rs.JudgementColor 0, Colors.black), Alignment.CENTER)
+        }
+
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ PageSetting(
+                "gameplay.hud.judgementmeter.animationtime",
+                Slider(animation_time, Step = 5f) )
+                .Pos(550.0f)
+                .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter.animationtime"))
+            |+ preview
+        )
+
+    override this.Title = L"gameplay.hud.judgementmeter.name"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        HUDOptions.set<HUD.JudgementMeter>
+            { data with
+                Position = pos.Value
+                AnimationTime = animation_time.Value
+            }
+
 type EditHUDPage() as this =
     inherit Page()
 
@@ -562,6 +599,9 @@ type EditHUDPage() as this =
             |+ PageButton("gameplay.hud.judgementcounts", fun () -> Menu.ShowPage EditJudgementCountsPage)
                 .Pos(690.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.judgementcounts"))
+            |+ PageButton("gameplay.hud.judgementmeter", fun () -> Menu.ShowPage EditJudgementMeterPage)
+                .Pos(760.0f)
+                .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter"))
         )
 
     override this.Title = L"gameplay.hud.name"

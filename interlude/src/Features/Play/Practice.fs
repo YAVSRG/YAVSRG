@@ -298,12 +298,13 @@ module PracticeScreen =
             override this.AddWidgets() =
                 let inline add_widget x = add_widget (this, this.Playfield, this.State) x
 
+                add_widget ComboMeter
+                add_widget ProgressMeter
                 add_widget AccuracyMeter
                 add_widget HitMeter
                 add_widget LifeMeter
-                add_widget ComboMeter
-                add_widget ProgressMeter
                 add_widget JudgementCounts
+                add_widget JudgementMeter
 
                 this.Add(Conditional((fun () -> options_mode), options_ui))
 

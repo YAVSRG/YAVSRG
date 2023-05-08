@@ -98,39 +98,36 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
             if conf.ShowNonJudgements || hit.Judgement.IsSome then
                 Draw.rect (if hit.IsRelease then r.Expand(0.0f, conf.ReleasesExtraHeight) else r) c
 
-//type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
-//    inherit StaticWidget(NodeType.None)
-//    let atime = conf.AnimationTime * 1.0f<ms>
-//    let mutable tier = 0
-//    let mutable late = 0
-//    let mutable time = -Time.infinity
-//    let texture = Content.getTexture "judgement"
+type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
+    inherit StaticWidget(NodeType.None)
+    let atime = conf.AnimationTime * 1.0f<ms>
+    let mutable tier = 0
+    let mutable time = -Time.infinity
 
-//    do
-//        helper.OnHit.Add
-//            ( fun ev ->
-//                let (judge, delta) =
-//                    match ev.Guts with
-//                    | Hit e -> (e.Judgement, e.Delta)
-//                    | Release e -> (e.Judgement, e.Delta)
-//                if
-//                    judge.IsSome && true
-//                    //match judge.Value with
-//                    //| _JType.RIDICULOUS
-//                    //| _JType.MARVELLOUS -> conf.ShowRDMA
-//                    //| _ -> true
-//                then
-//                    let j = int judge.Value in
-//                    if j >= tier || ev.Time - atime > time then
-//                        tier <- j
-//                        time <- ev.Time
-//                        late <- if delta > 0.0f<ms> then 1 else 0
-//            )
+    do
+        state.SubscribeToHits
+            ( fun ev ->
+                let (judge, delta) =
+                    match ev.Guts with
+                    | Hit e -> (e.Judgement, e.Delta)
+                    | Release e -> (e.Judgement, e.Delta)
+                if
+                    judge.IsSome && true //todo: prevent certain judgements from displaying?
+                    //match judge.Value with
+                    //| _JType.RIDICULOUS
+                    //| _JType.MARVELLOUS -> conf.ShowRDMA
+                    //| _ -> true
+                then
+                    let j = int judge.Value in
+                    if j >= tier || ev.Time - atime > time then
+                        tier <- j
+                        time <- ev.Time
+            )
 
-//    override this.Draw() =
-//        if time > -Time.infinity then
-//            let a = 255 - Math.Clamp(255.0f * (helper.CurrentChartTime() - time) / atime |> int, 0, 255)
-//            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
+    override this.Draw() =
+        if time > -Time.infinity then
+            let a = 255 - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
+            Text.drawFillB(Style.baseFont, state.Ruleset.JudgementName tier, this.Bounds, (state.Ruleset.JudgementColor(tier).O4a a, Colors.black.O4a a), Alignment.CENTER)
 
 type ComboMeter(conf: HUD.Combo, state: PlayState) =
     inherit StaticWidget(NodeType.None)

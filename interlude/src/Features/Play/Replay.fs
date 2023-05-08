@@ -102,14 +102,15 @@ module ReplayScreen =
             override this.AddWidgets() =
                 let inline add_widget x = add_widget (this, this.Playfield, this.State) x
                 
+                add_widget ComboMeter
+                add_widget SkipButton
+                add_widget ProgressMeter
                 if not is_auto then
                     add_widget AccuracyMeter
                     add_widget HitMeter
                     add_widget LifeMeter
                     add_widget JudgementCounts
-                add_widget ComboMeter
-                add_widget SkipButton
-                add_widget ProgressMeter
+                    add_widget JudgementMeter
 
                 this
                 |+ Text((Icons.watch + if is_auto then " Watching AUTOPLAY" else " Watching replay"),

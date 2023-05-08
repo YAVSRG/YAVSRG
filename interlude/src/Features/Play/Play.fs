@@ -69,14 +69,15 @@ module PlayScreen =
             override this.AddWidgets() =
                 let inline add_widget x = add_widget (this, this.Playfield, this.State) x
 
-                add_widget AccuracyMeter
-                add_widget HitMeter
-                add_widget LifeMeter
                 add_widget ComboMeter
                 add_widget SkipButton
                 add_widget ProgressMeter
+                add_widget AccuracyMeter
+                add_widget HitMeter
+                add_widget LifeMeter
                 add_widget Pacemaker
                 add_widget JudgementCounts
+                add_widget JudgementMeter
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
