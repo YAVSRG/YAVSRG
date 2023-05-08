@@ -98,6 +98,9 @@ type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as thi
         )
 
     do
+        this.Fill <- fun () -> if this.TextEntry.Selected then Colors.yellow_accent.O1 else !*Palette.DARK
+        this.Border <- fun () -> if this.TextEntry.Selected then Colors.yellow_accent else !*Palette.LIGHT
+
         this
         |+ textEntry
         |* Text(

@@ -77,8 +77,8 @@ module Scoreboard =
         let animation = Animation.seq [Animation.Delay 150; fade]
 
         do
-            this.Fill <- fun () -> Style.color (int (150.0f * fade.Value), 0.5f, 0.2f)
-            this.Border <- fun () -> if this.Focused then Style.highlight fade.Alpha () else Style.highlightL (int (150.0f * fade.Value)) ()
+            this.Fill <- fun () -> if this.Focused then Colors.yellow_accent.O1a fade.Alpha else Style.color (int (150.0f * fade.Value), 0.5f, 0.2f)
+            this.Border <- fun () -> if this.Focused then Colors.yellow_accent.O4a fade.Alpha else Style.highlightL (int (150.0f * fade.Value)) ()
 
             ignore data.Physical
             ignore data.Lamp
