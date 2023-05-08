@@ -8,7 +8,7 @@ open System.Drawing
 
 module Style =
 
-    let mutable padding = 5.0f
+    let padding = 5.0f
     let mutable baseFont = Unchecked.defaultof<SpriteFont>
     let accentColor = Animation.Color Color.Blue
     let changePrimaryColor col = accentColor.Target <- col

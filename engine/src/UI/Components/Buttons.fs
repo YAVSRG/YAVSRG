@@ -1,14 +1,17 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open Percyqaz.Common
 open Percyqaz.Flux.Input
 
-type Button(text: string, onClick: unit -> unit) =
+type Button(text: unit -> string, onClick: unit -> unit) =
     inherit StaticContainer(NodeType.Button onClick)
     
     let color = Animation.Fade(0.0f)
     let colorFunc = Palette.text (Palette.transition color Palette.LIGHTER Palette.WHITE) (!%Palette.DARKER)
 
     member val Hotkey : Hotkey = "none" with get, set
+
+    new(text: string, onClick: unit -> unit) = Button(K text, onClick)
 
     override this.OnFocus() =
         base.OnFocus()
