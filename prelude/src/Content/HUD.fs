@@ -159,31 +159,29 @@ module HUD =
                     }
             }
 
-    //[<Json.AutoCodec(false)>]
-    //type JudgementMeter =
-    //    {
-    //        Position: WidgetConfig
-    //        AnimationTime: float32
-    //        ShowRDMA: bool
-    //    }
-    //    static member Default = 
-    //        {
-    //            Position = 
-    //                {
-    //                    Enabled = true
-    //                    Float = false
-    //                    Left = -128.0f
-    //                    LeftA = 0.5f
-    //                    Top = 30.0f
-    //                    TopA = 0.5f
-    //                    Right = 128.0f
-    //                    RightA = 0.5f
-    //                    Bottom = 86.0f
-    //                    BottomA = 0.5f
-    //                }
-    //            AnimationTime = 800.0f
-    //            ShowRDMA = true
-    //        }
+    [<Json.AutoCodec(false)>]
+    type JudgementMeter =
+        {
+            Position: WidgetPosition
+            AnimationTime: float32
+        }
+        static member Default = 
+            {
+                Position = 
+                    {
+                        Enabled = false
+                        Float = false
+                        Left = -128.0f
+                        LeftA = 0.5f
+                        Top = 30.0f
+                        TopA = 0.5f
+                        Right = 128.0f
+                        RightA = 0.5f
+                        Bottom = 86.0f
+                        BottomA = 0.5f
+                    }
+                AnimationTime = 800.0f
+            }
 
     [<Json.AutoCodec(false)>]
     type ProgressMeter =
