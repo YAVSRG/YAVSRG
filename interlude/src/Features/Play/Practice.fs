@@ -29,10 +29,10 @@ module PracticeScreen =
             | AUDIO_OFFSET
             member this.Audio =
                 match this with
+                | VISUAL_OFFSET -> 0
                 | HIT_POSITION
-                | SCROLL_SPEED
-                | VISUAL_OFFSET -> false
-                | AUDIO_OFFSET -> true
+                | SCROLL_SPEED -> 1
+                | AUDIO_OFFSET -> 2
 
         let mutable suggested = false
         let mutable mode = Mode.AUDIO_OFFSET
@@ -65,7 +65,7 @@ module PracticeScreen =
         type ModeButton(label: string, m: Mode, apply_suggestion: unit -> unit) =
             inherit StaticContainer(NodeType.Button(fun () -> if mode = m then apply_suggestion() else mode <- m))
 
-            let requires_audio = m.Audio
+            let requires_audio = m.Audio = 2
 
             override this.Init(parent) =
                 this 
@@ -124,8 +124,9 @@ module PracticeScreen =
                 let desired_lead_time = current_lead_time - mean
                 scroll_speed_suggestion <- expected_pixels / float32 desired_lead_time
 
-                visual_offset_suggestion <- visual_offset.Value + mean / 1.0f<ms>
-                local_audio_offset_suggestion <- local_audio_offset.Value - mean
+                if options.AudioVolume.Value = 0.0 then
+                    visual_offset_suggestion <- visual_offset.Value + mean / 1.0f<ms>
+                else local_audio_offset_suggestion <- local_audio_offset.Value - mean
 
             member this.AcceptSuggestion() =
                 match mode with
@@ -150,17 +151,22 @@ module PracticeScreen =
                         ,
                         Position = Position.Box(0.0f, 0.0f, 20.0f, 350.0f, 300.0f, 230.0f)
                     )
-                |+ Conditional((fun () -> not mode.Audio && options.AudioVolume.Value > 0.0),
+                |+ Conditional((fun () -> mode.Audio = 0 && options.AudioVolume.Value > 0.0),
                         Callout.frame
-                            (Callout.Small.Icon(Icons.audio_mute).Title(L"practice.mute_hint"))
-                            (fun (w, h) -> Position.Box(0.0f, 0.0f, 20.0f, 650.0f, w, h + 40.0f))
+                            (Callout.Small.Icon(Icons.audio_mute).Body(L"practice.mute_mandatory_hint"))
+                            (fun (w, h) -> Position.Box(0.0f, 0.0f, 340.0f, 450.0f, w, h + 40.0f))
                     )
-                |+ Conditional((fun () -> mode.Audio && options.AudioVolume.Value = 0.0),
+                |+ Conditional((fun () -> mode.Audio = 1 && options.AudioVolume.Value > 0.0),
                         Callout.frame
-                            (Callout.Small.Icon(Icons.audio_on).Title(L"practice.unmute_hint"))
-                            (fun (w, h) -> Position.Box(0.0f, 0.0f, 20.0f, 650.0f, w, h + 40.0f))
+                            (Callout.Small.Icon(Icons.audio_mute).Body(L"practice.mute_hint"))
+                            (fun (w, h) -> Position.Box(0.0f, 0.0f, 340.0f, 450.0f, w, h + 40.0f))
                     )
-                |+ Conditional((fun () -> mode = Mode.HIT_POSITION && options.AudioVolume.Value = 0.0),
+                |+ Conditional((fun () -> mode.Audio = 2 && options.AudioVolume.Value = 0.0),
+                        Callout.frame
+                            (Callout.Small.Icon(Icons.audio_on).Body(L"practice.unmute_hint"))
+                            (fun (w, h) -> Position.Box(0.0f, 0.0f, 340.0f, 450.0f, w, h + 40.0f))
+                    )
+                |+ Conditional((fun () -> mode = Mode.HIT_POSITION),
                         Panel(
                             FlowContainer.Vertical<Widget>(50.0f, Spacing = 10.0f)
                             |+ Text(fun () -> sprintf "Current: %.0f" hit_position.Value)
@@ -170,7 +176,7 @@ module PracticeScreen =
                             Position = Position.Box(0.0f, 0.0f, 20.0f, 650.0f, 500.0f, 170.0f)
                         )
                     )
-                |+ Conditional((fun () -> mode = Mode.SCROLL_SPEED && options.AudioVolume.Value = 0.0),
+                |+ Conditional((fun () -> mode = Mode.SCROLL_SPEED),
                         Panel(
                             FlowContainer.Vertical<Widget>(50.0f, Spacing = 10.0f)
                             |+ Text(fun () -> sprintf "Current: %.0f%%" (100.0f * scroll_speed.Value))
