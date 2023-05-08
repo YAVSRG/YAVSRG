@@ -61,6 +61,26 @@ module Options =
             FadeLength: Setting.Bounded<float32>
             Color: Setting<Color>
         }
+        member this.LoadPreset(p: LaneCoverOptions) =
+            this.Enabled.Value <- p.Enabled.Value
+            this.Sudden.Value <- p.Sudden.Value
+            this.Hidden.Value <- p.Hidden.Value
+            this.FadeLength.Value <- p.FadeLength.Value
+            this.Color.Value <- p.Color.Value
+
+    [<Json.AutoCodec>]
+    type Preset =
+        {
+            Name: string
+            Locked: bool
+
+            VisualOffset: float32
+            ScrollSpeed: float32
+            HitPosition: float32
+            Upscroll: bool
+            LaneCover: LaneCoverOptions
+            Noteskin: string
+        }
 
     [<Json.AutoCodec(false)>]
     type GameOptions =
@@ -105,6 +125,10 @@ module Options =
             EnableConsole: Setting<bool>
             EnableTableEdit: Setting<bool>
             Hotkeys: Dictionary<Hotkey, Bind>
+
+            Preset1: Setting<Preset option>
+            Preset2: Setting<Preset option>
+            Preset3: Setting<Preset option>
         }
         static member Default = {
             VisualOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
@@ -130,6 +154,9 @@ module Options =
             KeymodePreference = Setting.simple Keymode.``4K``
             UseKeymodePreference = Setting.simple false
 
+            // playstyles are hints to the difficulty calc on how the hands are positioned
+            // will be removed when difficulty calc gets scrapped
+            // there is no way to edit these
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
             SelectedRuleset = 
                 Setting.simple Content.Rulesets.DEFAULT_ID
@@ -168,6 +195,10 @@ module Options =
                 [|mk Keys.Z; mk Keys.X; mk Keys.C; mk Keys.V; mk Keys.Space; mk Keys.Comma; mk Keys.Period; mk Keys.Slash; mk Keys.RightShift|]
                 [|mk Keys.CapsLock; mk Keys.Q; mk Keys.W; mk Keys.E; mk Keys.V; mk Keys.Space; mk Keys.K; mk Keys.L; mk Keys.Semicolon; mk Keys.Apostrophe|]
             |]
+
+            Preset1 = Setting.simple None
+            Preset2 = Setting.simple None
+            Preset3 = Setting.simple None
         }
 
     let mutable internal config : Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>
@@ -291,6 +322,32 @@ module Options =
             let id = typeof<'T>.Name
             cache.[id] <- value
             JSON.ToFile(Path.Combine(getDataPath "Data", "HUD", id + ".json"), true) value
+
+    module Presets =
+
+        let create(name: string) : Preset =
+            {
+                Name = name
+                Locked = false
+
+                VisualOffset = options.VisualOffset.Value
+                ScrollSpeed = options.ScrollSpeed.Value
+                HitPosition = options.HitPosition.Value
+                Upscroll = options.Upscroll.Value
+                LaneCover = options.LaneCover
+                Noteskin = options.Noteskin.Value
+            }
+
+        let load(preset: Preset) =
+            options.VisualOffset.Set preset.VisualOffset
+            options.ScrollSpeed.Set preset.ScrollSpeed
+            options.HitPosition.Set preset.HitPosition
+            options.Upscroll.Set preset.Upscroll
+            options.LaneCover.LoadPreset(preset.LaneCover)
+            if Content.Noteskins.loaded.ContainsKey preset.Noteskin then
+                options.Noteskin.Set preset.Noteskin
+                Content.Noteskins.Current.switch preset.Noteskin
+            else Logging.Error(sprintf "Noteskin '%s' use in this preset has been moved or isn't available" preset.Noteskin)
 
     let load(instance: int) =
         config <- loadImportantJsonFile "Config" configPath true

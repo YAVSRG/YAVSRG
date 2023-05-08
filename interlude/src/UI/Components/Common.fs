@@ -135,6 +135,27 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
         base.Update(elapsedTime, bounds)
         if searchTimer.ElapsedMilliseconds > this.DebounceTime then searchTimer.Reset(); callback()
 
+type ButtonV2(text: unit -> string, onClick: unit -> unit) as this =
+    inherit StaticContainer(NodeType.Button (fun () -> if not (this.Disabled()) then onClick()))
+
+    member val Hotkey : Hotkey = "none" with get, set
+    member val Disabled : unit -> bool = K false with get, set
+
+    new(text: string, onClick: unit -> unit) = ButtonV2(K text, onClick)
+
+    override this.Init(parent: Widget) =
+        this
+        |+ Text(
+            text,
+            Align = Alignment.CENTER,
+            Color = fun () -> 
+                if this.Disabled() then Colors.text_greyout
+                elif this.Focused then Colors.text_yellow_2
+                else Colors.text)
+        |+ Clickable((fun () -> if not (this.Disabled()) then this.Select()), OnHover = fun b -> if b && not (this.Disabled()) then this.Focus())
+        |* HotkeyAction(this.Hotkey, onClick)
+        base.Init parent
+
 type WIP() as this =
     inherit StaticWidget(NodeType.None)
 

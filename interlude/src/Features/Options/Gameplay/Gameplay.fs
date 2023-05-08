@@ -11,6 +11,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Features
 open Interlude.Features.OptionsMenu.Themes
@@ -90,12 +91,64 @@ type LanecoverPage() as this =
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = ()
 
+type EditPresetPage(setting: Setting<Preset option>) as this =
+    inherit Page()
+
+    let mutable delete = false
+    let deleteButton = PageButton("gameplay.preset.delete", fun () -> delete <- true; Menu.Back())
+
+    let preset = setting.Value.Value
+    let name = Setting.simple preset.Name
+    let locked = Setting.simple preset.Locked |> Setting.trigger (fun b -> deleteButton.Enabled <- not b)
+
+    do
+        this.Content(
+            column()
+            |+ PageSetting("gameplay.preset.name", TextEntry(name, "none"))
+                .Pos(200.0f)
+            |+ PageSetting("gameplay.preset.locked", Selector<_>.FromBool(locked))
+                .Pos(270.0f)
+                .Tooltip(Tooltip.Info("gameplay.preset.locked"))
+            |+ deleteButton
+                .Pos(340.0f)
+        )
+
+    override this.Title = preset.Name
+    override this.OnClose() = if delete then setting.Set None else setting.Set (Some { preset with Name = name.Value; Locked = locked.Value })
+
+
 type GameplayPage() as this =
     inherit Page()
 
     let keycount = Setting.simple options.KeymodePreference.Value
     let binds = GameplayKeybinder(keycount)
     let preview = NoteskinPreview 0.35f
+
+    let presetButtons (i: int) (setting: Setting<Preset option>) =
+        StaticContainer(NodeType.None, Position = Position.Box(1.0f, 1.0f, -1200.0f + float32 i * 300.0f, -90.0f, 290.0f, 80.0f))
+        |+ ButtonV2(
+                (fun () ->
+                    match setting.Value with
+                    | None -> sprintf "Preset %i (Empty)" i
+                    | Some s -> Icons.edit + " " + s.Name
+                ),
+                (fun () -> if setting.Value.IsSome then EditPresetPage(setting).Show()
+                ),
+                Disabled = (fun () -> setting.Value.IsNone),
+                Position = Position.SliceTop(40.0f)
+            )
+        |+ ButtonV2(
+                L"gameplay.preset.load",
+                (fun () -> match setting.Value with Some s -> Presets.load s; preview.Refresh() | None -> ()),
+                Disabled = (fun () -> setting.Value.IsNone),
+                Position = { Position.SliceBottom(40.0f) with Right = 0.5f %+ 0.0f }
+            )
+        |+ ButtonV2(
+                L"gameplay.preset.save",
+                (fun () -> setting.Value <- Presets.create(sprintf "Preset %i" i) |> Some),
+                Disabled = (fun () -> match setting.Value with Some s -> s.Locked | None -> false),
+                Position = { Position.SliceBottom(40.0f) with Left = 0.5f %+ 0.0f }
+            )
 
     do
         this.Content(
@@ -135,7 +188,11 @@ type GameplayPage() as this =
                 .Pos(860.0f)
                 .Tooltip(Tooltip.Info("gameplay.noteskins"))
             |+ preview
+            |+ presetButtons 1 options.Preset1
+            |+ presetButtons 2 options.Preset2
+            |+ presetButtons 3 options.Preset3
         )
+
     override this.Title = L"gameplay.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = ()
