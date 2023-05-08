@@ -546,7 +546,7 @@ type EditJudgementMeterPage() as this =
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFillB(Style.baseFont, rs.JudgementName 0, bounds, (rs.JudgementColor 0, Colors.black), Alignment.CENTER)
+                Text.drawFill(Style.baseFont, rs.JudgementName 0, bounds, rs.JudgementColor 0, Alignment.CENTER)
         }
 
     do

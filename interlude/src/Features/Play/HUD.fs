@@ -127,7 +127,7 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
     override this.Draw() =
         if time > -Time.infinity then
             let a = 255 - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
-            Text.drawFillB(Style.baseFont, state.Ruleset.JudgementName tier, this.Bounds, (state.Ruleset.JudgementColor(tier).O4a a, Colors.black.O4a a), Alignment.CENTER)
+            Text.drawFill(Style.baseFont, state.Ruleset.JudgementName tier, this.Bounds, state.Ruleset.JudgementColor(tier).O4a a, Alignment.CENTER)
 
 type ComboMeter(conf: HUD.Combo, state: PlayState) =
     inherit StaticWidget(NodeType.None)
