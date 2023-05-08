@@ -27,16 +27,19 @@ module Colors =
     let cyan = Color.FromArgb 0xFF_1d869d
     let cyan_shadow = Color.FromArgb 0xFF_084251
     let text_cyan = cyan_accent, cyan_shadow
+    let text_cyan_2 = cyan_accent, shadow_1
     
     let red_accent = Color.FromArgb 0xFF_ef5d57
     let red = Color.FromArgb 0xFF_9c3736
     let red_shadow = Color.FromArgb 0xFF_6e190d
     let text_red = red_accent, red_shadow
+    let text_red_2 = red_accent, shadow_1
 
     let pink_accent = Color.FromArgb 0xFF_ff85c0
     let pink = Color.FromArgb 0xFF_bc4980
     let pink_shadow = Color.FromArgb 0xFF_6c2d4d
     let text_pink = pink_accent, pink_shadow
+    let text_pink_2 = pink_accent, shadow_1
     
     let blue_accent = Color.FromArgb 0xFF_0032ff
     let blue = Color.FromArgb 0xFF_001696

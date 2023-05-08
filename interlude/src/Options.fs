@@ -272,6 +272,9 @@ module Options =
             Hotkeys.register "skip" (mk Keys.Space)
             Hotkeys.register "retry" (ctrl Keys.R)
 
+            Hotkeys.register "preset1" (ctrl Keys.F1)
+            Hotkeys.register "preset2" (ctrl Keys.F2)
+            Hotkeys.register "preset3" (ctrl Keys.F3)
 
             options <- { options with Hotkeys = Hotkeys.import d }
 

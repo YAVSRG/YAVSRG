@@ -139,13 +139,23 @@ type GameplayPage() as this =
             )
         |+ ButtonV2(
                 L"gameplay.preset.load",
-                (fun () -> match setting.Value with Some s -> Presets.load s; preview.Refresh() | None -> ()),
+                (fun () ->
+                    match setting.Value with
+                    | Some s -> 
+                        Presets.load s
+                        preview.Refresh()
+                        Notifications.action_feedback(Icons.system_notification, L"notification.preset_loaded", s.Name)
+                    | None -> ()),
                 Disabled = (fun () -> setting.Value.IsNone),
                 Position = { Position.SliceBottom(40.0f) with Right = 0.5f %+ 0.0f }
             )
         |+ ButtonV2(
                 L"gameplay.preset.save",
-                (fun () -> setting.Value <- Presets.create(sprintf "Preset %i" i) |> Some),
+                (fun () -> 
+                    let name = match setting.Value with Some s -> s.Name | None -> sprintf "Preset %i" i
+                    setting.Value <- Presets.create(name) |> Some
+                    Notifications.action_feedback(Icons.system_notification, L"notification.preset_saved", name)
+                ),
                 Disabled = (fun () -> match setting.Value with Some s -> s.Locked | None -> false),
                 Position = { Position.SliceBottom(40.0f) with Left = 0.5f %+ 0.0f }
             )
@@ -165,28 +175,28 @@ type GameplayPage() as this =
             |+ PageSetting("gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
                 .Pos(310.0f)
                 .Tooltip(Tooltip.Info("gameplay.backgrounddim"))
+            |+ PageButton("gameplay.noteskins", fun () -> Menu.ShowPage { new NoteskinsPage() with override this.OnClose() = base.OnClose(); preview.Refresh() })
+                .Pos(380.0f)
+                .Tooltip(Tooltip.Info("gameplay.noteskins"))
 
             |+ PageSetting("generic.keymode", Selector<_>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged)))
-                .Pos(410.0f)
+                .Pos(480.0f)
             |+ PageSetting("gameplay.keybinds", binds)
-                .Pos(480.0f, Viewport.vwidth - 200.0f)
+                .Pos(550.0f, Viewport.vwidth - 200.0f)
                 .Tooltip(Tooltip.Info("gameplay.keybinds"))
 
             |+ PageButton("gameplay.lanecover", fun() -> Menu.ShowPage LanecoverPage)
-                .Pos(580.0f)
+                .Pos(650.0f)
                 .Tooltip(Tooltip.Info("gameplay.lanecover"))
             |+ PageButton("gameplay.pacemaker", fun () ->  Menu.ShowPage PacemakerPage)
-                .Pos(650.0f)
+                .Pos(720.0f)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(L"gameplay.pacemaker.hint"))
             |+ PageButton("gameplay.rulesets", fun () -> Menu.ShowPage Rulesets.FavouritesPage)
-                .Pos(720.0f)
+                .Pos(790.0f)
                 .Tooltip(Tooltip.Info("gameplay.rulesets"))
             |+ PageButton("gameplay.hud", fun () -> Menu.ShowPage EditHUDPage)
-                .Pos(790.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud"))
-            |+ PageButton("gameplay.noteskins", fun () -> Menu.ShowPage { new NoteskinsPage() with override this.OnClose() = base.OnClose(); preview.Refresh() })
                 .Pos(860.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins"))
+                .Tooltip(Tooltip.Info("gameplay.hud"))
             |+ preview
             |+ presetButtons 1 options.Preset1
             |+ presetButtons 2 options.Preset2

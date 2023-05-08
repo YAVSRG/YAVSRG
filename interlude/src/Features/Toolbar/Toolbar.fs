@@ -12,6 +12,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Utils
+open Interlude.Options
 open Interlude.UI.Screen.Toolbar
 open Interlude.Features
 open Interlude.Features.Wiki
@@ -89,6 +90,24 @@ type Toolbar() =
             Themes.load()
             first_init <- false
             Notifications.action_feedback(Icons.system_notification, L"notification.reload_themes", "") )
+        |+ HotkeyAction("preset1", fun () -> 
+            match options.Preset1.Value with
+            | Some s when Screen.currentType <> Screen.Type.Play ->
+                Presets.load s
+                Notifications.action_feedback(Icons.system_notification, L"notification.preset_loaded", s.Name)
+            | _ -> () )
+        |+ HotkeyAction("preset2", fun () -> 
+            match options.Preset2.Value with
+            | Some s when Screen.currentType <> Screen.Type.Play ->
+                Presets.load s
+                Notifications.action_feedback(Icons.system_notification, L"notification.preset_loaded", s.Name)
+            | _ -> () )
+        |+ HotkeyAction("preset3", fun () -> 
+            match options.Preset3.Value with
+            | Some s when Screen.currentType <> Screen.Type.Play ->
+                Presets.load s
+                Notifications.action_feedback(Icons.system_notification, L"notification.preset_loaded", s.Name)
+            | _ -> () )
         |* Jukebox(Position = Position.Margin(0.0f, HEIGHT))
 
     override this.Draw() = 

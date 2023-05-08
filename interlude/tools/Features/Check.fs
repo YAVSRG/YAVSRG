@@ -62,7 +62,7 @@ module Check =
                 for m in matches """ localiseWith\s*\[.*\]\s*"([a-z\-_\.]*)" """ file_contents do
                     found.Add m
 
-                for m in Seq.append ["exit"; "select"; "up"; "down"; "left"; "right"] (matches """ Hotkeys.register "([a-z\-_\.]*)" """ file_contents) do
+                for m in Seq.append ["exit"; "select"; "up"; "down"; "left"; "right"] (matches """ Hotkeys.register "([a-z0-9\-_\.]*)" """ file_contents) do
                     found.Add (sprintf "hotkeys.%s.name" m)
                     found.Add (sprintf "hotkeys.%s.tooltip" m)
 
