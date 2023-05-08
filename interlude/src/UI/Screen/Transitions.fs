@@ -22,6 +22,52 @@ module Transitions =
 
     // drawing
 
+    let private beam (direction_deg: float32) (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) =
+        // angle is measured clockwise from vertical
+        let cos = MathF.Cos(direction_deg / 180.0f * MathF.PI)
+        let sin = MathF.Sin(direction_deg / 180.0f * MathF.PI)
+
+        let o = Vector2(x, y)
+        let d = Vector2(sin, -cos)
+        let perp = Vector2(cos * 2.5f, sin * 2.5f)
+        let startpoint = r1 + (r2 - r1) * (time *time)
+        let endpoint = r1 + (r2 - r1) * (time * (2.0f - time))
+
+        Draw.quad
+            ( Quad.create
+                (o + d * startpoint + perp)
+                (o + d * endpoint + perp)
+                (o + d * endpoint - perp)
+                (o + d * startpoint - perp)
+            )
+            ( Quad.colorOf col )
+            Sprite.DefaultQuad
+
+    let private glint (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) =
+        let t = 4.0f * (time - time * time)
+        let size = r1 * t
+        let direction_deg = 65.0f - time * 10.0f
+        let cos = MathF.Cos(direction_deg / 180.0f * MathF.PI)
+        let sin = MathF.Sin(direction_deg / 180.0f * MathF.PI)
+
+        let o = Vector2(x, y)
+        let d = Vector2(sin, -cos)
+
+        let cos = MathF.Cos((45.0f + direction_deg) / 180.0f * MathF.PI)
+        let sin = MathF.Sin((45.0f + direction_deg) / 180.0f * MathF.PI)
+        let p = Vector2(-sin * size, cos * size)
+        let p2 = Vector2(-cos * size, -sin * size)
+
+        let q = Quad.create o (o - p) (o + r2 * d) (o + p2)
+        let q2 = Quad.create o (o - p) (o + r2 * 0.6f * d) (o + p2) |> Quad.rotateDegO o 90.0
+
+        let c = Color.FromArgb(Math.Clamp(t * 255.0f |> int, 0, 255), col)
+
+        Draw.quad q (Quad.colorOf c) Sprite.DefaultQuad
+        Draw.quad q2 (Quad.colorOf c) Sprite.DefaultQuad
+        Draw.quad (Quad.rotateDegO o 180.0 q) (Quad.colorOf c) Sprite.DefaultQuad
+        Draw.quad (Quad.rotateDegO o 180.0 q2) (Quad.colorOf c) Sprite.DefaultQuad
+
     let private wedge (centre: Vector2) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
         let segments = int ((a2 - a1) / 0.10)
         let segsize = (a2 - a1) / float segments
