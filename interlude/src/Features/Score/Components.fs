@@ -120,10 +120,10 @@ type Accuracy(grade: Grade.GradeResult ref, improvements: ImprovementFlags ref, 
         Text.drawFillB(Style.baseFont, data.Scoring.FormatAccuracy(), this.Bounds.Shrink(10.0f, 0.0f).TrimBottom(LOWER_SIZE), (grade_color, Colors.black), Alignment.CENTER)
         let text, color =
             match (!improvements).Accuracy with
-            | Improvement.New -> new_record, (Colors.text_yellow_2)
-            | Improvement.Faster _ -> new_record, (Colors.text_cyan)
-            | Improvement.Better _ -> new_record, (Colors.text_green_2)
-            | Improvement.FasterBetter _ -> new_record, (Colors.text_pink)
+            | Improvement.New -> new_record, Colors.text_yellow_2
+            | Improvement.Faster r -> sprintf "%s  •  +%gx" new_record (System.MathF.Round(r, 2)), Colors.text_cyan_2
+            | Improvement.Better b -> sprintf "%s  •  +%.2f%%" new_record (b * 100.0), Colors.text_green_2
+            | Improvement.FasterBetter (r, b) ->  sprintf "%s  •  +%.2f%%  •  +%gx" new_record (b * 100.0) (System.MathF.Round(r, 2)), Colors.text_pink_2
             | Improvement.None ->
                 match (!previous_personal_bests) with
                 | Some pbs -> 
@@ -164,9 +164,15 @@ type Lamp(lamp: Lamp.LampResult ref, improvements: ImprovementFlags ref, previou
         let text, color =
             match (!improvements).Lamp with
             | Improvement.New -> new_record, (Colors.text_yellow_2)
-            | Improvement.Faster _ -> new_record, (Colors.text_cyan)
-            | Improvement.Better _ -> new_record, (Colors.text_green_2)
-            | Improvement.FasterBetter _ -> new_record, (Colors.text_pink)
+            | Improvement.Faster r -> sprintf "%s  •  +%gx" new_record (System.MathF.Round(r, 2)), (Colors.text_cyan_2)
+            | Improvement.Better b -> 
+                let new_lamp = data.Ruleset.LampName (!lamp).Lamp
+                let old_lamp = data.Ruleset.LampName( (!lamp).Lamp - b )
+                sprintf "%s  •  %s > %s" new_record old_lamp new_lamp, (Colors.text_green_2)
+            | Improvement.FasterBetter (r, b) -> 
+                let new_lamp = data.Ruleset.LampName (!lamp).Lamp
+                let old_lamp = data.Ruleset.LampName( (!lamp).Lamp - b )
+                sprintf "%s  •  %s > %s  •  +%gx" new_record old_lamp new_lamp (System.MathF.Round(r, 2)), (Colors.text_pink_2)
             | Improvement.None ->
                 match (!previous_personal_bests) with
                 | Some pbs -> 
