@@ -90,8 +90,11 @@ module Quad =
         let v = new Vector2(x, y)
         struct (c1 + v, c2 + v, c3 + v, c4 + v)
 
-    let rotateDeg degrees (struct (c1, c2, c3, c4): Quad) : Quad =
-        let centre = (c1 + c2 + c3 + c4) * 0.25f
+    let rotateDegO origin degrees (struct (c1, c2, c3, c4): Quad) : Quad =
         let mat = Matrix2.CreateRotation(-(float32(degrees / 180.0 * Math.PI)))
         struct (c1, c2, c3, c4)
-        |> map ((fun c -> c - centre) >> (fun c -> mat * c) >> (fun c -> c + centre))
+        |> map ((fun c -> c - origin) >> (fun c -> mat * c) >> (fun c -> c + origin))
+
+    let rotateDeg degrees (struct (c1, c2, c3, c4): Quad) : Quad =
+        let origin = (c1 + c2 + c3 + c4) * 0.25f
+        rotateDegO origin degrees struct (c1, c2, c3, c4)
