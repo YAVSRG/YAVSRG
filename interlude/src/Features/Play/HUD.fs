@@ -119,7 +119,7 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
                     //| _ -> true
                 then
                     let j = int judge.Value in
-                    if j >= tier || ev.Time - atime > time then
+                    if j >= tier || ev.Time - atime > time || ev.Time < time then
                         tier <- j
                         time <- ev.Time
             )
