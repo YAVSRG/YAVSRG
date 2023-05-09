@@ -24,6 +24,7 @@ module Startup =
         Logging.Subscribe
             ( fun (level, main, details) ->
                 sprintf "[%A] %s" level main |> Terminal.add_message )
+        |> ignore
 
         { new Screen.ScreenRoot(Toolbar())
             with override this.Init() = Gameplay.init(); base.Init() }
