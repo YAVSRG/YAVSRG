@@ -231,34 +231,33 @@ type IScoreMetric
             noteSeekActive <- noteSeekActive + 1
 
         let mutable i = noteSeekActive
-        let mutable delta = missWindow
-        let mutable found = -1
+        let mutable cbrush_absorb_delta = missWindow
+        let mutable earliest_note = -1
+        let mutable earliest_delta = missWindow
         let target = now + missWindow
 
         while i < hitData.Length && InternalScore.offsetOf hitData.[i] <= target do
             let struct (t, deltas, status) = hitData.[i]
             let d = now - t
-            if status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED then
-                if (Time.Abs delta > Time.Abs d) then
-                    found <- i
-                    delta <- d
-            // Accept a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
+            if earliest_note < 0 && (status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED) then
+                earliest_note <- i
+                earliest_delta <- d
+            // Detect a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
             elif status.[k] = HitStatus.HIT_ACCEPTED && deltas.[k] < -ruleset.Accuracy.CbrushWindow then
-                if (Time.Abs delta > Time.Abs d) then
-                    found <- i
-                    delta <- d
+                if (Time.Abs cbrush_absorb_delta > Time.Abs d) then
+                    cbrush_absorb_delta <- d
             i <- i + 1
 
-        if found >= 0 then
-            let struct (t, deltas, status) = hitData.[found]
-            if status.[k] <> HitStatus.HIT_ACCEPTED then // Could be an already hit note, in which case just swallow the extra input
+        if earliest_note >= 0 then
+            let struct (t, deltas, status) = hitData.[earliest_note]
+            // If user's hit is closer to a note hit extremely early than any other note, swallow it
+            if Time.Abs cbrush_absorb_delta >= Time.Abs earliest_delta then
                 let isHoldHead = status.[k] <> HitStatus.HIT_REQUIRED
                 status.[k] <- HitStatus.HIT_ACCEPTED
-                deltas.[k] <- delta / rate
+                deltas.[k] <- earliest_delta / rate
                 this._HandleEvent { Time = relativeTime; Column = k; Guts = Hit_ (deltas.[k], isHoldHead, false) }
                 // Begin tracking if it's a hold note
-                //assert(fst internalHoldStates.[k] = Nothing)
-                if isHoldHead then internalHoldStates.[k] <- Holding, found
+                if isHoldHead then internalHoldStates.[k] <- Holding, earliest_note
         else // If no note to hit, but a hold note head was missed, pressing key marks it dropped instead
             internalHoldStates.[k] <- 
                 match internalHoldStates.[k] with
@@ -272,7 +271,7 @@ type IScoreMetric
         | Holding, holdHeadIndex
         | Dropped, holdHeadIndex ->
 
-            let mutable i = holdHeadIndex + 1
+            let mutable i = holdHeadIndex
             let mutable delta = missWindow
             let mutable found = -1
             let target = now + missWindow
