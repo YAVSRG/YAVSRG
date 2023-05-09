@@ -4,38 +4,109 @@
   <meta charset="utf-8">
   <title>YAVSRG</title>
   <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
 </head>
-<body class="bg-teal-200">
+<body class="background-1 akrobat">
   <div class="flex flex-col h-screen justify-between">
+
+    <!-- content -->
     <div>
-      <div class="py-4 font-serif font-black items-center text-center">
-        <h1 class="text-5xl">YAVSRG</h1>
+
+      <div class="py-4 items-center text-center">
+        <!-- <h1 class="text-50">YAVSRG</h1>
         <div class="flex flex-row justify-center">
           <img src="https://user-images.githubusercontent.com/21290233/165412641-5f857e96-901b-48dc-867e-e509ca123a3b.png"/>
-        </div>
-        <p class="text-lg mb-2 text-gray-700">Yet another vertically scrolling rhythm game</p>
-        <p class="text-sm mb-4 text-gray-500">VISION WITHOUT ACTION IS JUST HALLUCINATION</p>
+        </div> -->
+        <div class="frame-green text-30 container p-4 mx-auto">Yet another vertically scrolling rhythm game</div>
       </div>
-      <div class="container flex flex-row mx-auto justify-between">
-        <div class="bg-teal-500 text-white text-center text-xl font-serif font-semibold border-4 border-teal-300 w-56 shadow-xl p-4 mr-4">
-          <img class="rounded-full border-4 border-white" src="pfp.png"/>
-          <a href="https://github.com/percyqaz" class="text-3xl">Percyqaz</a>
-        </div>
-        <div class="bg-teal-500 text-white text-xl w-full font-serif font-semibold border-4 border-teal-300 shadow-xl p-4">
-          <h1 class="text-3xl">Interlude</h1>
-          <p><- Open-source VSRG project written by this guy</p>
-          <p>Started as a fun hobby project, but now it's spiralled into a real game you can play!</p>
-          <div class="flex flex-row justify-end">
-            <a href="https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip" class="mt-2 text-white text-2xl font-black bg-teal-700 hover:bg-teal-800 rounded px-4 py-3">Download</a>
+
+      <div class="w-full p-10 background-2">
+
+        <div class="container flex flex-col mx-auto space-y-4">
+
+          <div class="flex flex-row space-x-4 justify-between">
+
+            <div class="frame text-center text-20 w-56 p-4">
+              <img class="rounded-full border-4 border-white" src="pfp.png"/>
+              <a href="https://github.com/percyqaz" class="text-30 hover:underline">Percyqaz</a>
+              <p class="leading-8 text-grey">Maker of Interlude</p>
+            </div>
+
+            <div class="frame text-20 w-full py-4 px-6">
+              <h1 class="text-30">Interlude</h1>
+              <p>
+              Interlude started as a hobby project, made for fun in my spare time.
+              <br/>
+              My aim is to create a client packed with all the cool ideas the community and I come up with towards providing my "ideal VSRG experience"
+              </p>
+              <div class="flex flex-row justify-end items-center">
+                <a href="https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip" class="button mt-4 px-4 py-3">Download Interlude</a>
+              </div>
+            </div>
+
           </div>
+          
+          <div class="frame text-20 text-center w-full p-4">
+            <h1 class="text-30">User interface</h1>
+            <p class="leading-8 mb-4">I'm not a UI designer by trade (and I've never made a website from scratch before either!)
+              <br/>I'm proud to say I've trial-and-errored my way into a design language that suits me, and I hope you find yourself comfortable navigating everything.
+            </p>
+            <img class="feature" src="levelselect.png"/>
+          </div>
+
+          <div class="frame text-20 text-center w-full p-4">
+            <h1 class="text-30">Ingame help</h1>
+            <p class="leading-8 mb-4">
+              Don't know what a button does? Forgotten how something works?
+              <br/>I know I have. That's why I've built helpful tooltips into the game.
+              Just press the / key while hovering over most things to see an explanation of what it is and how to use it
+            </p>
+            <img class="feature" src="tooltips.gif"/>
+          </div>
+
+          <div class="frame text-20 text-center w-full p-4">
+            <h1 class="text-30">Features</h1>
+            <p class="leading-8 mb-4">
+              Everything you would normally expect to be a setting in a rhythm game, Interlude has it.
+              <br/>This includes custom skins for your notes, and more advanced features like lane covers or pacemakers
+            </p>
+            <img class="feature" src="options.png"/>
+          </div>
+
+          <div class="frame text-20 text-center w-full p-4">
+            <h1 class="text-30">Customise your HUD</h1>
+            <p class="leading-8 mb-4">
+              You can reposition the gameplay HUD elements however you like, and also change a variety of settings about what they display.
+            </p>
+            <img class="feature" src="hud.png"/>
+          </div>
+
+          <div class="frame text-20 text-center w-full p-4 mb-0">
+
+            <h1 class="text-30">Like what you see?</h1>
+
+            <p class="leading-8 mb-8">
+              Interlude can only grow to its full potential with your help.
+              <br/>The best way to help out is to join the community and provide feature requests/playtesting feedback
+            </p>
+
+            <a href="https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip" class="mx-auto button text-30 mt-8 px-4 py-3">Download Interlude</a>
+
+            <div class="w-3/4 lg:w-1/2 mx-auto flex flex-row justify-between mt-8">
+              <a href="https://discord.gg/tA22tWR" class="px-4 py-2 hover:underline">Join the Discord</a>
+              <a href="https://github.com/YAVSRG/Interlude" class="px-4 py-2 hover:underline">Follow on GitHub</a>
+            </div>
+
+          </div>
+
         </div>
-      </div>  
-    </div>
-    <footer class="bg-teal-500 text-white text-xl font-serif font-semibold border-t-4 px-4 border-teal-300 flex flex-row justify-between">
+      </div>
+
+    <!-- footer -->
+    <footer class="footer text-20 px-4 flex flex-row justify-center">
       <span>© Percyqaz 2018-2023</span>
-      <a href="https://github.com/YAVSRG/Interlude">Github</a>
-      <a>Privacy Policy</a>
     </footer>
+
   </div>
 </body>
 </html>

@@ -1,0 +1,107 @@
+@font-face {
+    font-family: 'akrobatblack';
+    src: url('akrobat-black-webfont.woff2') format('woff2'),
+         url('akrobat-black-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --shadow-1: #050308;
+    --shadow-2: #0a0911;
+    --shadow-2-3a: #0a0911DD;
+    --shadow-2-2a: #0a0911AA;
+    --shadow-2-1a: #0a091177;
+    --cyan: #1d869d;
+    --cyan-accent: #43e0ef;
+    --cyan-shadow: #084251;
+    --cyan-shadow-2a: #084251AA;
+    --green-accent: #43ef70;
+    --green: #1d9d4b;
+    --green-shadow: #0c4b24;
+    --blue-accent: #0032ff;
+    --blue: #001696;
+    --blue-shadow: #000450;
+    --yellow-accent: #ffe670;
+}
+
+.akrobat {
+    font-family: 'akrobatblack';
+    color: white;
+}
+
+p {
+    color: #e5e6ec;
+}
+
+.text-20 {
+    text-shadow: var(--shadow-2-2a) 2.2px 2.2px 0;
+    font-size: 25px
+}
+
+.text-30 {
+    text-shadow: var(--shadow-2-2a) 3px 3px 0;
+    font-size: 35px
+}
+
+.text-50 {
+    text-shadow: var(--shadow-2-2a) 5px 5px 0;
+    font-size: 50px
+}
+
+.cool-shadow {
+    box-shadow: var(--shadow-2-3a) 5px 5px 0;
+}
+
+.button {
+    background-color: var(--cyan-shadow);
+    border-radius: 5px;
+    box-shadow: var(--shadow-2-3a) 5px 5px 0;
+}
+
+.button:hover {
+    background-color: var(--cyan-shadow-2a);
+    color: var(--yellow-accent);
+}
+
+.hang-button {
+    background-color: var(--shadow-2-1a);
+}
+
+.hang-button:hover {
+    background-color: var(--shadow-2-1a);
+    color: var(--yellow-accent);
+}
+
+.background-1 {
+    background-color: var(--green-shadow);
+}
+
+.background-2 {
+    background-color: var(--cyan-shadow);
+}
+
+.frame {
+    background-color: var(--cyan);
+    border-radius: 5px;
+    border: 5px solid var(--cyan-accent);
+    box-shadow: var(--shadow-2-3a) 5px 5px 0;
+}
+
+.frame-green {
+    background-color: var(--green);
+    border-radius: 5px;
+    border: 5px solid var(--green-accent);
+    box-shadow: var(--shadow-2-3a) 5px 5px 0;
+}
+
+.footer {
+    background-color: var(--cyan);
+    border-top: 5px solid var(--cyan-accent);
+}
+
+.feature {
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
