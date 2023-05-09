@@ -11,6 +11,9 @@ open Interlude.Features.Printerlude
 open Interlude.Features.Online
 
 let launch(instance: int) =
+    Logging.Verbosity <- if Prelude.Common.DEV_MODE then LoggingLevel.DEBUG else LoggingLevel.INFO
+    Logging.LogFile <- Some "log.txt"
+
     Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
     let crashSplash = Utils.randomSplash("CrashSplashes.txt") >> (fun s -> Logging.Critical s)
@@ -38,6 +41,8 @@ let launch(instance: int) =
 
     Options.save()
     Network.shutdown()
+
+    Logging.Shutdown()
 
 [<EntryPoint>]
 let main argv =
