@@ -57,6 +57,20 @@ module Filter =
                 if MathF.Round(v, 2) <> 1.0f then has_sv <- true
         MultiTimeData keys, has_sv
 
+    let no_ln (keys: int) (notes: TimeData<NoteRow>) : TimeData<NoteRow> * bool =
+        let mutable has_ln = false
+        seq {
+            for (time, nr) in notes.Data do
+                let new_nr = NoteRow.createEmpty keys
+                for k = 0 to (keys - 1) do
+                    match nr.[k] with
+                    | NoteType.HOLDHEAD -> has_ln <- true; new_nr.[k] <- NoteType.NORMAL
+                    | NoteType.NORMAL -> new_nr.[k] <- NoteType.NORMAL
+                    | _ -> ()
+                yield (time, new_nr)
+        } |> TimeData
+        , has_ln
+
 
 module Inverse =
 

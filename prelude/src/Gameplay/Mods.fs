@@ -98,15 +98,22 @@ module Mods =
             Status = ModStatus.Unranked
             Apply = fun _ mc -> let sv, changed = Filter.no_sv mc.Keys mc.SV in changed, { mc with SV = sv }
         }
+        
+    registerMod "noln"
+        { defaultMod with
+            Status = ModStatus.Unranked
+            Exclusions = ["inverse"]
+            Apply = fun _ mc -> let notes, changed = Filter.no_ln mc.Keys mc.Notes in changed, { mc with Notes = notes }
+        }
 
     registerMod "inverse"
         { defaultMod with
             Status = ModStatus.Unranked
             States = 1
+            Exclusions = ["noln"]
             Apply = fun s mc -> true, { mc with Notes = Inverse.apply mc.Keys mc.BPM mc.Notes (s > 0) }
         }
 
-    //todo: no ln (removes all lns)
     //todo: randomiser with seed
 
     (*
