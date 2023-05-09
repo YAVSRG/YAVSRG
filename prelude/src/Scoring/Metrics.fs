@@ -239,9 +239,12 @@ type IScoreMetric
         while i < hitData.Length && InternalScore.offsetOf hitData.[i] <= target do
             let struct (t, deltas, status) = hitData.[i]
             let d = now - t
-            if earliest_note < 0 && (status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED) then
-                earliest_note <- i
-                earliest_delta <- d
+            if (status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED) then
+                if (Time.Abs earliest_delta > Time.Abs d) then
+                    earliest_note <- i
+                    earliest_delta <- d
+                if Time.Abs earliest_delta < ruleset.Accuracy.CbrushWindow then
+                    i <- hitData.Length
             // Detect a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
             elif status.[k] = HitStatus.HIT_ACCEPTED && deltas.[k] < -ruleset.Accuracy.CbrushWindow then
                 if (Time.Abs cbrush_absorb_delta > Time.Abs d) then
