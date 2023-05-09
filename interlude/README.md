@@ -6,7 +6,7 @@ The YET ANOTHER VERTICALLY SCROLLING RHYTHM GAME project is a collection of all 
 
 This is my custom-made VSRG client, with the aim to put lots of tools, charts and quality of life into one place.
 
-Click [here to read more info about this project](https://yavsrg.github.io/Interlude)
+Click [here to read more info about this project](https://www.yavsrg.net/)
 
 ## 🎮 Play it:
 
