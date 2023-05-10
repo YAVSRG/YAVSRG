@@ -111,6 +111,7 @@ module ReplayScreen =
                     add_widget LifeMeter
                     add_widget JudgementCounts
                     add_widget JudgementMeter
+                    add_widget EarlyLateMeter
 
                 this
                 |+ Text((Icons.watch + if is_auto then " Watching AUTOPLAY" else " Watching replay"),

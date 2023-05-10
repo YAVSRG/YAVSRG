@@ -112,13 +112,9 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
                     | Hit e -> (e.Judgement, e.Delta)
                     | Release e -> (e.Judgement, e.Delta)
                 if
-                    judge.IsSome && true //todo: prevent certain judgements from displaying?
-                    //match judge.Value with
-                    //| _JType.RIDICULOUS
-                    //| _JType.MARVELLOUS -> conf.ShowRDMA
-                    //| _ -> true
+                    judge.IsSome && (not conf.IgnorePerfectJudgements || judge.Value > 0)
                 then
-                    let j = int judge.Value in
+                    let j = judge.Value in
                     if j >= tier || ev.Time - atime > time || ev.Time < time then
                         tier <- j
                         time <- ev.Time
@@ -128,6 +124,30 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
         if time > -Time.infinity then
             let a = 255 - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
             Text.drawFill(Style.baseFont, state.Ruleset.JudgementName tier, this.Bounds, state.Ruleset.JudgementColor(tier).O4a a, Alignment.CENTER)
+
+type EarlyLateMeter(conf: HUD.EarlyLateMeter, state: PlayState) =
+    inherit StaticWidget(NodeType.None)
+    let atime = conf.AnimationTime * 1.0f<ms>
+    let mutable early = false
+    let mutable time = -Time.infinity
+
+    do
+        state.SubscribeToHits
+            ( fun ev ->
+                let (judge, delta) =
+                    match ev.Guts with
+                    | Hit e -> (e.Judgement, e.Delta)
+                    | Release e -> (e.Judgement, e.Delta)
+                if judge.IsSome && judge.Value > 0
+                then
+                    early <- delta < 0.0f<ms>
+                    time <- ev.Time
+            )
+
+    override this.Draw() =
+        if time > -Time.infinity then
+            let a = 255 - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
+            Text.drawFill(Style.baseFont, (if early then conf.EarlyText else conf.LateText), this.Bounds, (if early then conf.EarlyColor else conf.LateColor).O4a a, Alignment.CENTER)
 
 type ComboMeter(conf: HUD.Combo, state: PlayState) =
     inherit StaticWidget(NodeType.None)

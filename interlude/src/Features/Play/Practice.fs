@@ -305,6 +305,7 @@ module PracticeScreen =
                 add_widget LifeMeter
                 add_widget JudgementCounts
                 add_widget JudgementMeter
+                add_widget EarlyLateMeter
 
                 this.Add(Conditional((fun () -> options_mode), options_ui))
 

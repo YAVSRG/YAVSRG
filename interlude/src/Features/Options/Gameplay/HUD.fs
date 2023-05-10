@@ -540,6 +540,7 @@ type EditJudgementMeterPage() as this =
     let pos = Setting.simple data.Position
     let default_pos = HUD.JudgementMeter.Default.Position
 
+    let ignore_perfect_judgements = Setting.simple data.IgnorePerfectJudgements
     let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
     let rs = Rulesets.current
 
@@ -557,6 +558,11 @@ type EditJudgementMeterPage() as this =
                 Slider(animation_time, Step = 5f) )
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter.animationtime"))
+            |+ PageSetting(
+                "gameplay.hud.judgementmeter.ignoreperfectjudgements",
+                Selector<_>.FromBool(ignore_perfect_judgements) )
+                .Pos(620.0f)
+                .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter.ignoreperfectjudgements"))
             |+ preview
         )
 
@@ -567,6 +573,71 @@ type EditJudgementMeterPage() as this =
             { data with
                 Position = pos.Value
                 AnimationTime = animation_time.Value
+                IgnorePerfectJudgements = ignore_perfect_judgements.Value
+            }
+
+type EditEarlyLateMeterPage() as this =
+    inherit Page()
+
+    let data = HUDOptions.get<HUD.EarlyLateMeter>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = HUD.EarlyLateMeter.Default.Position
+
+    let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
+    let early_text = Setting.simple data.EarlyText
+    let late_text = Setting.simple data.LateText
+    let early_color = Setting.simple data.EarlyColor
+    let late_color = Setting.simple data.LateColor
+
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.drawFill(Style.baseFont, early_text.Value, bounds, early_color.Value, Alignment.CENTER)
+        }
+
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ PageSetting(
+                "gameplay.hud.earlylatemeter.animationtime",
+                Slider(animation_time, Step = 5f) )
+                .Pos(550.0f)
+                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.animationtime"))
+            |+ PageSetting(
+                "gameplay.hud.earlylatemeter.earlytext",
+                TextEntry(early_text, "none") )
+                .Pos(620.0f)
+                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.earlytext"))
+            |+ PageSetting(
+                "gameplay.hud.earlylatemeter.earlycolor",
+                ColorPicker(early_color, false) )
+                .Pos(690.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.earlycolor"))
+            |+ PageSetting(
+                "gameplay.hud.earlylatemeter.latetext",
+                TextEntry(late_text, "none") )
+                .Pos(795.0f)
+                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.latetext"))
+            |+ PageSetting(
+                "gameplay.hud.earlylatemeter.latecolor",
+                ColorPicker(late_color, false) )
+                .Pos(865.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.latecolor"))
+            |+ preview
+        )
+
+    override this.Title = L"gameplay.hud.earlylatemeter.name"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        HUDOptions.set<HUD.EarlyLateMeter>
+            { data with
+                Position = pos.Value
+                AnimationTime = animation_time.Value
+                EarlyText = early_text.Value
+                EarlyColor = early_color.Value
+                LateText = late_text.Value
+                LateColor = late_color.Value
             }
 
 type EditHUDPage() as this =
@@ -602,6 +673,9 @@ type EditHUDPage() as this =
             |+ PageButton("gameplay.hud.judgementmeter", fun () -> Menu.ShowPage EditJudgementMeterPage)
                 .Pos(760.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter"))
+            |+ PageButton("gameplay.hud.earlylatemeter", fun () -> Menu.ShowPage EditEarlyLateMeterPage)
+                .Pos(830.0f)
+                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter"))
         )
 
     override this.Title = L"gameplay.hud.name"

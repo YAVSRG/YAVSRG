@@ -78,6 +78,7 @@ module PlayScreen =
                 add_widget Pacemaker
                 add_widget JudgementCounts
                 add_widget JudgementMeter
+                add_widget EarlyLateMeter
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
@@ -153,6 +154,8 @@ module PlayScreen =
                 add_widget ProgressMeter
                 add_widget Pacemaker
                 add_widget JudgementCounts
+                add_widget JudgementMeter
+                add_widget EarlyLateMeter
                 add_widget MultiplayerScoreTracker
 
             override this.OnExit(next) =

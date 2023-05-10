@@ -315,6 +315,7 @@ module Options =
             load_id<Pacemaker>()
             load_id<JudgementCounts>()
             load_id<JudgementMeter>()
+            load_id<EarlyLateMeter>()
                     
         let get<'T>() = 
             let id = typeof<'T>.Name
