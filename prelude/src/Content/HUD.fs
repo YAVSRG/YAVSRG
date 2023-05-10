@@ -164,6 +164,7 @@ module HUD =
         {
             Position: WidgetPosition
             AnimationTime: float32
+            IgnorePerfectJudgements: bool
         }
         static member Default = 
             {
@@ -173,14 +174,47 @@ module HUD =
                         Float = false
                         Left = -128.0f
                         LeftA = 0.5f
-                        Top = 30.0f
-                        TopA = 0.5f
+                        Top = -106.0f
+                        TopA = 0.45f
                         Right = 128.0f
                         RightA = 0.5f
-                        Bottom = 86.0f
-                        BottomA = 0.5f
+                        Bottom = -50.0f
+                        BottomA = 0.45f
                     }
                 AnimationTime = 800.0f
+                IgnorePerfectJudgements = false
+            }
+
+    [<Json.AutoCodec(false)>]
+    type EarlyLateMeter =
+        {
+            Position: WidgetPosition
+            AnimationTime: float32
+            EarlyText: string
+            EarlyColor: Color
+            LateText: string
+            LateColor: Color
+        }
+        static member Default = 
+            {
+                Position = 
+                    {
+                        Enabled = false
+                        Float = false
+                        Left = -128.0f
+                        LeftA = 0.5f
+                        Top = -130.0f
+                        TopA = 0.45f
+                        Right = 128.0f
+                        RightA = 0.5f
+                        Bottom = -96.0f
+                        BottomA = 0.45f
+                    }
+                AnimationTime = 800.0f
+                EarlyText = "Fast"
+                EarlyColor = Color.FromArgb(52, 79, 235)
+                LateText = "Slow"
+                LateColor = Color.FromArgb(235, 52, 52)
             }
 
     [<Json.AutoCodec(false)>]
