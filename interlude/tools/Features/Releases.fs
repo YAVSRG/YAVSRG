@@ -17,15 +17,18 @@ module Releases =
 
         f.Substring(i, j - i).Substring("<AssemblyVersion>".Length)
 
-    let change_version (v: string) =
+    let publish() =
 
         let changelog = Path.Combine(YAVSRG_PATH, "Interlude", "docs", "changelog.md")
         let logtxt = File.ReadAllText(changelog)
-        let latest = logtxt.Split(current_version + "\r\n" + "====", 2)[0]
-        if latest.Trim() = "" then failwithf "No changelog for new version: %s! Create this first" v
+        let latest = logtxt.Split(current_version + "\r\n" + "====", 2).[0]
+        if latest.Trim() = "" then failwithf "No changelog for new version. Create this first"
+        let v = latest.Split("====", 2).[0].Trim()
+
         File.WriteAllText(Path.Combine(YAVSRG_PATH, "Interlude", "docs", "changelog-latest.md"), latest)
 
         printfn "Version: %s -> %s" current_version v
+        printfn "%s" latest
         let file = Path.Combine(INTERLUDE_SOURCE_PATH, "Interlude.fsproj")
         let mutable f = File.ReadAllText file
 
@@ -44,6 +47,11 @@ module Releases =
         File.WriteAllText(file, f)
 
         current_version <- v
+
+        printfn "Creating git commit"
+
+        exec "git" "add ."
+        exec "git" (sprintf "commit -m \"🏷️ Version %s\"" v)
 
     let build_win64() =
         
@@ -84,8 +92,8 @@ module Releases =
             "version",
             Command.create "Displays the current version of Interlude" [] (Impl.Create ((fun () -> current_version), Types.str))
         ).WithCommand(
-            "publish_version",
-            Command.create "Publishes a new version of Interlude" ["new_version"] (Impl.Create (Types.str, change_version))
+            "publish",
+            Command.create "Publishes a new version of Interlude" [] (Impl.Create publish)
         ).WithCommand(
             "release_win64",
             Command.create "Build an Interlude release and zip it for upload" [] (Impl.Create build_win64)
