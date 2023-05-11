@@ -1,12 +1,18 @@
-0.6.15.2
+0.6.15.3
 ====
 
-## Improvements
-- Gameplay setting presets now have hotkeys for switching them quickly (for you multi-keymode mains who use different settings for each)
-- Record improvement indicators on score screen now display how much you improved your record by
+Features and changes that came directly from playtesters in the Discord
+Thank you all for playing and giving feedback
 
-## Features
-- The fabled Judgement Meter HUD item has made a return after many years being commented out
-  Currently it displays all judgements (there is no way to turn off Marvellous/300g from being displayed)
-  Hiding the "perfect" judgements will be added when the early/late meter is added which will also be soon
+## Bug fixes
+- Fixed bug in osu! and Wife hit detection reported by Eliminate
+  Now you will cbrush just as Mina and Peppy intended
+  
+## Improvements
+- Startup sound effect is no longer DEAFENING as suggested by Jude
+
+## New features
+- Added "No holds" mod as suggested by Wagg
+  This is not ranked and will not count towards pbs
+- Added Early/Late meter as suggested by lemonmaster
 
