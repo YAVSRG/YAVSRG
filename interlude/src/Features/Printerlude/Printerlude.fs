@@ -41,6 +41,7 @@ module Printerlude =
     module private Utils =
 
         open Prelude.Charts.Formats
+        open Prelude.Charts.Tools.Patterns
         open System.IO.Compression
 
         let show_version() =
@@ -53,11 +54,24 @@ module Printerlude =
             | Some c ->
                 let duration = Gameplay.Chart.cacheInfo.Value.Length
                 let data = 
-                    Prelude.Charts.Tools.Patterns.Patterns.analyse c
-                    |> Prelude.Charts.Tools.Patterns.Patterns.pattern_coverage Gameplay.rate.Value
+                    Patterns.analyse c
+                    |> Patterns.pattern_locations Gameplay.rate.Value
+                    |> Patterns.pattern_breakdown
+
                 for (p, bpm) in data.Keys do
-                    let percent = data.[(p, bpm)] / duration * 100.0f
-                    if percent > 0.1f then ctx.WriteLine(sprintf "%iBPM %s: %.2f%%" bpm p percent)
+                    let d = data.[(p, bpm)]
+                    let percent = d.TotalTime / duration * 100.0f
+
+                    let category =
+                        if d.Marathons > 0 then "Stamina"
+                        elif d.Sprints > 1 then "Sprints"
+                        elif d.Sprints = 1 then "Sprint"
+                        elif d.Runs > 1 then "Runs"
+                        elif d.Runs = 1 then "Run"
+                        elif d.Bursts > 1 then "Bursts"
+                        else "Burst"
+
+                    if percent > 1f then ctx.WriteLine(sprintf "%iBPM %s %s: %.2f%%" bpm p category percent)
 
         let export_osz() =
             match Gameplay.Chart.current with
