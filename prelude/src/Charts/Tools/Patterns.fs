@@ -55,7 +55,7 @@ type RowInfo =
         Direction: Direction
         Roll: bool
         Time: Time
-        BPM: float32<beat/minute>
+        MsPerBeat: float32<ms/beat>
     }
 
 module Analysis =
@@ -103,11 +103,7 @@ module Analysis =
                                 else Direction.None
                         Roll = pmin > cmax || pmax < cmin
                         Time = t
-                        BPM = 
-                            float (15000.0<ms/minute> / float (t - previous_time))
-                            |> round
-                            |> float32
-                            |> fun x -> x * 1.0f<beat/minute>
+                        MsPerBeat = (t - previous_time) * 4.0f</beat>
                     }
 
                     previous_row <- current_row
@@ -190,7 +186,7 @@ module Patterns =
                 :: _ when a > 1 && b > 1 -> true
             | _ -> false
 
-    module FourKey =
+    module ``4K`` =
 
         let HANDSTREAM : Pattern =
             function
@@ -277,7 +273,7 @@ module Patterns =
                 :: _ -> true
             | _ -> false
 
-    module SevenKey = 
+    module ``7K`` = 
 
         let DOUBLE_STAIRS : Pattern =
             function
@@ -315,36 +311,34 @@ module Patterns =
                 :: _ when x > 1 && y > 1 && z > 1 -> true
             | _ -> false
 
-    let matches (patterns: IDictionary<string, Pattern>) (data: RowInfo list) : (string * (Time * float32<beat/minute>)) seq =
+    let matches (patterns: IDictionary<string, Pattern>) (data: RowInfo list) : (string * (Time * float32<ms/beat>)) seq =
         let mutable data = data
         seq {
             while not data.IsEmpty do
                 for pattern_name in patterns.Keys do
-                    if patterns.[pattern_name] data then yield (pattern_name, (data.Head.Time, data.Head.BPM))
+                    if patterns.[pattern_name] data then yield (pattern_name, (data.Head.Time, data.Head.MsPerBeat))
                 data <- List.tail data
         }
 
     let analysis_4k = dict [
             "Streams", Common.STREAMS
-            "Jumpstream", FourKey.JUMPSTREAM
-            "Dense Jumpstream", FourKey.DENSE_JUMPSTREAM
-            "Double Jumpstream", FourKey.DOUBLE_JUMPSTREAM
-            "Triple Jumpstream", FourKey.TRIPLE_JUMPSTREAM
-            "Jumptrill", FourKey.JUMPTRILL
-            "Split trill", FourKey.SPLITTRILL
-            "Roll", FourKey.ROLL
-            "Handstream", FourKey.HANDSTREAM
-            "Alternation", Common.ALTERNATION
+            "Jumpstream", ``4K``.JUMPSTREAM
+            "Dense Jumpstream", ``4K``.DENSE_JUMPSTREAM
+            "Double Jumpstream", ``4K``.DOUBLE_JUMPSTREAM
+            "Triple Jumpstream", ``4K``.TRIPLE_JUMPSTREAM
+            "Jumptrill", ``4K``.JUMPTRILL
+            "Split trill", ``4K``.SPLITTRILL
+            "Roll", ``4K``.ROLL
+            "Handstream", ``4K``.HANDSTREAM
             "Jacks", Common.JACKS
-            "Jumpjacks", FourKey.JUMPJACKS
+            "Jumpjacks", ``4K``.JUMPJACKS
             "Chordjacks", Common.CHORDJACKS
             "Gluts", Common.GLUTS
-            "Jumpgluts", FourKey.JUMPGLUTS
+            "Jumpgluts", ``4K``.JUMPGLUTS
         ]
 
     let analysis_generic = dict [
             "Streams", Common.STREAMS
-            "Alternation", Common.ALTERNATION
             "Jacks", Common.JACKS
             "Chordjacks", Common.CHORDJACKS
             "Gluts", Common.GLUTS
@@ -352,11 +346,10 @@ module Patterns =
 
     let analysis_7k = dict [
             "Streams", Common.STREAMS
-            "Chordstream", SevenKey.CHORDSTREAM
-            "Double streams", SevenKey.DOUBLE_STREAMS
-            "Double stairs", SevenKey.DOUBLE_STAIRS
-            "Chord rolls", SevenKey.CHORD_ROLL
-            "Alternation", Common.ALTERNATION
+            "Chordstream", ``7K``.CHORDSTREAM
+            "Double streams", ``7K``.DOUBLE_STREAMS
+            "Double stairs", ``7K``.DOUBLE_STAIRS
+            "Chord rolls", ``7K``.CHORD_ROLL
             "Jacks", Common.JACKS
             "Chordjacks", Common.CHORDJACKS
             "Gluts", Common.GLUTS
@@ -390,34 +383,72 @@ module Patterns =
         elif chart.Keys = 7 then matches analysis_7k data
         else matches analysis_generic data
 
-    let pattern_coverage (rate: float32) (patterns: (string * (Time * float32<beat/minute>)) seq) =
-        let PATTERN_DURATION = 1000.0f<ms> * rate
+    //todo: categorise by length; 0-2 seconds = burst; 2-5 seconds = run; 5-30 seconds = sprint; 30 second+ = marathon
+    type PatternLocation = { Time: Time; Duration: Time; MsPerBeat: float32<ms/beat> }
+
+    let pattern_locations (rate: float32) (pattern_tokens: (string * (Time * float32<ms/beat>)) seq) : (string * PatternLocation) seq =
+        let PATTERN_DURATION = 600.0f<ms> * rate
 
         let groups =
-            patterns
+            pattern_tokens
             |> Seq.groupBy fst
             |> Array.ofSeq
             |> Array.map (fun (pattern, data) -> 
                     pattern, 
                     Seq.map snd data 
-                    |> Seq.map (fun (t, bpm) -> (t, bpm * rate |> int))
-                    |> Seq.filter (fun (t, bpm) -> bpm >= 100)
+                    |> Seq.map (fun (t, bpm) -> (t, bpm * rate))
+                    |> Seq.filter (fun (t, bpm) -> bpm <= (60000.0f<ms/minute> / 85.0f<beat/minute>))
                     |> Array.ofSeq
                 )
-        let coverage = Dictionary<string * int, Time>()
-        for pattern_name, data in groups do
-            let add_coverage pattern bpm duration =
-                let key = (pattern, bpm)
-                if coverage.ContainsKey(key) then
-                    coverage.[key] <- coverage.[key] + duration
-                else coverage.Add(key, duration)
 
-            let mutable last_time = fst data.[0]
-            let mutable last_bpm = snd data.[0]
-            for (t, bpm) in data do
-                add_coverage pattern_name last_bpm (min t (last_time + PATTERN_DURATION) - last_time)
-                last_time <- t
-                last_bpm <- bpm
-            add_coverage pattern_name last_bpm PATTERN_DURATION
+        let patterns = ResizeArray<string * PatternLocation>()
+
+        for pattern_name, data in groups do
+            let mutable current_n = 0
+            let mutable current_mspb = 0.0f<ms/beat>
+            let mutable current_start = 0.0f<ms>
+            let mutable current_end = 0.0f<ms>
+
+            let finish() =
+                patterns.Add((pattern_name, { MsPerBeat = current_mspb / float32 current_n; Time = current_start; Duration = (current_end - current_start) / rate }))
+                current_n <- 0
+
+            for (t, mspb) in data do
+                if current_n > 0 && (System.MathF.Abs((current_mspb / float32 current_n) - mspb |> float32) < 3.0f) && t <= current_end then
+                    current_n <- current_n + 1
+                    current_mspb <- current_mspb + mspb
+                    current_end <- t + PATTERN_DURATION
+                else
+                    if current_n > 0 then current_end <- min current_end t; finish()
+                    current_n <- 1
+                    current_mspb <- mspb
+                    current_start <- t
+                    current_end <- t + PATTERN_DURATION
+
+            finish()
+
+        patterns
+
+    type PatternBreakdown = 
+        { 
+            mutable TotalTime: Time
+            mutable Bursts: int
+            mutable Runs: int
+            mutable Sprints: int
+            mutable Marathons: int
+        }
+
+    let pattern_breakdown (patterns: (string * PatternLocation) seq) =
+        
+        let coverage = Dictionary<string * int, PatternBreakdown>()
+        for (pattern, info) in patterns do
+            let key = (pattern, info.MsPerBeat |> fun x -> 60000.0f<ms/minute> / x + 0.1f<beat/minute> |> float32 |> round |> int)
+            if not <| coverage.ContainsKey(key) then coverage.Add(key, { TotalTime = 0.0f<ms>; Bursts = 0; Runs = 0; Sprints = 0; Marathons = 0 })
+            coverage.[key].TotalTime <- coverage.[key].TotalTime + info.Duration
+            match info.Duration with
+            | x when x < 2000.0f<ms> -> coverage.[key].Bursts <- coverage.[key].Bursts + 1
+            | x when x < 5000.0f<ms> -> coverage.[key].Runs <- coverage.[key].Runs + 1
+            | x when x < 30000.0f<ms> -> coverage.[key].Sprints <- coverage.[key].Sprints + 1
+            | _ -> coverage.[key].Marathons <- coverage.[key].Marathons + 1
 
         coverage
