@@ -7,7 +7,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
-open Prelude.Charts.Tools.Patterns
 open Prelude.Scoring
 open Prelude.Scoring.Metrics
 open Interlude.Options
@@ -208,37 +207,6 @@ module PracticeScreen =
                     )
                 base.Init parent
 
-    type Timeline(chart: Chart, on_seek: Time -> unit) =
-        inherit StaticWidget(NodeType.None)
-
-        let density_graph_1, density_graph_2 = Analysis.density 100 chart
-        let density_graph_1, density_graph_2 = Array.map float32 density_graph_1, Array.map float32 density_graph_2
-        let max_note_density = Array.max density_graph_1
-
-        override this.Draw() =
-            let b = this.Bounds.Shrink(10.0f, 20.0f)
-            let start = chart.FirstNote - Song.LEADIN_TIME
-        
-            let w = b.Width / float32 density_graph_1.Length
-            for i = 0 to density_graph_1.Length - 1 do
-                let h = 80.0f * density_graph_1.[i] / max_note_density
-                let h2 = 80.0f * density_graph_2.[i] / max_note_density
-                Draw.rect (Rect.Box(b.Left + float32 i * w, b.Bottom - h, w, h - 5.0f)) (Color.FromArgb(120, Color.White))
-                Draw.rect (Rect.Box(b.Left + float32 i * w, b.Bottom - h2, w, h2 - 5.0f)) (Style.color(80, 1.0f, 0.0f))
-        
-            let percent = (Song.time() - start) / (chart.LastNote - start) 
-            Draw.rect (b.SliceBottom(5.0f)) (Color.FromArgb(160, Color.White))
-            let x = b.Width * percent
-            Draw.rect (b.SliceBottom(5.0f).SliceLeft x) (Style.color(255, 1.0f, 0.0f))
-
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
-            if this.Bounds.Bottom - Mouse.y() < 200.0f && Mouse.leftClick() then
-                let percent = (Mouse.x() - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
-                let start = chart.FirstNote - Song.LEADIN_TIME
-                let newTime = start + (chart.LastNote - start) * percent
-                on_seek newTime
-
     let info_callout = 
         Callout.Small
             .Icon(Icons.practice)
@@ -337,7 +305,7 @@ module PracticeScreen =
                 elif options_mode && (!|"skip").Tapped() then
                     play(this)
 
-                if not (liveplay :> IReplayProvider).Finished then
+                elif not (liveplay :> IReplayProvider).Finished then
                     Input.consumeGameplay(binds, fun column time isRelease ->
                         if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
                         else inputKeyState <- Bitmap.setBit column inputKeyState

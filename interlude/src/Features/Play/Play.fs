@@ -167,7 +167,6 @@ module PlayScreen =
                 let now = Song.timeWithOffset()
                 let chartTime = now - firstNote
 
-
                 if not (liveplay :> IReplayProvider).Finished then
 
                     if chartTime / MULTIPLAYER_REPLAY_DELAY_MS / 1.0f<ms> |> floor |> int > packet_count then
