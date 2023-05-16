@@ -37,11 +37,6 @@ module Conversions =
 
     module ``osu! to Interlude`` =
 
-        let private listToDotNet (list: 't list) = 
-            let result = ResizeArray<'t> list
-            result.Reverse()
-            result
-
         let private convertHitObjects (objects: HitObject list) (keys: int) : TimeArray<NoteRow> =
             let holds = Array.create keys -1.0f<ms>
 
@@ -277,15 +272,40 @@ module Conversions =
                 | [] -> None
 
             let findBackground () : string =
-                let guess = sm.TITLE + "-bg.jpg"
-                if not (File.Exists (Path.Combine (path, guess))) then
-                    Directory.GetFiles path
-                    |> Array.tryPick
-                        (fun s ->
-                            let filename = Path.GetFileNameWithoutExtension(s).ToLower()
-                            if (filename.Contains "bg" || filename.Contains "background") then Some <| Path.GetFileName s else None)
-                    |> function Some s -> s | None -> ""
-                else guess
+                let guesses =
+                    [
+                        sm.BACKGROUND
+                        Path.ChangeExtension(sm.BACKGROUND, ".png")
+                        Path.ChangeExtension(sm.BACKGROUND, ".jpg")
+                        sm.TITLE + "-bg.jpg"
+                        sm.TITLE + "-bg.png"
+                        "bg.png"
+                        "bg.jpg"
+                        "background.png"
+                        "background.jpg"
+                    ]
+                match List.tryFind (fun guess -> File.Exists (Path.Combine(path, guess)) ) guesses with
+                | Some p -> p
+                | None ->
+
+                let files = Directory.GetFiles path |> Array.map Path.GetFileName
+
+                match files |> Array.tryFind (fun filename -> filename.ToLower().Contains "bg" || filename.ToLower().Contains "back") with
+                | Some p -> p
+                | None ->
+
+                let image_files = 
+                    files
+                    |> Array.filter (fun f -> f.ToLower().Contains ".jpg" || f.ToLower().Contains ".png")
+                    |> Array.map (fun file -> 
+                        try 
+                            let info = Bitmap.Identify (Path.Combine(path, file))
+                            file, info.Width * info.Height
+                        with err -> file, 0
+                    )
+                if image_files.Length >= 3 then //expect a bg, bn and cdtitle
+                    fst (Array.sortByDescending snd image_files).[0]
+                else ""
 
             let findAuthor () : string =
                 let folderName = Path.GetFileName path
@@ -317,11 +337,15 @@ module Conversions =
 
                         PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
                         AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"] |> Relative
-                        BackgroundFile = metadataFallback [(if File.Exists (Path.Combine (path, sm.BACKGROUND)) then sm.BACKGROUND else ""); findBackground ()] |> Relative
+                        BackgroundFile = findBackground () |> Relative
 
                         SourcePack = "Singles"
                         ChartSource = Unknown
                     }
+                if not (File.Exists (Path.Combine(path, match header.BackgroundFile with Relative r -> r | _ -> ""))) then
+                    Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
+                    Logging.Debug("Dumping file tree")
+                    for f in Directory.EnumerateFileSystemEntries(path) do Logging.Debug(f)
                 let filepath = Path.Combine (path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
                 let (notes, bpm) = convert_measures keys diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)
 
