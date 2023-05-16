@@ -1,8 +1,8 @@
 ﻿namespace Interlude.Features.Score
 
-open Prelude.Common
-open Prelude.Scoring
-open Prelude.Gameplay.Mods
+open Prelude
+open Prelude.Charts.Tools
+open Prelude.Gameplay
 
 type ScoreScreenStats =
     {

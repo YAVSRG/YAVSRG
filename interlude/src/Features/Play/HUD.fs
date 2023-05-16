@@ -5,10 +5,9 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Prelude.Common
-open Prelude.Charts.Formats.Interlude
-open Prelude.Scoring
-open Prelude.Scoring.Grading
+open Prelude
+open Prelude.Gameplay
+open Prelude.Gameplay.Grading
 open Prelude.Data.Content
 open Interlude
 open Interlude.UI
@@ -180,7 +179,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
 
     let duration = 
         let chart = Gameplay.Chart.colored()
-        offsetOf chart.Notes.Last.Value - offsetOf chart.Notes.First.Value
+        chart.Notes.[chart.Notes.Length - 1].Time - chart.Notes.[0].Time
 
     let pulse = Animation.Counter(1000.0)
         
@@ -203,7 +202,7 @@ type SkipButton(conf: HUD.SkipButton, state) =
     let text = Localisation.localiseWith [(!|"skip").ToString()] "play.skiphint"
     let mutable active = true
         
-    let firstNote = offsetOf (Gameplay.Chart.colored().Notes.First.Value)
+    let firstNote = Gameplay.Chart.colored().Notes.[0].Time
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

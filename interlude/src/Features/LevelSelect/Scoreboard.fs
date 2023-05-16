@@ -7,7 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
-open Prelude.Scoring
+open Prelude.Gameplay
 open Prelude.Charts.Formats.Interlude
 open Interlude
 open Interlude.UI

@@ -4,8 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
-open Prelude.Common
-open Prelude.Scoring.Grading
+open Prelude
+open Prelude.Gameplay.Grading
 open Interlude.Web.Shared
 open Interlude.Utils
 open Interlude.UI

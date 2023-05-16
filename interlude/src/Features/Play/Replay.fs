@@ -5,11 +5,10 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Common
-open Prelude.Common
-open Prelude.Gameplay.Mods
-open Prelude.Charts.Formats.Interlude
-open Prelude.Scoring
-open Prelude.Scoring.Metrics
+open Prelude
+open Prelude.Charts.Tools
+open Prelude.Gameplay
+open Prelude.Gameplay.Metrics
 open Interlude.Content
 open Interlude.UI
 open Interlude.Options
@@ -53,7 +52,7 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
         let mutable peek = seek
         let struct (t, b) = replayData.[peek]
         for k = 0 to keys - 1 do
-            if Bitmap.hasBit k b then 
+            if Bitmask.hasBit k b then 
                 keys_down.[k] <- true
                 keys_times.[k] <- t
             else keys_down.[k] <- false
@@ -61,7 +60,7 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
         while replayData.Length - 1 > peek && let struct (t, _) = replayData.[peek] in t < timeTarget do
             let struct (t, b) = replayData.[peek]
             for k = 0 to keys - 1 do
-                if Bitmap.hasBit k b then 
+                if Bitmask.hasBit k b then 
                     if not keys_down.[k] then 
                         keys_down.[k] <- true
                         keys_times.[k] <- t
@@ -94,7 +93,7 @@ module ReplayScreen =
                 modchart
         Gameplay.rate.Value <- rate
 
-        let firstNote = offsetOf chart.Notes.First.Value
+        let firstNote = chart.Notes.[0].Time
         let ruleset = Rulesets.current
         let scoring = createScoreMetric ruleset chart.Keys replay_data chart.Notes rate
 

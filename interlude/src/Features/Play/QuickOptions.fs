@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude.Common
-open Prelude.Scoring
+open Prelude.Gameplay
 open Interlude.Features
 open Interlude.Options
 open Interlude.Utils

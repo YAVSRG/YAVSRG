@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Features.OptionsMenu.Gameplay
 
-open Prelude.Gameplay.NoteColors
+open Prelude.Charts.Tools.NoteColors
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input

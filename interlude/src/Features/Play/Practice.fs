@@ -5,10 +5,9 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Common
-open Prelude.Charts.Formats.Interlude
-open Prelude.Scoring
-open Prelude.Scoring.Metrics
+open Prelude
+open Prelude.Gameplay
+open Prelude.Gameplay.Metrics
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -221,11 +220,11 @@ module PracticeScreen =
     let rec practice_screen (practice_point: Time) =
 
         let chart = Gameplay.Chart.withMods.Value
-        let lastNote = offsetOf chart.Notes.Last.Value - 5.0f<ms> - Song.LEADIN_TIME * Gameplay.rate.Value
+        let lastNote = chart.Notes.[chart.Notes.Length - 1].Time - 5.0f<ms> - Song.LEADIN_TIME * Gameplay.rate.Value
         let mutable practice_point = min lastNote practice_point
 
-        let mutable playable_notes = TimeData(chart.Notes.EnumerateBetween (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value) Time.infinity)
-        let mutable firstNote = offsetOf playable_notes.First.Value
+        let mutable playable_notes = TimeArray.between (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value) Time.infinity chart.Notes |> Array.ofSeq
+        let mutable firstNote = playable_notes.[0].Time
         let mutable liveplay = LiveReplayProvider firstNote
         let mutable scoring = createScoreMetric Rulesets.current chart.Keys liveplay playable_notes Gameplay.rate.Value
 
@@ -242,8 +241,8 @@ module PracticeScreen =
             Song.playFrom(practice_point)
 
         let play(screen: IPlayScreen) =
-            playable_notes <- TimeData(chart.Notes.EnumerateBetween (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value) Time.infinity)
-            firstNote <- offsetOf playable_notes.First.Value
+            playable_notes <- TimeArray.between (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value) Time.infinity chart.Notes |> Array.ofSeq
+            firstNote <- playable_notes.[0].Time
             screen.FirstNote <- firstNote
             restart(screen)
             options_mode <- false
@@ -307,8 +306,8 @@ module PracticeScreen =
 
                 elif not (liveplay :> IReplayProvider).Finished then
                     Input.consumeGameplay(binds, fun column time isRelease ->
-                        if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
-                        else inputKeyState <- Bitmap.setBit column inputKeyState
+                        if isRelease then inputKeyState <- Bitmask.unsetBit column inputKeyState
+                        else inputKeyState <- Bitmask.setBit column inputKeyState
                         liveplay.Add(time, inputKeyState) )
                     this.State.Scoring.Update chartTime
 

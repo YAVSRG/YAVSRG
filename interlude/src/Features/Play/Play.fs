@@ -2,10 +2,9 @@
 
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
-open Prelude.Common
-open Prelude.Charts.Formats.Interlude
-open Prelude.Scoring
-open Prelude.Scoring.Metrics
+open Prelude
+open Prelude.Gameplay
+open Prelude.Gameplay.Metrics
 open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content
@@ -28,7 +27,7 @@ module PlayScreen =
         
         let chart = Gameplay.Chart.withMods.Value
         let ruleset = Rulesets.current
-        let firstNote = offsetOf chart.Notes.First.Value
+        let firstNote = chart.Notes.[0].Time
         let liveplay = LiveReplayProvider firstNote
         let scoring = createScoreMetric ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
 
@@ -88,8 +87,8 @@ module PlayScreen =
                 if not (liveplay :> IReplayProvider).Finished then
                     // feed keyboard input into the replay provider
                     Input.consumeGameplay(binds, fun column time isRelease ->
-                        if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
-                        else inputKeyState <- Bitmap.setBit column inputKeyState
+                        if isRelease then inputKeyState <- Bitmask.unsetBit column inputKeyState
+                        else inputKeyState <- Bitmask.setBit column inputKeyState
                         liveplay.Add(time, inputKeyState) )
                     this.State.Scoring.Update chartTime
 
@@ -125,7 +124,7 @@ module PlayScreen =
         
         let chart = Gameplay.Chart.withMods.Value
         let ruleset = Rulesets.current
-        let firstNote = offsetOf chart.Notes.First.Value
+        let firstNote = chart.Notes.[0].Time
         let liveplay = LiveReplayProvider firstNote
         let scoring = createScoreMetric ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
         
@@ -173,8 +172,8 @@ module PlayScreen =
                         send_replay_packet()
 
                     Input.consumeGameplay(binds, fun column time isRelease ->
-                        if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
-                        else inputKeyState <- Bitmap.setBit column inputKeyState
+                        if isRelease then inputKeyState <- Bitmask.unsetBit column inputKeyState
+                        else inputKeyState <- Bitmask.setBit column inputKeyState
                         liveplay.Add(time, inputKeyState) )
                     this.State.Scoring.Update chartTime
                 

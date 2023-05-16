@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.Play
 
 open System
-open Prelude.Scoring
+open Prelude.Gameplay
 
 [<RequireQualifiedAccess>]
 type PacemakerInfo =

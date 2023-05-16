@@ -7,8 +7,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
-open Prelude.Common
-open Prelude.Scoring
+open Prelude
+open Prelude.Gameplay
 open Prelude.Data.Content
 open Prelude.Data.Content.Noteskin
 

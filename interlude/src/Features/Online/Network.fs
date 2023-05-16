@@ -7,9 +7,9 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Json
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Data.Charts.Caching
-open Prelude.Scoring
+open Prelude.Gameplay
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Web.Shared

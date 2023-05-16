@@ -4,12 +4,13 @@ open System
 open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
+open Prelude.Charts.Tools
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Gameplay.Mods
-open Prelude.Scoring
+open Prelude.Gameplay
 open Prelude.Gameplay.Difficulty
-open Prelude.Gameplay.NoteColors
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
@@ -98,7 +99,7 @@ module Gameplay =
             | Some c ->
                 let mutable notes = 0
                 let mutable lnotes = 0
-                for (_, nr) in c.Notes.Data do
+                for { Data = nr } in c.Notes do
                     for n in nr do
                         if n = NoteType.NORMAL then notes <- notes + 1
                         elif n = NoteType.HOLDHEAD then notes <- notes + 1; lnotes <- lnotes + 1
@@ -200,7 +201,7 @@ module Gameplay =
             time = DateTime.Now
             replay = Replay.compress replayData
             rate = rate.Value
-            selectedMods = selectedMods.Value |> ModChart.filter Chart.withMods.Value
+            selectedMods = selectedMods.Value |> ModState.filter Chart.withMods.Value
             layout = options.Playstyles.[keys - 3]
             keycount = keys
         }

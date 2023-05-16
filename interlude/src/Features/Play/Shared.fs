@@ -6,11 +6,11 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
+open Prelude.Charts.Tools
 open Prelude.Charts.Tools.Patterns
-open Prelude.Scoring
-open Prelude.Gameplay.Mods
+open Prelude.Gameplay
 open Prelude.Data.Content
 open Interlude
 open Interlude.Options
@@ -64,7 +64,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         sliders |> Array.iter (fun s -> s.Update elapsedTime)
-        Array.iteri (fun k (s: Animation.Fade) -> if state.Scoring.KeyState |> Bitmap.hasBit k then s.Value <- 1.0f) sliders
+        Array.iteri (fun k (s: Animation.Fade) -> if state.Scoring.KeyState |> Bitmask.hasBit k then s.Value <- 1.0f) sliders
 
     override this.Draw() =
         let threshold = 1.0f - lightTime
@@ -118,7 +118,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
         animation.Update elapsedTime
         sliders |> Array.iter (fun s -> s.Update elapsedTime)
         for k = 0 to (keys - 1) do
-            if holding.[k] && state.Scoring.KeyState |> Bitmap.hasBit k |> not then
+            if holding.[k] && state.Scoring.KeyState |> Bitmask.hasBit k |> not then
                 holding.[k] <- false
                 sliders.[k].Target <- 0.0f
 
@@ -142,7 +142,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                     let color = 
                         if ns.Explosions.Colors = ExplosionColors.Column then k
                         else match e.Judgement with Some j -> int j | None -> 0
-                    let frame = (state.CurrentChartTime() - timers.[k]) / toTime ns.Explosions.AnimationFrameTime |> int
+                    let frame = (state.CurrentChartTime() - timers.[k]) / Time.ofFloat ns.Explosions.AnimationFrameTime |> int
                     Draw.quad
                         (box |> Quad.ofRect |> rotation k)
                         (Quad.colorOf (Color.FromArgb(a, Color.White)))
@@ -195,7 +195,7 @@ module Utils =
 type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
     inherit Screen()
     
-    let mutable firstNote = offsetOf chart.Notes.First.Value
+    let mutable firstNote = chart.Notes.[0].Time
 
     let state: PlayState =
         {

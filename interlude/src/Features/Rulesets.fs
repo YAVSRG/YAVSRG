@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features
 
 open Percyqaz.Common
-open Prelude.Common
+open Prelude
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Interlude.Options
@@ -14,7 +14,7 @@ module Rulesets = Interlude.Content.Rulesets
 
 module Rulesets = 
 
-    type private RulesetButton(id: string, ruleset: Prelude.Scoring.Ruleset) =
+    type private RulesetButton(id: string, ruleset: Gameplay.Ruleset) =
         inherit StaticContainer(NodeType.Button (fun _ -> options.SelectedRuleset.Set id))
             
         override this.Init(parent: Widget) =

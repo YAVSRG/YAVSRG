@@ -3,7 +3,7 @@
 open System.Drawing
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Scoring
+open Prelude.Gameplay
 open Prelude.Data.Scores
 
 type ScoreGraph(data: ScoreInfoProvider) =
