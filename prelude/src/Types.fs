@@ -90,7 +90,7 @@ module Types =
         let read<'T> (br: BinaryReader) (f: BinaryReader -> 'T) =
             let count = br.ReadInt32()
             let array = Array.zeroCreate<TimeItem<'T>> count
-            for i = 1 to count do
+            for i = 0 to count - 1 do
                 array.[i] <- { Time = br.ReadSingle() * 1.0f<ms>; Data = f br }
             array
 
