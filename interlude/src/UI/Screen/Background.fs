@@ -27,7 +27,7 @@ module Background =
                 member this.Handle(file: string) =
                     async {
                         match System.IO.Path.GetExtension(file).ToLower() with
-                        | ".png" | ".bmp" | ".jpg" | ".jpeg" ->
+                        | ".png" | ".bmp" | ".jpg" | ".jpeg" | ".jfif" ->
                             try
                                 let! img = Image.LoadAsync file |> Async.AwaitTask
                                 return Some img
