@@ -5,14 +5,6 @@ module Types =
 
     type Bitmask = uint16
 
-    [<AutoOpen>]
-    module BitmaskOperators =
-
-        let (|?) (x: Bitmask) k = (1us <<< k) &&& x > 0us
-        let (|+) (x: Bitmask) k = (1us <<< k) ||| x
-        let (|-) (x: Bitmask) k = ~~~(1us <<< k) &&& x
-        let (|^) (x: Bitmask) k = (1us <<< k) ^^^ x
-
     module Bitmask = 
 
         let empty = 0us
@@ -22,10 +14,10 @@ module Types =
             | 0us -> 0
             | n -> (if (n &&& 1us) = 1us then 1 else 0) + (count (n >>> 1))
 
-        let hasBit (k: int) (x: Bitmask) = x |? k
-        let setBit k (x: Bitmask) = x |+ k
-        let unsetBit k (x: Bitmask) = x |- k
-        let toggleBit k (x: Bitmask) = x |^ k
+        let hasBit (k: int) (x: Bitmask) = (1us <<< k) &&& x > 0us
+        let setBit k (x: Bitmask) = (1us <<< k) ||| x
+        let unsetBit k (x: Bitmask) = ~~~(1us <<< k) &&& x
+        let toggleBit k (x: Bitmask) = (1us <<< k) ^^^ x
 
         let rec toSeq (x: Bitmask) =
             seq {
