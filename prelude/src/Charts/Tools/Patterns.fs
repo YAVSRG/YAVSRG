@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Charts.Tools.Patterns
 
 open System.Collections.Generic
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
 
 (*
@@ -62,7 +62,7 @@ module Analysis =
 
     let run (chart: Chart) : RowInfo list =
         
-        let t, row = chart.Notes.First.Value
+        let { Time = t; Data = row } = (TimeArray.first chart.Notes).Value
         let mutable previous_row =
             seq {0 .. chart.Keys - 1}
             |> Seq.filter (fun x -> row.[x] = NoteType.NORMAL || row.[x] = NoteType.HOLDHEAD)
@@ -70,7 +70,7 @@ module Analysis =
         let mutable previous_time = t
 
         seq {
-            for t, row in (chart.Notes.Data |> Seq.skip 1) do
+            for { Time = t; Data = row } in (chart.Notes |> Seq.skip 1) do
                 
                 let current_row = 
                     seq {0 .. chart.Keys - 1}
@@ -126,7 +126,7 @@ module Analysis =
 
         if length > 0.0f<ms> then 
 
-            for t, row in chart.Notes.Data do
+            for { Time = t; Data = row } in chart.Notes do
                 let mutable is_empty = true
                 for nt in row do
                     if nt = NoteType.NORMAL || nt = NoteType.HOLDHEAD then 

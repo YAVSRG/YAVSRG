@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Compile Include="Common.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="Charts\Formats\Interlude.fs" />
     <Compile Include="Charts\Formats\StepMania.fs" />
     <Compile Include="Charts\Formats\osu!.fs" />

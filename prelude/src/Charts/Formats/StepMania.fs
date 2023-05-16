@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Charts.Formats
 
 open FParsec
-open Prelude.Common
+open Prelude
 
 //https://github.com/stepmania/stepmania/wiki/sm
 //https://github.com/stepmania/stepmania/wiki/ssc

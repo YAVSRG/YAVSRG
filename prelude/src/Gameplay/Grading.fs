@@ -1,7 +1,7 @@
-﻿namespace Prelude.Scoring.Grading
+﻿namespace Prelude.Gameplay.Grading
 
 open Percyqaz.Json
-open Prelude.Scoring
+open Prelude.Gameplay
 
 module Lamp =
 

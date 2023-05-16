@@ -6,7 +6,7 @@ open System.IO
 open System.Collections.Generic
 open System.Linq
 open Percyqaz.Common
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.``osu!``
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.StepMania
@@ -42,7 +42,7 @@ module Conversions =
             result.Reverse()
             result
 
-        let private convertHitObjects (objects: HitObject list) (keys: int) : TimeData<NoteRow> =
+        let private convertHitObjects (objects: HitObject list) (keys: int) : TimeArray<NoteRow> =
             let holds = Array.create keys -1.0f<ms>
 
             let xToColumn (x: float) = x / 512.0 * float keys |> int
@@ -53,39 +53,39 @@ module Conversions =
                     if holds.[i] >= 0.0f<ms> then nr.[i] <- NoteType.HOLDBODY
                 nr
 
-            let updateHolds time snaps =
+            let updateHolds time (snaps: TimeItem<NoteRow> list) =
                 let mutable s = snaps
                 let mutable minT = Array.fold (fun y x -> if x = -1.0f<ms> then y else min y x) Time.infinity holds
                 while minT < time do
                     for k in 0..(keys - 1) do
                         if (holds.[k] >= 0.0f<ms> && holds.[k] = minT) then 
                             match s with
-                            | (time: Time, nr: NoteRow) :: ss ->
+                            | { Time = t; Data = nr } :: ss ->
                                 holds.[k] <- -1.0f<ms>
                                 if time = minT then
                                     nr.[k] <- NoteType.HOLDTAIL
-                                else s <- (minT, let nr = createRow() in nr.[k] <- NoteType.HOLDTAIL; nr) :: s
+                                else s <- { Time = minT; Data = let nr = createRow() in nr.[k] <- NoteType.HOLDTAIL; nr } :: s
                             | [] -> failwith "impossible"
                     minT <- Array.fold (fun y x -> if x = -1.0f<ms> then y else min y x) Time.infinity holds
                 s
 
-            let note k time snaps =
+            let note k time (snaps: TimeItem<NoteRow> list) =
                 if holds.[k] <> -1.0f<ms> then
                     Logging.Debug(sprintf "Skipping stacked note (inside LN) at %f" time)
                     snaps
                 else
 
                 match snaps with
-                | (t: Time, nr: NoteRow) :: ss ->
+                | { Time = t; Data = nr } :: ss ->
                     if t = time then 
                         if nr.[k] <> NoteType.NOTHING then 
                             Logging.Debug(sprintf "Skipping stacked note at %f" time)
                         else nr.[k] <- NoteType.NORMAL
                         snaps
-                    else (time, let row = createRow() in row.[k] <- NoteType.NORMAL; row) :: snaps
-                | [] -> (time, let row = createRow() in row.[k] <- NoteType.NORMAL; row) :: snaps
+                    else { Time = time; Data = let row = createRow() in row.[k] <- NoteType.NORMAL; row } :: snaps
+                | [] -> { Time = time; Data = let row = createRow() in row.[k] <- NoteType.NORMAL; row } :: snaps
 
-            let hold (k: int) (time: Time) (release: Time) snaps =
+            let hold (k: int) (time: Time) (release: Time) (snaps: TimeItem<NoteRow> list) =
                 if holds.[k] <> -1.0f<ms> then 
                     Logging.Debug(sprintf "Skipping stacked LN (inside LN) at %f" time)
                     snaps
@@ -99,21 +99,21 @@ module Conversions =
 
                 holds.[k] <- release
                 match snaps with
-                | (t: Time, nr: NoteRow) :: ss ->
+                | { Time = t; Data = nr } :: ss ->
                     if t = time then nr.[k] <- NoteType.HOLDHEAD; snaps
-                    else (time, let row = createRow() in row.[k] <- NoteType.HOLDHEAD; row) :: snaps
-                | [] -> (time, let row = createRow() in row.[k] <- NoteType.HOLDHEAD; row) :: snaps
+                    else { Time = time; Data = let row = createRow() in row.[k] <- NoteType.HOLDHEAD; row } :: snaps
+                | [] -> { Time = time; Data = let row = createRow() in row.[k] <- NoteType.HOLDHEAD; row } :: snaps
 
-            let f snaps (hitObj: HitObject) =
+            let f (snaps: TimeItem<NoteRow> list) (hitObj: HitObject) =
                 match hitObj with
                 | HitCircle ((x, y), time, _, _) -> note (xToColumn x) time (updateHolds time snaps)
                 | HoldNote ((x, y), time, endTime, _, _) -> hold (xToColumn x) time endTime (updateHolds time snaps)
                 | _ -> snaps
 
             let states = updateHolds Time.infinity (List.fold f [] objects)
-            TimeData<NoteRow>(listToDotNet states)
+            states |> Array.ofList |> Array.rev
 
-        let private convertTimingPoints (points: TimingPoint list) (keys: int) (endTime: Time) : TimeData<BPM> * MultiTimeData<float32> =
+        let private convertTimingPoints (points: TimingPoint list) (keys: int) (endTime: Time) : TimeArray<BPM> * TimeArray<float32> =
             let rec bpmDurations points = 
                 if List.isEmpty points then failwith "no bpm point"
                 match List.head points with
@@ -136,21 +136,24 @@ module Conversions =
 
             let addOrSkipSV (offset, value) sv =
                 match sv with
-                | [] -> [(offset, value)]
-                | (time, oldValue) :: s -> if oldValue = value then sv else (offset, value) :: sv
+                | [] -> [{ Time = offset; Data = value }]
+                | { Time = time; Data = oldValue } :: s -> if oldValue = value then sv else { Time = offset; Data = value } :: sv
 
             let (bpm, sv, _) = 
-                let func ((bpm, sv, scroll): (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32)) (point: TimingPoint) : (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32) =
+                let func ((bpm, sv, scroll): (TimeItem<BPM> list * TimeItem<float32> list * float32)) (point: TimingPoint) : (TimeItem<BPM> list * TimeItem<float32> list * float32) =
                     match point with
                     | (TimingPoint.BPM (offset, msPerBeat, meter, _, _)) -> 
-                        (((offset, (meter, msPerBeat)) :: bpm), addOrSkipSV (offset, (mostCommonBpm / msPerBeat)) sv, mostCommonBpm / msPerBeat)
+                        { Time = offset; Data = { Meter = meter; MsPerBeat = msPerBeat } } :: bpm,
+                        addOrSkipSV (offset, (mostCommonBpm / msPerBeat)) sv,
+                        mostCommonBpm / msPerBeat
                     | (TimingPoint.SV (offset, value, _, _)) ->
-                        (bpm, addOrSkipSV (offset, (value * scroll)) sv, scroll)
+                        bpm, 
+                        addOrSkipSV (offset, (value * scroll)) sv, 
+                        scroll
                 List.fold func ([], [], 1.0f) points
 
-            let svData = new MultiTimeData<float32>(keys)
-            svData.SetChannelData(-1, listToDotNet sv)
-            (TimeData(listToDotNet bpm), svData)
+            bpm |> Array.ofList |> Array.rev,
+            sv |> Array.ofList |> Array.rev
 
         let private rateRegex = Regex("""((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)x)""");
         let looks_like_a_rate (b: Beatmap) : bool = rateRegex.IsMatch b.Metadata.Version
@@ -182,8 +185,18 @@ module Conversions =
                     ChartSource = Osu (b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
                 }
             let snaps = convertHitObjects b.Objects keys
-            let (bpm, sv) = (convertTimingPoints b.Timing keys (offsetOf (snaps.GetPointAt Time.infinity)))
-            Chart(keys, header, snaps, bpm, sv, String.Join("_", (b.Metadata.Title + " [" + b.Metadata.Version + "].yav").Split(Path.GetInvalidFileNameChars())))
+            if snaps.Length = 0 then failwith "osu! chart has no notes"
+            let bpm, sv = convertTimingPoints b.Timing keys (TimeArray.last snaps).Value.Time
+            {
+                Keys = keys
+                Header = header
+                Notes = snaps
+                BPM = bpm
+                SV = sv
+                ColumnSV = Array.init keys (fun i -> [||])
+
+                LoadedFromPath = String.Join("_", (b.Metadata.Title + " [" + b.Metadata.Version + "].yav").Split(Path.GetInvalidFileNameChars()))
+            }
 
     (*
         Conversion code for StepMania -> Interlude
@@ -196,14 +209,14 @@ module Conversions =
             let mutable bpms = bpms
             let meter = 4<beat>
             let fmeter = float32 meter * 1.0f<beat>
-            let states = new List<Time * NoteRow>()
-            let points = new List<Time * BPM>()
-            let mutable ln: Bitmap = 0us
+            let states = new List<TimeItem<NoteRow>>()
+            let points = new List<TimeItem<BPM>>()
+            let mutable ln: Bitmask = 0us
             let mutable now = start
-            let (_, b) = List.head bpms in points.Add(start, (meter, 60000.0f<ms/minute> / b))
+            let (_, b) = List.head bpms in points.Add({ Time = start; Data = { Meter = meter; MsPerBeat = 60000.0f<ms/minute> / b } })
             let mutable msPerBeat = 60000.0f<ms/minute> / b
             bpms <- List.tail bpms
-            let mutable totalBeats = 0.0f<beat>;
+            let mutable totalBeats = 0.0f<beat>
             let mutable lo = 0.0f<beat>
             let mutable hi = 0.0f<beat>
 
@@ -222,14 +235,14 @@ module Conversions =
                         | '1' -> nr.[k] <- NoteType.NORMAL
                         | '2' | '4' ->
                             nr.[k] <- NoteType.HOLDHEAD
-                            ln <- Bitmap.setBit k ln
+                            ln <- Bitmask.setBit k ln
                         | '3' ->
                             nr.[k] <- NoteType.HOLDTAIL
-                            ln <- Bitmap.unsetBit k ln
+                            ln <- Bitmask.unsetBit k ln
                         | 'M' -> () //ignore mines
                         | _ -> failwith ("unknown note type " + c.ToString())
                         ) m.[i]
-                    if NoteRow.isEmpty nr |> not then states.Add((offset + float32 (i - start) * sep), nr)
+                    if NoteRow.isEmpty nr |> not then states.Add({ Time = offset + float32 (i - start) * sep; Data = nr })
 
             List.iteri (fun i m -> 
                 totalBeats <- totalBeats + fmeter
@@ -239,13 +252,13 @@ module Conversions =
                     convert_measure m lo hi
                     now <- now + msPerBeat * (hi - lo)
                     lo <- hi
-                    let (_, b) = List.head bpms in points.Add(now, (meter, 60000.0f<ms/minute> / b))
+                    let (_, b) = List.head bpms in points.Add({ Time = now; Data = { Meter = meter; MsPerBeat = 60000.0f<ms/minute> / b } })
                     msPerBeat <- 60000.0f<ms/minute> / b
                     bpms <- List.tail bpms
                 convert_measure m lo fmeter
                 now <- now + msPerBeat * (fmeter - lo)
                 ) measures
-            (new TimeData<NoteRow>(states), new TimeData<BPM>(points))
+            (states |> Array.ofSeq, points |> Array.ofSeq)
 
         let convert (sm: StepmaniaData) (action: ConversionAction) = 
 
@@ -311,29 +324,43 @@ module Conversions =
                     }
                 let filepath = Path.Combine (path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
                 let (notes, bpm) = convert_measures keys diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)
-                Chart(keys, header, notes, bpm, new MultiTimeData<float32>(keys), filepath)
+
+                {
+                    Keys = keys
+                    Header = header
+                    Notes = notes
+                    BPM = bpm
+                    SV = [||]
+                    ColumnSV = Array.init keys (fun i -> [||])
+
+                    LoadedFromPath = filepath
+                }
+
             sm.Charts |> List.mapi convert_difficulty
 
     module ``Interlude to osu!`` =
 
-        let private convertSnapsToHitobjects snaps keys =
+        let private convertSnapsToHitobjects (snaps: TimeArray<NoteRow>) keys =
             let columnToX k = (float k + 0.5) * 512.0 / float keys |> round
-            let rec ln_lookahead k snaps =
+               
+            let rec ln_lookahead k (snaps: TimeItem<NoteRow> list) =
                 match snaps with
-                | (offset: Time, nr: NoteRow) :: ss -> if nr.[k] = NoteType.HOLDTAIL then offset else ln_lookahead k ss
+                | { Time = offset; Data = nr } :: ss -> if nr.[k] = NoteType.HOLDTAIL then offset else ln_lookahead k ss
                 | [] -> failwith "hold note has no end"
 
-            let rec convert snaps = seq {
+            let rec convert (snaps: TimeItem<NoteRow> list) = seq {
                 match snaps with
-                | (offset, nr) :: ss ->
-                    for k in nr |> NoteRow.noteData NoteType.NORMAL |> Bitmap.toSeq do
-                        yield HitCircle ((columnToX k, 240.0), offset, enum 0, (enum 0, enum 0, 0, 0, ""))
-                    for k in nr |> NoteRow.noteData NoteType.HOLDHEAD |> Bitmap.toSeq do
-                        yield HoldNote ((columnToX k, 240.0), offset, ln_lookahead k ss, enum 0, (enum 0, enum 0, 0, 0, ""))
+                | { Time = offset; Data = nr } :: ss ->
+                    for k = 0 to keys - 1 do
+                        if nr.[k] = NoteType.NORMAL then
+                            yield HitCircle ((columnToX k, 240.0), offset, enum 0, (enum 0, enum 0, 0, 0, ""))
+                        elif nr.[k] = NoteType.HOLDHEAD then
+                            yield HoldNote ((columnToX k, 240.0), offset, ln_lookahead k ss, enum 0, (enum 0, enum 0, 0, 0, ""))
                     yield! convert ss
                 | [] -> ()
             }
-            convert snaps |> Seq.toList
+            convert (snaps |> Array.toList)
+            |> List.ofSeq
 
         let rec private bpmDurations points (endTime: Time) = 
             if List.isEmpty points then failwith "no bpm point"
@@ -353,13 +380,13 @@ module Conversions =
             let d = (bpmDurations bs endTime).OrderBy(fun p -> p.Key)
             (d.First().Key, d.Last().Key)
 
-        let private convertToTimingPoints (bpm: TimeData<BPM>) (sv: MultiTimeData<float32>) (endTime: Time) =
+        let private convertToTimingPoints (bpm: TimeArray<BPM>) (sv: TimeArray<float32>) (endTime: Time) =
             let corrective_sv offset mult = 
-                if (sv.GetChannelData -1).Count = 0 then None else
-                    match (sv.GetChannelData -1).IndexAt offset with
+                if sv.Length = 0 then None else
+                    match TimeArray.find_left offset with
                     | (-1, false) -> None
                     | (i, false) ->
-                        let (offset, value) = (sv.GetChannelData -1).GetPointAt offset in
+                        let (offset, value) = sv.GetPointAt offset in
                             Some (TimingPoint.SV (offset, mult * value, (SampleSet.Soft, 0, 10), enum 0))
                     | _ -> None
 
@@ -368,7 +395,7 @@ module Conversions =
                     match corrective_sv time1 mult with
                     | None -> ()
                     | Some x -> yield x
-                    for (offset, value) in (sv.GetChannelData -1).EnumerateBetween time1 time2 do
+                    for (offset, value) in sv.EnumerateBetween time1 time2 do
                         yield TimingPoint.SV (offset, value / mult, (SampleSet.Soft, 0, 10), enum 0)
                 }
 
@@ -423,7 +450,7 @@ module Conversions =
                 Metadata = meta
                 Difficulty = diff
                 Events = [ Background ((match chart.Header.BackgroundFile with Relative s -> s | Absolute s -> Path.GetFileName s), (0.0, 0.0)) ]
-                Objects = convertSnapsToHitobjects (List.ofSeq (chart.Notes.Data)) chart.Keys
+                Objects = convertSnapsToHitobjects chart.Notes chart.Keys
                 Timing = convertToTimingPoints chart.BPM chart.SV chart.LastNote
             }
 
@@ -512,17 +539,16 @@ module Conversions =
 
         Directory.CreateDirectory targetFolder |> ignore
 
-        let c = 
-            Chart(
-                chart.Keys,
-                { chart.Header with 
-                    SourcePack = action.Config.PackName
-                    BackgroundFile = copyFile chart.Header.BackgroundFile
-                    AudioFile = copyFile chart.Header.AudioFile
-                },
-                chart.Notes, chart.BPM, chart.SV,
-                Path.Combine (targetFolder, Path.ChangeExtension (Path.GetFileName chart.FileIdentifier, ".yav"))
-            )
+        let new_chart =
+            { chart with
+                Header = 
+                    { chart.Header with
+                        SourcePack = action.Config.PackName
+                        BackgroundFile = copyFile chart.Header.BackgroundFile
+                        AudioFile = copyFile chart.Header.AudioFile
+                    }
+                LoadedFromPath = Path.Combine (targetFolder, Path.ChangeExtension (Path.GetFileName chart.LoadedFromPath, ".yav"))
+            }
 
-        Chart.save c
-        c
+        Chart.toFile new_chart new_chart.LoadedFromPath
+        new_chart

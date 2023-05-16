@@ -5,7 +5,7 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Prelude.Common
-open Prelude.Gameplay.NoteColors
+open Prelude.Charts.Tools.NoteColors
 
 
 //https://osu.ppy.sh/wiki/no/Skinning/skin.ini#[mania]

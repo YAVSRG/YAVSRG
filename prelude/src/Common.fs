@@ -8,6 +8,7 @@ open System.Collections.Generic
 open Percyqaz.Json
 open Percyqaz.Common
 
+[<AutoOpen>]
 module Common =
 
     #if DEBUG
@@ -15,17 +16,6 @@ module Common =
     #else
     let DEV_MODE = false
     #endif
-
-    [<Measure>] type ms = Percyqaz.Common.ms
-    [<Measure>] type beat
-    [<Measure>] type minute
-    type Time = Percyqaz.Common.Time
-    let inline toTime (f: float) = float32 f * 1.0f<ms>
-
-    module Time =
-        let Abs (t: Time) = if t < 0.0f<ms> then -t else t
-
-        let infinity = infinityf * 1.0f<ms>
 
     type SettingCodec<'T, 'Config>() =
         inherit Json.Codec<Setting<'T, 'Config>>()

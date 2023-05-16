@@ -1,10 +1,10 @@
-﻿namespace Prelude.Scoring
+﻿namespace Prelude.Gameplay
 
 open System
 open System.IO
 open System.IO.Compression
 open Percyqaz.Common
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
 
 // internally, a score is made up of flags on what a player has to do here
@@ -30,9 +30,9 @@ module InternalScore =
 
     let inline offsetOf (struct (t, _, _) : InternalScoreDataRow) = t
     
-    let createDefault (missWindow: Time) (keys: int) (notes: TimeData<NoteRow>) : InternalScoreData =
-        notes.Data
-        |> Seq.map ( fun (time, nr) ->
+    let createDefault (missWindow: Time) (keys: int) (notes: TimeArray<NoteRow>) : InternalScoreData =
+        notes
+        |> Array.map ( fun { Time = time; Data = nr } ->
             let times = Array.create keys missWindow
             let statuses = Array.create keys HitStatus.NOTHING 
 
@@ -46,13 +46,12 @@ module InternalScore =
 
             struct (time, times, statuses)
             )
-        |> Array.ofSeq
 
     // used for debug/test purposes, and not called normally.
     // creates what the internal data should look like after a "perfect" play
-    let createAuto (keys: int) (notes: TimeData<NoteRow>) : InternalScoreData =
-        notes.Data
-        |> Seq.map ( fun (time, nr) ->
+    let createAuto (keys: int) (notes: TimeArray<NoteRow>) : InternalScoreData =
+        notes
+        |> Array.map ( fun { Time = time; Data = nr } ->
             let times = Array.zeroCreate keys
             let statuses = Array.create keys HitStatus.NOTHING 
             for k = 0 to (keys - 1) do
@@ -63,7 +62,6 @@ module InternalScore =
 
             struct (time, times, statuses)
             )
-        |> Array.ofSeq
 
 // "replay" data in the sense that, with this data + the chart it was played against, you can know everything about the score and what happened
 
@@ -72,7 +70,7 @@ module InternalScore =
 // *into the chart = time since the first note, not audio time
 
 type ChartTime = float32<ms> //Indicates that 0 = first note
-type ReplayRow = (struct (ChartTime * Bitmap))
+type ReplayRow = (struct (ChartTime * Bitmask))
 type ReplayData = ReplayRow array
 
 module Replay =
@@ -103,28 +101,28 @@ module Replay =
         Convert.ToBase64String (outputStream.ToArray())
 
     // this replay is fed into score calculation when Auto-play is enabled
-    let perfectReplay (keys: int) (notes: TimeData<NoteRow>) : ReplayData =
-        let timeUntilNext i = if i >= notes.Count - 1 then 50.0f<ms> else offsetOf notes.Data.[i + 1] - offsetOf notes.Data.[i]
+    let perfectReplay (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
+        let timeUntilNext i = if i >= notes.Length - 1 then 50.0f<ms> else notes.[i + 1].Time - notes.[i].Time
 
-        let firstNote = fst notes.Data.[0]
+        let firstNote = notes.[0].Time
 
         seq {
             let mutable i = 0
-            let mutable held: Bitmap = 0us
+            let mutable held: Bitmask = 0us
 
-            while i < notes.Count do
-                let (time, nr) = notes.Data.[i]
+            while i < notes.Length do
+                let { Time = time; Data = nr } = notes.[i]
                 let delay = timeUntilNext i
                 let mutable hit = held
                 for k = 0 to (keys - 1) do
                     if nr.[k] = NoteType.NORMAL then
-                        hit <- Bitmap.setBit k hit
+                        hit <- Bitmask.setBit k hit
                     elif nr.[k] = NoteType.HOLDHEAD then
-                        hit <- Bitmap.setBit k hit
-                        held <- Bitmap.setBit k held
+                        hit <- Bitmask.setBit k hit
+                        held <- Bitmask.setBit k held
                     elif nr.[k] =  NoteType.HOLDTAIL then
-                        hit <- Bitmap.unsetBit k hit
-                        held <- Bitmap.unsetBit k held
+                        hit <- Bitmask.unsetBit k hit
+                        held <- Bitmask.unsetBit k held
                 yield struct (time - firstNote, hit)
                 yield struct (time - firstNote + delay * 0.5f, held)
                 i <- i + 1
@@ -228,7 +226,7 @@ type OnlineReplayProvider() =
 [<AbstractClass>]
 type ReplayConsumer(keys: int, replay: IReplayProvider) =
 
-    let mutable currentState: Bitmap = 0us
+    let mutable currentState: Bitmask = 0us
     
     member this.PollReplay(time: ChartTime) =
         while replay.HasNext time do
@@ -237,9 +235,9 @@ type ReplayConsumer(keys: int, replay: IReplayProvider) =
 
     member this.HandleReplayRow(time, keystates) =
         for k = 0 to (keys - 1) do
-            if Bitmap.hasBit k currentState && not (Bitmap.hasBit k keystates) then
+            if Bitmask.hasBit k currentState && not (Bitmask.hasBit k keystates) then
                 this.HandleKeyUp (time, k)
-            elif Bitmap.hasBit k keystates && not (Bitmap.hasBit k currentState) then
+            elif Bitmask.hasBit k keystates && not (Bitmask.hasBit k currentState) then
                 this.HandleKeyDown (time, k)
         currentState <- keystates
 

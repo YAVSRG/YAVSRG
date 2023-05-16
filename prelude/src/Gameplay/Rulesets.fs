@@ -1,4 +1,4 @@
-﻿namespace Prelude.Scoring
+﻿namespace Prelude.Gameplay
 
 open System
 open Percyqaz.Common

@@ -3,7 +3,7 @@
 open System
 open System.Collections.Generic
 open Percyqaz.Common
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools
 
@@ -17,20 +17,6 @@ module Mods =
     type ModStatus = Ranked = 0 | Unranked = 1 | Unstored = 2
 
     type ModState = Map<string, int>
-    type ModChart =
-        {
-            Keys: int
-            Notes: TimeData<NoteRow>
-            BPM: TimeData<BPM>
-            SV: MultiTimeData<float32>
-            ModsUsed: string list
-        }
-
-    module ModChart =
-        let create (chart: Chart) : ModChart = { Keys = chart.Keys; Notes = chart.Notes.Clone(); BPM = chart.BPM.Clone(); SV = chart.SV.Clone(); ModsUsed = [] }
-        
-        let filter (chart: ModChart) (mods: Map<string, int>) =
-            List.fold (fun m i -> Map.add i mods.[i] m) Map.empty chart.ModsUsed
 
     (*
         Mods (Modifiers) are a set of optional effects that can be enabled for a chart before playing it
@@ -50,10 +36,10 @@ module Mods =
             States: int
             RandomSeed: bool
             Exclusions: string list
-            // Returns flag + resulting chart
+            // Returns resulting chart + flag
             // flag is true if the mod made meaningful changes to the chart
             // The resulting chart can still be modified in ways that don't affect gameplay such as changing BPMs
-            Apply: int -> ModChart -> bool * ModChart
+            Apply: int -> ModChart -> ModChart * bool
             Priority: int
         }
     
@@ -61,6 +47,9 @@ module Mods =
     let registerMod id obj = modList.Add (id, obj)
 
     module ModState =
+        
+        let filter (chart: ModChart) (mods: ModState) =
+            List.fold (fun m i -> Map.add i mods.[i] m) Map.empty chart.ModsUsed
 
         let r = new Random()
 
@@ -85,25 +74,25 @@ module Mods =
                 )
             |> Seq.sortBy (fun (id, m, state) -> m.Priority)
 
-    let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Apply = (fun _ mc -> false, mc); Priority = 0 }
+    let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Apply = (fun _ mc -> mc, false); Priority = 0 }
 
     registerMod "mirror"
         { defaultMod with
             Status = ModStatus.Ranked
-            Apply = fun _ mc -> true, { mc with Notes = Filter.mirror -Time.infinity Time.infinity mc.Keys mc.Notes }
+            Apply = fun _ mc -> Mirror.apply mc
         }
 
     registerMod "nosv"
         { defaultMod with
             Status = ModStatus.Unranked
-            Apply = fun _ mc -> let sv, changed = Filter.no_sv mc.Keys mc.SV in changed, { mc with SV = sv }
+            Apply = fun _ mc -> NoSV.apply mc
         }
         
     registerMod "noln"
         { defaultMod with
             Status = ModStatus.Unranked
             Exclusions = ["inverse"]
-            Apply = fun _ mc -> let notes, changed = Filter.no_ln mc.Keys mc.Notes in changed, { mc with Notes = notes }
+            Apply = fun _ mc -> NoLN.apply mc
         }
 
     registerMod "inverse"
@@ -111,7 +100,7 @@ module Mods =
             Status = ModStatus.Unranked
             States = 1
             Exclusions = ["noln"]
-            Apply = fun s mc -> true, { mc with Notes = Inverse.apply mc.Keys mc.BPM mc.Notes (s > 0) }
+            Apply = fun s mc -> Inverse.apply (s > 0) mc
         }
 
     //todo: randomiser with seed
@@ -121,11 +110,11 @@ module Mods =
     *)
 
     let private applyMods (mods: ModState) (chart: Chart) : ModChart =
-        let mutable modChart = ModChart.create chart
+        let mutable modChart = ModChart.ofChart chart
 
         for id, m, state in ModState.enumerate mods do
-            let mod_was_applied, mc = m.Apply state modChart
-            modChart <- { mc with ModsUsed = if mod_was_applied then mc.ModsUsed @ [id] else mc.ModsUsed }
+            let mc, mod_was_applied = m.Apply state modChart
+            modChart <- { mc with ModsUsed = if mod_was_applied then modChart.ModsUsed @ [id] else modChart.ModsUsed }
 
         modChart
 

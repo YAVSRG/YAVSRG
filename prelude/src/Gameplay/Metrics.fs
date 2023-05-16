@@ -1,7 +1,7 @@
-﻿namespace Prelude.Scoring
+﻿namespace Prelude.Gameplay
 
 open System
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
 
 type HitEventGutsInternal =
@@ -133,12 +133,12 @@ type IScoreMetric
         healthBar: HealthBarMetric,
         keys: int,
         replayProvider: IReplayProvider,
-        notes: TimeData<NoteRow>,
+        notes: TimeArray<NoteRow>,
         rate: float32
     ) =
     inherit ReplayConsumer(keys, replayProvider)
 
-    let firstNote = offsetOf notes.First.Value
+    let firstNote = (TimeArray.first notes).Value.Time
     let missWindow = ruleset.Accuracy.MissWindow * rate
 
     // having two seekers improves performance when feeding scores rather than playing live
@@ -210,7 +210,7 @@ type IScoreMetric
                 elif status.[k] = HitStatus.RELEASE_REQUIRED then
                     let overhold =
                         match internalHoldStates.[k] with
-                        | Dropped, i | Holding, i when i <= noteSeekPassive -> Bitmap.hasBit k this.KeyState
+                        | Dropped, i | Holding, i when i <= noteSeekPassive -> Bitmask.hasBit k this.KeyState
                         | _ -> false
                     let dropped =
                         match internalHoldStates.[k] with

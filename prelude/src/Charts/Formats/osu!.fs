@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Charts.Formats
 
 open FParsec
-open Prelude.Common
+open Prelude
 
 //https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)
 //https://osu.ppy.sh/community/forums/topics/1869?start=12468#p12468

@@ -1,11 +1,10 @@
-﻿namespace Prelude.Gameplay
+﻿namespace Prelude.Charts.Tools
 
 open System
 open Percyqaz.Common
 open Percyqaz.Json
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
-open Prelude.Gameplay.Mods
 
 // This is the final stage of preprocessing chart data before it is played by the user.
 // Colorings are an assignment of a color id for each note. These ids are then used by skins to display differences in textures
@@ -31,62 +30,64 @@ module NoteColors =
 
     type ColorData = byte array
     type ColorDataSets = ColorData array // color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
-    type Colorizer<'state> = 'state -> TimeDataItem<NoteRow> -> ('state * ColorData)
+    type Colorizer<'state> = 'state -> TimeItem<NoteRow> -> ('state * ColorData)
 
     type private ColorNoteRow = (struct (NoteRow * ColorData))
     type ColorizedChart =
         {
             Keys: int
-            Notes: TimeData<ColorNoteRow>
-            BPM: TimeData<BPM>
-            SV: MultiTimeData<float32>
+            Notes: TimeArray<ColorNoteRow>
+            BPM: TimeArray<BPM>
+            SV: TimeArray<float32>
+            ColumnSV: TimeArray<float32> array
             ModsUsed: string list
         }
 
-    let colorize (mc: ModChart) (initialState, col : Colorizer<'t>) =
+    let colorize (mc: ModChart) (initialState, col: Colorizer<'t>) =
         let (_, _, data) = 
-            Seq.fold (fun (lastcolors: ColorData, s, data: (TimeDataItem<ColorNoteRow>) list) (time, nr) ->
+            Seq.fold (fun (lastcolors: ColorData, s, data: (TimeItem<ColorNoteRow>) list) (time, nr) ->
             (
                 let (ns, d) = col s (time, nr)
-                for k in Bitmap.toSeq ((NoteRow.noteData NoteType.HOLDBODY nr) ||| (NoteRow.noteData NoteType.HOLDTAIL nr)) do
+                for k in Bitmask.toSeq ((NoteRow.noteData NoteType.HOLDBODY nr) ||| (NoteRow.noteData NoteType.HOLDTAIL nr)) do
                     d.[k] <- lastcolors.[k]
                 (d, ns, (time, (nr, d)) :: data)
             )) (Array.zeroCreate(mc.Keys), initialState, []) mc.Notes.Data
         in data
         |> Seq.rev
-        |> ResizeArray<TimeDataItem<ColorNoteRow>>
-        |> TimeData<ColorNoteRow>
+        |> Array.ofSeq
 
-    let private roughlyDivisible (a: Time) (b: Time) = Time.Abs(a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
+    let private roughlyDivisible (a: Time) (b: Time) = Time.abs(a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
 
     let private ddr_func (delta: Time) (msPerBeat: float32<ms/beat>) : int =
         List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughlyDivisible delta (msPerBeat / n)) [0..7]
         |> Option.defaultValue DDRValues.Length
 
     let applyScheme (scheme: ColorScheme) (colorData: ColorData) (mc: ModChart) =
-        let (keys, bpm, sv, m) = (mc.Keys, mc.BPM, mc.SV, mc.ModsUsed)
         let ci i = colorData.[i]
         match scheme with
         | ColorScheme.Column ->
             ((), fun _ (_, nr) ->
-                ((), [|for i in 0..(keys-1) -> ci i|]))
+                ((), [| for i in 0 .. (mc.Keys - 1) -> ci i |]))
                 |> colorize mc
         | ColorScheme.Chord ->
             ((), fun _ (_, nr) ->
-                let index nr = (nr |> NoteRow.noteData NoteType.NORMAL |> Bitmap.count) + (nr |> NoteRow.noteData NoteType.HOLDHEAD |> Bitmap.count) - 1 |> max 0
+                let mutable index = -1
+                for k = 0 to keys - 1 do
+                    if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then index <- index + 1
+                index <- max 0 index
                 ((), Array.create keys (index nr |> ci)))
                 |> colorize mc
         | ColorScheme.DDR ->
             (mc, fun c (time, nr) ->
                 let (ptime, (_, msPerBeat)) =
-                    if bpm.Empty then
-                        (0.0f<ms>, (4<beat>, 500.0f<ms/beat>))
-                    elif offsetOf bpm.First.Value >= time then bpm.First.Value
-                    else bpm.GetPointAt(time)
-                in (mc, Array.create keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
+                    if mc.BPM.Length = 0 then
+                        { Time = 0.0f<ms>; Data = { Meter = 4<beat>; MsPerBeat = 500.0f<ms/beat>} }
+                    elif mc.BPM.[0].Time >= time then mc.BPM.[0]
+                    else mc.BPM.GetPointAt(time)
+                in (mc, Array.create mc.Keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
                 |> colorize mc
-        | _ -> ((), fun _ _ -> (), Array.zeroCreate keys) |> colorize mc
-        |> fun output -> { Keys = keys; Notes = output; BPM = bpm; SV = sv; ModsUsed = m }
+        | _ -> ((), fun _ _ -> (), Array.zeroCreate mc.Keys) |> colorize mc
+        |> fun output -> { Keys = mc.Keys; Notes = output; BPM = mc.BPM; SV = mc.SV; ColumnSV = mc.ColumnSV; ModsUsed = mc.ModsUsed }
 
     [<Json.AutoCodec(false)>]
     type ColorConfig = 
