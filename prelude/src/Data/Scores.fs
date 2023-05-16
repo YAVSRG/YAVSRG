@@ -5,10 +5,10 @@ open System.IO
 open System.Collections.Generic
 open Percyqaz.Json
 open Percyqaz.Common
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
-open Prelude.Scoring
-open Prelude.Scoring.Grading
+open Prelude.Gameplay
+open Prelude.Gameplay.Grading
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.Layout

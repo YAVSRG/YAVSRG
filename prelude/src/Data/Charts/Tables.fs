@@ -4,7 +4,7 @@ open System.Linq
 open Percyqaz.Common
 open Percyqaz.Json
 open Prelude.Data.Charts.Caching
-open Prelude.Scoring
+open Prelude.Gameplay
 
 [<Json.AutoCodec>]
 type TableChart =

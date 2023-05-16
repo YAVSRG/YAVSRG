@@ -57,12 +57,13 @@ module Types =
         
         let isEmpty (arr: TimeArray<'T>) = arr.Length = 0
 
-        let map (c: 'T -> 'T) (arr: TimeItem<'T> array) = Array.map (fun { Time = time; Data = d } -> { Time = time; Data = c d }) arr
+        let map (c: 'T -> 'U) (arr: TimeItem<'T> array) = Array.map (fun { Time = time; Data = d } -> { Time = time; Data = c d }) arr
 
         let last (arr: TimeArray<'T>) = if arr.Length > 0 then Some arr.[arr.Length - 1] else None
         let first (arr: TimeArray<'T>) = if arr.Length > 0 then Some arr.[0] else None
 
         // greatest index i where arr.[i] <= time
+        // if no such index because you are before all events, -1
         let find_left time (arr: TimeArray<'T>) =
             let mutable low = 0
             let mutable high = arr.Length

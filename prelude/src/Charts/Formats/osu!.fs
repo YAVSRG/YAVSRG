@@ -207,8 +207,8 @@ module ``osu!`` =
         .>>. (tuple4 (parseInt .>> comma) (parseInt .>> comma) (parseInt .>> comma) parseInt) |>>
         fun ((offset, value, meter, sampleSet), (sampleIndex, volume, isBpm, effects)) ->
             if isBpm > 0
-            then BPM (toTime offset, toTime value / 1.0f<beat>, meter * 1<beat>, (enum sampleSet, sampleIndex, volume), enum effects)
-            else SV (toTime offset, -100.0f / float32 value, (enum sampleSet, sampleIndex, volume), enum effects)
+            then BPM (Time.ofFloat offset, Time.ofFloat value / 1.0f<beat>, meter * 1<beat>, (enum sampleSet, sampleIndex, volume), enum effects)
+            else SV (Time.ofFloat offset, -100.0f / float32 value, (enum sampleSet, sampleIndex, volume), enum effects)
 
     let parseTimingPoints = pstring "[TimingPoints]" >>. newline >>. many (parseTimingPoint .>> newline)
 
@@ -235,7 +235,7 @@ module ``osu!`` =
     let parseHitObject: Parser<HitObject, unit> =
         tuple4 (parsePoint .>> comma) (parseNum .>> comma) (parseInt .>> comma) ((parseInt .>> comma) |>> enum)
         >>= (fun (pos, offset, objType, hitsound) ->
-            let offset = toTime offset
+            let offset = Time.ofFloat offset
             match objType &&& 139 with
             | 1 -> parseAddition |>> fun addition -> HitCircle(pos, offset, hitsound, addition)
             | 2 ->
@@ -245,10 +245,10 @@ module ``osu!`` =
                     Slider(pos, offset, slides, points, length, hitsound, sounds)
             | 8 ->
                 pipe2 (parseNum .>> comma) parseAddition
-                    (fun endTime addition -> Spinner(offset, toTime endTime, hitsound, addition))
+                    (fun endTime addition -> Spinner(offset, Time.ofFloat endTime, hitsound, addition))
             | 128 ->
                 pipe2 (parseNum .>> colon) parseAddition
-                    (fun endTime addition -> HoldNote(pos, offset, toTime endTime, hitsound, addition))
+                    (fun endTime addition -> HoldNote(pos, offset, Time.ofFloat endTime, hitsound, addition))
             | _ -> failwith "Unknown hitobject type")
 
     let parseHitObjects = pstring "[HitObjects]" >>. newline >>. many parseHitObject
@@ -276,7 +276,7 @@ module ``osu!`` =
                 | Some x, None -> x, x
                 | None, Some x -> x, x
                 | Some x, Some y -> x, y
-            let startTime, endTime = toTime startTime, toTime endTime
+            let startTime, endTime = Time.ofFloat startTime, Time.ofFloat endTime
             match eventType with
             | "F" -> parseNumsWithShorthand |>> fun (f1, f2) -> Fade(startTime, endTime, easing, f1, f2)
             | "M" -> parsePoint .>>. opt (comma >>. parsePoint) |>> fun (p1, p2) -> Move(startTime, endTime, easing, p1, Option.defaultValue p1 p2)
@@ -304,7 +304,7 @@ module ``osu!`` =
                 ((tuple4 (parseNum .>> comma) (parseInt .>> comma) (parseNum .>> comma) (parseName |>> LoopType.Parse))
                 .>> pchar '\n') (parseSpriteEvents (pchar '_' <|> pchar ' ')))
             |>> fun ((layer, origin, file, x), (y, frames, frameTime, loopType), events) ->
-                Animation(layer, origin, file, (x, y), frames, toTime frameTime, loopType, events))
+                Animation(layer, origin, file, (x, y), frames, Time.ofFloat frameTime, loopType, events))
 
         <|> ((pstring "Sprite" <|> pstring "4") >>. comma
             >>. ((tuple5 (parseName .>> comma |>> Layer.Parse) (parseName .>> comma |>> SpriteOrigin.Parse)
@@ -318,20 +318,20 @@ module ``osu!`` =
 
         <|> ((pstring "Sample") >>. comma
             >>. (tuple4 (parseNum .>> comma) (parseName .>> comma |>> Layer.Parse) (parseQuote .>> comma) parseInt)
-            |>> fun (time, layer, file, volume) -> Sample(toTime time, layer, file, volume))
+            |>> fun (time, layer, file, volume) -> Sample(Time.ofFloat time, layer, file, volume))
          
         <|> ((pstring "Video" <|> pstring "1") >>. comma
             >>. (tuple3 (parseNum .>> comma) parseQuote (opt (tuple2 (comma >>. parseNum) (comma >>. parseNum)) |>> Option.defaultValue (0.0, 0.0)))
-            |>> fun (time, file, (x, y)) -> Video(toTime time, file, (x, y)))
+            |>> fun (time, file, (x, y)) -> Video(Time.ofFloat time, file, (x, y)))
          
         <|> ((pstring "Break" <|> pstring "2") >>. comma
             >>. (parseNum .>> comma) .>>. parseNum
-            |>> fun (time1, time2) -> Break (toTime time1, toTime time2))
+            |>> fun (time1, time2) -> Break (Time.ofFloat time1, Time.ofFloat time2))
 
         //I have no idea what this does and cannot for the life of me find any documentation on it
         <|> (pstring "3" >>. comma
             >>. (tuple4 (parseNum .>> comma) (parseInt .>> comma) (parseInt .>> comma) (parseInt))
-            |>> fun (time, r, g, b) -> BackgroundColorChange(toTime time, r, g, b))
+            |>> fun (time, r, g, b) -> BackgroundColorChange(Time.ofFloat time, r, g, b))
 
     let parseEvents =
         pstring "[Events]" >>. newline >>. many comment
@@ -400,7 +400,7 @@ module ``osu!`` =
             match key with
             | "AudioFilename" -> { s with AudioFilename = value }
             | "AudioLeadIn" -> { s with AudioLeadIn = value |> int }
-            | "PreviewTime" -> { s with PreviewTime = value |> float |> toTime }
+            | "PreviewTime" -> { s with PreviewTime = value |> float |> Time.ofFloat }
             | "Countdown" -> { s with Countdown = value |> int }
             | "SampleSet" -> { s with SampleSet = value |> SampleSet.Parse }
             | "StackLeniency" -> { s with StackLeniency = value |> float }
@@ -450,7 +450,7 @@ module ``osu!`` =
             match key with
             | "Bookmarks" ->
                 match run (sepBy parseNum comma) value with
-                | Success(result, _, _) -> { s with Bookmarks = result |> List.map toTime }
+                | Success(result, _, _) -> { s with Bookmarks = result |> List.map Time.ofFloat }
                 | Failure(errorMsg, _, _) -> failwith errorMsg
             | "DistanceSpacing" -> { s with DistanceSpacing = value |> float }
             | "BeatDivisor" -> { s with BeatDivisor = value |> float }

@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Data.Charts
 
 open Percyqaz.Json
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.Conversions
 open Prelude.Gameplay.Layout
@@ -30,7 +30,7 @@ module Caching =
         let lastNote = chart.LastNote
         let rating = RatingReport(chart.Notes, 1.0f, Layout.Spread, chart.Keys)
         {
-            FilePath = chart.FileIdentifier
+            FilePath = chart.LoadedFromPath
             Title = chart.Header.Title
             Artist = chart.Header.Artist
             Creator = chart.Header.Creator
@@ -39,7 +39,7 @@ module Caching =
             Keys = chart.Keys
             Length = lastNote - chart.FirstNote
             // todo: move to Chart module
-            BPM = ``Interlude to osu!``.minMaxBPM (List.ofSeq chart.BPM.Data) lastNote
+            BPM = ``Interlude to osu!``.minMaxBPM (List.ofSeq chart.BPM) lastNote
             DiffName = chart.Header.DiffName
             Physical = rating.Physical
             Technical = rating.Technical

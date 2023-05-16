@@ -30,7 +30,7 @@ module Library =
         saveImportantJsonFile (Path.Combine(getDataPath "Data", "cache.json")) charts
         saveImportantJsonFile (Path.Combine(getDataPath "Data", "collections.json")) collections
     
-    let addOrUpdate (c: Chart) = charts.[c.FileIdentifier] <- cacheChart c
+    let addOrUpdate (c: Chart) = charts.[c.LoadedFromPath] <- cacheChart c
 
     let count() = charts.Count
 

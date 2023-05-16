@@ -240,21 +240,21 @@ type IScoreMetric
             let struct (t, deltas, status) = hitData.[i]
             let d = now - t
             if (status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED) then
-                if (Time.Abs earliest_delta > Time.Abs d) then
+                if (Time.abs earliest_delta > Time.abs d) then
                     earliest_note <- i
                     earliest_delta <- d
-                if Time.Abs earliest_delta < ruleset.Accuracy.CbrushWindow then
+                if Time.abs earliest_delta < ruleset.Accuracy.CbrushWindow then
                     i <- hitData.Length
             // Detect a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
             elif status.[k] = HitStatus.HIT_ACCEPTED && deltas.[k] < -ruleset.Accuracy.CbrushWindow then
-                if (Time.Abs cbrush_absorb_delta > Time.Abs d) then
+                if (Time.abs cbrush_absorb_delta > Time.abs d) then
                     cbrush_absorb_delta <- d
             i <- i + 1
 
         if earliest_note >= 0 then
             let struct (t, deltas, status) = hitData.[earliest_note]
             // If user's hit is closer to a note hit extremely early than any other note, swallow it
-            if Time.Abs cbrush_absorb_delta >= Time.Abs earliest_delta then
+            if Time.abs cbrush_absorb_delta >= Time.abs earliest_delta then
                 let isHoldHead = status.[k] <> HitStatus.HIT_REQUIRED
                 status.[k] <- HitStatus.HIT_ACCEPTED
                 deltas.[k] <- earliest_delta / rate

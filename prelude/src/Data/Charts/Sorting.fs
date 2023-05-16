@@ -2,8 +2,8 @@
 
 open System
 open System.Collections.Generic
-open Prelude.Common
-open Prelude.Scoring
+open Prelude
+open Prelude.Gameplay
 
 module Sorting =
 

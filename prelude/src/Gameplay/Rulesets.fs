@@ -3,7 +3,7 @@
 open System
 open Percyqaz.Common
 open Percyqaz.Json
-open Prelude.Common
+open Prelude
 
 type JudgementId = int
 /// Judgements are an indicator of how good a hit was, like "Perfect!" or "Nearly!"
@@ -242,8 +242,8 @@ module RulesetUtils =
         else miss_weight
 
     let osu_ln_judgement (od: float32) (headDelta: Time) (endDelta: Time) (overhold: bool) (dropped: bool) : JudgementId =
-        let absolute = Time.Abs endDelta * 0.5f
-        let headDelta = Time.Abs headDelta
+        let absolute = Time.abs endDelta * 0.5f
+        let headDelta = Time.abs headDelta
 
         if
             absolute < 16.5f<ms> * 1.2f &&
@@ -436,7 +436,7 @@ module PrefabRulesets =
 
         // not used at the moment
         let sc_curve (judge: int) (isRelease: bool) (delta: Time) =
-            let delta = Time.Abs delta
+            let delta = Time.abs delta
 
             // 1.0 = 100%
             if delta >= 180.0f<ms> then -1.0

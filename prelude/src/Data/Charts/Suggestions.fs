@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Data.Charts.Suggestions
 
 open System
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Interlude
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching

@@ -362,14 +362,14 @@ module Conversions =
             convert (snaps |> Array.toList)
             |> List.ofSeq
 
-        let rec private bpmDurations points (endTime: Time) = 
+        let rec private bpmDurations (points: TimeItem<BPM> list) (endTime: Time) = 
             if List.isEmpty points then failwith "no bpm point"
-            let (offset, (_, msPerBeat)) = (List.head points)
+            let { Time = offset; Data = { MsPerBeat = msPerBeat } } = List.head points
             let mutable current : float32<ms/beat> = msPerBeat
             let mutable t : Time = offset
             let data = new Dictionary<float32<ms/beat>, Time>()
 
-            for (offset, (_, msPerBeat)) in points do
+            for { Time = offset; Data = { MsPerBeat = msPerBeat } } in points do
                 if (not (data.ContainsKey current)) then data.Add(current, 0.0f<ms>)
                 data.[current] <- data.[current] + offset - t; t <- offset; current <- msPerBeat
             if (not (data.ContainsKey current)) then data.Add(current, 0.0f<ms>)
@@ -381,42 +381,44 @@ module Conversions =
             (d.First().Key, d.Last().Key)
 
         let private convertToTimingPoints (bpm: TimeArray<BPM>) (sv: TimeArray<float32>) (endTime: Time) =
+
             let corrective_sv offset mult = 
                 if sv.Length = 0 then None else
-                    match TimeArray.find_left offset with
-                    | (-1, false) -> None
-                    | (i, false) ->
-                        let (offset, value) = sv.GetPointAt offset in
-                            Some (TimingPoint.SV (offset, mult * value, (SampleSet.Soft, 0, 10), enum 0))
-                    | _ -> None
+                    let index = TimeArray.find_left offset sv
+                    if index < 0 then None
+                    else
+                        let { Time = time; Data = value } = sv.[index]
+                        if time = offset then None
+                        else Some (TimingPoint.SV (offset, mult * value, (SampleSet.Soft, 0, 10), enum 0))
 
             let svs time1 time2 mult =
                 seq {
                     match corrective_sv time1 mult with
                     | None -> ()
                     | Some x -> yield x
-                    for (offset, value) in sv.EnumerateBetween time1 time2 do
-                        yield TimingPoint.SV (offset, value / mult, (SampleSet.Soft, 0, 10), enum 0)
+                    for { Time = offset; Data = value } in TimeArray.between time1 time2 sv do
+                        yield TimingPoint.SV (offset, mult * value, (SampleSet.Soft, 0, 10), enum 0)
                 }
 
             let tps =
                 seq {
-                    let mutable bs = bpm.Data |> List.ofSeq
-                    if List.isEmpty bs then ()
-                    else
-                        let mostCommonBpm = (bpmDurations bs endTime).OrderByDescending(fun p -> p.Value).First().Key
-                        yield! svs (-Time.infinity) (bs |> List.head |> offsetOf) 1.0f
-                        while bs |> List.isEmpty |> not do
-                            match bs with
-                            | (offset, (meter, beatLength)) :: (offset2, _) :: rs ->
-                                yield TimingPoint.BPM (offset, beatLength, meter, (SampleSet.Soft, 0, 10), enum 0)
-                                yield! svs offset offset2 (mostCommonBpm / beatLength)
-                                bs <- List.tail bs
-                            | (offset, (meter, beatLength)) :: [] ->
-                                yield TimingPoint.BPM (offset, beatLength, meter, (SampleSet.Soft, 0, 10), enum 0)
-                                yield! svs offset Time.infinity (mostCommonBpm / beatLength)
-                                bs <- List.tail bs
-                            | _ -> failwith "impossible"
+                    let mutable bs = bpm |> List.ofArray
+                    if List.isEmpty bs then () else
+
+                    let mostCommonMspb = (bpmDurations bs endTime).OrderByDescending(fun p -> p.Value).First().Key
+
+                    yield! svs (-Time.infinity) (List.head bs).Time 1.0f
+                    while not (List.isEmpty bs) do
+                        match bs with
+                        | { Time = offset; Data = { Meter = meter; MsPerBeat = beatLength } } :: { Time = offset2 } :: rs ->
+                            yield TimingPoint.BPM (offset, beatLength, meter, (SampleSet.Soft, 0, 10), enum 0)
+                            yield! svs offset offset2 (mostCommonMspb / beatLength)
+                            bs <- List.tail bs
+                        | { Time = offset; Data = { Meter = meter; MsPerBeat = beatLength } } :: [] ->
+                            yield TimingPoint.BPM (offset, beatLength, meter, (SampleSet.Soft, 0, 10), enum 0)
+                            yield! svs offset Time.infinity (mostCommonMspb / beatLength)
+                            bs <- List.tail bs
+                        | [] -> failwith "impossible by loop condition"
                 }
             tps |> List.ofSeq
 
@@ -444,6 +446,7 @@ module Conversions =
                     OverallDifficulty = 8.0
                     HPDrainRate = 8.0
                 }
+            if chart.ColumnSV.Any(fun arr -> arr.Length > 0) then Logging.Warn("Interlude -> osu conversion will discard column SV information")
             {
                 General = general
                 Editor = editor
