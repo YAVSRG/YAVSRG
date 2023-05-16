@@ -73,4 +73,4 @@ try
 with err ->
     Logging.Critical (err.ToString(), err)
 
-Logging.Wait()
+Logging.Shutdown()
