@@ -3,7 +3,7 @@
 open System.IO
 open System.Collections.Generic
 open Prelude.Common
-open Prelude.Scoring
+open Prelude.Gameplay
 open Backbeat.Utils
 
 module Rulesets =

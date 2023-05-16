@@ -237,7 +237,7 @@ module Tables =
                         printfn "%s" chart.Id
                         if Directory.Exists path then Directory.Delete (path, true) |> ignore
                         Directory.CreateDirectory path |> ignore
-                        let updated_chart = Chart(c.Keys, { c.Header with AudioFile = Relative "audio.mp3"; BackgroundFile = Relative "bg.png" }, c.Notes, c.BPM, c.SV, "")
+                        let updated_chart = { c with Header = { c.Header with AudioFile = Relative "audio.mp3"; BackgroundFile = Relative "bg.png" }; LoadedFromPath = "" }
                         try
                             Chart.toFile updated_chart (Path.Combine(path, chart.Id.Split("/", 2).[1] + ".yav"))
                             File.Copy (c.AudioPath, Path.Combine(path, "audio.mp3"))

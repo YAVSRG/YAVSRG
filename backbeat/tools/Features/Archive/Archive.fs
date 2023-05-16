@@ -4,7 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Json
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.Conversions
 open Backbeat.Utils
 
