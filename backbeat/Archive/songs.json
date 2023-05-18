@@ -190,7 +190,7 @@
     }, 
     "150pia/nisemonochuuihou": {
         "AlternativeTitles": [], 
-        "Artists": ["150p & IA"], 
+        "Artists": ["150p", "IA"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -352,7 +352,7 @@
     }, 
     "aaaavsfrums/beepbitfutures": {
         "AlternativeTitles": [], 
-        "Artists": ["aaaa vs Frums"], 
+        "Artists": ["aaaa", "Frums"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -406,8 +406,8 @@
     }, 
     "aboogiewitdahoodiefeatkodakblack/drowning": {
         "AlternativeTitles": [], 
-        "Artists": ["A Boogie Wit da Hoodie (feat. Kodak Black)"], 
-        "OtherArtists": [], 
+        "Artists": ["A Boogie Wit da Hoodie"], 
+        "OtherArtists": ["Kodak Black"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -550,8 +550,8 @@
     }, 
     "alexcfeatyasmink/angelofdarkness": {
         "AlternativeTitles": [], 
-        "Artists": ["Alex C. Feat. Yasmin K."], 
-        "OtherArtists": [], 
+        "Artists": ["Alex C."], 
+        "OtherArtists": ["Yasmin K."], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -784,8 +784,8 @@
     }, 
     "annyahoofeathakainemaikovflower/xanaduofpureblood": {
         "AlternativeTitles": [], 
-        "Artists": ["annyahoo feat. Hakaine Maiko, v flower"], 
-        "OtherArtists": [], 
+        "Artists": ["annyahoo"], 
+        "OtherArtists": ["Hakaine Maiko", "v flower"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -1018,8 +1018,8 @@
     }, 
     "arminvanbuurenvinivicifeathilighttribe/greatspirit": {
         "AlternativeTitles": [], 
-        "Artists": ["Armin van Buuren, Vini Vici feat. Hilight Tribe"], 
-        "OtherArtists": [], 
+        "Artists": ["Armin van Buuren", "Vini Vici"], 
+        "OtherArtists": ["Hilight Tribe"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -1137,10 +1137,10 @@
         "AlternativeTitles": [], 
         "Artists": ["Avicii"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Didrick"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Broken Arrows (Didrick Remix)"
+        "Title": "Broken Arrows"
     }, 
     "avicii/thenights": {
         "AlternativeTitles": [], 
@@ -1270,9 +1270,9 @@
     }, 
     "barberfrenchfacesremix/technologic": {
         "AlternativeTitles": [], 
-        "Artists": ["Barber (FrenchFaces Remix)"], 
+        "Artists": ["Barber"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["FrenchFaces"], 
         "Source": null, 
         "Tags": [], 
         "Title": "Technologic"
@@ -1380,10 +1380,10 @@
         "AlternativeTitles": [], 
         "Artists": ["BiBi"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Momora EUROBEAT"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Cutie Panther (Momora EUROBEAT Remix)"
+        "Title": "Cutie Panther"
     }, 
     "bigwave/dancewithme": {
         "AlternativeTitles": [], 
@@ -1414,7 +1414,7 @@
     }, 
     "bingcrosbylouisarmstrong/gonefishin": {
         "AlternativeTitles": [], 
-        "Artists": ["Bing Crosby & Louis Armstrong"], 
+        "Artists": ["Bing Crosby", "Louis Armstrong"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -1675,7 +1675,7 @@
     }, 
     "bringmethehorizonbabymetal/kingslayer": {
         "AlternativeTitles": [], 
-        "Artists": ["Bring Me The Horizon & Babymetal"], 
+        "Artists": ["Bring Me The Horizon", "Babymetal"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -1684,8 +1684,8 @@
     }, 
     "bringmethehorizonftbabymetal/kingslayer": {
         "AlternativeTitles": [], 
-        "Artists": ["Bring Me The Horizon ft. BABYMETAL"], 
-        "OtherArtists": [], 
+        "Artists": ["Bring Me The Horizon"], 
+        "OtherArtists": ["BABYMETAL"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -1864,8 +1864,8 @@
     }, 
     "camelliafeatnanahira/magicalenergymakesthecrazieststrongestqualitymagical-audiono1": {
         "AlternativeTitles": [], 
-        "Artists": ["Camellia feat. Nanahira"], 
-        "OtherArtists": [], 
+        "Artists": ["Camellia"], 
+        "OtherArtists": ["Nanahira"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -1873,7 +1873,7 @@
     }, 
     "camillehanszimmer/suis-moireprise": {
         "AlternativeTitles": [], 
-        "Artists": ["Camille & Hans Zimmer"], 
+        "Artists": ["Camille", "Hans Zimmer"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -1963,8 +1963,8 @@
     }, 
     "caseyedwardsfeataliedwards/deviltrigger": {
         "AlternativeTitles": [], 
-        "Artists": ["Casey Edwards feat. Ali Edwards"], 
-        "OtherArtists": [], 
+        "Artists": ["Casey Edwards"], 
+        "OtherArtists": ["Ali Edwards"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -2035,8 +2035,8 @@
     }, 
     "charlixcxftritaora/doingit": {
         "AlternativeTitles": [], 
-        "Artists": ["Charli XCX ft. Rita Ora"], 
-        "OtherArtists": [], 
+        "Artists": ["Charli XCX"], 
+        "OtherArtists": ["Rita Ora"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -2044,7 +2044,7 @@
     }, 
     "chesteryoungcastion/pyro": {
         "AlternativeTitles": [], 
-        "Artists": ["Chester Young & Castion"], 
+        "Artists": ["Chester Young", "Castion"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -2071,7 +2071,7 @@
     }, 
     "chieriogatarikajougasakiriinatada/angeldream": {
         "AlternativeTitles": [], 
-        "Artists": ["Chieri Ogata, Rika Jougasaki, Riina Tada"], 
+        "Artists": ["Chieri Ogata", "Rika Jougasaki", "Riina Tada"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -2098,7 +2098,7 @@
     }, 
     "chitoyuuri/moreonenight": {
         "AlternativeTitles": [], 
-        "Artists": ["Chito, Yuuri"], 
+        "Artists": ["Chito", "Yuuri"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -2143,7 +2143,7 @@
     }, 
     "circuspgumi/copycat": {
         "AlternativeTitles": [], 
-        "Artists": ["CircusP&GUMI"], 
+        "Artists": ["CircusP", "GUMI"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -2224,9 +2224,9 @@
     }, 
     "coldkissedelritterremix/japanizedblue-": {
         "AlternativeTitles": [], 
-        "Artists": ["cold kiss (Edelritter Remix)"], 
+        "Artists": ["cold kiss"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Edelritter"], 
         "Source": null, 
         "Tags": [], 
         "Title": "JAPANIZED BLUE -"
@@ -2269,7 +2269,7 @@
     }, 
     "coraleganrobertolivierrobbifinkel/deepinmyheartcybersixopeningtheme": {
         "AlternativeTitles": [], 
-        "Artists": ["Coral Egan, Robert Olivier, Robbi Finkel"], 
+        "Artists": ["Coral Egan", "Robert Olivier", "Robbi Finkel"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -2332,7 +2332,7 @@
     }, 
     "crankyvshitechninja/hithithit": {
         "AlternativeTitles": [], 
-        "Artists": ["Cranky VS HiTECH NINJA"], 
+        "Artists": ["Cranky", "HiTECH NINJA"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -2422,7 +2422,7 @@
     }, 
     "d-mode-dandemoticon/littlenappy": {
         "AlternativeTitles": [], 
-        "Artists": ["D-Mode-D and Emoticon"], 
+        "Artists": ["D-Mode-D", "Emoticon"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -2431,8 +2431,8 @@
     }, 
     "daddyyankeeandeddiedeeftglory/gasolina": {
         "AlternativeTitles": [], 
-        "Artists": ["Daddy Yankee and Eddie Dee (ft. Glory)"], 
-        "OtherArtists": [], 
+        "Artists": ["Daddy Yankee", "Eddie Dee"], 
+        "OtherArtists": ["Glory"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -2485,8 +2485,8 @@
     }, 
     "dannybrownfteveryone/fuckanime": {
         "AlternativeTitles": [], 
-        "Artists": ["Danny Brown ft. everyone"], 
-        "OtherArtists": [], 
+        "Artists": ["Danny Brown"], 
+        "OtherArtists": ["everyone"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -2764,8 +2764,8 @@
     }, 
     "disarmoniamundifeatyokohallelujah/kimiwonosete": {
         "AlternativeTitles": [], 
-        "Artists": ["Disarmonia Mundi feat. Yoko Hallelujah"], 
-        "OtherArtists": [], 
+        "Artists": ["Disarmonia Mundi"], 
+        "OtherArtists": ["Yoko Hallelujah"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -3070,8 +3070,8 @@
     }, 
     "dmashurafeatdjamuro/zzzaaa": {
         "AlternativeTitles": [], 
-        "Artists": ["DM Ashura feat. DJ Amuro"], 
-        "OtherArtists": [], 
+        "Artists": ["DM Ashura"], 
+        "OtherArtists": ["DJ Amuro"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -3322,8 +3322,8 @@
     }, 
     "earlsweatshirtftknxwledge/balance": {
         "AlternativeTitles": [], 
-        "Artists": ["Earl Sweatshirt ft. Knxwledge"], 
-        "OtherArtists": [], 
+        "Artists": ["Earl Sweatshirt"], 
+        "OtherArtists": ["Knxwledge"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -3331,7 +3331,7 @@
     }, 
     "easypopgumimegurineluka/happysynthesizer": {
         "AlternativeTitles": [], 
-        "Artists": ["EasyPop, GUMI, Megurine Luka"], 
+        "Artists": ["EasyPop", "GUMI", "Megurine Luka"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -3385,8 +3385,8 @@
     }, 
     "elenasiegmanfeatkevinsherwood/115": {
         "AlternativeTitles": [], 
-        "Artists": ["Elena Siegman feat. Kevin Sherwood"], 
-        "OtherArtists": [], 
+        "Artists": ["Elena Siegman"], 
+        "OtherArtists": ["Kevin Sherwood"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -3601,8 +3601,8 @@
     }, 
     "ezfgfeatvy1vy2/hurtingforaveryhurtfulpain": {
         "AlternativeTitles": [], 
-        "Artists": ["EZFG feat. VY1 & VY2"], 
-        "OtherArtists": [], 
+        "Artists": ["EZFG"], 
+        "OtherArtists": ["VY1", "VY2"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -3871,8 +3871,8 @@
     }, 
     "floridaftredfoooflmfao/run": {
         "AlternativeTitles": [], 
-        "Artists": ["Flo Rida ft. RedFoo of LMFAO"], 
-        "OtherArtists": [], 
+        "Artists": ["Flo Rida"], 
+        "OtherArtists": ["RedFoo of LMFAO"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -3889,7 +3889,7 @@
     }, 
     "floxytekvsbillx/30sswingtek": {
         "AlternativeTitles": [], 
-        "Artists": ["FLOXYTEK vs BILLX"], 
+        "Artists": ["FLOXYTEK", "BILLX"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -3907,8 +3907,8 @@
     }, 
     "foregroundeclipseftmerami/koinotwinkledance": {
         "AlternativeTitles": [], 
-        "Artists": ["Foreground Eclipse ft. Merami"], 
-        "OtherArtists": [], 
+        "Artists": ["Foreground Eclipse"], 
+        "OtherArtists": ["Merami"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -3970,7 +3970,7 @@
     }, 
     "fujitaakanemiyamotoyumeozawaari/preciousyou": {
         "AlternativeTitles": [], 
-        "Artists": ["Fujita Akane, Miyamoto Yume, Ozawa Ari"], 
+        "Artists": ["Fujita Akane", "Miyamoto Yume", "Ozawa Ari"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -3988,8 +3988,8 @@
     }, 
     "fusq-perfumexmoeshopfthentaidude/superstar": {
         "AlternativeTitles": [], 
-        "Artists": ["Fusq - Perfume! x Moe Shop (ft.Hentai Dude)"], 
-        "OtherArtists": [], 
+        "Artists": ["Fusq - Perfume! x Moe Shop"], 
+        "OtherArtists": ["Hentai Dude"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -3997,8 +3997,8 @@
     }, 
     "futureyoungthugfeatoffset/patekwater": {
         "AlternativeTitles": [], 
-        "Artists": ["Future & Young Thug (feat. Offset)"], 
-        "OtherArtists": [], 
+        "Artists": ["Future", "Young Thug"], 
+        "OtherArtists": ["Offset"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -4042,7 +4042,7 @@
     }, 
     "gamefreakshotakageyama/headit": {
         "AlternativeTitles": [], 
-        "Artists": ["GAME FREAK & Shota Kageyama"], 
+        "Artists": ["GAME FREAK", "Shota Kageyama"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -4195,8 +4195,8 @@
     }, 
     "glowftgnome/eclipse": {
         "AlternativeTitles": [], 
-        "Artists": ["Glow ft. Gnome"], 
-        "OtherArtists": [], 
+        "Artists": ["Glow"], 
+        "OtherArtists": ["Gnome"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -4204,8 +4204,8 @@
     }, 
     "glycerolftmetronome/eclipse": {
         "AlternativeTitles": [], 
-        "Artists": ["Glycerol ft. Metronome"], 
-        "OtherArtists": [], 
+        "Artists": ["Glycerol"], 
+        "OtherArtists": ["Metronome"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -4267,8 +4267,8 @@
     }, 
     "gomurplsdougalgammerfeatnikimak/everytimeihearyourname": {
         "AlternativeTitles": [], 
-        "Artists": ["GomurplsDougal & Gammer Feat.Niki Mak"], 
-        "OtherArtists": [], 
+        "Artists": ["GomurplsDougal", "Gammer"], 
+        "OtherArtists": ["Niki Mak"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -4357,7 +4357,7 @@
     }, 
     "guhroovyvsled/comingtrue": {
         "AlternativeTitles": [], 
-        "Artists": ["GUHROOVY Vs. L.E.D."], 
+        "Artists": ["GUHROOVY", "L.E.D."], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -4591,7 +4591,7 @@
     }, 
     "hiroyukisawanomizuki/aliez": {
         "AlternativeTitles": [], 
-        "Artists": ["Hiroyuki Sawano & Mizuki"], 
+        "Artists": ["Hiroyuki Sawano", "Mizuki"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -4672,8 +4672,8 @@
     }, 
     "hyunfeatrerone/untitledsoul": {
         "AlternativeTitles": [], 
-        "Artists": ["HyuN feat.rerone"], 
-        "OtherArtists": [], 
+        "Artists": ["HyuN"], 
+        "OtherArtists": ["rerone"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -4798,7 +4798,7 @@
     }, 
     "imilm1dlet/bailandorape": {
         "AlternativeTitles": [], 
-        "Artists": ["Imil & m1dlet"], 
+        "Artists": ["Imil", "m1dlet"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -4906,8 +4906,8 @@
     }, 
     "ironattackfeatabsolutearea/kobura": {
         "AlternativeTitles": [], 
-        "Artists": ["IRON ATTACK! feat. ABSOLUTE AREA"], 
-        "OtherArtists": [], 
+        "Artists": ["IRON ATTACK!"], 
+        "OtherArtists": ["ABSOLUTE AREA"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -5014,8 +5014,8 @@
     }, 
     "jayseanfeatlilwayne/down": {
         "AlternativeTitles": [], 
-        "Artists": ["Jay Sean feat. Lil' Wayne"], 
-        "OtherArtists": [], 
+        "Artists": ["Jay Sean"], 
+        "OtherArtists": ["Lil' Wayne"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -5023,9 +5023,9 @@
     }, 
     "jayseanregardremix/timsop": {
         "AlternativeTitles": [], 
-        "Artists": ["Jay Sean (Regard Remix)"], 
+        "Artists": ["Jay Sean"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Regard"], 
         "Source": null, 
         "Tags": [], 
         "Title": "Tim's OP"
@@ -5068,8 +5068,8 @@
     }, 
     "jeffwilliamsfeatcaseyleewilliams/imtheone": {
         "AlternativeTitles": [], 
-        "Artists": ["Jeff Williams (feat. Casey Lee Williams)"], 
-        "OtherArtists": [], 
+        "Artists": ["Jeff Williams"], 
+        "OtherArtists": ["Casey Lee Williams"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -5131,8 +5131,8 @@
     }, 
     "jinftmariafromgarnidelia/daze": {
         "AlternativeTitles": [], 
-        "Artists": ["JIN ft. MARiA from GARNiDELiA"], 
-        "OtherArtists": [], 
+        "Artists": ["JIN"], 
+        "OtherArtists": ["MARiA from GARNiDELiA"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -5167,7 +5167,7 @@
     }, 
     "joeyriotenemy/deepinside": {
         "AlternativeTitles": [], 
-        "Artists": ["Joey Riot & Enemy"], 
+        "Artists": ["Joey Riot", "Enemy"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -5203,7 +5203,7 @@
     }, 
     "jojidonkrez/breathe": {
         "AlternativeTitles": [], 
-        "Artists": ["joji & Don Krez"], 
+        "Artists": ["joji", "Don Krez"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -5365,8 +5365,8 @@
     }, 
     "kairikibearfeatgumi/inaiinaiizonshou": {
         "AlternativeTitles": [], 
-        "Artists": ["Kairiki Bear feat. GUMI"], 
-        "OtherArtists": [], 
+        "Artists": ["Kairiki Bear"], 
+        "OtherArtists": ["GUMI"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -5383,7 +5383,7 @@
     }, 
     "kakumaaiokamotonobuhiko/daisukidayodaisukidayoumaretekitearigatou": {
         "AlternativeTitles": [], 
-        "Artists": ["Kakuma Ai & Okamoto Nobuhiko"], 
+        "Artists": ["Kakuma Ai", "Okamoto Nobuhiko"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -5518,7 +5518,7 @@
     }, 
     "kdamadisonbeergi-dle/popstarsfeatjairaburns": {
         "AlternativeTitles": [], 
-        "Artists": ["K/DA, Madison Beer & (G)I-DLE"], 
+        "Artists": ["K/DA", "Madison Beer", "(G)I-DLE"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -5554,7 +5554,7 @@
     }, 
     "keijiyamagishiryuichinitta/bossbattle": {
         "AlternativeTitles": [], 
-        "Artists": ["Keiji Yamagishi &Ryuichi Nitta"], 
+        "Artists": ["Keiji Yamagishi", "Ryuichi Nitta"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -5590,8 +5590,8 @@
     }, 
     "kenta-vezftgood-cool/magicspeedball": {
         "AlternativeTitles": [], 
-        "Artists": ["kenta-v.ez. Ft. good-cool"], 
-        "OtherArtists": [], 
+        "Artists": ["kenta-v.ez."], 
+        "OtherArtists": ["good-cool"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -5619,10 +5619,10 @@
         "AlternativeTitles": [], 
         "Artists": ["Kero Kero Bonito"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["WTN3"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Flamingo (WTN3 Remix)"
+        "Title": "Flamingo"
     }, 
     "kerokerobonito/youknowhowitis": {
         "AlternativeTitles": [], 
@@ -5662,7 +5662,7 @@
     }, 
     "kid606andhrvatskil/zvatstepdspedition": {
         "AlternativeTitles": [], 
-        "Artists": ["Kid606 and HrvatskiL"], 
+        "Artists": ["Kid606", "HrvatskiL"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -5770,9 +5770,9 @@
     }, 
     "kobaryoaranremix/eternalending": {
         "AlternativeTitles": [], 
-        "Artists": ["Kobaryo (Aran Remix)"], 
+        "Artists": ["Kobaryo"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Aran"], 
         "Source": null, 
         "Tags": [], 
         "Title": "Eternal Ending"
@@ -5797,7 +5797,7 @@
     }, 
     "kojikondoshinboutanakaskimasktheslumpgod/delfinoplaza": {
         "AlternativeTitles": [], 
-        "Artists": ["Koji Kondo, Shinbou Tanaka, Ski Mask the Slump God"], 
+        "Artists": ["Koji Kondo", "Shinbou Tanaka", "Ski Mask the Slump God"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 

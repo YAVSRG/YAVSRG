@@ -1,6 +1,7 @@
 ﻿namespace Backbeat.Features
 
 open System
+open System.Linq
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Json
@@ -32,6 +33,12 @@ module Archive =
             Source: string option
             Tags: string list
         }
+        member this.FormattedTitle =
+            String.concat ", " this.Artists
+            + if this.OtherArtists <> [] then " ft. " + String.concat ", " this.OtherArtists else ""
+            + " - "
+            + this.Title
+            + if this.Remixers <> [] then " (" + String.concat ", " this.Remixers + " Remix)" else ""
 
     type StepmaniaPackId = int
     [<Json.AutoCodec>]
@@ -121,8 +128,6 @@ module Archive =
     
     let wipe_archive() =
         charts.Clear()
-        artists.Clear()
-        songs.Clear()
         save()
 
     [<Json.AutoCodec>]
@@ -225,7 +230,6 @@ module Archive =
                 if similarity >= 2 && existing_id.IsNone then
                     similar_id <- Some other_song_id
                     Logging.Info(sprintf "Song similarity (but not identical) to %s" other_song_id)
-                    // add to human oversight queue
 
         match existing_id with
         | None ->
@@ -236,6 +240,9 @@ module Archive =
             let id = if i > 0 then id + "-" + i.ToString() else id
             songs.Add(id, song)
             Logging.Info(sprintf "+ Song: %s" id)
+            match similar_id with
+            | Some s -> Queue.append "songs-similar" (s + ", " + id)
+            | None -> ()
             id
         | Some id -> id
 
@@ -357,6 +364,73 @@ module Archive =
             else
                 Logging.Info packs.Stepmania.[p].Title
                 Queue.append "pack-imports" (p.ToString())
+
+    let remix_regex = Text.RegularExpressions.Regex("\\((.*?) Remix\\)$")
+    let song_meta_checks (song_id: SongId) (song: Song) =
+        let fmt = song.FormattedTitle
+        let suggestion =
+            if song.Artists.Length = 1 && song.OtherArtists = [] && song.Remixers = [] then
+
+                let artist, title, remixers =
+                    let artist_matches = remix_regex.Matches(song.Artists.Head)
+                    let title_matches = remix_regex.Matches(song.Title)
+
+                    if artist_matches.Count = 1 then
+                        let r: string = artist_matches.[0].Groups.[1].Value
+                        let original_artist = song.Artists.Head.Replace(artist_matches.First().Value, "").Trim()
+                        original_artist, song.Title, r.Split([|"&"; ","; " and "|], StringSplitOptions.TrimEntries) |> List.ofArray
+
+                    elif title_matches.Count = 1 then
+                        let r: string = title_matches.[0].Groups.[1].Value
+                        let original_title = song.Title.Replace(title_matches.First().Value, "").Trim()
+                        song.Artists.Head, original_title, r.Split([|"&"; ","; " and "|], StringSplitOptions.TrimEntries) |> List.ofArray
+
+                    else song.Artists.Head, song.Title, []
+
+                let artists, features =
+                    let ftSplit : string array = artist.Split([|"FEAT."; "FT."; "Feat."; "Ft."; "feat."; "ft."|], StringSplitOptions.TrimEntries)
+                    ftSplit.[0].TrimEnd([|' '; '('|]).Split([|" VS "; " Vs "; " vs "; " vs. "; " Vs. "; " VS. "; "&"; ","; " and "|], StringSplitOptions.TrimEntries) |> List.ofArray,
+                    if ftSplit.Length > 1 then
+                        ftSplit.[1].TrimEnd([|' '; ')'|]).Split([|"&"; ","; " and "|], StringSplitOptions.TrimEntries) |> List.ofArray
+                    else []
+
+                if artists <> song.Artists || features <> song.OtherArtists || remixers <> song.Remixers || title <> song.Title then
+                    Some { song with Artists = artists; OtherArtists = features; Remixers = remixers; Title = title }
+                else None
+            else None
+        match suggestion with
+        | Some suggestion ->
+            Logging.Info(sprintf "Suggested metadata change\n%A\n vvv \n%A" song suggestion)
+            Logging.Info(sprintf "New: %s" suggestion.FormattedTitle)
+            Logging.Info(sprintf "Old: %s" fmt)
+            Logging.Info("\noptions ::\n 1 - Accept changes\n 2 - Accept changes but mark for manual edit\n 3 - Ignore changes but mark for manual edit\n 4 - No correction needed, don't suggest for this song")
+            let mutable option_chosen = false
+            while not option_chosen do
+                match Console.ReadKey().Key with
+                | ConsoleKey.D1 -> songs.[song_id] <- suggestion; save(); option_chosen <- true
+                | ConsoleKey.D2 -> songs.[song_id] <- suggestion; Queue.append "songs-review" song_id; save(); option_chosen <- true
+                | ConsoleKey.D3 -> Queue.append "songs-review" song_id; option_chosen <- true
+                | ConsoleKey.D4 -> Queue.append "songs-ignore" song_id; option_chosen <- true
+                | _ -> ()
+        | _ -> ()
+
+    let check_all_songs() =
+        let ignores = Queue.get "songs-ignore"
+        let reviews = Queue.get "songs-review"
+        for id in songs.Keys |> Seq.except ignores |> Seq.except reviews do
+            song_meta_checks id songs.[id]
+
+    let rename_artist (old_artist: string, new_artist: string) =
+        let swap = (fun a -> if a = old_artist then new_artist else a)
+        for id in songs.Keys do
+            let song = songs.[id]
+            songs.[id] <-
+                { song with
+                    Artists = List.map swap song.Artists
+                    OtherArtists = List.map swap song.OtherArtists
+                    Remixers = List.map swap song.Remixers
+                }
+            save()
         
     open Percyqaz.Shell
 
@@ -368,4 +442,6 @@ module Archive =
             Command.create "Archives EO packs locally" [] <| Impl.Create(load_stepmania_packs))
             .WithCommand("slurp", 
             Command.create "Processes queues of chart data to add to database" [] <| Impl.Create(slurp))
+            .WithCommand("check_songs", 
+            Command.create "Scan song metadata for mistakes" [] <| Impl.Create(check_all_songs))
 
