@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Json
+open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Formats.Conversions
 open Backbeat.Utils
@@ -24,7 +25,7 @@ module Archive =
     type Song =
         {
             Artists: ArtistName list // never empty
-            OtherArtists: ArtistName list
+            OtherArtists: ArtistName list // alternate performers/cover artists
             Remixers: ArtistName list
             Title: string
             AlternativeTitles: string list
@@ -85,28 +86,28 @@ module Archive =
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "artists.json")) with
         | Ok d -> d
         | Error e -> 
-            printfn "Error loading artists.json: %s" e.Message;
+            Logging.Warn(sprintf "Error loading artists.json: %s" e.Message)
             Dictionary<ArtistName, Artist>()
     
     let songs = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "songs.json")) with
         | Ok d -> d
         | Error e -> 
-            printfn "Error loading songs.json: %s" e.Message;
+            Logging.Warn(sprintf "Error loading songs.json: %s" e.Message)
             Dictionary<SongId, Song>()
     
     let charts = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "charts.json")) with
         | Ok d -> d
         | Error e -> 
-            printfn "Error loading charts.json: %s" e.Message;
+            Logging.Warn(sprintf "Error loading charts.json: %s" e.Message)
             Dictionary<ChartHash, Chart>()
     
     let packs = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "packs.json")) with
         | Ok d -> d
         | Error e -> 
-            printfn "Error loading packs.json: %s" e.Message
+            Logging.Warn(sprintf "Error loading packs.json: %s" e.Message)
             {
                 Stepmania = Dictionary<StepmaniaPackId, StepmaniaPack>()
                 Community = Dictionary<CommunityPackId, CommunityPack>()
@@ -117,6 +118,12 @@ module Archive =
         JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
         JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
         JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs
+    
+    let wipe_archive() =
+        charts.Clear()
+        artists.Clear()
+        songs.Clear()
+        save()
 
     [<Json.AutoCodec>]
     type EOPackAttrs =
@@ -151,7 +158,7 @@ module Archive =
 
     let load_stepmania_packs() =
         async {
-            match! Prelude.Data.WebServices.download_json_async("https://api.etternaonline.com/v2/packs/") with
+            match! Data.WebServices.download_json_async("https://api.etternaonline.com/v2/packs/") with
             | None -> printfn "Failed to get EO packs"
             | Some (d: {| data: ResizeArray<EOPack> |}) ->
                 for p in d.data do
@@ -181,14 +188,7 @@ module Archive =
 
     let simplify_string =
         let regex = Text.RegularExpressions.Regex("[^\sa-zA-Z0-9_-]")
-        fun (s: string) -> regex.Replace(s.ToLowerInvariant(), "").Trim().Replace(" ", "-")
-
-    let simplify_string_10 =
-        simplify_string >> (fun s -> s.Substring(0, min s.Length 10))
-
-    let random_ident =
-        let r = Random()
-        fun () -> sprintf "#%4i" (r.Next(0, 10000))
+        fun (s: string) -> regex.Replace(s.ToLowerInvariant(), "").Trim().Replace(" ", "")
 
     let add_artist(artist: string) =
         if artists.ContainsKey(artist) then ()
@@ -199,7 +199,7 @@ module Archive =
             artists.[artist].Add alias
         elif artists.ContainsKey(alias) then
             artists.[alias].Add artist
-        else printfn "Can't add alias %s to %s because neither exists in artist list" alias artist
+        else Logging.Info(sprintf "Can't add alias %s to %s because neither exists in artist list" alias artist)
 
     let add_song(song: Song) : SongId =
         List.iter add_artist song.Artists
@@ -208,6 +208,7 @@ module Archive =
 
         let stitle = simplify_string song.Title
         let mutable existing_id = None
+        let mutable similar_id = None
         for other_song_id in songs.Keys do
             if existing_id.IsNone then
                 let other_song = songs.[other_song_id]
@@ -221,24 +222,28 @@ module Archive =
                 if other_song.Tags.Length - (List.except song.Tags other_song.Tags).Length > 2 then similarity <- similarity + 1
                 if other_song.Artists.Length - (List.except song.Artists other_song.Artists).Length > 1 then similarity <- similarity + 1
 
-                if similarity >= 2 then
-                    printfn "Incoming song %A may be similar to existing song %s" song other_song_id
+                if similarity >= 2 && existing_id.IsNone then
+                    similar_id <- Some other_song_id
+                    Logging.Info(sprintf "Song similarity (but not identical) to %s" other_song_id)
                     // add to human oversight queue
-                    // existing_id <- Some other_song_id
 
         match existing_id with
         | None ->
-            let id = (simplify_string_10 (List.head song.Artists)) + (simplify_string_10 song.Title) + random_ident()
+            let id = (simplify_string (List.head song.Artists)) + "/" + (simplify_string song.Title)
+            let mutable i = 0
+            while songs.ContainsKey(if i > 0 then id + "-" + i.ToString() else id) do
+                i <- i + 1
+            let id = if i > 0 then id + "-" + i.ToString() else id
             songs.Add(id, song)
-            printfn "+ Song: %s" id
+            Logging.Info(sprintf "+ Song: %s" id)
             id
         | Some id -> id
 
-    let slurp_chart(chart: Prelude.Charts.Formats.Interlude.Chart) =
+    let slurp_chart(chart: Charts.Formats.Interlude.Chart) =
         if not (File.Exists chart.AudioPath) then
-            printfn "Rejecting %s because it doesn't have audio" chart.Header.Title
+            Logging.Info(sprintf "Rejecting %s because it doesn't have audio" chart.Header.Title)
         elif not (File.Exists chart.BackgroundPath) then
-            printfn "Rejecting %s because it doesn't have a background image" chart.Header.Title
+            Logging.Info(sprintf "Rejecting %s because it doesn't have a background image" chart.Header.Title)
         else
 
         let song: Song =
@@ -267,47 +272,50 @@ module Archive =
                 BPM = (0.0f<ms/beat>, 0.0f<ms/beat>) //todo
                 Sources = 
                     match chart.Header.ChartSource with
-                    | Prelude.Charts.Formats.Interlude.ChartSource.Osu (set, id) -> [Osu {| BeatmapSetId = set; BeatmapId = id |}]
-                    | Prelude.Charts.Formats.Interlude.ChartSource.Stepmania (id) -> [Stepmania id]
-                    | Prelude.Charts.Formats.Interlude.ChartSource.Unknown -> []
+                    | Charts.Formats.Interlude.ChartSource.Osu (set, id) -> [Osu {| BeatmapSetId = set; BeatmapId = id |}]
+                    | Charts.Formats.Interlude.ChartSource.Stepmania (id) -> [Stepmania id]
+                    | Charts.Formats.Interlude.ChartSource.Unknown -> []
                 LastUpdated = DateTime.Now
             }
-        let hash = Prelude.Charts.Formats.Interlude.Chart.hash chart
+        let hash = Charts.Formats.Interlude.Chart.hash chart
         charts.Add(hash, chartEntry)
-        printfn "+ Chart: %s" hash
+        Logging.Info(sprintf "+ Chart: %s" hash)
 
-    let slurp_song_folder(target: string) =
+    let slurp_song_folder (sm_pack_id: int option) (target: string) =
         for file in Directory.EnumerateFiles target do
             match file with
             | ChartFile _ ->
                 try
                     let a = 
                         { 
-                            Config = { ConversionActionConfig.Default with CopyMediaFiles = false }
+                            Config = { ConversionActionConfig.Default with StepmaniaPackId = sm_pack_id; CopyMediaFiles = false }
                             Source = file
                             TargetDirectory = Path.Combine (ARCHIVE_PATH, "yav")
                         }
                     loadAndConvertFile a
                     |> List.map (relocateChart a)
                     |> List.iter slurp_chart
-                with err -> printfn "Failed to load/convert file: %s" target
+                with err -> Logging.Info(sprintf "Failed to load/convert file: %s" target)
             | _ -> ()
 
-    let slurp_pack_folder(target: string) =
-        for songFolder in Directory.EnumerateDirectories target do slurp_song_folder songFolder
+    let slurp_pack_folder (sm_pack_id: int option) (target: string) =
+        for songFolder in Directory.EnumerateDirectories target do slurp_song_folder sm_pack_id songFolder
 
     let rec try_download_mirrors(mirrors, filepath) : Async<bool> =
         async {
             match mirrors with
             | [] -> return false
             | url :: xs ->
-                if File.Exists filepath then File.Delete filepath
-                printfn "Downloading from %s ..." url
-                let! result = Prelude.Data.WebServices.download_file.RequestAsync(url, filepath, ignore)
-                if result then return true 
+                if not (File.Exists filepath) then
+                    Logging.Info(sprintf "Downloading from %s ..." url)
+                    let! result = Prelude.Data.WebServices.download_file.RequestAsync(url, filepath, ignore)
+                    if result then return true 
+                    else 
+                        Logging.Error(sprintf "Download from %s failed." url)
+                        return! try_download_mirrors (xs, filepath)
                 else 
-                    printfn "Download from %s failed." url
-                    return! try_download_mirrors (xs, filepath)
+                    Logging.Info(sprintf "Download from %s already on disk ..." url)
+                    return true
         }
 
     open System.IO.Compression
@@ -319,27 +327,43 @@ module Archive =
             let folder = Path.Combine(ARCHIVE_PATH, "tmp", string id)
             match! try_download_mirrors(mirrors, zip) with
             | true ->
+                if Directory.Exists(folder) then Directory.Delete(folder, true)
                 ZipFile.ExtractToDirectory(zip, folder)
                 let pack_folder = (Directory.GetDirectories folder)[0]
-                slurp_pack_folder pack_folder
+                slurp_pack_folder (Some id) pack_folder
                 return true
             | false ->
-                printfn "All mirrors failed."
+                Logging.Error(sprintf "All mirrors failed.")
                 return false
         }
 
     let slurp() =
         let mutable packs = Queue.get "pack-imports"
         while packs <> [] do
-            if download_pack(int (List.head packs)) |> Async.RunSynchronously then save()
-            else Queue.append "failed-packs" (List.head packs)
+            if download_pack(int (List.head packs)) |> Async.RunSynchronously then 
+                Queue.append "pack-imports-success" (List.head packs)
+                save()
+            else Queue.append "pack-imports-failed" (List.head packs)
             packs <- List.tail packs
             Queue.save "pack-imports" packs
+
+    let script() =
+        wipe_archive()
+        let keywords = ["skwid"; "nuclear"; "compulsive"; "valedumps"; "minty"]
+        Queue.save "pack-imports" []
+        for p in packs.Stepmania.Keys do
+            let title = packs.Stepmania.[p].Title.ToLower()
+            if keywords |> List.forall (fun w -> title.Contains(w) |> not) then ()
+            else
+                Logging.Info packs.Stepmania.[p].Title
+                Queue.append "pack-imports" (p.ToString())
         
     open Percyqaz.Shell
 
     let register (ctx: Context) =
         ctx
+            .WithCommand("script",
+            Command.create "User script" [] <| Impl.Create(script))
             .WithCommand("get_eo", 
             Command.create "Archives EO packs locally" [] <| Impl.Create(load_stepmania_packs))
             .WithCommand("slurp", 
