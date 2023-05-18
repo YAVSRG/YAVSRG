@@ -124,7 +124,7 @@ module Archive =
         JSON.ToFile (Path.Combine(ARCHIVE_PATH, "artists.json"), true) artists
         JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
         JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
-        JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs
+        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs with _ -> ()
     
     let wipe_archive() =
         charts.Clear()
@@ -431,6 +431,46 @@ module Archive =
                     Remixers = List.map swap song.Remixers
                 }
             save()
+
+    let rec levenshtein (a: char list) (b: char list) =
+        match a, b with
+        | [], ys -> ys.Length
+        | xs, [] -> xs.Length
+        | x :: xs, y :: ys when x = y -> levenshtein xs ys
+        | x :: xs, y :: ys ->
+            let a = levenshtein (x :: xs) ys
+            let b = levenshtein xs (y :: ys)
+            let c = levenshtein (x :: xs) (y :: ys)
+            1 + min (min a b) c
+
+    let check_all_artists() =
+        let artists = ResizeArray<string>()
+
+        let check_artist (artist: string) =
+            let b = List.ofSeq (artist.ToLower())
+            let mutable artist = artist
+            for a in artists |> Array.ofSeq do
+                if levenshtein (List.ofSeq (a.ToLower())) b < 5 then
+                    Logging.Info(sprintf "Possible artist match")
+                    Logging.Info(sprintf "Existing: %s" a)
+                    Logging.Info(sprintf "Incoming: %s" artist)
+                    Logging.Info("\noptions ::\n 1 - Existing is correct\n 2 - Incoming is correct\n 3 - These are not the same artist")
+                    let mutable option_chosen = false
+                    while not option_chosen do
+                        match Console.ReadKey().Key with
+                        | ConsoleKey.D1 -> rename_artist (artist, a); artists.Remove a |> ignore; artist <- a; option_chosen <- true
+                        | ConsoleKey.D2 -> rename_artist (a, artist); artists.Remove a |> ignore; option_chosen <- true
+                        | ConsoleKey.D3 -> Queue.append "artists-distinct" (artist + "," + a); option_chosen <- true
+                        | _ -> ()
+            artists.Add artist
+
+                    
+        for id in songs.Keys |> Array.ofSeq do
+            let song = songs.[id]
+            List.iter check_artist song.Artists
+            List.iter check_artist song.OtherArtists
+            List.iter check_artist song.Remixers
+            
         
     open Percyqaz.Shell
 
@@ -444,4 +484,5 @@ module Archive =
             Command.create "Processes queues of chart data to add to database" [] <| Impl.Create(slurp))
             .WithCommand("check_songs", 
             Command.create "Scan song metadata for mistakes" [] <| Impl.Create(check_all_songs))
-
+            .WithCommand("check_artists", 
+            Command.create "Scan artists for duplicates" [] <| Impl.Create(check_all_artists))
