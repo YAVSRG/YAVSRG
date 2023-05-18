@@ -438,7 +438,7 @@ module Archive =
         save()
 
     let rec levenshtein (a: char list) (b: char list) =
-        if abs (a.Length - b.Length) >= 5 then 100 else
+        if abs (a.Length - b.Length) > 5 then 100 else
         match a, b with
         | [], ys -> ys.Length
         | xs, [] -> xs.Length
@@ -461,25 +461,31 @@ module Archive =
         let filter (name: string) =
             name.Length > 3 && String.forall Char.IsAscii name
 
-        let check_artist (context: Song)  (artist: string) =
+        let check_artist (context: Song) (artist: string) =
             if artists.Contains artist then () else
 
             let b = List.ofSeq (artist.ToLower())
-            let mutable artist = artist
+            let mutable closest_match = ""
+            let mutable closest_match_v = artist.Length / 2
             for a in artists |> Array.ofSeq do
-                if filter a && filter artist && levenshtein (List.ofSeq (a.ToLower())) b < 3 && not (distinct_artists.Contains (artist + "," + a)) then
-                    Logging.Info(sprintf "Possible artist match")
-                    Logging.Info(sprintf "Existing: %A" a)
-                    Logging.Info(sprintf "Incoming: %A" artist)
-                    Logging.Info(sprintf " Context: %s" context.FormattedTitle)
-                    Logging.Info("\noptions ::\n 1 - Existing is correct\n 2 - Incoming is correct\n 3 - These are not the same artist")
-                    let mutable option_chosen = false
-                    while not option_chosen do
-                        match Console.ReadKey().Key with
-                        | ConsoleKey.D1 -> rename_artist (artist, a); artists.Remove a |> ignore; artist <- a; option_chosen <- true
-                        | ConsoleKey.D2 -> rename_artist (a, artist); artists.Remove a |> ignore; option_chosen <- true
-                        | ConsoleKey.D3 -> Queue.append "artists-distinct" (artist + "," + a); option_chosen <- true
-                        | _ -> ()
+                if filter a && filter artist && not (distinct_artists.Contains (artist + "," + a)) then
+                    let dist = levenshtein (List.ofSeq (a.ToLower())) b
+                    if dist < closest_match_v then closest_match <- a; closest_match_v <- dist
+                    
+            let mutable artist = artist
+            if closest_match <> "" then
+                Logging.Info(sprintf "Possible artist match")
+                Logging.Info(sprintf "Existing: %A" closest_match)
+                Logging.Info(sprintf "Incoming: %A" artist)
+                Logging.Info(sprintf " Context: %s" context.FormattedTitle)
+                Logging.Info("\noptions ::\n 1 - Existing is correct\n 2 - Incoming is correct\n 3 - These are not the same artist")
+                let mutable option_chosen = false
+                while not option_chosen do
+                    match Console.ReadKey().Key with
+                    | ConsoleKey.D1 -> rename_artist (artist, closest_match); artists.Remove closest_match |> ignore; artist <- closest_match; option_chosen <- true
+                    | ConsoleKey.D2 -> rename_artist (closest_match, artist); artists.Remove closest_match |> ignore; option_chosen <- true
+                    | ConsoleKey.D3 -> Queue.append "artists-distinct" (artist + "," + closest_match); option_chosen <- true
+                    | _ -> ()
             artists.Add artist
                     
         for id in songs.Keys |> Array.ofSeq do
