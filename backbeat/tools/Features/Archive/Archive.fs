@@ -121,10 +121,15 @@ module Archive =
             }
 
     let save() =
-        JSON.ToFile (Path.Combine(ARCHIVE_PATH, "artists.json"), true) artists
-        JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
-        JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
-        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs with _ -> ()
+        try
+            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "artists.json"), true) artists
+            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
+            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
+            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs 
+            Logging.Debug("Saved database")
+        with e ->
+            Logging.Error("Database not saved", e)
+            
     
     let wipe_archive() =
         charts.Clear()
@@ -430,30 +435,43 @@ module Archive =
                     OtherArtists = List.map swap song.OtherArtists
                     Remixers = List.map swap song.Remixers
                 }
-            save()
+        save()
 
     let rec levenshtein (a: char list) (b: char list) =
+        if abs (a.Length - b.Length) >= 5 then 100 else
         match a, b with
         | [], ys -> ys.Length
         | xs, [] -> xs.Length
         | x :: xs, y :: ys when x = y -> levenshtein xs ys
         | x :: xs, y :: ys ->
             let a = levenshtein (x :: xs) ys
+            if a >= 100 then 100 else
             let b = levenshtein xs (y :: ys)
-            let c = levenshtein (x :: xs) (y :: ys)
-            1 + min (min a b) c
+            if b >= 100 then 100 else
+            let c = levenshtein xs ys
+            if c >= 100 then 100 else
+            let res = 1 + min (min a b) c
+            if res > 5 then 100 else res
 
     let check_all_artists() =
         let artists = ResizeArray<string>()
 
-        let check_artist (artist: string) =
+        let distinct_artists = Queue.get "artists-distinct" |> Array.ofList
+
+        let filter (name: string) =
+            name.Length > 3 && String.forall Char.IsAscii name
+
+        let check_artist (context: Song)  (artist: string) =
+            if artists.Contains artist then () else
+
             let b = List.ofSeq (artist.ToLower())
             let mutable artist = artist
             for a in artists |> Array.ofSeq do
-                if levenshtein (List.ofSeq (a.ToLower())) b < 5 then
+                if filter a && filter artist && levenshtein (List.ofSeq (a.ToLower())) b < 3 && not (distinct_artists.Contains (artist + "," + a)) then
                     Logging.Info(sprintf "Possible artist match")
-                    Logging.Info(sprintf "Existing: %s" a)
-                    Logging.Info(sprintf "Incoming: %s" artist)
+                    Logging.Info(sprintf "Existing: %A" a)
+                    Logging.Info(sprintf "Incoming: %A" artist)
+                    Logging.Info(sprintf " Context: %s" context.FormattedTitle)
                     Logging.Info("\noptions ::\n 1 - Existing is correct\n 2 - Incoming is correct\n 3 - These are not the same artist")
                     let mutable option_chosen = false
                     while not option_chosen do
@@ -463,14 +481,12 @@ module Archive =
                         | ConsoleKey.D3 -> Queue.append "artists-distinct" (artist + "," + a); option_chosen <- true
                         | _ -> ()
             artists.Add artist
-
                     
         for id in songs.Keys |> Array.ofSeq do
             let song = songs.[id]
-            List.iter check_artist song.Artists
-            List.iter check_artist song.OtherArtists
-            List.iter check_artist song.Remixers
-            
+            List.iter (check_artist song) song.Artists
+            List.iter (check_artist song) song.OtherArtists
+            List.iter (check_artist song) song.Remixers
         
     open Percyqaz.Shell
 
