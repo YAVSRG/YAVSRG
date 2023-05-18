@@ -259,6 +259,8 @@ module Conversions =
 
             let path = Path.GetDirectoryName action.Source
 
+            if sm.STOPS <> [] then Logging.Warn(sprintf "StepMania STOPS are not supported, this file (%s) will not convert correctly" path)
+
             let rec metadataFallback x =
                 match x with
                 | "" :: xs -> metadataFallback xs
@@ -329,8 +331,8 @@ module Conversions =
                         Artist = artist
                         ArtistNative = match metadataFallbackOpt [sm.ARTISTTRANSLIT] with Some t when t = artist -> None | x -> x
                         Creator = metadataFallback [findAuthor(); sm.CREDIT; diff.CREDIT]
-                        DiffName = metadataFallback [sm.SUBTITLETRANSLIT; sm.SUBTITLE;
-                            diff.CHARTNAME; diff.DESCRIPTION; diff.CHARTSTYLE; diff.STEPSTYPE.ToString() + " " + diff.METER.ToString()]
+                        DiffName = metadataFallback [diff.STEPSTYPE.ToString() + " " + diff.METER.ToString();
+                            diff.CHARTNAME; diff.DESCRIPTION; diff.CHARTSTYLE]
                         Subtitle = metadataFallbackOpt [sm.SUBTITLETRANSLIT; sm.SUBTITLE]
                         Tags = sm.GENRE.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
                         Source = None
@@ -458,9 +460,9 @@ module Conversions =
             let meta =
                 { Metadata.Default with
                     Title = chart.Header.Title
-                    TitleUnicode = chart.Header.Title
+                    TitleUnicode = Option.defaultValue chart.Header.Title chart.Header.TitleNative
                     Artist = chart.Header.Artist
-                    ArtistUnicode = chart.Header.Artist
+                    ArtistUnicode = Option.defaultValue chart.Header.Artist chart.Header.ArtistNative
                     Creator = chart.Header.Creator
                     Version = chart.Header.DiffName
                 }
@@ -528,7 +530,14 @@ module Conversions =
             match Chart.fromFile action.Source with
             | Some chart -> [chart]
             | None -> []
-        | ".sm" -> ``StepMania to Interlude``.convert (loadStepmaniaFile action.Source) action
+        | ".sm" -> 
+            let f = 
+                if action.Config.StepmaniaPackId.IsSome then
+                    fun chart -> { chart with Header = { chart.Header with ChartSource = Stepmania action.Config.StepmaniaPackId.Value } }
+                else id
+
+            ``StepMania to Interlude``.convert (loadStepmaniaFile action.Source) action
+            |> List.map f
         | ".osu" -> 
             try
                 let map = loadBeatmapFile action.Source
