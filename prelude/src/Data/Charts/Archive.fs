@@ -85,3 +85,20 @@ type Chart =
     }
 
 type Charts = Dictionary<ChartHash, Chart>
+
+module DownloadUrl =
+
+    let into_base64 (str: string) =
+        str
+        |> Text.Encoding.UTF8.GetBytes
+        |> Convert.ToBase64String
+
+    let from_base64 (str: string) =
+        str
+        |> Convert.FromBase64String
+        |> Text.Encoding.UTF8.GetString
+
+    let create(str: string) =
+        str.Replace("https://", "").Replace("http://", "") |> into_base64
+
+    let unpickle(str: string) = "https://" + Uri.EscapeUriString(from_base64 str)
