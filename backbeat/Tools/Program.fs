@@ -1,5 +1,6 @@
 ﻿open Percyqaz.Shell
 open Backbeat.Features
+open Backbeat.Features.Archive
 
 let ctx =
     Context.Empty

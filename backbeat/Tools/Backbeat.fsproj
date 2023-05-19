@@ -8,6 +8,10 @@
   <ItemGroup>
     <Compile Include="Utils.fs" />
     <Compile Include="Features\Rulesets\Rulesets.fs" />
+    <Compile Include="Features\Archive\Storage.fs" />
+    <Compile Include="Features\Archive\Packs.fs" />
+    <Compile Include="Features\Archive\Maintenance.fs" />
+    <Compile Include="Features\Archive\Collect.fs" />
     <Compile Include="Features\Archive\Archive.fs" />
     <Compile Include="Features\Tables.fs" />
     <Compile Include="Program.fs" />
