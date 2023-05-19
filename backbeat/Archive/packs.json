@@ -1,5 +1,50 @@
 {
-    "Community": [], 
+    "Community": [[0, {
+        "Description": null, 
+        "Mirrors": ["Y2RuMi5mcm9jZG4uY29tL21hbmlhLzIwMTMlMjAob3N1IW1hbmlhKS56aXA="], 
+        "Size": 0, 
+        "Title": "Ranked osu!mania 2013"
+    }], [1, {
+        "Description": null, 
+        "Mirrors": ["Y2RuMi5mcm9jZG4uY29tL21hbmlhLzIwMTQlMjAob3N1IW1hbmlhKS56aXA="], 
+        "Size": 0, 
+        "Title": "Ranked osu!mania 2014"
+    }], [2, {
+        "Description": null, 
+        "Mirrors": ["Y2RuMi5mcm9jZG4uY29tL21hbmlhLzIwMTUlMjAob3N1IW1hbmlhKS56aXA="], 
+        "Size": 0, 
+        "Title": "Ranked osu!mania 2015"
+    }], [3, {
+        "Description": null, 
+        "Mirrors": ["Y2RuMi5mcm9jZG4uY29tL21hbmlhLzIwMTYlMjAob3N1IW1hbmlhKS56aXA="], 
+        "Size": 0, 
+        "Title": "Ranked osu!mania 2016"
+    }], [4, {
+        "Description": null, 
+        "Mirrors": ["Y2RuMi5mcm9jZG4uY29tL21hbmlhLzIwMTclMjAob3N1IW1hbmlhKS56aXA="], 
+        "Size": 0, 
+        "Title": "Ranked osu!mania 2017"
+    }], [5, {
+        "Description": null, 
+        "Mirrors": ["Y2RuMi5mcm9jZG4uY29tL21hbmlhLzIwMTglMjAob3N1IW1hbmlhKS56aXA="], 
+        "Size": 0, 
+        "Title": "Ranked osu!mania 2018"
+    }], [6, {
+        "Description": null, 
+        "Mirrors": ["Y2RuMi5mcm9jZG4uY29tL21hbmlhLzIwMTklMjAob3N1IW1hbmlhKS56aXA="], 
+        "Size": 0, 
+        "Title": "Ranked osu!mania 2019"
+    }], [7, {
+        "Description": null, 
+        "Mirrors": ["Y2RuMi5mcm9jZG4uY29tL21hbmlhLzIwMjAlMjAob3N1IW1hbmlhKS56aXA="], 
+        "Size": 0, 
+        "Title": "Ranked osu!mania 2020"
+    }], [8, {
+        "Description": null, 
+        "Mirrors": ["Y2RuMi5mcm9jZG4uY29tL21hbmlhLzIwMjElMjAob3N1IW1hbmlhKS56aXA="], 
+        "Size": 0, 
+        "Title": "Ranked osu!mania 2021"
+    }]], 
     "Stepmania": [[107666, {
         "Mirrors": ["ZG93bmxvYWRzLmV0dGVybmFvbmxpbmUuY29tL3BhY2tzLyUyMzElMjBFeHRyYS1UZXJyZXN0cmlhbCUyMFNlY3JldCUyMFRyYWluaW5nJTIwQm94LnppcA=="], 
         "Size": 194849003, 

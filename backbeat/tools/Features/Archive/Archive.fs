@@ -13,13 +13,6 @@ open Prelude.Data.Charts.Archive
 open Backbeat.Utils
 
 module Archive =
-
-    let artists = 
-        match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "artists.json")) with
-        | Ok d -> d
-        | Error e -> 
-            Logging.Warn(sprintf "Error loading artists.json: %s" e.Message)
-            Dictionary<ArtistName, Artist>()
     
     let songs : Songs = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "songs.json")) with
@@ -47,7 +40,6 @@ module Archive =
 
     let save() =
         try
-            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "artists.json"), true) artists
             JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
             JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
             JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs 
@@ -107,21 +99,7 @@ module Archive =
         let regex = Text.RegularExpressions.Regex("[^\sa-zA-Z0-9_-]")
         fun (s: string) -> regex.Replace(s.ToLowerInvariant(), "").Trim().Replace(" ", "")
 
-    let add_artist(artist: string) =
-        if artists.ContainsKey(artist) then ()
-        else artists.Add(artist, { Alternatives = [artist] })
-
-    let add_artist_alias(artist, alias) =
-        if artists.ContainsKey(artist) then 
-            artists.[artist].Add alias
-        elif artists.ContainsKey(alias) then
-            artists.[alias].Add artist
-        else Logging.Info(sprintf "Can't add alias %s to %s because neither exists in artist list" alias artist)
-
     let add_song(song: Song) : SongId =
-        List.iter add_artist song.Artists
-        List.iter add_artist song.OtherArtists
-        List.iter add_artist song.Remixers
 
         let stitle = simplify_string song.Title
         let mutable existing_id = None
@@ -158,7 +136,7 @@ module Archive =
             id
         | Some id -> id
 
-    let slurp_chart(chart: Charts.Formats.Interlude.Chart) =
+    let slurp_chart (extraSources: ChartSource list) (chart: Charts.Formats.Interlude.Chart) =
         if not (File.Exists chart.AudioPath) then
             Logging.Info(sprintf "Rejecting %s because it doesn't have audio" chart.Header.Title)
         elif not (File.Exists chart.BackgroundPath) then
@@ -187,6 +165,7 @@ module Archive =
                     | Charts.Formats.Interlude.ChartSource.Osu (set, id) -> [Osu {| BeatmapSetId = set; BeatmapId = id |}]
                     | Charts.Formats.Interlude.ChartSource.Stepmania (id) -> [Stepmania id]
                     | Charts.Formats.Interlude.ChartSource.Unknown -> []
+                    @ extraSources
                 LastUpdated = DateTime.Now
             }
         
@@ -214,11 +193,14 @@ module Archive =
             }
         let song_id = add_song song
 
-        match chart.Header.ArtistNative with Some a -> add_artist_alias (chart.Header.Artist, a) | None -> ()
+        // todo: record transliterations of artists as alternatives
+        //match chart.Header.ArtistNative with Some a -> add_artist_alias (chart.Header.Artist, a) | None -> ()
         
         let chart_entry = create_entry song_id
         charts.Add(hash, chart_entry)
         Logging.Info(sprintf "+ Chart: %s" hash)
+        
+    open System.IO.Compression
 
     let slurp_song_folder (sm_pack_id: int option) (target: string) =
         for file in Directory.EnumerateFiles target do
@@ -233,12 +215,33 @@ module Archive =
                         }
                     loadAndConvertFile a
                     |> List.map (relocateChart a)
-                    |> List.iter slurp_chart
+                    |> List.iter (fun c -> slurp_chart [] c)
                 with err -> Logging.Info(sprintf "Failed to load/convert file: %s" target)
             | _ -> ()
 
     let slurp_pack_folder (sm_pack_id: int option) (target: string) =
         for songFolder in Directory.EnumerateDirectories target do slurp_song_folder sm_pack_id songFolder
+
+    let slurp_folder_of_oszs (community_pack_id: int) (target: string) =
+        for osz in Directory.EnumerateFiles target |> Seq.filter (fun f -> Path.GetExtension(f).ToLower() = ".osz") do
+            let extracted_path = Path.GetFileNameWithoutExtension(osz)
+            if not (Directory.Exists extracted_path) then
+                ZipFile.ExtractToDirectory(osz, Path.GetFileNameWithoutExtension osz)
+            for file in Directory.EnumerateFiles extracted_path do
+                match file with
+                | ChartFile _ ->
+                    try
+                        let a = 
+                            { 
+                                Config = { ConversionActionConfig.Default with CopyMediaFiles = false }
+                                Source = file
+                                TargetDirectory = Path.Combine (ARCHIVE_PATH, "yav")
+                            }
+                        loadAndConvertFile a
+                        |> List.map (relocateChart a)
+                        |> List.iter (fun chart -> slurp_chart [ CommunityPack {| PackId = community_pack_id |} ] chart)
+                    with err -> Logging.Info(sprintf "Failed to load/convert file: %s" target)
+                | _ -> ()
 
     let rec try_download_mirrors(mirrors, filepath) : Async<bool> =
         async {
@@ -257,8 +260,6 @@ module Archive =
                     return true
         }
 
-    open System.IO.Compression
-
     let download_pack(id: StepmaniaPackId) =
         async {
             let mirrors = packs.Stepmania.[id].Mirrors |> List.map DownloadUrl.unpickle
@@ -275,8 +276,44 @@ module Archive =
                 Logging.Error(sprintf "All mirrors failed.")
                 return false
         }
+        
+    let download_community_pack(id: CommunityPackId) =
+        async {
+            let mirrors = packs.Community.[id].Mirrors |> List.map DownloadUrl.unpickle
+            let zip = Path.Combine(ARCHIVE_PATH, "tmp", "c-" + string id + ".zip")
+            let folder = Path.Combine(ARCHIVE_PATH, "tmp", "c-" + string id)
+            match! try_download_mirrors(mirrors, zip) with
+            | true ->
+                if Directory.Exists(folder) then Logging.Info("Looks like this pack was already extracted")
+                else ZipFile.ExtractToDirectory(zip, folder)
+                for f in Directory.GetDirectories folder do
+                    slurp_folder_of_oszs id f
+                return true
+            | false ->
+                Logging.Error(sprintf "All mirrors failed.")
+                return false
+        }
 
     let slurp() =
+        for c in Queue.get "cpacks-add" do
+            let s = c.Split('\t')
+            let mutable i = 0
+            while packs.Community.ContainsKey i do
+                i <- i + 1
+            packs.Community.Add(i, { Title = s.[0]; Description = None; Mirrors = [DownloadUrl.create s.[1]]; Size = 0 })
+            Queue.append "cpack-imports" (i.ToString())
+        save()
+        Queue.save "cpacks-add" []
+
+        let mutable packs = Queue.get "cpack-imports"
+        while packs <> [] do
+            if download_community_pack(int (List.head packs)) |> Async.RunSynchronously then 
+                Queue.append "cpack-imports-success" (List.head packs)
+                save()
+            else Queue.append "cpack-imports-failed" (List.head packs)
+            packs <- List.tail packs
+            Queue.save "cpack-imports" packs
+
         let mutable packs = Queue.get "pack-imports"
         while packs <> [] do
             if download_pack(int (List.head packs)) |> Async.RunSynchronously then 
@@ -287,7 +324,7 @@ module Archive =
             Queue.save "pack-imports" packs
 
     let script() =
-        let keywords = ["skwid"; "nuclear"; "compulsive"; "valedumps"; "minty"; "dumpass"]
+        let keywords = ["skwid"; "nuclear"; "compulsive"; "valedumps"; "minty"; "dumpass"; "cola"; " end"; "yolo"; "d e n p a"; "denpa"]
         Queue.save "pack-imports" []
         for p in packs.Stepmania.Keys do
             let title = packs.Stepmania.[p].Title.ToLower()
