@@ -8,86 +8,10 @@ open Percyqaz.Json
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Formats.Conversions
+open Prelude.Data.Charts.Archive
 open Backbeat.Utils
 
 module Archive =
-
-    type ArtistName = string
-    [<Json.AutoCodec>]
-    type Artist =
-        {
-            mutable Alternatives: string list // first element is primary name
-        }
-        member this.Add(alias: string) =
-            this.Alternatives <- this.Alternatives @ [alias] |> List.distinct
-    
-    type SongId = string
-    [<Json.AutoCodec>]
-    type Song =
-        {
-            Artists: ArtistName list // never empty
-            OtherArtists: ArtistName list // alternate performers/cover artists
-            Remixers: ArtistName list
-            Title: string
-            AlternativeTitles: string list
-            Source: string option
-            Tags: string list
-        }
-        member this.FormattedTitle =
-            String.concat ", " this.Artists
-            + if this.OtherArtists <> [] then " ft. " + String.concat ", " this.OtherArtists else ""
-            + " - "
-            + this.Title
-            + if this.Remixers <> [] then " (" + String.concat ", " this.Remixers + " Remix)" else ""
-
-    type StepmaniaPackId = int
-    [<Json.AutoCodec>]
-    type StepmaniaPack =
-        {
-            Title: string
-            Mirrors: string list
-            Size: int64
-        }
-    type CommunityPackId = int
-    [<Json.AutoCodec>]
-    type CommunityPack =
-        {
-            Title: string
-            Description: string option
-            Mirrors: string list
-            Size: int64
-        }
-
-    [<Json.AutoCodec>]
-    type Packs =
-        { 
-            Stepmania: Dictionary<StepmaniaPackId, StepmaniaPack>
-            Community: Dictionary<CommunityPackId, CommunityPack>
-        }
-    
-    [<Json.AutoCodec>]
-    type ChartSource =
-        | Osu of {| BeatmapId: int; BeatmapSetId: int |}
-        | Stepmania of StepmaniaPackId
-        | CommunityPack of {| PackId: CommunityPackId |}
-
-    type ChartHash = string
-    
-    [<Json.AutoCodec>]
-    type Chart =
-        {
-            SongId: SongId
-            Creators: string list // never empty
-            Keys: int
-            DifficultyName: string
-            Subtitle: string option
-            Tags: string list
-            Duration: Time
-            Notecount: int
-            BPM: (float32<ms/beat> * float32<ms/beat>)
-            Sources: ChartSource list
-            LastUpdated: DateTime
-        }
 
     let artists = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "artists.json")) with
@@ -96,21 +20,21 @@ module Archive =
             Logging.Warn(sprintf "Error loading artists.json: %s" e.Message)
             Dictionary<ArtistName, Artist>()
     
-    let songs = 
+    let songs : Songs = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "songs.json")) with
         | Ok d -> d
         | Error e -> 
             Logging.Warn(sprintf "Error loading songs.json: %s" e.Message)
             Dictionary<SongId, Song>()
     
-    let charts = 
+    let charts : Charts = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "charts.json")) with
         | Ok d -> d
         | Error e -> 
             Logging.Warn(sprintf "Error loading charts.json: %s" e.Message)
             Dictionary<ChartHash, Chart>()
     
-    let packs = 
+    let packs : Packs = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "packs.json")) with
         | Ok d -> d
         | Error e -> 
