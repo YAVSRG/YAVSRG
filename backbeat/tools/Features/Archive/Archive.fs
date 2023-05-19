@@ -73,19 +73,6 @@ module Archive =
             attributes: EOPackAttrs
         }
 
-    let into_base64 (str: string) =
-        str
-        |> Text.Encoding.UTF8.GetBytes
-        |> Convert.ToBase64String
-
-    let from_base64 (str: string) =
-        str
-        |> Convert.FromBase64String
-        |> Text.Encoding.UTF8.GetString
-
-    let archive_download_link(str: string) =
-        str.Replace("https://", "").Replace("http://", "") |> into_base64
-
     let load_stepmania_packs() =
         async {
             match! Data.WebServices.download_json_async("https://api.etternaonline.com/v2/packs/") with
@@ -96,7 +83,7 @@ module Archive =
                     packs.Stepmania.Add(p.id,
                             {
                                 Title = p.attributes.name
-                                Mirrors = [archive_download_link p.attributes.download; archive_download_link p.attributes.mirror] |> List.distinct
+                                Mirrors = [DownloadUrl.create p.attributes.download; DownloadUrl.create p.attributes.mirror] |> List.distinct
                                 Size = p.attributes.size
                             })
         }
@@ -274,7 +261,7 @@ module Archive =
 
     let download_pack(id: StepmaniaPackId) =
         async {
-            let mirrors = packs.Stepmania.[id].Mirrors |> List.map from_base64 |> List.map (fun s -> "http://" + s)
+            let mirrors = packs.Stepmania.[id].Mirrors |> List.map DownloadUrl.unpickle
             let zip = Path.Combine(ARCHIVE_PATH, "tmp", string id + ".zip")
             let folder = Path.Combine(ARCHIVE_PATH, "tmp", string id)
             match! try_download_mirrors(mirrors, zip) with
