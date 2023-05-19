@@ -23,6 +23,9 @@
     "-RYO-": {
         "Alternatives": ["-RYO-"]
     }, 
+    "100 Gecs": {
+        "Alternatives": ["100 Gecs"]
+    }, 
     "11 11": {
         "Alternatives": ["11 11"]
     }, 
@@ -62,6 +65,9 @@
     "556mm": {
         "Alternatives": ["556mm"]
     }, 
+    "8D": {
+        "Alternatives": ["8D"]
+    }, 
     "9mm Parabellum Bullet": {
         "Alternatives": ["9mm Parabellum Bullet"]
     }, 
@@ -73,6 +79,12 @@
     }, 
     "A Jinx Roleplayer": {
         "Alternatives": ["A Jinx Roleplayer"]
+    }, 
+    "A Si": {
+        "Alternatives": ["A Si"]
+    }, 
+    "AAAA": {
+        "Alternatives": ["AAAA"]
     }, 
     "ABBA": {
         "Alternatives": ["ABBA"]
@@ -97,6 +109,9 @@
     }, 
     "AOP": {
         "Alternatives": ["AOP"]
+    }, 
+    "ARForest": {
+        "Alternatives": ["ARForest"]
     }, 
     "ASCA": {
         "Alternatives": ["ASCA"]
@@ -142,6 +157,9 @@
     }, 
     "Alex C. Feat. Yasmin K.": {
         "Alternatives": ["Alex C. Feat. Yasmin K."]
+    }, 
+    "Alexander Panos": {
+        "Alternatives": ["Alexander Panos"]
     }, 
     "Alice DJ": {
         "Alternatives": ["Alice DJ"]
@@ -245,6 +263,9 @@
     "Ariana Grande": {
         "Alternatives": ["Ariana Grande"]
     }, 
+    "Ariana Grande / Doja Cat (feat.SZA)": {
+        "Alternatives": ["Ariana Grande / Doja Cat (feat.SZA)"]
+    }, 
     "Aries": {
         "Alternatives": ["Aries"]
     }, 
@@ -298,6 +319,9 @@
     }, 
     "Ayako Ikeda": {
         "Alternatives": ["Ayako Ikeda"]
+    }, 
+    "Ayo": {
+        "Alternatives": ["Ayo"]
     }, 
     "BABYMETAL": {
         "Alternatives": ["BABYMETAL"]
@@ -485,6 +509,12 @@
     "Carl Maria von Weber": {
         "Alternatives": ["Carl Maria von Weber"]
     }, 
+    "Carly Rae Jepsen": {
+        "Alternatives": ["Carly Rae Jepsen"]
+    }, 
+    "Carolina Marquez": {
+        "Alternatives": ["Carolina Marquez"]
+    }, 
     "Carpenter Brut": {
         "Alternatives": ["Carpenter Brut"]
     }, 
@@ -499,6 +529,9 @@
     }, 
     "Casey Edwards feat. Ali Edwards": {
         "Alternatives": ["Casey Edwards feat. Ali Edwards"]
+    }, 
+    "Ceephax Acid Crew": {
+        "Alternatives": ["Ceephax Acid Crew"]
     }, 
     "Celia Cruz": {
         "Alternatives": ["Celia Cruz"]
@@ -533,6 +566,12 @@
     "Chillindude829": {
         "Alternatives": ["Chillindude829"]
     }, 
+    "China": {
+        "Alternatives": ["China"]
+    }, 
+    "China National Traditional Orchestra": {
+        "Alternatives": ["China National Traditional Orchestra"]
+    }, 
     "Chito, Yuuri": {
         "Alternatives": ["Chito, Yuuri"]
     }, 
@@ -559,6 +598,9 @@
     }, 
     "Cocteau Twins": {
         "Alternatives": ["Cocteau Twins"]
+    }, 
+    "Cody·Lee(李)": {
+        "Alternatives": ["Cody·Lee(李)"]
     }, 
     "Coheed and Cambria": {
         "Alternatives": ["Coheed and Cambria"]
@@ -592,6 +634,9 @@
     }, 
     "Crush 40": {
         "Alternatives": ["Crush 40"]
+    }, 
+    "Crystal Castles": {
+        "Alternatives": ["Crystal Castles"]
     }, 
     "Customi Z": {
         "Alternatives": ["Customi Z"]
@@ -701,6 +746,9 @@
     "Denzel Curry": {
         "Alternatives": ["Denzel Curry"]
     }, 
+    "Desiigner": {
+        "Alternatives": ["Desiigner"]
+    }, 
     "Dethklok": {
         "Alternatives": ["Dethklok"]
     }, 
@@ -742,6 +790,9 @@
     }, 
     "Doma Umaru [CV.Tanaka Aimi]": {
         "Alternatives": ["Doma Umaru [CV.Tanaka Aimi]"]
+    }, 
+    "Don Omar ft. Lucenzo": {
+        "Alternatives": ["Don Omar ft. Lucenzo"]
     }, 
     "Dormir": {
         "Alternatives": ["Dormir"]
@@ -812,6 +863,9 @@
     "Eluveitie": {
         "Alternatives": ["Eluveitie"]
     }, 
+    "Emdyion": {
+        "Alternatives": ["Emdyion"]
+    }, 
     "Emily Bindiger": {
         "Alternatives": ["Emily Bindiger"]
     }, 
@@ -833,6 +887,9 @@
     "Equilibrium": {
         "Alternatives": ["Equilibrium"]
     }, 
+    "Erehamonika remixed by kors k": {
+        "Alternatives": ["Erehamonika remixed by kors k"]
+    }, 
     "Etsuko Yakushimaru": {
         "Alternatives": ["Etsuko Yakushimaru"]
     }, 
@@ -851,11 +908,17 @@
     "Every etterna player": {
         "Alternatives": ["Every etterna player"]
     }, 
+    "FELT": {
+        "Alternatives": ["FELT"]
+    }, 
     "FLOW": {
         "Alternatives": ["FLOW"]
     }, 
     "FLOXYTEK vs BILLX": {
         "Alternatives": ["FLOXYTEK vs BILLX"]
+    }, 
+    "FREDDIE DREDD": {
+        "Alternatives": ["FREDDIE DREDD"]
     }, 
     "Fairouz Ai / Ishikawa Kaito": {
         "Alternatives": ["Fairouz Ai / Ishikawa Kaito"]
@@ -932,6 +995,9 @@
     "Frederic Chopin": {
         "Alternatives": ["Frederic Chopin"]
     }, 
+    "Frenzy & Jaycee": {
+        "Alternatives": ["Frenzy & Jaycee"]
+    }, 
     "Frequent": {
         "Alternatives": ["Frequent"]
     }, 
@@ -946,6 +1012,9 @@
     }, 
     "Fusq - Perfume! x Moe Shop (ft.Hentai Dude)": {
         "Alternatives": ["Fusq - Perfume! x Moe Shop (ft.Hentai Dude)"]
+    }, 
+    "Future": {
+        "Alternatives": ["Future"]
     }, 
     "Future & Young Thug (feat. Offset)": {
         "Alternatives": ["Future & Young Thug (feat. Offset)"]
@@ -983,6 +1052,9 @@
     "Gareth Coker": {
         "Alternatives": ["Gareth Coker"]
     }, 
+    "Gaza Strip": {
+        "Alternatives": ["Gaza Strip"]
+    }, 
     "Gear Projectt": {
         "Alternatives": ["Gear Projectt"]
     }, 
@@ -1006,6 +1078,9 @@
     }, 
     "Giftpils": {
         "Alternatives": ["Giftpils"]
+    }, 
+    "Ginger Root": {
+        "Alternatives": ["Ginger Root"]
     }, 
     "Girl's Day": {
         "Alternatives": ["Girl's Day"]
@@ -1085,6 +1160,9 @@
     "Here Comes The Kraken": {
         "Alternatives": ["Here Comes The Kraken"]
     }, 
+    "Hidehito Aoki & Kenichi Tsuchi": {
+        "Alternatives": ["Hidehito Aoki & Kenichi Tsuchi"]
+    }, 
     "Hideyuki Fukasawa": {
         "Alternatives": ["Hideyuki Fukasawa"]
     }, 
@@ -1109,8 +1187,17 @@
     "Hollow Mellow": {
         "Alternatives": ["Hollow Mellow"]
     }, 
+    "Honda Mio (CV.Hara sayuri)": {
+        "Alternatives": ["Honda Mio (CV.Hara sayuri)"]
+    }, 
+    "Honey Works Feat. Case/Koss & EI Da Sensei": {
+        "Alternatives": ["Honey Works Feat. Case/Koss & EI Da Sensei"]
+    }, 
     "Horie Yui": {
         "Alternatives": ["Horie Yui"]
+    }, 
+    "Hoshino Gen": {
+        "Alternatives": ["Hoshino Gen"]
     }, 
     "Hotaru": {
         "Alternatives": ["Hotaru"]
@@ -1217,6 +1304,9 @@
     "Jasmine Sokko": {
         "Alternatives": ["Jasmine Sokko"]
     }, 
+    "Jay Chou": {
+        "Alternatives": ["Jay Chou"]
+    }, 
     "Jay Sean (Regard Remix)": {
         "Alternatives": ["Jay Sean (Regard Remix)"]
     }, 
@@ -1256,6 +1346,9 @@
     "Joji": {
         "Alternatives": ["Joji"]
     }, 
+    "Jolin Tsai": {
+        "Alternatives": ["Jolin Tsai"]
+    }, 
     "Jomekka": {
         "Alternatives": ["Jomekka"]
     }, 
@@ -1289,6 +1382,9 @@
     "KISIDA KYODAN & THE AKEBOSI ROCKETS": {
         "Alternatives": ["KISIDA KYODAN & THE AKEBOSI ROCKETS"]
     }, 
+    "KO3 Feat. 浅場佳苗": {
+        "Alternatives": ["KO3 Feat. 浅場佳苗"]
+    }, 
     "KOTOKO": {
         "Alternatives": ["KOTOKO"]
     }, 
@@ -1303,6 +1399,9 @@
     }, 
     "Kairiki Bear feat. GUMI": {
         "Alternatives": ["Kairiki Bear feat. GUMI"]
+    }, 
+    "Kajiura Yuki": {
+        "Alternatives": ["Kajiura Yuki"]
     }, 
     "Kakuma Ai & Okamoto Nobuhiko": {
         "Alternatives": ["Kakuma Ai & Okamoto Nobuhiko"]
@@ -1319,6 +1418,9 @@
     "Kana Hanazawa": {
         "Alternatives": ["Kana Hanazawa"]
     }, 
+    "Kashi Moimi feat. KaFu": {
+        "Alternatives": ["Kashi Moimi feat. KaFu"]
+    }, 
     "Katagiri": {
         "Alternatives": ["Katagiri"]
     }, 
@@ -1333,6 +1435,9 @@
     }, 
     "Kause & Konception": {
         "Alternatives": ["Kause & Konception"]
+    }, 
+    "Kawamura Yumi": {
+        "Alternatives": ["Kawamura Yumi"]
     }, 
     "Kazuma Kiryu (CV- Takaya Kuroda)": {
         "Alternatives": ["Kazuma Kiryu (CV- Takaya Kuroda)"]
@@ -1415,6 +1520,9 @@
     "Konomi Suzuki": {
         "Alternatives": ["Konomi Suzuki"]
     }, 
+    "Kors-k": {
+        "Alternatives": ["Kors-k"]
+    }, 
     "Kou Ogata": {
         "Alternatives": ["Kou Ogata"]
     }, 
@@ -1423,6 +1531,9 @@
     }, 
     "Krewella": {
         "Alternatives": ["Krewella"]
+    }, 
+    "Krovostok": {
+        "Alternatives": ["Krovostok"]
     }, 
     "Kuribayashi Minami": {
         "Alternatives": ["Kuribayashi Minami"]
@@ -1481,6 +1592,9 @@
     "Leno Lovecraft": {
         "Alternatives": ["Leno Lovecraft"]
     }, 
+    "Leremyc": {
+        "Alternatives": ["Leremyc"]
+    }, 
     "Lewis Del Mar": {
         "Alternatives": ["Lewis Del Mar"]
     }, 
@@ -1508,6 +1622,12 @@
     "Lily": {
         "Alternatives": ["Lily"]
     }, 
+    "Lime": {
+        "Alternatives": ["Lime"]
+    }, 
+    "Linear Ring": {
+        "Alternatives": ["Linear Ring"]
+    }, 
     "Ling Tosite Sigure": {
         "Alternatives": ["Ling Tosite Sigure"]
     }, 
@@ -1523,11 +1643,17 @@
     "Lisa Mitchell": {
         "Alternatives": ["Lisa Mitchell"]
     }, 
+    "Live Russian": {
+        "Alternatives": ["Live Russian"]
+    }, 
     "Lloyd Bankz": {
         "Alternatives": ["Lloyd Bankz"]
     }, 
     "Locomotive Curt": {
         "Alternatives": ["Locomotive Curt"]
+    }, 
+    "Loded Diper": {
+        "Alternatives": ["Loded Diper"]
     }, 
     "Loos (feat. Meramipop)": {
         "Alternatives": ["Loos (feat. Meramipop)"]
@@ -1546,6 +1672,9 @@
     }, 
     "Lzzy Hale": {
         "Alternatives": ["Lzzy Hale"]
+    }, 
+    "M-Project / Signal": {
+        "Alternatives": ["M-Project / Signal"]
     }, 
     "M.I.A.": {
         "Alternatives": ["M.I.A."]
@@ -1607,6 +1736,9 @@
     "Magazin": {
         "Alternatives": ["Magazin"]
     }, 
+    "Magdalena Bay": {
+        "Alternatives": ["Magdalena Bay"]
+    }, 
     "MaikiP Feat. Urucy": {
         "Alternatives": ["MaikiP Feat. Urucy"]
     }, 
@@ -1646,6 +1778,9 @@
     "Masayoshi Soken": {
         "Alternatives": ["Masayoshi Soken"]
     }, 
+    "Mass of Fermenting Dreggs": {
+        "Alternatives": ["Mass of Fermenting Dreggs"]
+    }, 
     "MatrixMarioX as SiIvaGunner": {
         "Alternatives": ["MatrixMarioX as SiIvaGunner"]
     }, 
@@ -1660,6 +1795,9 @@
     }, 
     "Memme": {
         "Alternatives": ["Memme"]
+    }, 
+    "Metallica": {
+        "Alternatives": ["Metallica"]
     }, 
     "Metro Zu": {
         "Alternatives": ["Metro Zu"]
@@ -1763,6 +1901,9 @@
     "Mylene Farmer": {
         "Alternatives": ["Mylene Farmer"]
     }, 
+    "Mylène Farmer": {
+        "Alternatives": ["Mylène Farmer"]
+    }, 
     "Mötley Crüe": {
         "Alternatives": ["Mötley Crüe"]
     }, 
@@ -1820,6 +1961,9 @@
     "Nanahira": {
         "Alternatives": ["Nanahira"]
     }, 
+    "Nanahira / Kano": {
+        "Alternatives": ["Nanahira / Kano"]
+    }, 
     "Nanamori Chu☆Goraku Bu": {
         "Alternatives": ["Nanamori Chu☆Goraku Bu"]
     }, 
@@ -1837,6 +1981,9 @@
     }, 
     "Nas": {
         "Alternatives": ["Nas"]
+    }, 
+    "Nasko remixed Deltabot": {
+        "Alternatives": ["Nasko remixed Deltabot"]
     }, 
     "Natasa Bekvalac": {
         "Alternatives": ["Natasa Bekvalac"]
@@ -1880,6 +2027,9 @@
     "Neros Day at Disneyland": {
         "Alternatives": ["Neros Day at Disneyland"]
     }, 
+    "Neru Feat. Kogeinu / Akatin": {
+        "Alternatives": ["Neru Feat. Kogeinu / Akatin"]
+    }, 
     "Never Get Used to People": {
         "Alternatives": ["Never Get Used to People"]
     }, 
@@ -1892,6 +2042,9 @@
     "Nhato": {
         "Alternatives": ["Nhato"]
     }, 
+    "Nhato Feat. Kanae Asaba": {
+        "Alternatives": ["Nhato Feat. Kanae Asaba"]
+    }, 
     "Nhato feat. IA": {
         "Alternatives": ["Nhato feat. IA"]
     }, 
@@ -1900,6 +2053,9 @@
     }, 
     "Night Tempo": {
         "Alternatives": ["Night Tempo"]
+    }, 
+    "Nightcore": {
+        "Alternatives": ["Nightcore"]
     }, 
     "Nightwish": {
         "Alternatives": ["Nightwish"]
@@ -1985,6 +2141,9 @@
     "Our Lady Peace": {
         "Alternatives": ["Our Lady Peace"]
     }, 
+    "OutKast": {
+        "Alternatives": ["OutKast"]
+    }, 
     "Outsider": {
         "Alternatives": ["Outsider"]
     }, 
@@ -2014,6 +2173,9 @@
     }, 
     "PSYQUI": {
         "Alternatives": ["PSYQUI"]
+    }, 
+    "PSYQUI feat. Such": {
+        "Alternatives": ["PSYQUI feat. Such"]
     }, 
     "PYLOT": {
         "Alternatives": ["PYLOT"]
@@ -2060,6 +2222,9 @@
     "Phantasy Star Online 2": {
         "Alternatives": ["Phantasy Star Online 2"]
     }, 
+    "Phonon": {
+        "Alternatives": ["Phonon"]
+    }, 
     "Phuture Noize / Sefa": {
         "Alternatives": ["Phuture Noize / Sefa"]
     }, 
@@ -2084,11 +2249,17 @@
     "Plus-Tech Squeeze Box": {
         "Alternatives": ["Plus-Tech Squeeze Box"]
     }, 
+    "Pocket Biscuits": {
+        "Alternatives": ["Pocket Biscuits"]
+    }, 
     "Pogo": {
         "Alternatives": ["Pogo"]
     }, 
     "Pokemon!": {
         "Alternatives": ["Pokemon!"]
+    }, 
+    "Polyphia": {
+        "Alternatives": ["Polyphia"]
     }, 
     "Poppin'Party feat. Silent Siren": {
         "Alternatives": ["Poppin'Party feat. Silent Siren"]
@@ -2102,8 +2273,14 @@
     "Portugal. The Man": {
         "Alternatives": ["Portugal. The Man"]
     }, 
+    "Powerwolf": {
+        "Alternatives": ["Powerwolf"]
+    }, 
     "Pratanallis": {
         "Alternatives": ["Pratanallis"]
+    }, 
+    "Primary": {
+        "Alternatives": ["Primary"]
     }, 
     "Protest The Hero": {
         "Alternatives": ["Protest The Hero"]
@@ -2116,6 +2293,9 @@
     }, 
     "Queen 26": {
         "Alternatives": ["Queen 26"]
+    }, 
+    "R Sound Design Feat. Hatsune Miku": {
+        "Alternatives": ["R Sound Design Feat. Hatsune Miku"]
     }, 
     "R. Kelly": {
         "Alternatives": ["R. Kelly"]
@@ -2192,6 +2372,9 @@
     "Riko, Regu": {
         "Alternatives": ["Riko, Regu"]
     }, 
+    "Rina Sawayama": {
+        "Alternatives": ["Rina Sawayama"]
+    }, 
     "Risk Junk": {
         "Alternatives": ["Risk Junk"]
     }, 
@@ -2209,6 +2392,9 @@
     }, 
     "Roselia": {
         "Alternatives": ["Roselia"]
+    }, 
+    "Run DMC": {
+        "Alternatives": ["Run DMC"]
     }, 
     "Runescape 07": {
         "Alternatives": ["Runescape 07"]
@@ -2264,8 +2450,14 @@
     "SILVERTEAR": {
         "Alternatives": ["SILVERTEAR"]
     }, 
+    "SKAN": {
+        "Alternatives": ["SKAN"]
+    }, 
     "SKAN (feat. Highdiwaan & Drama B)": {
         "Alternatives": ["SKAN (feat. Highdiwaan & Drama B)"]
+    }, 
+    "SKENZ": {
+        "Alternatives": ["SKENZ"]
     }, 
     "SLAKE feat.EMIKO": {
         "Alternatives": ["SLAKE feat.EMIKO"]
@@ -2275,6 +2467,9 @@
     }, 
     "SMiLE.dk": {
         "Alternatives": ["SMiLE.dk"]
+    }, 
+    "SOPHIE": {
+        "Alternatives": ["SOPHIE"]
     }, 
     "SOUND HOLIC": {
         "Alternatives": ["SOUND HOLIC"]
@@ -2312,8 +2507,14 @@
     "Sagara Kokoro": {
         "Alternatives": ["Sagara Kokoro"]
     }, 
+    "Saint Pepsi": {
+        "Alternatives": ["Saint Pepsi"]
+    }, 
     "Saiya": {
         "Alternatives": ["Saiya"]
+    }, 
+    "Sakana uo Sakana": {
+        "Alternatives": ["Sakana uo Sakana"]
     }, 
     "Sakuzyo": {
         "Alternatives": ["Sakuzyo"]
@@ -2417,6 +2618,12 @@
     "Silentroom": {
         "Alternatives": ["Silentroom"]
     }, 
+    "Simple Plan": {
+        "Alternatives": ["Simple Plan"]
+    }, 
+    "Sir Georg Solti, Wiener Philharmoniker, Konzertvereinigung Wiener Staatsopernchor": {
+        "Alternatives": ["Sir Georg Solti, Wiener Philharmoniker, Konzertvereinigung Wiener Staatsopernchor"]
+    }, 
     "Siri Nilsen": {
         "Alternatives": ["Siri Nilsen"]
     }, 
@@ -2452,6 +2659,9 @@
     }, 
     "Snail's House": {
         "Alternatives": ["Snail's House"]
+    }, 
+    "Soleily": {
+        "Alternatives": ["Soleily"]
     }, 
     "Sonar Pocket": {
         "Alternatives": ["Sonar Pocket"]
@@ -2639,6 +2849,9 @@
     "The Flashbulb": {
         "Alternatives": ["The Flashbulb"]
     }, 
+    "The Hania Show": {
+        "Alternatives": ["The Hania Show"]
+    }, 
     "The Nightcore": {
         "Alternatives": ["The Nightcore"]
     }, 
@@ -2711,6 +2924,9 @@
     "Toromaru": {
         "Alternatives": ["Toromaru"]
     }, 
+    "Touhou boukaru": {
+        "Alternatives": ["Touhou boukaru"]
+    }, 
     "Traxell": {
         "Alternatives": ["Traxell"]
     }, 
@@ -2759,6 +2975,9 @@
     "Unknown": {
         "Alternatives": ["Unknown"]
     }, 
+    "Unlike Pluto": {
+        "Alternatives": ["Unlike Pluto"]
+    }, 
     "Unlucky Morpheus": {
         "Alternatives": ["Unlucky Morpheus"]
     }, 
@@ -2777,11 +2996,17 @@
     "Vasilis Karras": {
         "Alternatives": ["Vasilis Karras"]
     }, 
+    "Vekked": {
+        "Alternatives": ["Vekked"]
+    }, 
     "Verbal Ase": {
         "Alternatives": ["Verbal Ase"]
     }, 
     "Vesala": {
         "Alternatives": ["Vesala"]
+    }, 
+    "Vicetone remixed VESK GREEN QingCai / TOm": {
+        "Alternatives": ["Vicetone remixed VESK GREEN QingCai / TOm"]
     }, 
     "Viki Miljkovic": {
         "Alternatives": ["Viki Miljkovic"]
@@ -2810,6 +3035,12 @@
     "Walküre": {
         "Alternatives": ["Walküre"]
     }, 
+    "Wang Chuan Feng Hua Lu Feat.Cang Qiong": {
+        "Alternatives": ["Wang Chuan Feng Hua Lu Feat.Cang Qiong"]
+    }, 
+    "Wang Chuan Feng Hua Lu Feat.Marblue / Hanser": {
+        "Alternatives": ["Wang Chuan Feng Hua Lu Feat.Marblue / Hanser"]
+    }, 
     "Warak ft. Yisun": {
         "Alternatives": ["Warak ft. Yisun"]
     }, 
@@ -2821,6 +3052,12 @@
     }, 
     "Weezer": {
         "Alternatives": ["Weezer"]
+    }, 
+    "What So Not": {
+        "Alternatives": ["What So Not"]
+    }, 
+    "Whisper Of Runes": {
+        "Alternatives": ["Whisper Of Runes"]
     }, 
     "Whispered": {
         "Alternatives": ["Whispered"]
@@ -2849,8 +3086,14 @@
     "Xi": {
         "Alternatives": ["Xi"]
     }, 
+    "Xie Xiaodong": {
+        "Alternatives": ["Xie Xiaodong"]
+    }, 
     "YMCK": {
         "Alternatives": ["YMCK"]
+    }, 
+    "YOASOBI": {
+        "Alternatives": ["YOASOBI"]
     }, 
     "YUC'e": {
         "Alternatives": ["YUC'e"]
@@ -2918,6 +3161,9 @@
     "Yousei Teikoku": {
         "Alternatives": ["Yousei Teikoku"]
     }, 
+    "Yultron / Bone Thugs-N-Harmony / Jay Park": {
+        "Alternatives": ["Yultron / Bone Thugs-N-Harmony / Jay Park"]
+    }, 
     "Yumi Matsutoya": {
         "Alternatives": ["Yumi Matsutoya"]
     }, 
@@ -2926,6 +3172,9 @@
     }, 
     "Yuta Imai": {
         "Alternatives": ["Yuta Imai"]
+    }, 
+    "Yuu Koito & Touko Nanami": {
+        "Alternatives": ["Yuu Koito & Touko Nanami"]
     }, 
     "Yuuna Kamishiro": {
         "Alternatives": ["Yuuna Kamishiro"]
@@ -2947,6 +3196,9 @@
     }, 
     "Zetto": {
         "Alternatives": ["Zetto"]
+    }, 
+    "Zhang Gaozhe": {
+        "Alternatives": ["Zhang Gaozhe"]
     }, 
     "Zircon": {
         "Alternatives": ["Zircon"]
@@ -3005,6 +3257,9 @@
     "colate": {
         "Alternatives": ["colate"]
     }, 
+    "colate feat. nanahira": {
+        "Alternatives": ["colate feat. nanahira"]
+    }, 
     "cold kiss (Edelritter Remix)": {
         "Alternatives": ["cold kiss (Edelritter Remix)"]
     }, 
@@ -3016,6 +3271,9 @@
     }, 
     "dj TAKA": {
         "Alternatives": ["dj TAKA"]
+    }, 
+    "dj TAKA feat. noria & Nanahira (remixed by Camellia)": {
+        "Alternatives": ["dj TAKA feat. noria & Nanahira (remixed by Camellia)"]
     }, 
     "e-dubble": {
         "Alternatives": ["e-dubble"]
@@ -3050,6 +3308,9 @@
     "goto80": {
         "Alternatives": ["goto80"]
     }, 
+    "halca": {
+        "Alternatives": ["halca"]
+    }, 
     "hey mom, i'm sorry": {
         "Alternatives": ["hey mom, i'm sorry"]
     }, 
@@ -3059,6 +3320,9 @@
     "i'm not typing the names of all these seiyuu": {
         "Alternatives": ["i'm not typing the names of all these seiyuu"]
     }, 
+    "icesawder": {
+        "Alternatives": ["icesawder"]
+    }, 
     "iconoclasm": {
         "Alternatives": ["iconoclasm"]
     }, 
@@ -3067,6 +3331,9 @@
     }, 
     "it's all the fucking seiyuu": {
         "Alternatives": ["it's all the fucking seiyuu"]
+    }, 
+    "jan Misali": {
+        "Alternatives": ["jan Misali"]
     }, 
     "joji": {
         "Alternatives": ["joji"]
@@ -3083,6 +3350,9 @@
     "kagetora.": {
         "Alternatives": ["kagetora."]
     }, 
+    "kai virtual, nevem, nomark": {
+        "Alternatives": ["kai virtual, nevem, nomark"]
+    }, 
     "katagiri": {
         "Alternatives": ["katagiri"]
     }, 
@@ -3092,6 +3362,9 @@
     "keyc": {
         "Alternatives": ["keyc"]
     }, 
+    "kis-kis": {
+        "Alternatives": ["kis-kis"]
+    }, 
     "koppepan": {
         "Alternatives": ["koppepan"]
     }, 
@@ -3100,6 +3373,9 @@
     }, 
     "lactate": {
         "Alternatives": ["lactate"]
+    }, 
+    "leroy": {
+        "Alternatives": ["leroy"]
     }, 
     "lil user 807443016": {
         "Alternatives": ["lil user 807443016"]
@@ -3118,6 +3394,9 @@
     }, 
     "maritumix": {
         "Alternatives": ["maritumix"]
+    }, 
+    "me in midnight": {
+        "Alternatives": ["me in midnight"]
     }, 
     "midare reject": {
         "Alternatives": ["midare reject"]
@@ -3148,6 +3427,9 @@
     }, 
     "nice job bro0o0o0o0o0o0o0": {
         "Alternatives": ["nice job bro0o0o0o0o0o0o0"]
+    }, 
+    "nomark": {
+        "Alternatives": ["nomark"]
     }, 
     "not": {
         "Alternatives": ["not"]
@@ -3206,6 +3488,9 @@
     "tomsfir": {
         "Alternatives": ["tomsfir"]
     }, 
+    "torr": {
+        "Alternatives": ["torr"]
+    }, 
     "verzache": {
         "Alternatives": ["verzache"]
     }, 
@@ -3248,14 +3533,26 @@
     "zts": {
         "Alternatives": ["zts"]
     }, 
+    "Ω vs. 2017": {
+        "Alternatives": ["Ω vs. 2017"]
+    }, 
     "μ's": {
         "Alternatives": ["μ's"]
+    }, 
+    "μ's Feat. Higuchi Kaede/Rindou Mikoto/Lize Helesta": {
+        "Alternatives": ["μ's Feat. Higuchi Kaede/Rindou Mikoto/Lize Helesta"]
+    }, 
+    "μ's Feat. Iyaz (DaymanOurSavior)": {
+        "Alternatives": ["μ's Feat. Iyaz (DaymanOurSavior)"]
     }, 
     "μ`s": {
         "Alternatives": ["μ`s"]
     }, 
     "☆puppy☆": {
         "Alternatives": ["☆puppy☆"]
+    }, 
+    "かめりあ": {
+        "Alternatives": ["かめりあ"]
     }, 
     "ばぶちゃん組": {
         "Alternatives": ["ばぶちゃん組"]
@@ -3284,11 +3581,17 @@
     "宮崎誠": {
         "Alternatives": ["宮崎誠"]
     }, 
+    "平沢進": {
+        "Alternatives": ["平沢進"]
+    }, 
     "影虎。": {
         "Alternatives": ["影虎。"]
     }, 
     "杏里": {
         "Alternatives": ["杏里"]
+    }, 
+    "椎名林檎 / 宇多田ヒカル": {
+        "Alternatives": ["椎名林檎 / 宇多田ヒカル"]
     }, 
     "翡乃イスカ": {
         "Alternatives": ["翡乃イスカ"]

@@ -7,6 +7,7 @@ open System.Collections.Generic
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude
+open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.Conversions
 open Prelude.Data.Charts.Archive
 open Backbeat.Utils
@@ -53,11 +54,6 @@ module Archive =
             Logging.Debug("Saved database")
         with e ->
             Logging.Error("Database not saved", e)
-            
-    
-    let wipe_archive() =
-        charts.Clear()
-        save()
 
     [<Json.AutoCodec>]
     type EOPackAttrs =
@@ -182,6 +178,43 @@ module Archive =
             Logging.Info(sprintf "Rejecting %s because it doesn't have a background image" chart.Header.Title)
         else
 
+        let create_entry(song_id) =
+            let lastNote = chart.LastNote
+            {
+                SongId = song_id
+                Creators = [chart.Header.Creator]
+                Keys = chart.Keys
+                DifficultyName = chart.Header.DiffName
+                Subtitle = chart.Header.Subtitle
+                Tags = chart.Header.Tags
+                Duration = lastNote - chart.FirstNote
+                Notecount =
+                    let mutable count = 0
+                    for row in chart.Notes do
+                        for k = 0 to chart.Keys - 1 do
+                            if row.Data.[k] = NoteType.NORMAL || row.Data.[k] = NoteType.HOLDHEAD then count <- count + 1
+                    count
+                BPM = ``Interlude to osu!``.minMaxBPM (List.ofSeq chart.BPM) lastNote
+                Sources = 
+                    match chart.Header.ChartSource with
+                    | Charts.Formats.Interlude.ChartSource.Osu (set, id) -> [Osu {| BeatmapSetId = set; BeatmapId = id |}]
+                    | Charts.Formats.Interlude.ChartSource.Stepmania (id) -> [Stepmania id]
+                    | Charts.Formats.Interlude.ChartSource.Unknown -> []
+                LastUpdated = DateTime.Now
+            }
+        
+        let hash = Chart.hash chart
+        if charts.ContainsKey hash then
+            let chart = charts.[hash]
+            let chart_entry = create_entry chart.SongId
+            charts.[hash] <- 
+                { chart_entry with
+                    Tags = List.distinct (chart_entry.Tags @ chart.Tags)
+                    Sources = List.distinct (chart_entry.Sources @ chart.Sources)
+                }
+            Logging.Info(sprintf "^ Chart: %s" hash)
+        else
+
         let song: Song =
             {
                 Artists = [chart.Header.Artist]
@@ -192,29 +225,12 @@ module Archive =
                 Source = chart.Header.Source
                 Tags = chart.Header.Tags
             }
-        let id = add_song song
+        let song_id = add_song song
+
         match chart.Header.ArtistNative with Some a -> add_artist_alias (chart.Header.Artist, a) | None -> ()
         
-        let chartEntry: Chart = 
-            {
-                SongId = id
-                Creators = [chart.Header.Creator]
-                Keys = chart.Keys
-                DifficultyName = chart.Header.DiffName
-                Subtitle = chart.Header.Subtitle
-                Tags = chart.Header.Tags
-                Duration = chart.LastNote - chart.FirstNote
-                Notecount = -1 //todo
-                BPM = (0.0f<ms/beat>, 0.0f<ms/beat>) //todo
-                Sources = 
-                    match chart.Header.ChartSource with
-                    | Charts.Formats.Interlude.ChartSource.Osu (set, id) -> [Osu {| BeatmapSetId = set; BeatmapId = id |}]
-                    | Charts.Formats.Interlude.ChartSource.Stepmania (id) -> [Stepmania id]
-                    | Charts.Formats.Interlude.ChartSource.Unknown -> []
-                LastUpdated = DateTime.Now
-            }
-        let hash = Charts.Formats.Interlude.Chart.hash chart
-        charts.Add(hash, chartEntry)
+        let chart_entry = create_entry song_id
+        charts.Add(hash, chart_entry)
         Logging.Info(sprintf "+ Chart: %s" hash)
 
     let slurp_song_folder (sm_pack_id: int option) (target: string) =
@@ -263,8 +279,8 @@ module Archive =
             let folder = Path.Combine(ARCHIVE_PATH, "tmp", string id)
             match! try_download_mirrors(mirrors, zip) with
             | true ->
-                if Directory.Exists(folder) then Directory.Delete(folder, true)
-                ZipFile.ExtractToDirectory(zip, folder)
+                if Directory.Exists(folder) then Logging.Info("Looks like this pack was already extracted")
+                else ZipFile.ExtractToDirectory(zip, folder)
                 let pack_folder = (Directory.GetDirectories folder)[0]
                 slurp_pack_folder (Some id) pack_folder
                 return true
@@ -284,8 +300,7 @@ module Archive =
             Queue.save "pack-imports" packs
 
     let script() =
-        wipe_archive()
-        let keywords = ["skwid"; "nuclear"; "compulsive"; "valedumps"; "minty"]
+        let keywords = ["skwid"; "nuclear"; "compulsive"; "valedumps"; "minty"; "dumpass"]
         Queue.save "pack-imports" []
         for p in packs.Stepmania.Keys do
             let title = packs.Stepmania.[p].Title.ToLower()
