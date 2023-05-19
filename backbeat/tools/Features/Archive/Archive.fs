@@ -334,6 +334,9 @@ module Archive =
                 Queue.append "pack-imports" (p.ToString())
 
     let remix_regex = Text.RegularExpressions.Regex("\\((.*?) Remix\\)$")
+    let feature_separators = [|"FEAT."; "FT."; "Feat."; "Ft."; "feat."; "ft."|]
+    let collab_separators = [|" x "; " X "; " / "; " VS "; " Vs "; " vs "; " vs. "; " Vs. "; " VS. "; "&"; ", and "; ","; " and "|]
+    let artist_separators = [|"&"; ", and "; ","; " and "|]
     let song_meta_checks (song_id: SongId) (song: Song) =
         let fmt = song.FormattedTitle
         let suggestion =
@@ -346,20 +349,20 @@ module Archive =
                     if artist_matches.Count = 1 then
                         let r: string = artist_matches.[0].Groups.[1].Value
                         let original_artist = song.Artists.Head.Replace(artist_matches.First().Value, "").Trim()
-                        original_artist, song.Title, r.Split([|"&"; ","; " and "|], StringSplitOptions.TrimEntries) |> List.ofArray
+                        original_artist, song.Title, r.Split(collab_separators, StringSplitOptions.TrimEntries) |> List.ofArray
 
                     elif title_matches.Count = 1 then
                         let r: string = title_matches.[0].Groups.[1].Value
                         let original_title = song.Title.Replace(title_matches.First().Value, "").Trim()
-                        song.Artists.Head, original_title, r.Split([|"&"; ","; " and "|], StringSplitOptions.TrimEntries) |> List.ofArray
+                        song.Artists.Head, original_title, r.Split(collab_separators, StringSplitOptions.TrimEntries) |> List.ofArray
 
                     else song.Artists.Head, song.Title, []
 
                 let artists, features =
-                    let ftSplit : string array = artist.Split([|"FEAT."; "FT."; "Feat."; "Ft."; "feat."; "ft."|], StringSplitOptions.TrimEntries)
-                    ftSplit.[0].TrimEnd([|' '; '('|]).Split([|" VS "; " Vs "; " vs "; " vs. "; " Vs. "; " VS. "; "&"; ","; " and "|], StringSplitOptions.TrimEntries) |> List.ofArray,
+                    let ftSplit : string array = artist.Split(feature_separators, StringSplitOptions.TrimEntries)
+                    ftSplit.[0].TrimEnd([|' '; '('|]).Split(collab_separators, StringSplitOptions.TrimEntries) |> List.ofArray,
                     if ftSplit.Length > 1 then
-                        ftSplit.[1].TrimEnd([|' '; ')'|]).Split([|"&"; ","; " and "|], StringSplitOptions.TrimEntries) |> List.ofArray
+                        ftSplit.[1].TrimEnd([|' '; ')'|]).Split(artist_separators, StringSplitOptions.TrimEntries) |> List.ofArray
                     else []
 
                 if artists <> song.Artists || features <> song.OtherArtists || remixers <> song.Remixers || title <> song.Title then
