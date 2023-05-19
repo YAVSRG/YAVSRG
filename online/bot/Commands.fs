@@ -19,32 +19,34 @@ module Commands =
                     return ()
                 }
             match command with
-            | "song" ->
+            | "search" ->
                 match args with
 
                 | None -> 
-                    do! reply "Enter a search term, for example: $song PLANET//SHAPER"
+                    do! reply "Enter a search term, for example: $search PLANET//SHAPER"
 
                 | Some args -> 
-                    let songs = Charts.search_for_songs args |> List.ofSeq
-                    match songs with
+                    let matches = Charts.search_for_charts args |> List.ofSeq
+                    match matches with
                     | [] -> 
                         do! reply "No matches found."
-                    | (id, song) :: [] ->
+                    | (song, charts) :: [] ->
                         let embed = 
                             EmbedBuilder(Title = song.Title)
-                                .AddField((if song.Artists.Length > 1 then "Artists" else "Artist"), String.concat ", " song.Artists)
+                                .AddField((if song.Artists.Length > 1 then "Artists" else "Artist"), String.concat ", " song.Artists, true)
                         if song.OtherArtists <> [] then
-                            embed.AddField("Featuring", String.concat ", " song.OtherArtists) |> ignore
+                            embed.AddField("Featuring", String.concat ", " song.OtherArtists, true) |> ignore
                         if song.Remixers <> [] then
-                            embed.AddField("Remixed by", String.concat ", " song.Remixers) |> ignore
+                            embed.AddField("Remixed by", String.concat ", " song.Remixers, true) |> ignore
                         if song.Tags <> [] then
                             embed.AddField("Tags", String.concat ", " song.Tags) |> ignore
                         if song.Source <> None then
                             embed.AddField("Source", song.Source.Value) |> ignore
                         embed.WithColor(Color.Blue) |> ignore
+                        for chart in charts do
+                            embed.AddField(chart.DifficultyName + " by " + String.concat ", " chart.Creators, String.concat "  |  " (chart.Sources |> List.map Charts.format_source)) |> ignore
                         do! reply_embed (embed.Build())
                     | _ ->
-                        do! reply (String.concat "\n" (List.map (fun (id, song: Song) -> song.FormattedTitle) songs))
+                        do! reply (String.concat "\n" (List.map (fun (song: Song, charts) -> song.FormattedTitle) matches))
             | _ -> ()
         }
