@@ -415,7 +415,7 @@
     }, 
     "aaaavsfrums/beepbitfutures": {
         "AlternativeTitles": [], 
-        "Artists": ["aaaa", "Frums"], 
+        "Artists": ["AAAA", "Frums"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -2413,8 +2413,8 @@
     }, 
     "colatefeatnanahira/lepus": {
         "AlternativeTitles": [], 
-        "Artists": ["colate feat. nanahira"], 
-        "OtherArtists": [], 
+        "Artists": ["colate"], 
+        "OtherArtists": ["Nanahira"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -3367,8 +3367,8 @@
     }, 
     "donomarftlucenzo/danzakuduro": {
         "AlternativeTitles": [], 
-        "Artists": ["Don Omar ft. Lucenzo"], 
-        "OtherArtists": [], 
+        "Artists": ["Don Omar"], 
+        "OtherArtists": ["Lucenzo"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -4240,7 +4240,7 @@
     }, 
     "freddiedredd/witness": {
         "AlternativeTitles": [], 
-        "Artists": ["FREDDIE DREDD"], 
+        "Artists": ["Freddie Dredd"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -4258,7 +4258,7 @@
     }, 
     "frenzyjaycee/drumbassshowerdown": {
         "AlternativeTitles": [], 
-        "Artists": ["Frenzy & Jaycee"], 
+        "Artists": ["Frenzy", "Jaycee"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -4888,7 +4888,7 @@
     }, 
     "hidehitoaokikenichitsuchi/childabuse": {
         "AlternativeTitles": [], 
-        "Artists": ["Hidehito Aoki & Kenichi Tsuchi"], 
+        "Artists": ["Hidehito Aoki", "Kenichi Tsuchi"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -4978,8 +4978,8 @@
     }, 
     "honeyworksfeatcasekosseidasensei/kawaikunarita": {
         "AlternativeTitles": [], 
-        "Artists": ["Honey Works Feat. Case/Koss & EI Da Sensei"], 
-        "OtherArtists": [], 
+        "Artists": ["Honey Works"], 
+        "OtherArtists": ["Case/Koss", "EI Da Sensei"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -5797,7 +5797,7 @@
     }, 
     "kaivirtualnevemnomark/celsvetnarazen": {
         "AlternativeTitles": [], 
-        "Artists": ["kai virtual, nevem, nomark"], 
+        "Artists": ["kai virtual", "nevem", "nomark"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -5887,8 +5887,8 @@
     }, 
     "kashimoimifeatkafu/catloving": {
         "AlternativeTitles": [], 
-        "Artists": ["Kashi Moimi feat. KaFu"], 
-        "OtherArtists": [], 
+        "Artists": ["Kashi Moimi"], 
+        "OtherArtists": ["KaFu"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -6229,8 +6229,8 @@
     }, 
     "ko3feat/fireinthesky": {
         "AlternativeTitles": [], 
-        "Artists": ["KO3 Feat. 浅場佳苗"], 
-        "OtherArtists": [], 
+        "Artists": ["KO3"], 
+        "OtherArtists": ["浅場佳苗"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -6364,7 +6364,7 @@
     }, 
     "kors-k/empireoffury": {
         "AlternativeTitles": [], 
-        "Artists": ["Kors-k"], 
+        "Artists": ["kors k"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -8263,8 +8263,8 @@
     }, 
     "nerufeatkogeinuakatin/law-evadingrock": {
         "AlternativeTitles": [], 
-        "Artists": ["Neru Feat. Kogeinu / Akatin"], 
-        "OtherArtists": [], 
+        "Artists": ["Neru"], 
+        "OtherArtists": ["Kogeinu / Akatin"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -8335,8 +8335,8 @@
     }, 
     "nhatofeatkanaeasaba/dontstopthemusic-1": {
         "AlternativeTitles": [], 
-        "Artists": ["Nhato Feat. Kanae Asaba"], 
-        "OtherArtists": [], 
+        "Artists": ["Nhato"], 
+        "OtherArtists": ["Kanae Asaba"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -9316,12 +9316,12 @@
     }, 
     "psyquifeatsuch/hystericnightgirlandroid52edit": {
         "AlternativeTitles": [], 
-        "Artists": ["PSYQUI feat. Such"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
+        "Artists": ["PSYQUI"], 
+        "OtherArtists": ["Such"], 
+        "Remixers": ["android52"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Hysteric Night Girl (android52 Edit)"
+        "Title": "Hysteric Night Girl"
     }, 
     "puppy/lc": {
         "AlternativeTitles": [], 
@@ -9757,8 +9757,8 @@
     }, 
     "rsounddesignfeathatsunemiku/teikokushoujo": {
         "AlternativeTitles": [], 
-        "Artists": ["R Sound Design Feat. Hatsune Miku"], 
-        "OtherArtists": [], 
+        "Artists": ["R Sound Design"], 
+        "OtherArtists": ["Hatsune Miku"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -10630,7 +10630,7 @@
     }, 
     "sirgeorgsoltiwienerphilharmonikerkonzertvereinigungwienerstaatsopernchor/requiemindminork626-diesirae": {
         "AlternativeTitles": [], 
-        "Artists": ["Sir Georg Solti, Wiener Philharmoniker, Konzertvereinigung Wiener Staatsopernchor"], 
+        "Artists": ["Sir Georg Solti", "Wiener Philharmoniker", "Konzertvereinigung Wiener Staatsopernchor"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -10666,7 +10666,7 @@
     }, 
     "skan/warriors": {
         "AlternativeTitles": [], 
-        "Artists": ["SKAN"], 
+        "Artists": ["Skan"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -11847,10 +11847,10 @@
         "AlternativeTitles": [], 
         "Artists": ["Touhou boukaru"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Nhato"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Usagi dai bakuhatsu (Nhato Remix)"
+        "Title": "Usagi dai bakuhatsu"
     }, 
     "tpazolite/cheatreal": {
         "AlternativeTitles": [], 
@@ -12358,8 +12358,8 @@
     }, 
     "wangchuanfenghualufeatcangqiong/mulanxing": {
         "AlternativeTitles": [], 
-        "Artists": ["Wang Chuan Feng Hua Lu Feat.Cang Qiong"], 
-        "OtherArtists": [], 
+        "Artists": ["Wang Chuan Feng Hua Lu"], 
+        "OtherArtists": ["Cang Qiong"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -12367,8 +12367,8 @@
     }, 
     "wangchuanfenghualufeatmarbluehanser/qingniaoxianfeng": {
         "AlternativeTitles": [], 
-        "Artists": ["Wang Chuan Feng Hua Lu Feat.Marblue / Hanser"], 
-        "OtherArtists": [], 
+        "Artists": ["Wang Chuan Feng Hua Lu"], 
+        "OtherArtists": ["Marblue / Hanser"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -12925,7 +12925,7 @@
     }, 
     "yuukoitotoukonanami/hectopascal": {
         "AlternativeTitles": [], 
-        "Artists": ["Yuu Koito & Touko Nanami"], 
+        "Artists": ["Yuu Koito", "Touko Nanami"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
