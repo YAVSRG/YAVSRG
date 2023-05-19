@@ -1361,11 +1361,11 @@
     "babymetal/dadadancefeattakmatsumoto": {
         "AlternativeTitles": [], 
         "Artists": ["BABYMETAL"], 
-        "OtherArtists": [], 
+        "OtherArtists": ["Tak Matsumoto"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "DA DA DANCE (feat. Tak Matsumoto)"
+        "Title": "DA DA DANCE"
     }, 
     "babymetal/megitsune": {
         "AlternativeTitles": [], 
@@ -1431,15 +1431,6 @@
         "Title": "Nisemono Chuuihou"
     }, 
     "beek/ohdelia": {
-        "AlternativeTitles": [], 
-        "Artists": ["beek"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Oh Delia"
-    }, 
-    "beek/ohdelia-1": {
         "AlternativeTitles": [], 
         "Artists": ["beek"], 
         "OtherArtists": [], 
@@ -8325,15 +8316,6 @@
         "Title": "Offshore"
     }, 
     "nhatofeatkanaeasaba/dontstopthemusic": {
-        "AlternativeTitles": [], 
-        "Artists": ["Nhato"], 
-        "OtherArtists": ["Kanae Asaba"], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Don't Stop The Music"
-    }, 
-    "nhatofeatkanaeasaba/dontstopthemusic-1": {
         "AlternativeTitles": [], 
         "Artists": ["Nhato"], 
         "OtherArtists": ["Kanae Asaba"], 

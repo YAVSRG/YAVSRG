@@ -358,7 +358,25 @@ module Archive =
                 | _ -> ()
         | _ -> ()
 
+    let rehome_song_id (old_id: string, new_id: string) =
+        for chart_id in charts.Keys do
+            let chart = charts.[chart_id]
+            if chart.SongId = old_id then
+                charts.[chart_id] <- { chart with SongId = new_id }
+        save()
+
+    let clean_duplicate_songs() =
+        let mutable seen = Map.empty
+        for id in songs.Keys |> Array.ofSeq do
+            match Map.tryFind songs.[id] seen with
+            | Some existing ->
+                Logging.Info(sprintf "%s is an exact duplicate of %s, removing" id existing)
+                songs.Remove id |> ignore
+                rehome_song_id (id, existing)
+            | None -> seen <- Map.add songs.[id] id seen
+
     let check_all_songs() =
+        clean_duplicate_songs()
         let ignores = Queue.get "songs-ignore"
         let reviews = Queue.get "songs-review"
         for id in songs.Keys |> Seq.except ignores |> Seq.except reviews do
