@@ -13,7 +13,7 @@ open Backbeat.Utils
 module Collect =
 
     let simplify_string =
-        let regex = Text.RegularExpressions.Regex("[^\sa-zA-Z0-9_-]")
+        let regex = Text.RegularExpressions.Regex("[^\sa-zA-Z0-9_]")
         fun (s: string) -> regex.Replace(s.ToLowerInvariant(), "").Trim().Replace(" ", "")
 
     let add_song(song: Song) : SongId =

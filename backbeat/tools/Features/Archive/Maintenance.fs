@@ -34,7 +34,7 @@ module Maintenance =
 
     let variations = 
         [|
-            "tv size ver."; "tv ver."; "tv size"; "anime ver."; "op cut"; "op ver."
+            "tv size ver."; "tv ver."; "tv size"; "tv version"; "tv edit"; "tv-size"; "anime ver."; "op cut"; "op ver."
             "uncut ver."; "long ver.";"extended ver."; "extended mix"
             "cut ver.";  "short ver."; "short edit"
             "album ver"; "original mix"
