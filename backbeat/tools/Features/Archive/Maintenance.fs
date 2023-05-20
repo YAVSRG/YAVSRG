@@ -174,6 +174,25 @@ module Maintenance =
             let res = 1 + min (min a b) c
             if res > 5 then 100 else res
 
+    let check_all_artists_v2() =
+        let map = artists.CreateMapping()
+        let swap (s: string) =
+            if map.ContainsKey(s.ToLower()) then 
+                let replace = map.[s.ToLower()]
+                Logging.Debug(sprintf "%s -> %s" s replace) 
+                replace
+            else s
+        
+        for id in songs.Keys |> Array.ofSeq do
+            let song = songs.[id]
+            songs.[id] <-
+                { song with 
+                    Artists = List.map swap song.Artists
+                    OtherArtists = List.map swap song.OtherArtists
+                    Remixers = List.map swap song.Remixers
+                }
+        save()
+
     let check_all_artists() =
         let artists = ResizeArray<string>()
 
