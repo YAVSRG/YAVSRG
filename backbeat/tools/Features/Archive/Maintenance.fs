@@ -116,7 +116,6 @@ module Maintenance =
             let chart = charts.[chart_id]
             if chart.SongId = old_id then
                 charts.[chart_id] <- { chart with SongId = new_id }
-        save()
 
     type Song_Deduplication = { Title: string; Artists: string list }
     let clean_duplicate_songs() =
@@ -240,6 +239,20 @@ module Maintenance =
             List.iter (check_artist song) song.Artists
             List.iter (check_artist song) song.OtherArtists
             List.iter (check_artist song) song.Remixers
+
+    let check_all_ids() =
+        for id in songs.Keys |> Array.ofSeq do
+            let song = songs.[id]
+            let new_id = (Collect.simplify_string (String.concat "" song.Artists)) + "/" + (Collect.simplify_string song.Title)
+            let mutable i = 0
+            while new_id <> id && songs.ContainsKey(if i > 0 then new_id + "-" + i.ToString() else new_id) do
+                i <- i + 1
+            let new_id = if i > 0 then new_id + "-" + i.ToString() else new_id
+            if new_id <> id then 
+                songs.Add(new_id, song)
+                songs.Remove(id) |> ignore
+                rehome_song_id (id, new_id)
+        save()
 
     let verify_artist (name: string) =
         if artists.Artists.ContainsKey name then
