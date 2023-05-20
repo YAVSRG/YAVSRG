@@ -16,3 +16,5 @@ module Archive =
             Command.create "Scan song metadata for mistakes" [] <| Impl.Create(Maintenance.check_all_songs))
             .WithCommand("check_artists", 
             Command.create "Scan artists for duplicates" [] <| Impl.Create(Maintenance.check_all_artists))
+            .WithCommand("verify_artist", 
+            Command.create "Add a verified artist name to the database" ["artist_name"] <| Impl.Create(Types.str, Maintenance.verify_artist))

@@ -10,6 +10,13 @@ open Backbeat.Utils
 [<AutoOpen>]
 module Storage =
     
+    let artists : VerifiedArtists = 
+        match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "artists.json")) with
+        | Ok d -> d
+        | Error e -> 
+            Logging.Warn(sprintf "Error loading artists.json: %s" e.Message)
+            { Artists = Dictionary<string, VerifiedArtist>() }
+    
     let songs : Songs = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "songs.json")) with
         | Ok d -> d
@@ -35,23 +42,25 @@ module Storage =
             }
 
     let save() =
-        try
-            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
-            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
-            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs 
-            Logging.Debug("Saved database")
-        with e ->
-            Logging.Error("Database not saved", e)
+        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "artists.json"), true) artists
+        with e -> Logging.Error("Artists not saved", e)
+        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
+        with e -> Logging.Error("Songs not saved", e)
+        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
+        with e -> Logging.Error("Charts not saved", e)
+        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs 
+        with e -> Logging.Error("Packs not saved", e)
+        Logging.Debug("Saved database")
 
     module Queue =
         let get id =
             try
-                File.ReadAllLines (Path.Combine(ARCHIVE_PATH, "queue", id+".txt"))
+                File.ReadAllLines (Path.Combine(ARCHIVE_PATH, "queue", id + ".txt"))
                 |> List.ofArray
             with :? FileNotFoundException -> []
 
         let save id xs =
-            File.WriteAllLines (Path.Combine(ARCHIVE_PATH, "queue", id+".txt"), Array.ofList xs)
+            File.WriteAllLines (Path.Combine(ARCHIVE_PATH, "queue", id + ".txt"), Array.ofList xs)
 
         let append id x =
-            File.AppendAllText (Path.Combine(ARCHIVE_PATH, "queue", id+".txt"), x + "\n")
+            File.AppendAllText (Path.Combine(ARCHIVE_PATH, "queue", id + ".txt"), x + "\n")

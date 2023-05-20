@@ -1,0 +1,724 @@
+{
+    "Artists": {
+        "ARM": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Akira Complex": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Amamiya Sora": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Ameba Tsukasa": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Aoi Eir": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Ariabl'eyeS": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Ariana Grande": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Arkitech": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Asterisk": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Avril Lavigne": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Ayano Mashiro": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "BABYMETAL": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "BRADIO": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Between August and December": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Betwixt & Between": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Billain": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Billie Eilish": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "BilliumMoto": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Birds & Buildings": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "BlackY": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Brad Breeck": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Britney Spears": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Bruno Mars": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "C-Show": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "CHiCO": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Caravan Palace": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Cardboard Box": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Carly Rae Jepsen": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Casey Lee Williams": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Chihara Minori": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Childish Gambino": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Chunk! No, Captain Chunk!": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "ClariS": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Co shu Nie": {
+            "Alternatives": ["Cö shu Nie"], 
+            "IsJapaneseFullName": false
+        }, 
+        "Coheed and Cambria": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Coldplay": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Colorful Sounds Port": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Cranky": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Culprate": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DAOKO": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DJ Genki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DJ Myosuke": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DJ SEVEN": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DJ TOTTO": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DJ Yoshitaka": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DJ'TEKINA//SOMETHING": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DJKurara": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DM Ashura": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DNCE": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Daft Punk": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Death Grips": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Dempagumi.inc": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Doja Cat": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DragonForce": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Dreamcatcher": {
+            "Alternatives": ["Dream Catcher"], 
+            "IsJapaneseFullName": false
+        }, 
+        "Dustvoxx": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "EBIMAYO": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Emily Haines And The Soft Skeleton": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Evanescence": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "FELT": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "FLOW": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Fairouz Ai": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Fall Out Boy": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Fear, and Loathing in Las Vegas": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Feed Me": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Feint": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Feryquitous": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Fleshgod Apocalypse": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Fractal Dreamers": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Frums": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Fujita Akane": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Fukasawa Hideyuki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "GARNiDELiA": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "GFRIEND": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "GUMI": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Getty": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Hachi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Halozy": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Hanazawa Kana": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hanazono Mei": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hara Sayuri": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hara Yumi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Harada Hitomi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Haruna Luna": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hasegawa Tomoki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hashimoto Miyuki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hashimoto Yukari": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hatsuki Yura": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hatsune Miku": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Helblinde": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "HiTECH NINJA": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Hino Isuka": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hirano Aya": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hommarju": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "HoneyWorks": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Horie Yui": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hyper Potions": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "HyuN": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "IOSYS": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Igorrr": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Iguchi Yuka": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Iida Riho": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Ikeda Ayako": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Imai Asami": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Imperial Circus Dead Decadence": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Inami Anju": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Infected Mushroom": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Ishida Yoko": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Ishikawa Chiaki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Ishikawa Kaito": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Itou Ayasa": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Itou Kanako": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Itou Shizuka": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "JAM Project": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Jackal Queenston": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "James Landino": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Jeff Williams": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Joji": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Kageyama Hironobu": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Kayano Ai": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Kikuta Hiroki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Kohara Konomi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Kubo Yurika": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Laura Brehm": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "M2U": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Megurine Luka": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Meramipop": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Minase Inori": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Miyamoto Yume": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Momoi Haruko": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Morishita Chisaki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Murakawa Rie": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Nakamura Maiko": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Nanahira": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Nekomata Master": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Ogura Yui": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Ohashi Ayaka": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Oozora Naomi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Ozawa Ari": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Pile": {
+            "Alternatives": ["Eriko Hori", "Hori Eriko"], 
+            "IsJapaneseFullName": false
+        }, 
+        "Qrispy Joybox": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Ruby My Dear": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Sakura Ayane": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Sakura Saori": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Sawano Hiroyuki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Sawashiro Miyuki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Serizawa Yuu": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Tadokoro Azusa": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Tak Matsumoto": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Takagaki Ayahi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Takahashi Rie": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Tanaka Aimi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Tanezaki Atsumi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Terui Haruki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Tomita Miyu": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Toujou Hisako": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Toyosaki Aki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Uchida Aya": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Uchida Maaya": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Ueda Kana": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Utada Hikaru": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Vini Vici": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Warak": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Yonezu Kenshi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Yooh": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Yuuki Aoi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Zekk": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "aaaa": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "bill wurtz": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "blink-182": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "cYsmix": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "deadmau5": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "dj TAKA": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "fourfolium": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "fripSide": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "goreshit": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "halca": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "kors k": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "lapix": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "siromaru": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }
+    }
+}

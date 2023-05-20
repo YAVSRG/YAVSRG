@@ -214,3 +214,12 @@ module Maintenance =
             List.iter (check_artist song) song.Artists
             List.iter (check_artist song) song.OtherArtists
             List.iter (check_artist song) song.Remixers
+
+    let verify_artist (name: string) =
+        if artists.Artists.ContainsKey name then
+            Logging.Warn("Already exists")
+        else
+            let is_japanese = name.Contains ' ' && Collect.romaji_regex.IsMatch(name.ToLower())
+            artists.Artists.Add(name, { Alternatives = []; IsJapaneseFullName = is_japanese })
+            Logging.Info(sprintf "Added %s, Is Japanese: %b" name is_japanese)
+            save()
