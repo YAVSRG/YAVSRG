@@ -23,6 +23,7 @@ type VerifiedArtists =
         let d = Dictionary<string, string>()
         for a in this.Artists.Keys do
             let v = this.Artists.[a]
+            d.Add(a.ToLower(), a)
             for alt in v.Alternatives do
                 d.Add(alt.ToLower(), a)
             if v.IsJapaneseFullName then
