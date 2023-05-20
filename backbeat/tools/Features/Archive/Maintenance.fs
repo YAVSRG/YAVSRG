@@ -32,7 +32,7 @@ module Maintenance =
             | _ -> ()
         option_chosen.Value
 
-    let variations = [|"tv size ver."; "tv ver."; "tv size"; "anime ver."; "op ver."; "uncut ver."; "cut ver."; "long ver."; "short ver."; "extended ver."; "extended mix"; "original mix"|]
+    let variations = [|"tv size ver."; "tv ver."; "tv size"; "anime ver."; "op cut"; "op ver."; "uncut ver."; "cut ver."; "long ver."; "short ver."; "extended ver."; "extended mix"; "original mix"|]
     let song_version (song_id: SongId) (song: Song) =
         let remove_mixes_and_cuts (title: string) =
             let mutable title = title
@@ -48,8 +48,40 @@ module Maintenance =
             | APPLY_NOW -> songs.[song_id] <- suggestion; save()
             | MANUAL_DATA s -> Logging.Debug "Ignoring manual data for now"
             | IGNORE -> ()
-
+            
     let remix_regex = Text.RegularExpressions.Regex("\\((.*?) [rR]emix\\)$")
+    let feature_separators = [|"FEAT."; "FT."; "Feat."; "Ft."; "featuring."; "feat."; "ft."|]
+    let collab_separators = [|" x "; " X "; " / "; " VS "; " Vs "; " vs "; " vs. "; " Vs. "; " VS. "; "&"; ", and "; ","; " and "|]
+    let artist_separators = [|"&"; ", and "; ","; " and "|]
+    let featuring_artists (song_id: SongId) (song: Song) =
+        let suggestion =
+            if song.Artists.Length > 1 || song.OtherArtists <> [] then song else
+
+            let artists, features =
+                let split : string array = song.Artists.[0].Split(feature_separators, StringSplitOptions.TrimEntries)
+                let artists = split.[0].TrimEnd([|' '; '('|]).Split(collab_separators, StringSplitOptions.TrimEntries) |> List.ofArray
+                let features = 
+                    if split.Length > 1 then
+                        split.[1].TrimEnd([|' '; ')'|]).Split(artist_separators, StringSplitOptions.TrimEntries) |> List.ofArray
+                    else []
+                artists, features
+
+            let title, features2 =
+                let split : string array = remix_regex.Replace(song.Title, "").Split(feature_separators, StringSplitOptions.TrimEntries)
+                let title = if split.Length > 1 then split.[0].TrimEnd([|' '; '('; '['|]) else song.Title // todo a ft. b (a Remix)
+                let features = 
+                    if split.Length > 1 then
+                        split.[1].TrimEnd([|' '; ')'; ']'|]).Split(artist_separators, StringSplitOptions.TrimEntries) |> List.ofArray
+                    else []
+                title, features
+
+            { song with Title = title; OtherArtists = List.distinct (features @ features2); Artists = artists }
+        if suggestion <> song then
+            match make_suggestion "MULTIPLEARTISTS" song suggestion with
+            | APPLY_NOW -> songs.[song_id] <- suggestion; save()
+            | MANUAL_DATA s -> Logging.Debug "Ignoring manual data for now"
+            | IGNORE -> ()
+
     let remixers_from_title (song_id: SongId) (song: Song) =
         let title_matches = remix_regex.Matches song.Title
 
@@ -59,7 +91,7 @@ module Maintenance =
                 let original_artist = song.Title.Replace(title_matches.First().Value, "").Trim()
                 let remixer = if remix_name.Contains("'s") then remix_name.Split("'s").[0] else remix_name
                 if song.Remixers = [] then
-                    { song with Remixers = remixer :: song.Remixers }
+                    { song with Remixers = remixer.Split(collab_separators, StringSplitOptions.TrimEntries) |> List.ofArray }
                 else song
             else song
         if suggestion <> song then
@@ -81,60 +113,10 @@ module Maintenance =
             | IGNORE -> ()
 
     let song_meta_checks_v2 (song_id: SongId) (song: Song) =
+        featuring_artists song_id song
         song_version song_id song
         remixers_from_title song_id song
         remixers_to_title song_id song
-
-    let feature_separators = [|"FEAT."; "FT."; "Feat."; "Ft."; "featuring."; "feat."; "ft."|]
-    let collab_separators = [|" x "; " X "; " / "; " VS "; " Vs "; " vs "; " vs. "; " Vs. "; " VS. "; "&"; ", and "; ","; " and "|]
-    let artist_separators = [|"&"; ", and "; ","; " and "|]
-    let song_meta_checks (song_id: SongId) (song: Song) =
-        let fmt = song.FormattedTitle
-        let suggestion =
-            if song.Artists.Length = 1 && song.OtherArtists = [] && song.Remixers = [] then
-
-                let artist, title, remixers =
-                    let artist_matches = remix_regex.Matches(song.Artists.Head)
-                    let title_matches = remix_regex.Matches(song.Title)
-
-                    if artist_matches.Count = 1 then
-                        let r: string = artist_matches.[0].Groups.[1].Value
-                        let original_artist = song.Artists.Head.Replace(artist_matches.First().Value, "").Trim()
-                        original_artist, song.Title, r.Split(collab_separators, StringSplitOptions.TrimEntries) |> List.ofArray
-
-                    elif title_matches.Count = 1 then
-                        let r: string = title_matches.[0].Groups.[1].Value
-                        let original_title = song.Title.Replace(title_matches.First().Value, "").Trim()
-                        song.Artists.Head, original_title, r.Split(collab_separators, StringSplitOptions.TrimEntries) |> List.ofArray
-
-                    else song.Artists.Head, song.Title, []
-
-                let artists, features =
-                    let ftSplit : string array = artist.Split(feature_separators, StringSplitOptions.TrimEntries)
-                    ftSplit.[0].TrimEnd([|' '; '('|]).Split(collab_separators, StringSplitOptions.TrimEntries) |> List.ofArray,
-                    if ftSplit.Length > 1 then
-                        ftSplit.[1].TrimEnd([|' '; ')'|]).Split(artist_separators, StringSplitOptions.TrimEntries) |> List.ofArray
-                    else []
-
-                if artists <> song.Artists || features <> song.OtherArtists || remixers <> song.Remixers || title <> song.Title then
-                    Some { song with Artists = artists; OtherArtists = features; Remixers = remixers; Title = title }
-                else None
-            else None
-        match suggestion with
-        | Some suggestion ->
-            Logging.Info(sprintf "Suggested metadata change\n%A\n vvv \n%A" song suggestion)
-            Logging.Info(sprintf "New: %s" suggestion.FormattedTitle)
-            Logging.Info(sprintf "Old: %s" fmt)
-            Logging.Info("\noptions ::\n 1 - Accept changes\n 2 - Accept changes but mark for manual edit\n 3 - Ignore changes but mark for manual edit\n 4 - No correction needed, don't suggest for this song")
-            let mutable option_chosen = false
-            while not option_chosen do
-                match Console.ReadKey().Key with
-                | ConsoleKey.D1 -> songs.[song_id] <- suggestion; save(); option_chosen <- true
-                | ConsoleKey.D2 -> songs.[song_id] <- suggestion; Queue.append "songs-review" song_id; save(); option_chosen <- true
-                | ConsoleKey.D3 -> Queue.append "songs-review" song_id; option_chosen <- true
-                | ConsoleKey.D4 -> Queue.append "songs-ignore" song_id; option_chosen <- true
-                | _ -> ()
-        | _ -> ()
 
     let rehome_song_id (old_id: string, new_id: string) =
         for chart_id in charts.Keys do
