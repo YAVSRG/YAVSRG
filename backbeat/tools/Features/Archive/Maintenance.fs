@@ -125,15 +125,26 @@ module Maintenance =
                 charts.[chart_id] <- { chart with SongId = new_id }
         save()
 
+    type Song_Deduplication = { Title: string; Artists: string list }
     let clean_duplicate_songs() =
         let mutable seen = Map.empty
         for id in songs.Keys |> Array.ofSeq do
-            match Map.tryFind songs.[id] seen with
+            let song = songs.[id]
+            let ded = { Title = song.Title; Artists = song.Artists @ song.OtherArtists @ song.Remixers }
+            match Map.tryFind ded seen with
             | Some existing ->
-                Logging.Info(sprintf "%s is an exact duplicate of %s, removing" id existing)
+                Logging.Info(sprintf "%s is a duplicate of %s, merging" id existing)
+                let existing_song = songs.[existing]
+                songs.[existing] <- 
+                    { existing_song with 
+                        Source = Option.orElse song.Source existing_song.Source
+                        Tags = List.distinct (existing_song.Tags @ song.Tags)
+                        AlternativeTitles = List.distinct (existing_song.AlternativeTitles @ song.AlternativeTitles)
+                    }
                 songs.Remove id |> ignore
                 rehome_song_id (id, existing)
-            | None -> seen <- Map.add songs.[id] id seen
+            | None -> seen <- Map.add ded id seen
+        save()
 
     let check_all_songs() =
         clean_duplicate_songs()
