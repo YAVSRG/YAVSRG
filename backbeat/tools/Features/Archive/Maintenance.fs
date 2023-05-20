@@ -7,8 +7,85 @@ open Prelude.Data.Charts.Archive
 
 module Maintenance =
 
-    let remix_regex = Text.RegularExpressions.Regex("\\((.*?) Remix\\)$")
-    let feature_separators = [|"FEAT."; "FT."; "Feat."; "Ft."; "feat."; "ft."|]
+    type Approval =
+        | APPLY_NOW
+        | MANUAL_DATA of string
+        | IGNORE
+    let make_suggestion (flag: string) (before: Song) (after: Song) : Approval =
+        let inline diff label a b = if a <> b then Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
+        Logging.Info(sprintf "Suggested metadata changes for %s" before.FormattedTitle)
+        diff "Artists" before.Artists after.Artists
+        diff "Performers" before.OtherArtists after.OtherArtists
+        diff "Remixers" before.Remixers after.Remixers
+        diff "Title" before.Title after.Title
+        diff "Alt Titles" before.AlternativeTitles after.AlternativeTitles
+        diff "Formatted title" before.FormattedTitle after.FormattedTitle
+        diff "Tags" before.Tags after.Tags
+        Logging.Info(sprintf "Reason: %s" flag)
+        Logging.Info("\noptions ::\n 1 - Accept changes\n 2 - Enter manual fix\n 3 - No correction needed, don't suggest for this song")
+        let mutable option_chosen = None
+        while option_chosen.IsNone do
+            match Console.ReadKey().Key with
+            | ConsoleKey.D1 -> option_chosen <- Some APPLY_NOW
+            | ConsoleKey.D2 -> option_chosen <- Some (MANUAL_DATA (Console.ReadLine()))
+            | ConsoleKey.D3 -> option_chosen <- Some IGNORE
+            | _ -> ()
+        option_chosen.Value
+
+    let variations = [|"tv size ver."; "tv ver."; "tv size"; "anime ver."; "op ver."; "uncut ver."; "cut ver."; "long ver."; "short ver."; "extended ver."; "extended mix"; "original mix"|]
+    let song_version (song_id: SongId) (song: Song) =
+        let remove_mixes_and_cuts (title: string) =
+            let mutable title = title
+            for v in variations do
+                let i = title.ToLower().IndexOf(v)
+                if i >= 0 then
+                    let matched_v = title.Substring(i, v.Length)
+                    title <- title.Replace("("+matched_v+")", "").Replace("["+matched_v+"]", "").Replace("-"+matched_v+"-", "").Replace("- "+matched_v+" -", "").Trim()
+            title
+        let suggestion = { song with Title = remove_mixes_and_cuts song.Title; AlternativeTitles = List.map remove_mixes_and_cuts song.AlternativeTitles }
+        if suggestion <> song then
+            match make_suggestion "SONGMIXES" song suggestion with
+            | APPLY_NOW -> songs.[song_id] <- suggestion; save()
+            | MANUAL_DATA s -> Logging.Debug "Ignoring manual data for now"
+            | IGNORE -> ()
+
+    let remix_regex = Text.RegularExpressions.Regex("\\((.*?) [rR]emix\\)$")
+    let remixers_from_title (song_id: SongId) (song: Song) =
+        let title_matches = remix_regex.Matches song.Title
+
+        let suggestion = 
+            if title_matches.Count = 1 then
+                let remix_name = title_matches.[0].Groups.[1].Value
+                let original_artist = song.Title.Replace(title_matches.First().Value, "").Trim()
+                let remixer = if remix_name.Contains("'s") then remix_name.Split("'s").[0] else remix_name
+                if song.Remixers = [] then
+                    { song with Remixers = remixer :: song.Remixers }
+                else song
+            else song
+        if suggestion <> song then
+            match make_suggestion "REMIXINTITLE" song suggestion with
+            | APPLY_NOW -> songs.[song_id] <- suggestion; save()
+            | MANUAL_DATA s -> songs.[song_id] <- { song with Remixers = s.Split(",", StringSplitOptions.TrimEntries) |> List.ofArray }; save()
+            | IGNORE -> ()
+
+    let remixers_to_title (song_id: SongId) (song: Song) =
+        let add_remix_to_title (title: string) =
+            if song.Remixers <> [] && not (title.Contains("remix", StringComparison.InvariantCultureIgnoreCase)) then
+                title + " (" + String.concat " & " song.Remixers + " Remix)"
+            else title
+        let suggestion = { song with Title = add_remix_to_title song.Title; AlternativeTitles = List.map add_remix_to_title song.AlternativeTitles }
+        if suggestion <> song then
+            match make_suggestion "REMIXTOTITLE" song suggestion with
+            | APPLY_NOW -> songs.[song_id] <- suggestion; save()
+            | MANUAL_DATA s -> Logging.Debug "Ignoring manual data for now"
+            | IGNORE -> ()
+
+    let song_meta_checks_v2 (song_id: SongId) (song: Song) =
+        song_version song_id song
+        remixers_from_title song_id song
+        remixers_to_title song_id song
+
+    let feature_separators = [|"FEAT."; "FT."; "Feat."; "Ft."; "featuring."; "feat."; "ft."|]
     let collab_separators = [|" x "; " X "; " / "; " VS "; " Vs "; " vs "; " vs. "; " Vs. "; " VS. "; "&"; ", and "; ","; " and "|]
     let artist_separators = [|"&"; ", and "; ","; " and "|]
     let song_meta_checks (song_id: SongId) (song: Song) =
@@ -81,7 +158,7 @@ module Maintenance =
         let ignores = Queue.get "songs-ignore"
         let reviews = Queue.get "songs-review"
         for id in songs.Keys |> Seq.except ignores |> Seq.except reviews do
-            song_meta_checks id songs.[id]
+            song_meta_checks_v2 id songs.[id]
 
     let rename_artist (old_artist: string, new_artist: string) =
         let swap = (fun a -> if a = old_artist then new_artist else a)
