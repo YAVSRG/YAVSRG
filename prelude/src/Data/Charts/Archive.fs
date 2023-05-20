@@ -31,7 +31,6 @@ type Song =
         + if this.OtherArtists <> [] then " ft. " + String.concat ", " this.OtherArtists else ""
         + " - "
         + this.Title
-        + if this.Remixers <> [] then " (" + String.concat ", " this.Remixers + " Remix)" else ""
 
 type Songs = Dictionary<SongId, Song>
 
