@@ -173,7 +173,8 @@ module Maintenance =
             if c >= 100 then 100 else
             let res = 1 + min (min a b) c
             if res > 5 then 100 else res
-
+            
+    let character_voice_regex = Text.RegularExpressions.Regex("[\\[\\(][cC][vV][.:\\-]?\\s?(.*)[\\]\\)]")
     let check_all_artists_v2() =
         let map = artists.CreateMapping()
         let swap (s: string) =
@@ -183,13 +184,20 @@ module Maintenance =
                 replace
             else s
         
+        let fix (artist: string) =
+            let matches = character_voice_regex.Matches artist
+            if matches.Count = 1 then
+                let character_voice = matches.[0].Groups.[1].Value
+                artist.Replace(matches.[0].Value, sprintf "(CV: %s)" (swap character_voice))
+            else swap artist
+        
         for id in songs.Keys |> Array.ofSeq do
             let song = songs.[id]
             songs.[id] <-
                 { song with 
-                    Artists = List.map swap song.Artists
-                    OtherArtists = List.map swap song.OtherArtists
-                    Remixers = List.map swap song.Remixers
+                    Artists = List.map fix song.Artists
+                    OtherArtists = List.map fix song.OtherArtists
+                    Remixers = List.map fix song.Remixers
                 }
         save()
 
