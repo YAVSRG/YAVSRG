@@ -27,7 +27,7 @@ type VerifiedArtists =
                 d.Add(alt.ToLower(), a)
             if v.IsJapaneseFullName then
                 let split = a.Split(' ', 2)
-                d.Add(split.[1] + " " + split.[0], a)
+                d.Add((split.[1] + " " + split.[0]).ToLower(), a)
         d
 
 type SongId = string
