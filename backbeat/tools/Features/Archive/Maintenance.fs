@@ -32,7 +32,7 @@ module Maintenance =
             | _ -> ()
         option_chosen.Value
 
-    let variations = [|"tv size ver."; "tv ver."; "tv size"; "anime ver."; "op cut"; "op ver."; "uncut ver."; "cut ver."; "long ver."; "short ver."; "extended ver."; "extended mix"; "original mix"|]
+    let variations = [|"tv size ver."; "tv ver."; "tv size"; "anime ver."; "op cut"; "op ver."; "uncut ver."; "cut ver."; "long ver."; "short ver."; "short edit"; "extended ver."; "extended mix"; "original mix"|]
     let song_version (song_id: SongId) (song: Song) =
         let remove_mixes_and_cuts (title: string) =
             let mutable title = title
