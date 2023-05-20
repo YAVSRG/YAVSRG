@@ -51,8 +51,8 @@ module Charts =
                 if song.FormattedTitle.ToLower().Contains(query) then
                     yield (chart, song)
         } 
-        |> Seq.truncate 30
         |> Seq.groupBy snd
+        |> Seq.truncate 30
         |> Seq.map (fun (song, stuff) -> song, Seq.map fst stuff |> List.ofSeq)
 
     let format_source (source: ChartSource) =
