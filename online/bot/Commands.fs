@@ -47,6 +47,10 @@ module Commands =
                             embed.AddField(chart.DifficultyName + " by " + String.concat ", " chart.Creators, String.concat "  |  " (chart.Sources |> List.map Charts.format_source)) |> ignore
                         do! reply_embed (embed.Build())
                     | _ ->
-                        do! reply (String.concat "\n" (List.map (fun (song: Song, charts) -> song.FormattedTitle) matches))
+                        let embed =
+                            EmbedBuilder(Title = match matches.Length with 30 -> "30+ matches found" | i -> sprintf "%i matches found" i)
+                                .WithDescription(String.concat "\n" (List.map (fun (song: Song, charts) -> song.FormattedTitle) matches))
+                                .WithColor(Color.Blue)
+                        do! reply_embed (embed.Build())
             | _ -> ()
         }
