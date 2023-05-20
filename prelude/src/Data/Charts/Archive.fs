@@ -7,12 +7,27 @@ open Prelude
 
 type ArtistName = string
 [<Json.AutoCodec>]
-type Artist =
+type VerifiedArtist =
     {
-        mutable Alternatives: string list // first element is primary name
+        Alternatives: string list
+        IsJapanese: bool
     }
-    member this.Add(alias: string) =
-        this.Alternatives <- this.Alternatives @ [alias] |> List.distinct
+// store of artists that i've confirmed exist, with the correct STYLISATION of their name
+type VerifiedArtists =
+    { 
+        Artists: Dictionary<string, VerifiedArtist>
+    }
+    // all-lowercase string map to correct stylised artist name, if exists
+    member this.CreateMapping() =
+        let d = Dictionary<string, string>()
+        for a in this.Artists.Keys do
+            let v = this.Artists.[a]
+            for alt in v.Alternatives do
+                d.Add(alt.ToLower(), a)
+            if v.IsJapanese then
+                let split = a.Split(' ', 2)
+                d.Add(split.[1] + " " + split.[0], a)
+        d
 
 type SongId = string
 [<Json.AutoCodec>]
