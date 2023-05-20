@@ -10,9 +10,10 @@ type ArtistName = string
 type VerifiedArtist =
     {
         Alternatives: string list
-        IsJapanese: bool
+        IsJapaneseFullName: bool
     }
 // store of artists that i've confirmed exist, with the correct STYLISATION of their name
+[<Json.AutoCodec>]
 type VerifiedArtists =
     { 
         Artists: Dictionary<string, VerifiedArtist>
@@ -24,7 +25,7 @@ type VerifiedArtists =
             let v = this.Artists.[a]
             for alt in v.Alternatives do
                 d.Add(alt.ToLower(), a)
-            if v.IsJapanese then
+            if v.IsJapaneseFullName then
                 let split = a.Split(' ', 2)
                 d.Add(split.[1] + " " + split.[0], a)
         d
