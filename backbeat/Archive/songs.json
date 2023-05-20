@@ -2187,22 +2187,13 @@
         "Title": "DA DA DANCE"
     }, 
     "babymetal/megitsune": {
-        "AlternativeTitles": [], 
-        "Artists": ["BABYMETAL"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Megitsune"
-    }, 
-    "babymetal/megitsune-1": {
         "AlternativeTitles": ["メギツネ"], 
         "Artists": ["BABYMETAL"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": ["jpop", "su", "yui", "moa", "metal"], 
-        "Title": "MEGITSUNE"
+        "Title": "Megitsune"
     }, 
     "babymetal/papaya": {
         "AlternativeTitles": [], 
@@ -5367,10 +5358,10 @@
         "AlternativeTitles": [], 
         "Artists": ["DJ SEVEN"], 
         "OtherArtists": [], 
-        "Remixers": ["P'n'B"], 
+        "Remixers": ["DJ SEVEN"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "To Dimension"
+        "Title": "To Dimension (DJ SEVEN P'n'B Remix)"
     }, 
     "djsharpnel/11eleven": {
         "AlternativeTitles": [], 
@@ -5535,15 +5526,6 @@
         "Title": "The Power of Underground"
     }, 
     "djsharpnel/touchtheangel": {
-        "AlternativeTitles": [], 
-        "Artists": ["DJ Sharpnel"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Touch The Angel"
-    }, 
-    "djsharpnel/touchtheangel-1": {
         "AlternativeTitles": [], 
         "Artists": ["DJ Sharpnel"], 
         "OtherArtists": [], 
@@ -5895,15 +5877,6 @@
         "Title": "Fury Of The Jumpstream"
     }, 
     "dragonforce/heroesofourtime": {
-        "AlternativeTitles": [], 
-        "Artists": ["DragonForce"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Heroes of our Time"
-    }, 
-    "dragonforce/heroesofourtime-1": {
         "AlternativeTitles": [], 
         "Artists": ["DragonForce"], 
         "OtherArtists": [], 
@@ -7487,15 +7460,6 @@
         "Tags": [], 
         "Title": "Angel Of Salvation"
     }, 
-    "galneryus/angelofsalvation-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["GALNERYUS"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "ANGEL OF SALVATION"
-    }, 
     "galneryus/causedisarray": {
         "AlternativeTitles": [], 
         "Artists": ["GALNERYUS"], 
@@ -8037,22 +8001,13 @@
         "Title": "one way to hannover"
     }, 
     "goreshit/thenatureofdying": {
-        "AlternativeTitles": [], 
-        "Artists": ["goreshit"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "The Nature of Dying"
-    }, 
-    "goreshit/thenatureofdying-1": {
-        "AlternativeTitles": [], 
+        "AlternativeTitles": ["the nature of dying"], 
         "Artists": ["goreshit"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": ["semantic", "compositions", "on", "death", "and", "its", "meaning"], 
-        "Title": "the nature of dying"
+        "Title": "The Nature of Dying"
     }, 
     "goreshit/thinkingofyou": {
         "AlternativeTitles": [], 
@@ -9800,15 +9755,6 @@
         "Tags": ["[_Baim_]", "Ibrahim", "risa", "oribe", "Verniy_Chan", "Mekakucity", "Actors", "Ending", "TV", "Size", "Mekakushitiakutāzu", "ed", "kagepro", "vocaloid", "ia", "kagerou", "project", "カゲロウプロジェクト", "小松一也", "Kazuya", "Komatsu"], 
         "Title": "Yuukei Yesterday"
     }, 
-    "jinftmariafromgarnidelia/daze": {
-        "AlternativeTitles": [], 
-        "Artists": ["JIN"], 
-        "OtherArtists": ["MARiA from GARNiDELiA"], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "daze"
-    }, 
     "jinhashimoto/standproud": {
         "AlternativeTitles": [], 
         "Artists": ["Jin Hashimoto"], 
@@ -10917,12 +10863,12 @@
         "Title": "vesna"
     }, 
     "kishidakyoudantheakeboshirockets/gatesorewaakatsukinoyouni": {
-        "AlternativeTitles": [], 
+        "AlternativeTitles": ["GATE~それは暁のように~"], 
         "Artists": ["Kishida Kyoudan & The Akeboshi Rockets"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
+        "Source": "GATE 自衛隊 彼の地にて、斯く戦えり", 
+        "Tags": ["ゲート", "OP", "Opening", "Rory", "Youji", "Lelei", "la", "Tuka", "Luna", "The", "Self-Defense", "Forces", "Fight", "Like", "This", "in", "That", "Place", "Jieitai", "Kanochi", "nite,", "Kaku", "Tatakaeri", "~Like", "the", "Break", "of", "Dawn~", "Rivals_7", "Dellvangel", "MEGAtive"], 
         "Title": "GATE~Sore wa Akatsuki no You ni~"
     }, 
     "kishidakyoudantheakeboshirockets/striketheblood": {
@@ -10951,15 +10897,6 @@
         "Source": "GATE 自衛隊 彼の地にて、斯く戦えり", 
         "Tags": ["opening", "drum", "2", "Jieitai", "Kanochi", "nite", "Kaku", "Tatakaeri", "2nd", "Season", "ゲートShini", "Puxtu"], 
         "Title": "Sekai o Koete"
-    }, 
-    "kisidakyodantheakebosirockets/gatesorewaakatsukinoyounitvsize": {
-        "AlternativeTitles": ["GATE～それは暁のように～"], 
-        "Artists": ["Kishida Kyoudan & The Akeboshi Rockets"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "GATE 自衛隊 彼の地にて、斯く戦えり", 
-        "Tags": ["ゲート", "OP", "Opening", "Rory", "Youji", "Lelei", "la", "Tuka", "Luna", "The", "Self-Defense", "Forces", "Fight", "Like", "This", "in", "That", "Place", "Jieitai", "Kanochi", "nite,", "Kaku", "Tatakaeri", "~Like", "the", "Break", "of", "Dawn~", "Rivals_7", "Dellvangel", "MEGAtive"], 
-        "Title": "GATE~Sore wa Akatsuki no You ni~"
     }, 
     "kitaujiquartet/tuttitvsize": {
         "AlternativeTitles": ["トゥッティ！"], 
@@ -15849,15 +15786,6 @@
         "Title": "Piano Etude (Demon Fire)"
     }, 
     "otokaze/amamichi": {
-        "AlternativeTitles": [], 
-        "Artists": ["Otokaze"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Amamichi"
-    }, 
-    "otokaze/amamichi-1": {
         "AlternativeTitles": ["雨道 -amamichi-"], 
         "Artists": ["Otokaze"], 
         "OtherArtists": [], 
@@ -18166,8 +18094,8 @@
         "Artists": ["μ's"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
+        "Source": "ラブライブ！ School idol project", 
+        "Tags": ["Love", "Live!", "2期", "2nd", "Season", "Hinsvar", "mingmichael", "ITer", "IamKwan", "Rumia-", "[_M_o_m_o_]", "Momo", "Vhy", "Simple_Star", "9th", "episode", "Episode", "9", "Muse", "Kousaka", "Honoka", "Sonoda", "Umi", "Minami", "Kotori", "Yazawa", "Nico", "Ayase", "Eli", "Toujou", "Nozomi", "Nishikino", "Maki", "Koizumi", "Hanayo", "Hoshizora", "Rin", "高坂", "穂乃果", "園田", "海未", "南", "ことり", "矢澤", "にこ", "絢瀬", "絵里", "東條", "希", "西木野", "真姫", "小泉", "花陽", "星空", "凛", "Nitta", "Emi", "Mimori", "Suzuko", "Uchida", "Aya", "Tokui", "Sora", "Nanjou", "Yoshino", "Kusuda", "Aina", "Hori", "Eriko", "Pile", "Kubo", "Yurika", "Iida", "Riho", "新田", "恵海", "三森", "すずこ", "内田", "彩", "徳井", "青空", "南條", "愛乃", "楠田", "亜衣奈", "堀絵梨子", "久保", "ユリカ", "飯田", "里穂"], 
         "Title": "Snow Halation"
     }, 
     "s3rl/bassslut": {
@@ -18259,15 +18187,6 @@
         "Source": null, 
         "Tags": [], 
         "Title": "Skyfire Ace"
-    }, 
-    "sabrepulse/skyfireace-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Sabrepulse"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "SkyFire Ace"
     }, 
     "sagarakokoro/hoshizoranoima": {
         "AlternativeTitles": [], 
@@ -19907,15 +19826,6 @@
         "Tags": [], 
         "Title": "Color of Giggles"
     }, 
-    "sleeplessdragn/colorofgiggles-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Sleeplessdragn"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Color of giggles"
-    }, 
     "sleepthiefftjodyquine/eurydice": {
         "AlternativeTitles": [], 
         "Artists": ["Sleepthief"], 
@@ -20713,18 +20623,9 @@
         "Artists": ["sweet ARMS"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Trust in You"
-    }, 
-    "sweetarms/trustinyoutvsize": {
-        "AlternativeTitles": [], 
-        "Artists": ["sweet ARMS"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
         "Source": "デート・ア・ライブ Ⅱ", 
         "Tags": ["date", "a", "live", "2", "opening", "simple_star"], 
-        "Title": "Trust in you"
+        "Title": "Trust in You"
     }, 
     "sweettrip/fruitcakeandcookies": {
         "AlternativeTitles": [], 
@@ -21046,18 +20947,9 @@
         "Artists": ["Tatsh"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Heavenly Moon"
-    }, 
-    "tatsh/heavenlymoon-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Tatsh"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
         "Source": "jubeat copious", 
         "Tags": ["CORE", "BEMANI", "KONAMI", "plus", "jukebeat", "pop'n", "music", "Sunny", "Park", "REFLEC", "BEAT", "limelight", "Mashiro-Fang"], 
-        "Title": "HEAVENLY MOON"
+        "Title": "Heavenly Moon"
     }, 
     "tatsh/xevel": {
         "AlternativeTitles": [], 
@@ -22769,15 +22661,6 @@
         "Tags": ["Kagu-chan", "Love", "Live", "Kawada", "Takao", "Hata", "Aki", "OST", "Lantis"], 
         "Title": "No brand girls"
     }, 
-    "us/snowhalationtvsize": {
-        "AlternativeTitles": [], 
-        "Artists": ["μ's"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "ラブライブ！ School idol project", 
-        "Tags": ["Love", "Live!", "2期", "2nd", "Season", "Hinsvar", "mingmichael", "ITer", "IamKwan", "Rumia-", "[_M_o_m_o_]", "Momo", "Vhy", "Simple_Star", "9th", "episode", "Episode", "9", "Muse", "Kousaka", "Honoka", "Sonoda", "Umi", "Minami", "Kotori", "Yazawa", "Nico", "Ayase", "Eli", "Toujou", "Nozomi", "Nishikino", "Maki", "Koizumi", "Hanayo", "Hoshizora", "Rin", "高坂", "穂乃果", "園田", "海未", "南", "ことり", "矢澤", "にこ", "絢瀬", "絵里", "東條", "希", "西木野", "真姫", "小泉", "花陽", "星空", "凛", "Nitta", "Emi", "Mimori", "Suzuko", "Uchida", "Aya", "Tokui", "Sora", "Nanjou", "Yoshino", "Kusuda", "Aina", "Hori", "Eriko", "Pile", "Kubo", "Yurika", "Iida", "Riho", "新田", "恵海", "三森", "すずこ", "内田", "彩", "徳井", "青空", "南條", "愛乃", "楠田", "亜衣奈", "堀絵梨子", "久保", "ユリカ", "飯田", "里穂"], 
-        "Title": "Snow halation"
-    }, 
     "usadapekora/discommunicationalien": {
         "AlternativeTitles": ["ディスコミュ星人"], 
         "Artists": ["Usada Pekora"], 
@@ -23530,18 +23413,9 @@
         "Artists": ["xi"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Ascension To Heaven"
-    }, 
-    "xi/ascensiontoheaven-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["xi"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
         "Source": "BMS", 
         "Tags": ["parousia", "artcore", "bms", "of", "fighters", "2009", "100sec", "records", "piano"], 
-        "Title": "Ascension to Heaven"
+        "Title": "Ascension To Heaven"
     }, 
     "xi/bluezenith": {
         "AlternativeTitles": [], 

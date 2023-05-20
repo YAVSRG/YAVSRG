@@ -57,7 +57,7 @@ module Maintenance =
             
     let remix_regex = Text.RegularExpressions.Regex("\\((.*?) [rR]emix\\)$")
     let feature_separators = [|"FEAT."; "FT."; "Feat."; "Ft."; "featuring."; "feat."; "ft."|]
-    let collab_separators = [|" x "; " X "; " / "; " VS "; " Vs "; " vs "; " vs. "; " Vs. "; " VS. "; "&"; ", and "; ","; " and "|]
+    let collab_separators = [|" x "; " X "; " / "; " VS "; " Vs "; " vs "; " vs. "; " Vs. "; " VS. "; "&"; ", and "; ","; " and "; "prod."|]
     let artist_separators = [|"&"; ", and "; ","; " and "|]
     let featuring_artists (song_id: SongId) (song: Song) =
         let suggestion =
@@ -106,23 +106,10 @@ module Maintenance =
             | MANUAL_DATA s -> songs.[song_id] <- { song with Remixers = s.Split(",", StringSplitOptions.TrimEntries) |> List.ofArray }; save()
             | IGNORE -> ()
 
-    let remixers_to_title (song_id: SongId) (song: Song) =
-        let add_remix_to_title (title: string) =
-            if song.Remixers <> [] && not (title.Contains("remix", StringComparison.InvariantCultureIgnoreCase)) then
-                title + " (" + String.concat " & " song.Remixers + " Remix)"
-            else title
-        let suggestion = { song with Title = add_remix_to_title song.Title; AlternativeTitles = List.map add_remix_to_title song.AlternativeTitles }
-        if suggestion <> song then
-            match make_suggestion "REMIXTOTITLE" song suggestion with
-            | APPLY_NOW -> songs.[song_id] <- suggestion; save()
-            | MANUAL_DATA s -> Logging.Debug "Ignoring manual data for now"
-            | IGNORE -> ()
-
     let song_meta_checks_v2 (song_id: SongId) (song: Song) =
         featuring_artists song_id song
         song_version song_id song
         remixers_from_title song_id song
-        remixers_to_title song_id song
 
     let rehome_song_id (old_id: string, new_id: string) =
         for chart_id in charts.Keys do
@@ -136,7 +123,7 @@ module Maintenance =
         let mutable seen = Map.empty
         for id in songs.Keys |> Array.ofSeq do
             let song = songs.[id]
-            let ded = { Title = song.Title; Artists = song.Artists @ song.OtherArtists @ song.Remixers }
+            let ded = { Title = song.Title.ToLower(); Artists = (song.Artists @ song.OtherArtists @ song.Remixers) |> List.map (fun s -> s.ToLower()) }
             match Map.tryFind ded seen with
             | Some existing ->
                 Logging.Info(sprintf "%s is a duplicate of %s, merging" id existing)
