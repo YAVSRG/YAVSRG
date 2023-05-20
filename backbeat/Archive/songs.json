@@ -5315,16 +5315,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "Cytus", 
-        "Tags": ["Kagami", "Yuki", "simple_star", "richardfeder"], 
-        "Title": "Prismatic Lollipops"
-    }, 
-    "djmashiro/prismaticlollipops-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["DJ Mashiro"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "Cytus", 
-        "Tags": ["Rayark", "chapter", "III", "Happy", "Hardcore", "Eon-"], 
+        "Tags": ["Kagami", "Yuki", "simple_star", "richardfeder", "Rayark", "chapter", "III", "Happy", "Hardcore", "Eon-"], 
         "Title": "Prismatic Lollipops"
     }, 
     "djmyosuke/genocider": {
@@ -12608,15 +12599,6 @@
         "Tags": ["めらみぽっぷ", "ripple", "space", "halfpipe", "tokyo", "joypolis", "ExUsagi"], 
         "Title": "Starlight Disco"
     }, 
-    "loosfeatmeramipop/starlightdisco": {
-        "AlternativeTitles": [], 
-        "Artists": ["loos"], 
-        "OtherArtists": ["Meramipop"], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Starlight Disco"
-    }, 
     "lostetas/cha-cha-cha": {
         "AlternativeTitles": [], 
         "Artists": ["Los Tetas"], 
@@ -14589,15 +14571,6 @@
         "Title": "Rock on."
     }, 
     "nanofeatmyfirststory/saviorofsong": {
-        "AlternativeTitles": [], 
-        "Artists": ["nano"], 
-        "OtherArtists": ["MY FIRST STORY"], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "SAVIOR OF SONG"
-    }, 
-    "nanofeatmyfirststory/saviorofsongtvsize": {
         "AlternativeTitles": [], 
         "Artists": ["nano"], 
         "OtherArtists": ["MY FIRST STORY"], 
@@ -17788,15 +17761,6 @@
         "Artists": ["Risk Junk"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Candy Galy"
-    }, 
-    "riskjunk-g/candygaly-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Risk Junk"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
         "Source": "Beatmania IIDX", 
         "Tags": ["nb3", "nuclear", "blast", "3", "gold", "ishimaru94", "yunofanatic", "hawke"], 
         "Title": "Candy Galy"
@@ -18756,13 +18720,13 @@
         "Title": "Sorahana"
     }, 
     "sasakureuk/atroposshortedit": {
-        "AlternativeTitles": ["AtröpΦs (Short Edit)"], 
+        "AlternativeTitles": ["AtröpΦs"], 
         "Artists": ["sasakure.UK"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "beatmania IIDX", 
         "Tags": ["beatmania,", "Sasakure.UK,", "SPADA,", "IIDX,", "AtröpΦs,", "NEUTRONIKA"], 
-        "Title": "Atropos (Short Edit)"
+        "Title": "Atropos"
     }, 
     "sasakureuk/bokurano16bitwars": {
         "AlternativeTitles": [], 
@@ -21317,16 +21281,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "SOUND VOLTEX BOOTH", 
-        "Tags": ["SDVX", "Roxas", "hs714", "Spectator", "Konami"], 
-        "Title": "croiX"
-    }, 
-    "teamgrimoireamaneko/croix-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["TeamGrimoire+Amaneko"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "SOUND VOLTEX BOOTH", 
-        "Tags": ["SDVX", "FLOOR", "KAC2012", "オリジナル楽曲コンテスト", "Original", "Song", "Contest", "ULTIMATE", "MEDLEY", "-HISTORIA", "SOUND", "VOLTEX-", "DE-CADE", "Shinzo-", "SpectorDG", "Eon-", "II", "-infinite", "infection-", "Grimoire", "of", "Blue"], 
+        "Tags": ["SDVX", "Roxas", "hs714", "Spectator", "Konami", "FLOOR", "KAC2012", "オリジナル楽曲コンテスト", "Original", "Song", "Contest", "ULTIMATE", "MEDLEY", "-HISTORIA", "SOUND", "VOLTEX-", "DE-CADE", "Shinzo-", "SpectorDG", "Eon-", "II", "-infinite", "infection-", "Grimoire", "of", "Blue"], 
         "Title": "croiX"
     }, 
     "teamhanayamata/hanawaodoreyairohanihotvsize": {
@@ -24057,15 +24012,6 @@
         "Title": "mnemonic"
     }, 
     "yanaginagi/tokohana": {
-        "AlternativeTitles": [], 
-        "Artists": ["yanaginagi"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Tokohana"
-    }, 
-    "yanaginagi/tokohana-1": {
         "AlternativeTitles": ["トコハナ"], 
         "Artists": ["yanaginagi"], 
         "OtherArtists": [], 
@@ -24225,7 +24171,7 @@
         "Remixers": [], 
         "Source": null, 
         "Tags": ["Vocaloid", "feat.", "結月ゆかり", "Yuzuki", "Yukari", "かずち", "Kazuchi", "Yokomin8005", "よこミンP", "YokominP"], 
-        "Title": "Proof -Album ver-"
+        "Title": "Proof"
     }, 
     "yokominfeatyuzukiyukari/storyineverlastingprincess": {
         "AlternativeTitles": [], 
