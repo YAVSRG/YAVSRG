@@ -180,7 +180,6 @@ module Maintenance =
         let swap (s: string) =
             if map.ContainsKey(s.ToLower()) then 
                 let replace = map.[s.ToLower()]
-                Logging.Debug(sprintf "%s -> %s" s replace) 
                 replace
             else s
         
@@ -188,7 +187,7 @@ module Maintenance =
             let matches = character_voice_regex.Matches artist
             if matches.Count = 1 then
                 let character_voice = matches.[0].Groups.[1].Value
-                artist.Replace(matches.[0].Value, sprintf "(CV: %s)" (swap character_voice))
+                swap character_voice
             else swap artist
         
         for id in songs.Keys |> Array.ofSeq do

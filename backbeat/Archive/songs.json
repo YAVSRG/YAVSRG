@@ -784,7 +784,7 @@
     }, 
     "aisakataigacvkugimiyariekawashimaamicvkitamuraeri/holynight": {
         "AlternativeTitles": ["ホーリーナイト"], 
-        "Artists": ["Aisaka Taiga (CV: Kugimiya Rie)", "Kawashima Ami (CV: Kitamura Eri)"], 
+        "Artists": ["Kugimiya Rie", "Kitamura Eri"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "とらドラ！", 
@@ -1045,7 +1045,7 @@
     }, 
     "altriapendragonsantaaltercvayakokawasumi/jinglebells": {
         "AlternativeTitles": [], 
-        "Artists": ["Altria Pendragon (CV: Ayako Kawasumi)"], 
+        "Artists": ["Ayako Kawasumi"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "Fate/Grand Order", 
@@ -2080,7 +2080,7 @@
     }, 
     "ayanecvserizawayuukurumicvuedakana/dingdongholynight": {
         "AlternativeTitles": ["Ding Dong Holy Night♪"], 
-        "Artists": ["Ayane (CV: Serizawa Yuu)", "Kurumi (CV: Ueda Kana)"], 
+        "Artists": ["Serizawa Yuu", "Ueda Kana"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "プリンセスコネクト!Re:Dive", 
@@ -2305,7 +2305,7 @@
     }, 
     "bcv/nisemonochuuihou": {
         "AlternativeTitles": [], 
-        "Artists": ["B子 (CV: 東山奈央)"], 
+        "Artists": ["東山奈央"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -3061,7 +3061,7 @@
     }, 
     "bunchofseiyuu/readygo": {
         "AlternativeTitles": [], 
-        "Artists": ["bunch of seiyuu"], 
+        "Artists": ["Tomoe Kei", "Yamazaki Erii", "Koichi Makoto"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -3515,7 +3515,7 @@
         "OtherArtists": ["Nanahira"], 
         "Remixers": [], 
         "Source": "SOUND VOLTEX II -infinite infection-", 
-        "Tags": ["SDVX", "kametek", "pop'n", "music", "Sunny", "Park", "ばーさす！Production", "Confirmation", "Commemorative", "Original", "Song", "Contest"], 
+        "Tags": ["SDVX", "kametek", "pop'n", "music", "Sunny", "Park", "ばーさす!Production", "Confirmation", "Commemorative", "Original", "Song", "Contest"], 
         "Title": "Mathematics MA+MA = Magic!"
     }, 
     "camelliafeatnanahira/songscompilation": {
@@ -3925,10 +3925,10 @@
     }, 
     "chierucvsakuraayanekuroecvtanezakiatsumiyunicvkoharakonomi/seishunspinner": {
         "AlternativeTitles": ["青春スピナー"], 
-        "Artists": ["Chieru (CV: Sakura Ayane)", "Kuroe (CV: Tanezaki Atsumi)", "Yuni (CV: Kohara Konomi)"], 
+        "Artists": ["Sakura Ayane", "Tanezaki Atsumi", "Kohara Konomi"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": "プリンセスコネクト！Re:Dive", 
+        "Source": "プリンセスコネクト!Re:Dive", 
         "Tags": ["dudehacker", "faputa", "cygames", "Princess", "Connect!", "redive", "Priconne", "Character", "Song", "16", "Japanese", "Pop", "jpop", "j-pop", "Mobile", "Video", "Game", "COCC-17676", "Mutsuki", "Shuhei", "睦月周平", "Mizuno", "Genki", "ミズノ", "ゲンキ", "Nakayoshi-bu", "なかよし部", "short", "cut", "ver", "purikone", "プリコネ"], 
         "Title": "Seishun Spinner"
     }, 
@@ -3979,7 +3979,7 @@
     }, 
     "chinocvminaseinori/miraipuzzle": {
         "AlternativeTitles": ["未来パズル"], 
-        "Artists": ["Chino (CV: Minase Inori)"], 
+        "Artists": ["Minase Inori"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ご注文はうさぎですか？？", 
@@ -3988,7 +3988,7 @@
     }, 
     "chinocvminaseinori/shinsakunoshiawasewakochira": {
         "AlternativeTitles": ["新作のしあわせはこちら!"], 
-        "Artists": ["Chino (CV: Minase Inori)"], 
+        "Artists": ["Minase Inori"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ご注文はうさぎですか？？", 
@@ -3997,7 +3997,7 @@
     }, 
     "chinocvminaseinori/soottoblanket": {
         "AlternativeTitles": ["そおっとブランケット"], 
-        "Artists": ["Chino (CV: Minase Inori)"], 
+        "Artists": ["Minase Inori"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ご注文はうさぎですか？？", 
@@ -4006,7 +4006,7 @@
     }, 
     "chitocvminaseinoriyuuricvkuboyurika/ugokuugokutvsize": {
         "AlternativeTitles": ["動く、動く"], 
-        "Artists": ["Chito (CV: Minase Inori)", "Yuuri (CV: Kubo Yurika)"], 
+        "Artists": ["Minase Inori", "Kubo Yurika"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "少女終末旅行", 
@@ -4699,7 +4699,7 @@
     }, 
     "cvminaseinorierikacvinamianju/animeokatareanimegataridoukoukainothema": {
         "AlternativeTitles": [], 
-        "Artists": ["Maya (CV: Minase Inori)", "Erika (CV: Inami Anju)"], 
+        "Artists": ["Minase Inori", "Inami Anju"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -5797,7 +5797,7 @@
     }, 
     "domaumarucvtanakaaimi/kakushintekimetamaruphose": {
         "AlternativeTitles": ["かくしん的☆めたまるふぉ～ぜっ！"], 
-        "Artists": ["Doma Umaru (CV: Tanaka Aimi)"], 
+        "Artists": ["Tanaka Aimi"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "干物妹！うまるちゃん", 
@@ -6265,7 +6265,7 @@
     }, 
     "emiliacvrietakahashi/stayalive": {
         "AlternativeTitles": [], 
-        "Artists": ["Emilia (CV: Takahashi Rie)"], 
+        "Artists": ["Takahashi Rie"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "Re:ゼロから始める異世界生活", 
@@ -6274,7 +6274,7 @@
     }, 
     "emiliacvtakahashirieremcvminaseinoriramcvmurakawarie/relation": {
         "AlternativeTitles": [], 
-        "Artists": ["Emilia (CV: Takahashi Rie)", "Rem (CV: Minase Inori)", "Ram (CV: Murakawa Rie)"], 
+        "Artists": ["Takahashi Rie", "Minase Inori", "Murakawa Rie"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "プリンセスコネクト!Re:Dive", 
@@ -7408,7 +7408,7 @@
     }, 
     "futabariocvtanezakiatsumi/fukashiginokartetvsize": {
         "AlternativeTitles": ["不可思議のカルテ"], 
-        "Artists": ["Futaba Rio (CV: Tanezaki Atsumi)"], 
+        "Artists": ["Tanezaki Atsumi"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "青春ブタ野郎はバニーガール先輩の夢を見ない", 
@@ -8605,7 +8605,7 @@
     }, 
     "hibikisakuracvfairouzainaruzomachiocvishikawakaito/onegaimuscletvsize": {
         "AlternativeTitles": ["お願いマッスル"], 
-        "Artists": ["Hibiki Sakura (CV: Fairouz Ai)", "Naruzo Machio (CV: Ishikawa Kaito)"], 
+        "Artists": ["Fairouz Ai", "Ishikawa Kaito"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ダンベル何キロ持てる？", 
@@ -8650,7 +8650,7 @@
     }, 
     "hiiragimayukicvogurayuihaginochiakicvtoujouhisako/shiawaseiro": {
         "AlternativeTitles": ["しあわせ色"], 
-        "Artists": ["Hiiragi Mayuki (CV: Ogura Yui)", "Hagino Chiaki (CV: Toujou Hisako)"], 
+        "Artists": ["Ogura Yui", "Toujou Hisako"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ひなこのーと", 
@@ -8758,7 +8758,7 @@
     }, 
     "hitoribocchicvmorishitachisaki/neisshonikaerotvsize": {
         "AlternativeTitles": ["ね、いっしょにかえろ。"], 
-        "Artists": ["Hitori Bocchi (CV: Morishita Chisaki)"], 
+        "Artists": ["Morishita Chisaki"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ひとりぼっちの○○生活", 
@@ -8794,7 +8794,7 @@
     }, 
     "hondamiocvharasayuri/step": {
         "AlternativeTitles": [], 
-        "Artists": ["Honda Mio (CV: Hara Sayuri)"], 
+        "Artists": ["Hara Sayuri"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -8804,7 +8804,7 @@
     "honeyworks/watashinotenshifeatnarumisenacvamamiyasora": {
         "AlternativeTitles": ["ワタシノテンシ feat. 成海聖奈（CV：雨宮天）"], 
         "Artists": ["HoneyWorks"], 
-        "OtherArtists": ["Narumi Sena (CV: Amamiya Sora)"], 
+        "OtherArtists": ["Amamiya Sora"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": ["full", "ver", "japanese", "pop", "jpop", "j-pop", "my", "little", "angel", "very", "cute", "sister", "imouto", "mona", "Confession", "Executive", "Committee", "告白実行委員会", "Kokuhaku", "Jikkou", "Iinkai", "Sound", "of", "コクハクノオト", "no", "Oto", "Pin_Point"], 
@@ -8848,7 +8848,7 @@
     }, 
     "hoshizorarincviidarihonishikinomakicvpile/beatinangel": {
         "AlternativeTitles": [], 
-        "Artists": ["Hoshizora Rin (CV: Iida Riho)", "Nishikino Maki (CV: Pile)"], 
+        "Artists": ["Iida Riho", "Pile"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "Love Live! School idol project", 
@@ -9019,7 +9019,7 @@
     }, 
     "ichigayaarisacvitouayasa/su-sukinankajanai": {
         "AlternativeTitles": ["す、好きなんかじゃない！"], 
-        "Artists": ["Ichigaya Arisa (CV: Itou Ayasa)"], 
+        "Artists": ["Itou Ayasa"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "バンドリ！ガールズバンドパーティ！", 
@@ -9235,7 +9235,7 @@
     }, 
     "imarinecvuchidaaya/divetoblue": {
         "AlternativeTitles": [], 
-        "Artists": ["iMarine (CV: Uchida Aya)"], 
+        "Artists": ["Uchida Aya"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "アイマリンプロジェクト", 
@@ -9406,7 +9406,7 @@
     }, 
     "irisdecemberuncrycvhanazonomeinoelthenextseasoncvamebatsukasa/cryingheart": {
         "AlternativeTitles": ["クライングハート"], 
-        "Artists": ["Iris December Uncry (CV: Hanazono Mei)", "Noel the Nextseason (CV: Ameba Tsukasa)"], 
+        "Artists": ["Hanazono Mei", "Ameba Tsukasa"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ノラと皇女と野良猫ハート２ -Nora, Princess, and Crying Cat.-", 
@@ -9469,7 +9469,7 @@
     }, 
     "itsallthefuckingseiyuu/gabrieldropkick": {
         "AlternativeTitles": [], 
-        "Artists": ["Gabriel Tenma White (CV: Tomita Miyu)", "Raphiel Shiraha Ainsworth (CV: Hanazawa Kana)", "Satanichia Kurumizawa McDowell (CV: Oozora Naomi)"], 
+        "Artists": ["Tomita Miyu", "Hanazawa Kana", "Oozora Naomi"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -9973,7 +9973,7 @@
     }, 
     "juliesigtunacvyamamotonozomi/believexbelieve": {
         "AlternativeTitles": ["Believe×Believe"], 
-        "Artists": ["JULIE SIGTUNA (CV: Yamamoto Nozomi)"], 
+        "Artists": ["Yamamoto Nozomi"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "アブソリュート・デュオ", 
@@ -10090,7 +10090,7 @@
     }, 
     "kagacviguchiyuka/kagamisaki": {
         "AlternativeTitles": ["加賀岬"], 
-        "Artists": ["Kaga (CV: Iguchi Yuka)"], 
+        "Artists": ["Iguchi Yuka"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "艦隊これくしょん -艦これ-", 
@@ -10378,7 +10378,7 @@
     }, 
     "kanonnakagawastarringnaotoyama/natsuirosurprise": {
         "AlternativeTitles": ["夏色サプライズ"], 
-        "Artists": ["Kanon Nakagawa (CV: Nao Toyama)"], 
+        "Artists": ["Nao Toyama"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "神のみぞ知るセカイ ４人とアイドル", 
@@ -10549,7 +10549,7 @@
     }, 
     "kazumakiryucv-takayakuroda/bakamitai": {
         "AlternativeTitles": [], 
-        "Artists": ["Kazuma Kiryu (CV: Takaya Kuroda)"], 
+        "Artists": ["Takaya Kuroda"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -11674,7 +11674,7 @@
     }, 
     "latinacvtakaokanon/imwithyoutvsize": {
         "AlternativeTitles": [], 
-        "Artists": ["Latina (CV: Takao Kanon)"], 
+        "Artists": ["Takao Kanon"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "うちの娘の為ならば、俺はもしかしたら魔王も倒せるかもしれない。", 
@@ -14158,7 +14158,7 @@
     }, 
     "nakagawakanoncvtoyamanao/happycrescent": {
         "AlternativeTitles": ["ハッピークレセント"], 
-        "Artists": ["Nakagawa Kanon (CV: Toyama Nao)"], 
+        "Artists": ["Toyama Nao"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "神のみぞ知るセカイ", 
@@ -15076,7 +15076,7 @@
     }, 
     "nishikinomakicvpileyazawanicocvtokuisora/zuruiyomagnetictoday": {
         "AlternativeTitles": ["ずるいよMagnetic today"], 
-        "Artists": ["Nishikino Maki (CV: Pile)", "Yazawa Nico (CV: Tokui Sora)"], 
+        "Artists": ["Pile", "Tokui Sora"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "Love Live! School idol project", 
@@ -15085,7 +15085,7 @@
     }, 
     "nishimoriyusacvuchidamaaya/rakuenmade": {
         "AlternativeTitles": ["楽園まで"], 
-        "Artists": ["Nishimori Yusa (CV: Uchida Maaya)"], 
+        "Artists": ["Uchida Maaya"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "Charlotte", 
@@ -15112,7 +15112,7 @@
     }, 
     "niwasakariracvyumezukiyaminishinomiyarichercvhanazawasakura/mottoamaikoigokoro": {
         "AlternativeTitles": ["もっと甘い恋心"], 
-        "Artists": ["Niwasaka Rira (CV: Yumezuki Yami)", "Nishinomiya Richer (CV: Hanazawa Sakura)"], 
+        "Artists": ["Yumezuki Yami", "Hanazawa Sakura"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "恋ニ、甘味ヲソエテ２", 
@@ -15427,7 +15427,7 @@
     }, 
     "nullcvwakiazumipetacvuedareina/nullpetatvsize": {
         "AlternativeTitles": [], 
-        "Artists": ["Null (CV: Waki Azumi)", "Peta (CV: Ueda Reina)"], 
+        "Artists": ["Waki Azumi", "Ueda Reina"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ぬるぺた", 
@@ -15706,7 +15706,7 @@
     }, 
     "orangeheartcvhondamarikoneptunecvtanakarie/mousoukatharsis": {
         "AlternativeTitles": ["妄想Katharsis"], 
-        "Artists": ["Orange Heart(CV: Honda Mariko) Neptune(cv: Tanaka Rie)"], 
+        "Artists": ["Honda Mariko) Neptune(cv: Tanaka Rie"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "新次元ゲイム ネプテューヌVⅡ", 
@@ -15715,7 +15715,7 @@
     }, 
     "orangeheartcvhondamarikoneptunecvtanakarie/mousoukatharsis-1": {
         "AlternativeTitles": ["妄想Katharsis"], 
-        "Artists": ["Orange Heart (CV: Honda Mariko)", "Neptune (CV: Tanaka Rie)"], 
+        "Artists": ["Honda Mariko", "Tanaka Rie"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "新次元ゲイム ネプテューヌVⅡ", 
@@ -16075,7 +16075,7 @@
     }, 
     "pecorinecvmaokokkorocvitoumikukarylcvtachibanarika/connectinghappytvsize": {
         "AlternativeTitles": [], 
-        "Artists": ["Pecorine (CV: M.A.O)", "Kokkoro (CV: Itou Miku)", "Karyl (CV: Tachibana Rika)"], 
+        "Artists": ["M.A.O", "Itou Miku", "Tachibana Rika"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "プリンセスコネクト!Re:Dive", 
@@ -17326,7 +17326,7 @@
     }, 
     "remcvminaseinori/wishing": {
         "AlternativeTitles": [], 
-        "Artists": ["Rem(CV: Minase Inori)"], 
+        "Artists": ["Minase Inori"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "Re:ゼロから始める異世界生活", 
@@ -18604,7 +18604,7 @@
     }, 
     "satoshicvricamatsumoto/xyz": {
         "AlternativeTitles": [], 
-        "Artists": ["Satoshi (CV: Rica Matsumoto)"], 
+        "Artists": ["Rica Matsumoto"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ポケットモンスターXY&Z", 
@@ -18613,7 +18613,7 @@
     }, 
     "satoshiwithpikachucvricamatsumotootaniikue/alola": {
         "AlternativeTitles": ["アローラ!!"], 
-        "Artists": ["Satoshi with Pikachu (CV: Rica Matsumoto/Otani Ikue)"], 
+        "Artists": ["Rica Matsumoto", "Otani Ikue"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ポケットモンスター　サン＆ムーン", 
@@ -18901,7 +18901,7 @@
     }, 
     "senkocvwakiazumi/moffumofudeyoinojayotvsize": {
         "AlternativeTitles": ["もっふもふ DE よいのじゃよ"], 
-        "Artists": ["Senko (CV: Waki Azumi)"], 
+        "Artists": ["Waki Azumi"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "世話やきキツネの仙狐さん", 
@@ -18910,7 +18910,7 @@
     }, 
     "senkocvwakiazumishirocvuchidamaaya/koyoimofumofutvsize": {
         "AlternativeTitles": ["今宵mofumofu!!"], 
-        "Artists": ["Senko (CV: Waki Azumi)", "Shiro (CV: Uchida Maaya)"], 
+        "Artists": ["Waki Azumi", "Uchida Maaya"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "世話やきキツネの仙狐さん", 
@@ -18918,7 +18918,7 @@
         "Title": "Koyoi mofumofu!!"
     }, 
     "senpi-/thefirstpartoftouhouexbossrush": {
-        "AlternativeTitles": ["東方EXボスラッシュ！！前編"], 
+        "AlternativeTitles": ["東方EXボスラッシュ!!前編"], 
         "Artists": ["Senpi-"], 
         "OtherArtists": [], 
         "Remixers": [], 
@@ -19657,7 +19657,7 @@
     }, 
     "sirencvliyuu/polaris": {
         "AlternativeTitles": [], 
-        "Artists": ["Siren (CV: Liyuu)"], 
+        "Artists": ["Liyuu"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "ドラガリアロスト", 
@@ -20377,7 +20377,7 @@
     }, 
     "sunlunarcvmomoiharukonogawasakura/romanticsummertvsize": {
         "AlternativeTitles": [], 
-        "Artists": ["SUN (CV: Momoi Haruko)", "LUNAR (CV: Nogawa Sakura)"], 
+        "Artists": ["Momoi Haruko", "Nogawa Sakura"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "瀬戸の花嫁", 
@@ -20773,7 +20773,7 @@
     }, 
     "takagi-sancvtakahashirie/kimagureromantictvsize": {
         "AlternativeTitles": ["気まぐれロマンティック"], 
-        "Artists": ["Takagi-san (CV: Takahashi Rie)"], 
+        "Artists": ["Takahashi Rie"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "からかい上手の高木さん", 
@@ -20791,7 +20791,7 @@
     }, 
     "takamiyanasunocv-narumikyoko/menimenimanimani": {
         "AlternativeTitles": ["メニメニマニマニ"], 
-        "Artists": ["Takamiya Nasuno (CV: Narumi Kyoko)"], 
+        "Artists": ["Narumi Kyoko"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "pop'n music ラピストリア", 
@@ -22582,7 +22582,7 @@
     }, 
     "unicorncvkakumaai/mynight": {
         "AlternativeTitles": [], 
-        "Artists": ["Unicorn (CV: Kakuma Ai)"], 
+        "Artists": ["Kakuma Ai"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "アズールレーン", 
@@ -24256,7 +24256,7 @@
     }, 
     "yukinoshitayukinocvhayamisaoriyuigahamayuicvtouyamanao/everydayworld": {
         "AlternativeTitles": ["エブリデイワールド"], 
-        "Artists": ["Yukinoshita Yukino (CV: Hayami Saori)", "Yuigahama Yui (CV: Touyama Nao)"], 
+        "Artists": ["Hayami Saori", "Touyama Nao"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "やはり俺の青春ラブコメはまちがっている。続", 
