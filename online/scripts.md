@@ -37,6 +37,10 @@ apt-cache policy docker-ce
 sudo apt install docker-ce
 
 sudo systemctl status docker
+
+snap install core; snap refresh core
+snap install --classic certbot
+certbot certonly --standalone
 ```
 
 ### ./update.sh
@@ -44,7 +48,13 @@ sudo systemctl status docker
 docker pull registry.digitalocean.com/yavsrg/interlude-web-server
 docker stop server
 docker rm server
-docker run -d -p 32767:32767 --restart unless-stopped --name server registry.digitalocean.com/yavsrg/interlude-web-server
+docker run -d -p 32767:32767 --restart unless-stopped --name server --mount type=bind,source="$(pwd)"/secrets,target=/docker_root/secrets registry.digitalocean.com/yavsrg/interlude-web-server
+```
+
+### ./cert.sh
+```
+mkdir ./secrets
+openssl pkcs12 -export -out ./secrets/api.pfx -inkey /etc/letsencrypt/live/api.yavsrg.net/privkey.pem -in /etc/letsencrypt/live/api.yavsrg.net/fullchain.pem
 ```
 
 ### ./logs.sh
