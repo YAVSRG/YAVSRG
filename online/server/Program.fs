@@ -84,7 +84,9 @@ let secrets =
         #endif
     match Prelude.Common.JSON.FromFile<Secrets>("secrets/secrets.json") with
     | Ok o -> o
-    | Error e -> failwithf "Error while reading secrets.json: %O" e
+    | Error e -> 
+        printfn "Contents of secrets.json: %A" (File.ReadAllText("secrets/secrets.json"))
+        failwithf "Error while reading secrets.json: %O %O" e e.StackTrace
 
 try
     let api_cert = new X509Certificate2(Path.Combine("secrets", secrets.ApiCert), secrets.ApiCertPassword)
