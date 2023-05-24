@@ -7246,12 +7246,12 @@
     }, 
     "fusqperfumexmoeshop/superstar": {
         "AlternativeTitles": [], 
-        "Artists": ["Fusq - Perfume! x Moe Shop"], 
+        "Artists": ["Fusq", "Moe Shop"], 
         "OtherArtists": ["Hentai Dude"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Superstar"
+        "Title": "Perfume! x Superstar"
     }, 
     "future/sht": {
         "AlternativeTitles": [], 
@@ -7637,8 +7637,8 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "BMS", 
-        "Tags": ["G2R2014", "Ne​/​nuit", "NIZI-RINGO", "-_[_L_e_a_h_]_-", "piano", "alchemists", "violin", "deemo"], 
-        "Title": "nightfall (full ver)"
+        "Tags": ["G2R2014", "Ne/nuit", "NIZI-RINGO", "-_[_L_e_a_h_]_-", "piano", "alchemists", "violin", "deemo"], 
+        "Title": "nightfall"
     }, 
     "ginkiha/pavedgarden": {
         "AlternativeTitles": [], 
@@ -17182,7 +17182,7 @@
     }, 
     "remixedbydjcommand/kisskisskissakibakouboumix": {
         "AlternativeTitles": ["KISS KISS KISS 秋葉工房 MIX"], 
-        "Artists": ["Remixed by DJ Command"], 
+        "Artists": ["DJ Command"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "DanceDanceRevolution X2", 
@@ -17191,7 +17191,7 @@
     }, 
     "remixedbydjcommand/mermaidgirlakibakouboumix": {
         "AlternativeTitles": ["Mermaid girl -秋葉工房MIX-"], 
-        "Artists": ["Remixed by DJ Command"], 
+        "Artists": ["DJ Command"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "beatmania IIDX", 
@@ -17200,7 +17200,7 @@
     }, 
     "remixedbydjtotto/the4thkacdjtottosselection": {
         "AlternativeTitles": [], 
-        "Artists": ["remixed by DJ TOTTO"], 
+        "Artists": ["DJ TOTTO"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "REFLEC BEAT groovin'!! Upper", 
@@ -17209,7 +17209,7 @@
     }, 
     "remixedbydjtotto/the5thkacdjtottosselection": {
         "AlternativeTitles": [], 
-        "Artists": ["remixed by DJ TOTTO"], 
+        "Artists": ["DJ TOTTO"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "REFLEC BEAT VOLZZA", 
@@ -17218,7 +17218,7 @@
     }, 
     "remixedbygmtn/extremez4": {
         "AlternativeTitles": [], 
-        "Artists": ["remixed. by gmtn."], 
+        "Artists": ["gmtn."], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -17227,7 +17227,7 @@
     }, 
     "remixedbyplight/weresohappyplightremixiidxver": {
         "AlternativeTitles": [], 
-        "Artists": ["Remixed by P*Light"], 
+        "Artists": ["P*Light"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "beatmania IIDX 22 PENDUAL", 
@@ -17374,7 +17374,7 @@
         "Artists": ["Rica Matsumoto", "Otani Ikue"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": "ポケットモンスター　サン＆ムーン", 
+        "Source": "ポケットモンスター サン＆ムーン", 
         "Tags": ["Nintendo", "Alolan", "Pokémon", "Pokemon", "Pocket", "Monster", "TV", "Size", "Series", "Sun", "and", "Moon", "Opening", "Ash", "Ketchum", "Tokyo", "7", "MEDIANET", "Generation", "VII", "Rotom", "Pokédex", "Lillie", "Kiawe", "Mallow", "Lana", "Sophocles", "Team", "Rocket", "Professor", "Kukui", "Samson", "Oak", "Litten", "Rowlet", "Popplio"], 
         "Title": "Alola!!"
     }, 
@@ -17619,7 +17619,7 @@
         "Remixers": [], 
         "Source": "バンドリ！ ガールズバンドパーティ！", 
         "Tags": ["Natteke", "Desu", "Nelly", "Imai", "Lisa", "Xetopia", "Lacrima", "myle", "Kanon", "Matsubara", "Shinitagari", "Hinsvar", "bbj0920", "[Shana", "Lesus]", "[Shana_Lesus]", "Virtue-", "toybot", "Jounzan", "evilElvis", "Cami", "Gaia", "Left", "island", "newton-", "iljaaz", "adioni", "tatoe", "BanG", "Dream!", "Girls", "Band", "Party!", "Garupa", "Bandori!", "ガルパ！anime", "opening", "op", "japanese", "艦隊これくしょん", "-艦これ-", "kantai", "collection", "みいろ", "ロゼリア", "minato", "yukina", "湊友希那", "aiba", "aina", "相羽あいな", "hikawa", "sayo", "氷川紗夜", "kudou", "haruka", "工藤晴香", "imai", "lisa", "今井リサ", "endou", "yurika", "遠藤ゆりか", "nakashima", "yuki", "中島由貴", "udagawa", "ako", "宇田川あこ", "sakuragawa", "megu", "櫻川めぐ", "shirokane", "rinko", "白金燐子", "akesaka", "satomi", "明坂聡美", "video", "game", "AKINO", "from", "bless4", "Fleet", "Girls", "Collection", "KanColle", "Animation", "Sequence", "game", "ver"], 
-        "Title": "MIIRO"
+        "Title": "Miiro"
     }, 
     "roselia/neoaspect": {
         "AlternativeTitles": [], 
