@@ -3,6 +3,7 @@ WORKDIR /src
 
 # Copy source code
 COPY Interlude.Web/ ./Interlude.Web
+COPY Prelude/ ./Prelude
 COPY Percyqaz.Common/ ./Percyqaz.Common
 
 WORKDIR ./Interlude.Web/server
