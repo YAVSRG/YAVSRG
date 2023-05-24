@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,7 +14,6 @@
     <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
     <DebugType>embedded</DebugType>
-    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,16 +25,15 @@
     <Optimize>True</Optimize>
 	<Tailcalls>True</Tailcalls>
   </PropertyGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Remove="Properties\**" />
-  </ItemGroup>
+	
+    <PropertyGroup>
+	    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+    </PropertyGroup>
 
   <ItemGroup>
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\icon.ico" />
     <EmbeddedResource Include="Resources\defaultArrow.isk" />
     <EmbeddedResource Include="Resources\defaultBar.isk" />
     <EmbeddedResource Include="Resources\defaultOrb.isk" />
