@@ -75,22 +75,21 @@ let tagline =
     use tr = new StreamReader(stream)
     tr.ReadToEnd()
 
-let secrets =
-    if not (Directory.Exists "secrets") then
-        #if DEBUG
-            failwith "Secrets folder not found! You are running the server as a non-docker instance, make sure you ran it with the script"
-        #else
-            failwith "Secrets folder not found! Did you mount it properly?"
-        #endif
-    match Prelude.Common.JSON.FromFile<Secrets>("secrets/secrets.json") with
-    | Ok o -> o
-    | Error e -> 
-        printfn "Contents of secrets.json: %A" (File.ReadAllText("secrets/secrets.json"))
-        failwithf "Error while reading secrets.json: %O %O" e e.StackTrace
-
 try
-    let api_cert = new X509Certificate2(Path.Combine("secrets", secrets.ApiCert), secrets.ApiCertPassword)
-    let socket_cert = new X509Certificate2(Path.Combine("secrets", secrets.SocketCert), secrets.SocketCertPassword)
+    let secrets =
+        if not (Directory.Exists "./secrets") then
+            #if DEBUG
+                failwith "Secrets folder not found! You are running the server as a non-docker instance, make sure you ran it with the script"
+            #else
+                failwith "Secrets folder not found! Did you mount it properly?"
+            #endif
+        match Prelude.Common.JSON.FromFile<Secrets>("./secrets/secrets.json") with
+        | Ok o -> o
+        | Error e ->
+            failwithf "Error while reading secrets.json: %O" e
+
+    let api_cert = new X509Certificate2(Path.Combine("./secrets", secrets.ApiCert), secrets.ApiCertPassword)
+    let socket_cert = new X509Certificate2(Path.Combine("./secrets", secrets.SocketCert), secrets.SocketCertPassword)
 
     Logging.Info(sprintf "Interlude.Web ~~ %s" tagline)
 
@@ -116,5 +115,6 @@ try
 
 with err ->
     Logging.Critical (err.ToString(), err)
+    Console.ReadLine() |> ignore
 
 Logging.Shutdown()

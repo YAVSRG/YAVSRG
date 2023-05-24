@@ -1,1 +1,1 @@
-﻿the one where I add SSL certificates and it doesn't work perfectly first try
+﻿server now hangs open even after a fatal crash so i can get in there and look

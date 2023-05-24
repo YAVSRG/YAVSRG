@@ -43,6 +43,10 @@ snap install --classic certbot
 certbot certonly --standalone
 ```
 
+Then login to docker repo
+`docker login registry.digitalocean.com/yavsrg/interlude-web-server`
+Enter DO API key for both username and password
+
 ### ./update.sh
 ```
 docker pull registry.digitalocean.com/yavsrg/interlude-web-server
