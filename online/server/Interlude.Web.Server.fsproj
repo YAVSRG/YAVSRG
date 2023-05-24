@@ -12,13 +12,12 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <ItemGroup />
-
   <ItemGroup>
     <PackageReference Include="NetCoreServer" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
     <ProjectReference Include="..\shared\Interlude.Web.Shared.fsproj" />
   </ItemGroup>
 

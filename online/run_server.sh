@@ -1,2 +1,1 @@
-cd server
-dotnet run
+dotnet run --project server

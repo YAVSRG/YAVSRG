@@ -32,7 +32,7 @@ let on_ready() =
 
 let on_message(message: SocketMessage) = 
     task {
-        if message.Author.Id = PERCYQAZ_ID && message.Channel.Id = CHANNEL_ID && message.Content.StartsWith "$" then
+        if message.Channel.Id = CHANNEL_ID && message.Content.StartsWith "$" then
             let cmd = message.Content.Substring(1).Split(' ', 2, StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
             do! Commands.dispatch message cmd.[0] (if cmd.Length > 1 then Some cmd.[1] else None)
     }

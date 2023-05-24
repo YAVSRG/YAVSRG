@@ -1,9 +1,30 @@
 ﻿open System
+open System.IO
 open System.Threading
+open System.Security.Authentication
+open System.Security.Cryptography.X509Certificates
 open System.Reflection
 open Percyqaz.Common
+open Percyqaz.Json
 open Interlude.Web.Shared
 open Interlude.Web.Server
+
+[<Json.AutoCodec(false)>]
+type Secrets = 
+    {
+        SocketCert: string
+        SocketCertPassword: string
+        ApiCert: string
+        ApiCertPassword: string
+        BotToken: string
+    }
+    static member Default = {
+            SocketCert = "localhost.pfx"
+            SocketCertPassword = "DEVELOPMENT"
+            ApiCert = "localhost.pfx"
+            ApiCertPassword = "DEVELOPMENT"
+            BotToken = ""
+        }
 
 let handle_packet(id: Guid, packet: Upstream) =
     async {
@@ -46,27 +67,48 @@ let handle_connect(id: Guid) = UserState.connect id
 let handle_disconnect(id: Guid) = 
     Lobby.ensure_player_leaves_lobby (id, fun () -> UserState.disconnect id)
 
-let PORT = 
-    try Environment.GetEnvironmentVariable "PORT" |> int
-    with err -> 32767
+let SOCKET_PORT = 32767
+let HTTPS_PORT = 443
 
 let tagline = 
     let stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Web.Server.Version.txt")
-    use tr = new IO.StreamReader(stream)
+    use tr = new StreamReader(stream)
     tr.ReadToEnd()
 
-try
+let secrets =
+    if not (Directory.Exists "secrets") then
+        #if DEBUG
+            failwith "Secrets folder not found! You are running the server as a non-docker instance, make sure you ran it with the script"
+        #else
+            failwith "Secrets folder not found! Did you mount it properly?"
+        #endif
+    match Prelude.Common.JSON.FromFile<Secrets>("secrets/secrets.json") with
+    | Ok o -> o
+    | Error e -> failwithf "Error while reading secrets.json: %O" e
 
-    Logging.Info(sprintf "Launching server [%s] on port %i ..." tagline PORT)
+try
+    let api_cert = new X509Certificate2(Path.Combine("secrets", secrets.ApiCert), secrets.ApiCertPassword)
+    let socket_cert = new X509Certificate2(Path.Combine("secrets", secrets.SocketCert), secrets.SocketCertPassword)
+
+    Logging.Info(sprintf "Interlude.Web ~~ %s" tagline)
+
     Server.init { 
         Address = "0.0.0.0"
-        Port = PORT
+        Port = SOCKET_PORT
         Handle_Packet = handle_packet
         Handle_Connect = handle_connect
         Handle_Disconnect = handle_disconnect
     }
+    
+    API.init {
+        Port = HTTPS_PORT
+        SSLContext = NetCoreServer.SslContext(SslProtocols.Tls12, api_cert)
+    }
 
+    Logging.Info(sprintf "Launching game server on port %i ..." SOCKET_PORT)
     Server.start()
+    Logging.Info(sprintf "Launching api on port %i ..." HTTPS_PORT)
+    API.start()
 
     Thread.Sleep Timeout.Infinite
 

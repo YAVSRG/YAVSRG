@@ -63,8 +63,8 @@ module Server =
         server <- new Listener(config)
 
     let start() = 
-        Logging.Info "Starting server..."
-        if server.Start() then Logging.Info "Started server."
+        Logging.Info "Starting socket server..."
+        if server.Start() then Logging.Info "Started socket server."
 
     let send(id: Guid, packet: Downstream) =
         let packet_with_header = Buffer.packet_bytes(packet.Write())
@@ -80,5 +80,5 @@ module Server =
         if not (isNull session) then session.Disconnect() |> ignore
 
     let stop() = 
-        Logging.Info "Stopping server..."
-        if server.Stop() then Logging.Info "Stopped server."
+        Logging.Info "Stopping socket server..."
+        if server.Stop() then Logging.Info "Stopped socket server."
