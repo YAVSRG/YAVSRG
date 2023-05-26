@@ -17,7 +17,7 @@ module API =
         {
             Port: int
             SSLContext: SslContext
-            Handle_Request: HttpMethod * string * string * Map<string, string array> * Map<string, string> * HttpResponse -> unit
+            Handle_Request: HttpMethod * string * string * Map<string, string array> * Map<string, string> * HttpResponse -> Async<unit>
         }
 
     let base_uri = Uri("https://localhost/")
@@ -33,15 +33,18 @@ module API =
             let headers =
                 seq { for i = 0 to int request.Headers - 1 do let struct (key, value) = request.Header i in (key, value) } |> Map.ofSeq
 
-            match request.Method with
-            | "GET" ->
-                config.Handle_Request (GET, uri.AbsolutePath, request.Body, query_params, headers, this.Response)
-                this.SendResponseAsync this.Response
-            | "POST" -> 
-                config.Handle_Request (POST, uri.AbsolutePath, request.Body, query_params, headers, this.Response)
-                this.SendResponseAsync this.Response
-            | _ -> this.SendResponseAsync(this.Response.MakeErrorResponse(404, "Not found"))
-            |> ignore
+            try
+                match request.Method with
+                | "GET" ->
+                    config.Handle_Request (GET, uri.AbsolutePath, request.Body, query_params, headers, this.Response) |> Async.RunSynchronously
+                    this.SendResponseAsync this.Response
+                | "POST" -> 
+                    config.Handle_Request (POST, uri.AbsolutePath, request.Body, query_params, headers, this.Response) |> Async.RunSynchronously
+                    this.SendResponseAsync this.Response
+                | _ -> this.SendResponseAsync(this.Response.MakeErrorResponse(404, "Not found"))
+                |> ignore
+            with e ->
+                Logging.Critical(sprintf "Error handling HTTP request %O" request, e)
 
         override this.OnReceivedRequestError(request: HttpRequest, error: string) =
             Logging.Error(sprintf "Error handling HTTP request: %s" error)

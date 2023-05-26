@@ -5,27 +5,10 @@ open System.Security.Authentication
 open System.Security.Cryptography.X509Certificates
 open System.Reflection
 open Percyqaz.Common
-open Percyqaz.Json
 open Interlude.Web.Shared
+open Interlude.Web.Server
 open Interlude.Web.Server.Online
 open Interlude.Web.Server.API
-
-[<Json.AutoCodec(false)>]
-type Secrets = 
-    {
-        SocketCert: string
-        SocketCertPassword: string
-        ApiCert: string
-        ApiCertPassword: string
-        BotToken: string
-    }
-    static member Default = {
-            SocketCert = "localhost.pfx"
-            SocketCertPassword = "DEVELOPMENT"
-            ApiCert = "localhost.pfx"
-            ApiCertPassword = "DEVELOPMENT"
-            BotToken = ""
-        }
 
 let SOCKET_PORT = 32767
 let HTTPS_PORT = 443
@@ -36,20 +19,8 @@ let tagline =
     tr.ReadToEnd()
 
 try
-    let secrets =
-        if not (Directory.Exists "./secrets") then
-            #if DEBUG
-                failwith "Secrets folder not found! You are running the server as a non-docker instance, make sure you ran it with the script"
-            #else
-                failwith "Secrets folder not found! Did you mount it properly?"
-            #endif
-        match Prelude.Common.JSON.FromFile<Secrets>("./secrets/secrets.json") with
-        | Ok o -> o
-        | Error e ->
-            failwithf "Error while reading secrets.json: %O" e
-
-    let api_cert = new X509Certificate2(Path.Combine("./secrets", secrets.ApiCert), secrets.ApiCertPassword)
-    let socket_cert = new X509Certificate2(Path.Combine("./secrets", secrets.SocketCert), secrets.SocketCertPassword)
+    let api_cert = new X509Certificate2(Path.Combine("./secrets", SECRETS.ApiCert), SECRETS.ApiCertPassword)
+    let socket_cert = new X509Certificate2(Path.Combine("./secrets", SECRETS.SocketCert), SECRETS.SocketCertPassword)
 
     Logging.Info(sprintf "~~ Interlude.Web [%s] ~~" tagline)
 

@@ -7,6 +7,10 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Version.txt" />
+    <Compile Include="Secrets.fs" />
+    <Compile Include="Domain\Auth.fs" />
+    <Compile Include="API\Auth\Discord.fs" />
+    <Compile Include="API\Auth\Register.fs" />
     <Compile Include="API\Health\HealthCheck.fs" />
     <Compile Include="API\API.fs" />
     <Compile Include="Online\Users.fs" />
@@ -22,10 +26,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
     <ProjectReference Include="..\shared\Interlude.Web.Shared.fsproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="API\Auth\" />
   </ItemGroup>
 
 </Project>
