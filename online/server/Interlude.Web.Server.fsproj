@@ -7,8 +7,11 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Version.txt" />
-    <Compile Include="Users.fs" />
-    <Compile Include="Lobbies.fs" />
+    <Compile Include="API\Health\HealthCheck.fs" />
+    <Compile Include="API\API.fs" />
+    <Compile Include="Online\Users.fs" />
+    <Compile Include="Online\Lobbies.fs" />
+    <Compile Include="Online\Online.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -19,6 +22,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
     <ProjectReference Include="..\shared\Interlude.Web.Shared.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="API\Auth\" />
   </ItemGroup>
 
 </Project>

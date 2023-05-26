@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server
+﻿namespace Interlude.Web.Server.Online
 
 open System
 open System.Collections.Generic

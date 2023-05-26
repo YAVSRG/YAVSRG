@@ -1,5 +1,7 @@
 ﻿namespace Interlude.Web.Shared
 
+open System
+open System.Web
 open System.Net
 open System.Net.Sockets
 open NetCoreServer
@@ -7,28 +9,45 @@ open Percyqaz.Common
 
 module API =
 
+    type HttpMethod =
+        | GET
+        | POST
+
     type Config =
         {
             Port: int
             SSLContext: SslContext
+            Handle_Request: HttpMethod * string * string * Map<string, string array> * Map<string, string> * HttpResponse -> unit
         }
+
+    let base_uri = Uri("https://localhost/")
 
     type private Session(server: HttpsServer, config: Config) =
         inherit HttpsSession(server)
 
         override this.OnReceivedRequest(request: HttpRequest) =
-            Logging.Info(sprintf "%O %s" request.Method request.Url)
+            let uri = new Uri(base_uri, request.Url)
+            let query_params =
+                let from_uri = HttpUtility.ParseQueryString uri.Query
+                seq { for p in from_uri do yield (p, from_uri.GetValues p) } |> Map.ofSeq
+            let headers =
+                seq { for i = 0 to int request.Headers - 1 do let struct (key, value) = request.Header i in (key, value) } |> Map.ofSeq
 
             match request.Method with
-            | "GET" -> this.SendResponseAsync(this.Response.MakeGetResponse("{}", "application/json"))
+            | "GET" ->
+                config.Handle_Request (GET, uri.AbsolutePath, request.Body, query_params, headers, this.Response)
+                this.SendResponseAsync this.Response
+            | "POST" -> 
+                config.Handle_Request (POST, uri.AbsolutePath, request.Body, query_params, headers, this.Response)
+                this.SendResponseAsync this.Response
             | _ -> this.SendResponseAsync(this.Response.MakeErrorResponse(404, "Not found"))
             |> ignore
 
         override this.OnReceivedRequestError(request: HttpRequest, error: string) =
-            Logging.Error(sprintf "Error handling http request: %s" error)
+            Logging.Error(sprintf "Error handling HTTP request: %s" error)
         
         override this.OnError(error: SocketError) =
-            Logging.Error(sprintf "Socket error in http session %O: %O" this.Id error)
+            Logging.Error(sprintf "Socket error in HTTP session %O: %O" this.Id error)
 
     type private Listener(config: Config) =
         inherit HttpsServer(
@@ -38,7 +57,7 @@ module API =
 
         override this.CreateSession() = new Session(this, config)
         override this.OnError(error: SocketError) =
-            Logging.Error(sprintf "Error in http server: %O" error)
+            Logging.Error(sprintf "Error in HTTP server: %O" error)
 
     let mutable private server = Unchecked.defaultof<Listener>
     
@@ -46,9 +65,7 @@ module API =
         server <- new Listener(config)
 
     let start() = 
-        Logging.Info "Starting HTTP server..."
-        if server.Start() then Logging.Info "Started HTTP server."
+        if server.Start() then Logging.Info "HTTP server is listening!"
 
     let stop() = 
-        Logging.Info "Stopping HTTP server..."
         if server.Stop() then Logging.Info "Stopped HTTP server."
