@@ -4,6 +4,7 @@ open System.Threading
 open System.Security.Authentication
 open System.Security.Cryptography.X509Certificates
 open System.Reflection
+open NetCoreServer
 open Percyqaz.Common
 open Interlude.Web.Shared
 open Interlude.Web.Server
@@ -27,6 +28,7 @@ try
     Server.init { 
         Address = "0.0.0.0"
         Port = SOCKET_PORT
+        SSLContext = SslContext(SslProtocols.Tls12, socket_cert, ClientCertificateRequired = false)
         Handle_Packet = Online.handle_packet
         Handle_Connect = Online.handle_connect
         Handle_Disconnect = Online.handle_disconnect
@@ -34,7 +36,7 @@ try
     
     API.init {
         Port = HTTPS_PORT
-        SSLContext = NetCoreServer.SslContext(SslProtocols.Tls12, api_cert)
+        SSLContext = SslContext(SslProtocols.Tls12, api_cert)
         Handle_Request = API.handle_request
     }
 

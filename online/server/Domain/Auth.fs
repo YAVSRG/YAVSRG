@@ -75,6 +75,7 @@ module AuthFlow =
                     
                             match auth_flows.[flow_id] with
                             | AuthFlowState.RegisterWaitingCallback id ->
+                                // todo: check if discord id is taken here
                                 auth_flows.[flow_id] <- AuthFlowState.RegisterWaitingUsername(id, discord_id)
                                 Server.send(id, Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag)
                                 true

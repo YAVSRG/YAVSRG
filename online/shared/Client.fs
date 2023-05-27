@@ -1,7 +1,9 @@
 ﻿namespace Interlude.Web.Shared
 
 open System.Net
+open System.Net.Security
 open System.Net.Sockets
+open System.Security.Authentication
 open NetCoreServer
 open Percyqaz.Common
 
@@ -16,12 +18,19 @@ module private Client =
             Handle_Disconnect: unit -> unit
         }
 
+    let ssl_context() =
+        SslContext(
+            SslProtocols.Tls12, 
+            ClientCertificateRequired = false,
+            CertificateValidationCallback = new RemoteCertificateValidationCallback(fun _ _ _ _ -> true)
+        )
+
     type Session(config: Config) =
-        inherit TcpClient(config.Address, config.Port)
+        inherit SslClient(ssl_context(), config.Address, config.Port)
 
         let buffer = ref Empty
 
-        override this.OnConnected() =
+        override this.OnHandshaked() =
             config.Handle_Connect()
             this.SendPacket(Upstream.VERSION PROTOCOL_VERSION)
 

@@ -67,6 +67,7 @@ module Users =
                         |> callback
 
                     | Action.Login (token, callback) ->
+                        Logging.Info "Received login token"
                         match users |> Seq.tryFind (fun u -> u.AuthToken = token) with
                         | Some user -> Ok user.Username
                         | None -> Error "Token invalid or expired"

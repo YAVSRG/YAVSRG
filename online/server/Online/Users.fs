@@ -60,6 +60,7 @@ module UserState =
                                     Server.send(id, Downstream.LOGIN_SUCCESS username)
                                     Logging.Info(sprintf "[-> %s" username)
                                 | Error reason ->
+                                    Logging.Info(sprintf "%O failed to authenticate: %s" id reason)
                                     Server.send(id, Downstream.LOGIN_FAILED reason)
                             ) |> Async.RunSynchronously
                         | UserState.Nothing -> Server.kick(id, "Login sent before handshake")

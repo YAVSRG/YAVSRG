@@ -11,13 +11,14 @@ module Server =
         {
             Address: string
             Port: int
+            SSLContext: SslContext
             Handle_Packet: Guid * Upstream -> unit
             Handle_Connect: Guid -> unit
             Handle_Disconnect: Guid -> unit
         }
 
-    type private Session(server: TcpServer, config: Config) =
-        inherit TcpSession(server)
+    type private Session(server: SslServer, config: Config) =
+        inherit SslSession(server)
 
         let buffer = ref Empty
 
@@ -46,7 +47,8 @@ module Server =
             this.Disconnect() |> ignore
 
     type private Listener(config: Config) =
-        inherit TcpServer(
+        inherit SslServer(
+            config.SSLContext,
             config.Address,
             config.Port,
             OptionKeepAlive = true,
