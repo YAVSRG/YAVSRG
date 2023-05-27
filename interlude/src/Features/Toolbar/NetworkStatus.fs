@@ -43,10 +43,6 @@ type LoginPage() as this =
 type NetworkStatus() =
     inherit StaticWidget(NodeType.None)
 
-    override this.Init(parent: Widget) =
-        base.Init parent
-        if Network.target_ip.ToString() <> "0.0.0.0" then Network.connect()
-
     override this.Draw() =
         let area = this.Bounds.Shrink(30.0f, 0.0f).TrimBottom(15.0f)
         let text, color =

@@ -171,7 +171,7 @@ module Network =
                 | Downstream.LOGIN_FAILED reason -> 
                     credentials.Token <- ""
                     Logging.Info(sprintf "Login failed: %s" reason)
-                    Notifications.error(L"notification.network.loginfailed", reason)
+                    if Screen.currentType <> Screen.Type.SplashScreen then Notifications.error(L"notification.network.loginfailed", reason)
 
                 | Downstream.LOBBY_LIST lobbies -> sync <| fun () ->
                     lobby_list <- lobbies

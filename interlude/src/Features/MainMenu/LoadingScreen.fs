@@ -7,6 +7,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude
 open Interlude.UI
+open Interlude.Features.Online
 
 // Loading screen
 
@@ -29,6 +30,7 @@ type LoadingScreen() =
             animation.Add (Animation.Delay 1200.0)
             animation.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
         | _ ->
+            if Network.target_ip.ToString() <> "0.0.0.0" then Network.connect()
             animation.Add (Animation.Action (fun () -> SoundEffect.play (Content.Sounds.getSound "hello") (Options.options.AudioVolume.Value * 0.6)))
             animation.Add (Animation.Delay 1000.0)
             animation.Add (Animation.Action (fun () -> audio_fade.Target <- 1.0f))
