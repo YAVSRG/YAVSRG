@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open Percyqaz.Common
 open Interlude.Web.Shared
+open Interlude.Web.Server.Domain
 
 [<RequireQualifiedAccess>]
 type UserState =
@@ -23,14 +24,6 @@ module UserState =
 
     let private user_states = Dictionary<Guid, UserState>()
     let private usernames = Dictionary<string, Guid>()
-
-    let VALID_USERNAME_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!*_-+=~|' "
-    let valid_username (proposed: string) : bool =
-        if (proposed.Length < 2 || proposed.Length > 20) then false else
-
-        if proposed.Trim().Length <> proposed.Length then false else
-
-        (Seq.forall (fun (c: char) -> Seq.contains c VALID_USERNAME_CHARACTERS) proposed)
 
     let private state_change = 
         { new Async.Service<Action, unit>()
@@ -56,19 +49,19 @@ module UserState =
                             Server.send(id, Downstream.HANDSHAKE_SUCCESS)
                         | _ -> Server.kick(id, "Handshake sent twice")
 
-                    | Action.Login (id, username) ->
+                    | Action.Login (id, token) ->
                         match user_states.[id] with
                         | UserState.Handshake ->
-
-                            if valid_username username then
-                                if usernames.ContainsKey username then Server.send(id, Downstream.LOGIN_FAILED "Username is taken") else
-
-                                usernames.Add(username, id)
-                                user_states.[id] <- UserState.LoggedIn username
-                                Server.send(id, Downstream.LOGIN_SUCCESS username)
-                                Logging.Info(sprintf "[-> %s" username)
-                            else Server.send(id, Downstream.LOGIN_FAILED "Invalid username")
-
+                            Users.login (token,
+                                function
+                                | Ok username ->
+                                    usernames.Add(username, id)
+                                    user_states.[id] <- UserState.LoggedIn username
+                                    Server.send(id, Downstream.LOGIN_SUCCESS username)
+                                    Logging.Info(sprintf "[-> %s" username)
+                                | Error reason ->
+                                    Server.send(id, Downstream.LOGIN_FAILED reason)
+                            ) |> Async.RunSynchronously
                         | UserState.Nothing -> Server.kick(id, "Login sent before handshake")
                         | _ -> Server.kick(id, "Login sent twice")
 

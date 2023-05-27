@@ -20,7 +20,6 @@ module API =
 
     do
         add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
-        add_endpoint Auth.Register.ROUTE Auth.Register.handle
         add_endpoint Auth.Discord.ROUTE Auth.Discord.handle
 
     let handle_request(method: HttpMethod, route: string, body: string, query_params: Map<string, string array>, header: Map<string, string>, response: HttpResponse) =

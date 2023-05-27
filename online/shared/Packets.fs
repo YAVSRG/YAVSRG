@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 7uy
+    let PROTOCOL_VERSION = 8uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 3
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -93,7 +93,10 @@ module Packets =
     [<RequireQualifiedAccess>]
     type Upstream =
         | VERSION of byte
-        | LOGIN of username: string
+        | BEGIN_REGISTRATION_WITH_DISCORD
+        | COMPLETE_REGISTRATION_WITH_DISCORD of username: string
+        | BEGIN_LOGIN_WITH_DISCORD
+        | LOGIN of token: string
         | LOGOUT
 
         | GET_LOBBIES
@@ -125,8 +128,11 @@ module Packets =
             let packet = 
                 match kind with
                 | 0x00uy -> VERSION (br.ReadByte())
-                | 0x01uy -> LOGIN (br.ReadString())
-                | 0x02uy -> LOGOUT
+                | 0x01uy -> BEGIN_REGISTRATION_WITH_DISCORD
+                | 0x02uy -> COMPLETE_REGISTRATION_WITH_DISCORD (br.ReadString())
+                | 0x03uy -> BEGIN_LOGIN_WITH_DISCORD
+                | 0x04uy -> LOGIN (br.ReadString())
+                | 0x05uy -> LOGOUT
 
                 | 0x10uy -> GET_LOBBIES
                 | 0x11uy -> JOIN_LOBBY (new Guid(br.ReadBytes 16)) 
@@ -165,8 +171,11 @@ module Packets =
             let kind = 
                 match this with
                 | VERSION v -> bw.Write v; 0x00uy
-                | LOGIN name -> bw.Write name; 0x01uy
-                | LOGOUT -> 0x02uy
+                | BEGIN_REGISTRATION_WITH_DISCORD -> 0x01uy
+                | COMPLETE_REGISTRATION_WITH_DISCORD username -> bw.Write username; 0x02uy
+                | BEGIN_LOGIN_WITH_DISCORD -> 0x03uy
+                | LOGIN name -> bw.Write name; 0x04uy
+                | LOGOUT -> 0x05uy
                 
                 | GET_LOBBIES -> 0x10uy
                 | JOIN_LOBBY id -> bw.Write (id.ToByteArray()); 0x11uy
@@ -196,9 +205,12 @@ module Packets =
     type Downstream =
         | DISCONNECT of reason: string
         | HANDSHAKE_SUCCESS
+        | DISCORD_AUTH_URL of url: string
+        | COMPLETE_REGISTRATION_WITH_DISCORD of identifier: string
+        | REGISTRATION_FAILED of reason: string
+        | AUTH_TOKEN of string
         | LOGIN_SUCCESS of username: string
         | LOGIN_FAILED of reason: string
-        // todo: ping and idle timeout system after 2 mins
 
         | LOBBY_LIST of lobbies: LobbyInfo array
         | YOU_JOINED_LOBBY of players: string array // todo: send status along with username
@@ -228,8 +240,12 @@ module Packets =
                 match kind with
                 | 0x00uy -> DISCONNECT (br.ReadString())
                 | 0x01uy -> HANDSHAKE_SUCCESS
-                | 0x02uy -> LOGIN_SUCCESS (br.ReadString())
-                | 0x03uy -> LOGIN_FAILED (br.ReadString())
+                | 0x02uy -> DISCORD_AUTH_URL (br.ReadString())
+                | 0x03uy -> COMPLETE_REGISTRATION_WITH_DISCORD (br.ReadString())
+                | 0x04uy -> REGISTRATION_FAILED (br.ReadString())
+                | 0x05uy -> AUTH_TOKEN (br.ReadString())
+                | 0x06uy -> LOGIN_SUCCESS (br.ReadString())
+                | 0x07uy -> LOGIN_FAILED (br.ReadString())
 
                 | 0x10uy -> LOBBY_LIST ( Array.init (br.ReadByte() |> int) (fun _ -> LobbyInfo.Read br) )
                 | 0x11uy -> YOU_JOINED_LOBBY ( Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString()) )
@@ -263,8 +279,12 @@ module Packets =
                 match this with
                 | DISCONNECT reason -> bw.Write reason; 0x00uy
                 | HANDSHAKE_SUCCESS -> 0x01uy
-                | LOGIN_SUCCESS name -> bw.Write name; 0x02uy
-                | LOGIN_FAILED reason -> bw.Write reason; 0x03uy
+                | DISCORD_AUTH_URL url -> bw.Write url; 0x02uy
+                | COMPLETE_REGISTRATION_WITH_DISCORD identifier -> bw.Write identifier; 0x03uy
+                | REGISTRATION_FAILED reason -> bw.Write reason; 0x04uy
+                | AUTH_TOKEN token -> bw.Write token; 0x05uy
+                | LOGIN_SUCCESS name -> bw.Write name; 0x06uy
+                | LOGIN_FAILED reason -> bw.Write reason; 0x07uy
 
                 | LOBBY_LIST lobbies -> 
                     bw.Write (byte lobbies.Length)

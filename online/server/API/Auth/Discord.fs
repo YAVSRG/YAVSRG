@@ -2,7 +2,6 @@
 
 open System.Net.Http
 open System.Net.Http.Json
-open Prelude
 open Percyqaz.Common
 open Percyqaz.Json
 open Interlude.Web.Shared.API
@@ -33,7 +32,7 @@ module Discord =
                     "client_secret", SECRETS.DiscordClientSecret
                     "grant_type", "authorization_code"
                     "code", code
-                    "redirect_uri", "https://localhost/auth/discord"
+                    "redirect_uri", "https://" + SECRETS.ApiBaseUrl + "/auth/discord"
                 ]
 
             let data = new FormUrlEncodedContent(form)
@@ -63,6 +62,6 @@ module Discord =
             let! response = identity_response.Content.ReadFromJsonAsync<DiscordIdentityResponse>() |> Async.AwaitTask
 
             match! AuthFlow.receive_discord_callback(state, int64 response.id, response.username + "#" + response.discriminator) with
-            | Ok () -> return { Status = "The last step registration process is now available in your Interlude client. You can now safely close this window" }
-            | Error e -> return { Status = e }
+            | true -> return { Status = "Success! You can now safely close this window and switch back to your Interlude client" }
+            | false -> return { Status = "Unknown error" }
         }

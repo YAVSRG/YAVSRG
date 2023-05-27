@@ -10,6 +10,7 @@ type Secrets =
         SocketCertPassword: string
         ApiCert: string
         ApiCertPassword: string
+        ApiBaseUrl: string
         BotToken: string
         DiscordClientId: string
         DiscordClientSecret: string
@@ -19,6 +20,7 @@ type Secrets =
             SocketCertPassword = "DEVELOPMENT"
             ApiCert = "localhost.pfx"
             ApiCertPassword = "DEVELOPMENT"
+            ApiBaseUrl = "localhost"
             BotToken = ""
             DiscordClientId = ""
             DiscordClientSecret = ""

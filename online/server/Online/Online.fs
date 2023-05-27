@@ -3,6 +3,7 @@
 open System
 open Percyqaz.Common
 open Interlude.Web.Shared
+open Interlude.Web.Server.Domain
 
 module Online =
 
@@ -13,8 +14,14 @@ module Online =
             | Upstream.VERSION v -> 
                 if v = PROTOCOL_VERSION then UserState.handshake id
                 else Server.kick(id, "Your client is out of date")
-            | Upstream.LOGIN username ->
-                UserState.login(id, username)
+            | Upstream.BEGIN_LOGIN_WITH_DISCORD ->
+                AuthFlow.begin_login_with_discord id
+            | Upstream.BEGIN_REGISTRATION_WITH_DISCORD ->
+                AuthFlow.begin_register_with_discord id
+            | Upstream.COMPLETE_REGISTRATION_WITH_DISCORD username ->
+                AuthFlow.finish_register_with_discord (id, username)
+            | Upstream.LOGIN token ->
+                UserState.login(id, token)
             | Upstream.LOGOUT ->
                 Lobby.ensure_player_leaves_lobby(id, fun () -> UserState.logout id)
     
