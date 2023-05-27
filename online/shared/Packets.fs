@@ -162,7 +162,7 @@ module Packets =
                 | 0x50uy -> KICK_PLAYER (br.ReadString())
 
                 | _ -> failwithf "Unknown packet type: %i" kind
-            if ms.Position <> ms.Length then failwithf "Expected end-of-packet but there are %i extra bytes" (ms.Length - ms.Position)
+            if ms.Position <> ms.Length then failwithf "Expected end-of-packet (%x) but there are %i extra bytes" kind (ms.Length - ms.Position)
             packet
 
         member this.Write() : byte * byte array =
@@ -269,7 +269,7 @@ module Packets =
                 | 0x33uy -> GAME_END
 
                 | _ -> failwithf "Unknown packet type: %i" kind
-            if ms.Position <> ms.Length then failwithf "Expected end-of-packet but there are %i extra bytes" (ms.Length - ms.Position)
+            if ms.Position <> ms.Length then failwithf "Expected end-of-packet (%x) but there are %i extra bytes" kind (ms.Length - ms.Position)
             packet
 
         member this.Write() : byte * byte array =

@@ -43,6 +43,7 @@ module Discord =
 
             if not oauth_response.IsSuccessStatusCode then
                 Logging.Error(sprintf "Discord OAuth request failed: %s" oauth_response.ReasonPhrase)
+                Logging.Error(oauth_response.Content.ReadAsStringAsync() |> Async.AwaitTask |> Async.RunSynchronously)
                 return { Status = "Discord OAuth error" }
             else
 
@@ -56,6 +57,7 @@ module Discord =
 
             if not identity_response.IsSuccessStatusCode then
                 Logging.Error(sprintf "Discord Identity request failed: %s" identity_response.ReasonPhrase)
+                Logging.Error(identity_response.Content.ReadAsStringAsync() |> Async.AwaitTask |> Async.RunSynchronously)
                 return { Status = "Discord Identity error" }
             else
 
