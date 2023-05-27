@@ -19,12 +19,14 @@ type Credentials =
     {
         DO_NOT_SHARE_THE_CONTENTS_OF_THIS_FILE_WITH_ANYONE_UNDER_ANY_CIRCUMSTANCES: string
         mutable Username: string
+        mutable Token: string
         mutable Host: string
     }
     static member Default =
         {
             DO_NOT_SHARE_THE_CONTENTS_OF_THIS_FILE_WITH_ANYONE_UNDER_ANY_CIRCUMSTANCES = "Doing so is equivalent to giving someone your account password"
             Username = ""
+            Token = ""
             Host = "online.yavsrg.net"
         }
     static member Location = Path.Combine(getDataPath "Data", "login.json") 
@@ -49,7 +51,7 @@ module Network =
         | LoggedIn
 
     let mutable status = NotConnected
-    let mutable username = ""
+    let mutable username = "" // todo: useless because if LoggedIn you can use Credentials.Username
 
     type LobbyPlayer =
         {
@@ -146,13 +148,28 @@ module Network =
                 | Downstream.DISCONNECT reason ->
                     Logging.Info(sprintf "Disconnected from server: %s" reason)
                     Notifications.error(L"notification.network.disconnected", reason)
-                | Downstream.HANDSHAKE_SUCCESS -> if credentials.Username <> "" then this.Send(Upstream.LOGIN credentials.Username)
+                | Downstream.HANDSHAKE_SUCCESS -> if credentials.Token <> "" then this.Send(Upstream.LOGIN credentials.Token)
+                | Downstream.DISCORD_AUTH_URL url ->
+                    if not (url.StartsWith("https://discord.com/api/oauth2")) then Logging.Error(sprintf "Got a strange auth link! %s" url)
+                    else openUrl url
+                | Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag ->
+                    Logging.Debug("You are linking an account with: " + discord_tag)
+                    // todo: UI for it
+                    this.Send(Upstream.COMPLETE_REGISTRATION_WITH_DISCORD "Percyqaz")
+                | Downstream.REGISTRATION_FAILED reason ->
+                    Logging.Info(sprintf "Registration failed: %s" reason)
+                    // todo: notification and ui
+                | Downstream.AUTH_TOKEN token -> 
+                    credentials.Token <- token
+                    this.Send(Upstream.LOGIN credentials.Token)
                 | Downstream.LOGIN_SUCCESS name -> sync <| fun () -> 
                     Logging.Info(sprintf "Logged in as %s" name)
+                    credentials.Username <- name
                     status <- LoggedIn
                     username <- name
                     Events.successful_login_ev.Trigger name
                 | Downstream.LOGIN_FAILED reason -> 
+                    credentials.Token <- ""
                     Logging.Info(sprintf "Login failed: %s" reason)
                     Notifications.error(L"notification.network.loginfailed", reason)
 
@@ -237,7 +254,9 @@ module Network =
         Logging.Info(sprintf "Connecting to %s ..." credentials.Host)
         client.Connect()
 
-    let login(name) = if status = Connected then client.Send(Upstream.LOGIN name)
+    let login_with_token() = client.Send(Upstream.LOGIN credentials.Token)
+    let begin_login() = client.Send(Upstream.BEGIN_LOGIN_WITH_DISCORD)
+    let begin_registration() = client.Send(Upstream.BEGIN_REGISTRATION_WITH_DISCORD)
 
     let logout() = 
         Events.leave_lobby_ev.Trigger()
@@ -245,6 +264,7 @@ module Network =
         if status = LoggedIn then
             client.Send(Upstream.LOGOUT)
             status <- Connected
+            credentials.Token <- ""
 
     let disconnect() =
         if lobby.IsSome then sync Events.leave_lobby_ev.Trigger

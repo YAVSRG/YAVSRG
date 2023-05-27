@@ -16,8 +16,8 @@ type LoginPage() as this =
 
     let username = Setting.simple ""
 
-    let login() =
-        Network.login(username.Value)
+    let login() = Network.begin_login()
+    let register() = Network.begin_registration()
 
     let success(username) =
         Network.credentials.Username <- username
@@ -33,6 +33,8 @@ type LoginPage() as this =
                 .Tooltip(Tooltip.Info("login.username"))
             |+ PageButton("confirm.yes", login)
                 .Pos(300.0f)
+            |+ PageButton("confirm.yes", register)
+                .Pos(400.0f)
         )
 
     override this.Title = L"login.name"
@@ -85,7 +87,7 @@ type NetworkStatus() =
         | Network.Connected -> [ 
                 Icons.login + " Log in", 
                 fun () -> 
-                    if Network.credentials.Username <> "" then Network.login Network.credentials.Username
+                    if Network.credentials.Token <> "" then Network.login_with_token()
                     else Menu.ShowPage LoginPage
             ]
         | Network.LoggedIn -> [
