@@ -12,7 +12,7 @@ type UserState =
     | Handshake
     | LoggedIn of username: string
 
-module UserState = 
+module LoggedInUsers = 
 
     [<RequireQualifiedAccess>]
     type Action =

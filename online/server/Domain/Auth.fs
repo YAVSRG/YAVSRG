@@ -75,9 +75,17 @@ module AuthFlow =
                     
                             match auth_flows.[flow_id] with
                             | AuthFlowState.RegisterWaitingCallback id ->
-                                // todo: check if discord id is taken here
-                                auth_flows.[flow_id] <- AuthFlowState.RegisterWaitingUsername(id, discord_id)
-                                Server.send(id, Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag)
+                                Users.check_exists(discord_id,
+                                    function
+                                    | true -> 
+                                        Logging.Info(sprintf "Discord account %s(%i) is already registered" discord_tag discord_id)
+                                        auth_flows.Remove(flow_id) |> ignore
+                                        Server.send(id, Downstream.REGISTRATION_FAILED (sprintf "%s is already linked to an existing account" discord_tag))
+                                    | false -> 
+                                        Logging.Info(sprintf "Ready to link account to %s(%i)" discord_tag discord_id)
+                                        auth_flows.[flow_id] <- AuthFlowState.RegisterWaitingUsername(id, discord_id)
+                                        Server.send(id, Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag)
+                                ) |> Async.RunSynchronously
                                 true
                             | AuthFlowState.LoginWaitingCallback id ->
                                 Users.discord_identify (discord_id,

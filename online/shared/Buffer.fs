@@ -40,8 +40,8 @@ module Buffer =
                 let new_remaining = remaining_size - amount_to_copy
                 offset <- offset + amount_to_copy
                 if new_remaining = 0 then
-                    packet (kind, b)
                     buffer := Empty
+                    packet (kind, b)
                 else
                     buffer := Reading_Buffer (new_remaining, kind, b)
 

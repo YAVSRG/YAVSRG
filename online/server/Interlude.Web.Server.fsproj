@@ -13,7 +13,7 @@
     <Compile Include="API\Auth\Discord.fs" />
     <Compile Include="API\Health\HealthCheck.fs" />
     <Compile Include="API\API.fs" />
-    <Compile Include="Online\Users.fs" />
+    <Compile Include="Online\LoggedInUsers.fs" />
     <Compile Include="Online\Lobbies.fs" />
     <Compile Include="Online\Online.fs" />
     <Compile Include="Program.fs" />

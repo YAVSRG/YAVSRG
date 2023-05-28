@@ -151,7 +151,7 @@ module Lobby =
             p.Status <- LobbyPlayerStatus.NotReady
 
     let private ensure_logged_in(player) : Async<string> = async {
-            match! UserState.find_username player with
+            match! LoggedInUsers.find_username player with
             | None -> return malice player "You are not logged in"
             | Some username -> return username
         }
@@ -260,7 +260,7 @@ module Lobby =
                             let! username = ensure_logged_in sender
                             let lobby_id, lobby = ensure_in_lobby sender
 
-                            match! UserState.find_session recipient with
+                            match! LoggedInUsers.find_session recipient with
                             | None -> user_error sender "User not found"
                             | Some recipient_id ->
 
@@ -471,7 +471,7 @@ module Lobby =
 
                             if lobby.Host <> player then user_error player "You are not host"
 
-                            match! UserState.find_session newhost with
+                            match! LoggedInUsers.find_session newhost with
                             | None -> user_error player "User is not in this lobby"
                             | Some newhost_id ->
                             if player = newhost_id then malice player "Hosting yourself"

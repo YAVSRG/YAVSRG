@@ -12,7 +12,7 @@ module Online =
             match packet with
     
             | Upstream.VERSION v -> 
-                if v = PROTOCOL_VERSION then UserState.handshake id
+                if v = PROTOCOL_VERSION then LoggedInUsers.handshake id
                 else Server.kick(id, "Your client is out of date")
             | Upstream.BEGIN_LOGIN_WITH_DISCORD ->
                 AuthFlow.begin_login_with_discord id
@@ -21,9 +21,9 @@ module Online =
             | Upstream.COMPLETE_REGISTRATION_WITH_DISCORD username ->
                 AuthFlow.finish_register_with_discord (id, username)
             | Upstream.LOGIN token ->
-                UserState.login(id, token)
+                LoggedInUsers.login(id, token)
             | Upstream.LOGOUT ->
-                Lobby.ensure_player_leaves_lobby(id, fun () -> UserState.logout id)
+                Lobby.ensure_player_leaves_lobby(id, fun () -> LoggedInUsers.logout id)
     
             | Upstream.GET_LOBBIES -> Lobby.List(id).Do
             | Upstream.JOIN_LOBBY lid -> Lobby.Join(id, lid).Do
@@ -50,7 +50,7 @@ module Online =
     
         } |> Async.Start
     
-    let handle_connect(id: Guid) = UserState.connect id
+    let handle_connect(id: Guid) = LoggedInUsers.connect id
 
     let handle_disconnect(id: Guid) = 
-        Lobby.ensure_player_leaves_lobby (id, fun () -> UserState.disconnect id)
+        Lobby.ensure_player_leaves_lobby (id, fun () -> LoggedInUsers.disconnect id)
