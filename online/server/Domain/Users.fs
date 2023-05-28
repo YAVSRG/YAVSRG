@@ -26,6 +26,7 @@ module Users =
         else
             let special_count = Seq.where (fun c -> Seq.contains c SPECIAL) proposed |> Seq.length
             if special_count > 2 then Error "Max 2 special characters"
+            elif proposed.Contains("  ") then Error "Contains forbidden spacing"
             elif Seq.forall (fun (c: char) -> Seq.contains c VALID_USERNAME_CHARACTERS) proposed then Ok()
             else Error "Contains forbidden characters"
 
