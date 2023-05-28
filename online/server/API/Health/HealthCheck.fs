@@ -1,8 +1,9 @@
 ﻿namespace Interlude.Web.Server.API.Health
 
+open NetCoreServer
 open Percyqaz.Json
 open Interlude.Web.Shared.API
-
+open Interlude.Web.Server.API
 module HealthCheck =
 
     let ROUTE = (GET, "/health")
@@ -12,8 +13,8 @@ module HealthCheck =
 
     let mutable private request_counter = 0
 
-    let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>) : Async<Response> =
+    let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) =
         async {
             request_counter <- request_counter + 1
-            return { Status = sprintf "Everything will be ok. This endpoint has been called %i times since last restart." request_counter }
+            response.ReplyJson { Status = sprintf "Everything will be ok. This endpoint has been called %i times since last restart." request_counter }
         }

@@ -9,14 +9,11 @@ open Interlude.Web.Server.API
 
 module API =
 
-    type Handler = string * Map<string, string array> * Map<string, string> -> Async<string>
+    type Handler = string * Map<string, string array> * Map<string, string> * HttpResponse -> Async<unit>
     let handlers = Dictionary<(HttpMethod * string), Handler>()
 
     let inline add_endpoint route handle =
-        handlers.Add( route, fun x -> async { 
-                let! data = handle x
-                return JSON.ToString data
-            } )
+        handlers.Add( route, handle )
 
     do
         add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
@@ -27,8 +24,7 @@ module API =
             if handlers.ContainsKey((method, route)) then
                 try
                     let handler = handlers.[(method, route)]
-                    let! data = handler(body, query_params, header)
-                    response.MakeGetResponse(data, "application/json") |> ignore
+                    do! handler(body, query_params, header, response)
                 with err -> 
                     Logging.Error(sprintf "Error in %O %s: %O" method route err)
                     response.MakeErrorResponse(500, "Internal error") |> ignore
