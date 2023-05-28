@@ -1,1 +1,1 @@
-﻿server now hangs open even after a fatal crash so i can get in there and look
+﻿epic first rollout of discord login system

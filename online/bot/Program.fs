@@ -20,15 +20,9 @@ let tagline =
     use tr = new IO.StreamReader(stream)
     tr.ReadToEnd()
 
-let on_log(msg: LogMessage) =
-    task {
-        Logging.Debug(msg.Message)
-    }
+let on_log(msg: LogMessage) = task { Logging.Debug(msg.Message) }
 
-let on_ready() = 
-    task {
-        Logging.Info("Bot is ready")
-    }
+let on_ready() = task { Logging.Info("Bot is ready") }
 
 let on_message(message: SocketMessage) = 
     task {
