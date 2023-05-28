@@ -1,18 +1,25 @@
-0.6.15.3
+0.6.16
 ====
 
-Features and changes that came directly from playtesters in the Discord
-Thank you all for playing and giving feedback
+Multiplayer technical leaps
 
-## Bug fixes
-- Fixed bug in osu! and Wife hit detection reported by Eliminate
-  Now you will cbrush just as Mina and Peppy intended
-  
-## Improvements
-- Startup sound effect is no longer DEAFENING as suggested by Jude
+I'm testing out the new account registration system 
+You can now link an account to your Discord account and that account is how you log into Interlude
 
-## New features
-- Added "No holds" mod as suggested by Wagg
-  This is not ranked and will not count towards pbs
-- Added Early/Late meter as suggested by lemonmaster
+**Please note: ** Accounts are currently temporary and get wiped whenever the server restarts
+No data is held against them other than your Discord ID so try and break it/find bugs before I start storing data for real
+
+You have a couple weeks cause I'm going on holiday
+
+## Features
+- All online features (multiplayer lobbies) use end-to-end encryption
+- Placeholder login where you 'claim' a name replaced with log in via discord
+
+## Other fixes/improvements
+- The Interlude.exe icon might be back, I'm not really sure until it goes through the build pipeline
+- I've rewritten some major parts of Prelude, hence some time between releases to see if I spot any bugs
+  You may see some improvements in background image detection for .sm files and various metadata conversion fixes
+- Fixed a rare crash when interacting with osu! song search
+- osu! downloads use a different mirror (perhaps multiple mirror options coming soon)
+- Some new menu splash messages
 
