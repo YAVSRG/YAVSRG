@@ -20,20 +20,22 @@ type SearchContainerLoader(taskWithCallback: (unit -> unit) -> unit) =
 type PopulateFunc = SearchContainer -> (unit -> unit) -> unit
 and FilterFunc = SearchContainer -> Filter -> unit
 and SearchContainer(populate: PopulateFunc, handleFilter: FilterFunc, itemheight) as this =
-    inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
+    inherit StaticContainer(NodeType.Switch(fun _ -> if (this.Items: FlowContainer.Vertical<Widget>).Count > 0 then this.Items else this.SearchBox))
 
     let flow = FlowContainer.Vertical<Widget>(itemheight, Spacing = 15.0f)
     let scroll = ScrollContainer.Flow(flow, Margin = Style.padding, Position = Position.TrimTop 70.0f)
+    let searchBox = SearchBox(Setting.simple "", (fun (f: Filter) -> handleFilter this f), Position = Position.SliceTop 60.0f )
 
     do
         flow |* SearchContainerLoader (populate this)
         this
-        |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> handleFilter this f), Position = Position.SliceTop 60.0f ))
+        |+ searchBox
         |* scroll
 
     new(populate, handleFilter) = SearchContainer(populate, handleFilter, 80.0f)
 
     member this.Items = flow
+    member private this.SearchBox = searchBox
 
 type DownloadStatus =
     | NotDownloaded
