@@ -22,6 +22,9 @@
     --blue-accent: #0032ff;
     --blue: #001696;
     --blue-shadow: #000450;
+    --red-accent: #ef5d57;
+    --red: #9c3736;
+    --red-shadow: #6e190d;
     --yellow-accent: #ffe670;
 }
 
@@ -92,6 +95,13 @@ p {
     background-color: var(--green);
     border-radius: 5px;
     border: 5px solid var(--green-accent);
+    box-shadow: var(--shadow-2-3a) 5px 5px 0;
+}
+
+.frame-red {
+    background-color: var(--red);
+    border-radius: 5px;
+    border: 5px solid var(--red-accent);
     box-shadow: var(--shadow-2-3a) 5px 5px 0;
 }
 

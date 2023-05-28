@@ -15,15 +15,15 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Tools", "Interlud
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Noteskins", "Interlude.Noteskins\tools\Interlude.Noteskins.fsproj", "{A61A0594-BA70-4740-ADB4-6FC20EA0B40F}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Pulse", "Pulse\src\Pulse.fsproj", "{1BA22946-F172-4322-ACF6-20BB8D1C0317}"
-EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Backbeat", "Backbeat\tools\Backbeat.fsproj", "{755DDB37-C1FF-4833-9679-B503CFAA5E9B}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Shared", "Interlude.Web\shared\Interlude.Web.Shared.fsproj", "{7EEF2A2C-DA63-41E7-9CC9-7D46155BFCD5}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Server", "Interlude.Web\server\Interlude.Web.Server.fsproj", "{17BA6969-20CE-4D19-AF7C-F9ED355786CE}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Interlude.Web.Tests", "Interlude.Web\tests\Interlude.Web.Tests.fsproj", "{81CCE970-9179-4A40-81CA-2D86F28732B8}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Tests", "Interlude.Web\tests\Interlude.Web.Tests.fsproj", "{81CCE970-9179-4A40-81CA-2D86F28732B8}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Bot", "Interlude.Web\bot\Interlude.Web.Bot.fsproj", "{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,10 +55,6 @@ Global
 		{A61A0594-BA70-4740-ADB4-6FC20EA0B40F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A61A0594-BA70-4740-ADB4-6FC20EA0B40F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A61A0594-BA70-4740-ADB4-6FC20EA0B40F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1BA22946-F172-4322-ACF6-20BB8D1C0317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1BA22946-F172-4322-ACF6-20BB8D1C0317}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1BA22946-F172-4322-ACF6-20BB8D1C0317}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1BA22946-F172-4322-ACF6-20BB8D1C0317}.Release|Any CPU.Build.0 = Release|Any CPU
 		{755DDB37-C1FF-4833-9679-B503CFAA5E9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{755DDB37-C1FF-4833-9679-B503CFAA5E9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{755DDB37-C1FF-4833-9679-B503CFAA5E9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -75,6 +71,10 @@ Global
 		{81CCE970-9179-4A40-81CA-2D86F28732B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81CCE970-9179-4A40-81CA-2D86F28732B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81CCE970-9179-4A40-81CA-2D86F28732B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

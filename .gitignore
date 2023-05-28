@@ -13,3 +13,4 @@ Interlude.Assets
 .vs
 **/bin
 **/obj
+.vscode/settings.json
