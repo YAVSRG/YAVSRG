@@ -456,6 +456,7 @@ notification.invited_to_lobby.body=Go to the multiplayer lobby screen to join.
 notification.invited_to_lobby.title=%0 invited you to a lobby!
 notification.network.disconnected=Disconnected from network
 notification.network.loginfailed=Login failed
+notification.network.registrationfailed=Registration failed
 notification.preset_loaded=Preset loaded!
 notification.preset_saved=Preset saved!
 notification.recache_complete=Recache complete!

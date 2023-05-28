@@ -158,7 +158,7 @@ module Network =
                     this.Send(Upstream.COMPLETE_REGISTRATION_WITH_DISCORD "Percyqaz")
                 | Downstream.REGISTRATION_FAILED reason ->
                     Logging.Info(sprintf "Registration failed: %s" reason)
-                    // todo: notification and ui
+                    Notifications.error(L"notification.network.registrationfailed", reason)
                 | Downstream.AUTH_TOKEN token -> 
                     credentials.Token <- token
                     this.Send(Upstream.LOGIN credentials.Token)
