@@ -76,6 +76,15 @@ module Network =
         }
 
     module Events =
+        let waiting_registration_ev = new Event<string>()
+        let waiting_registration = waiting_registration_ev.Publish
+        
+        let login_failed_ev = new Event<string>()
+        let login_failed = login_failed_ev.Publish
+                
+        let registration_failed_ev = new Event<string>()
+        let registration_failed = registration_failed_ev.Publish
+
         let successful_login_ev = new Event<string>()
         let successful_login = successful_login_ev.Publish
 
@@ -153,25 +162,27 @@ module Network =
                     if not (url.StartsWith("https://discord.com/api/oauth2")) then Logging.Error(sprintf "Got a strange auth link! %s" url)
                     else openUrl url
                 | Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag ->
-                    Logging.Debug("You are linking an account with: " + discord_tag)
-                    // todo: UI for it
-                    this.Send(Upstream.COMPLETE_REGISTRATION_WITH_DISCORD "Percyqaz")
+                    Logging.Debug("Linking an account with: " + discord_tag)
+                    Events.waiting_registration_ev.Trigger discord_tag
                 | Downstream.REGISTRATION_FAILED reason ->
                     Logging.Info(sprintf "Registration failed: %s" reason)
                     Notifications.error(L"notification.network.registrationfailed", reason)
+                    Events.registration_failed_ev.Trigger reason
                 | Downstream.AUTH_TOKEN token -> 
                     credentials.Token <- token
                     this.Send(Upstream.LOGIN credentials.Token)
                 | Downstream.LOGIN_SUCCESS name -> sync <| fun () -> 
                     Logging.Info(sprintf "Logged in as %s" name)
                     credentials.Username <- name
-                    status <- LoggedIn
                     username <- name
+                    status <- LoggedIn
+                    if Screen.currentType <> Screen.Type.SplashScreen then Notifications.system_feedback(Icons.connected, Localisation.localiseWith [username] "notification.network.login", "")
                     Events.successful_login_ev.Trigger name
                 | Downstream.LOGIN_FAILED reason -> 
                     credentials.Token <- ""
                     Logging.Info(sprintf "Login failed: %s" reason)
                     if Screen.currentType <> Screen.Type.SplashScreen then Notifications.error(L"notification.network.loginfailed", reason)
+                    Events.login_failed_ev.Trigger reason
 
                 | Downstream.LOBBY_LIST lobbies -> sync <| fun () ->
                     lobby_list <- lobbies
@@ -257,12 +268,13 @@ module Network =
     let login_with_token() = client.Send(Upstream.LOGIN credentials.Token)
     let begin_login() = client.Send(Upstream.BEGIN_LOGIN_WITH_DISCORD)
     let begin_registration() = client.Send(Upstream.BEGIN_REGISTRATION_WITH_DISCORD)
+    let complete_registration(desired_username) = client.Send(Upstream.COMPLETE_REGISTRATION_WITH_DISCORD desired_username)
 
     let logout() = 
         Events.leave_lobby_ev.Trigger()
         lobby <- None
         if status = LoggedIn then
-            client.Send(Upstream.LOGOUT)
+            client.Send Upstream.LOGOUT
             status <- Connected
             credentials.Token <- ""
 

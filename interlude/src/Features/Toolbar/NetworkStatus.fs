@@ -11,35 +11,6 @@ open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Online
 
-type LoginPage() as this =
-    inherit Page()
-
-    let username = Setting.simple ""
-
-    let login() = Network.begin_login()
-    let register() = Network.begin_registration()
-
-    let success(username) =
-        Network.credentials.Username <- username
-        Menu.Back()
-
-    let handler = Network.Events.successful_login.Subscribe(success)
-
-    do
-        this.Content(
-            column()
-            |+ PageSetting("login.username", TextEntry(username, "none"))
-                .Pos(200.0f)
-                .Tooltip(Tooltip.Info("login.username"))
-            |+ PageButton("confirm.yes", login)
-                .Pos(300.0f)
-            |+ PageButton("confirm.yes", register)
-                .Pos(400.0f)
-        )
-
-    override this.Title = L"login.name"
-    override this.OnClose() = handler.Dispose()
-
 type NetworkStatus() =
     inherit StaticWidget(NodeType.None)
 

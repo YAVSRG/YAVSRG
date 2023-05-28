@@ -61,6 +61,7 @@
     <Compile Include="Features\Wiki\Wiki.fs" />
     <Compile Include="Features\Rulesets.fs" />
     <Compile Include="Features\Online\Network.fs" />
+    <Compile Include="Features\Online\Login.fs" />
     <Compile Include="Features\Gameplay.fs" />
     <Compile Include="Features\Score\Util.fs" />
     <Compile Include="Features\Score\Graph.fs" />
