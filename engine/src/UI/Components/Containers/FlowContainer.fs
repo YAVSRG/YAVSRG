@@ -25,6 +25,9 @@ module FlowContainer =
         let mutable last_selected = 0
         let children = ResizeArray<FlowItem<'T>>()
 
+        /// Total children in this container, visible or not
+        member this.Count = children.Count
+
         override this.Focus() = if children.Count > 0 then base.Focus()
         override this.Select() = if children.Count > 0 then base.Select()
 
