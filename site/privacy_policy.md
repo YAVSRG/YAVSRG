@@ -1,5 +1,5 @@
 # Interlude privacy policy
-Last updated 27th May 2023.
+Last updated 29th May 2023.
 
 ## Summary of service
 
@@ -39,7 +39,7 @@ Logging data is used solely to improve the services, and is only stored for as l
 
 ## How the data is stored/used
 
-Your account information is held securely on servers in the United Kingdom, and never shared with any third parties outside of Interlude.
+Your account information is held securely on servers in the United Kingdom, and never shared with any third parties outside of Interlude, except in a circumstance where it is necessary to confirm to legal requirements or comply with legal process.
 
 Data such as your submitted scores and username are shared with other users of Interlude as part of the services provided.
 
