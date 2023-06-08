@@ -40,6 +40,8 @@ let on_interaction_created(interaction: SocketInteraction) =
 
 try
 
+    Redis.main()
+
     Charts.init()
     Logging.Info(sprintf "Backbeat init complete, %i Charts and %i Songs" Charts.charts.Count Charts.songs.Count)
     Logging.Info(sprintf "Launching bot [%s]" tagline)
