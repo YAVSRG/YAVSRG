@@ -8,6 +8,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Version.txt" />
     <Compile Include="Secrets.fs" />
+    <Compile Include="Domain\Redis.fs" />
+    <Compile Include="Domain\Objects.fs" />
     <Compile Include="Domain\Users.fs" />
     <Compile Include="Domain\Auth.fs" />
     <Compile Include="API\Utils.fs" />
@@ -22,6 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="NetCoreServer" Version="7.0.0" />
+    <PackageReference Include="NRedisStack" Version="0.6.1" />
   </ItemGroup>
 
   <ItemGroup>

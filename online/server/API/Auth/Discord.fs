@@ -20,6 +20,10 @@ module Discord =
 
     let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
         async {
+            if not (query_params.ContainsKey "code" && query_params.ContainsKey "state") then
+                response.MakeErrorResponse(400) |> ignore
+            else
+
             let code = query_params.["code"].[0]
             let state = query_params.["state"].[0]
 

@@ -30,7 +30,7 @@ type Secrets =
 module Secrets =
 
     let SECRETS =
-        if not (Directory.Exists "./secrets") then
+        if not (File.Exists "./secrets/secrets.json") then
             #if DEBUG
                 failwith "Secrets folder not found! You are running the server as a non-docker instance, make sure you ran it with the script"
             #else

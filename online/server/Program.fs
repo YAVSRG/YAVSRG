@@ -20,10 +20,13 @@ let tagline =
     tr.ReadToEnd()
 
 try
+    Logging.Verbosity <- LoggingLevel.DEBUG
+    Logging.Info(sprintf "~~ Interlude.Web [%s] ~~" tagline)
+
     let api_cert = new X509Certificate2(Path.Combine("./secrets", SECRETS.ApiCert), SECRETS.ApiCertPassword)
     let socket_cert = new X509Certificate2(Path.Combine("./secrets", SECRETS.SocketCert), SECRETS.SocketCertPassword)
 
-    Logging.Info(sprintf "~~ Interlude.Web [%s] ~~" tagline)
+    Domain.Migrations.run()
 
     Server.init { 
         Address = "0.0.0.0"

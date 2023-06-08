@@ -1,18 +1,7 @@
 ﻿namespace Interlude.Web.Server.Domain
 
 open System
-open System.Linq
-open System.Collections.Generic
 open Percyqaz.Common
-
-type User =
-    {
-        Id: int
-        Username: string
-        DiscordId: int64
-        mutable LastLogin: DateTime
-        mutable AuthToken: string
-    }
 
 module Users = 
 
@@ -37,8 +26,6 @@ module Users =
         | Login of token: string * callback : (Result<string, string> -> unit)
         | DiscordIdentify of discord_id: int64 * callback : (Result<string, string> -> unit)
 
-    let private users = List<User>()
-
     let private state_change = 
         { new Async.Service<Action, unit>() with 
             override this.Handle(req) = 
@@ -46,39 +33,36 @@ module Users =
                     match req with
 
                     | Action.CheckExists (discord_id, callback) ->
-                        callback (users.Any(fun u -> u.DiscordId = discord_id))
+                        callback (User.by_discord_id discord_id).IsSome
 
                     | Action.Register (username, discord_id, callback) ->
-                        if users.Any(fun u -> u.DiscordId = discord_id) then Error "A user is already registered to this Discord account"
+                        if (User.by_discord_id discord_id).IsSome then Error "A user is already registered to this Discord account"
                         else
                             match valid_username username with
                             | Error reason -> Error (sprintf "Invalid username (%s)" reason)
                             | Ok() -> 
-                                if users.Any(fun u -> u.Username.ToLowerInvariant() = username.ToLowerInvariant()) then Error "Username is taken!" else
-                                let user = 
-                                    { 
-                                        Id = users.Count + 1
-                                        Username = username
-                                        DiscordId = discord_id
-                                        LastLogin = DateTime.Now
-                                        AuthToken = Guid.NewGuid().ToString("N")
-                                    }
-                                users.Add(user)
+                                if (User.by_username(username)).IsSome then Error "Username is taken!" else
+                                let user = User.create(username, discord_id)
+                                let id = User.save_new(user)
+                                Logging.Info(sprintf "New user '%s' registered with id %i to discord id %i" username id discord_id)
                                 Ok user.AuthToken
                         |> callback
 
                     | Action.Login (token, callback) ->
                         Logging.Info "Received login token"
-                        match users |> Seq.tryFind (fun u -> u.AuthToken = token) with
-                        | Some user -> Ok user.Username
+                        match User.by_auth_token token with
+                        | Some (id, user) ->
+                            User.save(id, { user with LastLogin = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() })
+                            Ok user.Username
                         | None -> Error "Token invalid or expired"
                         |> callback
                         
                     | Action.DiscordIdentify (discord_id, callback) ->
-                        match users |> Seq.tryFind (fun u -> u.DiscordId = discord_id) with
-                        | Some user ->
-                            user.AuthToken <- Guid.NewGuid().ToString("N")
-                            Ok user.AuthToken
+                        match User.by_discord_id discord_id with
+                        | Some (id, user) ->
+                            let new_token = Guid.NewGuid().ToString("N")
+                            User.save(id, { user with AuthToken = new_token })
+                            Ok new_token
                         | None -> Error "No user is registered to this Discord account"
                         |> callback
                 }
