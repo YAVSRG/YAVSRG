@@ -69,6 +69,11 @@ module User =
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
 
+    //todo: this pulls all user data and will have to be scrapped for a pagination system when there are >100 users
+    let all() =
+        ft.Search("idx:users", Query("*")).Documents
+        |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
+
 module Migrations =
 
     let run() =

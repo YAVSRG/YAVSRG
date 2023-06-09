@@ -22,12 +22,15 @@ module LoggedInUsers =
         | Login of Guid * string
         | Logout of Guid
 
+    let private lock_obj = Object()
     let private user_states = Dictionary<Guid, UserState>()
     let private usernames = Dictionary<string, Guid>()
 
     let private state_change = 
-        { new Async.Service<Action, unit>()
-            with override this.Handle(req) = async {
+        { new Async.Service<Action, unit>() with 
+            override this.Handle(req) = 
+                async {
+                    lock lock_obj <| fun () ->
                     match req with
 
                     | Action.Connect id ->
@@ -73,7 +76,7 @@ module LoggedInUsers =
                             user_states.[id] <- UserState.Handshake
                             Logging.Info(sprintf "[<- %s" username)
                         | _ -> Server.kick(id, "Not logged in")
-            }
+                }
         }
 
     let connect(id) =
@@ -91,27 +94,40 @@ module LoggedInUsers =
     let logout(id) =
         state_change.Request(Action.Logout (id), ignore)
 
-    let private username_lookup =
-        { new Async.Service<Guid, string option>()
-            with override this.Handle(req) = async {
-                    let ok, state = user_states.TryGetValue req
-                    if ok then
-                        match state with
-                        | UserState.LoggedIn (_, username) -> return Some username
-                        | _ -> return None
-                    else return None
+    let who_is_online =
+        let service = 
+            { new Async.Service<unit, (int64 * string) array>() with 
+                override this.Handle(req) = 
+                    async {
+                        let states = lock lock_obj <| fun () -> Array.ofSeq user_states.Values
+                        return states |> Array.choose (function UserState.LoggedIn (id, username) -> Some (id, username) | _ -> None)
+                    }
             }
-        }
+        service.RequestAsync
 
-    let find_username(id: Guid) = username_lookup.RequestAsync id
-
-    let private session_lookup =
-        { new Async.Service<string, Guid option>()
-            with override this.Handle(req) = async {
-                    let ok, id = usernames.TryGetValue req
-                    if ok then return Some id
-                    else return None
+    let find_username =
+        let service =
+            { new Async.Service<Guid, string option>() with 
+                override this.Handle(req) = 
+                    async {
+                        let ok, state = lock lock_obj <| fun () -> user_states.TryGetValue req
+                        if ok then
+                            match state with
+                            | UserState.LoggedIn (_, username) -> return Some username
+                            | _ -> return None
+                        else return None
+                    }
             }
-        }
+        service.RequestAsync
 
-    let find_session(username: string) = session_lookup.RequestAsync username
+    let find_session =
+        let service = 
+            { new Async.Service<string, Guid option>() with
+                override this.Handle(req) =
+                    async {
+                        let ok, id = lock lock_obj <| fun () -> usernames.TryGetValue req
+                        if ok then return Some id
+                        else return None
+                    }
+            }
+        service.RequestAsync

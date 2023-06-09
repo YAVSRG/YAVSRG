@@ -5,6 +5,7 @@ open Discord
 open Discord.WebSocket
 open Prelude.Data.Charts.Archive
 open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Online
 
 module Commands =
 
@@ -91,10 +92,28 @@ module Commands =
                                 .AddField("User ID", id.ToString(), false)
                                 .AddField("Signed up", DateTimeOffset.FromUnixTimeMilliseconds(user.DateSignedUp).ToString("yyyy/MM/dd H:mm:ss"), false)
                                 .AddField("Last login", DateTimeOffset.FromUnixTimeMilliseconds(user.LastLogin).ToString("yyyy/MM/dd H:mm:ss"), false)
-                                .AddField("Badges", String.concat ", " user.Badges, false)
+                                .AddField("Badges", (if user.Badges.IsEmpty then "[ no badges ]" else String.concat ", " user.Badges), false)
                                 .WithColor(Color.Blue)
                         do! reply_embed (embed.Build())
                     | None -> do! reply "No user found."
+
+            | "users" ->
+                let user_list = User.all()
+                do!
+                    EmbedBuilder(Title = "All registered users")
+                        .WithDescription(user_list |> Seq.map snd |> Seq.map (fun user -> user.Username) |> String.concat "\n")
+                        .WithColor(Color.Blue)
+                        .Build()
+                    |> reply_embed
+
+            | "online" ->
+                let! user_list = LoggedInUsers.who_is_online()
+                do!
+                    EmbedBuilder(Title = sprintf "All online users (%i)" user_list.Length)
+                        .WithDescription(if user_list.Length = 0 then "nobody :(" else user_list |> Seq.map snd |> String.concat "\n")
+                        .WithColor(Color.Blue)
+                        .Build()
+                    |> reply_embed
 
             | "addbadge" ->
                 match args with

@@ -1,1 +1,1 @@
-﻿deploying more error logging so I can find bug in command
+﻿added $online and $users admin commands
