@@ -20,16 +20,20 @@ module Bot =
                 let cmd = message.Content.Substring(1).Split(' ', 2, StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
                 match User.by_discord_id(message.Author.Id) with
                 | Some (id, user) ->
-                    do! 
-                        Commands.user_dispatch
-                            (id, user)
-                            message
-                            cmd.[0]
-                            (
-                                if cmd.Length > 1 then 
-                                    cmd.[1].Split("$", StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries) |> List.ofArray 
-                                else []
-                            )
+                    try
+                        do! 
+                            Commands.user_dispatch
+                                (id, user)
+                                message
+                                (cmd.[0].ToLower())
+                                (
+                                    if cmd.Length > 1 then 
+                                        cmd.[1].Split("$", StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries) |> List.ofArray 
+                                    else []
+                                )
+                    with err ->
+                        Logging.Error(sprintf "Error handling user command '%s': %O" message.Content err)
+                        do! message.AddReactionAsync(Emoji.Parse(":alien:"))
                 | None -> do! message.AddReactionAsync(Emoji.Parse(":no_entry_sign:"))
 
             // Bootstrap command to give me the 'developer' badge
@@ -46,16 +50,20 @@ module Bot =
                 let cmd = message.Content.Substring(1).Split(' ', 2, StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
                 match User.by_discord_id(message.Author.Id) with
                 | Some (id, user) when user.Badges.Contains(Badge.DEVELOPER) -> 
-                    do! 
-                        Commands.admin_dispatch
-                            (id, user)
-                            message
-                            cmd.[0]
-                            (
-                                if cmd.Length > 1 then 
-                                    cmd.[1].Split("$", StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries) |> List.ofArray 
-                                else []
-                            )
+                    try
+                        do! 
+                            Commands.admin_dispatch
+                                (id, user)
+                                message
+                                (cmd.[0].ToLower())
+                                (
+                                    if cmd.Length > 1 then 
+                                        cmd.[1].Split("$", StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries) |> List.ofArray 
+                                    else []
+                                )
+                    with err ->
+                        Logging.Error(sprintf "Error handling admin command '%s': %O" message.Content err)
+                        do! message.AddReactionAsync(Emoji.Parse(":alien:"))
                 | _ ->
                     Logging.Warn(sprintf "Discord user with id %i attempted to trigger an admin command" message.Author.Id)
                     do! message.AddReactionAsync(Emoji.Parse(":skull:"))

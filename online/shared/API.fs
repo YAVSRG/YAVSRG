@@ -50,7 +50,8 @@ module API =
             Logging.Error(sprintf "Error handling HTTP request: %s" error)
         
         override this.OnError(error: SocketError) =
-            Logging.Error(sprintf "Socket error in HTTP session %O: %O" this.Id error)
+            if error <> SocketError.NotConnected then
+                Logging.Error(sprintf "Socket error in HTTP session %O: %O" this.Id error)
 
     type private Listener(config: Config) =
         inherit HttpsServer(

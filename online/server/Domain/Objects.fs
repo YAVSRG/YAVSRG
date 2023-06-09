@@ -65,7 +65,7 @@ module User =
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
         
     let by_username(username: string) =
-        let results = ft.Search("idx:users", Query(sprintf "@username:{%s}" username)).Documents
+        let results = ft.Search("idx:users", Query(sprintf "@username:{%s}" (escape username))).Documents
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
 
