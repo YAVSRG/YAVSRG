@@ -55,7 +55,7 @@ module Commands =
                     | _ ->
                         let embed =
                             EmbedBuilder(Title = match matches.Length with 30 -> "30+ matches found" | i -> sprintf "%i matches found" i)
-                                .WithDescription(String.concat "\n" (List.map (fun (song: Song, charts) -> song.FormattedTitle) matches))
+                                .WithDescription(String.concat "\n" (List.map (fun (song: Song, charts) -> song.FormattedTitle.Replace("*", "\\*")) matches))
                                 .WithColor(Color.Blue)
                         do! reply_embed (embed.Build())
             | _ -> ()
@@ -117,5 +117,6 @@ module Commands =
                         User.save(id, { user with Badges = Set.remove badge user.Badges })
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
+
             | _ -> ()
         }

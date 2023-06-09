@@ -11,7 +11,11 @@ module Redis =
 
     let redis: ConnectionMultiplexer = 
         let options = new ConfigurationOptions()
+        #if DEBUG
+        options.EndPoints.Add("localhost", 6379)
+        #else
         options.EndPoints.Add("redis", 6379)
+        #endif
         options.User <- "default"
         options.Password <- "redispw"
         options.Ssl <- false
