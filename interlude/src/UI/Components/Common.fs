@@ -43,22 +43,13 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
         base.Update(elapsedTime, moved)
         ticker.Update(elapsedTime)
 
-type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
+type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
     inherit StaticContainer(NodeType.Button onClick)
-    
-    let color = Animation.Fade(0.0f)
 
     member val Hotkey : Hotkey = "none" with get, set
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set
-    member val TextColor = Palette.text (Palette.transition color Palette.LIGHTER Palette.WHITE) (!%Palette.DARKER) with get, set
-
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        color.Update elapsedTime
-
-    override this.OnFocus() = base.OnFocus(); color.Target <- 1.0f
-    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.0f
+    member val TextColor = fun () -> (if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2 with get, set
 
     override this.Draw() =
         let h = this.Bounds.Height
