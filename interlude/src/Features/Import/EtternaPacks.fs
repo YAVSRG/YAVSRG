@@ -120,9 +120,9 @@ module EtternaPacks =
                 fun _ cert _ sslPolicyErrors ->
                     if sslPolicyErrors = SslPolicyErrors.None then true
                     else
-                        let cert_string = cert.GetCertHashString().ToLower()
+                        let cert_string = cert.GetCertHashString().ToUpper()
                         Logging.Debug(sprintf "Expired certificate: %s (expired on %s)" cert_string (cert.GetExpirationDateString()))
-                        cert_string = "5f9a90b88ae54db56d6fcff44ee5e0fb787801ad"
+                        cert_string = "56726C10C603AFE9C338966ABC303D161072FEE5"
             )
 
     let tab = 

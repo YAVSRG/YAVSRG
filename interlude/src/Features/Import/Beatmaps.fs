@@ -6,11 +6,14 @@ open Percyqaz.Common
 open Percyqaz.Json
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data
 open Interlude.UI
+open Interlude.UI.Components
+open Interlude.UI.Menu
 open Interlude.Utils
 open Interlude.Features.LevelSelect
 
@@ -131,56 +134,161 @@ type private BeatmapImportCard(data: BeatmapData) as this =
 
     member private this.Download() = download()
 
+type private SortingDropdown(options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
+    inherit StaticContainer(NodeType.None)
+    
+    let mutable displayValue = Seq.find (fun (id, _) -> id = setting.Value) options |> snd
+    
+    override this.Init(parent: Widget) =
+        this 
+        |+ StylishButton(
+            ( fun () -> this.ToggleDropdown() ),
+            K (label + ":"),
+            Style.highlight 100,
+            Hotkey = bind,
+            Position = Position.SliceLeft 120.0f)
+        |* StylishButton(
+            ( fun () -> reverse.Value <- not reverse.Value ),
+            ( fun () -> sprintf "%s %s" displayValue (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
+            Style.dark 100,
+            TiltRight = false,
+            Position = Position.TrimLeft 145.0f )
+        base.Init parent
+    
+    member this.ToggleDropdown() =
+        match this.Dropdown with
+        | Some _ -> this.Dropdown <- None
+        | _ ->
+            let d = Dropdown.Selector options snd (fun g -> displayValue <- snd g; setting.Set (fst g)) (fun () -> this.Dropdown <- None)
+            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
+            d.Init this
+            this.Dropdown <- Some d
+    
+    member val Dropdown : Dropdown option = None with get, set
+    
+    override this.Draw() =
+        base.Draw()
+        match this.Dropdown with
+        | Some d -> d.Draw()
+        | None -> ()
+    
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        match this.Dropdown with
+        | Some d -> d.Update(elapsedTime, moved)
+        | None -> ()
+
 module Beatmaps =
 
     let download_json_switch = 
         { new Async.SwitchService<string, BeatmapSearch option>()
             with override this.Handle(url) = WebServices.download_json_async<BeatmapSearch>(url)
         }
-    
-    let rec search (filter: Filter) (page: int) : PopulateFunc =
-        let mutable s = "https://osusearch.com/api/search?modes=Mania&query_order=play_count&key="
-        let mutable invalid = false
-        let mutable title = ""
-        List.iter(
-            function
-            | Impossible -> invalid <- true
-            | String "#p" -> s <- s + "&premium_mappers=true"
-            | String s -> match title with "" -> title <- s | t -> title <- t + " " + s
-            | Equals ("k", n)
-            | Equals ("key", n)
-            | Equals ("keys", n) -> match Int32.TryParse n with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
-            | Equals ("m", m)
-            | Equals ("c", m)
-            | Equals ("creator", m)
-            | Equals ("mapper", m) -> s <- s + "&mapper=" + m
-            | _ -> ()
-        ) filter
-        s <- s + "&title=" + Uri.EscapeDataString title
-        s <- s + "&offset=" + page.ToString()
-        fun (searchContainer: SearchContainer) callback ->
+
+    type BeatmapSearch() as this =
+        inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
+
+        let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
+        let scroll = ScrollContainer.Flow(items, Margin = Style.padding, Position = Position.TrimTop(125.0f).TrimBottom(65.0f))
+        let mutable filter : Filter = []
+        let query_order = Setting.simple "date"
+        let descending_order = Setting.simple true
+        let mutable statuses = Set.singleton "Ranked"
+        let mutable when_at_bottom : (unit -> unit) option = None
+
+        let rec search (filter: Filter) (page: int) =
+            when_at_bottom <- None
+            let mutable s = "https://osusearch.com/api/search?modes=Mania&key=&query_order=" + (if descending_order.Value then "" else "-") + query_order.Value + "&statuses=" + String.concat "," statuses
+            let mutable invalid = false
+            let mutable title = ""
+            List.iter(
+                function
+                | Impossible -> invalid <- true
+                | String "#p" -> s <- s + "&premium_mappers=true"
+                | String s -> match title with "" -> title <- s | t -> title <- t + " " + s
+                | Equals ("k", n)
+                | Equals ("key", n)
+                | Equals ("keys", n) -> match Int32.TryParse n with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
+                | Equals ("m", m)
+                | Equals ("c", m)
+                | Equals ("creator", m)
+                | Equals ("mapper", m) -> s <- s + "&mapper=" + m
+                | _ -> ()
+            ) filter
+            s <- s + "&title=" + Uri.EscapeDataString title
+            s <- s + "&offset=" + page.ToString()
+
             download_json_switch.Request(s,
                 fun data ->
                 match data with
                 | Some d -> 
                     sync(fun () ->
-                        for p in d.beatmaps do searchContainer.Items.Add(BeatmapImportCard p)
+                        for p in d.beatmaps do items.Add(BeatmapImportCard p)
                         if d.result_count < 0 || d.result_count > d.beatmaps.Count then
-                            SearchContainerLoader(search filter (page + 1) searchContainer)
-                            |> searchContainer.Items.Add
+                            when_at_bottom <- Some (fun () -> search filter (page + 1))
                     )
                 | None -> ()
-                callback()
             )
 
-    let tab =
-        let searchContainer =
-            SearchContainer(
-                (search [] 0),
-                (fun searchContainer filter -> searchContainer.Items.Clear(); searchContainer.Items.Add(new SearchContainerLoader(search filter 0 searchContainer))),
-                85.0f,
-                Position = Position.TrimBottom(60.0f)
+        let begin_search (filter: Filter) =
+            search filter 0
+            items.Clear()
+
+        let status_button (status: string) (position: Position) (color: Color) =
+            StylishButton(
+                (fun () -> 
+                    if statuses.Contains status then 
+                        statuses <- Set.remove status statuses 
+                    else statuses <- Set.add status statuses
+                    begin_search filter
+                ),
+                (fun () -> if statuses.Contains status then Icons.check + " " + status else Icons.x + " " + status),
+                (fun () -> if statuses.Contains status then color.O3 else color.O1),
+                Position = position
             )
-        StaticContainer(NodeType.Switch(K searchContainer))
-        |+ searchContainer
-        |+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom(55.0f))
+    
+        do
+            begin_search filter
+            this
+            |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> filter <- f; sync(fun () -> begin_search filter)), Position = Position.SliceTop 60.0f ))
+            |+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
+            |+ scroll
+            |+ (
+                let r = status_button "Ranked" { Position.TrimTop(65.0f).SliceTop(50.0f) with Right = 0.18f %- 25.0f } Colors.cyan
+                r.TiltLeft <- false
+                r
+               )
+            |+ status_button 
+                "Qualified"
+                { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.18f %+ 0.0f; Right = 0.36f %- 25.0f }
+                Colors.green
+            |+ status_button 
+                "Loved"
+                { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.36f %+ 0.0f; Right = 0.54f %- 25.0f }
+                Colors.pink
+            |+ status_button 
+                "Unranked"
+                { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.54f %+ 0.0f; Right = 0.72f %- 25.0f }
+                Colors.grey_2
+            |* SortingDropdown(
+                [
+                    "play_count", "Play count"
+                    "date", "Date"
+                    "difficulty", "Difficulty"
+                    "favorites", "Favourites"
+                ],
+                "Sort",
+                query_order |> Setting.trigger (fun _ -> begin_search filter),
+                descending_order |> Setting.trigger (fun _ -> begin_search filter),
+                "sort_mode",
+                Position = { Left = 0.72f %+ 0.0f; Top = 0.0f %+ 65.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 115.0f })
+
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            if when_at_bottom.IsSome && scroll.PositionPercent > 0.9f then
+                when_at_bottom.Value()
+                when_at_bottom <- None
+    
+        member private this.Items = items
+
+    let tab = BeatmapSearch()

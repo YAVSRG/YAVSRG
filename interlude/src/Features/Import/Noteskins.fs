@@ -118,5 +118,4 @@ module Noteskins =
     
         member this.Items = grid
 
-    let tab = 
-        NoteskinSearch()
+    let tab = NoteskinSearch()
