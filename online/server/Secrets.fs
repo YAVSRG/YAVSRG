@@ -11,9 +11,10 @@ type Secrets =
         ApiCert: string
         ApiCertPassword: string
         ApiBaseUrl: string
-        BotToken: string
+        DiscordBotToken: string
         DiscordClientId: string
         DiscordClientSecret: string
+        IsProduction: bool
     }
     static member Default = {
             SocketCert = "localhost.pfx"
@@ -21,9 +22,10 @@ type Secrets =
             ApiCert = "localhost.pfx"
             ApiCertPassword = "DEVELOPMENT"
             ApiBaseUrl = "localhost"
-            BotToken = ""
+            DiscordBotToken = ""
             DiscordClientId = ""
             DiscordClientSecret = ""
+            IsProduction = false
         }
 
 [<AutoOpen>]

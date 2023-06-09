@@ -18,7 +18,7 @@ module Badge =
 type User =
     {
         Username: string
-        DiscordId: int64
+        DiscordId: uint64
         DateSignedUp: int64
         LastLogin: int64
         AuthToken: string
@@ -49,7 +49,7 @@ module User =
         save(new_id, user)
         new_id
 
-    let by_discord_id(discord_id: int64) =
+    let by_discord_id(discord_id: uint64) =
         let results = ft.Search("idx:users", Query(sprintf "@discord_id:[%i %i]" discord_id discord_id)).Documents
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))

@@ -8,7 +8,7 @@ services:
             - 6379:6379
             - 8001:8001
         volumes:
-            - db:/data
+            - ./data:/data
     server:
         container_name: server
         build:
@@ -22,6 +22,3 @@ services:
             - db
         volumes:
             - ./secrets:/docker_root/secrets
-volumes:
-    db:
-        driver: local

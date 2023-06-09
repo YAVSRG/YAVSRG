@@ -10,6 +10,7 @@ open Interlude.Web.Shared
 open Interlude.Web.Server
 open Interlude.Web.Server.Online
 open Interlude.Web.Server.API
+open Interlude.Web.Server.Bot
 
 let SOCKET_PORT = 32767
 let HTTPS_PORT = 443
@@ -47,6 +48,8 @@ try
     Server.start()
     Logging.Info(sprintf "Launching api on port %i ..." HTTPS_PORT)
     API.start()
+    Logging.Info(sprintf "Launching discord bot ...")
+    Bot.start()
     
     #if DEBUG
     Console.ReadLine() |> ignore

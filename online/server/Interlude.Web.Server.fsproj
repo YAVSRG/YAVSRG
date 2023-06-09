@@ -19,10 +19,15 @@
     <Compile Include="Online\LoggedInUsers.fs" />
     <Compile Include="Online\Lobbies.fs" />
     <Compile Include="Online\Online.fs" />
+    <Compile Include="Bot\Constants.fs" />
+    <Compile Include="Bot\Charts.fs" />
+    <Compile Include="Bot\Commands.fs" />
+    <Compile Include="Bot\Bot.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
+	<PackageReference Include="Discord.Net" Version="3.10.0" />
     <PackageReference Include="NetCoreServer" Version="7.0.0" />
     <PackageReference Include="NRedisStack" Version="0.6.1" />
   </ItemGroup>

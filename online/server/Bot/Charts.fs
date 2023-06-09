@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Bot
+﻿namespace Interlude.Web.Server.Bot
 
 open System.IO
 open System.Diagnostics

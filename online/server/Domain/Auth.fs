@@ -9,7 +9,7 @@ open Interlude.Web.Server
 [<RequireQualifiedAccess>]
 type AuthFlowState =
     | RegisterWaitingCallback of online_session_id: Guid
-    | RegisterWaitingUsername of online_session_id: Guid * discord_id: int64
+    | RegisterWaitingUsername of online_session_id: Guid * discord_id: uint64
     | LoginWaitingCallback of online_session_id: Guid
 
 module AuthFlow = 
@@ -19,7 +19,7 @@ module AuthFlow =
         | BeginRegisterWithDiscord of Guid
         | FinishRegisterWithDiscord of Guid * requested_username: string
         | BeginLoginWithDiscord of Guid
-        | ReceiveDiscordCallback of flow_id: string * discord_id: int64 * discord_tag: string
+        | ReceiveDiscordCallback of flow_id: string * discord_id: uint64 * discord_tag: string
 
     let private flow_id(session_id: Guid) = session_id.ToString("N")
     let private auth_flows = Dictionary<string, AuthFlowState>()

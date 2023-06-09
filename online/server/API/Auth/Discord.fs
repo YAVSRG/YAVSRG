@@ -65,7 +65,7 @@ module Discord =
 
             let! identity = identity_response.Content.ReadFromJsonAsync<DiscordIdentityResponse>() |> Async.AwaitTask
 
-            match! AuthFlow.receive_discord_callback(state, int64 identity.id, identity.username + "#" + identity.discriminator) with
+            match! AuthFlow.receive_discord_callback(state, uint64 identity.id, identity.username + "#" + identity.discriminator) with
             | true -> response.ReplyRedirect("https://yavsrg.net/login_success") // todo: this page needs to have more info
             | false -> response.ReplyRedirect("https://yavsrg.net/login_failed")
         }

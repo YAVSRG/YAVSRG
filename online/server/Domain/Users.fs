@@ -21,10 +21,10 @@ module Users =
 
     [<RequireQualifiedAccess>]
     type Action =
-        | CheckExists of discord_id: int64 * callback : (bool -> unit)
-        | Register of username: string * discord_id: int64 * callback : (Result<string, string> -> unit)
+        | CheckExists of discord_id: uint64 * callback : (bool -> unit)
+        | Register of username: string * discord_id: uint64 * callback : (Result<string, string> -> unit)
         | Login of token: string * callback : (Result<string, string> -> unit)
-        | DiscordIdentify of discord_id: int64 * callback : (Result<string, string> -> unit)
+        | DiscordIdentify of discord_id: uint64 * callback : (Result<string, string> -> unit)
 
     let private state_change = 
         { new Async.Service<Action, unit>() with 
