@@ -42,7 +42,6 @@ type RegisterPage(discord_tag) as this =
     override this.Title = L"register.name"
     override this.OnClose() = handler.Dispose()
 
-
 type LoginPage() as this =
     inherit Page()
 
