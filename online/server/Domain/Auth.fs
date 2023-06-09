@@ -75,27 +75,32 @@ module AuthFlow =
                     
                             match auth_flows.[flow_id] with
                             | AuthFlowState.RegisterWaitingCallback id ->
+                                let mutable success = true
                                 Users.check_exists(discord_id,
                                     function
                                     | true -> 
                                         Logging.Info(sprintf "Discord account %s(%i) is already registered" discord_tag discord_id)
                                         auth_flows.Remove(flow_id) |> ignore
                                         Server.send(id, Downstream.REGISTRATION_FAILED (sprintf "%s is already linked to an existing account" discord_tag))
+                                        success <- false
                                     | false -> 
                                         Logging.Info(sprintf "Ready to link account to %s(%i)" discord_tag discord_id)
                                         auth_flows.[flow_id] <- AuthFlowState.RegisterWaitingUsername(id, discord_id)
                                         Server.send(id, Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag)
                                 ) |> Async.RunSynchronously
-                                true
+                                success
                             | AuthFlowState.LoginWaitingCallback id ->
+                                let mutable success = true
                                 Users.discord_identify (discord_id,
                                     function
                                     | Ok token ->
                                         auth_flows.Remove(flow_id) |> ignore
                                         Server.send(id, Downstream.AUTH_TOKEN token)
-                                    | Error reason -> Server.send(id, Downstream.LOGIN_FAILED reason)
+                                    | Error reason -> 
+                                        Server.send(id, Downstream.LOGIN_FAILED reason)
+                                        success <- false
                                     ) |> Async.RunSynchronously
-                                true
+                                success
                             | _ -> false
                 }
         }

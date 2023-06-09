@@ -49,7 +49,6 @@ module Users =
                         |> callback
 
                     | Action.Login (token, callback) ->
-                        Logging.Info "Received login token"
                         match User.by_auth_token token with
                         | Some (id, user) ->
                             User.save(id, { user with LastLogin = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() })

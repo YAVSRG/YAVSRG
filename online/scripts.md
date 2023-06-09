@@ -50,9 +50,8 @@ Enter DO API key for both username and password
 ### ./update.sh
 ```
 docker pull registry.digitalocean.com/yavsrg/interlude-web-server
-docker stop server
-docker rm server
-docker run -d -p 32767:32767 --restart unless-stopped --name server --mount type=bind,source="$(pwd)"/secrets,target=/docker_root/secrets registry.digitalocean.com/yavsrg/interlude-web-server
+wget https://raw.githubusercontent.com/YAVSRG/Interlude.Web/main/docker-compose-production.yml -O ./docker-compose.yml
+docker compose up --detach
 ```
 
 ### ./cert.sh

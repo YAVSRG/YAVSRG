@@ -10,9 +10,7 @@ open Interlude.Web.Server.Domain
 
 module Bot =
 
-    let on_log(msg: LogMessage) = task { Logging.Debug(msg.Message) }
-
-    let on_ready() = task { Logging.Info("Bot is ready") }
+    let on_log(msg: LogMessage) = task { Logging.Debug("[BOT] " + msg.Message) }
 
     let on_message(message: SocketMessage) = 
         task {
@@ -77,7 +75,6 @@ module Bot =
             let config = DiscordSocketConfig(GatewayIntents = (GatewayIntents.MessageContent ||| GatewayIntents.AllUnprivileged ^^^ GatewayIntents.GuildInvites ^^^ GatewayIntents.GuildScheduledEvents))
             use client = new DiscordSocketClient(config)
         
-            client.add_Ready(fun _ -> on_ready())
             client.add_MessageReceived(fun msg -> on_message msg)
             client.add_Log(fun log -> on_log log)
             client.add_InteractionCreated(fun i -> on_interaction_created i)

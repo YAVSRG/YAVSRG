@@ -30,7 +30,8 @@ module Server =
             config.Handle_Disconnect this.Id
         
         override this.OnError(error: SocketError) =
-            Logging.Error(sprintf "Socket error in session %O: %O" this.Id error)
+            if error <> SocketError.NotConnected then
+                Logging.Error(sprintf "Socket error in session %O: %O" this.Id error)
 
         override this.OnReceived(data: byte array, offset, size) =
             try Buffer.handle(buffer, data, offset, size, Upstream.Read >> fun packet -> config.Handle_Packet(this.Id, packet))
