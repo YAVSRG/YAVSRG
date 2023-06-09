@@ -1,1 +1,1 @@
-﻿enabling backbeat chart search
+﻿deploying more error logging so I can find bug in command
