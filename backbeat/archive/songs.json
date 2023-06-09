@@ -6258,7 +6258,7 @@
         "AlternativeTitles": ["os-宇宙人(Asterisk Makina Remix)"], 
         "Artists": ["Erio o Kamattechan"], 
         "OtherArtists": [], 
-        "Remixers": ["Asterisk Makina"], 
+        "Remixers": ["Asterisk"], 
         "Source": "電波女と青春男", 
         "Tags": ["dnb", "soundcloud", "nation", "works", "3", "denpa", "onna", "to", "seishun", "otoko", "asuka", "ogame", "shinsei"], 
         "Title": "os-Uchuujin (Asterisk Makina Remix)"
@@ -6297,7 +6297,7 @@
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "宿命～ETERNAL BATTLESHIP～"
+        "Title": "宿命~ETERNAL BATTLESHIP~"
     }, 
     "etia/claiomhsolais": {
         "AlternativeTitles": [], 
@@ -6489,15 +6489,6 @@
         "Title": "Viking Arena"
     }, 
     "fairouzaiishikawakaito/onegaimuscle": {
-        "AlternativeTitles": [], 
-        "Artists": ["Fairouz Ai", "Ishikawa Kaito"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Onegai Muscle"
-    }, 
-    "fairouzaiishikawakaito/onegaimuscle-2": {
         "AlternativeTitles": ["お願いマッスル"], 
         "Artists": ["Fairouz Ai", "Ishikawa Kaito"], 
         "OtherArtists": [], 
@@ -11237,16 +11228,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "とらドラ！", 
-        "Tags": ["Toradora!", "christmas", "xmas", "aisaka", "taiga", "kawashima", "ami", "simple_star"], 
-        "Title": "Holy Night"
-    }, 
-    "kugimiyariekitamuraeri/holynight-2": {
-        "AlternativeTitles": ["ホーリーナイト"], 
-        "Artists": ["Kugimiya Rie", "Kitamura Eri"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "とらドラ！", 
-        "Tags": ["anime", "japanese", "Toradora!", "christmas", "xmas", "FAMoss"], 
+        "Tags": ["Toradora!", "christmas", "xmas", "aisaka", "taiga", "kawashima", "ami", "simple_star", "anime", "japanese", "FAMoss"], 
         "Title": "Holy Night"
     }, 
     "kun/waitwaitwaitlive": {
@@ -11349,7 +11331,7 @@
         "Title": "Telephone"
     }, 
     "lagoon/kiminomatsusekai": {
-        "AlternativeTitles": ["君の待つ世界 （TVサイズ）"], 
+        "AlternativeTitles": ["君の待つ世界 (TVサイズ)"], 
         "Artists": ["LAGOON"], 
         "OtherArtists": [], 
         "Remixers": [], 

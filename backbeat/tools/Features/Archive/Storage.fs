@@ -42,14 +42,21 @@ module Storage =
             }
 
     let save() =
-        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "artists.json"), true) artists
-        with e -> Logging.Error("Artists not saved", e)
-        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
-        with e -> Logging.Error("Songs not saved", e)
-        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
-        with e -> Logging.Error("Charts not saved", e)
-        try JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs 
-        with e -> Logging.Error("Packs not saved", e)
+        let del p = if File.Exists p then File.Delete p
+        try 
+            del(Path.Combine(ARCHIVE_PATH, "artists.json.old"))
+            del(Path.Combine(ARCHIVE_PATH, "songs.json.old"))
+            del(Path.Combine(ARCHIVE_PATH, "charts.json.old"))
+            del(Path.Combine(ARCHIVE_PATH, "packs.json.old"))
+            File.Move(Path.Combine(ARCHIVE_PATH, "artists.json"), Path.Combine(ARCHIVE_PATH, "artists.json.old"))
+            File.Move(Path.Combine(ARCHIVE_PATH, "songs.json"), Path.Combine(ARCHIVE_PATH, "songs.json.old"))
+            File.Move(Path.Combine(ARCHIVE_PATH, "charts.json"), Path.Combine(ARCHIVE_PATH, "charts.json.old"))
+            File.Move(Path.Combine(ARCHIVE_PATH, "packs.json"), Path.Combine(ARCHIVE_PATH, "packs.json.old"))
+            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "artists.json"), true) artists
+            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
+            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
+            JSON.ToFile (Path.Combine(ARCHIVE_PATH, "packs.json"), true) packs
+        with e -> Logging.Error("Something didnt save", e)
         Logging.Debug("Saved database")
 
     module Queue =
