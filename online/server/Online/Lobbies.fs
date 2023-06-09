@@ -540,9 +540,7 @@ module Lobby =
             }
         }
 
-    type Action with
-        member this.Do = state_change.Request (this, ignore)
-
+    type Action with member this.Do = state_change.Request (this, ignore)
 
     let ensure_player_leaves_lobby(player, callback) =
         if in_lobby.ContainsKey(player) then state_change.Request( Leave(player), callback)

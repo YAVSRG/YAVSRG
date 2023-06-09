@@ -23,7 +23,7 @@ module Users =
     type Action =
         | CheckExists of discord_id: uint64 * callback : (bool -> unit)
         | Register of username: string * discord_id: uint64 * callback : (Result<string, string> -> unit)
-        | Login of token: string * callback : (Result<string, string> -> unit)
+        | Login of token: string * callback : (Result<int64 * string, string> -> unit)
         | DiscordIdentify of discord_id: uint64 * callback : (Result<string, string> -> unit)
 
     let private state_change = 
@@ -52,7 +52,7 @@ module Users =
                         match User.by_auth_token token with
                         | Some (id, user) ->
                             User.save(id, { user with LastLogin = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() })
-                            Ok user.Username
+                            Ok (id, user.Username)
                         | None -> Error "Token invalid or expired"
                         |> callback
                         

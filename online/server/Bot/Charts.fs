@@ -1,10 +1,8 @@
 ﻿namespace Interlude.Web.Server.Bot
 
-open System.IO
-open System.Diagnostics
 open System.Collections.Generic
 open Percyqaz.Common
-open Prelude
+open Prelude.Data
 open Prelude.Data.Charts.Archive
 
 module Charts =
@@ -16,31 +14,12 @@ module Charts =
     let mutable packs = { Stepmania = new Dictionary<StepmaniaPackId, StepmaniaPack>(); Community = new Dictionary<CommunityPackId, CommunityPack>() }
 
     let init() =
-        if not (Directory.Exists "Backbeat") then
-            Process.Start(ProcessStartInfo("git", "clone --depth 1 https://github.com/YAVSRG/Backbeat.git")).WaitForExit()
-        else Process.Start(ProcessStartInfo("git", "pull -f", WorkingDirectory = "Backbeat")).WaitForExit()
-        let ARCHIVE_PATH = Path.Combine("Backbeat", "archive")
-        charts <- 
-            match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "charts.json")) with
-            | Ok d -> d
-            | Error e -> 
-                Logging.Warn(sprintf "Error loading charts.json: %s" e.Message)
-                Dictionary<ChartHash, Chart>()
-        songs <-
-            match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "songs.json")) with
-            | Ok d -> d
-            | Error e -> 
-                Logging.Warn(sprintf "Error loading songs.json: %s" e.Message)
-                Dictionary<SongId, Song>()
-        packs <-
-            match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "packs.json")) with
-            | Ok d -> d
-            | Error e -> 
-                Logging.Warn(sprintf "Error loading packs.json: %s" e.Message)
-                {
-                    Stepmania = Dictionary<StepmaniaPackId, StepmaniaPack>()
-                    Community = Dictionary<CommunityPackId, CommunityPack>()
-                }
+        WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/songs.json", 
+            function Some data -> songs <- data | None -> Logging.Error("Failed to get song data from Backbeat repo"))
+        WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/charts.json", 
+            function Some data -> charts <- data | None -> Logging.Error("Failed to get chart data from Backbeat repo"))
+        WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/packs.json", 
+            function Some data -> packs <- data; Logging.Info(sprintf "Backbeat downloads complete, %i Charts and %i Songs" charts.Count songs.Count) | None -> Logging.Error("Failed to get pack data from Backbeat repo"))
 
     let search_for_charts(query: string) =
         let query = query.ToLower()

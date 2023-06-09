@@ -70,8 +70,7 @@ module Bot =
 
     let start() =
         try
-            //Charts.init()
-            Logging.Info(sprintf "Backbeat init complete (it's commented out), %i Charts and %i Songs" Charts.charts.Count Charts.songs.Count)
+            Charts.init()
             let config = DiscordSocketConfig(GatewayIntents = (GatewayIntents.MessageContent ||| GatewayIntents.AllUnprivileged ^^^ GatewayIntents.GuildInvites ^^^ GatewayIntents.GuildScheduledEvents))
             use client = new DiscordSocketClient(config)
         

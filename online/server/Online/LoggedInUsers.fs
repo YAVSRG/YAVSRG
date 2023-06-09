@@ -10,7 +10,7 @@ open Interlude.Web.Server.Domain
 type UserState =
     | Nothing
     | Handshake
-    | LoggedIn of username: string
+    | LoggedIn of id: int64 * username: string
 
 module LoggedInUsers = 
 
@@ -36,7 +36,7 @@ module LoggedInUsers =
                     | Action.Disconnect id ->
                         if user_states.ContainsKey id then
                             match user_states.[id] with
-                            | UserState.LoggedIn username ->
+                            | UserState.LoggedIn (_, username) ->
                                 usernames.Remove username |> ignore
                                 Logging.Info(sprintf "[<- %s" username)
                             | _ -> ()
@@ -49,26 +49,26 @@ module LoggedInUsers =
                             Server.send(id, Downstream.HANDSHAKE_SUCCESS)
                         | _ -> Server.kick(id, "Handshake sent twice")
 
-                    | Action.Login (id, token) ->
-                        match user_states.[id] with
+                    | Action.Login (session_id, token) ->
+                        match user_states.[session_id] with
                         | UserState.Handshake ->
                             Users.login (token,
                                 function
-                                | Ok username ->
-                                    usernames.Add(username, id)
-                                    user_states.[id] <- UserState.LoggedIn username
-                                    Server.send(id, Downstream.LOGIN_SUCCESS username)
+                                | Ok (user_id, username) ->
+                                    usernames.Add(username, session_id)
+                                    user_states.[session_id] <- UserState.LoggedIn (user_id, username)
+                                    Server.send(session_id, Downstream.LOGIN_SUCCESS username)
                                     Logging.Info(sprintf "[-> %s" username)
                                 | Error reason ->
-                                    Logging.Info(sprintf "%O failed to authenticate: %s" id reason)
-                                    Server.send(id, Downstream.LOGIN_FAILED reason)
+                                    Logging.Info(sprintf "%O failed to authenticate: %s" session_id reason)
+                                    Server.send(session_id, Downstream.LOGIN_FAILED reason)
                             ) |> Async.RunSynchronously
-                        | UserState.Nothing -> Server.kick(id, "Login sent before handshake")
-                        | _ -> Server.kick(id, "Login sent twice")
+                        | UserState.Nothing -> Server.kick(session_id, "Login sent before handshake")
+                        | _ -> Server.kick(session_id, "Login sent twice")
 
                     | Action.Logout id ->
                         match user_states.[id] with
-                        | UserState.LoggedIn username ->
+                        | UserState.LoggedIn (_, username) ->
                             usernames.Remove username |> ignore
                             user_states.[id] <- UserState.Handshake
                             Logging.Info(sprintf "[<- %s" username)
@@ -97,7 +97,7 @@ module LoggedInUsers =
                     let ok, state = user_states.TryGetValue req
                     if ok then
                         match state with
-                        | UserState.LoggedIn username -> return Some username
+                        | UserState.LoggedIn (_, username) -> return Some username
                         | _ -> return None
                     else return None
             }
