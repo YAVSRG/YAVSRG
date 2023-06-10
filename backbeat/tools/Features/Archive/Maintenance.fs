@@ -7,11 +7,7 @@ open Prelude.Data.Charts.Archive
 
 module Maintenance =
 
-    type Approval =
-        | APPLY_NOW
-        | MANUAL_DATA of string
-        | IGNORE
-    let make_suggestion (flag: string) (before: Song) (after: Song) : Approval =
+    let make_suggestion (flag: string) (id: SongId) (before: Song) (after: Song) : bool =
         let inline diff label a b = if a <> b then Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
         Logging.Info(sprintf "Suggested metadata changes for %s" before.FormattedTitle)
         diff "Artists" before.Artists after.Artists
@@ -22,13 +18,13 @@ module Maintenance =
         diff "Formatted title" before.FormattedTitle after.FormattedTitle
         diff "Tags" before.Tags after.Tags
         Logging.Info(sprintf "Reason: %s" flag)
-        Logging.Info("\noptions ::\n 1 - Accept changes\n 2 - Enter manual fix\n 3 - No correction needed, don't suggest for this song")
+        Logging.Info("\noptions ::\n 1 - Accept changes\n 2 - Mark for manual fix\n 3 - No correction needed")
         let mutable option_chosen = None
         while option_chosen.IsNone do
             match Console.ReadKey().Key with
-            | ConsoleKey.D1 -> option_chosen <- Some APPLY_NOW
-            | ConsoleKey.D2 -> option_chosen <- Some (MANUAL_DATA (Console.ReadLine()))
-            | ConsoleKey.D3 -> option_chosen <- Some IGNORE
+            | ConsoleKey.D1 -> option_chosen <- Some true
+            | ConsoleKey.D2 -> option_chosen <- Some false; Queue.append "songs-review" id
+            | ConsoleKey.D3 -> option_chosen <- Some false; Queue.append "songs-ignore" id
             | _ -> ()
         option_chosen.Value
 
@@ -50,10 +46,8 @@ module Maintenance =
             title
         let suggestion = { song with Title = remove_mixes_and_cuts song.Title; AlternativeTitles = List.map remove_mixes_and_cuts song.AlternativeTitles }
         if suggestion <> song then
-            match make_suggestion "SONGMIXES" song suggestion with
-            | APPLY_NOW -> songs.[song_id] <- suggestion; save()
-            | MANUAL_DATA s -> Logging.Debug "Ignoring manual data for now"
-            | IGNORE -> ()
+            if make_suggestion "SONGMIXES" song_id song suggestion then
+                songs.[song_id] <- suggestion; save()
             
     let remix_regex = Text.RegularExpressions.Regex("\\((.*?) [rR]emix\\)$")
     let feature_separators = [|"FEAT."; "FT."; "Feat."; "Ft."; "featuring."; "feat."; "ft."|]
@@ -83,10 +77,8 @@ module Maintenance =
 
             { song with Title = title; OtherArtists = List.distinct (features @ features2); Artists = artists }
         if suggestion <> song then
-            match make_suggestion "MULTIPLEARTISTS" song suggestion with
-            | APPLY_NOW -> songs.[song_id] <- suggestion; save()
-            | MANUAL_DATA s -> Logging.Debug "Ignoring manual data for now"
-            | IGNORE -> ()
+            if make_suggestion "MULTIPLEARTISTS" song_id song suggestion then
+                songs.[song_id] <- suggestion; save()
 
     let remixers_from_title (song_id: SongId) (song: Song) =
         let title_matches = remix_regex.Matches song.Title
@@ -101,10 +93,8 @@ module Maintenance =
                 else song
             else song
         if suggestion <> song then
-            match make_suggestion "REMIXINTITLE" song suggestion with
-            | APPLY_NOW -> songs.[song_id] <- suggestion; save()
-            | MANUAL_DATA s -> songs.[song_id] <- { song with Remixers = s.Split(",", StringSplitOptions.TrimEntries) |> List.ofArray }; save()
-            | IGNORE -> ()
+            if make_suggestion "REMIXINTITLE" song_id song suggestion then
+                songs.[song_id] <- suggestion; save()
 
     let song_meta_checks_v2 (song_id: SongId) (song: Song) =
         featuring_artists song_id song
@@ -174,7 +164,7 @@ module Maintenance =
             if res > 5 then 100 else res
             
     let character_voice_regex = Text.RegularExpressions.Regex("[\\[\\(][cC][vV][.:\\-]?\\s?(.*)[\\]\\)]")
-    let check_all_artists_v2() =
+    let private check_all_artists_v2() =
         let map = artists.CreateMapping()
         let swap (s: string) =
             if map.ContainsKey(s.ToLower()) then 
@@ -200,7 +190,8 @@ module Maintenance =
         save()
 
     let check_all_artists() =
-        let artists = ResizeArray<string>()
+        check_all_artists_v2()
+        let mutable checked_artists = Map.empty
 
         let distinct_artists = Queue.get "artists-distinct" |> Array.ofList
 
@@ -208,12 +199,24 @@ module Maintenance =
             name.Length > 3 && String.forall Char.IsAscii name
 
         let check_artist (context: Song) (artist: string) =
-            if artists.Contains artist then () else
+            if checked_artists.ContainsKey artist then
+                if checked_artists.[artist] = 2 && not (artists.Artists.ContainsKey artist) then
+                    Console.WriteLine(sprintf "'%s' looks like a common artist, want to make a note to verify them? [1 for yes, 2 for no]" artist)
+                    let mutable option_chosen = None
+                    while option_chosen.IsNone do
+                        match Console.ReadKey().Key with
+                        | ConsoleKey.D1 -> option_chosen <- Some true
+                        | ConsoleKey.D2 -> option_chosen <- Some false
+                        | _ -> ()
+                    if option_chosen.Value then
+                        Queue.append "artists-verify" artist
+                checked_artists <- checked_artists.Add (artist, checked_artists.[artist] + 1)
+            else
 
             let b = List.ofSeq (artist.ToLower())
             let mutable closest_match = ""
             let mutable closest_match_v = artist.Length / 2
-            for a in artists |> Array.ofSeq do
+            for a in checked_artists.Keys |> Array.ofSeq do
                 if filter a && filter artist && not (distinct_artists.Contains (artist + "," + a)) then
                     let dist = levenshtein (List.ofSeq (a.ToLower())) b
                     if dist < closest_match_v then closest_match <- a; closest_match_v <- dist
@@ -228,11 +231,11 @@ module Maintenance =
                 let mutable option_chosen = false
                 while not option_chosen do
                     match Console.ReadKey().Key with
-                    | ConsoleKey.D1 -> rename_artist (artist, closest_match); artists.Remove closest_match |> ignore; artist <- closest_match; option_chosen <- true
-                    | ConsoleKey.D2 -> rename_artist (closest_match, artist); artists.Remove closest_match |> ignore; option_chosen <- true
+                    | ConsoleKey.D1 -> rename_artist (artist, closest_match); checked_artists <- checked_artists.Remove closest_match; artist <- closest_match; option_chosen <- true
+                    | ConsoleKey.D2 -> rename_artist (closest_match, artist); checked_artists <- checked_artists.Remove closest_match; option_chosen <- true
                     | ConsoleKey.D3 -> Queue.append "artists-distinct" (artist + "," + closest_match); option_chosen <- true
                     | _ -> ()
-            artists.Add artist
+            checked_artists <- Map.add artist 1 checked_artists
                     
         for id in songs.Keys |> Array.ofSeq do
             let song = songs.[id]
