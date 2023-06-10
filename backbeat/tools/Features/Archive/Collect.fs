@@ -242,11 +242,19 @@ module Collect =
             Queue.save "pack-imports" packs
 
     let script() =
-        let keywords = ["skwid"; "nuclear"; "compulsive"; "valedumps"; "minty"; "dumpass"; "cola"; " end"; "yolo"; "d e n p a"; "denpa"]
+        let keywords = 
+            [
+                "skwid"; "nuclear"; "compulsive"; "valedumps"; "minty"; "dumpass"; "cola"; " end"; "yolo"
+                "d e n p a"; "denpa"; "the end"; "the.end"; "timdam"; "xingyue"; "nixo"; "boi"; "hi19hi19"
+                "lemon's"; "jumpstream of fighters"; "fullerene shift"; "fennec"; "mintapril"; "explosion excitepack";
+                "vsrg charting minipack"; "woaini"; "magicschool"
+            ]
+        let already_done = Queue.get "pack-imports-success"
         Queue.save "pack-imports" []
         for p in packs.Stepmania.Keys do
             let title = packs.Stepmania.[p].Title.ToLower()
             if keywords |> List.forall (fun w -> title.Contains(w) |> not) then ()
+            elif title.Contains "win for me boi" || List.contains (string p) already_done then ()
             else
                 Logging.Info packs.Stepmania.[p].Title
                 Queue.append "pack-imports" (p.ToString())

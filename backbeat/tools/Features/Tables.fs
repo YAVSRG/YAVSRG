@@ -191,6 +191,13 @@ module Tables =
 
         printfn "Commited updates to table."
 
+    let check_table(file: string) =
+        let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+
+        for l in table.Levels do
+            for c in l.Charts do
+                if not (Archive.Storage.charts.ContainsKey c.Hash) then printfn "'%s' is not in the backbeat database" c.Id
+
     // Publishing the table
 
     let export_table_sources(file: string) =
@@ -278,6 +285,8 @@ module Tables =
             Command.create "Add batch of table charts from a local collection" ["table"; "collection"] <| Impl.Create(Types.str, Types.str, add_suggestions))
             .WithCommand("edit", 
             Command.create "Make edits to existing charts in a table" ["table"] <| Impl.Create(Types.str, edit_table))
+            .WithCommand("check_table", 
+            Command.create "Verify all parts of the table are in backbeat" ["table"] <| Impl.Create(Types.str, check_table))
             .WithCommand("commit", 
             Command.create "Commit suggestions to table and generate a changelog" ["table"] <| Impl.Create(Types.str, commit_table))
             .WithCommand("sources", 
