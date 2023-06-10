@@ -42,6 +42,7 @@ module Storage =
             }
 
     let save() =
+        (artists, songs, charts, packs) |> ignore
         let del p = if File.Exists p then File.Delete p
         try 
             del(Path.Combine(ARCHIVE_PATH, "artists.json.old"))
