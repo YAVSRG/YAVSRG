@@ -1,25 +1,15 @@
-0.6.16
+0.6.17
 ====
 
-Multiplayer technical leaps
+Something to tide you over while I work on server infrastructure
 
-I'm testing out the new account registration system 
-You can now link an account to your Discord account and that account is how you log into Interlude
+Accounts are no longer temporary and now is the time to grab your desired username
+Early users get the permanent "early tester" badge which will show up on profiles later
 
-**Please note: ** Accounts are currently temporary and get wiped whenever the server restarts
-No data is held against them other than your Discord ID so try and break it/find bugs before I start storing data for real
+# Other changes
+- Some small UI adjustments (buttons now have yellow text on hover)
+- The osu beatmap search has been improved with some new ways to sort and filter charts
 
-You have a couple weeks cause I'm going on holiday
-
-## Features
-- All online features (multiplayer lobbies) use end-to-end encryption
-- Placeholder login where you 'claim' a name replaced with log in via discord
-
-## Other fixes/improvements
-- The Interlude.exe icon might be back, I'm not really sure until it goes through the build pipeline
-- I've rewritten some major parts of Prelude, hence some time between releases to see if I spot any bugs
-  You may see some improvements in background image detection for .sm files and various metadata conversion fixes
-- Fixed a rare crash when interacting with osu! song search
-- osu! downloads use a different mirror (perhaps multiple mirror options coming soon)
-- Some new menu splash messages
+As always please report bugs or anything that doesn't seem right quickly upon discovering it
+(and thank you to those that are doing so already :)))
 
