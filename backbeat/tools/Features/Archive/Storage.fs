@@ -44,15 +44,16 @@ module Storage =
     let save() =
         (artists, songs, charts, packs) |> ignore
         let del p = if File.Exists p then File.Delete p
+        let mov p = if File.Exists p then File.Move(p, p + ".old")
         try 
             del(Path.Combine(ARCHIVE_PATH, "artists.json.old"))
             del(Path.Combine(ARCHIVE_PATH, "songs.json.old"))
             del(Path.Combine(ARCHIVE_PATH, "charts.json.old"))
             del(Path.Combine(ARCHIVE_PATH, "packs.json.old"))
-            File.Move(Path.Combine(ARCHIVE_PATH, "artists.json"), Path.Combine(ARCHIVE_PATH, "artists.json.old"))
-            File.Move(Path.Combine(ARCHIVE_PATH, "songs.json"), Path.Combine(ARCHIVE_PATH, "songs.json.old"))
-            File.Move(Path.Combine(ARCHIVE_PATH, "charts.json"), Path.Combine(ARCHIVE_PATH, "charts.json.old"))
-            File.Move(Path.Combine(ARCHIVE_PATH, "packs.json"), Path.Combine(ARCHIVE_PATH, "packs.json.old"))
+            mov(Path.Combine(ARCHIVE_PATH, "artists.json"))
+            mov(Path.Combine(ARCHIVE_PATH, "songs.json"))
+            mov(Path.Combine(ARCHIVE_PATH, "charts.json"))
+            mov(Path.Combine(ARCHIVE_PATH, "packs.json"))
             JSON.ToFile (Path.Combine(ARCHIVE_PATH, "artists.json"), true) artists
             JSON.ToFile (Path.Combine(ARCHIVE_PATH, "songs.json"), true) songs
             JSON.ToFile (Path.Combine(ARCHIVE_PATH, "charts.json"), true) charts
