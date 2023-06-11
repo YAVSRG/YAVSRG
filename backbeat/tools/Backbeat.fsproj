@@ -12,6 +12,7 @@
     <Compile Include="Features\Archive\Packs.fs" />
     <Compile Include="Features\Archive\Collect.fs" />
     <Compile Include="Features\Archive\Maintenance.fs" />
+    <Compile Include="Features\Archive\MaintenanceV2.fs" />
     <Compile Include="Features\Archive\Archive.fs" />
     <Compile Include="Features\Tables.fs" />
     <Compile Include="Program.fs" />

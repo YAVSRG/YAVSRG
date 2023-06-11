@@ -824,6 +824,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": true
         }, 
+		"Seiryu": {
+			"Alternatives": ["青龍"],
+            "IsJapaneseFullName": false
+		},
         "Serizawa Yuu": {
             "Alternatives": [], 
             "IsJapaneseFullName": true

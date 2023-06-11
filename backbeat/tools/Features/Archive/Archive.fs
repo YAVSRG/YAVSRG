@@ -20,3 +20,5 @@ module Archive =
             Command.create "Fix old song ids" [] <| Impl.Create(Maintenance.check_all_ids))
             .WithCommand("verify_artist", 
             Command.create "Add a verified artist name to the database" ["artist_name"] <| Impl.Create(Types.str, Maintenance.verify_artist))
+            .WithCommand("v2_test", 
+            Command.create "Test" [] <| Impl.Create(Maintenance2.test))

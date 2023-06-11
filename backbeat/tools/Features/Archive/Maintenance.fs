@@ -9,7 +9,7 @@ module Maintenance =
 
     let make_suggestion (flag: string) (id: SongId) (before: Song) (after: Song) : bool =
         let inline diff label a b = if a <> b then Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
-        Logging.Info(sprintf "Suggested metadata changes for %s" before.FormattedTitle)
+        Logging.Info(sprintf "Backbot has a suggestion for %s" before.FormattedTitle)
         diff "Artists" before.Artists after.Artists
         diff "Performers" before.OtherArtists after.OtherArtists
         diff "Remixers" before.Remixers after.Remixers
@@ -18,13 +18,13 @@ module Maintenance =
         diff "Formatted title" before.FormattedTitle after.FormattedTitle
         diff "Tags" before.Tags after.Tags
         Logging.Info(sprintf "Reason: %s" flag)
-        Logging.Info("\noptions ::\n 1 - Accept changes\n 2 - Mark for manual fix\n 3 - No correction needed")
+        Logging.Info("\noptions ::\n 1 - Make this change\n 2 - Queue for manual review\n 3 - No correction needed")
         let mutable option_chosen = None
         while option_chosen.IsNone do
             match Console.ReadKey().Key with
             | ConsoleKey.D1 -> option_chosen <- Some true
-            | ConsoleKey.D2 -> option_chosen <- Some false; Queue.append "songs-review" id
-            | ConsoleKey.D3 -> option_chosen <- Some false; Queue.append "songs-ignore" id
+            | ConsoleKey.D2 -> option_chosen <- Some false; Queue.append "song-review" id
+            | ConsoleKey.D3 -> option_chosen <- Some false; Queue.append "song-ignore" id
             | _ -> ()
         option_chosen.Value
 

@@ -9604,7 +9604,7 @@
     }, 
     "djtekinasomething/aiae": {
         "AlternativeTitles": [], 
-        "Artists": ["DJ'TEKINA／／SOMETHING"], 
+        "Artists": ["Yuyoyuppe"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -9613,7 +9613,7 @@
     }, 
     "djtekinasomething/internetbitch": {
         "AlternativeTitles": [], 
-        "Artists": ["DJTEKINA-SOMETHING"], 
+        "Artists": ["DJ'TEKINA//SOMETHING"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -9702,7 +9702,7 @@
         "Title": "Curtain Call Memories"
     }, 
     "djtottototto/vajra": {
-        "AlternativeTitles": ["伐折羅-vajra-"], 
+        "AlternativeTitles": ["伐折羅-vajra-", "伐折羅-Vajra-"], 
         "Artists": ["DJ TOTTO", "TOTTO"], 
         "OtherArtists": [], 
         "Remixers": [], 
@@ -9712,12 +9712,12 @@
     }, 
     "djtottovstotto/vajra": {
         "AlternativeTitles": [], 
-        "Artists": ["DJ TOTTO VS TOTTO"], 
+        "Artists": ["DJ TOTTO", "TOTTO"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "伐折羅-Vajra-"
+        "Title": "Vajra"
     }, 
     "djunk/walkitout": {
         "AlternativeTitles": [], 
@@ -9750,10 +9750,10 @@
         "AlternativeTitles": [], 
         "Artists": ["DJ Yoshitaka"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Ryu*"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "FLOWER (Ryu*Remix)"
+        "Title": "FLOWER (Ryu* Remix)"
     }, 
     "djyoshitaka/flowerxcrazydog": {
         "AlternativeTitles": [], 
@@ -10917,13 +10917,13 @@
         "Title": "Victims of Contingency"
     }, 
     "epsilon114/aakenrannoutakatagashikuepsilonremix": {
-        "AlternativeTitles": [], 
-        "Artists": ["Epsilon114"], 
+        "AlternativeTitles": ["Aa Kenran no Utakata ga Shiku (Epsilon Remix)", "嗚呼 絢爛の泡沫が如く (Epsilon Remix)"], 
+        "Artists": ["Uinyasu", "Occhoko Bunny"], 
         "OtherArtists": [], 
         "Remixers": ["Epsilon114"], 
-        "Source": null, 
+        "Source": "Sen no Hatou, Tsukisome no Kouki", 
         "Tags": [], 
-        "Title": "Aa Kenran no Utakata ga Shiku (Epsilon Remix)"
+        "Title": "Aa Kenran no Yume ga Gotoku (Epsilon Remix)"
     }, 
     "equilibrium/wirtshausgaudi": {
         "AlternativeTitles": [], 
@@ -11196,13 +11196,13 @@
         "Title": "Coffin dance (Hard Renaissance)"
     }, 
     "evo/addiction": {
-        "AlternativeTitles": [], 
+        "AlternativeTitles": ["Addiction"], 
         "Artists": ["EVO+"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Addiction"
+        "Title": "[A]ddiction"
     }, 
     "evoke/edison": {
         "AlternativeTitles": [], 
@@ -35218,7 +35218,7 @@
     }, 
     "theoralcigarettes/shineholder": {
         "AlternativeTitles": [], 
-        "Artists": ["THE ORAL CIGARETTES「"], 
+        "Artists": ["THE ORAL CIGARETTES"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -35515,12 +35515,12 @@
     }, 
     "tiltsixcamelliasrefractionofthestoryremix/miraiprism": {
         "AlternativeTitles": [], 
-        "Artists": ["tilt-six (Camellia's Refraction of the story Remix)"], 
+        "Artists": ["tilt-six"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Camellia"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Mirai Prism"
+        "Title": "Mirai Prism (Camellia's Refraction of the story Remix)"
     }, 
     "timgeofffollinsoftwarecreations/level1": {
         "AlternativeTitles": [], 
@@ -35670,10 +35670,10 @@
         "AlternativeTitles": [], 
         "Artists": ["tofubeats"], 
         "OtherArtists": ["LIZ"], 
-        "Remixers": [], 
+        "Remixers": ["Pa"], 
         "Source": null, 
         "Tags": ["future", "bass", "candyland", "candy", "land"], 
-        "Title": "CANDYYYLAND - Pa's Lam System Remix"
+        "Title": "CANDYYYLAND (Pa's Lam System Remix)"
     }, 
     "togameyukaritamura/aitomakoto": {
         "AlternativeTitles": [], 
@@ -36253,7 +36253,7 @@
     }, 
     "tpazoliteroughsketch/astronasty": {
         "AlternativeTitles": [], 
-        "Artists": ["t+pazolite/RoughSketch"], 
+        "Artists": ["t+pazolite", "RoughSketch"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -36262,7 +36262,7 @@
     }, 
     "tpazolitewithsiromaru/chambarising": {
         "AlternativeTitles": [], 
-        "Artists": ["t+pazolite with siromaru"], 
+        "Artists": ["t+pazolite", "siromaru"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -36766,9 +36766,9 @@
     }, 
     "u2remixedbyrider/missingbanquet": {
         "AlternativeTitles": [], 
-        "Artists": ["U2 Remixed by rider"], 
+        "Artists": ["U2"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["rider"], 
         "Source": null, 
         "Tags": [], 
         "Title": "Missing Banquet"
@@ -37437,7 +37437,7 @@
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Eurocore MVP (Short Cut)"
+        "Title": "Eurocore MVP"
     }, 
     "venetiansnares/martystardis": {
         "AlternativeTitles": [], 
