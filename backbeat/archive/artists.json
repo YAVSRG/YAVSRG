@@ -824,10 +824,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": true
         }, 
-		"Seiryu": {
-			"Alternatives": ["青龍"],
+        "Seiryu": {
+            "Alternatives": ["青龍"], 
             "IsJapaneseFullName": false
-		},
+        }, 
         "Serizawa Yuu": {
             "Alternatives": [], 
             "IsJapaneseFullName": true
@@ -1074,6 +1074,10 @@
         }, 
         "fripSide": {
             "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "gmtn.": {
+            "Alternatives": ["witch's slave", "gumtune"], 
             "IsJapaneseFullName": false
         }, 
         "goreshit": {

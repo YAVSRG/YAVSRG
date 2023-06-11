@@ -14,8 +14,8 @@ module Maintenance2 =
 
     type ArtistsAndFeatures = ArtistFragment list * ArtistFragment list option
     module ArtistsAndFeatures =
-        let artists (a, f) = a |> List.map (function Verified v -> v | Artist a -> a)
-        let features (a, f) = Option.defaultValue [] f |> List.map (function Verified v -> v | Artist a -> a)
+        let artists (a, f) = a |> List.map (function Verified v -> v | Artist a -> a.Trim())
+        let features (a, f) = Option.defaultValue [] f |> List.map (function Verified v -> v | Artist a -> a.Trim())
         let flatten x = artists x @ features x
         let confident (a, f) =
             let mutable count1 = 0
@@ -68,7 +68,7 @@ module Maintenance2 =
             artist.Replace(matches.First().Value, "").Trim(), Some bracket_content
         else artist, None
     
-    let parse_artists_and_remixers (artist: string) : string list * string list * string list * bool =
+    let parse_artists_and_remixers (artist: string) : string list * string list * string list * string * bool =
         let p = parse_prod_and_features .>>. restOfLine false
 
         let artist, bracket = extract_bracket artist
@@ -77,6 +77,7 @@ module Maintenance2 =
         let mutable artists = [artist]
         let mutable performers = []
         let mutable confident = true
+        let mutable append_to_title = ""
 
         match bracket with
 
@@ -84,12 +85,17 @@ module Maintenance2 =
             match run p s with
             | Success((res, leftover), _, _) -> 
                 remixers <- ArtistsAndFeatures.flatten res
+                append_to_title <- "(" + s + ")"
                 if leftover <> "" then confident <- false
             | Failure(reason, _, _) -> confident <- false
 
         | Some s when s.ToLower().StartsWith("remix by ") || s.ToLower().StartsWith("remixed by ") || s.ToLower().StartsWith("edit by ") ->
-            remixers <- [s.Split(" by ", StringSplitOptions.TrimEntries).Last()]
-        | Some s -> Logging.Info(sprintf "Weird bracket text '%s'" s)
+            let remixer = s.Split(" by ", StringSplitOptions.TrimEntries).Last()
+            remixers <- [remixer]
+            append_to_title <- "(" + remixer + ")"
+        | Some s -> 
+            Logging.Info(sprintf "Weird bracket text '%s'" s)
+            confident <- false
         | None -> ()
 
         match run p artist with
@@ -97,10 +103,12 @@ module Maintenance2 =
             artists <- ArtistsAndFeatures.artists res
             performers <- ArtistsAndFeatures.features res
             if not (ArtistsAndFeatures.confident res) then confident <- false
-            if leftover <> "" then confident <- false
+            if leftover <> "" then 
+                confident <- false
+                artists <- (List.head artists).Trim() + " " + leftover.Trim() :: List.tail artists
         | Failure(reason, _, _) -> ()
 
-        artists, performers, remixers, confident
+        artists, performers, remixers, append_to_title, confident
 
     let make_suggestion (flag: string) (id: SongId) (before: Song) (after: Song) : bool =
         let inline diff label a b = if a <> b then Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
@@ -126,9 +134,15 @@ module Maintenance2 =
     let test() =
         for s in songs.Keys do
             let song = songs.[s]
-            if song.Artists.Length = 1 then
-                let artists, features, remixers, confident = parse_artists_and_remixers song.Artists.[0]
-                let suggestion = { song with Artists = artists; OtherArtists = features; Remixers = remixers }
+            if song.Artists.Length = 1 && song.Remixers.Length = 0 && song.OtherArtists.Length = 0 then
+                let artists, features, remixers, append_to_title, confident = parse_artists_and_remixers song.Artists.[0]
+                let suggestion = 
+                    { song with 
+                        Artists = artists
+                        OtherArtists = features
+                        Remixers = remixers
+                        Title = if append_to_title <> "" then song.Title.Trim() + " " + append_to_title else song.Title
+                    }
                 if suggestion <> song then
                     if confident || make_suggestion "artist_splitter" s song suggestion then
                         songs.[s] <- suggestion
