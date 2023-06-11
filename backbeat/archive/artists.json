@@ -52,6 +52,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Avicii": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "Avril Lavigne": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -69,6 +73,10 @@
             "IsJapaneseFullName": false
         }, 
         "BRADIO": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "BROCKHAMPTON": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -105,6 +113,10 @@
             "IsJapaneseFullName": false
         }, 
         "Blitz Lunar": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Boys Like Girls": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -160,6 +172,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Chroma": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "Chunk! No, Captain Chunk!": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -201,6 +217,10 @@
             "IsJapaneseFullName": false
         }, 
         "DAOKO": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "DJ DiA": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -296,6 +316,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Endorfin.": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "Evanescence": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -384,7 +408,15 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Game Freak": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "Getty": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Giga-P": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -461,6 +493,10 @@
             "IsJapaneseFullName": true
         }, 
         "Hirano Aya": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Hirasawa Susumu": {
             "Alternatives": [], 
             "IsJapaneseFullName": true
         }, 
@@ -576,6 +612,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "KASAI HARCORES": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "KOAN Sound": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -592,13 +632,25 @@
             "Alternatives": [], 
             "IsJapaneseFullName": true
         }, 
+        "Kaijura Yuki": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
         "Kanae Asaba": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Kaneko Chiharu": {
             "Alternatives": [], 
             "IsJapaneseFullName": true
         }, 
         "Kause & Konception": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
+        }, 
+        "Kawada Mami": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
         }, 
         "Kayano Ai": {
             "Alternatives": [], 
@@ -644,6 +696,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Kommisar": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "Kubo Yurika": {
             "Alternatives": [], 
             "IsJapaneseFullName": true
@@ -676,6 +732,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Lite Show Magic": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "M2U": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -692,6 +752,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "MY FIRST STORY": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "MYTH & ROID": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -700,9 +764,17 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Masayoshi Minoshima": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
         "Megurine Luka": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
+        }, 
+        "Meguro Shoji": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
         }, 
         "Memme": {
             "Alternatives": [], 
@@ -712,6 +784,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Mimori Suzuko": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
         "Minase Inori": {
             "Alternatives": [], 
             "IsJapaneseFullName": true
@@ -720,7 +796,15 @@
             "Alternatives": [], 
             "IsJapaneseFullName": true
         }, 
+        "Mizuki Nana": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
         "Momoi Haruko": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Morimori Atsushi": {
             "Alternatives": [], 
             "IsJapaneseFullName": true
         }, 
@@ -740,9 +824,25 @@
             "Alternatives": [], 
             "IsJapaneseFullName": true
         }, 
+        "Nakamura Meiko": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Namiki Manabu": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Nana Takahashi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
         "Nanahira": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
+        }, 
+        "Nanawo Akari": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
         }, 
         "Nekomata Master": {
             "Alternatives": [], 
@@ -820,11 +920,19 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Ray": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "Reol": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
         "Roselia": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "RoughSketch": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -840,7 +948,19 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "SHIKI": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "SHK": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "SILENT SIREN": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "SOUND HOLIC": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -859,6 +979,10 @@
         "Samir & Viktor": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
+        }, 
+        "Sasaki Sayaka": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
         }, 
         "Savant": {
             "Alternatives": [], 
@@ -884,6 +1008,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Skan": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "Sleeping With Sirens": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -896,6 +1024,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Sota Fujimori": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
         "Such": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -905,6 +1037,18 @@
             "IsJapaneseFullName": true
         }, 
         "T&S seq. factory": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "TAG": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "TAK": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "THE ORAL CIGARETTES": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -951,6 +1095,10 @@
         "Terui Haruki": {
             "Alternatives": [], 
             "IsJapaneseFullName": true
+        }, 
+        "The Dillinger Escape Plan": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
         }, 
         "The Flashbulb": {
             "Alternatives": [], 
@@ -1036,11 +1184,23 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Wakeshima Kanon": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
+        "Waki Azumi": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
         "Warak": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
         "Y&Co.": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "YMCK": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -1056,9 +1216,17 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "Yousei Teikoku": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
+        }, 
         "Yuikonnu": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
+        }, 
+        "Yuki Yumeno": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": true
         }, 
         "Yunomi": {
             "Alternatives": [], 
@@ -1100,6 +1268,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "aran": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "ave;new": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -1113,6 +1285,10 @@
             "IsJapaneseFullName": false
         }, 
         "cYsmix": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "cosMo@BousouP": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -1152,9 +1328,17 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "itaojirou": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "kamome sano": {
             "Alternatives": [], 
             "IsJapaneseFullName": true
+        }, 
+        "katagiri": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
         }, 
         "kors k": {
             "Alternatives": [], 
@@ -1168,6 +1352,10 @@
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
+        "nano": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
         "nomico": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
@@ -1177,6 +1365,14 @@
             "IsJapaneseFullName": false
         }, 
         "saradisk": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "sasakure.UK": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "senya": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
@@ -1193,6 +1389,10 @@
             "IsJapaneseFullName": false
         }, 
         "technoplanet": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "tomppabeats": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 
