@@ -30,6 +30,17 @@ type VerifiedArtists =
                 let split = a.Split(' ', 2)
                 d.Add((split.[1] + " " + split.[0]).ToLower(), a)
         d
+    member this.CreateMappingCaseSensitive() =
+        let d = Dictionary<string, string>()
+        for a in this.Artists.Keys do
+            let v = this.Artists.[a]
+            d.Add(a, a)
+            for alt in v.Alternatives do
+                d.Add(alt, a)
+            if v.IsJapaneseFullName then
+                let split = a.Split(' ', 2)
+                d.Add((split.[1] + " " + split.[0]), a)
+        d
 
 type SongId = string
 [<Json.AutoCodec>]
