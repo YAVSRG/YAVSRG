@@ -105,7 +105,7 @@ module Maintenance2 =
             if not (ArtistsAndFeatures.confident res) then confident <- false
             if leftover <> "" then 
                 confident <- false
-                artists <- (List.head artists).Trim() + " " + leftover.Trim() :: List.tail artists
+                artists <- (List.head artists) + leftover :: List.tail artists
         | Failure(reason, _, _) -> ()
 
         artists, performers, remixers, append_to_title, confident

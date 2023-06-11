@@ -6742,8 +6742,8 @@
     }, 
     "christianiceftratzingerco/mostrideltubo": {
         "AlternativeTitles": [], 
-        "Artists": ["Christian Ice ft Ratzinger & Co."], 
-        "OtherArtists": [], 
+        "Artists": ["Christian Ice"], 
+        "OtherArtists": ["Ratzinger & Friends"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -9946,7 +9946,7 @@
     }, 
     "dougalgammervsmickeyskedaleandjenna/guitarherovsthroughthedarkness": {
         "AlternativeTitles": [], 
-        "Artists": ["Dougal & Gammer vs. Mickey Skedale and Jenna"], 
+        "Artists": ["Dougal & Gammer", "Mickey Skedale", "Jenna"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -11737,7 +11737,7 @@
     }, 
     "fitzthetantrums/handclap": {
         "AlternativeTitles": [], 
-        "Artists": ["Fitz & the Tantrums"], 
+        "Artists": ["Fitz and the Tantrums"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -13564,7 +13564,7 @@
     }, 
     "hachikujimayoikatouemiri/kaerimichi": {
         "AlternativeTitles": [], 
-        "Artists": ["Hachikuji Mayoi (Katou Emiri)"], 
+        "Artists": ["Katou Emiri"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -14482,8 +14482,8 @@
     }, 
     "higedriverjoinshullynimo/papipuyeah": {
         "AlternativeTitles": [], 
-        "Artists": ["Hige Driver join. shully & Nimo"], 
-        "OtherArtists": [], 
+        "Artists": ["Hige Driver"], 
+        "OtherArtists": ["shully", "Nimo"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": ["Denpa", "BEMANI", "beatmania", "IIDX", "22", "PENDUAL", "jubeat", "prop", "REFLEC", "BEAT", "groovin'!!", "Upper", "SOUND", "VOLTEX", "III", "GRAVITY", "WARS", "DanceDanceRevolution", "pop'n", "music", "éclale"], 
@@ -19729,7 +19729,7 @@
     }, 
     "leevitheleavings/teuvomaanteidenkuningasnightcoreremix": {
         "AlternativeTitles": [], 
-        "Artists": ["Leevi & The Leavings"], 
+        "Artists": ["Leevi and the Leavings"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -21223,8 +21223,8 @@
     }, 
     "manwithamissionfeattakuma10feet/database": {
         "AlternativeTitles": [], 
-        "Artists": ["Man with a Mission feat. TAKUMA (10-FEET)"], 
-        "OtherArtists": [], 
+        "Artists": ["MAN WITH A MISSION"], 
+        "OtherArtists": ["TAKUMA"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -21286,7 +21286,7 @@
     }, 
     "marcodelhornodjswervepmoney/horiddim": {
         "AlternativeTitles": [], 
-        "Artists": ["Marco Del Horno/DJ Swerve/P-Money"], 
+        "Artists": ["Marco Del Horno", "DJ Swerve", "P-Money"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -21655,7 +21655,7 @@
     }, 
     "matsunagamahofromstylips/resonantworld": {
         "AlternativeTitles": [], 
-        "Artists": ["Matsunaga Maho (from StylipS)"], 
+        "Artists": ["Matsunaga Maho"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "フェアリーフェンサーエフ", 
@@ -21781,10 +21781,10 @@
     }, 
     "megamanx6ostakemikimura/blazeheatnixstage": {
         "AlternativeTitles": [], 
-        "Artists": ["Mega Man X6 OST / Akemi Kimura"], 
+        "Artists": ["Akemi Kimura"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
+        "Source": "Mega Man X6 OST", 
         "Tags": [], 
         "Title": "Blaze Heatnix Stage"
     }, 
@@ -21952,8 +21952,8 @@
     }, 
     "metamorphosefeaturingishidayoko/overthetestamentver1": {
         "AlternativeTitles": [], 
-        "Artists": ["Metamorphose featuring Ishida Yoko"], 
-        "OtherArtists": [], 
+        "Artists": ["Metamorphose"], 
+        "OtherArtists": ["uring Ishida Yoko"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -23185,7 +23185,7 @@
     }, 
     "moviesmoimoixceondai/aogakierutoki": {
         "AlternativeTitles": [], 
-        "Artists": ["movies (moimoi×Xceon×Dai.)"], 
+        "Artists": ["moimoi", "Xceon", "Dai."], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -23662,7 +23662,7 @@
     }, 
     "naledelweiss/hugethreatscene4": {
         "AlternativeTitles": [], 
-        "Artists": ["Nal / Edelweiss"], 
+        "Artists": ["Nal", "Edelweiss"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -24220,12 +24220,12 @@
     }, 
     "nardarrangedbytatsuyanishiwaki/20novemberfinaledit": {
         "AlternativeTitles": [], 
-        "Artists": ["N.A.R.D (arranged by TATSUYA NISHIWAKI)"], 
+        "Artists": ["N.A.R.D", "TATSUYA NISHIWAKI"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "20,november ~FINAL EDIT~"
+        "Title": "20,november"
     }, 
     "narumikyoko/menimenimanimani": {
         "AlternativeTitles": ["メニメニマニマニ"], 
@@ -25264,12 +25264,12 @@
     }, 
     "noisestormfluxxyremix/justaregularcrabravenothingtoseeherefolks": {
         "AlternativeTitles": [], 
-        "Artists": ["Noisestorm (Fluxxy remix)"], 
+        "Artists": ["Noisestorm"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Fluxxy remix"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "just a regular crab rave, nothing to see here folks"
+        "Title": "just a regular crab rave, nothing to see here folks (Fluxxy remix)"
     }, 
     "noisia/alphacentauri": {
         "AlternativeTitles": [], 
@@ -25867,7 +25867,7 @@
     }, 
     "onemanarmyandtheundeadquartet/saintlucifer": {
         "AlternativeTitles": [], 
-        "Artists": ["One Man Army And The Undead Quartet"], 
+        "Artists": ["One Man Army and the Undead Quartet"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -26785,12 +26785,12 @@
     }, 
     "pi3akaanubasuanubasu/nemesis": {
         "AlternativeTitles": [], 
-        "Artists": ["pi/3 a.k.a.anubasu-anubasu"], 
+        "Artists": ["anubasu-anubasu"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["pi/3"], 
         "Source": null, 
         "Tags": ["Psychadelic", "Trance"], 
-        "Title": "Nemesis"
+        "Title": "Nemesis (pi/3's Remix)"
     }, 
     "pianoid/wantspeed": {
         "AlternativeTitles": [], 
@@ -27473,7 +27473,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
-        "Tags": [], 
+        "Tags": ["Virt", "SnappleMan"], 
         "Title": "Full Mast"
     }, 
     "presti/rainbowafterrain": {
@@ -28531,7 +28531,7 @@
     }, 
     "retropolitaliensmsdadaco/musicplayer": {
         "AlternativeTitles": [], 
-        "Artists": ["Retropolitaliens(Ms.+Dadaco)"], 
+        "Artists": ["Retropolitaliens (Ms.+Dadaco)"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -28999,7 +28999,7 @@
     }, 
     "rottenemoticon/manitssoloudinhere": {
         "AlternativeTitles": [], 
-        "Artists": ["Rotten & Emoticon"], 
+        "Artists": ["Rotteen", "Emoticon"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -29035,8 +29035,8 @@
     }, 
     "roundtablefeaturingnino/groovinmagic": {
         "AlternativeTitles": [], 
-        "Artists": ["ROUND TABLE featuring Nino"], 
-        "OtherArtists": [], 
+        "Artists": ["ROUND TABLE"], 
+        "OtherArtists": ["uring Nino"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -29260,7 +29260,7 @@
     }, 
     "ryotokirinsatourinatooogameasuka/shiawasegraffiti": {
         "AlternativeTitles": [], 
-        "Artists": ["Ryo to Kirin (Satou Rina to Oogame Asuka)"], 
+        "Artists": ["Satou Rina", "Oogame Asuka"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -29701,7 +29701,7 @@
     }, 
     "sakikomatsuokaikumihayama/akuryousanirasshai": {
         "AlternativeTitles": [], 
-        "Artists": ["Sakiko Matsuoka(Ikumi Hayama)"], 
+        "Artists": ["Ikumi Hayama"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -29935,7 +29935,7 @@
     }, 
     "sakwellow/curtaincall": {
         "AlternativeTitles": [], 
-        "Artists": ["sak + wellow"], 
+        "Artists": ["sak", "wellow"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -31528,7 +31528,7 @@
     }, 
     "shironxi/magicaltoybox": {
         "AlternativeTitles": [], 
-        "Artists": ["Shiron + xi"], 
+        "Artists": ["Shiron", "xi"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "VOEZ", 
@@ -33022,12 +33022,12 @@
     }, 
     "stereomanyunomikotonohouseremix/cinderellababy": {
         "AlternativeTitles": [], 
-        "Artists": ["Stereoman & Yunomi (KOTONOHOUSE remix)"], 
+        "Artists": ["Stereoman", "Yunomi"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["KOTONOHOUSE remix"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Cinderella Baby"
+        "Title": "Cinderella Baby (KOTONOHOUSE remix)"
     }, 
     "steriogram/walkietalkieman": {
         "AlternativeTitles": [], 
@@ -33346,28 +33346,28 @@
     }, 
     "supersmashbrosbrawlostjunsenoue/angelislandzone": {
         "AlternativeTitles": [], 
-        "Artists": ["Super Smash Bros. Brawl OST / Jun Senoue"], 
+        "Artists": ["Jun Senoue"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
+        "Source": "Super Smash Bros. Brawl OST", 
         "Tags": [], 
         "Title": "Angel Island Zone"
     }, 
     "supersmashbrosbrawlostmotoisakuraba/airshiptheme": {
         "AlternativeTitles": [], 
-        "Artists": ["Super Smash Bros. Brawl OST / Motoi Sakuraba"], 
+        "Artists": ["Motoi Sakuraba"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
+        "Source": "Super Smash Bros. Brawl OST", 
         "Tags": [], 
         "Title": "Airship Theme"
     }, 
     "supersmashbrosbrawlostyuzokoshiro/mainthemethelegendofzelda": {
         "AlternativeTitles": [], 
-        "Artists": ["Super Smash Bros. Brawl OST / Yuzo Koshiro"], 
+        "Artists": ["Yuzo Koshiro"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
+        "Source": "Super Smash Bros. Brawl OST", 
         "Tags": [], 
         "Title": "Main Theme (The Legend of Zelda)"
     }, 
@@ -33382,10 +33382,10 @@
     }, 
     "supersmashbrososthirokazuando/endingpointmasterhandstage": {
         "AlternativeTitles": [], 
-        "Artists": ["Super Smash Bros. OST / Hirokazu Ando"], 
+        "Artists": ["Hirokazu Ando"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
+        "Source": "Super Smash Bros. OST", 
         "Tags": [], 
         "Title": "Ending Point (Master Hand Stage)"
     }, 
@@ -34273,7 +34273,7 @@
     }, 
     "tdstwojadoopasra/firmaozobombardcut": {
         "AlternativeTitles": [], 
-        "Artists": ["TDS (Twoja Doopa Sra)"], 
+        "Artists": ["Twoja Doopa Sra"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -34642,7 +34642,7 @@
     }, 
     "tetsuyashibatacapcom/dayofthemanches": {
         "AlternativeTitles": [], 
-        "Artists": ["Tetsuya Shibata / Capcom"], 
+        "Artists": ["Tetsuya Shibata"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -34896,10 +34896,10 @@
         "AlternativeTitles": [], 
         "Artists": ["The FiNATTiCZ"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["BilliumMoto"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Don't Drop that Thun thun"
+        "Title": "Don't Drop that Thun Thun (BilliumMoto Edit)"
     }, 
     "theflashbulb/antidm": {
         "AlternativeTitles": [], 
@@ -35317,7 +35317,7 @@
     }, 
     "thesupermariobros2tsmb2/penger": {
         "AlternativeTitles": [], 
-        "Artists": ["TheSuperMarioBros2 (TSMB2)"], 
+        "Artists": ["TheSuperMarioBros2"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -35452,10 +35452,10 @@
     }, 
     "timgeofffollinsoftwarecreations/level1": {
         "AlternativeTitles": [], 
-        "Artists": ["Tim & Geoff Follin / Software Creations"], 
+        "Artists": ["Tim Follin", "Geoff Follin"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
+        "Source": "Silver Surfer", 
         "Tags": [], 
         "Title": "Level 1"
     }, 
@@ -35479,12 +35479,12 @@
     }, 
     "tinacousinsgammergspencerremix/hymn": {
         "AlternativeTitles": [], 
-        "Artists": ["Tina Cousins (Gammer & G-Spencer Remix)"], 
+        "Artists": ["Tina Cousins"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Gammer", "G-Spencer Remix"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Hymn"
+        "Title": "Hymn (Gammer & G-Spencer Remix)"
     }, 
     "titancube/tripodbaby": {
         "AlternativeTitles": [], 
@@ -35587,7 +35587,7 @@
     }, 
     "toddduanecreativecarnage/overture": {
         "AlternativeTitles": [], 
-        "Artists": ["Todd Duane / Creative Carnage"], 
+        "Artists": ["Todd Duane"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -37495,9 +37495,9 @@
     }, 
     "vicetoneremixedveskgreenqingcaitom/astronomiamotorcyclegang": {
         "AlternativeTitles": [], 
-        "Artists": ["Vicetone remixed VESK GREEN QingCai / TOm"], 
+        "Artists": ["Vicetone", "Tony Igy"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["VESK GREEN", "TØm"], 
         "Source": null, 
         "Tags": [], 
         "Title": "Astronomia (Motorcycle Gang)"
@@ -40393,7 +40393,7 @@
     }, 
     "zytokineaki/silver": {
         "AlternativeTitles": [], 
-        "Artists": ["ZYTOKINE(aki)"], 
+        "Artists": ["ZYTOKINE"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
