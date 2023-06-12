@@ -30,10 +30,10 @@ module Charts =
         | Any of string
 
     let parse_query =
-        let artist = spaces >>. (pstring "artist:" <|> pstring "a:")
-        let title = spaces >>. (pstring "title:" <|> pstring "t:")
-        let charter = spaces >>. (pstring "charter:" <|> pstring "creator:" <|> pstring "mapper:" <|> pstring "m:" <|> pstring "c:")
-        let words = manyCharsTill anyChar (followedBy (artist <|> title <|> charter) <|> eof)
+        let artist = (pstring "artist:" <|> pstring "a:")
+        let title = (pstring "title:" <|> pstring "t:")
+        let charter = (pstring "charter:" <|> pstring "creator:" <|> pstring "mapper:" <|> pstring "m:" <|> pstring "c:")
+        let words = manyCharsTill anyChar (followedBy (artist <|> title <|> charter) <|> eof) |>> fun s -> s.Trim()
 
         let parser = 
             words .>>. many ((artist >>. words |>> Artist) <|> (title >>. words |>> Title) <|> (charter >>. words |>> Charter))

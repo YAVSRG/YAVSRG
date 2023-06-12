@@ -1,1 +1,1 @@
-﻿added $online and $users admin commands
+﻿better chart search
