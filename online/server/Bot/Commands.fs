@@ -26,14 +26,15 @@ module Commands =
                     return ()
                 }
             match command with
+            | "s"
             | "search" ->
                 match args with
 
                 | [] -> 
-                    do! reply "Enter a search term, for example: $search PLANET//SHAPER"
+                    do! reply "Enter a search term, for example: search PLANET//SHAPER artist:Camellia creator:Evening"
 
                 | query :: _ -> 
-                    let matches = Charts.search_for_charts query |> List.ofSeq
+                    let matches = Charts.search query |> List.ofSeq
                     match matches with
                     | [] -> 
                         do! reply "No matches found."
