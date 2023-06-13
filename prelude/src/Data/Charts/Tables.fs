@@ -34,6 +34,7 @@ type Table =
         Keymode: int
         RulesetId: string
         Levels: ResizeArray<Level>
+        Version: int
     }
 
     // Levels
@@ -120,6 +121,8 @@ module Table =
             fun (s: string) -> regex.Replace(s.ToLowerInvariant(), "").Trim().Replace(" ", "-")
         strip name
 
+    let generate_table_version() = System.DateTime.UtcNow.ToString("yyyyMMdd") |> int
+
     let table_path () = Path.Combine(getDataPath "Data", "Tables")
     let table_pathf f = Path.Combine(getDataPath "Data", "Tables", f)
 
@@ -163,6 +166,7 @@ module Table =
                         Keymode = keymode
                         RulesetId = Ruleset.hash ruleset
                         Levels = ResizeArray()
+                        Version = generate_table_version()
                     }
             }
         loaded.Add _current.Value
