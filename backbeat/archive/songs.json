@@ -10,15 +10,6 @@
     }, 
     "/-1": {
         "AlternativeTitles": [], 
-        "Artists": ["梁静茹"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "暖暖"
-    }, 
-    "/-10": {
-        "AlternativeTitles": [], 
         "Artists": ["卓依婷"], 
         "OtherArtists": [], 
         "Remixers": [], 
@@ -26,7 +17,7 @@
         "Tags": [], 
         "Title": "東南西北風"
     }, 
-    "/-11": {
+    "/-10": {
         "AlternativeTitles": [], 
         "Artists": ["楊採鈺"], 
         "OtherArtists": [], 
@@ -35,7 +26,7 @@
         "Tags": [], 
         "Title": "少年英雄小那咤"
     }, 
-    "/-12": {
+    "/-11": {
         "AlternativeTitles": [], 
         "Artists": [""], 
         "OtherArtists": [], 
@@ -44,7 +35,7 @@
         "Tags": [], 
         "Title": ""
     }, 
-    "/-13": {
+    "/-12": {
         "AlternativeTitles": [], 
         "Artists": ["銀臨"], 
         "OtherArtists": [], 
@@ -53,7 +44,7 @@
         "Tags": [], 
         "Title": "牽絲戲"
     }, 
-    "/-14": {
+    "/-13": {
         "AlternativeTitles": [], 
         "Artists": ["麻枝准"], 
         "OtherArtists": [], 
@@ -62,7 +53,7 @@
         "Tags": [], 
         "Title": "終わりの世界から"
     }, 
-    "/-15": {
+    "/-14": {
         "AlternativeTitles": [], 
         "Artists": ["鄧超"], 
         "OtherArtists": [], 
@@ -71,7 +62,7 @@
         "Tags": [], 
         "Title": "無敵"
     }, 
-    "/-16": {
+    "/-15": {
         "AlternativeTitles": [], 
         "Artists": ["みかん汁ふりかけ"], 
         "OtherArtists": [], 
@@ -80,7 +71,7 @@
         "Tags": [], 
         "Title": "星が降らない街"
     }, 
-    "/-17": {
+    "/-16": {
         "AlternativeTitles": [], 
         "Artists": ["周杰倫"], 
         "OtherArtists": [], 
@@ -89,7 +80,7 @@
         "Tags": [], 
         "Title": "龍戰騎士"
     }, 
-    "/-2": {
+    "/-17": {
         "AlternativeTitles": [], 
         "Artists": ["王亞民"], 
         "OtherArtists": [], 
@@ -98,7 +89,7 @@
         "Tags": [], 
         "Title": "穿越"
     }, 
-    "/-3": {
+    "/-2": {
         "AlternativeTitles": [], 
         "Artists": ["米倉千尋"], 
         "OtherArtists": [], 
@@ -107,7 +98,7 @@
         "Tags": [], 
         "Title": "フェアリーテイル - 約束の日 -"
     }, 
-    "/-4": {
+    "/-3": {
         "AlternativeTitles": [], 
         "Artists": ["森永真由美"], 
         "OtherArtists": [], 
@@ -116,7 +107,7 @@
         "Tags": [], 
         "Title": "華鳥風月"
     }, 
-    "/-5": {
+    "/-4": {
         "AlternativeTitles": [], 
         "Artists": ["幽閉サテライト"], 
         "OtherArtists": [], 
@@ -125,7 +116,7 @@
         "Tags": [], 
         "Title": "大地に咲く旋律"
     }, 
-    "/-6": {
+    "/-5": {
         "AlternativeTitles": [], 
         "Artists": ["ユーザー情報非公開"], 
         "OtherArtists": [], 
@@ -134,7 +125,7 @@
         "Tags": [], 
         "Title": "てーととおーおっおっびおーあっおぅてー"
     }, 
-    "/-7": {
+    "/-6": {
         "AlternativeTitles": [], 
         "Artists": ["紅薙 旅人"], 
         "OtherArtists": [], 
@@ -143,7 +134,7 @@
         "Tags": [], 
         "Title": "おてんば恋娘"
     }, 
-    "/-9": {
+    "/-7": {
         "AlternativeTitles": [], 
         "Artists": ["張敬軒"], 
         "OtherArtists": [], 
@@ -151,6 +142,15 @@
         "Source": null, 
         "Tags": [], 
         "Title": "吻得太逼真"
+    }, 
+    "/-8": {
+        "AlternativeTitles": [], 
+        "Artists": ["梁静茹"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "暖暖"
     }, 
     "/9420": {
         "AlternativeTitles": [], 
@@ -224,7 +224,7 @@
         "Tags": [], 
         "Title": "千年等一回 (劉洋 Cover)"
     }, 
-    "/cover-1": {
+    "/cover-2": {
         "AlternativeTitles": [], 
         "Artists": ["ゆうゆ"], 
         "OtherArtists": [], 
@@ -1438,15 +1438,6 @@
         "Source": "超次元ゲイム ネプテューヌ", 
         "Tags": ["THE", "ANIMATION", "Hyperdimension", "Neptunia", "ending", "ed", "tv", "size", "-_Ly0572_-"], 
         "Title": "Neptune*Sagashite"
-    }, 
-    "afiliasaga/neptunesagashite-2": {
-        "AlternativeTitles": [], 
-        "Artists": ["Afilia Saga"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Neptune Sagashite"
     }, 
     "afiliasaga/sml": {
         "AlternativeTitles": [], 
@@ -2772,22 +2763,22 @@
         "Title": "Metheus"
     }, 
     "ariableyes/": {
-        "AlternativeTitles": [], 
+        "AlternativeTitles": ["穢れなき薔薇十字"], 
         "Artists": ["Ariabl'eyeS"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "穢れなき薔薇十字"
+        "Title": "Kegarenaki Barajuuji"
     }, 
-    "ariableyes/-1": {
-        "AlternativeTitles": [], 
+    "ariableyes/-2": {
+        "AlternativeTitles": ["蒼月オラトリオ"], 
         "Artists": ["Ariabl'eyeS"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "蒼月オラトリオ"
+        "Title": "Sougetsu Oratorio"
     }, 
     "ariableyes/birdcageserenade": {
         "AlternativeTitles": [], 
@@ -2833,15 +2824,6 @@
         "Source": null, 
         "Tags": [], 
         "Title": "Senkou no Furea"
-    }, 
-    "ariableyes/sougetsuoratorio": {
-        "AlternativeTitles": [], 
-        "Artists": ["Ariabl'eyeS"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Sougetsu Oratorio"
     }, 
     "ariableyes/souzounoidea": {
         "AlternativeTitles": [], 
@@ -4283,15 +4265,6 @@
         "Tags": ["ExUsagi", "BlackY", "Yooh", "symphonic", "speed", "schranz", "sdvx", "KAC2013オリジナル楽曲コンテスト", "Original", "Song", "Contest", "C88", "Piano", "KERBEROX", "jubeat", "Qubell", "KAC", "2013", "ULTIMATE", "MEDLEY", "-HISTORIA", "SOUND", "VOLTEX-", "Emperor", "Side", "VOLTEX", "III", "GRAVITY", "WARS", "Monochrome", "Extended", "marathon", "HKCD-0010", "Symphonic", "Speed", "Schranz"], 
         "Title": "BLACK or WHITE?"
     }, 
-    "blackyoohsiromaru/blackorwhite-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["BlackYooh", "siromaru"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "BLACK or WHITE ?"
-    }, 
     "blackysbeatfloor/creutzwilknare": {
         "AlternativeTitles": [], 
         "Artists": ["BlackY's BEATFLOOR"], 
@@ -5091,15 +5064,6 @@
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Asairo no Kami Hikouki"
-    }, 
-    "camellia/asaironokamihikouki-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Camellia"], 
-        "OtherArtists": ["GUMI"], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
         "Title": "Asa Iro no Kami Hikouki"
     }, 
     "camellia/badboy2018": {
@@ -5298,15 +5262,6 @@
         "Remixers": ["Camellia"], 
         "Source": null, 
         "Tags": ["marathon", "CTCD-017", "Camellia", "\"Remixes\"", "Summary", "&", "VIPs", "02", "Hoto_Cocoa", "Hoto", "Cocoa", "Dreamwalker", "Dubstek", "o!m", "KMC"], 
-        "Title": "fastest crash (Camellia's ''paroxysmal'' Energetic Hitech Remix)"
-    }, 
-    "camellia/fastestcrashcamelliasparoxysmalenergetichitechremix-2": {
-        "AlternativeTitles": [], 
-        "Artists": ["Camellia"], 
-        "OtherArtists": [], 
-        "Remixers": ["Camellia"], 
-        "Source": null, 
-        "Tags": [], 
         "Title": "fastest crash (Camellia's \"paroxysmal\" Energetic Hitech Remix)"
     }, 
     "camellia/firsttownofthisjourney": {
@@ -5669,15 +5624,6 @@
         "Tags": ["electronic", "drumstep", "dubstep", "complextro", "かめるかめりあ", "CTCD-011", "C88", "KamelCamellia", "cametek"], 
         "Title": "PLANET//SHAPER"
     }, 
-    "camellia/planetshaper-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Camellia"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "PLANET SHAPER"
-    }, 
     "camellia/potentialcurve": {
         "AlternativeTitles": [], 
         "Artists": ["Camellia"], 
@@ -5768,7 +5714,7 @@
         "Tags": ["masaya", "oya", "phquase", "takahiro", "fukase", "marathon", "ませまてぃっく.ま+ま=まじっく!", "ばーさす!", "びっくりさせたらおこるよ!", "Jump", "Over!生物種", "-Hang", "Over!PHQ", "remix-", "気づいたら春夏秋冬"], 
         "Title": "Songs Compilation"
     }, 
-    "camellia/songscompilation-1": {
+    "camellia/songscompilation-2": {
         "AlternativeTitles": [], 
         "Artists": ["Camellia"], 
         "OtherArtists": [], 
@@ -7417,7 +7363,7 @@
     }, 
     "cosmo/hatsunemikunogekishou": {
         "AlternativeTitles": [], 
-        "Artists": ["cosMo"], 
+        "Artists": ["cosMo@BousouP"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -7426,12 +7372,12 @@
     }, 
     "cosmo/hatsunemikunoshoushitsugekijouban": {
         "AlternativeTitles": [], 
-        "Artists": ["cosMo"], 
+        "Artists": ["cosMo@BousouP"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Hatsune Miku no Shoushitsu -Gekijouban-"
+        "Title": "The Disappearance of Hatsune Miku"
     }, 
     "cosmobousoup/forultraplayers": {
         "AlternativeTitles": [], 
@@ -7462,21 +7408,21 @@
     }, 
     "cosmop/": {
         "AlternativeTitles": [], 
-        "Artists": ["cosMo＠暴走P"], 
+        "Artists": ["cosMo@BousouP"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
         "Title": "エンドマークに希望と涙を添えて"
     }, 
-    "cosmop/-2": {
-        "AlternativeTitles": [], 
-        "Artists": ["cosMo@暴走P"], 
+    "cosmop/-1": {
+        "AlternativeTitles": ["初音ミクの消失", "THE END OF HATSUNE MIKU", "Hatsune Miku no Shoushitsu"], 
+        "Artists": ["cosMo@BousouP"], 
         "OtherArtists": ["Hatsune Miku"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "初音ミクの消失"
+        "Title": "The Disappearance of Hatsune Miku"
     }, 
     "cowboybebopost/telephoneshopping": {
         "AlternativeTitles": [], 
@@ -9331,6 +9277,15 @@
         "Source": null, 
         "Tags": ["Gabber"], 
         "Title": "Pants"
+    }, 
+    "djsharpnel/papaverrhoeas": {
+        "AlternativeTitles": [], 
+        "Artists": ["DJ Sharpnel"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "PAPAVER RHOEAS"
     }, 
     "djsharpnel/shine": {
         "AlternativeTitles": [], 
@@ -12554,14 +12509,14 @@
         "Tags": [], 
         "Title": "極楽浄土"
     }, 
-    "garnidelia/-1": {
-        "AlternativeTitles": [], 
+    "garnidelia/-2": {
+        "AlternativeTitles": ["極楽浄土"], 
         "Artists": ["GARNiDELiA"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
-        "Tags": [], 
-        "Title": "極樂淨土"
+        "Tags": ["約束", "-Promise", "code-"], 
+        "Title": "Gokuraku Jodo"
     }, 
     "garnidelia/aikotoba": {
         "AlternativeTitles": ["アイコトバ"], 
@@ -12580,15 +12535,6 @@
         "Source": null, 
         "Tags": [], 
         "Title": "ambiguous"
-    }, 
-    "garnidelia/gokurakujodo": {
-        "AlternativeTitles": ["極楽浄土"], 
-        "Artists": ["GARNiDELiA"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": ["約束", "-Promise", "code-"], 
-        "Title": "Gokuraku Jodo"
     }, 
     "garnidelia/kyoukiranbu": {
         "AlternativeTitles": ["響喜乱舞"], 
@@ -29384,15 +29330,6 @@
         "Tags": ["22", "PENDUAL", "BEMANI", "KONAMI", "ELECTRO", "TECH", "EXIT", "TUNES", "DANCE", "PARTY", "beatnation", "summit", "2015", "Bruce", "Simple_Star"], 
         "Title": "Line 4 Ruin"
     }, 
-    "ryu/mirage": {
-        "AlternativeTitles": [], 
-        "Artists": ["Ryu*"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Mirage"
-    }, 
     "ryu/onebyone": {
         "AlternativeTitles": [], 
         "Artists": ["Ryu*"], 
@@ -29520,7 +29457,7 @@
         "Title": "Go Beyond!!"
     }, 
     "s/bokurawaimanonakade": {
-        "AlternativeTitles": ["僕らは今のなかで(TVサイズ)"], 
+        "AlternativeTitles": ["僕らは今のなかで"], 
         "Artists": ["μ's"], 
         "OtherArtists": [], 
         "Remixers": [], 
@@ -29529,7 +29466,7 @@
         "Title": "Bokura wa Ima no Naka de"
     }, 
     "s/korekaranosomeday": {
-        "AlternativeTitles": ["これからのSomeday(TVサイズ)"], 
+        "AlternativeTitles": ["これからのSomeday"], 
         "Artists": ["μ's"], 
         "OtherArtists": [], 
         "Remixers": [], 
@@ -30043,7 +29980,7 @@
     }, 
     "samplingmastersmega/route80s": {
         "AlternativeTitles": [], 
-        "Artists": ["sampling masters MEGA"], 
+        "Artists": ["SamplingMasters MEGA"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -30615,15 +30552,6 @@
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Sore wa Chiisa na Hikari no Youna"
-    }, 
-    "sayuri/sorewachiisanahikarinoyouna-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Sayuri"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
         "Title": "Sore wa Chiisana Hikari no Youna"
     }, 
     "sayurimyfirststory/reimei": {
@@ -30906,7 +30834,7 @@
         "Title": "The First Part of Touhou EX Boss Rush!!"
     }, 
     "senpi/touhouexbossrushakouhen": {
-        "AlternativeTitles": ["東方EXボスラッシュ！！＋α後編"], 
+        "AlternativeTitles": ["東方EXボスラッシュ!!+α後編"], 
         "Artists": ["Senpi-"], 
         "OtherArtists": [], 
         "Remixers": [], 
@@ -30938,7 +30866,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "東方Project", 
-        "Tags": ["Touhou", "東方紅魔郷", "～", "the", "Embodiment", "of", "Scarlet", "Devil", "The", "Day", "Magic", "Was", "Born", "Yuuhei", "パチュリーノーレッジ", "Patchouli", "Knowledge"], 
+        "Tags": ["Touhou", "東方紅魔郷", "~", "the", "Embodiment", "of", "Scarlet", "Devil", "The", "Day", "Magic", "Was", "Born", "Yuuhei", "パチュリーノーレッジ", "Patchouli", "Knowledge"], 
         "Title": "Mahou ga Umareta Hi"
     }, 
     "senya/mangekyou": {
@@ -31121,14 +31049,14 @@
         "Tags": [], 
         "Title": "MP5"
     }, 
-    "shadeempire/ashstatuesforattang": {
+    "shadeempire/ashstatues": {
         "AlternativeTitles": [], 
         "Artists": ["Shade Empire"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Ash Statues (For ATTang)"
+        "Title": "Ash Statues"
     }, 
     "shadowofintent/themadtyrantsbetrayal": {
         "AlternativeTitles": [], 
@@ -31256,15 +31184,6 @@
         "Tags": ["Vocaloid", "mafumafu", "IA", "Narcissu", "Oracle", "Fycho", "Kawaiwkyik", "RLC", "Icing_wind", "victorica_db", "Simple_Star", "Rumia-", "Xinely"], 
         "Title": "Kakushigoto"
     }, 
-    "sharpnelsounds/papaverrhoeas": {
-        "AlternativeTitles": [], 
-        "Artists": ["SHARPNEL SOUNDS"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "PAPAVER RHOEAS"
-    }, 
     "shawnwasabi/marblesoda": {
         "AlternativeTitles": [], 
         "Artists": ["Shawn Wasabi"], 
@@ -31276,7 +31195,7 @@
     }, 
     "she/archetype": {
         "AlternativeTitles": [], 
-        "Artists": ["SHE"], 
+        "Artists": ["She"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -31478,7 +31397,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
-        "Tags": ["しちごさん。753×ABSOLUTE", "753.", "ABSOLUTE", "CASTAWAY", "Another", "Flower", "日山", "尚", "Hiyama", "Nao", "塚越雄", "Tsukagoshi", "Yuichiro", "NanosizeMir", "japanese", "keysound", "piano"], 
+        "Tags": ["しちごさん。753xABSOLUTE", "753.", "ABSOLUTE", "CASTAWAY", "Another", "Flower", "日山", "尚", "Hiyama", "Nao", "塚越雄", "Tsukagoshi", "Yuichiro", "NanosizeMir", "japanese", "keysound", "piano"], 
         "Title": "Youka to Yumeutsutsu"
     }, 
     "shinfa/hanairoshygirl": {
@@ -31643,6 +31562,15 @@
         "Tags": ["[_S_a_k_u_r_a_]", "EURO", "BEAT", "AVAVA", "Analog"], 
         "Title": "Couple Breaking"
     }, 
+    "shk/deathmoon": {
+        "AlternativeTitles": [], 
+        "Artists": ["SHK"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Death Moon"
+    }, 
     "shk/identitypart4": {
         "AlternativeTitles": [], 
         "Artists": ["SHK"], 
@@ -31667,7 +31595,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "O2Jam", 
-        "Tags": ["Sound​Holic​K", "trancecore", "shiki", "Shin", "Hyun", "Keun"], 
+        "Tags": ["SoundHolicK", "trancecore", "shiki", "Shin", "Hyun", "Keun"], 
         "Title": "Identity part.II"
     }, 
     "shk/identitypartiii": {
@@ -31676,7 +31604,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "O2Jam", 
-        "Tags": ["Sound​Holic​K", "trancecore", "shiki", "Shin", "Hyun", "Keun"], 
+        "Tags": ["SoundHolicK", "trancecore", "shiki", "Shin", "Hyun", "Keun"], 
         "Title": "Identity Part III"
     }, 
     "shk/login": {
@@ -31696,15 +31624,6 @@
         "Source": null, 
         "Tags": ["Hanyuu", "17va", "soundholick"], 
         "Title": "Milky Way"
-    }, 
-    "shko2se/deathmoon": {
-        "AlternativeTitles": [], 
-        "Artists": ["SHK.o2SE"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Death Moon"
     }, 
     "shko2seozeshke1_zk/deathmoononionioni": {
         "AlternativeTitles": [], 
@@ -33051,7 +32970,7 @@
         "AlternativeTitles": [], 
         "Artists": ["Stereoman", "Yunomi"], 
         "OtherArtists": [], 
-        "Remixers": ["KOTONOHOUSE remix"], 
+        "Remixers": ["KOTONOHOUSE"], 
         "Source": null, 
         "Tags": [], 
         "Title": "Cinderella Baby (KOTONOHOUSE remix)"
@@ -34277,7 +34196,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "うみねこのなく頃に", 
-        "Tags": ["hardcore", "gothic", "-45", "Umineko", "no", "Naku", "Koro", "ni", "07th", "expansion", "うみねこのなく頃に散", "D'va；；；；；；；；5", "japanese", "Chiru"], 
+        "Tags": ["hardcore", "gothic", "-45", "Umineko", "no", "Naku", "Koro", "ni", "07th", "expansion", "うみねこのなく頃に散", "D'va;;;;;;;;5", "japanese", "Chiru"], 
         "Title": "RougokuSTRIP (Grimoire crossbreed rmx)"
     }, 
     "teamgrimoire/sheriruth": {
