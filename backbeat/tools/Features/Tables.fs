@@ -5,6 +5,7 @@ open System.IO.Compression
 open System.Diagnostics
 open System.Linq
 open Percyqaz.Shell
+open Percyqaz.Json
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Data.Charts.Tables
@@ -15,20 +16,10 @@ open Backbeat.Utils
 
 module Tables =
 
-    // Editing/suggestion phase
-
-    //let fetch_table(file: string) =
-        
-    //    let source = Path.Combine(INTERLUDE_TABLES_PATH, file + ".table")
-    //    let target = Path.Combine(TABLES_PATH, file + ".table")
-
-    //    if File.GetLastWriteTime target > File.GetLastWriteTime source then
-    //        printfn "Source is older than target. Is this what you want?"
-    //    else
-
-    //    File.Delete target
-    //    File.Copy (source, target)
-    //    printfn "Copied from %s" source
+    [<Json.AutoCodec>]
+    type TableIndexEntry = { Name: string; File: string; Version: int }
+    [<Json.AutoCodec>]
+    type TableIndex = { Tables: ResizeArray<TableIndexEntry> }
     
     let put_table(file: string) =
         
@@ -63,7 +54,7 @@ module Tables =
         
         let lines = File.ReadAllLines flat
 
-        let newTable = { table with Levels = ResizeArray<Level>() }
+        let new_table = { table with Levels = ResizeArray<Level>() }
         let mutable level = ""
         let mutable levelCharts = ResizeArray<TableChart>()
 
@@ -71,7 +62,7 @@ module Tables =
             if line.StartsWith "# " then
                 level <- line.Substring 2
                 levelCharts <- ResizeArray<TableChart>()
-                newTable.Levels.Add { Charts = levelCharts; Name = level }
+                new_table.Levels.Add { Charts = levelCharts; Name = level }
             else
                 let chart : TableChart =
                     table.Levels
@@ -80,7 +71,7 @@ module Tables =
                         .Find(fun chart -> chart.Id = line)
                 levelCharts.Add chart
 
-        JSON.ToFile (Path.Combine(TABLES_PATH, file + ".table"), true) newTable
+        JSON.ToFile (Path.Combine(TABLES_PATH, file + ".table"), true) { new_table with Version = Table.generate_table_version() }
         printfn "Updated %s.table" file
 
         File.Delete flat
@@ -124,7 +115,7 @@ module Tables =
                             folder.Remove cc |> ignore
                         else printfn "Failed adding %s" id
 
-        table |> JSON.ToFile(Path.Combine(TABLES_PATH, file + ".suggestions.table"), true)
+        { table with Version = Table.generate_table_version() } |> JSON.ToFile(Path.Combine(TABLES_PATH, file + ".suggestions.table"), true)
         printfn "Saved table additions."
         collections |> JSON.ToFile(INTERLUDE_COLLECTIONS_FILE, true)
         printfn "Saved collections."
@@ -187,7 +178,7 @@ module Tables =
         File.WriteAllText(Path.Combine(TABLES_PATH, file + ".diff"), diff_text)
         File.AppendAllText(Path.Combine(TABLES_PATH, file + ".changelog"), "\n" + diff_text)
 
-        new_table |> JSON.ToFile (Path.Combine(TABLES_PATH, file + ".table"), true)
+        { new_table with Version = Table.generate_table_version() } |> JSON.ToFile (Path.Combine(TABLES_PATH, file + ".table"), true)
 
         printfn "Commited updates to table."
 
@@ -275,10 +266,16 @@ module Tables =
                 zip.CreateEntryFromFile(Path.Combine(source_dir, "audio.mp3"), sprintf "%s/audio.mp3" dirname) |> ignore
                 zip.CreateEntryFromFile(Path.Combine(source_dir, "bg.png"), sprintf "%s/bg.png" dirname) |> ignore
 
+    let update_index() =
+        let index = { Tables = ResizeArray<TableIndexEntry>() }
+        for file in Directory.GetFiles(TABLES_PATH) do
+            if file.EndsWith(".table") && not (file.EndsWith(".suggestions.table")) then
+                JSON.FromFile<Table> file
+                |> function Result.Ok res -> index.Tables.Add { Name = res.Name; Version = res.Version; File = Path.GetFileNameWithoutExtension(file) } | _ -> ()
+        JSON.ToFile (Path.Combine(TABLES_PATH, "index.json"), true) index
+
     let register (ctx: Context) =
         ctx
-            //.WithCommand("fetch", 
-            //Command.create "Copies locally installed table to this repo" ["table"] <| Impl.Create(Types.str, fetch_table))
             .WithCommand("put", 
             Command.create "Copies repo table to your local interlude" ["table"] <| Impl.Create(Types.str, put_table))
             .WithCommand("add_batch", 
@@ -293,3 +290,5 @@ module Tables =
             Command.create "Export sources needed to have every chart for a table" ["table"] <| Impl.Create(Types.str, export_table_sources))
             .WithCommand("publish", 
             Command.create "Export Crescent as a .zip" ["table"] <| Impl.Create(Types.str, export_as_pack))
+            .WithCommand("index", 
+            Command.create "Update table index" [] <| Impl.Create(update_index))
