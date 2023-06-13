@@ -130,25 +130,17 @@ module Gameplay =
             | _ -> ()
 
         let unselect() =
-            options.Collection.Set ActiveCollection.None
+            options.SelectedCollection.Set None
             current <- None
     
         let select(name: string) =
             match collections.Get name with
             | Some c -> 
-                options.Collection.Set (ActiveCollection.Collection name)
+                options.SelectedCollection.Set (Some name)
                 current <- Some c
-            | None -> Logging.Error (sprintf "No such collection with name '%s'" name)
-
-        let select_level(name: string) =
-            match Table.current() with
-            | Some table ->
-                match table.TryLevel name with
-                | Some level -> 
-                    options.Collection.Set (ActiveCollection.Level name)
-                    current <- Some (Level level)
-                | None -> Logging.Error (sprintf "No such level with name '%s'" name)
-            | None -> Logging.Error (sprintf "No table selected, cannot select level '%s'" name)
+            | None -> 
+                Logging.Error (sprintf "No such collection with name '%s'" name)
+                options.SelectedCollection.Set None
 
     module Online =
         
@@ -245,8 +237,7 @@ module Gameplay =
             Logging.Debug("No charts installed")
             Background.load ""
         Table.init(options.Table.Value)
-        match options.Collection.Value with
-        | ActiveCollection.Collection c -> Collections.select c
-        | ActiveCollection.Level l -> Collections.select_level l
-        | ActiveCollection.None -> ()
+        match options.SelectedCollection.Value with
+        | Some c -> Collections.select c
+        | None -> ()
         Online.Multiplayer.init()

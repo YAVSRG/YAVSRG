@@ -15,42 +15,7 @@ open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Prelude.Data.Charts.Library
 
-type private CreateTablePage() as this =
-    inherit Page()
-
-    let new_name = Setting.simple "Table" |> Setting.alphaNum
-    let keymode = Setting.simple (match Chart.cacheInfo with Some c -> enum c.Keys | None -> Keymode.``4K``)
-
-    do
-        this.Content(
-            column()
-            |+ PageSetting("table.name", TextEntry(new_name, "none")).Pos(200.0f)
-            |+ PageSetting("generic.keymode", Selector<_>.FromEnum keymode).Pos(300.0f)
-            |+ PageButton("confirm.yes", 
-                (fun () -> if Table.create(new_name.Value, int keymode.Value, Rulesets.current) then options.Table.Set (Some new_name.Value); Menu.Back() )).Pos(400.0f)
-        )
-
-    override this.Title = L"tables.create.name"
-    override this.OnClose() = ()
-    
-type private CreateLevelPage() as this =
-    inherit Page()
-    
-    let new_name = Setting.simple "" |> Setting.alphaNum
-    
-    do
-        this.Content(
-            column()
-            |+ PageSetting("table.level_name", TextEntry(new_name, "none"))
-                .Pos(200.0f)
-            |+ PageButton("confirm.yes", 
-                (fun () -> if Table.current().Value.AddLevel new_name.Value then Menu.Back() ))
-                .Pos(300.0f)
-        )
-    
-    override this.Title = L"tables.create.name"
-    override this.OnClose() = ()
-
+// todo: remove or repurpose this
 type private EditLevelPage(level: Level) as this =
     inherit Page()
 
@@ -61,32 +26,11 @@ type private EditLevelPage(level: Level) as this =
             column()
             |+ PageSetting("table.level_name", TextEntry(new_name, "none"))
                 .Pos(200.0f)
-            |+ PageButton("collections.edit.delete", 
-                (fun () -> 
-                    ConfirmPage(Localisation.localiseWith [level.Name] "misc.confirmdelete", 
-                        fun () -> 
-                            if Table.current().Value.RemoveLevel level.Name then 
-                                if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh_all()
-                                if ActiveCollection.Level level.Name = options.Collection.Value then Collections.unselect()
-                                Menu.Back()
-                    ).Show()
-                ),
-                Icon = Icons.delete)
-                .Pos(400.0f)
-            |+ PageButton("collections.edit.select", 
-                (fun () -> Collections.select_level level.Name; Menu.Back()) )
-                .Pos(500.0f)
-                .Tooltip(Tooltip.Info("collections.edit.select"))
 
         this.Content content
 
     override this.Title = level.Name
-    override this.OnClose() =
-        if new_name.Value <> level.Name then
-            if Table.current().Value.RenameLevel(level.Name, new_name.Value) then
-                if options.Collection.Value = ActiveCollection.Level level.Name then Collections.select_level new_name.Value
-                Logging.Debug (sprintf "Renamed level '%s' to '%s'" level.Name new_name.Value)
-            else Logging.Debug "Rename failed, maybe that level already exists?"
+    override this.OnClose() = ()
 
 type private LevelButton(name, action) =
     inherit StaticContainer(NodeType.Button (fun _ -> action()))
@@ -97,8 +41,7 @@ type private LevelButton(name, action) =
             K (sprintf "%s %s  >" Icons.folder name),
             Color = ( 
                 fun () -> ( 
-                    (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White),
-                    (if options.Collection.Value = ActiveCollection.Level name then Style.color(255, 0.5f, 0.0f) else Color.Black)
+                    (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White), Color.Black
                 )
             ),
             Align = Alignment.LEFT,
@@ -147,24 +90,8 @@ type ManageTablesPage() as this =
             container |* TableButton(name, fun () -> 
                 options.Table.Set (Some name)
                 Table.load name
-                match options.Collection.Value with ActiveCollection.Level _ -> Collections.unselect() | _ -> ()
                 if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh_all() else LevelSelect.refresh_details()
                 sync refresh)
-
-        if options.EnableTableEdit.Value then
-            
-            container
-            |+ Dummy()
-            |+ PageButton("tables.create", (fun () -> Menu.ShowPage CreateTablePage), Icon = Icons.add)
-            |* PageButton("tables.create_level", (fun () -> Menu.ShowPage CreateLevelPage), Icon = Icons.add_to_collection)
-
-            match Table.current() with
-            | Some t ->
-                container |* Dummy()
-                for level in t.Levels do
-                    container |* LevelButton(level.Name, (fun () -> EditLevelPage(level).Show()) )
-            | None -> ()
-
 
         if container.Focused then container.Focus()
 
@@ -184,8 +111,6 @@ type SelectTableLevelPage(action: Level -> unit) as this =
     let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
     let refresh() =
         container.Clear()
-        container
-        |* PageButton("tables.create_level", (fun () -> Menu.ShowPage CreateLevelPage), Icon = Icons.add_to_collection)
 
         match Table.current() with
         | Some t ->

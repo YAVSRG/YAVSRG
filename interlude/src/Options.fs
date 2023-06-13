@@ -19,18 +19,6 @@ module Options =
         User settings
     *)
 
-    [<Json.AutoCodec>]
-    [<RequireQualifiedAccess>]
-    type ActiveCollection =
-        | Collection of string
-        | Level of string
-        | None
-        override this.ToString() =
-            match this with
-            | Collection c -> c
-            | Level l -> l
-            | None -> "" // todo: localised placeholder for nothing
-
     type Keymode =
         | ``3K`` = 3
         | ``4K`` = 4
@@ -118,12 +106,11 @@ module Options =
             ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
 
-            Collection: Setting<ActiveCollection>
+            SelectedCollection: Setting<string option>
             Table: Setting<string option>
             GameplayBinds: (Bind array) array
 
             EnableConsole: Setting<bool>
-            EnableTableEdit: Setting<bool>
             Hotkeys: Dictionary<Hotkey, Bind>
 
             Preset1: Setting<Preset option>
@@ -178,12 +165,11 @@ module Options =
             LibraryMode = Setting.simple LibraryMode.All
             ChartGroupReverse = Setting.simple false
             ScoreSortMode = Setting.simple 0
-
-            Collection = Setting.simple ActiveCollection.None
+            
+            SelectedCollection = Setting.simple None
             Table = Setting.simple None
 
             EnableConsole = Setting.simple false
-            EnableTableEdit = Setting.simple false
             Hotkeys = Dictionary<Hotkey, Bind>()
             GameplayBinds = [|
                 [|mk Keys.Left; mk Keys.Down; mk Keys.Right|]

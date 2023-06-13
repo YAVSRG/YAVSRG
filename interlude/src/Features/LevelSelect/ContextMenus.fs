@@ -30,7 +30,8 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             )
 
         match context with
-        | LibraryContext.None -> ()
+        | LibraryContext.None
+        | LibraryContext.Table _ -> ()
         | LibraryContext.Folder name
         | LibraryContext.Playlist (_, name, _) ->
             content
@@ -42,30 +43,6 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 Icon = Icons.remove_from_collection,
                 Text = Localisation.localiseWith [name] "chart.remove_from_collection.name"
             )
-        | LibraryContext.Table lvl ->
-            content
-            |* PageButton(
-                "chart.remove_from_collection",
-                (fun () -> 
-                    if CollectionManager.remove_from(lvl, Level (Table.current().Value.TryLevel(lvl).Value), cc, context) then Menu.Back()
-                ),
-                Icon = Icons.remove_from_collection,
-                Text = Localisation.localiseWith [options.Table.Value.Value] "chart.remove_from_collection.name"
-            )
-
-        if options.EnableTableEdit.Value then
-            
-            match Table.current() with
-            | Some table -> 
-                if not (table.Contains(cc: CachedChart)) then
-                    content
-                    |* PageButton(
-                        "chart.add_to_table",
-                        (fun () -> SelectTableLevelPage(fun level -> if CollectionManager.add_to(level.Name, Level level, cc) then Menu.Back()).Show()),
-                        Icon = Icons.add_to_collection,
-                        Text = Localisation.localiseWith [table.Name] "chart.add_to_table.name"
-                    )
-            | None -> ()
 
         this.Content content
 
@@ -110,4 +87,4 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         | LibraryGroupContext.None -> GroupContextMenu(name, charts, context).Show()
         | LibraryGroupContext.Folder id -> EditFolderPage(id, Library.collections.GetFolder(id).Value).Show()
         | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value).Show()
-        | LibraryGroupContext.Table lvl -> (EditLevelPage (Table.current().Value.TryLevel(lvl).Value)).Show()
+        | LibraryGroupContext.Table lvl -> EditLevelPage(Table.current().Value.TryLevel(lvl).Value).Show()

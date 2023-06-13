@@ -147,7 +147,7 @@ module Scoreboard =
                             seq { 
                                 for score in d.Scores do
                                     let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
-                                    if s.ModStatus = Prelude.Gameplay.Mods.ModStatus.Ranked then
+                                    if s.ModStatus = Mods.ModStatus.Ranked then
                                         req.NewBests <- Some (
                                             match req.NewBests with
                                             | None -> Bests.create s

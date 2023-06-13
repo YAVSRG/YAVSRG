@@ -12,16 +12,6 @@ module Printerlude =
 
     let mutable private ctx : Context = Unchecked.defaultof<_>
 
-    module private Tables = 
-        
-        let register_commands (ctx: Context) =
-            ctx
-                .WithCommand("enable_table_editing", Command.create "Enables editing of local tables" []
-                    ( Impl.Create (fun () -> Interlude.Options.options.EnableTableEdit.Value <- true) ))
-
-                .WithCommand("disable_table_editing", Command.create "Disables editing of local tables" []
-                    ( Impl.Create (fun () -> Interlude.Options.options.EnableTableEdit.Value <- false) ))
-
     module private Themes =
 
         let register_commands (ctx: Context) =
@@ -116,7 +106,6 @@ module Printerlude =
 
     ctx <-
         { Context.Empty with IO = { In = stdin; Out = context_writer } }
-        |> Tables.register_commands
         |> Themes.register_commands
         |> Utils.register_commands
 

@@ -23,7 +23,6 @@ module CollectionManager =
             match collection with
             | Folder c -> c.Add cc
             | Playlist p -> p.Add (cc, rate.Value, selectedMods.Value)
-            | Level lvl -> Table.current().Value.AddChart(lvl.Name, Table.generate_cid cc, cc)
         then
             if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh_all() else LevelSelect.refresh_details()
             Notifications.action_feedback (Icons.add_to_collection, Localisation.localiseWith [cc.Title; name] "collections.added", "")
@@ -38,7 +37,6 @@ module CollectionManager =
                 match context with
                 | LibraryContext.Playlist (i, in_name, _) when name = in_name -> p.RemoveAt i
                 | _ -> p.RemoveSingle cc
-            | Level _ -> Table.current().Value.RemoveChart cc
         then
             if options.LibraryMode.Value <> LibraryMode.All then LevelSelect.refresh_all() else LevelSelect.refresh_details()
             Notifications.action_feedback (Icons.remove_from_collection, Localisation.localiseWith [cc.Title; name] "collections.removed", "")
@@ -49,20 +47,14 @@ module CollectionManager =
     module Current =
 
         let quick_add(cc: CachedChart) =
-            match options.Collection.Value with
-            | ActiveCollection.Collection coll ->
-                add_to (coll, Collections.current.Value, cc)
-            | ActiveCollection.Level lvl ->
-                add_to (lvl, Collections.current.Value, cc)
-            | ActiveCollection.None -> false
+            match options.SelectedCollection.Value with
+            | Some coll -> add_to (coll, Collections.current.Value, cc)
+            | None -> false
 
         let quick_remove(cc: CachedChart, context: LibraryContext) =
-            match options.Collection.Value with
-            | ActiveCollection.Collection coll ->
-                remove_from(coll, Collections.current.Value, cc, context)
-            | ActiveCollection.Level lvl ->
-                remove_from(lvl, Collections.current.Value, cc, context)
-            | ActiveCollection.None -> false
+            match options.SelectedCollection.Value with
+            | Some coll -> remove_from(coll, Collections.current.Value, cc, context)
+            | None -> false
 
     let reorder_up (context: LibraryContext) =
         if
@@ -154,7 +146,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                         fun () ->
                             if collections.Delete name then 
                                 if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh_all()
-                                if ActiveCollection.Collection name = options.Collection.Value then Collections.unselect()
+                                if options.SelectedCollection.Value = Some name then Collections.unselect()
                                 Menu.Back()
                     ).Show()
                 ),
@@ -164,11 +156,11 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                 .Pos(470.0f)
                 .Tooltip(Tooltip.Info("collections.edit.select"))
 
-            |+ if options.Collection.Value = ActiveCollection.Collection name then
+            |+ if options.SelectedCollection.Value = Some name then
                 Text(L"collections.selected.this",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
                else
-                Text(Localisation.localiseWith [options.Collection.Value.ToString()] "collections.selected.other",
+                Text(Localisation.localiseWith [match options.SelectedCollection.Value with Some s -> s | None -> "--"] "collections.selected.other",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
             |+ Text(Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint",
                 Position = Position.SliceBottom(190.0f).SliceTop(70.0f))
@@ -181,7 +173,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
     override this.OnClose() =
         if new_name.Value <> name then
             if collections.RenameCollection(name, new_name.Value) then
-                if options.Collection.Value = ActiveCollection.Collection name then Collections.select new_name.Value
+                if options.SelectedCollection.Value = Some name then Collections.select new_name.Value
                 Logging.Debug (sprintf "Renamed collection '%s' to '%s'" name new_name.Value)
             else Logging.Debug "Rename failed, maybe that name already exists?"
 
@@ -203,7 +195,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                         fun () -> 
                             if collections.Delete name then 
                                 if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh_all()
-                                if ActiveCollection.Collection name = options.Collection.Value then Collections.unselect()
+                                if options.SelectedCollection.Value = Some name then Collections.unselect()
                                 Menu.Back()
                     ).Show()
                 ),
@@ -214,11 +206,11 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                 .Pos(470.0f)
                 .Tooltip(Tooltip.Info("collections.edit.select"))
             
-            |+ if options.Collection.Value = ActiveCollection.Collection name then
+            |+ if options.SelectedCollection.Value = Some name then
                 Text(L"collections.selected.this",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
                else
-                Text(Localisation.localiseWith [options.Collection.Value.ToString()] "collections.selected.other",
+                Text(Localisation.localiseWith [match options.SelectedCollection.Value with Some s -> s | None -> "[None]"] "collections.selected.other",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
             |+ Text(Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint",
                 Position = Position.SliceBottom(190.0f).SliceTop(70.0f))
@@ -231,7 +223,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
     override this.OnClose() =
         if new_name.Value <> name then
             if collections.RenamePlaylist(name, new_name.Value) then
-                if options.Collection.Value = ActiveCollection.Collection name then Collections.select new_name.Value
+                if options.SelectedCollection.Value = Some name then Collections.select new_name.Value
                 Logging.Debug (sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
             else Logging.Debug "Rename failed, maybe that name already exists?"
 
@@ -245,7 +237,7 @@ type private CollectionButton(icon, name, action) =
             Color = ( 
                 fun () -> ( 
                     (if this.Focused then Colors.yellow_accent else Colors.white),
-                    (if options.Collection.Value = ActiveCollection.Collection name then Colors.blue_shadow else Colors.shadow_2)
+                    (if options.SelectedCollection.Value = Some name then Colors.blue_shadow else Colors.shadow_2)
                 )
             ),
             Align = Alignment.LEFT,
@@ -283,7 +275,6 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
                     name,
                     fun () -> on_select(name, collection) )
                 )
-            | Level _ -> failwith "impossible"
         if container.Focused then container.Focus()
 
     do
@@ -301,5 +292,4 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
                 match collection with
                 | Folder f -> EditFolderPage(name, f).Show()
                 | Playlist p -> EditPlaylistPage(name, p).Show()
-                | Level _ -> failwith "impossible"
         )
