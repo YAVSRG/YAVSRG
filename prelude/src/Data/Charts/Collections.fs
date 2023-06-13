@@ -114,7 +114,7 @@ module Collections =
             let entry = Entry.OfChart chart
             this.Charts |> Seq.tryFind (fun (e, _) -> e = entry) |> Option.isSome
 
-    type Collection = Folder of Folder | Playlist of Playlist | Level of Tables.Level
+    type Collection = Folder of Folder | Playlist of Playlist
 
     [<Json.AutoCodec>]
     type Collections =
