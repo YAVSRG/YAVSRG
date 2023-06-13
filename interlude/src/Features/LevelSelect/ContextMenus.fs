@@ -8,7 +8,6 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Options
 
 type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     inherit Page()
