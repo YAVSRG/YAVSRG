@@ -16,6 +16,7 @@ open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Library
 open Interlude.UI
+open Interlude.Utils
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
@@ -87,7 +88,7 @@ module Tree =
             expandedGroup <- groupName
             selectedGroup <- groupName
             scrollTo <- ScrollTo.Chart
-        | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
+        | None -> Notifications.error(L"notification.chart_load_failed.title", L"notification.chart_load_failed.body")
     
     let play() =
         if Network.lobby.IsSome then
