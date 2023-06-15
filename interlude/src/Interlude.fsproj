@@ -83,13 +83,13 @@
     <Compile Include="Features\Play\Replay.fs" />
     <Compile Include="Features\Play\Practice.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
-    <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\Collections.fs" />
     <Compile Include="Features\LevelSelect\Tables.fs" />
     <Compile Include="Features\LevelSelect\LibraryView.fs" />
     <Compile Include="Features\LevelSelect\ActionBar.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus.fs" />
     <Compile Include="Features\LevelSelect\Tree.fs" />
+    <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard.fs" />
     <Compile Include="Features\LevelSelect\ChartInfo.fs" />

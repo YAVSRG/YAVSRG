@@ -8,6 +8,7 @@ open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools.Patterns
 open Interlude.Features.Play
+open Interlude.Features.Online
 
 type Preview(chart: Chart, changeRate: float32 -> unit) =
     inherit Dialog()
@@ -72,6 +73,7 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
             let newTime = start + (chart.LastNote - start) * percent
             Song.seek newTime
         if (!|"preview").Tapped() || (!|"exit").Tapped() then this.Close()
+        elif (!|"select").Tapped() then this.Close(); Tree.play()
         //elif (!|"ruleset_switch").Tapped() then 
         //    this.Close()
         //    Interlude.UI.Screen.changeNew 
