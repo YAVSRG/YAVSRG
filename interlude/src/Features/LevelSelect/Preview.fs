@@ -74,12 +74,6 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
             Song.seek newTime
         if (!|"preview").Tapped() || (!|"exit").Tapped() then this.Close()
         elif (!|"select").Tapped() then this.Close(); Tree.play()
-        //elif (!|"ruleset_switch").Tapped() then 
-        //    this.Close()
-        //    Interlude.UI.Screen.changeNew 
-        //        (fun () -> PracticeScreen.practice_screen(Song.time()))
-        //        Interlude.UI.Screen.Type.Practice
-        //        Interlude.UI.Transitions.Flags.Default
         elif (!|"uprate_small").Tapped() then changeRate(0.01f)
         elif (!|"uprate_half").Tapped() then changeRate(0.05f)
         elif (!|"uprate").Tapped() then changeRate(0.1f)

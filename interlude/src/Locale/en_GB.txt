@@ -324,6 +324,7 @@ levelselect.collections.name=Manage collections
 levelselect.collections.tooltip=Organise charts into your own folders and playlists here!
 levelselect.comments.label=Editing comment for %0
 levelselect.groupby.artist=Artist
+levelselect.groupby.none=None
 levelselect.groupby.creator=Creator
 levelselect.groupby.date_played=Date played
 levelselect.groupby.grade=Grade
