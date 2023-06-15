@@ -7,6 +7,7 @@ open Percyqaz.Flux.Windowing
 open Interlude
 open Interlude.UI
 open Interlude.Features
+open Interlude.Features.Import
 open Interlude.Features.Printerlude
 open Interlude.Features.Online
 
@@ -29,7 +30,7 @@ let launch(instance: int) =
     Window.onUnload.Add(Gameplay.save)
     Window.onFileDrop.Add(fun path -> 
         if not (Content.Noteskins.tryImport path [4; 7]) then 
-            if not (Import.FileDropHandling.tryImport path) then
+            if not (Import.dropFile path) then
                 Logging.Warn("Unrecognised file dropped: " + path))
 
     Launch.entryPoint

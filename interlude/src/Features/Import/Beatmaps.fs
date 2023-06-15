@@ -15,7 +15,6 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Utils
-open Interlude.Features.LevelSelect
 
 type BeatmapStatus =
     | PENDING = 0
@@ -59,7 +58,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
                 fun completed ->
                     if completed then Library.Imports.auto_convert.Request(target,
                         fun b ->
-                            if b then LevelSelect.refresh_all()
+                            if b then charts_updated_ev.Trigger()
                             Notifications.task_feedback (Icons.download, L"notification.install_song", data.title)
                             File.Delete target
                             status <- if b then Installed else DownloadFailed

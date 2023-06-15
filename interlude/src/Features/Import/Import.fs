@@ -8,22 +8,7 @@ open Prelude.Data
 open Prelude.Data.Charts
 open Interlude.UI
 open Interlude.Utils
-open Interlude.Features.LevelSelect
 open Interlude.Features.Online
-
-module FileDropHandling =
-    let tryImport(path: string) : bool =
-        match Mounts.dropFunc with
-        | Some f -> f path; true
-        | None -> 
-            Library.Imports.auto_convert.Request(path, 
-                fun success -> 
-                    if success then
-                        Notifications.action_feedback(Icons.check, L"notification.import_success", "")
-                        LevelSelect.refresh_all()
-                    else Notifications.error(L"notification.import_failure", "")
-            )
-            true
 
 type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
     inherit StaticContainer(NodeType.Switch(fun _ -> this.Button))
@@ -76,17 +61,22 @@ type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Servi
         Text.drawFill(Style.baseFont, icon, this.Bounds.SliceLeft this.Bounds.Height, iconColor, Alignment.CENTER)
         Text.drawFill(Style.baseFont, name, this.Bounds.TrimLeft this.Bounds.Height, textColor, Alignment.LEFT)
 
-type ImportScreen() as this =
-    inherit Screen()
+module ImportScreen =
 
     let container = SwapContainer(Position = Position.TrimLeft(400.0f).Margin(50.0f, 20.0f), Current = Mounts.tab)
+
+    let switch_to_noteskins() = container.Current <- Noteskins.tab
+    let switch_to_rulesets() = container.Current <- Rulesets.tab
+
+type ImportScreen() as this =
+    inherit Screen()
     let tabs = 
         FlowContainer.Vertical<Widget>(70.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
-        |+ TabButton(Icons.import_local, "Local imports", container, Mounts.tab)
-        |+ TabButton(Icons.import_etterna, "Etterna packs", container, EtternaPacks.tab)
-        |+ TabButton(Icons.import_osu, "osu!mania songs", container, Beatmaps.tab)
-        |+ TabButton(Icons.import_noteskin, "Noteskins", container, Noteskins.tab)
-        |+ TabButton(Icons.gameplay, "Rulesets", container, Rulesets.tab)
+        |+ TabButton(Icons.import_local, "Local imports", ImportScreen.container, Mounts.tab)
+        |+ TabButton(Icons.import_etterna, "Etterna packs", ImportScreen.container, EtternaPacks.tab)
+        |+ TabButton(Icons.import_osu, "osu!mania songs", ImportScreen.container, Beatmaps.tab)
+        |+ TabButton(Icons.import_noteskin, "Noteskins", ImportScreen.container, Noteskins.tab)
+        |+ TabButton(Icons.gameplay, "Rulesets", ImportScreen.container, Rulesets.tab)
         |+ ServiceStatus("Loading", WebServices.download_string)
         |+ ServiceStatus("Downloading", WebServices.download_file)
         |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)
@@ -97,7 +87,7 @@ type ImportScreen() as this =
         |* (
             SwitchContainer.Row<Widget>()
             |+ tabs
-            |+ container
+            |+ ImportScreen.container
         )
 
     override this.OnEnter _ = tabs.Focus()

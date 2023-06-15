@@ -96,6 +96,11 @@ and Menu(topLevel: Page) as this =
         match _instance with
         | None -> failwith "No instance of menu/pages to back out of"
         | Some instance -> instance.Back()
+
+    static member Close() = 
+        match _instance with
+        | None -> failwith "No instance of menu/pages to close"
+        | Some instance -> (instance :> Dialog).Close()
     
     member private this.Back() =
         namestack <- List.tail namestack
@@ -132,7 +137,7 @@ and Menu(topLevel: Page) as this =
             while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
                 stack.[i].Value.OnDestroy()
                 i <- i + 1
-            this.Close()
+            (this :> Dialog).Close()
 
         back_button.Update(elapsedTime, moved)
 

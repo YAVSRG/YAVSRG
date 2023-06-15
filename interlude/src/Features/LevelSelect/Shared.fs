@@ -12,3 +12,5 @@ module LevelSelect =
 
     let on_refresh_all = refresh_all_event.Publish
     let on_refresh_details = refresh_details_event.Publish
+
+    do Interlude.Features.Import.Import.charts_updated.Add refresh_all

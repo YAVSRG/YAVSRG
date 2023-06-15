@@ -2,9 +2,30 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
+
+[<AutoOpen>]
+module Import =
+
+    let charts_updated_ev = Event<unit>()
+    let charts_updated = charts_updated_ev.Publish
+
+    let dropFile(path: string) : bool =
+        match Mounts.dropFunc with
+        | Some f -> f path; true
+        | None -> 
+            Library.Imports.auto_convert.Request(path, 
+                fun success -> 
+                    if success then
+                        Notifications.action_feedback(Icons.check, L"notification.import_success", "")
+                        charts_updated_ev.Trigger()
+                    else Notifications.error(L"notification.import_failure", "")
+            )
+            true
 
 type SearchContainerLoader(taskWithCallback: (unit -> unit) -> unit) =
     inherit StaticWidget(NodeType.None)

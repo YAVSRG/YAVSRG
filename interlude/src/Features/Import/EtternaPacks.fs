@@ -13,7 +13,6 @@ open Prelude.Data.Charts.Sorting
 open Prelude.Data
 open Interlude.Utils
 open Interlude.UI
-open Interlude.Features.LevelSelect
 
 [<Json.AutoCodec>]
 type EOPackAttrs =
@@ -52,7 +51,7 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
                 fun completed ->
                     if completed then Library.Imports.auto_convert.Request(target,
                         fun b ->
-                            if b then LevelSelect.refresh_all()
+                            if b then charts_updated_ev.Trigger()
                             Notifications.task_feedback (Icons.download, L"notification.install_pack", data.name)
                             File.Delete target
                             status <- if b then Installed else DownloadFailed

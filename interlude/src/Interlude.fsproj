@@ -32,7 +32,7 @@
 
   <ItemGroup>
     <Content Include="Locale\en_GB.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="Resources\defaultArrow.isk" />
     <EmbeddedResource Include="Resources\defaultBar.isk" />
@@ -59,9 +59,16 @@
     <Compile Include="Features\Stats.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\Wiki.fs" />
-    <Compile Include="Features\Rulesets.fs" />
     <Compile Include="Features\Online\Network.fs" />
     <Compile Include="Features\Online\Login.fs" />
+    <Compile Include="Features\Import\Mounts.fs" />
+    <Compile Include="Features\Import\Shared.fs" />
+    <Compile Include="Features\Import\EtternaPacks.fs" />
+    <Compile Include="Features\Import\Beatmaps.fs" />
+    <Compile Include="Features\Import\Noteskins.fs" />
+    <Compile Include="Features\Import\Rulesets.fs" />
+    <Compile Include="Features\Import\Import.fs" />
+    <Compile Include="Features\Rulesets.fs" />
     <Compile Include="Features\Gameplay.fs" />
     <Compile Include="Features\Score\Util.fs" />
     <Compile Include="Features\Score\Graph.fs" />
@@ -92,13 +99,6 @@
     <Compile Include="Features\Multiplayer\Players.fs" />
     <Compile Include="Features\Multiplayer\Chat.fs" />
     <Compile Include="Features\Multiplayer\LobbyScreen.fs" />
-    <Compile Include="Features\Import\Shared.fs" />
-    <Compile Include="Features\Import\Mounts.fs" />
-    <Compile Include="Features\Import\EtternaPacks.fs" />
-    <Compile Include="Features\Import\Beatmaps.fs" />
-    <Compile Include="Features\Import\Noteskins.fs" />
-    <Compile Include="Features\Import\Rulesets.fs" />
-    <Compile Include="Features\Import\Import.fs" />
     <Compile Include="Features\Options\System.fs" />
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
     <Compile Include="Features\Options\Gameplay\Preview.fs" />

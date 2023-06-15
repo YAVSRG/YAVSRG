@@ -179,11 +179,18 @@ type NoteskinsPage() as this =
     and refresh() =
         container.Clear()
         container
+        |+ PageButton(
+            "gameplay.noteskins.install", 
+            (fun () -> 
+                Menu.Close()
+                Interlude.Features.Import.ImportScreen.switch_to_noteskins()
+                Screen.change Screen.Type.Import Transitions.Flags.Default
+            ), 
+            Enabled = (Screen.currentType <> Screen.Type.Play))
+        |+ Dummy()
         |+ PageButton("gameplay.noteskins.edit", tryEditNoteskin)
-            .Pos(570.0f)
             .Tooltip(Tooltip.Info("gameplay.noteskins.edit"))
         |+ PageButton("gameplay.noteskins.open_folder", fun () -> openDirectory (getDataPath "Noteskins"))
-            .Pos(640.0f)
             .Tooltip(Tooltip.Info("gameplay.noteskins.open_folder"))
         |* Dummy()
 

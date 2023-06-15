@@ -155,6 +155,7 @@ gameplay.noteskins.edit.noteskinname.name=Noteskin name
 gameplay.noteskins.edit.tooltip=Edit some noteskin settings here.\nNote: There are more things you can change manually (for now) via the files!\nThese features will be available from the menu in the future.
 gameplay.noteskins.name=Noteskins
 gameplay.noteskins.open_folder.name=Open noteskins folder
+gameplay.noteskins.install.name=Get more noteskins
 gameplay.noteskins.open_folder.tooltip=Opens the folder where noteskins are stored.
 gameplay.noteskins.tooltip=Noteskins allow you to customise how notes look when you are playing.\nSelect the current noteskin here.
 gameplay.pacemaker.accuracy.name=Accuracy
