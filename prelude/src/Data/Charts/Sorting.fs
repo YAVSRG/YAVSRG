@@ -60,6 +60,7 @@ module Sorting =
 
     type GroupMethod = CachedChart * GroupContext -> int * string
     let groupBy : IDictionary<string, GroupMethod> = dict [
+            "none", fun (c, _) -> 0, "No grouping"
             "pack", fun (c, _) -> 0, c.Pack
             "date_played", dateLastPlayed
             "grade", gradeAchieved
