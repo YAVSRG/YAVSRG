@@ -21,12 +21,12 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
 
     static member Flow(child: FlowContainer.Vertical<'T>) =
         let sc = ScrollContainer(child, 0.0f)
-        child.ContentHeightChanged.Add(sc.set_ContentHeight)
+        child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.padding * 2.0f))
         sc
         
     static member Grid(child: GridContainer<'T>) =
         let sc = ScrollContainer(child, 0.0f)
-        child.ContentHeightChanged.Add(sc.set_ContentHeight)
+        child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.padding * 2.0f))
         sc
 
     member val Margin = 0.0f with get, set
