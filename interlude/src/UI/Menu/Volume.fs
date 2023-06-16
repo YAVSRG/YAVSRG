@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Toolbar
+﻿namespace Interlude.UI.Menu
 
 open Percyqaz.Common
 open Interlude.Options
@@ -8,9 +8,8 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude.UI
 
-type Jukebox() =
+type Volume() =
     inherit StaticWidget(NodeType.None)
-    // todo: right click to seek/tools to pause and play music
     let fade = Animation.Fade 0.0f
     let slider = Animation.Fade 0.0f
 

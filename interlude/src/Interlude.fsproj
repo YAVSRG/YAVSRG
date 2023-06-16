@@ -48,6 +48,7 @@
     <Compile Include="UI\Callouts.fs" />
     <Compile Include="UI\Components\Common.fs" />
     <Compile Include="UI\Components\Dropdown.fs" />
+    <Compile Include="UI\Menu\Volume.fs" />
     <Compile Include="UI\Menu\Helpers.fs" />
     <Compile Include="UI\Menu\Controls.fs" />
     <Compile Include="UI\Menu\Grid.fs" />
@@ -111,7 +112,6 @@
     <Compile Include="Features\MainMenu\MainMenu.fs" />
     <Compile Include="Features\Printerlude\Terminal.fs" />
     <Compile Include="Features\Printerlude\Printerlude.fs" />
-    <Compile Include="Features\Toolbar\Jukebox.fs" />
     <Compile Include="Features\Toolbar\NetworkStatus.fs" />
     <Compile Include="Features\Toolbar\Toolbar.fs" />
     <Compile Include="Startup.fs" />

@@ -108,7 +108,7 @@ type Toolbar() =
                 Presets.load s
                 Notifications.action_feedback(Icons.system_notification, L"notification.preset_loaded", s.Name)
             | _ -> () )
-        |* Jukebox(Position = Position.Margin(0.0f, HEIGHT))
+        |* Volume(Position = Position.Margin(0.0f, HEIGHT))
 
     override this.Draw() = 
         let { Rect.Left = l; Top = t; Right = r; Bottom = b } = this.Bounds
