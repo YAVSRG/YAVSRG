@@ -97,7 +97,7 @@ type Table =
 
 module Table =
 
-    type private Loaded = { File: string; Table: Table }
+    type Loaded = { File: string; Table: Table }
 
     open Prelude.Common
     open System.IO
@@ -132,6 +132,7 @@ module Table =
         | None -> Logging.Warn(sprintf "Table not found: '%s'" name)
 
     let init(selected: string option) =
+        loaded.Clear()
         let table_path = Path.Combine(getDataPath "Data", "Tables")
         Directory.CreateDirectory table_path |> ignore
         for file in Directory.GetFiles table_path do
@@ -144,7 +145,11 @@ module Table =
         | Some selected -> load selected
         | None -> ()
 
-    let list() = loaded |> Seq.map(fun l -> l.Table.Name)
+    let install(id: string, table: Table) =
+        JSON.ToFile(table_pathf id, true) table
+        init(Some id)
+
+    let list() = loaded :> Loaded seq
 
     let save() =
         match _current with
@@ -172,3 +177,8 @@ module Table =
         loaded.Add _current.Value
         save()
         true
+
+[<Json.AutoCodec>]
+type TableIndexEntry = { Name: string; File: string; Version: int }
+[<Json.AutoCodec>]
+type TableIndex = { Tables: ResizeArray<TableIndexEntry> }
