@@ -102,10 +102,10 @@ type ManageTablesPage() as this =
         |+ PageButton("tables.install", ignore, Icon = Icons.download)
         |* Dummy()
 
-        for name in Table.list() do
-            container |* TableButton(name, fun () -> 
-                options.Table.Set (Some name)
-                Table.load name
+        for e in Table.list() do
+            container |* TableButton(e.Table.Name, fun () -> 
+                options.Table.Set (Some e.Table.Name)
+                Table.load e.Table.Name
                 if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh_all() else LevelSelect.refresh_details()
                 sync refresh)
 

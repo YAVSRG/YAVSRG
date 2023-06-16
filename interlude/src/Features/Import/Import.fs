@@ -70,12 +70,13 @@ module ImportScreen =
 type ImportScreen() as this =
     inherit Screen()
     let tabs = 
-        FlowContainer.Vertical<Widget>(70.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
+        FlowContainer.Vertical<Widget>(65.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
         |+ TabButton(Icons.import_local, "Local imports", ImportScreen.container, Mounts.tab)
         |+ TabButton(Icons.import_etterna, "Etterna packs", ImportScreen.container, EtternaPacks.tab)
         |+ TabButton(Icons.import_osu, "osu!mania songs", ImportScreen.container, Beatmaps.tab)
         |+ TabButton(Icons.import_noteskin, "Noteskins", ImportScreen.container, Noteskins.tab)
         |+ TabButton(Icons.gameplay, "Rulesets", ImportScreen.container, Rulesets.tab)
+        //|+ TabButton(Icons.table, "Tables", ImportScreen.container, Tables.tab)
         |+ ServiceStatus("Loading", WebServices.download_string)
         |+ ServiceStatus("Downloading", WebServices.download_file)
         |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)
