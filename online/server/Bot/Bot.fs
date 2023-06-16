@@ -78,7 +78,6 @@ module Bot =
 
     let start() =
         try
-            Charts.init()
             let config = DiscordSocketConfig(GatewayIntents = (GatewayIntents.MessageContent ||| GatewayIntents.AllUnprivileged ^^^ GatewayIntents.GuildInvites ^^^ GatewayIntents.GuildScheduledEvents))
             use client = new DiscordSocketClient(config)
         

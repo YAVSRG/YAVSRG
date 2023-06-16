@@ -16,8 +16,9 @@ module API =
         handlers.Add( route, handle )
 
     do
-        add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
         add_endpoint Auth.Discord.ROUTE Auth.Discord.handle
+        add_endpoint Charts.Identify.ROUTE Charts.Identify.handle
+        add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
 
     let handle_request(method: HttpMethod, route: string, body: string, query_params: Map<string, string array>, header: Map<string, string>, response: HttpResponse) =
         async {

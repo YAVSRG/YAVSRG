@@ -12,15 +12,16 @@
     <Compile Include="Domain\Objects.fs" />
     <Compile Include="Domain\Users.fs" />
     <Compile Include="Domain\Auth.fs" />
+    <Compile Include="Domain\Charts.fs" />
     <Compile Include="API\Utils.fs" />
     <Compile Include="API\Auth\Discord.fs" />
+    <Compile Include="API\Charts\Identify.fs" />
     <Compile Include="API\Health\HealthCheck.fs" />
     <Compile Include="API\API.fs" />
     <Compile Include="Online\LoggedInUsers.fs" />
     <Compile Include="Online\Lobbies.fs" />
     <Compile Include="Online\Online.fs" />
     <Compile Include="Bot\Constants.fs" />
-    <Compile Include="Bot\Charts.fs" />
     <Compile Include="Bot\Commands.fs" />
     <Compile Include="Bot\Bot.fs" />
     <Compile Include="Program.fs" />

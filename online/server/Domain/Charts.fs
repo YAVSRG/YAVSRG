@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Bot
+﻿namespace Interlude.Web.Server.Domain
 
 open System.Linq
 open System.Collections.Generic
@@ -22,6 +22,8 @@ module Charts =
             function Some data -> charts <- data | None -> Logging.Error("Failed to get chart data from Backbeat repo"))
         WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/packs.json", 
             function Some data -> packs <- data; Logging.Info(sprintf "Backbeat downloads complete, %i Charts and %i Songs" charts.Count songs.Count) | None -> Logging.Error("Failed to get pack data from Backbeat repo"))
+
+    // chart search by text
 
     type QueryFragment =
         | Artist of string
@@ -79,8 +81,27 @@ module Charts =
         |> Seq.truncate 30
         |> Seq.map (fun (song, stuff) -> song, Seq.map fst stuff |> List.ofSeq)
 
+    // sources (for human page visiting and automatic downloading)
+
     let format_source (source: ChartSource) =
         match source with
         | Osu data -> sprintf "[osu! Beatmap](https://osu.ppy.sh/beatmapsets/%i#mania/%i)" data.BeatmapSetId data.BeatmapId
-        | Stepmania id -> sprintf "[%s](%s)" packs.Stepmania.[id].Title (DownloadUrl.unpickle packs.Stepmania.[id].Mirrors.Head)
+        | Stepmania id -> sprintf "[%s](https://etternaonline.com/pack/%i)" packs.Stepmania.[id].Title id
         | CommunityPack data -> sprintf "[%s](%s)" packs.Community.[data.PackId].Title (DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors.Head)
+
+    let mirrors (sources: ChartSource list) =
+        seq {
+            for source in sources do
+                match source with
+                | Osu data -> yield sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.BeatmapSetId
+                | Stepmania id -> yield DownloadUrl.unpickle packs.Stepmania.[id].Mirrors.Head
+                | CommunityPack data -> yield! Seq.map DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors
+        }
+
+    // find a chart by hash
+
+    let by_hash(hash: string) =
+        if charts.ContainsKey hash then
+            let c = charts.[hash]
+            Some (c, songs.[c.SongId])
+        else None
