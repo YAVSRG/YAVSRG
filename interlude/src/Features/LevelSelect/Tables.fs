@@ -30,6 +30,9 @@ type private EditLevelPage(level: Level) as this =
                 if d.Bests.ContainsKey(ruleset_id) then
                     let (accuracy, rate) = d.Bests.[ruleset_id].Accuracy.Best
                     if System.MathF.Round(rate, 2) > 0.99f then total <- total + accuracy
+                    else
+                        let (accuracy, rate) = d.Bests.[ruleset_id].Accuracy.Fastest
+                        if System.MathF.Round(rate, 2) > 0.99f then total <- total + accuracy
             | None -> ()
         total / float level.Charts.Count
 

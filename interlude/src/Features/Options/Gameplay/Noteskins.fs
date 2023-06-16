@@ -182,7 +182,7 @@ type NoteskinsPage() as this =
         |+ PageButton(
             "gameplay.noteskins.install", 
             (fun () -> 
-                Menu.Close()
+                Menu.Exit()
                 Interlude.Features.Import.ImportScreen.switch_to_noteskins()
                 Screen.change Screen.Type.Import Transitions.Flags.Default
             ), 

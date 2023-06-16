@@ -97,10 +97,10 @@ and Menu(topLevel: Page) as this =
         | None -> failwith "No instance of menu/pages to back out of"
         | Some instance -> instance.Back()
 
-    static member Close() = 
+    static member Exit() = 
         match _instance with
         | None -> failwith "No instance of menu/pages to close"
-        | Some instance -> (instance :> Dialog).Close()
+        | Some instance -> instance.Exit()
     
     member private this.Back() =
         namestack <- List.tail namestack
@@ -110,6 +110,9 @@ and Menu(topLevel: Page) as this =
         page.OnClose()
         page.MoveDown()
         if n > 0 then stack.[n - 1].Value.View(true)
+
+    member private this.Exit() =
+        while namestack <> [] do this.Back()
 
     override this.Init(parent) =
         base.Init parent
@@ -137,7 +140,7 @@ and Menu(topLevel: Page) as this =
             while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
                 stack.[i].Value.OnDestroy()
                 i <- i + 1
-            (this :> Dialog).Close()
+            this.Close()
 
         back_button.Update(elapsedTime, moved)
 

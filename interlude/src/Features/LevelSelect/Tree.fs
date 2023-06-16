@@ -75,9 +75,9 @@ module Tree =
     /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
     let mutable private scrollTo = ScrollTo.Nothing
 
-    let private getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) =
-        if r1 < rate.Value then ( p2, r2, if r2 < rate.Value then Color.FromArgb(127, Color.White) else colorFunc p2 )
-        else ( p1, r1, colorFunc p1 )
+    let private getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) (format: 'T -> string) =
+        if r1 < rate.Value then ( p2, r2, (if r2 < rate.Value then Color.FromArgb(127, Color.White) else colorFunc p2), format p2 )
+        else ( p1, r1, colorFunc p1, format p1 )
     
     let switchChart(cc, context, groupName) =
         match Library.load cc with
@@ -140,7 +140,10 @@ module Tree =
         let mutable localCacheFlag = -1
         let mutable color = Color.Transparent
         let mutable chartData = None
-        let mutable pbData: Bests option = None
+        let mutable personal_bests: Bests option = None
+        let mutable grade = None
+        let mutable lamp = None
+        let mutable clear = None
         let mutable markers = ""
 
         let updateCachedInfo() =
@@ -148,9 +151,12 @@ module Tree =
             if chartData.IsNone then chartData <- Scores.getData cc.Hash
             match chartData with
             | Some d when d.Bests.ContainsKey Rulesets.current_hash ->
-                pbData <- Some d.Bests.[Rulesets.current_hash]
+                personal_bests <- Some d.Bests.[Rulesets.current_hash]
+                grade <- Some <| getPb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName
+                lamp <- Some <| getPb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
+                clear <- Some <| getPb personal_bests.Value.Clear Themes.clearToColor (fun x -> if x then "CLEAR" else "FAILED")
             | _ -> ()
-            color <- colorFunc pbData
+            color <- colorFunc personal_bests
             markers <-
                 if options.LibraryMode.Value <> LibraryMode.Collections then
                     match Collections.current with
@@ -188,38 +194,25 @@ module Tree =
                 Draw.rect (border.SliceLeft 5.0f) borderColor
 
             // draw pbs
-            let disp (pb: PersonalBests<'T>) (format: 'T -> string) (colorFunc: 'T -> Color) (pos: float32) =
-                let value, rate, color = getPb pb colorFunc
-                let formatted = format value
+            let disp (data: 'T * float32 * Color * string) (pos: float32) =
+                let value, rate, color, formatted = data
                 let rateLabel = sprintf "(%.2fx)" rate
                 if color.A > 0uy then
                     Draw.rect( Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom) ) accent
                     Text.drawJustB(Style.baseFont, formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
                     Text.drawJustB(Style.baseFont, rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
         
-            match pbData with
+            match personal_bests with
             | Some d ->
-                disp 
-                    d.Grade
-                    Rulesets.current.GradeName
-                    (fun _ -> let (_, _, c) = getPb d.Grade Rulesets.current.GradeColor in c)
-                    415.0f
-                disp
-                    d.Lamp
-                    Rulesets.current.LampName
-                    Rulesets.current.LampColor
-                    290.0f
-                disp
-                    d.Clear
-                    (fun x -> if x then "CLEAR" else "FAILED")
-                    Themes.clearToColor
-                    165.0f
+                disp grade.Value 415.0f
+                disp lamp.Value 290.0f
+                disp clear.Value 165.0f
             | None -> ()
 
             // draw text
             Draw.rect (bounds.SliceBottom 25.0f) Colors.shadow_1.O1
             Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Colors.text)
-            Text.drawB(Style.baseFont, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, Colors.text_subheading)
+            Text.drawB(Style.baseFont, sprintf "%s  •  %s" cc.Artist cc.Creator, 18.0f, left + 5f, top + 34.0f, Colors.text_subheading)
             Text.drawB(Style.baseFont, cc.DiffName, 15.0f, left + 5f, top + 65.0f, Colors.text_subheading)
             Text.drawJustB(Style.baseFont, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
