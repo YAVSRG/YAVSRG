@@ -211,7 +211,6 @@ module Gameplay =
         else ImprovementFlags.Default
 
     let save() =
-        Table.save()
         Scores.save()
         Library.save()
 

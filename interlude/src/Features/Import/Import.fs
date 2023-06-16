@@ -7,7 +7,6 @@ open Prelude.Common
 open Prelude.Data
 open Prelude.Data.Charts
 open Interlude.UI
-open Interlude.Utils
 open Interlude.Features.Online
 
 type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =

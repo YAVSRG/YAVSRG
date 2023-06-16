@@ -21,11 +21,24 @@ type private EditLevelPage(level: Level) as this =
 
     let new_name = Setting.simple level.Name |> Setting.alphaNum
 
+    let level_progress =
+        let mutable total = 0.0
+        for c in level.Charts do
+            match Prelude.Data.Scores.Scores.getData c.Hash with
+            | Some d -> 
+                let ruleset_id = Table.current().Value.RulesetId
+                if d.Bests.ContainsKey(ruleset_id) then
+                    let (accuracy, rate) = d.Bests.[ruleset_id].Accuracy.Best
+                    if System.MathF.Round(rate, 2) > 0.99f then total <- total + accuracy
+            | None -> ()
+        total / float level.Charts.Count
+
     do
         let content =
             column()
             |+ PageSetting("table.level_name", TextEntry(new_name, "none"))
                 .Pos(200.0f)
+            |+ Text(sprintf "Progress: %.2f%%" (level_progress * 100.0), Align = Alignment.LEFT, Position = Position.Box(0.0f, 0.0f, 100.0f, 300.0f, PRETTYWIDTH, PRETTYHEIGHT))
 
         this.Content content
 
