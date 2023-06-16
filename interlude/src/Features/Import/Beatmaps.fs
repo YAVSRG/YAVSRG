@@ -246,7 +246,7 @@ module Beatmaps =
                 Position = position
             )
     
-        do
+        override this.Init(parent) =
             begin_search filter
             this
             |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> filter <- f; sync(fun () -> begin_search filter)), Position = Position.SliceTop 60.0f ))
@@ -281,6 +281,7 @@ module Beatmaps =
                 descending_order |> Setting.trigger (fun _ -> begin_search filter),
                 "sort_mode",
                 Position = { Left = 0.72f %+ 0.0f; Top = 0.0f %+ 65.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 115.0f })
+            base.Init parent
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
