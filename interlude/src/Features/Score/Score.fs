@@ -8,7 +8,6 @@ open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
-open Interlude.Utils
 open Interlude.Features
 open Interlude.Features.Online
 

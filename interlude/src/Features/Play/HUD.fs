@@ -359,8 +359,8 @@ type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
         let mutable y = this.Bounds.Top
         Multiplayer.replays
         |> Seq.map (|KeyValue|)
-        |> Seq.sortByDescending (fun (_, s) -> s.Value)
-        |> Seq.iter (fun (username, s) ->
+        |> Seq.sortByDescending (fun (_, (s, _)) -> s.Value)
+        |> Seq.iter (fun (username, (s, _)) ->
             let c = if username = Network.username then Color.SkyBlue else Color.White
             Text.draw(Style.baseFont, username, 20.0f, x, y, c)
             Text.drawJust(Style.baseFont, s.FormatAccuracy(), 20.0f, x - 10.0f, y, c, 1.0f)
@@ -369,5 +369,5 @@ type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
-        for s in Multiplayer.replays.Values do
+        for s, _ in Multiplayer.replays.Values do
             s.Update(state.CurrentChartTime() - Web.Shared.Packets.MULTIPLAYER_REPLAY_DELAY_MS * 2.0f<ms>)

@@ -38,7 +38,7 @@ module Gameplay =
         let mutable rating : RatingReport option = None
         let mutable saveData : ChartSaveData option = None
 
-        let  _rate = Setting.rate 1.0f
+        let _rate = Setting.rate 1.0f
         let _selectedMods = Setting.simple Map.empty
 
         let update() =
@@ -142,38 +142,6 @@ module Gameplay =
                 Logging.Error (sprintf "No such collection with name '%s'" name)
                 options.SelectedCollection.Set None
 
-    module Online =
-        
-        module Multiplayer =
-            
-            let replays = new Dictionary<string, IScoreMetric>()
-
-            let private on_leave_lobby() =
-                replays.Clear()
-
-            let private on_game_start() =
-                replays.Clear()
-
-            let private player_status(username, status) =
-                if status = Web.Shared.Packets.LobbyPlayerStatus.Playing then
-                    let chart = Chart.withMods.Value
-                    replays.Add(username, 
-                        Metrics.createScoreMetric
-                            Content.Rulesets.current
-                            chart.Keys
-                            Network.lobby.Value.Players.[username].Replay
-                            chart.Notes
-                            Chart._rate.Value
-                    )
-
-            let add_own_replay(s: IScoreMetric) =
-                replays.Add(Network.username, s)
-
-            let init () =
-                Network.Events.game_start.Add on_game_start
-                Network.Events.leave_lobby.Add on_leave_lobby
-                Network.Events.player_status.Add player_status
-
     let rate =
         Chart._rate
         |> Setting.trigger ( fun v ->
@@ -209,6 +177,55 @@ module Gameplay =
                 Scores.saveScore Chart.saveData.Value data
                 ImprovementFlags.Default
         else ImprovementFlags.Default
+
+    module Online =
+            
+        module Multiplayer =
+                
+            let replays = new Dictionary<string, IScoreMetric * (unit -> ScoreInfoProvider)>()
+    
+            let private on_leave_lobby() =
+                replays.Clear()
+    
+            let private on_game_start() =
+                replays.Clear()
+    
+            let private player_status(username, status) =
+                if status = Web.Shared.Packets.LobbyPlayerStatus.Playing then
+                    let chart = Chart.withMods.Value
+                    replays.Add(username, 
+                        let metric =
+                            Metrics.createScoreMetric
+                                Content.Rulesets.current
+                                chart.Keys
+                                Network.lobby.Value.Players.[username].Replay
+                                chart.Notes
+                                Chart._rate.Value
+                        metric,
+                        fun () -> 
+                            ScoreInfoProvider(
+                                makeScore((Network.lobby.Value.Players.[username].Replay :> IReplayProvider).GetFullReplay(), chart.Keys),
+                                Chart.current.Value,
+                                Content.Rulesets.current,
+                                Player = Some username
+                            )
+                    )
+    
+            let add_own_replay(s: IScoreMetric, replay: IReplayProvider) =
+                replays.Add(Network.username, 
+                    (s, 
+                        fun () -> 
+                            ScoreInfoProvider(
+                                makeScore(replay.GetFullReplay(), Chart.withMods.Value.Keys),
+                                Chart.current.Value,
+                                Content.Rulesets.current
+                            )
+                    ))
+    
+            let init () =
+                Network.Events.game_start.Add on_game_start
+                Network.Events.leave_lobby.Add on_leave_lobby
+                Network.Events.player_status.Add player_status
 
     let save() =
         Scores.save()

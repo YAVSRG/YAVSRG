@@ -21,17 +21,22 @@ type TopBanner(data: ScoreInfoProvider) as this =
         this
         |+ Text(data.Chart.Header.Artist + " - " + data.Chart.Header.Title,
             Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 85.0f })
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 85.0f })
         |+ Text(data.Chart.Header.DiffName,
             Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 75.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 130.0f })
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 75.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 130.0f })
         |+ Text(sprintf "From %s" data.Chart.Header.SourcePack,
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 125.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 165.0f })
+
         |+ Text(data.ScoreInfo.time.ToString(),
             Align = Alignment.RIGHT,
             Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 75.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 130.0f })
-        |* Text((fun () -> "Current session: " + Stats.session_length()),
+        |* Text(
+            match data.Player with 
+            | Some p -> K (sprintf "Played by %s" p)
+            | None -> (fun () -> "Current session: " + Stats.session_length())
+            ,
             Align = Alignment.RIGHT,
             Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 125.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 165.0f })
 

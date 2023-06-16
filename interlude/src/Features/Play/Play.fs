@@ -133,7 +133,7 @@ module PlayScreen =
         let mutable packet_count = 0
 
         Lobby.start_playing()
-        Gameplay.Online.Multiplayer.add_own_replay scoring
+        Gameplay.Online.Multiplayer.add_own_replay (scoring, liveplay)
 
         let send_replay_packet() =
             use ms = new System.IO.MemoryStream()

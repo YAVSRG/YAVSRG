@@ -5,12 +5,14 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
+open Prelude.Data.Scores
 open Prelude.Gameplay.Grading
 open Interlude.Web.Shared
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Features.Gameplay
+open Interlude.Features.Score
 open Interlude.Features.Online
 
 type Chat() =
@@ -46,13 +48,13 @@ type Chat() =
             let scores = 
                 Online.Multiplayer.replays.Keys
                 |> Seq.map (fun username ->
-                    let s = Online.Multiplayer.replays.[username]
+                    let s, make_score_info = Online.Multiplayer.replays.[username]
                     s.Update(Time.infinity)
-                    username, s
+                    username, make_score_info()
                 )
-                |> Seq.sortByDescending(fun (_, s) -> s.Value)
+                |> Seq.sortByDescending(fun (_, s) -> s.Scoring.Value)
             let mutable place = 0
-            for username, score in scores do
+            for username, data in scores do
                 place <- place + 1
                 let color =
                     match place with
@@ -61,13 +63,25 @@ type Chat() =
                     | 3 -> Color.DarkOrange
                     | _ -> Color.White
                 let cmp =
-                    let lamp = Lamp.calculate score.Ruleset.Grading.Lamps score.State
-                    let grade = Grade.calculate score.Ruleset.Grading.Grades score.State
-                    StaticContainer(NodeType.None)
-                    |+ Text(sprintf "%i. %s" place username, Color = K (color, Colors.shadow_1), Align = Alignment.LEFT)
-                    |+ Text(sprintf "%s" (score.FormatAccuracy()), Color = K (score.Ruleset.GradeColor grade, Colors.shadow_1), Align = Alignment.CENTER)
-                    |+ Text(score.Ruleset.LampName lamp, Color = K (score.Ruleset.LampColor lamp, Colors.shadow_1), Align = 0.75f)
-                    |+ Text(sprintf "%ix" (score.State.BestCombo), Color = K (score.Ruleset.LampColor lamp, Colors.shadow_1), Align = Alignment.RIGHT)
+                    let lamp = data.Lamp
+                    let grade = data.Grade
+                    let container = 
+                        { new StaticContainer(NodeType.Leaf) with
+                            override this.Draw() =
+                                if this.Focused then Draw.rect this.Bounds Colors.grey_2.O1
+                                base.Draw()
+                        }
+                    container
+                    |+ Clickable((fun () ->
+                        Screen.changeNew 
+                            (fun () -> ScoreScreen(data, ImprovementFlags.Default) :> Screen)
+                            Screen.Type.Score
+                            Transitions.Flags.Default),
+                        OnHover = fun b -> if b then container.Focus())
+                    |+ Text(sprintf "%i. %s" place username, Color = (fun () -> if container.Focused then Colors.text_yellow_2 else (color, Colors.shadow_1)), Align = Alignment.LEFT)
+                    |+ Text(sprintf "%s" (data.Scoring.FormatAccuracy()), Color = K (data.Ruleset.GradeColor grade, Colors.shadow_1), Align = Alignment.CENTER)
+                    |+ Text(data.Ruleset.LampName lamp, Color = K (data.Ruleset.LampColor lamp, Colors.shadow_1), Align = 0.75f)
+                    |+ Text(sprintf "%ix" (data.Scoring.State.BestCombo), Color = K (data.Ruleset.LampColor lamp, Colors.shadow_1), Align = Alignment.RIGHT)
                 add_msg cmp
 
     let countdown(reason, seconds) =
