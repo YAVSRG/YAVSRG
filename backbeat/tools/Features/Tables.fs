@@ -5,7 +5,6 @@ open System.IO.Compression
 open System.Diagnostics
 open System.Linq
 open Percyqaz.Shell
-open Percyqaz.Json
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Data.Charts.Tables
@@ -15,11 +14,6 @@ open Prelude.Data.Charts.Caching
 open Backbeat.Utils
 
 module Tables =
-
-    [<Json.AutoCodec>]
-    type TableIndexEntry = { Name: string; File: string; Version: int }
-    [<Json.AutoCodec>]
-    type TableIndex = { Tables: ResizeArray<TableIndexEntry> }
     
     let put_table(file: string) =
         
@@ -271,7 +265,7 @@ module Tables =
         for file in Directory.GetFiles(TABLES_PATH) do
             if file.EndsWith(".table") && not (file.EndsWith(".suggestions.table")) then
                 JSON.FromFile<Table> file
-                |> function Result.Ok res -> index.Tables.Add { Name = res.Name; Version = res.Version; File = Path.GetFileNameWithoutExtension(file) } | _ -> ()
+                |> function Result.Ok res -> index.Tables.Add { Name = res.Name; Version = res.Version; File = Path.GetFileName(file) } | _ -> ()
         JSON.ToFile (Path.Combine(TABLES_PATH, "index.json"), true) index
 
     let register (ctx: Context) =
