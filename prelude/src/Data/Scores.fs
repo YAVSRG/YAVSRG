@@ -73,6 +73,8 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
     let mutable lamp = ValueNone
     let mutable grade = ValueNone
 
+    member val Player : string option = None with get, set
+
     member this.ScoreInfo = score
     member this.Chart = chart
 
