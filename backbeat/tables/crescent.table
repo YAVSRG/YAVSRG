@@ -11,19 +11,22 @@
             "Hash": "A840B85AA0C229B62357348CFBEE9DD2CE83B93EEA02555B3281527429DDFB32", 
             "Id": "hidden-is-fun/spy-and-spyce"
         }], 
-        "Name": "R-00"
+        "Name": "R-00",
+        "Rank": 0
     }, {
         "Charts": [{
             "Hash": "E77F185B9F0AA64F3758B1FC1D74856DA15705253E802F233A979E50B79427E9", 
             "Id": "alsty/ninelie-remix"
         }], 
-        "Name": "R-01"
+        "Name": "R-01",
+        "Rank": 1
     }, {
         "Charts": [{
             "Hash": "08CA01CA12918C8B703542ECE64DABC445B63B83354DE752E66734A4875D852E", 
             "Id": "keksikosu/gotoubun-no-kimochi"
         }], 
-        "Name": "R-03"
+        "Name": "R-03",
+        "Rank": 3
     }, {
         "Charts": [{
             "Hash": "491B17BE33F98D0A39DBC00CF771370A4EB9EFDF68B31A3F9883877B51B3DD4A", 
@@ -35,7 +38,8 @@
             "Hash": "543CD0E38E4B9BF99BA7A95F918BDC38C4B6B013764290A47112DB118B29471A", 
             "Id": "dellvangel/stay-alive"
         }], 
-        "Name": "R-04"
+        "Name": "R-04",
+        "Rank": 4
     }, {
         "Charts": [{
             "Hash": "BBA9D467502C378BEBC794208804BCC3BCCEC87D3A979812A4E4D76F09B151EE", 
@@ -53,13 +57,15 @@
             "Hash": "FA232C08A8B285EEC953E491C442129339CCEDE5B3A90B3937602F407DD9B8C6", 
             "Id": "riktoi/rhythm-of-love"
         }], 
-        "Name": "R-05"
+        "Name": "R-05",
+        "Rank": 5
     }, {
         "Charts": [{
             "Hash": "E2FFD03B9583D9BF45A0611437DCDE643203A17DCB99E9C6078F51FB1173AF42", 
             "Id": "das-hikari/magical-musical-master"
         }], 
-        "Name": "R-07"
+        "Name": "R-07",
+        "Rank": 7
     }, {
         "Charts": [{
             "Hash": "3485A35F1903C38F89E84169B38545762DCFFDB465764191DEE3A32BAF7EA2B3", 
@@ -68,7 +74,8 @@
             "Hash": "81756578BC148B95FF004010F8C34FA357F6E7FD133398A8A59F4C2FFBEE1993", 
             "Id": "kraezymann/dance-all-night"
         }], 
-        "Name": "R-08"
+        "Name": "R-08",
+        "Rank": 8
     }, {
         "Charts": [{
             "Hash": "63C546D5D2BE8181846EB0ED79D8DF11C3954C3A44E381D6AACFE2E977F6F815", 
@@ -77,7 +84,8 @@
             "Hash": "A12684CD45E6A02CC4B0641790AD66F6B55E034E13DA3EA016AD4621B0970AF1", 
             "Id": "muses/koufuku-na-wagamama"
         }], 
-        "Name": "R-09"
+        "Name": "R-09",
+        "Rank": 9
     }, {
         "Charts": [{
             "Hash": "6AEFD021059837E96B1702EE5ADE6D86005DBCA9E540E47AD711AE367052F491", 
@@ -86,13 +94,15 @@
             "Hash": "719C39343CCE68D47764FED8A2B9C35566371C4D640CDBA59B532465D0A5441F", 
             "Id": "leo137/cinema"
         }], 
-        "Name": "A-10"
+        "Name": "A-10",
+        "Rank": 10
     }, {
         "Charts": [{
             "Hash": "5ECD7A1B5D4E6057EBFCBB9118F16544F2720977AB51F4FE5877771705BFFE11", 
             "Id": "xingyue/cyaegha"
         }], 
-        "Name": "A-11"
+        "Name": "A-11",
+        "Rank": 11
     }, {
         "Charts": [{
             "Hash": "EDF278178473F064A453F9F0FB6975712ADB919DDB6C266A8FCF9AED3E793D0E", 
@@ -107,7 +117,8 @@
             "Hash": "C3D7F5D624156C7E344DEDC7B7B899A209AC57DD6CA7757F7A9C65770BBCC234", 
             "Id": "nikosek/colorful"
         }], 
-        "Name": "A-12"
+        "Name": "A-12",
+        "Rank": 12
     }, {
         "Charts": [{
             "Hash": "8ABA25DF43676C63F4457DE02B10857F20BA9ACBFFE9F961175ACD2F1BA769DC", 
@@ -125,7 +136,8 @@
             "Hash": "0166EBAB1F0CF0ACB9DBC71D2EC874DFB7557BA7A3FB471BB48BC6DFBBDD64FE", 
             "Id": "kraezymann/petrified"
         }], 
-        "Name": "A-13"
+        "Name": "A-13",
+        "Rank": 13
     }, {
         "Charts": [{
             "Hash": "7B45CDAAAD502B2006A29A50FBF0A737243D3EAA619AEB0AD52629FF1053FE55", 
@@ -143,7 +155,8 @@
             "Hash": "ADA3912E2990E97F7160D7AE7991BCC08DA106E48CEEB1D141FFF3AE10EE612B", 
             "Id": "piratom/boss-rush"
         }], 
-        "Name": "A-14"
+        "Name": "A-14",
+        "Rank": 14
     }, {
         "Charts": [{
             "Hash": "3E6BC14F7DD2B645781ACFA9568D9D2EA9AD8659C2F4A4CD32C1FCDCC4494119", 
@@ -167,7 +180,8 @@
             "Hash": "A5B2242240C7310C06AB78377D5CA0072FFAC954FC90B999184CDEA71154F716", 
             "Id": "nikosek/cherry"
         }], 
-        "Name": "A-15"
+        "Name": "A-15",
+        "Rank": 15
     }, {
         "Charts": [{
             "Hash": "66F32FEDBCD80F4C644513882042D7170D9ABF94CDCDAF8C7B3C802BF2049108", 
@@ -191,7 +205,8 @@
             "Hash": "7BC30EE292037D5D46D6EB42495BC9B77BC751A6B4F0EF41847CD95D832ECC7A", 
             "Id": "darkztar/towards-the-horizon"
         }], 
-        "Name": "A-16"
+        "Name": "A-16",
+        "Rank": 16
     }, {
         "Charts": [{
             "Hash": "4483462F18451F2139FB017B38E824F853D4FEB9AE7BE8192ADD27865630DBFE", 
@@ -215,7 +230,8 @@
             "Hash": "BE36C5A228E754E70963CF997C5871E2D41BF09AA4C6F44E5CCB5EEED3CA4E05", 
             "Id": "wh1teh/blue-noah"
         }], 
-        "Name": "A-17"
+        "Name": "A-17",
+        "Rank": 17
     }, {
         "Charts": [{
             "Hash": "A23E944DC94C7C914ACD0D183F3B3ED6DA985AFC74D282743D8472E6D62983E1", 
@@ -239,7 +255,8 @@
             "Hash": "FE97D862A476C666F2995778A6DEEDE820C14D3BBEE3B27F0BD45C5EEDF65946", 
             "Id": "juankristal/move-that-body"
         }], 
-        "Name": "A-18"
+        "Name": "A-18",
+        "Rank": 18
     }, {
         "Charts": [{
             "Hash": "9AC4965B6097F1C1AD5DA2FDB2F47A34AE35DEA3B80DC44E3CCF1DC988DAA2CA", 
@@ -272,7 +289,8 @@
             "Hash": "86A4247565633050993B69C3882795C05B3EF0395CC687186E298D403FAA082E", 
             "Id": "blaziken/senorita"
         }], 
-        "Name": "A-19"
+        "Name": "A-19",
+        "Rank": 19
     }, {
         "Charts": [{
             "Hash": "B32C7A8741E66198C9CDF98196670A60CEEC4FEF39E46AC367690D649C553798", 
@@ -308,7 +326,8 @@
             "Hash": "BBBCCEDD274731C22A756BCC06FB776568B98B6BE77E4DC56642E5326ACB4AE7", 
             "Id": "upan/rocket-beat"
         }], 
-        "Name": "E-20"
+        "Name": "E-20",
+        "Rank": 20
     }, {
         "Charts": [{
             "Hash": "34CB453291DBD3870B50F9A889CAD01F9B8801C6F3DC952F4658FAA1E4C19DBE", 
@@ -350,7 +369,8 @@
             "Hash": "B11A5B3CCD91726D84EF24EE7E2263D31E522AF6059FD5052CDB2894353E37C3", 
             "Id": "yoshl/in-black-and-white"
         }], 
-        "Name": "E-21"
+        "Name": "E-21",
+        "Rank": 21
     }, {
         "Charts": [{
             "Hash": "445DB2AE63CD052E22D087BEDABDA2455FE2CB004E2F90392FC0A25D5F00DF9D", 
@@ -395,7 +415,8 @@
             "Hash": "75F675F3E81ADDE4493F30F84B4AD12D90FC284A24109655835DF14B37F90D1D", 
             "Id": "caliber/disconnected"
         }], 
-        "Name": "E-22"
+        "Name": "E-22",
+        "Rank": 22
     }, {
         "Charts": [{
             "Hash": "DD8DEAD298F58D47E12FCA86ECF14A82FA4656F3C203C18CB84BF0DC8DCF3CC2", 
@@ -455,7 +476,8 @@
             "Hash": "BFCE72F07CBFAA90A8A82178E46D535BC0AD13392B5829CB4CC170F886C9957F", 
             "Id": "my-angel-koishi/ch3rry"
         }], 
-        "Name": "E-23"
+        "Name": "E-23",
+        "Rank": 23
     }, {
         "Charts": [{
             "Hash": "72DD0B4446F68B743567FEB66F7182596A46E428817206C432B6BF6F4FC96935", 
@@ -515,7 +537,8 @@
             "Hash": "66770D195538F1089B57E617EF54B329B151A2DDF4201CF426D42A0260FF62E8", 
             "Id": "skwid/bon-bon"
         }], 
-        "Name": "E-24"
+        "Name": "E-24",
+        "Rank": 24
     }, {
         "Charts": [{
             "Hash": "3424BA4231A8347FABD7F4075B4BBD843DD34F313D6CEF0A13CD56A30AADB1CD", 
@@ -560,7 +583,8 @@
             "Hash": "CC6E7F70C0B4D185731EB7C6C4C72F3F02E4394607B52B711D4CCF28FA224367", 
             "Id": "inteliser/infinite-youniverse"
         }], 
-        "Name": "E-25"
+        "Name": "E-25",
+        "Rank": 25
     }, {
         "Charts": [{
             "Hash": "F00FFE0FAFC450BB34EF6911B3BC785BB7EA5A3E0441A974F9114B91E9D39C8B", 
@@ -608,7 +632,8 @@
             "Hash": "CD251A62AAB22802915636FB1203DEF706A440FE07F09ECA691755DAC1B7EC15", 
             "Id": "hydria/power"
         }], 
-        "Name": "E-26"
+        "Name": "E-26",
+        "Rank": 26
     }, {
         "Charts": [{
             "Hash": "EA4FA9310F24B8D4EA18416F90BCF2AD0F75075683B8A557232D2D73FC097537", 
@@ -653,7 +678,8 @@
             "Hash": "F3C9B728CBED020D24F4027EC55F5597A766A8DACD7CD524F4ED762415060165", 
             "Id": "leo137/love-and-justice"
         }], 
-        "Name": "E-27"
+        "Name": "E-27",
+        "Rank": 27
     }, {
         "Charts": [{
             "Hash": "D43BD5DCD2150F417C8B353867444F252AC05E585B97AB930B19C502B48521E9", 
@@ -689,7 +715,8 @@
             "Hash": "3F801C73CB662DDF60AEFC71EB13C1277107BFE4452B1E70E581A4BB144F8279", 
             "Id": "ska/oddloop"
         }], 
-        "Name": "E-28"
+        "Name": "E-28",
+        "Rank": 28
     }, {
         "Charts": [{
             "Hash": "46854BB0CEFDBE83B82F9BDBFDA3479414654556B12858F59896C631BA2EFF82", 
@@ -722,7 +749,8 @@
             "Hash": "2D03D3EAAB6F43D0DFE4DEB3132FB4DCDE071A5132CAE5948FD363211CADA0DF", 
             "Id": "leo137/live-nor-die"
         }], 
-        "Name": "E-29"
+        "Name": "E-29",
+        "Rank": 29
     }, {
         "Charts": [{
             "Hash": "6B3BFF9485C892E9AA3824CB9DB1C72AF43F117BEA6E8E65B5A8BF543BED5269", 
@@ -746,7 +774,8 @@
             "Hash": "BB1153430C0E30BED8414DD45BCEE74696404B04D1AFF6AD4F209DBBA98E22CE", 
             "Id": "inteliser/staring-at-star"
         }], 
-        "Name": "X-30"
+        "Name": "X-30",
+        "Rank": 30
     }, {
         "Charts": [{
             "Hash": "CDAE74FFABDB400D2930ED003629E23A264A4191133EBA75980481C1A4321F48", 
@@ -764,13 +793,15 @@
             "Hash": "F53B0A3CF2D4880D5B475BE0F3E23C9218982169AC93398A3F6EF7C518E969CF", 
             "Id": "tera/love-shuga-remix"
         }], 
-        "Name": "X-31"
+        "Name": "X-31",
+        "Rank": 31
     }, {
         "Charts": [{
             "Hash": "388DD6EA8BC8841A793074B931D687618DA75807B36A46AFE2680F7494AF1AE6", 
             "Id": "evening/lazorbeamz"
         }], 
-        "Name": "X-32"
+        "Name": "X-32",
+        "Rank": 32
     }, {
         "Charts": [{
             "Hash": "4DD08F708727342BE562DFD1176F6F3E1F08D654E0008D2C2A767DCAF73D5B31", 
@@ -779,7 +810,8 @@
             "Hash": "B4A734FB580969DEBB5FC08AF240139AA5AB2F0B083608F7A61A17685ACB0B12", 
             "Id": "caliber/image-material"
         }], 
-        "Name": "X-33"
+        "Name": "X-33",
+        "Rank": 33
     }, {
         "Charts": [{
             "Hash": "6E03B9FD539E39D3B16CD9FE90277C54025ABBA99BC21DA2C1DB5EB39B8118B8", 
@@ -791,7 +823,8 @@
             "Hash": "46145D80FD6F9599C321B2C7D37E4F35071A66422EE6D30E0041C148F09DA6AE", 
             "Id": "evening/self-producer"
         }], 
-        "Name": "X-34"
+        "Name": "X-34",
+        "Rank": 34
     }, {
         "Charts": [{
             "Hash": "4465195C3AE981B5711DC558E728B11FD83C0A0E2761F38ECD0AAE60B89D4516", 
@@ -800,7 +833,8 @@
             "Hash": "D078DCCF0E68C1B365B0FFC9BC5A713A4BD1754916762DA5040E56630ADC4D55", 
             "Id": "evening/sono-tamashii-ni-yasuragi-wo-dignity-of-spirit"
         }], 
-        "Name": "X-35"
+        "Name": "X-35",
+        "Rank": 35
     }, {
         "Charts": [{
             "Hash": "ECA7A813FB8287210003E6AC328B8CF270E61D3BD13C9B8C529EC7AF4CEF560F", 
@@ -809,7 +843,8 @@
             "Hash": "9E353A96E4733325705281EEB4D2E65A1E71E19D77EAEB727BCFE0698C448099", 
             "Id": "spoon/yura-yura"
         }], 
-        "Name": "X-36"
+        "Name": "X-36",
+        "Rank": 36
     }, {
         "Charts": [{
             "Hash": "4052714E3EDD9B98B8F043EA816D430BD717C5EA3684CACB76A5916CE4C978D5", 
@@ -818,7 +853,8 @@
             "Hash": "E540BBD70EAC5A07E567CC030A795CBC6B87D85B5E842F298D22F86526143CB0", 
             "Id": "lemonguy/get-got"
         }], 
-        "Name": "X-37"
+        "Name": "X-37",
+        "Rank": 37
     }, {
         "Charts": [{
             "Hash": "9812223FEF9C78FF3171C5BB1D8850749AAFED6EEE435651D5591C254EB25B2A", 
@@ -827,7 +863,8 @@
             "Hash": "F318A450CC18936452DCED1E94594A6CBF7F47E438F7D137E13FBCC055771847", 
             "Id": "frolica/universe"
         }], 
-        "Name": "X-38"
+        "Name": "X-38",
+        "Rank": 38
     }], 
     "Name": "Crescent", 
     "RulesetId": "SC(J4)BC581C",

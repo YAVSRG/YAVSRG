@@ -34,7 +34,7 @@ module Tables =
         let lines = ResizeArray<string>()
 
         for level in table.Levels do
-            lines.Add(sprintf "# %s" level.Name)
+            lines.Add(sprintf "# %i\t%s" level.Rank level.Name)
             for chart in level.Charts do
                 lines.Add chart.Id
 
@@ -49,14 +49,13 @@ module Tables =
         let lines = File.ReadAllLines flat
 
         let new_table = { table with Levels = ResizeArray<Level>() }
-        let mutable level = ""
         let mutable levelCharts = ResizeArray<TableChart>()
 
         for line in lines do
             if line.StartsWith "# " then
-                level <- line.Substring 2
+                let split = line.Substring(2).Split([|'\t'|], 2)
                 levelCharts <- ResizeArray<TableChart>()
-                new_table.Levels.Add { Charts = levelCharts; Name = level }
+                new_table.Levels.Add { Charts = levelCharts; Name = split.[1]; Rank = int split.[0] }
             else
                 let chart : TableChart =
                     table.Levels
@@ -84,7 +83,7 @@ module Tables =
 
         let table : Table = Path.Combine(TABLES_PATH, file + ".suggestions.table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
 
-        table.AddLevel("XXX") |> ignore
+        table.AddLevel("XXX", -1) |> ignore
 
         let collections : Collections =
             match JSON.FromFile INTERLUDE_COLLECTIONS_FILE with
@@ -158,10 +157,10 @@ module Tables =
             sprintf "\n__%s__" level |> write_diff
             for (_, chart, action) in changes do
                 match action with
-                | Removed -> sprintf "- `%s`" chart.Id |> write_diff
-                | Added -> sprintf "+ `%s`" chart.Id |> write_diff
-                | MovedAway target -> sprintf "~ `%s` --> **%s**" chart.Id target |> write_diff
-                | MovedHere from -> sprintf "~ `%s` <-- **%s**" chart.Id from |> write_diff
+                | Removed -> sprintf "- %s" chart.Id |> write_diff
+                | Added -> sprintf "+ %s" chart.Id |> write_diff
+                | MovedAway target -> sprintf "~ %s -> %s" chart.Id target |> write_diff
+                | MovedHere from -> sprintf "~ %s <- %s" chart.Id from |> write_diff
 
         let diff_text = diff_text.ToString()
 
