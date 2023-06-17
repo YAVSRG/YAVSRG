@@ -106,12 +106,14 @@ module Tree =
                     Transitions.Flags.Default
             | None -> Logging.Warn "There is no chart selected"
 
-    let challengeScore(rate, replay) =
+    let challengeScore(_rate, _mods, replay) =
         match Chart.saveData with
         | Some data ->
             data.LastPlayed <- DateTime.Now
+            rate.Set _rate
+            selectedMods.Set _mods
             Screen.changeNew
-                ( fun () -> PlayScreen.play_screen(PacemakerMode.Score (rate, replay)) )
+                ( fun () -> PlayScreen.play_screen(PacemakerMode.Score (rate.Value, replay)) )
                 ( Screen.Type.Play )
                 Transitions.Flags.Default
         | None -> Logging.Warn "There is no chart selected"

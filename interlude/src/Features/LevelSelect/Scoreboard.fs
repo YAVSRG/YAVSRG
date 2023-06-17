@@ -32,7 +32,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
                 Icon = Icons.watch)
                 .Pos(270.0f)
             |+ PageButton("score.challenge",
-                (fun () -> Tree.challengeScore(score.ScoreInfo.rate, score.ReplayData); Menu.Back()),
+                (fun () -> Tree.challengeScore(score.ScoreInfo.rate, score.ScoreInfo.selectedMods, score.ReplayData); Menu.Back()),
                 Icon = Icons.goal,
                 Enabled = Network.lobby.IsNone)
                 .Pos(340.0f)
