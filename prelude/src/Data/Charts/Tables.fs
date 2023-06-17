@@ -148,7 +148,7 @@ module Table =
 
     let install(id: string, table: Table) =
         JSON.ToFile(table_pathf id, true) table
-        init(Some id)
+        init(Some table.Name)
 
     let list() = loaded :> Loaded seq
 
