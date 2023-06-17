@@ -7,6 +7,7 @@ open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools.Patterns
+open Interlude.UI.Menu
 open Interlude.Features.Play
 open Interlude.Features.Online
 
@@ -32,9 +33,12 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
         Playfield(PlayState.Dummy chart)
         |+ LaneCover()
 
+    let volume = Volume()
+
     override this.Init(parent: Widget) =
         base.Init parent
         playfield.Init this
+        volume.Init this
 
     override this.Draw() =
         playfield.Draw()
@@ -64,8 +68,11 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
         //    Text.draw(Style.baseFont, pattern, 20.0f, b.Left, y, Color.White)
         //    y <- y + 40.0f
 
+        volume.Draw()
+
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
+        volume.Update(elapsedTime, moved)
         playfield.Update(elapsedTime, moved)
         if this.Bounds.Bottom - Mouse.y() < 200.0f && Mouse.leftClick() then
             let percent = (Mouse.x() - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f

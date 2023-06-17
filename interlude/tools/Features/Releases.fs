@@ -50,8 +50,7 @@ module Releases =
 
         printfn "Creating git commit"
 
-        exec "git" "add ."
-        exec "git" (sprintf "commit -m \"🏷️ Version %s\"" v)
+        exec "git" (sprintf "commit -a -m \"🏷️ Version %s\"" v)
 
     let build_win64() =
         
