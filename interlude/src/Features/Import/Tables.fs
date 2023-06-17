@@ -96,7 +96,7 @@ type TableCard(id: string, table: Table) as this =
                             )
                             else 
                                 Logging.Info(sprintf "Download failed for %s" missing)
-                                sync(this.GetMissingCharts)
+                                sync(this.GetMissingCharts) 
                             unavailable_charts <- unavailable_charts.Add missing
                         )
                 | _ -> 

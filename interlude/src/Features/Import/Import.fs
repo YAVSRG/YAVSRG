@@ -66,6 +66,7 @@ module ImportScreen =
 
     let switch_to_noteskins() = container.Current <- Noteskins.tab
     let switch_to_rulesets() = container.Current <- Rulesets.tab
+    let switch_to_tables() = container.Current <- Tables.tab
 
 type ImportScreen() as this =
     inherit Screen()

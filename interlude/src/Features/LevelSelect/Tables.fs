@@ -99,7 +99,13 @@ type ManageTablesPage() as this =
         container.Clear()
 
         container
-        |+ PageButton("tables.install", ignore, Icon = Icons.download)
+        |+ PageButton("tables.install",
+            (fun () -> 
+                Menu.Exit()
+                Interlude.Features.Import.ImportScreen.switch_to_tables()
+                Screen.change Screen.Type.Import Transitions.Flags.Default
+            ),
+            Icon = Icons.download)
         |* Dummy()
 
         for e in Table.list() do
@@ -115,7 +121,6 @@ type ManageTablesPage() as this =
         refresh()
 
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
-        this |* WIP()
 
     override this.Title = L"table.name"
     override this.OnClose() = ()
