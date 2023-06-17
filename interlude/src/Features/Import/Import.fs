@@ -76,7 +76,7 @@ type ImportScreen() as this =
         |+ TabButton(Icons.import_osu, "osu!mania songs", ImportScreen.container, Beatmaps.tab)
         |+ TabButton(Icons.import_noteskin, "Noteskins", ImportScreen.container, Noteskins.tab)
         |+ TabButton(Icons.gameplay, "Rulesets", ImportScreen.container, Rulesets.tab)
-        //|+ TabButton(Icons.table, "Tables", ImportScreen.container, Tables.tab)
+        |+ TabButton(Icons.table, "Tables", ImportScreen.container, Tables.tab)
         |+ ServiceStatus("Loading", WebServices.download_string)
         |+ ServiceStatus("Downloading", WebServices.download_file)
         |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)
