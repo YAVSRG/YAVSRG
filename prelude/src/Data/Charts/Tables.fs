@@ -21,6 +21,7 @@ type Level =
     {
         /// Display name ingame
         mutable Name: string
+        Rank: int
         Charts: ResizeArray<TableChart>
     }
 
@@ -42,12 +43,12 @@ type Table =
     member private this.Level(id: string) : Level = this.Levels.Find(fun l -> l.Name = id)
     member this.TryLevel(id: string) : Level option = Seq.tryFind (fun (l: Level) -> l.Name = id) this.Levels
 
-    member this.AddLevel(id: string) : bool =
+    member this.AddLevel(id: string, rank: int) : bool =
         if id = "" then false else
 
-        if Seq.forall (fun (l: Level) -> l.Name <> id) this.Levels |> not then false else
+        if Seq.forall (fun (l: Level) -> l.Name <> id && l.Rank <> rank) this.Levels |> not then false else
 
-        let l = { Name = id; Charts = ResizeArray() }
+        let l = { Name = id; Charts = ResizeArray(); Rank = rank }
         this.Levels.Add l
         true
 
