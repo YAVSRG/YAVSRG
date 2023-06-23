@@ -37,6 +37,7 @@ apt-cache policy docker-ce
 sudo apt install docker-ce
 
 sudo systemctl status docker
+sysctl "vm.overcommit_memory=1"
 
 snap install core; snap refresh core
 snap install --classic certbot
@@ -64,5 +65,3 @@ openssl pkcs12 -export -out ./secrets/api.pfx -inkey /etc/letsencrypt/live/api.y
 ```
 docker logs server
 ```
-
-Still need a docker compose file and proper ssh stuff to secure it
