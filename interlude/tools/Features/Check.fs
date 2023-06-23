@@ -84,8 +84,9 @@ module Check =
         for m in locale.Keys do
             printfn "Unused locale key: %s" m
 
-    let register(ctx: Context) : Context =
+    let register(ctx: ShellContext) : ShellContext =
         ctx.WithCommand(
             "check_locale",
-            Command.create "Check locale for mistakes" [] (Impl.Create (fun () -> check_locale "en_GB"))
-        )
+            "Check locale for mistakes",
+            [""],
+            fun () -> check_locale "en_GB")

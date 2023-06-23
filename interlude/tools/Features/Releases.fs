@@ -86,14 +86,20 @@ module Releases =
         ZipFile.CreateFromDirectory(clean_dir, clean_dir + ".zip")
         printfn "Zipped to: %s.zip" clean_dir
 
-    let register(ctx: Context) : Context =
+    let register(ctx: ShellContext) : ShellContext =
         ctx.WithCommand(
             "version",
-            Command.create "Displays the current version of Interlude" [] (Impl.Create ((fun () -> current_version), Types.str))
+            "Displays the current version of Interlude",
+            [""],
+            fun () -> printfn "%s" current_version // todo: change this back once quotes are not placed around output strings
         ).WithCommand(
             "publish",
-            Command.create "Publishes a new version of Interlude" [] (Impl.Create publish)
+            "Publishes a new version of Interlude",
+            [""],
+            publish
         ).WithCommand(
             "release_win64",
-            Command.create "Build an Interlude release and zip it for upload" [] (Impl.Create build_win64)
+            "Build an Interlude release and zip it for upload",
+            [""],
+            build_win64
         )

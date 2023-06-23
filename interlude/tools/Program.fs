@@ -1,21 +1,18 @@
 ﻿open Percyqaz.Shell
+open Percyqaz.Shell.Shell
 open Interlude.Tools
 open Interlude.Tools.Features
 
 let ctx =
-    Context.Empty
+    ShellContext.Empty
     |> Check.register
     |> Assets.register
     |> Releases.register
 
 [<EntryPoint>]
 let main argv =
-    if argv.Length > 0 then
-        match ctx.Interpret(String.concat " " argv) with
-        | Ok _ -> ()
-        | ParseFail err -> printfn "%A" err
-        | RunFail err -> raise err
+    if argv.Length > 0 then ctx.Evaluate(String.concat " " argv)
     else
         printfn "== Interlude Tools CLI =="
-        Shell.basic_repl ctx
+        repl ctx
     0

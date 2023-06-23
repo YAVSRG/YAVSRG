@@ -28,8 +28,10 @@ module Assets =
         <| Path.Combine(Utils.ASSETS_PATH, "defaultOrb")
         <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "defaultOrb.isk")
 
-    let register(ctx: Context) : Context =
+    let register(ctx: ShellContext) : ShellContext =
         ctx.WithCommand(
             "bundle_assets",
-            Command.create "Bundle all assets for build pipeline" [] (Impl.Create main)
+            "Bundle all assets for build pipeline",
+            [""],
+            main
         )
