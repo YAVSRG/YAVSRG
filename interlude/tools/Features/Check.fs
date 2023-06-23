@@ -88,5 +88,4 @@ module Check =
         ctx.WithCommand(
             "check_locale",
             "Check locale for mistakes",
-            [""],
             fun () -> check_locale "en_GB")

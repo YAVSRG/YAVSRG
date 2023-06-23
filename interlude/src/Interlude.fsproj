@@ -120,7 +120,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Percyqaz.Shell" Version="0.5.1" />
+    <PackageReference Include="Percyqaz.Shell" Version="0.5.2" />
   </ItemGroup>
 
   <ItemGroup>

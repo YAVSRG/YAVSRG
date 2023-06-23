@@ -90,16 +90,13 @@ module Releases =
         ctx.WithCommand(
             "version",
             "Displays the current version of Interlude",
-            [""],
-            fun () -> printfn "%s" current_version // todo: change this back once quotes are not placed around output strings
+            fun () -> current_version
         ).WithCommand(
             "publish",
             "Publishes a new version of Interlude",
-            [""],
             publish
         ).WithCommand(
             "release_win64",
             "Build an Interlude release and zip it for upload",
-            [""],
             build_win64
         )

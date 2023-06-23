@@ -32,6 +32,5 @@ module Assets =
         ctx.WithCommand(
             "bundle_assets",
             "Bundle all assets for build pipeline",
-            [""],
             main
         )

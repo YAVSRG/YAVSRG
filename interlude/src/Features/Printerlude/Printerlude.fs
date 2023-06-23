@@ -16,17 +16,11 @@ module Printerlude =
 
         let register_commands (ctx: ShellContext) =
             ctx
-                .WithCommand("themes_reload", Command.create "Reload the current theme and noteskin" [""]
-                    ( Impl.Create1(fun () -> Content.Themes.load(); Content.Noteskins.load()) ))
-
-                .WithCommand("noteskin_stitch", Command.create "Stitch a noteskin texture" ["id"]
-                    ( Impl.Create1(fun id -> Content.Noteskins.Current.instance.StitchTexture id) ))
-
-                .WithCommand("noteskin_split", Command.create "Split a noteskin texture" ["id"]
-                    ( Impl.Create1(fun id -> Content.Noteskins.Current.instance.SplitTexture id) ))
-                    
-                .WithCommand("import_noteskin", Command.create "Import a noteskin from an existing source" ["path"; "keymodes"]
-                    ( Impl.Create2(fun path keymodes -> if not (Content.Noteskins.tryImport path keymodes) then ctx.WriteLine("Nothing found to import")) ))
+                .WithCommand("themes_reload", "Reload the current theme and noteskin", fun () -> Content.Themes.load(); Content.Noteskins.load())
+                .WithCommand("noteskin_stitch", "Stitch a noteskin texture", "id", fun id -> Content.Noteskins.Current.instance.StitchTexture id)
+                .WithCommand("noteskin_split", "Split a noteskin texture", "id", fun id -> Content.Noteskins.Current.instance.SplitTexture id)
+                .WithCommand("import_noteskin", "Import a noteskin from an existing source", "path", "keymodes", 
+                    fun path keymodes -> if not (Content.Noteskins.tryImport path keymodes) then ctx.WriteLine("Nothing found to import"))
 
     module private Utils =
 
@@ -93,12 +87,12 @@ module Printerlude =
         
         let register_commands (ctx: ShellContext) = 
             ctx
-                .WithCommand("version", Command.create "Shows info about the current game version" [""] (Impl.Create1 show_version))
-                .WithCommand("exit", Command.create "Exits the game" [""] (Impl.Create1 (fun () -> UI.Screen.exit <- true)))
-                .WithCommand("clear", Command.create "Clears the terminal" [""] (Impl.Create1 Terminal.Log.clear))
-                .WithCommand("export_osz", Command.create "Export current chart as osz" [""] (Impl.Create1 export_osz))
-                .WithCommand("patterns", Command.create "Experimental" [""] (Impl.Create1 analyse_patterns))
-                .WithCommand("local_server", Command.create "Switch to local development server" ["flag"] (Impl.Create1 (fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); Logging.Info("Restart your game to apply server change."))))
+                .WithCommand("version", "Shows info about the current game version", show_version)
+                .WithCommand("exit", "Exits the game", fun () -> UI.Screen.exit <- true)
+                .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
+                .WithCommand("export_osz", "Export current chart as osz", export_osz)
+                .WithCommand("patterns", "Experimental", analyse_patterns)
+                .WithCommand("local_server", "Switch to local development server", "flag", fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); ctx.WriteLine("Restart your game to apply server change."))
 
     let private ms = new MemoryStream()
     let private context_output = new StreamReader(ms)
