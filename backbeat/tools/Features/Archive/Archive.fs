@@ -4,21 +4,13 @@ module Archive =
         
     open Percyqaz.Shell
 
-    let register (ctx: Context) =
+    let register (ctx: ShellContext) =
         ctx
-            .WithCommand("get_eo", 
-            Command.create "Fetch EO packs locally" [] <| Impl.Create(Packs.load_stepmania_packs))
-            .WithCommand("script",
-            Command.create "User script" [] <| Impl.Create(Collect.script))
-            .WithCommand("slurp", 
-            Command.create "Processes queues of chart data to add to database" [] <| Impl.Create(Collect.slurp))
-            .WithCommand("check_songs", 
-            Command.create "Scan song metadata for mistakes" [] <| Impl.Create(Maintenance.check_all_songs))
-            .WithCommand("check_artists", 
-            Command.create "Scan artists for duplicates" [] <| Impl.Create(Maintenance.check_all_artists))
-            .WithCommand("check_ids", 
-            Command.create "Fix old song ids" [] <| Impl.Create(Maintenance.check_all_ids))
-            .WithCommand("verify_artist", 
-            Command.create "Add a verified artist name to the database" ["artist_name"] <| Impl.Create(Types.str, Maintenance.verify_artist))
-            .WithCommand("v2_test", 
-            Command.create "Test" [] <| Impl.Create(Maintenance2.test))
+            .WithCommand("get_eo", "Fetch EO packs locally", Packs.load_stepmania_packs)
+            .WithCommand("script", "User script", Collect.script)
+            .WithCommand("slurp", "Processes queues of chart data to add to database", Collect.slurp)
+            .WithCommand("check_songs", "Scan song metadata for mistakes", Maintenance.check_all_songs)
+            .WithCommand("check_artists", "Scan artists for duplicates", Maintenance.check_all_artists)
+            .WithCommand("check_ids", "Fix old song ids", Maintenance.check_all_ids)
+            .WithCommand("verify_artist", "Add a verified artist name to the database", "artist_name", Maintenance.verify_artist)
+            .WithCommand("v2_test", "Test", Maintenance2.test)

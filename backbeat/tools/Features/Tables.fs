@@ -267,21 +267,13 @@ module Tables =
                 |> function Result.Ok res -> index.Tables.Add { Name = res.Name; Version = res.Version; File = Path.GetFileName(file) } | _ -> ()
         JSON.ToFile (Path.Combine(TABLES_PATH, "index.json"), true) index
 
-    let register (ctx: Context) =
+    let register (ctx: ShellContext) =
         ctx
-            .WithCommand("put", 
-            Command.create "Copies repo table to your local interlude" ["table"] <| Impl.Create(Types.str, put_table))
-            .WithCommand("add_batch", 
-            Command.create "Add batch of table charts from a local collection" ["table"; "collection"] <| Impl.Create(Types.str, Types.str, add_suggestions))
-            .WithCommand("edit", 
-            Command.create "Make edits to existing charts in a table" ["table"] <| Impl.Create(Types.str, edit_table))
-            .WithCommand("check_table", 
-            Command.create "Verify all parts of the table are in backbeat" ["table"] <| Impl.Create(Types.str, check_table))
-            .WithCommand("commit", 
-            Command.create "Commit suggestions to table and generate a changelog" ["table"] <| Impl.Create(Types.str, commit_table))
-            .WithCommand("sources", 
-            Command.create "Export sources needed to have every chart for a table" ["table"] <| Impl.Create(Types.str, export_table_sources))
-            .WithCommand("publish", 
-            Command.create "Export Crescent as a .zip" ["table"] <| Impl.Create(Types.str, export_as_pack))
-            .WithCommand("index", 
-            Command.create "Update table index" [] <| Impl.Create(update_index))
+            .WithCommand("put", "Copies repo table to your local interlude", "table", put_table)
+            .WithCommand("add_batch", "Add batch of table charts from a local collection", "table", "collection", add_suggestions)
+            .WithCommand("edit", "Make edits to existing charts in a table", "table", edit_table)
+            .WithCommand("check_table", "Verify all parts of the table are in backbeat", "table", check_table)
+            .WithCommand("commit", "Commit suggestions to table and generate a changelog", "table", commit_table)
+            .WithCommand("sources", "Export sources needed to have every chart for a table", "table", export_table_sources)
+            .WithCommand("publish", "Export Crescent as a .zip", "table", export_as_pack)
+            .WithCommand("index", "Update table index", update_index)

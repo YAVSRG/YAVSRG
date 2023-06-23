@@ -38,7 +38,6 @@ module Rulesets =
 
     open Percyqaz.Shell
 
-    let register (ctx: Context) =
+    let register (ctx: ShellContext) =
         ctx
-            .WithCommand("compile_rulesets", 
-            Command.create "Compile ruleset repository" [] <| Impl.Create(compile_rulesets))
+            .WithCommand("compile_rulesets", "Compile ruleset repository", compile_rulesets)

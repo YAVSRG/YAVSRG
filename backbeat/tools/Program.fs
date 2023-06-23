@@ -1,22 +1,19 @@
 ﻿open Percyqaz.Shell
+open Percyqaz.Shell.Shell
 open Backbeat.Features
 open Backbeat.Features.Archive
 
 let ctx =
-    Context.Empty
+    ShellContext.Empty
     |> Tables.register
     |> Archive.register
     |> Rulesets.register
-
+    
 [<EntryPoint>]
 let main argv =
     use logging = Backbeat.Utils.init()
-    if argv.Length > 0 then
-        match ctx.Interpret(String.concat " " argv) with
-        | Ok _ -> ()
-        | ParseFail err -> printfn "%A" err
-        | RunFail err -> raise err
+    if argv.Length > 0 then ctx.Evaluate(String.concat " " argv)
     else
         printfn "== Backbeat CLI =="
-        Shell.basic_repl ctx
+        repl ctx
     0
