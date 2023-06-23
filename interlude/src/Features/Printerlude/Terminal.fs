@@ -106,7 +106,7 @@ module Terminal =
             currentLine.Set (sprintf "%s\"%s\"" v path)
         else currentLine.Set (sprintf "%s \"%s\"" v path)
 
-    let font = lazy ( Fonts.create "Courier Prime Sans" |> fun x -> x.SpaceWidth <- 0.5f; x )
+    let font = lazy ( Fonts.create "Courier Prime Sans" |> fun x -> x.SpaceWidth <- 0.7f; x )
 
     let draw() =
         if not shown then ()
@@ -117,7 +117,7 @@ module Terminal =
         Draw.rect (bounds.Expand 5.0f) (Colors.white.O2)
         Draw.rect (bounds.TrimBottom 70.0f) (Colors.shadow_1.O3)
         Draw.rect (bounds.SliceBottom 65.0f) (Colors.shadow_2.O3)
-        Text.drawB(font.Value, ">  " + currentLine.Value, 30.0f, bounds.Left + 20.0f, bounds.Bottom - 50.0f, Colors.text)
+        Text.drawB(font.Value, "> " + currentLine.Value, 30.0f, bounds.Left + 20.0f, bounds.Bottom - 50.0f, Colors.text)
         
         lock lockObj (fun () -> 
             for i, line in Seq.indexed Log.visible do
@@ -139,6 +139,7 @@ module Terminal =
         
         lock lockObj (fun () -> 
             if sendKey.Tapped() && currentLine.Value <> "" then
+                add_message ("> " + currentLine.Value)
                 exec_command currentLine.Value
                 History.add currentLine.Value
                 Log.home()

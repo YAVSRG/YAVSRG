@@ -10,23 +10,23 @@ open Interlude.Features
 
 module Printerlude =
 
-    let mutable private ctx : Context = Unchecked.defaultof<_>
+    let mutable private ctx : ShellContext = Unchecked.defaultof<_>
 
     module private Themes =
 
-        let register_commands (ctx: Context) =
+        let register_commands (ctx: ShellContext) =
             ctx
-                .WithCommand("themes_reload", Command.create "Reload the current theme and noteskin" []
-                    ( Impl.Create(fun () -> Content.Themes.load(); Content.Noteskins.load()) ))
+                .WithCommand("themes_reload", Command.create "Reload the current theme and noteskin" [""]
+                    ( Impl.Create1(fun () -> Content.Themes.load(); Content.Noteskins.load()) ))
 
                 .WithCommand("noteskin_stitch", Command.create "Stitch a noteskin texture" ["id"]
-                    ( Impl.Create(Types.str, fun id -> Content.Noteskins.Current.instance.StitchTexture id) ))
+                    ( Impl.Create1(fun id -> Content.Noteskins.Current.instance.StitchTexture id) ))
 
                 .WithCommand("noteskin_split", Command.create "Split a noteskin texture" ["id"]
-                    ( Impl.Create(Types.str, fun id -> Content.Noteskins.Current.instance.SplitTexture id) ))
+                    ( Impl.Create1(fun id -> Content.Noteskins.Current.instance.SplitTexture id) ))
                     
                 .WithCommand("import_noteskin", Command.create "Import a noteskin from an existing source" ["path"; "keymodes"]
-                    ( Impl.Create(Types.str, (Types.list Types.int), fun path keymodes -> if not (Content.Noteskins.tryImport path keymodes) then ctx.WriteLine("Nothing found to import")) ))
+                    ( Impl.Create2(fun path keymodes -> if not (Content.Noteskins.tryImport path keymodes) then ctx.WriteLine("Nothing found to import")) ))
 
     module private Utils =
 
@@ -91,33 +91,29 @@ module Printerlude =
                     Logging.Info "Cleaned up."
                 with err -> Logging.Error ("Error while cleaning up after export", err)
         
-        let register_commands (ctx: Context) = 
+        let register_commands (ctx: ShellContext) = 
             ctx
-                .WithCommand("version", Command.create "Shows info about the current game version" [] (Impl.Create show_version))
-                .WithCommand("exit", Command.create "Exits the game" [] (Impl.Create (fun () -> UI.Screen.exit <- true)))
-                .WithCommand("clear", Command.create "Clears the terminal" [] (Impl.Create Terminal.Log.clear))
-                .WithCommand("export_osz", Command.create "Export current chart as osz" [] (Impl.Create export_osz))
-                .WithCommand("patterns", Command.create "Experimental" [] (Impl.Create analyse_patterns))
-                .WithCommand("local_server", Command.create "Switch to local development server" ["flag"] (Impl.Create (Types.bool, fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); Logging.Info("Restart your game to apply server change."))))
+                .WithCommand("version", Command.create "Shows info about the current game version" [""] (Impl.Create1 show_version))
+                .WithCommand("exit", Command.create "Exits the game" [""] (Impl.Create1 (fun () -> UI.Screen.exit <- true)))
+                .WithCommand("clear", Command.create "Clears the terminal" [""] (Impl.Create1 Terminal.Log.clear))
+                .WithCommand("export_osz", Command.create "Export current chart as osz" [""] (Impl.Create1 export_osz))
+                .WithCommand("patterns", Command.create "Experimental" [""] (Impl.Create1 analyse_patterns))
+                .WithCommand("local_server", Command.create "Switch to local development server" ["flag"] (Impl.Create1 (fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); Logging.Info("Restart your game to apply server change."))))
 
     let private ms = new MemoryStream()
     let private context_output = new StreamReader(ms)
     let private context_writer = new StreamWriter(ms)
 
     ctx <-
-        { Context.Empty with IO = { In = stdin; Out = context_writer } }
+        { ShellContext.Empty with IO = { In = stdin; Out = context_writer } }
         |> Themes.register_commands
         |> Utils.register_commands
 
     let exec(s: string) =
         let msPos = ms.Position
-        match ctx.Interpret s with
-        | Ok new_ctx -> 
-            ctx <- new_ctx
-            context_writer.Flush()
-            ms.Position <- msPos
-            Terminal.add_message (context_output.ReadToEnd())
-        | ParseFail err -> Terminal.add_message (err.ToString())
-        | RunFail err -> Terminal.add_message err.Message
+        ctx.Evaluate s
+        context_writer.Flush()
+        ms.Position <- msPos
+        Terminal.add_message (context_output.ReadToEnd())
 
     let init() = Terminal.exec_command <- exec
