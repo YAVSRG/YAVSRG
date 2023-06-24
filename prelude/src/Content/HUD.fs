@@ -165,6 +165,7 @@ module HUD =
             Position: WidgetPosition
             AnimationTime: float32
             IgnorePerfectJudgements: bool
+            PrioritiseLowerJudgements: bool
         }
         static member Default = 
             {
@@ -183,6 +184,7 @@ module HUD =
                     }
                 AnimationTime = 800.0f
                 IgnorePerfectJudgements = false
+                PrioritiseLowerJudgements = false
             }
 
     [<Json.AutoCodec(false)>]
