@@ -422,42 +422,49 @@ type EditProgressMeterPage() as this =
     let pos = Setting.simple data.Position
     let default_pos = HUD.ProgressMeter.Default.Position
 
-    let bar_color = Setting.simple data.BarColor
-    let glow_color = Setting.simple data.GlowColor
-    let bar_height = Setting.simple data.BarHeight |> Setting.bound 0.0f 100.0f
-    let glow_size = Setting.simple data.GlowSize |> Setting.bound 0.0f 20.0f
+    let color = Setting.simple data.Color
+    let background_color = Setting.simple data.BackgroundColor
+    let label = Setting.simple data.Label
 
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                let bar = bounds.SliceTop(150.0f).SliceBottom(0.5f * bar_height.Value)
-                Draw.rect (bar.Expand glow_size.Value) (glow_color.Value)
-                Draw.rect bar bar_color.Value
+                let x, y = bounds.Center
+                let r = (min bounds.Width bounds.Height) * 0.5f
+                let angle = System.MathF.PI / 15.0f
+                let outer i = 
+                    let angle = float32 i * angle
+                    let struct (a, b) = System.MathF.SinCos(angle)
+                    (x + r * a, y - r * b)
+                let inner i = 
+                    let angle = float32 i * angle
+                    let struct (a, b) = System.MathF.SinCos(angle)
+                    (x + (r - 2f) * a, y - (r - 2f) * b)
+                for i = 0 to 29 do
+                    Draw.quad (Quad.createv(x, y)(x, y)(inner i)(inner (i+1))) (Quad.colorOf background_color.Value) Sprite.DefaultQuad
+                    Draw.quad (Quad.createv(inner i)(outer i)(outer (i+1))(inner (i+1))) (Quad.colorOf Colors.white.O2) Sprite.DefaultQuad
+                for i = 0 to 17 do
+                    Draw.quad (Quad.createv(x, y)(x, y)(inner i)(inner (i+1))) (Quad.colorOf color.Value) Sprite.DefaultQuad
+
+                let text = match label.Value with HUD.ProgressMeterLabel.Countdown -> "7:27" | HUD.ProgressMeterLabel.Percentage -> "60%" | _ -> ""
+                Text.drawFillB(Style.baseFont, text, bounds.Expand(0.0f, 20.0f).SliceBottom(20.0f), Colors.text_subheading, Alignment.CENTER)
         }
 
     do
         this.Content(
             positionEditor pos default_pos
             |+ PageSetting(
-                "gameplay.hud.progressmeter.barheight",
-                Slider(bar_height, Step = 1f))
+                "gameplay.hud.progressmeter.label",
+                Selector<HUD.ProgressMeterLabel>.FromEnum(label))
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.progressmeter.barheight"))
             |+ PageSetting(
-                "gameplay.hud.progressmeter.barcolor",
-                ColorPicker(bar_color, true) )
+                "gameplay.hud.progressmeter.color",
+                ColorPicker(color, true) )
                 .Pos(620.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("gameplay.hud.progressmeter.barcolor"))
             |+ PageSetting(
-                "gameplay.hud.progressmeter.glowsize",
-                Slider(glow_size, Step = 1f) )
-                .Pos(725.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.progressmeter.glowsize"))
-            |+ PageSetting(
-                "gameplay.hud.progressmeter.glowcolor",
-                ColorPicker(glow_color, true) )
-                .Pos(830.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("gameplay.hud.progressmeter.glowcolor"))
+                "gameplay.hud.progressmeter.backgroundcolor",
+                ColorPicker(background_color, true) )
+                .Pos(725.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
             |+ preview
         )
 
@@ -467,10 +474,9 @@ type EditProgressMeterPage() as this =
         HUDOptions.set<HUD.ProgressMeter>
             { data with
                 Position = pos.Value
-                BarHeight = bar_height.Value
-                BarColor = bar_color.Value
-                GlowSize = glow_size.Value
-                GlowColor = glow_color.Value
+                Label = label.Value
+                Color = color.Value
+                BackgroundColor = background_color.Value
             }
 
 type EditPacemakerPage() as this =

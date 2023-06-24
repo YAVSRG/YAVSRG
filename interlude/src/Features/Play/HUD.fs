@@ -181,20 +181,35 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
         let chart = Gameplay.Chart.colored()
         chart.Notes.[chart.Notes.Length - 1].Time - chart.Notes.[0].Time
 
-    let pulse = Animation.Counter(1000.0)
-        
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        pulse.Update elapsedTime
-
     override this.Draw() =
-        let height = this.Bounds.Height - conf.BarHeight
-        let pc = state.CurrentChartTime() / duration
+        let now = state.CurrentChartTime()
+        let pc = now / duration |> max 0.0f |> min 1.0f
 
-        let bar = Rect.Box(this.Bounds.Left, (this.Bounds.Top + height * pc), this.Bounds.Width, conf.BarHeight)
-        let glowA = (float conf.GlowColor.A) * pulse.Time / 1000.0 |> int
-        Draw.rect (bar.Expand(conf.GlowSize)) (Color.FromArgb(glowA, conf.GlowColor))
-        Draw.rect bar conf.BarColor
+        let x, y = this.Bounds.Center
+        let r = (min this.Bounds.Width this.Bounds.Height) * 0.5f
+        let angle = MathF.PI / 15.0f
+        let outer i = 
+            let angle = float32 i * angle
+            let struct (a, b) = MathF.SinCos(angle)
+            (x + r * a, y - r * b)
+        let inner i = 
+            let angle = float32 i * angle
+            let struct (a, b) = MathF.SinCos(angle)
+            (x + (r - 4f) * a, y - (r - 4f) * b)
+        for i = 0 to 29 do
+            Draw.quad (Quad.createv(x, y)(x, y)(inner i)(inner (i+1))) (Quad.colorOf conf.BackgroundColor) Sprite.DefaultQuad
+            Draw.quad (Quad.createv(inner i)(outer i)(outer (i+1))(inner (i+1))) (Quad.colorOf Colors.white.O2) Sprite.DefaultQuad
+        for i = 0 to pc * 29.9f |> floor |> int do
+            Draw.quad (Quad.createv(x, y)(x, y)(inner i)(inner (i+1))) (Quad.colorOf conf.Color) Sprite.DefaultQuad
+
+        let text = 
+            match conf.Label with 
+            | HUD.ProgressMeterLabel.Countdown -> 
+                let time_left = duration - now
+                sprintf "%i:%02i" (time_left / 60000.0f<ms> |> floor |> int) ((time_left % 60000.0f<ms>) / 1000.0f<ms> |> floor |> int)
+            | HUD.ProgressMeterLabel.Percentage -> sprintf "%.0f%%" (pc * 100.0f)
+            | _ -> ""
+        Text.drawFillB(Style.baseFont, text, this.Bounds.Expand(0.0f, 40.0f).SliceBottom(40.0f), Colors.text_subheading, Alignment.CENTER)
 
 type SkipButton(conf: HUD.SkipButton, state) =
     inherit StaticWidget(NodeType.None)

@@ -145,7 +145,7 @@ module PracticeScreen =
                         |+ ModeButton(L"gameplay.hitposition.name", Mode.HIT_POSITION, this.AcceptSuggestion)
                         |+ ModeButton(L"gameplay.scrollspeed.name", Mode.SCROLL_SPEED, this.AcceptSuggestion)
                         |+ ModeButton(L"system.visualoffset.name", Mode.VISUAL_OFFSET, this.AcceptSuggestion)
-                        |+ ModeButton(L"quick.localoffset.name", Mode.AUDIO_OFFSET, this.AcceptSuggestion)
+                        |+ ModeButton(L"practice.localoffset.name", Mode.AUDIO_OFFSET, this.AcceptSuggestion)
                         ,
                         Position = Position.Box(0.0f, 0.0f, 20.0f, 350.0f, 300.0f, 230.0f)
                     )
