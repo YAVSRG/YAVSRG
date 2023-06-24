@@ -194,7 +194,7 @@ module PracticeScreen =
                             Position = Position.Box(0.0f, 0.0f, 20.0f, 650.0f, 500.0f, 170.0f)
                         )
                     )
-                |* Conditional((fun () -> mode = Mode.AUDIO_OFFSET && options.AudioVolume.Value > 0.0),
+                |+ Conditional((fun () -> mode = Mode.AUDIO_OFFSET && options.AudioVolume.Value > 0.0),
                         Panel(
                             FlowContainer.Vertical<Widget>(50.0f, Spacing = 10.0f)
                             |+ Text(fun () -> sprintf "Current: %.0f" local_audio_offset.Value)
@@ -204,6 +204,9 @@ module PracticeScreen =
                             Position = Position.Box(0.0f, 0.0f, 20.0f, 650.0f, 500.0f, 170.0f)
                         )
                     )
+                |* Button(Icons.reset + " Reset offsets", 
+                    (fun () -> local_audio_offset.Set 0.0f<ms>; visual_offset.Set 0.0f),
+                    Position = Position.Box(0.0f, 0.0f, 20.0f, 900.0f, 300.0f, 50.0f))
                 base.Init parent
 
     let info_callout = 

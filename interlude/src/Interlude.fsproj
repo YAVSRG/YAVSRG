@@ -76,7 +76,7 @@
     <Compile Include="Features\Score\Graph.fs" />
     <Compile Include="Features\Score\Components.fs" />
     <Compile Include="Features\Score\Score.fs" />
-    <Compile Include="Features\Play\QuickOptions.fs" />
+    <Compile Include="Features\Play\AutomaticSync.fs" />
     <Compile Include="Features\Play\State.fs" />
     <Compile Include="Features\Play\Playfield.fs" />
     <Compile Include="Features\Play\HUD.fs" />

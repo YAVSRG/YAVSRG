@@ -127,9 +127,6 @@ module ReplayScreen =
                 let chartTime = now - firstNote
             
                 if not replay_data.Finished then scoring.Update chartTime
-            
-                if (!|"options").Tapped() then
-                    QuickOptions.show(scoring, ignore)
                     
                 if replay_data.Finished then Screen.back Transitions.Flags.Default
         }

@@ -2,6 +2,8 @@
 
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.Metrics
@@ -79,6 +81,11 @@ module PlayScreen =
                 add_widget JudgementMeter
                 add_widget EarlyLateMeter
 
+            override this.OnExit(next) =
+                if options.AutoCalibrateOffset.Value then 
+                    AutomaticSync.apply(scoring)
+                base.OnExit(next)
+
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
                 let now = Song.timeWithOffset()
@@ -91,12 +98,6 @@ module PlayScreen =
                         else inputKeyState <- Bitmask.setBit column inputKeyState
                         liveplay.Add(time, inputKeyState) )
                     this.State.Scoring.Update chartTime
-
-                if (!|"options").Tapped() then
-                    Song.pause()
-                    inputKeyState <- 0us
-                    liveplay.Add(now, inputKeyState)
-                    QuickOptions.show(this.State.Scoring, fun () -> Screen.changeNew (fun () -> play_screen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default)
 
                 if (!|"retry").Tapped() then
                     Screen.changeNew (fun () -> play_screen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
@@ -118,6 +119,11 @@ module PlayScreen =
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default
+                
+            override this.Draw() =
+                base.Draw()
+                if options.AutoCalibrateOffset.Value && this.State.CurrentChartTime() < 0.0f<ms> then
+                    Text.drawB(Style.baseFont, sprintf "Local offset: %.0fms" AutomaticSync.offset.Value, 20.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 20.0f, Colors.text_subheading)
         }
 
     let multiplayer_screen() =
@@ -158,6 +164,8 @@ module PlayScreen =
                 add_widget MultiplayerScoreTracker
 
             override this.OnExit(next) =
+                if options.AutoCalibrateOffset.Value then 
+                    AutomaticSync.apply(scoring)
                 if next <> Screen.Type.Score then Lobby.abandon_play()
                 base.OnExit(next)
 
