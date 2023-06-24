@@ -42,9 +42,6 @@ jobs:
       with:
         dotnet-version: 7.0.x
         
-    - name: Connect to Github Packges
-      run: dotnet nuget add source --username percyqaz --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/percyqaz/index.json"
-      
     - name: Package Interlude
       id: package
       run: |
