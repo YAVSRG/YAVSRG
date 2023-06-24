@@ -96,6 +96,8 @@ module Screen =
 
     type ScreenRoot(toolbar: Widget) =
         inherit Root()
+
+        //let perf = PerformanceMonitor()
     
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
@@ -108,6 +110,7 @@ module Screen =
             Style.accentColor.Target <- Content.accentColor
             Dialog.display.Update (elapsedTime, moved)
 
+            //perf.Update (elapsedTime, moved)
             toolbar.Update (elapsedTime, moved)
             globalAnimation.Update elapsedTime
             logo.Update (elapsedTime, moved)
@@ -132,6 +135,7 @@ module Screen =
                     (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize))
                     (if Notifications.tooltip_available then Colors.white else Style.color(255, 1.0f, 0.5f))
                     (Content.getTexture "cursor")
+            //perf.Draw()
 
         override this.Init() =
             base.Init()
@@ -141,6 +145,7 @@ module Screen =
             Notifications.display.Init this
             Dialog.display.Init this
             screenContainer.Init this
+            //perf.Init this
             current.OnEnter Type.SplashScreen
 
 type Screen = Screen.T
