@@ -181,6 +181,10 @@ type IScoreMetric
         | Dropped, i | MissedHead, i when i >= index -> true
         | _ -> false
 
+    member this.IsNoteHit (index: int) (k: int) =
+        let struct (t, deltas, flags) = hitData.[index]
+        flags.[k] = HitStatus.HIT_ACCEPTED
+
     member this.HitData = hitData
 
     member this.Finished = noteSeekPassive = hitData.Length
