@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Play
 
 open System
+open Prelude
 open Prelude.Gameplay
 
 [<RequireQualifiedAccess>]
@@ -21,10 +22,10 @@ type PlayState =
     static member Dummy(chart) =
         let s = Metrics.createDummyMetric chart
         {
-            Ruleset = Unchecked.defaultof<_>
+            Ruleset = s.Ruleset
             Scoring = s
             ScoringChanged = Event<unit>()
-            CurrentChartTime = Unchecked.defaultof<_>
+            CurrentChartTime = fun () -> 0.0f<ms>
             Pacemaker = PacemakerInfo.None
         }
     member this.SubscribeToHits(handler: HitEvent<HitEventGuts> -> unit) =

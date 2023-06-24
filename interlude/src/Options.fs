@@ -116,6 +116,9 @@ module Options =
             Preset1: Setting<Preset option>
             Preset2: Setting<Preset option>
             Preset3: Setting<Preset option>
+
+            VanishingNotes: Setting<bool>
+            AutoCalibrateOffset: Setting<bool>
         }
         static member Default = {
             VisualOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
@@ -185,6 +188,9 @@ module Options =
             Preset1 = Setting.simple None
             Preset2 = Setting.simple None
             Preset3 = Setting.simple None
+
+            VanishingNotes = Setting.simple false
+            AutoCalibrateOffset = Setting.simple false
         }
 
     let mutable internal config : Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>

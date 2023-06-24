@@ -30,6 +30,7 @@ debug.enableconsole.tooltip=Allows access to Interlude's terminal, Printerlude. 
 debug.name=Debug
 debug.rebuildcache.name=Rebuild cache
 debug.rebuildcache.tooltip=Rescans your song library folders, and rebuilds the cache from fresh.
+debug.vanishingnotes.name=Vanishing notes
 gameplay.backgrounddim.name=Background dim
 gameplay.backgrounddim.tooltip=Adjusts how much the chart's background image is dimmed when playing.\n100% will make the background completely black when playing.
 gameplay.hitposition.name=Hit position

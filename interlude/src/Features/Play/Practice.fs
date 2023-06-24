@@ -223,10 +223,18 @@ module PracticeScreen =
         let lastNote = chart.Notes.[chart.Notes.Length - 1].Time - 5.0f<ms> - Song.LEADIN_TIME * Gameplay.rate.Value
         let mutable practice_point = min lastNote practice_point
 
-        let mutable playable_notes = TimeArray.between (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value) Time.infinity chart.Notes |> Array.ofSeq
-        let mutable firstNote = playable_notes.[0].Time
+        let ignore_notes_before(time: Time, scoring: ScoreMetric) =
+            let mutable i = 0
+            while i < scoring.HitData.Length && let struct (t, _, _) = scoring.HitData.[i] in t < time do
+                let struct (t, deltas, flags) = scoring.HitData.[i]
+                for k = 0 to chart.Keys - 1 do flags.[k] <- HitStatus.NOTHING
+                i <- i + 1
+
+        let firstNote = chart.Notes.[0].Time
         let mutable liveplay = LiveReplayProvider firstNote
-        let mutable scoring = createScoreMetric Rulesets.current chart.Keys liveplay playable_notes Gameplay.rate.Value
+        let mutable scoring = createScoreMetric Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
+
+        do ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
 
         let binds = options.GameplayBinds.[chart.Keys - 3]
         let mutable inputKeyState = 0us
@@ -236,14 +244,12 @@ module PracticeScreen =
 
         let restart(screen: IPlayScreen) =
             liveplay <- LiveReplayProvider firstNote
-            scoring <- createScoreMetric Rulesets.current chart.Keys liveplay playable_notes Gameplay.rate.Value
+            scoring <- createScoreMetric Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
+            ignore_notes_before(practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
             screen.State.ChangeScoring scoring
             Song.playFrom(practice_point)
 
         let play(screen: IPlayScreen) =
-            playable_notes <- TimeArray.between (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value) Time.infinity chart.Notes |> Array.ofSeq
-            firstNote <- playable_notes.[0].Time
-            screen.FirstNote <- firstNote
             restart(screen)
             options_mode <- false
 

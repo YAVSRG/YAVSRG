@@ -58,10 +58,11 @@ module Debug =
                                 Notifications.system_feedback(Icons.system_notification, L"notification.update_installing.title", L"notification.update_installing.body")
                         ),
                         Enabled = (AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded) )
-                    .Pos(300.0f)
+                    .Pos(270.0f)
                 |+ PageSetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole)
-                    .Pos(400.0f)
-                    .Tooltip(Tooltip.Info("debug.enableconsole"))
+                    .Pos(340.0f)
+                |+ PageSetting("debug.vanishingnotes", Selector<_>.FromBool options.VanishingNotes)
+                    .Pos(410.0f)
                 |+ themes
                     .Pos(500.0f)
                     .Tooltip(Tooltip.Info("themes.theme"))

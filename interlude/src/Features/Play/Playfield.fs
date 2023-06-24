@@ -89,10 +89,11 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
 
         let playfieldHeight = bottom - top + holdnoteTrim
         let now = Song.timeWithOffset() + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
+        let begin_time = if options.VanishingNotes.Value then now - state.Ruleset.Accuracy.MissWindow * Gameplay.rate.Value else now
 
         // seek to appropriate sv and note locations in data.
         // bit of a mess here. see comments on the variables for more on whats going on
-        while note_seek < chart.Notes.Length && chart.Notes.[note_seek].Time < now do
+        while note_seek < chart.Notes.Length && chart.Notes.[note_seek].Time < begin_time do
             let { Data = struct (nr, _) } = chart.Notes.[note_seek]
             for k = 0 to keys - 1 do
                 if nr.[k] = NoteType.HOLDHEAD then hold_index.[k] <- note_seek
@@ -146,7 +147,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                 column_pos.[k] <- column_pos.[k] + scale * sv_value.[0] * (t - sv_time.[k])
                 sv_time.[k] <- t
                 min <- Math.Min(column_pos.[k], min)
-                if nd.[k] = NoteType.NORMAL then
+                if nd.[k] = NoteType.NORMAL && not (options.VanishingNotes.Value && state.Scoring.IsNoteHit note_peek k) then
                     Draw.quad // normal note
                         (
                             Quad.ofRect ( 
@@ -158,7 +159,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                         (Quad.colorOf Color.White)
                         (Sprite.gridUV (animation.Loops, int color.[k]) (Content.getTexture "note"))
                 elif nd.[k] = NoteType.HOLDHEAD then
-                    hold_pos.[k] <- column_pos.[k]
+                    hold_pos.[k] <- max column_pos.[k] hitposition
                     hold_colors.[k] <- int color.[k]
                     hold_presence.[k] <- true
                 elif nd.[k] = NoteType.HOLDTAIL then
