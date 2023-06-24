@@ -134,6 +134,7 @@ type private Image(width, title, url) as this =
     override this.Height = width / 16.0f * 9.0f
 
     override this.Draw() =
+        if not this.VisibleBounds.Visible then () else
         base.Draw()
         match sprite with
         | None -> Text.drawFillB(Style.baseFont, title, this.Bounds.Shrink(20.0f, 20.0f), Style.text(), Alignment.CENTER)
@@ -188,6 +189,8 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
     override this.Width = max_width
     override this.Height = height
 
+    override this.Draw() = if this.VisibleBounds.Visible then base.Draw()
+
 module private ListBlock =
 
     let INDENT = 45.0f
@@ -210,6 +213,8 @@ type private ListBlock(max_width: float32, paragraphs: IParagraph list) as this 
 
     override this.Width = max_width
     override this.Height = height
+    
+    override this.Draw() = if this.VisibleBounds.Visible then base.Draw()
 
 type private Paragraphs(max_width: float32, paragraphs: IParagraph list) as this =
     inherit IParagraph()
@@ -228,6 +233,8 @@ type private Paragraphs(max_width: float32, paragraphs: IParagraph list) as this
 
     override this.Width = max_width
     override this.Height = height
+    
+    override this.Draw() = if this.VisibleBounds.Visible then base.Draw()
 
 module Heading =
     
@@ -264,6 +271,8 @@ type private Heading(max_width, size, body: MarkdownSpan list) as this =
         if Heading.scrollTo <> "" && text.Contains(Heading.scrollTo, System.StringComparison.InvariantCultureIgnoreCase) then
             Heading.scrollTo <- ""
             Heading.scrollHandler this
+            
+    override this.Draw() = if this.VisibleBounds.Visible then base.Draw()
 
 type HorizontalRule(max_width) =
     inherit IParagraph()
@@ -272,6 +281,7 @@ type HorizontalRule(max_width) =
     override this.Height = Span.SIZE
 
     override this.Draw() =
+        if this.VisibleBounds.Visible then () else
         Draw.rect (this.Bounds.SliceTop(5.0f).Translate(0.0f, this.Bounds.Height / 2.0f - 2.5f)) (Color.FromArgb(127, 255, 255, 255))
 
 type CodeBlock(max_width, code, language) as this =
@@ -286,6 +296,8 @@ type CodeBlock(max_width, code, language) as this =
     
     override this.Width = max_width
     override this.Height = contents.Height + Heading.MARGIN * 4.0f
+    
+    override this.Draw() = if this.VisibleBounds.Visible then base.Draw()
 
 module private Paragraph =
 
