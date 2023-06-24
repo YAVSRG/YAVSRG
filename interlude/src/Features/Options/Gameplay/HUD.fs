@@ -541,6 +541,7 @@ type EditJudgementMeterPage() as this =
     let default_pos = HUD.JudgementMeter.Default.Position
 
     let ignore_perfect_judgements = Setting.simple data.IgnorePerfectJudgements
+    let prioritise_lower_judgements = Setting.simple data.PrioritiseLowerJudgements
     let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
     let rs = Rulesets.current
 
@@ -563,6 +564,11 @@ type EditJudgementMeterPage() as this =
                 Selector<_>.FromBool(ignore_perfect_judgements) )
                 .Pos(620.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter.ignoreperfectjudgements"))
+            |+ PageSetting(
+                "gameplay.hud.judgementmeter.prioritiselowerjudgements",
+                Selector<_>.FromBool(prioritise_lower_judgements) )
+                .Pos(690.0f)
+                .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter.prioritiselowerjudgements"))
             |+ preview
         )
 
@@ -574,6 +580,7 @@ type EditJudgementMeterPage() as this =
                 Position = pos.Value
                 AnimationTime = animation_time.Value
                 IgnorePerfectJudgements = ignore_perfect_judgements.Value
+                PrioritiseLowerJudgements = prioritise_lower_judgements.Value
             }
 
 type EditEarlyLateMeterPage() as this =

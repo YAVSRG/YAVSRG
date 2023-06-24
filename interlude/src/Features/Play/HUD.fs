@@ -114,7 +114,7 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
                     judge.IsSome && (not conf.IgnorePerfectJudgements || judge.Value > 0)
                 then
                     let j = judge.Value in
-                    if j >= tier || ev.Time - atime > time || ev.Time < time then
+                    if not conf.PrioritiseLowerJudgements || j >= tier || ev.Time - atime > time || ev.Time < time then
                         tier <- j
                         time <- ev.Time
             )
