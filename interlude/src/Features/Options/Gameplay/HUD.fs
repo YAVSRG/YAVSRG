@@ -219,7 +219,7 @@ type EditHitMeterPage() as this =
 
     let show_guide = Setting.simple data.ShowGuide
     let show_non_judgements = Setting.simple data.ShowNonJudgements
-    let thickness = Setting.simple data.Thickness |> Setting.bound 5.0f 25.0f
+    let thickness = Setting.simple data.Thickness |> Setting.bound 1.0f 25.0f
     let release_thickness = Setting.simple data.ReleasesExtraHeight |> Setting.bound 0.0f 20.0f
     let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
 
