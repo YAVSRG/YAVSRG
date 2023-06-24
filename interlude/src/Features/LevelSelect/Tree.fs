@@ -23,19 +23,6 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Play
 open Interlude.Features.Online
 
-[<RequireQualifiedAccess>]
-type Navigation =
-    | Nothing
-    | Backward of string * CachedChart * Collections.LibraryContext
-    /// Forward false is consumed by the selected chart, and replaced with Forward true
-    /// Forward true is consumed by any other chart, and switched to instantly
-    /// Combined effect is navigating forward by one chart
-    | Forward of bool
-    | ForwardGroup of bool
-    | BackwardGroup of string
-    | StartGroup
-    | EndGroup
-
 [<Struct>]
 [<RequireQualifiedAccess>]
 type ScrollTo =
@@ -135,6 +122,9 @@ module Tree =
         member this.RightClick(origin) =
             Mouse.released Mouse.RIGHT && drag_scroll_distance <= DRAG_THRESHOLD && Mouse.y() > origin
 
+    let CHART_HEIGHT = 90.0f
+    let GROUP_HEIGHT = 65.0f
+
     type private ChartItem(groupName: string, cc: CachedChart, context: LibraryContext) =
         inherit TreeItem()
 
@@ -171,7 +161,7 @@ module Tree =
                 | Some c when c.Comment <> "" -> Icons.comment
                 | _ -> ""
 
-        override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.4f, top, Viewport.vwidth, top + 90.0f)
+        override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.4f, top, Viewport.vwidth, top + CHART_HEIGHT)
         override this.Selected = selectedChart = cc.FilePath && (context = LibraryContext.None || Chart.context = context)
         override this.Spacing = 5.0f
         member this.Chart = cc
@@ -244,10 +234,10 @@ module Tree =
                 scrollTo <- ScrollTo.Nothing
             this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(origin, b, elapsedTime))
 
-    type private GroupItem(name: string, items: ChartItem list, context: LibraryGroupContext) =
+    type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: LibraryGroupContext) =
         inherit TreeItem()
 
-        override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.5f, top, Viewport.vwidth - 15.0f, top + 65.0f)
+        override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.5f, top, Viewport.vwidth - 15.0f, top + GROUP_HEIGHT)
         override this.Selected = selectedGroup = name
         override this.Spacing = 20.0f
 
@@ -266,7 +256,15 @@ module Tree =
         member this.Draw(top, origin, originB) =
             let b = this.CheckBounds(top, origin, originB, this.OnDraw)
             if this.Expanded then
-                let b2 = List.fold (fun t (i: ChartItem) -> i.Draw(t, origin, originB)) b items
+                let h = CHART_HEIGHT + 5.0f
+                let mutable index = 
+                    if scrollTo <> ScrollTo.Nothing then 0 
+                    else (origin - b) / h |> floor |> int |> max 0
+                let mutable p = b + float32 index * h
+                while (scrollTo <> ScrollTo.Nothing || p < originB) && index < items.Count do
+                    p <- items.[index].Draw(p, origin, originB)
+                    index <- index + 1
+                let b2 = b + float32 items.Count * h
                 if b < origin && b2 > origin then Text.drawJustB(Style.baseFont, name, 20.0f, Viewport.vwidth - 20f, origin + 10.0f, Colors.text, 1.0f)
                 b2
             else b
@@ -288,7 +286,15 @@ module Tree =
             | _ -> ()
             let b = this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(origin, b, elapsedTime))
             if this.Expanded then
-                List.fold (fun t (i: ChartItem) -> i.Update(t, origin, originB, elapsedTime)) b items
+                let h = CHART_HEIGHT + 5.0f
+                let mutable index =
+                    if scrollTo <> ScrollTo.Nothing then 0 
+                    else (origin - b) / h |> floor |> int |> max 0
+                let mutable p = b + float32 index * h
+                while (scrollTo <> ScrollTo.Nothing || p < originB) && index < items.Count do
+                    p <- items.[index].Update(p, origin, originB, elapsedTime)
+                    index <- index + 1
+                b + float32 items.Count * (CHART_HEIGHT + 5.0f)
             else b
             
     
@@ -330,7 +336,7 @@ module Tree =
                             i
                         )
                     |> if options.ChartSortReverse.Value then Seq.rev else id
-                    |> List.ofSeq
+                    |> ResizeArray
                     |> fun l -> GroupItem(groupName, l, library_groups.[(sortIndex, groupName)].Context)
                 )
             |> List.ofSeq
