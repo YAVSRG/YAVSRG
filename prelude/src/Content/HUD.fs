@@ -218,15 +218,20 @@ module HUD =
                 LateText = "Slow"
                 LateColor = Color.FromArgb(235, 52, 52)
             }
+        
+    [<RequireQualifiedAccess>]
+    type ProgressMeterLabel =
+        | None = 0
+        | Countdown = 1
+        | Percentage = 2
 
     [<Json.AutoCodec(false)>]
     type ProgressMeter =
         { 
             Position: WidgetPosition
-            BarHeight: float32
-            BarColor: Color
-            GlowSize: float32
-            GlowColor: Color
+            Color: Color
+            BackgroundColor: Color
+            Label: ProgressMeterLabel
         }
         static member Default =
             {
@@ -234,19 +239,18 @@ module HUD =
                     {
                         Enabled = true
                         Float = false
-                        Left = -15.0f
-                        LeftA = 0.0f
-                        Top = 10.0f
+                        Left = 100.0f
+                        LeftA = 0.5f
+                        Top = 50.0f
                         TopA = 0.0f
-                        Right = -5.0f
-                        RightA = 0.0f
-                        Bottom = -10.0f
-                        BottomA = 1.0f
+                        Right = 200.0f
+                        RightA = 0.5f
+                        Bottom = 110.0f
+                        BottomA = 0.0f
                     }
-                BarHeight = 15.0f
-                BarColor = Color.FromArgb(180, 0, 170, 255)
-                GlowSize = 2.0f
-                GlowColor = Color.FromArgb(100, 80, 190, 255)
+                Color = Color.FromArgb(100, 220, 220, 220)
+                BackgroundColor = Color.FromArgb(100, 20, 20, 20)
+                Label = ProgressMeterLabel.None
             }
 
     [<Json.AutoCodec(false)>]
