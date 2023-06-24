@@ -181,6 +181,11 @@ type IScoreMetric
         | Dropped, i | MissedHead, i when i >= index -> true
         | _ -> false
 
+    member this.IsHoldHeld (index: int) (k: int) =
+        match internalHoldStates.[k] with
+        | Holding, i when i = index -> true
+        | _ -> false
+
     member this.IsNoteHit (index: int) (k: int) =
         let struct (t, deltas, flags) = hitData.[index]
         flags.[k] = HitStatus.HIT_ACCEPTED
@@ -411,4 +416,10 @@ module Metrics =
         ScoreMetric(ruleset, keys, replay, notes, rate)
 
     let createDummyMetric (chart: Chart) : ScoreMetric =
-        createScoreMetric (PrefabRulesets.SC.create 4) chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f
+        let ruleset = PrefabRulesets.SC.create 4
+        createScoreMetric 
+            { ruleset with Accuracy = { ruleset.Accuracy with MissWindow = 0.0f<ms> } }
+            chart.Keys
+            (StoredReplayProvider Array.empty)
+            chart.Notes
+            1.0f
