@@ -1,28 +1,29 @@
-0.6.18
+0.6.19
 ====
 
-A couple of bug fixes + progress towards table community workflow
+Some requested features to make the engine feel a little more familiar (mostly for 4k players)
+I won't go into too much detail because Discord has a 2000 character limit
 
-If you have an Interlude account, there is a bot in the Discord that lets you search for songs and charts
-This same database will power other things like getting a chart you don't have in multiplayer, and installing missing charts for tables
+# 'Vanishing notes' setting
+Go to Debug > Check this setting to make notes render like they do in Stepmania/similar engines
+Hit notes will vanish and unhit notes will scroll past the receptors until they are hit or count as missed
 
-I've mostly been working on that but here are some changes to the client too
+4k players who play other games and have their reading directly tied to this visual cue, this may make you feel more at home
+This is not enabled by default, you need to enable it!
 
-# Fixes and improvements
-- Trying to load a chart file that cannot be found on disk now shows a visible error message
-- Added a 'Get more noteskins' button to the noteskins options menu, redirecting to the import screen
-- You can hit enter while previewing a song to play it (you don't have to close the preview first)
-- You can change the volume on options menus and while previewing a song
-- Added a 'None' grouping method that shows all charts under one group
-- Fixed osu! songs search loading when the game starts up instead of when the page is visited for the first time
-- You can click on scores in multiplayer chat to see a score screen for them (let me know if you spot any bugs)
+# 'Automatic sync' setting
+Go to Debug > Check this setting to enable automatic sync
+Local offset will be adjusted whenever you finish/restart a chart
+This means you can retry the intro of a chart 1 or 2 times to sync it
+For manual syncing tools, visit Practice mode
 
-# Tables
+# 'Prioritise low judges' setting
+Gameplay > HUD > Judgement Meter
+When this setting is OFF (default, and this is new behaviour), the judgement meter always shows the most recent judge
+When this setting is ON, the judgement meter shows the worst judgement in the last 500ms (or however long the fade time is set)
 
-Lots of things have changed about tables internally
-- There is no longer a console command to allow editing tables from in-game and this feature has been removed entirely
-- There is now a tab in the Imports screen for installing them (currently just Crescent, the 4k table, is available)
-- Click to install tables
-- Click again to attempt to install missing charts from various sources, using the aforementioned database (WIP and experimental)
-- Hidden top secret feature: Right click on a table level in level select to see your average accuracy over all charts in that level
+You may find this less confusing and more familiar, even though it is objectively less useful IMO
+
+# Other fixes
+- You can make the bars thinner on hit meter, the minimum has changed from 5 pixels to 1 pixel
 
