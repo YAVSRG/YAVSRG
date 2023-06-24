@@ -30,7 +30,9 @@ module Library =
         saveImportantJsonFile (Path.Combine(getDataPath "Data", "cache.json")) charts
         saveImportantJsonFile (Path.Combine(getDataPath "Data", "collections.json")) collections
     
-    let addOrUpdate (c: Chart) = charts.[c.LoadedFromPath] <- cacheChart c
+    let addOrUpdate (c: Chart) = 
+        let cc = cacheChart c
+        charts.[cc.FilePath] <- cc
 
     let count() = charts.Count
 
@@ -42,9 +44,7 @@ module Library =
     let lookupHash(id: string) : CachedChart option =
         Seq.tryFind (fun cc -> cc.Hash = id) charts.Values
 
-    let load (cc: CachedChart) : Chart Option =
-        cc.FilePath |> Chart.fromFile
-        (*|> function | Some c -> addOrUpdate c; Some c | None -> None*)
+    let load (cc: CachedChart) : Chart Option = cc.FilePath |> Chart.fromFile
 
     let recache_service =
         { new Async.Service<unit, unit>() with
@@ -127,7 +127,7 @@ module Library =
                     | Some cc -> Some (cc, LibraryContext.Playlist (i, name, info))
                     | None ->
                     match lookupHash entry.Hash with
-                    | Some cc -> Some (cc, LibraryContext.Playlist (i, name, info))
+                    | Some cc -> entry.Path <- cc.FilePath; Some (cc, LibraryContext.Playlist (i, name, info))
                     | None -> Logging.Warn(sprintf "Could not find chart: %s [%s] for playlist %s" entry.Path entry.Hash name); None
                 )
             |> Filter.applyf filter

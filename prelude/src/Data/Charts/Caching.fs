@@ -28,9 +28,10 @@ module Caching =
 
     let cacheChart (chart: Chart) : CachedChart =
         let lastNote = chart.LastNote
+        let songsFolder = getDataPath "Songs"
         let rating = RatingReport(chart.Notes, 1.0f, Layout.Spread, chart.Keys)
         {
-            FilePath = chart.LoadedFromPath
+            FilePath = chart.LoadedFromPath.Replace(songsFolder, "./Songs")
             Title = chart.Header.Title
             Artist = chart.Header.Artist
             Creator = chart.Header.Creator
