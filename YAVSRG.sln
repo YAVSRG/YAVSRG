@@ -23,8 +23,6 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Server", "Int
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Tests", "Interlude.Web\tests\Interlude.Web.Tests.fsproj", "{81CCE970-9179-4A40-81CA-2D86F28732B8}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Bot", "Interlude.Web\bot\Interlude.Web.Bot.fsproj", "{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,10 +69,6 @@ Global
 		{81CCE970-9179-4A40-81CA-2D86F28732B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81CCE970-9179-4A40-81CA-2D86F28732B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81CCE970-9179-4A40-81CA-2D86F28732B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{285F91EA-E30C-48FE-AA25-CC9FB92CCAC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
