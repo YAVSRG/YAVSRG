@@ -2,6 +2,7 @@
 
 open Percyqaz.Json
 open System.IO
+open System.Reflection
 
 [<Json.AutoCodec(false)>]
 type Secrets = 
@@ -42,3 +43,7 @@ module Secrets =
         | Ok o -> o
         | Error e ->
             failwithf "Error while reading secrets.json: %O" e
+    let TAGLINE = 
+        let stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Web.Server.Version.txt")
+        use tr = new StreamReader(stream)
+        tr.ReadToEnd()

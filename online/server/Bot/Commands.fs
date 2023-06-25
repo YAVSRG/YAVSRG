@@ -4,6 +4,7 @@ open System
 open Discord
 open Discord.WebSocket
 open Prelude.Data.Charts.Archive
+open Interlude.Web.Server
 open Interlude.Web.Server.Domain
 open Interlude.Web.Server.Online
 
@@ -138,5 +139,21 @@ module Commands =
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
 
+            | "addtestuser" when not SECRETS.IsProduction ->
+                match args with
+                | [] -> do! reply "Enter a username, for example: $addtestuser TESTUSER1"
+                | name :: _ ->
+
+                    match Users.valid_username name with
+                    | Error reason -> do! reply (sprintf "Invalid username (%s)" reason)
+                    | Ok() -> 
+
+                    match User.by_username(name) with
+                    | Some u -> do! reply "That username is already taken"
+                    | None ->
+
+                    let user = User.create(name, 0uL)
+                    let id = User.save_new(user)
+                    do! reply (sprintf "Created user '%s' with id '%i'\n\nAuth token:\n%s" user.Username id user.AuthToken)
             | _ -> ()
         }

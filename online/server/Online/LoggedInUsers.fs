@@ -58,7 +58,10 @@ module LoggedInUsers =
                             Users.login (token,
                                 function
                                 | Ok (user_id, username) ->
-                                    usernames.Add(username, session_id)
+                                    if usernames.ContainsKey(username) then 
+                                        user_states[usernames.[username]] <- UserState.Handshake
+                                        Server.kick(usernames.[username], "Logged in from another location")
+                                    usernames.[username] <- session_id
                                     user_states.[session_id] <- UserState.LoggedIn (user_id, username)
                                     Server.send(session_id, Downstream.LOGIN_SUCCESS username)
                                     Logging.Info(sprintf "[-> %s" username)

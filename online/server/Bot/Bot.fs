@@ -83,7 +83,7 @@ module Bot =
         
             client.add_Ready(fun () -> 
                 task {
-                    let! _ = (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync("Interlude.Web has (re)started")
+                    let! _ = (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(sprintf "Interlude.Web startup message [%s]" TAGLINE)
                     return ()
                 })
             client.add_MessageReceived(fun msg -> on_message msg)

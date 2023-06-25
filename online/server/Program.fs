@@ -15,14 +15,9 @@ open Interlude.Web.Server.Bot
 let SOCKET_PORT = 32767
 let HTTPS_PORT = 443
 
-let tagline = 
-    let stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Web.Server.Version.txt")
-    use tr = new StreamReader(stream)
-    tr.ReadToEnd()
-
 try
     Logging.Verbosity <- LoggingLevel.DEBUG
-    Logging.Info(sprintf "~~ Interlude.Web [%s] ~~" tagline)
+    Logging.Info(sprintf "~~ Interlude.Web [%s] ~~" TAGLINE)
 
     let api_cert = new X509Certificate2(Path.Combine("./secrets", SECRETS.ApiCert), SECRETS.ApiCertPassword)
     let socket_cert = new X509Certificate2(Path.Combine("./secrets", SECRETS.SocketCert), SECRETS.SocketCertPassword)
