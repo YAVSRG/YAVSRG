@@ -6,12 +6,13 @@ Last updated 29th May 2023.
 
 By using any of Interlude's online services, or the Interlude game client while connected to the online services, you are acknowledging your full compliance with these terms and conditions, without any modification. If you do not agree with all of these terms and conditions, you are expressly prohibited from using the services and must discontinue use immediately.
 
-Please also ensure you have read and understood [Interlude's Privacy Policy](privacy_policy.md).
+Please also ensure you have read and understood [Interlude's Privacy Policy](privacy_policy.html).
 
 If you violate any of these terms of service, your permission to use the online services automatically terminates.
 
 ## Prohibited activities
 As a user of Interlude's online services, you agree not to:
+
 - Use the services or register for an account if you are under 13 years old.
 - Trick, defraud, or mislead other users, especially in any attempt to learn sensitive account information such as user passwords.
 - Use any information obtained from the services in order to harass, abuse, or harm another person.
@@ -36,5 +37,5 @@ To the fullest extent permitted by law, Interlude disclaims all warranties of an
 
 Interlude provides links to third party sites. These links are for your convenience only, and the inclusion of these links in the services does not imply any endorsement, guarantee, warranty or representation by Interlude.
 
-# Limitation of liability
+## Limitation of liability
 In no event shall Interlude, its officers, directors, employees, or agents, be liable to you for any direct, indirect, incidental, special, exemplary, punitive, or consequential damages whatsoever arising from your use of the services.

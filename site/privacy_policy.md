@@ -14,13 +14,14 @@ In order to provide these services to users, Interlude stores and transmits pers
 
 You do not need to use the online services when you use the Interlude game client, and if you do not want Interlude to collect or process your personal information you can play without using any of the online features.
 
-By using Interlude's online services, you confirm that you have read and understood both this Privacy Policy and the Terms of Service, and that your use of the services is subject to the Privacy Policy and Terms of Service.
+By using Interlude's online services, you confirm that you have read and understood both this Privacy Policy and the [Terms of Service](terms_of_service.html), and that your use of the services is subject to the Privacy Policy and Terms of Service.
 
 ## What data gets collected
 
 All personal data collected by Interlude comes directly from your interactions with the online services.
 
 When you create your account, Interlude stores
+
 - Your discord ID
 - Your username
 - Your IP address
@@ -28,6 +29,7 @@ When you create your account, Interlude stores
 Your username is shared publicly with other users of Interlude. The other information is never shared publicly.
 
 As you use Interlude, services may store
+
 - Scores you submit online
 - Your friends list
 - Data about your current game session
