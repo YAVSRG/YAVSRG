@@ -89,8 +89,8 @@ type LobbyScreen() =
 
     let list = 
         StaticContainer(NodeType.None)
-        |+ LobbyList(Position = Position.Default.Margin(300.0f, 100.0f).TrimRight(600.0f))
-        |+ InviteList(Position = Position.Default.Margin(300.0f, 100.0f).SliceRight(500.0f))
+        |+ LobbyList(Position = { Position.Default with Right = 0.7f %+ 0.0f }.Margin(200.0f, 100.0f))
+        |+ InviteList(Position = { Position.Default with Left = 0.7f %+ 0.0f }.Margin(100.0f, 100.0f))
     let main = Lobby()
 
     let swap = SwapContainer(Current = list)
