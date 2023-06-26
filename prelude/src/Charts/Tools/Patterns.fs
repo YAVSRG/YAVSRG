@@ -384,7 +384,11 @@ module Patterns =
         else matches analysis_generic data
 
     //todo: categorise by length; 0-2 seconds = burst; 2-5 seconds = run; 5-30 seconds = sprint; 30 second+ = marathon
-    type PatternLocation = { Time: Time; Duration: Time; MsPerBeat: float32<ms/beat> }
+    type PatternLocation = { Time: Time; Duration: Time; BPM: int }
+
+    type private BPMCluster = { mutable MsPerBeat: float32<ms/beat>; mutable Size: int }
+
+    let private BPM_CLUSTER_THRESHOLD = 5.0f<ms/beat>
 
     let pattern_locations (rate: float32) (pattern_tokens: (string * (Time * float32<ms/beat>)) seq) : (string * PatternLocation) seq =
         let PATTERN_DURATION = 600.0f<ms> * rate
@@ -396,10 +400,20 @@ module Patterns =
             |> Array.map (fun (pattern, data) -> 
                     pattern, 
                     Seq.map snd data 
-                    |> Seq.map (fun (t, bpm) -> (t, bpm * rate))
-                    |> Seq.filter (fun (t, bpm) -> bpm <= (60000.0f<ms/minute> / 85.0f<beat/minute>))
+                    |> Seq.map (fun (t, mspb) -> (t, mspb / rate))
+                    |> Seq.filter (fun (t, mspb) -> mspb <= (60000.0f<ms/minute> / 85.0f<beat/minute>))
                     |> Array.ofSeq
                 )
+
+        let clusters = ResizeArray<BPMCluster>()
+        let cluster value =
+            match clusters |> Seq.tryFind (fun c -> abs (c.MsPerBeat - value) < BPM_CLUSTER_THRESHOLD) with
+            | Some c -> 
+                c.MsPerBeat <- (c.MsPerBeat * float32 c.Size + value) / (float32 c.Size + 1.0f)
+                c.Size <- c.Size + 1
+            | None -> clusters.Add({ Size = 1; MsPerBeat = value })
+        for _, data in groups do
+            for (_, value) in data do cluster value
 
         let patterns = ResizeArray<string * PatternLocation>()
 
@@ -410,11 +424,17 @@ module Patterns =
             let mutable current_end = 0.0f<ms>
 
             let finish() =
-                patterns.Add((pattern_name, { MsPerBeat = current_mspb / float32 current_n; Time = current_start; Duration = (current_end - current_start) / rate }))
+                let mspb = current_mspb / float32 current_n
+                let clustered_mspb =
+                    match clusters |> Seq.tryFind (fun c -> abs (c.MsPerBeat - mspb) < BPM_CLUSTER_THRESHOLD) with
+                    | Some c -> c.MsPerBeat
+                    | None -> mspb
+                let bpm = (60000.0f<ms/minute> / clustered_mspb |> float32 |> round |> int)
+                patterns.Add((pattern_name, { BPM = bpm; Time = current_start; Duration = (current_end - current_start) / rate }))
                 current_n <- 0
 
             for (t, mspb) in data do
-                if current_n > 0 && (System.MathF.Abs((current_mspb / float32 current_n) - mspb |> float32) < 3.0f) && t <= current_end then
+                if current_n > 0 && (abs ((current_mspb / float32 current_n) - mspb) < BPM_CLUSTER_THRESHOLD) && t <= current_end then
                     current_n <- current_n + 1
                     current_mspb <- current_mspb + mspb
                     current_end <- t + PATTERN_DURATION
@@ -442,7 +462,7 @@ module Patterns =
         
         let coverage = Dictionary<string * int, PatternBreakdown>()
         for (pattern, info) in patterns do
-            let key = (pattern, info.MsPerBeat |> fun x -> 60000.0f<ms/minute> / x + 0.1f<beat/minute> |> float32 |> round |> int)
+            let key = (pattern, info.BPM)
             if not <| coverage.ContainsKey(key) then coverage.Add(key, { TotalTime = 0.0f<ms>; Bursts = 0; Runs = 0; Sprints = 0; Marathons = 0 })
             coverage.[key].TotalTime <- coverage.[key].TotalTime + info.Duration
             match info.Duration with
