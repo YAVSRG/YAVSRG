@@ -383,7 +383,6 @@ module Patterns =
         elif chart.Keys = 7 then matches analysis_7k data
         else matches analysis_generic data
 
-    //todo: categorise by length; 0-2 seconds = burst; 2-5 seconds = run; 5-30 seconds = sprint; 30 second+ = marathon
     type PatternLocation = { Time: Time; Duration: Time; BPM: int }
 
     type private BPMCluster = { mutable MsPerBeat: float32<ms/beat>; mutable Size: int }
@@ -452,10 +451,10 @@ module Patterns =
     type PatternBreakdown = 
         { 
             mutable TotalTime: Time
-            mutable Bursts: int
-            mutable Runs: int
-            mutable Sprints: int
-            mutable Marathons: int
+            mutable Bursts: ResizeArray<Time * Time>
+            mutable Runs: ResizeArray<Time * Time>
+            mutable Sprints: ResizeArray<Time * Time>
+            mutable Marathons: ResizeArray<Time * Time>
         }
 
     let pattern_breakdown (patterns: (string * PatternLocation) seq) =
@@ -463,12 +462,12 @@ module Patterns =
         let coverage = Dictionary<string * int, PatternBreakdown>()
         for (pattern, info) in patterns do
             let key = (pattern, info.BPM)
-            if not <| coverage.ContainsKey(key) then coverage.Add(key, { TotalTime = 0.0f<ms>; Bursts = 0; Runs = 0; Sprints = 0; Marathons = 0 })
+            if not <| coverage.ContainsKey(key) then coverage.Add(key, { TotalTime = 0.0f<ms>; Bursts = ResizeArray<_>(); Runs = ResizeArray<_>(); Sprints = ResizeArray<_>(); Marathons = ResizeArray<_>() })
             coverage.[key].TotalTime <- coverage.[key].TotalTime + info.Duration
             match info.Duration with
-            | x when x < 2000.0f<ms> -> coverage.[key].Bursts <- coverage.[key].Bursts + 1
-            | x when x < 5000.0f<ms> -> coverage.[key].Runs <- coverage.[key].Runs + 1
-            | x when x < 30000.0f<ms> -> coverage.[key].Sprints <- coverage.[key].Sprints + 1
-            | _ -> coverage.[key].Marathons <- coverage.[key].Marathons + 1
+            | x when x < 2000.0f<ms> -> coverage.[key].Bursts.Add((info.Time, info.Duration))
+            | x when x < 5000.0f<ms> -> coverage.[key].Runs.Add((info.Time, info.Duration))
+            | x when x < 30000.0f<ms> -> coverage.[key].Sprints.Add((info.Time, info.Duration))
+            | _ -> coverage.[key].Marathons.Add((info.Time, info.Duration))
 
         coverage
