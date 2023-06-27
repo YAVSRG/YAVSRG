@@ -232,7 +232,7 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
         |+ Clear(data, 
             Position = Position.Box(1.0f, 0.0f, -240.0f, -35.0f, 200.0f, 50.0f))
         |+ StylishButton(
-            ignore,
+            (fun () -> { new ScoreGraphSettingsPage() with override this.OnClose() = graph.Refresh() }.Show()),
             sprintf "%s %s" Icons.edit (L"score.graph.settings") |> K,
             Style.main 100,
             Position = { Left = 0.55f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.7f %- 25.0f; Bottom = 1.0f %- 0.0f })
