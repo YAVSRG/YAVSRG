@@ -126,6 +126,16 @@ type private HoldState =
     | Dropped
     | MissedHead
 
+type ScoreMetricSnapshot =
+    {
+        Time: ChartTime
+        HP: float
+        PointsScored: float
+        MaxPointsScored: float
+        Combo: int
+    }
+    static member COUNT = 100
+
 [<AbstractClass>]
 type IScoreMetric
     (
@@ -139,6 +149,8 @@ type IScoreMetric
     inherit ReplayConsumer(keys, replayProvider)
 
     let firstNote = (TimeArray.first notes).Value.Time
+    let lastNote = (TimeArray.last notes).Value.Time
+    let duration = lastNote - firstNote
     let missWindow = ruleset.Accuracy.MissWindow * rate
 
     // having two seekers improves performance when feeding scores rather than playing live
@@ -147,6 +159,7 @@ type IScoreMetric
 
     let internalHoldStates = Array.create keys (Nothing, -1)
 
+    let snapshots = ResizeArray<ScoreMetricSnapshot>()
     let hitData = InternalScore.createDefault ruleset.Accuracy.MissWindow keys notes
     let hitEvents = ResizeArray<HitEvent<HitEventGuts>>()
 
@@ -195,6 +208,7 @@ type IScoreMetric
     member this.Finished = noteSeekPassive = hitData.Length
 
     member this.HitEvents = hitEvents.AsReadOnly()
+    member this.Snapshots = snapshots.AsReadOnly()
 
     // correctness guaranteed up to the time you update, no matter how you update
     // call Update with Time.infinity to do a correct feeding of the whole replay
@@ -205,6 +219,16 @@ type IScoreMetric
     member private this.HandlePassive (relativeTime: ChartTime) =
         let now = firstNote + relativeTime
         let target = now - missWindow
+        let snapshot_target_count = (float32 ScoreMetricSnapshot.COUNT * relativeTime) / duration |> ceil |> int |> max 0 |> min ScoreMetricSnapshot.COUNT
+        while snapshots.Count < snapshot_target_count do
+            snapshots.Add
+                    { 
+                        Time = relativeTime
+                        HP = this.HP.State.Health
+                        PointsScored = this.State.PointsScored
+                        MaxPointsScored = this.State.MaxPointsScored
+                        Combo = this.State.CurrentCombo 
+                    }
         while noteSeekPassive < hitData.Length && InternalScore.offsetOf hitData.[noteSeekPassive] <= target do
             let struct (t, deltas, status) = hitData.[noteSeekPassive]
             for k = 0 to (keys - 1) do
