@@ -42,17 +42,17 @@ module Printerlude =
                     |> Patterns.pattern_locations Gameplay.rate.Value
                     |> Patterns.pattern_breakdown
 
-                for (p, bpm) in data.Keys do
+                for (p, bpm) in data.Keys |> Seq.sortByDescending(fun k -> data.[k].TotalTime) do
                     let d = data.[(p, bpm)]
                     let percent = d.TotalTime / duration * 100.0f
 
                     let category =
-                        if d.Marathons > 0 then "Stamina"
-                        elif d.Sprints > 1 then "Sprints"
-                        elif d.Sprints = 1 then "Sprint"
-                        elif d.Runs > 1 then "Runs"
-                        elif d.Runs = 1 then "Run"
-                        elif d.Bursts > 1 then "Bursts"
+                        if d.Marathons.Count > 0 then "Stamina"
+                        elif d.Sprints.Count > 1 then "Sprints"
+                        elif d.Sprints.Count = 1 then "Sprint"
+                        elif d.Runs.Count > 1 then "Runs"
+                        elif d.Runs.Count = 1 then "Run"
+                        elif d.Bursts.Count > 1 then "Bursts"
                         else "Burst"
 
                     if percent > 1f then ctx.WriteLine(sprintf "%iBPM %s %s: %.2f%%" bpm p category percent)
