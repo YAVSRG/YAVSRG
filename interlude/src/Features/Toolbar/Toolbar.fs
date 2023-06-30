@@ -124,6 +124,7 @@ type Toolbar() =
         Terminal.draw()
 
     override this.Update(elapsedTime, moved) =
+        Stats.session.GameTime <- Stats.session.GameTime + elapsedTime
         let moved = if wasHidden <> hidden then wasHidden <- hidden; true else moved || expandAmount.Moving
         if shown() && (!|"toolbar").Tapped() then
             userCollapse <- not userCollapse

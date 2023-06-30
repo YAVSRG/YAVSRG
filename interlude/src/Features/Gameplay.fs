@@ -230,6 +230,7 @@ module Gameplay =
     let save() =
         Scores.save()
         Library.save()
+        Stats.save()
 
     let init() =
         try
@@ -257,3 +258,4 @@ module Gameplay =
         | Some c -> Collections.select c
         | None -> ()
         Online.Multiplayer.init()
+        Stats.init()

@@ -236,6 +236,8 @@ module PracticeScreen =
         let firstNote = chart.Notes.[0].Time
         let mutable liveplay = LiveReplayProvider firstNote
         let mutable scoring = createScoreMetric Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
+        
+        scoring.OnHit.Add(fun h -> match h.Guts with Hit d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1 | _ -> ())
 
         do ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
 
@@ -250,6 +252,8 @@ module PracticeScreen =
             scoring <- createScoreMetric Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
             ignore_notes_before(practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
             screen.State.ChangeScoring scoring
+            scoring.OnHit.Add(fun h -> match h.Guts with Hit d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1 | _ -> ())
+
             Song.playFrom(practice_point)
 
         let play(screen: IPlayScreen) =
@@ -302,6 +306,8 @@ module PracticeScreen =
             override this.Update(elapsedTime, bounds) =
                 let now = Song.timeWithOffset()
                 let chartTime = now - firstNote
+
+                if not options_mode then Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsedTime
 
                 if (!|"retry").Tapped() then
                     if options_mode then play(this) else restart(this)

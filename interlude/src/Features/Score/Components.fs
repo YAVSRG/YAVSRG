@@ -35,7 +35,7 @@ type TopBanner(data: ScoreInfoProvider) as this =
         |* Text(
             match data.Player with 
             | Some p -> K (sprintf "Played by %s" p)
-            | None -> (fun () -> "Current session: " + Stats.session_length())
+            | None -> (fun () -> "Current session: " + Stats.format_short_time Stats.session.GameTime)
             ,
             Align = Alignment.RIGHT,
             Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 125.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 165.0f })
