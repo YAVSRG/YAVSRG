@@ -64,7 +64,7 @@ type RowInfo =
 
 module Analysis =
 
-    let private DENSITY_SENTITIVITY = -10f
+    let private DENSITY_SENTITIVITY = -4f
 
     let private density_step(time: Time) (d: float32) =
         let seconds = time / 1000f<ms>
@@ -501,7 +501,7 @@ module Patterns =
             let key = (pattern, info.BPM)
             if not <| coverage.ContainsKey(key) then coverage.Add(key, { TotalTime = 0.0f<ms/rate>; DensityTime = 0.0f<ms/rate>; Bursts = ResizeArray<_>(); Runs = ResizeArray<_>(); Sprints = ResizeArray<_>(); Marathons = ResizeArray<_>() })
             coverage.[key].TotalTime <- coverage.[key].TotalTime + info.Duration
-            coverage.[key].DensityTime <- coverage.[key].TotalTime + info.Duration * info.AverageDensity
+            coverage.[key].DensityTime <- coverage.[key].DensityTime + info.Duration * info.AverageDensity
             match info.Duration with
             | x when x < 2000.0f<ms/rate> -> coverage.[key].Bursts.Add((info.Time, info.Duration))
             | x when x < 5000.0f<ms/rate> -> coverage.[key].Runs.Add((info.Time, info.Duration))
