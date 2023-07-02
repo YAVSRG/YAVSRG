@@ -15,6 +15,14 @@ module Badge =
     let MODERATOR = "moderator"
     let EARLYTESTER = "early-tester"
 
+    let badge_color(badge: Badge) : int32 list =
+        match badge with
+        | _ when badge = EARLYTESTER -> [0x0_66ff6e]
+        | _ when badge = MODERATOR -> [0x0_66c2ff]
+        | _ when badge = DEVELOPER -> [0x0_ff7559]
+        | _ when badge = DONATOR -> [0x0_ff8cdd; 0x0_ffd36e]
+        | _ -> []
+
 type User =
     {
         Username: string
@@ -23,6 +31,7 @@ type User =
         LastLogin: int64
         AuthToken: string
         Badges: Set<Badge>
+        Color: int32 option
     }
 
 module User =
@@ -39,6 +48,7 @@ module User =
             LastLogin = 0L
             AuthToken = Guid.NewGuid().ToString("N")
             Badges = Set.empty
+            Color = None
         }
 
     let save(id, user: User) =
