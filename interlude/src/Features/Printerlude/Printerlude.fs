@@ -55,7 +55,9 @@ module Printerlude =
                         elif d.Bursts.Count > 1 then "Bursts"
                         else "Burst"
 
-                    if percent > 1f then ctx.WriteLine(sprintf "%iBPM %s %s: %.2f%%; %.1f NPS" bpm p category percent (d.DensityTime / d.TotalTime))
+                    let density = d.DensityTime / d.TotalTime
+                    let max_density = float32 bpm / 15f
+                    if percent > 5f then ctx.WriteLine(sprintf "%iBPM %s %s (%.0f%% density): %.2f%%" bpm p category (100.0f * density / max_density) percent)
 
         let export_osz() =
             match Gameplay.Chart.current with
