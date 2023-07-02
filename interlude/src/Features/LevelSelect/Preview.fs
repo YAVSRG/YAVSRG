@@ -9,12 +9,11 @@ open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools.Patterns
 open Interlude.UI.Menu
 open Interlude.Features.Play
-open Interlude.Features.Online
 
 type Preview(chart: Chart, changeRate: float32 -> unit) =
     inherit Dialog()
 
-    let density_graph_1, density_graph_2 = Analysis.density 100 chart
+    let density_graph_1, density_graph_2 = Analysis.nps_cps 100 chart
     let density_graph_1, density_graph_2 = Array.map float32 density_graph_1, Array.map float32 density_graph_2
     let max_note_density = Array.max density_graph_1
     //let patterns =

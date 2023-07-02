@@ -36,10 +36,10 @@ module Printerlude =
             match Gameplay.Chart.current with
             | None -> failwith "No chart to analyze"
             | Some c ->
-                let duration = Gameplay.Chart.cacheInfo.Value.Length
+                let duration = Gameplay.Chart.cacheInfo.Value.Length / (Gameplay.rate.Value * 1.0f<rate>)
                 let data = 
-                    Patterns.analyse c
-                    |> Patterns.pattern_locations Gameplay.rate.Value
+                    Patterns.analyse Gameplay.rate.Value c
+                    |> Patterns.pattern_locations
                     |> Patterns.pattern_breakdown
 
                 for (p, bpm) in data.Keys |> Seq.sortByDescending(fun k -> data.[k].TotalTime) do
@@ -55,7 +55,7 @@ module Printerlude =
                         elif d.Bursts.Count > 1 then "Bursts"
                         else "Burst"
 
-                    if percent > 1f then ctx.WriteLine(sprintf "%iBPM %s %s: %.2f%%" bpm p category percent)
+                    if percent > 1f then ctx.WriteLine(sprintf "%iBPM %s %s: %.2f%%; %.1f NPS" bpm p category percent (d.DensityTime / d.TotalTime))
 
         let export_osz() =
             match Gameplay.Chart.current with

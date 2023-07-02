@@ -47,7 +47,7 @@ module AutomaticSync =
 type Timeline(chart: Chart, on_seek: Time -> unit) =
     inherit StaticWidget(NodeType.None)
 
-    let density_graph_1, density_graph_2 = Analysis.density 200 chart
+    let density_graph_1, density_graph_2 = Analysis.nps_cps 200 chart
     let density_graph_1, density_graph_2 = Array.map float32 density_graph_1, Array.map float32 density_graph_2
     let max_note_density = Array.max density_graph_1
 
