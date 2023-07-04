@@ -42,7 +42,7 @@ type [<Sealed>] Clickable(onLeftClick) =
         let was_hovering = hover
         hover <- Mouse.hover (if this.Floating then this.Bounds else this.VisibleBounds)
         if was_hovering && not hover then this.OnHover false
-        elif not was_hovering && hover then this.OnHover true
+        elif not was_hovering && hover && Mouse.moved_recently() then this.OnHover true
         elif hover then
             if Mouse.leftClick() then this.OnLeftClick()
             if Mouse.rightClick() then this.OnRightClick()

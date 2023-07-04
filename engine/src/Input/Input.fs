@@ -165,6 +165,7 @@ module internal InputThread =
 
 module Input =
 
+    let mutable last_time_mouse_moved = 0L
     let mutable internal this_frame : FrameEvents = Unchecked.defaultof<_>
     let mutable internal last_frame : FrameEvents = Unchecked.defaultof<_>
     let mutable internal thisFrameFinished = false
@@ -305,6 +306,8 @@ module Input =
         last_frame <- this_frame
         InputThread.fetch(&events_this_frame, &this_frame)
         if Object.ReferenceEquals(null, last_frame) then last_frame <- this_frame
+        if (this_frame.MouseX <> last_frame.MouseX) || (this_frame.MouseY <> last_frame.MouseY) then
+            last_time_mouse_moved <- DateTime.UtcNow.Ticks
         scrolled_this_frame <- this_frame.MouseZ - last_frame.MouseZ
         thisFrameFinished <- false
         updateIM()
@@ -328,7 +331,7 @@ module Mouse =
 
     let held b = Input.held (Mouse b)
     let released b = Input.consumeOne(Mouse b, InputEvType.Release).IsSome
-    let moved() = Input.this_frame.MouseX <> Input.last_frame.MouseX || Input.this_frame.MouseY <> Input.last_frame.MouseY
+    let moved_recently() = (DateTime.UtcNow.Ticks - Input.last_time_mouse_moved) < 5_000_000L
 
     let hover (r: Rect) = not Input.thisFrameFinished && r.Contains(pos())
 

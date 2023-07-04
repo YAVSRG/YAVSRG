@@ -64,7 +64,7 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
             let before = Selection.get_focused_element()
             child.Update(elapsedTime, moved)
             let after = Selection.get_focused_element()
-            if before <> after && abs (scroll_pos.Target - scroll_pos.Value) < 10.0f then scroll_to_child_next_frame <- true
+            if before <> after then scroll_to_child_next_frame <- true
         else child.Update(elapsedTime, moved)
 
     override this.Draw() = 
