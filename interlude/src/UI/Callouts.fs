@@ -8,10 +8,12 @@ open Prelude.Common
 open Interlude.UI
 open Interlude.Utils
 
+[<RequireQualifiedAccess>]
 type CalloutContent =
     | Header of string
     | Body of string[]
     | Hotkey of string option * Hotkey
+    | Button of string * (unit -> unit)
 
 type Callout =
     {
@@ -21,11 +23,12 @@ type Callout =
     }
     static member Small = { IsSmall = true; Contents = []; _Icon = None }
     static member Normal = { IsSmall = false; Contents = []; _Icon = None }
-    member this.Title(s: string) = if s <> "" then { this with Contents = this.Contents @ [Header s] } else this
-    member this.Body(s: string) = if s <> "" then { this with Contents = this.Contents @ [Body (s.Split "\n")] } else this
-    member this.Hotkey(h: Hotkey) = { this with Contents = this.Contents @ [Hotkey (None, h)] }
-    member this.Hotkey(desc: string, h: Hotkey) = { this with Contents = this.Contents @ [Hotkey (Some desc, h)] }
+    member this.Title(s: string) = if s <> "" then { this with Contents = this.Contents @ [CalloutContent.Header s] } else this
+    member this.Body(s: string) = if s <> "" then { this with Contents = this.Contents @ [CalloutContent.Body (s.Split "\n")] } else this
+    member this.Hotkey(h: Hotkey) = { this with Contents = this.Contents @ [CalloutContent.Hotkey (None, h)] }
+    member this.Hotkey(desc: string, h: Hotkey) = { this with Contents = this.Contents @ [CalloutContent.Hotkey (Some desc, h)] }
     member this.Icon(icon: string) = if icon <> "" then { this with _Icon = Some icon } else { this with _Icon = None }
+    member this.Button(label: string, action: unit -> unit) = { this with Contents = this.Contents @ [CalloutContent.Button (label, action)] }
 
 module Callout =
 
@@ -43,15 +46,16 @@ module Callout =
         let mutable height = 0.0f
         for b in c.Contents do
             match b with
-            | Header text -> 
+            | CalloutContent.Header text -> 
                 let size = header_size c.IsSmall
                 height <- height + size
                 width <- max width (Text.measure (Style.baseFont, text) * size)
-            | Body xs ->
+            | CalloutContent.Body xs ->
                 let size = text_size c.IsSmall
                 height <- height + (float32 xs.Length * size) + (float32 (xs.Length - 1) * text_spacing c.IsSmall)
                 for x in xs do width <- max width (Text.measure (Style.baseFont, x) * size)
-            | Hotkey _ -> height <- height + text_size c.IsSmall
+            | CalloutContent.Hotkey _ -> height <- height + text_size c.IsSmall
+            | CalloutContent.Button _ -> height <- height + spacing * 3.0f + text_size c.IsSmall
             height <- height + spacing
         let icon_size =
             if c._Icon.IsSome then
@@ -60,23 +64,24 @@ module Callout =
                 
         width + icon_size + x_padding, height
 
-    let draw (x, y, height, col, c: Callout) =
-        let x =
+    let draw (x, y, width, height, col, c: Callout) =
+        let x, width =
             match c._Icon with
             | Some i ->
                 let icon_size = min (if c.IsSmall then 30.0f else 50.0f) height
                 Text.drawB(Style.baseFont, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.7f, col)
-                x + icon_size + x_padding * 2.0f
-            | None -> x + x_padding
+                x + icon_size + x_padding * 2.0f, width - icon_size - x_padding * 3.0f
+            | None -> x + x_padding, width - x_padding * 2.0f
         let spacing = spacing c.IsSmall
         let mutable y = y
+        let a = int (fst col).A
         for b in c.Contents do
             match b with
-            | Header s ->
+            | CalloutContent.Header s ->
                 let size = header_size c.IsSmall
                 Text.drawB(Style.baseFont, s, size, x, y, col)
                 y <- y + size
-            | Body xs ->
+            | CalloutContent.Body xs ->
                 let size = text_size c.IsSmall
                 let tspacing = text_spacing c.IsSmall
                 for line in xs do
@@ -84,16 +89,48 @@ module Callout =
                     y <- y + size
                     y <- y + tspacing
                 y <- y - tspacing
-            | Hotkey (desc, hk) ->
+            | CalloutContent.Hotkey (desc, hk) ->
                 let size = text_size c.IsSmall
                 let text = sprintf "%s: %O" (Option.defaultValue default_hotkey_text desc) (!|hk)
-                let a = int (fst col).A
                 Text.drawB(
                     Style.baseFont,
                     text,
                     size, x, y,
                     (Colors.cyan_accent.O4a a, Colors.shadow_2.O4a a))
                 y <- y + size
+            | CalloutContent.Button (label, _) ->
+                y <- y + spacing
+                let tsize = text_size c.IsSmall
+                let buttonSize = tsize + spacing * 2.0f
+                let bounds = Rect.Box(x, y, width, buttonSize)
+                Draw.rect bounds (Colors.shadow_2.O2a a)
+                let text_col = if bounds.Contains(Mouse.pos()) then (Colors.yellow_accent.O4a a, Colors.shadow_2.O4a a) else col
+                Text.drawJustB(Style.baseFont, label, tsize, x + width * 0.5f, y + buttonSize * 0.5f - tsize * 0.8f, text_col, Alignment.CENTER)
+                y <- y + buttonSize
+            y <- y + spacing
+
+    let update(x, y, width, height, c) =
+        let x, width =
+            match c._Icon with
+            | Some i ->
+                let icon_size = min (if c.IsSmall then 30.0f else 50.0f) height
+                x + icon_size + x_padding * 2.0f, width - icon_size - x_padding * 3.0f
+            | None -> x + x_padding, width - x_padding * 2.0f
+        let spacing = spacing c.IsSmall
+        let mutable y = y
+        for b in c.Contents do
+            match b with
+            | CalloutContent.Header s -> y <- y + header_size c.IsSmall
+            | CalloutContent.Body xs ->
+                y <- y + (float32 xs.Length * text_size c.IsSmall) + (float32 (xs.Length - 1) * text_spacing c.IsSmall)
+            | CalloutContent.Hotkey (desc, hk) -> y <- y + text_size c.IsSmall
+            | CalloutContent.Button (_, action) ->
+                y <- y + spacing
+                let tsize = text_size c.IsSmall
+                let buttonSize = tsize + spacing * 2.0f
+                let bounds = Rect.Box(x, y, width, buttonSize)
+                if Mouse.hover bounds && Mouse.leftClick() then action()
+                y <- y + buttonSize
             y <- y + spacing
 
     let frame (callout: Callout) (pos: float32 * float32 -> Position) =
@@ -105,7 +142,10 @@ module Callout =
             Position = pos (w, h)) with 
             override this.Draw() =
                 base.Draw()
-                draw (this.Bounds.Left, this.Bounds.Top + 20.0f, h, Colors.text, callout)
+                draw (this.Bounds.Left, this.Bounds.Top + 20.0f, w, h, Colors.text, callout)
+            override this.Update(elapsedTime, moved) =
+                base.Update(elapsedTime, moved)
+                update (this.Bounds.Left, this.Bounds.Top + 20.0f, w, h, callout)
         }
 
 type private Notification =
@@ -145,8 +185,28 @@ module Notifications =
                 if t.Fade.Target <> 0.0f then
                     if t.Bind.Released() then t.Fade.Target <- 0.0f
                 elif t.Fade.Value < 0.01f then current_tooltip <- None
+                    
+                let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
+                let width, height = t.Size
+                let x = 
+                    outline.CenterX - width * 0.5f
+                    |> min (Viewport.bounds.Width - width - 50.0f)
+                    |> max 50.0f
+                let y =
+                    if outline.Top > Viewport.bounds.CenterY then
+                        outline.Top - 50.0f - height - 60.0f
+                    else outline.Bottom + 50.0f
+                let calloutBounds = Rect.Box(x, y, width, height + 60.0f)
+                Callout.update (calloutBounds.Left, calloutBounds.Top + 30.0f, width, height, t.Data)
 
+            let padding = 20.0f
+            let mutable y = this.Bounds.Top + 80.0f
             for i in items do
+                let width, height = i.Size
+                let bounds = Rect.Box(this.Bounds.Right - width - 10.0f, y, width, height + padding * 2.0f)
+                Callout.update (bounds.Left, bounds.Top + padding, width, height, i.Data)
+                y <- y + (height + padding * 2.0f + 15.0f) * i.Fade.Value
+                
                 i.Duration <- i.Duration - elapsedTime
                 i.Fade.Update elapsedTime
                 if i.Fade.Target <> 0.0f then
@@ -187,7 +247,7 @@ module Notifications =
                 Draw.rect (frameBounds.SliceBottom 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
                 Draw.rect (frameBounds.SliceLeft 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
                 Draw.rect (frameBounds.SliceRight 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Callout.draw (calloutBounds.Left, calloutBounds.Top + 30.0f, height, (Colors.white.O4a t.Fade.Alpha, Colors.shadow_1.O4a t.Fade.Alpha), t.Data)
+                Callout.draw (calloutBounds.Left, calloutBounds.Top + 30.0f, width, height, (Colors.white.O4a t.Fade.Alpha, Colors.shadow_1.O4a t.Fade.Alpha), t.Data)
 
             let padding = 20.0f
             let mutable y = this.Bounds.Top + 80.0f
@@ -202,7 +262,7 @@ module Notifications =
                 Draw.rect (border.SliceBottom(5.0f)) (accent.O4a i.Fade.Alpha)
                 Draw.rect bounds (Colors.shadow_2.O2a i.Fade.Alpha)
                 Draw.rect bounds (body.O3a i.Fade.Alpha)
-                Callout.draw (bounds.Left, bounds.Top + padding, height,
+                Callout.draw (bounds.Left, bounds.Top + padding, width, height,
                     ((fst i.ContentColor).O4a i.Fade.Alpha, (snd i.ContentColor).O4a i.Fade.Alpha), i.Data)
                 y <- y + (height + padding * 2.0f + 15.0f) * i.Fade.Value
 

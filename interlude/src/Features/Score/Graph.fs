@@ -118,7 +118,6 @@ type ScoreGraph(data: ScoreInfoProvider) =
             let ss = sss.[snapshot_index]
             let box_h = this.Bounds.Height - 40.0f
             let box = Rect.Box(this.Bounds.Left + 20.0f + pc * (this.Bounds.Width - 200.0f - 40.0f), this.Bounds.Top + 20.0f, 200.0f, box_h)
-            printfn "%A" box
             Draw.rect box Colors.shadow_2.O2
             Text.drawFillB(Style.baseFont, (if ss.MaxPointsScored = 0.0 then 100.0 else 100.0 * ss.PointsScored / ss.MaxPointsScored) |> sprintf "%.2f%%", box.SliceTop(box_h / 3f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
             Text.drawFillB(Style.baseFont, ss.Combo |> sprintf "%ix", box.TrimBottom(box_h / 3f).SliceBottom(box_h / 3f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)

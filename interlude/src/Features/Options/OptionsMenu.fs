@@ -12,7 +12,7 @@ module OptionsMenuRoot =
     type private TileButton(body: Callout, onclick: unit -> unit) =
         inherit StaticContainer(NodeType.Button (onclick))
     
-        let body_height = snd <| Callout.measure body
+        let body_width, body_height = Callout.measure body
     
         member val Disabled = false with get, set
         member val Margin = (0.0f, 20.0f) with get, set
@@ -29,7 +29,7 @@ module OptionsMenuRoot =
                 else Colors.shadow_1
             Draw.rect this.Bounds color.O3
             Draw.rect (this.Bounds.Expand(0.0f, 5.0f).SliceBottom(5.0f)) color
-            Callout.draw (this.Bounds.Left + fst this.Margin, this.Bounds.Top + snd this.Margin, body_height, Colors.text, body)
+            Callout.draw (this.Bounds.Left + fst this.Margin, this.Bounds.Top + snd this.Margin, body_width, body_height, Colors.text, body)
     
     type OptionsPage() as this =
         inherit Page()
