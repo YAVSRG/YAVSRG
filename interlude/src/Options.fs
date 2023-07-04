@@ -36,6 +36,12 @@ module Options =
         | Lamp of int
         static member Default = Accuracy 0.95
 
+    [<RequireQualifiedAccess>]
+    type ScoreGraphMode =
+        | HP = 0
+        | Combo = 1
+        | None = 2
+
     type FailType =
         | Instant = 0
         | EndOfSong = 1
@@ -119,6 +125,7 @@ module Options =
 
             VanishingNotes: Setting<bool>
             AutoCalibrateOffset: Setting<bool>
+            ScoreGraphMode: Setting<ScoreGraphMode>
         }
         static member Default = {
             VisualOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
@@ -191,6 +198,7 @@ module Options =
 
             VanishingNotes = Setting.simple false
             AutoCalibrateOffset = Setting.simple false
+            ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
         }
 
     let mutable internal config : Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>

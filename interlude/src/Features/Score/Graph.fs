@@ -10,16 +10,10 @@ open Prelude.Data.Scores
 open Interlude.UI
 open Interlude.Utils
 open Interlude.UI.Menu
-
-[<RequireQualifiedAccess>]
-type GraphMode =
-    | HP = 0
-    | Combo = 1
-    | None = 2
+open Interlude.Options
 
 module GraphSettings =
-    
-    let graph_mode = Setting.simple GraphMode.Combo
+
     let only_releases = Setting.simple false
 
 type ScoreGraphSettingsPage() as this =
@@ -28,7 +22,7 @@ type ScoreGraphSettingsPage() as this =
     do 
         this.Content(
             column()
-            |+ PageSetting("score.graph.settings.graph_mode", Selector<_>.FromEnum GraphSettings.graph_mode)
+            |+ PageSetting("score.graph.settings.graph_mode", Selector<_>.FromEnum options.ScoreGraphMode)
                 .Pos(200.0f)
             |+ PageSetting("score.graph.settings.only_releases", Selector<_>.FromBool GraphSettings.only_releases)
                 .Pos(300.0f)
@@ -63,13 +57,13 @@ type ScoreGraph(data: ScoreInfoProvider) =
         assert (events.Count > 0)
 
         // line graph
-        if GraphSettings.graph_mode.Value <> GraphMode.None then
+        if options.ScoreGraphMode.Value <> ScoreGraphMode.None then
             let snapshots = data.Scoring.Snapshots
             assert (snapshots.Count > 0)
             let hscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
             for i = 1 to snapshots.Count - 1 do
                 let l, r = 
-                    if GraphSettings.graph_mode.Value = GraphMode.Combo then 
+                    if options.ScoreGraphMode.Value = ScoreGraphMode.Combo then 
                         float32 snapshots.[i-1].Combo / float32 data.Scoring.State.BestCombo, float32 snapshots.[i].Combo / float32 data.Scoring.State.BestCombo
                     else float32 snapshots.[i-1].HP, float32 snapshots.[i].HP
                 let x1 = this.Bounds.Left + snapshots.[i-1].Time * hscale
