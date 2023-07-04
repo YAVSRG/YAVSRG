@@ -176,6 +176,7 @@ module Analysis =
 
         } |> List.ofSeq
 
+type PatternId = Stream of string | Jack of string
 type Pattern = RowInfo list -> bool
 
 module Patterns =
@@ -344,7 +345,7 @@ module Patterns =
 
     type PatternToken = { Time: ScaledTime; MsPerBeat: float32<ms/beat>; Density: float32 }
 
-    let matches (patterns: IDictionary<string, Pattern>) (data: RowInfo list) : (string * PatternToken) seq =
+    let matches (patterns: IDictionary<PatternId, Pattern>) (data: RowInfo list) : (PatternId * PatternToken) seq =
         let mutable data = data
         seq {
             while not data.IsEmpty do
@@ -354,60 +355,60 @@ module Patterns =
         }
 
     let analysis_4k = dict [
-            "Streams", Common.STREAMS
-            "Jumpstream", ``4K``.JUMPSTREAM
-            "Dense Jumpstream", ``4K``.DENSE_JUMPSTREAM
-            "Double Jumpstream", ``4K``.DOUBLE_JUMPSTREAM
-            "Triple Jumpstream", ``4K``.TRIPLE_JUMPSTREAM
-            "Jumptrill", ``4K``.JUMPTRILL
-            "Split trill", ``4K``.SPLITTRILL
-            "Roll", ``4K``.ROLL
-            "Handstream", ``4K``.HANDSTREAM
-            "Jacks", Common.JACKS
-            "Jumpjacks", ``4K``.JUMPJACKS
-            "Chordjacks", Common.CHORDJACKS
-            "Gluts", Common.GLUTS
-            "Jumpgluts", ``4K``.JUMPGLUTS
+            Stream "Streams", Common.STREAMS
+            Stream "Jumpstream", ``4K``.JUMPSTREAM
+            Stream "Dense Jumpstream", ``4K``.DENSE_JUMPSTREAM
+            Stream "Double Jumpstream", ``4K``.DOUBLE_JUMPSTREAM
+            Stream "Triple Jumpstream", ``4K``.TRIPLE_JUMPSTREAM
+            Stream "Jumptrill", ``4K``.JUMPTRILL
+            Stream "Split trill", ``4K``.SPLITTRILL
+            Stream "Roll", ``4K``.ROLL
+            Stream "Handstream", ``4K``.HANDSTREAM
+            Jack "Jacks", Common.JACKS
+            Jack "Jumpjacks", ``4K``.JUMPJACKS
+            Jack "Chordjacks", Common.CHORDJACKS
+            Jack "Gluts", Common.GLUTS
+            Jack "Jumpgluts", ``4K``.JUMPGLUTS
         ]
 
     let analysis_generic = dict [
-            "Streams", Common.STREAMS
-            "Jacks", Common.JACKS
-            "Chordjacks", Common.CHORDJACKS
-            "Gluts", Common.GLUTS
+            Stream "Streams", Common.STREAMS
+            Jack "Jacks", Common.JACKS
+            Jack "Chordjacks", Common.CHORDJACKS
+            Jack "Gluts", Common.GLUTS
         ]
 
     let analysis_7k = dict [
-            "Streams", Common.STREAMS
-            "Chordstream", ``7K``.CHORDSTREAM
-            "Double streams", ``7K``.DOUBLE_STREAMS
-            "Double stairs", ``7K``.DOUBLE_STAIRS
-            "Chord rolls", ``7K``.CHORD_ROLL
-            "Jacks", Common.JACKS
-            "Chordjacks", Common.CHORDJACKS
-            "Gluts", Common.GLUTS
+            Stream "Streams", Common.STREAMS
+            Stream "Chordstream", ``7K``.CHORDSTREAM
+            Stream "Double streams", ``7K``.DOUBLE_STREAMS
+            Stream "Double stairs", ``7K``.DOUBLE_STAIRS
+            Stream "Chord rolls", ``7K``.CHORD_ROLL
+            Jack "Jacks", Common.JACKS
+            Jack "Chordjacks", Common.CHORDJACKS
+            Jack "Gluts", Common.GLUTS
         ]
 
     let display = dict [
-            "Streams", (Color.Green, 120, 400)
-            "Alternation", (Color.Cyan, 100, 300)
-            "Jumpstream", (Color.SkyBlue, 100, 350)
-            "Dense Jumpstream", (Color.DeepSkyBlue, 100, 350)
-            "Double Jumpstream", (Color.CadetBlue, 100, 300)
-            "Triple Jumpstream", (Color.Aqua, 100, 300)
-            "Handstream", (Color.Orange, 100, 300)
-            "Chordstream", (Color.Orange, 100, 250)
-            "Double streams", (Color.Yellow, 100, 250)
-            "Double stairs", (Color.OrangeRed, 100, 250)
-            "Chord rolls", (Color.Yellow, 100, 250)
-            "Split trill", (Color.Purple, 100, 400)
-            "Jumptrill", (Color.Blue, 100, 400)
-            "Roll", (Color.Lime, 100, 400)
-            "Jacks", (Color.PaleVioletRed, 100, 200)
-            "Jumpjacks", (Color.Lavender, 100, 200)
-            "Chordjacks", (Color.Red, 100, 200)
-            "Gluts", (Color.Crimson, 100, 200)
-            "Jumpgluts", (Color.Magenta, 100, 200)
+            Stream "Streams", (Color.Green, 120, 400)
+            Stream "Alternation", (Color.Cyan, 100, 300)
+            Stream "Jumpstream", (Color.SkyBlue, 100, 350)
+            Stream "Dense Jumpstream", (Color.DeepSkyBlue, 100, 350)
+            Stream "Double Jumpstream", (Color.CadetBlue, 100, 300)
+            Stream "Triple Jumpstream", (Color.Aqua, 100, 300)
+            Stream "Handstream", (Color.Orange, 100, 300)
+            Stream "Chordstream", (Color.Orange, 100, 250)
+            Stream "Double streams", (Color.Yellow, 100, 250)
+            Stream "Double stairs", (Color.OrangeRed, 100, 250)
+            Stream "Chord rolls", (Color.Yellow, 100, 250)
+            Stream "Split trill", (Color.Purple, 100, 400)
+            Stream "Jumptrill", (Color.Blue, 100, 400)
+            Stream "Roll", (Color.Lime, 100, 400)
+            Jack "Jacks", (Color.PaleVioletRed, 100, 200)
+            Jack "Jumpjacks", (Color.Lavender, 100, 200)
+            Jack "Chordjacks", (Color.Red, 100, 200)
+            Jack "Gluts", (Color.Crimson, 100, 200)
+            Jack "Jumpgluts", (Color.Magenta, 100, 200)
         ]
 
     let analyse (rate: float32) (chart: Chart) =
@@ -422,7 +423,7 @@ module Patterns =
 
     let private BPM_CLUSTER_THRESHOLD = 5.0f<ms/beat>
 
-    let pattern_locations (pattern_tokens: (string * PatternToken) seq) : (string * PatternLocation) seq =
+    let pattern_locations (pattern_tokens: (PatternId * PatternToken) seq) : (PatternId * PatternLocation) seq =
         let PATTERN_DURATION = 600.0f<ms/rate>
 
         let groups =
@@ -446,9 +447,9 @@ module Patterns =
         for _, data in groups do
             for token in data do cluster token.MsPerBeat
 
-        let patterns = ResizeArray<string * PatternLocation>()
+        let patterns = ResizeArray<PatternId * PatternLocation>()
 
-        for pattern_name, data in groups do
+        for pattern_id, data in groups do
             let mutable current_n = 0
             let mutable current_mspb = 0.0f<ms/beat>
             let mutable current_density = 0.0f
@@ -463,7 +464,7 @@ module Patterns =
                     | Some c -> c.MsPerBeat
                     | None -> mspb
                 let bpm = (60000.0f<ms/minute> / clustered_mspb |> float32 |> round |> int)
-                patterns.Add((pattern_name, { BPM = bpm; Time = current_start; Duration = current_end - current_start; AverageDensity = density }))
+                patterns.Add((pattern_id, { BPM = bpm; Time = current_start; Duration = current_end - current_start; AverageDensity = density }))
                 current_n <- 0
 
             for token in data do
@@ -494,9 +495,9 @@ module Patterns =
             mutable Marathons: ResizeArray<ScaledTime * ScaledTime>
         }
 
-    let pattern_breakdown (patterns: (string * PatternLocation) seq) =
+    let pattern_breakdown (patterns: (PatternId * PatternLocation) seq) =
         
-        let coverage = Dictionary<string * int, PatternBreakdown>()
+        let coverage = Dictionary<PatternId * int, PatternBreakdown>()
         for (pattern, info) in patterns do
             let key = (pattern, info.BPM)
             if not <| coverage.ContainsKey(key) then coverage.Add(key, { TotalTime = 0.0f<ms/rate>; DensityTime = 0.0f<ms/rate>; Bursts = ResizeArray<_>(); Runs = ResizeArray<_>(); Sprints = ResizeArray<_>(); Marathons = ResizeArray<_>() })
