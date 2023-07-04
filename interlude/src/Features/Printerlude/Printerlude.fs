@@ -57,7 +57,11 @@ module Printerlude =
 
                     let density = d.DensityTime / d.TotalTime
                     let max_density = float32 bpm / 15f
-                    if percent > 5f then ctx.WriteLine(sprintf "%iBPM %s %s (%.0f%% density): %.2f%%" bpm p category (100.0f * density / max_density) percent)
+                    let name, density_ratio =
+                        match p with
+                        | Stream s -> s, density * 200.0f / max_density
+                        | Jack s -> s, (density * 200.0f / max_density) - 50.0f
+                    if percent > 5f then ctx.WriteLine(sprintf "%iBPM %s %s (%.0f%% anchor): %.2f%%" bpm name category density_ratio percent)
 
         let export_osz() =
             match Gameplay.Chart.current with
