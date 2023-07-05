@@ -4,15 +4,12 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
 open Interlude.Options
 open Interlude.Utils
-open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
-open Interlude.Features.Gameplay
 open Prelude.Data.Charts.Library
 
 // todo: remove or repurpose this

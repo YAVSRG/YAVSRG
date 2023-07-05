@@ -48,6 +48,16 @@ type ChartInfo() as this =
             Align = Alignment.RIGHT,
             Position = { Left = 0.66f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 100.0f })
 
+        |+ 
+            { new StaticWidget(NodeType.None, Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 100.0f }) with
+                override this.Update(elapsedTime, moved) = 
+                    base.Update(elapsedTime, moved)
+                    if Mouse.hover this.Bounds then
+                        Notifications.tooltip_available <- true
+                        if (!|"tooltip").Tapped() then Notifications.tooltip ((!|"tooltip"), this, Patterns.display())
+                override this.Draw() = ()
+            }
+
         |+ Text(
             (fun () -> notecounts),
             Align = Alignment.RIGHT,

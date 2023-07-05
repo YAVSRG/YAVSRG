@@ -8,7 +8,6 @@ open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
-open Prelude.Data.Charts.Tables
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI

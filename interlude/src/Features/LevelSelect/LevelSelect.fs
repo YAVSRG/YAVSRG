@@ -61,6 +61,7 @@ type LevelSelectScreen() =
         |* infoPanel
 
         Chart.onChange.Add infoPanel.Refresh
+        Chart.onChange.Add Patterns.update_report
         Comments.init this
 
         LevelSelect.on_refresh_all.Add refresh
