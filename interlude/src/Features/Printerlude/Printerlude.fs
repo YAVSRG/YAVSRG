@@ -42,9 +42,14 @@ module Printerlude =
                     |> Patterns.pattern_locations
                     |> Patterns.pattern_breakdown
 
-                for (p, bpm) in data.Keys |> Seq.sortByDescending(fun k -> data.[k].TotalTime) do
+                let importance (p, bpm) =
+                    match p with
+                    | Stream s -> float32 bpm * 0.5f
+                    | Jack s -> float32 bpm
+
+                for (p, bpm) in data.Keys |> Seq.sortByDescending(fun k -> data.[k].TotalTime * importance k) do
                     let d = data.[(p, bpm)]
-                    let percent = d.TotalTime / duration * 100.0f
+                    let percent = d.TotalTime * 100.0f / duration
 
                     let category =
                         if d.Marathons.Count > 0 then "Stamina"
