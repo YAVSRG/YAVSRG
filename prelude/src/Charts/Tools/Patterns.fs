@@ -177,7 +177,7 @@ module Analysis =
         } |> List.ofSeq
 
 type PatternId = Stream of string | Jack of string
-type Pattern = RowInfo list -> bool
+type Pattern = RowInfo list -> int
 
 module Patterns =
 
@@ -189,34 +189,34 @@ module Patterns =
                 :: { Jacks = 0 }
                 :: { Jacks = 0 }
                 :: { Jacks = 0 }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 4
+            | _ -> 0
 
         let ALTERNATION : Pattern =
             function 
             |      { Jacks = 0; Direction = Direction.Right }
                 :: { Jacks = 0; Direction = Direction.Left }
-                :: _ -> true
+                :: _ -> 2
             |      { Jacks = 0; Direction = Direction.Left }
                 :: { Jacks = 0; Direction = Direction.Right }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 2
+            | _ -> 0
 
-        let JACKS : Pattern = function { Jacks = x } :: _ when x > 0 -> true | _ -> false
+        let JACKS : Pattern = function { Jacks = x } :: _ when x > 0 -> 1 | _ -> 0
 
         let CHORDJACKS : Pattern = 
             function
             |   { Notes = a }
                 :: { Notes = b; Jacks = j } 
-                :: _ when a > 1 && b > 1 && j >= 1 && (b < a || j < b) -> true
-            | _ -> false
+                :: _ when a > 1 && b > 1 && j >= 1 && (b < a || j < b) -> 2
+            | _ -> 0
 
         let GLUTS : Pattern =
             function
             |   { Notes = a }
                 :: { Notes = b; Jacks = 1 } 
-                :: _ when a > 1 && b > 1 -> true
-            | _ -> false
+                :: _ when a > 1 && b > 1 -> 2
+            | _ -> 0
 
     module ``4K`` =
 
@@ -224,15 +224,15 @@ module Patterns =
             function
             |      { Notes = 3; Jacks = 0 }
                 :: { Jacks = 0 }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 2
+            | _ -> 0
 
         let JUMPSTREAM : Pattern =
             function
             |      { Notes = 2; Jacks = 0 }
                 :: { Jacks = 0 }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 2
+            | _ -> 0
             
         let DENSE_JUMPSTREAM : Pattern =
             function
@@ -240,8 +240,8 @@ module Patterns =
                 :: { Notes = 1; Jacks = 0 }
                 :: { Notes = 2; Jacks = 0 }
                 :: { Notes = 1; Jacks = 0 }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 4
+            | _ -> 0
 
         let DOUBLE_JUMPSTREAM : Pattern =
             function
@@ -249,8 +249,8 @@ module Patterns =
                 :: { Notes = 2; Jacks = 0 }
                 :: { Notes = 2; Jacks = 0 }
                 :: { Notes = 1; Jacks = 0 }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 4
+            | _ -> 0
 
         let TRIPLE_JUMPSTREAM : Pattern =
             function
@@ -259,8 +259,8 @@ module Patterns =
                 :: { Notes = 2; Jacks = 0 }
                 :: { Notes = 2; Jacks = 0 }
                 :: { Notes = 1; Jacks = 0 }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 4
+            | _ -> 0
         
         let JUMPTRILL : Pattern =
             function
@@ -268,42 +268,42 @@ module Patterns =
                 :: { Notes = 2; Roll = true }
                 :: { Notes = 2; Roll = true }
                 :: { Notes = 2; Roll = true }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 4
+            | _ -> 0
 
         let SPLITTRILL : Pattern =
             function
             |      { Notes = 2 }
                 :: { Notes = 2; Jacks = 0; Roll = false }
                 :: { Notes = 2; Jacks = 0; Roll = false }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 3
+            | _ -> 0
 
         let ROLL : Pattern =
             function
             |      { Notes = 1; Direction = Direction.Left }
                 :: { Notes = 1; Direction = Direction.Left }
                 :: { Notes = 1; Direction = Direction.Left }
-                :: _ -> true
+                :: _ -> 3
             |      { Notes = 1; Direction = Direction.Right }
                 :: { Notes = 1; Direction = Direction.Right }
                 :: { Notes = 1; Direction = Direction.Right }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 3
+            | _ -> 0
 
         let JUMPJACKS : Pattern =
             function
             |      { Notes = 2 }
                 :: { Notes = 2; Jacks = 2 }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 2
+            | _ -> 0
 
         let JUMPGLUTS : Pattern =
             function
             |      { Notes = 2 }
                 :: { Notes = 2; Jacks = 1 }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 2
+            | _ -> 0
 
     module ``7K`` = 
 
@@ -311,37 +311,37 @@ module Patterns =
             function
             |      { Notes = 2 }
                 :: { Notes = 2; Jacks = 0; Direction = Direction.Left; Roll = false }
-                :: _ -> true
+                :: _ -> 2
             |      { Notes = 2 }
                 :: { Notes = 2; Jacks = 0; Direction = Direction.Right; Roll = false }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 2
+            | _ -> 0
             
         let DOUBLE_STREAMS : Pattern =
             function
             |      { Notes = 2 }
                 :: { Notes = 2; Jacks = 0; Roll = false }
-                :: _ -> true
-            | _ -> false
+                :: _ -> 2
+            | _ -> 0
 
         let CHORDSTREAM : Pattern =
             function
             |      { Notes = x }
                 :: { Notes = y; Jacks = 0 }
-                :: _ when x > 1 && y > 1 -> true
-            | _ -> false
+                :: _ when x > 1 && y > 1 -> 2
+            | _ -> 0
 
         let CHORD_ROLL : Pattern =
             function
             |      { Notes = x }
                 :: { Notes = y; Direction = Direction.Left; Roll = true }
                 :: { Notes = z; Direction = Direction.Left; Roll = true }
-                :: _ when x > 1 && y > 1 && z > 1 -> true
+                :: _ when x > 1 && y > 1 && z > 1 -> 3
             |      { Notes = x }
                 :: { Notes = y; Direction = Direction.Right; Roll = true }
                 :: { Notes = z; Direction = Direction.Right; Roll = true }
-                :: _ when x > 1 && y > 1 && z > 1 -> true
-            | _ -> false
+                :: _ when x > 1 && y > 1 && z > 1 -> 3
+            | _ -> 0
 
     type PatternToken = { Time: ScaledTime; MsPerBeat: float32<ms/beat>; Density: float32 }
 
@@ -350,7 +350,10 @@ module Patterns =
         seq {
             while not data.IsEmpty do
                 for pattern_name in patterns.Keys do
-                    if patterns.[pattern_name] data then yield (pattern_name, { Time = data.Head.Time; MsPerBeat = data.Head.MsPerBeat; Density = data.Head.Density })
+                    match patterns.[pattern_name] data with
+                    | 0 -> ()
+                    | 1 -> yield (pattern_name, { Time = data.Head.Time; MsPerBeat = data.Head.MsPerBeat; Density = data.Head.Density })
+                    | n -> yield (pattern_name, { Time = data.Head.Time; MsPerBeat = data.Tail.Head.MsPerBeat; Density = List.take n data |> List.averageBy (fun d -> d.Density) })
                 data <- List.tail data
         }
 
