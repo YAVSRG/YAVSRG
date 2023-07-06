@@ -221,6 +221,7 @@ type EditHitMeterPage() as this =
     let show_non_judgements = Setting.simple data.ShowNonJudgements
     let thickness = Setting.simple data.Thickness |> Setting.bound 1.0f 25.0f
     let release_thickness = Setting.simple data.ReleasesExtraHeight |> Setting.bound 0.0f 20.0f
+    let half_scale_releases = Setting.simple data.HalfScaleReleases
     let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
 
     let preview = 
@@ -245,19 +246,24 @@ type EditHitMeterPage() as this =
                 .Pos(620.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.shownonjudgements"))
             |+ PageSetting(
+                "gameplay.hud.hitmeter.halfscalereleases",
+                Selector<_>.FromBool half_scale_releases )
+                .Pos(690.0f)
+                .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.halfscalereleases"))
+            |+ PageSetting(
                 "gameplay.hud.hitmeter.thickness",
                 Slider(thickness, Step = 1f) )
-                .Pos(690.0f)
+                .Pos(760.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.thickness"))
             |+ PageSetting(
                 "gameplay.hud.hitmeter.releasesextraheight",
                 Slider(release_thickness, Step = 1f) )
-                .Pos(760.0f)
+                .Pos(830.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.releasesextraheight"))
             |+ PageSetting(
                 "gameplay.hud.hitmeter.animationtime",
                 Slider(animation_time, Step = 5f) )
-                .Pos(830.0f)
+                .Pos(900.0f)
                 .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.animationtime"))
             |+ preview
         )

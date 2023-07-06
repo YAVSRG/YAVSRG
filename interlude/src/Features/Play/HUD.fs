@@ -62,6 +62,7 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
     let mutable w = 0.0f
 
     let mutable last_seen_time = -Time.infinity
+    let ln_mult = if conf.HalfScaleReleases then 0.5f else 1.0f
 
     do
         state.SubscribeToHits(fun ev ->
@@ -69,7 +70,7 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
             | Hit e ->
                 hits.Add { Time = ev.Time; Position = e.Delta / state.Scoring.MissWindow * w * 0.5f; IsRelease = false; Judgement = e.Judgement }
             | Release e ->
-                hits.Add { Time = ev.Time; Position = e.Delta / state.Scoring.MissWindow * w * 0.5f; IsRelease = true; Judgement = e.Judgement }
+                hits.Add { Time = ev.Time; Position = e.Delta / state.Scoring.MissWindow * w * ln_mult; IsRelease = true; Judgement = e.Judgement }
         )
 
     override this.Update(elapsedTime, moved) =
