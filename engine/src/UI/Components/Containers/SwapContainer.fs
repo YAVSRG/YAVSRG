@@ -10,6 +10,8 @@ type SwapContainer() as this =
     let mutable current : Widget = Unchecked.defaultof<_>
     let mutable justSwapped = false
 
+    override this.Focusable = current.Focusable
+
     member this.Current
         with get() = current
         and set(v) =

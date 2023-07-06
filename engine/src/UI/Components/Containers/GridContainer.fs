@@ -1,5 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open System.Linq
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 
@@ -29,6 +30,7 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     override this.Select() = if children.Count > 0 then base.Select()
 
     member val Floating = false with get, set
+    member val WrapNavigation = true with get, set
 
     member this.Filter 
         with set value = 
@@ -47,6 +49,8 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         if children.Count = 0 then failwithf "Tried to focus this %O with no children" this
         if last_selected >= children.Count then last_selected <- 0
         children.[last_selected].Widget
+        
+    override this.Focusable = if children.Count = 0 then false else base.Focusable
 
     member this.PackContent() =
         let spacing_x, spacing_y = this.Spacing
@@ -137,6 +141,42 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         for c in children do
             c.Widget.Init this
 
+    member private this.CanUp() =
+        if this.WrapNavigation then true else
+
+        match this.WhoIsFocused with
+        | Some i ->
+            let c = children.[i]
+            children.Any(fun (item: GridItem<'T>) -> item.X = c.X && item.Y < c.Y && item.Widget.Focusable && item.Visible)
+        | None -> false
+    
+    member private this.CanDown() =
+        if this.WrapNavigation then true else
+    
+        match this.WhoIsFocused with
+        | Some i ->
+            let c = children.[i]
+            children.Any(fun (item: GridItem<'T>) -> item.X = c.X && item.Y > c.Y && item.Widget.Focusable && item.Visible)
+        | None -> false
+    
+    member private this.CanLeft() =
+        if this.WrapNavigation then true else
+    
+        match this.WhoIsFocused with
+        | Some i ->
+            let c = children.[i]
+            children.Any(fun (item: GridItem<'T>) -> item.X < c.X && item.Y = c.Y && item.Widget.Focusable && item.Visible)
+        | None -> false
+        
+    member private this.CanRight() =
+        if this.WrapNavigation then true else
+        
+        match this.WhoIsFocused with
+        | Some i ->
+            let c = children.[i]
+            children.Any(fun (item: GridItem<'T>) -> item.X > c.X && item.Y = c.Y && item.Widget.Focusable && item.Visible)
+        | None -> false
+
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved || refresh)
 
@@ -153,11 +193,11 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
         if this.Focused then
 
-            if (!|"up").Tapped() then this.Up()
-            elif (!|"down").Tapped() then this.Down()
-            elif (!|"left").Tapped() then this.Left()
-            elif (!|"right").Tapped() then this.Right()
-            elif (!|"select").Tapped() then
+            if this.CanUp() && (!|"up").Tapped() then this.Up()
+            if this.CanDown() && (!|"down").Tapped() then this.Down()
+            if this.CanLeft() && (!|"left").Tapped() then this.Left()
+            if this.CanRight() && (!|"right").Tapped() then this.Right()
+            if (!|"select").Tapped() then
                 match this.WhoIsFocused with
                 | Some i -> last_selected <- i; children.[i].Widget.Select()
                 | None -> ()

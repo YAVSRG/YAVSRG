@@ -32,6 +32,8 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
     member val Margin = 0.0f with get, set
     member this.ContentHeight with set(value) = contentHeight <- value; refresh <- true
     member this.PositionPercent = scroll_pos.Value / (contentHeight - this.Bounds.Height)
+    
+    override this.Focusable = child.Focusable
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)

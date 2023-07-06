@@ -16,7 +16,8 @@ type ISelection(nt: NodeType) =
     abstract member OnSelected : unit -> unit
     abstract member OnDeselected : unit -> unit
     
-    member this.Focusable = match nt with NodeType.None -> false | _ -> true
+    abstract member Focusable : bool
+    default this.Focusable = match nt with NodeType.None -> false | _ -> true
 
 and [<RequireQualifiedAccess>] NodeType =
     | None

@@ -36,6 +36,8 @@ module FlowContainer =
             if children.Count = 0 then failwithf "Tried to focus this %O with no children" this
             if last_selected >= children.Count then last_selected <- 0
             children.[last_selected].Widget
+            
+        override this.Focusable = if children.Count = 0 then false else base.Focusable
 
         member this.Previous() =
             match this.WhoIsFocused with
@@ -170,8 +172,8 @@ module FlowContainer =
 
         override this.Navigate() =
             if (!|"up").Tapped() then this.Previous()
-            elif (!|"down").Tapped() then this.Next()
-            elif (!|"select").Tapped() then this.SelectFocusedChild()
+            if (!|"down").Tapped() then this.Next()
+            if (!|"select").Tapped() then this.SelectFocusedChild()
 
     [<Sealed>]
     type LeftToRight<'T when 'T :> Widget>(item_width: float32) =
@@ -195,8 +197,8 @@ module FlowContainer =
                     
         override this.Navigate() =
             if (!|"left").Tapped() then this.Previous()
-            elif (!|"right").Tapped() then this.Next()
-            elif (!|"select").Tapped() then this.SelectFocusedChild()
+            if (!|"right").Tapped() then this.Next()
+            if (!|"select").Tapped() then this.SelectFocusedChild()
 
     [<Sealed>]
     type RightToLeft<'T when 'T :> Widget>(item_width: float32) =
@@ -221,5 +223,5 @@ module FlowContainer =
                     
         override this.Navigate() =
             if (!|"left").Tapped() then this.Next()
-            elif (!|"right").Tapped() then this.Previous()
-            elif (!|"select").Tapped() then this.SelectFocusedChild()
+            if (!|"right").Tapped() then this.Previous()
+            if (!|"select").Tapped() then this.SelectFocusedChild()
