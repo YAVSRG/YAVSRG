@@ -78,7 +78,7 @@ module Rulesets =
     type RulesetSearch() as this =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
     
-        let grid = GridContainer<RulesetCard>(80.0f, 2, Spacing = (15.0f, 15.0f))
+        let grid = GridContainer<RulesetCard>(80.0f, 2, Spacing = (15.0f, 15.0f), WrapNavigation = false)
         let scroll = ScrollContainer.Grid(grid, Margin = Style.padding, Position = Position.TrimTop(70.0f))
         let mutable failed = false
     

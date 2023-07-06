@@ -245,6 +245,8 @@ module Beatmaps =
                 (fun () -> if statuses.Contains status then color.O3 else color.O1),
                 Position = position
             )
+
+        override this.Focusable = items.Focusable
     
         override this.Init(parent) =
             begin_search filter
