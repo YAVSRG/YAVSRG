@@ -434,18 +434,6 @@ module PrefabRulesets =
 
     module SC =
 
-        // not used at the moment
-        let sc_curve (judge: int) (isRelease: bool) (delta: Time) =
-            let delta = Time.abs delta
-
-            // 1.0 = 100%
-            if delta >= 180.0f<ms> then -1.0
-            else
-                let delta = if isRelease then delta * 0.5f else delta
-                let delta = float delta
-                let scale = 6.0 / (10.0 - float judge)
-                Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056))
-
         let create (judge: int) =
             {
                 Name = sprintf "SC (J%i)" judge

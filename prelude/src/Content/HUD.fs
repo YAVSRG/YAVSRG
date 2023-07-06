@@ -58,6 +58,7 @@ module HUD =
             ShowGuide: bool
             ShowNonJudgements: bool
             ReleasesExtraHeight: float32
+            HalfScaleReleases: bool
         }
         static member Default = 
             {
@@ -79,6 +80,7 @@ module HUD =
                 ShowGuide = true
                 ShowNonJudgements = true
                 ReleasesExtraHeight = 5.0f
+                HalfScaleReleases = true
             }
 
     [<Json.AutoCodec(false)>]

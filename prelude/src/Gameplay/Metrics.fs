@@ -285,7 +285,7 @@ type IScoreMetric
             i <- i + 1
 
         if earliest_note >= 0 then
-            let struct (t, deltas, status) = hitData.[earliest_note]
+            let struct (_, deltas, status) = hitData.[earliest_note]
             // If user's hit is closer to a note hit extremely early than any other note, swallow it
             if Time.abs cbrush_absorb_delta >= Time.abs earliest_delta then
                 let isHoldHead = status.[k] <> HitStatus.HIT_REQUIRED
@@ -323,7 +323,7 @@ type IScoreMetric
                 i <- i + 1
 
             if found >= 0 then
-                let struct (t, deltas, status) = hitData.[found]
+                let struct (_, deltas, status) = hitData.[found]
                 status.[k] <- HitStatus.RELEASE_ACCEPTED
                 deltas.[k] <- delta / rate
                 this._HandleEvent { Time = relativeTime; Column = k; Guts = Release_ (deltas.[k], false, false, fst internalHoldStates.[k] = Dropped) }
