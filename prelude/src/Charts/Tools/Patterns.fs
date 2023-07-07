@@ -207,8 +207,8 @@ module Patterns =
         let CHORDJACKS : Pattern = 
             function
             |   { Notes = a }
-                :: { Notes = b; Jacks = j } 
-                :: _ when a > 1 && b > 1 && j >= 1 && (b < a || j < b) -> 2
+                :: { Notes = b; Jacks = j }
+                :: _ when a > 2 && b > 1 && j >= 1 && (b < a || j < b) -> 2
             | _ -> 0
 
         let GLUTS : Pattern =
