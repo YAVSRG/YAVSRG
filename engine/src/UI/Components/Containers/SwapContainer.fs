@@ -1,7 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open Percyqaz.Common
-open Percyqaz.Flux.Input
 
 /// Container whose content can be swapped for other widgets
 type SwapContainer() as this =
