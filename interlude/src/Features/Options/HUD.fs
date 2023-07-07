@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Gameplay
+﻿namespace Interlude.Features.OptionsMenu.HUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -12,7 +12,7 @@ open Interlude.UI
 open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.UI.Components
-open Interlude.Features.OptionsMenu.Themes
+open Interlude.Features.OptionsMenu.Gameplay
 
 [<AutoOpen>]
 module private Helpers =
@@ -73,20 +73,20 @@ module private Helpers =
     let positionEditor (setting: Setting<WidgetPosition>) (default_pos: WidgetPosition) =
         column()
         |+ PageSetting(
-            "gameplay.hud.generic.enable",
+            "hud.generic.enable",
             Selector<_>.FromBool(
                 Setting.make (fun v -> setting.Set { setting.Value with Enabled = v } ) (fun () -> setting.Value.Enabled)
             ) ).Pos(100.0f)
         |+ PageSetting(
-            "gameplay.hud.generic.float",
+            "hud.generic.float",
             Selector<_>.FromBool(
                 Setting.make (fun v -> setting.Set { setting.Value with Float = v } ) (fun () -> setting.Value.Float)
             ) )
             .Pos(170.0f)
-            .Tooltip(Tooltip.Info("gameplay.hud.generic.float"))
+            .Tooltip(Tooltip.Info("hud.generic.float"))
 
         |+ PageSetting(
-            "gameplay.hud.generic.move",
+            "hud.generic.move",
             { new PositionEditor(Icons.move) with
                 override this.Up() =
                     { setting.Value with 
@@ -110,10 +110,10 @@ module private Helpers =
                     } |> setting.Set
             } )
             .Pos(240.0f)
-            .Tooltip(Tooltip.Info("gameplay.hud.generic.move"))
+            .Tooltip(Tooltip.Info("hud.generic.move"))
         
         |+ PageSetting(
-            "gameplay.hud.generic.grow",
+            "hud.generic.grow",
             { new PositionEditor(Icons.grow) with
                 override this.Up() =
                     { setting.Value with 
@@ -133,10 +133,10 @@ module private Helpers =
                     } |> setting.Set
             } )
             .Pos(310.0f)
-            .Tooltip(Tooltip.Info("gameplay.hud.generic.grow"))
+            .Tooltip(Tooltip.Info("hud.generic.grow"))
 
         |+ PageSetting(
-            "gameplay.hud.generic.shrink",
+            "hud.generic.shrink",
             { new PositionEditor(Icons.shrink) with
                 override this.Up() =
                     { setting.Value with 
@@ -156,14 +156,14 @@ module private Helpers =
                     } |> setting.Set
             } )
             .Pos(380.0f)
-            .Tooltip(Tooltip.Info("gameplay.hud.generic.shrink"))
+            .Tooltip(Tooltip.Info("hud.generic.shrink"))
         
         |+ PageButton(
-            "gameplay.hud.generic.reset",
+            "hud.generic.reset",
             fun () -> setting.Value <- { default_pos with Enabled = setting.Value.Enabled }
            )
            .Pos(450.0f)
-           .Tooltip(Tooltip.Info("gameplay.hud.generic.reset"))
+           .Tooltip(Tooltip.Info("hud.generic.reset"))
 
 type EditAccuracyMeterPage() as this =
     inherit Page()
@@ -187,19 +187,19 @@ type EditAccuracyMeterPage() as this =
         this.Content(
             positionEditor pos default_pos
             |+ PageSetting(
-                "gameplay.hud.accuracymeter.gradecolors",
+                "hud.accuracymeter.gradecolors",
                 Selector<_>.FromBool grade_colors )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.accuracymeter.gradecolors"))
+                .Tooltip(Tooltip.Info("hud.accuracymeter.gradecolors"))
             |+ PageSetting(
-                "gameplay.hud.accuracymeter.showname",
+                "hud.accuracymeter.showname",
                 Selector<_>.FromBool show_name )
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.accuracymeter.showname"))
+                .Tooltip(Tooltip.Info("hud.accuracymeter.showname"))
             |+ preview
         )
 
-    override this.Title = L"gameplay.hud.accuracymeter.name"
+    override this.Title = L"hud.accuracymeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.AccuracyMeter>
@@ -236,39 +236,39 @@ type EditHitMeterPage() as this =
         this.Content(
             positionEditor pos default_pos
             |+ PageSetting(
-                "gameplay.hud.hitmeter.showguide",
+                "hud.hitmeter.showguide",
                 Selector<_>.FromBool show_guide )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.showguide"))
+                .Tooltip(Tooltip.Info("hud.hitmeter.showguide"))
             |+ PageSetting(
-                "gameplay.hud.hitmeter.shownonjudgements",
+                "hud.hitmeter.shownonjudgements",
                 Selector<_>.FromBool show_non_judgements )
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.shownonjudgements"))
+                .Tooltip(Tooltip.Info("hud.hitmeter.shownonjudgements"))
             |+ PageSetting(
-                "gameplay.hud.hitmeter.halfscalereleases",
+                "hud.hitmeter.halfscalereleases",
                 Selector<_>.FromBool half_scale_releases )
                 .Pos(690.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.halfscalereleases"))
+                .Tooltip(Tooltip.Info("hud.hitmeter.halfscalereleases"))
             |+ PageSetting(
-                "gameplay.hud.hitmeter.thickness",
+                "hud.hitmeter.thickness",
                 Slider(thickness, Step = 1f) )
                 .Pos(760.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.thickness"))
+                .Tooltip(Tooltip.Info("hud.hitmeter.thickness"))
             |+ PageSetting(
-                "gameplay.hud.hitmeter.releasesextraheight",
+                "hud.hitmeter.releasesextraheight",
                 Slider(release_thickness, Step = 1f) )
                 .Pos(830.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.releasesextraheight"))
+                .Tooltip(Tooltip.Info("hud.hitmeter.releasesextraheight"))
             |+ PageSetting(
-                "gameplay.hud.hitmeter.animationtime",
+                "hud.hitmeter.animationtime",
                 Slider(animation_time, Step = 5f) )
                 .Pos(900.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.hitmeter.animationtime"))
+                .Tooltip(Tooltip.Info("hud.hitmeter.animationtime"))
             |+ preview
         )
 
-    override this.Title = L"gameplay.hud.hitmeter.name"
+    override this.Title = L"hud.hitmeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.HitMeter>
@@ -309,29 +309,29 @@ type EditLifeMeterPage() as this =
         this.Content(
             positionEditor pos default_pos
             |+ PageSetting(
-                "gameplay.hud.lifemeter.horizontal",
+                "hud.lifemeter.horizontal",
                 Selector<_>.FromBool horizontal )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.lifemeter.horizontal"))
+                .Tooltip(Tooltip.Info("hud.lifemeter.horizontal"))
             |+ PageSetting(
-                "gameplay.hud.lifemeter.fullcolor",
+                "hud.lifemeter.fullcolor",
                 ColorPicker(full_color, false) )
                 .Pos(620.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("gameplay.hud.lifemeter.fullcolor"))
+                .Tooltip(Tooltip.Info("hud.lifemeter.fullcolor"))
             |+ PageSetting(
-                "gameplay.hud.lifemeter.emptycolor",
+                "hud.lifemeter.emptycolor",
                 ColorPicker(empty_color, false) )
                 .Pos(725.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("gameplay.hud.lifemeter.emptycolor"))
+                .Tooltip(Tooltip.Info("hud.lifemeter.emptycolor"))
             |+ PageSetting(
-                "gameplay.hud.lifemeter.tipcolor",
+                "hud.lifemeter.tipcolor",
                 ColorPicker(tip_color, true) )
                 .Pos(830.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("gameplay.hud.lifemeter.tipcolor"))
+                .Tooltip(Tooltip.Info("hud.lifemeter.tipcolor"))
             |+ preview
         )
 
-    override this.Title = L"gameplay.hud.lifemeter.name"
+    override this.Title = L"hud.lifemeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.LifeMeter>
@@ -365,24 +365,24 @@ type EditComboMeterPage() as this =
         this.Content(
             positionEditor pos default_pos
             |+ PageSetting(
-                "gameplay.hud.combo.lampcolors",
+                "hud.combo.lampcolors",
                 Selector<_>.FromBool lamp_colors )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.combo.lampcolors"))
+                .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
             |+ PageSetting(
-                "gameplay.hud.combo.pop",
+                "hud.combo.pop",
                 Slider(pop_amount, Step = 1f) )
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.combo.pop"))
+                .Tooltip(Tooltip.Info("hud.combo.pop"))
             |+ PageSetting(
-                "gameplay.hud.combo.growth",
+                "hud.combo.growth",
                 Slider(growth_amount) )
                 .Pos(690.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.combo.growth"))
+                .Tooltip(Tooltip.Info("hud.combo.growth"))
             |+ preview
         )
 
-    override this.Title = L"gameplay.hud.combo.name"
+    override this.Title = L"hud.combo.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.Combo>
@@ -414,7 +414,7 @@ type EditSkipButtonPage() as this =
             |+ preview
         )
 
-    override this.Title = L"gameplay.hud.skipbutton.name"
+    override this.Title = L"hud.skipbutton.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.SkipButton>
@@ -460,21 +460,21 @@ type EditProgressMeterPage() as this =
         this.Content(
             positionEditor pos default_pos
             |+ PageSetting(
-                "gameplay.hud.progressmeter.label",
+                "hud.progressmeter.label",
                 Selector<HUD.ProgressMeterLabel>.FromEnum(label))
                 .Pos(550.0f)
             |+ PageSetting(
-                "gameplay.hud.progressmeter.color",
+                "hud.progressmeter.color",
                 ColorPicker(color, true) )
                 .Pos(620.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
             |+ PageSetting(
-                "gameplay.hud.progressmeter.backgroundcolor",
+                "hud.progressmeter.backgroundcolor",
                 ColorPicker(background_color, true) )
                 .Pos(725.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
             |+ preview
         )
 
-    override this.Title = L"gameplay.hud.progressmeter.name"
+    override this.Title = L"hud.progressmeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.ProgressMeter>
@@ -505,7 +505,7 @@ type EditPacemakerPage() as this =
             |+ preview
         )
 
-    override this.Title = L"gameplay.hud.pacemaker.name"
+    override this.Title = L"hud.pacemaker.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.Pacemaker>
@@ -531,14 +531,14 @@ type EditJudgementCountsPage() as this =
         this.Content(
             positionEditor pos default_pos
             |+ PageSetting(
-                "gameplay.hud.judgementcounts.animationtime",
+                "hud.judgementcounts.animationtime",
                 Slider(animation_time |> Setting.f32, Step = 5f) )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.judgementcounts.animationtime"))
+                .Tooltip(Tooltip.Info("hud.judgementcounts.animationtime"))
             |+ preview
         )
             
-    override this.Title = L"gameplay.hud.judgementcounts.name"
+    override this.Title = L"hud.judgementcounts.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.JudgementCounts>
@@ -567,24 +567,24 @@ type EditJudgementMeterPage() as this =
         this.Content(
             positionEditor pos default_pos
             |+ PageSetting(
-                "gameplay.hud.judgementmeter.animationtime",
+                "hud.judgementmeter.animationtime",
                 Slider(animation_time, Step = 5f) )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter.animationtime"))
+                .Tooltip(Tooltip.Info("hud.judgementmeter.animationtime"))
             |+ PageSetting(
-                "gameplay.hud.judgementmeter.ignoreperfectjudgements",
+                "hud.judgementmeter.ignoreperfectjudgements",
                 Selector<_>.FromBool(ignore_perfect_judgements) )
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter.ignoreperfectjudgements"))
+                .Tooltip(Tooltip.Info("hud.judgementmeter.ignoreperfectjudgements"))
             |+ PageSetting(
-                "gameplay.hud.judgementmeter.prioritiselowerjudgements",
+                "hud.judgementmeter.prioritiselowerjudgements",
                 Selector<_>.FromBool(prioritise_lower_judgements) )
                 .Pos(690.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter.prioritiselowerjudgements"))
+                .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
             |+ preview
         )
 
-    override this.Title = L"gameplay.hud.judgementmeter.name"
+    override this.Title = L"hud.judgementmeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.JudgementMeter>
@@ -619,34 +619,34 @@ type EditEarlyLateMeterPage() as this =
         this.Content(
             positionEditor pos default_pos
             |+ PageSetting(
-                "gameplay.hud.earlylatemeter.animationtime",
+                "hud.earlylatemeter.animationtime",
                 Slider(animation_time, Step = 5f) )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.animationtime"))
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.animationtime"))
             |+ PageSetting(
-                "gameplay.hud.earlylatemeter.earlytext",
+                "hud.earlylatemeter.earlytext",
                 TextEntry(early_text, "none") )
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.earlytext"))
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext"))
             |+ PageSetting(
-                "gameplay.hud.earlylatemeter.earlycolor",
+                "hud.earlylatemeter.earlycolor",
                 ColorPicker(early_color, false) )
                 .Pos(690.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.earlycolor"))
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
             |+ PageSetting(
-                "gameplay.hud.earlylatemeter.latetext",
+                "hud.earlylatemeter.latetext",
                 TextEntry(late_text, "none") )
                 .Pos(795.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.latetext"))
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
             |+ PageSetting(
-                "gameplay.hud.earlylatemeter.latecolor",
+                "hud.earlylatemeter.latecolor",
                 ColorPicker(late_color, false) )
                 .Pos(865.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter.latecolor"))
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
             |+ preview
         )
 
-    override this.Title = L"gameplay.hud.earlylatemeter.name"
+    override this.Title = L"hud.earlylatemeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         HUDOptions.set<HUD.EarlyLateMeter>
@@ -665,37 +665,37 @@ type EditHUDPage() as this =
     do
         this.Content(
             column()
-            |+ PageButton("gameplay.hud.accuracymeter", fun () -> Menu.ShowPage EditAccuracyMeterPage)
+            |+ PageButton("hud.accuracymeter", fun () -> Menu.ShowPage EditAccuracyMeterPage)
                 .Pos(200.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.accuracymeter"))
-            |+ PageButton("gameplay.hud.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage)
+                .Tooltip(Tooltip.Info("hud.accuracymeter"))
+            |+ PageButton("hud.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage)
                 .Pos(270.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.hitmeter"))
-            |+ PageButton("gameplay.hud.lifemeter", fun () -> Menu.ShowPage EditLifeMeterPage)
+                .Tooltip(Tooltip.Info("hud.hitmeter"))
+            |+ PageButton("hud.lifemeter", fun () -> Menu.ShowPage EditLifeMeterPage)
                 .Pos(340.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.lifemeter"))
-            |+ PageButton("gameplay.hud.combo", fun () -> Menu.ShowPage EditComboMeterPage)
+                .Tooltip(Tooltip.Info("hud.lifemeter"))
+            |+ PageButton("hud.combo", fun () -> Menu.ShowPage EditComboMeterPage)
                 .Pos(410.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.combo"))
-            |+ PageButton("gameplay.hud.skipbutton", fun () -> Menu.ShowPage EditSkipButtonPage)
+                .Tooltip(Tooltip.Info("hud.combo"))
+            |+ PageButton("hud.skipbutton", fun () -> Menu.ShowPage EditSkipButtonPage)
                 .Pos(480.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.skipbutton"))
-            |+ PageButton("gameplay.hud.progressmeter", fun () -> Menu.ShowPage EditProgressMeterPage)
+                .Tooltip(Tooltip.Info("hud.skipbutton"))
+            |+ PageButton("hud.progressmeter", fun () -> Menu.ShowPage EditProgressMeterPage)
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.progressmeter"))
-            |+ PageButton("gameplay.hud.pacemaker", fun () -> Menu.ShowPage EditPacemakerPage)
+                .Tooltip(Tooltip.Info("hud.progressmeter"))
+            |+ PageButton("hud.pacemaker", fun () -> Menu.ShowPage EditPacemakerPage)
                 .Pos(620.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.pacemaker"))
-            |+ PageButton("gameplay.hud.judgementcounts", fun () -> Menu.ShowPage EditJudgementCountsPage)
+                .Tooltip(Tooltip.Info("hud.pacemaker"))
+            |+ PageButton("hud.judgementcounts", fun () -> Menu.ShowPage EditJudgementCountsPage)
                 .Pos(690.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.judgementcounts"))
-            |+ PageButton("gameplay.hud.judgementmeter", fun () -> Menu.ShowPage EditJudgementMeterPage)
+                .Tooltip(Tooltip.Info("hud.judgementcounts"))
+            |+ PageButton("hud.judgementmeter", fun () -> Menu.ShowPage EditJudgementMeterPage)
                 .Pos(760.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.judgementmeter"))
-            |+ PageButton("gameplay.hud.earlylatemeter", fun () -> Menu.ShowPage EditEarlyLateMeterPage)
+                .Tooltip(Tooltip.Info("hud.judgementmeter"))
+            |+ PageButton("hud.earlylatemeter", fun () -> Menu.ShowPage EditEarlyLateMeterPage)
                 .Pos(830.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud.earlylatemeter"))
+                .Tooltip(Tooltip.Info("hud.earlylatemeter"))
         )
 
-    override this.Title = L"gameplay.hud.name"
+    override this.Title = L"hud.name"
     override this.OnClose() = ()

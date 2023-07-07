@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Gameplay
+﻿namespace Interlude.Features.OptionsMenu.Noteskins
 
 open Prelude.Charts.Tools.NoteColors
 open Percyqaz.Common
@@ -13,6 +13,7 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
+open Interlude.Features.OptionsMenu.Gameplay
 
 type NoteColorPicker(color: Setting<byte>) as this =
     inherit StaticContainer(NodeType.Leaf)
@@ -73,45 +74,45 @@ type EditNoteskinPage() as this =
     do
         this.Content(
             column()
-            |+ PageSetting("gameplay.noteskins.edit.noteskinname", TextEntry(name, "none"))
+            |+ PageSetting("noteskins.edit.noteskinname", TextEntry(name, "none"))
                 .Pos(100.0f)
-            |+ PageSetting("gameplay.noteskins.edit.holdnotetrim", Slider(holdNoteTrim))
+            |+ PageSetting("noteskins.edit.holdnotetrim", Slider(holdNoteTrim))
                 .Pos(170.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins.edit.holdnotetrim"))
-            |+ PageSetting("gameplay.noteskins.edit.enablecolumnlight", Selector<_>.FromBool enableColumnLight)
+                .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
+            |+ PageSetting("noteskins.edit.enablecolumnlight", Selector<_>.FromBool enableColumnLight)
                 .Pos(240.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins.edit.enablecolumnlight"))
-            |+ PageSetting("gameplay.noteskins.edit.columnwidth", Slider(columnWidth, Step = 1f))
+                .Tooltip(Tooltip.Info("noteskins.edit.enablecolumnlight"))
+            |+ PageSetting("noteskins.edit.columnwidth", Slider(columnWidth, Step = 1f))
                 .Pos(310.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins.edit.columnwidth"))
-            |+ PageSetting("gameplay.noteskins.edit.columnspacing",Slider(columnSpacing, Step = 1f))
+                .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
+            |+ PageSetting("noteskins.edit.columnspacing",Slider(columnSpacing, Step = 1f))
                 .Pos(390.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins.edit.columnspacing"))
+                .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
             |+ PageSetting("generic.keymode",
                     Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors)) )
                 .Pos(490.0f)
-            |+ PageSetting("gameplay.noteskins.edit.globalcolors",
+            |+ PageSetting("noteskins.edit.globalcolors",
                     Selector<_>.FromBool(
                         Setting.make
                             (fun v -> noteColors <- { noteColors with UseGlobalColors = v })
                             (fun () -> noteColors.UseGlobalColors)
                         |> Setting.trigger (ignore >> refreshColors)) )
                 .Pos(560.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins.edit.globalcolors"))
-            |+ PageSetting("gameplay.noteskins.edit.colorstyle",
+                .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
+            |+ PageSetting("noteskins.edit.colorstyle",
                     Selector.FromEnum(
                         Setting.make
                             (fun v -> noteColors <- { noteColors with Style = v })
                             (fun () -> noteColors.Style)
                         |> Setting.trigger (ignore >> refreshColors)) )
                 .Pos(630.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins.edit.colorstyle"))
-            |+ PageSetting("gameplay.noteskins.edit.notecolors", colors)
+                .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
+            |+ PageSetting("noteskins.edit.notecolors", colors)
                 .Pos(700.0f, Viewport.vwidth - 200.0f, 120.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins.edit.notecolors"))
-            |+ PageButton.Once("gameplay.noteskins.edit.export", fun () -> if not (Noteskins.exportCurrent()) then Notifications.error(L"notification.export_noteskin_failure.title", L"notification.export_noteskin_failure.body"))
+                .Tooltip(Tooltip.Info("noteskins.edit.notecolors"))
+            |+ PageButton.Once("noteskins.edit.export", fun () -> if not (Noteskins.exportCurrent()) then Notifications.error(L"notification.export_noteskin_failure.title", L"notification.export_noteskin_failure.body"))
                 .Pos(820.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins.edit.export"))
+                .Tooltip(Tooltip.Info("noteskins.edit.export"))
         )
 
     override this.Title = data.Name
@@ -162,14 +163,14 @@ type NoteskinsPage() as this =
         match ns.Source with
         | Zip (_, Some file) ->
             ConfirmPage(
-                Localisation.localiseWith [ns.Config.Name] "gameplay.noteskins.confirm_extract_zip",
+                Localisation.localiseWith [ns.Config.Name] "noteskins.confirm_extract_zip",
                 (fun () -> 
                     if Noteskins.extractCurrent() then refresh()
                     else Logging.Error "Noteskin folder already exists"
                 )).Show()
         | Zip (_, None) ->
             ConfirmPage(
-                Localisation.localiseWith [ns.Config.Name] "gameplay.noteskins.confirm_extract_default", 
+                Localisation.localiseWith [ns.Config.Name] "noteskins.confirm_extract_default", 
                 (fun () -> 
                     if Noteskins.extractCurrent() then refresh()
                     else Logging.Error "Noteskin folder already exists"
@@ -180,7 +181,7 @@ type NoteskinsPage() as this =
         container.Clear()
         container
         |+ PageButton(
-            "gameplay.noteskins.install", 
+            "noteskins.install", 
             (fun () -> 
                 Menu.Exit()
                 Interlude.Features.Import.ImportScreen.switch_to_noteskins()
@@ -188,10 +189,10 @@ type NoteskinsPage() as this =
             ), 
             Enabled = (Screen.currentType <> Screen.Type.Play))
         |+ Dummy()
-        |+ PageButton("gameplay.noteskins.edit", tryEditNoteskin)
-            .Tooltip(Tooltip.Info("gameplay.noteskins.edit"))
-        |+ PageButton("gameplay.noteskins.open_folder", fun () -> openDirectory (getDataPath "Noteskins"))
-            .Tooltip(Tooltip.Info("gameplay.noteskins.open_folder"))
+        |+ PageButton("noteskins.edit", tryEditNoteskin)
+            .Tooltip(Tooltip.Info("noteskins.edit"))
+        |+ PageButton("noteskins.open_folder", fun () -> openDirectory (getDataPath "Noteskins"))
+            .Tooltip(Tooltip.Info("noteskins.open_folder"))
         |* Dummy()
 
         for id, name in Noteskins.list() do
@@ -203,6 +204,6 @@ type NoteskinsPage() as this =
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 150.0f)) )
         this |* preview
 
-    override this.Title = L"gameplay.noteskins.name"
+    override this.Title = L"noteskins.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = ()

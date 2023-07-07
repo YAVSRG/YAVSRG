@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Audio
 open Prelude.Common
 open Interlude.Content
 open Interlude.Options
@@ -12,7 +13,6 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Features
-open Interlude.Features.OptionsMenu.Themes
 
 type GameplayKeybinder(keymode: Setting<Keymode>) as this =
     inherit StaticContainer(NodeType.Leaf)
@@ -173,28 +173,30 @@ type GameplayPage() as this =
             |+ PageSetting("gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
                 .Pos(310.0f)
                 .Tooltip(Tooltip.Info("gameplay.backgrounddim"))
-            |+ PageButton("gameplay.noteskins", fun () -> Menu.ShowPage { new NoteskinsPage() with override this.OnClose() = base.OnClose(); preview.Refresh() })
+            |+ PageSetting("system.audiooffset",
+                    { new Slider(options.AudioOffset, Step = 1f)
+                        with override this.OnDeselected() = base.OnDeselected(); Song.changeGlobalOffset (options.AudioOffset.Value * 1.0f<ms>) } )
                 .Pos(380.0f)
-                .Tooltip(Tooltip.Info("gameplay.noteskins"))
+                .Tooltip(Tooltip.Info("system.audiooffset"))
+            |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
+                .Pos(450.0f)
+                .Tooltip(Tooltip.Info("system.visualoffset"))
 
             |+ PageSetting("generic.keymode", Selector<_>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged)))
-                .Pos(480.0f)
+                .Pos(550.0f)
             |+ PageSetting("gameplay.keybinds", binds)
-                .Pos(550.0f, Viewport.vwidth - 200.0f)
+                .Pos(620.0f, Viewport.vwidth - 200.0f)
                 .Tooltip(Tooltip.Info("gameplay.keybinds"))
 
             |+ PageButton("gameplay.lanecover", fun() -> Menu.ShowPage LanecoverPage)
-                .Pos(650.0f)
+                .Pos(720.0f)
                 .Tooltip(Tooltip.Info("gameplay.lanecover"))
             |+ PageButton("gameplay.pacemaker", fun () ->  Menu.ShowPage PacemakerPage)
-                .Pos(720.0f)
+                .Pos(790.0f)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(L"gameplay.pacemaker.hint"))
             |+ PageButton("gameplay.rulesets", fun () -> Menu.ShowPage Rulesets.FavouritesPage)
-                .Pos(790.0f)
-                .Tooltip(Tooltip.Info("gameplay.rulesets"))
-            |+ PageButton("gameplay.hud", fun () -> Menu.ShowPage EditHUDPage)
                 .Pos(860.0f)
-                .Tooltip(Tooltip.Info("gameplay.hud"))
+                .Tooltip(Tooltip.Info("gameplay.rulesets"))
             |+ preview
             |+ presetButtons 1 options.Preset1
             |+ presetButtons 2 options.Preset2

@@ -34,6 +34,10 @@ module OptionsMenuRoot =
     type OptionsPage() as this =
         inherit Page()
 
+        let button_size =
+            let _, h = Callout.measure (Callout.Normal.Title("Example"))
+            h + 40.0f
+
         let tooltip_hint = 
             Callout.Normal
                 .Icon(Icons.info)
@@ -41,38 +45,45 @@ module OptionsMenuRoot =
                 .Body(L"options.ingame_help.hint")
                 .Hotkey("tooltip")
 
-        let system =
-            TileButton(
-                Callout.Normal
-                    .Icon(Icons.system)
-                    .Title(L"system.name"),
-                fun () -> Menu.ShowPage System.SystemPage)
-
-        let gameplay =
-            TileButton(
-                Callout.Normal
-                    .Icon(Icons.gameplay)
-                    .Title(L"gameplay.name"),
-                fun () -> Menu.ShowPage Gameplay.GameplayPage)
-                
-        let debug =
-            TileButton(
-                Callout.Normal
-                    .Icon(Icons.debug)
-                    .Title(L"debug.name"),
-                fun () -> Menu.ShowPage Debug.DebugPage)
-
         do
+            let _, h = Callout.measure tooltip_hint
+
             this.Content(
-                GridContainer(system.Height, 3,
-                    Spacing = (50.0f, 0.0f),
-                    Position = Position.SliceTop(400.0f).SliceBottom(system.Height).Margin(200.0f, 0.0f))
-                |+ system
-                |+ gameplay
-                |+ debug
+                GridContainer(button_size, 3,
+                    Spacing = (50.0f, h + 120.0f),
+                    Position = 
+                        { 
+                            Left = 0.0f %+ 200.0f
+                            Right = 1.0f %- 200.0f
+                            Top = 0.5f %- (60.0f + h * 0.5f + button_size)
+                            Bottom = 0.5f %+ (60.0f + h * 0.5f + button_size) })
+                |+ TileButton(Callout.Normal
+                        .Icon(Icons.gameplay)
+                        .Title(L"gameplay.name"),
+                    fun () -> Gameplay.GameplayPage().Show())
+                |+ TileButton(Callout.Normal
+                        .Icon(Icons.themes)
+                        .Title(L"noteskins.name"),
+                    fun () -> Noteskins.NoteskinsPage().Show())
+                |+ TileButton(Callout.Normal
+                        .Icon(Icons.mods)
+                        .Title(L"hud.name"),
+                    fun () -> HUD.EditHUDPage().Show())
+                |+ TileButton(Callout.Normal
+                        .Icon(Icons.system)
+                        .Title(L"system.name"),
+                    fun () -> System.SystemPage().Show())
+                |+ TileButton(Callout.Normal
+                        .Icon(Icons.heart)
+                        .Title(L"advanced.name"),
+                    ignore)
+                |+ TileButton(Callout.Normal
+                        .Icon(Icons.debug)
+                        .Title(L"debug.name"),
+                    fun () -> Debug.DebugPage().Show())
             )
             this |* Callout.frame (tooltip_hint) 
-                ( fun (w, h) -> Position.SliceBottom(600.0f).SliceTop(h + 40.0f).Margin(200.0f, 0.0f) )
+                ( fun (w, h) -> { Left = 0.0f %+ 200.0f; Right = 1.0f %- 200.0f; Top = 0.5f %- (20.0f + h * 0.5f); Bottom = 0.5f %+ (20.0f + h * 0.5f) } )
 
         override this.Title = L"options.name"
         override this.OnClose() = LevelSelect.refresh_all()
