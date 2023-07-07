@@ -81,7 +81,7 @@ module User =
 
     //todo: this pulls all user data and will have to be scrapped for a pagination system when there are >100 users
     let all() =
-        ft.Search("idx:users", Query("*")).Documents
+        ft.Search("idx:users", Query("*").Limit(0, 100)).Documents
         |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
 
 module Migrations =
