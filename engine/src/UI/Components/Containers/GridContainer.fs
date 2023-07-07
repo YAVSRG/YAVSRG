@@ -28,6 +28,8 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             
     override this.Focus() = if children.Count > 0 then base.Focus()
     override this.Select() = if children.Count > 0 then base.Select()
+    
+    member this.Clear() = children.Clear()
 
     member val Floating = false with get, set
     member val WrapNavigation = true with get, set
