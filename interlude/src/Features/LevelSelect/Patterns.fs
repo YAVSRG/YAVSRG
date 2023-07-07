@@ -17,8 +17,8 @@ module Patterns =
 
         let importance (p, bpm) =
             match p with
-            | Stream s -> float32 bpm * 0.5f
-            | Jack s -> float32 bpm
+            | Stream s -> float32 (bpm * bpm) * 0.5f
+            | Jack s -> float32 (bpm * bpm)
 
         report <-
         seq {

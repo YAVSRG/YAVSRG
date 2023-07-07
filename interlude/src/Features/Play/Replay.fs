@@ -32,6 +32,10 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
         if options.Upscroll.Value then fun _ -> id 
         else fun bottom -> fun (r: Rect) -> { Left = r.Left; Top = bottom - r.Bottom; Right = r.Right; Bottom = bottom - r.Top }
 
+    override this.Init(parent) =
+        state.ScoringChanged.Publish.Add(fun _ -> seek <- 0)
+        base.Init parent
+
     override this.Draw() =
 
         if not enable.Value then () else
@@ -74,9 +78,50 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
 
 module ReplayScreen =
 
-    let replay_screen(mode: ReplayMode) =
+    let show_input_overlay = Setting.simple false
 
-        let show_input_overlay = Setting.simple false
+    type Controls() =
+        inherit StaticContainer(NodeType.None)
+
+        override this.Init(parent) =
+            this
+            |* IconButton("Toggle input overlay", Icons.preview, 50.0f, (fun () -> show_input_overlay.Set (not show_input_overlay.Value)),
+                Position = Position.SliceTop(50.0f).Margin(20.0f, 0.0f))
+            base.Init parent
+
+        override this.Draw() =
+            Draw.rect this.Bounds Colors.black.O2
+            base.Draw()
+
+    type ControlOverlay(is_auto, on_seek) =
+        inherit DynamicContainer(NodeType.None)
+
+        let mutable show = true
+        let mutable show_timeout = 3000.0
+
+        override this.Init(parent) =
+            this
+            |+ Text((Icons.watch + if is_auto then " Watching AUTOPLAY" else " Watching replay"),
+                Color = K Colors.text,
+                Align = Alignment.CENTER,
+                Position = Position.SliceTop(70.0f).Margin(30.0f, 10.0f).SliceLeft(440.0f))
+            |+ Timeline(Gameplay.Chart.current.Value, on_seek)
+            |* Controls(Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 60.0f))
+            base.Init parent
+
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            if Mouse.moved_recently() then
+                show <- true
+                this.Position <- Position.Default
+                show_timeout <- 1500.0
+            elif show then
+                show_timeout <- show_timeout - elapsedTime
+                if show_timeout < 0.0 then
+                    show <- false
+                    this.Position <- { Position.Default with Top = 0.0f %- 300.0f; Bottom = 1.0f %+ 100.0f }
+
+    let replay_screen(mode: ReplayMode) =
 
         let replay_data, is_auto, rate, chart =
             match mode with
@@ -95,7 +140,14 @@ module ReplayScreen =
 
         let firstNote = chart.Notes.[0].Time
         let ruleset = Rulesets.current
-        let scoring = createScoreMetric ruleset chart.Keys replay_data chart.Notes rate
+
+        let mutable replay_data = replay_data
+        let mutable scoring = createScoreMetric ruleset chart.Keys replay_data chart.Notes rate
+
+        let seek_backwards(screen: IPlayScreen) =
+            replay_data <- StoredReplayProvider(replay_data.GetFullReplay())
+            scoring <- createScoreMetric ruleset chart.Keys replay_data chart.Notes rate
+            screen.State.ChangeScoring scoring
 
         { new IPlayScreen(chart, PacemakerInfo.None, ruleset, scoring) with
             override this.AddWidgets() =
@@ -113,13 +165,8 @@ module ReplayScreen =
                     add_widget EarlyLateMeter
 
                 this
-                |+ Text((Icons.watch + if is_auto then " Watching AUTOPLAY" else " Watching replay"),
-                    Color = K Colors.text,
-                    Align = Alignment.LEFT,
-                    Position = Position.SliceTop(90.0f).Margin(20.0f, 20.0f))
                 |+ InputOverlay(chart.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, show_input_overlay)
-                |* IconButton("Toggle input overlay", Icons.preview, 50.0f, (fun () -> show_input_overlay.Set (not show_input_overlay.Value)),
-                    Position = Position.TrimTop(90.0f).SliceTop(90.0f).Margin(20.0f, 20.0f).SliceLeft(360.0f))
+                |* ControlOverlay(is_auto, fun t -> let now = Song.time() in Song.seek t; if t < now then seek_backwards this)
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
