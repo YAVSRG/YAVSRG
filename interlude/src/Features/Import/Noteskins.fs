@@ -94,11 +94,11 @@ module Noteskins =
     type NoteskinSearch() as this =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
     
-        let grid = GridContainer<NoteskinCard>(380.0f, 3, Spacing = (15.0f, 15.0f))
+        let grid = GridContainer<NoteskinCard>(380.0f, 3, Spacing = (15.0f, 15.0f), WrapNavigation = false)
         let scroll = ScrollContainer.Grid(grid, Margin = Style.padding, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
         let mutable failed = false
     
-        do
+        override this.Init(parent) =
             WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Interlude.Noteskins/main/index.json",
                 fun data ->
                 match data with
@@ -115,6 +115,9 @@ module Noteskins =
             |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> grid.Filter <- NoteskinCard.Filter f), Position = Position.SliceTop 60.0f ))
             |+ Text(L"imports.noteskins.hint", Position = Position.SliceBottom 55.0f)
             |* scroll
+            base.Init parent
+
+        override this.Focusable = grid.Focusable 
     
         member this.Items = grid
 

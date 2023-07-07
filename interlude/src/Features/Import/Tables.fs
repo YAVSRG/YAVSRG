@@ -169,6 +169,8 @@ module Tables =
             this
             |* scroll
             base.Init parent
+
+        override this.Focusable = flow.Focusable 
     
         member this.Items = flow
 

@@ -82,7 +82,7 @@ module Rulesets =
         let scroll = ScrollContainer.Grid(grid, Margin = Style.padding, Position = Position.TrimTop(70.0f))
         let mutable failed = false
     
-        do
+        override this.Init(parent) =
             WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/rulesets/rulesets.json",
                 fun data ->
                 match data with
@@ -95,6 +95,9 @@ module Rulesets =
             this
             |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> grid.Filter <- RulesetCard.Filter f), Position = Position.SliceTop 60.0f ))
             |* scroll
+            base.Init parent
+            
+        override this.Focusable = grid.Focusable 
     
         member this.Items = grid
 
