@@ -15,8 +15,7 @@ open Interlude.Features.Gameplay
 type private ModSelector(id, states: string[], current_state: unit -> int, action: unit -> unit) =
     inherit StaticContainer(NodeType.Button action)
 
-    let fill = Animation.Color(Colors.grey_2.O4a 0)
-    let selected = Animation.Fade(0.0f)
+    let TOP_HEIGHT = 70.0f
 
     override this.Init(parent) =
         this
@@ -24,73 +23,55 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
         |+ Text(
             ModState.getModName id,
             Color = (fun () -> (if this.Focused then Colors.yellow_accent else Colors.white), Colors.shadow_1),
-            Position = Position.SliceTop(50.0f),
-            Align = Alignment.CENTER)
+            Position = Position.SliceTop(TOP_HEIGHT).Margin(20.0f, 0.0f),
+            Align = Alignment.LEFT)
         |* Text(
             ModState.getModDesc id,
             Color = (fun () -> (if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2),
-            Position = Position.TrimTop(40.0f).TrimBottom(30.0f),
-            Align = Alignment.CENTER)
+            Position = Position.TrimTop(TOP_HEIGHT).Margin(20.0f, 0.0f),
+            Align = Alignment.LEFT)
         base.Init parent
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        let state = current_state()
-        if state >= 0 then 
-            selected.Target <- 1.0f
-            fill.Target <- Colors.pink_shadow.O2
-        else 
-            selected.Target <- 0.0f
-            if this.Focused then fill.Target <- Colors.yellow_accent.O1
-            else fill.Target <- Colors.grey_2.O4a 0
-        fill.Update elapsedTime
-        selected.Update elapsedTime
-
     override this.Draw() =
-        Draw.rect this.Bounds fill.Value
         let state = current_state()
-        let edgeColor = if this.Focused then Colors.yellow_accent.O2 elif state >= 0 then Colors.pink_accent.O2 else Colors.grey_2.O1
-        let bottom_edge = this.Bounds.Expand(0.0f, Style.padding).SliceBottom(Style.padding)
-        Draw.rect bottom_edge edgeColor
-        Draw.rect (Rect.Create(bottom_edge.CenterX - 100.0f - 150.0f * selected.Value, bottom_edge.Top, bottom_edge.CenterX + 100.0f + 150.0f * selected.Value, bottom_edge.Bottom)) edgeColor
+        Draw.rect (this.Bounds.SliceTop(TOP_HEIGHT)) (if state >= 0 then Colors.pink.O3 else Colors.shadow_2.O3)
+        Draw.rect (this.Bounds.TrimTop(TOP_HEIGHT)) (if state >= 0 then Colors.pink_shadow.O3 else Colors.black.O3)
 
-        if state >= 0 then Text.drawFillB(Style.baseFont, states.[state], this.Bounds.SliceBottom(40.0f), Colors.text, Alignment.CENTER)
+        if state >= 0 then Text.drawFillB(Style.baseFont, states.[state], this.Bounds.SliceTop(TOP_HEIGHT).Shrink(20.0f, 0.0f), Colors.text, Alignment.RIGHT)
         base.Draw()
 
 type private ModSelectPage(onClose) as this =
     inherit Page()
 
-    let flow = FlowContainer.Vertical<Widget>(100.0f, Spacing = 5f, Position = Position.TrimTop(100.0f))
+    let grid = GridContainer<Widget>(100.0f, 3, Spacing = (30f, 30f), Position = Position.Margin(100.0f, 200.0f), WrapNavigation = false)
 
     do 
-        flow
+        grid
         |* ModSelector("auto",
             [|Icons.check|],
             (fun _ -> if autoplay then 0 else -1),
             (fun _ -> autoplay <- not autoplay))
 
         for id in modList.Keys do
-            flow
+            grid
             |* ModSelector(id,
                 [|Icons.check|],
                 (fun _ -> if selectedMods.Value.ContainsKey id then selectedMods.Value.[id] else -1),
                 (fun _ -> Setting.app (ModState.cycleState id) selectedMods))
 
-        flow
-        |+ ModSelector("pacemaker",
+        grid
+        |* ModSelector("pacemaker",
             [|Icons.check|],
             (fun _ -> if enablePacemaker then 0 else -1),
             (fun _ -> enablePacemaker <- not enablePacemaker))
-        |* SwapContainer(Current =
-                PageButton("gameplay.pacemaker", fun () -> PacemakerPage().Show())
-                .Pos(15.0f)
-                .Tooltip(Tooltip.Info("gameplay.pacemaker"))
-            )
 
     do
         this.Content(
-            SwitchContainer.Row<Widget>()
-            |+ flow
+            SwitchContainer.Column<Widget>()
+            |+ grid
+            |+ PageButton("gameplay.pacemaker", fun () -> PacemakerPage().Show())
+                .Pos(500.0f)
+                .Tooltip(Tooltip.Info("gameplay.pacemaker"))
         )
 
     override this.Title = L"mods.name"
