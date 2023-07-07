@@ -142,7 +142,7 @@ type private NoteskinButton(id: string, name: string, on_switch: unit -> unit) =
                     elif this.IsCurrent then Colors.text_pink
                     else Colors.text
             ),
-            Align = Alignment.LEFT,
+            Align = Alignment.CENTER,
             Position = Position.SliceTop(PRETTYHEIGHT).Margin Style.padding)
         |* Clickable.Focus this
         base.Init parent
@@ -155,9 +155,9 @@ type private NoteskinButton(id: string, name: string, on_switch: unit -> unit) =
 type NoteskinsPage() as this =
     inherit Page()
 
-    let preview = NoteskinPreview 0.5f
-    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
-    
+    let preview = NoteskinPreview 0.35f
+    let grid = GridContainer<NoteskinButton>(PRETTYHEIGHT, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
+
     let rec tryEditNoteskin() =
         let ns = Noteskins.Current.instance
         match ns.Source with
@@ -178,30 +178,31 @@ type NoteskinsPage() as this =
         | Folder _ -> Menu.ShowPage { new EditNoteskinPage() with override this.OnClose() = base.OnClose(); refresh() }
 
     and refresh() =
-        container.Clear()
-        container
-        |+ PageButton(
-            "noteskins.install", 
-            (fun () -> 
-                Menu.Exit()
-                Interlude.Features.Import.ImportScreen.switch_to_noteskins()
-                Screen.change Screen.Type.Import Transitions.Flags.Default
-            ), 
-            Enabled = (Screen.currentType <> Screen.Type.Play))
-        |+ Dummy()
-        |+ PageButton("noteskins.edit", tryEditNoteskin)
-            .Tooltip(Tooltip.Info("noteskins.edit"))
-        |+ PageButton("noteskins.open_folder", fun () -> openDirectory (getDataPath "Noteskins"))
-            .Tooltip(Tooltip.Info("noteskins.open_folder"))
-        |* Dummy()
+        grid.Clear()
 
         for id, name in Noteskins.list() do
-            container |* NoteskinButton(id, name, preview.Refresh)
+            grid |* NoteskinButton(id, name, preview.Refresh)
 
     do
-
         refresh()
-        this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 150.0f)) )
+        this.Content(
+            SwitchContainer.Column<Widget>()
+            |+ PageButton("noteskins.get_more", 
+                (fun () -> 
+                    Menu.Exit()
+                    Interlude.Features.Import.ImportScreen.switch_to_noteskins()
+                    Screen.change Screen.Type.Import Transitions.Flags.Default
+                ))
+                .Pos(200.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit"))
+            |+ PageButton("noteskins.edit", tryEditNoteskin)
+                .Pos(300.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit"))
+            |+ PageButton("noteskins.open_folder", fun () -> openDirectory (getDataPath "Noteskins"))
+                .Pos(370.0f)
+                .Tooltip(Tooltip.Info("noteskins.open_folder"))
+            |+ ScrollContainer.Grid(grid, Position = { Left = 0.0f %+ 100.0f; Right = 0.6f %- 0.0f; Top = 0.0f %+ 470.0f; Bottom = 1.0f %- 150.0f })
+        )
         this |* preview
 
     override this.Title = L"noteskins.name"

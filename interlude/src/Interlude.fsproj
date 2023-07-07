@@ -107,6 +107,7 @@
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
     <Compile Include="Features\Options\Noteskins\Noteskins.fs" />
     <Compile Include="Features\Options\HUD.fs" />
+    <Compile Include="Features\Options\Advanced.fs" />
     <Compile Include="Features\Options\Debug.fs" />
     <Compile Include="Features\Options\OptionsMenu.fs" />
     <Compile Include="Features\MainMenu\LoadingScreen.fs" />

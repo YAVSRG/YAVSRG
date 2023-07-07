@@ -59,7 +59,7 @@ module Icons =
     let download = Feather.download
 
     let system = Feather.airplay
-    let themes = Feather.image
+    let noteskins = Feather.image
     let gameplay = Feather.sliders
     let binds = Feather.link
     let debug = Feather.terminal

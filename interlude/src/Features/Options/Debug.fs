@@ -59,12 +59,6 @@ module Debug =
                         ),
                         Enabled = (AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded) )
                     .Pos(270.0f)
-                |+ PageSetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole)
-                    .Pos(340.0f)
-                |+ PageSetting("debug.vanishingnotes", Selector<_>.FromBool options.VanishingNotes)
-                    .Pos(410.0f)
-                |+ PageSetting("debug.autocalibrateoffset", Selector<_>.FromBool options.AutoCalibrateOffset)
-                    .Pos(480.0f)
                 |+ themes
                     .Pos(580.0f)
                     .Tooltip(Tooltip.Info("themes.theme"))

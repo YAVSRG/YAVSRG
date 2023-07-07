@@ -49,7 +49,7 @@ module OptionsMenuRoot =
             let _, h = Callout.measure tooltip_hint
 
             this.Content(
-                GridContainer(button_size, 3,
+                GridContainer<Widget>(button_size, 3,
                     Spacing = (50.0f, h + 120.0f),
                     Position = 
                         { 
@@ -62,13 +62,15 @@ module OptionsMenuRoot =
                         .Title(L"gameplay.name"),
                     fun () -> Gameplay.GameplayPage().Show())
                 |+ TileButton(Callout.Normal
-                        .Icon(Icons.themes)
+                        .Icon(Icons.noteskins)
                         .Title(L"noteskins.name"),
                     fun () -> Noteskins.NoteskinsPage().Show())
+                    .Tooltip(Tooltip.Info("noteskins"))
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.mods)
                         .Title(L"hud.name"),
                     fun () -> HUD.EditHUDPage().Show())
+                    .Tooltip(Tooltip.Info("hud"))
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.system)
                         .Title(L"system.name"),
@@ -76,7 +78,7 @@ module OptionsMenuRoot =
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.heart)
                         .Title(L"advanced.name"),
-                    ignore)
+                    fun () -> Advanced.AdvancedPage().Show())
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.debug)
                         .Title(L"debug.name"),
