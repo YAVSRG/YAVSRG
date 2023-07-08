@@ -1,14 +1,13 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System.Drawing
-open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 
 type PerformanceMonitor() =
     inherit StaticWidget(NodeType.None)
 
+    // todo: just use Render.FPS
     let mutable frame_times = []
     let mutable fps = 0.0
 
