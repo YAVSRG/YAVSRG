@@ -1,19 +1,29 @@
-0.6.21
+0.6.22
 ====
 
-A few fixes and improvements
-
 # New features
-- The 'Graph Settings' button does something after all this time
-  You can now set a mode for a line graph to render, by default it shows your combo progression over time
-- Game now tracks some stats like number of notes hit and your total playtime
-  This will become a screen you can look at eventually, for now it is hidden away in stats.json (and controls the session time display on the score screen)
-  
-# Bug fixes
-- Options menu buttons will not select themselves just because the mouse is over them, only when you move the mouse yourself
-- Scrolling in containers with the arrow keys is no longer janky
-- Scrolling in containers with the mouse wheel is no longer janky
+- The options menu has been reorganised a little bit
+  Let me know what you think, hopefully you have to dig through fewer nested menus to find what you need now
+- 'Advanced' settings is the home of opt-in experimental features
+- Notification for taking a screenshot has a button to open the screenshots folder (requested by Wagg)
+- New setting for hit meter to turn off the scaling factor for LN releases (requested by Lifly)
+- You can change your ruleset while in multiplayer lobbies
 
-I've also been improving the secret pattern analyser and some of its reports will be showing in level select soon
-You can currently see the output by enabling Printerlude and typing `patterns` in the console
+- Pattern analyzer: It's still a work-in-progress, but I've simplified its output to be presentable to users
+  Press the tooltip hotkey (/ by default) while hovering over the difficulty rating to see this info
+  With your feedback, it will become even more useful
+  
+# Improvements
+- Mod select menu looks a little less poo
+- Noteskin select menu is different, let me know what you think (I have more changes planned but am under time constraints)
+- The 'chart suggestions' feature is now an experimental feature you opt into in the 'Advanced' options menu
+  When you press the random key, it now just gives you an actually random chart by default
+
+# Bug fixes
+- Arrow key navigation in some menus is the most glitchless it's ever been
+- Fixed several crashes in the import screen
+- Fixed some crashes in the score screen graph
+- Fixed a crash in multiplayer if you quit out instantly after the round begins
+- Fixed a bug where the host could select mods just for them in multiplayer
+
 
