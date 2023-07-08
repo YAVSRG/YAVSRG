@@ -57,9 +57,8 @@ type ScoreGraph(data: ScoreInfoProvider) =
         assert (events.Count > 0)
 
         // line graph
-        if options.ScoreGraphMode.Value <> ScoreGraphMode.None then
+        if options.ScoreGraphMode.Value <> ScoreGraphMode.None && data.Scoring.Snapshots.Count > 0 then
             let snapshots = data.Scoring.Snapshots
-            assert (snapshots.Count > 0)
             let hscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
             for i = 1 to snapshots.Count - 1 do
                 let l, r = 
@@ -105,7 +104,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
     override this.Draw() =
         if refresh then this.Redraw()
         Draw.sprite Viewport.bounds Color.White fbo.sprite
-        if this.Bounds.Contains(Mouse.pos()) then
+        if this.Bounds.Contains(Mouse.pos()) && data.Scoring.Snapshots.Count > 0 then
             let sss = data.Scoring.Snapshots
             let pc = (Mouse.x() - this.Bounds.Left) / this.Bounds.Width
             let snapshot_index = pc * float32 sss.Count |> int |> max 0 |> min (sss.Count - 1)
