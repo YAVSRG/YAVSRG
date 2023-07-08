@@ -185,10 +185,10 @@ module Patterns =
         
         let STREAMS : Pattern = 
             function
-            |      { Jacks = 0 }
-                :: { Jacks = 0 }
-                :: { Jacks = 0 }
-                :: { Jacks = 0 }
+            |      { Notes = 1; Jacks = 0 }
+                :: { Notes = 1; Jacks = 0 }
+                :: { Notes = 1; Jacks = 0 }
+                :: { Notes = 1; Jacks = 0 }
                 :: _ -> 4
             | _ -> 0
 
@@ -202,7 +202,13 @@ module Patterns =
                 :: _ -> 2
             | _ -> 0
 
-        let JACKS : Pattern = function { Jacks = x } :: _ when x > 0 -> 1 | _ -> 0
+        let JACKS : Pattern = 
+            function
+            |      { Notes = n }
+                :: { Jacks = x }
+                :: { Jacks = y }
+                :: _ when x > 1 && y > 1 && x <= n && y <= x -> 3
+            | _ -> 0
 
         let CHORDJACKS : Pattern = 
             function
@@ -224,14 +230,18 @@ module Patterns =
             function
             |      { Notes = 3; Jacks = 0 }
                 :: { Jacks = 0 }
-                :: _ -> 2
+                :: { Jacks = 0 }
+                :: { Jacks = 0 }
+                :: _ -> 4
             | _ -> 0
 
         let JUMPSTREAM : Pattern =
             function
             |      { Notes = 2; Jacks = 0 }
                 :: { Jacks = 0 }
-                :: _ -> 2
+                :: { Notes = a; Jacks = 0 }
+                :: { Notes = b; Jacks = 0 }
+                :: _ when a < 3 && b < 3 -> 4
             | _ -> 0
             
         let DENSE_JUMPSTREAM : Pattern =
@@ -324,11 +334,18 @@ module Patterns =
                 :: _ -> 2
             | _ -> 0
 
-        let CHORDSTREAM : Pattern =
+        let DENSE_CHORDSTREAM : Pattern =
             function
             |      { Notes = x }
                 :: { Notes = y; Jacks = 0 }
                 :: _ when x > 1 && y > 1 -> 2
+            | _ -> 0
+            
+        let LIGHT_CHORDSTREAM : Pattern =
+            function
+            |      { Notes = x }
+                :: { Notes = y; Jacks = 0 }
+                :: _ when x > 1 && y = 1 -> 2
             | _ -> 0
 
         let CHORD_ROLL : Pattern =
@@ -360,22 +377,19 @@ module Patterns =
     let analysis_4k = dict [
             Stream "Streams", Common.STREAMS
             Stream "Jumpstream", ``4K``.JUMPSTREAM
-            Stream "Dense Jumpstream", ``4K``.DENSE_JUMPSTREAM
-            Stream "Double Jumpstream", ``4K``.DOUBLE_JUMPSTREAM
-            Stream "Triple Jumpstream", ``4K``.TRIPLE_JUMPSTREAM
             Stream "Jumptrill", ``4K``.JUMPTRILL
             Stream "Split trill", ``4K``.SPLITTRILL
-            Stream "Roll", ``4K``.ROLL
+            Stream "Rolls", ``4K``.ROLL
             Stream "Handstream", ``4K``.HANDSTREAM
             Jack "Jacks", Common.JACKS
-            Jack "Jumpjacks", ``4K``.JUMPJACKS
             Jack "Chordjacks", Common.CHORDJACKS
-            Jack "Gluts", Common.GLUTS
             Jack "Jumpgluts", ``4K``.JUMPGLUTS
         ]
 
     let analysis_generic = dict [
             Stream "Streams", Common.STREAMS
+            Stream "Light chordstream", ``7K``.LIGHT_CHORDSTREAM
+            Stream "Dense chordstream", ``7K``.DENSE_CHORDSTREAM
             Jack "Jacks", Common.JACKS
             Jack "Chordjacks", Common.CHORDJACKS
             Jack "Gluts", Common.GLUTS
@@ -383,35 +397,14 @@ module Patterns =
 
     let analysis_7k = dict [
             Stream "Streams", Common.STREAMS
-            Stream "Chordstream", ``7K``.CHORDSTREAM
+            Stream "Light chordstream", ``7K``.LIGHT_CHORDSTREAM
+            Stream "Dense chordstream", ``7K``.DENSE_CHORDSTREAM
             Stream "Double streams", ``7K``.DOUBLE_STREAMS
             Stream "Double stairs", ``7K``.DOUBLE_STAIRS
             Stream "Chord rolls", ``7K``.CHORD_ROLL
             Jack "Jacks", Common.JACKS
             Jack "Chordjacks", Common.CHORDJACKS
             Jack "Gluts", Common.GLUTS
-        ]
-
-    let display = dict [
-            Stream "Streams", (Color.Green, 120, 400)
-            Stream "Alternation", (Color.Cyan, 100, 300)
-            Stream "Jumpstream", (Color.SkyBlue, 100, 350)
-            Stream "Dense Jumpstream", (Color.DeepSkyBlue, 100, 350)
-            Stream "Double Jumpstream", (Color.CadetBlue, 100, 300)
-            Stream "Triple Jumpstream", (Color.Aqua, 100, 300)
-            Stream "Handstream", (Color.Orange, 100, 300)
-            Stream "Chordstream", (Color.Orange, 100, 250)
-            Stream "Double streams", (Color.Yellow, 100, 250)
-            Stream "Double stairs", (Color.OrangeRed, 100, 250)
-            Stream "Chord rolls", (Color.Yellow, 100, 250)
-            Stream "Split trill", (Color.Purple, 100, 400)
-            Stream "Jumptrill", (Color.Blue, 100, 400)
-            Stream "Roll", (Color.Lime, 100, 400)
-            Jack "Jacks", (Color.PaleVioletRed, 100, 200)
-            Jack "Jumpjacks", (Color.Lavender, 100, 200)
-            Jack "Chordjacks", (Color.Red, 100, 200)
-            Jack "Gluts", (Color.Crimson, 100, 200)
-            Jack "Jumpgluts", (Color.Magenta, 100, 200)
         ]
 
     let analyse (rate: float32) (chart: Chart) =
