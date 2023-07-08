@@ -41,12 +41,11 @@ module Patterns =
                     match p with
                     | Stream s -> s, density * 200.0f / max_density
                     | Jack s -> s, (density * 200.0f / max_density) - 50.0f
-                if percent > 5f then 
-                    yield (name, category, bpm, density_ratio, percent)
+                yield (name, bpm)
         } |> List.ofSeq
 
     let display() =
         let mutable c = Callout.Normal.Title("What's in this chart?")
-        for (pattern, desc, bpm, density_ratio, percent) in List.truncate 10 report do
-            c <- c.Body(sprintf "%02.0f%% %i BPM %s %s" percent bpm pattern desc)
-        c.Body("Pattern analysis is a WIP")
+        for (pattern, bpm) in List.truncate 5 report do
+            c <- c.Body(sprintf "%i BPM %s" bpm pattern)
+        c.Body("^ These are the top matches. Pattern analysis is a WIP")
