@@ -15,8 +15,6 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     do
         let content = 
             FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
-            |+ PageButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.delete)
-
             |+ PageButton(
                 "chart.add_to_collection",
                 (fun () -> 
@@ -25,8 +23,8 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                             if CollectionManager.add_to(name, collection, cc) then Menu.Back()
                     ).Show()
                 ),
-                Icon = Icons.add_to_collection
-            )
+                Icon = Icons.add_to_collection)
+            |+ PageButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.delete)
 
         match context with
         | LibraryContext.None

@@ -8,8 +8,11 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
+open Interlude.Options
 open Interlude.Features.Play
 open Interlude.Features.Online
+open Interlude.Features.LevelSelect
+open Interlude.Features
 
 type LobbySettingsPage(settings: LobbySettings) as this =
     inherit Page()
@@ -58,12 +61,22 @@ type Lobby() =
             Position = { Position.SliceTop(90.0f).Margin(10.0f) with Right = 0.4f %- 0.0f })
         |+ PlayerList(Position = { Left = 0.0f %+ 50.0f; Right = 0.4f %- 50.0f; Top = 0.0f %+ 100.0f; Bottom = 1.0f %- 100.0f })
         |+ StylishButton(
+                (fun () -> if Network.lobby.IsSome && SelectedChart.chart.IsSome && SelectedChart.found then Preview(Gameplay.Chart.current.Value, ignore).Show()),
+                K (sprintf "%s %s" Icons.preview (L"levelselect.preview.name")),
+                Style.main 100,
+                TiltLeft = false,
+                Hotkey = "preview",
+                Position = { Position.SliceBottom(50.0f) with Right = (0.4f / 3f) %- 25.0f }
+            ).Tooltip(Tooltip.Info("levelselect.preview"))
+        |+ StylishButton(
             (fun () -> Network.lobby.Value.Ready <- SelectedChart.found && not Network.lobby.Value.Ready; Lobby.set_ready Network.lobby.Value.Ready),
             (fun () -> match Network.lobby with Some l -> (if l.Ready then (sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")) else (sprintf "%s %s" Icons.ready (L"lobby.ready"))) | None -> "!"),
-            Style.main 100,
-            TiltRight = false,
-            Position = { Left = (0.4f / 1.5f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.4f %- 0.0f; Bottom = 1.0f %- 0.0f }
-            )
+            Style.dark 100,
+            Position = { Left = (0.4f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = (0.4f / 1.5f) %- 25.0f; Bottom = 1.0f %- 0.0f })
+        |+ Rulesets.QuickSwitcher(
+            options.SelectedRuleset,
+            Position = { Left = (0.4f / 1.5f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.4f %- 0.0f; Bottom = 1.0f %- 0.0f })
+            .Tooltip(Tooltip.Info("levelselect.rulesets", "ruleset_switch").Hotkey(L"levelselect.rulesets.picker_hint", "ruleset_picker"))
         |+ SelectedChart(Position = { Left = 0.5f %+ 20.0f; Top = 0.0f %+ 100.0f; Right = 1.0f %- 20.0f; Bottom = 0.5f %- 0.0f } )
         |* Chat(Position = { Position.Margin(20.0f) with Left = 0.4f %+ 20.0f; Top = 0.5f %+ 0.0f } )
         
