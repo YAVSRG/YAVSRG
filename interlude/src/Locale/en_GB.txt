@@ -467,6 +467,7 @@ notification.recache_complete=Recache complete!
 notification.recache=Recache queued!
 notification.reload_themes=Themes and Noteskins have been reloaded
 notification.screenshot=Screenshot saved!
+notification.screenshot.open_folder=Open folder
 notification.update_available.body=Click on 'What's New' to see and install it.
 notification.update_available.title=Update available!
 notification.update_installed.body=Relaunch the game to apply it.

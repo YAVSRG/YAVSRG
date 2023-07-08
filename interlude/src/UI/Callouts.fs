@@ -296,6 +296,9 @@ module Notifications =
 
     let action_feedback(icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.cyan_accent, Colors.cyan), Colors.text)
+        
+    let action_feedback_button(icon: string, title: string, description: string, button_label: string, button_action: unit -> unit) =
+        add (Callout.Small.Icon(icon).Title(title).Body(description).Button(button_label, button_action), (Colors.cyan_accent, Colors.cyan), Colors.text)
 
     let system_feedback(icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.green_accent, Colors.green), Colors.text)
