@@ -29,9 +29,13 @@ type LevelSelectScreen() =
         Tree.refresh()
 
     let random_chart() =
-        match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value Tree.filter Rulesets.current_hash with
-        | Some c -> Tree.switchChart(c, LibraryContext.None, ""); refresh()
-        | None -> ()
+        if options.AdvancedRecommendations.Value then
+            match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value Tree.filter Rulesets.current_hash with
+            | Some c -> Tree.switchChart(c, LibraryContext.None, ""); refresh()
+            | None -> ()
+        else
+            let c = Suggestion.get_random Tree.filter
+            Tree.switchChart(c, LibraryContext.None, ""); refresh()
 
     override this.Init(parent: Widget) =
         base.Init parent

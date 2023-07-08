@@ -125,6 +125,7 @@ module Options =
 
             VanishingNotes: Setting<bool>
             AutoCalibrateOffset: Setting<bool>
+            AdvancedRecommendations: Setting<bool>
             ScoreGraphMode: Setting<ScoreGraphMode>
         }
         static member Default = {
@@ -198,6 +199,7 @@ module Options =
 
             VanishingNotes = Setting.simple false
             AutoCalibrateOffset = Setting.simple false
+            AdvancedRecommendations = Setting.simple false
             ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
         }
 

@@ -19,6 +19,10 @@ module Advanced =
                     .Pos(270.0f)
                 |+ PageSetting("advanced.autocalibrateoffset", Selector<_>.FromBool options.AutoCalibrateOffset)
                     .Pos(340.0f)
+                    .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
+                |+ PageSetting("advanced.advancedrecommendations", Selector<_>.FromBool options.AdvancedRecommendations)
+                    .Pos(410.0f)
+                    .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
             )
         override this.Title = L"advanced.name"
         override this.OnClose() = ()

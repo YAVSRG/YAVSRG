@@ -46,8 +46,8 @@ module Tree =
     let mutable private currently_drag_scrolling = false
     let mutable private drag_scroll_distance = 0.0f
     let mutable private drag_scroll_position = 0.0f
-    let DRAG_THRESHOLD = 40.0f
-    let DRAG_LEFTCLICK_SCALE = 1.75f
+    let private DRAG_THRESHOLD = 40.0f
+    let private DRAG_LEFTCLICK_SCALE = 1.75f
 
     /// Increment the flag to recalculate cached data on tree items
     /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
