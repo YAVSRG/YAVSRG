@@ -203,20 +203,23 @@ module Gameplay =
                                 Chart._rate.Value
                         metric,
                         fun () -> 
+                            let replay = Network.lobby.Value.Players.[username].Replay
+                            if not (replay :> IReplayProvider).Finished then replay.Finish()
                             ScoreInfoProvider(
-                                makeScore((Network.lobby.Value.Players.[username].Replay :> IReplayProvider).GetFullReplay(), chart.Keys),
+                                makeScore((replay :> IReplayProvider).GetFullReplay(), chart.Keys),
                                 Chart.current.Value,
                                 Content.Rulesets.current,
                                 Player = Some username
                             )
                     )
     
-            let add_own_replay(s: IScoreMetric, replay: IReplayProvider) =
+            let add_own_replay(s: IScoreMetric, replay: LiveReplayProvider) =
                 replays.Add(Network.username, 
                     (s, 
                         fun () -> 
+                            if not (replay :> IReplayProvider).Finished then replay.Finish()
                             ScoreInfoProvider(
-                                makeScore(replay.GetFullReplay(), Chart.withMods.Value.Keys),
+                                makeScore((replay :> IReplayProvider).GetFullReplay(), Chart.withMods.Value.Keys),
                                 Chart.current.Value,
                                 Content.Rulesets.current
                             )
