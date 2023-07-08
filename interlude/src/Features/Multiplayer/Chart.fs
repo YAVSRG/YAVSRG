@@ -62,7 +62,11 @@ module SelectedChart =
                 match Library.lookupHash chart.Hash with
                 | Some cc -> 
                     match Library.load cc with 
-                    | Some c -> Chart.change(cc, Collections.LibraryContext.None, c); rate.Set chart.Rate; true
+                    | Some c -> 
+                        Chart.change(cc, Collections.LibraryContext.None, c)
+                        rate.Set chart.Rate
+                        selectedMods.Set Map.empty
+                        true
                     | None -> false
                 | None -> Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash); false
             if found then
