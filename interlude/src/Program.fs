@@ -33,11 +33,15 @@ let launch(instance: int) =
             if not (Import.dropFile path) then
                 Logging.Warn("Unrecognised file dropped: " + path))
 
+    use icon_stream = Utils.getResourceStream("icon.png")
+    use icon = Percyqaz.Flux.Utils.Bitmap.load icon_stream
+
     Launch.entryPoint
         (
             Options.config,
             "Interlude",
-            Startup.ui_entry_point()
+            Startup.ui_entry_point(),
+            Some icon
         )
 
     Options.save()

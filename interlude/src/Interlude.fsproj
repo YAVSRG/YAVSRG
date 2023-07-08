@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -34,6 +34,7 @@
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\icon.png" />
     <EmbeddedResource Include="Resources\defaultArrow.isk" />
     <EmbeddedResource Include="Resources\defaultBar.isk" />
     <EmbeddedResource Include="Resources\defaultOrb.isk" />
@@ -142,5 +143,5 @@
       <HintPath>Resources\FSharp.Formatting.Markdown.dll</HintPath>
     </Reference>
   </ItemGroup>
-
+	
 </Project>
