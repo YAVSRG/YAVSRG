@@ -64,3 +64,12 @@ module Suggestion =
                 best_chart <- Some chart
 
         best_chart
+
+    let get_random (filter: Filter) =
+        let rand = Random()
+
+        let charts =
+            Filter.apply filter Library.charts.Values
+            |> Array.ofSeq
+
+        charts.[rand.Next charts.Length]
