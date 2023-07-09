@@ -432,30 +432,32 @@ module Lobby =
 
                             if not lobby.GameRunning then user_error player "Game is not running"
                             match lobby.Players.[player].Status with
-                            | LobbyPlayerStatus.Playing
-                            | LobbyPlayerStatus.Spectating -> malice player "Spectated while already playing/spectating"
-                            | _ -> ()
+                            | LobbyPlayerStatus.Playing -> malice player "Spectated while already playing"
+                            | LobbyPlayerStatus.Spectating -> ()
+                            | _ ->
 
-
+                            let needs_catchup = lobby.Players.[player].Status <> LobbyPlayerStatus.AbandonedPlay
                             lobby.Players.[player].Status <- LobbyPlayerStatus.Spectating
                             multicast_except(player, lobby, Downstream.PLAYER_STATUS (username, LobbyPlayerStatus.Spectating))
-                            for p in lobby.Players.Values do
-                                if p.Status = LobbyPlayerStatus.Playing && p.PlayPacketsReceived > 0 then
-                                    // 65532 is a multiple of 6 and less than the max packet size of 65535
-                                    let PACKET_SIZE = 65532
 
-                                    let data = p.GetReplay()
-                                    let mutable offset = 0
-                                    while data.Length - offset > PACKET_SIZE do
-                                        let sub_data = Array.zeroCreate PACKET_SIZE
-                                        Buffer.BlockCopy(data, offset, sub_data, 0, PACKET_SIZE)
-                                        offset <- offset + PACKET_SIZE
-                                        Server.send(player, Downstream.PLAY_DATA(p.Username, sub_data))
-                                    if offset > 0 then
-                                        let remaining_data = Array.zeroCreate (data.Length - offset)
-                                        Buffer.BlockCopy(data, offset, remaining_data, 0, remaining_data.Length)
-                                        Server.send(player, Downstream.PLAY_DATA(p.Username, remaining_data))
-                                    else Server.send(player, Downstream.PLAY_DATA(p.Username, data))
+                            if needs_catchup then
+                                for p in lobby.Players.Values do
+                                    if p.Status = LobbyPlayerStatus.Playing && p.PlayPacketsReceived > 0 then
+                                        // 65532 is a multiple of 6 and less than the max packet size of 65535
+                                        let PACKET_SIZE = 65532
+
+                                        let data = p.GetReplay()
+                                        let mutable offset = 0
+                                        while data.Length - offset > PACKET_SIZE do
+                                            let sub_data = Array.zeroCreate PACKET_SIZE
+                                            Buffer.BlockCopy(data, offset, sub_data, 0, PACKET_SIZE)
+                                            offset <- offset + PACKET_SIZE
+                                            Server.send(player, Downstream.PLAY_DATA(p.Username, sub_data))
+                                        if offset > 0 then
+                                            let remaining_data = Array.zeroCreate (data.Length - offset)
+                                            Buffer.BlockCopy(data, offset, remaining_data, 0, remaining_data.Length)
+                                            Server.send(player, Downstream.PLAY_DATA(p.Username, remaining_data))
+                                        else Server.send(player, Downstream.PLAY_DATA(p.Username, data))
 
 
 
@@ -467,7 +469,7 @@ module Lobby =
 
                             lobby.Players.[player].ReceivePlayPacket(player, data)
                             for p in lobby.Players.Keys do
-                                if p <> player && (lobby.Players.[p].Status = LobbyPlayerStatus.Playing || lobby.Players.[p].Status = LobbyPlayerStatus.Spectating) then
+                                if p <> player && (lobby.Players.[p].Status = LobbyPlayerStatus.Playing || lobby.Players.[p].Status = LobbyPlayerStatus.AbandonedPlay || lobby.Players.[p].Status = LobbyPlayerStatus.Spectating) then
                                     Server.send(p, Downstream.PLAY_DATA(username, data))
 
 
