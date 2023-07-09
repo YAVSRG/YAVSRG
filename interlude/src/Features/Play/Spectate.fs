@@ -59,6 +59,8 @@ module SpectateScreen =
         let firstNote = chart.Notes.[0].Time
         let ruleset = Rulesets.current
 
+        let mutable wait_for_load = 1000.0
+
         Lobby.start_spectating()
 
         let handler = Network.Events.game_end.Subscribe (fun () -> Screen.back Transitions.Flags.Default)
@@ -84,7 +86,7 @@ module SpectateScreen =
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
                 Song.onFinish <- SongFinishAction.Wait
-                Song.seek(replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
+                Song.pause()
 
             override this.OnExit(next) =
                 base.OnExit(next)
@@ -92,6 +94,14 @@ module SpectateScreen =
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
+
+                if wait_for_load > 0.0 then
+                    wait_for_load <- wait_for_load - elapsedTime
+                    if wait_for_load <= 0 then
+                        Song.seek(replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
+                        Song.resume()
+                else
+
                 let now = Song.timeWithOffset()
                 let chartTime = now - firstNote
 

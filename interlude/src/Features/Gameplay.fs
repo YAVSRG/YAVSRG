@@ -193,17 +193,17 @@ module Gameplay =
             let private player_status(username, status) =
                 if status = Web.Shared.Packets.LobbyPlayerStatus.Playing then
                     let chart = Chart.withMods.Value
+                    let replay = Network.lobby.Value.Players.[username].Replay
                     replays.Add(username, 
                         let metric =
                             Metrics.createScoreMetric
                                 Content.Rulesets.current
                                 chart.Keys
-                                Network.lobby.Value.Players.[username].Replay
+                                replay
                                 chart.Notes
                                 Chart._rate.Value
                         metric,
-                        fun () -> 
-                            let replay = Network.lobby.Value.Players.[username].Replay
+                        fun () ->
                             if not (replay :> IReplayProvider).Finished then replay.Finish()
                             ScoreInfoProvider(
                                 makeScore((replay :> IReplayProvider).GetFullReplay(), chart.Keys),

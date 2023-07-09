@@ -152,7 +152,8 @@ module PlayScreen =
 
         scoring.OnHit.Add(fun h -> match h.Guts with Hit d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1 | _ -> ())
 
-        let send_replay_packet() =
+        let send_replay_packet(now: Time) =
+            if not (liveplay :> IReplayProvider).Finished then liveplay.Add(now, inputKeyState)
             use ms = new System.IO.MemoryStream()
             use bw = new System.IO.BinaryWriter(ms)
             liveplay.ExportLiveBlock bw
@@ -194,7 +195,7 @@ module PlayScreen =
                 if not (liveplay :> IReplayProvider).Finished then
 
                     if chartTime / MULTIPLAYER_REPLAY_DELAY_MS / 1.0f<ms> |> floor |> int > packet_count then
-                        send_replay_packet()
+                        send_replay_packet(now)
 
                     Input.consumeGameplay(binds, fun column time isRelease ->
                         if isRelease then inputKeyState <- Bitmask.unsetBit column inputKeyState
@@ -204,7 +205,7 @@ module PlayScreen =
                 
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
                     liveplay.Finish()
-                    send_replay_packet()
+                    send_replay_packet(now)
                     Lobby.finish_playing()
                     Screen.changeNew
                         ( fun () ->

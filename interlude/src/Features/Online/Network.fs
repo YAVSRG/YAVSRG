@@ -259,7 +259,7 @@ module Network =
                 | Downstream.PLAY_DATA (username, data) -> sync <| fun () ->
                     use ms = new MemoryStream(data)
                     use br = new BinaryReader(ms)
-                    lobby.Value.Players.[username].Replay.ImportLiveBlock (br, MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
+                    lobby.Value.Players.[username].Replay.ImportLiveBlock br
         }
 
     let connect() =
