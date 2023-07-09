@@ -32,7 +32,7 @@ module Online =
             | Upstream.INVITE_TO_LOBBY username -> Lobby.Invite(id, username).Do
             | Upstream.LEAVE_LOBBY -> Lobby.Leave(id).Do
             | Upstream.CHAT msg -> Lobby.Chat(id, msg).Do
-            | Upstream.READY_STATUS r -> Lobby.ReadyUp(id, r).Do
+            | Upstream.READY_STATUS f -> Lobby.ReadyUp(id, f).Do
             | Upstream.MISSING_CHART -> Lobby.MissingChart(id).Do
     
             | Upstream.BEGIN_PLAYING -> Lobby.BeginPlaying(id).Do

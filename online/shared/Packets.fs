@@ -16,10 +16,11 @@ module Packets =
     type LobbyPlayerStatus =
         | NotReady = 0uy
         | Ready = 1uy
-        | Playing = 2uy
-        | AbandonedPlay = 3uy
-        | Spectating = 4uy
-        | MissingChart = 5uy
+        | ReadyToSpectate = 2uy
+        | Playing = 3uy
+        | AbandonedPlay = 4uy
+        | Spectating = 5uy
+        | MissingChart = 6uy
 
     type LobbyChart =
         {
@@ -86,9 +87,15 @@ module Packets =
         | Leave = 1uy
         | Host = 2uy
         | Ready = 3uy
-        | NotReady = 4uy
-        | Invite = 5uy
-        | Generic = 6uy
+        | Ready_Spectate = 4uy
+        | NotReady = 5uy
+        | Invite = 6uy
+        | Generic = 7uy
+
+    type ReadyFlag =
+        | NotReady = 0uy
+        | Play = 1uy
+        | Spectate = 2uy
 
     [<RequireQualifiedAccess>]
     type Upstream =
@@ -106,7 +113,7 @@ module Packets =
         | INVITE_TO_LOBBY of username: string
         | LEAVE_LOBBY
         | CHAT of message: string
-        | READY_STATUS of bool
+        | READY_STATUS of ReadyFlag
         | MISSING_CHART
 
         | BEGIN_PLAYING
@@ -141,7 +148,7 @@ module Packets =
                 | 0x20uy -> INVITE_TO_LOBBY (br.ReadString())
                 | 0x21uy -> LEAVE_LOBBY
                 | 0x22uy -> CHAT (br.ReadString())
-                | 0x23uy -> READY_STATUS (br.ReadBoolean())
+                | 0x23uy -> READY_STATUS (br.ReadByte() |> LanguagePrimitives.EnumOfValue)
                 | 0x24uy -> MISSING_CHART
 
                 | 0x30uy -> BEGIN_PLAYING
@@ -184,7 +191,7 @@ module Packets =
                 | INVITE_TO_LOBBY username -> bw.Write username; 0x20uy
                 | LEAVE_LOBBY -> 0x21uy
                 | CHAT msg -> bw.Write msg; 0x22uy
-                | READY_STATUS ready -> bw.Write ready; 0x23uy
+                | READY_STATUS flag -> bw.Write (byte flag); 0x23uy
                 | MISSING_CHART -> 0x24uy
 
                 | BEGIN_PLAYING -> 0x30uy

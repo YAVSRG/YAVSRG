@@ -89,7 +89,7 @@ module Lobby =
         | Leave of player: PlayerId
         | Invite of invitor: PlayerId * invitee: string
         | Chat of sender: PlayerId * msg: string
-        | ReadyUp of player: PlayerId * isReady: bool
+        | ReadyUp of player: PlayerId * flag: ReadyFlag
         | SelectChart of player: PlayerId * chart: LobbyChart
         | StartGame of player: PlayerId
         | CancelStartGame of player: PlayerId
@@ -279,7 +279,7 @@ module Lobby =
 
 
 
-                        | ReadyUp (player, ready) ->
+                        | ReadyUp (player, flag) ->
                             let! username = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
@@ -291,18 +291,25 @@ module Lobby =
                             | _ -> ()
 
 
-                            let new_status = if ready then LobbyPlayerStatus.Ready else LobbyPlayerStatus.NotReady
+                            let new_status, lobby_event_flag = 
+                                match flag with
+                                | ReadyFlag.NotReady -> LobbyPlayerStatus.NotReady, LobbyEvent.NotReady
+                                | ReadyFlag.Play -> LobbyPlayerStatus.Ready, LobbyEvent.Ready
+                                | ReadyFlag.Spectate -> LobbyPlayerStatus.ReadyToSpectate, LobbyEvent.Ready_Spectate
+                                | _ -> malice player  "Invalid ready flag sent"
+
                             if new_status <> old_status then
 
                                 lobby.Players.[player].Status <- new_status
                             
                                 multicast_except(player, lobby, Downstream.PLAYER_STATUS(username, new_status))
-                                multicast(lobby, Downstream.LOBBY_EVENT((if ready then LobbyEvent.Ready else LobbyEvent.NotReady), username))
+                                multicast(lobby, Downstream.LOBBY_EVENT(lobby_event_flag, username))
 
                                 if 
                                     not lobby.CountingDown 
                                     && lobby.Settings.AutomaticRoundCountdown 
-                                    && lobby.Players.Values.All(fun p -> p.Status = LobbyPlayerStatus.Ready)
+                                    && lobby.Players.Values.All(fun p -> p.Status = LobbyPlayerStatus.Ready || p.Status = LobbyPlayerStatus.ReadyToSpectate)
+                                    && lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Ready)
                                 then
                                     
                                     lobby.CountdownId <- lobby.CountdownId + 1
@@ -541,6 +548,8 @@ module Lobby =
                                     lobby.CountingDown <- false
                                     lobby.GameRunning <- true
                                     multicast(lobby, Downstream.GAME_START)
+
+                                    // todo: start a 5 second countdown - if nobody is playing then stop the round
 
 
 
