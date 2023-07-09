@@ -1,5 +1,6 @@
 #r "nuget: FSharp.Formatting,18.1.0"
 
+open System.Text.RegularExpressions
 open System.IO
 open FSharp.Formatting.Markdown
 
@@ -49,9 +50,20 @@ module MarkdownToHtml =
     let render_document (md: MarkdownDocument) = paragraphs md.Paragraphs
 
 let template = File.ReadAllText("./site_data/page.html")
+let template_m = File.ReadAllText("./site_data/page_m.html")
 
-let build_page (file: string) (title: string) (content: string)  =
+let build_page (file: string) (title: string) (content: string) =
     template
+        .Replace("{{title}}", title)
+        .Replace("{{content}}", content)
+        |> fun t -> File.WriteAllText(file, t)
+
+let build_mpage (file: string) (title: string) (contents: string array) =
+    let content =
+        contents
+        |> Array.map (sprintf "<div class=\"frame text-20 container flex flex-col mx-auto p-4\">%s</div>")
+        |> String.concat ""
+    template_m
         .Replace("{{title}}", title)
         .Replace("{{content}}", content)
         |> fun t -> File.WriteAllText(file, t)
@@ -64,7 +76,12 @@ Markdown.Parse(File.ReadAllText("./site_data/privacy_policy.md"))
 |> MarkdownToHtml.render_document
 |> build_page "./site/privacy_policy.html" "Privacy Policy"
 
+let re = Regex("(?=\s[0-9]\.[0-9]+\.[0-9]+.*\s*\=\=\=\=)")
 
-Markdown.Parse(File.ReadAllText("./Interlude/docs/changelog.md"))
-|> MarkdownToHtml.render_document
-|> build_page "./site/changelog.html" "Changelog"
+File.ReadAllText("./Interlude/docs/changelog.md")
+|> re.Split
+|> Array.map (fun s -> s.Trim())
+|> Array.except [""]
+|> Array.map Markdown.Parse
+|> Array.map MarkdownToHtml.render_document
+|> build_mpage "./site/changelog.html" "Changelog"
