@@ -212,15 +212,15 @@ type OnlineReplayProvider() =
         member this.GetFullReplay() =
             if finished then buffer.ToArray() else invalidOp "Online play is not declared as over, we don't have the full replay yet!"
 
-    member this.ImportLiveBlock (br: BinaryReader) =
+    member this.ImportLiveBlock (br: BinaryReader, interval: Time) =
         if finished then invalidOp "Online play is declared as over; cannot append to replay" else
 
         try
             while not (br.BaseStream.Position = br.BaseStream.Length) do
                 let t = br.ReadSingle() * 1.0f<ms>
                 buffer.Add(struct(t, br.ReadUInt16()))
-                current_chart_time <- t
         with err -> Logging.Error("Error while receiving online replay data", err)
+        current_chart_time <- current_chart_time + interval
 
     member this.Finish() =
         if not finished then finished <- true else invalidOp "Online play is already declared as over; cannot do so again"
