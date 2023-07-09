@@ -14,3 +14,5 @@ Interlude.Assets
 **/bin
 **/obj
 .vscode/settings.json
+
+.fake
