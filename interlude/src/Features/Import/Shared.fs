@@ -27,6 +27,7 @@ module Import =
             )
             true
 
+// todo: only etterna packs use this old one so just move it to there
 type SearchContainerLoader(taskWithCallback: (unit -> unit) -> unit) =
     inherit StaticWidget(NodeType.None)
     let mutable loading = false

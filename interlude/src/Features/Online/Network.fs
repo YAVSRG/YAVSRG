@@ -55,12 +55,14 @@ module Network =
 
     type LobbyPlayer =
         {
+            Color: Color
             mutable Status: LobbyPlayerStatus
             mutable Replay: OnlineReplayProvider
         }
-        static member Create = 
+        static member Create color status = 
             {
-                Status = LobbyPlayerStatus.NotReady
+                Color = Color.FromArgb color
+                Status = status
                 Replay = Unchecked.defaultof<_>
             }
 
@@ -156,7 +158,7 @@ module Network =
                 match packet with
                 | Downstream.DISCONNECT reason ->
                     Logging.Info(sprintf "Disconnected from server: %s" reason)
-                    Notifications.error(L"notification.network.disconnected", reason)
+                    sync <| fun () -> Notifications.error(L"notification.network.disconnected", reason)
                 | Downstream.HANDSHAKE_SUCCESS -> if credentials.Token <> "" then this.Send(Upstream.LOGIN credentials.Token)
                 | Downstream.DISCORD_AUTH_URL url ->
                     if not (url.StartsWith("https://discord.com/api/oauth2")) then Logging.Error(sprintf "Got a strange auth link! %s" url)
@@ -192,7 +194,7 @@ module Network =
                             Settings = None
                             Players =
                                 let d = new Dictionary<string, LobbyPlayer>()
-                                for p in players do d.Add(p, LobbyPlayer.Create)
+                                for (username, color, status) in players do d.Add(username, LobbyPlayer.Create color status)
                                 d
                             YouAreHost = false
                             Ready = false
@@ -209,8 +211,8 @@ module Network =
                     Events.leave_lobby_ev.Trigger()
                 | Downstream.YOU_ARE_HOST b -> sync <| fun () ->
                     lobby.Value.YouAreHost <- b
-                | Downstream.PLAYER_JOINED_LOBBY username -> sync <| fun () ->
-                    lobby.Value.Players.Add(username, LobbyPlayer.Create)
+                | Downstream.PLAYER_JOINED_LOBBY (username, color) -> sync <| fun () ->
+                    lobby.Value.Players.Add(username, LobbyPlayer.Create color LobbyPlayerStatus.NotReady)
                     Events.lobby_players_updated_ev.Trigger()
                 | Downstream.PLAYER_LEFT_LOBBY username -> sync <| fun () ->
                     lobby.Value.Players.Remove(username) |> ignore
