@@ -114,6 +114,7 @@ type Chat() =
                 | LobbyEvent.Leave, who -> sprintf "%s %s left" Icons.logout who, Colors.red_accent
                 | LobbyEvent.Host, who -> sprintf "%s %s is now host" Icons.star who, Colors.yellow_accent
                 | LobbyEvent.Ready, who -> sprintf "%s %s is ready" Icons.ready who, Colors.green
+                | LobbyEvent.Ready_Spectate, who -> sprintf "%s %s is ready" Icons.preview who, Colors.green
                 | LobbyEvent.NotReady, who -> sprintf "%s %s is not ready" Icons.not_ready who, Colors.pink
                 | LobbyEvent.Invite, who -> sprintf "%s %s invited" Icons.invite who, Colors.cyan_accent
                 | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.info msg, Colors.grey_1

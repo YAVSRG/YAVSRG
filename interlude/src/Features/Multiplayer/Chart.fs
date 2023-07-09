@@ -98,6 +98,7 @@ type SelectedChart() =
         |+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> if SelectedChart.found then "" else L"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
+        // todo: move this and also make the chart itself clickable when host
         |+ Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost),
             StylishButton(
@@ -105,12 +106,39 @@ type SelectedChart() =
                 K (sprintf "%s %s" Icons.reset (L"lobby.change_chart")),
                 Style.dark 100,
                 TiltRight = false,
-                Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f }
+                Position = { Position.TrimBottom(50.0f).SliceBottom(50.0f) with Left = 0.66f %- 0.0f }
             )
         )
+        
+        |+ StylishButton(
+            (fun () -> 
+                if Network.lobby.IsSome && SelectedChart.found then
+                    Network.lobby.Value.ReadyStatus <-
+                        match Network.lobby.Value.ReadyStatus with
+                        | ReadyFlag.NotReady -> if Network.lobby.Value.Spectate then ReadyFlag.Spectate else ReadyFlag.Play
+                        | _ -> ReadyFlag.NotReady
+                    Lobby.set_ready Network.lobby.Value.ReadyStatus
+            ),
+            (fun () -> 
+                match Network.lobby with 
+                | Some l -> 
+                    match l.ReadyStatus with
+                    | ReadyFlag.NotReady -> 
+                        if Network.lobby.Value.Spectate then 
+                            sprintf "%s %s" Icons.preview (L"lobby.ready") 
+                        else 
+                            sprintf "%s %s" Icons.ready (L"lobby.ready")
+                    | _ -> sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")
+                | None -> "!"),
+            Style.dark 100,
+            TiltRight = false,
+            Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f })
+
+        // temporary way to spectate
+        //|+ HotkeyAction("right", fun () -> Network.lobby.Value.Spectate <- not Network.lobby.Value.Spectate)
 
         |* Conditional(
-            (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.Ready),
+            (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.ReadyStatus <> ReadyFlag.NotReady),
             StylishButton(
                 (fun () -> if Network.lobby.Value.Countdown then Lobby.cancel_round() else Lobby.start_round()),
                 (fun () -> 

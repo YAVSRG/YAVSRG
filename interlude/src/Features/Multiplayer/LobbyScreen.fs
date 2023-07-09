@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Audio
 open Prelude.Common
 open Interlude.Web.Shared
 open Interlude.Utils
@@ -69,10 +70,12 @@ type Lobby() =
                 Position = { Position.SliceBottom(50.0f) with Right = (0.4f / 3f) %- 25.0f }
             ).Tooltip(Tooltip.Info("levelselect.preview"))
         |+ StylishButton(
-            (fun () -> Network.lobby.Value.Ready <- SelectedChart.found && not Network.lobby.Value.Ready; Lobby.set_ready Network.lobby.Value.Ready),
-            (fun () -> match Network.lobby with Some l -> (if l.Ready then (sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")) else (sprintf "%s %s" Icons.ready (L"lobby.ready"))) | None -> "!"),
-            Style.dark 100,
-            Position = { Left = (0.4f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = (0.4f / 1.5f) %- 25.0f; Bottom = 1.0f %- 0.0f })
+                ignore,
+                K (sprintf "%s %s" Icons.mods (L"levelselect.mods.name")),
+                Style.dark 100,
+                Hotkey = "mods",
+                Position = { Position.SliceBottom(50.0f) with Left = (0.4f / 3f) %- 0.0f; Right = (0.4f / 1.5f) %- 25.0f }
+            ).Tooltip(Tooltip.Info("levelselect.mods"))
         |+ Rulesets.QuickSwitcher(
             options.SelectedRuleset,
             Position = { Left = (0.4f / 1.5f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.4f %- 0.0f; Bottom = 1.0f %- 0.0f })
@@ -84,11 +87,25 @@ type Lobby() =
 
         Network.Events.game_start.Add(
             fun () ->
-                // todo: if you are ready to spectate, spectate instead
-                if Screen.currentType = Screen.Type.Lobby && SelectedChart.found && Network.lobby.Value.Ready then 
+                if 
+                    Screen.currentType = Screen.Type.Lobby
+                    && Network.lobby.Value.ReadyStatus = ReadyFlag.Play
+                then
                     Screen.changeNew 
                         (fun () -> PlayScreen.multiplayer_screen())
                         Screen.Type.Play
+                        Transitions.Flags.Default
+            )
+        Network.Events.player_status.Add(
+            fun (username, status) ->
+                if 
+                    status = LobbyPlayerStatus.Playing 
+                    && Screen.currentType = Screen.Type.Lobby
+                    && Network.lobby.Value.ReadyStatus = ReadyFlag.Spectate 
+                then
+                    Screen.changeNew 
+                        (fun () -> SpectateScreen.spectate_screen username)
+                        Screen.Type.Replay
                         Transitions.Flags.Default
             )
         Network.Events.lobby_settings_updated.Add(fun () -> lobby_title <- Network.lobby.Value.Settings.Value.Name)
@@ -113,6 +130,7 @@ type LobbyScreen() =
         swap.Current <- if in_lobby then main :> Widget else list
         if not in_lobby then Lobby.refresh_list()
         if in_lobby then SelectedChart.update Network.lobby.Value.Chart
+        Song.onFinish <- SongFinishAction.Loop
     override this.OnExit(_) = ()
 
     override this.OnBack() = 

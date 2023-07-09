@@ -173,7 +173,6 @@ module PlayScreen =
                 add_widget JudgementMeter
                 add_widget EarlyLateMeter
                 add_widget MultiplayerScoreTracker
-            
 
             override this.OnEnter(previous) =
                 Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
