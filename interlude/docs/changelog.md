@@ -8,6 +8,7 @@
 - Notification for taking a screenshot has a button to open the screenshots folder (requested by Wagg)
 - New setting for hit meter to turn off the scaling factor for LN releases (requested by Lifly)
 - You can change your ruleset while in multiplayer lobbies
+- You can seek while watching replays to skip to where you want
 
 - Pattern analyzer: It's still a work-in-progress, but I've simplified its output to be presentable to users
   Press the tooltip hotkey (/ by default) while hovering over the difficulty rating to see this info
@@ -119,6 +120,7 @@ I've mostly been working on that but here are some changes to the client too
 # Tables
 
 Lots of things have changed about tables internally
+
 - There is no longer a console command to allow editing tables from in-game and this feature has been removed entirely
 - There is now a tab in the Imports screen for installing them (currently just Crescent, the 4k table, is available)
 - Click to install tables
@@ -488,6 +490,7 @@ Small update grindset
 - Bug fix: "Favourite" rulesets as picked from the options screen now stay selected even when changing themes
 
 Other improvements to rulesets:
+
 - Ruleset switcher on level select now shows a selector instead of just cycling rulesets
 - Switcher now appears on score screen and is how you switch rulesets there too
 - In both cases the hotkey is D by default (you can no longer use arrow keys on the score screen)
@@ -532,6 +535,7 @@ A table = a ton of charts hand-sorted into levels/folders.
 You work through each folder, setting a certain standard of score, and each folder is a good-sized step to slowly push your skills and improve.
 
 Interlude is getting tables because:
+
 - It gives the game the closest thing to "official" content - There will be clear goals to achieve rather than just picking stuff to play every session
 - It lets me collect some sweet sweet analytics data for difficulty calculation algorithms
 - It provides useful progression advice to players while the aforementioned difficulty calculation algorithms are made
