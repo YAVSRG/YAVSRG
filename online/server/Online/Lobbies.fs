@@ -214,7 +214,7 @@ module Lobby =
                             if not (lobbies.ContainsKey lobby_id) then user_error player "Lobby no longer exists"
 
                             let lobby = lobbies.[lobby_id]
-                            let player_list = lobby.Players.Values |> Seq.map (fun p -> p.Username, Badge.DEFAULT_COLOR, p.Status) |> Array.ofSeq
+                            let player_list = lobby.Players.Values |> Seq.map (fun p -> p.Username, Badge.DEFAULT_COLOR) |> Array.ofSeq
 
                             multicast(lobby, Downstream.PLAYER_JOINED_LOBBY (username, Badge.DEFAULT_COLOR))
                             multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Join, username))
@@ -226,6 +226,8 @@ module Lobby =
                             Server.send(player, Downstream.LOBBY_SETTINGS lobby.Settings)
                             if lobby.Chart.IsSome then Server.send(player, Downstream.SELECT_CHART lobby.Chart.Value)
                             if lobby.GameRunning then Server.send(player, Downstream.GAME_START)
+                            for p in lobby.Players.Values do
+                                if p.Status <> LobbyPlayerStatus.NotReady then Server.send(player, Downstream.PLAYER_STATUS(p.Username, p.Status))
 
 
 

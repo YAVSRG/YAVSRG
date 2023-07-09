@@ -220,7 +220,7 @@ module Packets =
         | LOGIN_FAILED of reason: string
 
         | LOBBY_LIST of lobbies: LobbyInfo array
-        | YOU_JOINED_LOBBY of players: (string * int32 * LobbyPlayerStatus) array
+        | YOU_JOINED_LOBBY of players: (string * int32) array
         | INVITED_TO_LOBBY of by_who: string * id: Guid
 
         | YOU_LEFT_LOBBY
@@ -255,7 +255,7 @@ module Packets =
                 | 0x07uy -> LOGIN_FAILED (br.ReadString())
 
                 | 0x10uy -> LOBBY_LIST ( Array.init (br.ReadByte() |> int) (fun _ -> LobbyInfo.Read br) )
-                | 0x11uy -> YOU_JOINED_LOBBY ( Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString(), br.ReadInt32(), br.ReadByte() |> LanguagePrimitives.EnumOfValue) )
+                | 0x11uy -> YOU_JOINED_LOBBY ( Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString(), br.ReadInt32()) )
                 | 0x12uy -> INVITED_TO_LOBBY (br.ReadString(), new Guid(br.ReadBytes 16))
                 | 0x13uy -> SYSTEM_MESSAGE (br.ReadString())
 
@@ -299,7 +299,7 @@ module Packets =
                     0x10uy
                 | YOU_JOINED_LOBBY players -> 
                     bw.Write (byte players.Length)
-                    for (player, color, status) in players do bw.Write player; bw.Write color; bw.Write (byte status)
+                    for (player, color) in players do bw.Write player; bw.Write color
                     0x11uy
                 | INVITED_TO_LOBBY (by_who, id) -> bw.Write by_who; bw.Write (id.ToByteArray()); 0x12uy
                 | SYSTEM_MESSAGE message -> bw.Write message; 0x13uy
