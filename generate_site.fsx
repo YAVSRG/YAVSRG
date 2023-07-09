@@ -12,7 +12,7 @@ module MarkdownToHtml =
         | Paragraph (body, _) -> sprintf "<p class=\"leading-8 mb-4\">%s</p>" (spans body)
         | Span (body, _) -> spans body
         | ListBlock (kind, items, _) ->
-            let content = items |> List.map (fun ps -> sprintf "<li class=\"ml-4 list-disc\">%s</li>" (paragraphs ps)) |> String.concat ""
+            let content = items |> List.map (fun ps -> sprintf "<li class=\"ml-8 list-disc\">%s</li>" (paragraphs ps)) |> String.concat ""
             sprintf "<ul>%s</ul>" content
         | HorizontalRule (char, _) -> "<hr/>"
         | CodeBlock (code, _, _, language, _, _) -> sprintf "<code>%s</code>" code
@@ -38,7 +38,7 @@ module MarkdownToHtml =
         | Strong (body, _) -> sprintf "<strong>%s</strong>" (spans body)
         | Emphasis (body, _) -> sprintf "<em>%s</em>" (spans body)
         | DirectLink (body, link, title, _) -> sprintf "<a class=\"underline\" href=\"%s\">%s</a>" link (spans body)
-        | DirectImage (body, link, title, _) -> sprintf "<img src=\"%s\" alt=\"%s\">%s</img>" link (Option.defaultValue "" title) body
+        | DirectImage (body, link, title, _) -> sprintf "<img class=\"feature\" src=\"%s\" alt=\"%s\">%s</img>" link (Option.defaultValue "" title) body
         | IndirectImage (body, link, key, _) -> ""
         | IndirectLink (body, original, key, _) -> ""
         | AnchorLink (link, _) -> ""
