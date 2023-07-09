@@ -196,6 +196,7 @@ type LiveReplayProvider(firstNote: Time) =
 type OnlineReplayProvider() =
     let mutable i = 0
     let mutable finished = false
+    let mutable current_chart_time = 0.0f<ms>
     let buffer = ResizeArray<ReplayRow>()
 
     interface IReplayProvider with
@@ -216,11 +217,15 @@ type OnlineReplayProvider() =
 
         try
             while not (br.BaseStream.Position = br.BaseStream.Length) do
-                buffer.Add(struct(br.ReadSingle() * 1.0f<ms>, br.ReadUInt16()))
+                let t = br.ReadSingle() * 1.0f<ms>
+                buffer.Add(struct(t, br.ReadUInt16()))
+                current_chart_time <- t
         with err -> Logging.Error("Error while receiving online replay data", err)
 
     member this.Finish() =
         if not finished then finished <- true else invalidOp "Online play is already declared as over; cannot do so again"
+
+    member this.Time() : ChartTime = current_chart_time
 
 // provides an interface to read keypresses out of a replay easily
 [<AbstractClass>]
