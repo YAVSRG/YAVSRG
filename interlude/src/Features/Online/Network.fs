@@ -59,10 +59,10 @@ module Network =
             mutable Status: LobbyPlayerStatus
             mutable Replay: OnlineReplayProvider
         }
-        static member Create color status = 
+        static member Create color = 
             {
                 Color = Color.FromArgb color
-                Status = status
+                Status = LobbyPlayerStatus.NotReady
                 Replay = Unchecked.defaultof<_>
             }
 
@@ -195,7 +195,7 @@ module Network =
                             Settings = None
                             Players =
                                 let d = new Dictionary<string, LobbyPlayer>()
-                                for (username, color, status) in players do d.Add(username, LobbyPlayer.Create color status)
+                                for (username, color) in players do d.Add(username, LobbyPlayer.Create color)
                                 d
                             YouAreHost = false
                             Spectate = false
@@ -214,7 +214,7 @@ module Network =
                 | Downstream.YOU_ARE_HOST b -> sync <| fun () ->
                     lobby.Value.YouAreHost <- b
                 | Downstream.PLAYER_JOINED_LOBBY (username, color) -> sync <| fun () ->
-                    lobby.Value.Players.Add(username, LobbyPlayer.Create color LobbyPlayerStatus.NotReady)
+                    lobby.Value.Players.Add(username, LobbyPlayer.Create color)
                     Events.lobby_players_updated_ev.Trigger()
                 | Downstream.PLAYER_LEFT_LOBBY username -> sync <| fun () ->
                     lobby.Value.Players.Remove(username) |> ignore
@@ -259,7 +259,7 @@ module Network =
                 | Downstream.PLAY_DATA (username, data) -> sync <| fun () ->
                     use ms = new MemoryStream(data)
                     use br = new BinaryReader(ms)
-                    lobby.Value.Players.[username].Replay.ImportLiveBlock br
+                    lobby.Value.Players.[username].Replay.ImportLiveBlock (br, MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
         }
 
     let connect() =

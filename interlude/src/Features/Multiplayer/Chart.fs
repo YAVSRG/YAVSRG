@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Multiplayer
 
+open System.Linq
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -15,6 +16,7 @@ open Interlude.UI.Components
 open Interlude.Features.Gameplay
 open Interlude.Features.LevelSelect
 open Interlude.Features.Online
+open Interlude.Features.Play
 
 type ContextMenu(cc: CachedChart) as this =
     inherit Page()
@@ -88,8 +90,8 @@ type SelectedChart() =
         
         this
         |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> L"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
-        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Artist + "  •  " + c.Creator | None -> ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
-        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DiffName else "???"), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Artist + "  •  " + c.Creator | None -> ""), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DiffName else "???"), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
 
         |+ Text((fun () -> SelectedChart.difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> SelectedChart.length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
@@ -98,47 +100,68 @@ type SelectedChart() =
         |+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> if SelectedChart.found then "" else L"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
-        // todo: move this and also make the chart itself clickable when host
+        |+ Clickable(
+            fun () -> 
+                if 
+                    Network.lobby.IsSome
+                    && Network.lobby.Value.YouAreHost 
+                then Screen.change Screen.Type.LevelSelect Transitions.Flags.Default
+            , Position = Position.SliceTop(100.0f)
+        )
+
+        // temporary way to spectate
+        |+ HotkeyAction("right", fun () -> Network.lobby.Value.Spectate <- not Network.lobby.Value.Spectate)
+
         |+ Conditional(
-            (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost),
-            StylishButton(
-                (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default),
-                K (sprintf "%s %s" Icons.reset (L"lobby.change_chart")),
+            (fun () -> Network.lobby.IsSome && SelectedChart.found && Network.lobby.Value.GameInProgress),
+                StylishButton(
+                (fun () ->
+                    let username = Network.lobby.Value.Players.Keys.First(fun p -> Network.lobby.Value.Players.[p].Status = LobbyPlayerStatus.Playing)
+                    Screen.changeNew 
+                        (fun () -> SpectateScreen.spectate_screen username)
+                        Screen.Type.Replay
+                        Transitions.Flags.Default
+                ),
+                K (sprintf "%s %s" Icons.preview (L"lobby.spectate")),
                 Style.dark 100,
                 TiltRight = false,
-                Position = { Position.TrimBottom(50.0f).SliceBottom(50.0f) with Left = 0.66f %- 0.0f }
+                Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f })
             )
-        )
         
-        |+ StylishButton(
-            (fun () -> 
-                if Network.lobby.IsSome && SelectedChart.found then
+        |+ Conditional(
+            (fun () -> Network.lobby.IsSome && SelectedChart.found && SelectedChart.chart.IsSome && not Network.lobby.Value.GameInProgress),
+
+            StylishButton(
+                (fun () -> 
                     Network.lobby.Value.ReadyStatus <-
                         match Network.lobby.Value.ReadyStatus with
                         | ReadyFlag.NotReady -> if Network.lobby.Value.Spectate then ReadyFlag.Spectate else ReadyFlag.Play
                         | _ -> ReadyFlag.NotReady
                     Lobby.set_ready Network.lobby.Value.ReadyStatus
-            ),
-            (fun () -> 
-                match Network.lobby with 
-                | Some l -> 
-                    match l.ReadyStatus with
-                    | ReadyFlag.NotReady -> 
-                        if Network.lobby.Value.Spectate then 
-                            sprintf "%s %s" Icons.preview (L"lobby.ready") 
-                        else 
-                            sprintf "%s %s" Icons.ready (L"lobby.ready")
-                    | _ -> sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")
-                | None -> "!"),
-            Style.dark 100,
-            TiltRight = false,
-            Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f })
-
-        // temporary way to spectate
-        //|+ HotkeyAction("right", fun () -> Network.lobby.Value.Spectate <- not Network.lobby.Value.Spectate)
+                ),
+                (fun () -> 
+                    match Network.lobby with 
+                    | Some l -> 
+                        match l.ReadyStatus with
+                        | ReadyFlag.NotReady -> 
+                            if Network.lobby.Value.Spectate then 
+                                sprintf "%s %s" Icons.preview (L"lobby.ready") 
+                            else 
+                                sprintf "%s %s" Icons.ready (L"lobby.ready")
+                        | _ -> sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")
+                    | None -> "!"),
+                Style.dark 100,
+                TiltRight = false,
+                Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f })
+            )
 
         |* Conditional(
-            (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.ReadyStatus <> ReadyFlag.NotReady),
+            (fun () -> 
+                Network.lobby.IsSome
+                && Network.lobby.Value.YouAreHost
+                && Network.lobby.Value.ReadyStatus <> ReadyFlag.NotReady
+                && not Network.lobby.Value.GameInProgress),
+
             StylishButton(
                 (fun () -> if Network.lobby.Value.Countdown then Lobby.cancel_round() else Lobby.start_round()),
                 (fun () -> 

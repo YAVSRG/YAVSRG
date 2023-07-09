@@ -6,6 +6,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Charts.Tools
+open Interlude.Web.Shared.Packets
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features
@@ -33,7 +34,7 @@ module SpectateScreen =
 
         override this.Init(parent) =
             this
-            |+ Timeline(Gameplay.Chart.current.Value, on_seek)
+            |+ Timeline(Gameplay.Chart.current.Value, ignore)
             |* Controls(Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 60.0f))
             base.Init parent
 
@@ -83,6 +84,7 @@ module SpectateScreen =
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
                 Song.onFinish <- SongFinishAction.Wait
+                Song.seek(replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
 
             override this.OnExit(next) =
                 base.OnExit(next)
@@ -93,7 +95,7 @@ module SpectateScreen =
                 let now = Song.timeWithOffset()
                 let chartTime = now - firstNote
 
-                if replay_data.Time() - chartTime < 3000.0f<ms> then
+                if replay_data.Time() - chartTime < MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms> then
                     if Song.playing() then Song.pause()
                 elif not (Song.playing()) then Song.resume()
             

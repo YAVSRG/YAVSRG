@@ -36,12 +36,13 @@ type Player(name: string, player: Network.LobbyPlayer) =
         let icon, fill, border = 
             match player.Status with
             | LobbyPlayerStatus.Ready -> Icons.ready, Colors.green, Colors.green_accent
+            | LobbyPlayerStatus.ReadyToSpectate -> Icons.preview, Colors.green, Colors.green_accent
             | LobbyPlayerStatus.Playing -> Icons.play, Colors.green, Colors.green_accent
-            | LobbyPlayerStatus.Spectating -> Icons.preview, Colors.cyan, Colors.cyan_accent
-            | LobbyPlayerStatus.AbandonedPlay -> Icons.not_ready, Colors.grey_2, Colors.grey_1
-            | LobbyPlayerStatus.MissingChart -> Icons.connection_failed, Colors.grey_2, Colors.grey_1
+            | LobbyPlayerStatus.Spectating -> Icons.preview, Colors.green, Colors.green_accent
+            | LobbyPlayerStatus.AbandonedPlay -> Icons.not_ready, Colors.grey_2.O1, Colors.white
+            | LobbyPlayerStatus.MissingChart -> Icons.connection_failed, Colors.grey_2.O1, Colors.white
             | LobbyPlayerStatus.NotReady
-            | _ -> "", Colors.grey_1, Colors.grey_1
+            | _ -> "", Colors.cyan, Colors.cyan_accent
 
         let b = this.Bounds.Expand(Style.padding)
         Draw.rect (b.SliceTop Style.padding) border.O3
@@ -67,7 +68,7 @@ type PlayerList() =
     inherit StaticContainer(NodeType.None)
 
     let other_players = FlowContainer.Vertical<Widget>(50.0f, Spacing = 5.0f)
-    let other_players_scroll = ScrollContainer.Flow(other_players, Position = Position.TrimTop 60.0f)
+    let other_players_scroll = ScrollContainer.Flow(other_players, Position = Position.TrimTop 60.0f, Margin = Style.padding)
 
     let refresh() =
         other_players.Clear()
