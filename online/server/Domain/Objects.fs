@@ -17,11 +17,13 @@ module Badge =
 
     let badge_color(badge: Badge) : int32 list =
         match badge with
-        | _ when badge = EARLYTESTER -> [0x0_66ff6e]
-        | _ when badge = MODERATOR -> [0x0_66c2ff]
-        | _ when badge = DEVELOPER -> [0x0_ff7559]
-        | _ when badge = DONATOR -> [0x0_ff8cdd; 0x0_ffd36e]
+        | _ when badge = EARLYTESTER -> [0xFF_66ff6e]
+        | _ when badge = MODERATOR -> [0xFF_66c2ff]
+        | _ when badge = DEVELOPER -> [0xFF_ff7559]
+        | _ when badge = DONATOR -> [0xFF_ff8cdd; 0xFF_ffd36e]
         | _ -> []
+
+    let DEFAULT_COLOR = 0xFF_cecfd9
 
 type User =
     {

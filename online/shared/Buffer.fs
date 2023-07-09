@@ -27,7 +27,7 @@ module Buffer =
             | Header_Size_2 (msb, lsb) ->
                 let packet_length = (int msb <<< 8) + int lsb
 
-                if packet_length = 0 then
+                if packet_length <= 0 then
                     buffer := Empty
                     packet (data.[offset], [||])
                 else

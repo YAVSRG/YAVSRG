@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 8uy
+    let PROTOCOL_VERSION = 9uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 3
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -213,12 +213,12 @@ module Packets =
         | LOGIN_FAILED of reason: string
 
         | LOBBY_LIST of lobbies: LobbyInfo array
-        | YOU_JOINED_LOBBY of players: string array // todo: send status along with username
+        | YOU_JOINED_LOBBY of players: (string * int32 * LobbyPlayerStatus) array
         | INVITED_TO_LOBBY of by_who: string * id: Guid
 
         | YOU_LEFT_LOBBY
         | YOU_ARE_HOST of bool
-        | PLAYER_JOINED_LOBBY of username: string
+        | PLAYER_JOINED_LOBBY of username: string * color: int32
         | PLAYER_LEFT_LOBBY of username: string
         | SELECT_CHART of LobbyChart
         | LOBBY_SETTINGS of LobbySettings
@@ -248,13 +248,13 @@ module Packets =
                 | 0x07uy -> LOGIN_FAILED (br.ReadString())
 
                 | 0x10uy -> LOBBY_LIST ( Array.init (br.ReadByte() |> int) (fun _ -> LobbyInfo.Read br) )
-                | 0x11uy -> YOU_JOINED_LOBBY ( Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString()) )
+                | 0x11uy -> YOU_JOINED_LOBBY ( Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString(), br.ReadInt32(), br.ReadByte() |> LanguagePrimitives.EnumOfValue) )
                 | 0x12uy -> INVITED_TO_LOBBY (br.ReadString(), new Guid(br.ReadBytes 16))
                 | 0x13uy -> SYSTEM_MESSAGE (br.ReadString())
 
                 | 0x20uy -> YOU_LEFT_LOBBY
                 | 0x21uy -> YOU_ARE_HOST (br.ReadBoolean())
-                | 0x22uy -> PLAYER_JOINED_LOBBY (br.ReadString())
+                | 0x22uy -> PLAYER_JOINED_LOBBY (br.ReadString(), br.ReadInt32())
                 | 0x23uy -> PLAYER_LEFT_LOBBY (br.ReadString())
                 | 0x24uy -> SELECT_CHART (LobbyChart.Read br)
                 | 0x25uy -> LOBBY_SETTINGS (LobbySettings.Read br)
@@ -292,14 +292,14 @@ module Packets =
                     0x10uy
                 | YOU_JOINED_LOBBY players -> 
                     bw.Write (byte players.Length)
-                    for player in players do bw.Write player
+                    for (player, color, status) in players do bw.Write player; bw.Write color; bw.Write (byte status)
                     0x11uy
                 | INVITED_TO_LOBBY (by_who, id) -> bw.Write by_who; bw.Write (id.ToByteArray()); 0x12uy
                 | SYSTEM_MESSAGE message -> bw.Write message; 0x13uy
 
                 | YOU_LEFT_LOBBY -> 0x20uy
                 | YOU_ARE_HOST you_are_host -> bw.Write you_are_host; 0x21uy
-                | PLAYER_JOINED_LOBBY username -> bw.Write username; 0x22uy
+                | PLAYER_JOINED_LOBBY (username, color) -> bw.Write username; bw.Write color; 0x22uy
                 | PLAYER_LEFT_LOBBY username -> bw.Write username; 0x23uy
                 | SELECT_CHART chart -> chart.Write bw; 0x24uy
                 | LOBBY_SETTINGS settings -> settings.Write bw; 0x25uy

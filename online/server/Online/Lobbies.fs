@@ -213,11 +213,10 @@ module Lobby =
 
                             if not (lobbies.ContainsKey lobby_id) then user_error player "Lobby no longer exists"
 
-
                             let lobby = lobbies.[lobby_id]
-                            let player_list = lobby.Players.Values |> Seq.map (fun p -> p.Username) |> Array.ofSeq
+                            let player_list = lobby.Players.Values |> Seq.map (fun p -> p.Username, Badge.DEFAULT_COLOR, p.Status) |> Array.ofSeq
 
-                            multicast(lobby, Downstream.PLAYER_JOINED_LOBBY username)
+                            multicast(lobby, Downstream.PLAYER_JOINED_LOBBY (username, Badge.DEFAULT_COLOR))
                             multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Join, username))
                             
                             in_lobby.Add(player, lobby_id)
@@ -226,8 +225,6 @@ module Lobby =
                             Server.send(player, Downstream.YOU_JOINED_LOBBY player_list)
                             Server.send(player, Downstream.LOBBY_SETTINGS lobby.Settings)
                             if lobby.Chart.IsSome then Server.send(player, Downstream.SELECT_CHART lobby.Chart.Value)
-                            for p in lobby.Players.Values do
-                                if p.Status <> LobbyPlayerStatus.NotReady then Server.send(player, Downstream.PLAYER_STATUS(p.Username, p.Status))
                             if lobby.GameRunning then Server.send(player, Downstream.GAME_START)
 
 
@@ -435,8 +432,21 @@ module Lobby =
                             multicast_except(player, lobby, Downstream.PLAYER_STATUS (username, LobbyPlayerStatus.Spectating))
                             for p in lobby.Players.Values do
                                 if p.Status = LobbyPlayerStatus.Playing && p.PlayPacketsReceived > 0 then
-                                    // todo: break play data that is too large into smaller packets, for when you start spectating late into a song
-                                    Server.send(player, Downstream.PLAY_DATA(p.Username, p.GetReplay()))
+                                    // 65532 is a multiple of 6 and less than the max packet size of 65535
+                                    let PACKET_SIZE = 65532
+
+                                    let data = p.GetReplay()
+                                    let mutable offset = 0
+                                    while data.Length - offset > PACKET_SIZE do
+                                        let sub_data = Array.zeroCreate PACKET_SIZE
+                                        Buffer.BlockCopy(data, offset, sub_data, 0, PACKET_SIZE)
+                                        offset <- offset + PACKET_SIZE
+                                        Server.send(player, Downstream.PLAY_DATA(p.Username, sub_data))
+                                    if offset > 0 then
+                                        let remaining_data = Array.zeroCreate (data.Length - offset)
+                                        Buffer.BlockCopy(data, offset, remaining_data, 0, remaining_data.Length)
+                                        Server.send(player, Downstream.PLAY_DATA(p.Username, remaining_data))
+                                    else Server.send(player, Downstream.PLAY_DATA(p.Username, data))
 
 
 
