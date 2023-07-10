@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="utf-8"/>
+		<title>{{title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="../../style.css" rel="stylesheet"/>
+    <link rel="icon" type="image/x-icon" href="../../favicon.ico"/>
     <script src="https://unpkg.com/feather-icons"></script>
   </head>
-  <body class="background-1 akrobat">
-    <span class="absolute m-3 p-2 frame top-5 left-4 cursor-pointer" onclick="openSidebar()">
+  <body class="background-2 akrobat flex flex-row">
+    <!-- sidebar -->
+    <span class="open-sidebar absolute lg:hidden m-3 p-2 frame top-5 left-4 cursor-pointer" onclick="toggleSidebar()">
       <i data-feather="chevrons-right" class="feather w-12 h-12"></i>
     </span>
-    <div class="sidebar fixed top-0 bottom-0 lg:left-0 px-4 overflow-y-auto">
+    <div class="sidebar fixed lg:static top-0 bottom-0 lg:left-0 px-4 overflow-y-auto">
       <div class="text-30">
         <div class="mx-4 mt-4 flex flex-row justify-between mx-auto items-center space-x-6">
-          <h1 class="pt-1">Interlude Wiki</h1>
-          <i data-feather="x" class="cursor-pointer lg:hidden" onclick="openSidebar()"></i>
+          <h1 class="pt-1 lg:mx-auto">Interlude Wiki</h1>
+          <i data-feather="x" class="cursor-pointer lg:hidden" onclick="toggleSidebar()"></i>
         </div>
       </div>
-      <hr/>
-      <div class="ml-3 text-20">
-        <h2>Gameplay</h2>
-        <ul class="ml-8 list-disc">
-          <li class="hover:underline"><a href="terms_of_service.html">How to play</a></li>
-          <li class="hover:underline"><a href="privacy_policy.html">How to play</a></li>
-          <li class="hover:underline"><a href="visited.html">How to play</a></li>
-        </ul>
+      <div class="text-20">
+        {{sidebar}}
       </div>
     </div>
+    
+		<div class="flex flex-col h-screen w-full justify-between">
+      <div class="mx-4">
+        <!-- content -->
+        <div class="w-full p-10 space-y-8">
+          {{content}}
+        </div>
+      </div>
+			
+			<!-- footer -->
+			<footer class="footer text-20 px-4 flex flex-row justify-center">
+				<span>© Percyqaz 2018-2023</span>
+			</footer>
+		</div>
 
     <script type="text/javascript">
-      function openSidebar() {
+      function toggleSidebar() {
         document.querySelector(".sidebar").classList.toggle("hidden");
+        document.querySelector(".open-sidebar").classList.toggle("lg:hidden");
       }
       feather.replace()
     </script>

@@ -114,6 +114,7 @@ p {
     background-color: var(--cyan);
     border-right: 5px solid var(--cyan-accent);
     box-shadow: var(--shadow-2-3a) 5px 5px 0;
+    width: 300px;
 }
 
 .feature {
