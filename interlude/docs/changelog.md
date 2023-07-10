@@ -3,16 +3,17 @@
 
 # New features
 - The options menu has been reorganised a little bit
-  Let me know what you think, hopefully you have to dig through fewer nested menus to find what you need now
+  - Let me know what you think, hopefully you have to dig through fewer nested menus to find what you need now
 - 'Advanced' settings is the home of opt-in experimental features
 - Notification for taking a screenshot has a button to open the screenshots folder (requested by Wagg)
 - New setting for hit meter to turn off the scaling factor for LN releases (requested by Lifly)
 - You can change your ruleset while in multiplayer lobbies
 - You can seek while watching replays to skip to where you want
 
-- Pattern analyzer: It's still a work-in-progress, but I've simplified its output to be presentable to users
-  Press the tooltip hotkey (/ by default) while hovering over the difficulty rating to see this info
-  With your feedback, it will become even more useful
+### Pattern analyser
+It's still a work-in-progress, but I've simplified its output to be presentable to users  
+Press the tooltip hotkey (/ by default) while hovering over the difficulty rating to see this info  
+With your feedback, it will become even more useful
   
 # Improvements
 - Mod select menu looks a little less poo
@@ -348,16 +349,15 @@ I won't say more than that as hopefully the new UI stuff ingame lets you find ou
 0.6.10.4
 ====
 
-Fixed not being able to connect to the online server
+Fixed not being able to connect to the online server  
 I commented something out and forgot to put it back
 
 0.6.10.3
 ====
 
-Minor bug fixes
+- Minor bug fixes
 - When login fails, the server doesn't just kick you with a message any more
 - Idle connections time out after 2 minutes, fixing "Username is already taken" bug
-
 
 0.6.10.2
 ====
@@ -751,9 +751,9 @@ This release is a test of my automated publishing system :)
 0.5.16
 ====
 
-Some bug fixes
-Major refactor to UI (no visible changes)
-Noteskin repository! Go to the imports screen to see the (at time of release) single noteskin that's available. Feel free to send me noteskins to be available there (I am also going to add some more soon)
+- Some bug fixes
+- Major refactor to UI (no visible changes)
+- Noteskin repository! Go to the imports screen to see the (at time of release) single noteskin that's available. Feel free to send me noteskins to be available there (I am also going to add some more soon)
 
 0.5.15
 ====
