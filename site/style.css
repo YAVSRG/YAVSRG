@@ -110,6 +110,12 @@ p {
     border-top: 5px solid var(--cyan-accent);
 }
 
+.sidebar {
+    background-color: var(--cyan);
+    border-right: 5px solid var(--cyan-accent);
+    box-shadow: var(--shadow-2-3a) 5px 5px 0;
+}
+
 .feature {
     width: 90%;
     margin-left: auto;
@@ -121,4 +127,20 @@ hr {
     border-top: 5px solid #ffffff;
     box-shadow: var(--shadow-2-1a) 5px 5px 0;
     margin: 20px auto
+}
+
+.feather {
+    width: 40px;
+    height: 40px;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    
+    filter: drop-shadow(3px 3px 0 var(--shadow-2-2a));
+    fill: none;
+}
+
+a:visited  {
+    color: #cdb2d7;
 }

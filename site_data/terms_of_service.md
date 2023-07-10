@@ -1,7 +1,7 @@
 # Interlude terms of service
 Last updated 29th May 2023.
 
-"**Interlude**" refers to this site (https://yavsrg.net), the Interlude game client as available on [GitHub](https://github.com/YAVSRG/Interlude), and any affiliated services. These services are offered to You, conditioned on your acceptance of these terms and conditions.
+"**Interlude**" refers to this site [https://yavsrg.net](https://yavsrg.net), the Interlude game client as available on [GitHub](https://github.com/YAVSRG/Interlude), and any affiliated services. These services are offered to You, conditioned on your acceptance of these terms and conditions.
 "You" and "Your" refers to you, the person accessing this website and accepting Interlude's terms and conditions.
 
 By using any of Interlude's online services, or the Interlude game client while connected to the online services, you are acknowledging your full compliance with these terms and conditions, without any modification. If you do not agree with all of these terms and conditions, you are expressly prohibited from using the services and must discontinue use immediately.
