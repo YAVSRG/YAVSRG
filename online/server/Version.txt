@@ -1,1 +1,1 @@
-﻿fix command to display more than 10 users :)
+﻿SPECTATOR SUPPORT
