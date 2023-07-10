@@ -124,7 +124,7 @@ module Song =
             match onFinish with
             | SongFinishAction.Loop -> playFrom 0.0f<ms>
             | SongFinishAction.Wait -> ()
-            | SongFinishAction.Stop -> pause()
+            | SongFinishAction.Stop -> pause() // todo: don't pause every frame
             | SongFinishAction.Callback f -> f()
 
 type SoundEffect =
