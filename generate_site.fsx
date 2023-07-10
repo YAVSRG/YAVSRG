@@ -50,7 +50,7 @@ module MarkdownToHtml =
     let render_document (md: MarkdownDocument) = paragraphs md.Paragraphs
 
 let template = File.ReadAllText("./site_data/page.html")
-let template_m = File.ReadAllText("./site_data/page_m.html")
+let changelog_template = File.ReadAllText("./site_data/changelog.html")
 
 let build_page (file: string) (title: string) (content: string) =
     template
@@ -63,7 +63,7 @@ let build_mpage (file: string) (title: string) (contents: string array) =
         contents
         |> Array.map (sprintf "<div class=\"frame text-20 container flex flex-col mx-auto p-4\">%s</div>")
         |> String.concat ""
-    template_m
+    changelog_template
         .Replace("{{title}}", title)
         .Replace("{{content}}", content)
         |> fun t -> File.WriteAllText(file, t)
@@ -84,7 +84,7 @@ File.ReadAllText("./Interlude/docs/changelog.md")
 |> Array.except [""]
 |> Array.map Markdown.Parse
 |> Array.map MarkdownToHtml.render_document
-|> build_mpage "./site/changelog.html" "Changelog"
+|> build_mpage "./site/interlude/changelog.html" "Changelog"
 
 let title (filename: string) =
     let clean = filename.Replace(".md", "").Replace("_", " ")

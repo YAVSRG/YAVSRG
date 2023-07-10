@@ -2,14 +2,14 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-Percyqaz.Common
-Percyqaz.Flux
-Prelude
-Interlude.Noteskins
+./Percyqaz.Common
+./Percyqaz.Flux
+./Prelude
+./Interlude.Noteskins
 ./Interlude
-Interlude.Web
-Backbeat
-Interlude.Assets
+./Interlude.Web
+./Backbeat
+./Interlude.Assets
 .vs
 **/bin
 **/obj
