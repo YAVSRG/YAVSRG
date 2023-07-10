@@ -19,11 +19,12 @@ To play the game, download the latest release
 
 Build for development:
 ```
-cd Interlude/src
-dotnet build
-cd bin/Debug/net7.0
-# to run: ./Interlude.exe or ./Interlude depending on platform
-# + you need to put the correct bass library in your build directory
+cd Interlude
+./interlude.sh
+# The game will crash upon first startup, because
+# you need the correct bass.dll/dynlib/so for your platform placed in ./src/bin/Debug/net7.0
+# Get it here https://github.com/percyqaz/Percyqaz.Flux/tree/master/lib
+# If your platform isn't there contact me in the discord or search online for it
 ```
 
 Run the same toolchain that CI does to make a distributable build:
