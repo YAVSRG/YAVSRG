@@ -34,7 +34,7 @@ module SpectateScreen =
 
         override this.Init(parent) =
             this
-            |+ Timeline(Gameplay.Chart.current.Value, ignore)
+            |+ Timeline(Gameplay.Chart.current.Value, on_seek)
             |* Controls(Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 60.0f))
             base.Init parent
 
@@ -81,7 +81,7 @@ module SpectateScreen =
                 add_widget MultiplayerScoreTracker
 
                 this
-                |* ControlOverlay(fun t -> Song.seek t)
+                |* ControlOverlay(ignore)
 
             override this.OnEnter(prev) =
                 base.OnEnter(prev)

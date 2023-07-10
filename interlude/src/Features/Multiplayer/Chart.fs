@@ -108,9 +108,23 @@ type SelectedChart() =
                 then Screen.change Screen.Type.LevelSelect Transitions.Flags.Default
             , Position = Position.SliceTop(100.0f)
         )
+        
+        |+ Conditional(
+            (fun () -> 
+                Network.lobby.IsSome
+                && SelectedChart.found
+                && SelectedChart.chart.IsSome
+                && not Network.lobby.Value.GameInProgress
+                && Network.lobby.Value.ReadyStatus = ReadyFlag.NotReady),
 
-        // temporary way to spectate
-        |+ HotkeyAction("right", fun () -> Network.lobby.Value.Spectate <- not Network.lobby.Value.Spectate)
+            StylishButton(
+                (fun () -> Network.lobby.Value.Spectate <- not Network.lobby.Value.Spectate),
+                (fun () -> 
+                    if Network.lobby.Value.Spectate then sprintf "%s %s" Icons.preview (L"lobby.spectator")
+                    else sprintf "%s %s" Icons.play (L"lobby.player")),
+                Style.main 100,
+                Position = { Position.SliceBottom(50.0f) with Right = 0.5f %- 25.0f })
+            )
 
         |+ Conditional(
             (fun () -> Network.lobby.IsSome && SelectedChart.found && Network.lobby.Value.GameInProgress),
@@ -125,7 +139,7 @@ type SelectedChart() =
                 K (sprintf "%s %s" Icons.preview (L"lobby.spectate")),
                 Style.dark 100,
                 TiltRight = false,
-                Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f })
+                Position = { Position.SliceBottom(50.0f) with Left = 0.5f %- 0.0f })
             )
         
         |+ Conditional(
@@ -152,7 +166,7 @@ type SelectedChart() =
                     | None -> "!"),
                 Style.dark 100,
                 TiltRight = false,
-                Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f })
+                Position = { Position.SliceBottom(50.0f) with Left = 0.5f %- 0.0f })
             )
 
         |* Conditional(
@@ -168,7 +182,7 @@ type SelectedChart() =
                     if Network.lobby.Value.Countdown then sprintf "%s %s" Icons.connection_failed (L"lobby.cancel_game")
                     else sprintf "%s %s" Icons.play (L"lobby.start_game")),
                 Style.main 100,
-                Position = { Position.SliceBottom(50.0f) with Left = 0.33f %+ 0.0f; Right = 0.66f %- 25.0f }
+                Position = { Position.SliceBottom(50.0f) with Right = 0.5f %- 25.0f }
             )
         )
 
