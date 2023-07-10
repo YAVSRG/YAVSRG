@@ -1,5 +1,7 @@
 ﻿namespace Interlude.Features.LevelSelect
 
+open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude.Charts.Tools.Patterns
 open Interlude.Features
 open Interlude.UI
@@ -44,8 +46,12 @@ module Patterns =
                 yield (name, bpm)
         } |> List.ofSeq
 
-    let display() =
-        let mutable c = Callout.Normal.Title("What's in this chart?")
-        for (pattern, bpm) in List.truncate 5 report do
-            c <- c.Body(sprintf "%i BPM %s" bpm pattern)
-        c.Body("^ These are the top matches. Pattern analysis is a WIP")
+    let display =
+        { new StaticWidget(NodeType.None, Position = Position.TrimBottom(120.0f)) with 
+            override this.Draw() =
+                Text.drawFillB(Style.baseFont, "What's in this chart?", this.Bounds.SliceTop(70.0f).Shrink(10.0f), Colors.text, Alignment.CENTER)
+                let mutable b = this.Bounds.SliceTop(40.0f).Shrink(10.0f, 0.0f).Translate(0.0f, 70.0f)
+                for (pattern, bpm) in List.truncate 10 report do
+                    Text.drawFillB(Style.baseFont, sprintf "%i BPM %s" bpm pattern, b, Colors.text_subheading, Alignment.CENTER)
+                    b <- b.Translate(0.0f, 45.0f)
+        }

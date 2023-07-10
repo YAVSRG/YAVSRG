@@ -18,18 +18,23 @@ open Interlude.Features.Gameplay
 type ChartInfo() as this =
     inherit StaticContainer(NodeType.None)
 
-    let scores = Scoreboard(Position = Position.TrimBottom 120.0f)
+    let scoreboard = Scoreboard(Position = Position.TrimBottom 120.0f)
     let mutable length = ""
     let mutable bpm = ""
     let mutable notecounts = ""
+
+    let mutable show_patterns = false
     
     let changeRate v = 
         rate.Value <- rate.Value + v
         LevelSelect.refresh_details()
+        Patterns.update_report()
 
     do
         this
-        |+ scores
+        |+ Conditional((fun () -> not show_patterns), scoreboard)
+
+        |+ Conditional((fun () -> show_patterns), Patterns.display)
 
         |+ Text(
             fun () -> sprintf "%s %.2f" Icons.star (match Chart.rating with None -> 0.0 | Some d -> d.Physical)
@@ -47,16 +52,6 @@ type ChartInfo() as this =
             (fun () -> length),
             Align = Alignment.RIGHT,
             Position = { Left = 0.66f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 100.0f })
-
-        |+ 
-            { new StaticWidget(NodeType.None, Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 100.0f }) with
-                override this.Update(elapsedTime, moved) = 
-                    base.Update(elapsedTime, moved)
-                    if Mouse.hover this.Bounds then
-                        Notifications.tooltip_available <- true
-                        if (!|"tooltip").Tapped() then Notifications.tooltip ((!|"tooltip"), this, Patterns.display())
-                override this.Draw() = ()
-            }
 
         |+ Text(
             (fun () -> notecounts),
@@ -87,7 +82,7 @@ type ChartInfo() as this =
             Position = { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.33f %- 25.0f; Bottom = 1.0f %- 0.0f })
             .Tooltip(Tooltip.Info("levelselect.preview", "preview"))
 
-        |+ ModSelect(scores.Refresh,
+        |+ ModSelect(scoreboard.Refresh,
              Position = { Left = 0.33f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.66f %- 25.0f; Bottom = 1.0f %- 0.0f })
             .Tooltip(Tooltip.Info("levelselect.mods", "mods"))
         
@@ -103,9 +98,11 @@ type ChartInfo() as this =
         length <- Chart.format_duration()
         bpm <- Chart.format_bpm()
         notecounts <- Chart.format_notecounts()
-        scores.Refresh()
+        scoreboard.Refresh()
 
     override this.Update(elapsedTime, moved) =
+        if (!|"scoreboard_storage").Tapped() then show_patterns <- not show_patterns
+
         base.Update(elapsedTime, moved)
 
         if (!|"uprate_small").Tapped() then changeRate(0.01f)

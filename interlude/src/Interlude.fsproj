@@ -94,8 +94,8 @@
     <Compile Include="Features\LevelSelect\Tree.fs" />
     <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
-    <Compile Include="Features\LevelSelect\Scoreboard.fs" />
     <Compile Include="Features\LevelSelect\Patterns.fs" />
+    <Compile Include="Features\LevelSelect\Scoreboard.fs" />
     <Compile Include="Features\LevelSelect\ChartInfo.fs" />
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect.fs" />
