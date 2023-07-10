@@ -126,6 +126,7 @@ type private HoldState =
     | Dropped
     | MissedHead
 
+[<Struct>]
 type ScoreMetricSnapshot =
     {
         Time: ChartTime
