@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Play
 
+open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
@@ -103,6 +104,7 @@ module PlayScreen =
                 if not (liveplay :> IReplayProvider).Finished then
                     // feed keyboard input into the replay provider
                     Input.consumeGameplay(binds, fun column time isRelease ->
+                        if time > now then Logging.Debug("Received input event from the future") else
                         if isRelease then inputKeyState <- Bitmask.unsetBit column inputKeyState
                         else inputKeyState <- Bitmask.setBit column inputKeyState
                         liveplay.Add(time, inputKeyState) )
@@ -198,6 +200,7 @@ module PlayScreen =
                         send_replay_packet(now)
 
                     Input.consumeGameplay(binds, fun column time isRelease ->
+                        if time > now then Logging.Debug("Received input event from the future") else
                         if isRelease then inputKeyState <- Bitmask.unsetBit column inputKeyState
                         else inputKeyState <- Bitmask.setBit column inputKeyState
                         liveplay.Add(time, inputKeyState) )

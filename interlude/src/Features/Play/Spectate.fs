@@ -8,6 +8,7 @@ open Prelude
 open Prelude.Charts.Tools
 open Interlude.Web.Shared.Packets
 open Interlude.Content
+open Interlude.Utils
 open Interlude.UI
 open Interlude.Features
 open Interlude.Features.Online
@@ -15,18 +16,21 @@ open Interlude.Features.Play.HUD
 
 module SpectateScreen =
 
-    type Controls() =
+    type Controls(who: unit -> string, cycle: unit -> unit) =
         inherit StaticContainer(NodeType.None)
 
         override this.Init(parent) =
-            // todo: controls for choosing who to spec
+            this
+            |+ Text("Currently spectating", Color = K Colors.text_subheading, Align = Alignment.CENTER, Position = Position.SliceTop(40.0f))
+            |+ Text(who, Color = K Colors.text, Align = Alignment.CENTER, Position = Position.TrimTop(40.0f))
+            |* Clickable(cycle)
             base.Init parent
 
         override this.Draw() =
             Draw.rect this.Bounds Colors.black.O2
             base.Draw()
 
-    type ControlOverlay(on_seek) =
+    type ControlOverlay(on_seek, who, cycle) =
         inherit DynamicContainer(NodeType.None)
 
         let mutable show = true
@@ -35,7 +39,7 @@ module SpectateScreen =
         override this.Init(parent) =
             this
             |+ Timeline(Gameplay.Chart.current.Value, on_seek)
-            |* Controls(Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 60.0f))
+            |* Controls(who, cycle, Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
             base.Init parent
 
         override this.Update(elapsedTime, moved) =
@@ -53,17 +57,37 @@ module SpectateScreen =
     let spectate_screen(username: string) =
 
         let chart = Gameplay.Chart.withMods.Value
-        let scoring = fst Gameplay.Online.Multiplayer.replays.[username]
-        let replay_data = Network.lobby.Value.Players.[username].Replay
+
+        let mutable currently_spectating = username
+        let mutable scoring = fst Gameplay.Online.Multiplayer.replays.[username]
+        let mutable replay_data = Network.lobby.Value.Players.[username].Replay
+
+        let cycle_spectator(screen: IPlayScreen) =
+            let users_available_to_spectate =
+                let players = Network.lobby.Value.Players
+                players.Keys
+                |> Seq.filter (fun p -> players.[p].Status = LobbyPlayerStatus.Playing)
+                |> Array.ofSeq
+
+            let next_user =
+                match Array.tryFindIndex (fun u -> u = currently_spectating) users_available_to_spectate with
+                | None -> users_available_to_spectate.[0]
+                | Some i -> users_available_to_spectate.[(i + 1) % users_available_to_spectate.Length]
+
+            currently_spectating <- next_user
+            scoring <- fst Gameplay.Online.Multiplayer.replays.[next_user]
+            replay_data <- Network.lobby.Value.Players.[next_user].Replay
+            Song.seek(replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
+            screen.State.ChangeScoring scoring
 
         let firstNote = chart.Notes.[0].Time
+        let lastNote = chart.Notes.[chart.Notes.Length - 1].Time
         let ruleset = Rulesets.current
 
         let mutable wait_for_load = 1000.0
+        let mutable exiting = false
 
         Lobby.start_spectating()
-
-        let handler = Network.Events.game_end.Subscribe (fun () -> Screen.back Transitions.Flags.Default)
 
         { new IPlayScreen(chart, PacemakerInfo.None, ruleset, scoring) with
             override this.AddWidgets() =
@@ -81,16 +105,15 @@ module SpectateScreen =
                 add_widget MultiplayerScoreTracker
 
                 this
-                |* ControlOverlay(ignore)
+                |* ControlOverlay(ignore, (fun () -> currently_spectating), fun () -> if Network.lobby.IsSome then cycle_spectator this)
 
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
-                Song.onFinish <- SongFinishAction.Wait
                 Song.pause()
 
             override this.OnExit(next) =
                 base.OnExit(next)
-                handler.Dispose()
+                Song.resume()
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
@@ -108,6 +131,10 @@ module SpectateScreen =
                 if replay_data.Time() - chartTime < MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms> then
                     if Song.playing() then Song.pause()
                 elif not (Song.playing()) then Song.resume()
-            
+
                 scoring.Update chartTime
+
+                if this.State.Scoring.Finished && not exiting then
+                    exiting <- true
+                    Screen.back Transitions.Flags.Default
         }
