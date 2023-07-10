@@ -1,12 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <RepositoryUrl>https://github.com/YAVSRG/Interlude</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.6.22</AssemblyVersion>
-    <FileVersion>0.6.22</FileVersion>
+    <AssemblyVersion>0.6.23</AssemblyVersion>
+    <FileVersion>0.6.23</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
