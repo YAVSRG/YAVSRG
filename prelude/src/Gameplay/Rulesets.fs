@@ -87,22 +87,6 @@ type GradingConfig =
         Lamps: Lamp array
     }
     member this.Validate jcount = this //nyi, could check lamps
-    
-[<Json.AutoCodec>]
-type HealthBarConfig =
-    {
-        StartingHealth: float
-        OnlyFailAtEnd: bool
-        ClearThreshold: float
-        Points: float array
-    }
-    member this.Validate name jcount =
-        { this with
-            Points = 
-                if this.Points.Length <> jcount then
-                    Logging.Error (sprintf "Problem with ruleset '%s': %i hp weights given for %i judgements" name this.Points.Length jcount)
-                this.Points
-        }
 
 [<Json.AutoCodec>]
 type AccuracyConfig =
@@ -135,7 +119,6 @@ type Ruleset =
 
         Judgements: Judgement array
         Accuracy: AccuracyConfig
-        Health: HealthBarConfig
         Grading: GradingConfig
     }
     member this.DefaultJudgement : JudgementId = this.Judgements.Length - 1
@@ -155,7 +138,6 @@ type Ruleset =
     member this.Validate =
         { this with
             Accuracy = this.Accuracy.Validate this.Name this.Judgements.Length
-            Health = this.Health.Validate this.Name this.Judgements.Length
             Grading = this.Grading.Validate this.Judgements.Length
         }
 
@@ -190,11 +172,6 @@ module Ruleset =
                 bw.Write (float32 t)
                 bw.Write j
         | HoldNoteBehaviour.OnlyJudgeReleases -> bw.Write 1s
-        bw.Write config.Health.StartingHealth
-        bw.Write config.Health.ClearThreshold
-        bw.Write config.Health.OnlyFailAtEnd
-        for p in config.Health.Points do
-            bw.Write p
         for g in config.Grading.Grades do
             bw.Write g.Accuracy
         for l in config.Grading.Lamps do
@@ -322,13 +299,6 @@ module PrefabRulesets =
                         Points = AccuracyPoints.WifeCurve judge
                         HoldNoteBehaviour = HoldNoteBehaviour.JustBreakCombo
                     }
-                Health =
-                    {
-                        StartingHealth = 0.5
-                        OnlyFailAtEnd = false
-                        ClearThreshold = 0.0
-                        Points = [|0.008; 0.008; 0.004; 0.0; -0.04; -0.08|]
-                    }
                 Grading = 
                     {
                         Grades = 
@@ -399,14 +369,6 @@ module PrefabRulesets =
                         Points = AccuracyPoints.Weights (300.0, [|300.0; 300.0; 200.0; 100.0; 50.0; 0.0|])
                         HoldNoteBehaviour = HoldNoteBehaviour.Osu od
                     }
-                Health =
-                    {
-                        StartingHealth = 1.0
-                        OnlyFailAtEnd = false
-                        ClearThreshold = 0.0
-                        // Roughly HP8
-                        Points = [|0.008; 0.008; 0.004; 0.0; -0.033; -0.066|]
-                    }
                 Grading = 
                     {
                         Grades = 
@@ -454,13 +416,6 @@ module PrefabRulesets =
                         Timegates = DP.windows judge false
                         Points = AccuracyPoints.Weights (10.0, [|10.0; 9.0; 5.0; -5.0; -10.0; -10.0|])
                         HoldNoteBehaviour = HoldNoteBehaviour.Normal {| JudgementIfDropped = 3; JudgementIfOverheld = 3 |}
-                    }
-                Health =
-                    {
-                        StartingHealth = 0.5
-                        OnlyFailAtEnd = false
-                        ClearThreshold = 0.0
-                        Points = [|0.008; 0.008; 0.004; 0.0; -0.04; -0.08|]
                     }
                 Grading = 
                     {
@@ -529,13 +484,6 @@ module PrefabRulesets =
                         Timegates = [-data.Critical, 1; data.Critical, 0; data.Near, 1]
                         Points = AccuracyPoints.Weights (1.0, [|1.0; 0.5; 0.0; 0.0|])
                         HoldNoteBehaviour = HoldNoteBehaviour.Normal {| JudgementIfDropped = 2; JudgementIfOverheld = 1 |}
-                    }
-                Health =
-                    {
-                        StartingHealth = 0.5
-                        OnlyFailAtEnd = false
-                        ClearThreshold = 0.0
-                        Points = [|0.008; 0.004; 0.0; -0.08|]
                     }
                 Grading = 
                     {

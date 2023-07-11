@@ -43,51 +43,6 @@ type HitEvent<'Guts> =
     }
 
 (*
-    Health bar system to be attached to other metrics (Bars are dependent on/coupled with the judgements scored according to other systems)
-    These maintain a meter that fills as you hit notes well, and depletes as you hit notes badly (or miss)
-    Falling below a certain level of "health" causes you to "fail" a chart
-        Players can choose what the consequences of for failure (ending play immediately, just a flag on score screen, etc)
-
-    In some games health bar is the main metric for competence at a chart
-        Here its purpose is primarily to push players away from charts that are clearly too hard rather than being the arbiter
-    (But things are complete enough here for you to simulate clear-oriented play as in those certain games e.g. BMS)
-*)
-
-type HealthBarState =
-    {
-        mutable HasFailed: bool
-        mutable CurrentlyFailed: bool
-        mutable Health: float
-    }
-
-type HealthBarMetric(config: HealthBarConfig) =
-
-    member val State: HealthBarState = 
-        { 
-            HasFailed = false
-            CurrentlyFailed = false
-            Health = config.StartingHealth
-        }
-
-    member this.ChangeHP (x: float) =
-        let newHP = Math.Clamp(this.State.Health + x, 0.0, 1.0)
-        this.State.Health <- newHP
-        if this.FailCondition newHP then
-            this.State.HasFailed <- true
-            this.State.CurrentlyFailed <- true
-        else this.State.CurrentlyFailed <- false
-        
-    member this.Failed = if config.OnlyFailAtEnd then this.State.CurrentlyFailed else this.State.HasFailed
-    member this.Format() = sprintf "%.2f%%" (this.State.Health * 100.0)
-
-    member this.FailCondition hp = hp <= config.ClearThreshold
-
-    member this.HandleEvent ev =
-        match ev.Guts with
-        | Hit evData -> match evData.Judgement with Some j -> this.ChangeHP(config.Points[j]) | None -> ()
-        | Release evData -> match evData.Judgement with Some j -> this.ChangeHP(config.Points[j]) | None -> ()
-
-(*
     Accuracy/scoring system metric.
     Each note you hit is assigned a certain number of points - Your % accuracy is points scored out of the possible maximum.
     Combo/combo breaking also built-in - Your combo is the number of notes hit well in a row
@@ -130,7 +85,6 @@ type private HoldState =
 type ScoreMetricSnapshot =
     {
         Time: ChartTime
-        HP: float
         PointsScored: float
         MaxPointsScored: float
         Combo: int
@@ -141,7 +95,6 @@ type ScoreMetricSnapshot =
 type IScoreMetric
     (
         ruleset: Ruleset,
-        healthBar: HealthBarMetric,
         keys: int,
         replayProvider: IReplayProvider,
         notes: TimeArray<NoteRow>,
@@ -185,7 +138,6 @@ type IScoreMetric
         let v = this.State.PointsScored / this.State.MaxPointsScored
         if Double.IsNaN v then 1.0 else v
     member this.FormatAccuracy() = sprintf "%.2f%%" (this.Value * 100.0)
-    member this.HP = healthBar
     member this.MissWindow = ruleset.Accuracy.MissWindow
     member this.ScaledMissWindow = missWindow
     member this.Ruleset = ruleset
@@ -225,7 +177,6 @@ type IScoreMetric
             snapshots.Add
                     { 
                         Time = relativeTime
-                        HP = this.HP.State.Health
                         PointsScored = this.State.PointsScored
                         MaxPointsScored = this.State.MaxPointsScored
                         Combo = this.State.CurrentCombo 
@@ -343,7 +294,6 @@ type IScoreMetric
         let ev = this.HandleEvent ev
         hitEvents.Add ev
         onHit.Trigger ev
-        healthBar.HandleEvent ev
 
 module Helpers =
 
@@ -363,7 +313,7 @@ module Helpers =
 // Concrete implementation of rulesets
 
 type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
-    inherit IScoreMetric(config, HealthBarMetric(config.Health), keys, replay, notes, rate)
+    inherit IScoreMetric(config, keys, replay, notes, rate)
 
     let headJudgements = Array.create keys config.DefaultJudgement
     let headDeltas = Array.create keys config.Accuracy.MissWindow

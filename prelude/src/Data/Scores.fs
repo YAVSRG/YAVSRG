@@ -30,7 +30,6 @@ type Bests =
         Lamp: PersonalBests<int>
         Accuracy: PersonalBests<float>
         Grade: PersonalBests<int>
-        Clear: PersonalBests<bool>
     }
 
 [<Json.AutoCodec(false)>]
@@ -100,8 +99,6 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
             |> ValueSome
         metrics.Value
 
-    member this.HP = this.Scoring.HP
-
     member this.Difficulty
         with get() =
             difficulty <- ValueOption.defaultWith (fun () -> RatingReport (this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys)) difficulty |> ValueSome
@@ -140,40 +137,32 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
 [<Json.AutoCodec>]
 type ImprovementFlags =
     {
-        // future: marker of if you beat a bucket score/goals achieved etc
         Lamp: Improvement<int>
         Accuracy: Improvement<float>
         Grade: Improvement<int>
-        Clear: Improvement<bool>
     }
     static member Default = 
         {
             Lamp = Improvement.None
             Accuracy = Improvement.None
             Grade = Improvement.None
-            Clear = Improvement.None
         }
 
 module Bests =
-
-    let private btoi = function true -> 1 | _ -> 0
-    let private itob = fun x -> x > 0
 
     let update (score: ScoreInfoProvider) (existing: Bests) : Bests * ImprovementFlags =
         let l, lp = PersonalBests.update (score.Lamp, score.ScoreInfo.rate) existing.Lamp
         let a, ap = PersonalBests.update (score.Scoring.Value, score.ScoreInfo.rate) existing.Accuracy
         let g, gp = PersonalBests.update (score.Grade, score.ScoreInfo.rate) existing.Grade
-        let c, cp = PersonalBests.update (not score.HP.Failed |> btoi, score.ScoreInfo.rate) (existing.Clear |> PersonalBests.map btoi)
         
-        { Lamp = l; Accuracy = a; Grade = g; Clear = c |> PersonalBests.map itob },
-        { Lamp = lp; Accuracy = ap; Grade = gp; Clear = cp |> Improvement.map itob }
+        { Lamp = l; Accuracy = a; Grade = g },
+        { Lamp = lp; Accuracy = ap; Grade = gp }
 
     let create (score: ScoreInfoProvider) : Bests =
         {
             Lamp = PersonalBests.create (score.Lamp, score.ScoreInfo.rate)
             Accuracy = PersonalBests.create (score.Scoring.Value, score.ScoreInfo.rate)
             Grade = PersonalBests.create (score.Grade, score.ScoreInfo.rate)
-            Clear = PersonalBests.create (not score.HP.Failed, score.ScoreInfo.rate)
         }
 
 module Scores =
@@ -215,4 +204,4 @@ module Scores =
             flags
         else
             d.Bests.Add(rulesetId, Bests.create score)
-            { Lamp = Improvement.New; Accuracy = Improvement.New; Grade = Improvement.New; Clear = Improvement.New }
+            { Lamp = Improvement.New; Accuracy = Improvement.New; Grade = Improvement.New }

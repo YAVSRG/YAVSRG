@@ -15,7 +15,6 @@ open Prelude.Gameplay
 type ThemeConfig = 
     {
         Name: string
-        ClearColors: Color * Color
         PBColors: Color array
         Font: string
         DefaultAccentColor: Color
@@ -25,7 +24,6 @@ type ThemeConfig =
     static member Default : ThemeConfig = 
         {
             Name = "Unnamed Theme"
-            ClearColors = (Color.FromArgb(255, 127, 255, 180), Color.FromArgb(255, 255, 160, 140))
             PBColors = 
                 [|
                     Color.Transparent

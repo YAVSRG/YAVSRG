@@ -84,36 +84,6 @@ module HUD =
             }
 
     [<Json.AutoCodec(false)>]
-    type LifeMeter =
-        {
-            Position: WidgetPosition
-            Horizontal: bool
-            TipColor: Color
-            FullColor: Color
-            EmptyColor: Color
-        }
-        static member Default =
-            {
-                Position =
-                    {
-                        Enabled = false
-                        Float = false
-                        Left = 0.0f
-                        LeftA = 1.0f
-                        Top = 0.0f
-                        TopA = 0.6f
-                        Right = 20.0f
-                        RightA = 1.0f
-                        Bottom = 0.0f
-                        BottomA = 1.0f
-                    }
-                Horizontal = false
-                TipColor = Color.FromArgb(100, Color.Red)
-                FullColor = Color.White
-                EmptyColor = Color.Red
-            }
-
-    [<Json.AutoCodec(false)>]
     type Combo =
         {
             Position: WidgetPosition
