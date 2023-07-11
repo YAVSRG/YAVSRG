@@ -95,6 +95,13 @@ module Printerlude =
                     File.Delete beatmapFile
                     Logging.Info "Cleaned up."
                 with err -> Logging.Error ("Error while cleaning up after export", err)
+
+        let fix_personal_bests() =
+            for entry in Prelude.Data.Scores.Scores.data.Entries.Values do
+                if entry.Bests.ContainsKey("SC(J4)BC581C") then
+                    entry.Bests.["SC(J4)548E5A"] <- entry.Bests.["SC(J4)BC581C"]
+                if entry.Bests.ContainsKey("Wife3(J4)E92BD3") then
+                    entry.Bests.["Wife3(J4)1AFE7B"] <- entry.Bests.["Wife3(J4)E92BD3"]
         
         let register_commands (ctx: ShellContext) = 
             ctx
@@ -102,6 +109,7 @@ module Printerlude =
                 .WithCommand("exit", "Exits the game", fun () -> UI.Screen.exit <- true)
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
                 .WithCommand("export_osz", "Export current chart as osz", export_osz)
+                .WithCommand("fix_personal_bests", "Fix personal best display values", fix_personal_bests)
                 .WithCommand("patterns", "Experimental", analyse_patterns)
                 .WithCommand("local_server", "Switch to local development server", "flag", fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); ctx.WriteLine("Restart your game to apply server change."))
 
