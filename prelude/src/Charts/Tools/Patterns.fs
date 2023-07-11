@@ -4,42 +4,6 @@ open System.Collections.Generic
 open Prelude
 open Prelude.Charts.Formats.Interlude
 
-(*
-
-type Primitives =
-    | Stream of
-        // if spacing of each note is equal back to back it's a stair e.g. 1234 or 1357, valued 1 - 10. note that 1 is only possible for an isolated note
-        stair_length: int
-    | Jack of 
-        // marks length of jack, from 2 - 10
-        length: int *
-        // number of columns shared from this row to next, 1 - 10
-        count: int *
-        // number of notes in row, 1 - 10
-        chord_size: int
-    | Chord of
-        // number of notes in chord
-        size: int *
-        // number of consecutive single notes appearing after chord, 1 - 9 
-        spacing: int
-    | Chord_Stream of
-        // number of notes in chord, 2 - 10
-        size: int *
-        // chords in a row where notes are only ascending/descending, 1 - 5
-        roll_length: int *
-        // chords in a row, from 2 - 10
-        length: int
-    | Trill of
-        // number of columns shared from this row to 2 rows ago, 1 - 9
-        count: int *
-        // number of notes in row, 1 - 9
-        chord_size: int *
-        // length of trill in rows, 3 - 10
-        length: int
-    | Release
-
-*)
-
 [<RequireQualifiedAccess>]
 type Direction =
     | None
@@ -370,7 +334,12 @@ module Patterns =
                     match patterns.[pattern_name] data with
                     | 0 -> ()
                     | 1 -> yield (pattern_name, { Time = data.Head.Time; MsPerBeat = data.Head.MsPerBeat; Density = data.Head.Density })
-                    | n -> yield (pattern_name, { Time = data.Head.Time; MsPerBeat = data.Tail.Head.MsPerBeat; Density = List.take n data |> List.averageBy (fun d -> d.Density) })
+                    | n ->
+                        let d = List.take n data
+                        let mean_mspb = List.take n data |> List.averageBy (fun d -> d.MsPerBeat)
+
+                        if d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < 1.0f<ms/beat>) then
+                            yield (pattern_name, { Time = data.Head.Time; MsPerBeat = mean_mspb; Density = d |> List.averageBy (fun d -> d.Density) })
                 data <- List.tail data
         }
 
@@ -424,13 +393,12 @@ module Patterns =
 
         let groups =
             pattern_tokens
+            |> Seq.filter (fun (_, token) -> token.MsPerBeat <= (60000.0f<ms/minute> / 85.0f<beat/minute>))
             |> Seq.groupBy fst
             |> Array.ofSeq
             |> Array.map (fun (pattern, data) -> 
                     pattern, 
-                    Seq.map snd data 
-                    |> Seq.filter (fun token -> token.MsPerBeat <= (60000.0f<ms/minute> / 85.0f<beat/minute>))
-                    |> Array.ofSeq
+                    Seq.map snd data |> Array.ofSeq
                 )
 
         let clusters = ResizeArray<BPMCluster>()
@@ -460,6 +428,8 @@ module Patterns =
                     | Some c -> c.MsPerBeat
                     | None -> mspb
                 let bpm = (60000.0f<ms/minute> / clustered_mspb |> float32 |> round |> int)
+                
+                if bpm < 85 then printfn "%A %A %A" current_start current_mspb current_n
                 patterns.Add((pattern_id, { BPM = bpm; Time = current_start; Duration = current_end - current_start; AverageDensity = density }))
                 current_n <- 0
 

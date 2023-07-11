@@ -177,7 +177,7 @@ module Scores =
                 Entries = new Dictionary<string, ChartSaveData>()
             }
 
-    let data: Data =
+    let data : Data =
         loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) true
         |> fun d -> Logging.Info (sprintf "Loaded scores for %i charts." d.Entries.Keys.Count); d
 
