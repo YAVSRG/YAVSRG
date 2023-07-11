@@ -57,14 +57,14 @@ type ScoreGraph(data: ScoreInfoProvider) =
         assert (events.Count > 0)
 
         // line graph
-        if options.ScoreGraphMode.Value <> ScoreGraphMode.None && data.Scoring.Snapshots.Count > 0 then
+        if options.ScoreGraphMode.Value = ScoreGraphMode.Combo && data.Scoring.Snapshots.Count > 0 then
             let snapshots = data.Scoring.Snapshots
             let hscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
             for i = 1 to snapshots.Count - 1 do
                 let l, r = 
-                    if options.ScoreGraphMode.Value = ScoreGraphMode.Combo then 
+                    //if options.ScoreGraphMode.Value = ScoreGraphMode.Combo then 
                         float32 snapshots.[i-1].Combo / float32 data.Scoring.State.BestCombo, float32 snapshots.[i].Combo / float32 data.Scoring.State.BestCombo
-                    else float32 snapshots.[i-1].HP, float32 snapshots.[i].HP
+                    //else float32 snapshots.[i-1].HP, float32 snapshots.[i].HP
                 let x1 = this.Bounds.Left + snapshots.[i-1].Time * hscale
                 let x2 = this.Bounds.Left + snapshots.[i].Time * hscale
                 let y1 = this.Bounds.Bottom - HTHICKNESS - (this.Bounds.Height - THICKNESS) * l
@@ -114,6 +114,6 @@ type ScoreGraph(data: ScoreInfoProvider) =
             Draw.rect box Colors.shadow_2.O2
             Text.drawFillB(Style.baseFont, (if ss.MaxPointsScored = 0.0 then 100.0 else 100.0 * ss.PointsScored / ss.MaxPointsScored) |> sprintf "%.2f%%", box.SliceTop(box_h / 3f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
             Text.drawFillB(Style.baseFont, ss.Combo |> sprintf "%ix", box.TrimBottom(box_h / 3f).SliceBottom(box_h / 3f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
-            Text.drawFillB(Style.baseFont, 100.0 * ss.HP |> sprintf "%.0f HP", box.SliceBottom(box_h / 3f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
+            //Text.drawFillB(Style.baseFont, 100.0 * ss.HP |> sprintf "%.0f HP", box.SliceBottom(box_h / 3f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
 
     member this.Dispose() = fbo.Dispose()

@@ -40,7 +40,6 @@ module Stats =
 
     let init() = 
         total <- loadImportantJsonFile "Stats" (Path.Combine(getDataPath "Data", "stats.json")) false
-        Logging.Info("Loaded stats")
 
     let save() =
         total.PlayTime <- total.PlayTime + session.PlayTime

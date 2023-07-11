@@ -98,7 +98,6 @@ module SpectateScreen =
                 add_widget ProgressMeter
                 add_widget AccuracyMeter
                 add_widget HitMeter
-                add_widget LifeMeter
                 add_widget JudgementCounts
                 add_widget JudgementMeter
                 add_widget EarlyLateMeter

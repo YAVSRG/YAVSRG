@@ -310,7 +310,6 @@ module Options =
 
             load_id<AccuracyMeter>()
             load_id<HitMeter>()
-            load_id<LifeMeter>()
             load_id<Combo>()
             load_id<SkipButton>()
             load_id<ProgressMeter>()
@@ -372,7 +371,7 @@ module Options =
         File.WriteAllText(Path.Combine(getDataPath "Songs", "HOW_TO_ADD_SONGS.txt"),
             "Dragging and dropping things into this folder won't work.\n" +
             "Instead, drag and drop things onto the *game window* while it's open and it will import.\n" +
-            "Does this folder have stuff in, but they don't work in game?\n" +
+            "Does this folder have stuff in, but they don't show up in game?\n" +
             "Check they are .yav files, and then go to Options > Debug > Rebuild cache and let that run.")
 
         HUDOptions.load()

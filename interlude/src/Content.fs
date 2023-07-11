@@ -183,8 +183,6 @@ module Content =
                  true
              else false
 
-        let clearToColor (cleared: bool) = Current.config.ClearColors |> (if cleared then fst else snd)
-
     module Noteskins =
         
         let loaded : Dictionary<string, Noteskin> = new Dictionary<string, Noteskin>()

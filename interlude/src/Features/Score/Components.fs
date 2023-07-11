@@ -93,16 +93,6 @@ type Grade(grade: Grade.GradeResult ref, data: ScoreInfoProvider) =
         Draw.rect this.Bounds grade_color.O1
         base.Draw()
 
-type Clear(data: ScoreInfoProvider) =
-    inherit StaticWidget(NodeType.None)
-
-    override this.Draw() =
-        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
-        Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
-        let clear_color = Themes.clearToColor (not data.HP.Failed)
-        Draw.rect this.Bounds clear_color.O2
-        Text.drawFillB(Style.baseFont, (if data.HP.Failed then "FAILED" else "CLEAR"), this.Bounds.Shrink(10.0f, 0.0f), (clear_color, Colors.black), Alignment.CENTER)
-
 type Accuracy(grade: Grade.GradeResult ref, improvements: ImprovementFlags ref, previous_personal_bests: Bests option ref, data: ScoreInfoProvider) =
     inherit StaticContainer(NodeType.None)
 
@@ -229,8 +219,6 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
         graph.Position <- { Left = 0.35f %+ 20.0f; Top = 0.0f %+ 25.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 65.0f }
         this
         |+ graph
-        |+ Clear(data, 
-            Position = Position.Box(1.0f, 0.0f, -240.0f, -35.0f, 200.0f, 50.0f))
         |+ StylishButton(
             (fun () -> { new ScoreGraphSettingsPage() with override this.OnClose() = graph.Refresh() }.Show()),
             sprintf "%s %s" Icons.edit (L"score.graph.settings") |> K,

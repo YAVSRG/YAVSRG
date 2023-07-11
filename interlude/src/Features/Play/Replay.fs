@@ -159,7 +159,6 @@ module ReplayScreen =
                 if not is_auto then
                     add_widget AccuracyMeter
                     add_widget HitMeter
-                    add_widget LifeMeter
                     add_widget JudgementCounts
                     add_widget JudgementMeter
                     add_widget EarlyLateMeter

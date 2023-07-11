@@ -231,34 +231,6 @@ type SkipButton(conf: HUD.SkipButton, state) =
     override this.Draw() =
         if active then Text.drawFillB(Style.baseFont, text, this.Bounds, Style.text(), Alignment.CENTER)
 
-type LifeMeter(conf: HUD.LifeMeter, state: PlayState) =
-    inherit StaticWidget(NodeType.None)
-
-    let color = Animation.Color conf.FullColor
-    let slider = Animation.Fade(float32 state.Scoring.HP.State.Health)
-
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        slider.Target <- float32 state.Scoring.HP.State.Health
-        color.Target <- (Color.FromArgb(
-            Percyqaz.Flux.Utils.lerp (float32 state.Scoring.HP.State.Health) (float32 conf.EmptyColor.R) (float32 conf.FullColor.R) |> int,
-            Percyqaz.Flux.Utils.lerp (float32 state.Scoring.HP.State.Health) (float32 conf.EmptyColor.G) (float32 conf.FullColor.G) |> int,
-            Percyqaz.Flux.Utils.lerp (float32 state.Scoring.HP.State.Health) (float32 conf.EmptyColor.B) (float32 conf.FullColor.B) |> int
-            ))
-        color.Update elapsedTime
-        slider.Update elapsedTime
-
-    override this.Draw() =
-        let w, h = this.Bounds.Width, this.Bounds.Height
-        if conf.Horizontal then
-            let b = this.Bounds.SliceLeft(w * slider.Value)
-            Draw.rect b color.Value
-            Draw.rect (b.SliceRight h) conf.TipColor
-        else
-            let b = this.Bounds.SliceBottom(h * slider.Value)
-            Draw.rect b color.Value
-            Draw.rect (b.SliceTop w) conf.TipColor
-
 type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 

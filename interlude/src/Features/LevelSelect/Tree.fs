@@ -135,7 +135,6 @@ module Tree =
         let mutable personal_bests: Bests option = None
         let mutable grade = None
         let mutable lamp = None
-        let mutable clear = None
         let mutable markers = ""
 
         let updateCachedInfo() =
@@ -146,7 +145,6 @@ module Tree =
                 personal_bests <- Some d.Bests.[Rulesets.current_hash]
                 grade <- Some <| getPb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName
                 lamp <- Some <| getPb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
-                clear <- Some <| getPb personal_bests.Value.Clear Themes.clearToColor (fun x -> if x then "CLEAR" else "FAILED")
             | _ -> ()
             color <- colorFunc personal_bests
             markers <-
@@ -194,12 +192,9 @@ module Tree =
                     Text.drawJustB(Style.baseFont, formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
                     Text.drawJustB(Style.baseFont, rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
         
-            match personal_bests with
-            | Some d ->
-                disp grade.Value 415.0f
-                disp lamp.Value 290.0f
-                disp clear.Value 165.0f
-            | None -> ()
+            if personal_bests.IsSome then
+                disp grade.Value 290.0f
+                disp lamp.Value 165.0f
 
             // draw text
             Draw.rect (bounds.SliceBottom 25.0f) Colors.shadow_1.O1

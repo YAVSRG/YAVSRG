@@ -281,68 +281,6 @@ type EditHitMeterPage() as this =
                 AnimationTime = animation_time.Value
             }
 
-type EditLifeMeterPage() as this =
-    inherit Page()
-
-    let data = HUDOptions.get<HUD.LifeMeter>()
-
-    let pos = Setting.simple data.Position
-    let default_pos = HUD.LifeMeter.Default.Position
-
-    let horizontal = Setting.simple data.Horizontal
-    let empty_color = Setting.simple data.EmptyColor
-    let full_color = Setting.simple data.FullColor
-    let tip_color = Setting.simple data.TipColor
-
-    let preview = 
-        { new ConfigPreview(0.5f, pos) with
-            override this.DrawComponent(bounds) =
-                if horizontal.Value then
-                    Draw.rect bounds (full_color.Value)
-                    Draw.rect (bounds.SliceRight bounds.Height) tip_color.Value
-                else
-                    Draw.rect bounds (full_color.Value)
-                    Draw.rect (bounds.SliceTop bounds.Width) tip_color.Value
-        }
-
-    do
-        this.Content(
-            positionEditor pos default_pos
-            |+ PageSetting(
-                "hud.lifemeter.horizontal",
-                Selector<_>.FromBool horizontal )
-                .Pos(550.0f)
-                .Tooltip(Tooltip.Info("hud.lifemeter.horizontal"))
-            |+ PageSetting(
-                "hud.lifemeter.fullcolor",
-                ColorPicker(full_color, false) )
-                .Pos(620.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("hud.lifemeter.fullcolor"))
-            |+ PageSetting(
-                "hud.lifemeter.emptycolor",
-                ColorPicker(empty_color, false) )
-                .Pos(725.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("hud.lifemeter.emptycolor"))
-            |+ PageSetting(
-                "hud.lifemeter.tipcolor",
-                ColorPicker(tip_color, true) )
-                .Pos(830.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("hud.lifemeter.tipcolor"))
-            |+ preview
-        )
-
-    override this.Title = L"hud.lifemeter.name"
-    override this.OnDestroy() = preview.Destroy()
-    override this.OnClose() = 
-        HUDOptions.set<HUD.LifeMeter>
-            { data with
-                Position = pos.Value
-                Horizontal = horizontal.Value
-                FullColor = full_color.Value
-                EmptyColor = empty_color.Value
-                TipColor = tip_color.Value
-            }
-
 type EditComboMeterPage() as this =
     inherit Page()
 
@@ -671,29 +609,26 @@ type EditHUDPage() as this =
             |+ PageButton("hud.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage)
                 .Pos(270.0f)
                 .Tooltip(Tooltip.Info("hud.hitmeter"))
-            |+ PageButton("hud.lifemeter", fun () -> Menu.ShowPage EditLifeMeterPage)
-                .Pos(340.0f)
-                .Tooltip(Tooltip.Info("hud.lifemeter"))
             |+ PageButton("hud.combo", fun () -> Menu.ShowPage EditComboMeterPage)
-                .Pos(410.0f)
+                .Pos(340.0f)
                 .Tooltip(Tooltip.Info("hud.combo"))
             |+ PageButton("hud.skipbutton", fun () -> Menu.ShowPage EditSkipButtonPage)
-                .Pos(480.0f)
+                .Pos(410.0f)
                 .Tooltip(Tooltip.Info("hud.skipbutton"))
             |+ PageButton("hud.progressmeter", fun () -> Menu.ShowPage EditProgressMeterPage)
-                .Pos(550.0f)
+                .Pos(480.0f)
                 .Tooltip(Tooltip.Info("hud.progressmeter"))
             |+ PageButton("hud.pacemaker", fun () -> Menu.ShowPage EditPacemakerPage)
-                .Pos(620.0f)
+                .Pos(550.0f)
                 .Tooltip(Tooltip.Info("hud.pacemaker"))
             |+ PageButton("hud.judgementcounts", fun () -> Menu.ShowPage EditJudgementCountsPage)
-                .Pos(690.0f)
+                .Pos(620.0f)
                 .Tooltip(Tooltip.Info("hud.judgementcounts"))
             |+ PageButton("hud.judgementmeter", fun () -> Menu.ShowPage EditJudgementMeterPage)
-                .Pos(760.0f)
+                .Pos(690.0f)
                 .Tooltip(Tooltip.Info("hud.judgementmeter"))
             |+ PageButton("hud.earlylatemeter", fun () -> Menu.ShowPage EditEarlyLateMeterPage)
-                .Pos(830.0f)
+                .Pos(760.0f)
                 .Tooltip(Tooltip.Info("hud.earlylatemeter"))
         )
 
