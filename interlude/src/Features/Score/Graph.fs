@@ -61,10 +61,8 @@ type ScoreGraph(data: ScoreInfoProvider) =
             let snapshots = data.Scoring.Snapshots
             let hscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
             for i = 1 to snapshots.Count - 1 do
-                let l, r = 
-                    //if options.ScoreGraphMode.Value = ScoreGraphMode.Combo then 
-                        float32 snapshots.[i-1].Combo / float32 data.Scoring.State.BestCombo, float32 snapshots.[i].Combo / float32 data.Scoring.State.BestCombo
-                    //else float32 snapshots.[i-1].HP, float32 snapshots.[i].HP
+                let l, r = float32 snapshots.[i-1].Combo / float32 data.Scoring.State.BestCombo, float32 snapshots.[i].Combo / float32 data.Scoring.State.BestCombo
+                let color = data.Ruleset.LampColor snapshots.[i].Lamp
                 let x1 = this.Bounds.Left + snapshots.[i-1].Time * hscale
                 let x2 = this.Bounds.Left + snapshots.[i].Time * hscale
                 let y1 = this.Bounds.Bottom - HTHICKNESS - (this.Bounds.Height - THICKNESS) * l
@@ -72,7 +70,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 let theta = System.MathF.Atan((y2 - y1) / (x2 - x1))
                 let dy = -HTHICKNESS * System.MathF.Cos theta
                 let dx = HTHICKNESS * System.MathF.Sin theta
-                Draw.quad (Quad.createv(x1 + dx, y1 + dy)(x2 + dx, y2 + dy)(x2 - dx, y2 - dy)(x1 - dx, y1 - dy)) (Quad.colorOf Colors.green.O3) Sprite.DefaultQuad
+                Draw.quad (Quad.createv(x1 + dx, y1 + dy)(x2 + dx, y2 + dy)(x2 - dx, y2 - dy)(x1 - dx, y1 - dy)) (Quad.colorOf color.O3) Sprite.DefaultQuad
 
         // draw dots
         let hscale = (width - 10.0f) / events.[events.Count - 1].Time
@@ -109,11 +107,10 @@ type ScoreGraph(data: ScoreInfoProvider) =
             let pc = (Mouse.x() - this.Bounds.Left) / this.Bounds.Width
             let snapshot_index = pc * float32 sss.Count |> int |> max 0 |> min (sss.Count - 1)
             let ss = sss.[snapshot_index]
-            let box_h = this.Bounds.Height - 40.0f
-            let box = Rect.Box(this.Bounds.Left + 20.0f + pc * (this.Bounds.Width - 200.0f - 40.0f), this.Bounds.Top + 20.0f, 200.0f, box_h)
+            let box_h = this.Bounds.Height - 80.0f
+            let box = Rect.Box(this.Bounds.Left + 40.0f + pc * (this.Bounds.Width - 200.0f - 80.0f), this.Bounds.Top + 40.0f, 200.0f, box_h)
             Draw.rect box Colors.shadow_2.O2
-            Text.drawFillB(Style.baseFont, (if ss.MaxPointsScored = 0.0 then 100.0 else 100.0 * ss.PointsScored / ss.MaxPointsScored) |> sprintf "%.2f%%", box.SliceTop(box_h / 3f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
-            Text.drawFillB(Style.baseFont, ss.Combo |> sprintf "%ix", box.TrimBottom(box_h / 3f).SliceBottom(box_h / 3f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
-            //Text.drawFillB(Style.baseFont, 100.0 * ss.HP |> sprintf "%.0f HP", box.SliceBottom(box_h / 3f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
+            Text.drawFillB(Style.baseFont, (if ss.MaxPointsScored = 0.0 then 100.0 else 100.0 * ss.PointsScored / ss.MaxPointsScored) |> sprintf "%.2f%%", box.SliceTop(box_h * 0.5f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
+            Text.drawFillB(Style.baseFont, ss.Combo |> sprintf "%ix", box.TrimTop(box_h * 0.5f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
 
     member this.Dispose() = fbo.Dispose()

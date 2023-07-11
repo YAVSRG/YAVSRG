@@ -8,7 +8,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay.Grading
+open Prelude.Gameplay
 open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching

@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Data.Scores
-open Prelude.Gameplay.Grading
+open Prelude.Gameplay
 open Interlude.Web.Shared
 open Interlude.Utils
 open Interlude.UI

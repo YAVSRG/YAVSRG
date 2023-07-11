@@ -39,8 +39,8 @@ module Options =
     [<RequireQualifiedAccess>]
     type ScoreGraphMode =
         | HP = 0
+        | None = 0
         | Combo = 1
-        | None = 2
 
     type FailType =
         | Instant = 0
