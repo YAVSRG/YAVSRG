@@ -8,7 +8,6 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Formats.Interlude
 open Prelude.Gameplay
-open Prelude.Gameplay.Grading
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.Layout

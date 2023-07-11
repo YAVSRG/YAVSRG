@@ -48,33 +48,6 @@ type HitEvent<'Guts> =
     Combo/combo breaking also built-in - Your combo is the number of notes hit well in a row
 *)
 
-type AccuracySystemState =
-    {
-        Judgements: int array
-        mutable PointsScored: float
-        mutable MaxPointsScored: float
-        mutable CurrentCombo: int
-        mutable BestCombo: int
-        mutable MaxPossibleCombo: int
-        mutable ComboBreaks: int
-    }
-    member this.BreakCombo (wouldHaveIncreasedCombo: bool) =
-        if wouldHaveIncreasedCombo then this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
-        this.CurrentCombo <- 0
-        this.ComboBreaks <- this.ComboBreaks + 1
-
-    member this.IncrCombo() =
-        this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
-        this.CurrentCombo <- this.CurrentCombo + 1
-        this.BestCombo <- Math.Max(this.CurrentCombo, this.BestCombo)
-
-    member this.Add(points: float, maxpoints: float, judge: JudgementId) =
-        this.PointsScored <- this.PointsScored + points
-        this.MaxPointsScored <- this.MaxPointsScored + maxpoints
-        this.Judgements.[judge] <- this.Judgements.[judge] + 1
-
-    member this.Add(judge: JudgementId) = this.Add(0.0, 0.0, judge)
-
 type private HoldState =
     | Nothing
     | Holding
@@ -88,6 +61,7 @@ type ScoreMetricSnapshot =
         PointsScored: float
         MaxPointsScored: float
         Combo: int
+        Lamp: int
     }
     static member COUNT = 100
 
@@ -175,12 +149,13 @@ type IScoreMetric
         let snapshot_target_count = (float32 ScoreMetricSnapshot.COUNT * relativeTime) / duration |> ceil |> int |> max 0 |> min ScoreMetricSnapshot.COUNT
         while snapshots.Count < snapshot_target_count do
             snapshots.Add
-                    { 
-                        Time = relativeTime
-                        PointsScored = this.State.PointsScored
-                        MaxPointsScored = this.State.MaxPointsScored
-                        Combo = this.State.CurrentCombo 
-                    }
+                { 
+                    Time = relativeTime
+                    PointsScored = this.State.PointsScored
+                    MaxPointsScored = this.State.MaxPointsScored
+                    Combo = this.State.CurrentCombo
+                    Lamp = Lamp.calculate ruleset.Grading.Lamps this.State
+                }
         while noteSeekPassive < hitData.Length && InternalScore.offsetOf hitData.[noteSeekPassive] <= target do
             let struct (t, deltas, status) = hitData.[noteSeekPassive]
             for k = 0 to (keys - 1) do

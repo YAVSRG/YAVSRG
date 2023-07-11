@@ -42,7 +42,7 @@ module Sorting =
         match Prelude.Data.Scores.Scores.getData c.Hash with
         | Some d ->
             if d.Bests.ContainsKey ctx.RulesetId then
-                match Grading.PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Grade with
+                match PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Grade with
                 | Some i -> i, ctx.Ruleset.GradeName i
                 | None -> -2, "No grade achieved"
             else -2, "No grade achieved"
@@ -52,7 +52,7 @@ module Sorting =
         match Prelude.Data.Scores.Scores.getData c.Hash with
         | Some d ->
             if d.Bests.ContainsKey ctx.RulesetId then
-                match Grading.PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Lamp with
+                match PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Lamp with
                 | Some i -> i, ctx.Ruleset.LampName i
                 | None -> -2, "No lamp achieved"
             else -2, "No lamp achieved"

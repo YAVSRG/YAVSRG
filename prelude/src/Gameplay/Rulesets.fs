@@ -6,6 +6,34 @@ open Percyqaz.Json
 open Prelude
 
 type JudgementId = int
+
+type AccuracySystemState =
+    {
+        Judgements: int array
+        mutable PointsScored: float
+        mutable MaxPointsScored: float
+        mutable CurrentCombo: int
+        mutable BestCombo: int
+        mutable MaxPossibleCombo: int
+        mutable ComboBreaks: int
+    }
+    member this.BreakCombo (wouldHaveIncreasedCombo: bool) =
+        if wouldHaveIncreasedCombo then this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
+        this.CurrentCombo <- 0
+        this.ComboBreaks <- this.ComboBreaks + 1
+
+    member this.IncrCombo() =
+        this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
+        this.CurrentCombo <- this.CurrentCombo + 1
+        this.BestCombo <- max this.CurrentCombo this.BestCombo
+
+    member this.Add(points: float, maxpoints: float, judge: JudgementId) =
+        this.PointsScored <- this.PointsScored + points
+        this.MaxPointsScored <- this.MaxPointsScored + maxpoints
+        this.Judgements.[judge] <- this.Judgements.[judge] + 1
+
+    member this.Add(judge: JudgementId) = this.Add(0.0, 0.0, judge)
+
 /// Judgements are an indicator of how good a hit was, like "Perfect!" or "Nearly!"
 /// Scores are commonly measured by how many of each judgement you get (for example a good score might be getting all "Perfect!" judgements)
 [<Json.AutoCodec>]
@@ -68,6 +96,31 @@ type Grade =
         Color: Color
     }
 
+module Grade =
+
+    type GradeResult =
+        {
+            Grade: int
+            /// Improvement needed to get next grade; None if you got the best grade
+            AccuracyNeeded: float option
+        }
+
+    let calculateWithTarget (grades: Grade array) (state: AccuracySystemState) : GradeResult =
+        let percent = state.PointsScored / state.MaxPointsScored
+
+        let rec loop (achieved: int) =
+            if achieved + 1 = grades.Length then // got max grade already
+                { Grade = achieved; AccuracyNeeded = None }
+            else
+                let accuracyNeeded = grades.[achieved + 1].Accuracy - percent
+                if accuracyNeeded > 0.0 then { Grade = achieved; AccuracyNeeded = Some accuracyNeeded }
+                else loop (achieved + 1)
+
+        loop -1
+
+    let calculate (grades: Grade array) (state: AccuracySystemState) =
+        (calculateWithTarget grades state).Grade
+
 /// Lamps are awarded at the end of the score as a summarising "tag" to indicate certain accomplishments
 /// Examples: You didn't miss a single note, so you get a "Full Combo" tag, you only got "Perfect" judgements, so you get a "Perfect Full Combo" tag
 /// These provide alternative accomplishments to grades that can provide different challenge
@@ -79,6 +132,45 @@ type Lamp =
         JudgementThreshold: int
         Color: Color
     }
+
+module Lamp =
+
+    type LampResult =
+        {
+            Lamp: int
+            /// Improvement needed to get next lamp; None if you got the best lamp
+            ImprovementNeeded: {| Judgement: JudgementId; LessNeeded: int|} option
+        }
+
+    let calculateWithTarget (lamps: Lamp array) (state: AccuracySystemState) : LampResult =
+
+        let worstJudgement =
+            let mutable w = -1
+            let mutable i = 0
+            while i < state.Judgements.Length do
+                if state.Judgements.[i] > 0 then w <- i
+                i <- i + 1
+            w
+
+        let rec loop (achieved: int) =
+            if achieved + 1 = lamps.Length then // got max grade already
+                { Lamp = achieved; ImprovementNeeded = None }
+            else
+                let nextLamp = lamps.[achieved + 1]
+                if nextLamp.Judgement < 0 then // then it refers to cbs
+                    if state.ComboBreaks > nextLamp.JudgementThreshold then
+                        { Lamp = achieved; ImprovementNeeded = Some {| Judgement = -1; LessNeeded = state.ComboBreaks - nextLamp.JudgementThreshold |} }
+                    else loop (achieved + 1)
+                else
+                    if worstJudgement > nextLamp.Judgement then
+                        { Lamp = achieved; ImprovementNeeded = Some {| Judgement = worstJudgement; LessNeeded = state.Judgements.[worstJudgement] |} }
+                    elif state.Judgements.[nextLamp.Judgement] > nextLamp.JudgementThreshold then
+                        { Lamp = achieved; ImprovementNeeded = Some {| Judgement = nextLamp.Judgement; LessNeeded = state.Judgements.[nextLamp.Judgement] - nextLamp.JudgementThreshold |} }
+                    else loop (achieved + 1)
+        loop -1
+    
+    let calculate (lamps: Lamp array) (state: AccuracySystemState) : int =
+        (calculateWithTarget lamps state).Lamp
 
 [<Json.AutoCodec>]
 type GradingConfig =
