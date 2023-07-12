@@ -1,5 +1,5 @@
 # Interlude privacy policy
-Last updated 29th May 2023.
+Last updated 12th June 2023. You can view the full history [here](https://github.com/YAVSRG/YAVSRG/blame/master/site_data/privacy_policy.md).
 
 ## Summary of service
 
@@ -22,7 +22,7 @@ All personal data collected by Interlude comes directly from your interactions w
 
 When you create your account, Interlude stores
 
-- Your discord ID
+- Your Discord ID
 - Your username
 - Your IP address
 
@@ -44,6 +44,12 @@ Logging data is used solely to improve the services, and is only stored for as l
 Your account information is held securely on servers in the United Kingdom, and never shared with any third parties outside of Interlude, except in a circumstance where it is necessary to confirm to legal requirements or comply with legal process.
 
 Data such as your submitted scores and username are shared with other users of Interlude as part of the services provided.
+
+Your discord ID or IP address may be used internally for moderation purposes.  
+Examples include:
+- Contacting you through Discord regarding your account or a related issue
+- Detecting multiple accounts for one user or account sharing
+To respect your privacy, measures are taken to minimise or entirely prevent internal staff members from seeing this information directly.
 
 ## Your rights
 
