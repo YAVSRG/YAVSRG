@@ -509,6 +509,8 @@ module Lobby =
                             let! username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
+                            if lobby.Players.[player].Status = LobbyPlayerStatus.MissingChart then () else
+
                             if lobby.Players.[player].Status <> LobbyPlayerStatus.NotReady then
                                 malice player "Can't be missing the chart in this state"
 
@@ -536,7 +538,13 @@ module Lobby =
                             let lobby = lobbies.[lobby_id]
                             if countdown_ref = lobby.CountdownId && lobby.CountingDown then
 
-                                if automatic && not <| lobby.Players.Values.All(fun p -> p.Status = LobbyPlayerStatus.Ready) then
+                                if 
+                                    automatic
+                                    && not (
+                                        lobby.Players.Values.All(fun p -> p.Status = LobbyPlayerStatus.Ready || p.Status = LobbyPlayerStatus.ReadyToSpectate)
+                                        && lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Ready)
+                                    )
+                                then
                                     Logging.Debug("Cancelling auto lobby start because someone is no longer ready")
                                     lobby.CountingDown <- false
                                     multicast(lobby, Downstream.GAME_COUNTDOWN false)
