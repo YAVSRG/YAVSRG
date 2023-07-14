@@ -67,9 +67,8 @@ module User =
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
 
     let by_id(id: int64) =
-        json.MGet([| key id |], "$")
-        |> Array.tryExactlyOne
-        |> Option.map (fun r -> Text.Json.JsonSerializer.Deserialize<User>(r.ToString()))
+        json.Get<User>(key id, "$") |> Some
+        // todo: error handling when not found
 
     let by_auth_token(token: string) =
         let results = ft.Search("idx:users", Query(sprintf "@auth_token:{%s}" token)).Documents
@@ -80,6 +79,13 @@ module User =
         let results = ft.Search("idx:users", Query(sprintf "@username:{%s}" (escape username))).Documents
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
+
+    let delete(id: int64) =
+        match by_id id with
+        | Some user ->
+            Logging.Info(sprintf "Deleting user with id %i, discord id %i, username %s" id user.DiscordId user.Username)
+            json.Del(key id) |> ignore
+        | None -> failwithf "No such user with id %i" id
 
     //todo: this pulls all user data and will have to be scrapped for a pagination system when there are >100 users
     let all() =

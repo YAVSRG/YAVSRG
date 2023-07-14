@@ -139,6 +139,25 @@ module Commands =
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
 
+            | "contact" ->
+                match args with
+                | [] -> do! reply "Enter a username, for example: $contact Percyqaz"
+                | name :: _ ->
+                    match user_by_name name with
+                    | Some (id, user) ->
+                        do! reply (sprintf "<@%i>" user.DiscordId)
+                    | None -> do! reply "No user found."
+
+            | "removeuser" ->
+                match args with
+                | [] -> do! reply "Enter a username, for example: $removeuser Percyqaz"
+                | name :: _ ->
+                    match user_by_name name with
+                    | Some (id, user) ->
+                        User.delete(id)
+                        do! reply_emoji ":white_check_mark:"
+                    | None -> do! reply "No user found."
+
             | "addtestuser" when not SECRETS.IsProduction ->
                 match args with
                 | [] -> do! reply "Enter a username, for example: $addtestuser TESTUSER1"
