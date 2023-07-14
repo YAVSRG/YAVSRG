@@ -1,10 +1,10 @@
-0.6.24
+0.6.24.1
 ====
 
-Midweek release
-
-# Changes
-- Removed Life meter and HP from the game entirely. It was a dead-end for features and I didn't like maintaining it
-- Score screen line graph is now colored according to the lamp you were on at the time
-- Some bugs in the pattern analyser have been fixed or improved
+# Some quick fixes
+- Automatic countdown in multiplayer now works when people are spectating
+- Fixed a bug where you would be kicked for notifying the server that you don't have a chart multiple times
+- Lobby hosts can now select mods in multiplayer
+- Spectator time delay has been reduced from a worst case of 6 seconds to a worst case of 2 seconds
+- Some new menu splashes
 
