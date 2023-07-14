@@ -6,9 +6,9 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 9uy
+    let PROTOCOL_VERSION = 10uy
 
-    let MULTIPLAYER_REPLAY_DELAY_SECONDS = 3
+    let MULTIPLAYER_REPLAY_DELAY_SECONDS = 1
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
 
     let PLAY_PACKET_THRESHOLD_PER_SECOND = 600
@@ -29,6 +29,7 @@ module Packets =
             Title: string
             Creator: string
             Rate: float32
+            Mods: (string * int) array
         }
         member this.Write(bw: BinaryWriter) =
             bw.Write this.Hash
@@ -36,6 +37,9 @@ module Packets =
             bw.Write this.Title
             bw.Write this.Creator
             bw.Write this.Rate
+            bw.Write (byte this.Mods.Length)
+            for (id, state) in this.Mods do bw.Write id; bw.Write state
+
         static member Read(br: BinaryReader) =
             {
                 Hash = br.ReadString()
@@ -43,6 +47,7 @@ module Packets =
                 Title = br.ReadString()
                 Creator = br.ReadString()
                 Rate = br.ReadSingle()
+                Mods = Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString(), br.ReadInt32())
             }
 
     type LobbySettings =
