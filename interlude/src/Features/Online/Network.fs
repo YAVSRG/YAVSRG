@@ -8,6 +8,7 @@ open Percyqaz.Common
 open Percyqaz.Json
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Gameplay.Mods
 open Prelude.Data.Charts.Caching
 open Prelude.Gameplay
 open Interlude.UI
@@ -315,6 +316,6 @@ module Lobby =
     let finish_playing() = client.Send (Upstream.FINISH_PLAYING false)
     let abandon_play() = client.Send (Upstream.FINISH_PLAYING true)
 
-    let select_chart(cc: CachedChart, rate: float32) =
+    let select_chart(cc: CachedChart, rate: float32, mods: ModState) =
         if lobby.Value.YouAreHost then
-            client.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Creator = cc.Creator; Rate = rate })
+            client.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Creator = cc.Creator; Rate = rate; Mods = Map.toArray mods })

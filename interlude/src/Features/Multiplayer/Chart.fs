@@ -67,7 +67,7 @@ module SelectedChart =
                     | Some c -> 
                         Chart.change(cc, Collections.LibraryContext.None, c)
                         rate.Set chart.Rate
-                        selectedMods.Set Map.empty
+                        selectedMods.Set (chart.Mods |> Map.ofArray |> Map.filter (fun id _ -> modList.ContainsKey id))
                         true
                     | None -> false
                 | None -> Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash); false
@@ -96,7 +96,7 @@ type SelectedChart() =
         |+ Text((fun () -> SelectedChart.difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> SelectedChart.length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> SelectedChart.bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Text((fun () -> if SelectedChart.found then getModString(rate.Value, selectedMods.Value, autoplay) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        |+ Text((fun () -> if SelectedChart.found then getModString(rate.Value, selectedMods.Value, false) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> if SelectedChart.found then "" else L"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
