@@ -449,7 +449,7 @@ module Conversions =
         let convert (chart: Chart) : Beatmap =
             let general = 
                 { General.Default with
-                    AudioFilename = match chart.Header.AudioFile with Relative s -> s | Absolute s -> Path.GetFileName s
+                    AudioFilename = match chart.Header.AudioFile with Relative s -> s | Absolute s -> Path.GetFileName s | Asset s -> "audio.mp3"
                     PreviewTime = chart.Header.PreviewTime
                     SampleSet = SampleSet.Soft
                     Mode = GameMode.Mania
@@ -475,7 +475,7 @@ module Conversions =
                 Editor = editor
                 Metadata = meta
                 Difficulty = diff
-                Events = [ Background ((match chart.Header.BackgroundFile with Relative s -> s | Absolute s -> Path.GetFileName s), (0.0, 0.0)) ]
+                Events = [ Background ((match chart.Header.BackgroundFile with Relative s -> s | Absolute s -> Path.GetFileName s | Asset s -> "bg.png"), (0.0, 0.0)) ]
                 Objects = convertSnapsToHitobjects chart.Notes chart.Keys
                 Timing = convertToTimingPoints chart.BPM chart.SV chart.LastNote
             }
@@ -555,6 +555,7 @@ module Conversions =
 
         let copyFile (file: MediaPath) =
             match file with
+            | Asset s -> Asset s
             | Relative "" -> Relative ""
             | Absolute s -> Absolute s
             | Relative file ->

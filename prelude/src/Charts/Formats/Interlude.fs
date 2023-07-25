@@ -83,6 +83,7 @@ module Interlude =
     type MediaPath =
         | Relative of string
         | Absolute of string
+        | Asset of string
 
     [<Json.AutoCodec>]
     type ChartSource =
@@ -144,10 +145,12 @@ module Interlude =
             match this.Header.BackgroundFile with 
             | Relative s -> Path.Combine(Path.GetDirectoryName this.LoadedFromPath, s)
             | Absolute s -> s
+            | Asset s -> Path.Combine(getDataPath "Songs", ".assets", s.Substring(0, 2), s)
         member this.AudioPath = 
             match this.Header.AudioFile with
             | Relative s -> Path.Combine(Path.GetDirectoryName this.LoadedFromPath, s)
             | Absolute s -> s
+            | Asset s -> Path.Combine(getDataPath "Songs", ".assets", s.Substring(0, 2), s)
         
         member this.FirstNote = (TimeArray.first this.Notes).Value.Time
         member this.LastNote = (TimeArray.last this.Notes).Value.Time

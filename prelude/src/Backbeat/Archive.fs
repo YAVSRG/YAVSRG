@@ -1,9 +1,10 @@
-﻿namespace Prelude.Data.Charts.Archive
+﻿namespace Prelude.Backbeat.Archive
 
 open System
 open System.Collections.Generic
 open Percyqaz.Json
 open Prelude
+open Prelude.Charts.Formats.Interlude
 
 type ArtistName = string
 [<Json.AutoCodec>]
@@ -12,7 +13,7 @@ type VerifiedArtist =
         Alternatives: string list
         IsJapaneseFullName: bool
     }
-// store of artists that i've confirmed exist, with the correct STYLISATION of their name
+// store of artists that are confirmed to exist, with the correct STYLiSATION of their name
 [<Json.AutoCodec>]
 type VerifiedArtists =
     { 
@@ -54,11 +55,10 @@ type Song =
         Source: string option
         Tags: string list
     }
-    member this.FormattedTitle =
+    member this.FormattedArtists =
         String.concat ", " this.Artists
         + if this.OtherArtists <> [] then " ft. " + String.concat ", " this.OtherArtists else ""
-        + " - "
-        + this.Title
+    member this.FormattedTitle = this.FormattedArtists + " - " + this.Title
 
 type Songs = Dictionary<SongId, Song>
 
@@ -107,6 +107,9 @@ type Chart =
         Duration: Time
         Notecount: int
         BPM: (float32<ms/beat> * float32<ms/beat>)
+        PreviewTime: Time
+        BackgroundFile: string // sha256
+        AudioFile: string // sha256
         Sources: ChartSource list
         LastUpdated: DateTime
     }
@@ -129,3 +132,27 @@ module DownloadUrl =
         str.Replace("https://", "").Replace("http://", "") |> into_base64
 
     let unpickle(str: string) = "https://" + Uri.EscapeUriString(from_base64 str)
+
+module Download =
+    
+    let toChartHeader (chart: Chart) (song: Song) : ChartHeader =
+        {
+            Title = song.Title
+            TitleNative = None
+            Artist = song.FormattedArtists
+            ArtistNative = None
+            Creator = chart.Creators |> String.concat ", "
+            DiffName = chart.DifficultyName
+            Subtitle = chart.Subtitle
+            Source = song.Source
+            Tags = chart.Tags
+            PreviewTime = chart.PreviewTime
+            SourcePack = "Unknown"
+            BackgroundFile = Asset chart.BackgroundFile
+            AudioFile = Asset chart.AudioFile
+            ChartSource =
+                match chart.Sources with
+                | Osu d :: _ -> Prelude.Charts.Formats.Interlude.ChartSource.Osu (d.BeatmapSetId, d.BeatmapId)
+                | Stepmania d :: _ -> Prelude.Charts.Formats.Interlude.ChartSource.Stepmania d
+                | _ -> Prelude.Charts.Formats.Interlude.ChartSource.Unknown
+        }
