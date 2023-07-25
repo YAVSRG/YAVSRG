@@ -3,11 +3,12 @@
 open System
 open System.IO
 open System.IO.Compression
+open System.Security.Cryptography
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.Conversions
-open Prelude.Data.Charts.Archive
+open Prelude.Backbeat.Archive
 open Backbeat.Utils
 
 module Collect =
@@ -56,12 +57,17 @@ module Collect =
             id
         | Some id -> id
 
+    let private sha_256 = SHA256.Create()
+
     let slurp_chart (extraSources: ChartSource list) (chart: Charts.Formats.Interlude.Chart) =
         if not (File.Exists chart.AudioPath) then
             Logging.Info(sprintf "Rejecting %s because it doesn't have audio" chart.Header.Title)
         elif not (File.Exists chart.BackgroundPath) then
             Logging.Info(sprintf "Rejecting %s because it doesn't have a background image" chart.Header.Title)
         else
+
+        let audio_hash = chart.AudioPath |> File.OpenRead |> sha_256.ComputeHash |> BitConverter.ToString |> fun s -> s.Replace("-", "")
+        let bg_hash = chart.BackgroundPath |> File.OpenRead |> sha_256.ComputeHash |> BitConverter.ToString |> fun s -> s.Replace("-", "")
 
         let create_entry(song_id) =
             let lastNote = chart.LastNote
@@ -87,6 +93,9 @@ module Collect =
                     | Charts.Formats.Interlude.ChartSource.Unknown -> []
                     @ extraSources
                 LastUpdated = DateTime.Now
+                PreviewTime = chart.Header.PreviewTime
+                BackgroundFile = bg_hash
+                AudioFile = audio_hash
             }
         
         let hash = Chart.hash chart

@@ -3,7 +3,7 @@
 open System
 open System.Linq
 open Percyqaz.Common
-open Prelude.Data.Charts.Archive
+open Prelude.Backbeat.Archive
 
 module Maintenance =
 

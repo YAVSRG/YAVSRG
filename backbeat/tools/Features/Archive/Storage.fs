@@ -4,7 +4,7 @@ open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
-open Prelude.Data.Charts.Archive
+open Prelude.Backbeat.Archive
 open Backbeat.Utils
 
 [<AutoOpen>]

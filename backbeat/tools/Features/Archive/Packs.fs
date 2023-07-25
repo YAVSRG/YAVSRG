@@ -4,7 +4,7 @@ open System
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude
-open Prelude.Data.Charts.Archive
+open Prelude.Backbeat.Archive
 
 module Packs =
 
