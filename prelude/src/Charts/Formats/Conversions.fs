@@ -272,7 +272,7 @@ module Conversions =
                 | s :: _ -> Some (s.Trim())
                 | [] -> None
 
-            let findBackground () : string =
+            let findBackground() : string =
                 let guesses =
                     [
                         sm.BACKGROUND
@@ -308,7 +308,17 @@ module Conversions =
                     fst (Array.sortByDescending snd image_files).[0]
                 else ""
 
-            let findAuthor () : string =
+            let findAudio() : string =
+                if File.Exists (Path.Combine(path, sm.MUSIC)) then sm.MUSIC
+                else
+
+                let files = Directory.GetFiles path |> Array.map Path.GetFileName
+                
+                match files |> Array.tryFind (fun filename -> filename.ToLower().Contains "mp3" || filename.ToLower().Contains "wav" || filename.ToLower().Contains "ogg") with
+                | Some p -> p
+                | None -> "audio.mp3"
+
+            let findAuthor() : string =
                 let folderName = Path.GetFileName path
                 let paren = folderName.LastIndexOf('(')
                 if paren > 1 then
@@ -320,7 +330,7 @@ module Conversions =
                     if guess.EndsWith(']') then guess.TrimEnd ']' else ""
         
             let convert_difficulty (i: int) (diff: ChartData) : Chart = 
-                let keys = keyCount diff.STEPSTYPE
+                let keys = diff.STEPSTYPE.Keycount
                 let title = metadataFallback [sm.TITLETRANSLIT; sm.TITLE]
                 let artist = metadataFallback [sm.ARTISTTRANSLIT; sm.ARTIST]
                 let header = 
@@ -330,15 +340,14 @@ module Conversions =
                         Artist = artist
                         ArtistNative = match metadataFallbackOpt [sm.ARTISTTRANSLIT] with Some t when t = artist -> None | x -> x
                         Creator = metadataFallback [findAuthor(); sm.CREDIT; diff.CREDIT]
-                        DiffName = metadataFallback [diff.STEPSTYPE.ToString() + " " + diff.METER.ToString();
-                            diff.CHARTNAME; diff.DESCRIPTION; diff.CHARTSTYLE]
+                        DiffName = sprintf "%O %O %O" diff.STEPSTYPE diff.DIFFICULTY diff.METER
                         Subtitle = metadataFallbackOpt [sm.SUBTITLETRANSLIT; sm.SUBTITLE]
                         Tags = sm.GENRE.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries) |> List.ofArray
                         Source = None
 
                         PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
-                        AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"] |> Relative
-                        BackgroundFile = findBackground () |> Relative
+                        AudioFile = findAudio() |> Relative
+                        BackgroundFile = findBackground() |> Relative
 
                         SourcePack = "Singles"
                         ChartSource = Unknown
@@ -346,7 +355,11 @@ module Conversions =
                 if not (File.Exists (Path.Combine(path, match header.BackgroundFile with Relative r -> r | _ -> ""))) then
                     Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
                     Logging.Debug("Dumping file tree")
-                    for f in Directory.EnumerateFileSystemEntries(path) do Logging.Debug(f)
+                    for f in Directory.EnumerateFileSystemEntries path do Logging.Debug f
+                if not (File.Exists (Path.Combine(path, match header.AudioFile with Relative r -> r | _ -> ""))) then
+                    Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
+                    Logging.Debug("Dumping file tree")
+                    for f in Directory.EnumerateFileSystemEntries path do Logging.Debug f
                 let filepath = Path.Combine (path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
                 let (notes, bpm) = convert_measures keys diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)
 

@@ -35,22 +35,22 @@ module StepMania =
         | Pump_Routine
         | Kb7_Single
         | UNKNOWN
-
-    let keyCount (mode: ChartType): int =
-        match mode with
-        | Dance_Threepanel -> 3
-        | Dance_Single
-        | UNKNOWN -> 4
-        | Pump_Single -> 5
-        | Dance_Solo
-        | Pump_Halfdouble -> 6
-        | Kb7_Single -> 7
-        | Dance_Couple
-        | Dance_Double
-        | Dance_Routine -> 8
-        | Pump_Couple
-        | Pump_Double
-        | Pump_Routine -> 10
+        member this.Keycount =
+            match this with
+            | Dance_Threepanel -> 3
+            | Dance_Single
+            | UNKNOWN -> 4
+            | Pump_Single -> 5
+            | Dance_Solo
+            | Pump_Halfdouble -> 6
+            | Kb7_Single -> 7
+            | Dance_Couple
+            | Dance_Double
+            | Dance_Routine -> 8
+            | Pump_Couple
+            | Pump_Double
+            | Pump_Routine -> 10
+        override this.ToString() = sprintf "%iK" this.Keycount
 
     type Note =
         | Nothing = '0'
