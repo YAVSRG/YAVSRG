@@ -35,12 +35,12 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
     // arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection
     let mutable note_seek = 0 // see comments for sv_seek and sv_peek. same role but for index of next row
     let mutable note_peek = note_seek
-    let sv = Array.init (keys + 1) (fun i -> if i = 0 then chart.SV else chart.ColumnSV.[i - 1])
-    let sv_seek = Array.create (keys + 1) 0 // index of next appearing SV point for each channel; = number of SV points if there are no more
-    let sv_peek = Array.create (keys + 1) 0 // same as sv_seek, but sv_seek stores the relevant point for t = now (according to music) and this stores t > now
-    let sv_value = Array.create (keys + 1) 1.0f // value of the most recent sv point per channel, equal to the sv value at index (sv_peek - 1), or 1 if that point doesn't exist
-    let sv_time = Array.zeroCreate (keys + 1)
-    let column_pos = Array.zeroCreate keys // running position calculation of notes for sv
+    let sv = chart.SV
+    let mutable sv_seek = 0 // index of next appearing SV point; = number of SV points if there are no more
+    let mutable sv_peek = 0 // same as sv_seek, but sv_seek stores the relevant point for t = now (according to music) and this stores t > now
+    let mutable sv_value = 1.0f // value of the most recent sv point, equal to the sv value at index (sv_peek - 1), or 1 if that point doesn't exist
+    let mutable sv_time = 0.0f<ms>
+    let mutable column_pos = 0.0f // running position calculation of notes for sv
     let hold_presence = Array.create keys false
     let hold_pos = Array.create keys 0.0f
     let hold_colors = Array.create keys 0
@@ -51,7 +51,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
     let mutable time = -Time.infinity
     let reset() =
         note_seek <- 0
-        for k = 0 to keys do sv_seek.[k] <- 0
+        for k = 0 to 0 do sv_seek <- 0
 
     let scrollDirectionPos bottom : Rect -> Rect =
         if options.Upscroll.Value then id 
@@ -99,16 +99,17 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                 if nr.[k] = NoteType.HOLDHEAD then hold_index.[k] <- note_seek
             note_seek <- note_seek + 1
         note_peek <- note_seek
-        for i = 0 to keys do
-            while sv_seek.[i] < sv.[i].Length && sv.[i].[sv_seek.[i]].Time < now do
-                sv_seek.[i] <- sv_seek.[i] + 1
-            sv_peek.[i] <- sv_seek.[i]
-            sv_value.[i] <- if sv_seek.[i] > 0 then sv.[i].[sv_seek.[i] - 1].Data else 1.0f
+
+        while sv_seek < sv.Length && sv.[sv_seek].Time < now do
+            sv_seek <- sv_seek + 1
+        sv_peek <- sv_seek
+        sv_value <- if sv_seek > 0 then sv.[sv_seek - 1].Data else 1.0f
+
+        sv_time <- now
+        column_pos <- hitposition
 
         for k in 0 .. (keys - 1) do
             Draw.rect (Rect.Create(left + columnPositions.[k], top, left + columnPositions.[k] + column_width, bottom)) playfieldColor
-            sv_time.[k] <- now
-            column_pos.[k] <- hitposition
             hold_pos.[k] <- hitposition
             hold_presence.[k] <-
                 if note_seek > 0 then
@@ -133,25 +134,24 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
             let { Time = t; Data = struct (nd, color) } = chart.Notes.[note_peek]
             // until no sv adjustments needed...
             // update main sv
-            while (sv_peek.[0] < sv.[0].Length && sv.[0].[sv_peek.[0]].Time < t) do
-                let { Time = t2; Data = v } = sv.[0].[sv_peek.[0]]
+            while (sv_peek < sv.Length && sv.[sv_peek].Time < t) do
+                let { Time = t2; Data = v } = sv.[sv_peek]
                 for k in 0 .. (keys - 1) do
-                    column_pos.[k] <- column_pos.[k] + scale * sv_value.[0] * (t2 - sv_time.[k])
-                    sv_time.[k] <- t2
-                sv_value.[0] <- v
-                sv_peek.[0] <- sv_peek.[0] + 1
-            // todo: updating column sv goes here
+                    column_pos <- column_pos + scale * sv_value * (t2 - sv_time)
+                    sv_time <- t2
+                sv_value <- v
+                sv_peek <- sv_peek + 1
 
             // render notes
             for k in 0 .. (keys - 1) do
-                column_pos.[k] <- column_pos.[k] + scale * sv_value.[0] * (t - sv_time.[k])
-                sv_time.[k] <- t
-                min <- Math.Min(column_pos.[k], min)
+                column_pos <- column_pos + scale * sv_value * (t - sv_time)
+                sv_time <- t
+                min <- Math.Min(column_pos, min)
                 if nd.[k] = NoteType.NORMAL && not (options.VanishingNotes.Value && state.Scoring.IsNoteHit note_peek k) then
                     Draw.quad // normal note
                         (
                             Quad.ofRect ( 
-                                Rect.Box(left + columnPositions.[k], column_pos.[k], column_width, noteHeight)
+                                Rect.Box(left + columnPositions.[k], column_pos, column_width, noteHeight)
                                 |> scrollDirectionPos bottom
                             )
                             |> rotation k
@@ -159,13 +159,13 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                         (Quad.colorOf Color.White)
                         (Sprite.gridUV (animation.Loops, int color.[k]) (Content.getTexture "note"))
                 elif nd.[k] = NoteType.HOLDHEAD then
-                    hold_pos.[k] <- max column_pos.[k] hitposition
+                    hold_pos.[k] <- max column_pos hitposition
                     hold_colors.[k] <- int color.[k]
                     hold_presence.[k] <- true
                 elif nd.[k] = NoteType.HOLDTAIL then
                     let headpos = hold_pos.[k]
                     let tint = if hold_pos.[k] = hitposition && state.Scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
-                    let pos = column_pos.[k] - holdnoteTrim
+                    let pos = column_pos - holdnoteTrim
                     if headpos < pos then
                         Draw.quad // body of ln
                             ( Quad.ofRect (
