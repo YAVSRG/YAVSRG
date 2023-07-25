@@ -72,13 +72,14 @@ module Printerlude =
             match Gameplay.Chart.current with
             | None -> failwith "No chart to export"
             | Some c ->
+                // todo: move into prelude
                 let beatmap = Conversions.``Interlude to osu!``.convert c
                 let exportName = ``osu!``.getBeatmapFilename beatmap
                 let path = getDataPath "Exports"
                 let beatmapFile = Path.Combine(path, exportName)
                 ``osu!``.saveBeatmapFile beatmapFile beatmap
-                let audioFile = Path.Combine(path, Path.GetFileName c.AudioPath)
-                let bgFile = Path.Combine(path, Path.GetFileName c.BackgroundPath)
+                let audioFile = Path.Combine(path, match c.Header.AudioFile with Interlude.Relative s -> s | Interlude.Absolute s -> Path.GetFileName s | Interlude.Asset s -> "audio.mp3")
+                let bgFile = Path.Combine(path, match c.Header.AudioFile with Interlude.Relative s -> s | Interlude.Absolute s -> Path.GetFileName s | Interlude.Asset s -> "bg.png")
                 try
                     File.Copy (c.AudioPath, audioFile, true)
                     File.Copy (c.BackgroundPath, bgFile, true)
