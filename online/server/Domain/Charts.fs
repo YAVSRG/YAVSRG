@@ -5,7 +5,7 @@ open System.Collections.Generic
 open FParsec
 open Percyqaz.Common
 open Prelude.Data
-open Prelude.Data.Charts.Archive
+open Prelude.Backbeat.Archive
 
 module Charts =
 

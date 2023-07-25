@@ -3,7 +3,7 @@
 open System
 open Discord
 open Discord.WebSocket
-open Prelude.Data.Charts.Archive
+open Prelude.Backbeat.Archive
 open Interlude.Web.Server
 open Interlude.Web.Server.Domain
 open Interlude.Web.Server.Online
