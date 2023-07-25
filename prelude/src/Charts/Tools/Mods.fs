@@ -10,7 +10,6 @@ type ModChart =
         Notes: TimeArray<NoteRow>
         BPM: TimeArray<BPM>
         SV: TimeArray<float32>
-        ColumnSV: TimeArray<float32> array
         ModsUsed: string list
     }
 
@@ -22,14 +21,13 @@ module ModChart =
             Notes = chart.Notes
             BPM = chart.BPM
             SV = chart.SV
-            ColumnSV = chart.ColumnSV
             ModsUsed = []
         }
 
 module Mirror =
     
     let apply (chart: ModChart) : ModChart * bool = 
-        { chart with Notes = TimeArray.map Array.rev chart.Notes; ColumnSV = Array.rev chart.ColumnSV }, true
+        { chart with Notes = TimeArray.map Array.rev chart.Notes }, true
 
 module NoSV =
 
@@ -37,10 +35,7 @@ module NoSV =
         let mutable has_sv = false
         for { Data = s } in chart.SV do
             if MathF.Round(s, 2) <> 1.0f then has_sv <- true
-        for sv in chart.ColumnSV do
-            for { Data = s } in sv do
-                if MathF.Round(s, 2) <> 1.0f then has_sv <- true
-        { chart with SV = [||]; ColumnSV = Array.init chart.Keys (fun _ -> [||]) }, has_sv
+        { chart with SV = [||] }, has_sv
 
 module NoLN =
 

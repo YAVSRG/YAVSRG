@@ -39,7 +39,6 @@ module NoteColors =
             Notes: TimeArray<ColorNoteRow>
             BPM: TimeArray<BPM>
             SV: TimeArray<float32>
-            ColumnSV: TimeArray<float32> array
             ModsUsed: string list
         }
 
@@ -105,7 +104,7 @@ module NoteColors =
             | ColorScheme.Chord -> chord_colors colorData mc
             | ColorScheme.DDR -> ddr_colors colorData mc
             | _ -> column_colors (Array.zeroCreate mc.Keys) mc
-        { Keys = mc.Keys; Notes = colored_notes; BPM = mc.BPM; SV = mc.SV; ColumnSV = mc.ColumnSV; ModsUsed = mc.ModsUsed }
+        { Keys = mc.Keys; Notes = colored_notes; BPM = mc.BPM; SV = mc.SV; ModsUsed = mc.ModsUsed }
 
     [<Json.AutoCodec(false)>]
     type ColorConfig = 

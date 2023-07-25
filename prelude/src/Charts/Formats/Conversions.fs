@@ -188,7 +188,6 @@ module Conversions =
                 Notes = snaps
                 BPM = bpm
                 SV = sv
-                ColumnSV = Array.init keys (fun i -> [||])
 
                 LoadedFromPath = String.Join("_", (b.Metadata.Title + " [" + b.Metadata.Version + "].yav").Split(Path.GetInvalidFileNameChars()))
             }
@@ -357,7 +356,6 @@ module Conversions =
                     Notes = notes
                     BPM = bpm
                     SV = [||]
-                    ColumnSV = Array.init keys (fun i -> [||])
 
                     LoadedFromPath = filepath
                 }
@@ -472,7 +470,6 @@ module Conversions =
                     OverallDifficulty = 8.0
                     HPDrainRate = 8.0
                 }
-            if chart.ColumnSV.Any(fun arr -> arr.Length > 0) then Logging.Warn("Interlude -> osu conversion will discard column SV information")
             {
                 General = general
                 Editor = editor

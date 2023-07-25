@@ -137,7 +137,6 @@ module Interlude =
             Notes: TimeArray<NoteRow>
             BPM: TimeArray<BPM>
             SV: TimeArray<float32>
-            ColumnSV: TimeArray<float32> array
 
             LoadedFromPath: string
         }
@@ -165,9 +164,6 @@ module Interlude =
                 let notes = TimeArray.read br (NoteRow.read keys)
                 let bpms = TimeArray.read br (fun r -> { Meter = r.ReadInt32() * 1<beat>; MsPerBeat =  r.ReadSingle() * 1.0f<ms/beat> })
                 let sv = TimeArray.read br (fun r -> r.ReadSingle())
-                let column_sv = Array.zeroCreate<TimeArray<float32>> keys
-                for i = 0 to keys - 1 do
-                    column_sv.[i] <- TimeArray.read br (fun r -> r.ReadSingle())
 
                 Some {
                     Keys = keys
@@ -175,7 +171,6 @@ module Interlude =
                     Notes = notes
                     BPM = bpms
                     SV = sv
-                    ColumnSV = column_sv
 
                     LoadedFromPath = filepath
                 }
@@ -189,8 +184,6 @@ module Interlude =
             TimeArray.write chart.Notes bw (fun bw nr -> NoteRow.write bw nr)
             TimeArray.write chart.BPM bw (fun bw bpm -> bw.Write (bpm.Meter / 1<beat>); bw.Write (float32 bpm.MsPerBeat))
             TimeArray.write chart.SV bw (fun bw f -> bw.Write f)
-            for i = 0 to chart.Keys - 1 do
-                TimeArray.write chart.ColumnSV.[i] bw (fun bw f -> bw.Write f)
 
         let hash (chart: Chart) : string =
             let h = SHA256.Create()
@@ -211,15 +204,6 @@ module Interlude =
                     bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
                     bw.Write(f)
                     speed <- f
-            
-            for i = 0 to chart.Keys - 1 do
-                let mutable speed = 1.0
-                for { Time = o; Data = f } in chart.ColumnSV.[i] do
-                    let f = float f
-                    if (speed <> f) then
-                        bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
-                        bw.Write(f)
-                        speed <- f
 
             BitConverter.ToString(h.ComputeHash (ms.ToArray())).Replace("-", "")
 
