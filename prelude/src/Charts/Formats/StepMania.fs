@@ -207,7 +207,7 @@ module StepMania =
                                 STEPSTYPE = readChartType chartType
                                 DESCRIPTION = ""
                                 CHARTSTYLE = ""
-                                DIFFICULTY = DifficultyType.Parse difficultyType
+                                DIFFICULTY = DifficultyType.Parse(difficultyType, true)
                                 METER = int footMeter
                                 CREDIT = author
                             }

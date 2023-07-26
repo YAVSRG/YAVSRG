@@ -214,9 +214,13 @@ module ``osu!`` =
 
     let private parsePoint = parseNum .>> comma .>>. parseNum |>> Point
     let private parsePointColon = parseNum .>> colon .>>. parseNum |>> Point
-    let private parseAddition =
-        tuple5 (parseInt .>> colon) (parseInt .>> colon) (parseInt .>> colon) (parseInt .>> colon) (restOfLine true)
-        |>> fun (normal, addition, index, volume, file) -> (enum normal, enum addition, index, volume, file)
+    let private parseAddition : Parser<HitAddition, unit> =
+        attempt (
+            tuple5 (parseInt .>> colon) (parseInt .>> colon) (parseInt .>> colon) (parseInt .>> colon) (restOfLine true)
+            |>> fun (normal, addition, index, volume, file) -> (enum normal, enum addition, index, volume, file)
+        )
+        // for parsing and discarding legacy hitsounds (there is no documentation)
+        <|> ((parseInt >>. colon >>. parseInt >>. colon >>. parseInt >>. restOfLine true) >>. preturn (enum 0, enum 0, 0, 0, ""))
 
     let parseSliderType =
         anyOf "LBCP" |>> fun c ->
@@ -493,12 +497,9 @@ module ``osu!`` =
 
     let private readMetadata (title, settings) =
         assert (title = "Metadata")
-        let f s (key, value) =
+        let f s (key, value: string) =
             match key with
-            | "Tags" ->
-                match run (sepBy (many1Satisfy (Text.IsWhitespace >> not)) (many1 (pchar ' '))) value with
-                | Success(result, _, _) -> { s with Tags = result }
-                | Failure(errorMsg, _, _) -> failwith (errorMsg + "|" + value + "|")
+            | "Tags" -> { s with Tags = value.Split(([||] : char array), System.StringSplitOptions.RemoveEmptyEntries) |> List.ofArray }
             | "Title" -> { s with Title = value }
             | "TitleUnicode" -> { s with TitleUnicode = value }
             | "Artist" -> { s with Artist = value }

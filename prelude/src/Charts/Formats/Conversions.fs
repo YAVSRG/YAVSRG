@@ -40,7 +40,7 @@ module Conversions =
         let private convertHitObjects (objects: HitObject list) (keys: int) : TimeArray<NoteRow> =
             let holds = Array.create keys -1.0f<ms>
 
-            let xToColumn (x: float) = x / 512.0 * float keys |> int
+            let xToColumn (x: float) = x / 512.0 * float keys |> int |> min (keys - 1) |> max 0
 
             let createRow () =
                 let nr = NoteRow.createEmpty keys
@@ -66,7 +66,7 @@ module Conversions =
 
             let note k time (snaps: TimeItem<NoteRow> list) =
                 if holds.[k] <> -1.0f<ms> then
-                    Logging.Debug(sprintf "Skipping stacked note (inside LN) at %f" time)
+                    //Logging.Debug(sprintf "Skipping stacked note (inside LN) at %f" time)
                     snaps
                 else
 
@@ -74,7 +74,7 @@ module Conversions =
                 | { Time = t; Data = nr } :: ss ->
                     if t = time then 
                         if nr.[k] <> NoteType.NOTHING then 
-                            Logging.Debug(sprintf "Skipping stacked note at %f" time)
+                            ()//Logging.Debug(sprintf "Skipping stacked note at %f" time)
                         else nr.[k] <- NoteType.NORMAL
                         snaps
                     else { Time = time; Data = let row = createRow() in row.[k] <- NoteType.NORMAL; row } :: snaps
@@ -82,13 +82,13 @@ module Conversions =
 
             let hold (k: int) (time: Time) (release: Time) (snaps: TimeItem<NoteRow> list) =
                 if holds.[k] <> -1.0f<ms> then 
-                    Logging.Debug(sprintf "Skipping stacked LN (inside LN) at %f" time)
+                    //Logging.Debug(sprintf "Skipping stacked LN (inside LN) at %f" time)
                     snaps
                 elif release < time then 
-                    Logging.Debug(sprintf "Skipping LN that ends at %f but starts at %f" release time)
+                    //Logging.Debug(sprintf "Skipping LN that ends at %f but starts at %f" release time)
                     snaps
                 elif release = time then
-                    Logging.Debug(sprintf "Treating LN that ends & starts at %f as a note" time)
+                    //Logging.Debug(sprintf "Treating LN that ends & starts at %f as a note" time)
                     note k time snaps
                 else
 
@@ -233,7 +233,7 @@ module Conversions =
                         | '3' ->
                             nr.[k] <- NoteType.HOLDTAIL
                             ln <- Bitmask.unsetBit k ln
-                        | 'M' -> () //ignore mines
+                        | 'M' | 'L' | 'F' -> () //ignore mines, lifts, fakes
                         | _ -> failwith ("unknown note type " + c.ToString())
                         ) m.[i]
                     if NoteRow.isEmpty nr |> not then states.Add({ Time = offset + float32 (i - start) * sep; Data = nr })
@@ -258,7 +258,9 @@ module Conversions =
 
             let path = Path.GetDirectoryName action.Source
 
-            if sm.STOPS <> [] then Logging.Warn(sprintf "StepMania STOPS are not supported, this file (%s) will not convert correctly" path)
+            if sm.STOPS <> [] then 
+                Logging.Warn(sprintf "StepMania STOPS are not supported, this file (%s) will not convert correctly" path)
+                Logging.Debug(sprintf "Stops: %A" sm.STOPS)
 
             let rec metadataFallback x =
                 match x with
@@ -354,11 +356,9 @@ module Conversions =
                     }
                 if not (File.Exists (Path.Combine(path, match header.BackgroundFile with Relative r -> r | _ -> ""))) then
                     Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
-                    Logging.Debug("Dumping file tree")
                     for f in Directory.EnumerateFileSystemEntries path do Logging.Debug f
                 if not (File.Exists (Path.Combine(path, match header.AudioFile with Relative r -> r | _ -> ""))) then
                     Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
-                    Logging.Debug("Dumping file tree")
                     for f in Directory.EnumerateFileSystemEntries path do Logging.Debug f
                 let filepath = Path.Combine (path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
                 let (notes, bpm) = convert_measures keys diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)
