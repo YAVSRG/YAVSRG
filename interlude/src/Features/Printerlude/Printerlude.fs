@@ -73,7 +73,7 @@ module Printerlude =
             | None -> failwith "No chart to export"
             | Some c ->
                 // todo: move into prelude
-                let beatmap = Conversions.``Interlude to osu!``.convert c
+                let beatmap = Conversions.Interlude.toOsu c
                 let exportName = ``osu!``.getBeatmapFilename beatmap
                 let path = getDataPath "Exports"
                 let beatmapFile = Path.Combine(path, exportName)
