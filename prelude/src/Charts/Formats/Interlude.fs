@@ -86,7 +86,7 @@ module Interlude =
         | Asset of string
 
     [<Json.AutoCodec>]
-    type ChartSource =
+    type Origin =
         | Osu of beatmapsetid: int * beatmapid: int
         | Stepmania of packid: int
         | Unknown
@@ -109,7 +109,7 @@ module Interlude =
             AudioFile: MediaPath
 
             SourcePack: string
-            ChartSource: ChartSource
+            ChartSource: Origin
         }
         static member Default =
             {
@@ -155,7 +155,23 @@ module Interlude =
         member this.FirstNote = (TimeArray.first this.Notes).Value.Time
         member this.LastNote = (TimeArray.last this.Notes).Value.Time
 
-    module Chart = 
+    module Chart =
+
+        let readHeadless (keys: int) (header: ChartHeader) (source_path: string) (br: BinaryReader) =
+
+            let notes = TimeArray.read br (NoteRow.read keys)
+            let bpms = TimeArray.read br (fun r -> { Meter = r.ReadInt32() * 1<beat>; MsPerBeat =  r.ReadSingle() * 1.0f<ms/beat> })
+            let sv = TimeArray.read br (fun r -> r.ReadSingle())
+
+            Some {
+                Keys = keys
+                Header = header
+                Notes = notes
+                BPM = bpms
+                SV = sv
+
+                LoadedFromPath = source_path
+            }
 
         let fromFile filepath =
             try
@@ -164,29 +180,21 @@ module Interlude =
                 let keys = br.ReadByte() |> int
 
                 let header = match JSON.FromString (br.ReadString()) with Ok v -> v | Error err -> Logging.Error(sprintf "%O" err); raise err
-                let notes = TimeArray.read br (NoteRow.read keys)
-                let bpms = TimeArray.read br (fun r -> { Meter = r.ReadInt32() * 1<beat>; MsPerBeat =  r.ReadSingle() * 1.0f<ms/beat> })
-                let sv = TimeArray.read br (fun r -> r.ReadSingle())
+                readHeadless keys header filepath br
 
-                Some {
-                    Keys = keys
-                    Header = header
-                    Notes = notes
-                    BPM = bpms
-                    SV = sv
-
-                    LoadedFromPath = filepath
-                }
             with err -> Logging.Error (sprintf "Could not load chart from %s: %O" filepath err, err); None
+
+        let writeHeadless (chart: Chart) (bw: BinaryWriter) =
+            TimeArray.write chart.Notes bw (fun bw nr -> NoteRow.write bw nr)
+            TimeArray.write chart.BPM bw (fun bw bpm -> bw.Write (bpm.Meter / 1<beat>); bw.Write (float32 bpm.MsPerBeat))
+            TimeArray.write chart.SV bw (fun bw f -> bw.Write f)
 
         let toFile (chart: Chart) filepath =
             use fs = new FileStream(filepath, FileMode.Create)
             use bw = new BinaryWriter(fs)
             bw.Write(chart.Keys |> byte)
             bw.Write(JSON.ToString chart.Header)
-            TimeArray.write chart.Notes bw (fun bw nr -> NoteRow.write bw nr)
-            TimeArray.write chart.BPM bw (fun bw bpm -> bw.Write (bpm.Meter / 1<beat>); bw.Write (float32 bpm.MsPerBeat))
-            TimeArray.write chart.SV bw (fun bw f -> bw.Write f)
+            writeHeadless chart bw
 
         let hash (chart: Chart) : string =
             let h = SHA256.Create()

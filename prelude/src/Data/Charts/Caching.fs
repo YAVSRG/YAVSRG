@@ -39,8 +39,7 @@ module Caching =
             Hash = Chart.hash chart
             Keys = chart.Keys
             Length = lastNote - chart.FirstNote
-            // todo: move to Chart module
-            BPM = ``Interlude to osu!``.minMaxBPM (List.ofSeq chart.BPM) lastNote
+            BPM = Interlude.minMaxBPM (List.ofSeq chart.BPM) lastNote
             DiffName = Option.defaultValue chart.Header.DiffName chart.Header.Subtitle
             Physical = rating.Physical
             Technical = rating.Technical

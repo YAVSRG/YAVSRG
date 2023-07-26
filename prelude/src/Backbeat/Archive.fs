@@ -152,7 +152,7 @@ module Download =
             AudioFile = Asset chart.AudioFile
             ChartSource =
                 match chart.Sources with
-                | Osu d :: _ -> Prelude.Charts.Formats.Interlude.ChartSource.Osu (d.BeatmapSetId, d.BeatmapId)
-                | Stepmania d :: _ -> Prelude.Charts.Formats.Interlude.ChartSource.Stepmania d
-                | _ -> Prelude.Charts.Formats.Interlude.ChartSource.Unknown
+                | Osu d :: _ -> Prelude.Charts.Formats.Interlude.Origin.Osu (d.BeatmapSetId, d.BeatmapId)
+                | Stepmania d :: _ -> Prelude.Charts.Formats.Interlude.Origin.Stepmania d
+                | _ -> Prelude.Charts.Formats.Interlude.Origin.Unknown
         }
