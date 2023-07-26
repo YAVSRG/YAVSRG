@@ -100,14 +100,15 @@ module Collect =
         
         let hash = Chart.hash chart
         if charts.ContainsKey hash then
-            let chart = charts.[hash]
-            let chart_entry = create_entry chart.SongId
-            charts.[hash] <- 
-                { chart_entry with
-                    Tags = List.distinct (chart_entry.Tags @ chart.Tags)
-                    Sources = List.distinct (chart_entry.Sources @ chart.Sources)
-                }
-            Logging.Info(sprintf "^ Chart: %s" hash)
+            let old_entry = charts.[hash]
+            let new_entry = create_entry old_entry.SongId
+            if { new_entry with LastUpdated = old_entry.LastUpdated } <> old_entry then
+                charts.[hash] <- 
+                    { new_entry with
+                        Tags = List.distinct (new_entry.Tags @ old_entry.Tags)
+                        Sources = List.distinct (new_entry.Sources @ old_entry.Sources)
+                    }
+                Logging.Info(sprintf "^ Chart: %s" hash)
         else
 
         let song: Song =
