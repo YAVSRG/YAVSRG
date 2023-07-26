@@ -85,12 +85,12 @@ module Collect =
                         for k = 0 to chart.Keys - 1 do
                             if row.Data.[k] = NoteType.NORMAL || row.Data.[k] = NoteType.HOLDHEAD then count <- count + 1
                     count
-                BPM = ``Interlude to osu!``.minMaxBPM (List.ofSeq chart.BPM) lastNote
+                BPM = Interlude.minMaxBPM (List.ofSeq chart.BPM) lastNote
                 Sources = 
                     match chart.Header.ChartSource with
-                    | Charts.Formats.Interlude.ChartSource.Osu (set, id) -> [Osu {| BeatmapSetId = set; BeatmapId = id |}]
-                    | Charts.Formats.Interlude.ChartSource.Stepmania (id) -> [Stepmania id]
-                    | Charts.Formats.Interlude.ChartSource.Unknown -> []
+                    | Origin.Osu (set, id) -> [Osu {| BeatmapSetId = set; BeatmapId = id |}]
+                    | Origin.Stepmania (id) -> [Stepmania id]
+                    | Origin.Unknown -> []
                     @ extraSources
                 LastUpdated = DateTime.Now
                 PreviewTime = chart.Header.PreviewTime
