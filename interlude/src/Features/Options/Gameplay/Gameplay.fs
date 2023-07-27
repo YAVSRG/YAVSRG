@@ -140,22 +140,31 @@ type GameplayPage() as this =
                 (fun () ->
                     match setting.Value with
                     | Some s -> 
-                        Presets.load s
-                        preview.Refresh()
-                        Notifications.action_feedback(Icons.system_notification, L"notification.preset_loaded", s.Name)
+                        ConfirmPage(Localisation.localiseWith [s.Name] "gameplay.preset.load.prompt", fun () ->
+                            Presets.load s
+                            preview.Refresh()
+                            Notifications.action_feedback(Icons.system_notification, L"notification.preset_loaded", s.Name)
+                        ).Show()
                     | None -> ()),
                 Disabled = (fun () -> setting.Value.IsNone),
-                Position = { Position.SliceBottom(40.0f) with Right = 0.5f %+ 0.0f }
+                Position = { Position.SliceBottom(40.0f) with Right = 0.5f %+ 0.0f }.Margin(40.0f, 0.0f)
             )
         |+ ButtonV2(
                 L"gameplay.preset.save",
-                (fun () -> 
-                    let name = match setting.Value with Some s -> s.Name | None -> sprintf "Preset %i" i
-                    setting.Value <- Presets.create(name) |> Some
-                    Notifications.action_feedback(Icons.system_notification, L"notification.preset_saved", name)
+                (fun () ->
+                    if setting.Value.IsNone then
+                        let name = sprintf "Preset %i" i
+                        setting.Value <- Presets.create(name) |> Some
+                        Notifications.action_feedback(Icons.system_notification, L"notification.preset_saved", name)
+                    else
+                        let name = setting.Value.Value.Name
+                        ConfirmPage(Localisation.localiseWith [name] "gameplay.preset.save.prompt", fun () ->
+                            setting.Value <- Presets.create(name) |> Some
+                            Notifications.action_feedback(Icons.system_notification, L"notification.preset_saved", name)
+                        ).Show()
                 ),
                 Disabled = (fun () -> match setting.Value with Some s -> s.Locked | None -> false),
-                Position = { Position.SliceBottom(40.0f) with Left = 0.5f %+ 0.0f }
+                Position = { Position.SliceBottom(40.0f) with Left = 0.5f %+ 0.0f }.Margin(40.0f, 0.0f)
             )
 
     do
