@@ -102,7 +102,7 @@ module Tables =
                     match Chart.fromFile entry.Path with
                     | None -> printfn "Failed loading %s" entry.Path
                     | Some chart -> 
-                        let cc = cacheChart chart
+                        let cc = cacheChart table.Name chart
                         let id = Table.generate_cid cc
                         if table.AddChart("XXX", id, cc) then 
                             printfn "+ %s" id
@@ -199,7 +199,7 @@ module Tables =
                     | Some c -> 
                         let source =
                             match c.Header.ChartSource with
-                            | Unknown -> sprintf "Pack: %s" c.Header.SourcePack
+                            | Unknown -> sprintf "Unknown source, local folder: %s" cc.Pack
                             | Osu (setid, mapid) -> sprintf "https://osu.ppy.sh/beatmapsets/%i#mania/%i" setid mapid
                             | Stepmania packid -> sprintf "https://etternaonline.com/pack/%i" packid
                         if sources.Contains source |> not then sources.Add source

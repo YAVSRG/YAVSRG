@@ -88,6 +88,7 @@ module Collect =
                 BPM = Interlude.minMaxBPM (List.ofSeq chart.BPM) lastNote
                 Sources = 
                     match chart.Header.ChartSource with
+                    | Origin.Osu (-1, 0) -> []
                     | Origin.Osu (set, id) -> [Osu {| BeatmapSetId = set; BeatmapId = id |}]
                     | Origin.Stepmania (id) -> [Stepmania id]
                     | Origin.Unknown -> []
@@ -102,6 +103,9 @@ module Collect =
         if charts.ContainsKey hash then
             let old_entry = charts.[hash]
             let new_entry = create_entry old_entry.SongId
+            if new_entry.Sources = [] then Logging.Info(sprintf "Rejecting %s because it doesn't have a source" chart.Header.Title)
+            if new_entry.Notecount < 50 then Logging.Info(sprintf "Rejecting %s because it doesn't have enough notes" chart.Header.Title)
+
             if { new_entry with LastUpdated = old_entry.LastUpdated } <> old_entry then
                 charts.[hash] <- 
                     { new_entry with
@@ -137,12 +141,11 @@ module Collect =
                 try
                     let a = 
                         { 
-                            Config = { ConversionActionConfig.Default with StepmaniaPackId = sm_pack_id; CopyMediaFiles = false }
+                            Config = { ConversionActionConfig.Default with StepmaniaPackId = sm_pack_id; CopyMediaFiles = false; PackName = sm_pack_id.ToString() }
                             Source = file
-                            TargetDirectory = Path.Combine (ARCHIVE_PATH, "yav")
                         }
                     loadAndConvertFile a
-                    |> List.map (relocateChart a)
+                    |> List.map (relocateChart (Path.Combine (ARCHIVE_PATH, "yav")) a)
                     |> List.iter (fun c -> slurp_chart [] c)
                 with err -> Logging.Info(sprintf "Failed to load/convert file: %s" target)
             | _ -> ()
@@ -161,12 +164,11 @@ module Collect =
                     try
                         let a = 
                             { 
-                                Config = { ConversionActionConfig.Default with CopyMediaFiles = false }
+                                Config = { ConversionActionConfig.Default with CopyMediaFiles = false; PackName = "c-" + community_pack_id.ToString() }
                                 Source = file
-                                TargetDirectory = Path.Combine (ARCHIVE_PATH, "yav")
                             }
                         loadAndConvertFile a
-                        |> List.map (relocateChart a)
+                        |> List.map (relocateChart (Path.Combine (ARCHIVE_PATH, "yav")) a)
                         |> List.iter (fun chart -> slurp_chart [ CommunityPack {| PackId = community_pack_id |} ] chart)
                     with err -> Logging.Info(sprintf "Failed to load/convert file: %s" target)
                 | _ -> ()

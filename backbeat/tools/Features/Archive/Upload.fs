@@ -1,7 +1,5 @@
 ﻿namespace Backbeat.Features.Archive
 
-open System
-open System.Text
 open System.IO
 open Percyqaz.Common
 open Prelude.Charts.Formats
