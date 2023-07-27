@@ -4,6 +4,7 @@ open System.IO
 open System.IO.Compression
 open System.Diagnostics
 open System.Linq
+open Percyqaz.Common
 open Percyqaz.Shell
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
@@ -210,6 +211,24 @@ module Tables =
 
     open SixLabors.ImageSharp
 
+    let upload_table_charts(file: string) =
+
+        Directory.SetCurrentDirectory config.InterludePath
+
+        let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+        for level in table.Levels do
+            for chart in level.Charts do
+                match lookupHash chart.Hash with
+                | Some cc -> 
+                    match load cc with
+                    | Some c -> 
+                        let ok, info = Archive.Storage.charts.TryGetValue(chart.Hash)
+                        if ok then Archive.Upload.upload_chart c info |> Async.AwaitTask |> Async.RunSynchronously
+                        else Logging.Info(sprintf "Chart not in backbeat: %s" chart.Id)
+                    | None -> Logging.Info(sprintf "Error loading chart: %s" chart.Id)
+                | None -> Logging.Info(sprintf "Chart missing from local library: %s" chart.Id)
+    
+
     let export_table_charts(file: string, skip: bool) =
 
         Directory.SetCurrentDirectory config.InterludePath
@@ -273,6 +292,7 @@ module Tables =
             .WithCommand("add_batch", "Add batch of table charts from a local collection", "table", "collection", add_suggestions)
             .WithCommand("edit", "Make edits to existing charts in a table", "table", edit_table)
             .WithCommand("check_table", "Verify all parts of the table are in backbeat", "table", check_table)
+            .WithCommand("upload_table", "Upload charts from table to backbeat storage", "table", upload_table_charts)
             .WithCommand("commit", "Commit suggestions to table and generate a changelog", "table", commit_table)
             .WithCommand("sources", "Export sources needed to have every chart for a table", "table", export_table_sources)
             .WithCommand("publish", "Export Crescent as a .zip", "table", export_as_pack)

@@ -22,8 +22,15 @@ module Utils =
     type Config = 
         {
             InterludePath: string
+            S3ApiKey: string
+            S3ApiKeyID: string
         }
-        static member Default = { InterludePath = "C:/Interlude/dev" }
+        static member Default = 
+            { 
+                InterludePath = "C:/Interlude/dev"
+                S3ApiKey = ""
+                S3ApiKeyID = ""
+            }
 
     let config : Config = 
         match JSON.FromFile SETTINGS_FILE with
