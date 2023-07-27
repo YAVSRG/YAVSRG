@@ -24,7 +24,8 @@ type TopBanner(data: ScoreInfoProvider) as this =
         |+ Text(data.Chart.Header.DiffName,
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 75.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 130.0f })
-        |+ Text(sprintf "From %s" data.Chart.Header.SourcePack,
+            // todo: bug in multiplayer when looking at a previous score for chart A while on chart B
+        |+ Text(sprintf "From %s" Gameplay.Chart.cacheInfo.Value.Pack,
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 125.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 165.0f })
 
