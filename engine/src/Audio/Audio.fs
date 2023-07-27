@@ -79,14 +79,20 @@ module Song =
                 Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
                 timer.Reset()
                 timerStart <- time
-        else playFrom time
+        elif timer.IsRunning then 
+            playFrom time
+        else 
+            timer.Reset()
+            timerStart <- time
 
     let pause() =
-        Bass.ChannelPause nowplaying.ID |> bassError
+        let time = time()
+        if (time >= 0.0f<ms> && time < duration()) then Bass.ChannelPause nowplaying.ID |> bassError
         timer.Stop()
 
     let resume() =
-        Bass.ChannelPlay nowplaying.ID |> bassError
+        let time = time()
+        if (time >= 0.0f<ms> && time < duration()) then Bass.ChannelPlay nowplaying.ID |> bassError
         timer.Start()
 
     let changeRate(newRate) =
