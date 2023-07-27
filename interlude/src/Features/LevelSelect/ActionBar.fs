@@ -92,7 +92,7 @@ type ActionBar(random_chart) =
             (fun () ->
             if Chart.current.IsSome then
                 Screen.changeNew 
-                    (fun () -> PracticeScreen.practice_screen(Song.time()))
+                    (fun () -> PracticeScreen.practice_screen(0.0f<ms>))
                     Screen.Type.Practice
                     Transitions.Flags.Default),
             (K false),
