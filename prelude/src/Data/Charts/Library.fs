@@ -30,8 +30,8 @@ module Library =
         saveImportantJsonFile (Path.Combine(getDataPath "Data", "cache.json")) charts
         saveImportantJsonFile (Path.Combine(getDataPath "Data", "collections.json")) collections
     
-    let addOrUpdate (c: Chart) = 
-        let cc = cacheChart c
+    let addOrUpdate (packFolderName: string) (c: Chart) = 
+        let cc = cacheChart packFolderName c
         charts.[cc.FilePath] <- cc
 
     let count() = charts.Count
@@ -59,7 +59,7 @@ module Library =
                                 | ".yav" ->
                                     match Chart.fromFile file with
                                     | Some c ->
-                                        addOrUpdate c
+                                        addOrUpdate (Path.GetFileName pack) c
                                     | None -> ()
                                 | _ -> ()
                     save()
@@ -188,10 +188,10 @@ module Library =
                             match file with
                             | ChartFile _ ->
                                 try
-                                    let action = { Config = config; Source = file; TargetDirectory = Path.Combine (getDataPath "Songs", config.PackName, Path.GetFileName path) }
+                                    let action = { Config = config; Source = file }
                                     loadAndConvertFile action
-                                    |> List.map (relocateChart action)
-                                    |> fun charts -> List.iter addOrUpdate charts
+                                    |> List.map (relocateChart (getDataPath "songs") action)
+                                    |> fun charts -> List.iter (addOrUpdate config.PackName) charts
                                 with err -> Logging.Error ("Failed to load/convert file: " + file, err)
                             | _ -> ()
                     }

@@ -108,7 +108,6 @@ module Interlude =
             BackgroundFile: MediaPath
             AudioFile: MediaPath
 
-            SourcePack: string
             ChartSource: Origin
         }
         static member Default =
@@ -127,7 +126,6 @@ module Interlude =
                 BackgroundFile = Relative ""
                 AudioFile = Relative "audio.mp3"
 
-                SourcePack = "Unknown"
                 ChartSource = Unknown
             }
 

@@ -30,7 +30,6 @@ type ConversionAction =
     {
         Config: ConversionActionConfig
         Source: string
-        TargetDirectory: string
     }
 
 module ``osu!`` =
@@ -174,7 +173,6 @@ module ``osu!`` =
                 BackgroundFile = findBackgroundFile b.Events |> Relative
                 AudioFile = b.General.AudioFilename |> Relative
 
-                SourcePack = "osu!"
                 ChartSource = Osu (b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
             }
         let snaps = convertHitObjects b.Objects keys
@@ -345,7 +343,6 @@ module Stepmania =
                     AudioFile = findAudio() |> Relative
                     BackgroundFile = findBackground() |> Relative
 
-                    SourcePack = "Singles"
                     ChartSource = Unknown
                 }
             if not (File.Exists (Path.Combine(path, match header.BackgroundFile with Relative r -> r | _ -> ""))) then
@@ -555,10 +552,10 @@ module Utilities =
         | _ -> []
 
     /// Writes chart to new location, including copying its background and audio files if needed
-    let relocateChart (action: ConversionAction) (chart: Chart) =
+    let relocateChart (songFolderRoot: string) (action: ConversionAction) (chart: Chart) =
 
         let sourceFolder = Path.GetDirectoryName action.Source
-        let targetFolder = action.TargetDirectory
+        let targetFolder = Path.Combine(songFolderRoot, action.Config.PackName, Chart.hash chart)
 
         let copyFile (file: MediaPath) =
             match file with
@@ -584,7 +581,6 @@ module Utilities =
             { chart with
                 Header = 
                     { chart.Header with
-                        SourcePack = action.Config.PackName
                         BackgroundFile = copyFile chart.Header.BackgroundFile
                         AudioFile = copyFile chart.Header.AudioFile
                     }

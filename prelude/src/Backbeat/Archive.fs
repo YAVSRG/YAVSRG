@@ -147,12 +147,11 @@ module Download =
             Source = song.Source
             Tags = chart.Tags
             PreviewTime = chart.PreviewTime
-            SourcePack = "Unknown"
             BackgroundFile = Asset chart.BackgroundFile
             AudioFile = Asset chart.AudioFile
             ChartSource =
                 match chart.Sources with
-                | Osu d :: _ -> Prelude.Charts.Formats.Interlude.Origin.Osu (d.BeatmapSetId, d.BeatmapId)
-                | Stepmania d :: _ -> Prelude.Charts.Formats.Interlude.Origin.Stepmania d
-                | _ -> Prelude.Charts.Formats.Interlude.Origin.Unknown
+                | Osu d :: _ -> Origin.Osu (d.BeatmapSetId, d.BeatmapId)
+                | Stepmania d :: _ -> Origin.Stepmania d
+                | _ -> Origin.Unknown
         }

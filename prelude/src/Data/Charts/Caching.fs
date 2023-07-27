@@ -26,7 +26,7 @@ module Caching =
             Technical: float
         }
 
-    let cacheChart (chart: Chart) : CachedChart =
+    let cacheChart (packFolderName: string) (chart: Chart) : CachedChart =
         let lastNote = chart.LastNote
         let songsFolder = getDataPath "Songs"
         let rating = RatingReport(chart.Notes, 1.0f, Layout.Spread, chart.Keys)
@@ -35,7 +35,7 @@ module Caching =
             Title = chart.Header.Title
             Artist = chart.Header.Artist
             Creator = chart.Header.Creator
-            Pack = chart.Header.SourcePack
+            Pack = packFolderName
             Hash = Chart.hash chart
             Keys = chart.Keys
             Length = lastNote - chart.FirstNote
