@@ -5,6 +5,8 @@ open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Percyqaz.Common
 open Prelude.Common
+open Prelude.Data.Charts
+open Prelude.Data.Charts.Caching
 open Interlude
 open Interlude.Features
 
@@ -78,21 +80,33 @@ module Printerlude =
                 let path = getDataPath "Exports"
                 let beatmapFile = Path.Combine(path, exportName)
                 ``osu!``.saveBeatmapFile beatmapFile beatmap
-                let audioFile = Path.Combine(path, match c.Header.AudioFile with Interlude.Relative s -> s | Interlude.Absolute s -> Path.GetFileName s | Interlude.Asset s -> "audio.mp3")
-                let bgFile = Path.Combine(path, match c.Header.AudioFile with Interlude.Relative s -> s | Interlude.Absolute s -> Path.GetFileName s | Interlude.Asset s -> "bg.png")
+                let target_audio_file =
+                    match c.Header.AudioFile with 
+                    | Interlude.Relative s -> Some <| Path.Combine(path, s)
+                    | Interlude.Absolute s -> Some <| Path.Combine(path, Path.GetFileName s)
+                    | Interlude.Asset s -> Some <| Path.Combine(path, "audio.mp3")
+                    | Interlude.Missing -> None
+                
+                let target_bg_file =
+                    match c.Header.BackgroundFile with 
+                    | Interlude.Relative s -> Some <| Path.Combine(path, s)
+                    | Interlude.Absolute s -> Some <| Path.Combine(path, Path.GetFileName s)
+                    | Interlude.Asset s -> Some <| Path.Combine(path, "bg.png")
+                    | Interlude.Missing -> None
                 try
-                    File.Copy (c.AudioPath, audioFile, true)
-                    File.Copy (c.BackgroundPath, bgFile, true)
+                    match target_audio_file with Some p -> File.Copy ((Cache.audio_path c Library.cache).Value, p, true) | _ -> ()
+                    match target_bg_file with Some p -> File.Copy ((Cache.background_path c Library.cache).Value, p, true) | _ -> ()
                 with err -> printfn "%O" err
+
                 use fs = File.Create(Path.Combine(path, Path.ChangeExtension(exportName, ".osz")))
                 use archive = new ZipArchive(fs, ZipArchiveMode.Create, true)
                 archive.CreateEntryFromFile(beatmapFile, Path.GetFileName beatmapFile) |> ignore
-                archive.CreateEntryFromFile(audioFile, Path.GetFileName audioFile) |> ignore
-                archive.CreateEntryFromFile(bgFile, Path.GetFileName bgFile) |> ignore
+                match target_audio_file with Some p -> archive.CreateEntryFromFile(p, Path.GetFileName p) |> ignore | _ -> ()
+                match target_bg_file with Some p -> archive.CreateEntryFromFile(p, Path.GetFileName p) |> ignore | _ -> ()
                 Logging.Info "Exported."
                 try
-                    File.Delete(Path.Combine(path, Path.GetFileName c.AudioPath))
-                    File.Delete(Path.Combine(path, Path.GetFileName c.BackgroundPath))
+                    match target_audio_file with Some p -> File.Delete p | _ -> ()
+                    match target_bg_file with Some p -> File.Delete p | _ -> ()
                     File.Delete beatmapFile
                     Logging.Info "Cleaned up."
                 with err -> Logging.Error ("Error while cleaning up after export", err)

@@ -37,6 +37,7 @@ module Gameplay =
     
         let mutable rating : RatingReport option = None
         let mutable saveData : ChartSaveData option = None
+        // todo: patterns
 
         let _rate = Setting.rate 1.0f
         let _selectedMods = Setting.simple Map.empty
@@ -60,10 +61,10 @@ module Gameplay =
             current <- Some c
             context <- ctx
             saveData <- Some (Scores.getOrCreateData c)
-            Background.load c.BackgroundPath
-            if Song.change (c.AudioPath, saveData.Value.Offset - c.FirstNote, _rate.Value) then
+            Background.load (Cache.background_path c Library.cache)
+            if Song.change ((Cache.audio_path c Library.cache), saveData.Value.Offset - c.FirstNote, _rate.Value) then
                 Song.playFrom c.Header.PreviewTime
-            options.CurrentChart.Value <- cache.FilePath
+            options.CurrentChart.Value <- cache.Key
             update()
             chartChangeEvent.Trigger()
 
@@ -237,25 +238,23 @@ module Gameplay =
 
     let init() =
         try
-            let c, ch =
-                match Library.lookup options.CurrentChart.Value with
+            let cc, chart =
+                match Cache.by_key options.CurrentChart.Value Library.cache with
                 | Some cc ->
-                    match Library.load cc with
+                    match Cache.load cc Library.cache with
                     | Some c -> cc, c
                     | None ->
-                        Logging.Error("Could not load chart file: " + cc.FilePath)
-                        Library.getGroups Unchecked.defaultof<_> (K (0, "All")) (Comparison(fun _ _ -> 0)) []
-                        |> fun d -> fst d.[(0, "All")].Charts.[0]
-                        |> fun c -> c, Library.load(c).Value
+                        Logging.Error("Could not load chart file: " + cc.Key)
+                        let cc = Suggestions.Suggestion.get_random []
+                        cc, (Cache.load cc Library.cache).Value
                 | None ->
                     Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
-                    Library.getGroups Unchecked.defaultof<_> (K (0, "All")) (Comparison(fun _ _ -> 0)) []
-                    |> fun d -> fst d.[(0, "All")].Charts.[0]
-                    |> fun c -> c, Library.load(c).Value
-            Chart.change(c, LibraryContext.None, ch)
+                    let cc = Suggestions.Suggestion.get_random []
+                    cc, (Cache.load cc Library.cache).Value
+            Chart.change(cc, LibraryContext.None, chart)
         with err ->
-            Logging.Debug("No charts installed")
-            Background.load ""
+            Logging.Debug "No charts installed"
+            Background.load None
         Table.init(options.Table.Value)
         match options.SelectedCollection.Value with
         | Some c -> Collections.select c

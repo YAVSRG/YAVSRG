@@ -46,7 +46,7 @@ module Debug =
                 |+ PageButton.Once(
                         "debug.rebuildcache",
                         fun () -> 
-                            Library.recache_service.Request((), fun () -> Notifications.task_feedback(Icons.folder, L"notification.recache_complete", ""))
+                            Caching.Cache.recache_service.Request(Library.cache, fun () -> Notifications.task_feedback(Icons.folder, L"notification.recache_complete", ""))
                             Notifications.action_feedback(Icons.folder, L"notification.recache", "") )
                     .Pos(200.0f)
                     .Tooltip(Tooltip.Info("debug.rebuildcache"))

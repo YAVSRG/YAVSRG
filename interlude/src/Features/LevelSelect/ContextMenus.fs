@@ -47,11 +47,11 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     override this.OnClose() = ()
     
     static member ConfirmDelete(cc, is_submenu) =
-        let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
+        let chartName = sprintf "%s [%s]" cc.Title cc.DifficultyName
         ConfirmPage(
             Localisation.localiseWith [chartName] "misc.confirmdelete",
             fun () ->
-                Library.delete cc
+                Cache.delete cc Library.cache
                 LevelSelect.refresh_all()
                 if is_submenu then Menu.Back()
         ).Show()
@@ -74,7 +74,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         ConfirmPage(
             Localisation.localiseWith [groupName] "misc.confirmdelete",
             fun () ->
-                Library.deleteMany charts
+                Cache.deleteMany charts Library.cache
                 LevelSelect.refresh_all()
                 if is_submenu then Menu.Back()
         ).Show()

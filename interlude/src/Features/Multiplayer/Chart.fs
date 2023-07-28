@@ -61,9 +61,9 @@ module SelectedChart =
             notecounts <- ""
         | Some chart ->
             found <- 
-                match Library.lookupHash chart.Hash with
+                match Cache.by_hash chart.Hash Library.cache with
                 | Some cc -> 
-                    match Library.load cc with 
+                    match Cache.load cc Library.cache with 
                     | Some c -> 
                         Chart.change(cc, Collections.LibraryContext.None, c)
                         rate.Set chart.Rate
@@ -91,7 +91,7 @@ type SelectedChart() =
         this
         |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> L"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
         |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Artist + "  •  " + c.Creator | None -> ""), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
-        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DiffName else "???"), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DifficultyName else "???"), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
 
         |+ Text((fun () -> SelectedChart.difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> SelectedChart.length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))

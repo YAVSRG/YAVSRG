@@ -23,21 +23,22 @@ module Background =
 
     let load =
         let worker = 
-            { new Async.SwitchService<string, Bitmap option>() with
-                member this.Handle(file: string) =
+            { new Async.SwitchService<string option, Bitmap option>() with
+                member this.Handle(file: string option) =
                     async {
-                        match System.IO.Path.GetExtension(file).ToLower() with
-                        | ".png" | ".bmp" | ".jpg" | ".jpeg" | ".jfif" ->
-                            try
-                                let! img = Image.LoadAsync file |> Async.AwaitTask
-                                return Some img
-                            with err -> 
-                                Logging.Warn("Failed to load background image: " + file, err)
-                                return None
-                        | ext -> return None
+                        match file with 
+                        | None -> return None 
+                        | Some file ->
+
+                        try
+                            let! img = Image.LoadAsync file |> Async.AwaitTask
+                            return Some img
+                        with err -> 
+                            Logging.Warn("Failed to load background image: " + file, err)
+                            return None
                     }
             }
-        fun (path: string) ->
+        fun (path: string option) ->
             List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background
             worker.Request(path,
                 function

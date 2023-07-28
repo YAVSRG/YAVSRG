@@ -81,7 +81,7 @@ type ImportScreen() as this =
         |+ ServiceStatus("Loading", WebServices.download_string)
         |+ ServiceStatus("Downloading", WebServices.download_file)
         |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)
-        |+ ServiceStatus("Recaching", Library.recache_service)
+        |+ ServiceStatus("Recaching", Caching.Cache.recache_service)
 
     do
         this

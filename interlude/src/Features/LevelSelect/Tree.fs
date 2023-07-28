@@ -67,11 +67,11 @@ module Tree =
         else ( p1, r1, colorFunc p1, format p1 )
     
     let switchChart(cc, context, groupName) =
-        match Library.load cc with
+        match Cache.load cc Library.cache with
         | Some c ->
             Chart.change(cc, context, c)
             Selection.clear()
-            selectedChart <- cc.FilePath
+            selectedChart <- cc.Key
             expandedGroup <- groupName
             selectedGroup <- groupName
             scrollTo <- ScrollTo.Chart
@@ -160,7 +160,7 @@ module Tree =
                 | _ -> ""
 
         override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.4f, top, Viewport.vwidth, top + CHART_HEIGHT)
-        override this.Selected = selectedChart = cc.FilePath && (context = LibraryContext.None || Chart.context = context)
+        override this.Selected = selectedChart = cc.Key && (context = LibraryContext.None || Chart.context = context)
         override this.Spacing = 5.0f
         member this.Chart = cc
 
@@ -200,7 +200,8 @@ module Tree =
             Draw.rect (bounds.SliceBottom 25.0f) Colors.shadow_1.O1
             Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Colors.text)
             Text.drawB(Style.baseFont, sprintf "%s  •  %s" cc.Artist cc.Creator, 18.0f, left + 5f, top + 34.0f, Colors.text_subheading)
-            Text.drawB(Style.baseFont, cc.DiffName, 15.0f, left + 5f, top + 65.0f, Colors.text_subheading)
+            // todo: option to show subtitle if exists, otherwise difficulty name
+            Text.drawB(Style.baseFont, cc.DifficultyName, 15.0f, left + 5f, top + 65.0f, Colors.text_subheading)
             Text.drawJustB(Style.baseFont, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
             if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
@@ -310,7 +311,7 @@ module Tree =
             let g = library_groups.Keys.First()
             if library_groups.[g].Charts.Count = 1 then
                 let cc, context = library_groups.[g].Charts.[0]
-                if cc.FilePath <> selectedChart then
+                if cc.Key <> selectedChart then
                     switchChart(cc, context, snd g)
         // build groups ui
         lastItem <- None
@@ -325,7 +326,7 @@ module Tree =
                         ( fun (cc, context) ->
                             match Chart.cacheInfo with
                             | None -> ()
-                            | Some c -> if c.FilePath = cc.FilePath && (context = LibraryContext.None || context = Chart.context) then selectedChart <- c.FilePath; selectedGroup <- groupName
+                            | Some c -> if c.Key = cc.Key && (context = LibraryContext.None || context = Chart.context) then selectedChart <- c.Key; selectedGroup <- groupName
                             let i = ChartItem(groupName, cc, context)
                             lastItem <- Some i
                             i

@@ -8,6 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data
 open Prelude.Data.Charts
+open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
 open Interlude.UI
 
@@ -62,7 +63,7 @@ type TableCard(id: string, table: Table) as this =
             levels <- levels + 1
             for chart in level.Charts do
                 charts <- charts + 1
-                match Library.lookupHash chart.Hash with
+                match Cache.by_hash chart.Hash Library.cache with
                 | Some _ -> ()
                 | None -> missing <- missing + 1
 
@@ -72,7 +73,7 @@ type TableCard(id: string, table: Table) as this =
             seq {
                 for level in existing.Levels do
                     for chart in level.Charts do
-                        match Library.lookupHash chart.Hash with
+                        match Cache.by_hash chart.Hash Library.cache with
                         | Some _ -> ()
                         | None -> if not (unavailable_charts.Contains chart.Hash) then yield chart.Hash
             }

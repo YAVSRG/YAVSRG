@@ -50,7 +50,7 @@ type LevelSelectScreen() =
             Position = { Left = 0.0f %+ 30.0f; Top = 0.0f %+ 20.0f; Right = 0.4f %- 30.0f; Bottom = 0.0f %+ 100.0f })
 
         |+ Text(
-            (fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.DiffName),
+            (fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.DifficultyName),
             Align = Alignment.CENTER,
             Position = { Left = 0.0f %+ 30.0f; Top = 0.0f %+ 90.0f; Right = 0.4f %- 30.0f; Bottom = 0.0f %+ 140.0f })
 
