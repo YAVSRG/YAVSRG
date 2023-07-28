@@ -105,15 +105,15 @@ module Song =
     let changeLocalOffset(offset) = localOffset <- offset
     let changeGlobalOffset(offset) = globalOffset <- offset
 
-    let change (path, offset, rate) : bool =
-        let isDifferentFile = path <> nowplaying.Path
+    let change (path: string option, offset, rate) : bool =
+        let isDifferentFile = path <> Some nowplaying.Path
         if isDifferentFile then
             if playing() then pause()
             timerStart <- -infinityf * 1.0f<ms>
             if nowplaying.ID <> 0 then
                 nowplaying.Free()
             channelPlaying <- false
-            nowplaying <- Song.FromFile path
+            nowplaying <- match path with Some p -> Song.FromFile p | None -> Song.Default
         changeLocalOffset offset
         changeRate rate
         isDifferentFile
