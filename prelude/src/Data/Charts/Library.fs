@@ -138,15 +138,19 @@ module Library =
             { new Async.Service<string * ConversionActionConfig, unit>() with
                 override this.Handle((path, config)) =
                     async {
-                        for file in Directory.EnumerateFiles path do
-                            match file with
-                            | ChartFile _ ->
-                                try
-                                    let action = { Config = config; Source = file }
-                                    loadAndConvertFile action
-                                    |> fun charts -> Cache.add_new config.PackName charts cache
-                                with err -> Logging.Error ("Failed to convert/cache file: " + file, err)
-                            | _ -> ()
+                        Directory.EnumerateFiles path
+                        |> Seq.collect
+                            (
+                                function
+                                | ChartFile _ as file ->
+                                    try
+                                        let action = { Config = config; Source = file }
+                                        loadAndConvertFile action
+                                    with err -> Logging.Error ("Failed to convert/cache file: " + file, err); []
+                                | _ -> []
+                            )
+                        |> List.ofSeq
+                        |> fun charts -> Cache.add_new config.PackName charts cache
                     }
             }
 

@@ -93,9 +93,8 @@ module Cache =
         let target_folder = Path.Combine(cache.RootPath, ".assets", hash.Substring(0, 2))
         Directory.CreateDirectory target_folder |> ignore
         let target_path = Path.Combine(target_folder, hash)
-        if File.Exists(target_path) then 
-            Logging.Info(sprintf "Asset %s is already stored" hash)
-            File.Delete(file_path)
+        if File.Exists target_path then
+            File.Delete file_path
         else File.Move(file_path, target_path)
         hash
 
@@ -216,7 +215,7 @@ module Cache =
                                 match c.Header.BackgroundFile with
                                 | Relative s ->
                                     if moved_assets.ContainsKey s then Asset moved_assets.[s]
-                                    else 
+                                    else
                                         let path = (background_path c cache).Value
                                         if not (File.Exists path) then Missing else
                                         let hash = hash_asset path cache

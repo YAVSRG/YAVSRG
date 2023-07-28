@@ -185,7 +185,7 @@ module ``osu!`` =
             BPM = bpm
             SV = sv
 
-            LoadedFromPath = String.Join("_", (b.Metadata.Title + " [" + b.Metadata.Version + "].yav").Split(Path.GetInvalidFileNameChars()))
+            LoadedFromPath = Path.Combine(Path.GetDirectoryName action.Source, String.Join("_", (b.Metadata.Title + " [" + b.Metadata.Version + "].yav").Split(Path.GetInvalidFileNameChars())))
         }
 
 module Stepmania =
