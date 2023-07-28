@@ -84,6 +84,7 @@ module Interlude =
         | Relative of string
         | Absolute of string
         | Asset of string
+        | Missing
 
     [<Json.AutoCodec>]
     type Origin =
@@ -123,8 +124,8 @@ module Interlude =
                 Tags = []
 
                 PreviewTime = 0.0f<ms>
-                BackgroundFile = Relative ""
-                AudioFile = Relative "audio.mp3"
+                BackgroundFile = Missing
+                AudioFile = Missing
 
                 ChartSource = Unknown
             }
@@ -139,16 +140,6 @@ module Interlude =
 
             LoadedFromPath: string
         }
-        member this.BackgroundPath = 
-            match this.Header.BackgroundFile with 
-            | Relative s -> Path.Combine(Path.GetDirectoryName this.LoadedFromPath, s)
-            | Absolute s -> s
-            | Asset s -> Path.Combine(getDataPath "Songs", ".assets", s.Substring(0, 2), s)
-        member this.AudioPath = 
-            match this.Header.AudioFile with
-            | Relative s -> Path.Combine(Path.GetDirectoryName this.LoadedFromPath, s)
-            | Absolute s -> s
-            | Asset s -> Path.Combine(getDataPath "Songs", ".assets", s.Substring(0, 2), s)
         
         member this.FirstNote = (TimeArray.first this.Notes).Value.Time
         member this.LastNote = (TimeArray.last this.Notes).Value.Time
@@ -180,7 +171,7 @@ module Interlude =
                 let header = match JSON.FromString (br.ReadString()) with Ok v -> v | Error err -> Logging.Error(sprintf "%O" err); raise err
                 readHeadless keys header filepath br
 
-            with err -> Logging.Error (sprintf "Could not load chart from %s: %O" filepath err, err); None
+            with err -> Logging.Error (sprintf "Couldn't load chart from %s: %O" filepath err, err); None
 
         let writeHeadless (chart: Chart) (bw: BinaryWriter) =
             TimeArray.write chart.Notes bw (fun bw nr -> NoteRow.write bw nr)

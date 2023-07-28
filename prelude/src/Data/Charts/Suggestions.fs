@@ -47,7 +47,7 @@ module Suggestion =
         let now = DateTime.Now
         let rand = Random()
 
-        for chart in Filter.apply filter_and_constraints Library.charts.Values do
+        for chart in Filter.apply filter_and_constraints Library.cache.Entries.Values do
             
             // points out of 10
             let bpm_similarity : int = 10 - ( (bpm - 60000.0f<ms/minute> / fst chart.BPM) / 10.0f<beat/minute> |> MathF.Abs |> MathF.Truncate |> int )
@@ -69,7 +69,7 @@ module Suggestion =
         let rand = Random()
 
         let charts =
-            Filter.apply filter Library.charts.Values
+            Filter.apply filter Library.cache.Entries.Values
             |> Array.ofSeq
 
         charts.[rand.Next charts.Length]

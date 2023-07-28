@@ -266,7 +266,7 @@ module Stepmania =
             | s :: _ -> Some (s.Trim())
             | [] -> None
 
-        let findBackground() : string =
+        let findBackground() : string option =
             let guesses =
                 [
                     sm.BACKGROUND
@@ -280,13 +280,13 @@ module Stepmania =
                     "background.jpg"
                 ]
             match List.tryFind (fun guess -> File.Exists (Path.Combine(path, guess)) ) guesses with
-            | Some p -> p
+            | Some p -> Some p
             | None ->
 
             let files = Directory.GetFiles path |> Array.map Path.GetFileName
 
             match files |> Array.tryFind (fun filename -> filename.ToLower().Contains "bg" || filename.ToLower().Contains "back") with
-            | Some p -> p
+            | Some p -> Some p
             | None ->
 
             let image_files = 
@@ -299,18 +299,16 @@ module Stepmania =
                     with err -> file, 0
                 )
             if image_files.Length >= 3 then //expect a bg, bn and cdtitle
-                fst (Array.sortByDescending snd image_files).[0]
-            else ""
+                fst (Array.sortByDescending snd image_files).[0] |> Some
+            else None
 
-        let findAudio() : string =
-            if File.Exists (Path.Combine(path, sm.MUSIC)) then sm.MUSIC
+        let findAudio() : string option =
+            if File.Exists (Path.Combine(path, sm.MUSIC)) then Some sm.MUSIC
             else
 
             let files = Directory.GetFiles path |> Array.map Path.GetFileName
                 
-            match files |> Array.tryFind (fun filename -> filename.ToLower().Contains "mp3" || filename.ToLower().Contains "wav" || filename.ToLower().Contains "ogg") with
-            | Some p -> p
-            | None -> "audio.mp3"
+            files |> Array.tryFind (fun filename -> filename.ToLower().Contains "mp3" || filename.ToLower().Contains "wav" || filename.ToLower().Contains "ogg")
 
         let findAuthor() : string =
             let folderName = Path.GetFileName path
@@ -340,8 +338,8 @@ module Stepmania =
                     Source = None
 
                     PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
-                    AudioFile = findAudio() |> Relative
-                    BackgroundFile = findBackground() |> Relative
+                    AudioFile = match findAudio() with Some file -> Relative file | None -> Missing
+                    BackgroundFile = match findBackground() with Some file -> Relative file | None -> Missing
 
                     ChartSource = Unknown
                 }
@@ -453,7 +451,7 @@ module Interlude =
     let toOsu (chart: Chart) : Beatmap =
         let general = 
             { General.Default with
-                AudioFilename = match chart.Header.AudioFile with Relative s -> s | Absolute s -> Path.GetFileName s | Asset s -> "audio.mp3"
+                AudioFilename = match chart.Header.AudioFile with Relative s -> s | Absolute s -> Path.GetFileName s | Asset _ | Missing -> "audio.mp3"
                 PreviewTime = chart.Header.PreviewTime
                 SampleSet = SampleSet.Soft
                 Mode = GameMode.Mania
@@ -479,7 +477,7 @@ module Interlude =
             Editor = editor
             Metadata = meta
             Difficulty = diff
-            Events = [ Background ((match chart.Header.BackgroundFile with Relative s -> s | Absolute s -> Path.GetFileName s | Asset s -> "bg.png"), (0.0, 0.0)) ]
+            Events = [ Background ((match chart.Header.BackgroundFile with Relative s -> s | Absolute s -> Path.GetFileName s | Asset _ | Missing -> "bg.png"), (0.0, 0.0)) ]
             Objects = convertSnapsToHitobjects chart.Notes chart.Keys
             Timing = convertToTimingPoints chart.BPM chart.SV chart.LastNote
         }
@@ -496,7 +494,7 @@ module Utilities =
     let (|ChartFile|_|) (path: string) =
         let s = Path.GetExtension(path).ToLower()
         match s with
-        | ".yav" | ".sm" | ".osu" -> Some s
+        | ".sm" | ".osu" -> Some s
         | _ -> None
 
     let (|ChartArchive|_|) (path: string) = 
@@ -526,10 +524,6 @@ module Utilities =
 
     let loadAndConvertFile (action: ConversionAction) : Chart list =
         match Path.GetExtension(action.Source).ToLower() with
-        | ".yav" ->
-            match Chart.fromFile action.Source with
-            | Some chart -> [chart]
-            | None -> []
         | ".sm" -> 
             let f = 
                 if action.Config.StepmaniaPackId.IsSome then
@@ -550,42 +544,3 @@ module Utilities =
                 else []
             with err -> Logging.Debug ("Skipped .osu file: " + action.Source, err); []
         | _ -> []
-
-    /// Writes chart to new location, including copying its background and audio files if needed
-    let relocateChart (songFolderRoot: string) (action: ConversionAction) (chart: Chart) =
-
-        let sourceFolder = Path.GetDirectoryName action.Source
-        let targetFolder = Path.Combine(songFolderRoot, action.Config.PackName, Chart.hash chart)
-
-        let copyFile (file: MediaPath) =
-            match file with
-            | Asset s -> Asset s
-            | Relative "" -> Relative ""
-            | Absolute s -> Absolute s
-            | Relative file ->
-                if action.Config.CopyMediaFiles then
-                    let source = Path.Combine (sourceFolder, file)
-                    let target = Path.Combine (targetFolder, file)
-                    if File.Exists source then
-                        if not (File.Exists target) then
-                            try File.Copy (source, target)
-                            with err -> Logging.Error ("Could not copy media file from " + source, err)
-                    else Logging.Warn ("Missing media file at " + source)
-                    Relative file
-                else
-                    Absolute (Path.Combine (sourceFolder, file))
-
-        Directory.CreateDirectory targetFolder |> ignore
-
-        let new_chart =
-            { chart with
-                Header = 
-                    { chart.Header with
-                        BackgroundFile = copyFile chart.Header.BackgroundFile
-                        AudioFile = copyFile chart.Header.AudioFile
-                    }
-                LoadedFromPath = Path.Combine (targetFolder, Path.ChangeExtension (Path.GetFileName chart.LoadedFromPath, ".yav"))
-            }
-
-        Chart.toFile new_chart new_chart.LoadedFromPath
-        new_chart

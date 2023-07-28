@@ -123,7 +123,8 @@ module Common =
                     Logging.Critical "If you would like to launch anyway (WILL WIPE THIS DATA!!), press ENTER."
                     Logging.Critical "If you would like to try and fix the problem youself, CLOSE THIS WINDOW NOW."
                     Console.ReadLine() |> ignore
-                    Logging.Critical "User has chosen to launch game with default data."
+                    Logging.Critical "User has chosen to load library with default data."
+                    // todo: Queue a recache in this situation
                 JSON.Default<'T>()
         else
             Logging.Info (sprintf "No %s file found, creating it." name)

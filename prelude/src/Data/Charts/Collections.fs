@@ -20,7 +20,7 @@ module Collections =
             | _ -> false
         override this.GetHashCode() = this.Hash.GetHashCode()
         static member OfChart(cc: CachedChart) =
-            { Hash = cc.Hash; Path = cc.FilePath }
+            { Hash = cc.Hash; Path = cc.Key }
         interface IComparable with
             member this.CompareTo other =
                 match other with

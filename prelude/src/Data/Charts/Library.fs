@@ -11,70 +11,24 @@ open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.Conversions
 open Prelude.Data.Charts.Tables
+open Prelude.Data.Charts.Caching
 
 open Sorting
 open Collections
-open Caching
 
 module Library =
 
-    let charts : ConcurrentDictionary<string, CachedChart> = loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) false
+    let cache : Cache = Cache.from_path (getDataPath "Songs")
     let collections = 
         let cs : Collections = loadImportantJsonFile "Collections" (Path.Combine(getDataPath "Data", "collections.json")) false
-        Logging.Info (sprintf "Loaded chart library of %i charts, %i folders, %i playlists" charts.Count cs.Folders.Count cs.Playlists.Count)
+        Logging.Info (sprintf "Loaded chart library of %i charts, %i folders, %i playlists" cache.Entries.Count cs.Folders.Count cs.Playlists.Count)
         cs
 
     // ---- Basic data layer stuff ----
 
     let save() = 
-        saveImportantJsonFile (Path.Combine(getDataPath "Data", "cache.json")) charts
+        Cache.save cache
         saveImportantJsonFile (Path.Combine(getDataPath "Data", "collections.json")) collections
-    
-    let addOrUpdate (packFolderName: string) (c: Chart) = 
-        let cc = cacheChart packFolderName c
-        charts.[cc.FilePath] <- cc
-
-    let count() = charts.Count
-
-    let lookup (id: string) : CachedChart option =
-        let success, c = charts.TryGetValue id
-        if success then Some c else None
-
-    // todo: optimise!
-    let lookupHash(id: string) : CachedChart option =
-        Seq.tryFind (fun cc -> cc.Hash = id) charts.Values
-
-    let load (cc: CachedChart) : Chart Option = cc.FilePath |> Chart.fromFile
-
-    let recache_service =
-        { new Async.Service<unit, unit>() with
-            override this.Handle(()) =
-                async {
-                    Logging.Debug("Rebuilding chart cache")
-                    charts.Clear()
-                    for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
-                        for song in Directory.EnumerateDirectories pack do
-                            for file in Directory.EnumerateFiles song do
-                                match Path.GetExtension(file).ToLower() with
-                                | ".yav" ->
-                                    match Chart.fromFile file with
-                                    | Some c ->
-                                        addOrUpdate (Path.GetFileName pack) c
-                                    | None -> ()
-                                | _ -> ()
-                    save()
-                }
-        }
-    
-    let delete (c: CachedChart) =
-        charts.TryRemove c.FilePath |> ignore
-        if File.Exists c.FilePath then File.Delete c.FilePath
-        let songfolder = Path.GetDirectoryName c.FilePath
-        match songfolder with SongFolder _ -> () | _ -> Directory.Delete(songfolder, true) 
-        let packfolder = Path.GetDirectoryName songfolder
-        if packfolder |> Directory.EnumerateDirectories |> Seq.isEmpty then Directory.Delete(packfolder, false)
-    
-    let deleteMany (cs: CachedChart seq) = Seq.iter delete cs
 
     // ---- Retrieving library for level select ----
 
@@ -86,7 +40,7 @@ module Library =
 
         let groups = new Dictionary<int * string, Group>()
 
-        for c in Filter.apply filter charts.Values do
+        for c in Filter.apply filter cache.Entries.Values do
             let s = grouping (c, ctx)
             if groups.ContainsKey s |> not then groups.Add(s, { Charts = ResizeArray<CachedChart * LibraryContext>(); Context = LibraryGroupContext.None })
             groups.[s].Charts.Add (c, LibraryContext.None)
@@ -105,11 +59,11 @@ module Library =
             collection.Charts
             |> Seq.choose
                 ( fun entry ->
-                    match lookup entry.Path with
+                    match Cache.by_key entry.Path cache with
                     | Some cc -> Some (cc, LibraryContext.Folder name)
                     | None ->
-                    match lookupHash entry.Hash with
-                    | Some cc -> Some (cc, LibraryContext.Folder name)
+                    match Cache.by_hash entry.Hash cache with
+                    | Some cc -> entry.Path <- cc.Key; Some (cc, LibraryContext.Folder name)
                     | None -> Logging.Warn(sprintf "Could not find chart: %s [%s] for collection %s" entry.Path entry.Hash name); None
                 )
             |> Filter.applyf filter
@@ -123,11 +77,11 @@ module Library =
             |> Seq.indexed
             |> Seq.choose
                 ( fun (i, (entry, info)) ->
-                    match lookup entry.Path with
+                    match Cache.by_key entry.Path cache with
                     | Some cc -> Some (cc, LibraryContext.Playlist (i, name, info))
                     | None ->
-                    match lookupHash entry.Hash with
-                    | Some cc -> entry.Path <- cc.FilePath; Some (cc, LibraryContext.Playlist (i, name, info))
+                    match Cache.by_key entry.Hash cache with
+                    | Some cc -> entry.Path <- cc.Key; Some (cc, LibraryContext.Playlist (i, name, info))
                     | None -> Logging.Warn(sprintf "Could not find chart: %s [%s] for playlist %s" entry.Path entry.Hash name); None
                 )
             |> Filter.applyf filter
@@ -144,7 +98,7 @@ module Library =
                 level.Charts
                 |> Seq.choose
                     ( fun (c: TableChart) ->
-                        lookupHash c.Hash
+                        Cache.by_hash c.Hash cache
                         |> Option.map (fun x -> x, LibraryContext.Table level.Name)
                     )
                 |> Filter.applyf filter
@@ -190,9 +144,8 @@ module Library =
                                 try
                                     let action = { Config = config; Source = file }
                                     loadAndConvertFile action
-                                    |> List.map (relocateChart (getDataPath "songs") action)
-                                    |> fun charts -> List.iter (addOrUpdate config.PackName) charts
-                                with err -> Logging.Error ("Failed to load/convert file: " + file, err)
+                                    |> fun charts -> Cache.add_new config.PackName charts cache
+                                with err -> Logging.Error ("Failed to convert/cache file: " + file, err)
                             | _ -> ()
                     }
             }

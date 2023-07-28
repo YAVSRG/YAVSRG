@@ -7,7 +7,7 @@ open Prelude.Gameplay
 
 module Sorting =
 
-    open Caching
+    open Prelude.Data.Charts.Caching
     open FParsec
 
     let private firstCharacter (s: string) =
@@ -61,7 +61,7 @@ module Sorting =
     type GroupMethod = CachedChart * GroupContext -> int * string
     let groupBy : IDictionary<string, GroupMethod> = dict [
             "none", fun (c, _) -> 0, "No grouping"
-            "pack", fun (c, _) -> 0, c.Pack
+            "pack", fun (c, _) -> 0, c.Folder
             "date_played", dateLastPlayed
             "grade", gradeAchieved
             "lamp", lampAchieved
@@ -110,7 +110,7 @@ module Sorting =
             | Failure (f, _, _) -> [Impossible]
 
         let private _f (filter: Filter) (c: CachedChart) : bool =
-            let s = (c.Title + " " + c.Artist + " " + c.Creator + " " + c.DiffName + " " + c.Pack).ToLower()
+            let s = (c.Title + " " + c.Artist + " " + c.Creator + " " + c.DifficultyName + " " + c.Folder).ToLower()
             List.forall
                 (
                     function
