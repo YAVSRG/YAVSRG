@@ -23,24 +23,8 @@ module Collect =
     let add_song(song: Song) : SongId =
 
         let stitle = simplify_string song.Title
-        let mutable existing_id = None
-        let mutable similar_id = None
-        for other_song_id in songs.Keys do
-            if existing_id.IsNone then
-                let other_song = songs.[other_song_id]
-                if other_song = song then existing_id <- Some other_song_id
-                //let mutable similarity = 0
 
-                //if stitle = simplify_string other_song.Title then similarity <- similarity + 1
-                //if song.Source = other_song.Source then similarity <- similarity + 1
-                //if List.contains song.Title other_song.AlternativeTitles then similarity <- similarity + 1
-                //if List.contains song.Title other_song.AlternativeTitles then similarity <- similarity + 1
-                //if other_song.Tags.Length - (List.except song.Tags other_song.Tags).Length > 2 then similarity <- similarity + 1
-                //if other_song.Artists.Length - (List.except song.Artists other_song.Artists).Length > 1 then similarity <- similarity + 1
-
-                //if similarity >= 2 && existing_id.IsNone then
-                //    similar_id <- Some other_song_id
-                //    Logging.Info(sprintf "Song similarity (but not identical) to %s" other_song_id)
+        let existing_id = songs.Keys |> Seq.tryFind (fun other_song_id -> song = songs.[other_song_id])
 
         match existing_id with
         | None ->
@@ -51,9 +35,6 @@ module Collect =
             let id = if i > 0 then id + "-" + i.ToString() else id
             songs.Add(id, song)
             Logging.Info(sprintf "+ Song: %s" id)
-            //match similar_id with
-            //| Some s -> Queue.append "songs-similar" (s + ", " + id)
-            //| None -> ()
             id
         | Some id -> id
 
