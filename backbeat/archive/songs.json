@@ -10,15 +10,6 @@
     }, 
     "/-1": {
         "AlternativeTitles": [], 
-        "Artists": ["楊採鈺"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "少年英雄小那咤"
-    }, 
-    "/-10": {
-        "AlternativeTitles": [], 
         "Artists": [""], 
         "OtherArtists": [], 
         "Remixers": [], 
@@ -26,7 +17,7 @@
         "Tags": [], 
         "Title": ""
     }, 
-    "/-11": {
+    "/-10": {
         "AlternativeTitles": [], 
         "Artists": ["銀臨"], 
         "OtherArtists": [], 
@@ -35,7 +26,7 @@
         "Tags": [], 
         "Title": "牽絲戲"
     }, 
-    "/-12": {
+    "/-11": {
         "AlternativeTitles": [], 
         "Artists": ["麻枝准"], 
         "OtherArtists": [], 
@@ -44,7 +35,7 @@
         "Tags": [], 
         "Title": "終わりの世界から"
     }, 
-    "/-13": {
+    "/-12": {
         "AlternativeTitles": [], 
         "Artists": ["鄧超"], 
         "OtherArtists": [], 
@@ -53,7 +44,7 @@
         "Tags": [], 
         "Title": "無敵"
     }, 
-    "/-14": {
+    "/-13": {
         "AlternativeTitles": [], 
         "Artists": ["みかん汁ふりかけ"], 
         "OtherArtists": [], 
@@ -62,7 +53,7 @@
         "Tags": [], 
         "Title": "星が降らない街"
     }, 
-    "/-15": {
+    "/-14": {
         "AlternativeTitles": [], 
         "Artists": ["周杰倫"], 
         "OtherArtists": [], 
@@ -71,7 +62,7 @@
         "Tags": [], 
         "Title": "龍戰騎士"
     }, 
-    "/-16": {
+    "/-15": {
         "AlternativeTitles": [], 
         "Artists": ["王亞民"], 
         "OtherArtists": [], 
@@ -80,7 +71,7 @@
         "Tags": [], 
         "Title": "穿越"
     }, 
-    "/-17": {
+    "/-16": {
         "AlternativeTitles": [], 
         "Artists": ["米倉千尋"], 
         "OtherArtists": [], 
@@ -89,7 +80,7 @@
         "Tags": [], 
         "Title": "フェアリーテイル - 約束の日 -"
     }, 
-    "/-2": {
+    "/-17": {
         "AlternativeTitles": [], 
         "Artists": ["森永真由美"], 
         "OtherArtists": [], 
@@ -98,7 +89,7 @@
         "Tags": [], 
         "Title": "華鳥風月"
     }, 
-    "/-3": {
+    "/-2": {
         "AlternativeTitles": [], 
         "Artists": ["幽閉サテライト"], 
         "OtherArtists": [], 
@@ -107,7 +98,7 @@
         "Tags": [], 
         "Title": "大地に咲く旋律"
     }, 
-    "/-4": {
+    "/-3": {
         "AlternativeTitles": [], 
         "Artists": ["ユーザー情報非公開"], 
         "OtherArtists": [], 
@@ -116,7 +107,7 @@
         "Tags": [], 
         "Title": "てーととおーおっおっびおーあっおぅてー"
     }, 
-    "/-5": {
+    "/-4": {
         "AlternativeTitles": [], 
         "Artists": ["紅薙 旅人"], 
         "OtherArtists": [], 
@@ -125,7 +116,7 @@
         "Tags": [], 
         "Title": "おてんば恋娘"
     }, 
-    "/-6": {
+    "/-5": {
         "AlternativeTitles": [], 
         "Artists": ["張敬軒"], 
         "OtherArtists": [], 
@@ -134,7 +125,7 @@
         "Tags": [], 
         "Title": "吻得太逼真"
     }, 
-    "/-7": {
+    "/-6": {
         "AlternativeTitles": [], 
         "Artists": ["梁静茹"], 
         "OtherArtists": [], 
@@ -143,7 +134,7 @@
         "Tags": [], 
         "Title": "暖暖"
     }, 
-    "/-9": {
+    "/-7": {
         "AlternativeTitles": [], 
         "Artists": ["卓依婷"], 
         "OtherArtists": [], 
@@ -151,6 +142,15 @@
         "Source": null, 
         "Tags": [], 
         "Title": "東南西北風"
+    }, 
+    "/-8": {
+        "AlternativeTitles": [], 
+        "Artists": ["楊採鈺"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "少年英雄小那咤"
     }, 
     "/9420": {
         "AlternativeTitles": [], 
@@ -224,7 +224,7 @@
         "Tags": [], 
         "Title": "千年等一回 (劉洋 Cover)"
     }, 
-    "/cover-1": {
+    "/cover-2": {
         "AlternativeTitles": [], 
         "Artists": ["ゆうゆ"], 
         "OtherArtists": [], 
@@ -782,7 +782,7 @@
         "Tags": ["進め！高捷（たかめ）少女！", "茶米(dav)", "Hoskey", "Ayre", "Shi", "Duang", "Lee", "初夏", "緋華", "小啾", "Riv", "迷子燒", "兔姬", "shinia", "高雄捷運", "Spy"], 
         "Title": "Next Stop.With You"
     }, 
-    "3r2/themeofrabiribi-2": {
+    "3r2/themeofrabiribi": {
         "AlternativeTitles": [], 
         "Artists": ["3R2"], 
         "OtherArtists": [], 
@@ -2989,8 +2989,8 @@
     }, 
     "artyfeatangeltaylor/upallnight": {
         "AlternativeTitles": [], 
-        "Artists": ["Arty (feat. Angel Taylor)"], 
-        "OtherArtists": [], 
+        "Artists": ["Arty"], 
+        "OtherArtists": ["Angel Taylor"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -4607,22 +4607,13 @@
         "Tags": [], 
         "Title": "Kiss My Lips"
     }, 
-    "boa/masayumechasing": {
+    "boa/masayumechasing-2": {
         "AlternativeTitles": [], 
         "Artists": ["BoA"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "Fairy Tail", 
         "Tags": ["15th", "フェアリーテイル", "OP15", "Opening"], 
-        "Title": "MASAYUME CHASING"
-    }, 
-    "boa/masayumechasing-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["BoA"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
         "Title": "Masayume Chasing"
     }, 
     "bokkendodomemagenta/eth": {
@@ -5777,7 +5768,7 @@
         "Tags": ["masaya", "oya", "phquase", "takahiro", "fukase", "marathon", "ませまてぃっく.ま+ま=まじっく!", "ばーさす!", "びっくりさせたらおこるよ!", "Jump", "Over!生物種", "-Hang", "Over!PHQ", "remix-", "気づいたら春夏秋冬"], 
         "Title": "Songs Compilation"
     }, 
-    "camellia/songscompilation-1": {
+    "camellia/songscompilation-2": {
         "AlternativeTitles": [], 
         "Artists": ["Camellia"], 
         "OtherArtists": [], 
@@ -7496,7 +7487,7 @@
         "Tags": [], 
         "Title": "The Disappearance of Hatsune Miku"
     }, 
-    "cosmobousoup/thedisappearanceofhatsunemiku-1": {
+    "cosmobousoup/thedisappearanceofhatsunemiku-2": {
         "AlternativeTitles": ["初音ミクの消失", "THE END OF HATSUNE MIKU", "Hatsune Miku no Shoushitsu"], 
         "Artists": ["cosMo@BousouP"], 
         "OtherArtists": ["Hatsune Miku"], 
@@ -7649,16 +7640,7 @@
         "Tags": [], 
         "Title": "TOXICC."
     }, 
-    "crimewave/youarealreadydeadprodghostie": {
-        "AlternativeTitles": [], 
-        "Artists": ["CRIMEWAVE", "GHOSTIE"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "YOU ARE ALREADY DEAD"
-    }, 
-    "crimewaveghostie/youarealreadydead": {
+    "crimewaveghostie/youarealreadydead-1": {
         "AlternativeTitles": [], 
         "Artists": ["CRIMEWAVE", "GHOSTIE"], 
         "OtherArtists": [], 
@@ -9593,22 +9575,13 @@
         "Tags": ["14th", "GOLD", "TRANCE", "fanzhen0019", "irie", "miyuki", "happy623", "kawaiwkyik", "victorica_db", "richardfeder"], 
         "Title": "snow storm"
     }, 
-    "djtaka/trueblue": {
+    "djtaka/trueblue-2": {
         "AlternativeTitles": [], 
         "Artists": ["dj TAKA"], 
         "OtherArtists": ["AiMEE"], 
         "Remixers": [], 
         "Source": "jubeat saucer", 
-        "Tags": ["[Emiria]", "AiMEE", "victorica_db", "Beatmania", "IIDX", "20", "tricoro", "KONAMI", "BEMANI", "REFLEC", "BEAT", "colette", "pop'n", "music", "Sunny", "Park", "SOUND", "VOLTEX", "II", "-infinite", "infection-", "POLICY", "BREAK", "Dance", "Dance", "Revolution"], 
-        "Title": "True Blue"
-    }, 
-    "djtaka/trueblue-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["dj TAKA"], 
-        "OtherArtists": ["AiMEE"], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
+        "Tags": ["[Emiria]", "AiMEE", "victorica_db", "Beatmania", "IIDX", "20", "tricoro", "KONAMI", "BEMANI", "REFLEC", "BEAT", "colette", "pop'n", "music", "Sunny", "Park", "SOUND", "VOLTEX", "II", "-infinite", "infection-", "POLICY", "BREAK", "Dance", "Revolution"], 
         "Title": "True Blue"
     }, 
     "djtakadjyoshitaka/elementalcreation": {
@@ -11366,16 +11339,7 @@
         "Tags": ["BGM", "OST", "victorica_db", "simple_star"], 
         "Title": "Phantasmagoria"
     }, 
-    "falcomsoundteamjdk/theazurearbitrator": {
-        "AlternativeTitles": [], 
-        "Artists": ["Falcom Sound Team J.D.K."], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "The Azure Arbitrator"
-    }, 
-    "falcomsoundteamjdk/theazurearbitrator-1": {
+    "falcomsoundteamjdk/theazurearbitrator-2": {
         "AlternativeTitles": [], 
         "Artists": ["Falcom Sound Team J.D.K."], 
         "OtherArtists": [], 
@@ -11924,22 +11888,13 @@
         "Tags": [], 
         "Title": "Elegy"
     }, 
-    "fleshgodapocalypse/thehypocrisy": {
+    "fleshgodapocalypse/thehypocrisy-2": {
         "AlternativeTitles": [], 
         "Artists": ["Fleshgod Apocalypse"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": ["marathon", "technical", "death", "metal", "rock", "english", "agony", "xay", "xayphon", "collaboration"], 
-        "Title": "The Hypocrisy"
-    }, 
-    "fleshgodapocalypse/thehypocrisy-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Fleshgod Apocalypse"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
         "Title": "The Hypocrisy"
     }, 
     "fleshgodapocalypse/thruourscars": {
@@ -12347,7 +12302,7 @@
         "Tags": [], 
         "Title": "Memory of Snow"
     }, 
-    "fripside/onlymyrailgun-1": {
+    "fripside/onlymyrailgun": {
         "AlternativeTitles": [], 
         "Artists": ["fripSide"], 
         "OtherArtists": [], 
@@ -15749,22 +15704,13 @@
         "Tags": [], 
         "Title": "Shinbatsu o Tadori Kyo Kotsu ni Itaru"
     }, 
-    "imperialcircusdeaddecadence/uta": {
+    "imperialcircusdeaddecadence/uta-2": {
         "AlternativeTitles": ["謳"], 
         "Artists": ["Imperial Circus Dead Decadence"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": ["puxtu", "extol", "ou", "song", "declare", "express", "Ode", "To", "The", "Dreadful", "Sacrament", "惨劇の血に赫く染まった愛と絶望の黒い死とが紡ぐ最期の物語", "Sangeki", "no", "Chi", "ni", "Kagayaku", "Somatta", "Ai", "to", "Zetsubou", "Kuroi", "Shitoga", "Tsumugu", "Saigo", "Monogatari", "Rib:y(uhki)", "L.G.C.", "KIM", "Kylie", "Hull", "VAGUEDGE", "Another", "Stream", "Kimiko", "PEATH2", "TOME", "あにょ", "REINO", "Hellnear", "nanomortis", "Rib-y(uhki)"], 
-        "Title": "Uta"
-    }, 
-    "imperialcircusdeaddecadence/uta-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Imperial Circus Dead Decadence"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
         "Title": "Uta"
     }, 
     "incinerate/rengokupurgatorium": {
@@ -16153,15 +16099,6 @@
         "Source": null, 
         "Tags": [], 
         "Title": "Douse Konna no ga Suki desho"
-    }, 
-    "izumiakazawacvmadokayonezawa/responsibilityresponse": {
-        "AlternativeTitles": [], 
-        "Artists": ["Yonezawa Madoka"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Responsibility Response"
     }, 
     "izumimutsuhiko/tengokutojigoku": {
         "AlternativeTitles": [], 
@@ -19457,22 +19394,13 @@
         "Tags": ["Electronic"], 
         "Title": "Ace of Hz"
     }, 
-    "lagoon/kiminomatsusekai": {
+    "lagoon/kiminomatsusekai-2": {
         "AlternativeTitles": ["君の待つ世界 (TVサイズ)"], 
         "Artists": ["LAGOON"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "まじっく快斗1412", 
         "Tags": ["opening", "Kuroba", "Kaito", "1412", "IamKwaN", "Zan_-"], 
-        "Title": "Kimi no Matsu Sekai"
-    }, 
-    "lagoon/kiminomatsusekai-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["LAGOON"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
         "Title": "Kimi no Matsu Sekai"
     }, 
     "lamazep/popiporyuremix": {
@@ -20375,16 +20303,7 @@
         "Tags": ["attack", "on", "titan", "shingeki", "no", "kyojin", "season", "2", "two", "dedicate", "your", "hearts", "snk", "aot", "-", "Ly0572", "R_e_m_u_r_i_n_g", "Chromoxx", "Opfert", "eure", "Herzen!", "Attack", "Titan", "all", "澤野", "弘之", "hiroyuki", "sawano", "revo", "諌山", "創", "Hajime", "Isayama", "進撃の軌跡", "Shingeki", "Kiseki", "鎌仲泰郎Yasuo", "Kamanaka", "Sound", "Opening", "Theme", "PCCA-04540", "PCCA-04539"], 
         "Title": "Shinzou o Sasageyo!"
     }, 
-    "linkinpark/breakingthehabit": {
-        "AlternativeTitles": [], 
-        "Artists": ["Linkin Park"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Breaking The Habit"
-    }, 
-    "linkinpark/breakingthehabit-1": {
+    "linkinpark/breakingthehabit-2": {
         "AlternativeTitles": [], 
         "Artists": ["Linkin Park"], 
         "OtherArtists": [], 
@@ -22040,7 +21959,7 @@
         "Tags": [], 
         "Title": "graphite/diamond"
     }, 
-    "mayumimorinagamoimoi/dreamin-1": {
+    "mayumimorinagamoimoi/dreamin": {
         "AlternativeTitles": [], 
         "Artists": ["Mayumi Morinaga(moimoi)"], 
         "OtherArtists": ["Ryu*"], 
@@ -23012,7 +22931,7 @@
         "Tags": [], 
         "Title": "Viva Happy"
     }, 
-    "mitchiemandcotorifeathatsunemikumegurineluka/aidee": {
+    "mitchiemcotori/aidee": {
         "AlternativeTitles": [], 
         "Artists": ["Mitchie M", "Cotori"], 
         "OtherArtists": ["Hatsune Miku", "Megurine Luka"], 
@@ -25279,6 +25198,15 @@
         "Source": null, 
         "Tags": [], 
         "Title": "Moonlight Shadow (Nightcore remix)"
+    }, 
+    "nightcore/welcometotheuk": {
+        "AlternativeTitles": [], 
+        "Artists": ["Nightcore"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Welcome to the UK"
     }, 
     "nightmare/boulafacet": {
         "AlternativeTitles": [], 
@@ -28205,22 +28133,13 @@
         "Tags": ["konami", "jubeat", "plus", "colette", "bemani", "duca", "KONAMI", "saucer", "+", "MUSIC", "PACK", "03", "a.mayuko", "Virtue-", "[_A_v_a_l_o_n_]", "Syadow-", "Amiichii", "FAMoss", "FadillSan"], 
         "Title": "Colorful Minutes"
     }, 
-    "qrispyjoybox/licca": {
+    "qrispyjoybox/licca-2": {
         "AlternativeTitles": [], 
         "Artists": ["Qrispy Joybox"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "REFLEC BEAT groovin'!!", 
         "Tags": ["Spy", "victorica_db", "yf_bmp", "skystar", "amamiya", "yuko", "Reflec", "Beat"], 
-        "Title": "licca"
-    }, 
-    "qrispyjoybox/licca-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Qrispy Joybox"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
         "Title": "licca"
     }, 
     "qrispyjoybox/printemps": {
@@ -31661,6 +31580,15 @@
         "Tags": ["Vocaloid", "mafumafu", "IA", "Narcissu", "Oracle", "Fycho", "Kawaiwkyik", "RLC", "Icing_wind", "victorica_db", "Simple_Star", "Rumia-", "Xinely"], 
         "Title": "Kakushigoto"
     }, 
+    "shawnwasabi/macncheese": {
+        "AlternativeTitles": [], 
+        "Artists": ["Shawn Wasabi"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Mac n' Cheese"
+    }, 
     "shawnwasabi/marblesoda": {
         "AlternativeTitles": [], 
         "Artists": ["Shawn Wasabi"], 
@@ -33325,15 +33253,6 @@
         "Source": null, 
         "Tags": [], 
         "Title": "Thunder Light"
-    }, 
-    "ssssshawnwasabi/macncheese": {
-        "AlternativeTitles": [], 
-        "Artists": ["Shawn Wasabi"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Mac n' Cheese"
     }, 
     "sta/thesilence": {
         "AlternativeTitles": [], 
@@ -38555,15 +38474,6 @@
         "Tags": [], 
         "Title": "Moonlight Shadow"
     }, 
-    "whocaresitsfuckingnightcore/welcometotheuk": {
-        "AlternativeTitles": [], 
-        "Artists": ["Nightcore"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Welcome to the UK"
-    }, 
     "why/jumpingjacksong": {
         "AlternativeTitles": [], 
         "Artists": ["why"], 
@@ -39580,6 +39490,15 @@
         "Source": null, 
         "Tags": [], 
         "Title": "Koiseyo Otome!"
+    }, 
+    "yonezawamadoka/responsibilityresponse": {
+        "AlternativeTitles": [], 
+        "Artists": ["Yonezawa Madoka"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Responsibility Response"
     }, 
     "yonezukenshi/loser": {
         "AlternativeTitles": [], 
