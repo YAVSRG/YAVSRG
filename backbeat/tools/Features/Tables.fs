@@ -9,6 +9,7 @@ open Prelude.Common
 open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Caching
+open Backbeat.Features.Archive
 open Backbeat.Utils
 
 module Tables =
@@ -189,8 +190,10 @@ module Tables =
                 | Some cc -> 
                     match Cache.load cc interlude_cache with
                     | Some c -> 
-                        let ok, info = Archive.Storage.charts.TryGetValue(chart.Hash)
-                        if ok then Archive.Upload.upload_chart c info |> Async.AwaitTask |> Async.RunSynchronously
+                        let ok, info = Archive.Storage.charts.TryGetValue chart.Hash
+                        if ok then
+                            Cache.clone table.Name cc interlude_cache backbeat_cache
+                            Archive.Upload.upload_chart c info
                         else Logging.Info(sprintf "Chart not in backbeat: %s" chart.Id)
                     | None -> Logging.Info(sprintf "Error loading chart: %s" chart.Id)
                 | None -> Logging.Info(sprintf "Chart missing from local library: %s" chart.Id)

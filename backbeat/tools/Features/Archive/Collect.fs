@@ -102,7 +102,7 @@ module Collect =
                     }
                 Logging.Info(sprintf "^ Chart: %s" hash)
             
-            upload_chart chart new_entry |> Async.AwaitTask |> Async.RunSynchronously
+            upload_chart chart new_entry
         else
 
         let song: Song =
@@ -129,7 +129,7 @@ module Collect =
         Logging.Info(sprintf "+ Chart: %s" hash)
 
         Logging.Info(sprintf "Uploading %s .." hash)
-        upload_chart chart chart_entry |> Async.AwaitTask |> Async.RunSynchronously
+        upload_chart chart chart_entry
 
     let slurp_folder (extra_sources: ChartSource list) (folder: string) =
         Directory.EnumerateFiles(Path.Combine(backbeat_cache.RootPath, folder))
@@ -237,6 +237,10 @@ module Collect =
         if packs.Community.ContainsKey id then 
             download_community_pack id |> Async.RunSynchronously |> ignore
         else Logging.Error "Not found"
+
+    let search_sm (name: string) =
+        let name = name.ToLower().Trim()
+        for kvp in packs.Stepmania do if kvp.Value.Title.ToLower().Contains(name) then printfn "%s" kvp.Value.Title
 
     let script() =
         let keywords = 
