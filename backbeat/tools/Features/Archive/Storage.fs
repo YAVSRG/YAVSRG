@@ -4,11 +4,14 @@ open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
+open Prelude.Data.Charts.Caching
 open Prelude.Backbeat.Archive
 open Backbeat.Utils
 
 [<AutoOpen>]
 module Storage =
+
+    let backbeat_cache = Cache.from_path BACKBEAT_CACHE_FOLDER
     
     let artists : VerifiedArtists = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "artists.json")) with

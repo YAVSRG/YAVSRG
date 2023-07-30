@@ -3,11 +3,11 @@
 open System
 open System.IO
 open System.IO.Compression
-open System.Security.Cryptography
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.Conversions
+open Prelude.Data.Charts.Caching
 open Prelude.Backbeat.Archive
 open Backbeat.Utils
 
@@ -21,8 +21,6 @@ module Collect =
         fun (s: string) -> regex.Replace(s.ToLowerInvariant(), "").Trim().Replace(" ", "")
 
     let add_song(song: Song) : SongId =
-
-        let stitle = simplify_string song.Title
 
         let existing_id = songs.Keys |> Seq.tryFind (fun other_song_id -> song = songs.[other_song_id])
 
@@ -38,17 +36,26 @@ module Collect =
             id
         | Some id -> id
 
-    let private sha_256 = SHA256.Create()
-
     let slurp_chart (extraSources: ChartSource list) (chart: Charts.Formats.Interlude.Chart) =
-        if not (File.Exists chart.AudioPath) then
+        if chart.Header.AudioFile = Missing then
             Logging.Info(sprintf "Rejecting %s because it doesn't have audio" chart.Header.Title)
-        elif not (File.Exists chart.BackgroundPath) then
+        elif chart.Header.BackgroundFile = Missing then
             Logging.Info(sprintf "Rejecting %s because it doesn't have a background image" chart.Header.Title)
         else
 
-        let audio_hash = chart.AudioPath |> File.OpenRead |> sha_256.ComputeHash |> BitConverter.ToString |> fun s -> s.Replace("-", "")
-        let bg_hash = chart.BackgroundPath |> File.OpenRead |> sha_256.ComputeHash |> BitConverter.ToString |> fun s -> s.Replace("-", "")
+        let audio_hash = 
+            match chart.Header.AudioFile with
+            | Asset s -> s 
+            | _ -> 
+                (Cache.audio_path chart backbeat_cache).Value
+                |> Cache.compute_hash
+        
+        let bg_hash = 
+            match chart.Header.BackgroundFile with
+            | Asset s -> s 
+            | _ -> 
+                (Cache.background_path chart backbeat_cache).Value
+                |> Cache.compute_hash
 
         let create_entry(song_id) =
             let lastNote = chart.LastNote
@@ -84,8 +91,8 @@ module Collect =
         if charts.ContainsKey hash then
             let old_entry = charts.[hash]
             let new_entry = create_entry old_entry.SongId
-            if new_entry.Sources = [] then Logging.Info(sprintf "Rejecting %s because it doesn't have a source" chart.Header.Title)
-            if new_entry.Notecount < 50 then Logging.Info(sprintf "Rejecting %s because it doesn't have enough notes" chart.Header.Title)
+            if new_entry.Sources.IsEmpty then Logging.Info(sprintf "Rejecting %s because it doesn't have a source" chart.Header.Title) else
+            if new_entry.Notecount < 50 then Logging.Info(sprintf "Rejecting %s because it doesn't have enough notes" chart.Header.Title) else
 
             if { new_entry with LastUpdated = old_entry.LastUpdated } <> old_entry then
                 charts.[hash] <- 
@@ -94,6 +101,8 @@ module Collect =
                         Sources = List.distinct (new_entry.Sources @ old_entry.Sources)
                     }
                 Logging.Info(sprintf "^ Chart: %s" hash)
+            
+            upload_chart chart new_entry |> Async.AwaitTask |> Async.RunSynchronously
         else
 
         let song: Song =
@@ -112,47 +121,60 @@ module Collect =
         //match chart.Header.ArtistNative with Some a -> add_artist_alias (chart.Header.Artist, a) | None -> ()
         
         let chart_entry = create_entry song_id
+        
+        if chart_entry.Sources.IsEmpty then Logging.Info(sprintf "Rejecting %s because it doesn't have a source" chart.Header.Title) else 
+        if chart_entry.Notecount < 50 then Logging.Info(sprintf "Rejecting %s because it doesn't have enough notes" chart.Header.Title) else
+
         charts.Add(hash, chart_entry)
         Logging.Info(sprintf "+ Chart: %s" hash)
 
-    let slurp_song_folder (sm_pack_id: int option) (target: string) =
-        for file in Directory.EnumerateFiles target do
-            match file with
-            | ChartFile _ ->
-                try
-                    let a = 
-                        { 
-                            Config = { ConversionActionConfig.Default with StepmaniaPackId = sm_pack_id; CopyMediaFiles = false; PackName = sm_pack_id.ToString() }
-                            Source = file
-                        }
-                    loadAndConvertFile a
-                    |> List.map (relocateChart (Path.Combine (ARCHIVE_PATH, "yav")) a)
-                    |> List.iter (fun c -> slurp_chart [] c)
-                with err -> Logging.Info(sprintf "Failed to load/convert file: %s" target)
-            | _ -> ()
+        Logging.Info(sprintf "Uploading %s .." hash)
+        upload_chart chart chart_entry |> Async.AwaitTask |> Async.RunSynchronously
 
-    let slurp_pack_folder (sm_pack_id: int option) (target: string) =
-        for songFolder in Directory.EnumerateDirectories target do slurp_song_folder sm_pack_id songFolder
+    let slurp_folder (extra_sources: ChartSource list) (folder: string) =
+        Directory.EnumerateFiles(Path.Combine(backbeat_cache.RootPath, folder))
+        |> Seq.map Chart.fromFile
+        |> Seq.iter (Option.iter (slurp_chart extra_sources))
 
-    let slurp_folder_of_oszs (community_pack_id: int) (target: string) =
+    let cache_song_folder (config: ConversionActionConfig) (target: string) =
+        Directory.EnumerateFiles target
+        |> Seq.collect
+            (
+                function
+                | ChartFile _ as file ->
+                    try
+                        let action = 
+                            { 
+                                Config = config
+                                Source = file
+                            }
+                        loadAndConvertFile action
+                    with err -> Logging.Error ("Failed to convert/cache file: " + file, err); []
+                | _ -> []
+            )
+        |> List.ofSeq
+        |> fun charts -> Cache.add_new config.PackName charts backbeat_cache
+
+    let cache_pack_folder (sm_pack_id: int) (target: string) =
+        let pack_name = sm_pack_id.ToString()
+        for songFolder in Directory.EnumerateDirectories target do 
+            cache_song_folder 
+                { ConversionActionConfig.Default with StepmaniaPackId = Some sm_pack_id; CopyMediaFiles = false; PackName = pack_name }
+                songFolder
+        Cache.save backbeat_cache
+        slurp_folder [] pack_name
+
+    let cache_folder_of_oszs (community_pack_id: int) (target: string) =
+        let pack_name = "c-" + community_pack_id.ToString()
         for osz in Directory.EnumerateFiles target |> Seq.filter (fun f -> Path.GetExtension(f).ToLower() = ".osz") do
             let extracted_path = Path.GetFileNameWithoutExtension(osz)
             if not (Directory.Exists extracted_path) then
                 ZipFile.ExtractToDirectory(osz, Path.GetFileNameWithoutExtension osz)
-            for file in Directory.EnumerateFiles extracted_path do
-                match file with
-                | ChartFile _ ->
-                    try
-                        let a = 
-                            { 
-                                Config = { ConversionActionConfig.Default with CopyMediaFiles = false; PackName = "c-" + community_pack_id.ToString() }
-                                Source = file
-                            }
-                        loadAndConvertFile a
-                        |> List.map (relocateChart (Path.Combine (ARCHIVE_PATH, "yav")) a)
-                        |> List.iter (fun chart -> slurp_chart [ CommunityPack {| PackId = community_pack_id |} ] chart)
-                    with err -> Logging.Info(sprintf "Failed to load/convert file: %s" target)
-                | _ -> ()
+            cache_song_folder
+                { ConversionActionConfig.Default with CopyMediaFiles = false; PackName = pack_name }
+                extracted_path
+        Cache.save backbeat_cache
+        slurp_folder [ChartSource.CommunityPack {| PackId = community_pack_id |}] pack_name
 
     let rec try_download_mirrors(mirrors, filepath) : Async<bool> =
         async {
@@ -178,13 +200,13 @@ module Collect =
             let folder = Path.Combine(ARCHIVE_PATH, "tmp", string id)
             match! try_download_mirrors(mirrors, zip) with
             | true ->
-                if Directory.Exists(folder) then Logging.Info("Looks like this pack was already extracted")
+                if Directory.Exists folder then Logging.Info (sprintf "Looks like this pack was already extracted to %s" folder)
                 else ZipFile.ExtractToDirectory(zip, folder)
                 let pack_folder = (Directory.GetDirectories folder)[0]
-                slurp_pack_folder (Some id) pack_folder
+                cache_pack_folder id pack_folder
                 return true
             | false ->
-                Logging.Error(sprintf "All mirrors failed.")
+                Logging.Error "All mirrors failed."
                 return false
         }
         
@@ -195,44 +217,26 @@ module Collect =
             let folder = Path.Combine(ARCHIVE_PATH, "tmp", "c-" + string id)
             match! try_download_mirrors(mirrors, zip) with
             | true ->
-                if Directory.Exists(folder) then Logging.Info("Looks like this pack was already extracted")
+                if Directory.Exists folder then Logging.Info (sprintf "Looks like this pack was already extracted to %s" folder)
                 else ZipFile.ExtractToDirectory(zip, folder)
                 for f in Directory.GetDirectories folder do
-                    slurp_folder_of_oszs id f
+                    cache_folder_of_oszs id f
                 return true
             | false ->
-                Logging.Error(sprintf "All mirrors failed.")
+                Logging.Error "All mirrors failed."
                 return false
         }
 
-    let slurp() =
-        for c in Queue.get "cpacks-add" do
-            let s = c.Split('\t')
-            let mutable i = 0
-            while packs.Community.ContainsKey i do
-                i <- i + 1
-            packs.Community.Add(i, { Title = s.[0]; Description = None; Mirrors = [DownloadUrl.create s.[1]]; Size = 0 })
-            Queue.append "cpack-imports" (i.ToString())
-        save()
-        Queue.save "cpacks-add" []
+    let slurp_sm (name: string) =
+        let name = name.ToLower().Trim()
+        match packs.Stepmania |> Seq.tryFind(fun x -> x.Value.Title.ToLower().Contains name) with
+        | Some kv -> kv.Key |> download_pack |> Async.RunSynchronously |> ignore
+        | None -> Logging.Error "Not found"
 
-        let mutable packs = Queue.get "cpack-imports"
-        while packs <> [] do
-            if download_community_pack(int (List.head packs)) |> Async.RunSynchronously then 
-                Queue.append "cpack-imports-success" (List.head packs)
-                save()
-            else Queue.append "cpack-imports-failed" (List.head packs)
-            packs <- List.tail packs
-            Queue.save "cpack-imports" packs
-
-        let mutable packs = Queue.get "pack-imports"
-        while packs <> [] do
-            if download_pack(int (List.head packs)) |> Async.RunSynchronously then 
-                Queue.append "pack-imports-success" (List.head packs)
-                save()
-            else Queue.append "pack-imports-failed" (List.head packs)
-            packs <- List.tail packs
-            Queue.save "pack-imports" packs
+    let slurp_community (id: int) =
+        if packs.Community.ContainsKey id then 
+            download_community_pack id |> Async.RunSynchronously |> ignore
+        else Logging.Error "Not found"
 
     let script() =
         let keywords = 
@@ -251,4 +255,3 @@ module Collect =
             else
                 Logging.Info packs.Stepmania.[p].Title
                 Queue.append "pack-imports" (p.ToString())
-

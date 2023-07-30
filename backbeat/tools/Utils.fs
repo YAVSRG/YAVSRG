@@ -38,12 +38,12 @@ module Utils =
         | Error e -> Logging.Error("Error loading settings (using default): ", e); Config.Default
 
     let TABLES_PATH = Path.Combine(REPO_PATH, "tables")
-    let CHARTS_PATH = Path.Combine(REPO_PATH, "tables", "charts")
-    let PACKS_PATH = Path.Combine(REPO_PATH, "tables", "release")
     let ARCHIVE_PATH = Path.Combine(REPO_PATH, "archive")
+    let BACKBEAT_CACHE_FOLDER = Path.Combine(ARCHIVE_PATH, "yav")
     let RULESETS_PATH = Path.Combine(REPO_PATH, "rulesets")
     let INTERLUDE_TABLES_PATH = Path.Combine(config.InterludePath, "Data", "Tables")
     let INTERLUDE_COLLECTIONS_FILE = Path.Combine(config.InterludePath, "Data", "collections.json")
+    let INTERLUDE_SONGS_FOLDER = Path.Combine(config.InterludePath, "Songs")
 
     let init() =
         JSON.ToFile (SETTINGS_FILE, true) config

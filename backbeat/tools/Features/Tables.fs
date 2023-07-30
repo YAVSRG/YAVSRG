@@ -1,20 +1,19 @@
 ﻿namespace Backbeat.Features
 
 open System.IO
-open System.IO.Compression
 open System.Diagnostics
 open System.Linq
 open Percyqaz.Common
 open Percyqaz.Shell
 open Prelude.Common
-open Prelude.Charts.Formats.Interlude
 open Prelude.Data.Charts.Tables
-open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Caching
 open Backbeat.Utils
 
 module Tables =
+
+    let interlude_cache = Cache.from_path INTERLUDE_SONGS_FOLDER
     
     let put_table(file: string) =
         
@@ -99,15 +98,13 @@ module Tables =
             for entry in folder.Charts |> List.ofSeq do
                 if table.Contains entry.Hash then printfn "Already in table: %s" entry.Path
                 else
-                    match Chart.fromFile entry.Path with
-                    | None -> printfn "Failed loading %s" entry.Path
-                    | Some chart -> 
-                        let cc = cacheChart table.Name chart
+                    match Cache.by_key entry.Path interlude_cache with
+                    | Some cc -> 
                         let id = Table.generate_cid cc
                         if table.AddChart("XXX", id, cc) then 
                             printfn "+ %s" id
                             folder.Remove cc |> ignore
-                        else printfn "Failed adding %s" id
+                    | None -> printfn "Chart key '%s' from collection not in cache" entry.Path
 
         { table with Version = Table.generate_table_version() } |> JSON.ToFile(Path.Combine(TABLES_PATH, file + ".suggestions.table"), true)
         printfn "Saved table additions."
@@ -183,100 +180,20 @@ module Tables =
             for c in l.Charts do
                 if not (Archive.Storage.charts.ContainsKey c.Hash) then printfn "'%s' is not in the backbeat database" c.Id
 
-    // Publishing the table
-
-    let export_table_sources(file: string) =
-
-        Directory.SetCurrentDirectory config.InterludePath
-        
-        let sources = ResizeArray<string>()
-        let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
-        for level in table.Levels do
-            for chart in level.Charts do
-                match lookupHash chart.Hash with
-                | Some cc -> 
-                    match load cc with
-                    | Some c -> 
-                        let source =
-                            match c.Header.ChartSource with
-                            | Unknown -> sprintf "Unknown source, local folder: %s" cc.Pack
-                            | Osu (setid, mapid) -> sprintf "https://osu.ppy.sh/beatmapsets/%i#mania/%i" setid mapid
-                            | Stepmania packid -> sprintf "https://etternaonline.com/pack/%i" packid
-                        if sources.Contains source |> not then sources.Add source
-                    | None -> printfn "Error loading chart: %s" chart.Id
-                | None -> printfn "Chart missing from local library: %s" chart.Id
-
-        File.WriteAllLines(Path.Combine(TABLES_PATH, file + ".sources.txt"), sources)
-        printfn "Written to %s.sources.txt" file
-
-    open SixLabors.ImageSharp
-
     let upload_table_charts(file: string) =
 
-        Directory.SetCurrentDirectory config.InterludePath
-
         let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
         for level in table.Levels do
             for chart in level.Charts do
-                match lookupHash chart.Hash with
+                match Cache.by_hash chart.Hash interlude_cache with
                 | Some cc -> 
-                    match load cc with
+                    match Cache.load cc interlude_cache with
                     | Some c -> 
                         let ok, info = Archive.Storage.charts.TryGetValue(chart.Hash)
                         if ok then Archive.Upload.upload_chart c info |> Async.AwaitTask |> Async.RunSynchronously
                         else Logging.Info(sprintf "Chart not in backbeat: %s" chart.Id)
                     | None -> Logging.Info(sprintf "Error loading chart: %s" chart.Id)
                 | None -> Logging.Info(sprintf "Chart missing from local library: %s" chart.Id)
-    
-
-    let export_table_charts(file: string, skip: bool) =
-
-        Directory.SetCurrentDirectory config.InterludePath
-        
-        let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
-        for level in table.Levels do
-            for chart in level.Charts do
-                match lookupHash chart.Hash with
-                | Some cc -> 
-                    match load cc with
-                    | Some c -> 
-                        let path = Path.Combine(CHARTS_PATH, chart.Id.Replace("/", "_"))
-                        if skip && Directory.Exists path then
-                            printfn "Skipping %s" chart.Id
-                        else
-                        printfn "%s" chart.Id
-                        if Directory.Exists path then Directory.Delete (path, true) |> ignore
-                        Directory.CreateDirectory path |> ignore
-                        let updated_chart = { c with Header = { c.Header with AudioFile = Relative "audio.mp3"; BackgroundFile = Relative "bg.png" }; LoadedFromPath = "" }
-                        try
-                            Chart.toFile updated_chart (Path.Combine(path, chart.Id.Split("/", 2).[1] + ".yav"))
-                            File.Copy (c.AudioPath, Path.Combine(path, "audio.mp3"))
-                            use bitmap = Bitmap.Load c.BackgroundPath
-                            bitmap.SaveAsPng(Path.Combine(path, "bg.png"))
-                        with err -> printfn "Error copying chart %s: %O" chart.Id err
-                    | None -> printfn "Error loading chart: %s" chart.Id
-                | None -> printfn "Chart missing from local library: %s" chart.Id
-    
-    let export_as_pack(file: string) =
-
-        export_table_charts (file, true)
-
-        printfn "\n GOT ALL THE CHARTS WE NEED \n"
-            
-        let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
-
-        use fs = File.Open(Path.Combine(PACKS_PATH, file + ".zip"), FileMode.CreateNew)
-        use zip = new ZipArchive(fs, ZipArchiveMode.Create)
-
-        for level in table.Levels do
-            for chart in level.Charts do
-                let dirname = chart.Id.Replace("/", "_")
-                printfn "%s" dirname
-                let source_dir = Path.Combine(CHARTS_PATH, dirname)
-                let filename = chart.Id.Split("/", 2).[1] + ".yav"
-                zip.CreateEntryFromFile(Path.Combine(source_dir, filename), sprintf "%s/%s" dirname filename) |> ignore
-                zip.CreateEntryFromFile(Path.Combine(source_dir, "audio.mp3"), sprintf "%s/audio.mp3" dirname) |> ignore
-                zip.CreateEntryFromFile(Path.Combine(source_dir, "bg.png"), sprintf "%s/bg.png" dirname) |> ignore
 
     let update_index() =
         let index = { Tables = ResizeArray<TableIndexEntry>() }
@@ -294,6 +211,4 @@ module Tables =
             .WithCommand("check_table", "Verify all parts of the table are in backbeat", "table", check_table)
             .WithCommand("upload_table", "Upload charts from table to backbeat storage", "table", upload_table_charts)
             .WithCommand("commit", "Commit suggestions to table and generate a changelog", "table", commit_table)
-            .WithCommand("sources", "Export sources needed to have every chart for a table", "table", export_table_sources)
-            .WithCommand("publish", "Export Crescent as a .zip", "table", export_as_pack)
             .WithCommand("index", "Update table index", update_index)

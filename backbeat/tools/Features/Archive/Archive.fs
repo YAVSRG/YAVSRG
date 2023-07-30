@@ -7,8 +7,8 @@ module Archive =
     let register (ctx: ShellContext) =
         ctx
             .WithCommand("get_eo", "Fetch EO packs locally", Packs.load_stepmania_packs)
-            .WithCommand("script", "User script", Collect.script)
-            .WithCommand("slurp", "Processes queues of chart data to add to database", Collect.slurp)
+            .WithCommand("slurp_sm", "Download, convert, add to database and upload charts from a stepmania pack", "pack_title", Collect.slurp_sm)
+            .WithCommand("slurp_community", "Download, convert, add to database and upload charts from a community pack", "pack_id", Collect.slurp_community)
             .WithCommand("check_songs", "Scan song metadata for mistakes", Maintenance.check_all_songs)
             .WithCommand("check_artists", "Scan artists for duplicates", Maintenance.check_all_artists)
             .WithCommand("check_ids", "Fix old song ids", Maintenance.check_all_ids)
