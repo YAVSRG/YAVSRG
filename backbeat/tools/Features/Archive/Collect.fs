@@ -135,6 +135,7 @@ module Collect =
         Directory.EnumerateFiles(Path.Combine(backbeat_cache.RootPath, folder))
         |> Seq.map Chart.fromFile
         |> Seq.iter (Option.iter (slurp_chart extra_sources))
+        save()
 
     let cache_song_folder (config: ConversionActionConfig) (target: string) =
         Directory.EnumerateFiles target
