@@ -152,9 +152,10 @@ module ``osu!`` =
 
     let toInterlude (b: Beatmap) (action: ConversionAction) : Chart =
         let keys = b.Difficulty.CircleSize |> int
+        let path = Path.GetDirectoryName action.Source
         let rec findBackgroundFile e =
             match e with
-            | (Background (path, _)) :: _ -> path
+            | (Background (bg, _)) :: _ -> bg
             | _ :: es -> findBackgroundFile es
             | [] -> ""
         let header =
@@ -170,8 +171,20 @@ module ``osu!`` =
                 Tags = b.Metadata.Tags
 
                 PreviewTime = b.General.PreviewTime
-                BackgroundFile = findBackgroundFile b.Events |> Relative
-                AudioFile = b.General.AudioFilename |> Relative
+                BackgroundFile = 
+                    let r = findBackgroundFile b.Events
+                    if File.Exists(Path.Combine(path, r)) then
+                        if action.Config.CopyMediaFiles then Relative r else Absolute (Path.Combine(path, r))
+                    else
+                        Logging.Warn(sprintf "Background file for %s not found: %s" path r)
+                        Missing
+                AudioFile =
+                    let r = b.General.AudioFilename
+                    if File.Exists(Path.Combine(path, r)) then
+                        if action.Config.CopyMediaFiles then Relative r else Absolute (Path.Combine(path, r))
+                    else 
+                        Logging.Warn(sprintf "Background file for %s not found: %s" path r)
+                        Missing
 
                 ChartSource = Osu (b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
             }
@@ -185,7 +198,7 @@ module ``osu!`` =
             BPM = bpm
             SV = sv
 
-            LoadedFromPath = Path.Combine(Path.GetDirectoryName action.Source, String.Join("_", (b.Metadata.Title + " [" + b.Metadata.Version + "].yav").Split(Path.GetInvalidFileNameChars())))
+            LoadedFromPath = Path.Combine(path, String.Join("_", (b.Metadata.Title + " [" + b.Metadata.Version + "].yav").Split(Path.GetInvalidFileNameChars())))
         }
 
 module Stepmania =
@@ -338,17 +351,25 @@ module Stepmania =
                     Source = None
 
                     PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
-                    AudioFile = match findAudio() with Some file -> Relative file | None -> Missing
-                    BackgroundFile = match findBackground() with Some file -> Relative file | None -> Missing
+                    AudioFile = 
+                        match findAudio() with
+                        | Some file -> 
+                            if action.Config.CopyMediaFiles then Relative file 
+                            else Absolute (Path.Combine(path, file)) 
+                        | None ->
+                            Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
+                            Missing
+                    BackgroundFile = 
+                        match findBackground() with
+                        | Some file -> 
+                            if action.Config.CopyMediaFiles then Relative file 
+                            else Absolute (Path.Combine(path, file)) 
+                        | None -> 
+                            Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
+                            Missing
 
                     ChartSource = Unknown
                 }
-            if not (File.Exists (Path.Combine(path, match header.BackgroundFile with Relative r -> r | _ -> ""))) then
-                Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
-                for f in Directory.EnumerateFileSystemEntries path do Logging.Debug f
-            if not (File.Exists (Path.Combine(path, match header.AudioFile with Relative r -> r | _ -> ""))) then
-                Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
-                for f in Directory.EnumerateFileSystemEntries path do Logging.Debug f
             let filepath = Path.Combine (path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
             let (notes, bpm) = convert_measures keys diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)
 

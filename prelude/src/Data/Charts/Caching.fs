@@ -85,11 +85,13 @@ module Cache =
 
     let private sha_256 = SHA256.Create()
 
+    let compute_hash (file_path: string) : string =
+        use stream = File.OpenRead file_path
+        sha_256.ComputeHash stream |> BitConverter.ToString |> fun s -> s.Replace("-", "")
+
     let hash_asset (file_path: string) (cache: Cache) : string =
         if not (File.Exists file_path) then failwithf "Missing asset file: %s" file_path
-        let stream = File.OpenRead(file_path)
-        let hash = sha_256.ComputeHash stream |> BitConverter.ToString |> fun s -> s.Replace("-", "")
-        stream.Dispose()
+        let hash = compute_hash file_path
         let target_folder = Path.Combine(cache.RootPath, ".assets", hash.Substring(0, 2))
         Directory.CreateDirectory target_folder |> ignore
         let target_path = Path.Combine(target_folder, hash)
@@ -242,6 +244,7 @@ module Cache =
                 }
             let entry = create_entry folder now c
             let new_file = get_path entry cache
+            Directory.CreateDirectory(Path.GetDirectoryName new_file) |> ignore
             Chart.toFile c new_file
 
             cache.Entries.[entry.Key] <- entry
