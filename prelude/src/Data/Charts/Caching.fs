@@ -205,6 +205,7 @@ module Cache =
                 }
         }
 
+    // For charts being imported from someplace outside of any cache
     let add_new (folder: string) (charts: Chart list) (cache: Cache) =
         let moved_assets = Dictionary<string, string>()
         let now = DateTime.UtcNow
@@ -249,6 +250,55 @@ module Cache =
 
             cache.Entries.[entry.Key] <- entry
         save cache
+
+    // For charts being copied from one cache to another
+    let clone (folder: string) (entry: CachedChart) (source: Cache) (target: Cache) =
+        if target.Entries.ContainsKey({ entry with Folder = folder }.Key) then () else
+        let chart = (Chart.fromFile (get_path entry source)).Value
+        let chart = 
+            { chart with
+                Header = 
+                    { chart.Header with
+                        BackgroundFile = 
+                            match chart.Header.BackgroundFile with
+                            | Relative _ ->
+                                let path = (background_path chart source).Value
+                                if not (File.Exists path) then Missing else
+                                let hash = hash_asset path target
+                                Asset hash
+                            | Asset s ->
+                                let source = Path.Combine(source.RootPath, ".assets", s.Substring(0, 2), s)
+                                let target = Path.Combine(target.RootPath, ".assets", s.Substring(0, 2), s)
+                                if File.Exists target then ()
+                                else Directory.CreateDirectory(Path.GetDirectoryName target) |> ignore; File.Copy(source, target)
+                                Asset s
+                            | Absolute s -> Absolute s
+                            | Missing -> Missing
+                            
+                        AudioFile = 
+                            match chart.Header.AudioFile with
+                            | Relative _ ->
+                                let path = (audio_path chart source).Value
+                                if not (File.Exists path) then Missing else
+                                let hash = hash_asset path target
+                                Asset hash
+                            | Asset s ->
+                                let source = Path.Combine(source.RootPath, ".assets", s.Substring(0, 2), s)
+                                let target = Path.Combine(target.RootPath, ".assets", s.Substring(0, 2), s)
+                                if File.Exists target then ()
+                                else Directory.CreateDirectory(Path.GetDirectoryName target) |> ignore; File.Copy(source, target)
+                                Asset s
+                            | Absolute s -> Absolute s
+                            | Missing -> Missing
+                    }
+            }
+        let entry = create_entry folder DateTime.UtcNow chart
+        let target_path = get_path entry target
+        Directory.CreateDirectory(Path.GetDirectoryName target_path) |> ignore
+        Chart.toFile chart target_path
+
+        target.Entries.[entry.Key] <- entry
+        save target
     
     let load (entry: CachedChart) (cache: Cache) =
         get_path entry cache |> Chart.fromFile
