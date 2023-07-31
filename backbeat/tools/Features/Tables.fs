@@ -179,7 +179,7 @@ module Tables =
 
         for l in table.Levels do
             for c in l.Charts do
-                if not (Archive.Storage.charts.ContainsKey c.Hash) then printfn "'%s' is not in the backbeat database" c.Id
+                if not (charts.ContainsKey c.Hash) then printfn "'%s' is not in the backbeat database" c.Id
 
     let upload_table_charts(file: string) =
 
@@ -190,10 +190,10 @@ module Tables =
                 | Some cc -> 
                     match Cache.load cc interlude_cache with
                     | Some c -> 
-                        let ok, info = Archive.Storage.charts.TryGetValue chart.Hash
+                        let ok, info = charts.TryGetValue chart.Hash
                         if ok then
                             Cache.clone table.Name cc interlude_cache backbeat_cache
-                            Archive.Upload.upload_chart c info
+                            upload_chart c info
                         else Logging.Info(sprintf "Chart not in backbeat: %s" chart.Id)
                     | None -> Logging.Info(sprintf "Error loading chart: %s" chart.Id)
                 | None -> Logging.Info(sprintf "Chart missing from local library: %s" chart.Id)
