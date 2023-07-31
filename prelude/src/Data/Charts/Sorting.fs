@@ -15,8 +15,8 @@ module Sorting =
         elif Char.IsLetterOrDigit s.[0] then s.[0].ToString().ToUpper()
         else "?"
 
-    let dateLastPlayed (c: CachedChart, ctx) =
-        match Prelude.Data.Scores.Scores.getData c.Hash with
+    let dateLastPlayed (c: CachedChart, _) =
+        match Data.Scores.Scores.getData c.Hash with
         | Some d ->
             let daysAgo = (DateTime.Today - d.LastPlayed).TotalDays
             if daysAgo < 0 then 0, "Today"
@@ -30,16 +30,28 @@ module Sorting =
             elif daysAgo < 3600 then 8, "A long time ago"
             else 9, "Never"
         | None -> 9, "Never"
+        
+    let dateInstalled (c: CachedChart, _) =
+        let daysAgo = (DateTime.Today - c.DateAdded).TotalDays
+        if daysAgo < 0 then 0, "Today"
+        elif daysAgo < 1 then 1, "Yesterday"
+        elif daysAgo < 7 then 2, "This week"
+        elif daysAgo < 30 then 3, "This month"
+        elif daysAgo < 60 then 4, "A month ago"
+        elif daysAgo < 90 then 5, "2 months ago"
+        elif daysAgo < 120 then 6, "3 months ago"
+        elif daysAgo < 210 then 7, "6 months ago"
+        else 8, "A long time ago"
 
     type GroupContext = { Rate: float32; RulesetId: string; Ruleset: Ruleset }
 
     let has_comment (c: CachedChart, comment: string) =
-        match Prelude.Data.Scores.Scores.getData c.Hash with
+        match Data.Scores.Scores.getData c.Hash with
         | Some d -> d.Comment.Contains(comment, StringComparison.OrdinalIgnoreCase)
         | None -> false
 
     let gradeAchieved (c: CachedChart, ctx: GroupContext) =
-        match Prelude.Data.Scores.Scores.getData c.Hash with
+        match Data.Scores.Scores.getData c.Hash with
         | Some d ->
             if d.Bests.ContainsKey ctx.RulesetId then
                 match PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Grade with
@@ -49,7 +61,7 @@ module Sorting =
         | None -> -2, "No grade achieved"
 
     let lampAchieved (c: CachedChart, ctx: GroupContext) =
-        match Prelude.Data.Scores.Scores.getData c.Hash with
+        match Data.Scores.Scores.getData c.Hash with
         | Some d ->
             if d.Bests.ContainsKey ctx.RulesetId then
                 match PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Lamp with
@@ -63,6 +75,7 @@ module Sorting =
             "none", fun (c, _) -> 0, "No grouping"
             "pack", fun (c, _) -> 0, c.Folder
             "date_played", dateLastPlayed
+            "date_installed", dateInstalled
             "grade", gradeAchieved
             "lamp", lampAchieved
             "title", fun (c, _) -> 0, firstCharacter c.Title
