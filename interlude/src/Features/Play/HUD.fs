@@ -62,6 +62,7 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
 
     let mutable last_seen_time = -Time.infinity
     let ln_mult = if conf.HalfScaleReleases then 0.5f else 1.0f
+    let animation_time = conf.AnimationTime * Gameplay.rate.Value
 
     do
         state.SubscribeToHits(fun ev ->
@@ -78,7 +79,7 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
         let now = state.CurrentChartTime()
         if now < last_seen_time then hits.Clear()
         last_seen_time <- now
-        while hits.Count > 0 && hits.[0].Time + conf.AnimationTime * 1.0f<ms> < now do
+        while hits.Count > 0 && hits.[0].Time + animation_time * 1.0f<ms> < now do
             hits.RemoveAt(0)
 
     override this.Draw() =
@@ -92,14 +93,14 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
             let r = Rect.Create(centre + hit.Position - conf.Thickness, this.Bounds.Top, centre + hit.Position + conf.Thickness, this.Bounds.Bottom)
             let c = 
                 match hit.Judgement with
-                | None -> Color.FromArgb(Math.Clamp(127 - int (127.0f * (now - hit.Time) / conf.AnimationTime), 0, 127), Color.Silver)
-                | Some j -> Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - hit.Time) / conf.AnimationTime), 0, 255), state.Ruleset.JudgementColor j)
+                | None -> Color.FromArgb(Math.Clamp(127 - int (127.0f * (now - hit.Time) / animation_time), 0, 127), Color.Silver)
+                | Some j -> Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - hit.Time) / animation_time), 0, 255), state.Ruleset.JudgementColor j)
             if conf.ShowNonJudgements || hit.Judgement.IsSome then
                 Draw.rect (if hit.IsRelease then r.Expand(0.0f, conf.ReleasesExtraHeight) else r) c
 
 type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let atime = conf.AnimationTime * 1.0f<ms>
+    let atime = conf.AnimationTime * Gameplay.rate.Value * 1.0f<ms>
     let mutable tier = 0
     let mutable time = -Time.infinity
 
@@ -126,7 +127,7 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
 
 type EarlyLateMeter(conf: HUD.EarlyLateMeter, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let atime = conf.AnimationTime * 1.0f<ms>
+    let atime = conf.AnimationTime * Gameplay.rate.Value * 1.0f<ms>
     let mutable early = false
     let mutable time = -Time.infinity
 
