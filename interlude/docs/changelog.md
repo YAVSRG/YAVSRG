@@ -1,7 +1,7 @@
 0.6.25
 ====
 
-Hope you're having a nice summer, I know I have been
+Hope you're having a nice summer, I know I have been  
 Here's some new stuff I added in between weekend excursions
 
 # New cache system
