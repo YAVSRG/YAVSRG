@@ -236,7 +236,7 @@ module Gameplay =
         Library.save()
         Stats.save()
 
-    let init() =
+    let init() =            
         try
             let cc, chart =
                 match Cache.by_key options.CurrentChart.Value Library.cache with
@@ -255,7 +255,7 @@ module Gameplay =
         with err ->
             Logging.Debug "No charts installed"
             Background.load None
-        Table.init(options.Table.Value)
+        Table.init options.Table.Value
         match options.SelectedCollection.Value with
         | Some c -> Collections.select c
         | None -> ()

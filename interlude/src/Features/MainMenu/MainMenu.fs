@@ -85,7 +85,10 @@ type MainMenuScreen() as this =
         
     override this.OnEnter prev =
         
-        //Offset.OffsetPage(Gameplay.Chart.current.Value).Show()
+        if Prelude.Data.Charts.Library.cache.Entries.Count = 0 && IO.File.Exists(IO.Path.Combine(getDataPath "Data", "cache.json")) then
+            IO.File.Delete(IO.Path.Combine(getDataPath "Data", "cache.json"))
+            Prelude.Data.Charts.Caching.Cache.recache_service.Request(Prelude.Data.Charts.Library.cache, fun () -> Notifications.task_feedback(Icons.folder, L"notification.recache_complete", ""))
+            Notifications.action_feedback(Icons.folder, L"notification.recache", "")
 
         if AutoUpdate.updateAvailable then Notifications.system_feedback (Icons.system_notification, L"notification.update_available.title", L"notification.update_available.body")
         if prev = Screen.Type.SplashScreen && firstLaunch then Wiki.show()
