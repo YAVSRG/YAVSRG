@@ -46,14 +46,17 @@ Your account information is held securely on servers in the United Kingdom, and 
 Data such as your submitted scores and username are shared with other users of Interlude as part of the services provided.
 
 Your discord ID or IP address may be used internally for moderation purposes.  
-Examples include:
+Examples include:  
+
 - Contacting you through Discord regarding your account or a related issue
 - Detecting multiple accounts for one user or account sharing
+
+
 To respect your privacy, measures are taken to minimise or entirely prevent internal staff members from seeing this information directly.
 
 ## Your rights
 
 You are entitled to view, modify or erase any personal information stored about you on Interlude's services.
-This is currently a manual process and may take a few days - contact [support@yavsrg.net](mailto://support@yavsrg.net) to file a request.
+This is currently a manual process and may take a few days - contact [support@yavsrg.net](mailto:support@yavsrg.net) to file a request.
 
 For any other concerns about your data or how it is used, [contact Percyqaz via discord](https://discord.gg/tA22tWR).

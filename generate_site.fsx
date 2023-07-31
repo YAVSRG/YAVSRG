@@ -115,3 +115,15 @@ for f, items in wiki_folders do
             .Replace("{{content}}", content)
             .Replace("{{sidebar}}", wiki_sidebar_content)
         |> fun t -> File.WriteAllText("./site/interlude/wiki/" + i.Replace(".md", ".html"), t)
+
+let content = 
+    File.ReadAllText("./Interlude/docs/wiki/index.md")
+        .Split([|"::::"|], System.StringSplitOptions.TrimEntries)
+    |> Array.map (Markdown.Parse >> MarkdownToHtml.render_document)
+    |> Array.map (sprintf "<div class=\"frame text-20 container flex flex-col mx-auto p-4\">%s</div>")
+    |> String.concat ""
+wiki_template
+    .Replace("{{title}}", "Interlude Wiki")
+    .Replace("{{content}}", content)
+    .Replace("{{sidebar}}", wiki_sidebar_content)
+|> fun t -> File.WriteAllText("./site/interlude/wiki/index.html", t)
