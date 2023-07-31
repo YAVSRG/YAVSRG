@@ -5,7 +5,7 @@ Hope you're having a nice summer, I know I have been
 Here's some new stuff I added in between weekend excursions
 
 # New cache system
-- Implemented a new organisation system for the cache and Songs folder
+- Implemented a new organisation system for the cache and Songs folder  
   YOUR CACHE WILL BE BROKEN WHEN YOU UPDATE, AND A RECACHE WILL BE NEEDED
   A RECACHE WILL MIGRATE YOUR EXISTING CHARTS TO THE NEW FOLDER STRUCTURE
   THE RECACHE WILL RUN AUTOMATICALLY WHEN YOU UPDATE AND OPEN THE GAME
@@ -13,7 +13,7 @@ Here's some new stuff I added in between weekend excursions
 - New cache system will simplify many things in the future, like multiplayer downloads
   
 # New features
-- Thanks to the new cache, you can now group by Date added
+- Thanks to the new cache, you can now group by Date added  
   This is the time when the chart was downloaded/converted/imported to Interlude
 
 # Bug fixes
