@@ -201,7 +201,7 @@ module Tree =
             Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Colors.text)
             Text.drawB(Style.baseFont, sprintf "%s  •  %s" cc.Artist cc.Creator, 18.0f, left + 5f, top + 34.0f, Colors.text_subheading)
             // todo: option to show subtitle if exists, otherwise difficulty name
-            Text.drawB(Style.baseFont, cc.DifficultyName, 15.0f, left + 5f, top + 65.0f, Colors.text_subheading)
+            Text.drawB(Style.baseFont, cc.Subtitle |> Option.defaultValue cc.DifficultyName, 15.0f, left + 5f, top + 65.0f, Colors.text_subheading)
             Text.drawJustB(Style.baseFont, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
             if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
