@@ -16,6 +16,7 @@ module Identify =
         {
             Found: bool
             Song: Prelude.Backbeat.Archive.Song
+            Chart: Prelude.Backbeat.Archive.Chart
             Mirrors: string list
         }
 
@@ -28,7 +29,7 @@ module Identify =
             let hash = query_params.["id"].[0].ToUpper()
             match Charts.by_hash hash with
             | Some (chart, song) ->
-                response.ReplyJson({ Found = true; Song = song; Mirrors = chart.Sources |> Charts.mirrors |> List.ofSeq })
+                response.ReplyJson({ Found = true; Song = song; Chart = chart; Mirrors = chart.Sources |> Charts.mirrors |> List.ofSeq })
             | None ->
                 response.ReplyJson({| Found = false |})
         }
