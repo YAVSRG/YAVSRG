@@ -305,6 +305,7 @@ levelselect.comments.label=Editing comment for %0
 levelselect.groupby.artist=Artist
 levelselect.groupby.creator=Creator
 levelselect.groupby.date_played=Date played
+levelselect.groupby.date_installed=Date added
 levelselect.groupby.grade=Grade
 levelselect.groupby.keymode=Keymode
 levelselect.groupby.lamp=Lamp
