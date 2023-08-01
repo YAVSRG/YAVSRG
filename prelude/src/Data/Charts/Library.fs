@@ -173,7 +173,7 @@ module Library =
                     async {
                         match source.Type with
                         | Pack packname ->
-                            let config = { ConversionActionConfig.Default with CopyMediaFiles = false; ChangedAfter = Some source.LastImported; PackName = packname }
+                            let config = { ConversionActionConfig.Default with MoveAssets = false; ChangedAfter = Some source.LastImported; PackName = packname }
                             do! convert_pack_folder.RequestAsync(source.SourceFolder, config)
                             source.LastImported <- DateTime.Now
                         | Library ->
@@ -181,7 +181,7 @@ module Library =
                                 Directory.EnumerateDirectories source.SourceFolder
                                 |> Seq.filter (fun path -> Directory.GetLastWriteTime path >= source.LastImported)
                                 do
-                                do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with CopyMediaFiles = false; ChangedAfter = Some source.LastImported; PackName = Path.GetFileName packFolder })
+                                do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with MoveAssets = false; ChangedAfter = Some source.LastImported; PackName = Path.GetFileName packFolder })
                             source.LastImported <- DateTime.Now
                     }
             }

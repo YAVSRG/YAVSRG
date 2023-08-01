@@ -13,14 +13,14 @@ open Prelude.Charts.Formats.StepMania
 
 type ConversionActionConfig =
     {
-        CopyMediaFiles: bool
+        MoveAssets: bool
         StepmaniaPackId: int option
         ChangedAfter: DateTime option
         PackName: string
     }
     static member Default =
         {
-            CopyMediaFiles = true
+            MoveAssets = true
             StepmaniaPackId = None
             ChangedAfter = None
             PackName = "Singles"
@@ -174,14 +174,14 @@ module ``osu!`` =
                 BackgroundFile = 
                     let r = findBackgroundFile b.Events
                     if File.Exists(Path.Combine(path, r)) then
-                        if action.Config.CopyMediaFiles then Relative r else Absolute (Path.Combine(path, r))
+                        if action.Config.MoveAssets then Relative r else Absolute (Path.Combine(path, r))
                     else
                         Logging.Warn(sprintf "Background file for %s not found: %s" path r)
                         Missing
                 AudioFile =
                     let r = b.General.AudioFilename
                     if File.Exists(Path.Combine(path, r)) then
-                        if action.Config.CopyMediaFiles then Relative r else Absolute (Path.Combine(path, r))
+                        if action.Config.MoveAssets then Relative r else Absolute (Path.Combine(path, r))
                     else 
                         Logging.Warn(sprintf "Background file for %s not found: %s" path r)
                         Missing
@@ -354,7 +354,7 @@ module Stepmania =
                     AudioFile = 
                         match findAudio() with
                         | Some file -> 
-                            if action.Config.CopyMediaFiles then Relative file 
+                            if action.Config.MoveAssets then Relative file 
                             else Absolute (Path.Combine(path, file)) 
                         | None ->
                             Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
@@ -362,7 +362,7 @@ module Stepmania =
                     BackgroundFile = 
                         match findBackground() with
                         | Some file -> 
-                            if action.Config.CopyMediaFiles then Relative file 
+                            if action.Config.MoveAssets then Relative file 
                             else Absolute (Path.Combine(path, file)) 
                         | None -> 
                             Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
