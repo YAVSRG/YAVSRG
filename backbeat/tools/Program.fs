@@ -11,7 +11,6 @@ let ctx =
     
 [<EntryPoint>]
 let main argv =
-    printfn "%i" Upload.existing_files.Count
     use logging = Backbeat.Utils.init()
     if argv.Length > 0 then ctx.Evaluate(String.concat " " argv)
     else
