@@ -50,4 +50,4 @@ jobs:
             script: ./update.sh
             
       - name: Run garbage collection on DigitalOcean registry
-        run: doctl registry garbage-collection start
+        run: doctl registry garbage-collection start --force
