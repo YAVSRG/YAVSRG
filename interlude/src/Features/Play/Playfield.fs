@@ -12,10 +12,6 @@ open Interlude
 open Interlude.Options
 open Interlude.Features
 
-// TODO LIST
-//  COLUMN INDEPENDENT SV
-//  FIX HOLD TAIL CLIPPING
-
 type Playfield(chart: ColorizedChart, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
 
@@ -37,7 +33,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
     let mutable note_peek = note_seek
     let sv = chart.SV
     let mutable sv_seek = 0 // index of next appearing SV point; = number of SV points if there are no more
-    let mutable sv_peek = 0 // same as sv_seek, but sv_seek stores the relevant point for t = now (according to music) and this stores t > now
+    let mutable sv_peek = sv_seek // same as sv_seek, but sv_seek stores the relevant point for t = now (according to music) and this stores t > now
     let mutable sv_value = 1.0f // value of the most recent sv point, equal to the sv value at index (sv_peek - 1), or 1 if that point doesn't exist
     let mutable sv_time = 0.0f<ms>
     let mutable column_pos = 0.0f // running position calculation of notes for sv
@@ -51,7 +47,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
     let mutable time = -Time.infinity
     let reset() =
         note_seek <- 0
-        for k = 0 to 0 do sv_seek <- 0
+        sv_seek <- 0
 
     let scrollDirectionPos bottom : Rect -> Rect =
         if options.Upscroll.Value then id 
@@ -83,16 +79,20 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
 
     override this.Draw() =
         let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = this.Bounds
-        
+
         let scale = options.ScrollSpeed.Value / Gameplay.rate.Value * 1.0f</ms>
         let hitposition = float32 options.HitPosition.Value
 
         let playfieldHeight = bottom - top + holdnoteTrim
         let now = Song.timeWithOffset() + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
-        let begin_time = if options.VanishingNotes.Value then now - state.Ruleset.Accuracy.MissWindow * Gameplay.rate.Value else now
+        let begin_time = 
+            if options.VanishingNotes.Value then 
+                let space_needed = hitposition + noteHeight
+                let time_needed = space_needed / scale
+                now - time_needed // todo: this is true only with no SV but can be too small a margin for SV < 1.0x
+            else now
 
-        // seek to appropriate sv and note locations in data.
-        // bit of a mess here. see comments on the variables for more on whats going on
+        // variable setup before draw
         while note_seek < chart.Notes.Length && chart.Notes.[note_seek].Time < begin_time do
             let { Data = struct (nr, _) } = chart.Notes.[note_seek]
             for k = 0 to keys - 1 do
@@ -100,14 +100,29 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
             note_seek <- note_seek + 1
         note_peek <- note_seek
 
-        while sv_seek < sv.Length && sv.[sv_seek].Time < now do
+        // move sv pointer
+        while sv_seek < sv.Length && sv.[sv_seek].Time < begin_time do
             sv_seek <- sv_seek + 1
         sv_peek <- sv_seek
         sv_value <- if sv_seek > 0 then sv.[sv_seek - 1].Data else 1.0f
 
-        sv_time <- now
+        // let's travel to now and see how far we went
         column_pos <- hitposition
+        if options.VanishingNotes.Value then
+            let mutable i = sv_seek
+            let mutable sv_v = sv_value
+            let mutable sv_t = begin_time
+            while (i < sv.Length && sv.[i].Time < now) do
+                let { Time = t2; Data = v } = sv.[i]
+                column_pos <- column_pos - scale * sv_v * (t2 - sv_t)
+                sv_t <- t2
+                sv_v <- v
+                i <- i + 1
+            column_pos <- column_pos - scale * sv_v * (now - sv_t)
 
+        sv_time <- begin_time
+
+        // draw column backdrops and receptors
         for k in 0 .. (keys - 1) do
             Draw.rect (Rect.Create(left + columnPositions.[k], top, left + columnPositions.[k] + column_width, bottom)) playfieldColor
             hold_pos.[k] <- hitposition
@@ -127,71 +142,90 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                 (Color.White |> Quad.colorOf)
                 (Sprite.gridUV (animation.Loops, if (state.Scoring.KeyState |> Bitmask.hasBit k) then 1 else 0) (Content.getTexture "receptor"))
 
+        let inline draw_note(k, pos, color) =
+            Draw.quad
+                (
+                    Quad.ofRect ( 
+                        Rect.Box(left + columnPositions.[k], pos, column_width, noteHeight)
+                        |> scrollDirectionPos bottom
+                    )
+                    |> rotation k
+                )
+                (Quad.colorOf Color.White)
+                (Sprite.gridUV (animation.Loops, color) (Content.getTexture "note"))
+
+        let inline draw_head(k, pos, color, tint) =
+            Draw.quad
+                (
+                    Quad.ofRect ( 
+                        Rect.Box(left + columnPositions.[k], pos, column_width, noteHeight)
+                        |> scrollDirectionPos bottom
+                    )
+                    |> rotation k
+                )
+                (Quad.colorOf tint)
+                (Sprite.gridUV (animation.Loops, color) (Content.getTexture "holdhead"))
+
+        let inline draw_body(k, pos_a, pos_b, color, tint) =
+            Draw.quad
+                (
+                    Quad.ofRect ( 
+                        Rect.Create(
+                            left + columnPositions.[k],
+                            pos_a + noteHeight * 0.5f,
+                            left + columnPositions.[k] + column_width,
+                            pos_b + noteHeight * 0.5f)
+                        |> scrollDirectionPos bottom
+                    )
+                )
+                (Quad.colorOf tint)
+                (Sprite.gridUV (animation.Loops, color) (Content.getTexture "holdbody"))
+
+        let inline draw_tail(k, pos, clip, color, tint) =
+            Draw.quad
+                (
+                    Quad.ofRect ( 
+                        Rect.Create(left + columnPositions.[k], max clip pos, left + columnPositions.[k] + column_width, pos + noteHeight)
+                        |> scrollDirectionPos bottom
+                    )
+                    |> rotation k
+                )
+                (Quad.colorOf tint)
+                (Sprite.gridUV (animation.Loops, color) (Content.getTexture "holdtail") |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
+
         // main render loop - until the last note rendered in every column appears off screen
-        let mutable min = hitposition
-        while min < playfieldHeight && note_peek < chart.Notes.Length do
-            min <- playfieldHeight
+        while column_pos < playfieldHeight && note_peek < chart.Notes.Length do
             let { Time = t; Data = struct (nd, color) } = chart.Notes.[note_peek]
-            // until no sv adjustments needed...
-            // update main sv
+            // update sv
             while (sv_peek < sv.Length && sv.[sv_peek].Time < t) do
                 let { Time = t2; Data = v } = sv.[sv_peek]
-                for k in 0 .. (keys - 1) do
-                    column_pos <- column_pos + scale * sv_value * (t2 - sv_time)
-                    sv_time <- t2
+                column_pos <- column_pos + scale * sv_value * (t2 - sv_time)
+                sv_time <- t2
                 sv_value <- v
                 sv_peek <- sv_peek + 1
 
             // render notes
+            column_pos <- column_pos + scale * sv_value * (t - sv_time)
+            sv_time <- t
+
             for k in 0 .. (keys - 1) do
-                column_pos <- column_pos + scale * sv_value * (t - sv_time)
-                sv_time <- t
-                min <- Math.Min(column_pos, min)
                 if nd.[k] = NoteType.NORMAL && not (options.VanishingNotes.Value && state.Scoring.IsNoteHit note_peek k) then
-                    Draw.quad // normal note
-                        (
-                            Quad.ofRect ( 
-                                Rect.Box(left + columnPositions.[k], column_pos, column_width, noteHeight)
-                                |> scrollDirectionPos bottom
-                            )
-                            |> rotation k
-                        )
-                        (Quad.colorOf Color.White)
-                        (Sprite.gridUV (animation.Loops, int color.[k]) (Content.getTexture "note"))
+                    draw_note(k, column_pos, int color.[k])
+
                 elif nd.[k] = NoteType.HOLDHEAD then
                     hold_pos.[k] <- max column_pos hitposition
                     hold_colors.[k] <- int color.[k]
                     hold_presence.[k] <- true
+
                 elif nd.[k] = NoteType.HOLDTAIL then
                     let headpos = hold_pos.[k]
                     let tint = if hold_pos.[k] = hitposition && state.Scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
                     let pos = column_pos - holdnoteTrim
                     if headpos < pos then
-                        Draw.quad // body of ln
-                            ( Quad.ofRect (
-                                Rect.Box(left + columnPositions.[k], headpos + noteHeight * 0.5f, column_width, pos - headpos)
-                                |> scrollDirectionPos bottom
-                              ) )
-                            (Quad.colorOf tint)
-                            (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdbody"))
+                        draw_body(k, headpos, pos, hold_colors.[k], tint)
                     if headpos - pos < noteHeight * 0.5f then
-                        Draw.quad // tail of ln
-                            (Quad.ofRect (
-                                Rect.Create(left + columnPositions.[k], Math.Max(pos, headpos), left + columnPositions.[k] + column_width, pos + noteHeight)
-                                |> scrollDirectionPos bottom
-                              ) ) // todo: clipping maths
-                            (Quad.colorOf tint)
-                            (Sprite.gridUV (animation.Loops, int color.[k]) tailsprite |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
-                    Draw.quad // head of ln
-                        (
-                            Quad.ofRect ( 
-                                Rect.Box(left + columnPositions.[k], headpos, column_width, noteHeight)
-                                |> scrollDirectionPos bottom
-                            )
-                            |> rotation k
-                        )
-                        (Quad.colorOf tint)
-                        (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
+                        draw_tail(k, pos, headpos, int color.[k], tint)
+                    draw_head(k, headpos, hold_colors.[k], tint)
                     hold_presence.[k] <- false
             note_peek <- note_peek + 1
         
@@ -199,28 +233,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
             if hold_presence.[k] then
                 let headpos = hold_pos.[k]
                 let tint = if hold_pos.[k] = hitposition && state.Scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
-                Draw.quad // body of ln, tail is offscreen
-                    (
-                        Quad.ofRect ( 
-                            Rect.Create(
-                                left + columnPositions.[k],
-                                headpos + noteHeight * 0.5f,
-                                left + columnPositions.[k] + column_width,
-                                bottom + 2.0f)
-                            |> scrollDirectionPos bottom
-                        )
-                    )
-                    (Quad.colorOf tint)
-                    (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdbody"))
-                Draw.quad // head of ln, tail is offscreen
-                    (
-                        Quad.ofRect ( 
-                            Rect.Box(left + columnPositions.[k], headpos, column_width, noteHeight)
-                            |> scrollDirectionPos bottom
-                        )
-                        |> rotation k
-                    )
-                    (Quad.colorOf tint)
-                    (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
+                draw_body(k, headpos, bottom, hold_colors.[k], tint)
+                draw_head(k, headpos, hold_colors.[k], tint)
 
         base.Draw()
