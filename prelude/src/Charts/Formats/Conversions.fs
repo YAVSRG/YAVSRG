@@ -62,30 +62,22 @@ module ``osu!`` =
             s
 
         let note k time (snaps: TimeItem<NoteRow> list) =
-            if holds.[k] <> -1.0f<ms> then
-                //Logging.Debug(sprintf "Skipping stacked note (inside LN) at %f" time)
-                snaps
-            else
+            if holds.[k] <> -1.0f<ms> then snaps else
 
             match snaps with
             | { Time = t; Data = nr } :: ss ->
                 if t = time then 
-                    if nr.[k] <> NoteType.NOTHING then 
-                        ()//Logging.Debug(sprintf "Skipping stacked note at %f" time)
-                    else nr.[k] <- NoteType.NORMAL
+                    if nr.[k] = NoteType.NOTHING then nr.[k] <- NoteType.NORMAL
                     snaps
                 else { Time = time; Data = let row = createRow() in row.[k] <- NoteType.NORMAL; row } :: snaps
             | [] -> { Time = time; Data = let row = createRow() in row.[k] <- NoteType.NORMAL; row } :: snaps
 
         let hold (k: int) (time: Time) (release: Time) (snaps: TimeItem<NoteRow> list) =
             if holds.[k] <> -1.0f<ms> then 
-                //Logging.Debug(sprintf "Skipping stacked LN (inside LN) at %f" time)
                 snaps
             elif release < time then 
-                //Logging.Debug(sprintf "Skipping LN that ends at %f but starts at %f" release time)
                 snaps
             elif release = time then
-                //Logging.Debug(sprintf "Treating LN that ends & starts at %f as a note" time)
                 note k time snaps
             else
 
@@ -243,7 +235,8 @@ module Stepmania =
                     ) m.[i]
                 if NoteRow.isEmpty nr |> not then states.Add({ Time = offset + float32 (i - start) * sep; Data = nr })
 
-        List.iteri (fun i m -> 
+        List.iteri (fun i m ->
+            let mutable point_at_end_of_measure = false
             totalBeats <- totalBeats + fmeter
             lo <- 0.0f<beat>
             while ((not (List.isEmpty bpms)) && fst (List.head bpms) < totalBeats) do
@@ -251,11 +244,13 @@ module Stepmania =
                 convert_measure m lo hi
                 now <- now + msPerBeat * (hi - lo)
                 lo <- hi
+                point_at_end_of_measure <- true
                 let (_, b) = List.head bpms in points.Add({ Time = now; Data = { Meter = meter; MsPerBeat = 60000.0f<ms/minute> / b } })
                 msPerBeat <- 60000.0f<ms/minute> / b
                 bpms <- List.tail bpms
             convert_measure m lo fmeter
             now <- now + msPerBeat * (fmeter - lo)
+            if point_at_end_of_measure then points.Add({ Time = now; Data = { Meter = meter; MsPerBeat = msPerBeat } })
             ) measures
         (states |> Array.ofSeq, points |> Array.ofSeq)
 
