@@ -9605,16 +9605,16 @@
     "djtekinasomething/internetbitch": {
         "AlternativeTitles": [], 
         "Artists": ["DJ'TEKINA//SOMETHING"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
+        "OtherArtists": ["YUC'e"], 
+        "Remixers": ["P*Light"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Internet bitch"
+        "Title": "Internet bitch (P*Light Remix)"
     }, 
     "djtekinasomething/internetbitchplightremix": {
-        "AlternativeTitles": [], 
+        "AlternativeTitles": ["Internet bxxch (P*Light Remix)"], 
         "Artists": ["DJ'TEKINA//SOMETHING"], 
-        "OtherArtists": [], 
+        "OtherArtists": ["YUC'e"], 
         "Remixers": ["P*Light"], 
         "Source": null, 
         "Tags": ["ゆよゆっぺ", "Yuyoyuppe", "YUC'e", "YUCe'", "Dubstep", "Happy", "Hardcore", "Short", "Cut", "Version", "ver.", "M3-2014", "Spring", "M3-33", "Music", "Media", "Market", "TOKYO", "LOGIC", "Motoloid", "Bxxch", "Electronic", "Japanese"], 
@@ -9793,7 +9793,7 @@
     }, 
     "djyoshitakameetsdjtaka/triplecounter": {
         "AlternativeTitles": [], 
-        "Artists": ["DJ YOSHITAKA meets dj TAKA"], 
+        "Artists": ["DJ YOSHITAKA", "dj TAKA"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
