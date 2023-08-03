@@ -17,6 +17,7 @@ module Advanced =
                     .Pos(200.0f)
                 |+ PageSetting("advanced.vanishingnotes", Selector<_>.FromBool options.VanishingNotes)
                     .Pos(270.0f)
+                    .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
                 |+ PageSetting("advanced.autocalibrateoffset", Selector<_>.FromBool options.AutoCalibrateOffset)
                     .Pos(340.0f)
                     .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
