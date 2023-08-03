@@ -48,11 +48,24 @@ type HitEvent<'Guts> =
     Combo/combo breaking also built-in - Your combo is the number of notes hit well in a row
 *)
 
-type private HoldState =
+[<Struct>]
+type private HoldInternalState =
     | Nothing
     | Holding
     | Dropped
+    | MissedHeadThenHeld
     | MissedHead
+
+[<Struct>]
+[<RequireQualifiedAccess>]
+type HoldState =
+    | Released
+    | Holding
+    | Dropped
+    | MissedHead
+    | InTheFuture
+    member this.ShowInReceptor = this = Holding || this = Dropped || this = Released
+
 
 [<Struct>]
 type ScoreMetricSnapshot =
@@ -116,18 +129,21 @@ type IScoreMetric
     member this.ScaledMissWindow = missWindow
     member this.Ruleset = ruleset
 
-    member this.IsHoldDropped (index: int) (k: int) =
-        match internalHoldStates.[k] with
-        | Dropped, i | MissedHead, i when i >= index -> true
-        | _ -> false
-
-    member this.IsHoldHeld (index: int) (k: int) =
-        match internalHoldStates.[k] with
-        | Holding, i when i = index -> true
-        | _ -> false
+    member this.HoldState (index: int) (k: int) =
+        let state, i = internalHoldStates.[k]
+        if i = index then
+            match state with
+            | Nothing -> HoldState.Released
+            | Holding -> HoldState.Holding
+            | Dropped -> HoldState.Dropped
+            | MissedHead | MissedHeadThenHeld -> HoldState.MissedHead
+        elif i > index then
+            let struct (_, _, flags) = hitData.[index]
+            if flags.[k] = HitStatus.HIT_ACCEPTED then HoldState.Released else HoldState.MissedHead
+        else HoldState.InTheFuture
 
     member this.IsNoteHit (index: int) (k: int) =
-        let struct (t, deltas, flags) = hitData.[index]
+        let struct (_, _, flags) = hitData.[index]
         flags.[k] = HitStatus.HIT_ACCEPTED
 
     member this.HitData = hitData
@@ -224,7 +240,7 @@ type IScoreMetric
         else // If no note to hit, but a hold note head was missed, pressing key marks it dropped instead
             internalHoldStates.[k] <- 
                 match internalHoldStates.[k] with
-                | MissedHead, i -> Dropped, i
+                | MissedHead, i -> MissedHeadThenHeld, i
                 | x -> x
                 
     override this.HandleKeyUp (relativeTime: ChartTime, k: int) =
@@ -232,7 +248,8 @@ type IScoreMetric
         let now = firstNote + relativeTime
         match internalHoldStates.[k] with
         | Holding, holdHeadIndex
-        | Dropped, holdHeadIndex ->
+        | Dropped, holdHeadIndex
+        | MissedHeadThenHeld, holdHeadIndex ->
 
             let mutable i = holdHeadIndex
             let mutable delta = missWindow
@@ -253,8 +270,8 @@ type IScoreMetric
                 let struct (_, deltas, status) = hitData.[found]
                 status.[k] <- HitStatus.RELEASE_ACCEPTED
                 deltas.[k] <- delta / rate
-                this._HandleEvent { Time = relativeTime; Column = k; Guts = Release_ (deltas.[k], false, false, fst internalHoldStates.[k] = Dropped) }
-                internalHoldStates.[k] <- Nothing, found
+                this._HandleEvent { Time = relativeTime; Column = k; Guts = Release_ (deltas.[k], false, false, fst internalHoldStates.[k] = Dropped || fst internalHoldStates.[k] = MissedHeadThenHeld) }
+                internalHoldStates.[k] <- Nothing, holdHeadIndex
             else // If we released but too early (no sign of the tail within range) make the long note dropped
                 internalHoldStates.[k] <- 
                     match internalHoldStates.[k] with
