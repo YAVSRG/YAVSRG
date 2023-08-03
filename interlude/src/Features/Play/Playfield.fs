@@ -183,7 +183,6 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                         Rect.Create(left + columnPositions.[k], max clip pos, left + columnPositions.[k] + column_width, pos + noteHeight)
                         |> scrollDirectionPos bottom
                     )
-                    |> rotation k
                 )
                 (Quad.colorOf tint)
                 (Sprite.gridUV (animation.Loops, color) tailsprite |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
