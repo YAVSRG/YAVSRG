@@ -1,16 +1,21 @@
 ﻿namespace Interlude.Features.Play
 
-open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Gameplay
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Content
 open Interlude
 open Interlude.Options
 open Interlude.Features
+
+type private HoldRenderState =
+    | HeadOffscreen of index: int
+    | HeadOnscreen of pos: float32 * index: int
+    | NoHold
 
 type Playfield(chart: ColorizedChart, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
@@ -28,19 +33,11 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
     let tailsprite = Content.getTexture(if Content.noteskinConfig().UseHoldTailTexture then "holdtail" else "holdhead")
     let animation = Animation.Counter (Content.noteskinConfig().AnimationFrameTime)
 
-    // arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection
-    let mutable note_seek = 0 // see comments for sv_seek and sv_peek. same role but for index of next row
-    let mutable note_peek = note_seek
     let sv = chart.SV
-    let mutable sv_seek = 0 // index of next appearing SV point; = number of SV points if there are no more
-    let mutable sv_peek = sv_seek // same as sv_seek, but sv_seek stores the relevant point for t = now (according to music) and this stores t > now
-    let mutable sv_value = 1.0f // value of the most recent sv point, equal to the sv value at index (sv_peek - 1), or 1 if that point doesn't exist
-    let mutable sv_time = 0.0f<ms>
-    let mutable column_pos = 0.0f // running position calculation of notes for sv
-    let hold_presence = Array.create keys false
-    let hold_pos = Array.create keys 0.0f
-    let hold_colors = Array.create keys 0
-    let hold_index = Array.create keys -1
+    let mutable note_seek = 0
+    let mutable sv_seek = 0
+    let holds_offscreen = Array.create keys -1
+    let hold_states = Array.create keys NoHold
 
     let rotation = Content.Noteskins.noteRotation keys
 
@@ -89,25 +86,26 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
             if options.VanishingNotes.Value then 
                 let space_needed = hitposition + noteHeight
                 let time_needed = space_needed / scale
-                now - time_needed // todo: this is true only with no SV but can be too small a margin for SV < 1.0x
+                now - time_needed // todo: this is true only with no SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im a laze
             else now
 
-        // variable setup before draw
+        // note_seek = index of the next row to appear, or notes.Length if none left
         while note_seek < chart.Notes.Length && chart.Notes.[note_seek].Time < begin_time do
             let { Data = struct (nr, _) } = chart.Notes.[note_seek]
             for k = 0 to keys - 1 do
-                if nr.[k] = NoteType.HOLDHEAD then hold_index.[k] <- note_seek
+                if nr.[k] = NoteType.HOLDHEAD then holds_offscreen.[k] <- note_seek
+                elif nr.[k] = NoteType.HOLDTAIL then holds_offscreen.[k] <- -1
             note_seek <- note_seek + 1
-        note_peek <- note_seek
+        let mutable note_peek = note_seek
 
-        // move sv pointer
+        // sv_seek = index of the next sv to appear, or sv.Length if none left
         while sv_seek < sv.Length && sv.[sv_seek].Time < begin_time do
             sv_seek <- sv_seek + 1
-        sv_peek <- sv_seek
-        sv_value <- if sv_seek > 0 then sv.[sv_seek - 1].Data else 1.0f
+        let mutable sv_value = if sv_seek > 0 then sv.[sv_seek - 1].Data else 1.0f
+        let mutable sv_peek = sv_seek
 
-        // let's travel to now and see how far we went
-        column_pos <- hitposition
+        // calculation of where to start drawing from (for vanishing notes this depends on sv between begin_time and now)
+        let mutable column_pos = hitposition
         if options.VanishingNotes.Value then
             let mutable i = sv_seek
             let mutable sv_v = sv_value
@@ -119,19 +117,13 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                 sv_v <- v
                 i <- i + 1
             column_pos <- column_pos - scale * sv_v * (now - sv_t)
-
-        sv_time <- begin_time
+        let mutable sv_time = begin_time
+        let begin_pos = column_pos
 
         // draw column backdrops and receptors
         for k in 0 .. (keys - 1) do
             Draw.rect (Rect.Create(left + columnPositions.[k], top, left + columnPositions.[k] + column_width, bottom)) playfieldColor
-            hold_pos.[k] <- hitposition
-            hold_presence.[k] <-
-                if note_seek > 0 then
-                    let { Data = struct (nr, c) } = chart.Notes.[note_seek - 1] in
-                    hold_colors.[k] <- int c.[k]
-                    (nr.[k] = NoteType.HOLDHEAD || nr.[k] = NoteType.HOLDBODY)
-                else false
+            hold_states.[k] <- if holds_offscreen.[k] < 0 then NoHold else HeadOffscreen holds_offscreen.[k]
             Draw.quad // receptor
                 (
                     Rect.Box(left + columnPositions.[k], hitposition, column_width, noteHeight)
@@ -191,12 +183,14 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                     |> rotation k
                 )
                 (Quad.colorOf tint)
-                (Sprite.gridUV (animation.Loops, color) (Content.getTexture "holdtail") |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
+                (Sprite.gridUV (animation.Loops, color) tailsprite |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
 
-        // main render loop - until the last note rendered in every column appears off screen
+        // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
+        // todo: also put a cap at -playfieldHeight when *negative sv comes into play
         while column_pos < playfieldHeight && note_peek < chart.Notes.Length do
+
             let { Time = t; Data = struct (nd, color) } = chart.Notes.[note_peek]
-            // update sv
+            // update vertical position + scroll speed based on sv
             while (sv_peek < sv.Length && sv.[sv_peek].Time < t) do
                 let { Time = t2; Data = v } = sv.[sv_peek]
                 column_pos <- column_pos + scale * sv_value * (t2 - sv_time)
@@ -213,27 +207,79 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                     draw_note(k, column_pos, int color.[k])
 
                 elif nd.[k] = NoteType.HOLDHEAD then
-                    hold_pos.[k] <- max column_pos hitposition
-                    hold_colors.[k] <- int color.[k]
-                    hold_presence.[k] <- true
+                    // assert hold_states.[k] = NoHold
+                    hold_states.[k] <- HeadOnscreen (column_pos, note_peek)
 
                 elif nd.[k] = NoteType.HOLDTAIL then
-                    let headpos = hold_pos.[k]
-                    let tint = if hold_pos.[k] = hitposition && state.Scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
-                    let pos = column_pos - holdnoteTrim
-                    if headpos < pos then
-                        draw_body(k, headpos, pos, hold_colors.[k], tint)
-                    if headpos - pos < noteHeight * 0.5f then
-                        draw_tail(k, pos, headpos, int color.[k], tint)
-                    draw_head(k, headpos, hold_colors.[k], tint)
-                    hold_presence.[k] <- false
+                    match hold_states.[k] with
+                    | HeadOffscreen i ->
+                        let hold_state = state.Scoring.HoldState i k
+                        if options.VanishingNotes.Value && hold_state = HoldState.Released then () else
+
+                        let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
+                        let tailpos = column_pos - holdnoteTrim
+                        let headpos = if hold_state.ShowInReceptor then hitposition else begin_pos
+                        let head_and_body_color = let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
+
+                        if headpos < tailpos then
+                            draw_body(k, headpos, tailpos, head_and_body_color, tint)
+                        if headpos - tailpos < noteHeight * 0.5f then
+                            draw_tail(k, tailpos, headpos, int color.[k], tint)
+                        if not options.VanishingNotes.Value || hold_state.ShowInReceptor then
+                            draw_head(k, headpos, head_and_body_color, tint)
+                            
+                        hold_states.[k] <- NoHold
+
+                    | HeadOnscreen (headpos, i) ->
+                        let hold_state = state.Scoring.HoldState i k
+                        if options.VanishingNotes.Value && hold_state = HoldState.Released then () else
+                        
+                        let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
+                        let tailpos = column_pos - holdnoteTrim
+                        let headpos = if hold_state.ShowInReceptor then max hitposition headpos else headpos
+                        let head_and_body_color = let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
+                        
+                        if headpos < tailpos then
+                            draw_body(k, headpos, tailpos, head_and_body_color, tint)
+                        if headpos - tailpos < noteHeight * 0.5f then
+                            draw_tail(k, tailpos, headpos, int color.[k], tint)
+                        draw_head(k, headpos, head_and_body_color, tint)
+
+                        hold_states.[k] <- NoHold
+                    | _ -> () // assert impossible
             note_peek <- note_peek + 1
         
         for k in 0 .. (keys - 1) do
-            if hold_presence.[k] then
-                let headpos = hold_pos.[k]
-                let tint = if hold_pos.[k] = hitposition && state.Scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
-                draw_body(k, headpos, bottom, hold_colors.[k], tint)
-                draw_head(k, headpos, hold_colors.[k], tint)
+            match hold_states.[k] with
+            | HeadOffscreen i ->
+                let hold_state = state.Scoring.HoldState i k
+                if options.VanishingNotes.Value && hold_state = HoldState.Released then () else
+
+                let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
+                let tailpos = bottom
+                let headpos = if hold_state.ShowInReceptor then hitposition else begin_pos
+                let head_and_body_color = let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
+
+                if headpos < tailpos then draw_body(k, headpos, tailpos, head_and_body_color, tint)
+                if not options.VanishingNotes.Value || hold_state.ShowInReceptor then
+                    draw_head(k, headpos, head_and_body_color, tint)
+
+                hold_states.[k] <- NoHold
+
+            | HeadOnscreen (headpos, i) ->
+                let hold_state = state.Scoring.HoldState i k
+                if options.VanishingNotes.Value && hold_state = HoldState.Released then () else
+                
+                let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
+                let tailpos = bottom
+                let headpos = if hold_state.ShowInReceptor then max hitposition headpos else headpos
+                let head_and_body_color = let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
+                
+                if headpos < tailpos then
+                    draw_body(k, headpos, tailpos, head_and_body_color, tint)
+                draw_head(k, headpos, head_and_body_color, tint)
+                
+                hold_states.[k] <- NoHold
+            | NoHold -> ()
 
         base.Draw()
