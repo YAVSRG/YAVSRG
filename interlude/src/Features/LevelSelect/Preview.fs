@@ -18,7 +18,7 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
     let max_note_density = Array.max density_graph_1
 
     let playfield =
-        Playfield(PlayState.Dummy chart)
+        Playfield(PlayState.Dummy chart, false)
         |+ LaneCover()
 
     let volume = Volume()

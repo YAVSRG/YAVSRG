@@ -12,12 +12,13 @@ open Interlude
 open Interlude.Options
 open Interlude.Features
 
+[<Struct>]
 type private HoldRenderState =
-    | HeadOffscreen of index: int
+    | HeadOffscreen of int
     | HeadOnscreen of pos: float32 * index: int
     | NoHold
 
-type Playfield(chart: ColorizedChart, state: PlayState) as this =
+type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this =
     inherit StaticContainer(NodeType.None)
 
     let keys = chart.Keys
@@ -62,7 +63,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                 Bottom = Position.max
             }
 
-    new (state: PlayState) = Playfield(Gameplay.Chart.colored(), state)
+    new (state: PlayState, vanishing_notes) = Playfield(Gameplay.Chart.colored(), state, vanishing_notes)
 
     member this.ColumnWidth = column_width
     member this.ColumnPositions = columnPositions
@@ -83,7 +84,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
         let playfieldHeight = bottom - top + holdnoteTrim
         let now = Song.timeWithOffset() + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
         let begin_time = 
-            if options.VanishingNotes.Value then 
+            if vanishing_notes then 
                 let space_needed = hitposition + noteHeight
                 let time_needed = space_needed / scale
                 now - time_needed // todo: this is true only with no SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im a laze
@@ -106,7 +107,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
 
         // calculation of where to start drawing from (for vanishing notes this depends on sv between begin_time and now)
         let mutable column_pos = hitposition
-        if options.VanishingNotes.Value then
+        if vanishing_notes then
             let mutable i = sv_seek
             let mutable sv_v = sv_value
             let mutable sv_t = begin_time
@@ -203,7 +204,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
             sv_time <- t
 
             for k in 0 .. (keys - 1) do
-                if nd.[k] = NoteType.NORMAL && not (options.VanishingNotes.Value && state.Scoring.IsNoteHit note_peek k) then
+                if nd.[k] = NoteType.NORMAL && not (vanishing_notes && state.Scoring.IsNoteHit note_peek k) then
                     draw_note(k, column_pos, int color.[k])
 
                 elif nd.[k] = NoteType.HOLDHEAD then
@@ -214,7 +215,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                     match hold_states.[k] with
                     | HeadOffscreen i ->
                         let hold_state = state.Scoring.HoldState i k
-                        if options.VanishingNotes.Value && hold_state = HoldState.Released then () else
+                        if vanishing_notes && hold_state = HoldState.Released then () else
 
                         let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
                         let tailpos = column_pos - holdnoteTrim
@@ -225,14 +226,14 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                             draw_body(k, headpos, tailpos, head_and_body_color, tint)
                         if headpos - tailpos < noteHeight * 0.5f then
                             draw_tail(k, tailpos, headpos, int color.[k], tint)
-                        if not options.VanishingNotes.Value || hold_state.ShowInReceptor then
+                        if not vanishing_notes || hold_state.ShowInReceptor then
                             draw_head(k, headpos, head_and_body_color, tint)
                             
                         hold_states.[k] <- NoHold
 
                     | HeadOnscreen (headpos, i) ->
                         let hold_state = state.Scoring.HoldState i k
-                        if options.VanishingNotes.Value && hold_state = HoldState.Released then () else
+                        if vanishing_notes && hold_state = HoldState.Released then () else
                         
                         let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
                         let tailpos = column_pos - holdnoteTrim
@@ -253,7 +254,7 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
             match hold_states.[k] with
             | HeadOffscreen i ->
                 let hold_state = state.Scoring.HoldState i k
-                if options.VanishingNotes.Value && hold_state = HoldState.Released then () else
+                if vanishing_notes && hold_state = HoldState.Released then () else
 
                 let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
                 let tailpos = bottom
@@ -261,14 +262,14 @@ type Playfield(chart: ColorizedChart, state: PlayState) as this =
                 let head_and_body_color = let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
 
                 if headpos < tailpos then draw_body(k, headpos, tailpos, head_and_body_color, tint)
-                if not options.VanishingNotes.Value || hold_state.ShowInReceptor then
+                if not vanishing_notes || hold_state.ShowInReceptor then
                     draw_head(k, headpos, head_and_body_color, tint)
 
                 hold_states.[k] <- NoHold
 
             | HeadOnscreen (headpos, i) ->
                 let hold_state = state.Scoring.HoldState i k
-                if options.VanishingNotes.Value && hold_state = HoldState.Released then () else
+                if vanishing_notes && hold_state = HoldState.Released then () else
                 
                 let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
                 let tailpos = bottom

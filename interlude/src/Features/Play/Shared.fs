@@ -230,7 +230,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
             Pacemaker = pacemakerInfo
         }
 
-    let playfield = Playfield state
+    let playfield = Playfield(state, options.VanishingNotes.Value)
 
     do
         this.Add playfield
