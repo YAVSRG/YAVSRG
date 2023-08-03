@@ -187,8 +187,8 @@ module Library =
             }
 
         let auto_convert =
-            { new Async.Service<string, bool>() with
-                override this.Handle(path) =
+            { new Async.Service<string * bool, bool>() with
+                override this.Handle((path, move_assets)) =
                     async {
                         match File.GetAttributes path &&& FileAttributes.Directory |> int with
                         | 0 ->
@@ -205,25 +205,24 @@ module Library =
                                     return false
                                 else
                                     ZipFile.ExtractToDirectory(path, dir)
-                                    do! convert_pack_folder.RequestAsync(dir, { ConversionActionConfig.Default with PackName = Path.GetFileName dir })
-                                    Directory.Delete(dir, true)
+                                    this.Request((dir, true), fun b -> Directory.Delete(dir, true))
                                     return true
                             | _ -> Logging.Warn(sprintf "%s: Unrecognised file for import" path); return false
                         | _ ->
                             match path with
                             | SongFolder ext ->
-                                do! convert_song_folder.RequestAsync(path, { ConversionActionConfig.Default with MoveAssets = false; PackName = if ext = ".osu" then "osu!" else "Singles" })
+                                do! convert_song_folder.RequestAsync(path, { ConversionActionConfig.Default with MoveAssets = move_assets; PackName = if ext = ".osu" then "osu!" else "Singles" })
                                 return true
                             | PackFolder ->
                                 let packname =
                                     match Path.GetFileName path with
                                     | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
                                     | s -> s
-                                do! convert_pack_folder.RequestAsync(path, { ConversionActionConfig.Default with PackName = packname; MoveAssets = false })
+                                do! convert_pack_folder.RequestAsync(path, { ConversionActionConfig.Default with PackName = packname; MoveAssets = move_assets })
                                 return true
                             | FolderOfPacks ->
                                 for packFolder in Directory.EnumerateDirectories path do
-                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with PackName = Path.GetFileName packFolder; MoveAssets = false })
+                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with PackName = Path.GetFileName packFolder; MoveAssets = move_assets })
                                 return true
                             | _ -> Logging.Warn(sprintf "%s: No importable folder structure detected" path); return false
                     }
