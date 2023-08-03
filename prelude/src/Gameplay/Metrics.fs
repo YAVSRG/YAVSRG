@@ -139,7 +139,7 @@ type IScoreMetric
             | MissedHead | MissedHeadThenHeld -> HoldState.MissedHead
         elif i > index then
             let struct (_, _, flags) = hitData.[index]
-            if flags.[k] = HitStatus.HIT_ACCEPTED then HoldState.Released else HoldState.MissedHead
+            if flags.[k] <> HitStatus.HIT_HOLD_REQUIRED then HoldState.Released else HoldState.MissedHead
         else HoldState.InTheFuture
 
     member this.IsNoteHit (index: int) (k: int) =
@@ -385,7 +385,7 @@ module Metrics =
     let createDummyMetric (chart: Chart) : ScoreMetric =
         let ruleset = PrefabRulesets.SC.create 4
         createScoreMetric 
-            { ruleset with Accuracy = { ruleset.Accuracy with MissWindow = 0.0f<ms> } }
+            ruleset
             chart.Keys
             (StoredReplayProvider Array.empty)
             chart.Notes
