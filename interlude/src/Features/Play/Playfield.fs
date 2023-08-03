@@ -46,6 +46,8 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
     let reset() =
         note_seek <- 0
         sv_seek <- 0
+        for k = 0 to hold_states.Length - 1 do
+            hold_states.[k] <- NoHold
 
     let scrollDirectionPos bottom : Rect -> Rect =
         if options.Upscroll.Value then id 
