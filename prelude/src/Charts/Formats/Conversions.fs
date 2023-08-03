@@ -195,14 +195,15 @@ module ``osu!`` =
 
 module Stepmania =
 
-    let private convert_measures (keys: int) (measures: string list list) (bpms: (float32<beat> * float32<beat/minute>) list) start = 
+    let private convert_measures (keys: int) (measures: string list list) (bpms: (float32<beat> * float32<beat/minute>) list) (stops: (float32<beat> * float32) list) start = 
 
         let mutable bpms = bpms
+        let mutable stops = stops
         let meter = 4<beat>
         let fmeter = float32 meter * 1.0f<beat>
         let states = new List<TimeItem<NoteRow>>()
         let points = new List<TimeItem<BPM>>()
-        let mutable ln: Bitmask = 0us
+        let mutable ln : Bitmask = 0us
         let mutable now = start
         let (_, b) = List.head bpms in points.Add({ Time = start; Data = { Meter = meter; MsPerBeat = 60000.0f<ms/minute> / b } })
         let mutable msPerBeat = 60000.0f<ms/minute> / b
@@ -210,15 +211,21 @@ module Stepmania =
         let mutable totalBeats = 0.0f<beat>
         let mutable lo = 0.0f<beat>
         let mutable hi = 0.0f<beat>
+        let mutable point_at_end_of_measure = false
 
         let convert_measure (m: string list) (lo: float32<beat>) (hi: float32<beat>) =
             let l = List.length m |> float32
             let sep = msPerBeat * fmeter / l
             let start = Math.Ceiling(lo * l / fmeter |> float) |> int
             let finish = Math.Ceiling(hi * l / fmeter |> float) |> int
-            let offset = now + (float32 start * sep) - (lo * msPerBeat)
+            let offset = float32 start * sep - lo * msPerBeat
 
             for i in start .. (finish - 1) do
+                let beat = totalBeats + float32 i * fmeter / l
+                while ((not (List.isEmpty stops)) && fst (List.head stops) <= beat) do
+                    let (_, s) = List.head stops in now <- now + s * 1000.0f<ms>
+                    stops <- List.tail stops
+                    point_at_end_of_measure <- true
                 let nr = NoteRow.createLnBodies keys ln
                 Seq.iteri (fun k c ->
                     match c with
@@ -230,17 +237,16 @@ module Stepmania =
                     | '3' ->
                         nr.[k] <- NoteType.HOLDTAIL
                         ln <- Bitmask.unsetBit k ln
-                    | 'M' | 'L' | 'F' -> () //ignore mines, lifts, fakes
+                    | 'M' | 'L' | 'F' -> () // ignore mines, lifts, fakes
                     | _ -> failwith ("unknown note type " + c.ToString())
                     ) m.[i]
-                if NoteRow.isEmpty nr |> not then states.Add({ Time = offset + float32 (i - start) * sep; Data = nr })
+                if NoteRow.isEmpty nr |> not then states.Add({ Time = now + offset + float32 (i - start) * sep; Data = nr })
 
         List.iteri (fun i m ->
-            let mutable point_at_end_of_measure = false
-            totalBeats <- totalBeats + fmeter
+            point_at_end_of_measure <- false
             lo <- 0.0f<beat>
-            while ((not (List.isEmpty bpms)) && fst (List.head bpms) < totalBeats) do
-                hi <- fst (List.head bpms) - totalBeats + fmeter
+            while ((not (List.isEmpty bpms)) && fst (List.head bpms) < totalBeats + fmeter) do
+                hi <- fst (List.head bpms) - totalBeats
                 convert_measure m lo hi
                 now <- now + msPerBeat * (hi - lo)
                 lo <- hi
@@ -250,6 +256,7 @@ module Stepmania =
                 bpms <- List.tail bpms
             convert_measure m lo fmeter
             now <- now + msPerBeat * (fmeter - lo)
+            totalBeats <- totalBeats + fmeter
             if point_at_end_of_measure then points.Add({ Time = now; Data = { Meter = meter; MsPerBeat = msPerBeat } })
             ) measures
         (states |> Array.ofSeq, points |> Array.ofSeq)
@@ -257,10 +264,6 @@ module Stepmania =
     let toInterlude (sm: StepmaniaData) (action: ConversionAction) = 
 
         let path = Path.GetDirectoryName action.Source
-
-        if sm.STOPS <> [] then 
-            Logging.Warn(sprintf "StepMania STOPS are not supported, this file (%s) will not convert correctly" path)
-            Logging.Debug(sprintf "Stops: %A" sm.STOPS)
 
         let rec metadataFallback x =
             match x with
@@ -366,7 +369,7 @@ module Stepmania =
                     ChartSource = Unknown
                 }
             let filepath = Path.Combine (path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
-            let (notes, bpm) = convert_measures keys diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)
+            let (notes, bpm) = convert_measures keys diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
 
             {
                 Keys = keys
