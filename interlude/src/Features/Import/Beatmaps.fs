@@ -56,7 +56,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             let target = Path.Combine(getDataPath "Downloads", Guid.NewGuid().ToString() + ".osz")
             WebServices.download_file.Request((sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.beatmapset_id, target, fun p -> progress <- p),
                 fun completed ->
-                    if completed then Library.Imports.auto_convert.Request(target,
+                    if completed then Library.Imports.auto_convert.Request((target, true),
                         fun b ->
                             if b then charts_updated_ev.Trigger()
                             Notifications.task_feedback (Icons.download, L"notification.install_song", data.title)

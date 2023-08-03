@@ -88,7 +88,7 @@ type TableCard(id: string, table: Table) as this =
                     let target = Path.Combine(getDataPath "Downloads", System.Guid.NewGuid().ToString() + ".zip")
                     WebServices.download_file.Request((mirror, target, ignore),
                         fun completed ->
-                            if completed then Library.Imports.auto_convert.Request(target,
+                            if completed then Library.Imports.auto_convert.Request((target, true),
                                 fun b ->
                                     if b then charts_updated_ev.Trigger()
                                     File.Delete target

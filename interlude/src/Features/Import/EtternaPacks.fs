@@ -49,7 +49,7 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
             let target = Path.Combine(getDataPath "Downloads", System.Guid.NewGuid().ToString() + ".zip")
             WebServices.download_file.Request((data.download, target, fun p -> progress <- p),
                 fun completed ->
-                    if completed then Library.Imports.auto_convert.Request(target,
+                    if completed then Library.Imports.auto_convert.Request((target, true),
                         fun b ->
                             if b then charts_updated_ev.Trigger()
                             Notifications.task_feedback (Icons.download, L"notification.install_pack", data.name)
