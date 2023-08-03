@@ -200,26 +200,30 @@ module Library =
                                 return true
                             | ChartArchive ->
                                 let dir = Path.ChangeExtension(path, null)
-                                // This has built-in directory traversal protection
-                                ZipFile.ExtractToDirectory(path, dir)
-                                this.Request(dir, fun _ -> Directory.Delete(dir, true))
-                                return true
+                                if Directory.Exists(dir) && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not then
+                                    Logging.Error(sprintf "Can't extract zip to %s because that folder exists already" dir)
+                                    return false
+                                else
+                                    ZipFile.ExtractToDirectory(path, dir)
+                                    do! convert_pack_folder.RequestAsync(dir, { ConversionActionConfig.Default with PackName = Path.GetFileName dir })
+                                    Directory.Delete(dir, true)
+                                    return true
                             | _ -> Logging.Warn(sprintf "%s: Unrecognised file for import" path); return false
                         | _ ->
                             match path with
                             | SongFolder ext ->
-                                do! convert_song_folder.RequestAsync(path, { ConversionActionConfig.Default with PackName = if ext = ".osu" then "osu!" else "Singles" })
+                                do! convert_song_folder.RequestAsync(path, { ConversionActionConfig.Default with MoveAssets = false; PackName = if ext = ".osu" then "osu!" else "Singles" })
                                 return true
                             | PackFolder ->
                                 let packname =
                                     match Path.GetFileName path with
                                     | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
                                     | s -> s
-                                do! convert_pack_folder.RequestAsync(path, { ConversionActionConfig.Default with PackName = packname })
+                                do! convert_pack_folder.RequestAsync(path, { ConversionActionConfig.Default with PackName = packname; MoveAssets = false })
                                 return true
                             | FolderOfPacks ->
                                 for packFolder in Directory.EnumerateDirectories path do
-                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with PackName = Path.GetFileName packFolder })
+                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with PackName = Path.GetFileName packFolder; MoveAssets = false })
                                 return true
                             | _ -> Logging.Warn(sprintf "%s: No importable folder structure detected" path); return false
                     }
