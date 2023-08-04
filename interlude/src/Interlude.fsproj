@@ -52,7 +52,6 @@
     <Compile Include="UI\Menu\Volume.fs" />
     <Compile Include="UI\Menu\Helpers.fs" />
     <Compile Include="UI\Menu\Controls.fs" />
-    <Compile Include="UI\Menu\Grid.fs" />
     <Compile Include="UI\Menu\Menu.fs" />
     <Compile Include="UI\Screen\Logo.fs" />
     <Compile Include="UI\Screen\Background.fs" />

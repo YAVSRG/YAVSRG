@@ -1,55 +1,15 @@
 ﻿namespace Interlude.UI
 
 open System.Drawing
-open Percyqaz.Flux.UI
-open Interlude.Utils
 
-// todo: merge into Percyqaz.Flux
 module Style =
 
-    open Percyqaz.Flux.UI.Style
+    open Percyqaz.Flux.UI
 
     type private ColorFunc = unit -> Color
-    type private ColorFuncF = float32 -> Color
 
-    let alpha a (c: 'T -> Color) = fun x -> Color.FromArgb(a, c x)
-    let alphaF (a: Animation.Fade) (c: ColorFunc) = fun () -> Color.FromArgb(a.Alpha, c ())
-
-    let white a : ColorFunc = K <| Color.FromArgb(a, Color.White)
-    let black a : ColorFunc = K <| Color.FromArgb(a, Color.Black)
-
-    /// 1.0, 0.0
-    let highlight a : ColorFunc = fun () ->
-        color (a, 1.0f, 0.0f)
-        
-    /// 1.0, 0.5
-    let highlightL a : ColorFunc = fun () ->
-        color (a, 1.0f, 0.5f)
-
-    /// 0.25, 0.0
-    let highlightD a : ColorFunc = fun () ->
-        color (a, 0.25f, 0.0f)
-
-    /// 1.0f, f
-    let highlightF a : ColorFuncF = fun f ->
-        color (a, 1.0f, f)
-        
-    /// 0.9, 0.0
-    let main a : ColorFunc = fun () ->
-        color (a, 0.9f, 0.0f)
-                
-    /// 0.9, f
-    let mainF a : ColorFuncF = fun f ->
-        color (a, 0.9f, f)
-    
-    /// 0.25, 0.5
-    let dark a : ColorFunc = fun () ->
-        color (a, 0.5f, 0.2f)
-    
-    /// 0.25, 0.75
-    let darkL a : ColorFunc = fun () ->
-        color (a, 0.25f, 0.75f)
-    
-    /// 0.1, 0.25
-    let darkD a : ColorFunc = fun () ->
-        color (a, 0.1f, 0.25f)
+    let highlight a : ColorFunc = fun () -> (!*Palette.HIGHLIGHT).O4a a
+    let highlightL a : ColorFunc = fun () -> (!*Palette.LIGHT).O4a a
+    let main a : ColorFunc = fun () -> (!*Palette.MAIN).O4a a
+    let dark a : ColorFunc = fun () -> (!*Palette.DARK).O4a a
+    let darkD a : ColorFunc = fun () -> (!*Palette.DARKER).O4a a

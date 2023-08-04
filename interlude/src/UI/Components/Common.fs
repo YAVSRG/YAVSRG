@@ -85,7 +85,7 @@ type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as thi
     let textEntry = 
         TextEntry(setting, bind, 
             Position = Position.Margin(10.0f, 0.0f),
-            ColorFunc = fun () -> (if this.TextEntry.Selected then !*Palette.WHITE else !*Palette.LIGHT), !*Palette.DARKER
+            ColorFunc = fun () -> (if this.TextEntry.Selected then Colors.white else !*Palette.LIGHT), !*Palette.DARKER
         )
 
     do
