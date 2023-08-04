@@ -20,7 +20,7 @@ type [<Sealed>] Text(textFunc) =
     new(text: string) = Text(K text)
 
     member val Align = Alignment.CENTER with get, set
-    member val Color = Style.text with get, set
+    member val Color = K Colors.text with get, set
 
     override this.Draw() = Text.drawFillB(Style.baseFont, textFunc(), this.Bounds, this.Color(), this.Align)
 
