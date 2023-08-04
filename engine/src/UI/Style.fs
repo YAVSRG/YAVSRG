@@ -104,7 +104,8 @@ module Palette =
 
     let DARKER = { Alpha = 255; Brightness = 0.25f; White = 0.15f }
     let DARK = { Alpha = 255; Brightness = 0.5f; White = 0.2f }
-    let BASE = { Alpha = 255; Brightness = 0.8f; White = 0.25f }
+    let MAIN = { Alpha = 255; Brightness = 0.9f; White = 0.0f }
+    let HIGHLIGHT = { Alpha = 255; Brightness = 1.0f; White = 0.0f }
     let LIGHT = { Alpha = 255; Brightness = 1.0f; White = 0.45f }
     let LIGHTER = { Alpha = 255; Brightness = 1.0f; White = 0.7f }
 
@@ -121,15 +122,6 @@ module Palette =
 [<AutoOpen>]
 module PaletteOperators =
 
-    let (!%) (p: PaletteColor) =
-        if p = Palette.BLACK then K Color.Black
-        elif p = Palette.WHITE then K Color.White
-        else fun () -> Style.color (p.Alpha, p.Brightness, p.White)
+    let (!%) (p: PaletteColor) = fun () -> Style.color (p.Alpha, p.Brightness, p.White)
     
-    let (!*) (p: PaletteColor) =
-        if p = Palette.BLACK then Color.Black
-        elif p = Palette.WHITE then Color.White
-        else Style.color (p.Alpha, p.Brightness, p.White)
-    
-    let (!^) (p: PaletteColor) =
-        fun () -> Style.color (p.Alpha, p.Brightness, p.White), Color.Black
+    let (!*) (p: PaletteColor) = Style.color (p.Alpha, p.Brightness, p.White)

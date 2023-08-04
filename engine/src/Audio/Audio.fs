@@ -157,7 +157,7 @@ module SoundEffect =
         Bass.ChannelPlay(fx.ChannelID, true) |> bassError
 
 type SoundEffect with
-    member this.Play() = SoundEffect.play this 1.0
+    member this.Play() = if this.ID <> 0 then SoundEffect.play this 1.0
 
 module Devices =
 
