@@ -24,4 +24,4 @@ type PerformanceMonitor() =
             Draw.rect(Rect.Create(x, this.Bounds.Bottom - float32 t, x + step, this.Bounds.Bottom)) Color.Red
             x <- x + step
         if frame_times <> [] then
-            Text.drawJustB(Style.baseFont, sprintf "%.1f FPS" fps, 30.0f, this.Bounds.Right - 20.0f, this.Bounds.Top + 20.0f, (Color.White, Color.Black), Alignment.RIGHT)
+            Text.drawJustB(Style.font, sprintf "%.1f FPS" fps, 30.0f, this.Bounds.Right - 20.0f, this.Bounds.Top + 20.0f, (Color.White, Color.Black), Alignment.RIGHT)

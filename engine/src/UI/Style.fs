@@ -6,26 +6,6 @@ open Percyqaz.Flux.Graphics.Fonts
 
 open System.Drawing
 
-module Style =
-
-    let padding = 5.0f
-    let mutable baseFont = Unchecked.defaultof<SpriteFont>
-    let accentColor = Animation.Color Color.Blue
-    let changePrimaryColor col = accentColor.Target <- col
-
-    let color (alpha, brightness, white) =
-        let accentColor = accentColor.Value
-        let r = float32 accentColor.R
-        let g = float32 accentColor.G
-        let b = float32 accentColor.B
-        let rd = (255.0f - r * brightness) * white
-        let gd = (255.0f - g * brightness) * white
-        let bd = (255.0f - b * brightness) * white
-        Color.FromArgb(alpha,
-            int ((r + rd) * brightness) |> min 255,
-            int ((g + gd) * brightness) |> min 255,
-            int ((b + bd) * brightness) |> min 255)
-
 module Colors =
 
     let black = Color.Black
@@ -83,6 +63,26 @@ module ColorExtensions =
         member this.O1 = Color.FromArgb(63, this)
         member this.O2 = Color.FromArgb(127, this)
         member this.O3 = Color.FromArgb(223, this)
+        
+module Style =
+        
+    let padding = 5.0f
+    let mutable font = Unchecked.defaultof<SpriteFont>
+    let accentColor = Animation.Color Color.Blue
+    let changePrimaryColor col = accentColor.Target <- col
+        
+    let color (alpha, brightness, white) =
+        let accentColor = accentColor.Value
+        let r = float32 accentColor.R
+        let g = float32 accentColor.G
+        let b = float32 accentColor.B
+        let rd = (255.0f - r * brightness) * white
+        let gd = (255.0f - g * brightness) * white
+        let bd = (255.0f - b * brightness) * white
+        Color.FromArgb(alpha,
+            int ((r + rd) * brightness) |> min 255,
+            int ((g + gd) * brightness) |> min 255,
+            int ((b + bd) * brightness) |> min 255)
 
 type PaletteColor =
     {

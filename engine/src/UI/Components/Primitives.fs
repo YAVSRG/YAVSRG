@@ -22,7 +22,7 @@ type [<Sealed>] Text(textFunc) =
     member val Align = Alignment.CENTER with get, set
     member val Color = K Colors.text with get, set
 
-    override this.Draw() = Text.drawFillB(Style.baseFont, textFunc(), this.Bounds, this.Color(), this.Align)
+    override this.Draw() = Text.drawFillB(Style.font, textFunc(), this.Bounds, this.Color(), this.Align)
 
     override this.Init(parent) =
         base.Init parent
