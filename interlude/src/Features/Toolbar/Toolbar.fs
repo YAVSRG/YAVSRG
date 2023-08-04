@@ -20,7 +20,7 @@ open Interlude.Features.OptionsMenu
 open Interlude.Features.Printerlude
 
 type ToolbarButton(label, action, icon) =
-    inherit StaticContainer(NodeType.Button action)
+    inherit StaticContainer(NodeType.Button (fun () -> Style.click.Play(); action()))
 
     member val Hotkey = "none" with get, set
     member val HoverIcon = icon with get, set
@@ -28,8 +28,10 @@ type ToolbarButton(label, action, icon) =
     override this.Init(parent) =
          this 
          |+ Clickable.Focus this
-         |* HotkeyAction(this.Hotkey, action)
+         |* HotkeyAction(this.Hotkey, fun () -> Style.click.Play(); action())
          base.Init parent
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
     
     override this.Draw() =
          let area = this.Bounds.TrimBottom(15.0f)

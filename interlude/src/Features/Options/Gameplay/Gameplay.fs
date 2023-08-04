@@ -124,7 +124,7 @@ type GameplayPage() as this =
 
     let presetButtons (i: int) (setting: Setting<Preset option>) =
         StaticContainer(NodeType.None, Position = Position.Box(1.0f, 1.0f, -1200.0f + float32 i * 300.0f, -90.0f, 290.0f, 80.0f))
-        |+ ButtonV2(
+        |+ Button(
                 (fun () ->
                     match setting.Value with
                     | None -> sprintf "Preset %i (Empty)" i
@@ -135,7 +135,7 @@ type GameplayPage() as this =
                 Disabled = (fun () -> setting.Value.IsNone),
                 Position = Position.SliceTop(40.0f)
             )
-        |+ ButtonV2(
+        |+ Button(
                 L"gameplay.preset.load",
                 (fun () ->
                     match setting.Value with
@@ -149,7 +149,7 @@ type GameplayPage() as this =
                 Disabled = (fun () -> setting.Value.IsNone),
                 Position = { Position.SliceBottom(40.0f) with Right = 0.5f %+ 0.0f }.Margin(40.0f, 0.0f)
             )
-        |+ ButtonV2(
+        |+ Button(
                 L"gameplay.preset.save",
                 (fun () ->
                     if setting.Value.IsNone then

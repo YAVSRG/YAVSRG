@@ -9,7 +9,7 @@ module private Dropdown =
     let ITEMSIZE = 60.0f
     
     type Item(label: string, onclick: unit -> unit) as this =
-        inherit StaticContainer(NodeType.Button onclick)
+        inherit StaticContainer(NodeType.Button (fun () -> Style.click.Play(); onclick()))
 
         do
             this
@@ -17,6 +17,8 @@ module private Dropdown =
             |* Text(label,
                 Align = Alignment.LEFT,
                 Position = Position.Margin(10.0f, 5.0f))
+
+        override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
         override this.Draw() =
             if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)

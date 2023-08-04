@@ -8,7 +8,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
-open Interlude.UI
 open Interlude.Utils
 
 type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
@@ -33,10 +32,12 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
 
     override this.OnSelected() =
         base.OnSelected()
-        Input.setTextInput(setting, fun () -> if this.Selected then this.Focus())
+        Style.text_open.Play()
+        Input.setTextInput(setting |> Setting.trigger(fun v -> Style.key.Play()), fun () -> if this.Selected then this.Focus())
 
     override this.OnDeselected() =
         base.OnDeselected()
+        Style.text_close.Play()
         Input.removeInputMethod()
 
     override this.Update(elapsedTime, moved) =
@@ -44,7 +45,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
         ticker.Update(elapsedTime)
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
-    inherit StaticContainer(NodeType.Button onClick)
+    inherit StaticContainer(NodeType.Button (fun () -> Style.click.Play(); onClick()))
 
     member val Hotkey : Hotkey = "none" with get, set
     member val TiltLeft = true with get, set
@@ -67,8 +68,10 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
     override this.Init(parent: Widget) =
         this
         |+ Clickable.Focus this
-        |* HotkeyAction(this.Hotkey, onClick)
+        |* HotkeyAction(this.Hotkey, fun () -> Style.click.Play(); onClick())
         base.Init parent
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     static member Selector<'T>(label: string, values: ('T * string) array, setting: Setting<'T>, colorFunc) =
         let mutable current = array.IndexOf(values |> Array.map fst, setting.Value)
@@ -125,27 +128,6 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if searchTimer.ElapsedMilliseconds > this.DebounceTime then searchTimer.Reset(); callback()
-
-type ButtonV2(text: unit -> string, onClick: unit -> unit) as this =
-    inherit StaticContainer(NodeType.Button (fun () -> if not (this.Disabled()) then onClick()))
-
-    member val Hotkey : Hotkey = "none" with get, set
-    member val Disabled : unit -> bool = K false with get, set
-
-    new(text: string, onClick: unit -> unit) = ButtonV2(K text, onClick)
-
-    override this.Init(parent: Widget) =
-        this
-        |+ Text(
-            text,
-            Align = Alignment.CENTER,
-            Color = fun () -> 
-                if this.Disabled() then Colors.text_greyout
-                elif this.Focused then Colors.text_yellow_2
-                else Colors.text)
-        |+ Clickable((fun () -> if not (this.Disabled()) then this.Select()), OnHover = fun b -> if b && not (this.Disabled()) then this.Focus())
-        |* HotkeyAction(this.Hotkey, onClick)
-        base.Init parent
 
 type WIP() as this =
     inherit StaticWidget(NodeType.None)

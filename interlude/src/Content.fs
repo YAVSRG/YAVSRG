@@ -73,7 +73,7 @@ module Content =
 
         let switch (new_id: string) =
             let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Ruleset '" + new_id + "' not found, switching to default"); DEFAULT_ID
-            if new_id <> id then
+            if new_id <> id || first_init then
                 id <- new_id
                 current <- loaded.[id]
                 current_hash <- Ruleset.hash current
@@ -120,14 +120,6 @@ module Content =
                 config <- instance.Config
 
             let reload() =
-                if config.OverrideAccentColor then accentColor <- config.DefaultAccentColor
-                for font in defaultTheme.GetFonts() do
-                    Fonts.add font
-                for font in instance.GetFonts() do
-                    Fonts.add font
-                if Style.font <> null then Style.font.Dispose()
-                Style.font <- Fonts.create config.Font
-
                 for id in Storage.themeTextures do
                     match instance.GetTexture id with
                     | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
@@ -143,6 +135,20 @@ module Content =
                         match loaded.["*default"].GetSound id with
                         | Some stream -> SoundEffect.FromStream (id, stream) |> Sounds.add id
                         | None -> failwithf "Failed to load sound '%s' from *default" id
+
+                if config.OverrideAccentColor then accentColor <- config.DefaultAccentColor
+                for font in defaultTheme.GetFonts() do
+                    Fonts.add font
+                for font in instance.GetFonts() do
+                    Fonts.add font
+                if Style.font <> null then Style.font.Dispose()
+                Style.font <- Fonts.create config.Font
+
+                Style.click <- Sounds.getSound "click"
+                Style.hover <- Sounds.getSound "hover"
+                Style.text_close <- Sounds.getSound "text-close"
+                Style.text_open <- Sounds.getSound "text-open"
+                Style.key <- Sounds.getSound "key"
 
             let switch (new_id: string) =
                 let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Theme '" + new_id + "' not found, switching to default"); "*default"
