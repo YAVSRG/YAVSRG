@@ -161,4 +161,4 @@ type WIP() as this =
         for i = 0 to 19 do
             Draw.rect (Rect.Box (this.Bounds.Left + w * float32 i, this.Bounds.Top, w, 10.0f)) (if i % 2 = 0 then Color.Yellow else Color.Black)
             Draw.rect (Rect.Box (this.Bounds.Left + w * float32 i, this.Bounds.Bottom - 10.0f, w, 10.0f)) (if i % 2 = 1 then Color.Yellow else Color.Black)
-        Text.drawFillB(Style.baseFont, text, this.Bounds.Shrink(20.0f), Style.text(), Alignment.CENTER)
+        Text.drawFillB(Style.baseFont, text, this.Bounds.Shrink(20.0f), Colors.text, Alignment.CENTER)

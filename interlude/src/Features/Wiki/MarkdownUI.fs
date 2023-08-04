@@ -137,7 +137,7 @@ type private Image(width, title, url) as this =
         if not this.VisibleBounds.Visible then () else
         base.Draw()
         match sprite with
-        | None -> Text.drawFillB(Style.baseFont, title, this.Bounds.Shrink(20.0f, 20.0f), Style.text(), Alignment.CENTER)
+        | None -> Text.drawFillB(Style.baseFont, title, this.Bounds.Shrink(20.0f, 20.0f), Colors.text, Alignment.CENTER)
         | Some s -> Draw.sprite this.Bounds Color.White s
 
 type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as this =

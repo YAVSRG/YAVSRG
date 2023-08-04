@@ -229,7 +229,7 @@ type SkipButton(conf: HUD.SkipButton, state) =
         else active <- false
 
     override this.Draw() =
-        if active then Text.drawFillB(Style.baseFont, text, this.Bounds, Style.text(), Alignment.CENTER)
+        if active then Text.drawFillB(Style.baseFont, text, this.Bounds, Colors.text, Alignment.CENTER)
 
 type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
     inherit StaticWidget(NodeType.None)

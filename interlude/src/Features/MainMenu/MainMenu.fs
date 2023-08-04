@@ -63,7 +63,7 @@ type MainMenuScreen() as this =
         |+ options
         |+ quit
         |+ Text((fun () -> if AutoUpdate.updateDownloaded then L"menu.updatehint" else ""),
-            Color = Style.text_subheading,
+            Color = K Colors.text_subheading,
             Align = Alignment.RIGHT,
             Position = Position.Box(1.0f, 1.0f, 490.0f, 40.0f).Translate(-500.0f, -95.0f))
         |+ (

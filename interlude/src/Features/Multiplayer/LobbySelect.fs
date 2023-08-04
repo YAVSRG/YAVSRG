@@ -74,9 +74,9 @@ type LobbyInfoCard(info: LobbyInfo) =
     override this.Init(parent) =
         this
         |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
-        |+ Text((match info.CurrentlyPlaying with None -> L"lobby.no_song_selected" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Text((match info.CurrentlyPlaying with None -> L"lobby.no_song_selected" | Some s -> s), Color = K Colors.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
         |+ Clickable(fun () -> Lobby.join info.Id)
-        |* Text(info.Players.ToString() + " " + Icons.multiplayer, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
+        |* Text(info.Players.ToString() + " " + Icons.multiplayer, Color = K Colors.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
         base.Init parent
         
     member this.Name = info.Name

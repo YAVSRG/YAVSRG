@@ -343,7 +343,7 @@ type EditSkipButtonPage() as this =
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFillB(Style.baseFont, preview_text, bounds, Style.text(), Alignment.CENTER)
+                Text.drawFillB(Style.baseFont, preview_text, bounds, Colors.text, Alignment.CENTER)
         }
 
     do
@@ -434,7 +434,7 @@ type EditPacemakerPage() as this =
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFillB(Style.baseFont, Icons.goal, bounds, Style.text(), Alignment.CENTER)
+                Text.drawFillB(Style.baseFont, Icons.goal, bounds, Colors.text, Alignment.CENTER)
         }
 
     do

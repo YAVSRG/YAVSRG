@@ -175,7 +175,7 @@ module Mounts =
                     | Some s -> Localisation.localiseWith [if s.LastImported = System.DateTime.UnixEpoch then "--" else s.LastImported.ToString()] "imports.mount.lastimported"
                     | None -> L"imports.mount.notlinked"
                 ,
-                Color = Style.text_subheading,
+                Color = K Colors.text_subheading,
                 Position = Position.SliceTop(145.0f).TrimTop(85.0f),
                 Align = Alignment.CENTER)
             base.Init parent

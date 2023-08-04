@@ -34,7 +34,7 @@ module Grid =
     type SelectionButton<'T>(item: 'T, selected: bool, config: Config<'T>, main: IGrid) =
         inherit StaticWidget(NodeType.Button(fun () -> config.Selection.Value.Select(item, not selected); main.Refresh()))
 
-        override this.Draw() = Text.drawFillB(Style.baseFont, (if selected then Icons.selected else Icons.unselected), this.Bounds, Style.text(), Alignment.CENTER)
+        override this.Draw() = Text.drawFillB(Style.baseFont, (if selected then Icons.selected else Icons.unselected), this.Bounds, Colors.text, Alignment.CENTER)
 
     type ActionButton<'T>(item: 'T, action: Action<'T>, main: IGrid) as this =
         inherit StaticContainer(NodeType.Button(fun () -> this.Action()))
@@ -43,7 +43,7 @@ module Grid =
 
         do
             this 
-            |+ Text(action.Icon, Color = if enabled then Style.text else K (Color.Gray, Color.Black))
+            |+ Text(action.Icon, Color = if enabled then K Colors.text else K Colors.text_greyout)
             |* Clickable.Focus this
 
         member private this.Action() = 
