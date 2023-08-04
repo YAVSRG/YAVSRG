@@ -21,12 +21,12 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
 
     static member Flow(child: FlowContainer.Vertical<'T>) =
         let sc = ScrollContainer(child, 0.0f)
-        child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.padding * 2.0f))
+        child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.PADDING * 2.0f))
         sc
         
     static member Grid(child: GridContainer<'T>) =
         let sc = ScrollContainer(child, 0.0f)
-        child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.padding * 2.0f))
+        child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.PADDING * 2.0f))
         sc
 
     member val Margin = 0.0f with get, set
@@ -50,9 +50,9 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
             scroll_to_child_next_frame <- false
             let selected_bounds = (Selection.get_focused_element().Value :?> Widget).Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
             if selected_bounds.Bottom > this.Bounds.Bottom then
-                scrollby <- scrollby + selected_bounds.Bottom - this.Bounds.Bottom + Style.padding
+                scrollby <- scrollby + selected_bounds.Bottom - this.Bounds.Bottom + Style.PADDING
             elif this.Bounds.Top > selected_bounds.Top then
-                scrollby <- scrollby - this.Bounds.Top + selected_bounds.Top - Style.padding
+                scrollby <- scrollby - this.Bounds.Top + selected_bounds.Top - Style.PADDING
 
         let moved = 
             if scrollby <> 0.0f || refresh then

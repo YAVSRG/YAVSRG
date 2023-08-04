@@ -66,23 +66,8 @@ module ColorExtensions =
         
 module Style =
         
-    let padding = 5.0f
+    let PADDING = 5.0f
     let mutable font = Unchecked.defaultof<SpriteFont>
-    let accentColor = Animation.Color Color.Blue
-    let changePrimaryColor col = accentColor.Target <- col
-        
-    let color (alpha, brightness, white) =
-        let accentColor = accentColor.Value
-        let r = float32 accentColor.R
-        let g = float32 accentColor.G
-        let b = float32 accentColor.B
-        let rd = (255.0f - r * brightness) * white
-        let gd = (255.0f - g * brightness) * white
-        let bd = (255.0f - b * brightness) * white
-        Color.FromArgb(alpha,
-            int ((r + rd) * brightness) |> min 255,
-            int ((g + gd) * brightness) |> min 255,
-            int ((b + bd) * brightness) |> min 255)
 
 type PaletteColor =
     {
@@ -99,6 +84,22 @@ type PaletteColor =
 
 module Palette =
     
+    let accentColor = Animation.Color Color.Blue
+    let changePrimaryColor col = accentColor.Target <- col
+        
+    let color (alpha, brightness, white) =
+        let accentColor = accentColor.Value
+        let r = float32 accentColor.R
+        let g = float32 accentColor.G
+        let b = float32 accentColor.B
+        let rd = (255.0f - r * brightness) * white
+        let gd = (255.0f - g * brightness) * white
+        let bd = (255.0f - b * brightness) * white
+        Color.FromArgb(alpha,
+            int ((r + rd) * brightness) |> min 255,
+            int ((g + gd) * brightness) |> min 255,
+            int ((b + bd) * brightness) |> min 255)
+
     let WHITE = { Alpha = 255; Brightness = 1f; White = 1f }
 
     let DARKER = { Alpha = 255; Brightness = 0.25f; White = 0.15f }
@@ -116,13 +117,13 @@ module Palette =
     let transition (f: Animation.Fade) (a: PaletteColor) (b: PaletteColor) =
         fun () -> 
             let p = a.Lerp b f.Value
-            Style.color (p.Alpha, p.Brightness, p.White)
+            color (p.Alpha, p.Brightness, p.White)
 
     let text (a: unit -> Color) (b: unit -> Color) = fun () -> (a(), b())
 
 [<AutoOpen>]
 module PaletteOperators =
 
-    let (!%) (p: PaletteColor) = fun () -> Style.color (p.Alpha, p.Brightness, p.White)
+    let (!%) (p: PaletteColor) = fun () -> Palette.color (p.Alpha, p.Brightness, p.White)
     
-    let (!*) (p: PaletteColor) = Style.color (p.Alpha, p.Brightness, p.White)
+    let (!*) (p: PaletteColor) = Palette.color (p.Alpha, p.Brightness, p.White)

@@ -19,7 +19,7 @@ type Root() =
     default this.Init() =
         this.Bounds <- Viewport.bounds
         this.VisibleBounds <- Viewport.bounds
-        ROOT_ANIMATION.Add(Style.accentColor)
+        ROOT_ANIMATION.Add Palette.accentColor
 
     override this.FocusTree = []
 

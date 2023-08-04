@@ -89,13 +89,13 @@ type Frame(nodeType) =
         let border = this.Border()
         if border.A > 0uy then
 
-            let r = this.Bounds.Expand Style.padding
-            Draw.rect (r.SliceLeft Style.padding) border
-            Draw.rect (r.SliceRight Style.padding) border
+            let r = this.Bounds.Expand Style.PADDING
+            Draw.rect (r.SliceLeft Style.PADDING) border
+            Draw.rect (r.SliceRight Style.PADDING) border
 
-            let r = this.Bounds.Expand (0.0f, Style.padding)
-            Draw.rect (r.SliceTop Style.padding) border
-            Draw.rect (r.SliceBottom Style.padding) border
+            let r = this.Bounds.Expand (0.0f, Style.PADDING)
+            Draw.rect (r.SliceTop Style.PADDING) border
+            Draw.rect (r.SliceBottom Style.PADDING) border
 
         let fill = this.Fill()
         if fill.A > 0uy then
