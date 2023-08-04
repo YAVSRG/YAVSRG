@@ -171,7 +171,7 @@ module Tree =
 
             // draw base
             let accent = Style.color(80 + int (hover.Value * 40.0f), 1.0f, 0.4f)
-            Draw.rect bounds (if this.Selected then Style.main 80 () else Colors.shadow_1.O2)
+            Draw.rect bounds (if this.Selected then !*Palette.MAIN_100 else Colors.shadow_1.O2)
             let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
             Draw.quad
                 (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
@@ -185,7 +185,7 @@ module Tree =
 
             // draw pbs
             let disp (data: 'T * float32 * Color * string) (pos: float32) =
-                let value, rate, color, formatted = data
+                let _, rate, color, formatted = data
                 let rateLabel = sprintf "(%.2fx)" rate
                 if color.A > 0uy then
                     Draw.rect( Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom) ) accent
@@ -200,7 +200,7 @@ module Tree =
             Draw.rect (bounds.SliceBottom 25.0f) Colors.shadow_1.O1
             Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Colors.text)
             Text.drawB(Style.baseFont, sprintf "%s  •  %s" cc.Artist cc.Creator, 18.0f, left + 5f, top + 34.0f, Colors.text_subheading)
-            // todo: option to show subtitle if exists, otherwise difficulty name
+            // todo: option between subtitle preference, source preference and just always showing difficulty name
             Text.drawB(Style.baseFont, cc.Subtitle |> Option.defaultValue cc.DifficultyName, 15.0f, left + 5f, top + 65.0f, Colors.text_subheading)
             Text.drawJustB(Style.baseFont, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 

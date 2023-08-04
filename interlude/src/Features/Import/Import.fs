@@ -22,7 +22,7 @@ type private TabButton(icon: string, name: string, container: SwapContainer, tar
         |+ Frame(NodeType.None,
             Border = fun () -> if container.Current = target then Color.White else Color.Transparent
             ,
-            Fill = fun () -> if this.Focused then Style.main 100 () else Style.dark 100 ())
+            Fill = fun () -> if this.Focused then !*Palette.MAIN_100 else !*Palette.DARK_100)
         |* button
 
 type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Service<'Request, 'Result>) =

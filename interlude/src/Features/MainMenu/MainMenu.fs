@@ -27,8 +27,8 @@ type private MenuButton(onClick, label: string, pos) as this =
         this.Position <- pos
 
     override this.Draw() =
-        Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf (Style.highlight 100 ())) Sprite.DefaultQuad
-        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf (Style.main 120 ())) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf !*Palette.HIGHLIGHT_100) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf !*Palette.MAIN_100) Sprite.DefaultQuad
         base.Draw()
 
     member this.Pop() =
@@ -70,7 +70,7 @@ type MainMenuScreen() as this =
             let b = StylishButton(
                 Wiki.show_changelog,
                 K (Icons.star + " " + L"menu.changelog"),
-                Style.main 100,
+                !%Palette.MAIN_100,
                 TiltRight = false,
                 Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-300.0f, -50.0f) )
             let c = b.TextColor
@@ -80,7 +80,7 @@ type MainMenuScreen() as this =
         |* StylishButton(
             (fun () -> openUrl("https://discord.gg/tA22tWR")),
             K (Icons.comment + " " + L"menu.discord"),
-            Style.dark 100,
+            !%Palette.DARK_100,
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-625.0f, -50.0f) )
         
     override this.OnEnter prev =

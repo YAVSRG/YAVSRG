@@ -75,7 +75,7 @@ type private ActionButton(icon, action, active) =
     override this.Draw() =
          let area = this.Bounds.SliceTop(this.Bounds.Height + 5.0f)
          let isActive = active()
-         Draw.rect area (Style.main 100 ())
+         Draw.rect area !*Palette.MAIN_100
          Text.drawFillB(
             Style.baseFont,
             icon,
@@ -114,5 +114,5 @@ type ActionBar(random_chart) =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect this.Bounds (Style.dark 100 ())
+        Draw.rect this.Bounds !*Palette.DARK_100
         base.Draw()

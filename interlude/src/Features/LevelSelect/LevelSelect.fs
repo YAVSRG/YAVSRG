@@ -94,7 +94,7 @@ type LevelSelectScreen() =
         let { Rect.Left = left; Top = top; Right = right } = this.Bounds
         Draw.quad
             ( Quad.create <| Vector2(left, top) <| Vector2(left + w + 85.0f, top) <| Vector2(left + w, top + 170.0f) <| Vector2(left, top + 170.0f) )
-            (Quad.colorOf (Style.dark 120 ())) Sprite.DefaultQuad
+            (Quad.colorOf !*Palette.DARK_100) Sprite.DefaultQuad
         Draw.rect (this.Bounds.SliceTop(170.0f).SliceLeft(w).Shrink(20.0f)) (Colors.shadow_2.O2)
 
         Draw.quad

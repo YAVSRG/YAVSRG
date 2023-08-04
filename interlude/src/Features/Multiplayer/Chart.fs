@@ -122,7 +122,7 @@ type SelectedChart() =
                 (fun () -> 
                     if Network.lobby.Value.Spectate then sprintf "%s %s" Icons.preview (L"lobby.spectator")
                     else sprintf "%s %s" Icons.play (L"lobby.player")),
-                Style.main 100,
+                !%Palette.MAIN_100,
                 Position = { Position.SliceBottom(50.0f) with Right = 0.5f %- 25.0f })
             )
 
@@ -137,7 +137,7 @@ type SelectedChart() =
                         Transitions.Flags.Default
                 ),
                 K (sprintf "%s %s" Icons.preview (L"lobby.spectate")),
-                Style.dark 100,
+                !%Palette.DARK_100,
                 TiltRight = false,
                 Position = { Position.SliceBottom(50.0f) with Left = 0.5f %- 0.0f })
             )
@@ -164,7 +164,7 @@ type SelectedChart() =
                                 sprintf "%s %s" Icons.ready (L"lobby.ready")
                         | _ -> sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")
                     | None -> "!"),
-                Style.dark 100,
+                !%Palette.DARK_100,
                 TiltRight = false,
                 Position = { Position.SliceBottom(50.0f) with Left = 0.5f %- 0.0f })
             )
@@ -181,7 +181,7 @@ type SelectedChart() =
                 (fun () -> 
                     if Network.lobby.Value.Countdown then sprintf "%s %s" Icons.connection_failed (L"lobby.cancel_game")
                     else sprintf "%s %s" Icons.play (L"lobby.start_game")),
-                Style.main 100,
+                !%Palette.MAIN_100,
                 Position = { Position.SliceBottom(50.0f) with Right = 0.5f %- 25.0f }
             )
         )
@@ -193,8 +193,8 @@ type SelectedChart() =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.SliceTop(70.0f)) (if SelectedChart.found then Style.dark 180 () else Color.FromArgb(180, 100, 100, 100))
-        Draw.rect (this.Bounds.SliceTop(100.0f).SliceBottom(30.0f)) (if SelectedChart.found then Style.darkD 180 () else Color.FromArgb(180, 50, 50, 50))
-        Draw.rect (this.Bounds.SliceTop(100.0f).SliceLeft(5.0f)) (if SelectedChart.found then Style.main 255 () else Colors.white)
+        Draw.rect (this.Bounds.SliceTop(70.0f)) (if SelectedChart.found then (!*Palette.DARK).O4a 180 else Color.FromArgb(180, 100, 100, 100))
+        Draw.rect (this.Bounds.SliceTop(100.0f).SliceBottom(30.0f)) (if SelectedChart.found then (!*Palette.DARKER).O4a 180 else Color.FromArgb(180, 50, 50, 50))
+        Draw.rect (this.Bounds.SliceTop(100.0f).SliceLeft(5.0f)) (if SelectedChart.found then !*Palette.MAIN else Colors.white)
 
         base.Draw()

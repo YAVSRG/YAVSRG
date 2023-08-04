@@ -77,9 +77,8 @@ module Scoreboard =
         let animation = Animation.seq [Animation.Delay 150; fade]
 
         do
-            this.Fill <- fun () -> if this.Focused then Colors.yellow_accent.O1a fade.Alpha else Style.color (int (150.0f * fade.Value), 0.5f, 0.2f)
-            this.Border <- fun () -> if this.Focused then Colors.yellow_accent.O4a fade.Alpha else Style.highlightL (int (150.0f * fade.Value)) ()
-
+            this.Fill <- fun () -> if this.Focused then Colors.yellow_accent.O1a fade.Alpha else (!*Palette.DARK).O2a fade.Alpha
+            this.Border <- fun () -> if this.Focused then Colors.yellow_accent.O4a fade.Alpha else (!*Palette.LIGHT).O2a fade.Alpha
             ignore data.Physical
             ignore data.Lamp
 
@@ -216,7 +215,7 @@ type Scoreboard() as this =
         |+ StylishButton(
             this.Refresh,
             K <| Localisation.localise "levelselect.scoreboard.storage.local",
-            Style.main 100,
+            !%Palette.MAIN_100,
             Hotkey = "scoreboard_storage",
             TiltLeft = false,
             Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.33f %- 25.0f; Bottom = 0.0f %+ 50.0f })
@@ -229,7 +228,7 @@ type Scoreboard() as this =
                 Sort.Time, L"levelselect.scoreboard.sort.time"
             |],
             sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
-            Style.dark 100,
+            !%Palette.DARK_100,
             Hotkey = "scoreboard_sort",
             Position = { Left = 0.33f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.66f %- 25.0f; Bottom = 0.0f %+ 50.0f })
             .Tooltip(Tooltip.Info("levelselect.scoreboard.sort", "scoreboard_sort"))
@@ -241,7 +240,7 @@ type Scoreboard() as this =
                 Filter.CurrentMods, L"levelselect.scoreboard.filter.currentmods"
             |],
             filter |> Setting.trigger (fun _ -> this.Refresh()),
-            Style.main 100,
+            !%Palette.MAIN_100,
             Hotkey = "scoreboard_filter",
             TiltRight = false,
             Position = { Left = 0.66f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 50.0f })

@@ -76,7 +76,7 @@ type ChartInfo() as this =
         |+ StylishButton(
             (fun () -> match Chart.current with Some c -> Preview(c, changeRate).Show() | None -> ()),
             K (Icons.preview + " " + L"levelselect.preview.name"),
-            Style.main 100,
+            !%Palette.MAIN_100,
             Hotkey = "preview",
             TiltLeft = false,
             Position = { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.33f %- 25.0f; Bottom = 1.0f %- 0.0f })

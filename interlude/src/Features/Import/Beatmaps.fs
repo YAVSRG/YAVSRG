@@ -143,13 +143,13 @@ type private SortingDropdown(options: (string * string) seq, label: string, sett
         |+ StylishButton(
             ( fun () -> this.ToggleDropdown() ),
             K (label + ":"),
-            Style.highlight 100,
+            !%Palette.HIGHLIGHT_100,
             Hotkey = bind,
             Position = Position.SliceLeft 120.0f)
         |* StylishButton(
             ( fun () -> reverse.Value <- not reverse.Value ),
             ( fun () -> sprintf "%s %s" displayValue (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
-            Style.dark 100,
+            !%Palette.DARK_100,
             TiltRight = false,
             Position = Position.TrimLeft 145.0f )
         base.Init parent

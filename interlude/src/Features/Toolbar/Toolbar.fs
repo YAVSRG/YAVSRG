@@ -112,8 +112,8 @@ type Toolbar() =
 
     override this.Draw() = 
         let { Rect.Left = l; Top = t; Right = r; Bottom = b } = this.Bounds
-        Draw.rect (Rect.Create(l, t, r, t + HEIGHT)) (Style.main 100 ())
-        Draw.rect (Rect.Create(l, b - HEIGHT, r, b)) (Style.main 100 ())
+        Draw.rect (Rect.Create(l, t, r, t + HEIGHT)) !*Palette.MAIN_100
+        Draw.rect (Rect.Create(l, b - HEIGHT, r, b)) !*Palette.MAIN_100
         if expandAmount.Value > 0.01f then
             let s = this.Bounds.Width / 48.0f
             for i in 0 .. 47 do

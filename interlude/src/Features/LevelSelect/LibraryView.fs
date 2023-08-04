@@ -23,13 +23,13 @@ type private ModeDropdown(options: (string * string) seq, label: string, setting
         |+ StylishButton(
             ( fun () -> this.ToggleDropdown() ),
             K (label + ":"),
-            Style.highlight 100,
+            !%Palette.HIGHLIGHT_100,
             Hotkey = bind,
             Position = Position.SliceLeft 120.0f)
         |* StylishButton(
             ( fun () -> reverse.Value <- not reverse.Value ),
             ( fun () -> sprintf "%s %s" displayValue (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
-            Style.dark 100,
+            !%Palette.DARK_100,
             Position = Position.TrimLeft 145.0f )
         base.Init parent
 
@@ -73,7 +73,7 @@ type LibraryModeSettings() =
         StylishButton(
             (fun () -> Menu.ShowPage SelectCollectionPage.Editor),
             K (sprintf "%s %s" Icons.collections (L"levelselect.collections.name")),
-            Style.main 100,
+            !%Palette.MAIN_100,
             Hotkey = "group_mode"
         ).Tooltip(Tooltip.Info("levelselect.collections", "group_mode"))
         
@@ -81,7 +81,7 @@ type LibraryModeSettings() =
         StylishButton(
             (fun () -> Menu.ShowPage ManageTablesPage),
             K (sprintf "%s %s" Icons.edit (L"levelselect.table.name")),
-            Style.main 100,
+            !%Palette.MAIN_100,
             Hotkey = "group_mode"
         ).Tooltip(Tooltip.Info("levelselect.table", "group_mode"))
 
@@ -104,7 +104,7 @@ type LibraryModeSettings() =
                 LibraryMode.Table, L"levelselect.librarymode.table"
             |],
             options.LibraryMode |> Setting.trigger (fun _ -> LevelSelect.refresh_all(); update_swap()),
-            Style.dark 100,
+            !%Palette.DARK_100,
             Hotkey = "library_mode",
             Position = { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f })
             .Tooltip(Tooltip.Info("levelselect.librarymode", "library_mode"))

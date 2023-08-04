@@ -59,7 +59,7 @@ module Rulesets =
             |* StylishButton(
                 ( fun () -> this.ToggleDropdown() ),
                 ( fun () -> Rulesets.current.Name ),
-                Style.main 100,
+                !%Palette.MAIN_100,
                 TiltRight = false,
                 Hotkey = "ruleset_switch")
             base.Init parent

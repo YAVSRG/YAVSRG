@@ -64,7 +64,7 @@ type Lobby() =
         |+ StylishButton(
                 (fun () -> if Network.lobby.IsSome && SelectedChart.chart.IsSome && SelectedChart.found then Preview(Gameplay.Chart.current.Value, ignore).Show()),
                 K (sprintf "%s %s" Icons.preview (L"levelselect.preview.name")),
-                Style.main 100,
+                !%Palette.MAIN_100,
                 TiltLeft = false,
                 Hotkey = "preview",
                 Position = { Position.SliceBottom(50.0f) with Right = (0.4f / 3f) %- 25.0f }
@@ -72,7 +72,7 @@ type Lobby() =
         |+ StylishButton(
                 ignore,
                 K (sprintf "%s %s" Icons.mods (L"levelselect.mods.name")),
-                Style.dark 100,
+                !%Palette.DARK_100,
                 Hotkey = "mods",
                 Position = { Position.SliceBottom(50.0f) with Left = (0.4f / 3f) %- 0.0f; Right = (0.4f / 1.5f) %- 25.0f }
             ).Tooltip(Tooltip.Info("levelselect.mods"))
