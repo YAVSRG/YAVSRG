@@ -1,8 +1,8 @@
 ﻿namespace Percyqaz.Flux.UI
 
-open Percyqaz.Common
 open Percyqaz.Flux.Utils
 open Percyqaz.Flux.Graphics.Fonts
+open Percyqaz.Flux.Audio
 
 open System.Drawing
 
@@ -68,6 +68,12 @@ module Style =
         
     let PADDING = 5.0f
     let mutable font = Unchecked.defaultof<SpriteFont>
+
+    let mutable hover = SoundEffect.Default
+    let mutable click = SoundEffect.Default
+    let mutable text_open = SoundEffect.Default
+    let mutable text_close = SoundEffect.Default
+    let mutable key = SoundEffect.Default
 
 type PaletteColor =
     {

@@ -147,7 +147,7 @@ type SoundEffect =
         let channel = Bass.SampleGetChannel(id)
         { ID = id; ChannelID = channel }
     member this.Free() = if this.ID <> 0 then Bass.SampleFree this.ID |> bassError
-    member this.Default = { ID = 0; ChannelID = 0 }
+    static member Default = { ID = 0; ChannelID = 0 }
 
 module SoundEffect =
 
