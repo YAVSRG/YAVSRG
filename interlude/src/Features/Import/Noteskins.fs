@@ -56,7 +56,7 @@ type NoteskinCard(data: RepoEntry) as this =
             Draw.sprite img_bounds (Colors.white.O4a imgFade.Alpha) p
         | None -> ()
         Text.drawFillB(
-            Style.baseFont, 
+            Style.font, 
             (
                 match status with
                 | NotDownloaded -> Icons.download + " Download"

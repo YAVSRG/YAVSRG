@@ -90,8 +90,8 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 Draw.rect(Rect.Box(x - HTHICKNESS, this.Bounds.Top + y - HTHICKNESS, THICKNESS, THICKNESS)) col
 
         // early/late
-        Text.draw(Style.baseFont, "Early", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 33.0f, Colors.white.O3)
-        Text.draw(Style.baseFont, "Late", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 3.0f, Colors.white.O3)
+        Text.draw(Style.font, "Early", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 33.0f, Colors.white.O3)
+        Text.draw(Style.font, "Late", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 3.0f, Colors.white.O3)
 
         fbo.Unbind()
 
@@ -110,7 +110,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
             let box_h = this.Bounds.Height - 80.0f
             let box = Rect.Box(this.Bounds.Left + 40.0f + pc * (this.Bounds.Width - 200.0f - 80.0f), this.Bounds.Top + 40.0f, 200.0f, box_h)
             Draw.rect box Colors.shadow_2.O2
-            Text.drawFillB(Style.baseFont, (if ss.MaxPointsScored = 0.0 then 100.0 else 100.0 * ss.PointsScored / ss.MaxPointsScored) |> sprintf "%.2f%%", box.SliceTop(box_h * 0.5f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
-            Text.drawFillB(Style.baseFont, ss.Combo |> sprintf "%ix", box.TrimTop(box_h * 0.5f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
+            Text.drawFillB(Style.font, (if ss.MaxPointsScored = 0.0 then 100.0 else 100.0 * ss.PointsScored / ss.MaxPointsScored) |> sprintf "%.2f%%", box.SliceTop(box_h * 0.5f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
+            Text.drawFillB(Style.font, ss.Combo |> sprintf "%ix", box.TrimTop(box_h * 0.5f).Expand(-20.0f, -5.0f), Colors.text, Alignment.LEFT)
 
     member this.Dispose() = fbo.Dispose()

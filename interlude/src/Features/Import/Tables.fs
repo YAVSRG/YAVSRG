@@ -122,7 +122,7 @@ type TableCard(id: string, table: Table) as this =
         base.Draw()
         Draw.rect (this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(20.0f, 0.0f)) Colors.shadow_2.O2
         Text.drawFillB(
-            Style.baseFont, 
+            Style.font, 
             (
                 match status with
                 | InstallingCharts -> Icons.download + " Installing charts"

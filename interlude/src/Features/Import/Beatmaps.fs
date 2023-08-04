@@ -94,17 +94,17 @@ type private BeatmapImportCard(data: BeatmapData) as this =
         | Downloading -> Draw.rect (this.Bounds.SliceLeft(this.Bounds.Width * progress)) Colors.white.O1
         | _ -> ()
 
-        Text.drawFillB(Style.baseFont, data.title, this.Bounds.SliceTop(50.0f).Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
-        Text.drawFillB(Style.baseFont, data.artist + "  •  " + data.mapper, this.Bounds.SliceBottom(45.0f).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.LEFT)
+        Text.drawFillB(Style.font, data.title, this.Bounds.SliceTop(50.0f).Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
+        Text.drawFillB(Style.font, data.artist + "  •  " + data.mapper, this.Bounds.SliceBottom(45.0f).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.LEFT)
 
         let status_bounds = this.Bounds.SliceBottom(40.0f).SliceRight(150.0f).Shrink(5.0f, 0.0f)
         Draw.rect status_bounds Colors.shadow_2.O2
-        Text.drawFillB(Style.baseFont, ranked_status, status_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), (border, Colors.shadow_2), Alignment.CENTER)
+        Text.drawFillB(Style.font, ranked_status, status_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), (border, Colors.shadow_2), Alignment.CENTER)
 
         let stat x text =
             let stat_bounds = this.Bounds.SliceBottom(40.0f).TrimRight(x).SliceRight(145.0f)
             Draw.rect stat_bounds Colors.shadow_2.O2
-            Text.drawFillB(Style.baseFont, text, stat_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), Colors.text_subheading, Alignment.CENTER)
+            Text.drawFillB(Style.font, text, stat_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), Colors.text_subheading, Alignment.CENTER)
 
         stat 150.0f (sprintf "%s %i" Icons.heart data.favorites)
         stat 300.0f (sprintf "%s %i" Icons.play data.play_count)
@@ -113,7 +113,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
         let download_bounds = this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(5.0f, 0.0f)
         Draw.rect download_bounds Colors.shadow_2.O2
         Text.drawFillB(
-            Style.baseFont, 
+            Style.font, 
             (
                 match status with
                 | NotDownloaded -> Icons.download + " Download"

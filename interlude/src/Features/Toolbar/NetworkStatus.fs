@@ -25,13 +25,13 @@ type NetworkStatus() =
             | Network.LoggedIn -> Icons.connected + "  " + Network.username, Colors.green_accent
 
         Draw.rect area (Colors.shadow_1.O2)
-        Text.drawFillB(Style.baseFont, text, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)
-        if Network.credentials.Host = "localhost" then Text.drawFillB(Style.baseFont, "LOCALHOST", this.Bounds.SliceBottom(20.0f), Colors.text, Alignment.CENTER)
+        Text.drawFillB(Style.font, text, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)
+        if Network.credentials.Host = "localhost" then Text.drawFillB(Style.font, "LOCALHOST", this.Bounds.SliceBottom(20.0f), Colors.text, Alignment.CENTER)
 
         if Screen.currentType <> Screen.Type.Lobby && Network.lobby.IsSome then
             let area = area.Translate(-300.0f, 0.0f)
             Draw.rect area (Colors.shadow_1.O2)
-            Text.drawFillB(Style.baseFont, Icons.multiplayer + "  In a lobby", area.Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.CENTER)
+            Text.drawFillB(Style.font, Icons.multiplayer + "  In a lobby", area.Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.CENTER)
 
         match this.Dropdown with
         | Some d -> d.Draw()

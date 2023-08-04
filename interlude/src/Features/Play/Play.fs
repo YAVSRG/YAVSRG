@@ -133,7 +133,7 @@ module PlayScreen =
             override this.Draw() =
                 base.Draw()
                 if options.AutoCalibrateOffset.Value && this.State.CurrentChartTime() < 0.0f<ms> then
-                    Text.drawB(Style.baseFont, sprintf "Local offset: %.0fms" AutomaticSync.offset.Value, 20.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 20.0f, Colors.text_subheading)
+                    Text.drawB(Style.font, sprintf "Local offset: %.0fms" AutomaticSync.offset.Value, 20.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 20.0f, Colors.text_subheading)
         }
 
     let multiplayer_screen() =

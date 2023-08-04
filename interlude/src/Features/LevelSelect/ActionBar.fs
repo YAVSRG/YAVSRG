@@ -77,7 +77,7 @@ type private ActionButton(icon, action, active) =
          let isActive = active()
          Draw.rect area !*Palette.MAIN_100
          Text.drawFillB(
-            Style.baseFont,
+            Style.font,
             icon,
             area.Shrink(10.0f, 5.0f),
             ((if isActive then Colors.pink_accent elif this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2),

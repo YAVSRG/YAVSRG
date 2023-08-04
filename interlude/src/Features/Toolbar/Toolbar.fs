@@ -35,7 +35,7 @@ type ToolbarButton(label, action, icon) =
          let area = this.Bounds.TrimBottom(15.0f)
          let text = sprintf "%s %s" (if this.Focused then this.HoverIcon else icon) label
          Draw.rect area (Colors.shadow_1.O2)
-         Text.drawFillB(Style.baseFont, text, area.Shrink(10.0f, 5.0f), ((if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2), Alignment.CENTER)
+         Text.drawFillB(Style.font, text, area.Shrink(10.0f, 5.0f), ((if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2), Alignment.CENTER)
 
 type Toolbar() =
     inherit Widget(NodeType.None)

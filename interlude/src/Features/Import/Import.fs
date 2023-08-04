@@ -57,8 +57,8 @@ type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Servi
         let textColor =
             let x = 127 + fade.Alpha / 2
             Color.FromArgb(x, x, x)
-        Text.drawFill(Style.baseFont, icon, this.Bounds.SliceLeft this.Bounds.Height, iconColor, Alignment.CENTER)
-        Text.drawFill(Style.baseFont, name, this.Bounds.TrimLeft this.Bounds.Height, textColor, Alignment.LEFT)
+        Text.drawFill(Style.font, icon, this.Bounds.SliceLeft this.Bounds.Height, iconColor, Alignment.CENTER)
+        Text.drawFill(Style.font, name, this.Bounds.TrimLeft this.Bounds.Height, textColor, Alignment.LEFT)
 
 module ImportScreen =
 

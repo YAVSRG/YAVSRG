@@ -49,11 +49,11 @@ module Callout =
             | CalloutContent.Header text -> 
                 let size = header_size c.IsSmall
                 height <- height + size
-                width <- max width (Text.measure (Style.baseFont, text) * size)
+                width <- max width (Text.measure (Style.font, text) * size)
             | CalloutContent.Body xs ->
                 let size = text_size c.IsSmall
                 height <- height + (float32 xs.Length * size) + (float32 (xs.Length - 1) * text_spacing c.IsSmall)
-                for x in xs do width <- max width (Text.measure (Style.baseFont, x) * size)
+                for x in xs do width <- max width (Text.measure (Style.font, x) * size)
             | CalloutContent.Hotkey _ -> height <- height + text_size c.IsSmall
             | CalloutContent.Button _ -> height <- height + spacing * 3.0f + text_size c.IsSmall
             height <- height + spacing
@@ -69,7 +69,7 @@ module Callout =
             match c._Icon with
             | Some i ->
                 let icon_size = min (if c.IsSmall then 30.0f else 50.0f) height
-                Text.drawB(Style.baseFont, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.7f, col)
+                Text.drawB(Style.font, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.7f, col)
                 x + icon_size + x_padding * 2.0f, width - icon_size - x_padding * 3.0f
             | None -> x + x_padding, width - x_padding * 2.0f
         let spacing = spacing c.IsSmall
@@ -79,13 +79,13 @@ module Callout =
             match b with
             | CalloutContent.Header s ->
                 let size = header_size c.IsSmall
-                Text.drawB(Style.baseFont, s, size, x, y, col)
+                Text.drawB(Style.font, s, size, x, y, col)
                 y <- y + size
             | CalloutContent.Body xs ->
                 let size = text_size c.IsSmall
                 let tspacing = text_spacing c.IsSmall
                 for line in xs do
-                    Text.drawB(Style.baseFont, line, size, x, y, col)
+                    Text.drawB(Style.font, line, size, x, y, col)
                     y <- y + size
                     y <- y + tspacing
                 y <- y - tspacing
@@ -93,7 +93,7 @@ module Callout =
                 let size = text_size c.IsSmall
                 let text = sprintf "%s: %O" (Option.defaultValue default_hotkey_text desc) (!|hk)
                 Text.drawB(
-                    Style.baseFont,
+                    Style.font,
                     text,
                     size, x, y,
                     (Colors.cyan_accent.O4a a, Colors.shadow_2.O4a a))
@@ -105,7 +105,7 @@ module Callout =
                 let bounds = Rect.Box(x, y, width, buttonSize)
                 Draw.rect bounds (Colors.shadow_2.O2a a)
                 let text_col = if bounds.Contains(Mouse.pos()) then (Colors.yellow_accent.O4a a, Colors.shadow_2.O4a a) else col
-                Text.drawJustB(Style.baseFont, label, tsize, x + width * 0.5f, y + buttonSize * 0.5f - tsize * 0.8f, text_col, Alignment.CENTER)
+                Text.drawJustB(Style.font, label, tsize, x + width * 0.5f, y + buttonSize * 0.5f - tsize * 0.8f, text_col, Alignment.CENTER)
                 y <- y + buttonSize
             y <- y + spacing
 

@@ -128,7 +128,7 @@ and Menu(topLevel: Page) as this =
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
             stack.[i].Value.Draw()
             i <- i + 1
-        Text.drawFillB(Style.baseFont, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Colors.text, 0.0f)
+        Text.drawFillB(Style.font, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Colors.text, 0.0f)
     
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)

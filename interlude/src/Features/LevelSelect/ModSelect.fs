@@ -37,7 +37,7 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
         Draw.rect (this.Bounds.SliceTop(TOP_HEIGHT)) (if state >= 0 then Colors.pink.O3 else Colors.shadow_2.O3)
         Draw.rect (this.Bounds.TrimTop(TOP_HEIGHT)) (if state >= 0 then Colors.pink_shadow.O3 else Colors.black.O3)
 
-        if state >= 0 then Text.drawFillB(Style.baseFont, states.[state], this.Bounds.SliceTop(TOP_HEIGHT).Shrink(20.0f, 0.0f), Colors.text, Alignment.RIGHT)
+        if state >= 0 then Text.drawFillB(Style.font, states.[state], this.Bounds.SliceTop(TOP_HEIGHT).Shrink(20.0f, 0.0f), Colors.text, Alignment.RIGHT)
         base.Draw()
 
 type private ModSelectPage(onClose) as this =

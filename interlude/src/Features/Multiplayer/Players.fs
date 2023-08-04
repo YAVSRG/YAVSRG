@@ -53,8 +53,8 @@ type Player(name: string, player: Network.LobbyPlayer) =
 
         Draw.rect this.Bounds fill.O3
 
-        Text.drawFillB(Style.baseFont, name, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
-        Text.drawFillB(Style.baseFont, icon, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.RIGHT)
+        Text.drawFillB(Style.font, name, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
+        Text.drawFillB(Style.font, icon, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.RIGHT)
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
@@ -105,7 +105,7 @@ type PlayerList() =
 
         Draw.rect user_bounds fill.O3
 
-        Text.drawFillB(Style.baseFont, Network.username, user_bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
-        Text.drawFillB(Style.baseFont, (if (match Network.lobby with Some l -> l.YouAreHost | None -> false) then Icons.star + " Host" else ""), user_bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.RIGHT)
+        Text.drawFillB(Style.font, Network.username, user_bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
+        Text.drawFillB(Style.font, (if (match Network.lobby with Some l -> l.YouAreHost | None -> false) then Icons.star + " Host" else ""), user_bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.RIGHT)
 
         base.Draw()

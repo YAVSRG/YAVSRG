@@ -189,8 +189,8 @@ module Tree =
                 let rateLabel = sprintf "(%.2fx)" rate
                 if color.A > 0uy then
                     Draw.rect( Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom) ) accent
-                    Text.drawJustB(Style.baseFont, formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
-                    Text.drawJustB(Style.baseFont, rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
+                    Text.drawJustB(Style.font, formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
+                    Text.drawJustB(Style.font, rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
         
             if personal_bests.IsSome then
                 disp grade.Value 290.0f
@@ -198,15 +198,15 @@ module Tree =
 
             // draw text
             Draw.rect (bounds.SliceBottom 25.0f) Colors.shadow_1.O1
-            Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Colors.text)
-            Text.drawB(Style.baseFont, sprintf "%s  •  %s" cc.Artist cc.Creator, 18.0f, left + 5f, top + 34.0f, Colors.text_subheading)
+            Text.drawB(Style.font, cc.Title, 23.0f, left + 5f, top, Colors.text)
+            Text.drawB(Style.font, sprintf "%s  •  %s" cc.Artist cc.Creator, 18.0f, left + 5f, top + 34.0f, Colors.text_subheading)
             // todo: option between subtitle preference, source preference and just always showing difficulty name
-            Text.drawB(Style.baseFont, cc.Subtitle |> Option.defaultValue cc.DifficultyName, 15.0f, left + 5f, top + 65.0f, Colors.text_subheading)
-            Text.drawJustB(Style.baseFont, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
+            Text.drawB(Style.font, cc.Subtitle |> Option.defaultValue cc.DifficultyName, 15.0f, left + 5f, top + 65.0f, Colors.text_subheading)
+            Text.drawJustB(Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
             if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
                 Draw.rect bounds (Style.color(Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
-                Text.drawFillB(Style.baseFont, chartData.Value.Comment, bounds.Shrink(30.0f, 15.0f), (Colors.white.O4a Comments.fade.Alpha, Colors.shadow_1.O4a Comments.fade.Alpha), Alignment.CENTER)
+                Text.drawFillB(Style.font, chartData.Value.Comment, bounds.Shrink(30.0f, 15.0f), (Colors.white.O4a Comments.fade.Alpha, Colors.shadow_1.O4a Comments.fade.Alpha), Alignment.CENTER)
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
 
@@ -247,7 +247,7 @@ module Tree =
             Draw.rect (bounds.Translate(10.0f, 10.0f)) (Style.color(255, 0.2f, 0.0f))
             Background.draw (bounds, (Color.FromArgb(40, 40, 40)), 1.5f)
             Draw.rect bounds (if this.Selected then Style.color(120, 1.0f, 0.2f) else Style.color(100, 0.7f, 0.0f))
-            Text.drawFillB(Style.baseFont, name, bounds.Shrink 5.0f, Colors.text, 0.5f)
+            Text.drawFillB(Style.font, name, bounds.Shrink 5.0f, Colors.text, 0.5f)
 
         member this.Draw(top, origin, originB) =
             let b = this.CheckBounds(top, origin, originB, this.OnDraw)
@@ -261,7 +261,7 @@ module Tree =
                     p <- items.[index].Draw(p, origin, originB)
                     index <- index + 1
                 let b2 = b + float32 items.Count * h
-                if b < origin && b2 > origin then Text.drawJustB(Style.baseFont, name, 20.0f, Viewport.vwidth - 20f, origin + 10.0f, Colors.text, 1.0f)
+                if b < origin && b2 > origin then Text.drawJustB(Style.font, name, 20.0f, Viewport.vwidth - 20f, origin + 10.0f, Colors.text, 1.0f)
                 b2
             else b
 

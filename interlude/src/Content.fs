@@ -125,8 +125,8 @@ module Content =
                     Fonts.add font
                 for font in instance.GetFonts() do
                     Fonts.add font
-                if Style.baseFont <> null then Style.baseFont.Dispose()
-                Style.baseFont <- Fonts.create config.Font
+                if Style.font <> null then Style.font.Dispose()
+                Style.font <- Fonts.create config.Font
 
                 for id in Storage.themeTextures do
                     match instance.GetTexture id with

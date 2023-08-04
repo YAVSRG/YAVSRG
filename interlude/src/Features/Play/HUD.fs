@@ -123,7 +123,7 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
     override this.Draw() =
         if time > -Time.infinity then
             let a = 255 - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
-            Text.drawFill(Style.baseFont, state.Ruleset.JudgementName tier, this.Bounds, state.Ruleset.JudgementColor(tier).O4a a, Alignment.CENTER)
+            Text.drawFill(Style.font, state.Ruleset.JudgementName tier, this.Bounds, state.Ruleset.JudgementColor(tier).O4a a, Alignment.CENTER)
 
 type EarlyLateMeter(conf: HUD.EarlyLateMeter, state: PlayState) =
     inherit StaticWidget(NodeType.None)
@@ -147,7 +147,7 @@ type EarlyLateMeter(conf: HUD.EarlyLateMeter, state: PlayState) =
     override this.Draw() =
         if time > -Time.infinity then
             let a = 255 - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
-            Text.drawFill(Style.baseFont, (if early then conf.EarlyText else conf.LateText), this.Bounds, (if early then conf.EarlyColor else conf.LateColor).O4a a, Alignment.CENTER)
+            Text.drawFill(Style.font, (if early then conf.EarlyText else conf.LateText), this.Bounds, (if early then conf.EarlyColor else conf.LateColor).O4a a, Alignment.CENTER)
 
 type ComboMeter(conf: HUD.Combo, state: PlayState) =
     inherit StaticWidget(NodeType.None)
@@ -173,7 +173,7 @@ type ComboMeter(conf: HUD.Combo, state: PlayState) =
     override this.Draw() =
         let combo = state.Scoring.State.CurrentCombo
         let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
-        Text.drawFill(Style.baseFont, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
+        Text.drawFill(Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
 
 type ProgressMeter(conf: HUD.ProgressMeter, state) =
     inherit StaticWidget(NodeType.None)
@@ -210,7 +210,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
                 sprintf "%i:%02i" (time_left / 60000.0f<ms> |> floor |> int) ((time_left % 60000.0f<ms>) / 1000.0f<ms> |> floor |> int)
             | HUD.ProgressMeterLabel.Percentage -> sprintf "%.0f%%" (pc * 100.0f)
             | _ -> ""
-        Text.drawFillB(Style.baseFont, text, this.Bounds.Expand(0.0f, 40.0f).SliceBottom(40.0f), Colors.text_subheading, Alignment.CENTER)
+        Text.drawFillB(Style.font, text, this.Bounds.Expand(0.0f, 40.0f).SliceBottom(40.0f), Colors.text_subheading, Alignment.CENTER)
 
 type SkipButton(conf: HUD.SkipButton, state) =
     inherit StaticWidget(NodeType.None)
@@ -229,7 +229,7 @@ type SkipButton(conf: HUD.SkipButton, state) =
         else active <- false
 
     override this.Draw() =
-        if active then Text.drawFillB(Style.baseFont, text, this.Bounds, Colors.text, Alignment.CENTER)
+        if active then Text.drawFillB(Style.font, text, this.Bounds, Colors.text, Alignment.CENTER)
 
 type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
     inherit StaticWidget(NodeType.None)
@@ -291,7 +291,7 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
         | PacemakerInfo.None -> ()
         | PacemakerInfo.Accuracy _
         | PacemakerInfo.Replay _ ->
-            Text.drawFillB(Style.baseFont, Icons.goal, this.Bounds.SliceLeft(0.0f).Expand(this.Bounds.Height, 0.0f).Translate(this.Bounds.Width * flag_position.Value, 0.0f), (color.Value, Color.Black), Alignment.CENTER)
+            Text.drawFillB(Style.font, Icons.goal, this.Bounds.SliceLeft(0.0f).Expand(this.Bounds.Height, 0.0f).Translate(this.Bounds.Width * flag_position.Value, 0.0f), (color.Value, Color.Black), Alignment.CENTER)
         | PacemakerInfo.Judgement (judgement, count) ->
             let actual = 
                 if judgement = -1 then state.Scoring.State.ComboBreaks
@@ -307,7 +307,7 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
                 if hearts > 5 then sprintf "%s x%i" (String.replicate 5 Icons.heart2) hearts
                 elif hearts > 0 then (String.replicate hearts Icons.heart2)
                 else Icons.failure
-            Text.drawFillB(Style.baseFont, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
+            Text.drawFillB(Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
 
 type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
     inherit StaticWidget(NodeType.None)
@@ -335,8 +335,8 @@ type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
             Draw.rect (r.Expand(10.0f, 5.0f).SliceLeft(5.0f)) j.Color
             if not judgementAnimations.[i].Complete && state.Scoring.State.Judgements.[i] > 0 then
                 Draw.rect (r.Expand 5.0f) (Color.FromArgb(127 - max 0 (int (127.0 * judgementAnimations.[i].Elapsed / conf.AnimationTime)), j.Color))
-            Text.drawFillB(Style.baseFont, j.Name, r, (Color.White, Color.Black), Alignment.LEFT)
-            Text.drawFillB(Style.baseFont, state.Scoring.State.Judgements.[i].ToString(), r, (Color.White, Color.Black), Alignment.RIGHT)
+            Text.drawFillB(Style.font, j.Name, r, (Color.White, Color.Black), Alignment.LEFT)
+            Text.drawFillB(Style.font, state.Scoring.State.Judgements.[i].ToString(), r, (Color.White, Color.Black), Alignment.RIGHT)
             r <- r.Translate(0.0f, h)
 
 type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
@@ -350,8 +350,8 @@ type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
         |> Seq.sortByDescending (fun (_, (s, _)) -> s.Value)
         |> Seq.iter (fun (username, (s, _)) ->
             let c = if username = Network.username then Color.SkyBlue else Color.White
-            Text.draw(Style.baseFont, username, 20.0f, x, y, c)
-            Text.drawJust(Style.baseFont, s.FormatAccuracy(), 20.0f, x - 10.0f, y, c, 1.0f)
+            Text.draw(Style.font, username, 20.0f, x, y, c)
+            Text.drawJust(Style.font, s.FormatAccuracy(), 20.0f, x - 10.0f, y, c, 1.0f)
             y <- y + 25.0f
         )
 

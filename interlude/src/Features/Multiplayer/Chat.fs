@@ -23,7 +23,7 @@ type Chat() =
     let current_message = Setting.simple ""
 
     let chat_msg(sender: string, message: string) =
-        let w = Text.measure(Style.baseFont, sender) * 0.6f * MESSAGE_HEIGHT
+        let w = Text.measure(Style.font, sender) * 0.6f * MESSAGE_HEIGHT
         let sender_color = 
             if sender = Network.username then Colors.text_subheading // todo: know your own username color
             else Network.lobby.Value.Players.[sender].Color, Colors.shadow_2

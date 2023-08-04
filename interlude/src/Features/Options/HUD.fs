@@ -179,8 +179,8 @@ type EditAccuracyMeterPage() as this =
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFill(Style.baseFont, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
-                if show_name.Value then Text.drawFill(Style.baseFont, "SC+ J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f)
+                Text.drawFill(Style.font, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
+                if show_name.Value then Text.drawFill(Style.font, "SC+ J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f)
         }
 
     do
@@ -296,7 +296,7 @@ type EditComboMeterPage() as this =
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFill(Style.baseFont, "727", bounds, Color.White, Alignment.CENTER)
+                Text.drawFill(Style.font, "727", bounds, Color.White, Alignment.CENTER)
         }
 
     do
@@ -343,7 +343,7 @@ type EditSkipButtonPage() as this =
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFillB(Style.baseFont, preview_text, bounds, Colors.text, Alignment.CENTER)
+                Text.drawFillB(Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
         }
 
     do
@@ -391,7 +391,7 @@ type EditProgressMeterPage() as this =
                     Draw.quad (Quad.createv(x, y)(x, y)(inner i)(inner (i+1))) (Quad.colorOf color.Value) Sprite.DefaultQuad
 
                 let text = match label.Value with HUD.ProgressMeterLabel.Countdown -> "7:27" | HUD.ProgressMeterLabel.Percentage -> "60%" | _ -> ""
-                Text.drawFillB(Style.baseFont, text, bounds.Expand(0.0f, 20.0f).SliceBottom(20.0f), Colors.text_subheading, Alignment.CENTER)
+                Text.drawFillB(Style.font, text, bounds.Expand(0.0f, 20.0f).SliceBottom(20.0f), Colors.text_subheading, Alignment.CENTER)
         }
 
     do
@@ -434,7 +434,7 @@ type EditPacemakerPage() as this =
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFillB(Style.baseFont, Icons.goal, bounds, Colors.text, Alignment.CENTER)
+                Text.drawFillB(Style.font, Icons.goal, bounds, Colors.text, Alignment.CENTER)
         }
 
     do
@@ -498,7 +498,7 @@ type EditJudgementMeterPage() as this =
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFill(Style.baseFont, rs.JudgementName 0, bounds, rs.JudgementColor 0, Alignment.CENTER)
+                Text.drawFill(Style.font, rs.JudgementName 0, bounds, rs.JudgementColor 0, Alignment.CENTER)
         }
 
     do
@@ -550,7 +550,7 @@ type EditEarlyLateMeterPage() as this =
     let preview = 
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFill(Style.baseFont, early_text.Value, bounds, early_color.Value, Alignment.CENTER)
+                Text.drawFill(Style.font, early_text.Value, bounds, early_color.Value, Alignment.CENTER)
         }
 
     do

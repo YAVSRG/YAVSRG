@@ -72,13 +72,13 @@ module private Span =
 
         let mutable text = text.Replace("&gt;", ">").Replace("&lt;", "<")
         let mutable remainingText = ""
-        let mutable width = (Text.measure(Style.baseFont, text)) * settings.Size
+        let mutable width = (Text.measure(Style.font, text)) * settings.Size
         let height = settings.Size / 0.6f
         while width > max_width && text.Contains(' ') do
             let i = text.LastIndexOf(' ')
             remainingText <- text.Substring(i) + remainingText
             text <- text.Substring(0, i)
-            width <- (Text.measure(Style.baseFont, text)) * settings.Size
+            width <- (Text.measure(Style.font, text)) * settings.Size
 
         match settings.Link with
         | None -> (fragment (text, (fg, bg), highlight), (width, height), remainingText)
@@ -137,7 +137,7 @@ type private Image(width, title, url) as this =
         if not this.VisibleBounds.Visible then () else
         base.Draw()
         match sprite with
-        | None -> Text.drawFillB(Style.baseFont, title, this.Bounds.Shrink(20.0f, 20.0f), Colors.text, Alignment.CENTER)
+        | None -> Text.drawFillB(Style.font, title, this.Bounds.Shrink(20.0f, 20.0f), Colors.text, Alignment.CENTER)
         | Some s -> Draw.sprite this.Bounds Color.White s
 
 type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as this =
