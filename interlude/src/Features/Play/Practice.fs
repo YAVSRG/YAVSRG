@@ -57,7 +57,7 @@ module PracticeScreen =
 
             override this.Draw() =
                 Draw.rect this.Bounds Colors.shadow_1.O2
-                Draw.rect (this.Bounds.Expand(0.0f, Style.padding).SliceBottom(Style.padding)) Colors.shadow_2.O3
+                Draw.rect (this.Bounds.Expand(0.0f, Style.PADDING).SliceBottom(Style.PADDING)) Colors.shadow_2.O3
                 base.Draw()
         
         type ModeButton(label: string, m: Mode, apply_suggestion: unit -> unit) =

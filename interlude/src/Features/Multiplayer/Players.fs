@@ -44,12 +44,12 @@ type Player(name: string, player: Network.LobbyPlayer) =
             | LobbyPlayerStatus.NotReady
             | _ -> "", Colors.cyan, Colors.cyan_accent
 
-        let b = this.Bounds.Expand(Style.padding)
-        Draw.rect (b.SliceTop Style.padding) border.O3
-        Draw.rect (b.SliceBottom Style.padding) border.O3
-        let b2 = this.Bounds.Expand(Style.padding, 0.0f)
-        Draw.rect (b2.SliceRight Style.padding) border.O3
-        Draw.rect (b2.SliceLeft Style.padding) border.O3
+        let b = this.Bounds.Expand(Style.PADDING)
+        Draw.rect (b.SliceTop Style.PADDING) border.O3
+        Draw.rect (b.SliceBottom Style.PADDING) border.O3
+        let b2 = this.Bounds.Expand(Style.PADDING, 0.0f)
+        Draw.rect (b2.SliceRight Style.PADDING) border.O3
+        Draw.rect (b2.SliceLeft Style.PADDING) border.O3
 
         Draw.rect this.Bounds fill.O3
 
@@ -68,7 +68,7 @@ type PlayerList() =
     inherit StaticContainer(NodeType.None)
 
     let other_players = FlowContainer.Vertical<Widget>(50.0f, Spacing = 5.0f)
-    let other_players_scroll = ScrollContainer.Flow(other_players, Position = Position.TrimTop 60.0f, Margin = Style.padding)
+    let other_players_scroll = ScrollContainer.Flow(other_players, Position = Position.TrimTop 60.0f, Margin = Style.PADDING)
 
     let refresh() =
         other_players.Clear()
@@ -96,12 +96,12 @@ type PlayerList() =
 
         let user_bounds = this.Bounds.SliceTop(55.0f)
         
-        let b = user_bounds.Expand(Style.padding)
-        Draw.rect (b.SliceTop Style.padding) border.O3
-        Draw.rect (b.SliceBottom Style.padding) border.O3
-        let b2 = user_bounds.Expand(Style.padding, 0.0f)
-        Draw.rect (b2.SliceRight Style.padding) border.O3
-        Draw.rect (b2.SliceLeft Style.padding) border.O3
+        let b = user_bounds.Expand(Style.PADDING)
+        Draw.rect (b.SliceTop Style.PADDING) border.O3
+        Draw.rect (b.SliceBottom Style.PADDING) border.O3
+        let b2 = user_bounds.Expand(Style.PADDING, 0.0f)
+        Draw.rect (b2.SliceRight Style.PADDING) border.O3
+        Draw.rect (b2.SliceLeft Style.PADDING) border.O3
 
         Draw.rect user_bounds fill.O3
 

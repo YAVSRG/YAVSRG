@@ -30,10 +30,10 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
         this
         |+ Text(ruleset.Name,
             Align = Alignment.LEFT,
-            Position = Position.SliceTop(50.0f).Margin(10.0f, Style.padding))
+            Position = Position.SliceTop(50.0f).Margin(10.0f, Style.PADDING))
         |+ Text(ruleset.Description,
             Align = Alignment.LEFT,
-            Position = Position.TrimTop(40.0f).Margin(10.0f, Style.padding))
+            Position = Position.TrimTop(40.0f).Margin(10.0f, Style.PADDING))
         |* Clickable.Focus this
 
     member this.Install() =
@@ -53,7 +53,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
                 | UpdateAvailable -> Icons.download + " Update available"
                 | UpToDate -> Icons.check + " Installed"
             ),
-            this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.padding),
+            this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.PADDING),
             (
                 match status with
                 | NotInstalled -> if this.Focused then Colors.text_yellow_2 else Colors.text
@@ -79,7 +79,7 @@ module Rulesets =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
     
         let grid = GridContainer<RulesetCard>(80.0f, 2, Spacing = (15.0f, 15.0f), WrapNavigation = false)
-        let scroll = ScrollContainer.Grid(grid, Margin = Style.padding, Position = Position.TrimTop(70.0f))
+        let scroll = ScrollContainer.Grid(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f))
         let mutable failed = false
     
         override this.Init(parent) =

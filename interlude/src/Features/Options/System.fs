@@ -85,7 +85,7 @@ module System =
             | Some _ -> this.Dropdown <- None
             | _ ->
                 let d = Dropdown.Selector WindowResolution.presets (fun (w, h) -> sprintf "%ix%i" w h) setting.Set (fun () -> this.Dropdown <- None)
-                d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
+                d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
                 d.Init this
                 this.Dropdown <- Some d
 

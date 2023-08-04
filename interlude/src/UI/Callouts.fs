@@ -222,10 +222,10 @@ module Notifications =
                 let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
                 let c l = Math.Clamp((t.Fade.Value - l) / 0.25f, 0.0f, 1.0f)
                 // border around thing
-                Draw.rect (outline.SliceLeft(Style.padding).SliceBottom(outline.Height * c 0.0f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
-                Draw.rect (outline.SliceTop(Style.padding).SliceLeft(outline.Width * c 0.25f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
-                Draw.rect (outline.SliceRight(Style.padding).SliceTop(outline.Height * c 0.5f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
-                Draw.rect (outline.SliceBottom(Style.padding).SliceRight(outline.Width * c 0.75f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
+                Draw.rect (outline.SliceLeft(Style.PADDING).SliceBottom(outline.Height * c 0.0f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
+                Draw.rect (outline.SliceTop(Style.PADDING).SliceLeft(outline.Width * c 0.25f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
+                Draw.rect (outline.SliceRight(Style.PADDING).SliceTop(outline.Height * c 0.5f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
+                Draw.rect (outline.SliceBottom(Style.PADDING).SliceRight(outline.Width * c 0.75f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
                 // blackout effect
                 Draw.rect (Viewport.bounds.SliceLeft outline.Left) (Colors.shadow_2.O3a t.Fade.Alpha)
                 Draw.rect (Viewport.bounds.TrimLeft outline.Right) (Colors.shadow_2.O3a t.Fade.Alpha)

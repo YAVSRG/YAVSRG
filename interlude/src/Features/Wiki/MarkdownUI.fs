@@ -60,7 +60,7 @@ module private Span =
 
     let create_fragment (max_width: float32) (text: string) (settings: Settings) =
         let fg = 
-            if settings.Strong then Style.color(255, 1.0f, 0.8f)
+            if settings.Strong then Palette.color(255, 1.0f, 0.8f)
             else Color.White
         let bg =
             if settings.Emphasis then Color.Gray

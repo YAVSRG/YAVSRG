@@ -240,7 +240,7 @@ type private CollectionButton(icon, name, action) =
                 )
             ),
             Align = Alignment.LEFT,
-            Position = Position.Margin Style.padding)
+            Position = Position.Margin Style.PADDING)
         |* Clickable.Focus this
         base.Init parent
     

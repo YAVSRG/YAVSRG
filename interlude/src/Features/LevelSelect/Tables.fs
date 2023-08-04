@@ -54,11 +54,11 @@ type private LevelButton(name, action) =
             K (sprintf "%s %s  >" Icons.folder name),
             Color = ( 
                 fun () -> ( 
-                    (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White), Color.Black
+                    (if this.Focused then Palette.color(255, 1.0f, 0.5f) else Colors.white), Colors.black
                 )
             ),
             Align = Alignment.LEFT,
-            Position = Position.Margin Style.padding)
+            Position = Position.Margin Style.PADDING)
         |* Clickable.Focus this
         base.Init parent
     
@@ -75,12 +75,12 @@ type private TableButton(name, action) =
             K (sprintf "%s  >" name),
             Color = ( 
                 fun () -> ( 
-                    (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White),
-                    (if Some name = options.Table.Value then Style.color(255, 0.5f, 0.0f) else Color.Black)
+                    (if this.Focused then Palette.color(255, 1.0f, 0.5f) else Colors.white),
+                    (if Some name = options.Table.Value then Palette.color(255, 0.5f, 0.0f) else Colors.black)
                 )
             ),
             Align = Alignment.LEFT,
-            Position = Position.Margin Style.padding)
+            Position = Position.Margin Style.PADDING)
         |* Clickable.Focus this
         base.Init parent
             

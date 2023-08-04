@@ -159,7 +159,7 @@ type private SortingDropdown(options: (string * string) seq, label: string, sett
         | Some _ -> this.Dropdown <- None
         | _ ->
             let d = Dropdown.Selector options snd (fun g -> displayValue <- snd g; setting.Set (fst g)) (fun () -> this.Dropdown <- None)
-            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
+            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
             d.Init this
             this.Dropdown <- Some d
     
@@ -188,7 +188,7 @@ module Beatmaps =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
 
         let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
-        let scroll = ScrollContainer.Flow(items, Margin = Style.padding, Position = Position.TrimTop(125.0f).TrimBottom(65.0f))
+        let scroll = ScrollContainer.Flow(items, Margin = Style.PADDING, Position = Position.TrimTop(125.0f).TrimBottom(65.0f))
         let mutable filter : Filter = []
         let query_order = Setting.simple "date"
         let descending_order = Setting.simple true

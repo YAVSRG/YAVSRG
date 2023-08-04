@@ -118,8 +118,8 @@ type Toolbar() =
             let s = this.Bounds.Width / 48.0f
             for i in 0 .. 47 do
                 let level = System.Math.Min((Devices.waveForm.[i] + 0.01f) * expandAmount.Value * 0.4f, HEIGHT)
-                Draw.rect (Rect.Create(l + float32 i * s + 2.0f, t, l + (float32 i + 1.0f) * s - 2.0f, t + level)) (Style.color(int level, 1.0f, 0.5f))
-                Draw.rect (Rect.Create(r - (float32 i + 1.0f) * s + 2.0f, b - level, r - float32 i * s - 2.0f, b)) (Style.color(int level, 1.0f, 0.5f))
+                Draw.rect (Rect.Create(l + float32 i * s + 2.0f, t, l + (float32 i + 1.0f) * s - 2.0f, t + level)) (Palette.color(int level, 1.0f, 0.5f))
+                Draw.rect (Rect.Create(r - (float32 i + 1.0f) * s + 2.0f, b - level, r - float32 i * s - 2.0f, b)) (Palette.color(int level, 1.0f, 0.5f))
         container.Draw()
         Terminal.draw()
 

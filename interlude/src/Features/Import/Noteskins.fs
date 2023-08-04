@@ -27,7 +27,7 @@ type NoteskinCard(data: RepoEntry) as this =
         this
         |+ Text(data.Name,
             Align = Alignment.CENTER,
-            Position = Position.Margin(Style.padding).SliceTop(70.0f))
+            Position = Position.Margin(Style.PADDING).SliceTop(70.0f))
         |* Clickable.Focus this
 
     member this.Download() =
@@ -64,7 +64,7 @@ type NoteskinCard(data: RepoEntry) as this =
                 | DownloadFailed -> Icons.x + " Error"
                 | Installed -> Icons.check + " Downloaded"
             ),
-            this.Bounds.SliceBottom(60.0f).Shrink(Style.padding),
+            this.Bounds.SliceBottom(60.0f).Shrink(Style.PADDING),
             (
                 match status with
                 | NotDownloaded -> if this.Focused then Colors.text_yellow_2 else Colors.text
@@ -95,7 +95,7 @@ module Noteskins =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
     
         let grid = GridContainer<NoteskinCard>(380.0f, 3, Spacing = (15.0f, 15.0f), WrapNavigation = false)
-        let scroll = ScrollContainer.Grid(grid, Margin = Style.padding, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
+        let scroll = ScrollContainer.Grid(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
         let mutable failed = false
     
         override this.Init(parent) =

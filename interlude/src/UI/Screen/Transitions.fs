@@ -128,7 +128,7 @@ module Transitions =
                 diamond (s * float32 x) (s * float32 y)
                 diamond (0.5f * s + s * float32 x) (0.5f * s + s * float32 y)
         Stencil.draw()
-        Background.draw (bounds, Style.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+        Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
         Stencil.finish()
 
     let private stripes inbound amount bounds =
@@ -167,7 +167,7 @@ module Transitions =
         for i = 0 to number_of_stripes - 1 do
             stripe i
         Stencil.draw()
-        Background.draw (bounds, Style.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+        Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
         Stencil.finish()
     
     let private draw_internal flags inbound amount bounds =

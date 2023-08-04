@@ -34,8 +34,8 @@ type EOPack =
 
 type private SMImportCard(id: int, data: EOPackAttrs) as this =
     inherit Frame(NodeType.Button(fun () -> this.Download()),
-        Fill = (fun () -> Style.color(120, 0.5f, 0.0f)),
-        Border = (fun () -> if this.Focused then Color.White else Style.color(200, 0.7f, 0.2f))
+        Fill = (fun () -> Palette.color(120, 0.5f, 0.0f)),
+        Border = (fun () -> if this.Focused then Color.White else Palette.color(200, 0.7f, 0.2f))
     )
     
     let mutable progress = 0.0f

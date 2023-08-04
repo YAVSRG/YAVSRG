@@ -67,7 +67,7 @@ type NetworkStatus() =
         | Some _ -> this.Dropdown <- None
         | None ->
             let d = Dropdown(this.MenuItems, (fun () -> this.Dropdown <- None))
-            d.Position <- Position.SliceTop(d.Height + Screen.Toolbar.HEIGHT).TrimTop(Screen.Toolbar.HEIGHT).Margin(Style.padding, 0.0f)
+            d.Position <- Position.SliceTop(d.Height + Screen.Toolbar.HEIGHT).TrimTop(Screen.Toolbar.HEIGHT).Margin(Style.PADDING, 0.0f)
             d.Init this
             this.Dropdown <- Some d
 

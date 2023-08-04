@@ -47,10 +47,10 @@ type TableCard(id: string, table: Table) as this =
         this
         |+ Text(table.Name,
             Align = Alignment.LEFT,
-            Position = Position.SliceTop(60.0f).Margin(10.0f, Style.padding))
+            Position = Position.SliceTop(60.0f).Margin(10.0f, Style.PADDING))
         |+ Text((fun () -> sprintf "%i levels, %i charts (%i missing)" levels charts missing),
             Align = Alignment.LEFT,
-            Position = Position.TrimTop(60.0f).SliceTop(50.0f).Margin(10.0f, Style.padding))
+            Position = Position.TrimTop(60.0f).SliceTop(50.0f).Margin(10.0f, Style.PADDING))
         |* Clickable.Focus this
 
         this.RefreshInfo()
@@ -130,7 +130,7 @@ type TableCard(id: string, table: Table) as this =
                 | UpdateAvailable -> Icons.download + " Update available"
                 | UpToDate -> Icons.check + " Installed"
             ),
-            this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.padding),
+            this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.PADDING),
             (
                 match status with
                 | InstallingCharts -> Colors.text_cyan_2
@@ -148,7 +148,7 @@ module Tables =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
     
         let flow = FlowContainer.Vertical<TableCard>(200.0f, Spacing = 15.0f)
-        let scroll = ScrollContainer.Flow(flow, Margin = Style.padding)
+        let scroll = ScrollContainer.Flow(flow, Margin = Style.PADDING)
     
         override this.Init(parent) =
             WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/tables/index.json",

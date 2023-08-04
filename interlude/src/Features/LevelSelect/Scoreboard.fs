@@ -205,8 +205,8 @@ type Scoreboard() as this =
         | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selectedMods.Value)
         | _ -> K true
 
-    let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.padding * 3.0f, Sort = sorter(), Filter = filterer())
-    let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.padding, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
+    let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.PADDING * 3.0f, Sort = sorter(), Filter = filterer())
+    let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.PADDING, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
 
     let load_scores_async = Loader.handle flowContainer
 

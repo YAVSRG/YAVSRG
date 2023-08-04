@@ -42,8 +42,8 @@ type TopBanner(data: ScoreInfoProvider) as this =
 
     override this.Draw() =
 
-        Draw.rect (this.Bounds.TrimBottom 5.0f) (Style.color(127, 0.5f, 0.0f))
-        Draw.rect (this.Bounds.SliceBottom 5.0f) (Color.FromArgb(127, Color.White))
+        Draw.rect (this.Bounds.TrimBottom 5.0f) (Palette.color(127, 0.5f, 0.0f))
+        Draw.rect (this.Bounds.SliceBottom 5.0f) Colors.white.O2
 
         base.Draw()
 
@@ -236,7 +236,7 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
 
     override this.Draw() =
 
-        Draw.rect (this.Bounds.TrimTop 5.0f) (Style.color(127, 0.5f, 0.0f))
+        Draw.rect (this.Bounds.TrimTop 5.0f) (Palette.color(127, 0.5f, 0.0f))
         Draw.rect (this.Bounds.SliceTop 5.0f) Colors.white.O2
         
         // stats

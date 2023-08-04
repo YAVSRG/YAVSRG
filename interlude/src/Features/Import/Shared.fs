@@ -45,7 +45,7 @@ and SearchContainer(populate: PopulateFunc, handleFilter: FilterFunc, itemheight
     inherit StaticContainer(NodeType.Switch(fun _ -> if (this.Items: FlowContainer.Vertical<Widget>).Count > 0 then this.Items else this.SearchBox))
 
     let flow = FlowContainer.Vertical<Widget>(itemheight, Spacing = 15.0f)
-    let scroll = ScrollContainer.Flow(flow, Margin = Style.padding, Position = Position.TrimTop 70.0f)
+    let scroll = ScrollContainer.Flow(flow, Margin = Style.PADDING, Position = Position.TrimTop 70.0f)
     let searchBox = SearchBox(Setting.simple "", (fun (f: Filter) -> handleFilter this f), Position = Position.SliceTop 60.0f )
 
     do

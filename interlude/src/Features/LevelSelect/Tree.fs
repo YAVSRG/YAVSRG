@@ -170,7 +170,7 @@ module Tree =
             let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = bounds
 
             // draw base
-            let accent = Style.color(80 + int (hover.Value * 40.0f), 1.0f, 0.4f)
+            let accent = Palette.color(80 + int (hover.Value * 40.0f), 1.0f, 0.4f)
             Draw.rect bounds (if this.Selected then !*Palette.MAIN_100 else Colors.shadow_1.O2)
             let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
             Draw.quad
@@ -205,7 +205,7 @@ module Tree =
             Text.drawJustB(Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
             if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
-                Draw.rect bounds (Style.color(Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
+                Draw.rect bounds (Palette.color(Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
                 Text.drawFillB(Style.font, chartData.Value.Comment, bounds.Shrink(30.0f, 15.0f), (Colors.white.O4a Comments.fade.Alpha, Colors.shadow_1.O4a Comments.fade.Alpha), Alignment.CENTER)
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
@@ -244,9 +244,9 @@ module Tree =
         member this.SelectLast() = items.Last().Select()
 
         member private this.OnDraw(bounds: Rect) =
-            Draw.rect (bounds.Translate(10.0f, 10.0f)) (Style.color(255, 0.2f, 0.0f))
+            Draw.rect (bounds.Translate(10.0f, 10.0f)) (Palette.color(255, 0.2f, 0.0f))
             Background.draw (bounds, (Color.FromArgb(40, 40, 40)), 1.5f)
-            Draw.rect bounds (if this.Selected then Style.color(120, 1.0f, 0.2f) else Style.color(100, 0.7f, 0.0f))
+            Draw.rect bounds (if this.Selected then Palette.color(120, 1.0f, 0.2f) else Palette.color(100, 0.7f, 0.0f))
             Text.drawFillB(Style.font, name, bounds.Shrink 5.0f, Colors.text, 0.5f)
 
         member this.Draw(top, origin, originB) =

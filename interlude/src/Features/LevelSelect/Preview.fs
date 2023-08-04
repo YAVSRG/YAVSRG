@@ -39,12 +39,12 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
             let h = 80.0f * density_graph_1.[i] / max_note_density
             let h2 = 80.0f * density_graph_2.[i] / max_note_density
             Draw.rect (Rect.Box(b.Left + float32 i * w, b.Bottom - h, w, h - 5.0f)) (Color.FromArgb(120, Color.White))
-            Draw.rect (Rect.Box(b.Left + float32 i * w, b.Bottom - h2, w, h2 - 5.0f)) (Style.color(80, 1.0f, 0.0f))
+            Draw.rect (Rect.Box(b.Left + float32 i * w, b.Bottom - h2, w, h2 - 5.0f)) (Palette.color(80, 1.0f, 0.0f))
 
         let percent = (Song.time() - start) / (chart.LastNote - start) 
         Draw.rect (b.SliceBottom(5.0f)) (Color.FromArgb(160, Color.White))
         let x = b.Width * percent
-        Draw.rect (b.SliceBottom(5.0f).SliceLeft x) (Style.color(255, 1.0f, 0.0f))
+        Draw.rect (b.SliceBottom(5.0f).SliceLeft x) (Palette.color(255, 1.0f, 0.0f))
 
         volume.Draw()
 

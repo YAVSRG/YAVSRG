@@ -133,7 +133,7 @@ type PageSetting(name, widget: Widget) as this =
         and set(w: Widget) =
             let old_widget = widget
             widget <- w
-            w.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.padding)
+            w.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.PADDING)
             if this.Initialised then 
                 w.Init this
                 if old_widget.Focused then w.Focus()
@@ -151,14 +151,14 @@ type PageSetting(name, widget: Widget) as this =
             K (L (sprintf "%s.name" name) + ":"),
             Color = (fun () -> (if this.Focused then Colors.text_yellow_2 else Colors.text)),
             Align = Alignment.LEFT,
-            Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH - 10.0f, PRETTYHEIGHT).Margin(Style.padding))
+            Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH - 10.0f, PRETTYHEIGHT).Margin(Style.PADDING))
         base.Init parent
-        widget.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.padding)
+        widget.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.PADDING)
         widget.Init this
 
     override this.Draw() =
-        if widget.Selected then Draw.rect (widget.Bounds.Expand(15.0f, Style.padding)) Colors.pink_accent.O2
-        elif widget.Focused then Draw.rect (widget.Bounds.Expand(15.0f, Style.padding)) Colors.yellow_accent.O1
+        if widget.Selected then Draw.rect (widget.Bounds.Expand(15.0f, Style.PADDING)) Colors.pink_accent.O2
+        elif widget.Focused then Draw.rect (widget.Bounds.Expand(15.0f, Style.PADDING)) Colors.yellow_accent.O1
         base.Draw()
         widget.Draw()
     
@@ -182,7 +182,7 @@ type PageButton(name, action) as this =
                     else Colors.text_greyout
             ),
             Align = Alignment.LEFT,
-            Position = Position.Margin(Style.padding))
+            Position = Position.Margin(Style.PADDING))
         |* Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
         base.Init parent
 

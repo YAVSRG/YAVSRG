@@ -40,7 +40,7 @@ module Screen =
 
         let moving() = wasHidden <> hidden || expandAmount.Moving
 
-    let globalAnimation = Animation.fork [Style.accentColor; Toolbar.expandAmount]
+    let globalAnimation = Animation.fork [Palette.accentColor; Toolbar.expandAmount]
 
     let logo = Logo.display
     
@@ -107,7 +107,7 @@ module Screen =
             if Viewport.vwidth > 0.0f then
                 let x, y = Mouse.pos()
                 Background.setParallaxPos(x / Viewport.vwidth, y / Viewport.vheight)
-            Style.accentColor.Target <- Content.accentColor
+            Palette.accentColor.Target <- Content.accentColor
             Dialog.display.Update (elapsedTime, moved)
 
             //perf.Update (elapsedTime, moved)
@@ -133,7 +133,7 @@ module Screen =
                 let x, y = Mouse.pos()
                 Draw.sprite 
                     (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize))
-                    (if Notifications.tooltip_available then Colors.white else Style.color(255, 1.0f, 0.5f))
+                    (if Notifications.tooltip_available then Colors.white else Palette.color(255, 1.0f, 0.5f))
                     (Content.getTexture "cursor")
             //perf.Draw()
 

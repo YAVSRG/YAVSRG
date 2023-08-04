@@ -143,7 +143,7 @@ type private NoteskinButton(id: string, name: string, on_switch: unit -> unit) =
                     else Colors.text
             ),
             Align = Alignment.CENTER,
-            Position = Position.SliceTop(PRETTYHEIGHT).Margin Style.padding)
+            Position = Position.SliceTop(PRETTYHEIGHT).Margin Style.PADDING)
         |* Clickable.Focus this
         base.Init parent
         

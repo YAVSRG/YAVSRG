@@ -25,12 +25,12 @@ module Rulesets =
                     fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text
                 ),
                 Align = Alignment.LEFT,
-                Position = Position.SliceTop(PRETTYHEIGHT).Margin Style.padding)
+                Position = Position.SliceTop(PRETTYHEIGHT).Margin Style.PADDING)
             |+ Text(
                 ruleset.Description,
                 Color = K Colors.text,
                 Align = Alignment.LEFT,
-                Position = Position.TrimTop(PRETTYHEIGHT - 10.0f).Margin Style.padding)
+                Position = Position.TrimTop(PRETTYHEIGHT - 10.0f).Margin Style.PADDING)
             |* Clickable.Focus this
             base.Init parent
             
@@ -70,7 +70,7 @@ module Rulesets =
             | _ ->
                 let rulesets = Rulesets.list()
                 let d = Dropdown.Selector rulesets (fun (id, rs) -> rs.Name) (fun (id, rs) -> setting.Set id) (fun () -> this.Dropdown <- None)
-                d.Position <- Position.SliceBottom(d.Height + 60.0f).TrimBottom(60.0f).Margin(Style.padding, 0.0f)
+                d.Position <- Position.SliceBottom(d.Height + 60.0f).TrimBottom(60.0f).Margin(Style.PADDING, 0.0f)
                 d.Init this
                 this.Dropdown <- Some d
     

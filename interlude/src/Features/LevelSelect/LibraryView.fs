@@ -38,7 +38,7 @@ type private ModeDropdown(options: (string * string) seq, label: string, setting
         | Some _ -> this.Dropdown <- None
         | _ ->
             let d = Dropdown.Selector options snd (fun g -> displayValue <- snd g; setting.Set (fst g)) (fun () -> this.Dropdown <- None)
-            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
+            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
             d.Init this
             this.Dropdown <- Some d
 
