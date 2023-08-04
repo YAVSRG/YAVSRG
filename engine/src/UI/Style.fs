@@ -99,13 +99,14 @@ type PaletteColor =
 
 module Palette =
     
-    let BLACK = { Alpha = 255; Brightness = 0f; White = 0f }
     let WHITE = { Alpha = 255; Brightness = 1f; White = 1f }
 
     let DARKER = { Alpha = 255; Brightness = 0.25f; White = 0.15f }
     let DARK = { Alpha = 255; Brightness = 0.5f; White = 0.2f }
+    let DARK_100 = { Alpha = 100; Brightness = 0.5f; White = 0.2f }
     let MAIN = { Alpha = 255; Brightness = 0.9f; White = 0.0f }
-    let HIGHLIGHT = { Alpha = 255; Brightness = 1.0f; White = 0.0f }
+    let MAIN_100 = { Alpha = 100; Brightness = 0.9f; White = 0.0f }
+    let HIGHLIGHT_100 = { Alpha = 100; Brightness = 1.0f; White = 0.0f }
     let LIGHT = { Alpha = 255; Brightness = 1.0f; White = 0.45f }
     let LIGHTER = { Alpha = 255; Brightness = 1.0f; White = 0.7f }
 
