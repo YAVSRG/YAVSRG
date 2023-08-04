@@ -31,20 +31,20 @@ type LoadingScreen() =
             animation.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
         | _ ->
             if Network.target_ip.ToString() <> "0.0.0.0" then Network.connect()
-            animation.Add (Animation.Action (fun () -> SoundEffect.play (Content.Sounds.getSound "hello") (Options.options.AudioVolume.Value * 0.6)))
+            animation.Add (Animation.Action (fun () -> Content.Sounds.getSound("hello").Play()))
             animation.Add (Animation.Delay 1000.0)
             animation.Add (Animation.Action (fun () -> audio_fade.Target <- 1.0f))
             animation.Add (Animation.Delay 1200.0)
             animation.Add (Animation.Action (fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo))
 
     override this.OnExit _ =
-        if not closing then Devices.changeVolume Options.options.AudioVolume.Value
+        if not closing then Devices.change_volume (Options.options.AudioVolume.Value, Options.options.AudioVolume.Value)
 
     override this.Update (elapsedTime, bounds) =
         base.Update (elapsedTime, bounds)
         audio_fade.Update elapsedTime
         animation.Update elapsedTime
-        Devices.changeVolume (Options.options.AudioVolume.Value * float audio_fade.Value)
+        Devices.change_volume (Options.options.AudioVolume.Value, Options.options.AudioVolume.Value * float audio_fade.Value)
         
     override this.Draw() =
         let (x, y) = this.Bounds.Center

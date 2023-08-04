@@ -139,7 +139,7 @@ module System =
                     .Tooltip(Tooltip.Info("system.framelimit"))
 
                 |+ PageSetting("system.audiovolume",
-                    Slider.Percent(options.AudioVolume |> Setting.trigger Devices.changeVolume |> Setting.f32) )
+                    Slider.Percent(options.AudioVolume |> Setting.trigger (fun v -> Devices.change_volume(v, v)) |> Setting.f32) )
                     .Pos(430.0f)
                     .Tooltip(Tooltip.Info("system.audiovolume"))
 

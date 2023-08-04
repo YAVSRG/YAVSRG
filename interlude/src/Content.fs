@@ -134,7 +134,7 @@ module Content =
                     | None ->
                         match loaded.["*default"].GetTexture id with
                         | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
-                        | None -> failwithf "Failed to load texture %s from *default" id
+                        | None -> failwithf "Failed to load texture '%s' from *default" id
 
                 for id in Storage.themeSounds do
                     match instance.GetSound id with
@@ -142,7 +142,7 @@ module Content =
                     | None -> 
                         match loaded.["*default"].GetSound id with
                         | Some stream -> SoundEffect.FromStream (id, stream) |> Sounds.add id
-                        | None -> failwithf "Failed to load sound %s from *default" id
+                        | None -> failwithf "Failed to load sound '%s' from *default" id
 
             let switch (new_id: string) =
                 let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Theme '" + new_id + "' not found, switching to default"); "*default"

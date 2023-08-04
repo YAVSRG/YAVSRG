@@ -22,7 +22,7 @@ type Volume() =
         if (!|"volume").Pressed() then
             fade.Target <- 1.0f
             Setting.app ((+) (float (Mouse.scroll()) * 0.02)) options.AudioVolume
-            Devices.changeVolume options.AudioVolume.Value
+            Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
             slider.Target <- float32 options.AudioVolume.Value
         else fade.Target <- 0.0f
 
