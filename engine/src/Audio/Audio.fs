@@ -146,14 +146,18 @@ type SoundEffect =
         if id = 0 then Logging.Error(sprintf "Couldn't load sound effect '%s'" source, Bass.LastError)
         let channel = Bass.SampleGetChannel(id)
         { ID = id; ChannelID = channel }
-    member this.Free() = Bass.SampleFree this.ID |> bassError
+    member this.Free() = if this.ID <> 0 then Bass.SampleFree this.ID |> bassError
+    member this.Default = { ID = 0; ChannelID = 0 }
 
 module SoundEffect =
 
     let play (fx: SoundEffect) (volume: float) =
         Bass.ChannelSetDevice(fx.ChannelID, Bass.CurrentDevice) |> bassError
-        Bass.ChannelSetAttribute(fx.ChannelID, ChannelAttribute.Volume, volume * 3.0) |> bassError
+        Bass.ChannelSetAttribute(fx.ChannelID, ChannelAttribute.Volume, volume * 2.0) |> bassError
         Bass.ChannelPlay(fx.ChannelID, true) |> bassError
+
+type SoundEffect with
+    member this.Play() = SoundEffect.play this 1.0
 
 module Devices =
 
@@ -186,7 +190,9 @@ module Devices =
     let mutable private defaultDevice = -1
     let mutable private devices = [||]
 
-    let changeVolume(newVolume) = Bass.GlobalStreamVolume <- int (newVolume * 8000.0) |> max 0
+    let change_volume (fx_volume: float, song_volume: float) = 
+        Bass.GlobalSampleVolume <- int (fx_volume * 8000.0) |> max 0
+        Bass.GlobalStreamVolume <- int (song_volume * 8000.0) |> max 0
 
     let private get() =
         devices <-
