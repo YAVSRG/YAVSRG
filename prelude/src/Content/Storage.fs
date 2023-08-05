@@ -245,4 +245,4 @@ module Storage =
     
     let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "receptorlighting"|]
     let themeTextures = [|"background"; "rain"; "logo"; "cursor"|]
-    let themeSounds = [|"hello"; "click"; "hover"; "text-open"; "text-close"; "key" |]
+    let themeSounds = [|"hello"; "click"; "hover"; "text-open"; "text-close"; "key"; "notify-error"; "notify-info"; "notify-system"; "notify-task" |]
