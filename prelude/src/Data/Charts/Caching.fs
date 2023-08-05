@@ -251,8 +251,20 @@ module Cache =
             cache.Entries.[entry.Key] <- entry
         save cache
 
+    // For copying a chart from one folder to another
+    let copy (folder: string) (entry: CachedChart) (cache: Cache) =
+        let new_entry = { entry with Folder = folder }
+        if cache.Entries.ContainsKey(new_entry.Key) then () else
+
+        cache.Entries.[new_entry.Key] <- new_entry
+        let target = get_path new_entry cache
+        Directory.CreateDirectory(Path.GetDirectoryName target) |> ignore
+        File.Copy(get_path entry cache, target)
+
+        save cache
+
     // For charts being copied from one cache to another
-    let clone (folder: string) (entry: CachedChart) (source: Cache) (target: Cache) =
+    let replicate (folder: string) (entry: CachedChart) (source: Cache) (target: Cache) =
         if target.Entries.ContainsKey({ entry with Folder = folder }.Key) then () else
         let chart = (Chart.fromFile (get_path entry source)).Value
         let chart = 
