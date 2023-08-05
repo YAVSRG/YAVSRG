@@ -117,6 +117,8 @@ module Scoreboard =
 
         member this.Data = data
 
+        override this.OnFocus() = Style.hover.Play(); base.OnFocus()
+
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             animation.Update elapsedTime

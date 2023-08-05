@@ -227,7 +227,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
             else Logging.Debug "Rename failed, maybe that name already exists?"
 
 type private CollectionButton(icon, name, action) =
-    inherit StaticContainer(NodeType.Button (fun _ -> action()))
+    inherit StaticContainer(NodeType.Button (fun () -> Style.click.Play(); action()))
     
     override this.Init(parent: Widget) =
         this
@@ -243,6 +243,8 @@ type private CollectionButton(icon, name, action) =
             Position = Position.Margin Style.PADDING)
         |* Clickable.Focus this
         base.Init parent
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
     
     override this.Draw() =
         if this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O1

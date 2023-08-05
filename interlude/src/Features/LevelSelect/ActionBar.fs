@@ -62,15 +62,17 @@ module Comments =
             editor.Draw()
 
 type private ActionButton(icon, action, active) =
-    inherit StaticContainer(NodeType.Button action)
+    inherit StaticContainer(NodeType.Button (fun () -> Style.click.Play(); action()))
 
     member val Hotkey = "none" with get, set
 
     override this.Init(parent) =
          this 
          |+ Clickable.Focus this
-         |* HotkeyAction(this.Hotkey, action)
+         |* HotkeyAction(this.Hotkey, (fun () -> Style.click.Play(); action()))
          base.Init parent
+        
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
     
     override this.Draw() =
          let area = this.Bounds.SliceTop(this.Bounds.Height + 5.0f)

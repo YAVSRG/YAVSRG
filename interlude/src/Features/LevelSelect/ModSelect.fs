@@ -13,7 +13,7 @@ open Interlude.Utils
 open Interlude.Features.Gameplay
 
 type private ModSelector(id, states: string[], current_state: unit -> int, action: unit -> unit) =
-    inherit StaticContainer(NodeType.Button action)
+    inherit StaticContainer(NodeType.Button (fun () -> Style.click.Play(); action()))
 
     let TOP_HEIGHT = 70.0f
 
@@ -31,6 +31,8 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
             Position = Position.TrimTop(TOP_HEIGHT).Margin(20.0f, 0.0f),
             Align = Alignment.LEFT)
         base.Init parent
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     override this.Draw() =
         let state = current_state()

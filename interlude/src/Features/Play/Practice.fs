@@ -61,7 +61,7 @@ module PracticeScreen =
                 base.Draw()
         
         type ModeButton(label: string, m: Mode, apply_suggestion: unit -> unit) =
-            inherit StaticContainer(NodeType.Button(fun () -> if mode = m then apply_suggestion() else mode <- m))
+            inherit StaticContainer(NodeType.Button(fun () -> Style.click.Play(); if mode = m then apply_suggestion() else mode <- m))
 
             let requires_audio = m.Audio = 2
 
@@ -75,6 +75,8 @@ module PracticeScreen =
                     )
                 |* Clickable.Focus this
                 base.Init parent
+
+            override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
             override this.Draw() =
                 if this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O2

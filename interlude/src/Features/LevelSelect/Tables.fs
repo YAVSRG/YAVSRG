@@ -46,7 +46,7 @@ type private EditLevelPage(level: Level) as this =
     override this.OnClose() = ()
 
 type private LevelButton(name, action) =
-    inherit StaticContainer(NodeType.Button (fun _ -> action()))
+    inherit StaticContainer(NodeType.Button (fun _ -> Style.click.Play(); action()))
     
     override this.Init(parent: Widget) =
         this
@@ -62,12 +62,14 @@ type private LevelButton(name, action) =
         |* Clickable.Focus this
         base.Init parent
     
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
+    
     override this.Draw() =
         if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
         base.Draw()
 
 type private TableButton(name, action) =
-    inherit StaticContainer(NodeType.Button (fun _ -> action()))
+    inherit StaticContainer(NodeType.Button (fun _ -> Style.click.Play(); action()))
             
     override this.Init(parent: Widget) =
         this
@@ -83,6 +85,8 @@ type private TableButton(name, action) =
             Position = Position.Margin Style.PADDING)
         |* Clickable.Focus this
         base.Init parent
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
             
     override this.Draw() =
         if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
