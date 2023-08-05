@@ -18,7 +18,7 @@ module Import =
         match Mounts.dropFunc with
         | Some f -> f path; true
         | None -> 
-            Library.Imports.auto_convert.Request((path, false), 
+            Library.Imports.auto_convert.Request((path, false, None), 
                 fun success -> 
                     if success then
                         Notifications.action_feedback(Icons.check, L"notification.import_success", "")
