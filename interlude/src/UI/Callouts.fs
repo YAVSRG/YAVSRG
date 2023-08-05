@@ -293,21 +293,21 @@ module Notifications =
 
     let task_feedback(icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.pink_accent, Colors.pink), Colors.text)
-        Style.notify_task.Play()
+        sync Style.notify_task.Play
 
     let action_feedback(icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.cyan_accent, Colors.cyan), Colors.text)
-        Style.notify_info.Play()
+        sync Style.notify_info.Play
         
     let action_feedback_button(icon: string, title: string, description: string, button_label: string, button_action: unit -> unit) =
         add (Callout.Small.Icon(icon).Title(title).Body(description).Button(button_label, button_action), (Colors.cyan_accent, Colors.cyan), Colors.text)
-        Style.notify_info.Play()
+        sync Style.notify_info.Play
 
     let system_feedback(icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.green_accent, Colors.green), Colors.text)
-        Style.notify_system.Play()
+        sync Style.notify_system.Play
 
     let error(title, description) =
         add (Callout.Small.Icon(Icons.alert).Title(title).Body(description), (Colors.red_accent, Colors.red), Colors.text)
-        Style.notify_error.Play()
+        sync Style.notify_error.Play
         
