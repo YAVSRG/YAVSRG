@@ -27,7 +27,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
         let (Setting.Bounds (lo, hi)) = setting.Config
         setting.Value <- MathF.Round((hi - lo) * v + lo, decimal_places)
 
-    let add(v) = setting.Value <- MathF.Round(setting.Value + v, decimal_places)
+    let add(v) = setting.Value <- MathF.Round(setting.Value + v, decimal_places); Style.click.Play();
 
     do
         this
@@ -45,6 +45,8 @@ type Slider(setting: Setting.Bounded<float32>) as this =
 
     static member Percent(setting) = Slider(setting, Format = fun x -> sprintf "%.0f%%" (x * 100.0f))
 
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
+
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let bounds = this.Bounds.TrimLeft TEXTWIDTH
@@ -53,11 +55,11 @@ type Slider(setting: Setting.Bounded<float32>) as this =
             if s > 0.0f then setting.Value <- setting.Value + step
             elif s < 0.0f then setting.Value <- setting.Value - step
         if this.Selected then
-            if (Mouse.held Mouse.LEFT && dragging) then
+            if Mouse.held Mouse.LEFT && dragging then
                 let l, r = bounds.Left, bounds.Right
                 let amt = (Mouse.x() - l) / (r - l)
                 set_percent amt
-            else dragging <- false
+            elif dragging then Style.click.Play(); dragging <- false
 
             if (!|"left").Tapped() then add (-step)
             elif (!|"right").Tapped() then add (step)
@@ -84,11 +86,13 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
     let fd() = 
         index <- (index + 1) % items.Length
         setting.Value <- fst items.[index]
+        Style.click.Play()
 
     let bk() =
         index <- (index + items.Length - 1) % items.Length
         setting.Value <- fst items.[index]
-
+        Style.click.Play()
+        
     do
         this
         |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
@@ -96,6 +100,8 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
             (fun () -> (if not this.Selected then this.Select()); fd()),
             OnHover = fun b -> if b && not this.Focused then this.Focus())
         this.Position <- Position.SliceLeft 100.0f
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -167,7 +173,7 @@ type PageSetting(name, widget: Widget) as this =
         widget.Update(elapsedTime, moved)
 
 type PageButton(name, action) as this =
-    inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then action()))
+    inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then Style.click.Play(); action()))
 
     member val Icon = "" with get, set
     member val Text = L (sprintf "%s.name" name) with get, set
@@ -185,6 +191,8 @@ type PageButton(name, action) as this =
             Position = Position.Margin(Style.PADDING))
         |* Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
         base.Init parent
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     override this.Draw() =
         if this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O1
@@ -308,6 +316,8 @@ type ColorPicker(s: Setting<Color>, allowAlpha: bool) as this =
     do this.Add hexEditor
 
     member private this.HexEditor = hexEditor
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     override this.Draw() =
         base.Draw()

@@ -10,16 +10,17 @@ open Interlude.Features.LevelSelect
 module OptionsMenuRoot =
 
     type private TileButton(body: Callout, onclick: unit -> unit) =
-        inherit StaticContainer(NodeType.Button (onclick))
+        inherit StaticContainer(NodeType.Button (fun () -> Style.click.Play(); onclick()))
     
         let body_width, body_height = Callout.measure body
     
         member val Disabled = false with get, set
         member val Margin = (0.0f, 20.0f) with get, set
-        member this.Height = body_height + snd this.Margin * 2.0f
+        
+        override this.OnFocus() = Style.hover.Play(); base.OnFocus()
     
         override this.Init(parent) =
-            this |* Clickable.Focus(this)
+            this |* Clickable.Focus this
             base.Init(parent)
     
         override this.Draw() =

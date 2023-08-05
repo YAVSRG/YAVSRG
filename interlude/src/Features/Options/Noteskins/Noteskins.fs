@@ -21,12 +21,14 @@ type NoteColorPicker(color: Setting<byte>) as this =
     let sprite = getTexture "note"
     let n = byte sprite.Rows
     
-    let fd() = Setting.app (fun x -> (x + n - 1uy) % n) color
-    let bk() = Setting.app (fun x -> (x + 1uy) % n) color
+    let fd() = Setting.app (fun x -> (x + n - 1uy) % n) color; Style.click.Play()
+    let bk() = Setting.app (fun x -> (x + 1uy) % n) color; Style.click.Play()
     
     do 
         this
         |* Clickable((fun () -> (if not this.Selected then this.Select()); fd ()), OnHover = fun b -> if b && not this.Focused then this.Focus())
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
     
     override this.Draw() =
         base.Draw()

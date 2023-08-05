@@ -15,7 +15,7 @@ module Rulesets = Interlude.Content.Rulesets
 module Rulesets = 
 
     type private RulesetButton(id: string, ruleset: Gameplay.Ruleset) =
-        inherit StaticContainer(NodeType.Button (fun _ -> options.SelectedRuleset.Set id))
+        inherit StaticContainer(NodeType.Button (fun _ -> Style.click.Play(); options.SelectedRuleset.Set id))
             
         override this.Init(parent: Widget) =
             this
@@ -33,6 +33,8 @@ module Rulesets =
                 Position = Position.TrimTop(PRETTYHEIGHT - 10.0f).Margin Style.PADDING)
             |* Clickable.Focus this
             base.Init parent
+
+        override this.OnFocus() = Style.hover.Play(); base.OnFocus()
             
         override this.Draw() =
             if this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O1

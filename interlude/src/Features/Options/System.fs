@@ -25,6 +25,7 @@ module System =
             | Key (k, (ctrl, _, shift)) ->
                 set <| Key (k, (ctrl, false, shift))
                 this.Focus()
+                Style.key.Play()
             | _ -> Input.grabNextEvent inputCallback
 
         do
@@ -36,8 +37,11 @@ module System =
             |* Clickable((fun () -> if not this.Selected then this.Select()), 
                 OnHover = fun b -> if b then this.Focus())
 
+        override this.OnFocus() = Style.hover.Play(); base.OnFocus()
+
         override this.OnSelected() =
             base.OnSelected()
+            Style.click.Play()
             Input.grabNextEvent inputCallback
 
         override this.OnDeselected() =

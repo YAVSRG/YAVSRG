@@ -26,6 +26,8 @@ module private Helpers =
         let REPEAT_DELAY = 400.0
         let REPEAT_INTERVAL = 40.0
 
+        override this.OnFocus() = Style.hover.Play(); base.OnFocus()
+
         override this.Init(parent) =
             base.Init parent
             this

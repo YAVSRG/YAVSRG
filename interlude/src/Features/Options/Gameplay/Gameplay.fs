@@ -39,6 +39,7 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             if progress = int keymode.Value then this.Focus()
             else Input.grabNextEvent inputCallback
             refreshText()
+            Style.key.Play()
         | _ -> Input.grabNextEvent inputCallback
 
     do
@@ -48,11 +49,14 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             Align = Alignment.LEFT)
         |* Clickable((fun () -> if not this.Selected then this.Select()),
             OnHover = fun b -> if b then this.Focus())
+    
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     override this.OnSelected() =
         base.OnSelected()
         progress <- 0
         refreshText()
+        Style.click.Play()
         Input.grabNextEvent inputCallback
 
     override this.OnDeselected() =
