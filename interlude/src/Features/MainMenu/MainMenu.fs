@@ -102,7 +102,7 @@ type MainMenuScreen() as this =
 
     override this.OnExit next =
         Logo.moveOffscreen()
-        splashAnim.Target <- 0.0f
+        splashAnim.Target <- 0.0f; splashAnim.Snap()
         Background.dim 0.7f
 
     override this.OnBack() = Some Screen.Type.SplashScreen
@@ -112,8 +112,8 @@ type MainMenuScreen() as this =
         let (s, ss) = splashText
         let a1 = splashSubAnim.Value * splashAnim.Value * 255.0f |> int
         let a2 = splashAnim.Alpha
-        Text.drawJustB (Style.font, ss, 20.0f, c, this.Bounds.Top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb (a1, Color.White), Palette.color (a1, 0.5f, 0.0f)), 0.5f)
-        Text.drawJustB (Style.font, s, 40.0f, c, this.Bounds.Top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), Palette.color (a2, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB (Style.font, ss, 20.0f, c, this.Bounds.Top + 50.0f + 30.0f * splashSubAnim.Value, (Colors.white.O4a a1, Palette.color (a1, 0.5f, 0.0f)), Alignment.CENTER)
+        Text.drawJustB (Style.font, s, 40.0f, c, this.Bounds.Top - 60.0f + 80.0f * splashAnim.Value, (Colors.white.O4a a2, Palette.color (a2, 0.5f, 0.0f)), Alignment.CENTER)
         base.Draw()
 
     override this.Update (elapsedTime, moved) =

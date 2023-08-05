@@ -17,7 +17,7 @@ type private RulesetStatus =
     | UpToDate
 
 type RulesetCard(id: string, ruleset: Ruleset) as this =
-    inherit Frame(NodeType.Button (fun () -> this.Install()),
+    inherit Frame(NodeType.Button (fun () -> Style.click.Play(); this.Install()),
         Fill = (fun () -> if this.Focused then Colors.pink.O2 else Colors.shadow_2.O2),
         Border = (fun () -> if this.Focused then Colors.pink_accent else Colors.grey_2.O3))
             
@@ -35,6 +35,8 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
             Align = Alignment.LEFT,
             Position = Position.TrimTop(40.0f).Margin(10.0f, Style.PADDING))
         |* Clickable.Focus this
+    
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     member this.Install() =
         match status with

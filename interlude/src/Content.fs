@@ -149,6 +149,11 @@ module Content =
                 Style.text_close <- Sounds.getSound "text-close"
                 Style.text_open <- Sounds.getSound "text-open"
                 Style.key <- Sounds.getSound "key"
+                
+                Style.notify_error <- Sounds.getSound "notify-error"
+                Style.notify_info <- Sounds.getSound "notify-info"
+                Style.notify_system <- Sounds.getSound "notify-system"
+                Style.notify_task <- Sounds.getSound "notify-task"
 
             let switch (new_id: string) =
                 let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Theme '" + new_id + "' not found, switching to default"); "*default"

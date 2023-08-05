@@ -33,7 +33,7 @@ type EOPack =
     }
 
 type private SMImportCard(id: int, data: EOPackAttrs) as this =
-    inherit Frame(NodeType.Button(fun () -> this.Download()),
+    inherit Frame(NodeType.Button(fun () -> Style.click.Play(); this.Download()),
         Fill = (fun () -> Palette.color(120, 0.5f, 0.0f)),
         Border = (fun () -> if this.Focused then Color.White else Palette.color(200, 0.7f, 0.2f))
     )
@@ -83,6 +83,8 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
             Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
         |* Button(Icons.download, download,
             Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     override this.Draw() =
         base.Draw()

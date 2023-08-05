@@ -14,7 +14,7 @@ open Interlude.Utils
 open Interlude.Content
 
 type NoteskinCard(data: RepoEntry) as this =
-    inherit Frame(NodeType.Button (fun () -> this.Download()),
+    inherit Frame(NodeType.Button (fun () -> Style.click.Play(); this.Download()),
         Fill = (fun () -> if this.Focused then Colors.pink.O2 else Colors.shadow_2.O2),
         Border = (fun () -> if this.Focused then Colors.pink_accent else Colors.grey_2.O3))
             
@@ -29,6 +29,8 @@ type NoteskinCard(data: RepoEntry) as this =
             Align = Alignment.CENTER,
             Position = Position.Margin(Style.PADDING).SliceTop(70.0f))
         |* Clickable.Focus this
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     member this.Download() =
         if status = NotDownloaded || status = DownloadFailed then
