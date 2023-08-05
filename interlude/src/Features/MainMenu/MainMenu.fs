@@ -15,16 +15,18 @@ open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 
 type private MenuButton(onClick, label: string, pos) as this =
-    inherit DynamicContainer(NodeType.Button(onClick))
+    inherit DynamicContainer(NodeType.Button(fun () -> Style.click.Play(); onClick()))
 
     do
         this
         |+ Clickable.Focus this
         |* Text(label,
             Align = Alignment.CENTER,
-            Color = K Colors.text,
+            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),
             Position = { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 10.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 20.0f })
         this.Position <- pos
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
     override this.Draw() =
         Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf !*Palette.HIGHLIGHT_100) Sprite.DefaultQuad
