@@ -6002,6 +6002,15 @@
         "Tags": ["BEMANI", "KONAMI", "ORIENTAL", "TECHDANCE", "かめりあ", "Sota", "Fujimori", "Season", "Line", "occasional", "rain", "hydrangea"], 
         "Title": "AZISAI"
     }, 
+    "camelliaftnanahira/edmjumpersshortver": {
+        "AlternativeTitles": [], 
+        "Artists": ["Camellia", "Nanahira"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "EDM Jumpers"
+    }, 
     "camellialapix/hypnotize": {
         "AlternativeTitles": [], 
         "Artists": ["Camellia", "lapix"], 
@@ -20375,6 +20384,15 @@
         "Tags": [], 
         "Title": "abnormalize"
     }, 
+    "lingtositesigure/abnormalize-1": {
+        "AlternativeTitles": [], 
+        "Artists": ["Ling Tosite Sigure"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "abnormalize"
+    }, 
     "lingtositesigure/enigmaticfeeling": {
         "AlternativeTitles": [], 
         "Artists": ["Ling Tosite Sigure"], 
@@ -23795,6 +23813,15 @@
         "Tags": [], 
         "Title": "Maniera"
     }, 
+    "musicalmasterpieceremixedbydaisan/mamissingascensionmix": {
+        "AlternativeTitles": [], 
+        "Artists": ["Musical Masterpiece remixed by daisan"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "M-A (Missing Ascension Mix)"
+    }, 
     "mustdie/oniichan": {
         "AlternativeTitles": [], 
         "Artists": ["MUST DIE!"], 
@@ -25612,6 +25639,15 @@
         "Source": null, 
         "Tags": [], 
         "Title": "Sweet Dreams (11t dnb remix)"
+    }, 
+    "nishinokana11tdnbremix/sweetdreams": {
+        "AlternativeTitles": [], 
+        "Artists": ["Nishino Kana (11t dnb remix)"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Sweet Dreams"
     }, 
     "nishizawahagumi/yumekaibiyori": {
         "AlternativeTitles": ["夢飼い日和"], 
@@ -29411,6 +29447,15 @@
         "Tags": [], 
         "Title": "World Domination How-To"
     }, 
+    "risuruaraki/worlddominationhowto-1": {
+        "AlternativeTitles": [], 
+        "Artists": ["Risuru & Araki"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": ["I", "really", "love", "Araki"], 
+        "Title": "World Domination How-To"
+    }, 
     "rita/littlebusters": {
         "AlternativeTitles": [], 
         "Artists": ["Rita"], 
@@ -33137,6 +33182,15 @@
         "Tags": ["KONAMI", "BEMANI", "BGM", "JAEPO2014", "Simple_Star", "Kuo", "Kyoka"], 
         "Title": "DANCE ALL NIGHT"
     }, 
+    "sotafujimori/danceallnight-1": {
+        "AlternativeTitles": [], 
+        "Artists": ["Sota Fujimori"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "DANCE ALL NIGHT"
+    }, 
     "sotafujimori/transport": {
         "AlternativeTitles": [], 
         "Artists": ["Sota Fujimori"], 
@@ -33919,6 +33973,15 @@
         "Source": null, 
         "Tags": [], 
         "Title": "Nothing To Save"
+    }, 
+    "sunlessrise/nothingtosave-1": {
+        "AlternativeTitles": [], 
+        "Artists": ["Sunless Rise"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Nothing To Save "
     }, 
     "sunriseskaterkids/nothingspecial": {
         "AlternativeTitles": [], 
@@ -36060,6 +36123,15 @@
         "Remixers": [], 
         "Source": "Ez2Dj 7th TraX Class R Codename : Violet", 
         "Tags": ["sasakure.UK", "victorica_db"], 
+        "Title": "Kamui"
+    }, 
+    "tjhangneil/kamui-1": {
+        "AlternativeTitles": [], 
+        "Artists": ["TJ.hangneil"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
         "Title": "Kamui"
     }, 
     "tkfromlingtositesigure/unravel": {
@@ -40247,6 +40319,15 @@
         "Tags": [], 
         "Title": "Watashi no COLOR(S)"
     }, 
+    "yuicvyuukitakada/watashinocolors-1": {
+        "AlternativeTitles": [], 
+        "Artists": ["Yui(CV.Yuuki Takada)"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Watashi no COLOR(S)"
+    }, 
     "yuikonnu/houkagostride": {
         "AlternativeTitles": ["放課後ストライド"], 
         "Artists": ["Yuikonnu"], 
@@ -40574,6 +40655,15 @@
     "yuukiaoimizukinanatakagakiayahihikasayoukonanjouyoshinokayanoaitakayamaminami/nijiironoflugel": {
         "AlternativeTitles": [], 
         "Artists": ["Yuuki Aoi", "Mizuki Nana", "Takagaki Ayahi", "Hikasa Youko", "Nanjou Yoshino", "Kayano Ai", "Takayama Minami"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Nijiiro no Flugel"
+    }, 
+    "yuukiaoimizukinanatakagakiayahihikasayoukonanjouyoshinokayanoaitakayamaminami/nijiironoflugel-1": {
+        "AlternativeTitles": [], 
+        "Artists": ["Yuuki Aoi, Mizuki Nana, Takagaki Ayahi, Hikasa Youko, Nanjou Yoshino, Kayano Ai, Takayama Minami"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -41065,6 +41155,15 @@
         "Source": null, 
         "Tags": [], 
         "Title": "Plastic Mind"
+    }, 
+    "zunremixby44teruk/harutomannoyoukaishoujovirusv": {
+        "AlternativeTitles": [], 
+        "Artists": ["ZUN"], 
+        "OtherArtists": [], 
+        "Remixers": ["44teru-k"], 
+        "Source": null, 
+        "Tags": [], 
+        "Title": "Harutoman no Youkai Shoujo ~ VirusV"
     }, 
     "zutt/": {
         "AlternativeTitles": [], 
