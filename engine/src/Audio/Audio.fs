@@ -7,7 +7,7 @@ open Percyqaz.Common
 
 [<AutoOpen>]
 module private Helpers =
-    let bassError b = () //if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString()) System.Environment.StackTrace
+    let bassError b = ()//if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString(), Environment.StackTrace)
 
 type Song =
     {
@@ -151,6 +151,7 @@ type SoundEffect =
 
 module SoundEffect =
 
+    // todo: if you change audio device sfx stops working
     let play (fx: SoundEffect) (volume: float) =
         Bass.ChannelSetDevice(fx.ChannelID, Bass.CurrentDevice) |> bassError
         Bass.ChannelSetAttribute(fx.ChannelID, ChannelAttribute.Volume, volume * 2.0) |> bassError
