@@ -74,6 +74,10 @@ module Style =
     let mutable text_open = SoundEffect.Default
     let mutable text_close = SoundEffect.Default
     let mutable key = SoundEffect.Default
+    let mutable notify_error = SoundEffect.Default
+    let mutable notify_info = SoundEffect.Default
+    let mutable notify_system = SoundEffect.Default
+    let mutable notify_task = SoundEffect.Default
 
 type PaletteColor =
     {
