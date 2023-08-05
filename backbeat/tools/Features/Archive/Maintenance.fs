@@ -265,3 +265,8 @@ module Maintenance =
             artists.Artists.Add(name, { Alternatives = []; IsJapaneseFullName = is_japanese })
             Logging.Info(sprintf "Added %s, Is Japanese: %b" name is_japanese)
             save()
+
+    open Prelude.Data.Charts.Caching
+
+    let recache() =
+        Cache.recache_service.RequestAsync(backbeat_cache) |> Async.RunSynchronously

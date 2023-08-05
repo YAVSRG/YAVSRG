@@ -15,3 +15,4 @@ module Archive =
             .WithCommand("check_ids", "Fix old song ids", Maintenance.check_all_ids)
             .WithCommand("verify_artist", "Add a verified artist name to the database", "artist_name", Maintenance.verify_artist)
             .WithCommand("v2_test", "Test", Maintenance2.test)
+            .WithCommand("recache", "Rebuilds the backbeat chart cache", Maintenance.recache)

@@ -57,7 +57,7 @@ module Upload =
                     Logging.Info(sprintf "Uploaded %s (%.1fKB)" hash (float response.Response.ContentLength / 1000.0))
 
                     add_existing_file hash
-                else Logging.Info(sprintf "Skipping %s" hash)
+                else ()//Logging.Info(sprintf "Skipping %s" hash)
             } |> Async.AwaitTask
 
             task {
@@ -70,7 +70,7 @@ module Upload =
                     Logging.Info(sprintf "Uploaded %s (%.1fMB)" audio_hash (float response.Response.ContentLength / 1000000.0))
 
                     add_existing_file audio_hash
-                else Logging.Info(sprintf "Skipping %s" audio_hash)
+                else ()//Logging.Info(sprintf "Skipping %s" audio_hash)
             } |> Async.AwaitTask
                 
             task {
@@ -83,7 +83,7 @@ module Upload =
                     Logging.Info(sprintf "Uploaded %s (%.1fMB)" bg_hash (float response.Response.ContentLength / 1000000.0))
 
                     add_existing_file bg_hash
-                else Logging.Info(sprintf "Skipping %s" bg_hash)
+                else ()//Logging.Info(sprintf "Skipping %s" bg_hash)
             } |> Async.AwaitTask
         ] |> Async.Ignore
 
