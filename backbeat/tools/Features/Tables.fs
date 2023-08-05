@@ -186,17 +186,21 @@ module Tables =
         let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
         for level in table.Levels do
             for chart in level.Charts do
+                //If already in backbeat cache, skip
+                match Cache.by_key (sprintf "%s/%s" table.Name chart.Hash) backbeat_cache with
+                | Some _ -> ()
+                | None ->
+
                 match Cache.by_hash chart.Hash interlude_cache with
                 | Some cc -> 
                     match Cache.load cc interlude_cache with
                     | Some c -> 
-                        let ok, info = charts.TryGetValue chart.Hash
-                        if ok then
-                            Cache.clone table.Name cc interlude_cache backbeat_cache
-                            upload_chart c info
-                        else Logging.Info(sprintf "Chart not in backbeat: %s" chart.Id)
+                        Cache.clone table.Name cc interlude_cache backbeat_cache
+                        Logging.Info(sprintf "Chart copied to backbeat: %s" chart.Id)
                     | None -> Logging.Info(sprintf "Error loading chart: %s" chart.Id)
                 | None -> Logging.Info(sprintf "Chart missing from local library: %s" chart.Id)
+        Cache.save backbeat_cache
+        Collect.slurp_folder [] table.Name
 
     let update_index() =
         let index = { Tables = ResizeArray<TableIndexEntry>() }
