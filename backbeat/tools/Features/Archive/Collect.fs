@@ -137,7 +137,7 @@ module Collect =
         |> Seq.iter (Option.iter (slurp_chart extra_sources))
         save()
 
-    let cache_song_folder (config: ConversionActionConfig) (target: string) =
+    let cache_song_folder (config: ConversionOptions) (target: string) =
         Directory.EnumerateFiles target
         |> Seq.collect
             (
@@ -160,7 +160,7 @@ module Collect =
         let pack_name = sm_pack_id.ToString()
         for songFolder in Directory.EnumerateDirectories target do 
             cache_song_folder 
-                { ConversionActionConfig.Default with StepmaniaPackId = Some sm_pack_id; MoveAssets = false; PackName = pack_name }
+                { ConversionOptions.Default with StepmaniaPackId = Some sm_pack_id; MoveAssets = false; PackName = pack_name }
                 songFolder
         Cache.save backbeat_cache
         slurp_folder [] pack_name
@@ -172,7 +172,7 @@ module Collect =
             if not (Directory.Exists extracted_path) then
                 ZipFile.ExtractToDirectory(osz, Path.GetFileNameWithoutExtension osz)
             cache_song_folder
-                { ConversionActionConfig.Default with MoveAssets = false; PackName = pack_name }
+                { ConversionOptions.Default with MoveAssets = false; PackName = pack_name }
                 extracted_path
         Cache.save backbeat_cache
         slurp_folder [ChartSource.CommunityPack {| PackId = community_pack_id |}] pack_name
