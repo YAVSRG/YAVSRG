@@ -11,7 +11,7 @@ open Prelude.Charts.Formats.``osu!``
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.StepMania
 
-type ConversionActionConfig =
+type ConversionOptions =
     {
         MoveAssets: bool
         StepmaniaPackId: int option
@@ -20,7 +20,7 @@ type ConversionActionConfig =
     }
     static member Default =
         {
-            MoveAssets = true
+            MoveAssets = false
             StepmaniaPackId = None
             ChangedAfter = None
             PackName = "Singles"
@@ -28,7 +28,7 @@ type ConversionActionConfig =
 
 type ConversionAction =
     {
-        Config: ConversionActionConfig
+        Config: ConversionOptions
         Source: string
     }
 
@@ -168,14 +168,14 @@ module ``osu!`` =
                     if File.Exists(Path.Combine(path, r)) then
                         if action.Config.MoveAssets then Relative r else Absolute (Path.Combine(path, r))
                     else
-                        Logging.Warn(sprintf "Background file for %s not found: %s" path r)
+                        //Logging.Warn(sprintf "Background file for %s not found: %s" path r)
                         Missing
                 AudioFile =
                     let r = b.General.AudioFilename
                     if File.Exists(Path.Combine(path, r)) then
                         if action.Config.MoveAssets then Relative r else Absolute (Path.Combine(path, r))
                     else 
-                        Logging.Warn(sprintf "Background file for %s not found: %s" path r)
+                        //Logging.Warn(sprintf "Background file for %s not found: %s" path r)
                         Missing
 
                 ChartSource = Osu (b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
@@ -355,7 +355,7 @@ module Stepmania =
                             if action.Config.MoveAssets then Relative file 
                             else Absolute (Path.Combine(path, file)) 
                         | None ->
-                            Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
+                            //Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
                             Missing
                     BackgroundFile = 
                         match findBackground() with
@@ -363,7 +363,7 @@ module Stepmania =
                             if action.Config.MoveAssets then Relative file 
                             else Absolute (Path.Combine(path, file)) 
                         | None -> 
-                            Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
+                            //Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
                             Missing
 
                     ChartSource = Unknown

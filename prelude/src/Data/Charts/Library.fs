@@ -135,7 +135,7 @@ module Library =
                 { SourceFolder = path; LastImported = DateTime.UnixEpoch; Type = Library; ImportOnStartup = false }
 
         let convert_song_folder = 
-            { new Async.Service<string * ConversionActionConfig, unit>() with
+            { new Async.Service<string * ConversionOptions, unit>() with
                 override this.Handle((path, config)) =
                     async {
                         Directory.EnumerateFiles path
@@ -155,7 +155,7 @@ module Library =
             }
 
         let convert_pack_folder =
-            { new Async.Service<string * ConversionActionConfig, unit>() with
+            { new Async.Service<string * ConversionOptions, unit>() with
                 override this.Handle((path, config)) =
                     async {
                         for songFolder in
@@ -173,7 +173,7 @@ module Library =
                     async {
                         match source.Type with
                         | Pack packname ->
-                            let config = { ConversionActionConfig.Default with MoveAssets = false; ChangedAfter = Some source.LastImported; PackName = packname }
+                            let config = { ConversionOptions.Default with MoveAssets = false; ChangedAfter = Some source.LastImported; PackName = packname }
                             do! convert_pack_folder.RequestAsync(source.SourceFolder, config)
                             source.LastImported <- DateTime.Now
                         | Library ->
@@ -181,14 +181,14 @@ module Library =
                                 Directory.EnumerateDirectories source.SourceFolder
                                 |> Seq.filter (fun path -> Directory.GetLastWriteTime path >= source.LastImported)
                                 do
-                                do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with MoveAssets = false; ChangedAfter = Some source.LastImported; PackName = Path.GetFileName packFolder })
+                                do! convert_pack_folder.RequestAsync(packFolder, { ConversionOptions.Default with MoveAssets = false; ChangedAfter = Some source.LastImported; PackName = Path.GetFileName packFolder })
                             source.LastImported <- DateTime.Now
                     }
             }
 
         let auto_convert =
-            { new Async.Service<string * bool, bool>() with
-                override this.Handle((path, move_assets)) =
+            { new Async.Service<string * bool * int option, bool>() with
+                override this.Handle((path, move_assets, sm_pack_id)) =
                     async {
                         match File.GetAttributes path &&& FileAttributes.Directory |> int with
                         | 0 ->
@@ -196,7 +196,7 @@ module Library =
                             | ChartFile ext ->
                                 do! convert_song_folder.RequestAsync(
                                     Path.GetDirectoryName path,
-                                    { ConversionActionConfig.Default with PackName = if ext = ".osu" then "osu!" else "Singles" })
+                                    { ConversionOptions.Default with PackName = if ext = ".osu" then "osu!" else "Singles" })
                                 return true
                             | ChartArchive ->
                                 let dir = Path.ChangeExtension(path, null)
@@ -205,24 +205,24 @@ module Library =
                                     return false
                                 else
                                     ZipFile.ExtractToDirectory(path, dir)
-                                    this.Request((dir, true), fun b -> Directory.Delete(dir, true))
+                                    this.Request((dir, true, sm_pack_id), fun _ -> Directory.Delete(dir, true))
                                     return true
                             | _ -> Logging.Warn(sprintf "%s: Unrecognised file for import" path); return false
                         | _ ->
                             match path with
                             | SongFolder ext ->
-                                do! convert_song_folder.RequestAsync(path, { ConversionActionConfig.Default with MoveAssets = move_assets; PackName = if ext = ".osu" then "osu!" else "Singles" })
+                                do! convert_song_folder.RequestAsync(path, { ConversionOptions.Default with MoveAssets = move_assets; PackName = if ext = ".osu" then "osu!" else "Singles" })
                                 return true
                             | PackFolder ->
                                 let packname =
                                     match Path.GetFileName path with
                                     | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
                                     | s -> s
-                                do! convert_pack_folder.RequestAsync(path, { ConversionActionConfig.Default with PackName = packname; MoveAssets = move_assets })
+                                do! convert_pack_folder.RequestAsync(path, { ConversionOptions.Default with StepmaniaPackId = sm_pack_id; PackName = packname; MoveAssets = move_assets })
                                 return true
                             | FolderOfPacks ->
                                 for packFolder in Directory.EnumerateDirectories path do
-                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with PackName = Path.GetFileName packFolder; MoveAssets = move_assets })
+                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionOptions.Default with StepmaniaPackId = sm_pack_id; PackName = Path.GetFileName packFolder; MoveAssets = move_assets })
                                 return true
                             | _ -> Logging.Warn(sprintf "%s: No importable folder structure detected" path); return false
                     }
