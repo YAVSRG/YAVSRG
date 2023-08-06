@@ -149,9 +149,11 @@ module Backbot =
             else 
                 Logging.Info(sprintf "Unknown remix name '%s'" s)
                 confident <- false
+                suggested_title <- title + " (" + s + ")"
         | Some s -> 
-            Logging.Info(sprintf "Unknown bracket text '%s'" s)
+            //Logging.Info(sprintf "Unknown bracket text '%s'" s)
             confident <- false
+            suggested_title <- title + " (" + s + ")"
         | None -> ()
 
         match run p title with
@@ -191,7 +193,7 @@ module Backbot =
         save()
 
     let correct_meta(user_oversight) =
-        Logging.Info "Scanning for metadata corrections"
+        Logging.Info "Scanning for metadata corrections (artists)"
         for s in songs.Keys |> Seq.toArray do
             let song = songs.[s]
             if song.Artists.Length = 1 && song.Remixers.Length = 0 && song.OtherArtists.Length = 0 then
@@ -207,7 +209,8 @@ module Backbot =
                     if confident || (user_oversight && make_suggestion "artist_splitter" s song suggestion) then
                         songs.[s] <- suggestion
                         if confident then Logging.Info(sprintf "Making confident edit to '%s'" s) else save()
-
+                        
+        Logging.Info "Scanning for metadata corrections (title)"
         for s in songs.Keys |> Seq.toArray do
             let song = songs.[s]
             if song.Remixers.Length = 0 && song.OtherArtists.Length = 0 then
@@ -227,9 +230,9 @@ module Backbot =
     let private title_variations = 
         [|
             "tv size ver."; "tv ver."; "tv size"; "tv version"; "tv edit"; "tv-size"; "anime ver."; "op cut"; "op ver."
-            "uncut ver."; "long ver."; "extended ver."; "extended mix"
-            "cut ver.";  "short ver."; "short edit"
-            "album ver"; "original mix"
+            "uncut ver."; "long ver."; "extended ver."; "extended mix"; "radio ver."; "radio edit"; "radio mix"
+            "cut ver.";  "short ver."; "short edit"; "short cut"
+            "album ver"; "original mix"; "bass boosted"; "full version"
         |]
     let correct_titles() =
         Logging.Info "Scanning for title variations to prune (TV Size, Extended mix, etc)"

@@ -4184,14 +4184,14 @@
         "Tags": [], 
         "Title": "LAMENTO"
     }, 
-    "blackmill/homefullversion": {
+    "blackmill/home": {
         "AlternativeTitles": [], 
         "Artists": ["Blackmill"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": ["Chillstep", "melodic", "dubstep", "calm"], 
-        "Title": "Home (Full Version)"
+        "Title": "Home"
     }, 
     "blacky/": {
         "AlternativeTitles": [], 
@@ -7721,7 +7721,7 @@
         "Tags": [], 
         "Title": "Breath After Breath"
     }, 
-    "crazytfeatdopenessishone/badasfuck": {
+    "crazyt/badasfuck": {
         "AlternativeTitles": [], 
         "Artists": ["CRAZY-T"], 
         "OtherArtists": ["鎮座DOPENESS", "ISH-ONE"], 
@@ -7765,15 +7765,6 @@
         "Source": "BMS", 
         "Tags": ["BOF", "2006", "requiem", "trance"], 
         "Title": "End Time"
-    }, 
-    "cres/endtimeshortcut": {
-        "AlternativeTitles": [], 
-        "Artists": ["Cres"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "End Time (Short Cut)"
     }, 
     "crimewave/toxicc": {
         "AlternativeTitles": [], 
@@ -8515,7 +8506,7 @@
     }, 
     "dejobon/wheelpowergo": {
         "AlternativeTitles": [], 
-        "Artists": ["Dejo & Bon"], 
+        "Artists": ["Dejo", "Bon"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -15956,14 +15947,14 @@
         "Tags": [], 
         "Title": "A Betrayal Unforetold"
     }, 
-    "infinityink/infinitydubdogzbhaskarremixbassboosted": {
+    "infinityink/infinitydubdogzbhaskarremix": {
         "AlternativeTitles": [], 
         "Artists": ["Infinity Ink"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Dubdogz", "Bhaskar"], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Infinity (Dubdogz & Bhaskar Remix) (Bass Boosted)"
+        "Title": "Infinity (Dubdogz & Bhaskar Remix)"
     }, 
     "inflames/crawlthroughknives": {
         "AlternativeTitles": [], 
@@ -21500,14 +21491,14 @@
         "Tags": [], 
         "Title": "Divide"
     }, 
-    "maidable/sawykftwrk": {
+    "maidable/sawyk": {
         "AlternativeTitles": [], 
         "Artists": ["maidable"], 
-        "OtherArtists": [], 
+        "OtherArtists": ["WRK"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "SAWYK FTWRK"
+        "Title": "SAWYK"
     }, 
     "maidable/tokimaidableremix": {
         "AlternativeTitles": [], 
@@ -21832,15 +21823,6 @@
         "Source": null, 
         "Tags": ["original", "mix", "short", "version", "nowsmart", "lonleyplanet120", "arviejhay", "Asphalt", "8", "Airborne", "Gold", "Skies"], 
         "Title": "Animals"
-    }, 
-    "martingarrix/animalsradioedit": {
-        "AlternativeTitles": [], 
-        "Artists": ["Martin Garrix"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Animals (Radio Edit)"
     }, 
     "masa/kitsunenoyomeiri": {
         "AlternativeTitles": [], 
@@ -22895,14 +22877,14 @@
         "Tags": ["1st", "Album", "Innocent", "flower", "Yusuke", "Shirato", "J-Pop", "Japanese"], 
         "Title": "Lucky Clover"
     }, 
-    "minaseinori/melodyflagamiisedit": {
+    "minaseinori/melodyflag": {
         "AlternativeTitles": [], 
         "Artists": ["Minase Inori"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Amii"], 
         "Source": null, 
         "Tags": ["中野領太", "ryota", "nakano", "edit", "ViVid", "Strike!", "Starry", "Wish", "ヴィヴィッド"], 
-        "Title": "MELODY FLAG (Amii's Edit)"
+        "Title": "MELODY FLAG"
     }, 
     "minaseinori/miraipuzzle": {
         "AlternativeTitles": ["未来パズル"], 
@@ -37016,14 +36998,14 @@
         "Tags": [], 
         "Title": "Por ella"
     }, 
-    "tropkillaz/hidehobassboosted": {
+    "tropkillaz/hideho": {
         "AlternativeTitles": [], 
         "Artists": ["Tropkillaz"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "HIDEHO (Bass Boosted)"
+        "Title": "HIDEHO"
     }, 
     "true/butterflyeffector": {
         "AlternativeTitles": [], 
@@ -38892,7 +38874,7 @@
         "AlternativeTitles": [], 
         "Artists": ["Wiwek"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Zekk"], 
         "Source": null, 
         "Tags": [], 
         "Title": "Drum Nation (Zekk Edit)"
