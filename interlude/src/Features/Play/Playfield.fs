@@ -169,7 +169,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                             left + columnPositions.[k],
                             pos_a + noteHeight * 0.5f,
                             left + columnPositions.[k] + column_width,
-                            pos_b + noteHeight * 0.5f)
+                            pos_b + noteHeight * 0.5f + 2.0f)
                         |> scrollDirectionPos bottom
                     )
                 )
