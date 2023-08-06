@@ -230,7 +230,7 @@ module Collect =
 
     let slurp_sm (name: string) =
         let name = name.ToLower().Trim()
-        match packs.Stepmania |> Seq.tryFind(fun x -> x.Value.Title.ToLower().Contains name) with
+        match packs.Stepmania |> Seq.tryFind(fun x -> x.Value.Title.ToLower() = name) with
         | Some kv -> kv.Key |> download_pack |> Async.RunSynchronously |> ignore
         | None -> Logging.Error "Not found"
 
