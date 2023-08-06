@@ -165,7 +165,7 @@ module Maintenance =
             
     let character_voice_regex = Text.RegularExpressions.Regex("[\\[\\(][cC][vV][.:\\-]?\\s?(.*)[\\]\\)]")
     let private check_all_artists_v2() =
-        let map = artists.CreateMapping()
+        let map = artists.FixerMapping()
         let swap (s: string) =
             if map.ContainsKey(s.ToLower()) then 
                 let replace = map.[s.ToLower()]
@@ -242,20 +242,6 @@ module Maintenance =
             List.iter (check_artist song) song.Artists
             List.iter (check_artist song) song.OtherArtists
             List.iter (check_artist song) song.Remixers
-
-    let check_all_ids() =
-        for id in songs.Keys |> Array.ofSeq do
-            let song = songs.[id]
-            let new_id = (Collect.simplify_string (String.concat "" song.Artists)) + "/" + (Collect.simplify_string song.Title)
-            let mutable i = 0
-            while new_id <> id && songs.ContainsKey(if i > 0 then new_id + "-" + i.ToString() else new_id) do
-                i <- i + 1
-            let new_id = if i > 0 then new_id + "-" + i.ToString() else new_id
-            if new_id <> id then 
-                songs.Add(new_id, song)
-                songs.Remove(id) |> ignore
-                rehome_song_id (id, new_id)
-        save()
 
     let verify_artist (name: string) =
         if artists.Artists.ContainsKey name then

@@ -774,7 +774,7 @@
         "Title": "Farewell"
     }, 
     "3r2/nextstopwithyou": {
-        "AlternativeTitles": ["下一站．與你 (feat. KSP)"], 
+        "AlternativeTitles": ["下一站．與你"], 
         "Artists": ["3R2"], 
         "OtherArtists": ["KSP"], 
         "Remixers": [], 
@@ -1521,7 +1521,7 @@
         "Title": "Picotto! Papitto!! GARUPA PICO!!!"
     }, 
     "aiobahn/sugiyukuhitokimie": {
-        "AlternativeTitles": ["過ぎゆく日と君へ (feat. nayuta)"], 
+        "AlternativeTitles": ["過ぎゆく日と君へ"], 
         "Artists": ["Aiobahn"], 
         "OtherArtists": ["nayuta"], 
         "Remixers": [], 
@@ -5162,7 +5162,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "osu!", 
-        "Tags": ["featured", "artist", "fa", "mappers'", "guild", "cametek", "kamelcamellia", "TF40K", "EP", "(​Thanks", "Twitter", "Followers", "40K)", "E​.​P.", "electronic", "edm", "かめるかめりあ", "UK", "Hardcore", "Techno", "instrumental"], 
+        "Tags": ["featured", "artist", "fa", "mappers'", "guild", "cametek", "kamelcamellia", "TF40K", "EP", "(Thanks", "Twitter", "Followers", "40K)", "E|P.", "electronic", "edm", "かめるかめりあ", "UK", "Hardcore", "Techno", "instrumental"], 
         "Title": "Clouds in the Blue"
     }, 
     "camellia/conveyorsokudomaxshaininkaitenzushisushipeace": {
@@ -7723,8 +7723,8 @@
     }, 
     "crazytfeatdopenessishone/badasfuck": {
         "AlternativeTitles": [], 
-        "Artists": ["CRAZY-T (FEAT. 鎮座DOPENESS & ISH-ONE)"], 
-        "OtherArtists": [], 
+        "Artists": ["CRAZY-T"], 
+        "OtherArtists": ["鎮座DOPENESS", "ISH-ONE"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -15399,7 +15399,7 @@
         "Title": "Theme of Puella Magi"
     }, 
     "icedblade/soranosenritsuthemelodyofthecosmos": {
-        "AlternativeTitles": ["宙の旋律 -the melody of the cosmos- feat.lily-an"], 
+        "AlternativeTitles": ["宙の旋律 -the melody of the cosmos-"], 
         "Artists": ["Iced Blade"], 
         "OtherArtists": ["lily-an"], 
         "Remixers": [], 
@@ -18576,7 +18576,7 @@
         "Title": "Limit Breaker x Survivor"
     }, 
     "kizunaai/aiaiai": {
-        "AlternativeTitles": ["AIAIAI (feat. 中田ヤスタカ)"], 
+        "AlternativeTitles": [], 
         "Artists": ["Kizuna AI"], 
         "OtherArtists": ["Nakata Yasutaka"], 
         "Remixers": [], 
@@ -39819,7 +39819,7 @@
         "AlternativeTitles": [], 
         "Artists": ["Yoko Kanno"], 
         "OtherArtists": [], 
-        "Remixers": [], 
+        "Remixers": ["Hyphen"], 
         "Source": null, 
         "Tags": [], 
         "Title": "Inner Universe (Hyphen's Bootleg)"

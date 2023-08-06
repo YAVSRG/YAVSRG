@@ -18,7 +18,7 @@ module Storage =
         | Ok d -> d
         | Error e -> 
             Logging.Warn(sprintf "Error loading artists.json: %s" e.Message)
-            { Artists = Dictionary<string, VerifiedArtist>() }
+            { Artists = Dictionary<string, VerifiedArtist>(); Aliases = Dictionary<string, string list>() }
     
     let songs : Songs = 
         match JSON.FromFile (Path.Combine(ARCHIVE_PATH, "songs.json")) with

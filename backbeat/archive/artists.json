@@ -1,4 +1,7 @@
 {
+    "Aliases": {
+        
+    }, 
     "Artists": {
         "3L": {
             "Alternatives": [], 
@@ -1193,6 +1196,10 @@
             "IsJapaneseFullName": true
         }, 
         "Warak": {
+            "Alternatives": [], 
+            "IsJapaneseFullName": false
+        }, 
+        "Y&CO.": {
             "Alternatives": [], 
             "IsJapaneseFullName": false
         }, 

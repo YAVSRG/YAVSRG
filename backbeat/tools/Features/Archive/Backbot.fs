@@ -8,6 +8,27 @@ open Prelude.Backbeat.Archive
 
 module Backbot =
 
+    let make_suggestion (flag: string) (id: SongId) (before: Song) (after: Song) : bool =
+        let inline diff label a b = if a <> b then Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
+        Logging.Info(sprintf "Backbot has a suggestion for '%s' that needs your approval" id)
+        diff "Artists" before.Artists after.Artists
+        diff "Performers" before.OtherArtists after.OtherArtists
+        diff "Remixers" before.Remixers after.Remixers
+        diff "Title" before.Title after.Title
+        diff "Alt Titles" before.AlternativeTitles after.AlternativeTitles
+        diff "Formatted title" before.FormattedTitle after.FormattedTitle
+        diff "Tags" before.Tags after.Tags
+        Logging.Info(sprintf "Reason: %s" flag)
+        Logging.Info("\noptions ::\n 1 - Make this change\n 2 - Queue for manual review\n 3 - No correction needed")
+        let mutable option_chosen = None
+        while option_chosen.IsNone do
+            match Console.ReadKey().Key with
+            | ConsoleKey.D1 -> option_chosen <- Some true
+            | ConsoleKey.D2 -> option_chosen <- Some false; Queue.append "song-review" id
+            | ConsoleKey.D3 -> option_chosen <- Some false; Queue.append "song-ignore" id
+            | _ -> ()
+        option_chosen.Value
+
     type ArtistFragment =
         | Verified of string
         | Artist of string
@@ -48,7 +69,7 @@ module Backbot =
 
     let private parse_collab : Parser<_, unit> =
         let verified =
-            let mapping = artists.CreateMappingCaseSensitive()
+            let mapping = artists.ParserMapping()
             match mapping.Keys |> Seq.sortByDescending (fun s -> s.Length) |> List.ofSeq with
             | [] -> pzero
             | x :: xs -> 
@@ -61,14 +82,14 @@ module Backbot =
     let private parse_prod_and_features : Parser<ArtistsAndFeatures, unit> =
         parse_collab .>>. opt (feature_separator >>. parse_collab)
 
-    let private extract_bracket (artist: string) =
+    let private extract_bracket (text: string) =
         let bracket_regex = Text.RegularExpressions.Regex("\\((.*?)\\)$")
         
-        let matches = bracket_regex.Matches artist
+        let matches = bracket_regex.Matches text
         if matches.Count = 1 then
             let bracket_content = matches.[0].Groups.[1].Value
-            artist.Replace(matches.First().Value, "").Trim(), Some bracket_content
-        else artist, None
+            text.Replace(matches.First().Value, "").Trim(), Some bracket_content
+        else text, None
     
     let private parse_artists_and_remixers (artist: string) : string list * string list * string list * string * bool =
         let p = parse_prod_and_features .>>. restOfLine false
@@ -82,7 +103,6 @@ module Backbot =
         let mutable append_to_title = ""
 
         match bracket with
-
         | Some s when s.ToLower().EndsWith(" remix") || s.ToLower().EndsWith(" mix") || s.ToLower().EndsWith(" edit") || s.ToLower().EndsWith(" bootleg") ->
             match run p s with
             | Success((res, leftover), _, _) -> 
@@ -94,9 +114,9 @@ module Backbot =
         | Some s when s.ToLower().StartsWith("remix by ") || s.ToLower().StartsWith("remixed by ") || s.ToLower().StartsWith("edit by ") ->
             let remixer = s.Split(" by ", StringSplitOptions.TrimEntries).Last()
             remixers <- [remixer]
-            append_to_title <- "(" + remixer + ")"
+            append_to_title <- "(" + remixer + " Remix)"
         | Some s -> 
-            Logging.Info(sprintf "Weird bracket text '%s'" s)
+            Logging.Info(sprintf "Unusual bracket text '%s'" s)
             confident <- false
         | None -> ()
 
@@ -112,31 +132,41 @@ module Backbot =
 
         artists, performers, remixers, append_to_title, confident
 
-    let make_suggestion (flag: string) (id: SongId) (before: Song) (after: Song) : bool =
-        let inline diff label a b = if a <> b then Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
-        Logging.Info(sprintf "Backbot has a suggestion for '%s' that needs your approval" id)
-        diff "Artists" before.Artists after.Artists
-        diff "Performers" before.OtherArtists after.OtherArtists
-        diff "Remixers" before.Remixers after.Remixers
-        diff "Title" before.Title after.Title
-        diff "Alt Titles" before.AlternativeTitles after.AlternativeTitles
-        diff "Formatted title" before.FormattedTitle after.FormattedTitle
-        diff "Tags" before.Tags after.Tags
-        Logging.Info(sprintf "Reason: %s" flag)
-        Logging.Info("\noptions ::\n 1 - Make this change\n 2 - Queue for manual review\n 3 - No correction needed")
-        let mutable option_chosen = None
-        while option_chosen.IsNone do
-            match Console.ReadKey().Key with
-            | ConsoleKey.D1 -> option_chosen <- Some true
-            | ConsoleKey.D2 -> option_chosen <- Some false; Queue.append "song-review" id
-            | ConsoleKey.D3 -> option_chosen <- Some false; Queue.append "song-ignore" id
-            | _ -> ()
-        option_chosen.Value
+    let private parse_artists_and_remixers_title (title: string) : string * string list * string list * bool =
+        let p = many1CharsTill anyChar (followedBy ((feature_separator |>> ignore) <|> eof)) .>>. opt (feature_separator >>. parse_collab)
+
+        let title, bracket = extract_bracket title
+
+        let mutable remixers = []
+        let mutable performers = []
+        let mutable confident = true
+        let mutable suggested_title = title
+
+        match bracket with
+        | Some s when s.ToLower().EndsWith(" remix") || s.ToLower().EndsWith(" mix") || s.ToLower().EndsWith(" edit") || s.ToLower().EndsWith(" bootleg") ->
+            if s.Contains("'s") then 
+                remixers <- [s.Split("'s").[0]]
+            else 
+                Logging.Info(sprintf "Unknown remix name '%s'" s)
+                confident <- false
+        | Some s -> 
+            Logging.Info(sprintf "Unknown bracket text '%s'" s)
+            confident <- false
+        | None -> ()
+
+        match run p title with
+        | Success((title, features), _, _) ->
+            suggested_title <- title
+            performers <- ArtistsAndFeatures.features ([], features)
+            if not (ArtistsAndFeatures.confident ([], features)) then confident <- false
+        | Failure(reason, _, _) -> ()
+
+        suggested_title, performers, remixers, confident
 
     let character_voice_regex = Text.RegularExpressions.Regex("[\\[\\(][cC][vV][.:\\-]?\\s?(.*)[\\]\\)]")
     let correct_artists() =
         Logging.Info "Scanning for artist name corrections"
-        let map = artists.CreateMapping()
+        let map = artists.FixerMapping()
         let swap (s: string) =
             if map.ContainsKey(s.ToLower()) then 
                 let replace = map.[s.ToLower()]
@@ -162,7 +192,7 @@ module Backbot =
 
     let correct_meta(user_oversight) =
         Logging.Info "Scanning for metadata corrections"
-        for s in songs.Keys do
+        for s in songs.Keys |> Seq.toArray do
             let song = songs.[s]
             if song.Artists.Length = 1 && song.Remixers.Length = 0 && song.OtherArtists.Length = 0 then
                 let artists, features, remixers, append_to_title, confident = parse_artists_and_remixers song.Artists.[0]
@@ -175,6 +205,21 @@ module Backbot =
                     }
                 if suggestion <> song then
                     if confident || (user_oversight && make_suggestion "artist_splitter" s song suggestion) then
+                        songs.[s] <- suggestion
+                        if confident then Logging.Info(sprintf "Making confident edit to '%s'" s) else save()
+
+        for s in songs.Keys |> Seq.toArray do
+            let song = songs.[s]
+            if song.Remixers.Length = 0 && song.OtherArtists.Length = 0 then
+                let new_title, features, remixers, confident = parse_artists_and_remixers_title song.Title
+                let suggestion = 
+                    { song with 
+                        OtherArtists = features
+                        Remixers = remixers
+                        Title = new_title
+                    }
+                if suggestion <> song then
+                    if confident || (user_oversight && make_suggestion "title_splitter" s song suggestion) then
                         songs.[s] <- suggestion
                         if confident then Logging.Info(sprintf "Making confident edit to '%s'" s) else save()
         save()
