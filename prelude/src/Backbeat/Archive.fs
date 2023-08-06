@@ -18,9 +18,10 @@ type VerifiedArtist =
 type VerifiedArtists =
     { 
         Artists: Dictionary<string, VerifiedArtist>
+        Aliases: Dictionary<string, string list>
     }
     // all-lowercase string map to correct stylised artist name, if exists
-    member this.CreateMapping() =
+    member this.FixerMapping() =
         let d = Dictionary<string, string>()
         for a in this.Artists.Keys do
             let v = this.Artists.[a]
@@ -31,7 +32,8 @@ type VerifiedArtists =
                 let split = a.Split(' ', 2)
                 d.Add((split.[1] + " " + split.[0]).ToLower(), a)
         d
-    member this.CreateMappingCaseSensitive() =
+    // case-sensitive mapping of what strings map to what parsed artist
+    member this.ParserMapping() =
         let d = Dictionary<string, string>()
         for a in this.Artists.Keys do
             let v = this.Artists.[a]
@@ -41,6 +43,8 @@ type VerifiedArtists =
             if v.IsJapaneseFullName then
                 let split = a.Split(' ', 2)
                 d.Add((split.[1] + " " + split.[0]), a)
+        for alias in this.Aliases.Keys do
+            d.Add(alias, alias)
         d
 
 type SongId = string
