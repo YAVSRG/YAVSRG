@@ -232,7 +232,7 @@ module Backbot =
             "tv size ver."; "tv ver."; "tv size"; "tv version"; "tv edit"; "tv-size"; "anime ver."; "op cut"; "op ver."
             "uncut ver."; "long ver."; "extended ver."; "extended mix"; "radio ver."; "radio edit"; "radio mix"
             "cut ver.";  "short ver."; "short edit"; "short cut"
-            "album ver"; "original mix"; "bass boosted"; "full version"
+            "album ver"; "original mix"; "bass boosted"; "full version"; "video mix"
         |]
     let correct_titles() =
         Logging.Info "Scanning for title variations to prune (TV Size, Extended mix, etc)"
