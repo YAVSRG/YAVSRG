@@ -23057,14 +23057,14 @@
         "Tags": [], 
         "Title": "Don"
     }, 
-    "mirandacosgrove/extraleaveitalltome": {
+    "mirandacosgrove/leaveitalltome": {
         "AlternativeTitles": [], 
         "Artists": ["Miranda Cosgrove"], 
         "OtherArtists": ["Drake Bell"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": ["actually", "insane"], 
-        "Title": "[Extra] Leave It All to Me"
+        "Title": "Leave It All to Me"
     }, 
     "misakiakira/jumbofruitparfaitdx": {
         "AlternativeTitles": [], 
@@ -23255,41 +23255,32 @@
         "Tags": [], 
         "Title": "Pleasure!"
     }, 
-    "miz/extrakakenukeruanimesongmedleyv": {
-        "AlternativeTitles": [], 
+    "miz/kakenukeruanimesongmedleyvioriginalsongsver": {
+        "AlternativeTitles": ["Kakenukeru Anime Song Medley VI (Original Songs ver.)"], 
         "Artists": ["M.Iz"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "[EXTRA] Kake Nukeru Anime Song Medley V"
+        "Title": "Kakenukeru Anime Song Medley VI (Original Songs ver.)"
     }, 
-    "miz/extrakakenukeruanimesongmedleyvi": {
-        "AlternativeTitles": [], 
+    "miz/kakenukeruanimesongmedleyvoriginalsongsver": {
+        "AlternativeTitles": ["Kake Nukeru Anime Song Medley V (Original Songs ver.)", "Kakenukeru Anime Song Medley V (Original Songs ver.)"], 
         "Artists": ["M.Iz"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "[EXTRA] Kake Nukeru Anime Song Medley VI"
+        "Title": "Kakenukeru Anime Song Medley V (Original Songs ver.)"
     }, 
-    "miz/kakenukeruanimesongmedleyoriginalsongsver": {
-        "AlternativeTitles": [], 
-        "Artists": ["M.Iz"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Kake Nukeru Anime Song Medley Ⅴ (Original Songs ver.)"
-    }, 
-    "mizukinana/extraexterminate": {
+    "mizukinana/exterminate": {
         "AlternativeTitles": [], 
         "Artists": ["Mizuki Nana"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "[Extra] Exterminate"
+        "Title": "Exterminate"
     }, 
     "mizukinana/startingnow": {
         "AlternativeTitles": [], 
@@ -23432,7 +23423,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
-        "Tags": ["東方Vocal／Trance"], 
+        "Tags": ["東方Vocal/Trance"], 
         "Title": "CODE-49 | A little..."
     }, 
     "monoral/kiri": {
@@ -34028,15 +34019,6 @@
         "Tags": [], 
         "Title": "Nothing To Save"
     }, 
-    "sunlessrise/nothingtosave-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Sunless Rise"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
-        "Title": "Nothing To Save "
-    }, 
     "sunriseskaterkids/nothingspecial": {
         "AlternativeTitles": [], 
         "Artists": ["Sunrise Skater Kids"], 
@@ -38546,7 +38528,7 @@
         "Tags": [], 
         "Title": "Shannon's Theorem"
     }, 
-    "w_trerespectforathu/schurstheorem": {
+    "w_treathu/schurstheorem": {
         "AlternativeTitles": [], 
         "Artists": ["w_tre", "AT&HU"], 
         "OtherArtists": [], 
@@ -39519,7 +39501,7 @@
         "Title": "Rinne"
     }, 
     "yamamotonozomi/believexbelieve": {
-        "AlternativeTitles": ["Believe×Believe"], 
+        "AlternativeTitles": [], 
         "Artists": ["Yamamoto Nozomi"], 
         "OtherArtists": [], 
         "Remixers": [], 
