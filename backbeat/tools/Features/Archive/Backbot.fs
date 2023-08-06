@@ -6,7 +6,7 @@ open FParsec
 open Percyqaz.Common
 open Prelude.Backbeat.Archive
 
-module Maintenance2 =
+module Backbot =
 
     type ArtistFragment =
         | Verified of string
@@ -24,27 +24,29 @@ module Maintenance2 =
             for f in Option.defaultValue [] f do match f with Artist a -> count2 <- count2 + 1 | _ -> ()
             count1 < 2 && count2 < 2
 
-    let collab_separator =
+    let private collab_separator =
         pstringCI " x "
         <|> pstring " + "
         <|> pstring "/"
+        <|> pstring " / "
         <|> pstringCI " vs. "
         <|> pstringCI " vs "
         <|> pstring "&"
+        <|> pstring " & "
         <|> pstringCI ", and "
         <|> pstring ","
         <|> pstringCI " and "
         <|> pstringCI " with "
         <|> pstringCI "prod." .>> spaces
     
-    let feature_separator =
+    let private feature_separator =
         pstringCI " feat." .>> spaces
         <|> pstringCI " ft." .>> spaces
         <|> pstringCI " featuring." .>> spaces
         <|> pstringCI " feat" .>> spaces
         <|> pstringCI " ft" .>> spaces
 
-    let parse_collab : Parser<_, unit> =
+    let private parse_collab : Parser<_, unit> =
         let verified =
             let mapping = artists.CreateMappingCaseSensitive()
             match mapping.Keys |> Seq.sortByDescending (fun s -> s.Length) |> List.ofSeq with
@@ -56,10 +58,10 @@ module Maintenance2 =
         let unverified = many1CharsTill anyChar (followedBy collab_separator <|> followedBy feature_separator <|> eof) |>> Artist
         sepBy1 (verified <|> unverified) collab_separator
 
-    let parse_prod_and_features : Parser<ArtistsAndFeatures, unit> =
+    let private parse_prod_and_features : Parser<ArtistsAndFeatures, unit> =
         parse_collab .>>. opt (feature_separator >>. parse_collab)
 
-    let extract_bracket (artist: string) =
+    let private extract_bracket (artist: string) =
         let bracket_regex = Text.RegularExpressions.Regex("\\((.*?)\\)$")
         
         let matches = bracket_regex.Matches artist
@@ -68,7 +70,7 @@ module Maintenance2 =
             artist.Replace(matches.First().Value, "").Trim(), Some bracket_content
         else artist, None
     
-    let parse_artists_and_remixers (artist: string) : string list * string list * string list * string * bool =
+    let private parse_artists_and_remixers (artist: string) : string list * string list * string list * string * bool =
         let p = parse_prod_and_features .>>. restOfLine false
 
         let artist, bracket = extract_bracket artist
@@ -131,7 +133,35 @@ module Maintenance2 =
             | _ -> ()
         option_chosen.Value
 
-    let test() =
+    let character_voice_regex = Text.RegularExpressions.Regex("[\\[\\(][cC][vV][.:\\-]?\\s?(.*)[\\]\\)]")
+    let correct_artists() =
+        Logging.Info "Scanning for artist name corrections"
+        let map = artists.CreateMapping()
+        let swap (s: string) =
+            if map.ContainsKey(s.ToLower()) then 
+                let replace = map.[s.ToLower()]
+                replace
+            else s
+            
+        let fix (artist: string) =
+            let matches = character_voice_regex.Matches artist
+            if matches.Count = 1 then
+                let character_voice = matches.[0].Groups.[1].Value
+                swap character_voice
+            else swap artist
+            
+        for id in songs.Keys |> Array.ofSeq do
+            let song = songs.[id]
+            songs.[id] <-
+                { song with 
+                    Artists = List.map fix song.Artists
+                    OtherArtists = List.map fix song.OtherArtists
+                    Remixers = List.map fix song.Remixers
+                }
+        save()
+
+    let correct_meta(user_oversight) =
+        Logging.Info "Scanning for metadata corrections"
         for s in songs.Keys do
             let song = songs.[s]
             if song.Artists.Length = 1 && song.Remixers.Length = 0 && song.OtherArtists.Length = 0 then
@@ -144,7 +174,84 @@ module Maintenance2 =
                         Title = if append_to_title <> "" then song.Title.Trim() + " " + append_to_title else song.Title
                     }
                 if suggestion <> song then
-                    if confident || make_suggestion "artist_splitter" s song suggestion then
+                    if confident || (user_oversight && make_suggestion "artist_splitter" s song suggestion) then
                         songs.[s] <- suggestion
-                        if confident then Logging.Info(sprintf "Backbot making confident edit to '%s'" s) else save()
+                        if confident then Logging.Info(sprintf "Making confident edit to '%s'" s) else save()
         save()
+    
+    let private title_variations = 
+        [|
+            "tv size ver."; "tv ver."; "tv size"; "tv version"; "tv edit"; "tv-size"; "anime ver."; "op cut"; "op ver."
+            "uncut ver."; "long ver."; "extended ver."; "extended mix"
+            "cut ver.";  "short ver."; "short edit"
+            "album ver"; "original mix"
+        |]
+    let correct_titles() =
+        Logging.Info "Scanning for title variations to prune (TV Size, Extended mix, etc)"
+        let remove_mixes_and_cuts (title: string) =
+            let mutable title = title.Replace("[EXTRA]", "").Replace("[Extra]", "").Trim()
+            for v in title_variations do
+                let i = title.ToLower().IndexOf(v)
+                if i >= 0 then
+                    let matched_v = title.Substring(i, v.Length)
+                    title <- title.Replace("("+matched_v+")", "").Replace("["+matched_v+"]", "").Replace("-"+matched_v+"-", "").Replace("- "+matched_v+" -", "").Trim()
+            title
+        for song_id in songs.Keys |> Array.ofSeq do
+            let song = songs.[song_id]
+            let suggestion = { song with Title = remove_mixes_and_cuts song.Title; AlternativeTitles = List.map remove_mixes_and_cuts song.AlternativeTitles }
+            if suggestion <> song then
+                Logging.Info(sprintf "%s -> %s" song.Title suggestion.Title)
+                songs.[song_id] <- suggestion
+
+    let private rehome_song_id (old_id: string, new_id: string) =
+        for chart_id in charts.Keys do
+            let chart = charts.[chart_id]
+            if chart.SongId = old_id then
+                charts.[chart_id] <- { chart with SongId = new_id }
+
+    type Song_Deduplication = { Title: string; Artists: string list }
+    let correct_duplicate_songs() =
+        Logging.Info "Scanning for duplicate songs"
+        let mutable seen = Map.empty
+        for id in songs.Keys |> Array.ofSeq do
+            let song = songs.[id]
+            let ded = { Title = song.Title.ToLower(); Artists = (song.Artists @ song.OtherArtists @ song.Remixers |> List.sort) |> List.map (fun s -> s.ToLower()) }
+            match Map.tryFind ded seen with
+            | Some existing ->
+                Logging.Info(sprintf "%s is a duplicate of %s, merging" id existing)
+                let existing_song = songs.[existing]
+                songs.[existing] <- 
+                    { existing_song with 
+                        Source = Option.orElse song.Source existing_song.Source
+                        Tags = List.distinct (existing_song.Tags @ song.Tags)
+                        AlternativeTitles = List.distinct (existing_song.AlternativeTitles @ song.AlternativeTitles)
+                    }
+                songs.Remove id |> ignore
+                rehome_song_id (id, existing)
+            | None -> seen <- Map.add ded id seen
+        save()
+
+    let correct_song_ids() =
+        Logging.Info "Correcting song ids"
+        for id in songs.Keys |> Array.ofSeq do
+            let song = songs.[id]
+            let new_id = (Collect.simplify_string (String.concat "" song.Artists)) + "/" + (Collect.simplify_string song.Title)
+            let mutable i = 0
+            let generated_id() = if i > 0 then new_id + "-" + i.ToString() else new_id
+            while generated_id() <> id && songs.ContainsKey(generated_id()) do
+                i <- i + 1
+
+            let new_id = generated_id()
+            if new_id <> id then 
+                songs.Add(new_id, song)
+                songs.Remove(id) |> ignore
+                rehome_song_id (id, new_id)
+                Logging.Info(sprintf "%s -> %s" id new_id)
+        save()
+
+    let run(user_oversight) =
+        correct_meta(user_oversight)
+        correct_artists()
+        correct_titles()
+        correct_duplicate_songs()
+        correct_song_ids()

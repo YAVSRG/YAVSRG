@@ -31,7 +31,7 @@ module Maintenance =
     let variations = 
         [|
             "tv size ver."; "tv ver."; "tv size"; "tv version"; "tv edit"; "tv-size"; "anime ver."; "op cut"; "op ver."
-            "uncut ver."; "long ver.";"extended ver."; "extended mix"
+            "uncut ver."; "long ver."; "extended ver."; "extended mix"
             "cut ver.";  "short ver."; "short edit"
             "album ver"; "original mix"
         |]
@@ -112,7 +112,7 @@ module Maintenance =
         let mutable seen = Map.empty
         for id in songs.Keys |> Array.ofSeq do
             let song = songs.[id]
-            let ded = { Title = song.Title.ToLower(); Artists = (song.Artists @ song.OtherArtists @ song.Remixers) |> List.map (fun s -> s.ToLower()) }
+            let ded = { Title = song.Title.ToLower(); Artists = (song.Artists @ song.OtherArtists @ song.Remixers |> List.sort) |> List.map (fun s -> s.ToLower()) }
             match Map.tryFind ded seen with
             | Some existing ->
                 Logging.Info(sprintf "%s is a duplicate of %s, merging" id existing)
