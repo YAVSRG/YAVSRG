@@ -1,1 +1,1 @@
-﻿Chart identifier API improvement.. also broken devops stuff
+﻿Support for reloading backbeat data

@@ -17,12 +17,25 @@ module Charts =
 
     let init() =
         WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/songs.json", 
-            function Some data -> songs <- data | None -> Logging.Error("Failed to get song data from Backbeat repo"))
-        WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/charts.json", 
-            function Some data -> charts <- data | None -> Logging.Error("Failed to get chart data from Backbeat repo"))
-        WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/packs.json", 
-            function Some data -> packs <- data; Logging.Info(sprintf "Backbeat downloads complete, %i Charts and %i Songs" charts.Count songs.Count) | None -> Logging.Error("Failed to get pack data from Backbeat repo"))
-
+        function 
+        | Some _songs -> 
+            WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/charts.json", 
+            function 
+            | Some _charts -> 
+                WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/packs.json", 
+                    function
+                    | Some _packs -> 
+                        packs <- _packs
+                        charts <- _charts
+                        songs <- _songs
+                        Logging.Info(sprintf "Backbeat downloads complete, %i Charts and %i Songs" charts.Count songs.Count)
+                    | None -> Logging.Error("Failed to get pack data from Backbeat repo")
+                )
+            | None -> Logging.Error("Failed to get chart data from Backbeat repo")
+            )
+        | None -> Logging.Error("Failed to get song data from Backbeat repo")
+        )
+        
     // chart search by text
 
     type QueryFragment =

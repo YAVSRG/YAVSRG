@@ -174,5 +174,10 @@ module Commands =
                     let user = User.create(name, 0uL)
                     let id = User.save_new(user)
                     do! reply (sprintf "Created user '%s' with id '%i'\n\nAuth token:\n%s" user.Username id user.AuthToken)
+
+            | "reloadbackbeat" ->
+                Charts.init()
+                do! reply_emoji ":white_check_mark:"
+
             | _ -> ()
         }
