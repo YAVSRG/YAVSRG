@@ -10,6 +10,7 @@ open Prelude.Data
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
+open Prelude.Backbeat.Archive
 open Interlude.UI
 
 type private TableStatus =
@@ -21,9 +22,12 @@ type private TableStatus =
 [<Json.AutoCodec(false)>]
 type ChartIdentity =
     {
+        Found: bool
+        Chart: Chart option
+        Song: Song option
         Mirrors: string list
     }
-    static member Default = { Mirrors = [] }
+    static member Default = { Found = false; Mirrors = []; Chart = None; Song = None }
 
 type TableCard(id: string, table: Table) as this =
     inherit Frame(NodeType.Button (fun () -> Style.click.Play(); this.Install()),
@@ -71,45 +75,26 @@ type TableCard(id: string, table: Table) as this =
 
     member this.GetMissingCharts() =
         status <- InstallingCharts
-        match
+        let missing_charts =
             seq {
                 for level in existing.Levels do
                     for chart in level.Charts do
                         match Cache.by_hash chart.Hash Library.cache with
                         | Some _ -> ()
-                        | None -> if not (unavailable_charts.Contains chart.Hash) then yield chart.Hash
+                        | None -> if not (unavailable_charts.Contains chart.Hash) then yield chart.Id, chart.Hash
             }
-            |> Seq.tryHead
-        with
-        | Some missing ->
-            WebServices.download_json("https://api.yavsrg.net/charts/identify?id=" + missing,
+        for id, hash in missing_charts do
+            WebServices.download_json("https://api.yavsrg.net/charts/identify?id=" + hash,
                 function
-                | Some (d: ChartIdentity) when not d.Mirrors.IsEmpty ->
-                    let mirror = d.Mirrors.Head
-                    Logging.Info("Starting download: " + mirror)
-                    let target = Path.Combine(getDataPath "Downloads", System.Guid.NewGuid().ToString() + ".zip")
-                    WebServices.download_file.Request((mirror, target, ignore),
-                        fun completed ->
-                            if completed then Library.Imports.auto_convert.Request((target, true, None),
-                                fun b ->
-                                    if b then charts_updated_ev.Trigger()
-                                    File.Delete target
-                                    sync(this.RefreshInfo)
-                                    sync(this.GetMissingCharts)
-                            )
-                            else 
-                                Logging.Info(sprintf "Download failed for %s" missing)
-                                sync(this.GetMissingCharts) 
-                            unavailable_charts <- unavailable_charts.Add missing
-                        )
+                | Some (d: ChartIdentity) when d.Found ->
+                    Cache.cdn_download_service.Request((table.Name, hash, (d.Chart.Value, d.Song.Value), Library.cache), fun b -> if b then missing <- missing - 1)
+                    unavailable_charts <- unavailable_charts.Add hash
                 | _ -> 
-                    Logging.Info(sprintf "Failed to identify chart %s" missing)
-                    unavailable_charts <- unavailable_charts.Add missing
-                    sync(this.GetMissingCharts)
+                    Logging.Info(sprintf "Chart not found: %s(%s)" id hash)
+                    unavailable_charts <- unavailable_charts.Add hash
             )
-        | None -> 
-            Logging.Info("All charts for this table are installed!") 
-            status <- UpToDate
+        // todo: any good state management at all
+        status <- UpToDate
 
     member this.Install() =
         match status with
@@ -179,3 +164,4 @@ module Tables =
 
     let tab = 
         TableList()
+        |+ Components.WIP()
