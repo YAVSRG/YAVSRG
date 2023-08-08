@@ -2,7 +2,14 @@
 
 module Archive =
         
+    open System.IO
     open Percyqaz.Shell
+    open Backbeat.Utils
+    
+    let script() =
+        for pack in File.ReadAllLines(Path.Combine(ARCHIVE_PATH, "masterlist")) do
+            Collect.slurp_sm (pack.Trim())
+        Backbot.run false
 
     let register (ctx: ShellContext) =
         ctx
@@ -14,4 +21,5 @@ module Archive =
             .WithCommand("verify_artist", "Add a verified artist name to the database", "artist_name", Maintenance.verify_artist)
             .WithCommand("backbot_auto", "Run a backbot scan of the database for metadata corrections", fun () -> Backbot.run false)
             .WithCommand("backbot_manual", "Run a backbot scan of the database for metadata corrections, including manual corrections", fun () -> Backbot.run true)
+            .WithCommand("backbot_omni", "Slurp all packs in master list, upload charts to mirror, scan for metadata corrections", script)
             .WithCommand("recache", "Rebuilds the backbeat chart cache", Maintenance.recache)

@@ -9,5 +9,5 @@ settings.json
 Charts
 archive/yav
 archive/tmp
-/Archive/input
+archive/input
 **/*.old
