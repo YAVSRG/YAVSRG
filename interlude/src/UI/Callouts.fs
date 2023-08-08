@@ -290,6 +290,18 @@ module Notifications =
                 Duration = 2000.0
             }
         if Percyqaz.Flux.Utils.isUiThread() then items.Add n else sync(fun () -> items.Add n)
+        
+    let private add_long (body: Callout, colors: Color * Color, content_colors: Color * Color) =
+        let n: Notification =
+            {
+                Data = body
+                Size = Callout.measure body
+                FillColor = colors
+                ContentColor = content_colors
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
+                Duration = 5000.0
+            }
+        if Percyqaz.Flux.Utils.isUiThread() then items.Add n else sync(fun () -> items.Add n)
 
     let task_feedback(icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.pink_accent, Colors.pink), Colors.text)
@@ -300,7 +312,7 @@ module Notifications =
         sync Style.notify_info.Play
         
     let action_feedback_button(icon: string, title: string, description: string, button_label: string, button_action: unit -> unit) =
-        add (Callout.Small.Icon(icon).Title(title).Body(description).Button(button_label, button_action), (Colors.cyan_accent, Colors.cyan), Colors.text)
+        add_long (Callout.Small.Icon(icon).Title(title).Body(description).Button(button_label, button_action), (Colors.cyan_accent, Colors.cyan), Colors.text)
         sync Style.notify_info.Play
 
     let system_feedback(icon: string, title: string, description: string) =
