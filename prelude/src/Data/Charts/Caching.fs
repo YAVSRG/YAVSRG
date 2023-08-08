@@ -100,6 +100,9 @@ module Cache =
         else File.Move(file_path, target_path)
         hash
 
+    let asset_path (hash: string) (cache: Cache) : string =
+        Path.Combine(cache.RootPath, ".assets", hash.Substring(0, 2), hash)
+
     (* Using the cache *)
 
     let get_path (entry: CachedChart) (cache: Cache) = Path.Combine(cache.RootPath, entry.Folder, entry.Hash + ".yav")
@@ -329,3 +332,76 @@ module Cache =
         // todo: remove assets IF they aren't used by anything else in the cache
     
     let deleteMany (cs: CachedChart seq) (cache: Cache) = Seq.iter (fun c -> delete c cache) cs
+
+    // Download protocol
+
+    open Prelude.Backbeat.Archive
+    open Prelude.Data.WebServices
+
+    let private make_chart_header (chart: Chart, song: Song) : ChartHeader =
+        {
+            Title = song.Title
+            TitleNative = None
+            Artist = song.FormattedArtists
+            ArtistNative = None
+            Creator = chart.Creators |> String.concat ", "
+            DiffName = chart.DifficultyName
+            Subtitle = chart.Subtitle
+            Source = song.Source
+            Tags = chart.Tags
+            PreviewTime = chart.PreviewTime
+            BackgroundFile = Asset chart.BackgroundFile
+            AudioFile = Asset chart.AudioFile
+            ChartSource =
+                match chart.Sources with
+                | Osu d :: _ -> Origin.Osu (d.BeatmapSetId, d.BeatmapId)
+                | Stepmania d :: _ -> Origin.Stepmania d
+                | _ -> Origin.Unknown
+        }
+
+    let cdn_download (folder: string) (hash: string) (chart: Chart, song: Song) (cache: Cache) =
+        async {
+            let header = make_chart_header (chart, song)
+            let yav_path = Path.Combine(getDataPath "Downloads", hash)
+            let! success = download_file.RequestAsync("https://cdn.yavsrg.net/" + hash, yav_path, ignore)
+            if not success then Logging.Error("Error downloading chart " + hash); return false else
+            
+            use fs = File.OpenRead yav_path
+            use br = new BinaryReader(fs)
+            match Chart.readHeadless chart.Keys header yav_path br with
+            | None -> return false
+            | Some chart_data ->
+
+            let actual_hash = Chart.hash chart_data
+            if actual_hash <> hash then Logging.Error(sprintf "Downloaded chart hash was '%s', expected '%s'" actual_hash hash); return false else
+
+            try
+                if File.Exists(asset_path chart.BackgroundFile cache) |> not then
+
+                    let bg_path = Path.Combine(getDataPath "Downloads", chart.BackgroundFile)
+                    let! success = download_file.RequestAsync("https://cdn.yavsrg.net/assets/" + chart.BackgroundFile, bg_path, ignore)
+
+                    let actual_bg_hash = hash_asset bg_path cache
+                    if chart.BackgroundFile <> actual_bg_hash then Logging.Warn(sprintf "Downloaded background hash was '%s', expected '%s'" actual_bg_hash chart.BackgroundFile)
+
+                if File.Exists(asset_path chart.AudioFile cache) |> not then
+
+                    let audio_path = Path.Combine(getDataPath "Downloads", chart.AudioFile)
+                    let! success = download_file.RequestAsync("https://cdn.yavsrg.net/assets/" + chart.AudioFile, audio_path, ignore)
+
+                    let actual_audio_hash = hash_asset audio_path cache
+                    if chart.AudioFile <> actual_audio_hash then Logging.Warn(sprintf "Downloaded audio hash was '%s', expected '%s'" actual_audio_hash chart.AudioFile)
+
+                add_new folder [chart_data] cache
+
+                Logging.Info(sprintf "Successful download and install of '%s' from CDN" song.FormattedTitle)
+
+                return true
+            with err -> return false
+        }
+
+    let cdn_download_service =
+        { new Async.Service<string * ChartHash * (Chart * Song) * Cache, bool>() with
+            override this.Handle((folder, hash, (chart, song), cache)) =
+                cdn_download folder hash (chart, song) cache
+        }

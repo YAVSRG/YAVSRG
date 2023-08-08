@@ -136,26 +136,3 @@ module DownloadUrl =
         str.Replace("https://", "").Replace("http://", "") |> into_base64
 
     let unpickle(str: string) = "https://" + Uri.EscapeUriString(from_base64 str)
-
-module Download =
-    
-    let toChartHeader (chart: Chart) (song: Song) : ChartHeader =
-        {
-            Title = song.Title
-            TitleNative = None
-            Artist = song.FormattedArtists
-            ArtistNative = None
-            Creator = chart.Creators |> String.concat ", "
-            DiffName = chart.DifficultyName
-            Subtitle = chart.Subtitle
-            Source = song.Source
-            Tags = chart.Tags
-            PreviewTime = chart.PreviewTime
-            BackgroundFile = Asset chart.BackgroundFile
-            AudioFile = Asset chart.AudioFile
-            ChartSource =
-                match chart.Sources with
-                | Osu d :: _ -> Origin.Osu (d.BeatmapSetId, d.BeatmapId)
-                | Stepmania d :: _ -> Origin.Stepmania d
-                | _ -> Origin.Unknown
-        }
