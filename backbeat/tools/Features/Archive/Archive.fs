@@ -22,4 +22,5 @@ module Archive =
             .WithCommand("backbot_auto", "Run a backbot scan of the database for metadata corrections", fun () -> Backbot.run false)
             .WithCommand("backbot_manual", "Run a backbot scan of the database for metadata corrections, including manual corrections", fun () -> Backbot.run true)
             .WithCommand("backbot_omni", "Slurp all packs in master list, upload charts to mirror, scan for metadata corrections", script)
+            .WithCommand("backbot_duplicates", "Look for duplicate song entries in the backbeat database", Backbot.find_fuzzy_duplicates)
             .WithCommand("recache", "Rebuilds the backbeat chart cache", Maintenance.recache)

@@ -146,6 +146,7 @@ module Backbot =
         | Some s when s.ToLower().EndsWith(" remix") || s.ToLower().EndsWith(" mix") || s.ToLower().EndsWith(" edit") || s.ToLower().EndsWith(" bootleg") ->
             if s.Contains("'s") then 
                 remixers <- [s.Split("'s").[0]]
+                suggested_title <- title + " (" + s + ")"
             else 
                 Logging.Info(sprintf "Unknown remix name '%s'" s)
                 confident <- false
@@ -278,6 +279,21 @@ module Backbot =
                 rehome_song_id (id, existing)
             | None -> seen <- Map.add ded id seen
         save()
+    
+    type Song_Fuzzy_Deduplication = { Title: string; Artists: string }
+    let find_fuzzy_duplicates() =
+        let mutable titles = Set.empty
+        let mutable seen = Map.empty
+        Logging.Info "Looking for fuzzy duplicates (to help with manual correction)"
+        for id in songs.Keys |> Array.ofSeq do
+            let song = songs.[id]
+            let ded = { Title = song.Title.ToLower().Replace(" ", ""); Artists = (song.Artists @ song.OtherArtists @ song.Remixers) |> List.sort |> String.concat "" |> fun s -> s.ToLower().Replace(" ", "") }
+            match Map.tryFind ded seen with
+            | Some existing -> Logging.Info(sprintf "%s could be a duplicate of %s" id existing)
+            | None -> seen <- Map.add ded id seen
+            if titles.Contains ded.Title then
+                Logging.Info(sprintf "%s could be a duplicate title" ded.Title)
+            else titles <- Set.add ded.Title titles
 
     let correct_song_ids() =
         Logging.Info "Correcting song ids"
