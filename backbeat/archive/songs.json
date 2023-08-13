@@ -19817,10 +19817,10 @@
         "Tags": ["DE-CADE", "PLUS", "ALL", "JUSTICE", "COLLECTION", "ep.I", "WAVE", "MASTER", "ウェーブマスター", "SEGA", "electronic", "instrumental"], 
         "Title": "Gangu Kyou Sou Kyoku -Shuuen-"
     }, 
-    "kikuofeathatsunemiku/shikabanenoodori": {
+    "kikuo/shikabanenoodori": {
         "AlternativeTitles": [], 
-        "Artists": ["Kikuo (feat. Hatsune Miku)"], 
-        "OtherArtists": [], 
+        "Artists": ["Kikuo"], 
+        "OtherArtists": ["Hatsune Miku"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
@@ -22042,7 +22042,7 @@
     }, 
     "lilbouldergumi/diamondintheskyremix": {
         "AlternativeTitles": [], 
-        "Artists": ["Lil Boulder & Gumi"], 
+        "Artists": ["Lil Boulder", "GUMI"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -22067,14 +22067,14 @@
         "Tags": [], 
         "Title": "In the Pit"
     }, 
-    "liljontheeastsideboyz/getlowfeatyingyangtwins": {
+    "liljontheeastsideboyz/getlow": {
         "AlternativeTitles": [], 
-        "Artists": ["Lil Jon & The East Side Boyz"], 
-        "OtherArtists": [], 
+        "Artists": ["Lil Jon", "The East Side Boyz"], 
+        "OtherArtists": ["Ying Yang Twins"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
-        "Title": "Get Low (feat. Ying Yang Twins)"
+        "Title": "Get Low"
     }, 
     "lilpump/guccigang": {
         "AlternativeTitles": [], 
@@ -29681,10 +29681,10 @@
         "Tags": ["Hatsune", "Miku", "Vocaloid"], 
         "Title": "SLoWMoTIoN"
     }, 
-    "pirifeatsomnium/decapitation": {
+    "piri/decapitation": {
         "AlternativeTitles": [], 
-        "Artists": ["PIRI (feat. SOMNIUM)"], 
-        "OtherArtists": [], 
+        "Artists": ["PIRI"], 
+        "OtherArtists": ["SOMNIUM"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": [], 
