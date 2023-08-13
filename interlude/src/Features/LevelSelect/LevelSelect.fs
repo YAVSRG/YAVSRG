@@ -13,6 +13,7 @@ open Prelude.Data.Charts.Suggestions
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
@@ -107,6 +108,8 @@ type LevelSelectScreen() =
 
     override this.OnEnter prev =
         Song.onFinish <- SongFinishAction.Callback (fun () -> Song.playFrom Chart.current.Value.Header.PreviewTime)
+        if Cache.recache_service.Status <> Async.ServiceStatus.Idle then
+            Notifications.system_feedback(Icons.system_notification, L"notification.recache_running.title", L"notification.recache_running.body")
         refresh()
 
     override this.OnExit next = Input.removeInputMethod()
