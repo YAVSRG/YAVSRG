@@ -167,7 +167,6 @@ module Library =
             }
 
         let import_mounted_source =
-            
             { new Async.Service<MountedChartSource, unit>() with
                 override this.Handle(source) =
                     async {
@@ -186,9 +185,32 @@ module Library =
                     }
             }
 
+        let convert_stepmania_pack_zip =
+            { new Async.Service<string * int, bool>() with
+                override this.Handle((path, pack_id)) =
+                    async {
+                        let dir = Path.ChangeExtension(path, null)
+                        if Directory.Exists(dir) && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not then
+                            Logging.Error(sprintf "Can't extract zip to %s because that folder exists already" dir)
+                            return false
+                        else
+                            ZipFile.ExtractToDirectory(path, dir)
+                            match dir with
+                            | FolderOfPacks ->
+                                for packFolder in Directory.EnumerateDirectories dir do
+                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionOptions.Default with StepmaniaPackId = Some pack_id; PackName = Path.GetFileName packFolder; MoveAssets = true })
+                                Directory.Delete(dir, true)
+                                return true
+                            | _ -> 
+                                Logging.Warn(sprintf "%s: Extracted zip does not match the usual structure for a Stepmania pack" dir)
+                                Directory.Delete(dir, true)
+                                return false
+                    }
+            }
+
         let auto_convert =
-            { new Async.Service<string * bool * int option, bool>() with
-                override this.Handle((path, move_assets, sm_pack_id)) =
+            { new Async.Service<string * bool, bool>() with
+                override this.Handle((path, move_assets)) =
                     async {
                         match File.GetAttributes path &&& FileAttributes.Directory |> int with
                         | 0 ->
@@ -205,7 +227,7 @@ module Library =
                                     return false
                                 else
                                     ZipFile.ExtractToDirectory(path, dir)
-                                    this.Request((dir, true, sm_pack_id), fun _ -> Directory.Delete(dir, true))
+                                    this.Request((dir, true), fun _ -> Directory.Delete(dir, true))
                                     return true
                             | _ -> Logging.Warn(sprintf "%s: Unrecognised file for import" path); return false
                         | _ ->
@@ -218,11 +240,11 @@ module Library =
                                     match Path.GetFileName path with
                                     | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
                                     | s -> s
-                                do! convert_pack_folder.RequestAsync(path, { ConversionOptions.Default with StepmaniaPackId = sm_pack_id; PackName = packname; MoveAssets = move_assets })
+                                do! convert_pack_folder.RequestAsync(path, { ConversionOptions.Default with PackName = packname; MoveAssets = move_assets })
                                 return true
                             | FolderOfPacks ->
                                 for packFolder in Directory.EnumerateDirectories path do
-                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionOptions.Default with StepmaniaPackId = sm_pack_id; PackName = Path.GetFileName packFolder; MoveAssets = move_assets })
+                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionOptions.Default with PackName = Path.GetFileName packFolder; MoveAssets = move_assets })
                                 return true
                             | _ -> Logging.Warn(sprintf "%s: No importable folder structure detected" path); return false
                     }
