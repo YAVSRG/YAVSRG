@@ -70,7 +70,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
             fps_timer.Restart()
             fps_count <- 0
 
-        if this.RenderFrequency = 0.0 then 0.0 else frameTime - frame_timer.Elapsed.TotalSeconds
+        if this.RenderFrequency = 0.0 then 0.0 else frameTime - elapsedTime
 
     member this.Init() =
         Devices.init audioDevice

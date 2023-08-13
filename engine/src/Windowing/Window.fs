@@ -89,12 +89,12 @@ type Window(config: Config, title: string, root: Root) as this =
             base.WindowState <- WindowState.Maximized
 
         | WindowType.Fullscreen ->
-            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
             base.WindowState <- WindowState.Fullscreen
+            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
 
         | WindowType.``Borderless Fullscreen`` ->
-            base.WindowBorder <- WindowBorder.Hidden
             base.WindowState <- WindowState.Normal
+            base.WindowBorder <- WindowBorder.Hidden
             base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
 
         | _ -> Logging.Error "Tried to change to invalid window mode"
