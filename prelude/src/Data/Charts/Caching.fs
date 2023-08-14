@@ -364,7 +364,7 @@ module Cache =
             let header = make_chart_header (chart, song)
             let yav_path = Path.Combine(getDataPath "Downloads", hash)
             let! success = download_file.RequestAsync("https://cdn.yavsrg.net/" + hash, yav_path, ignore)
-            if not success then Logging.Error("Error downloading chart " + hash); return false else
+            if not success then return false else
             
             use fs = File.OpenRead yav_path
             use br = new BinaryReader(fs)
@@ -394,7 +394,7 @@ module Cache =
 
                 add_new folder [chart_data] cache
 
-                Logging.Info(sprintf "Successful download and install of '%s' from CDN" song.FormattedTitle)
+                Logging.Debug(sprintf "Installed '%s' from CDN" song.FormattedTitle)
 
                 return true
             with err -> return false
