@@ -16,8 +16,9 @@ open Interlude.UI
 type private TableStatus =
     | NotInstalled
     | UpdateAvailable
-    | UpToDate
+    | MissingCharts
     | InstallingCharts
+    | UpToDate
 
 [<Json.AutoCodec(false)>]
 type ChartIdentity =
@@ -40,8 +41,6 @@ type TableCard(id: string, table: Table) as this =
     let mutable charts = 0
     let mutable missing = 0
 
-    let mutable unavailable_charts = Set.empty
-
     do
         for t in Table.list() do
             if t.File = id then
@@ -50,11 +49,11 @@ type TableCard(id: string, table: Table) as this =
 
         this
         |+ Text(table.Name,
-            Align = Alignment.LEFT,
-            Position = Position.SliceTop(60.0f).Margin(10.0f, Style.PADDING))
-        |+ Text((fun () -> sprintf "%i levels, %i charts (%i missing)" levels charts missing),
-            Align = Alignment.LEFT,
-            Position = Position.TrimTop(60.0f).SliceTop(50.0f).Margin(10.0f, Style.PADDING))
+            Align = Alignment.CENTER,
+            Position = Position.SliceTop(80.0f).Margin(20.0f, Style.PADDING))
+        |+ Text((fun () -> sprintf "%iK, %i levels, %i charts" table.Keymode levels charts),
+            Align = Alignment.CENTER,
+            Position = Position.TrimTop(70.0f).SliceTop(60.0f).Margin(20.0f, Style.PADDING))
         |* Clickable.Focus this
 
         this.RefreshInfo()
@@ -69,59 +68,69 @@ type TableCard(id: string, table: Table) as this =
             levels <- levels + 1
             for chart in level.Charts do
                 charts <- charts + 1
-                match Cache.by_hash chart.Hash Library.cache with
+                match Cache.by_key (sprintf "%s/%s" table.Name chart.Hash) Library.cache with
                 | Some _ -> ()
                 | None -> missing <- missing + 1
+        if missing > 0 && status = UpToDate then status <- MissingCharts
 
     member this.GetMissingCharts() =
         status <- InstallingCharts
+
+        let on_download_chart() =
+            missing <- missing - 1
+            if missing = 0 then 
+                status <- UpToDate
+                this.RefreshInfo()
+
         let missing_charts =
             seq {
                 for level in existing.Levels do
                     for chart in level.Charts do
-                        match Cache.by_hash chart.Hash Library.cache with
+                        match Cache.by_key (sprintf "%s/%s" table.Name chart.Hash) Library.cache with
                         | Some _ -> ()
-                        | None -> if not (unavailable_charts.Contains chart.Hash) then yield chart.Id, chart.Hash
+                        | None -> yield chart.Id, chart.Hash
             }
         for id, hash in missing_charts do
             WebServices.download_json("https://api.yavsrg.net/charts/identify?id=" + hash,
                 function
                 | Some (d: ChartIdentity) when d.Found ->
-                    Cache.cdn_download_service.Request((table.Name, hash, (d.Chart.Value, d.Song.Value), Library.cache), fun b -> if b then missing <- missing - 1)
-                    unavailable_charts <- unavailable_charts.Add hash
+                    Cache.cdn_download_service.Request((table.Name, hash, (d.Chart.Value, d.Song.Value), Library.cache), fun _ -> sync on_download_chart)
                 | _ -> 
                     Logging.Info(sprintf "Chart not found: %s(%s)" id hash)
-                    unavailable_charts <- unavailable_charts.Add hash
+                    sync on_download_chart
             )
-        // todo: any good state management at all
-        status <- UpToDate
 
     member this.Install() =
         match status with
-        | InstallingCharts -> ()
-        | UpToDate -> this.GetMissingCharts()
-        | _ -> 
+        | NotInstalled 
+        | UpdateAvailable ->
             Table.install(id, table)
-            status <- UpToDate
             existing <- table
+            this.RefreshInfo()
+        | InstallingCharts -> ()
+        | MissingCharts -> this.GetMissingCharts()
+        | UpToDate -> ()
 
     override this.Draw() =
         base.Draw()
-        Draw.rect (this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(20.0f, 0.0f)) Colors.shadow_2.O2
+        let button_bounds = this.Bounds.SliceBottom(70.0f).Shrink(20.0f, 10.0f)
+        Draw.rect button_bounds Colors.shadow_2.O2
         Text.drawFillB(
             Style.font, 
             (
                 match status with
-                | InstallingCharts -> Icons.download + " Installing charts"
                 | NotInstalled -> Icons.download + " Install"
                 | UpdateAvailable -> Icons.download + " Update available"
-                | UpToDate -> Icons.check + " Installed"
+                | MissingCharts -> sprintf "%s Download missing charts (%i)" Icons.download missing
+                | InstallingCharts -> sprintf "%s Installing missing charts (%i)" Icons.download missing
+                | UpToDate -> Icons.check + " Up to date!"
             ),
-            this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.PADDING),
+            button_bounds.Shrink Style.PADDING,
             (
                 match status with
                 | InstallingCharts -> Colors.text_cyan_2
                 | NotInstalled -> if this.Focused then Colors.text_yellow_2 else Colors.text
+                | MissingCharts -> if this.Focused then Colors.text_yellow_2 else Colors.text_green_2
                 | UpdateAvailable -> Colors.text_yellow_2
                 | UpToDate -> Colors.text_green
             ),
