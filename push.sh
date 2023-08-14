@@ -11,7 +11,7 @@ cd Interlude.Web
 (git status | grep "ahead of" -c) && git push
 cd ..
 cd Interlude.Noteskins
-(git status | grep "ahead of" -c) && git push
+(git status | grep "ahead of" -c) && git pull --rebase && git push
 cd ..
 cd Interlude.Assets
 (git status | grep "ahead of" -c) && git push
