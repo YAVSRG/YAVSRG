@@ -6,4 +6,4 @@
 **/obj/
 secrets
 /data
-/b2AuthorizeCfWorker.py
+/b2AuthorizeCfWorker_local.py
