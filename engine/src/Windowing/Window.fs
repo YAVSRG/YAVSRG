@@ -1,4 +1,6 @@
-﻿namespace Percyqaz.Flux.Windowing
+﻿#nowarn "9"
+
+namespace Percyqaz.Flux.Windowing
 
 open System
 open System.Threading
@@ -90,7 +92,10 @@ type Window(config: Config, title: string, root: Root) as this =
 
         | WindowType.Fullscreen ->
             base.WindowState <- WindowState.Fullscreen
-            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
+            let monitor = monitor.Handle.ToUnsafePtr<Monitor>()
+            let modePtr = GLFW.GetVideoMode(monitor)
+            let mode = NativeInterop.NativePtr.read modePtr
+            GLFW.SetWindowMonitor(this.WindowPtr, monitor, 0, 0, mode.Width, mode.Height, max config.FullscreenRefreshRateOverride.Value mode.RefreshRate)
 
         | WindowType.``Borderless Fullscreen`` ->
             base.WindowState <- WindowState.Normal
