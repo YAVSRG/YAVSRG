@@ -159,9 +159,10 @@ module Backbot =
 
         match run p title with
         | Success((title, features), _, _) ->
-            suggested_title <- title
-            performers <- ArtistsAndFeatures.features ([], features)
-            if not (ArtistsAndFeatures.confident ([], features)) then confident <- false
+            if features.IsSome then
+                suggested_title <- title
+                performers <- ArtistsAndFeatures.features ([], features)
+                if not (ArtistsAndFeatures.confident ([], features)) then confident <- false
         | Failure(reason, _, _) -> ()
 
         suggested_title, performers, remixers, confident
