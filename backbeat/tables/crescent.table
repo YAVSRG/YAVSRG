@@ -426,6 +426,9 @@
         }, {
             "Hash": "75F675F3E81ADDE4493F30F84B4AD12D90FC284A24109655835DF14B37F90D1D", 
             "Id": "caliber/disconnected"
+        }, {
+            "Hash": "6F4AA017A322ACAE0398BFAEDB486E7ACAF5D4E6959EBC8F949443625F7B3109", 
+            "Id": "celebelian/conjure"
         }], 
         "Name": "E-22", 
         "Rank": 22
@@ -658,6 +661,9 @@
         }, {
             "Hash": "CD251A62AAB22802915636FB1203DEF706A440FE07F09ECA691755DAC1B7EC15", 
             "Id": "hydria/power"
+        }, {
+            "Hash": "252F043459148E8909F38EE283E771EC82B2DFC7C7859875862E1BACE4D968FA", 
+            "Id": "hylotl/offshore"
         }], 
         "Name": "E-26", 
         "Rank": 26
@@ -672,11 +678,11 @@
             "Hash": "96D8634ADBBC0F1CDC265B41AE051445C521E51974CBF7FEBA549AA8B800F4BF", 
             "Id": "tim/all-my-life"
         }, {
-            "Hash": "252F043459148E8909F38EE283E771EC82B2DFC7C7859875862E1BACE4D968FA", 
-            "Id": "hylotl/offshore"
-        }, {
             "Hash": "B0C0457D1D6E80607E3E8E53F66B6C794B3AFED32CF21E2727B08D90DB8DA799", 
             "Id": "sherie/sengoku-hop"
+        }, {
+            "Hash": "C10A214A7311352AE2C13D13C48C9CD0FD144DDECDD1EE5B22498E1911A50B8A", 
+            "Id": "couil/asphyxia-tv-edit"
         }, {
             "Hash": "7165DDD77E7865A18F8F597DEFD20158C1DD0FEA94491088D5FE3BC824FE3E65", 
             "Id": "arpia97/the-other-side-of-the-wall"
@@ -773,9 +779,6 @@
             "Hash": "4C588BE2098ADC4D29B7C3F960547FCAC4EC848952D0D675CC828631F949AAFB", 
             "Id": "wh1teh/motteke-sailor-fuku"
         }, {
-            "Hash": "CD133A5352B1ED65ACC6FD58372F9C053E184CC5E443C622EEAD895E73763C88", 
-            "Id": "suu-is-my-waifu/decapitation"
-        }, {
             "Hash": "00283848FCABEE50E5BC150ECD6ED6A166055412FBC349201C84BE9F6E1CAEC1", 
             "Id": "leo137/satori-de-pon"
         }, {
@@ -790,11 +793,17 @@
         }, {
             "Hash": "2D03D3EAAB6F43D0DFE4DEB3132FB4DCDE071A5132CAE5948FD363211CADA0DF", 
             "Id": "leo137/live-nor-die"
+        }, {
+            "Hash": "B29825E906CF2461D2622DD008F01B8172FE252B4D182EB0FDF7736520668869", 
+            "Id": "evening/tengaku"
         }], 
         "Name": "E-29", 
         "Rank": 29
     }, {
         "Charts": [{
+            "Hash": "CD133A5352B1ED65ACC6FD58372F9C053E184CC5E443C622EEAD895E73763C88", 
+            "Id": "suu-is-my-waifu/decapitation"
+        }, {
             "Hash": "5B9E22001AB0A03DE8B8C613774C520419138498848A97A9245CF1323B53195B", 
             "Id": "kauitsu/dynatsy"
         }, {
@@ -885,6 +894,9 @@
         "Rank": 35
     }, {
         "Charts": [{
+            "Hash": "85CE27EC4762E8848129737E054C1A761E3BB10715E58E27E754E949FAF4C4DD", 
+            "Id": "estear--fia/powa-of-da-wildanes"
+        }, {
             "Hash": "ECA7A813FB8287210003E6AC328B8CF270E61D3BD13C9B8C529EC7AF4CEF560F", 
             "Id": "lein/beepbit-futures"
         }, {
