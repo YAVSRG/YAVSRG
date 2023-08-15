@@ -98,6 +98,9 @@ module Library =
                 level.Charts
                 |> Seq.choose
                     ( fun (c: TableChart) ->
+                        match Cache.by_key (sprintf "%s/%s" table.Name c.Hash) cache with
+                        | Some cc -> Some (cc, LibraryContext.Table level.Name)
+                        | None ->
                         Cache.by_hash c.Hash cache
                         |> Option.map (fun x -> x, LibraryContext.Table level.Name)
                     )
