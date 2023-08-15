@@ -19,7 +19,8 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     let mutable resized = false
     let mutable fps_count = 0
     let fps_timer = Stopwatch()
-    let frame_timer = Stopwatch()
+    let last_frame_timer = Stopwatch()
+    let this_frame_timer = Stopwatch()
     member val RenderFrequency = 0.0 with get, set
 
     member this.OnResize(newSize: Vector2i) =
@@ -32,8 +33,8 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         fps_timer.Start()
         try
             while not (GLFW.WindowShouldClose window.WindowPtr) do
-                let timeUntilNextFrame = this.DispatchFrame()
-                if timeUntilNextFrame > 0.0 then Thread.Sleep(Math.Floor(timeUntilNextFrame * 1000.0) |> int)
+                let timeUntilNextFrameMs = this.DispatchFrame()
+                if timeUntilNextFrameMs > 1.0 then Thread.Sleep(TimeSpan.FromMilliseconds(timeUntilNextFrameMs - 1.0))
         with fatal_err -> Logging.Critical("Fatal crash in UI thread", fatal_err); window.Close()
 
     member this.Start() =
@@ -43,9 +44,9 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         
     member this.DispatchFrame() =
 
-        let frameTime = if this.RenderFrequency = 0.0 then 0.0 else 1.0 / this.RenderFrequency
-        let elapsedTime = frame_timer.Elapsed.TotalMilliseconds
-        frame_timer.Restart()
+        let frameTime = if this.RenderFrequency = 0.0 then 0.0 else 1000.0 / this.RenderFrequency
+        let elapsedTime = last_frame_timer.Elapsed.TotalMilliseconds
+        last_frame_timer.Restart()
         
         // Update
         Input.begin_frame_events()
@@ -69,6 +70,9 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
             Render.FPS <- (fps_count, time)
             fps_timer.Restart()
             fps_count <- 0
+
+        let elapsedTime = this_frame_timer.Elapsed.TotalMilliseconds
+        this_frame_timer.Restart()
 
         if this.RenderFrequency = 0.0 then 0.0 else frameTime - elapsedTime
 
