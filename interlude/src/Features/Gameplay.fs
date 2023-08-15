@@ -159,7 +159,7 @@ module Gameplay =
 
     let makeScore (replayData, keys) : Score =
         {
-            time = DateTime.Now
+            time = DateTime.UtcNow
             replay = Replay.compress replayData
             rate = rate.Value
             selectedMods = selectedMods.Value |> ModState.filter Chart.withMods.Value

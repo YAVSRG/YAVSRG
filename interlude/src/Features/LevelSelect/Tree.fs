@@ -84,7 +84,7 @@ module Tree =
         else
             match Chart.saveData with
             | Some data ->
-                data.LastPlayed <- DateTime.Now
+                data.LastPlayed <- DateTime.UtcNow
                 Screen.changeNew
                     ( fun () -> 
                         if autoplay then ReplayScreen.replay_screen(ReplayMode.Auto) :> Screen.T
@@ -96,7 +96,7 @@ module Tree =
     let challengeScore(_rate, _mods, replay) =
         match Chart.saveData with
         | Some data ->
-            data.LastPlayed <- DateTime.Now
+            data.LastPlayed <- DateTime.UtcNow
             rate.Set _rate
             selectedMods.Set _mods
             Screen.changeNew

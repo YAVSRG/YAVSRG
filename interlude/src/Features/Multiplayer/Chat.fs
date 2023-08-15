@@ -88,9 +88,9 @@ type Chat() =
                 add_msg cmp
 
     let countdown(reason, seconds) =
-        let now = System.DateTime.Now
+        let now = System.DateTime.UtcNow
         let seconds_left() =
-            let elapsed = (System.DateTime.Now - now).TotalSeconds |> System.Math.Floor |> int
+            let elapsed = (System.DateTime.UtcNow - now).TotalSeconds |> System.Math.Floor |> int
             max 0 (seconds - elapsed)
         StaticContainer(NodeType.None)
         |+ Text(
