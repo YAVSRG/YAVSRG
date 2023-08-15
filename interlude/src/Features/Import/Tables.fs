@@ -30,7 +30,7 @@ type ChartIdentity =
     }
     static member Default = { Found = false; Mirrors = []; Chart = None; Song = None }
 
-type TableCard(id: string, table: Table) as this =
+type TableCard(id: string, desc: string, table: Table) as this =
     inherit Frame(NodeType.Button (fun () -> Style.click.Play(); this.Install()),
         Fill = (fun () -> if this.Focused then Colors.pink.O2 else Colors.shadow_2.O2),
         Border = (fun () -> if this.Focused then Colors.pink_accent else Colors.grey_2.O3))
@@ -51,9 +51,12 @@ type TableCard(id: string, table: Table) as this =
         |+ Text(table.Name,
             Align = Alignment.CENTER,
             Position = Position.SliceTop(80.0f).Margin(20.0f, Style.PADDING))
+        |+ Text(desc,
+            Align = Alignment.CENTER,
+            Position = Position.TrimTop(65.0f).SliceTop(60.0f).Margin(20.0f, Style.PADDING))
         |+ Text((fun () -> sprintf "%iK, %i levels, %i charts" table.Keymode levels charts),
             Align = Alignment.CENTER,
-            Position = Position.TrimTop(70.0f).SliceTop(60.0f).Margin(20.0f, Style.PADDING))
+            Position = Position.TrimTop(130.0f).SliceTop(60.0f).Margin(20.0f, Style.PADDING))
         |* Clickable.Focus this
 
         this.RefreshInfo()
@@ -143,7 +146,7 @@ module Tables =
     type TableList() as this =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
     
-        let flow = FlowContainer.Vertical<TableCard>(200.0f, Spacing = 15.0f)
+        let flow = FlowContainer.Vertical<TableCard>(260.0f, Spacing = 15.0f)
         let scroll = ScrollContainer.Flow(flow, Margin = Style.PADDING)
     
         override this.Init(parent) =
@@ -157,7 +160,7 @@ module Tables =
                             match table with
                             | Some (t: Table) ->
                                 sync (
-                                    fun () -> flow.Add(TableCard(entry.File, t))
+                                    fun () -> flow.Add(TableCard(entry.File, entry.Description, t))
                                 )
                             | None -> Logging.Error(sprintf "Error getting table %s" entry.File)
                         )
@@ -173,4 +176,3 @@ module Tables =
 
     let tab = 
         TableList()
-        |+ Components.WIP()
