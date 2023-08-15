@@ -180,6 +180,6 @@ module Table =
         true
 
 [<Json.AutoCodec>]
-type TableIndexEntry = { Name: string; File: string; Version: int }
+type TableIndexEntry = { Name: string; Description: string; File: string; Version: int }
 [<Json.AutoCodec>]
 type TableIndex = { Tables: ResizeArray<TableIndexEntry> }
