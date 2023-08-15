@@ -146,7 +146,7 @@ module Tables =
         let diff_text = System.Text.StringBuilder()
         let write_diff (s: string) = diff_text.AppendLine(s) |> ignore
 
-        sprintf "## Updates to %s table -- %s" new_table.Name (System.DateTime.Now.ToString("dd/MM/yy", System.Globalization.CultureInfo.InvariantCulture)) |> write_diff
+        sprintf "## Updates to %s table -- %s" new_table.Name (System.DateTime.UtcNow.ToString("dd/MM/yy", System.Globalization.CultureInfo.InvariantCulture)) |> write_diff
 
         let mutable removals = []
         let mutable additions = []

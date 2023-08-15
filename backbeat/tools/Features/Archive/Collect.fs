@@ -81,7 +81,7 @@ module Collect =
                     | Origin.Stepmania (id) -> [Stepmania id]
                     | Origin.Unknown -> []
                     @ extraSources
-                LastUpdated = DateTime.Now
+                LastUpdated = DateTime.UtcNow
                 PreviewTime = chart.Header.PreviewTime
                 BackgroundFile = bg_hash
                 AudioFile = audio_hash

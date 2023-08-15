@@ -48,3 +48,4 @@ jobs:
         commit_message: <🌙> Apply pending table changes
         skip_checkout: true
         skip_fetch: true
+        repository: ./Backbeat
