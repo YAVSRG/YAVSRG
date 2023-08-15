@@ -68,9 +68,6 @@
         "Rank": 7
     }, {
         "Charts": [{
-            "Hash": "3485A35F1903C38F89E84169B38545762DCFFDB465764191DEE3A32BAF7EA2B3", 
-            "Id": "scotty/stepper"
-        }, {
             "Hash": "81756578BC148B95FF004010F8C34FA357F6E7FD133398A8A59F4C2FFBEE1993", 
             "Id": "kraezymann/dance-all-night"
         }], 
@@ -100,6 +97,9 @@
         "Charts": [{
             "Hash": "5ECD7A1B5D4E6057EBFCBB9118F16544F2720977AB51F4FE5877771705BFFE11", 
             "Id": "xingyue/cyaegha"
+        }, {
+            "Hash": "9AB36E3961CA88FCC70627668B38EDD18E68CD7823C86EFAE01012CEF509669D", 
+            "Id": "arpia97/pa-pi-pu-yeah"
         }], 
         "Name": "A-11", 
         "Rank": 11
@@ -259,8 +259,8 @@
         "Rank": 18
     }, {
         "Charts": [{
-            "Hash": "9AC4965B6097F1C1AD5DA2FDB2F47A34AE35DEA3B80DC44E3CCF1DC988DAA2CA", 
-            "Id": "wh1teh/to-the-limit"
+            "Hash": "61A2524678E984C3EE69926450F87433CFF96713C68938F7553D721AAC97D08B", 
+            "Id": "hokkyoku/magnet"
         }, {
             "Hash": "7EF818EB2A1584C1D20F5F9315AB3F4F9F0FE2EE18A5A37D2E7676F1864111C3", 
             "Id": "leo137/reminiscing"
@@ -325,6 +325,9 @@
         }, {
             "Hash": "BBBCCEDD274731C22A756BCC06FB776568B98B6BE77E4DC56642E5326ACB4AE7", 
             "Id": "upan/rocket-beat"
+        }, {
+            "Hash": "9AC4965B6097F1C1AD5DA2FDB2F47A34AE35DEA3B80DC44E3CCF1DC988DAA2CA", 
+            "Id": "wh1teh/to-the-limit"
         }], 
         "Name": "E-20", 
         "Rank": 20
@@ -347,6 +350,9 @@
         }, {
             "Hash": "6536AEE0F238FD1C17229EF9EB01D8CF6F135CE3DFC835BE392B78026C6C69FF", 
             "Id": "skalim/chrono-diver"
+        }, {
+            "Hash": "72A9A0638DD6B590BD3BB2FBAADF1947EBBD525A68FE9279E29366D019347E3F", 
+            "Id": "yoshl/double-helix"
         }, {
             "Hash": "E33C32C2AA3A1F68BA5BA35D8283B3F3DF033C5D374C13342EE6EED522AEB6EC", 
             "Id": "klaius/can-you-interpret"
@@ -373,6 +379,12 @@
         "Rank": 21
     }, {
         "Charts": [{
+            "Hash": "E9192C5EA70B58D166CA5638B37E56D7CB67712C6AAC12819A6F51D4A2A22238", 
+            "Id": "elexire/inner-spirit-extended"
+        }, {
+            "Hash": "DAC24A76E84A9E6835103869A2A5A1E45849FF64CB7E2D67A9E7A82BD340715E", 
+            "Id": "hylotl/hunch-gray"
+        }, {
             "Hash": "445DB2AE63CD052E22D087BEDABDA2455FE2CB004E2F90392FC0A25D5F00DF9D", 
             "Id": "xingren/day-dreamer"
         }, {
@@ -480,6 +492,9 @@
         "Rank": 23
     }, {
         "Charts": [{
+            "Hash": "D76E63CBF9C2962FC748C9B198D0F69CD9AAB117F52290F446C5C0DE0695DB93", 
+            "Id": "wiosna/anguish"
+        }, {
             "Hash": "72DD0B4446F68B743567FEB66F7182596A46E428817206C432B6BF6F4FC96935", 
             "Id": "klaius/halloween-of-the-dead-ii"
         }, {
@@ -541,6 +556,9 @@
         "Rank": 24
     }, {
         "Charts": [{
+            "Hash": "A2AC184131682461EAFFE6B99668AB56B03AFF4FDD7F4CCCF2044BCE319F106D", 
+            "Id": "zia/rhythm-feat-hatsune-miku"
+        }, {
             "Hash": "3424BA4231A8347FABD7F4075B4BBD843DD34F313D6CEF0A13CD56A30AADB1CD", 
             "Id": "xingren/ta-ti-tu-teatime"
         }, {
@@ -582,11 +600,17 @@
         }, {
             "Hash": "CC6E7F70C0B4D185731EB7C6C4C72F3F02E4394607B52B711D4CCF28FA224367", 
             "Id": "inteliser/infinite-youniverse"
+        }, {
+            "Hash": "26AA37E252065E1B676F92171E8FE1ECECE945782336EE22D09CF317F4274905", 
+            "Id": "ska/no1"
         }], 
         "Name": "E-25", 
         "Rank": 25
     }, {
         "Charts": [{
+            "Hash": "1BCD13BF5F14DD37BC056EED53A7C5BD1B7F63C0AA9785198E760CA0D4B2E987", 
+            "Id": "beatmap/shadow"
+        }, {
             "Hash": "F00FFE0FAFC450BB34EF6911B3BC785BB7EA5A3E0441A974F9114B91E9D39C8B", 
             "Id": "klaius/intro-duck-tion"
         }, {
@@ -628,6 +652,9 @@
         }, {
             "Hash": "766AC5E5086B547E6B3137E79542F924A07A52DC089F5B66912D70F9A27A6512", 
             "Id": "nixo/nijiiro-no-flugel"
+        }, {
+            "Hash": "DBD0A620432063D59F07FA73607739C2F567015B6E3AD6ABD8BA5E2D89B3326F", 
+            "Id": "tim--celebelian/the-baddest"
         }, {
             "Hash": "CD251A62AAB22802915636FB1203DEF706A440FE07F09ECA691755DAC1B7EC15", 
             "Id": "hydria/power"
@@ -672,11 +699,17 @@
             "Hash": "10F47EFFF1F86F0AF7E330EF1A6BAD35C4DAB1ADDD34318788804DCD9C0FD133", 
             "Id": "wh1teh/big-brother"
         }, {
+            "Hash": "C9CA942C30D7F84A36E30FF6CA1934B298F454B7D66B36771507ABF7356E0540", 
+            "Id": "penguinosity/angels-salad-le-mythe-tendu-ver"
+        }, {
             "Hash": "ADD810F8427192B3A6AD4D52617FD0BFCFE9AE21DE4E75C4FB79B1862965ED54", 
             "Id": "pope-gadget/wallspin"
         }, {
             "Hash": "F3C9B728CBED020D24F4027EC55F5597A766A8DACD7CD524F4ED762415060165", 
             "Id": "leo137/love-and-justice"
+        }, {
+            "Hash": "8A7577E148D382BA44BE9DA0208D9CE644E52C7F128D67566F12AEADD817377F", 
+            "Id": "skwid/harebare-fanfare"
         }], 
         "Name": "E-27", 
         "Rank": 27
@@ -712,6 +745,9 @@
             "Hash": "4660EDDECE9CEAAB83628B15DC13CDD2820666CD7330C2B9A292FECDB9843606", 
             "Id": "ska/babyhalo"
         }, {
+            "Hash": "1C9F4E9733A7E357FF05FEE460E069BCE3F8C7C5813D7997C4818686799CBB8A", 
+            "Id": "ska/melissa"
+        }, {
             "Hash": "3F801C73CB662DDF60AEFC71EB13C1277107BFE4452B1E70E581A4BB144F8279", 
             "Id": "ska/oddloop"
         }], 
@@ -734,6 +770,12 @@
             "Hash": "E4EDB2D0C18CBAF8BCA3A23BA4AE6918E5F5478C63B62BCAA729840C200BAA69", 
             "Id": "leo137/catch-you-catch-me"
         }, {
+            "Hash": "4C588BE2098ADC4D29B7C3F960547FCAC4EC848952D0D675CC828631F949AAFB", 
+            "Id": "wh1teh/motteke-sailor-fuku"
+        }, {
+            "Hash": "CD133A5352B1ED65ACC6FD58372F9C053E184CC5E443C622EEAD895E73763C88", 
+            "Id": "suu-is-my-waifu/decapitation"
+        }, {
             "Hash": "00283848FCABEE50E5BC150ECD6ED6A166055412FBC349201C84BE9F6E1CAEC1", 
             "Id": "leo137/satori-de-pon"
         }, {
@@ -753,6 +795,9 @@
         "Rank": 29
     }, {
         "Charts": [{
+            "Hash": "5B9E22001AB0A03DE8B8C613774C520419138498848A97A9245CF1323B53195B", 
+            "Id": "kauitsu/dynatsy"
+        }, {
             "Hash": "6B3BFF9485C892E9AA3824CB9DB1C72AF43F117BEA6E8E65B5A8BF543BED5269", 
             "Id": "xingren/video-game-lover-vs-hydraulic-press"
         }, {
@@ -792,6 +837,9 @@
         }, {
             "Hash": "F53B0A3CF2D4880D5B475BE0F3E23C9218982169AC93398A3F6EF7C518E969CF", 
             "Id": "tera/love-shuga-remix"
+        }, {
+            "Hash": "2B9B1F29C21846BB749AA8E6F4DE9CB0513AAF12DCA3C7C84CE0BB20385FB0F9", 
+            "Id": "snitori/yoizakura-kairou"
         }], 
         "Name": "X-31", 
         "Rank": 31
@@ -804,9 +852,6 @@
         "Rank": 32
     }, {
         "Charts": [{
-            "Hash": "4DD08F708727342BE562DFD1176F6F3E1F08D654E0008D2C2A767DCAF73D5B31", 
-            "Id": "percyqaz/scat-beat"
-        }, {
             "Hash": "B4A734FB580969DEBB5FC08AF240139AA5AB2F0B083608F7A61A17685ACB0B12", 
             "Id": "caliber/image-material"
         }], 
@@ -832,6 +877,9 @@
         }, {
             "Hash": "D078DCCF0E68C1B365B0FFC9BC5A713A4BD1754916762DA5040E56630ADC4D55", 
             "Id": "evening/sono-tamashii-ni-yasuragi-wo-dignity-of-spirit"
+        }, {
+            "Hash": "CFA94C2B3972BA2FB14FE2D1600CDE57A10C362E1B202BFD799A3AE42AD33B37", 
+            "Id": "wh1teh/wiseman-no-theme"
         }], 
         "Name": "X-35", 
         "Rank": 35
@@ -867,21 +915,6 @@
         "Rank": 38
     }, {
         "Charts": [{
-            "Hash": "4C588BE2098ADC4D29B7C3F960547FCAC4EC848952D0D675CC828631F949AAFB", 
-            "Id": "wh1teh/motteke-sailor-fuku"
-        }, {
-            "Hash": "D76E63CBF9C2962FC748C9B198D0F69CD9AAB117F52290F446C5C0DE0695DB93", 
-            "Id": "wiosna/anguish"
-        }, {
-            "Hash": "72A9A0638DD6B590BD3BB2FBAADF1947EBBD525A68FE9279E29366D019347E3F", 
-            "Id": "yoshl/double-helix"
-        }, {
-            "Hash": "8A7577E148D382BA44BE9DA0208D9CE644E52C7F128D67566F12AEADD817377F", 
-            "Id": "skwid/harebare-fanfare"
-        }, {
-            "Hash": "1C9F4E9733A7E357FF05FEE460E069BCE3F8C7C5813D7997C4818686799CBB8A", 
-            "Id": "ska/melissa"
-        }, {
             "Hash": "D6677D7392AD7226A49AD8A276CBBAF957EC75771F48A938297C503331DFB496", 
             "Id": "ska/last-surprise"
         }, {
@@ -930,9 +963,6 @@
             "Hash": "56C285C0D566C960C073EDA9D7084B8466045C3E46D61038F1A4AFFF32A17643", 
             "Id": "xcaliboor/stronghold"
         }, {
-            "Hash": "26AA37E252065E1B676F92171E8FE1ECECE945782336EE22D09CF317F4274905", 
-            "Id": "ska/no1"
-        }, {
             "Hash": "AD00F668369C97DA0E50315EDDD7C5534A072A93EF1D1C3DBB5A1299731C82F0", 
             "Id": "flexo123/plvck"
         }, {
@@ -953,9 +983,6 @@
         }, {
             "Hash": "85CE27EC4762E8848129737E054C1A761E3BB10715E58E27E754E949FAF4C4DD", 
             "Id": "estear--fia/powa-of-da-wildanes"
-        }, {
-            "Hash": "5B9E22001AB0A03DE8B8C613774C520419138498848A97A9245CF1323B53195B", 
-            "Id": "kauitsu/dynatsy"
         }, {
             "Hash": "8F112F5547EB2BDCCF60A5FEF13D746F6859C33464515F6C05A76498FB1E3267", 
             "Id": "10dollar/kirakira-time"
@@ -990,23 +1017,11 @@
             "Hash": "E0123C3E7054B848058BA2C30E0F8853F89630A15699ECA81FAF41F7BFCBAA23", 
             "Id": "crewk/kaeru"
         }, {
-            "Hash": "2B9B1F29C21846BB749AA8E6F4DE9CB0513AAF12DCA3C7C84CE0BB20385FB0F9", 
-            "Id": "snitori/yoizakura-kairou"
-        }, {
-            "Hash": "DBD0A620432063D59F07FA73607739C2F567015B6E3AD6ABD8BA5E2D89B3326F", 
-            "Id": "tim--celebelian/the-baddest"
-        }, {
             "Hash": "972F00365F2DD6895DCEF5B49A17B787B0FA94B7FD35FB8E9E19459598FA54C5", 
             "Id": "leo137/narcissus-ni-sayonara"
         }, {
             "Hash": "7E2935C643F5995B85203A37DC22C26CB6D73A6AF36283C296E87BB58E00F81E", 
             "Id": "vish/muzik-overload"
-        }, {
-            "Hash": "61A2524678E984C3EE69926450F87433CFF96713C68938F7553D721AAC97D08B", 
-            "Id": "hokkyoku/magnet"
-        }, {
-            "Hash": "CD133A5352B1ED65ACC6FD58372F9C053E184CC5E443C622EEAD895E73763C88", 
-            "Id": "suu-is-my-waifu/decapitation"
         }, {
             "Hash": "5F924641E6FB14DBAD869DF6829E4AF1030699535DD7267E1CDD45CAB4A2E7BB", 
             "Id": "11bit/fastest-crash-camellias-paroxysmal-energetic-hitech-remix"
@@ -1020,25 +1035,49 @@
             "Hash": "77EAE0ABE4C43F08B3478ACF358A694BFFB9A985D95EA3A1FF260CDB75ADEC17", 
             "Id": "penguinosity/metallic-madness-zone---act-2"
         }, {
-            "Hash": "C9CA942C30D7F84A36E30FF6CA1934B298F454B7D66B36771507ABF7356E0540", 
-            "Id": "penguinosity/angels-salad-le-mythe-tendu-ver"
-        }, {
             "Hash": "938ED16B9036380B611B16034A54A5F184EF972464B9A0ABD8E3BC58743B2071", 
             "Id": "sheenoboo/energy-synergy-matrix"
         }, {
             "Hash": "7A87D9FF4CCBCCF5EFFA82722EC89D609B637835CE22D2AAB73F095E39FB7D3E", 
             "Id": "vish/echidna-extended-mix"
         }, {
-            "Hash": "9AB36E3961CA88FCC70627668B38EDD18E68CD7823C86EFAE01012CEF509669D", 
-            "Id": "arpia97/pa-pi-pu-yeah"
-        }, {
             "Hash": "B4864A33795CC196636A74498C3408FD080C33CE58B5242F0C6BF08A289C7A52", 
             "Id": "chrubble/sailing-force"
+        }, {
+            "Hash": "78BE43422AD3AC3EDA3C5235952359B65D6EFDA35A53124320F4E5CFA8829E96", 
+            "Id": "tachyon/infiltration"
+        }, {
+            "Hash": "6F4AA017A322ACAE0398BFAEDB486E7ACAF5D4E6959EBC8F949443625F7B3109", 
+            "Id": "celebelian/conjure"
+        }, {
+            "Hash": "EC492854F5F806C6A115C1128D70E6F744485B4B9EE5068F4C4E4212EA386B10", 
+            "Id": "myzterion-/higanbara"
+        }, {
+            "Hash": "B29825E906CF2461D2622DD008F01B8172FE252B4D182EB0FDF7736520668869", 
+            "Id": "evening/tengaku"
+        }, {
+            "Hash": "2909E8A0B31ACACE9F974547EC08108B2A2526B4038063E7CADDB3A8CF3284D2", 
+            "Id": "sanadayukimura/critical-crystal"
+        }, {
+            "Hash": "3D8B91D1DE5275F6FC0328CE01DD2F20165F625900DA7B2FB34C81AF79ADBFF8", 
+            "Id": "icyworld/the-time-vampire"
+        }, {
+            "Hash": "D24DA63885169799190BF24B15382B306D2A6284411476E00179CE4C79C73DAE", 
+            "Id": "stepdwi/poppin-candy-fever"
+        }, {
+            "Hash": "FA07160D103D7BA5F65D7B52D1CE594A71F044D1623C189AAF2DB778B43A0F5C", 
+            "Id": "miaurichesu/bison-charge"
+        }, {
+            "Hash": "87D0F1EE8FBA3F13C0DF0E4A8ACF4D0CAB7544F1742E78C7E67EB3D502B9EB94", 
+            "Id": "sakisagee/kinou-ni-kanaderu-ashita-no-uta"
+        }, {
+            "Hash": "7143A9E9E073B0E8EC2C23BDDF0212D8EAA8CC395A84E698FF6DB0E48D1239D5", 
+            "Id": "sheenoboo/maxrage"
         }], 
         "Name": "XXX", 
         "Rank": -1
     }], 
     "Name": "Crescent", 
     "RulesetId": "SC(J4)BC581C", 
-    "Version": 20230617
+    "Version": 20230815
 }

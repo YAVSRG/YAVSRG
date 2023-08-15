@@ -1,165 +1,55 @@
-**Updates to Crescent table -- 11/03/23**
-
-__R-00__
-+ `hidden-is-fun/spy-and-spyce`
-
-__R-01__
-+ `alsty/ninelie-remix`
-
-__R-03__
-+ `keksikosu/gotoubun-no-kimochi`
-
-__R-04__
-+ `flevi/utopiosphere`
-
-__R-05__
-+ `civilization/m-a-missing-ascension`
-+ `flexo123/plvck-1`
-+ `riktoi/rhythm-of-love`
-
-__R-07__
-+ `das-hikari/magical-musical-master`
+**Updates to Crescent table -- 15/08/23**
 
 __R-08__
-+ `kraezymann/dance-all-night`
+- scotty/stepper
 
-__R-09__
-+ `muses/koufuku-na-wagamama`
-
-__A-10__
-+ `ziel/mirrorwall`
-+ `leo137/cinema`
-
-__A-13__
-+ `hlimak/flowers`
-+ `ruberususcarlet/pochiko-no-shiawase-na-nichijou`
-+ `kraezymann/petrified`
-
-__A-14__
-+ `lein/pleasure-island`
-+ `aeyeong/be-alright`
-~ `piratom/boss-rush` <-- **A-15**
-
-__A-15__
-~ `piratom/boss-rush` --> **A-14**
-+ `lemonguy/chrono-diver`
-+ `wh1teh/harutoman-no-youkai-shoujo`
-+ `aeyeoung/yes-ok`
-+ `juankristal/shotgun-senorita`
-+ `nikosek/cherry`
-
-__A-16__
-+ `todestrieb/inner-universe`
-+ `wafles/happiness`
-+ `felixspade/mate-um-bonito`
-+ `nikosek/blight-my-name`
-+ `nikosek/shimmer`
-+ `darkztar/towards-the-horizon`
-
-__A-17__
-~ `icyworld/everytime-i-hear-your-name` <-- **A-19**
-+ `flexo123/popstars`
-~ `lein/goodtek` <-- **E-21**
-~ `xeostyle/lone-digger` <-- **A-18**
-+ `riktoi/flamingo-remix`
-+ `wh1teh/blue-noah`
-~ `xeostyle/dancer-of-saramandora` --> **A-18**
-
-__A-18__
-~ `xeostyle/lone-digger` --> **A-17**
-~ `xeostyle/dancer-of-saramandora` <-- **A-17**
-+ `arpia97/carry-me-away`
-+ `skwid/lay-your-hands-on-me`
-~ `icyworld/m-a` <-- **E-21**
-+ `juankristal/move-that-body`
+__A-11__
++ arpia97/pa-pi-pu-yeah
 
 __A-19__
-~ `icyworld/everytime-i-hear-your-name` --> **A-17**
-~ `leo137/internet-bitch` <-- **E-20**
-~ `icyworld/cyber-induction` <-- **E-22**
-+ `autotelic/paiii-sensation`
-+ `ilikexd/ant-idm`
-~ `blaziken/senorita` <-- **E-20**
-~ `icyworld/send-my-love-to-mars` --> **E-20**
++ hokkyoku/magnet
+~ wh1teh/to-the-limit -> E-20
 
 __E-20__
-~ `leo137/internet-bitch` --> **A-19**
-~ `blaziken/senorita` --> **A-19**
-+ `hylotl/hectopascal`
-~ `icyworld/send-my-love-to-mars` <-- **A-19**
-~ `leo137/express-emotion` <-- **E-21**
-+ `upan/rocket-beat`
+~ wh1teh/to-the-limit <- A-19
 
 __E-21__
-~ `lein/goodtek` --> **A-17**
-~ `icyworld/m-a` --> **A-18**
-~ `leo137/express-emotion` --> **E-20**
-+ `skwid/kaze-no-uta`
-+ `tim/prom-night`
-~ `celebelian/3y3s` <-- **E-22**
-~ `yoshl/in-black-and-white` <-- **E-22**
++ yoshl/double-helix
 
 __E-22__
-~ `icyworld/cyber-induction` --> **A-19**
-~ `celebelian/3y3s` --> **E-21**
-~ `yoshl/in-black-and-white` --> **E-21**
-+ `wiosna/abnormalize`
-+ `tim-evening/nightmare-of-hornets-squad`
-~ `klaius/aa-kenran-no-utakata-ga-shiku` <-- **E-23**
-+ `celebelian/the-magic-valleys-of-dark-wolf`
-+ `ska/exterminate`
-~ `wiosna/sapphire` <-- **E-24**
-~ `caliber/disconnected` <-- **E-23**
-~ `dmriw/around-n-around` --> **E-23**
-
-__E-23__
-~ `klaius/aa-kenran-no-utakata-ga-shiku` --> **E-22**
-~ `caliber/disconnected` --> **E-22**
-+ `sheenoboo-dourgent/nothing-to-save`
-~ `dmriw/around-n-around` <-- **E-22**
-+ `tim/frame`
-+ `pixl/kamui`
-+ `klaius/kokonatsu-wa-yume-no-katachi`
-+ `sherie/karma`
-+ `ska/crazy-for-you`
-+ `my-angel-koishi/ch3rry`
++ elexire/inner-spirit-extended
++ hylotl/hunch-gray
 
 __E-24__
-~ `wiosna/sapphire` --> **E-22**
-+ `wiosna/kaisei-joshou-hallelujah`
-+ `sheenoboo/lamento`
-+ `juankristal/kamisama-nejimaki`
-+ `ska/sugar-song-to-bitter-step`
-+ `snugglemagne/run-away-with-me`
-+ `felixspade/psychology`
-+ `skwid/bon-bon`
++ wiosna/anguish
 
 __E-25__
-+ `xingren/ta-ti-tu-teatime`
-+ `myzterion/angels-salad`
++ zia/rhythm-feat-hatsune-miku
++ ska/no1
 
 __E-26__
-+ `leo137-celebelian/some`
-+ `nixo/nijiiro-no-flugel`
-+ `hydria/power`
++ beatmap/shadow
++ tim--celebelian/the-baddest
 
 __E-27__
-+ `lemonguy/adcar`
-+ `sherie/sengoku-hop`
++ penguinosity/angels-salad-le-mythe-tendu-ver
++ skwid/harebare-fanfare
 
 __E-28__
-~ `nixo/rainbow-jakka-jan` <-- **E-29**
-+ `ska/babyhalo`
-+ `ska/oddloop`
++ ska/melissa
 
 __E-29__
-~ `nixo/rainbow-jakka-jan` --> **E-28**
++ wh1teh/motteke-sailor-fuku
++ suu-is-my-waifu/decapitation
 
 __X-30__
-+ `xingren/video-game-lover-vs-hydraulic-press`
++ kauitsu/dynatsy
 
 __X-31__
-+ `hylotl/21st-century`
++ snitori/yoizakura-kairou
 
-__X-38__
-+ `frolica/universe`
+__X-33__
+- percyqaz/scat-beat
+
+__X-35__
++ wh1teh/wiseman-no-theme

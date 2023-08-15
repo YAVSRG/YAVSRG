@@ -82,13 +82,13 @@ module Tables =
 
     let add_suggestions (file: string) (folder: string) =
 
-        let table : Table = Path.Combine(TABLES_PATH, file + ".suggestions.table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+        let table : Table = Path.Combine(TABLES_PATH, file + ".suggestions.table") |> JSON.FromFile |> function Ok t -> t | Error e -> raise e
 
         table.AddLevel("XXX", -1) |> ignore
 
         let collections : Collections =
             match JSON.FromFile INTERLUDE_COLLECTIONS_FILE with
-            | Result.Ok c -> c
+            | Ok c -> c
             | Error e -> raise e
 
         match collections.GetFolder folder with
@@ -97,15 +97,13 @@ module Tables =
             printfn "Local folders: %s" (String.concat ", " collections.Folders.Keys)
         | Some folder ->
             for entry in folder.Charts |> List.ofSeq do
-                if table.Contains entry.Hash then printfn "Already in table: %s" entry.Path
-                else
-                    match Cache.by_key entry.Path interlude_cache with
-                    | Some cc -> 
-                        let id = Table.generate_cid cc
-                        if table.AddChart("XXX", id, cc) then 
-                            printfn "+ %s" id
-                            folder.Remove cc |> ignore
-                    | None -> printfn "Chart key '%s' from collection not in cache" entry.Path
+                match Cache.by_key entry.Path interlude_cache with
+                | Some cc -> 
+                    let id = Table.generate_cid cc
+                    if table.AddChart("XXX", id, cc) then 
+                        printfn "+ %s" id
+                        folder.Remove cc |> ignore
+                | None -> printfn "Chart key '%s' from collection not in cache" entry.Path
 
         { table with Version = Table.generate_table_version() } |> JSON.ToFile(Path.Combine(TABLES_PATH, file + ".suggestions.table"), true)
         printfn "Saved table additions."
@@ -200,9 +198,10 @@ module Tables =
 
                 // otherwise look in Interlude client's cache for it
                 match Cache.by_hash chart.Hash interlude_cache with
-                | Some cc -> 
-                    Cache.replicate table.Name cc interlude_cache backbeat_cache
-                    Logging.Info(sprintf "-> %s" chart.Id)
+                | _
+                //| Some cc -> 
+                    //Cache.replicate table.Name cc interlude_cache backbeat_cache
+                    //Logging.Info(sprintf "-> %s" chart.Id)
                 | None -> Logging.Info(sprintf "Chart missing from both backbeat and your local client: %s" chart.Id)
         Collect.slurp_folder [] table.Name
 
