@@ -113,10 +113,9 @@ module Tables =
     // Commit phase
 
     type Action = 
-        | Removed
-        | Added
-        | MovedHere of string
-        | MovedAway of string
+        | Removed of string
+        | Added of string
+        | Moved of before: string * after: string
 
     let commit_table(file: string) =
         
@@ -125,20 +124,19 @@ module Tables =
 
         new_table.RemoveLevel("XXX") |> ignore
 
-        let diffs = ResizeArray<string * TableChart * Action>()
+        let diffs = ResizeArray<TableChart * Action>()
         for new_level in new_table.Levels do
             for chart in new_level.Charts do
                 if table.Contains chart.Hash then
                     let level = table.LevelOf chart.Hash
                     if level.Name <> new_level.Name then
-                        diffs.Add (level.Name, chart, MovedAway new_level.Name)
-                        diffs.Add (new_level.Name, chart, MovedHere level.Name)
-                else diffs.Add(new_level.Name, chart, Added)
+                        diffs.Add (chart, Moved (level.Name, new_level.Name))
+                else diffs.Add(chart, Added new_level.Name)
         
         for level in table.Levels do
             for chart in level.Charts do
                 if not (new_table.Contains chart.Hash) then
-                    diffs.Add(level.Name, chart, Removed)
+                    diffs.Add(chart, Removed level.Name)
 
         if diffs.Count = 0 then 
             printfn "No changes to commit." 
@@ -148,16 +146,31 @@ module Tables =
         let diff_text = System.Text.StringBuilder()
         let write_diff (s: string) = diff_text.AppendLine(s) |> ignore
 
-        sprintf "**Updates to %s table -- %s**" new_table.Name (System.DateTime.Now.ToString("dd/MM/yy", System.Globalization.CultureInfo.InvariantCulture)) |> write_diff
+        sprintf "## Updates to %s table -- %s" new_table.Name (System.DateTime.Now.ToString("dd/MM/yy", System.Globalization.CultureInfo.InvariantCulture)) |> write_diff
 
-        for level, changes in Seq.groupBy(fun (l, _, _) -> l) diffs |> Seq.sortBy(fun (l, _) -> int <| l.Substring(2)) do
-            sprintf "\n__%s__" level |> write_diff
-            for (_, chart, action) in changes do
-                match action with
-                | Removed -> sprintf "- %s" chart.Id |> write_diff
-                | Added -> sprintf "+ %s" chart.Id |> write_diff
-                | MovedAway target -> sprintf "~ %s -> %s" chart.Id target |> write_diff
-                | MovedHere from -> sprintf "~ %s <- %s" chart.Id from |> write_diff
+        let mutable removals = []
+        let mutable additions = []
+        let mutable movements = []
+        for chart, action in diffs do
+            match action with
+            | Removed l -> removals <- sprintf "[%s] %s" l chart.Id :: removals
+            | Added l -> additions <- sprintf "[%s] %s" l chart.Id :: additions
+            | Moved (before, after) -> movements <- sprintf "[%s] %s -> [%s] %s" before chart.Id after chart.Id :: movements
+
+        if additions <> [] then
+            write_diff ""
+            write_diff "### New charts"
+            List.iter write_diff additions
+        
+        if movements <> [] then
+            write_diff ""
+            write_diff "### Level changes"
+            List.iter write_diff movements
+        
+        if removals <> [] then
+            write_diff ""
+            write_diff "### Removed charts"
+            List.iter write_diff removals
 
         let diff_text = diff_text.ToString()
 
