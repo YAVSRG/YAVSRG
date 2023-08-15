@@ -177,14 +177,14 @@ module Library =
                         | Pack packname ->
                             let config = { ConversionOptions.Default with MoveAssets = false; ChangedAfter = Some source.LastImported; PackName = packname }
                             do! convert_pack_folder.RequestAsync(source.SourceFolder, config)
-                            source.LastImported <- DateTime.Now
+                            source.LastImported <- DateTime.UtcNow
                         | Library ->
                             for packFolder in
                                 Directory.EnumerateDirectories source.SourceFolder
                                 |> Seq.filter (fun path -> Directory.GetLastWriteTime path >= source.LastImported)
                                 do
                                 do! convert_pack_folder.RequestAsync(packFolder, { ConversionOptions.Default with MoveAssets = false; ChangedAfter = Some source.LastImported; PackName = Path.GetFileName packFolder })
-                            source.LastImported <- DateTime.Now
+                            source.LastImported <- DateTime.UtcNow
                     }
             }
 

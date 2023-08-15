@@ -21,7 +21,7 @@ module Suggestion =
             if fst d.Accuracy.Best > 0.965 then TooEasy
             elif fst d.Accuracy.Best < 0.945 then TooHard
             else JustRight
-        | false, _ -> if (DateTime.Now - data.LastPlayed).TotalDays < 7.0 then TooHard else JustRight
+        | false, _ -> if (DateTime.UtcNow - data.LastPlayed).TotalDays < 7.0 then TooHard else JustRight
     
     let get_suggestion (chart: Chart) (cacheData: CachedChart) (filter: Filter) (rulesetId: string) =
 
@@ -44,7 +44,7 @@ module Suggestion =
         let mutable best_chart_points = -1
 
         let bpm = 60000.0f<ms/minute> / fst cacheData.BPM
-        let now = DateTime.Now
+        let now = DateTime.UtcNow
         let rand = Random()
 
         for chart in Filter.apply filter_and_constraints Library.cache.Entries.Values do
