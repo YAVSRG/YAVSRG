@@ -24,7 +24,7 @@ module Server =
 
         override this.OnConnected() =
             config.Handle_Connect this.Id
-            Logging.Debug(sprintf "%O :: %O :: %O" DateTime.Now this.Id this.Socket.RemoteEndPoint)
+            Logging.Debug(sprintf "%O :: %O :: %O" DateTime.UtcNow this.Id this.Socket.RemoteEndPoint)
 
         override this.OnDisconnected() =
             config.Handle_Disconnect this.Id
