@@ -2,6 +2,7 @@
     "Tables": [{
         "File": "crescent.table", 
         "Name": "Crescent", 
+        "Description": "A variety of interesting 4K charts to improve your skills with", 
         "Version": 20230614
     }]
 }

@@ -206,14 +206,6 @@ module Tables =
                 | None -> Logging.Info(sprintf "Chart missing from both backbeat and your local client: %s" chart.Id)
         Collect.slurp_folder [] table.Name
 
-    let update_index() =
-        let index = { Tables = ResizeArray<TableIndexEntry>() }
-        for file in Directory.GetFiles(TABLES_PATH) do
-            if file.EndsWith(".table") && not (file.EndsWith(".suggestions.table")) then
-                JSON.FromFile<Table> file
-                |> function Result.Ok res -> index.Tables.Add { Name = res.Name; Version = res.Version; File = Path.GetFileName(file) } | _ -> ()
-        JSON.ToFile (Path.Combine(TABLES_PATH, "index.json"), true) index
-
     let register (ctx: ShellContext) =
         ctx
             .WithCommand("put", "Copies repo table to your local interlude", "table", put_table)
@@ -222,4 +214,3 @@ module Tables =
             .WithCommand("check_table", "Verify all parts of the table are in backbeat", "table", check_table)
             .WithCommand("upload_table", "Upload charts from table to backbeat storage", "table", upload_table_charts)
             .WithCommand("commit", "Commit suggestions to table and generate a changelog", "table", commit_table)
-            .WithCommand("index", "Update table index", update_index)
