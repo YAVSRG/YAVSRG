@@ -30,6 +30,19 @@ module Printerlude =
         open Prelude.Charts.Tools.Patterns
         open System.IO.Compression
 
+        let mutable cmp = None
+        let cmp_1() =
+            match Gameplay.Chart.current with
+            | None -> failwith "Select a chart"
+            | Some c -> cmp <- Some c
+        let cmp_2() =
+            match cmp with
+            | None -> failwith "Use cmp_1 first"
+            | Some cmp ->
+            match Gameplay.Chart.current with
+            | None -> failwith "Select a chart"
+            | Some c -> Interlude.Chart.diff cmp c
+
         let show_version() =
             ctx.WriteLine(sprintf "You are running %s" Utils.version)
             ctx.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latestVersionName)
@@ -127,6 +140,8 @@ module Printerlude =
                 .WithCommand("fix_personal_bests", "Fix personal best display values", fix_personal_bests)
                 .WithCommand("patterns", "Experimental", analyse_patterns)
                 .WithCommand("local_server", "Switch to local development server", "flag", fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); ctx.WriteLine("Restart your game to apply server change."))
+                .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
+                .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
 
     let private ms = new MemoryStream()
     let private context_output = new StreamReader(ms)
