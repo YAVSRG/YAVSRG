@@ -225,7 +225,7 @@ module Interlude =
                     bw.Write(f)
                     speed <- f
 
-            bw.Write((chart.LastNote - chart.FirstNote) * 0.1f |> float32 |> round |> int)
+            bw.Write((chart.LastNote - chart.FirstNote) * 0.01f |> float32 |> round |> int)
         
             BitConverter.ToString(h.ComputeHash (ms.ToArray())).Replace("-", "")
 
