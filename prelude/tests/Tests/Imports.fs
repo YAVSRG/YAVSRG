@@ -1,34 +1,19 @@
 ﻿namespace Prelude.Test
 
+open System.IO
 open Percyqaz.Common
 open Prelude.Charts.Formats.Interlude
+open Prelude.Charts.Formats.Conversions
 open Prelude.Data.Charts
 
 module Imports =
-    
-    let mount = Library.Imports.MountedChartSource.Pack ("osu!", Library.Imports.osuSongFolder)
 
     let main() =
 
-        //mount.LastImported <- DateTime.Today.AddDays(-1.0)
-
-        Reporter.func <- Reports.minor
-        Logging.Info "Converting osu! songs ..."
-        // todo: update this system if I ever fix this test rig
-        //let t = BackgroundTask.Create TaskFlags.NONE "Convert osu! songs" (Library.Imports.importMountedSource mount)
-        //t.Wait()
-        Library.save()
-        Logging.Info "Conversion complete!"
-        
-        Reporter.func <- Reports.major
-        Logging.Info "Checking osu! imports for defects ..."
-        for id in Library.charts.Keys do
-            match Chart.fromFile id with
-            | Some chart -> Chart.check chart
-            | None -> ()
-        Logging.Info "Check complete!"
-
-    let getRandomChart() =
-        // not yet a random chart
-        Chart.fromFile @"C:\Users\percy\Desktop\Source\YAVSRG\Interlude\bin\Debug\netcoreapp3.1\Songs\Compulsive Chordjack Collection 2\Day Dreamer (XingRen)\Dance_Single 23 [0].yav"
-        |> Option.get
+        Logging.Info "Running converter on all osu! songs ..."
+        for song in Directory.EnumerateDirectories Library.Imports.osuSongFolder do
+            for file in Directory.EnumerateFiles song do
+                if file.ToLower().EndsWith(".osu") then
+                    for chart in loadAndConvertFile { Source = file; Config = ConversionOptions.Default } do
+                        try Chart.check chart with err -> Logging.Error(err.ToString(), err)
+        Logging.Info "Complete!"

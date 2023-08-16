@@ -1,6 +1,6 @@
 ﻿module Sail
 
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.``osu!``
 
 let source = @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637823398692216004-AWOLNATION - Sail (Official Music Video)\AWOLNATION - Sail (Percyqaz) [SAIL WITH ME INTO THE DARK].osu"

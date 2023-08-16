@@ -25,11 +25,10 @@ let main argv =
     //Imports.main()
     //Metrics.main()
     //Sail.main()
-    Caramell.main()
+    //Caramell.main()
+    Imports.main()
 
     Logging.Info "Test track complete, showing reports ..."
 
-    Reports.display true
-
-    Logging.Wait()
+    Logging.Shutdown()
     0

@@ -2,7 +2,7 @@
 
 open System
 open System.IO
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Formats.``osu!``
 
 [<Measure>]
