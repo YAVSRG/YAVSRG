@@ -20,6 +20,6 @@ cd Interlude
 (git status | grep "ahead of" -c) && git push
 cd ..
 cd Backbeat
-(git status | grep "ahead of" -c) && git push
+(git status | grep "ahead of" -c) && git pull --rebase && git push
 cd ..
 (git status | grep "ahead of" -c) && git push
