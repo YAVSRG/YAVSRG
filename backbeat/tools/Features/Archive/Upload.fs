@@ -40,6 +40,7 @@ module Upload =
         Queue.append "uploaded" s
     
     let private upload_chart_internal (chart: Interlude.Chart) (chart_info: Chart) =
+        Interlude.Chart.check chart
         Async.Parallel [
             task {
                 let hash = Interlude.Chart.hash chart
