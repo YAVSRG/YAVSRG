@@ -206,6 +206,28 @@ module Interlude =
                     speed <- f
 
             BitConverter.ToString(h.ComputeHash (ms.ToArray())).Replace("-", "")
+        
+        let hash_v2 (chart: Chart) : string =
+            let h = SHA256.Create()
+            use ms = new MemoryStream()
+            use bw = new BinaryWriter(ms)
+        
+            let offset = chart.FirstNote
+        
+            for { Data = nr } in chart.Notes do
+                for nt in nr do bw.Write (byte nt)
+        
+            let mutable speed = 1.0
+            for { Time = o; Data = f } in chart.SV do
+                let f = float f
+                if (speed <> f) then
+                    bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
+                    bw.Write(f)
+                    speed <- f
+
+            bw.Write((chart.LastNote - chart.FirstNote) * 0.1f |> float32 |> round |> int)
+        
+            BitConverter.ToString(h.ComputeHash (ms.ToArray())).Replace("-", "")
 
         let check (chart: Chart) =
             try

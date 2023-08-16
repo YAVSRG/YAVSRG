@@ -11,7 +11,6 @@
     <Compile Include="Tests\Sail.fs" />
     <Compile Include="Tests\Trendy.fs" />
     <Compile Include="Tests\Imports.fs" />
-    <Compile Include="Tests\Metrics.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

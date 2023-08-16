@@ -11,7 +11,7 @@ open Prelude.Test
 
     So my test todo-list looks like this
     - A setup to en-masse convert stepmania/osu files on my PC, and when anything goes wrong output those cases to a special folder I can look through
-    - A sanity checker algorithm I can feed the results of mod charts and conversions into to make sure no obvious DTIs have been broken
+    - A sanity checker algorithm I can feed the results of mod charts and conversions into to make sure no invariants have been broken
     - A collection of replays/replay data to feed into score algorithms - Tests my code is equivalent to what it was before a change
     - A checklist of manual things to look at with my eyes and see if they seem correct (mainly for things where correctness is not critical/can be fixed retroactively without problems for users)
 *)
@@ -21,14 +21,9 @@ let main argv =
     Console.BufferHeight <- 32766
     Logging.Info "Welcome to the Prelude test track"
 
-    //Generic.main()
-    //Imports.main()
-    //Metrics.main()
-    //Sail.main()
-    //Caramell.main()
     Imports.main()
 
-    Logging.Info "Test track complete, showing reports ..."
+    Logging.Info "Test track complete!"
 
     Logging.Shutdown()
     0
