@@ -109,6 +109,7 @@ type TableCard(id: string, desc: string, table: Table) as this =
         | UpdateAvailable ->
             Table.install(id, table)
             existing <- table
+            status <- UpToDate
             this.RefreshInfo()
         | InstallingCharts -> ()
         | MissingCharts -> this.GetMissingCharts()
