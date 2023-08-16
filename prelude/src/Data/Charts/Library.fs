@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Data.Charts
 
 open System
+open System.Linq
 open System.IO
 open System.IO.Compression
 open System.Collections.Generic
@@ -45,8 +46,9 @@ module Library =
             if groups.ContainsKey s |> not then groups.Add(s, { Charts = ResizeArray<CachedChart * LibraryContext>(); Context = LibraryGroupContext.None })
             groups.[s].Charts.Add (c, LibraryContext.None)
 
-        for g in groups.Values do
-            g.Charts.Sort sorting
+        for g in groups.Keys |> Seq.toArray do
+            groups.[g] <- { groups.[g] with Charts = groups.[g].Charts |> Seq.distinctBy (fun (cc, _) -> cc.Hash) |> ResizeArray }
+            groups.[g].Charts.Sort sorting
 
         groups
 
