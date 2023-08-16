@@ -261,11 +261,12 @@ module ``osu!`` =
         Storyboard parsing code
     *)
 
-    //Parsing loops is unsupported!
     let rec private parseSpriteEvent depthSkipper =
         depthSkipper
         >>. 
         (
+        (pchar 'L' >>. fail "Storyboard loops are not supported!")
+        <|>
         //((pchar 'L' >>. comma >>. tuple3 (parseNum .>> comma) (parseInt .>> comma .>> spaces) (many (parseSpriteEvent ((pchar ' ' <|> pchar '_') >>. depthSkipper .>> skipNewline))))
         //|>> (fun (time, repeats, events) -> Loop(time, repeats, events)))
         //<|>
@@ -613,7 +614,7 @@ module ``osu!`` =
                 Metadata = readMetadata metadata
                 Difficulty = readDifficulty difficulty
                 Events = events
-                Objects = List.sortBy (fun o -> o.Time) hitobjects
+                Objects = hitobjects
                 Timing = timingpoints
             }
 

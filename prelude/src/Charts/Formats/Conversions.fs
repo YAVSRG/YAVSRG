@@ -34,70 +34,80 @@ type ConversionAction =
 
 module ``osu!`` =
 
-    let private convertHitObjects (objects: HitObject list) (keys: int) : TimeArray<NoteRow> =
-        let holds = Array.create keys -1.0f<ms>
+    let private convert_hit_objects (objects: HitObject list) (keys: int) : TimeArray<NoteRow> =
+        let output = List<TimeItem<NoteRow>>()
+        let holding_until : Time option array = Array.zeroCreate keys
+        let mutable last_row : TimeItem<NoteRow> = { Time = -Time.infinity; Data = [||] }
 
         let xToColumn (x: float) = x / 512.0 * float keys |> int |> min (keys - 1) |> max 0
 
-        let createRow () =
-            let nr = NoteRow.createEmpty keys
-            for i = 0 to (holds.Length - 1) do
-                if holds.[i] >= 0.0f<ms> then nr.[i] <- NoteType.HOLDBODY
-            nr
+        let finish_holds time =
+            let mutable earliest_release = Time.infinity
+            let find_earliest() =
+                earliest_release <- Time.infinity
+                for h in holding_until do
+                    match h with
+                    | Some v -> earliest_release <- min earliest_release v
+                    | None -> ()
+            find_earliest()
 
-        let updateHolds time (snaps: TimeItem<NoteRow> list) =
-            let mutable s = snaps
-            let mutable minT = Array.fold (fun y x -> if x = -1.0f<ms> then y else min y x) Time.infinity holds
-            while minT < time do
-                for k in 0..(keys - 1) do
-                    if (holds.[k] >= 0.0f<ms> && holds.[k] = minT) then 
-                        match s with
-                        | { Time = t; Data = nr } :: ss ->
-                            holds.[k] <- -1.0f<ms>
-                            if time = minT then
-                                nr.[k] <- NoteType.HOLDTAIL
-                            else s <- { Time = minT; Data = let nr = createRow() in nr.[k] <- NoteType.HOLDTAIL; nr } :: s
-                        | [] -> failwith "impossible"
-                minT <- Array.fold (fun y x -> if x = -1.0f<ms> then y else min y x) Time.infinity holds
-            s
+            while earliest_release < time do
+                for k = 0 to keys-1 do
+                    if holding_until.[k] = Some earliest_release then
+                        // assert: earliest_release >= last_row.Time
+                        if earliest_release > last_row.Time then
+                            last_row <- { Time = earliest_release; Data = Array.zeroCreate keys }
+                            output.Add last_row
+                            for k = 0 to keys-1 do
+                                if holding_until.[k] <> None then last_row.Data.[k] <- NoteType.HOLDBODY
+                
+                        match last_row.Data.[k] with
+                        | NoteType.NOTHING
+                        | NoteType.HOLDBODY -> 
+                            last_row.Data.[k] <- NoteType.HOLDTAIL
+                            holding_until.[k] <- None
+                        | _ -> failwithf "impossible"
+                find_earliest()
 
-        let note k time (snaps: TimeItem<NoteRow> list) =
-            if holds.[k] <> -1.0f<ms> then snaps else
+        let add_note column time =
+            finish_holds time
+            // assert: time >= last_row.Time
+            if time > last_row.Time then
+                last_row <- { Time = time; Data = Array.zeroCreate keys }
+                output.Add last_row
+                for k = 0 to keys-1 do
+                    if holding_until.[k] <> None then last_row.Data.[k] <- NoteType.HOLDBODY
+            
+            match last_row.Data.[column] with
+            | NoteType.NOTHING -> last_row.Data.[column] <- NoteType.NORMAL
+            | stack -> ()//Logging.Debug(sprintf "Skipped note because it's stacked with %A" stack)
 
-            match snaps with
-            | { Time = t; Data = nr } :: ss ->
-                if t = time then 
-                    if nr.[k] = NoteType.NOTHING then nr.[k] <- NoteType.NORMAL
-                    snaps
-                else { Time = time; Data = let row = createRow() in row.[k] <- NoteType.NORMAL; row } :: snaps
-            | [] -> { Time = time; Data = let row = createRow() in row.[k] <- NoteType.NORMAL; row } :: snaps
+        let start_hold column time endtime =
+            finish_holds time
+            // assert: time >= last_row.Time
+            if time > last_row.Time then
+                last_row <- { Time = time; Data = Array.zeroCreate keys }
+                output.Add last_row
+                for k = 0 to keys-1 do
+                    if holding_until.[k] <> None then last_row.Data.[k] <- NoteType.HOLDBODY
+            
+            match last_row.Data.[column] with
+            | NoteType.NOTHING -> 
+                last_row.Data.[column] <- NoteType.HOLDHEAD
+                holding_until.[column] <- Some endtime
+            | stack -> ()//Logging.Debug(sprintf "Skipped hold because it's stacked with %A" stack)
 
-        let hold (k: int) (time: Time) (release: Time) (snaps: TimeItem<NoteRow> list) =
-            if holds.[k] <> -1.0f<ms> then 
-                snaps
-            elif release < time then 
-                snaps
-            elif release = time then
-                note k time snaps
-            else
+        for object in objects |> List.sortBy (fun o -> o.Time) do
+            match object with
+            | HitCircle ((x, _), time, _, _) -> add_note (xToColumn x) time
+            | HoldNote ((x, _), time, endTime, _, _) when endTime > time -> start_hold (xToColumn x) time endTime
+            | HoldNote ((x, _), time, endTime, _, _) -> add_note (xToColumn x) time
+            | _ -> ()
+        
+        finish_holds Time.infinity
+        output.ToArray()
 
-            holds.[k] <- release
-            match snaps with
-            | { Time = t; Data = nr } :: ss ->
-                if t = time then nr.[k] <- NoteType.HOLDHEAD; snaps
-                else { Time = time; Data = let row = createRow() in row.[k] <- NoteType.HOLDHEAD; row } :: snaps
-            | [] -> { Time = time; Data = let row = createRow() in row.[k] <- NoteType.HOLDHEAD; row } :: snaps
-
-        let f (snaps: TimeItem<NoteRow> list) (hitObj: HitObject) =
-            match hitObj with
-            | HitCircle ((x, y), time, _, _) -> note (xToColumn x) time (updateHolds time snaps)
-            | HoldNote ((x, y), time, endTime, _, _) -> hold (xToColumn x) time endTime (updateHolds time snaps)
-            | _ -> snaps
-
-        let states = updateHolds Time.infinity (List.fold f [] objects)
-        states |> Array.ofList |> Array.rev
-
-    let private convertTimingPoints (points: TimingPoint list) (keys: int) (endTime: Time) : TimeArray<BPM> * TimeArray<float32> =
+    let private convertTimingPoints (points: TimingPoint list) (endTime: Time) : TimeArray<BPM> * TimeArray<float32> =
         let rec bpmDurations points = 
             if List.isEmpty points then failwith "no bpm point"
             match List.head points with
@@ -180,9 +190,9 @@ module ``osu!`` =
 
                 ChartSource = Osu (b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
             }
-        let snaps = convertHitObjects b.Objects keys
+        let snaps = convert_hit_objects b.Objects keys
         if snaps.Length = 0 then failwith "osu! chart has no notes"
-        let bpm, sv = convertTimingPoints b.Timing keys (TimeArray.last snaps).Value.Time
+        let bpm, sv = convertTimingPoints b.Timing (TimeArray.last snaps).Value.Time
         {
             Keys = keys
             Header = header
@@ -558,8 +568,9 @@ module Utilities =
                     map.General.Mode = GameMode.Mania
                     && (let keys = map.Difficulty.CircleSize |> int in 3 <= keys && keys <= 10)
                     && not (``osu!``.looks_like_a_rate map)
+                    && map.Objects.Length >= 20
                 then
                     [ ``osu!``.toInterlude (loadBeatmapFile action.Source) action ]
                 else []
-            with err -> Logging.Debug ("Skipped .osu file: " + action.Source, err); []
+            with err -> Logging.Debug (sprintf "Error loading %s" action.Source, err); []
         | _ -> []

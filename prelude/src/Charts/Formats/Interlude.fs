@@ -212,22 +212,37 @@ module Interlude =
                 let mutable lastTime = -Time.infinity
                 let mutable ln = 0us
                 for { Time = time; Data = nr } in chart.Notes do
-                    if time <= lastTime then failwithf "Sanity check failed: Note row appears on or before the previous time (%f, %f)" time lastTime
+                    if time <= lastTime then failwithf "Note row appears on or before the previous time (%f, %f)" time lastTime
                     lastTime <- time
 
                     for k = 0 to (chart.Keys - 1) do
                         if nr.[k] = NoteType.HOLDHEAD then
-                            if Bitmask.hasBit k ln then failwithf "Sanity check failed: Hold head appears inside hold at %f" time
+                            if Bitmask.hasBit k ln then failwithf "Hold head appears inside hold at %f" time
                             ln <- Bitmask.setBit k ln
                         elif nr.[k] = NoteType.HOLDBODY then
-                            if Bitmask.hasBit k ln |> not then failwithf "Sanity check failed: Hold middle appears with no head at %f" time
+                            if Bitmask.hasBit k ln |> not then failwithf "Hold middle appears with no head at %f" time
                         elif nr.[k] = NoteType.NOTHING then
-                            if Bitmask.hasBit k ln then failwithf "Sanity check failed: Hold middle should have been present at %f" time
+                            if Bitmask.hasBit k ln then failwithf "Hold middle should have been present at %f" time
                         elif nr.[k] = NoteType.HOLDTAIL then
-                            if Bitmask.hasBit k ln |> not then failwithf "Sanity check failed: Hold tail appears with no head at %f" time
+                            if Bitmask.hasBit k ln |> not then failwithf "Hold tail appears with no head at %f" time
                             ln <- Bitmask.unsetBit k ln
 
-                    if NoteRow.isEmpty nr then failwithf "Sanity check failed: Note row is useless/empty at %f" time
+                    if NoteRow.isEmpty nr then failwithf "Note row is useless/empty at %f" time
+                if ln <> 0us then failwithf "Unterminated hold notes at end of chart at %f [%i]" lastTime ln
             with err ->
-                Logging.Error (sprintf "Sanity check for chart %s failed; %s" chart.LoadedFromPath err.Message)
+                Logging.Error (sprintf "Sanity check for chart %s failed: %s" chart.LoadedFromPath err.Message)
                 Console.ReadLine() |> ignore
+
+        let diff (left: Chart) (right: Chart) =
+            let f (o: Time) : int = o * 0.01f |> float32 |> round |> int
+            let left_offset = left.FirstNote
+            let xs =
+                left.Notes
+                |> Array.map (fun { Time = o; Data = nr } -> f (o - left_offset), NoteRow.prettyPrint nr)
+            let right_offset = right.FirstNote
+            let ys =
+                right.Notes
+                |> Array.map (fun { Time = o; Data = nr } -> f (o - right_offset), NoteRow.prettyPrint nr)
+            for i = 0 to (min xs.Length ys.Length) - 1 do
+                if xs.[i] <> ys.[i] then printfn "! %A %A %f %f" xs.[i] ys.[i] (left.Notes.[i].Time - left_offset) (right.Notes.[i].Time - right_offset)
+            printfn "%f : %f" (left.LastNote - left.FirstNote) (right.LastNote - right.FirstNote)
