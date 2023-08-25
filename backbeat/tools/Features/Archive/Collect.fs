@@ -87,7 +87,12 @@ module Collect =
                 AudioFile = audio_hash
             }
         
-        let hash = Chart.hash chart
+        let hash = Chart.hash_new chart
+        let old_hash = Chart.hash_old chart
+        if charts.ContainsKey old_hash then
+            charts.[hash] <- charts.[old_hash]
+            charts.Remove(old_hash) |> ignore
+
         if charts.ContainsKey hash then
             let old_entry = charts.[hash]
             let new_entry = create_entry old_entry.SongId
@@ -102,7 +107,7 @@ module Collect =
                     }
                 Logging.Info(sprintf "^ Chart: %s" hash)
             
-            upload_chart chart new_entry
+            //upload_chart chart new_entry
         else
 
         let song: Song =
@@ -128,8 +133,8 @@ module Collect =
         charts.Add(hash, chart_entry)
         Logging.Info(sprintf "+ Chart: %s" hash)
 
-        Logging.Info(sprintf "Uploading %s .." hash)
-        upload_chart chart chart_entry
+        //Logging.Info(sprintf "Uploading %s .." hash)
+        //upload_chart chart chart_entry
 
     let slurp_folder (extra_sources: ChartSource list) (folder: string) =
         Directory.EnumerateFiles(Path.Combine(backbeat_cache.RootPath, folder))
@@ -168,7 +173,7 @@ module Collect =
     let cache_folder_of_oszs (community_pack_id: int) (target: string) =
         let pack_name = "c-" + community_pack_id.ToString()
         for osz in Directory.EnumerateFiles target |> Seq.filter (fun f -> Path.GetExtension(f).ToLower() = ".osz") do
-            let extracted_path = Path.GetFileNameWithoutExtension(osz)
+            let extracted_path = Path.GetFileNameWithoutExtension osz
             if not (Directory.Exists extracted_path) then
                 ZipFile.ExtractToDirectory(osz, Path.GetFileNameWithoutExtension osz)
             cache_song_folder

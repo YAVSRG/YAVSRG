@@ -7,8 +7,10 @@ module Archive =
     open Backbeat.Utils
     
     let script() =
-        for pack in File.ReadAllLines(Path.Combine(ARCHIVE_PATH, "masterlist")) do
-            Collect.slurp_sm (pack.Trim())
+        for i = 0 to 8 do
+            Collect.slurp_community i
+        //for pack in File.ReadAllLines(Path.Combine(ARCHIVE_PATH, "masterlist")) do
+        //    Collect.slurp_sm (pack.Trim())
         Backbot.run false
 
     let register (ctx: ShellContext) =
