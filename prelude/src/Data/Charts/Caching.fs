@@ -72,7 +72,7 @@ module Cache =
             Creator = chart.Header.Creator
             Tags = chart.Header.Tags
             Folder = folder_name
-            Hash = Chart.hash chart
+            Hash = Chart.hash_new chart
             Keys = chart.Keys
             Length = lastNote - chart.FirstNote
             DateAdded = file_time
@@ -199,9 +199,16 @@ module Cache =
                                     | _ -> ()
 
                                     let intended_path = get_path entry cache
-                                    if intended_path <> file then Logging.Debug(sprintf "Moving cache file from %s to %s" file intended_path); File.Move(file, intended_path)
 
-                                    cache.Entries.[entry.Key] <- entry
+                                    if intended_path <> file && File.Exists intended_path then 
+                                        Logging.Warn(sprintf "Deleting %s because it should be named %s, which already exists" file intended_path)
+                                        File.Delete file
+                                    else
+                                        if intended_path <> file then
+                                            Logging.Debug(sprintf "Moving cache file from %s to %s" file intended_path)
+                                            File.Move(file, intended_path)
+
+                                        cache.Entries.[entry.Key] <- entry
                                 | None -> ()
                             | _ -> ()
                     save cache
@@ -372,7 +379,7 @@ module Cache =
             | None -> return false
             | Some chart_data ->
 
-            let actual_hash = Chart.hash chart_data
+            let actual_hash = Chart.hash_new chart_data
             if actual_hash <> hash then Logging.Error(sprintf "Downloaded chart hash was '%s', expected '%s'" actual_hash hash); return false else
 
             try

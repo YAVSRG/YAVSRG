@@ -185,7 +185,7 @@ module Interlude =
             bw.Write(JSON.ToString chart.Header)
             writeHeadless chart bw
 
-        let hash (chart: Chart) : string =
+        let hash_old (chart: Chart) : string =
             let h = SHA256.Create()
             use ms = new MemoryStream()
             use bw = new BinaryWriter(ms)
@@ -207,25 +207,27 @@ module Interlude =
 
             BitConverter.ToString(h.ComputeHash (ms.ToArray())).Replace("-", "")
         
-        let hash_v2 (chart: Chart) : string =
+        let hash_new (chart: Chart) : string =
             let h = SHA256.Create()
             use ms = new MemoryStream()
             use bw = new BinaryWriter(ms)
         
             let offset = chart.FirstNote
+
+            bw.Write chart.Keys
         
-            for { Data = nr } in chart.Notes do
-                for nt in nr do bw.Write (byte nt)
+            for r in chart.Notes do
+                for nt in r.Data do bw.Write (byte nt)
         
             let mutable speed = 1.0
             for { Time = o; Data = f } in chart.SV do
                 let f = float f
-                if (speed <> f) then
+                if speed <> f then
                     bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
-                    bw.Write(f)
+                    bw.Write f
                     speed <- f
 
-            bw.Write((chart.LastNote - chart.FirstNote) * 0.01f |> float32 |> round |> int)
+            bw.Write((chart.LastNote - offset) * 0.01f |> float32 |> round |> int)
         
             BitConverter.ToString(h.ComputeHash (ms.ToArray())).Replace("-", "")
 
@@ -251,9 +253,10 @@ module Interlude =
 
                     if NoteRow.isEmpty nr then failwithf "Note row is useless/empty at %f" time
                 if ln <> 0us then failwithf "Unterminated hold notes at end of chart at %f [%i]" lastTime ln
+                true
             with err ->
                 Logging.Error (sprintf "Sanity check for chart %s failed: %s" chart.LoadedFromPath err.Message)
-                Console.ReadLine() |> ignore
+                false
 
         let diff (left: Chart) (right: Chart) =
             let f (o: Time) : int = o * 0.01f |> float32 |> round |> int

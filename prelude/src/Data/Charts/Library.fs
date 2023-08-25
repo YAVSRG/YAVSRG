@@ -5,11 +5,9 @@ open System.Linq
 open System.IO
 open System.IO.Compression
 open System.Collections.Generic
-open System.Collections.Concurrent
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude.Common
-open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.Conversions
 open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
