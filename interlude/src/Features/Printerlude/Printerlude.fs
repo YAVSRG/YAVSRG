@@ -43,11 +43,6 @@ module Printerlude =
             | None -> failwith "Select a chart"
             | Some c -> Interlude.Chart.diff cmp c
 
-        let hash_v2() =
-            match Gameplay.Chart.current with
-            | None -> failwith "Select a chart"
-            | Some c -> Interlude.Chart.hash_v2 c
-
         let show_version() =
             ctx.WriteLine(sprintf "You are running %s" Utils.version)
             ctx.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latestVersionName)
@@ -147,7 +142,6 @@ module Printerlude =
                 .WithCommand("local_server", "Switch to local development server", "flag", fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); ctx.WriteLine("Restart your game to apply server change."))
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
                 .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
-                .WithCommand("hash_v2", "Calculate v2 hash of current chart", hash_v2)
 
     let private ms = new MemoryStream()
     let private context_output = new StreamReader(ms)

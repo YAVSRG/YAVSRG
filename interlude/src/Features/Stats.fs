@@ -1,11 +1,10 @@
 ﻿namespace Interlude.Features
 
 open System.IO
-open Percyqaz.Common
 open Percyqaz.Json
 open Prelude
 
-[<Json.AutoCodec>]
+[<Json.AutoCodec(false)>]
 type Stats =
     {
         mutable PlayTime: float
@@ -17,6 +16,8 @@ type Stats =
         mutable PlaysRetried: int
         mutable PlaysCompleted: int
         mutable PlaysQuit: int
+
+        mutable MigrationVersion: int option
     }
     static member Default =
         {
@@ -29,6 +30,8 @@ type Stats =
             PlaysRetried = 0
             PlaysCompleted = 0
             PlaysQuit = 0
+
+            MigrationVersion = None
         }
 
 module Stats =

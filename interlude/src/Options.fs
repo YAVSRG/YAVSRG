@@ -141,7 +141,7 @@ module Options =
             Upscroll = Setting.simple false
             BackgroundDim = Setting.percentf 0.5f
             LaneCover = 
-                { 
+                {
                     Enabled = Setting.simple false
                     Sudden = Setting.percentf 0.0f
                     Hidden = Setting.percentf 0.45f
@@ -349,7 +349,7 @@ module Options =
             options.ScrollSpeed.Set preset.ScrollSpeed
             options.HitPosition.Set preset.HitPosition
             options.Upscroll.Set preset.Upscroll
-            options.LaneCover.LoadPreset(preset.LaneCover)
+            options.LaneCover.LoadPreset preset.LaneCover
             if Content.Noteskins.loaded.ContainsKey preset.Noteskin then
                 options.Noteskin.Set preset.Noteskin
                 Content.Noteskins.Current.switch preset.Noteskin
