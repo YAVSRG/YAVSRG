@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 10uy
+    let PROTOCOL_VERSION = 11uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 1
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
