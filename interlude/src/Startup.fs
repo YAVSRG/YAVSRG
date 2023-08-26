@@ -33,8 +33,7 @@ module private HashMigration =
                 match Path.GetExtension(file).ToLower() with
                 | ".yav" ->
                     match Chart.fromFile file with
-                    | Some c -> 
-                        // delete invalid charts
+                    | Some c ->
                         if not (Chart.check c) then
                             File.Delete file
                         else
