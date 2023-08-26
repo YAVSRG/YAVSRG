@@ -12,7 +12,7 @@ type TableChart =
         /// (Human-friendly) unique identifier for this particular chart
         Id: string
         /// Reference by hash to a particular chart.
-        /// In future, when you don't have the chart this hash will be used to look up song name and download information
+        /// When you don't have the chart this hash will be used to look up song name and download information
         Hash: string
     }
 

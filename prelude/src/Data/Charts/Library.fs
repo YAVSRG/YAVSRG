@@ -1,7 +1,6 @@
 ﻿namespace Prelude.Data.Charts
 
 open System
-open System.Linq
 open System.IO
 open System.IO.Compression
 open System.Collections.Generic
