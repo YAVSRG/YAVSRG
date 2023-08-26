@@ -231,10 +231,10 @@ module Backbot =
     
     let private title_variations = 
         [|
-            "tv size ver."; "tv size ver"; "tv ver."; "tv ver"; "tv size"; "tv version"; "tv edit"; "tv-size"; "anime ver."; "anime ver"; "op cut"; "op ver."; "op ver"
+            "tv size ver."; "tv size ver"; "tv ver."; "tv version"; "tv size"; "tv ver"; "tv edit"; "tv-size"; "anime ver."; "anime ver"; "op cut"; "op ver."; "op ver"
             "uncut ver."; "uncut ver"; "long ver."; "long ver"; "extended ver."; "extended ver"; "extended mix"; "radio ver."; "radio ver"; "radio edit"; "radio mix"
             "cut ver."; "cut ver";  "short ver."; "short ver"; "short edit"; "short cut"
-            "album ver"; "original mix"; "bass boosted"; "full version"; "video mix"
+            "album ver"; "original mix"; "bass boosted"; "full version"; "full ver"; "video mix"
         |]
     let correct_titles() =
         Logging.Info "Scanning for title variations to prune (TV Size, Extended mix, etc)"
