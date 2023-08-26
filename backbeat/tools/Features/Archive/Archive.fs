@@ -9,32 +9,6 @@ module Archive =
     let script() =
         printfn "%i in cache, %i in chart db" backbeat_cache.Entries.Count charts.Count
 
-        //let mutable cache_hashes = Set.empty
-        //for c in backbeat_cache.Entries.Values do
-        //    cache_hashes <- Set.add c.Hash cache_hashes
-
-        //let mutable osu_sources = Map.empty
-        //let mutable sm_sources = Set.empty
-
-        //for chart in charts.Keys do
-        //    if Set.contains chart cache_hashes then
-        //        for source in charts.[chart].Sources do
-        //            match source with
-        //            | Prelude.Backbeat.Archive.ChartSource.Osu d ->
-        //                osu_sources <- Map.add d.BeatmapId chart osu_sources
-        //            | Prelude.Backbeat.Archive.ChartSource.Stepmania id ->
-        //                sm_sources <- Set.add packs.Stepmania.[id].Title sm_sources
-        //            | _ -> ()
-
-        //for chart in charts.Keys |> List.ofSeq do
-        //    if not (Set.contains chart cache_hashes) then
-        //        let c = charts.[chart]
-        //        for source in c.Sources do
-        //            match source with
-        //            | Prelude.Backbeat.Archive.ChartSource.Stepmania id ->
-        //                printfn "I'M FROM '%s' AND IM NOT UP TO DATE" packs.Stepmania.[id].Title
-        //            | _ -> ()
-
         for pack in File.ReadAllLines(Path.Combine(ARCHIVE_PATH, "masterlist")) do
             Collect.slurp_sm (pack.Trim())
         Backbot.run false
