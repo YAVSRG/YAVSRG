@@ -259,7 +259,6 @@ module Cache =
             Chart.toFile c new_file
 
             cache.Entries.[entry.Key] <- entry
-        save cache
 
     // For copying a chart from one folder to another
     let copy (folder: string) (entry: CachedChart) (cache: Cache) =
@@ -270,8 +269,6 @@ module Cache =
         let target = get_path new_entry cache
         Directory.CreateDirectory(Path.GetDirectoryName target) |> ignore
         File.Copy(get_path entry cache, target)
-
-        save cache
 
     // For charts being copied from one cache to another
     let replicate (folder: string) (entry: CachedChart) (source: Cache) (target: Cache) =
@@ -320,7 +317,6 @@ module Cache =
         Chart.toFile chart target_path
 
         target.Entries.[entry.Key] <- entry
-        save target
     
     let load (entry: CachedChart) (cache: Cache) =
         get_path entry cache |> Chart.fromFile
