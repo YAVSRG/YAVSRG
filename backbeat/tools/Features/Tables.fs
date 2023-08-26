@@ -216,6 +216,7 @@ module Tables =
                     //Cache.replicate table.Name cc interlude_cache backbeat_cache
                     //Logging.Info(sprintf "-> %s" chart.Id)
                 | None -> Logging.Info(sprintf "Chart missing from both backbeat and your local client: %s" chart.Id)
+        Cache.save backbeat_cache
         Collect.slurp_folder [] table.Name
 
     let register (ctx: ShellContext) =
