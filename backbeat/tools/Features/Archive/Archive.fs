@@ -40,8 +40,7 @@ module Archive =
                                 charts.Remove chart |> ignore
                             else 
                                 printfn "Song id mismatch: %s -> %s" c.SongId new_data.SongId
-                                charts.Remove chart |> ignore
-                                songs.Remove c.SongId |> ignore
+                                songs.[new_data.SongId] <- songs.[c.SongId]
                         | None -> ()
                     | _ -> ()
 
