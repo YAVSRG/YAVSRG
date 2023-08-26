@@ -1657,7 +1657,7 @@
     }, 
     "aimerwithchellyegoist/ninelieredshiftxvesuviaremix": {
         "AlternativeTitles": [], 
-        "Artists": ["Aimer with chelly (EGOIST)"], 
+        "Artists": ["Aimer", "chelly"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "甲鉄城のカバネリ", 
@@ -1864,7 +1864,7 @@
     }, 
     "akinowithbless4/yukinoyouni": {
         "AlternativeTitles": ["雪のように"], 
-        "Artists": ["AKINO with bless4"], 
+        "Artists": ["AKINO", "bless4"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -1999,7 +1999,7 @@
     }, 
     "alexgootkurtschneiderandchrissycostanza/countingstarsnightcoremix": {
         "AlternativeTitles": [], 
-        "Artists": ["Alex Goot, Kurt Schneider, and Chrissy Costanza"], 
+        "Artists": ["Alex Goot", "Kurt Schneider", "Chrissy Costanza"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -2845,7 +2845,7 @@
     }, 
     "aoivsr0y/coldlapse": {
         "AlternativeTitles": [], 
-        "Artists": ["Aoi vs. r0y"], 
+        "Artists": ["Aoi", "r0y"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "SOUND VOLTEX IV HEAVENLY HAVEN", 
@@ -3610,7 +3610,7 @@
     }, 
     "asumikanafujitasakikitamuraeri/coolishwalk": {
         "AlternativeTitles": [], 
-        "Artists": ["Asumi Kana & Fujita Saki & Kitamura Eri"], 
+        "Artists": ["Asumi Kana", "Fujita Saki", "Kitamura Eri"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -3907,7 +3907,7 @@
     }, 
     "ayahiranoemirikatoukaorifukuharaayaendou/mottekesailorfuku": {
         "AlternativeTitles": [], 
-        "Artists": ["Aya Hirano, Emiri Katou, Kaori Fukuhara, Aya Endou"], 
+        "Artists": ["Aya Hirano", "Emiri Katou", "Kaori Fukuhara", "Aya Endou"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": null, 
@@ -5680,7 +5680,7 @@
     }, 
     "brz1128vsmue/bloodymarquis": {
         "AlternativeTitles": [], 
-        "Artists": ["brz1128 vs. M-UE"], 
+        "Artists": ["brz1128", "M-UE"], 
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "Lanota", 
@@ -19439,6 +19439,15 @@
         "Tags": [], 
         "Title": "Uncontrollable"
     }, 
+    "itoumiku/connectinghappy": {
+        "AlternativeTitles": [], 
+        "Artists": ["Itou Miku"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": "プリンセスコネクト！Re:Dive", 
+        "Tags": ["ed", "ending", "anime", "video", "game", "japanese", "pop", "j-pop", "Princess", "Connect!", "Purinsesu", "Konekuto!", "cygames", "priconne", "RPG", "Sun", "pekori-nu", "kyaru", "Lost", "Princess", "~Youkoso", "Bishokudono", "e!~", "～ようこそ美食殿へ!～"], 
+        "Title": "Connecting Happy!!"
+    }, 
     "itsue/goodbyemaboroshi": {
         "AlternativeTitles": [], 
         "Artists": ["Itsue"], 
@@ -26171,15 +26180,6 @@
         "Tags": ["ed", "ending", "anime", "video", "game", "japanese", "pop", "j-pop", "Princess", "Connect!", "Purinsesu", "Konekuto!", "cygames", "priconne", "RPG", "Sun", "pekori-nu", "kyaru", "Lost", "Princess", "~Youkoso", "Bishokudono", "e!~", "～ようこそ美食殿へ!～"], 
         "Title": "Connecting Happy!!"
     }, 
-    "maokokkorocvitoumikukarylcvtachibanarika/connectinghappy": {
-        "AlternativeTitles": [], 
-        "Artists": ["M.A.O), Kokkoro (CV: Itou Miku), Karyl (CV: Tachibana Rika"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "プリンセスコネクト！Re:Dive", 
-        "Tags": ["ed", "ending", "anime", "video", "game", "japanese", "pop", "j-pop", "Princess", "Connect!", "Purinsesu", "Konekuto!", "cygames", "priconne", "RPG", "Sun", "pekori-nu", "kyaru", "Lost", "Princess", "~Youkoso", "Bishokudono", "e!~", "～ようこそ美食殿へ!～"], 
-        "Title": "Connecting Happy!!"
-    }, 
     "maozon/equilibrium": {
         "AlternativeTitles": [], 
         "Artists": ["Maozon"], 
@@ -27557,6 +27557,15 @@
         "Tags": ["香風", "智乃", "kafuu", "Kafū", "character", "song", "pop", "gochuumon", "wa", "usagi", "desu", "ka??", "is", "the", "order", "a", "rabbit", "gochiusa", "ごちうさ", "cup", "of", "chino", "Japanese", "short", "ver", "agayers", "dudehacker"], 
         "Title": "Mirai Puzzle"
     }, 
+    "minaseinori/relation": {
+        "AlternativeTitles": [], 
+        "Artists": ["Minase Inori"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": "プリンセスコネクト！Re:Dive", 
+        "Tags": ["Murumoo", "relation", "Princess", "Connect!", "リゼロ", "Re:ゼロから始める異世界生活", "zero", "kara", "hajimeru", "isekai", "seikatsu", "life", "in", "a", "different", "world", "from", "ed", "ending", "cygames", "priconne", "プリコネ", "japanese", "jpop"], 
+        "Title": "Re:lation"
+    }, 
     "minaseinori/shinsakunoshiawasewakochira": {
         "AlternativeTitles": ["新作のしあわせはこちら!"], 
         "Artists": ["Minase Inori"], 
@@ -27863,15 +27872,6 @@
         "Tags": ["AlisceaSparku", "Crono", "drum", "and", "bass", "dnb"], 
         "Title": "Movements"
     }, 
-    "mitis/movementsfeatmahi": {
-        "AlternativeTitles": [], 
-        "Artists": ["MitiS"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": ["AlisceaSparku", "Crono", "drum", "and", "bass", "dnb"], 
-        "Title": "Movements Feat. MaHi"
-    }, 
     "mitismahi/bluspeedupver": {
         "AlternativeTitles": [], 
         "Artists": ["MitiS", "MaHi"], 
@@ -28166,16 +28166,7 @@
         "OtherArtists": [], 
         "Remixers": [], 
         "Source": "瀬戸の花嫁", 
-        "Tags": ["seto", "san", "edomae", "luna", "my", "bride", "is", "a", "mermaid", "瀬戸燦", "江戸前留奈", "seto", "no", "hanayome"], 
-        "Title": "Romantic summer"
-    }, 
-    "momoiharukonogawasakura/romanticsummer-1": {
-        "AlternativeTitles": [], 
-        "Artists": ["Momoi Haruko & Nogawa Sakura"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "瀬戸の花嫁", 
-        "Tags": ["seto", "san", "edomae", "luna", "my", "bride", "is", "a", "mermaid", "瀬戸燦", "江戸前留奈", "seto", "no", "hanayome"], 
+        "Tags": ["seto", "san", "edomae", "luna", "my", "bride", "is", "a", "mermaid", "瀬戸燦", "江戸前留奈", "no", "hanayome"], 
         "Title": "Romantic summer"
     }, 
     "momoirocloverz/santasan": {
@@ -36557,15 +36548,6 @@
         "Tags": ["Pokémon", "Nintendo", "NDS", "Mystery", "Dungeon", "Explorers", "of", "the", "Darkness", "Time", "Sky", "ポケモン不思議のダンジョン", "空の探検隊", "時の探検隊", "闇の探検隊", "とざくろ", "Tozakuro", "Portable", "Memories", "March", "BMS", "Edition", "Optie", "しろやぎとざくろ", "Pikachu", "Chimchar", "Primal", "Dialga", "Final", "Boss", "Battle", "Theme", "Fight", "to", "The", "Finish", "Remix", "Finale", "Critical_Star"], 
         "Title": "Reason of being"
     }, 
-    "sakuraayanekuroecvtanezakiatsumiyunicvkoharakonomi/seishunspinner": {
-        "AlternativeTitles": ["青春スピナー"], 
-        "Artists": ["Sakura Ayane), Kuroe (CV: Tanezaki Atsumi), Yuni (CV: Kohara Konomi"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "プリンセスコネクト！Re:Dive", 
-        "Tags": ["dudehacker", "faputa", "cygames", "Princess", "Connect!", "redive", "Priconne", "Character", "Song", "16", "Japanese", "Pop", "jpop", "j-pop", "Mobile", "Video", "Game", "COCC-17676", "Mutsuki", "Shuhei", "睦月周平", "Mizuno", "Genki", "ミズノ", "ゲンキ", "Nakayoshi-bu", "なかよし部", "short", "cut", "ver", "purikone", "プリコネ"], 
-        "Title": "Seishun Spinner"
-    }, 
     "sakuraayanetanezakiatsumikoharakonomi/seishunspinner": {
         "AlternativeTitles": ["青春スピナー"], 
         "Artists": ["Sakura Ayane", "Tanezaki Atsumi", "Kohara Konomi"], 
@@ -37132,15 +37114,6 @@
         "Source": "アイドル☆シチュエーション", 
         "Tags": ["idol", "situation", "dmm", "browser", "eroge", "yoshilove"], 
         "Title": "My Dear Girl"
-    }, 
-    "sasakisayaka/mydeargirlshortver": {
-        "AlternativeTitles": ["マイ・ディア・ガール (short Ver)"], 
-        "Artists": ["Sasaki Sayaka"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "アイドル☆シチュエーション", 
-        "Tags": ["idol", "situation", "dmm", "browser", "eroge", "yoshilove"], 
-        "Title": "My Dear Girl (short Ver)"
     }, 
     "sasakisayaka/sakurareincarnation": {
         "AlternativeTitles": ["さくら、Reincarnation"], 
@@ -41543,15 +41516,6 @@
         "Tags": ["arpia97"], 
         "Title": "Unhappy End World"
     }, 
-    "takahashirieremcvminaseinoriramcvmurakawarie/relation": {
-        "AlternativeTitles": [], 
-        "Artists": ["Takahashi Rie), Rem (CV: Minase Inori), Ram (CV: Murakawa Rie"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "プリンセスコネクト！Re:Dive", 
-        "Tags": ["Murumoo", "relation", "Princess", "Connect!", "リゼロ", "Re:ゼロから始める異世界生活", "zero", "kara", "hajimeru", "isekai", "seikatsu", "life", "in", "a", "different", "world", "from", "ed", "ending", "cygames", "priconne", "プリコネ", "japanese", "jpop"], 
-        "Title": "Re:lation"
-    }, 
     "takahiroeguchi/stargazer": {
         "AlternativeTitles": [], 
         "Artists": ["Takahiro Eguchi"], 
@@ -41848,6 +41812,15 @@
         "Source": "青春ブタ野郎はバニーガール先輩の夢を見ない", 
         "Tags": ["Anime", "Japanese", "Seishun", "Buta", "Yarō", "Yarou", "wa", "Yumemiru", "Shōjo", "Shoujo", "no", "Yume", "o", "Minai", "ao-buta", "aobuta", "Puberty", "Syndrome:", "Abnormal", "experiences", "during", "adolescence", "due", "to", "sensitivity", "and", "instability.", "Rascal", "Does", "Not", "Dream", "of", "Bunny", "Girl", "Senpai", "桜島麻衣", "瀬戸麻沙美", "古賀朋絵", "東山奈央", "双葉理央", "種﨑敦美", "豊浜のどか", "内田真礼", "梓川かえで", "久保ユリカ", "牧之原翔子", "水瀬いのり", "Sakurajima", "Mai", "Seto", "Asami", "Koga", "Tomoe", "Touyama", "Toyama", "Nao", "Toyohama", "Nodoka", "Uchida", "Maaya", "Azusagawa", "Kaede", "Kubo", "Yurika", "Makinohara", "Shouko", "Shoko", "Minase", "Inori", "ending", "mysterious", "patient", "chart", "carte", "karute"], 
         "Title": "Fukashigi no Karte"
+    }, 
+    "tanezakiatsumi/seishunspinner": {
+        "AlternativeTitles": ["青春スピナー"], 
+        "Artists": ["Tanezaki Atsumi"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": "プリンセスコネクト！Re:Dive", 
+        "Tags": ["dudehacker", "faputa", "cygames", "Princess", "Connect!", "redive", "Priconne", "Character", "Song", "16", "Japanese", "Pop", "jpop", "j-pop", "Mobile", "Video", "Game", "COCC-17676", "Mutsuki", "Shuhei", "睦月周平", "Mizuno", "Genki", "ミズノ", "ゲンキ", "Nakayoshi-bu", "なかよし部", "short", "cut", "ver", "purikone", "プリコネ"], 
+        "Title": "Seishun Spinner"
     }, 
     "taniguchinaohisa/liesparks": {
         "AlternativeTitles": [], 
@@ -43785,22 +43758,13 @@
         "Title": "Super Ultra Hyper Miracle Romantic"
     }, 
     "tokotokonishizawasanp/heartbeatfromyou": {
-        "AlternativeTitles": ["ハートビート・フロムユー"], 
+        "AlternativeTitles": ["ハートビート・フロムユー", "ハートビート・フロムユー feat. ゆいこんぬ"], 
         "Artists": ["TOKOTOKO (NishizawasanP)"], 
         "OtherArtists": ["Yuikonnu"], 
         "Remixers": [], 
         "Source": null, 
         "Tags": ["初音ミク", "Hatsune", "Miku", "Vocaloid", "友達募集P", "tomobop", "TomodachiboshuuP", "utaite", "pop", "jpop", "j_pop", "j-pop", "japanese", "nishizawasan-P", "zawaso", "edited", "たま", "7＠"], 
         "Title": "heartbeat from you"
-    }, 
-    "tokotokonishizawasanp/heartbeatfromyoufeatyuikonnu": {
-        "AlternativeTitles": ["ハートビート・フロムユー feat. ゆいこんぬ"], 
-        "Artists": ["TOKOTOKO (NishizawasanP)"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": null, 
-        "Tags": ["初音ミク", "Hatsune", "Miku", "Vocaloid", "友達募集P", "tomobop", "TomodachiboshuuP", "utaite", "pop", "jpop", "j_pop", "j-pop", "japanese", "nishizawasan-P", "zawaso", "edited", "たま", "7＠"], 
-        "Title": "heartbeat from you feat. yuikonnu"
     }, 
     "tokup/spica": {
         "AlternativeTitles": [], 
@@ -44773,15 +44737,6 @@
         "Source": "エロマンガ先生", 
         "Tags": ["Eromanga-sensei", "Ending", "Theme", "ED", "JPop", "Syadow-", "Amiichii"], 
         "Title": "adrenaline!!!"
-    }, 
-    "trysail/adrenalinetvver": {
-        "AlternativeTitles": [], 
-        "Artists": ["TrySail"], 
-        "OtherArtists": [], 
-        "Remixers": [], 
-        "Source": "エロマンガ先生", 
-        "Tags": ["Eromanga-sensei", "Ending", "Theme", "ED", "JPop", "Syadow-", "Amiichii"], 
-        "Title": "adrenaline!!! -TV Ver-"
     }, 
     "trysail/azure": {
         "AlternativeTitles": [], 

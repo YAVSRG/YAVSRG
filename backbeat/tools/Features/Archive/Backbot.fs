@@ -231,9 +231,9 @@ module Backbot =
     
     let private title_variations = 
         [|
-            "tv size ver."; "tv ver."; "tv size"; "tv version"; "tv edit"; "tv-size"; "anime ver."; "op cut"; "op ver."
-            "uncut ver."; "long ver."; "extended ver."; "extended mix"; "radio ver."; "radio edit"; "radio mix"
-            "cut ver.";  "short ver."; "short edit"; "short cut"
+            "tv size ver."; "tv size ver"; "tv ver."; "tv ver"; "tv size"; "tv version"; "tv edit"; "tv-size"; "anime ver."; "anime ver"; "op cut"; "op ver."; "op ver"
+            "uncut ver."; "uncut ver"; "long ver."; "long ver"; "extended ver."; "extended ver"; "extended mix"; "radio ver."; "radio ver"; "radio edit"; "radio mix"
+            "cut ver."; "cut ver";  "short ver."; "short ver"; "short edit"; "short cut"
             "album ver"; "original mix"; "bass boosted"; "full version"; "video mix"
         |]
     let correct_titles() =
