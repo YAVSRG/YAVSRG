@@ -1,1 +1,1 @@
-﻿Support for reloading backbeat data
+﻿Version bump for the hashening
