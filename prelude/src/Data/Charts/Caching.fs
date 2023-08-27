@@ -72,7 +72,7 @@ module Cache =
             Creator = chart.Header.Creator
             Tags = chart.Header.Tags
             Folder = folder_name
-            Hash = Chart.hash_new chart
+            Hash = Chart.hash chart
             Keys = chart.Keys
             Length = lastNote - chart.FirstNote
             DateAdded = file_time
@@ -375,7 +375,7 @@ module Cache =
             | None -> return false
             | Some chart_data ->
 
-            let actual_hash = Chart.hash_new chart_data
+            let actual_hash = Chart.hash chart_data
             if actual_hash <> hash then Logging.Error(sprintf "Downloaded chart hash was '%s', expected '%s'" actual_hash hash); return false else
 
             try

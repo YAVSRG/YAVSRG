@@ -15,5 +15,5 @@ module Imports =
             for file in Directory.EnumerateFiles song do
                 if file.ToLower().EndsWith(".osu") then
                     for chart in loadAndConvertFile { Source = file; Config = ConversionOptions.Default } do
-                        try Chart.check chart with err -> Logging.Error(err.ToString(), err)
+                        match Chart.check chart with Error msg -> Logging.Error msg | Ok() -> ()
         Logging.Info "Complete!"

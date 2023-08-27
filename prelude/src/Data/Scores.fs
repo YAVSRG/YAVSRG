@@ -183,7 +183,7 @@ module Scores =
     let save() = saveImportantJsonFile (Path.Combine(getDataPath "Data", "scores.json")) data
 
     let getOrCreateData (chart: Chart) =
-        let hash = Chart.hash_new chart
+        let hash = Chart.hash chart
         if hash |> data.Entries.ContainsKey |> not then data.Entries.Add(hash, ChartSaveData.FromChart chart)
         data.Entries.[hash]
 
