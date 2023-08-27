@@ -26,7 +26,7 @@ module Suggestion =
 
     let mutable recommended_recently = Set.empty
 
-    let get_suggestions (chart: Chart) (cacheData: CachedChart) =
+    let get_suggestions (chart: Chart) (cacheData: CachedChart) (filter: Filter) =
     
         recommended_recently <- Set.add cacheData.Hash recommended_recently
         let patterns = Patterns.generate_pattern_report (1.0f, chart)
@@ -47,6 +47,8 @@ module Suggestion =
             |> Seq.filter (fun x -> match Scores.getData x.Hash with Some d -> (now - d.LastPlayed).TotalDays < 2 | _ -> true)
             |> Seq.filter (fun x -> Library.patterns.ContainsKey x.Hash)
             |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
+
+            |> Filter.apply filter
 
         seq {
             for entry in candidates do
@@ -70,11 +72,11 @@ module Suggestion =
                 yield entry, similarity_score
         } |> Seq.sortByDescending snd |> Seq.map fst
 
-    let get_suggestion (chart: Chart) (cacheData: CachedChart) =
+    let get_suggestion (chart: Chart) (cacheData: CachedChart) (filter: Filter) =
         let rand = Random()
         
         let options = 
-            get_suggestions chart cacheData
+            get_suggestions chart cacheData filter
             |> Seq.truncate 100
             |> Array.ofSeq
 

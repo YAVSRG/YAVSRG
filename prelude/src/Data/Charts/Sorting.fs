@@ -60,6 +60,8 @@ module Sorting =
             let p = Library.patterns.[c.Hash]
             let pattern_to_find =
                 match pattern.ToLower() with
+                | "streams"
+                | "stream" -> Stream "Streams"
                 | "jumpstream"
                 | "js" -> Stream "Jumpstream"
                 | "handstream"
@@ -69,6 +71,12 @@ module Sorting =
                 | "chordjack"
                 | "chordjacks"
                 | "cj" -> Jack "Chordjacks"
+                | "doublestream"
+                | "doublestreams"
+                | "ds" -> Stream "Double streams"
+                | "chordstream"
+                | "chordstreams"
+                | "cs" -> Stream "Dense chordstream"
                 | _ -> Stream ""
             let matching = p |> Seq.where(fun x -> x.Pattern = pattern_to_find) |> Seq.sumBy(fun x -> x.Score)
             let total = p |> Seq.sumBy(fun x -> x.Score)
