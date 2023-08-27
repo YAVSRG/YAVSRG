@@ -10,7 +10,7 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
-open Prelude.Data.Charts.Library
+open Prelude.Data.Charts.Sorting
 
 // todo: remove or repurpose this
 type private EditLevelPage(level: Level) as this =

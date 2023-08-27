@@ -7,6 +7,7 @@ open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
+open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
 open Interlude.Options
 open Interlude.Utils

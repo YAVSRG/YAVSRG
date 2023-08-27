@@ -9,7 +9,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Prelude.Common
 open Prelude.Gameplay.Layout
-open Prelude.Data.Charts.Library
+open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Library.Imports
 open Interlude
 
