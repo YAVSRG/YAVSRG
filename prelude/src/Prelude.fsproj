@@ -47,8 +47,8 @@
     <Compile Include="Data\Charts\Caching.fs" />
     <Compile Include="Data\Charts\Tables.fs" />
     <Compile Include="Data\Charts\Collections.fs" />
-    <Compile Include="Data\Charts\Sorting.fs" />
     <Compile Include="Data\Charts\Library.fs" />
+    <Compile Include="Data\Charts\Sorting.fs" />
     <Compile Include="Data\Charts\Suggestions.fs" />
   </ItemGroup>
 

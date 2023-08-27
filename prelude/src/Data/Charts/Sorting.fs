@@ -2,8 +2,13 @@
 
 open System
 open System.Collections.Generic
+open Percyqaz.Json
+open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
+open Prelude.Data.Charts.Tables
+open Prelude.Data.Charts.Collections
+open Prelude.Charts.Tools.Patterns
 
 module Sorting =
 
@@ -49,6 +54,27 @@ module Sorting =
         match Data.Scores.Scores.getData c.Hash with
         | Some d -> d.Comment.Contains(comment, StringComparison.OrdinalIgnoreCase)
         | None -> false
+
+    let has_pattern (c: CachedChart, pattern: string) =
+        if Library.patterns.ContainsKey c.Hash then
+            let p = Library.patterns.[c.Hash]
+            let pattern_to_find =
+                match pattern.ToLower() with
+                | "jumpstream"
+                | "js" -> Stream "Jumpstream"
+                | "handstream"
+                | "hs" -> Stream "Handstream"
+                | "jacks" -> Jack "Jacks"
+                | "chords"
+                | "chordjack"
+                | "chordjacks"
+                | "cj" -> Jack "Chordjacks"
+                | _ -> Stream ""
+            let matching = p |> Seq.where(fun x -> x.Pattern = pattern_to_find) |> Seq.sumBy(fun x -> x.Score)
+            let total = p |> Seq.sumBy(fun x -> x.Score)
+            matching / total > 0.4f
+
+        else false
 
     let gradeAchieved (c: CachedChart, ctx: GroupContext) =
         match Data.Scores.Scores.getData c.Hash with
@@ -134,6 +160,8 @@ module Sorting =
                     | Equals ("keys", n) -> c.Keys.ToString() = n
                     | Equals ("c", str)
                     | Equals ("comment", str) -> has_comment (c, str)
+                    | Equals ("p", str) -> has_pattern (c, str)
+                    | Equals ("pattern", str) -> has_pattern (c, str)
                     | MoreThan ("d", d)
                     | MoreThan ("diff", d) -> c.Physical > d
                     | LessThan ("d", d)
@@ -147,4 +175,84 @@ module Sorting =
 
         let apply (filter: Filter) (charts: CachedChart seq) = Seq.filter (_f filter) charts
 
-        let applyf (filter: Filter) (charts: (CachedChart * Collections.LibraryContext) seq) = Seq.filter (fun (c, _) -> _f filter c) charts
+        let applyf (filter: Filter) (charts: (CachedChart * LibraryContext) seq) = Seq.filter (fun (c, _) -> _f filter c) charts
+
+    type [<RequireQualifiedAccess; Json.AutoCodec>] LibraryMode = All | Collections | Table
+    type Group = { Charts: ResizeArray<CachedChart * LibraryContext>; Context: LibraryGroupContext }
+    type LexSortedGroups = Dictionary<int * string, Group>
+    
+    let getGroups (ctx: GroupContext) (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+    
+        let groups = new Dictionary<int * string, Group>()
+    
+        for c in Filter.apply filter Library.cache.Entries.Values do
+            let s = grouping (c, ctx)
+            if groups.ContainsKey s |> not then groups.Add(s, { Charts = ResizeArray<CachedChart * LibraryContext>(); Context = LibraryGroupContext.None })
+            groups.[s].Charts.Add (c, LibraryContext.None)
+    
+        for g in groups.Keys |> Seq.toArray do
+            groups.[g] <- { groups.[g] with Charts = groups.[g].Charts |> Seq.distinctBy (fun (cc, _) -> cc.Hash) |> ResizeArray }
+            groups.[g].Charts.Sort sorting
+    
+        groups
+    
+    let getCollectionGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+    
+        let groups = new Dictionary<int * string, Group>()
+    
+        for name in Library.collections.Folders.Keys do
+            let collection = Library.collections.Folders.[name]
+            collection.Charts
+            |> Seq.choose
+                ( fun entry ->
+                    match Cache.by_key entry.Path Library.cache with
+                    | Some cc -> Some (cc, LibraryContext.Folder name)
+                    | None ->
+                    match Cache.by_hash entry.Hash Library.cache with
+                    | Some cc -> entry.Path <- cc.Key; Some (cc, LibraryContext.Folder name)
+                    | None -> Logging.Warn(sprintf "Could not find chart: %s [%s] for collection %s" entry.Path entry.Hash name); None
+                )
+            |> Filter.applyf filter
+            |> ResizeArray<CachedChart * LibraryContext>
+            |> fun x -> x.Sort sorting; x
+            |> fun x -> if x.Count > 0 then groups.Add((0, name), { Charts = x; Context = LibraryGroupContext.Folder name })
+    
+        for name in Library.collections.Playlists.Keys do
+            let playlist = Library.collections.Playlists.[name]
+            playlist.Charts
+            |> Seq.indexed
+            |> Seq.choose
+                ( fun (i, (entry, info)) ->
+                    match Cache.by_key entry.Path Library.cache with
+                    | Some cc -> Some (cc, LibraryContext.Playlist (i, name, info))
+                    | None ->
+                    match Cache.by_key entry.Hash Library.cache with
+                    | Some cc -> entry.Path <- cc.Key; Some (cc, LibraryContext.Playlist (i, name, info))
+                    | None -> Logging.Warn(sprintf "Could not find chart: %s [%s] for playlist %s" entry.Path entry.Hash name); None
+                )
+            |> Filter.applyf filter
+            |> ResizeArray<CachedChart * LibraryContext>
+            |> fun x -> if x.Count > 0 then groups.Add((0, name), { Charts = x; Context = LibraryGroupContext.Playlist name })
+    
+        groups
+    
+    let getTableGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+        let groups = new Dictionary<int * string, Group>()
+        match Table.current() with
+        | Some table ->
+            for level_no, level in Seq.indexed table.Levels do
+                level.Charts
+                |> Seq.choose
+                    ( fun (c: TableChart) ->
+                        match Cache.by_key (sprintf "%s/%s" table.Name c.Hash) Library.cache with
+                        | Some cc -> Some (cc, LibraryContext.Table level.Name)
+                        | None ->
+                        Cache.by_hash c.Hash Library.cache
+                        |> Option.map (fun x -> x, LibraryContext.Table level.Name)
+                    )
+                |> Filter.applyf filter
+                |> ResizeArray<CachedChart * LibraryContext>
+                |> fun x -> x.Sort sorting; x
+                |> fun x -> if x.Count > 0 then groups.Add((level_no, level.Name), { Charts = x; Context = LibraryGroupContext.Table level.Name })
+        | None -> ()
+        groups
