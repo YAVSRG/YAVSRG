@@ -31,7 +31,7 @@ type LevelSelectScreen() =
 
     let random_chart() =
         if options.AdvancedRecommendations.Value then
-            match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value with
+            match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value Tree.filter with
             | Some c -> Tree.switchChart(c, LibraryContext.None, ""); refresh()
             | None -> ()
         else
