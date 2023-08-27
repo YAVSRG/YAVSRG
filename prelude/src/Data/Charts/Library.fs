@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.IO.Compression
 open System.Collections.Generic
+open System.Collections.Concurrent
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude.Common
@@ -16,17 +17,21 @@ open Collections
 
 module Library =
 
+    type Patterns = ConcurrentDictionary<string, Prelude.Charts.Tools.Patterns.Patterns.PatternReportEntry list>
+
     let cache : Cache = Cache.from_path (getDataPath "Songs")
     let collections = 
         let cs : Collections = loadImportantJsonFile "Collections" (Path.Combine(getDataPath "Data", "collections.json")) false
         Logging.Info (sprintf "Loaded chart library of %i charts, %i folders, %i playlists" cache.Entries.Count cs.Folders.Count cs.Playlists.Count)
         cs
+    let patterns : Patterns = loadImportantJsonFile "Patterns" (Path.Combine(getDataPath "Data", "patterns.json")) false
 
     // ---- Basic data layer stuff ----
 
     let save() = 
         Cache.save cache
         saveImportantJsonFile (Path.Combine(getDataPath "Data", "collections.json")) collections
+        saveImportantJsonFile (Path.Combine(getDataPath "Data", "patterns.json")) patterns
 
     // ---- Retrieving library for level select ----
 
@@ -251,3 +256,15 @@ module Library =
                             | _ -> Logging.Warn(sprintf "%s: No importable folder structure detected" path); return false
                     }
             }
+
+    let cache_patterns =
+        { new Async.Service<unit, unit>() with
+            override this.Handle(()) =
+                async {
+                    for entry in cache.Entries.Values do
+                        if not (patterns.ContainsKey entry.Hash) then
+                            match Cache.load entry cache with
+                            | Some c -> patterns.[entry.Hash] <- Prelude.Charts.Tools.Patterns.Patterns.generate_pattern_report (1.0f, c)
+                            | None -> ()
+                }
+        }

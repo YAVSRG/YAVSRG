@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Charts.Tools.Patterns
 
 open System.Collections.Generic
+open Percyqaz.Json
 open Prelude
 open Prelude.Charts.Formats.Interlude
 
@@ -142,7 +143,11 @@ module Analysis =
 
         } |> List.ofSeq
 
-type PatternId = Stream of string | Jack of string
+[<Json.AutoCodec>]
+type PatternId = 
+    | Stream of string
+    | Jack of string
+    override this.ToString() = match this with Stream s | Jack s -> s
 type Pattern = RowInfo list -> int
 
 module Patterns =
@@ -479,3 +484,22 @@ module Patterns =
             | _ -> coverage.[key].Marathons.Add((info.Time, info.Duration))
 
         coverage
+
+    [<Json.AutoCodec>]
+    type PatternReportEntry = { Pattern: PatternId; BPM: int; Score: float32<ms/rate> }
+    let generate_pattern_report (rate: float32, chart: Chart) =
+        let data = 
+            analyse rate chart
+            |> pattern_locations
+            |> pattern_breakdown
+
+        let importance (p, bpm) =
+            match p with
+            | Stream s -> float32 (bpm * bpm) * 0.5f
+            | Jack s -> float32 (bpm * bpm)
+
+        data.Keys 
+        |> Seq.map ( fun (p, bpm) -> { Pattern = p; BPM = bpm; Score = data.[(p, bpm)].TotalTime * importance (p, bpm) / 1_000_000.0f } )
+        |> Seq.sortByDescending (fun x -> x.Score )
+        |> List.ofSeq
+        |> List.truncate 10
