@@ -3,6 +3,7 @@
 open System
 open Prelude
 open Prelude.Charts.Formats.Interlude
+open Prelude.Charts.Tools.Patterns
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
@@ -22,48 +23,66 @@ module Suggestion =
             elif fst d.Accuracy.Best < 0.945 then TooHard
             else JustRight
         | false, _ -> if (DateTime.UtcNow - data.LastPlayed).TotalDays < 7.0 then TooHard else JustRight
+
+    let mutable recommended_recently = Set.empty
+
+    let get_suggestions (chart: Chart) (cacheData: CachedChart) =
     
-    let get_suggestion (chart: Chart) (cacheData: CachedChart) (filter: Filter) (rulesetId: string) =
+        recommended_recently <- Set.add cacheData.Hash recommended_recently
+        let patterns = Patterns.generate_pattern_report (1.0f, chart)
+        
+        let min_difficulty = cacheData.Physical - 0.5
+        let max_difficulty = cacheData.Physical + 0.5
 
-        let data = Scores.getOrCreateData chart
-        let challenge_level = estimate_challenge_level rulesetId data
+        let min_length = cacheData.Length - 60000.0f<ms>
+        let max_length = min_length + 120000.0f<ms>
 
-        let min_difficulty = cacheData.Physical - match challenge_level with TooHard -> 0.5 | JustRight -> 0.25 | TooEasy -> 0.1
-        let max_difficulty = cacheData.Physical + match challenge_level with TooHard -> 0.1 | JustRight -> 0.25 | TooEasy -> 0.5
-
-        let min_length : float = float (cacheData.Length / 1000.0f<ms>) - 60.0
-        let max_length : float = min_length + 120.0
-
-        let filter_and_constraints = 
-            (Equals ("key", chart.Keys.ToString())) ::
-            (LessThan ("diff", max_difficulty)) :: (MoreThan ("diff", min_difficulty)) :: 
-            (LessThan ("length", max_length)) :: (MoreThan ("length", min_length)) ::
-            filter
-
-        let mutable best_chart = None
-        let mutable best_chart_points = -1
-
-        let bpm = 60000.0f<ms/minute> / fst cacheData.BPM
         let now = DateTime.UtcNow
+
+        let candidates =
+            Library.cache.Entries.Values
+            |> Seq.filter (fun x -> x.Keys = cacheData.Keys)
+            |> Seq.filter (fun x -> x.Physical >= min_difficulty && x.Physical <= max_difficulty)
+            |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
+            |> Seq.filter (fun x -> match Scores.getData x.Hash with Some d -> (now - d.LastPlayed).TotalDays < 2 | _ -> true)
+            |> Seq.filter (fun x -> Library.patterns.ContainsKey x.Hash)
+            |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
+
+        seq {
+            for entry in candidates do
+                let candidate_patterns = Library.patterns.[entry.Hash]
+
+                let mutable similarity_score = 0.0f
+
+                for p in patterns do
+                    for p2 in candidate_patterns do
+                        if p.Pattern = p2.Pattern then
+                            let bpm_similarity = 
+                                match p.Pattern with
+                                | Stream _ -> 
+                                    abs (p.BPM - p2.BPM) |> min 50 |> fun i -> 1.0f - float32 i / 50.0f
+                                | Jack _ -> 
+                                    abs (p.BPM - p2.BPM) |> min 25 |> fun i -> 1.0f - float32 i / 25.0f
+                            let duration_similarity =
+                                abs (p.Score - p.Score) |> float32 |> min 1000.0f |> fun i -> 1.0f - i / 1000.0f
+                            similarity_score <- similarity_score + duration_similarity * bpm_similarity
+
+                yield entry, similarity_score
+        } |> Seq.sortByDescending snd |> Seq.map fst
+
+    let get_suggestion (chart: Chart) (cacheData: CachedChart) =
         let rand = Random()
+        
+        let options = 
+            get_suggestions chart cacheData
+            |> Seq.truncate 100
+            |> Array.ofSeq
 
-        for chart in Filter.apply filter_and_constraints Library.cache.Entries.Values do
+        if options.Length = 0 then None else 
             
-            // points out of 10
-            let bpm_similarity : int = 10 - ( (bpm - 60000.0f<ms/minute> / fst chart.BPM) / 10.0f<beat/minute> |> MathF.Abs |> MathF.Truncate |> int )
-            let recency_bonus : int =
-                match Scores.getData chart.Hash with
-                | Some d -> if d.LastPlayed = DateTime.UnixEpoch then 8 else Math.Clamp(Math.Log((now - d.LastPlayed).TotalDays, 1.4), 0, 10) |> int
-                | None -> 8
-
-            let score = 
-                if chart.Hash = cacheData.Hash then -1 else 
-                    bpm_similarity + recency_bonus * 2 + rand.Next(-3, 3)
-            if score > best_chart_points then
-                best_chart_points <- score
-                best_chart <- Some chart
-
-        best_chart
+        let res = options.[rand.NextDouble() |> fun x -> x * x |> fun x -> x * float options.Length |> floor |> int]
+        recommended_recently <- Set.add res.Hash recommended_recently
+        Some res
 
     let get_random (filter: Filter) =
         let rand = Random()
