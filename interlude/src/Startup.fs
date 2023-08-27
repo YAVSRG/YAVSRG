@@ -24,7 +24,7 @@ module private HashMigration =
     let run () =
         Logging.Info "---- ---- ----"
         Logging.Info "Hold it! Update 0.7.2 changes how chart hashing work - Please wait while your data gets migrated"
-        Logging.Info "This may take a couple of minutes ..."
+        Logging.Info "This may take a couple of minutes, do not close your game ..."
 
         // build mapping from cache
         let mapping = Dictionary<string, ResizeArray<string>>()
@@ -34,11 +34,24 @@ module private HashMigration =
                 | ".yav" ->
                     match Chart.fromFile file with
                     | Some c ->
-                        if not (Chart.check c) then
+                        match Chart.check c with
+                        | Error _ ->
+
+                            let fix = Chart.LegacyHash.fix c
+                            match Chart.check fix with 
+                            | Ok() ->
+                                let old_hash = Chart.LegacyHash.hash c
+                                let new_hash = Chart.hash fix
+                                if not (mapping.ContainsKey new_hash) then mapping.[new_hash] <- ResizeArray<_>()
+                                mapping.[new_hash].Add(old_hash)
+                                let file_hash = Path.GetFileNameWithoutExtension(file)
+                                if file_hash <> old_hash then mapping.[new_hash].Add(file_hash)
+                            | Error _ -> ()
                             File.Delete file
-                        else
-                            let old_hash = Chart.hash_old c
-                            let new_hash = Chart.hash_new c
+
+                        | Ok() ->
+                            let old_hash = Chart.LegacyHash.hash c
+                            let new_hash = Chart.hash c
                             if not (mapping.ContainsKey new_hash) then mapping.[new_hash] <- ResizeArray<_>()
                             mapping.[new_hash].Add(old_hash)
                     | None -> ()
