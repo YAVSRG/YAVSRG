@@ -19,9 +19,9 @@ open Interlude.Features.Multiplayer
 open Interlude.Features.Printerlude
 open Interlude.Features.Toolbar
 
-module private HashMigration =
+module private Migrations =
     
-    let run () =
+    let run_1 () =
         Logging.Info "---- ---- ----"
         Logging.Info "Hold it! Update 0.7.2 changes how chart hashing work - Please wait while your data gets migrated"
         Logging.Info "This may take a couple of minutes, do not close your game ..."
@@ -113,8 +113,14 @@ module private HashMigration =
         Logging.Info "Running a recache ..."
         Cache.recache_service.RequestAsync Library.cache |> Async.RunSynchronously
 
+    let run_2 () =
+        Logging.Info "---- ---- ----"
+        Logging.Info "Please wait while Interlude caches what patterns you have in your charts - it shouldn't take long"
+        Library.cache_patterns.RequestAsync () |> Async.RunSynchronously
+        
+
 module Startup =
-    let MIGRATION_VERSION = 1
+    let MIGRATION_VERSION = 2
     let migrate() =
         
         if Stats.total.MigrationVersion.IsNone then
@@ -126,8 +132,12 @@ module Startup =
         | None -> failwith "impossible"
         | Some i ->
             if i < 1 then
-                HashMigration.run()
+                Migrations.run_1()
                 Stats.total.MigrationVersion <- Some 1
+
+            if i < 2 then
+                Migrations.run_2()
+                Stats.total.MigrationVersion <- Some 2
 
     let ui_entry_point() =
         Screen.init [|LoadingScreen(); MainMenuScreen(); ImportScreen(); LobbyScreen(); LevelSelectScreen()|]

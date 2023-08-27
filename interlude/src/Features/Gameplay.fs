@@ -8,6 +8,7 @@ open Prelude
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools
 open Prelude.Charts.Tools.NoteColors
+open Prelude.Charts.Tools.Patterns
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay
 open Prelude.Gameplay.Difficulty
@@ -19,7 +20,6 @@ open Prelude.Data.Scores
 open Interlude
 open Interlude.Options
 open Interlude.UI
-open Interlude.Utils
 open Interlude.Features.Online
 
 module Gameplay =
@@ -37,7 +37,7 @@ module Gameplay =
     
         let mutable rating : RatingReport option = None
         let mutable saveData : ChartSaveData option = None
-        // todo: patterns
+        let mutable patterns : Patterns.PatternReportEntry list option = None
 
         let _rate = Setting.rate 1.0f
         let _selectedMods = Setting.simple Map.empty
@@ -51,6 +51,7 @@ module Gameplay =
                 rating <- 
                     RatingReport(modChart.Notes, _rate.Value, options.Playstyles.[modChart.Keys - 3], modChart.Keys)
                     |> Some
+                patterns <- Some (Patterns.generate_pattern_report (_rate.Value, c))
                 withColors <- None
         
         let chartChangeEvent = Event<unit>()

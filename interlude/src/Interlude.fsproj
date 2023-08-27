@@ -92,7 +92,7 @@
     <Compile Include="Features\LevelSelect\Tree.fs" />
     <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
-    <Compile Include="Features\LevelSelect\Info\Patterns.fs" />
+    <Compile Include="Features\LevelSelect\Info\Details.fs" />
     <Compile Include="Features\LevelSelect\Info\Scoreboard.fs" />
     <Compile Include="Features\LevelSelect\Info\Info.fs" />
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />

@@ -20,20 +20,19 @@ type ChartInfo() as this =
 
     let show_patterns = Setting.simple false
     let scoreboard = Scoreboard(show_patterns, Position = Position.TrimBottom 120.0f)
+    let details = Details(show_patterns, Position = Position.TrimBottom 120.0f)
     let mutable length = ""
     let mutable bpm = ""
     let mutable notecounts = ""
 
-    
     let changeRate v = 
         rate.Value <- rate.Value + v
         LevelSelect.refresh_details()
-        Patterns.update_report()
 
     do
         this
         |+ Conditional((fun () -> not show_patterns.Value), scoreboard)
-        |+ Conditional((fun () -> show_patterns.Value), Patterns.display)
+        |+ Conditional((fun () -> show_patterns.Value), details)
 
         |+ Text(
             fun () -> sprintf "%s %.2f" Icons.star (match Chart.rating with None -> 0.0 | Some d -> d.Physical)
