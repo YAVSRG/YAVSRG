@@ -40,10 +40,13 @@ module Upload =
         Queue.append "uploaded" s
     
     let private upload_chart_internal (chart: Interlude.Chart) (chart_info: Chart) =
-        if not (Interlude.Chart.check chart) then failwith "Invalid chart to upload"
+        match Interlude.Chart.check chart with
+        | Error msg ->
+            failwithf "Invalid chart to upload: %s" msg
+        | Ok() ->
         Async.Parallel [
             task {
-                let hash = Interlude.Chart.hash_new chart
+                let hash = Interlude.Chart.hash chart
 
                 let exists = existing_files.ContainsKey hash
                 if not exists then

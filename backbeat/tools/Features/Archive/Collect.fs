@@ -87,11 +87,7 @@ module Collect =
                 AudioFile = audio_hash
             }
         
-        let hash = Chart.hash_new chart
-        let old_hash = Chart.hash_old chart
-        if charts.ContainsKey old_hash then
-            charts.[hash] <- charts.[old_hash]
-            charts.Remove(old_hash) |> ignore
+        let hash = Chart.hash chart
 
         if charts.ContainsKey hash then
             let old_entry = charts.[hash]
@@ -107,7 +103,7 @@ module Collect =
                     }
                 Logging.Info(sprintf "^ Chart: %s" hash)
             
-            //upload_chart chart new_entry
+            upload_chart chart new_entry
         else
 
         let song: Song =
@@ -133,8 +129,7 @@ module Collect =
         charts.Add(hash, chart_entry)
         Logging.Info(sprintf "+ Chart: %s" hash)
 
-        //Logging.Info(sprintf "Uploading %s .." hash)
-        //upload_chart chart chart_entry
+        upload_chart chart chart_entry
 
     let slurp_folder (extra_sources: ChartSource list) (folder: string) =
         Directory.EnumerateFiles(Path.Combine(backbeat_cache.RootPath, folder))
