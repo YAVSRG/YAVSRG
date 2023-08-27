@@ -86,12 +86,6 @@ type MainMenuScreen() as this =
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-625.0f, -50.0f) )
         
     override this.OnEnter prev =
-        
-        if Prelude.Data.Charts.Library.cache.Entries.Count = 0 && IO.File.Exists(IO.Path.Combine(getDataPath "Data", "cache.json")) then
-            IO.File.Delete(IO.Path.Combine(getDataPath "Data", "cache.json"))
-            Prelude.Data.Charts.Caching.Cache.recache_service.Request(Prelude.Data.Charts.Library.cache, fun () -> Notifications.task_feedback(Icons.folder, L"notification.recache_complete", ""))
-            Notifications.action_feedback(Icons.folder, L"notification.recache", "")
-
         if AutoUpdate.updateAvailable then Notifications.system_feedback (Icons.system_notification, L"notification.update_available.title", L"notification.update_available.body")
         if prev = Screen.Type.SplashScreen && firstLaunch then Wiki.show()
         splashText <- newSplash()

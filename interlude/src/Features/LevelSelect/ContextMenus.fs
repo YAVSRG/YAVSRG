@@ -2,12 +2,17 @@
 
 open Percyqaz.Flux.UI
 open Prelude.Common
+open Prelude.Charts.Formats.Interlude
+open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Gameplay
+open Interlude.Features.Online
+open Interlude.Features.Score
 
 type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     inherit Page()
@@ -85,3 +90,36 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         | LibraryGroupContext.Folder id -> EditFolderPage(id, Library.collections.GetFolder(id).Value).Show()
         | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value).Show()
         | LibraryGroupContext.Table lvl -> EditLevelPage(Table.current().Value.TryLevel(lvl).Value).Show()
+
+type ScoreContextMenu(score: ScoreInfoProvider) as this =
+    inherit Page()
+
+    do
+        this.Content(
+            column()
+            |+ PageButton("score.delete", (fun () -> ScoreContextMenu.ConfirmDeleteScore(score, true)), Icon = Icons.delete)
+                .Pos(200.0f)
+            |+ PageButton("score.watch_replay", 
+                (fun () -> ScoreScreenHelpers.watchReplay(score.ModChart, score.ScoreInfo.rate, score.ReplayData); Menu.Back()),
+                Icon = Icons.watch)
+                .Pos(270.0f)
+            |+ PageButton("score.challenge",
+                (fun () -> LevelSelect.challengeScore(score.ScoreInfo.rate, score.ScoreInfo.selectedMods, score.ReplayData); Menu.Back()),
+                Icon = Icons.goal,
+                Enabled = Network.lobby.IsNone)
+                .Pos(340.0f)
+                .Tooltip(Tooltip.Info("score.challenge"))
+        )
+    override this.Title = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
+    override this.OnClose() = ()
+    
+    static member ConfirmDeleteScore(score, is_submenu) =
+        let scoreName = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
+        ConfirmPage(
+            Localisation.localiseWith [scoreName] "misc.confirmdelete",
+            fun () ->
+                Chart.saveData.Value.Scores.Remove score.ScoreInfo |> ignore
+                LevelSelect.refresh_all()
+                Notifications.action_feedback (Icons.delete, Localisation.localiseWith [scoreName] "notification.deleted", "")
+                if is_submenu then Menu.Back()
+        ).Show()

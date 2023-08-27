@@ -58,7 +58,7 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
             let newTime = start + (chart.LastNote - start) * percent
             Song.seek newTime
         if (!|"preview").Tapped() || (!|"exit").Tapped() then this.Close()
-        elif (!|"select").Tapped() then this.Close(); Tree.play()
+        elif (!|"select").Tapped() then this.Close(); LevelSelect.play()
         elif (!|"uprate_small").Tapped() then changeRate(0.01f)
         elif (!|"uprate_half").Tapped() then changeRate(0.05f)
         elif (!|"uprate").Tapped() then changeRate(0.1f)

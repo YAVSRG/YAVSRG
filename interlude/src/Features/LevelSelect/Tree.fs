@@ -67,7 +67,7 @@ module Tree =
         else ( p1, r1, colorFunc p1, format p1 )
     
     let switchChart(cc, context, groupName) =
-        match Cache.load cc Library.cache with
+        match Cache.load cc cache with
         | Some c ->
             Chart.change(cc, context, c)
             Selection.clear()
@@ -76,35 +76,7 @@ module Tree =
             selectedGroup <- groupName
             scrollTo <- ScrollTo.Chart
         | None -> Notifications.error(L"notification.chart_load_failed.title", L"notification.chart_load_failed.body")
-    
-    let play() =
-        if Network.lobby.IsSome then
-            Lobby.select_chart(Chart.cacheInfo.Value, rate.Value, selectedMods.Value)
-            Screen.change Screen.Type.Lobby Transitions.Flags.Default
-        else
-            match Chart.saveData with
-            | Some data ->
-                data.LastPlayed <- DateTime.UtcNow
-                Screen.changeNew
-                    ( fun () -> 
-                        if autoplay then ReplayScreen.replay_screen(ReplayMode.Auto) :> Screen.T
-                        else PlayScreen.play_screen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
-                    ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
-                    Transitions.Flags.Default
-            | None -> Logging.Warn "There is no chart selected"
-
-    let challengeScore(_rate, _mods, replay) =
-        match Chart.saveData with
-        | Some data ->
-            data.LastPlayed <- DateTime.UtcNow
-            rate.Set _rate
-            selectedMods.Set _mods
-            Screen.changeNew
-                ( fun () -> PlayScreen.play_screen(PacemakerMode.Score (rate.Value, replay)) )
-                ( Screen.Type.Play )
-                Transitions.Flags.Default
-        | None -> Logging.Warn "There is no chart selected"
-
+   
     [<AbstractClass>]
     type private TreeItem() =
         abstract member Bounds: float32 -> Rect
@@ -217,7 +189,7 @@ module Tree =
             if Mouse.hover bounds then
                 hover.Target <- 1.0f
                 if this.LeftClick(origin) then
-                    if this.Selected then play()
+                    if this.Selected then LevelSelect.play()
                     else this.Select()
                 elif this.RightClick(origin) then ChartContextMenu(cc, context).Show()
                 elif (!|"delete").Tapped() then ChartContextMenu.ConfirmDelete(cc, false)

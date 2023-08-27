@@ -76,7 +76,7 @@ type LevelSelectScreen() =
 
         Comments.update(elapsedTime, moved)
 
-        if (!|"select").Tapped() then Tree.play()
+        if (!|"select").Tapped() then LevelSelect.play()
 
         elif (!|"next").Tapped() then Tree.next()
         elif (!|"previous").Tapped() then Tree.previous()

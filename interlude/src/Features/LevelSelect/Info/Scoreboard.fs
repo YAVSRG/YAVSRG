@@ -16,41 +16,7 @@ open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
-open Interlude.Features.Online
 open Interlude.Features.Score
-
-type ScoreContextMenu(score: ScoreInfoProvider) as this =
-    inherit Page()
-
-    do
-        this.Content(
-            column()
-            |+ PageButton("score.delete", (fun () -> ScoreContextMenu.ConfirmDeleteScore(score, true)), Icon = Icons.delete)
-                .Pos(200.0f)
-            |+ PageButton("score.watch_replay", 
-                (fun () -> ScoreScreenHelpers.watchReplay(score.ModChart, score.ScoreInfo.rate, score.ReplayData); Menu.Back()),
-                Icon = Icons.watch)
-                .Pos(270.0f)
-            |+ PageButton("score.challenge",
-                (fun () -> Tree.challengeScore(score.ScoreInfo.rate, score.ScoreInfo.selectedMods, score.ReplayData); Menu.Back()),
-                Icon = Icons.goal,
-                Enabled = Network.lobby.IsNone)
-                .Pos(340.0f)
-                .Tooltip(Tooltip.Info("score.challenge"))
-        )
-    override this.Title = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
-    override this.OnClose() = ()
-    
-    static member ConfirmDeleteScore(score, is_submenu) =
-        let scoreName = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
-        ConfirmPage(
-            Localisation.localiseWith [scoreName] "misc.confirmdelete",
-            fun () ->
-                Chart.saveData.Value.Scores.Remove score.ScoreInfo |> ignore
-                LevelSelect.refresh_all()
-                Notifications.action_feedback (Icons.delete, Localisation.localiseWith [scoreName] "notification.deleted", "")
-                if is_submenu then Menu.Back()
-        ).Show()
 
 module Scoreboard =
 
@@ -183,7 +149,7 @@ module Scoreboard =
 
 open Scoreboard
 
-type Scoreboard() as this =
+type Scoreboard(show_patterns: Setting<bool>) as this =
     inherit StaticContainer(NodeType.None)
 
     let mutable count = -1
@@ -215,7 +181,7 @@ type Scoreboard() as this =
     do
         this
         |+ StylishButton(
-            this.Refresh,
+            (fun () -> show_patterns.Set true),
             K <| Localisation.localise "levelselect.scoreboard.storage.local",
             !%Palette.MAIN_100,
             Hotkey = "scoreboard_storage",
