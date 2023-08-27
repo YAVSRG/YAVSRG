@@ -17,6 +17,7 @@ type ScaledTime = float32<ms/rate>
 
 type RowInfo =
     {
+        RawNotes: int array
         Notes: int
         Jacks: int
         Direction: Direction
@@ -113,6 +114,7 @@ module Analysis =
                     let cmax = Array.max current_row
 
                     yield {
+                        RawNotes = current_row
                         Notes = current_row.Length
                         Jacks = current_row.Length - (Array.except previous_row current_row).Length
                         Direction =
@@ -149,11 +151,12 @@ module Patterns =
         
         let STREAMS : Pattern = 
             function
-            |      { Notes = 1; Jacks = 0 }
+            |      { Notes = 1; Jacks = 0; RawNotes = x }
                 :: { Notes = 1; Jacks = 0 }
                 :: { Notes = 1; Jacks = 0 }
                 :: { Notes = 1; Jacks = 0 }
-                :: _ -> 4
+                :: { Notes = 1; Jacks = 0; RawNotes = y }
+                :: _ when x.[0] <> y.[0] -> 5
             | _ -> 0
 
         let ALTERNATION : Pattern =
