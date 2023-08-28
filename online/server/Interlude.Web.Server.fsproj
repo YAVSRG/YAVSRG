@@ -15,6 +15,7 @@
     <Compile Include="Domain\Charts.fs" />
     <Compile Include="API\Utils.fs" />
     <Compile Include="API\Auth\Discord.fs" />
+    <Compile Include="API\Friends\List.fs" />
     <Compile Include="API\Charts\Identify.fs" />
     <Compile Include="API\Health\HealthCheck.fs" />
     <Compile Include="API\API.fs" />

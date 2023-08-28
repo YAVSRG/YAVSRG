@@ -40,7 +40,9 @@ module User =
 
     let id (key: string) = key.Substring(5) |> int64
     let key (id: int64) = RedisKey("user:" + id.ToString())
-    let escape (username: string) = username.Replace("'", "\\'").Replace("-", "\\-")
+    let escape (query: string) = 
+        let regex = System.Text.RegularExpressions.Regex("[^a-zA-Z0-9'\\-_\\s]")
+        regex.Replace(query, "").Replace("'", "\\'").Replace("-", "\\-")
 
     let create(username, discord_id) =
         { 
@@ -67,11 +69,25 @@ module User =
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
 
     let by_id(id: int64) =
-        json.Get<User>(key id, "$") |> Some
-        // todo: error handling when not found
+        let result = json.Get(key id, [|"$"|])
+        if result.IsNull then None 
+        else 
+            let s : string = RedisResult.op_Explicit result
+            Some <| Text.Json.JsonSerializer.Deserialize<User>(s)
+
+    let by_ids(ids: int64 array) =
+        if ids.Length = 0 then [||] else
+
+        json.MGet(ids |> Array.map key, "$")
+        |> Array.map (fun result -> 
+            if result.IsNull then None 
+            else 
+                let s : string = RedisResult.op_Explicit result
+                Some <| Text.Json.JsonSerializer.Deserialize<User array>(s).[0]
+            )
 
     let by_auth_token(token: string) =
-        let results = ft.Search("idx:users", Query(sprintf "@auth_token:{%s}" token)).Documents
+        let results = ft.Search("idx:users", Query(sprintf "@auth_token:{%s}" (escape token))).Documents
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
         
@@ -80,17 +96,128 @@ module User =
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
 
-    let delete(id: int64) =
-        match by_id id with
-        | Some user ->
-            Logging.Info(sprintf "Deleting user with id %i, discord id %i, username %s" id user.DiscordId user.Username)
-            json.Del(key id) |> ignore
-        | None -> failwithf "No such user with id %i" id
-
-    //todo: this pulls all user data and will have to be scrapped for a pagination system when there are >100 users
+    // todo: a pagination system when there are >100 users
     let all() =
         ft.Search("idx:users", Query("*").Limit(0, 100)).Documents
         |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
+
+module Friends =
+    
+    let key (id: int64) = RedisKey("friends:" + id.ToString())
+
+    let get_id_list(userId: int64) : int64 array =
+        db.SetScan(key userId)
+        |> Seq.map (fun v ->
+            let mutable r = 0L
+            let _ = v.TryParse(&r)
+            r)
+        |> Array.ofSeq
+
+    let add_friend(userId: int64, friendId: int64) =
+        if userId <> friendId then db.SetAdd(key userId, friendId) |> ignore
+    let remove_friend(userId: int64, friendId: int64) = db.SetRemove(key userId, friendId) |> ignore
+    let has_friend(userId: int64, friendId: int64) = db.SetContains(key userId, friendId)
+
+    let friends_list(userId: int64) = User.by_ids (get_id_list userId)
+
+open Prelude.Gameplay
+
+type Score =
+    {
+        Replay: string
+        Rate: float32
+        Mods: Mods.ModState
+        Timestamp: int64
+        UploadTimestamp: int64
+    }
+
+module Score =
+
+    let key (userId: int64) (hash: string) = RedisKey(sprintf "score:%i:%s" userId hash)
+
+    let create (replay, rate, mods, timestamp: DateTime) =
+        match Mods.check mods with
+        | Ok Mods.ModStatus.Ranked ->
+            {
+                Replay = replay
+                Rate = rate
+                Mods = mods
+                Timestamp = (DateTimeOffset.op_Implicit timestamp).ToUnixTimeMilliseconds()
+                UploadTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            }
+        | Ok _ -> failwith "This score is unranked because of mods, cannot be stored online"
+        | Error reason -> failwithf "Mods are invalid: %s" reason
+
+    let save (userId: int64) (hash: string) (score: Score) =
+        json.Set(key userId hash, "$", score) |> ignore
+
+    let get (userId: int64) (hash: string) =
+        let result = json.Get(key userId hash, [|"$"|])
+        if result.IsNull then None 
+        else 
+            let s : string = RedisResult.op_Explicit result
+            Some <| Text.Json.JsonSerializer.Deserialize<Score>(s)
+
+    let get_chart_scores (userIds: int64 array) (hash: string) =
+        if userIds.Length = 0 then [||] else
+
+        json.MGet(userIds |> Array.map (fun id -> key id hash), "$")
+        |> Array.map (fun result -> 
+            if result.IsNull then None 
+            else 
+                let s : string = RedisResult.op_Explicit result
+                Some <| Text.Json.JsonSerializer.Deserialize<Score array>(s).[0]
+            )
+
+module Leaderboard =
+
+    let key (hash: string) (ruleset: string) = RedisKey(sprintf "leaderboard:%s:%s" hash ruleset)
+
+    let add (userId: int64) (score: float) (hash: string) (ruleset: string) =
+        db.SortedSetAdd(key hash ruleset, userId, score)
+
+    let get_top_20_ids (hash: string) (ruleset: string) =
+        db.SortedSetRangeByRankWithScores(key hash ruleset, 0, 20, Order.Descending)
+        |> Array.map (fun v ->
+            let mutable r = 0L
+            let _ = v.Element.TryParse(&r)
+            r, v.Score)
+
+    let get_top_20_info (hash: string) (ruleset: string) =
+        let userIds =
+            get_top_20_ids hash ruleset
+            |> Array.map fst
+        Array.zip
+            (User.by_ids userIds |> Array.map (Option.map (fun x -> x.Username)))
+            (Score.get_chart_scores userIds hash)
+
+    let position (userId: int64) (hash: string) (ruleset: string) =
+        let result = db.SortedSetRank(key hash ruleset, userId, Order.Descending)
+        if result.HasValue then Some result.Value else None
+
+module Aggregate =
+    
+    let delete_user(userId: int64) =
+        match User.by_id userId with
+        | Some user ->
+            Logging.Info(sprintf "Deleting user with id %i, discord id %i, username '%s'" userId user.DiscordId user.Username)
+
+            let server = redis.GetServers().[0]
+            let leaderboard_keys = server.Keys(pattern = RedisValue("leaderboard:*:*")) |> Array.ofSeq
+            for k in leaderboard_keys do db.SortedSetRemove(k, userId) |> ignore
+            Logging.Info(sprintf "Removed %s from all leaderboards (%i)" user.Username leaderboard_keys.Length)
+
+            let score_keys = server.Keys(pattern = RedisValue(sprintf "scores:%i:*" userId)) |> Array.ofSeq
+            for k in score_keys do json.Del(k) |> ignore
+            Logging.Info(sprintf "Removed %s's scores (%i)" user.Username score_keys.Length)
+
+            json.Del(Friends.key userId) |> ignore
+            Logging.Info(sprintf "Removed %s's friend list" user.Username)
+
+            json.Del(User.key userId) |> ignore
+            Logging.Info(sprintf "Deleting %s complete" user.Username)
+
+        | None -> failwithf "No such user with id %i" userId
 
 module Migrations =
 
@@ -122,16 +249,3 @@ module Migrations =
 
             db.StringIncrement("migration", 1L) |> ignore
             Logging.Debug("Migration 1 OK")
-
-        //if migration < 2L then
-        //    Logging.Debug("Performing migration 2")
-
-        //    // next migration
-        //    db.StringIncrement("migration", 1L) |> ignore
-        //    Logging.Debug("Migration 2 OK")
-        
-        //if migration < 3L then
-        //    Logging.Debug("Performing migration 3")
-        //    // next migration
-        //    db.StringIncrement("migration", 1L) |> ignore
-        //    Logging.Debug("Migration 3 OK")

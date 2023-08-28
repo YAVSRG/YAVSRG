@@ -2,6 +2,7 @@
 
 open NetCoreServer
 open Prelude
+open Interlude.Web.Server.Domain
 
 [<AutoOpen>]
 module Utils =
@@ -13,3 +14,13 @@ module Utils =
         member this.ReplyRedirect(url: string) =
             this.Clear().SetBegin(303).SetHeader("Location", url).SetBody()
             |> ignore
+
+    exception NotAuthorizedException
+    exception AuthorizeFailedException
+
+    let authorize (header: Map<string, string>) =
+        if header.ContainsKey("Authorization") then
+            match User.by_auth_token header.["Authorization"] with
+            | Some (id, user) -> id, user
+            | None -> raise AuthorizeFailedException
+        else raise NotAuthorizedException

@@ -26,13 +26,18 @@ module Commands =
                     let! _ = context.Channel.SendMessageAsync(embed = embed)
                     return ()
                 }
+            let reply_emoji emoji =
+                task {
+                    let! _ = context.AddReactionAsync(Emoji.Parse emoji)
+                    return ()
+                }
             match command with
             | "s"
             | "search" ->
                 match args with
 
                 | [] -> 
-                    do! reply "Enter a search term, for example: search PLANET//SHAPER artist:Camellia creator:Evening"
+                    do! reply "Enter a search term, for example: $search PLANET//SHAPER artist:Camellia creator:Evening"
 
                 | query :: _ -> 
                     let matches = Charts.search query |> List.ofSeq
@@ -61,6 +66,41 @@ module Commands =
                                 .WithDescription(String.concat "\n" (List.map (fun (song: Song, charts) -> song.FormattedTitle.Replace("*", "\\*")) matches))
                                 .WithColor(Color.Blue)
                         do! reply_embed (embed.Build())
+            | "fl"
+            | "friends"
+            | "friendlist" ->
+                let friends = Friends.friends_list(userId)
+                let embed = 
+                    EmbedBuilder(Title = sprintf "%s's friends list" userInfo.Username)
+                        .WithColor(Color.Blue)
+                        .WithDescription(
+                        if friends.Length = 0 then "nobody :(" else
+                        friends
+                        |> Array.map (function Some user -> user.Username | None -> "<deleted user>")
+                        |> String.concat "\n"
+                    )
+                do! reply_embed (embed.Build())
+            | "f"
+            | "friend" ->
+                match args with
+                | [] -> do! reply "Enter a username, for example: $friend Percyqaz"
+                | username :: _ ->
+                    match user_by_name username with
+                    | Some (id, _) ->
+                        Friends.add_friend(userId, id)
+                        do! reply_emoji ":white_check_mark:"
+                    | None -> do! reply "No user found."
+            | "uf"
+            | "unfriend" ->
+                match args with
+                | [] -> do! reply "Enter a username, for example: $unfriend Percyqaz"
+                | username :: _ ->
+                    match user_by_name username with
+                    | Some (id, _) ->
+                        Friends.remove_friend(userId, id)
+                        do! reply_emoji ":white_check_mark:"
+                    | None -> do! reply "No user found."
+
             | _ -> ()
         }
 
@@ -154,7 +194,7 @@ module Commands =
                 | name :: _ ->
                     match user_by_name name with
                     | Some (id, user) ->
-                        User.delete(id)
+                        Aggregate.delete_user(id)
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
 
