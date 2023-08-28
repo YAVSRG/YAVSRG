@@ -123,3 +123,17 @@ module Mods =
     let getModString(rate: float32, selectedMods: ModState, autoPlay: bool) = 
         String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (fun (id, _, _) -> id) |> Seq.map (ModState.getModName) |> List.ofSeq))
         + if autoPlay then ", " + ModState.getModName "auto" else ""
+
+    let check (mods: ModState) =
+        try
+            let mutable status = ModStatus.Ranked
+            for m in mods.Keys do
+                if modList.ContainsKey m then
+                    status <- max status modList.[m].Status
+                    if mods.[m] >= modList.[m].States then failwithf "Mod '%s' in invalid state %i" m mods.[m]
+                        
+                    for e in modList.[m].Exclusions do
+                        if mods.ContainsKey e then failwithf "Mods '%s' and '%s' cannot both be selected" m e
+                else failwithf "No such mod '%s'" m
+            Ok status
+        with err -> Error err.Message
