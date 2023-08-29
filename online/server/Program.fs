@@ -3,7 +3,6 @@ open System.IO
 open System.Threading
 open System.Security.Authentication
 open System.Security.Cryptography.X509Certificates
-open System.Reflection
 open NetCoreServer
 open Percyqaz.Common
 open Interlude.Web.Shared
@@ -34,7 +33,7 @@ try
         Handle_Disconnect = Online.handle_disconnect
     }
     
-    API.init {
+    API.Server.init {
         Port = HTTPS_PORT
         SSLContext = SslContext(SslProtocols.Tls12, api_cert)
         Handle_Request = API.handle_request
@@ -43,7 +42,7 @@ try
     Logging.Info(sprintf "Launching game server on port %i ..." SOCKET_PORT)
     Server.start()
     Logging.Info(sprintf "Launching api on port %i ..." HTTPS_PORT)
-    API.start()
+    API.Server.start()
     Logging.Info(sprintf "Launching discord bot ...")
     Bot.start()
     

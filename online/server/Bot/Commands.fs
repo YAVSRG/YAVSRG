@@ -219,5 +219,13 @@ module Commands =
                 Charts.init()
                 do! reply_emoji ":white_check_mark:"
 
+            | "addleaderboard" ->
+                match args with
+                | []
+                | _ :: [] -> do! reply "Enter a hash and ruleset, for example: $addleaderboard 1467CD6DEB4A3B87FA58FAB4F2398BE9AD7B0017031C511C549D3EF28FFB58D3$SC(J4)548E5A"
+                | hash :: ruleset :: _ ->
+                    Leaderboard.create hash ruleset
+                    do! reply_emoji ":white_check_mark:"
+
             | _ -> ()
         }

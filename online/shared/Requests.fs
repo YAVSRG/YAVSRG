@@ -1,7 +1,11 @@
 ﻿namespace Interlude.Web.Shared.Requests
 
 open Percyqaz.Json
-open Interlude.Web.Shared.API
+
+type HttpMethod =
+    | GET
+    | POST
+    | DELETE
 
 module Auth =
     

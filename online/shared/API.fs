@@ -6,13 +6,10 @@ open System.Net
 open System.Net.Sockets
 open NetCoreServer
 open Percyqaz.Common
+open Prelude
+open Interlude.Web.Shared.Requests
 
 module API =
-
-    type HttpMethod =
-        | GET
-        | POST
-        | DELETE
 
     type Config =
         {
@@ -61,13 +58,62 @@ module API =
         override this.OnError(error: SocketError) =
             Logging.Error(sprintf "Error in HTTP server: %O" error)
 
-    let mutable private server = Unchecked.defaultof<Listener>
+    module Server =
+
+        let mutable private server = Unchecked.defaultof<Listener>
     
-    let init(config: Config) =
-        server <- new Listener(config)
+        let init(config: Config) =
+            server <- new Listener(config)
 
-    let start() = 
-        if server.Start() then Logging.Info "HTTP server is listening!"
+        let start() = 
+            if server.Start() then Logging.Info "HTTP server is listening!"
 
-    let stop() = 
-        if server.Stop() then Logging.Info "Stopped HTTP server."
+        let stop() = 
+            if server.Stop() then Logging.Info "Stopped HTTP server."
+
+    module Client =
+
+        let private client = new Http.HttpClient()
+
+        let init(baseAddress: string) =
+            client.BaseAddress <- new Uri(baseAddress)
+
+        let authenticate(token: string) =
+            client.DefaultRequestHeaders.Authorization <- new Http.Headers.AuthenticationHeaderValue("Bearer", token)
+
+        let private queue =
+            { new Async.Service<Http.HttpClient -> Async<unit>, unit>() 
+                with override this.Handle(action) = async { do! action client }
+            }
+
+        let get<'T>(route: string, callback: 'T option -> unit) =
+            queue.Request (
+                fun client -> async {
+                    let! response = client.GetAsync(route) |> Async.AwaitTask
+                    if response.IsSuccessStatusCode then
+                        match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                        | Ok res -> Some res
+                        | Error err -> Logging.Error(sprintf "Error getting %s: %s" route err.Message); None
+                    else None
+                    |> callback
+                }
+                , ignore
+            )
+
+        let post<'T>(route: string, request: 'T, callback: bool -> unit) =
+            queue.Request (
+                fun client -> async {
+                    let! response = client.PostAsync(route, new Http.StringContent(JSON.ToString request, Text.Encoding.UTF8, "application/json")) |> Async.AwaitTask
+                    callback response.IsSuccessStatusCode
+                }
+                , ignore
+            )
+            
+        let delete<'T>(route: string, callback: bool -> unit) =
+            queue.Request (
+                fun client -> async {
+                    let! response = client.DeleteAsync(route) |> Async.AwaitTask
+                    callback response.IsSuccessStatusCode
+                }
+                , ignore
+            )
