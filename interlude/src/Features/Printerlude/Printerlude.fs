@@ -139,7 +139,11 @@ module Printerlude =
                 .WithCommand("export_osz", "Export current chart as osz", export_osz)
                 .WithCommand("fix_personal_bests", "Fix personal best display values", fix_personal_bests)
                 .WithCommand("patterns", "Experimental", analyse_patterns)
-                .WithCommand("local_server", "Switch to local development server", "flag", fun b -> Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net"); ctx.WriteLine("Restart your game to apply server change."))
+                .WithCommand("local_server", "Switch to local development server", "flag", 
+                    fun b -> 
+                        Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
+                        Online.Network.credentials.Api <- (if b then "localhost" else "api.yavsrg.net")
+                        ctx.WriteLine("Restart your game to apply server change."))
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
                 .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
 

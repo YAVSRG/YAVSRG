@@ -15,13 +15,14 @@ open Interlude.UI
 open Interlude.Utils
 open Interlude.Web.Shared
 
-[<Json.AutoCodec>]
+[<Json.AutoCodec(false)>]
 type Credentials =
     {
         DO_NOT_SHARE_THE_CONTENTS_OF_THIS_FILE_WITH_ANYONE_UNDER_ANY_CIRCUMSTANCES: string
         mutable Username: string
         mutable Token: string
         mutable Host: string
+        mutable Api: string
     }
     static member Default =
         {
@@ -29,6 +30,7 @@ type Credentials =
             Username = ""
             Token = ""
             Host = "online.yavsrg.net"
+            Api = "api.yavsrg.net"
         }
     static member Location = Path.Combine(getDataPath "Data", "login.json") 
     static member Load() =
@@ -178,6 +180,7 @@ module Network =
                 | Downstream.LOGIN_SUCCESS name -> sync <| fun () -> 
                     Logging.Info(sprintf "Logged in as %s" name)
                     credentials.Username <- name
+                    API.Client.authenticate credentials.Token
                     username <- name
                     status <- LoggedIn
                     if Screen.currentType <> Screen.Type.SplashScreen then Notifications.system_feedback(Icons.connected, Localisation.localiseWith [username] "notification.network.login", "")
@@ -264,6 +267,7 @@ module Network =
         }
 
     let connect() =
+        API.Client.init("https://" + credentials.Api)
         if status <> NotConnected && status <> ConnectionFailed then () else
         status <- Connecting
 

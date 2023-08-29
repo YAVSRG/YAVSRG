@@ -11,6 +11,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
 open Prelude.Backbeat.Archive
+open Interlude.Web.Shared
 open Interlude.UI
 
 type private TableStatus =
@@ -94,12 +95,16 @@ type TableCard(id: string, desc: string, table: Table) as this =
                         | None -> yield chart.Id, chart.Hash
             }
         for id, hash in missing_charts do
-            WebServices.download_json("https://api.yavsrg.net/charts/identify?id=" + hash,
+            API.Client.get("charts/identify?chart=" + hash,
                 function
-                | Some (d: ChartIdentity) when d.Found ->
-                    Cache.cdn_download_service.Request((table.Name, hash, (d.Chart.Value, d.Song.Value), Library.cache), fun _ -> sync on_download_chart)
+                | Some (d: Requests.Charts.Identify.Response) ->
+                    match d.Info with
+                    | Some info -> Cache.cdn_download_service.Request((table.Name, hash, (info.Chart, info.Song), Library.cache), fun _ -> sync on_download_chart)
+                    | None -> 
+                        Logging.Info(sprintf "Chart not found: %s(%s)" id hash)
+                        sync on_download_chart
                 | _ -> 
-                    Logging.Info(sprintf "Chart not found: %s(%s)" id hash)
+                    Logging.Info(sprintf "Chart not found/server error: %s(%s)" id hash)
                     sync on_download_chart
             )
 
