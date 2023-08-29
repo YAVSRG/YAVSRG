@@ -266,8 +266,12 @@ module Network =
                     lobby.Value.Players.[username].Replay.ImportLiveBlock br
         }
 
+    let mutable private api_initialised = false
+
     let connect() =
-        API.Client.init("https://" + credentials.Api)
+        if not api_initialised then
+            API.Client.init("https://" + credentials.Api)
+            api_initialised <- true
         if status <> NotConnected && status <> ConnectionFailed then () else
         status <- Connecting
 

@@ -34,7 +34,7 @@ let launch(instance: int) =
                 Logging.Warn("Unrecognised file dropped: " + path))
 
     use icon_stream = Utils.getResourceStream("icon.png")
-    use icon = Percyqaz.Flux.Utils.Bitmap.load icon_stream
+    use icon = Utils.Bitmap.load icon_stream
 
     Launch.entryPoint
         (
