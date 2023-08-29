@@ -80,10 +80,14 @@ module Bot =
         try
             let config = DiscordSocketConfig(GatewayIntents = (GatewayIntents.MessageContent ||| GatewayIntents.AllUnprivileged ^^^ GatewayIntents.GuildInvites ^^^ GatewayIntents.GuildScheduledEvents))
             use client = new DiscordSocketClient(config)
+
+            let mutable startup_message_shown = false
         
             client.add_Ready(fun () -> 
                 task {
-                    let! _ = (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(sprintf "Interlude.Web startup message [%s]" TAGLINE)
+                    if not startup_message_shown then
+                        let! _ = (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(sprintf "Server restarted [%s]" TAGLINE)
+                        startup_message_shown <- true
                     return ()
                 })
             client.add_MessageReceived(fun msg -> on_message msg)

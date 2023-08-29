@@ -15,10 +15,11 @@
     <Compile Include="Domain\Charts.fs" />
     <Compile Include="API\Utils.fs" />
     <Compile Include="API\Auth\Discord.fs" />
+    <Compile Include="API\Charts\Identify.fs" />
+    <Compile Include="API\Charts\SetScore.fs" />
     <Compile Include="API\Friends\List.fs" />
     <Compile Include="API\Friends\Add.fs" />
     <Compile Include="API\Friends\Remove.fs" />
-    <Compile Include="API\Charts\Identify.fs" />
     <Compile Include="API\Health\HealthCheck.fs" />
     <Compile Include="API\API.fs" />
     <Compile Include="Online\LoggedInUsers.fs" />

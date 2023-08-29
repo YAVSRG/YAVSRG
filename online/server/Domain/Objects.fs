@@ -141,7 +141,9 @@ module Score =
 
     let key (userId: int64) (hash: string) = RedisKey(sprintf "score:%i:%s" userId hash)
 
-    let create (replay, rate, mods, timestamp: DateTime) =
+    let create (replay: string, rate: float32, mods: Mods.ModState, timestamp: DateTime) =
+        let rate = MathF.Round(rate, 2)
+        if rate < 1.0f then failwith "This score is unranked because it was played at a lower rate than 1.0x"
         match Mods.check mods with
         | Ok Mods.ModStatus.Ranked ->
             {
@@ -178,9 +180,10 @@ module Score =
 module Leaderboard =
 
     let key (hash: string) (ruleset: string) = RedisKey(sprintf "leaderboard:%s:%s" hash ruleset)
+    let existence_key (hash: string) = RedisKey(sprintf "leaderboards:%s" hash)
 
-    let add (userId: int64) (score: float) (hash: string) (ruleset: string) =
-        db.SortedSetAdd(key hash ruleset, userId, score)
+    let add_score (userId: int64) (score: float) (hash: string) (ruleset: string) =
+        db.SortedSetAdd(key hash ruleset, userId, score) |> ignore
 
     let get_top_20_ids (hash: string) (ruleset: string) =
         db.SortedSetRangeByRankWithScores(key hash ruleset, 0, 20, Order.Descending)
@@ -200,6 +203,17 @@ module Leaderboard =
     let position (userId: int64) (hash: string) (ruleset: string) =
         let result = db.SortedSetRank(key hash ruleset, userId, Order.Descending)
         if result.HasValue then Some result.Value else None
+
+    let exists (hash: string) (ruleset: string) =
+        db.SetContains(existence_key hash, ruleset)
+
+    let create (hash: string) (ruleset: string) =
+        db.SetAdd(existence_key hash, ruleset) |> ignore
+
+    let rulesets_by_hash (hash: string) =
+        db.SetScan(existence_key hash)
+        |> Seq.map (fun v -> v.ToString())
+        |> Array.ofSeq
 
 module Aggregate =
     

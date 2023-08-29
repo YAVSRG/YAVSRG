@@ -16,7 +16,15 @@ module Identify =
             let hash = query_params.["id"].[0].ToUpper()
             match Charts.by_hash hash with
             | Some (chart, song) ->
-                response.ReplyJson({ Found = true; Song = song; Chart = chart; Mirrors = chart.Sources |> Charts.mirrors |> List.ofSeq } : Charts.Identify.Response)
+                response.ReplyJson(
+                    { 
+                        Info = 
+                            Some { 
+                                Song = song
+                                Chart = chart
+                                Mirrors = chart.Sources |> Charts.mirrors |> List.ofSeq 
+                            }
+                    } : Charts.Identify.Response)
             | None ->
-                response.ReplyJson({| Found = false |})
+                response.ReplyJson({ Info = None } : Charts.Identify.Response)
         }
