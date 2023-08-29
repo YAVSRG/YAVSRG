@@ -12,6 +12,7 @@ module API =
     type HttpMethod =
         | GET
         | POST
+        | DELETE
 
     type Config =
         {
@@ -35,14 +36,11 @@ module API =
 
             try
                 match request.Method with
-                | "GET" ->
-                    config.Handle_Request (GET, uri.AbsolutePath, request.Body, query_params, headers, this.Response) |> Async.RunSynchronously
-                    this.SendResponseAsync this.Response
-                | "POST" -> 
-                    config.Handle_Request (POST, uri.AbsolutePath, request.Body, query_params, headers, this.Response) |> Async.RunSynchronously
-                    this.SendResponseAsync this.Response
-                | _ -> this.SendResponseAsync(this.Response.MakeErrorResponse(404, "Not found"))
-                |> ignore
+                | "GET" -> config.Handle_Request (GET, uri.AbsolutePath, request.Body, query_params, headers, this.Response) |> Async.RunSynchronously
+                | "DELETE" -> config.Handle_Request (DELETE, uri.AbsolutePath, request.Body, query_params, headers, this.Response) |> Async.RunSynchronously
+                | "POST" -> config.Handle_Request (POST, uri.AbsolutePath, request.Body, query_params, headers, this.Response) |> Async.RunSynchronously
+                | _ -> this.Response.MakeErrorResponse(404, "Not found") |> ignore
+                this.SendResponseAsync this.Response |> ignore
             with e ->
                 Logging.Critical(sprintf "Error handling HTTP request %O" request, e)
 

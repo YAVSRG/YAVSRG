@@ -11,6 +11,7 @@
     <Compile Include="Client.fs" />
     <Compile Include="Server.fs" />
     <Compile Include="API.fs" />
+    <Compile Include="Requests.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Percyqaz.Common\src\Percyqaz.Common.fsproj" />
+    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

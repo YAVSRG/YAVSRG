@@ -5,6 +5,7 @@ open NetCoreServer
 open Percyqaz.Common
 open Prelude
 open Interlude.Web.Shared.API
+open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 
 module API =
@@ -17,9 +18,14 @@ module API =
 
     do
         add_endpoint Auth.Discord.ROUTE Auth.Discord.handle
+
         add_endpoint Charts.Identify.ROUTE Charts.Identify.handle
+
         add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
+
         add_endpoint Friends.List.ROUTE Friends.List.handle
+        add_endpoint Friends.Add.ROUTE Friends.Add.handle
+        add_endpoint Friends.Remove.ROUTE Friends.Remove.handle
 
     let handle_request(method: HttpMethod, route: string, body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) =
         async {

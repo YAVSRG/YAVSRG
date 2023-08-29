@@ -11,8 +11,6 @@ open Interlude.Web.Server.Domain
 
 module Discord =
 
-    let ROUTE = (GET, "/auth/discord")
-
     let http_client = new HttpClient()
 
     type DiscordOAuthResponse = { access_token: string; token_type: string }

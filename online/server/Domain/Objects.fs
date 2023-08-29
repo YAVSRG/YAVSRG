@@ -42,7 +42,7 @@ module User =
     let key (id: int64) = RedisKey("user:" + id.ToString())
     let escape (query: string) = 
         let regex = System.Text.RegularExpressions.Regex("[^a-zA-Z0-9'\\-_\\s]")
-        regex.Replace(query, "").Replace("'", "\\'").Replace("-", "\\-")
+        regex.Replace(query, "").Replace("'", "\\'").Replace("-", "\\-").Trim()
 
     let create(username, discord_id) =
         { 
@@ -87,12 +87,18 @@ module User =
             )
 
     let by_auth_token(token: string) =
-        let results = ft.Search("idx:users", Query(sprintf "@auth_token:{%s}" (escape token))).Documents
+        let token = escape token
+        if token = "" then None else
+
+        let results = ft.Search("idx:users", Query(sprintf "@auth_token:{%s}" token)).Documents
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
         
     let by_username(username: string) =
-        let results = ft.Search("idx:users", Query(sprintf "@username:{%s}" (escape username))).Documents
+        let username = escape username
+        if username = "" then None else
+
+        let results = ft.Search("idx:users", Query(sprintf "@username:{%s}" username)).Documents
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
 
