@@ -20,7 +20,7 @@ module Utils =
 
     let authorize (header: Map<string, string>) =
         if header.ContainsKey("Authorization") then
-            match User.by_auth_token header.["Authorization"] with
+            match User.by_auth_token (header.["Authorization"].Substring("Bearer ".Length)) with
             | Some (id, user) -> id, user
             | None -> raise AuthorizeFailedException
         else raise NotAuthorizedException

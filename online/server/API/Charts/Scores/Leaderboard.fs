@@ -15,7 +15,7 @@ module Leaderboard =
             let ruleset = query_params.["ruleset"].[0]
 
             if Leaderboard.exists hash ruleset then
-
+            
                 let info = Leaderboard.get_top_20_info hash ruleset
 
                 let scores : Charts.Scores.Leaderboard.Score array =
