@@ -120,19 +120,42 @@ type Chart =
 
 type Charts = Dictionary<ChartHash, Chart>
 
-module DownloadUrl =
+module Archive =
 
-    let into_base64 (str: string) =
-        str
-        |> Text.Encoding.UTF8.GetBytes
-        |> Convert.ToBase64String
+    let make_chart_header (chart: Chart, song: Song) : ChartHeader =
+        {
+            Title = song.Title
+            TitleNative = None
+            Artist = song.FormattedArtists
+            ArtistNative = None
+            Creator = chart.Creators |> String.concat ", "
+            DiffName = chart.DifficultyName
+            Subtitle = chart.Subtitle
+            Source = song.Source
+            Tags = chart.Tags
+            PreviewTime = chart.PreviewTime
+            BackgroundFile = Asset chart.BackgroundFile
+            AudioFile = Asset chart.AudioFile
+            ChartSource =
+                match chart.Sources with
+                | Osu d :: _ -> Origin.Osu (d.BeatmapSetId, d.BeatmapId)
+                | Stepmania d :: _ -> Origin.Stepmania d
+                | _ -> Origin.Unknown
+        }
 
-    let from_base64 (str: string) =
-        str
-        |> Convert.FromBase64String
-        |> Text.Encoding.UTF8.GetString
+    module DownloadUrl =
 
-    let create(str: string) =
-        str.Replace("https://", "").Replace("http://", "") |> into_base64
+        let into_base64 (str: string) =
+            str
+            |> Text.Encoding.UTF8.GetBytes
+            |> Convert.ToBase64String
 
-    let unpickle(str: string) = "https://" + Uri.EscapeUriString(from_base64 str)
+        let from_base64 (str: string) =
+            str
+            |> Convert.FromBase64String
+            |> Text.Encoding.UTF8.GetString
+
+        let create(str: string) =
+            str.Replace("https://", "").Replace("http://", "") |> into_base64
+
+        let unpickle(str: string) = "https://" + Uri.EscapeUriString(from_base64 str)

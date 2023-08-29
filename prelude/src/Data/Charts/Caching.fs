@@ -341,30 +341,9 @@ module Cache =
     open Prelude.Backbeat.Archive
     open Prelude.Data.WebServices
 
-    let private make_chart_header (chart: Chart, song: Song) : ChartHeader =
-        {
-            Title = song.Title
-            TitleNative = None
-            Artist = song.FormattedArtists
-            ArtistNative = None
-            Creator = chart.Creators |> String.concat ", "
-            DiffName = chart.DifficultyName
-            Subtitle = chart.Subtitle
-            Source = song.Source
-            Tags = chart.Tags
-            PreviewTime = chart.PreviewTime
-            BackgroundFile = Asset chart.BackgroundFile
-            AudioFile = Asset chart.AudioFile
-            ChartSource =
-                match chart.Sources with
-                | Osu d :: _ -> Origin.Osu (d.BeatmapSetId, d.BeatmapId)
-                | Stepmania d :: _ -> Origin.Stepmania d
-                | _ -> Origin.Unknown
-        }
-
     let cdn_download (folder: string) (hash: string) (chart: Chart, song: Song) (cache: Cache) =
         async {
-            let header = make_chart_header (chart, song)
+            let header = Archive.make_chart_header (chart, song)
             let yav_path = Path.Combine(getDataPath "Downloads", hash)
             let! success = download_file.RequestAsync("https://cdn.yavsrg.net/" + hash, yav_path, ignore)
             if not success then return false else
