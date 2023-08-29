@@ -5,9 +5,12 @@ open System.Collections.Generic
 open FParsec
 open Percyqaz.Common
 open Prelude.Data
+open Prelude.Gameplay
 open Prelude.Backbeat.Archive
 
 module Charts =
+
+    let rulesets = Dictionary<string, Ruleset>()
 
     let mutable songs = Songs()
 
@@ -34,6 +37,13 @@ module Charts =
             | None -> Logging.Error("Failed to get chart data from Backbeat repo")
             )
         | None -> Logging.Error("Failed to get song data from Backbeat repo")
+        )
+        WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/rulesets/rulesets.json",
+        function
+        | Some (archive : PrefabRulesets.Repo) ->
+            for rs in archive.Rulesets.Values do
+                rulesets.[Ruleset.hash rs] <- rs
+        | None -> Logging.Error("Failed to get ruleset data from Backbeat repo")
         )
         
     // chart search by text
@@ -100,15 +110,15 @@ module Charts =
         match source with
         | Osu data -> sprintf "[osu! Beatmap](https://osu.ppy.sh/beatmapsets/%i#mania/%i)" data.BeatmapSetId data.BeatmapId
         | Stepmania id -> sprintf "[%s](https://etternaonline.com/pack/%i)" packs.Stepmania.[id].Title id
-        | CommunityPack data -> sprintf "[%s](%s)" packs.Community.[data.PackId].Title (DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors.Head)
+        | CommunityPack data -> sprintf "[%s](%s)" packs.Community.[data.PackId].Title (Archive.DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors.Head)
 
     let mirrors (sources: ChartSource list) =
         seq {
             for source in sources do
                 match source with
                 | Osu data -> yield sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.BeatmapSetId
-                | Stepmania id -> yield DownloadUrl.unpickle packs.Stepmania.[id].Mirrors.Head
-                | CommunityPack data -> yield! Seq.map DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors
+                | Stepmania id -> yield Archive.DownloadUrl.unpickle packs.Stepmania.[id].Mirrors.Head
+                | CommunityPack data -> yield! Seq.map Archive.DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors
         }
 
     // find a chart by hash

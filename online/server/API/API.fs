@@ -20,6 +20,8 @@ module API =
         add_endpoint Auth.Discord.ROUTE Auth.Discord.handle
 
         add_endpoint Charts.Identify.ROUTE Charts.Identify.handle
+        add_endpoint Charts.Scores.Save.ROUTE Charts.Scores.Save.handle
+        add_endpoint Charts.Scores.Leaderboard.ROUTE Charts.Scores.Leaderboard.handle
 
         add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
 

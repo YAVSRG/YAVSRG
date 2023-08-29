@@ -179,8 +179,8 @@ module Score =
 
 module Leaderboard =
 
-    let key (hash: string) (ruleset: string) = RedisKey(sprintf "leaderboard:%s:%s" hash ruleset)
-    let existence_key (hash: string) = RedisKey(sprintf "leaderboards:%s" hash)
+    let private key (hash: string) (ruleset: string) = RedisKey(sprintf "leaderboard:%s:%s" hash ruleset)
+    let private existence_key (hash: string) = RedisKey(sprintf "leaderboards:%s" hash)
 
     let add_score (userId: int64) (score: float) (hash: string) (ruleset: string) =
         db.SortedSetAdd(key hash ruleset, userId, score) |> ignore
@@ -208,7 +208,7 @@ module Leaderboard =
         db.SetContains(existence_key hash, ruleset)
 
     let create (hash: string) (ruleset: string) =
-        db.SetAdd(existence_key hash, ruleset) |> ignore
+        db.SetAdd(existence_key (hash.ToUpper()), ruleset) |> ignore
 
     let rulesets_by_hash (hash: string) =
         db.SetScan(existence_key hash)

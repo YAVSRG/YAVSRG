@@ -15,7 +15,7 @@ module Auth =
 module Charts =
 
     /// url parameters:
-    ///  id - hash of chart to get details for
+    ///  chart - hash of chart to get details for
     module Identify =
 
         let ROUTE = (GET, "/charts/identify")
@@ -34,20 +34,47 @@ module Charts =
                 Info: Info option
             }
             
-    /// requires login token as Authorization header
-    module SetScore =
+    module Scores =
 
-        let ROUTE = (POST, "/charts/scores")
+        /// requires login token as Authorization header
+        module Save =
 
-        [<Json.AutoCodec>]
-        type Request =
-            {
-                ChartId: string
-                Replay: string
-                Rate: float32
-                Mods: Prelude.Gameplay.Mods.ModState
-                Timestamp: System.DateTime
-            }
+            let ROUTE = (POST, "/charts/scores")
+
+            [<Json.AutoCodec>]
+            type Request =
+                {
+                    ChartId: string
+                    Replay: string
+                    Rate: float32
+                    Mods: Prelude.Gameplay.Mods.ModState
+                    Timestamp: System.DateTime
+                }
+                
+        /// requires login token as Authorization header
+        /// url parameters:
+        ///  chart - hash of chart to get details for
+        ///  ruleset - id of ruleset to get details for
+        module Leaderboard =
+
+            let ROUTE = (GET, "/charts/scores")
+
+            [<Json.AutoCodec>]
+            type Score =
+                {
+                    Username: string
+                    Rank: int
+                    Replay: string
+                    Rate: float32
+                    Mods: Prelude.Gameplay.Mods.ModState
+                    Timestamp: System.DateTime
+                }
+
+            [<Json.AutoCodec>]
+            type Response =
+                {
+                    Scores: Score array
+                }
 
 module Friends =
 

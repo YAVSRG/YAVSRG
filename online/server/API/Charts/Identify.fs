@@ -9,11 +9,11 @@ module Identify =
 
     let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
         async {
-            if not (query_params.ContainsKey "id") then
-                response.MakeErrorResponse(400, "'id' is required") |> ignore
+            if not (query_params.ContainsKey "chart") then
+                response.MakeErrorResponse(400, "'chart' is required") |> ignore
             else
 
-            let hash = query_params.["id"].[0].ToUpper()
+            let hash = query_params.["chart"].[0].ToUpper()
             match Charts.by_hash hash with
             | Some (chart, song) ->
                 response.ReplyJson(

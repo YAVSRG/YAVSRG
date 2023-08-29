@@ -16,7 +16,8 @@
     <Compile Include="API\Utils.fs" />
     <Compile Include="API\Auth\Discord.fs" />
     <Compile Include="API\Charts\Identify.fs" />
-    <Compile Include="API\Charts\SetScore.fs" />
+    <Compile Include="API\Charts\Scores\Leaderboard.fs" />
+    <Compile Include="API\Charts\Scores\Save.fs" />
     <Compile Include="API\Friends\List.fs" />
     <Compile Include="API\Friends\Add.fs" />
     <Compile Include="API\Friends\Remove.fs" />
