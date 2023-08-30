@@ -44,6 +44,9 @@ module Icons =
     let preview = Feather.eye
     let table = Feather.sidebar
     let watch = Feather.film
+    let empty_scoreboard = Feather.wind
+    let leaderboard = Feather.flag
+    let no_leaderboard = Feather.cloud_off
 
     let options = Feather.settings
     let import = Feather.download

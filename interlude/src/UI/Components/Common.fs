@@ -144,3 +144,14 @@ type WIP() as this =
             Draw.rect (Rect.Box (this.Bounds.Left + w * float32 i, this.Bounds.Top, w, 10.0f)) (if i % 2 = 0 then Color.Yellow else Color.Black)
             Draw.rect (Rect.Box (this.Bounds.Left + w * float32 i, this.Bounds.Bottom - 10.0f, w, 10.0f)) (if i % 2 = 1 then Color.Yellow else Color.Black)
         Text.drawFillB(Style.font, text, this.Bounds.Shrink(20.0f), Colors.text, Alignment.CENTER)
+
+type EmptyState(icon: string, text: string) = 
+    inherit StaticWidget(NodeType.None)
+
+    member val Subtitle = "" with get, set
+
+    override this.Draw() =
+        let color = (!*Palette.LIGHT, !*Palette.DARKER)
+        Text.drawFillB(Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
+        Text.drawFillB(Style.font, text, this.Bounds.Shrink(30.0f, 100.0f).TrimTop(175.0f).SliceTop(60.0f), color, Alignment.CENTER)
+        Text.drawFillB(Style.font, this.Subtitle, this.Bounds.Shrink(30.0f, 100.0f).TrimTop(230.0f).SliceTop(40.0f), color, Alignment.CENTER)

@@ -104,7 +104,7 @@ type LobbyList() =
     override this.Init(parent) =
         this
         |+ container
-        |+ Text((fun _ -> if no_lobbies then L"lobby_list.none" else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Conditional((fun () -> no_lobbies), EmptyState(Icons.multiplayer, L"lobby_list.none", Subtitle = L"lobby_list.none.subtitle"))
         |+ IconButton(L"lobby_list.create", Icons.add, 60.0f, create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(250.0f))
         |+ IconButton(L"lobby_list.refresh", Icons.reset, 60.0f, Lobby.refresh_list, Position = Position.SliceBottom(60.0f).SliceRight(250.0f))
         |* SearchBox(searchtext, (fun () -> container.Filter <- fun l -> l.Name.ToLower().Contains searchtext.Value), Position = Position.SliceTop 60.0f)

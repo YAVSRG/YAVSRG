@@ -215,9 +215,7 @@ type Scoreboard(display: Setting<Display>) as this =
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scrollContainer
         |+ HotkeyAction("scoreboard", fun () -> if flowContainer.Focused then Selection.clear() else flowContainer.Focus())
-        |* Text( (let noLocalScores = L"levelselect.info.scoreboard.empty" in (fun () -> if count = 0 then noLocalScores else "")),
-            Align = Alignment.CENTER,
-            Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.3f %+ 80.0f })
+        |* Conditional((fun () -> count = 0), EmptyState(Icons.empty_scoreboard, L"levelselect.info.scoreboard.empty"))
 
     member this.Refresh() =
         let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""

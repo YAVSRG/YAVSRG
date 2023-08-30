@@ -18,7 +18,7 @@ open Interlude.Features.Gameplay
 type ChartInfo() as this =
     inherit StaticContainer(NodeType.None)
 
-    let display = Setting.simple Display.Local
+    let display = Setting.simple Display.Local |> Setting.trigger (fun _ -> this.Refresh())
     let scoreboard = Scoreboard(display, Position = Position.TrimBottom 120.0f)
     let online = Leaderboard(display, Position = Position.TrimBottom 120.0f)
     let details = Details(display, Position = Position.TrimBottom 120.0f)
@@ -98,8 +98,10 @@ type ChartInfo() as this =
         length <- Chart.format_duration()
         bpm <- Chart.format_bpm()
         notecounts <- Chart.format_notecounts()
-        scoreboard.Refresh()
-        online.Refresh()
+        match display.Value with
+        | Display.Local -> scoreboard.Refresh()
+        | Display.Online -> online.Refresh()
+        | _ -> ()
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
