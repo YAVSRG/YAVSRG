@@ -89,13 +89,14 @@ module API =
         let get<'T>(route: string, callback: 'T option -> unit) =
             queue.Request (
                 fun client -> async {
-                    let! response = client.GetAsync(route) |> Async.AwaitTask
-                    if response.IsSuccessStatusCode then
-                        match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
-                        | Ok res -> Some res
-                        | Error err -> Logging.Error(sprintf "Error getting %s: %s" route err.Message); None
-                    else None
-                    |> callback
+                    try
+                        let! response = client.GetAsync(route) |> Async.AwaitTask
+                        if response.IsSuccessStatusCode then
+                            match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                            | Ok res -> callback (Some res)
+                            | Error err -> Logging.Error(sprintf "Error getting %s: %s" route err.Message); callback None
+                        else callback None
+                    with :? Http.HttpRequestException -> callback None
                 }
                 , ignore
             )
@@ -103,8 +104,10 @@ module API =
         let post<'T>(route: string, request: 'T, callback: bool -> unit) =
             queue.Request (
                 fun client -> async {
-                    let! response = client.PostAsync(route, new Http.StringContent(JSON.ToString request, Text.Encoding.UTF8, "application/json")) |> Async.AwaitTask
-                    callback response.IsSuccessStatusCode
+                    try
+                        let! response = client.PostAsync(route, new Http.StringContent(JSON.ToString request, Text.Encoding.UTF8, "application/json")) |> Async.AwaitTask
+                        callback response.IsSuccessStatusCode
+                    with :? Http.HttpRequestException -> callback false
                 }
                 , ignore
             )
@@ -112,8 +115,10 @@ module API =
         let delete<'T>(route: string, callback: bool -> unit) =
             queue.Request (
                 fun client -> async {
-                    let! response = client.DeleteAsync(route) |> Async.AwaitTask
-                    callback response.IsSuccessStatusCode
+                    try
+                        let! response = client.DeleteAsync(route) |> Async.AwaitTask
+                        callback response.IsSuccessStatusCode
+                    with :? Http.HttpRequestException -> callback false
                 }
                 , ignore
             )
