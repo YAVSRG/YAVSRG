@@ -9,7 +9,13 @@ open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Features
 
-type Details(show_patterns: Setting<bool>) =
+[<RequireQualifiedAccess>]
+type Display =
+    | Local
+    | Online
+    | Details
+
+type Details(display: Setting<Display>) =
     inherit StaticContainer(NodeType.None)
 
     override this.Init(parent: Widget) =
@@ -17,14 +23,14 @@ type Details(show_patterns: Setting<bool>) =
 
         this
         |* StylishButton(
-            (fun () -> show_patterns.Set false),
-            K <| Localisation.localise "levelselect.scoreboard.storage.details",
+            (fun () -> display.Set Display.Local),
+            K <| Localisation.localise "levelselect.info.details.name",
             !%Palette.MAIN_100,
             Hotkey = "scoreboard_storage",
             TiltLeft = false,
             TiltRight = false,
             Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 50.0f })
-            .Tooltip(Tooltip.Info("levelselect.scoreboard.storage", "scoreboard_storage"))
+            .Tooltip(Tooltip.Info("levelselect.info.mode", "scoreboard_storage"))
 
     override this.Draw() =
         base.Draw()

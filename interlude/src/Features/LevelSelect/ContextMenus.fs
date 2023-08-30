@@ -109,6 +109,22 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
                 Enabled = Network.lobby.IsNone)
                 .Pos(340.0f)
                 .Tooltip(Tooltip.Info("score.challenge"))
+            
+            |+ PageButton("score.upload",
+                (fun () ->
+                    Interlude.Web.Shared.API.Client.post("charts/scores", 
+                        ({ 
+                            ChartId = Chart.cacheInfo.Value.Hash
+                            Replay = score.ScoreInfo.replay
+                            Rate = score.ScoreInfo.rate
+                            Mods = score.ScoreInfo.selectedMods
+                            Timestamp = score.ScoreInfo.time
+                        }: Interlude.Web.Shared.Requests.Charts.Scores.Save.Request), printfn "%A")
+                    Menu.Back()),
+                Icon = Icons.debug,
+                Enabled = Network.lobby.IsNone)
+                .Pos(410.0f)
+                .Tooltip(Tooltip.Info("score.upload"))
         )
     override this.Title = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
     override this.OnClose() = ()

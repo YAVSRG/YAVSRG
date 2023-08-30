@@ -18,9 +18,10 @@ open Interlude.Features.Gameplay
 type ChartInfo() as this =
     inherit StaticContainer(NodeType.None)
 
-    let show_patterns = Setting.simple false
-    let scoreboard = Scoreboard(show_patterns, Position = Position.TrimBottom 120.0f)
-    let details = Details(show_patterns, Position = Position.TrimBottom 120.0f)
+    let display = Setting.simple Display.Local
+    let scoreboard = Scoreboard(display, Position = Position.TrimBottom 120.0f)
+    let online = Leaderboard(display, Position = Position.TrimBottom 120.0f)
+    let details = Details(display, Position = Position.TrimBottom 120.0f)
     let mutable length = ""
     let mutable bpm = ""
     let mutable notecounts = ""
@@ -31,8 +32,9 @@ type ChartInfo() as this =
 
     do
         this
-        |+ Conditional((fun () -> not show_patterns.Value), scoreboard)
-        |+ Conditional((fun () -> show_patterns.Value), details)
+        |+ Conditional((fun () -> display.Value = Display.Local), scoreboard)
+        |+ Conditional((fun () -> display.Value = Display.Online), online)
+        |+ Conditional((fun () -> display.Value = Display.Details), details)
 
         |+ Text(
             fun () -> sprintf "%s %.2f" Icons.star (match Chart.rating with None -> 0.0 | Some d -> d.Physical)
@@ -97,6 +99,7 @@ type ChartInfo() as this =
         bpm <- Chart.format_bpm()
         notecounts <- Chart.format_notecounts()
         scoreboard.Refresh()
+        online.Refresh()
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)

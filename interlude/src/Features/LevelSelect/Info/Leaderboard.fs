@@ -17,8 +17,16 @@ open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
+open Interlude.Web.Shared
 
-module Scoreboard =
+module Leaderboard =
+
+    [<RequireQualifiedAccess>]
+    type State =
+        | Loading = 0
+        | NoLeaderboard = 1
+        | EmptyLeaderboard = 2
+        | Loaded = 3
 
     [<RequireQualifiedAccess>]
     type Sort =
@@ -32,7 +40,9 @@ module Scoreboard =
         | CurrentRate = 1
         | CurrentMods = 2
 
-    type ScoreCard(data: ScoreInfoProvider) as this =
+    type LeaderboardScore = Requests.Charts.Scores.Leaderboard.Score
+
+    type LeaderboardCard(score: LeaderboardScore, data: ScoreInfoProvider) as this =
         inherit Frame(NodeType.Button((fun () -> 
             Screen.changeNew 
                 (fun () -> new ScoreScreen(data, ImprovementFlags.Default) :> Screen)
@@ -53,14 +63,14 @@ module Scoreboard =
 
             this
             |+ Text(
-                fun () -> data.Scoring.FormatAccuracy()
+                K (sprintf "#%i %s  •  %s" score.Rank score.Username (data.Scoring.FormatAccuracy()))
                 ,
                 Color = text_color,
                 Align = Alignment.LEFT,
                 Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 0.6f %+ 0.0f })
 
             |+ Text(
-                fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical
+                K (sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical)
                 ,
                 Color = text_subcolor,
                 Align = Alignment.LEFT,
@@ -95,64 +105,73 @@ module Scoreboard =
 
         type private Request =
             {
+                Scores: LeaderboardScore array
                 RulesetId: string
                 Ruleset: Ruleset
-                CurrentChart: Chart
-                ChartSaveData: ChartSaveData option
-                mutable NewBests: Bests option
+                Hash: string
+                Chart: Chart
             }
-            override this.ToString() = "<scoreboard calculation>"
+            override this.ToString() = "<leaderboard calculation>"
 
-        let handle (container: FlowContainer.Vertical<ScoreCard>) =
+        let handle (container: FlowContainer.Vertical<LeaderboardCard>) =
             let worker =
-                { new Async.SwitchServiceSeq<Request, ScoreInfoProvider>() with
+                { new Async.SwitchServiceSeq<Request, LeaderboardScore * ScoreInfoProvider>() with
                     member this.Handle(req: Request) =
-                        match req.ChartSaveData with
-                        | None -> Seq.empty
-                        | Some d ->
-                            sync container.Clear
-                            seq { 
-                                for score in d.Scores do
-                                    let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
-                                    if s.ModStatus = Mods.ModStatus.Ranked then
-                                        req.NewBests <- Some (
-                                            match req.NewBests with
-                                            | None -> Bests.create s
-                                            | Some b -> fst(Bests.update s b))
-                                    yield s
-                            }
-                    member this.Callback(score: ScoreInfoProvider) =
-                        let sc = ScoreCard score
+                        sync container.Clear
+                        seq { 
+                            for score in req.Scores do
+                                let data = ScoreInfoProvider(
+                                    ({ 
+                                        time = score.Timestamp
+                                        replay = score.Replay
+                                        rate = score.Rate
+                                        selectedMods = score.Mods
+                                        layout = options.Playstyles.[req.Chart.Keys - 3]
+                                        keycount = req.Chart.Keys
+                                    } : Score), req.Chart, req.Ruleset)
+                                yield score, data
+                        }
+                    member this.Callback((score: LeaderboardScore, data: ScoreInfoProvider)) =
+                        let sc = LeaderboardCard(score, data)
                         sync(fun () -> container.Add sc)
-                    member this.JobCompleted(req: Request) =
-                        match req.NewBests with
-                        | None -> ()
-                        | Some b ->
-                            sync( fun () -> 
-                                if 
-                                    not (req.ChartSaveData.Value.Bests.ContainsKey req.RulesetId) 
-                                    || b <> req.ChartSaveData.Value.Bests[req.RulesetId] 
-                                then
-                                    LevelSelect.refresh_details()
-                                req.ChartSaveData.Value.Bests[req.RulesetId] <- b
-                            )
+                    member this.JobCompleted(req: Request) = ()
                 }
-            fun () ->
-                worker.Request
-                    {
-                        RulesetId = Content.Rulesets.current_hash
-                        Ruleset = Content.Rulesets.current
-                        CurrentChart = Chart.current.Value
-                        ChartSaveData = Chart.saveData
-                        NewBests = None
-                    }
+            fun (state: Setting<State>) ->
+                state.Set State.Loading
+                let hash, ruleset_id = Chart.cacheInfo.Value.Hash, Content.Rulesets.current_hash
+                API.Client.get<Requests.Charts.Scores.Leaderboard.Response>(sprintf "charts/scores?chart=%s&ruleset=%s" hash ruleset_id,
+                    function
+                    | Some reply ->
+                        if (hash, ruleset_id) <> (Chart.cacheInfo.Value.Hash, Content.Rulesets.current_hash) then () else
 
-open Scoreboard
+                        worker.Request
+                            {
+                                Scores = reply.Scores
+                                RulesetId = Content.Rulesets.current_hash
+                                Ruleset = Content.Rulesets.current
+                                Chart = Chart.current.Value
+                                Hash = Chart.cacheInfo.Value.Hash
+                            }
+                        state.Set (if reply.Scores.Length > 0 then State.Loaded else State.EmptyLeaderboard)
+                    | None -> 
+                        // worker is requested anyway because it ensures any loading scores get swallowed and the scoreboard is cleared
+                        worker.Request
+                            {
+                                Scores = [||]
+                                RulesetId = Content.Rulesets.current_hash
+                                Ruleset = Content.Rulesets.current
+                                Chart = Chart.current.Value
+                                Hash = Chart.cacheInfo.Value.Hash
+                            }
+                        state.Set State.NoLeaderboard
+                )
 
-type Scoreboard(display: Setting<Display>) as this =
+open Leaderboard
+
+type Leaderboard(display: Setting<Display>) as this =
     inherit StaticContainer(NodeType.None)
 
-    let mutable count = -1
+    let state = Setting.simple State.NoLeaderboard
 
     let mutable chart = ""
     let mutable scoring = ""
@@ -160,29 +179,17 @@ type Scoreboard(display: Setting<Display>) as this =
     let filter = Setting.simple Filter.None
     let sort = Setting.map enum int options.ScoreSortMode
 
-    let sorter() : ScoreCard -> ScoreCard -> int =
-        match sort.Value with
-        | Sort.Accuracy -> fun b a -> a.Data.Scoring.Value.CompareTo b.Data.Scoring.Value
-        | Sort.Performance -> fun b a -> a.Data.Physical.CompareTo b.Data.Physical
-        | Sort.Time
-        | _ -> fun b a -> a.Data.ScoreInfo.time.CompareTo b.Data.ScoreInfo.time
-
-    let filterer() : ScoreCard -> bool =
-        match filter.Value with
-        | Filter.CurrentRate -> (fun a -> a.Data.ScoreInfo.rate = rate.Value)
-        | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selectedMods.Value)
-        | _ -> K true
-
-    let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.PADDING * 3.0f, Sort = sorter(), Filter = filterer())
+    let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.PADDING * 3.0f)
     let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.PADDING, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
 
-    let load_scores_async = Loader.handle flowContainer
+    let loader = Loader.handle flowContainer
+    let load_leaderboard_async = fun () -> loader state
 
     do
         this
         |+ StylishButton(
-            (fun () -> display.Set Display.Online),
-            K <| Localisation.localise "levelselect.info.scoreboard.name",
+            (fun () -> display.Set Display.Details),
+            K <| Localisation.localise "levelselect.info.leaderboard.name",
             !%Palette.MAIN_100,
             Hotkey = "scoreboard_storage",
             TiltLeft = false,
@@ -195,11 +202,11 @@ type Scoreboard(display: Setting<Display>) as this =
                 Sort.Performance, L"levelselect.info.scoreboard.sort.performance"
                 Sort.Time, L"levelselect.info.scoreboard.sort.time"
             |],
-            sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
+            sort,
             !%Palette.DARK_100,
             Hotkey = "scoreboard_sort",
             Position = { Left = 0.33f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.66f %- 25.0f; Bottom = 0.0f %+ 50.0f })
-            .Tooltip(Tooltip.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
+            .Tooltip(Tooltip.Info("levelselect.scoreboard.sort", "scoreboard_sort"))
         |+ StylishButton.Selector(
             Icons.filter,
             [|
@@ -207,7 +214,7 @@ type Scoreboard(display: Setting<Display>) as this =
                 Filter.CurrentRate, L"levelselect.info.scoreboard.filter.currentrate"
                 Filter.CurrentMods, L"levelselect.info.scoreboard.filter.currentmods"
             |],
-            filter |> Setting.trigger (fun _ -> this.Refresh()),
+            filter,
             !%Palette.MAIN_100,
             Hotkey = "scoreboard_filter",
             TiltRight = false,
@@ -215,16 +222,13 @@ type Scoreboard(display: Setting<Display>) as this =
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scrollContainer
         |+ HotkeyAction("scoreboard", fun () -> if flowContainer.Focused then Selection.clear() else flowContainer.Focus())
-        |* Text( (let noLocalScores = L"levelselect.info.scoreboard.empty" in (fun () -> if count = 0 then noLocalScores else "")),
+        |* Text( (let noLocalScores = L"levelselect.leaderboard.empty" in (fun () -> if state.Value = State.EmptyLeaderboard then noLocalScores else "")),
             Align = Alignment.CENTER,
             Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.3f %+ 80.0f })
 
     member this.Refresh() =
         let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""
-        if (match Chart.saveData with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
+        if h <> chart || scoring <> Content.Rulesets.current_hash then
             chart <- h
-            load_scores_async()
-        elif scoring <> Content.Rulesets.current_hash then
-            flowContainer.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
             scoring <- Content.Rulesets.current_hash
-        flowContainer.Filter <- filterer()
+            load_leaderboard_async()
