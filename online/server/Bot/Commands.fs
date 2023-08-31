@@ -142,22 +142,26 @@ module Commands =
                         |> Option.defaultValue Badge.DEFAULT_COLOR
                         |> Drawing.Color.FromArgb
                         |> Color.op_Explicit
-                    EmbedBuilder(Title = userInfo.Username, Footer = EmbedFooterBuilder(Text = (String.concat ", " userInfo.Badges).Replace("-", " ").ToUpper()))
-                        .WithColor(color)
-                        .WithFields(
+                    let embed = 
+                        EmbedBuilder(Title = userInfo.Username, Footer = EmbedFooterBuilder(Text = (String.concat ", " userInfo.Badges).Replace("-", " ").ToUpper()))
+                            .WithColor(color)
+
+                    if recent_scores.Length > 0 then
+                        embed.WithFields(
                             EmbedFieldBuilder(Name = "Recent scores", IsInline = true)
                                 .WithValue(
                                     recent_scores
-                                    |> Array.map(fun s -> match Charts.by_hash s.ChartId with Some (_, song) -> song.Title | None -> "???" |> sprintf "`%-30s`")
+                                    |> Array.map(fun s -> match Charts.by_hash s.ChartId with Some (_, song) -> song.Title | None -> "???" |> sprintf "`%-20s`")
                                     |> String.concat "\n"
                                 ),
                             EmbedFieldBuilder(Name = "..", IsInline = true)
                                 .WithValue(
                                     recent_scores
-                                    |> Array.map(fun s -> sprintf "`%10.2f%%` `%10s` `%10s` `%10s`" (s.Score * 100.0) (Charts.rulesets.[s.RulesetId].LampName s.Lamp) (formatMods s) (formatTimeOffset s.Timestamp))
+                                    |> Array.map(fun s -> sprintf "`%6.2f%%` `%6s` `%6s` `%8s`" (s.Score * 100.0) (Charts.rulesets.[s.RulesetId].LampName s.Lamp) (formatMods s) (formatTimeOffset s.Timestamp))
                                     |> String.concat "\n"
                                 )
                             )
+                    else embed
                 do! reply_embed (embed.Build())
 
             | "help" ->
