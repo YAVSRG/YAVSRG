@@ -209,7 +209,7 @@ type Leaderboard(display: Setting<Display>) as this =
             !%Palette.DARK_100,
             Hotkey = "scoreboard_sort",
             Position = { Left = 0.33f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.66f %- 25.0f; Bottom = 0.0f %+ 50.0f })
-            .Tooltip(Tooltip.Info("levelselect.scoreboard.sort", "scoreboard_sort"))
+            .Tooltip(Tooltip.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
         |+ StylishButton.Selector(
             Icons.filter,
             [|
