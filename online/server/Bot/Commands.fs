@@ -14,7 +14,7 @@ module Commands =
         if Seq.forall (fun (c: char) -> Seq.contains c Users.VALID_USERNAME_CHARACTERS) name then User.by_username name else None
 
     // Requires user to exist but no particular permissions
-    let user_dispatch (userId: int64, userInfo: User) (context: SocketMessage) (command: string) (args: string list) =
+    let user_dispatch (client: DiscordSocketClient) (userId: int64, userInfo: User) (context: SocketMessage) (command: string) (args: string list) =
         task {
             let reply msg =
                 task { 
@@ -100,12 +100,74 @@ module Commands =
                         Friends.remove_friend(userId, id)
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
+            | "pc"
+            | "profilecolor" ->
+                match args with
+                | [] -> do! reply "Enter a badge name, for example $profilecolor early-tester"
+                | badge :: [] ->
+                    if userInfo.Badges.Contains badge then
+                        let color = (Badge.badge_color badge).[0]
+                        User.save(userId, { userInfo with Color = Some color })
+                        do! reply_emoji ":white_check_mark:"
+                    else do! reply "You don't have this badge."
+                | badge :: choice :: _ ->
+                    if userInfo.Badges.Contains badge then
+                        let colors = Badge.badge_color badge
+                        match System.Int32.TryParse(choice) with
+                        | true, c when c > 0 && c <= colors.Length ->
+                            User.save(userId, { userInfo with Color = Some colors.[c - 1] })
+                            do! reply_emoji ":white_check_mark:"
+                        | _ -> do! reply (sprintf "The options for this badge are 1-%i" colors.Length)
+                    else do! reply "You don't have this badge."
+            | "p"
+            | "profile" ->
+                
+                let now = DateTimeOffset.UtcNow
+                let formatTimeOffset (ts: int64) =
+                   let ts: TimeSpan = now - DateTimeOffset.FromUnixTimeMilliseconds(ts)
+                   if ts.TotalDays > 365.0 then sprintf "%.0fy ago" (ts.TotalDays / 365.0)
+                   elif ts.TotalDays > 30.0 then sprintf "%.0fmo ago" (ts.TotalDays / 30.0)
+                   elif ts.TotalDays > 7.0 then sprintf "%.0fw ago" (ts.TotalDays / 7.0)
+                   elif ts.TotalDays > 1.0 then sprintf "%.0fd ago" ts.TotalDays
+                   elif ts.TotalHours > 1.0 then sprintf "%.0fh ago" ts.TotalHours
+                   elif ts.TotalMinutes > 5.0 then sprintf "%.0fm ago" ts.TotalMinutes
+                   else "Just now"
+                let formatMods (score: Score) =
+                    if score.Mods.IsEmpty then sprintf "%.2fx" score.Rate else sprintf "%.2fx*" score.Rate
 
+                let recent_scores = Score.get_recent userId
+                let embed = 
+                    let color = 
+                        userInfo.Color
+                        |> Option.defaultValue Badge.DEFAULT_COLOR
+                        |> Drawing.Color.FromArgb
+                        |> Color.op_Explicit
+                    EmbedBuilder(Title = userInfo.Username, Footer = EmbedFooterBuilder(Text = (String.concat ", " userInfo.Badges).Replace("-", " ").ToUpper()))
+                        .WithColor(color)
+                        .WithFields(
+                            EmbedFieldBuilder(Name = "Recent scores", IsInline = true)
+                                .WithValue(
+                                    recent_scores
+                                    |> Array.map(fun s -> match Charts.by_hash s.ChartId with Some (_, song) -> song.Title | None -> "???" |> sprintf "`%-30s`")
+                                    |> String.concat "\n"
+                                ),
+                            EmbedFieldBuilder(Name = "..", IsInline = true)
+                                .WithValue(
+                                    recent_scores
+                                    |> Array.map(fun s -> sprintf "`%10.2f%%` `%10s` `%10s` `%10s`" (s.Score * 100.0) (Charts.rulesets.[s.RulesetId].LampName s.Lamp) (formatTimeOffset s.Timestamp) (formatMods s))
+                                    |> String.concat "\n"
+                                )
+                            )
+                do! reply_embed (embed.Build())
+
+            | "help" ->
+                do! reply "Available commands: $search, $friends, $friend, $unfriend, $profilecolor, $profile"
+                    
             | _ -> ()
         }
 
     // Requires user to exist, with the developer role
-    let admin_dispatch (userId: int64, userInfo: User) (context: SocketMessage) (command: string) (args: string list) =
+    let admin_dispatch (client: DiscordSocketClient) (userId: int64, userInfo: User) (context: SocketMessage) (command: string) (args: string list) =
         task {
             let reply msg =
                 task { 
@@ -221,10 +283,14 @@ module Commands =
 
             | "addleaderboard" ->
                 match args with
-                | []
-                | _ :: [] -> do! reply "Enter a hash and ruleset, for example: $addleaderboard 1467CD6DEB4A3B87FA58FAB4F2398BE9AD7B0017031C511C549D3EF28FFB58D3$SC(J4)548E5A"
-                | hash :: ruleset :: _ ->
-                    Leaderboard.create hash ruleset
+                | [] -> do! reply "Enter a hash and ruleset, for example: $addleaderboard 1467CD6DEB4A3B87FA58FAB4F2398BE9AD7B0017031C511C549D3EF28FFB58D3"
+                | hash :: _ ->
+                    match Charts.by_hash hash with
+                    | None -> do! reply "Chart not found."
+                    | Some (chart, song) ->
+                    Leaderboard.create hash "SC(J4)548E5A"
+                    let msg = sprintf "## :checkered_flag: Leaderboard created:\n%s [%s]" song.FormattedTitle chart.DifficultyName
+                    let! _ = (client.GetChannel(FEED_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(msg)
                     do! reply_emoji ":white_check_mark:"
 
             | _ -> ()

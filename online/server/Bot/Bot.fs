@@ -10,6 +10,9 @@ open Interlude.Web.Server.Domain
 
 module Bot =
 
+    let config = DiscordSocketConfig(GatewayIntents = (GatewayIntents.MessageContent ||| GatewayIntents.AllUnprivileged ^^^ GatewayIntents.GuildInvites ^^^ GatewayIntents.GuildScheduledEvents))
+    let client = new DiscordSocketClient(config)
+
     let on_log(msg: LogMessage) = task { Logging.Debug("[BOT] " + msg.Message) }
 
     let on_message(message: SocketMessage) = 
@@ -23,6 +26,7 @@ module Bot =
                     try
                         do! 
                             Commands.user_dispatch
+                                client
                                 (id, user)
                                 message
                                 (cmd.[0].ToLower())
@@ -53,6 +57,7 @@ module Bot =
                     try
                         do! 
                             Commands.admin_dispatch
+                                client
                                 (id, user)
                                 message
                                 (cmd.[0].ToLower())
@@ -78,8 +83,6 @@ module Bot =
 
     let start() =
         try
-            let config = DiscordSocketConfig(GatewayIntents = (GatewayIntents.MessageContent ||| GatewayIntents.AllUnprivileged ^^^ GatewayIntents.GuildInvites ^^^ GatewayIntents.GuildScheduledEvents))
-            use client = new DiscordSocketClient(config)
 
             let mutable startup_message_shown = false
         
@@ -91,7 +94,7 @@ module Bot =
                     return ()
                 })
             client.add_MessageReceived(fun msg -> on_message msg)
-            client.add_Log(fun log -> on_log log)
+            //client.add_Log(fun log -> on_log log)
             client.add_InteractionCreated(fun i -> on_interaction_created i)
         
             client.LoginAsync(TokenType.Bot, SECRETS.DiscordBotToken)

@@ -5,7 +5,6 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
-open Prelude.Gameplay.Mods
 open Prelude.Backbeat.Archive
 open Prelude.Charts.Formats.Interlude
 open Interlude.Web.Shared.Requests
@@ -38,40 +37,67 @@ module Save =
                 }
         }
 
+    let SHORT_TERM_RULESET_LIST = [|"SC(J4)548E5A"|]
+
     let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
         async {
-            let userId, _ = authorize headers
+            let userId, user = authorize headers
 
             match JSON.FromString body with
-            | Error e -> Logging.Error(sprintf "Error parsing body for api/charts/scores: %s" e.Message)
+            | Error e -> 
+                Logging.Error(sprintf "Error parsing body for api/charts/scores: %s" e.Message)
+                response.MakeErrorResponse(400) |> ignore
             | Ok (request : Charts.Scores.Save.Request) ->
+            
+            // todo: basic clamp on how much data can be sent in one request (about 10kb?)
 
             let hash = request.ChartId.ToUpper()
 
-            let existing_leaderboard_rulesets = Leaderboard.rulesets_by_hash hash
+            match Charts.by_hash hash with
+            | None -> response.ReplyJson(false) // doesn't exist in database
+            | Some (chart_info, song) ->
 
-            if existing_leaderboard_rulesets.Length > 0 then
-            
-                match! fetch_chart.RequestAsync(hash) with
-                | None -> failwithf "Couldn't get note data for chart %s, even though it has leaderboards" hash
-                | Some chart ->
+            match! fetch_chart.RequestAsync(hash) with
+            | None -> failwithf "Couldn't get note data for chart %s" hash
+            | Some chart ->
 
-                // todo: basic clamp on how much data can be sent in one request (about 10kb?)
+            match Mods.check request.Mods with
+            | Error _ -> response.MakeErrorResponse(400) |> ignore
+            | Ok status when status >= Mods.ModStatus.Unstored -> response.ReplyJson(false)
+            | Ok _ ->
 
-                let score = Score.create (request.Replay, request.Rate, request.Mods, request.Timestamp)
-                Score.save userId hash score
+            let replay = Replay.decompress request.Replay
+            let modChart = Mods.getModChart request.Mods chart
+            let rate = System.MathF.Round(request.Rate, 2)
 
-                for ruleset_id in existing_leaderboard_rulesets do
+            for ruleset_id in SHORT_TERM_RULESET_LIST do
+                let ruleset = Charts.rulesets.[ruleset_id]
 
-                    // todo: zip bomb shielding
-                    let replay = Replay.decompress score.Replay
-                    let modChart = getModChart score.Mods chart
-                    let scoring = Metrics.createScoreMetric Charts.rulesets.[ruleset_id] chart.Keys (StoredReplayProvider replay) modChart.Notes score.Rate
-                    scoring.Update Time.infinity
-                    let score = scoring.Value
+                let scoring = Metrics.createScoreMetric ruleset chart.Keys (StoredReplayProvider replay) modChart.Notes rate
+                scoring.Update Time.infinity
 
-                    Leaderboard.add_score userId score hash ruleset_id
+                let score : Score = 
+                    {
+                        UserId = userId
+                        ChartId = hash
+                        RulesetId = ruleset_id
+                        Score = scoring.Value
+                        Grade = Grade.calculate ruleset.Grading.Grades scoring.State
+                        Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
+                        Rate = rate
+                        Mods = request.Mods
+                        Timestamp = (System.DateTimeOffset.op_Implicit request.Timestamp).ToUnixTimeMilliseconds()
+                    }
 
-                response.ReplyJson(true)
-            else response.ReplyJson(false)
+                let score_id = Score.save_new score
+                Logging.Info(sprintf "Saved score #%i - %.2f%% on %s by %s" score_id (score.Score * 100.0) song.FormattedTitle user.Username)
+
+                if rate >= 1.0f then
+                    match Leaderboard.Replay.create (request.Replay, rate, request.Mods, request.Timestamp) with
+                    | Ok replay ->
+                        Leaderboard.Replay.save hash ruleset_id userId replay
+                        Leaderboard.add_score hash ruleset_id userId score.Score
+                    | Error _ -> ()
+
+            response.ReplyJson(true)
         }

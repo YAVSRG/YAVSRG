@@ -104,7 +104,7 @@ module User =
 
     // todo: a pagination system when there are >100 users
     let all() =
-        ft.Search("idx:users", Query("*").Limit(0, 100)).Documents
+        ft.Search("idx:users", Query("*").SetSortBy("date_signed_up", false).Limit(0, 100)).Documents
         |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
 
 module Friends =
@@ -130,59 +130,92 @@ open Prelude.Gameplay
 
 type Score =
     {
-        Replay: string
+        UserId: int64
+        ChartId: string
+        RulesetId: string
+        Score: float
+        Grade: int
+        Lamp: int
         Rate: float32
         Mods: Mods.ModState
         Timestamp: int64
-        UploadTimestamp: int64
     }
 
 module Score =
 
-    let key (userId: int64) (hash: string) = RedisKey(sprintf "score:%i:%s" userId hash)
+    let private key (id: int64) = RedisKey("score:" + id.ToString())
 
-    let create (replay: string, rate: float32, mods: Mods.ModState, timestamp: DateTime) =
-        let rate = MathF.Round(rate, 2)
-        if rate < 1.0f then failwith "This score is unranked because it was played at a lower rate than 1.0x"
-        match Mods.check mods with
-        | Ok Mods.ModStatus.Ranked ->
-            {
-                Replay = replay
-                Rate = rate
-                Mods = mods
-                Timestamp = (DateTimeOffset.op_Implicit timestamp).ToUnixTimeMilliseconds()
-                UploadTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-            }
-        | Ok _ -> failwith "This score is unranked because of mods, cannot be stored online"
-        | Error reason -> failwithf "Mods are invalid: %s" reason
+    let private save(id, score: Score) =
+        json.Set(key id, "$", score) |> ignore
+    
+    let save_new(score: Score) : int64 =
+        let new_id = db.StringIncrement("count:scores", 1L)
+        save(new_id, score)
+        new_id
 
-    let save (userId: int64) (hash: string) (score: Score) =
-        json.Set(key userId hash, "$", score) |> ignore
+    let get_recent (userId: int64) =
+        let results = ft.Search("idx:scores", Query(sprintf "@user_id:[%i %i]" userId userId).SetSortBy("timestamp", false).Limit(0, 10)).Documents
+        results
+        |> Seq.map (fun d -> Text.Json.JsonSerializer.Deserialize<Score>(d.Item "json"))
+        |> Array.ofSeq
 
-    let get (userId: int64) (hash: string) =
-        let result = json.Get(key userId hash, [|"$"|])
-        if result.IsNull then None 
-        else 
-            let s : string = RedisResult.op_Explicit result
-            Some <| Text.Json.JsonSerializer.Deserialize<Score>(s)
+module Leaderboard =
 
-    let get_chart_scores (userIds: int64 array) (hash: string) =
-        if userIds.Length = 0 then [||] else
+    type Replay =
+        {
+            Replay: string
+            Rate: float32
+            Mods: Mods.ModState
+            Timestamp: int64
+            UploadTimestamp: int64
+        }
 
-        json.MGet(userIds |> Array.map (fun id -> key id hash), "$")
-        |> Array.map (fun result -> 
+    module Replay =
+
+        let key (hash: string) (ruleset: string) (userId: int64) = RedisKey(sprintf "leaderboard.score:%s:%s:%i" hash ruleset userId)
+
+        let create (replay: string, rate: float32, mods: Mods.ModState, timestamp: DateTime) =
+            let rate = MathF.Round(rate, 2)
+            try
+                if rate < 1.0f then failwith "This score is unranked because it was played at a lower rate than 1.0x"
+                match Mods.check mods with
+                | Ok Mods.ModStatus.Ranked ->
+                    Ok {
+                        Replay = replay
+                        Rate = rate
+                        Mods = mods
+                        Timestamp = (DateTimeOffset.op_Implicit timestamp).ToUnixTimeMilliseconds()
+                        UploadTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    }
+                | Ok _ -> failwith "This score is unranked because of mods, cannot be stored online"
+                | Error reason -> failwithf "Mods are invalid: %s" reason
+            with err -> Error err.Message
+
+        let save (hash: string) (ruleset: string) (userId: int64) (score: Replay) =
+            json.Set(key hash ruleset userId, "$", score) |> ignore
+
+        let get (hash: string) (ruleset: string) (userId: int64) =
+            let result = json.Get(key hash ruleset userId, [|"$"|])
             if result.IsNull then None 
             else 
                 let s : string = RedisResult.op_Explicit result
-                Some <| Text.Json.JsonSerializer.Deserialize<Score array>(s).[0]
-            )
+                Some <| Text.Json.JsonSerializer.Deserialize<Replay>(s)
 
-module Leaderboard =
+        let get_chart_scores (hash: string) (ruleset: string) (userIds: int64 array) =
+            if userIds.Length = 0 then [||] else
+
+            json.MGet(userIds |> Array.map (fun id -> key hash ruleset id), "$")
+            |> Array.map (fun result -> 
+                if result.IsNull then None 
+                else 
+                    let s : string = RedisResult.op_Explicit result
+                    Some <| Text.Json.JsonSerializer.Deserialize<Replay array>(s).[0]
+                )
 
     let private key (hash: string) (ruleset: string) = RedisKey(sprintf "leaderboard:%s:%s" hash ruleset)
     let private existence_key (hash: string) = RedisKey(sprintf "leaderboards:%s" hash)
 
-    let add_score (userId: int64) (score: float) (hash: string) (ruleset: string) =
+    let add_score (hash: string) (ruleset: string) (userId: int64) (score: float) =
         db.SortedSetAdd(key hash ruleset, userId, score) |> ignore
 
     let get_top_20_ids (hash: string) (ruleset: string) =
@@ -198,7 +231,7 @@ module Leaderboard =
             |> Array.map fst
         Array.zip
             (User.by_ids userIds |> Array.map (Option.map (fun x -> x.Username)))
-            (Score.get_chart_scores userIds hash)
+            (Replay.get_chart_scores hash ruleset userIds)
 
     let position (userId: int64) (hash: string) (ruleset: string) =
         let result = db.SortedSetRank(key hash ruleset, userId, Order.Descending)
@@ -269,3 +302,24 @@ module Migrations =
 
             db.StringIncrement("migration", 1L) |> ignore
             Logging.Debug("Migration 1 OK")
+
+        if migration < 2L then
+            Logging.Debug("Performing migration 2")
+
+            ft.Create(
+                "idx:scores",
+                FTCreateParams()
+                    .On(IndexDataType.JSON)
+                    .Prefix("score:"),
+                Schema()
+                    .AddTagField(new FieldName("$.RulesetId", "ruleset_id"), false)
+                    .AddNumericField(new FieldName("$.UserId", "user_id"), false)
+                    .AddNumericField(FieldName("$.Timestamp", "timestamp"), true)
+                    .AddNumericField(FieldName("$.Score", "score"), true)
+                    .AddNumericField(FieldName("$.Grade", "grade"), true)
+                    .AddNumericField(FieldName("$.Lamp", "lamp"), true)
+                    .AddNumericField(FieldName("$.Rate", "rate"), true)
+            ) |> ignore
+
+            db.StringIncrement("migration", 2L) |> ignore
+            Logging.Debug("Migration 2 OK")
