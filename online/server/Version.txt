@@ -1,1 +1,1 @@
-﻿Version bump for the hashening
+﻿Added friends, profile colours, score tracking, leaderboards

@@ -154,7 +154,7 @@ module Commands =
                             EmbedFieldBuilder(Name = "..", IsInline = true)
                                 .WithValue(
                                     recent_scores
-                                    |> Array.map(fun s -> sprintf "`%10.2f%%` `%10s` `%10s` `%10s`" (s.Score * 100.0) (Charts.rulesets.[s.RulesetId].LampName s.Lamp) (formatTimeOffset s.Timestamp) (formatMods s))
+                                    |> Array.map(fun s -> sprintf "`%10.2f%%` `%10s` `%10s` `%10s`" (s.Score * 100.0) (Charts.rulesets.[s.RulesetId].LampName s.Lamp) (formatMods s) (formatTimeOffset s.Timestamp))
                                     |> String.concat "\n"
                                 )
                             )
