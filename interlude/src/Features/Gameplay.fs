@@ -21,6 +21,7 @@ open Interlude
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Online
+open Interlude.Web.Shared
 
 module Gameplay =
 
@@ -173,7 +174,15 @@ module Gameplay =
            (options.SaveScoreIfUnderPace.Value || pacemakerMet)
         then
             if data.ModStatus = ModStatus.Ranked then
-                // todo: score uploading goes here when online added
+                if Network.status = Network.Status.LoggedIn then
+                    API.Client.post("charts/scores", 
+                        ({ 
+                            ChartId = Chart.cacheInfo.Value.Hash
+                            Replay = data.ScoreInfo.replay
+                            Rate = data.ScoreInfo.rate
+                            Mods = data.ScoreInfo.selectedMods
+                            Timestamp = data.ScoreInfo.time
+                        }: Requests.Charts.Scores.Save.Request), ignore)
                 Scores.saveScoreWithPbs Chart.saveData.Value Content.Rulesets.current_hash data
             else
                 Scores.saveScore Chart.saveData.Value data
