@@ -71,8 +71,8 @@ jobs:
       with:
         webhook-url: ${{ secrets.WEBHOOK_URL }}
         content: |
-          **New update released!**
+          **New update released!** <@&1147134372504408095>
           ```
           ${{ steps.read_file.outputs.contents }}
           ```
-          Update ingame or download Interlude here: <https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip>
+          Update ingame or [download Interlude from GitHub](https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip)
