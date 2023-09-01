@@ -196,7 +196,7 @@ module Collect =
 
     let download_pack(id: StepmaniaPackId) =
         async {
-            let mirrors = packs.Stepmania.[id].Mirrors |> List.map DownloadUrl.unpickle
+            let mirrors = packs.Stepmania.[id].Mirrors |> List.map Archive.DownloadUrl.unpickle
             let zip = Path.Combine(ARCHIVE_PATH, "tmp", string id + ".zip")
             let folder = Path.Combine(ARCHIVE_PATH, "tmp", string id)
             match! try_download_mirrors(mirrors, zip) with
@@ -213,7 +213,7 @@ module Collect =
         
     let download_community_pack(id: CommunityPackId) =
         async {
-            let mirrors = packs.Community.[id].Mirrors |> List.map DownloadUrl.unpickle
+            let mirrors = packs.Community.[id].Mirrors |> List.map Archive.DownloadUrl.unpickle
             let zip = Path.Combine(ARCHIVE_PATH, "tmp", "c-" + string id + ".zip")
             let folder = Path.Combine(ARCHIVE_PATH, "tmp", "c-" + string id)
             match! try_download_mirrors(mirrors, zip) with

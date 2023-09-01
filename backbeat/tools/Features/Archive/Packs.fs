@@ -36,7 +36,7 @@ module Packs =
                     packs.Stepmania.Add(p.id,
                             {
                                 Title = p.attributes.name
-                                Mirrors = [DownloadUrl.create p.attributes.download; DownloadUrl.create p.attributes.mirror] |> List.distinct
+                                Mirrors = [Archive.DownloadUrl.create p.attributes.download; Archive.DownloadUrl.create p.attributes.mirror] |> List.distinct
                                 Size = p.attributes.size
                             })
         }
