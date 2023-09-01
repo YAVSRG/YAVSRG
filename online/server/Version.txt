@@ -1,1 +1,1 @@
-﻿Added friends, profile colours, score tracking, leaderboards + HOTFIX
+﻿Can now see profiles of other people
