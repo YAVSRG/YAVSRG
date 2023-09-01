@@ -37,8 +37,6 @@ module Save =
                 }
         }
 
-    let SHORT_TERM_RULESET_LIST = [|"SC(J4)548E5A"|]
-
     let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
         async {
             let userId, user = authorize headers
@@ -70,7 +68,7 @@ module Save =
             let modChart = Mods.getModChart request.Mods chart
             let rate = System.MathF.Round(request.Rate, 2)
 
-            for ruleset_id in SHORT_TERM_RULESET_LIST do
+            for ruleset_id in Score.SHORT_TERM_RULESET_LIST do
                 let ruleset = Charts.rulesets.[ruleset_id]
 
                 let scoring = Metrics.createScoreMetric ruleset chart.Keys (StoredReplayProvider replay) modChart.Notes rate
@@ -92,7 +90,7 @@ module Save =
                 let score_id = Score.save_new score
                 Logging.Info(sprintf "Saved score #%i - %.2f%% on %s by %s" score_id (score.Score * 100.0) song.FormattedTitle user.Username)
 
-                if rate >= 1.0f then
+                if rate >= 1.0f && (match Leaderboard.score userId hash ruleset_id with Some s -> s < score.Score | None -> true) then
                     match Leaderboard.Replay.create (request.Replay, rate, request.Mods, request.Timestamp) with
                     | Ok replay ->
                         Leaderboard.Replay.save hash ruleset_id userId replay

@@ -14,6 +14,11 @@ module Leaderboard =
             let hash = query_params.["chart"].[0].ToUpper()
             let ruleset = query_params.["ruleset"].[0]
 
+            let ruleset = 
+                if ruleset <> Score.SHORT_TERM_RULESET_LIST.[0] && not (Leaderboard.exists hash ruleset) then
+                    Score.SHORT_TERM_RULESET_LIST.[0]
+                else ruleset
+
             if Leaderboard.exists hash ruleset then
             
                 let info = Leaderboard.get_top_20_info hash ruleset
@@ -35,7 +40,7 @@ module Leaderboard =
                         | _ -> None
                         )
 
-                response.ReplyJson({ Scores = scores } : Charts.Scores.Leaderboard.Response)
+                response.ReplyJson({ Scores = scores; RulesetId = ruleset } : Charts.Scores.Leaderboard.Response)
 
             else response.MakeErrorResponse(404) |> ignore
         }

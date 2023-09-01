@@ -142,6 +142,8 @@ type Score =
     }
 
 module Score =
+    
+    let SHORT_TERM_RULESET_LIST = [|"SC(J4)548E5A"|]
 
     let private key (id: int64) = RedisKey("score:" + id.ToString())
 
@@ -235,6 +237,10 @@ module Leaderboard =
 
     let position (userId: int64) (hash: string) (ruleset: string) =
         let result = db.SortedSetRank(key hash ruleset, userId, Order.Descending)
+        if result.HasValue then Some result.Value else None
+
+    let score (userId: int64) (hash: string) (ruleset: string) =
+        let result = db.SortedSetScore(key hash ruleset, userId)
         if result.HasValue then Some result.Value else None
 
     let exists (hash: string) (ruleset: string) =

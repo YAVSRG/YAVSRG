@@ -77,6 +77,7 @@ module Charts =
             [<Json.AutoCodec>]
             type Response =
                 {
+                    RulesetId: string
                     Scores: Score array
                 }
 
