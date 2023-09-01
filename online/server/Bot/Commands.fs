@@ -121,48 +121,56 @@ module Commands =
                     else do! reply "You don't have this badge."
             | "p"
             | "profile" ->
-                
-                let now = DateTimeOffset.UtcNow
-                let formatTimeOffset (ts: int64) =
-                   let ts: TimeSpan = now - DateTimeOffset.FromUnixTimeMilliseconds(ts)
-                   if ts.TotalDays > 365.0 then sprintf "%.0fy ago" (ts.TotalDays / 365.0)
-                   elif ts.TotalDays > 30.0 then sprintf "%.0fmo ago" (ts.TotalDays / 30.0)
-                   elif ts.TotalDays > 7.0 then sprintf "%.0fw ago" (ts.TotalDays / 7.0)
-                   elif ts.TotalDays > 1.0 then sprintf "%.0fd ago" ts.TotalDays
-                   elif ts.TotalHours > 1.0 then sprintf "%.0fh ago" ts.TotalHours
-                   elif ts.TotalMinutes > 5.0 then sprintf "%.0fm ago" ts.TotalMinutes
-                   else "Just now"
-                let formatMods (score: Score) =
-                    if score.Mods.IsEmpty then sprintf "%.2fx" score.Rate else sprintf "%.2fx*" score.Rate
+                let profile (userId, userInfo) =
+                    task {
+                        let now = DateTimeOffset.UtcNow
+                        let formatTimeOffset (ts: int64) =
+                           let ts: TimeSpan = now - DateTimeOffset.FromUnixTimeMilliseconds(ts)
+                           if ts.TotalDays > 365.0 then sprintf "%.0fy ago" (ts.TotalDays / 365.0)
+                           elif ts.TotalDays > 30.0 then sprintf "%.0fmo ago" (ts.TotalDays / 30.0)
+                           elif ts.TotalDays > 7.0 then sprintf "%.0fw ago" (ts.TotalDays / 7.0)
+                           elif ts.TotalDays > 1.0 then sprintf "%.0fd ago" ts.TotalDays
+                           elif ts.TotalHours > 1.0 then sprintf "%.0fh ago" ts.TotalHours
+                           elif ts.TotalMinutes > 5.0 then sprintf "%.0fm ago" ts.TotalMinutes
+                           else "Just now"
+                        let formatMods (score: Score) =
+                            if score.Mods.IsEmpty then sprintf "%.2fx" score.Rate else sprintf "%.2fx*" score.Rate
 
-                let recent_scores = Score.get_recent userId
-                let embed = 
-                    let color = 
-                        userInfo.Color
-                        |> Option.defaultValue Badge.DEFAULT_COLOR
-                        |> Drawing.Color.FromArgb
-                        |> Color.op_Explicit
-                    let embed = 
-                        EmbedBuilder(Title = userInfo.Username, Footer = EmbedFooterBuilder(Text = (String.concat ", " userInfo.Badges).Replace("-", " ").ToUpper()))
-                            .WithColor(color)
+                        let recent_scores = Score.get_recent userId
+                        let embed = 
+                            let color = 
+                                userInfo.Color
+                                |> Option.defaultValue Badge.DEFAULT_COLOR
+                                |> Drawing.Color.FromArgb
+                                |> Color.op_Explicit
+                            let embed = 
+                                EmbedBuilder(Title = userInfo.Username, Footer = EmbedFooterBuilder(Text = (String.concat ", " userInfo.Badges).Replace("-", " ").ToUpper()))
+                                    .WithColor(color)
 
-                    if recent_scores.Length > 0 then
-                        embed.WithFields(
-                            EmbedFieldBuilder(Name = "Recent scores", IsInline = true)
-                                .WithValue(
-                                    recent_scores
-                                    |> Array.map(fun s -> match Charts.by_hash s.ChartId with Some (_, song) -> song.Title | None -> "???" |> sprintf "`%-20s`")
-                                    |> String.concat "\n"
-                                ),
-                            EmbedFieldBuilder(Name = "..", IsInline = true)
-                                .WithValue(
-                                    recent_scores
-                                    |> Array.map(fun s -> sprintf "`%6.2f%%` `%6s` `%6s` `%8s`" (s.Score * 100.0) (Charts.rulesets.[s.RulesetId].LampName s.Lamp) (formatMods s) (formatTimeOffset s.Timestamp))
-                                    |> String.concat "\n"
-                                )
-                            )
-                    else embed
-                do! reply_embed (embed.Build())
+                            if recent_scores.Length > 0 then
+                                embed.WithFields(
+                                    EmbedFieldBuilder(Name = "Recent scores", IsInline = true)
+                                        .WithValue(
+                                            recent_scores
+                                            |> Array.map(fun s -> match Charts.by_hash s.ChartId with Some (_, song) -> song.Title | None -> "???" |> sprintf "`%-20s`")
+                                            |> String.concat "\n"
+                                        ),
+                                    EmbedFieldBuilder(Name = "..", IsInline = true)
+                                        .WithValue(
+                                            recent_scores
+                                            |> Array.map(fun s -> sprintf "`%6.2f%%` `%6s` `%6s` `%8s`" (s.Score * 100.0) (Charts.rulesets.[s.RulesetId].LampName s.Lamp) (formatMods s) (formatTimeOffset s.Timestamp))
+                                            |> String.concat "\n"
+                                        )
+                                    )
+                            else embed
+                        do! reply_embed (embed.Build())
+                    }
+                match args with
+                | [] -> do! profile (userId, userInfo)
+                | name :: _ ->
+                    match user_by_name name with
+                    | Some (id, user) -> do! profile (id, user)
+                    | None -> do! reply "No user found."
 
             | "help" ->
                 do! reply "Available commands: $search, $friends, $friend, $unfriend, $profilecolor, $profile"
