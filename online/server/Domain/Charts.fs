@@ -7,8 +7,11 @@ open Percyqaz.Common
 open Prelude.Data
 open Prelude.Gameplay
 open Prelude.Backbeat.Archive
+open Prelude.Data.Charts.Tables
 
 module Charts =
+
+    let mutable crescent : Table option = None
 
     let rulesets = Dictionary<string, Ruleset>()
 
@@ -44,6 +47,11 @@ module Charts =
             for rs in archive.Rulesets.Values do
                 rulesets.[Ruleset.hash rs] <- rs
         | None -> Logging.Error("Failed to get ruleset data from Backbeat repo")
+        )
+        WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Backbeat/main/tables/crescent.table",
+        function
+        | Some (t : Table) -> crescent <- Some t
+        | None -> Logging.Error("Failed to get Crescent from Backbeat repo")
         )
         
     // chart search by text

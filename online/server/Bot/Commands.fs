@@ -304,6 +304,22 @@ module Commands =
                     let msg = sprintf "## :checkered_flag: Leaderboard created:\n%s [%s]" song.FormattedTitle chart.DifficultyName
                     let! _ = (client.GetChannel(FEED_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(msg)
                     do! reply_emoji ":white_check_mark:"
+            
+            | "addleaderboards" ->
+                let missing = ResizeArray<string>()
+                match Charts.crescent with
+                | None -> do! reply "Table is not loaded."
+                | Some table ->
+                    for level in table.Levels do
+                        for chart in level.Charts do
+                            match Charts.by_hash chart.Hash with
+                            | None -> missing.Add chart.Id
+                            | Some (_, _) ->
+                                if not (Leaderboard.exists chart.Hash table.RulesetId) then
+                                    Leaderboard.create chart.Hash table.RulesetId
+                    if missing.Count > 0 then
+                        do! reply ("Missing charts:\n  " + String.concat "\n  " missing)
+                    do! reply_emoji ":white_check_mark:"
 
             | _ -> ()
         }

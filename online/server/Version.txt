@@ -1,1 +1,1 @@
-﻿Can now see profiles of other people
+﻿Command to leaderboard all crescent charts (except missing ones)
