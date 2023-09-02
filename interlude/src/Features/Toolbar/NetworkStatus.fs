@@ -20,7 +20,7 @@ type NetworkStatus() =
             | Network.Connecting -> Icons.connecting + "  Connecting..", Colors.grey_1
             | Network.ConnectionFailed -> Icons.connection_failed + "  Offline", Colors.red_accent
             | Network.Connected -> Icons.connected + "  Not logged in", Colors.green_accent
-            | Network.LoggedIn -> Icons.connected + "  " + Network.username, Colors.green_accent
+            | Network.LoggedIn -> Icons.connected + "  " + Network.credentials.Username, Colors.green_accent
 
         Draw.rect area (Colors.shadow_1.O2)
         Text.drawFillB(Style.font, text, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)

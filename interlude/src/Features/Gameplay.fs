@@ -20,6 +20,7 @@ open Prelude.Data.Scores
 open Interlude
 open Interlude.Options
 open Interlude.UI
+open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Web.Shared
 
@@ -225,7 +226,7 @@ module Gameplay =
                     )
     
             let add_own_replay(s: IScoreMetric, replay: LiveReplayProvider) =
-                replays.Add(Network.username, 
+                replays.Add(Network.credentials.Username, 
                     (s, 
                         fun () -> 
                             if not (replay :> IReplayProvider).Finished then replay.Finish()

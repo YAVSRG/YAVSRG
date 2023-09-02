@@ -13,6 +13,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Features
+open Interlude.Features.Stats
 open Interlude.Features.Play.HUD
 
 module PracticeScreen =

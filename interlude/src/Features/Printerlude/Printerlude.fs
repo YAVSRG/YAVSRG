@@ -130,6 +130,14 @@ module Printerlude =
                     entry.Bests.["SC(J4)548E5A"] <- entry.Bests.["SC(J4)BC581C"]
                 if entry.Bests.ContainsKey("Wife3(J4)E92BD3") then
                     entry.Bests.["Wife3(J4)1AFE7B"] <- entry.Bests.["Wife3(J4)E92BD3"]
+
+        let table_rating() =
+            Tables.Table.ratings()
+            |> Seq.truncate 50
+            |> Seq.map (fun (c, score) -> ctx.WriteLine(sprintf "%s: %.1f" c.Id score); (c, score))
+            |> Array.ofSeq
+            |> fun arr -> if arr.Length > 0 then Array.sumBy snd arr / float arr.Length else 0.0
+            |> fun r -> ctx.WriteLine(sprintf "Final table rating: %f" r)
         
         let register_commands (ctx: ShellContext) = 
             ctx
@@ -146,6 +154,7 @@ module Printerlude =
                         ctx.WriteLine("Restart your game to apply server change."))
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
                 .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
+                .WithCommand("table_rating", "Calculate and display your table rating info", table_rating)
 
     let private ms = new MemoryStream()
     let private context_output = new StreamReader(ms)

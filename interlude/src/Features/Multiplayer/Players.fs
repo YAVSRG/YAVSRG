@@ -105,7 +105,7 @@ type PlayerList() =
 
         Draw.rect user_bounds fill.O3
 
-        Text.drawFillB(Style.font, Network.username, user_bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
+        Text.drawFillB(Style.font, Network.credentials.Username, user_bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
         Text.drawFillB(Style.font, (if (match Network.lobby with Some l -> l.YouAreHost | None -> false) then Icons.star + " Host" else ""), user_bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.RIGHT)
 
         base.Draw()

@@ -25,7 +25,7 @@ type Chat() =
     let chat_msg(sender: string, message: string) =
         let w = Text.measure(Style.font, sender) * 0.6f * MESSAGE_HEIGHT
         let sender_color = 
-            if sender = Network.username then Colors.text_subheading // todo: know your own username color
+            if sender = Network.credentials.Username then Colors.text_subheading // todo: know your own username color
             else Network.lobby.Value.Players.[sender].Color, Colors.shadow_2
         StaticContainer(NodeType.None)
         |+ Text(sender, Color = K sender_color, Position = Position.SliceLeft w, Align = Alignment.RIGHT)

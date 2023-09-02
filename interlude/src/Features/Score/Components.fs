@@ -12,6 +12,7 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Features
+open Interlude.Features.Stats
 
 type TopBanner(data: ScoreInfoProvider) as this =
     inherit StaticContainer(NodeType.None)
@@ -234,6 +235,7 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
         graph.Position <- { Left = 0.35f %+ 30.0f; Top = 0.0f %+ 25.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 65.0f }
         this
         |+ graph
+        |+ Text(version, Position = Position.SliceBottom(50.0f).Margin(20.0f, 5.0f), Color = K Colors.text_subheading, Align = Alignment.LEFT)
         |+ StylishButton(
             (fun () -> { new ScoreGraphSettingsPage() with override this.OnClose() = graph.Refresh() }.Show()),
             sprintf "%s %s" Icons.edit (L"score.graph.settings") |> K,

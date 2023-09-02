@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features
+﻿namespace Interlude.Features.Stats
 
 open System.IO
 open Percyqaz.Json

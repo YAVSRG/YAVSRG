@@ -14,6 +14,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Web.Shared
 open Interlude.Features
+open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Features.Play.HUD
 open Interlude.Features.Score

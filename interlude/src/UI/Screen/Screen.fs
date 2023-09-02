@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI
 
-open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -21,6 +20,7 @@ module Screen =
         | Practice = 6
         | Replay = 7
         | Score = 8
+        | Stats = 9
 
     [<AbstractClass>]
     type T() =

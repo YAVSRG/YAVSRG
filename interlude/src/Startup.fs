@@ -10,6 +10,7 @@ open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Interlude
 open Interlude.Features
+open Interlude.Features.Stats
 open Interlude.Features.MainMenu
 open Interlude.Features.Import
 open Interlude.Features.Score

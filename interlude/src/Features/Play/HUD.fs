@@ -349,7 +349,7 @@ type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
         |> Seq.map (|KeyValue|)
         |> Seq.sortByDescending (fun (_, (s, _)) -> s.Value)
         |> Seq.iter (fun (username, (s, _)) ->
-            let c = if username = Network.username then Color.SkyBlue else Color.White
+            let c = if username = Network.credentials.Username then Color.SkyBlue else Color.White
             Text.draw(Style.font, username, 20.0f, x, y, c)
             Text.drawJust(Style.font, s.FormatAccuracy(), 20.0f, x - 10.0f, y, c, 1.0f)
             y <- y + 25.0f

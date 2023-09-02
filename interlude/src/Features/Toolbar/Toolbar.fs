@@ -15,6 +15,7 @@ open Interlude.Utils
 open Interlude.Options
 open Interlude.UI.Screen.Toolbar
 open Interlude.Features
+open Interlude.Features.Stats
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 open Interlude.Features.Printerlude
@@ -78,6 +79,11 @@ type Toolbar() =
                 HoverIcon = Icons.wiki2,
                 Hotkey = "wiki")
                 .Tooltip(Tooltip.Info("menu.wiki").Hotkey("wiki"))
+            |+ ToolbarButton(
+                L"menu.stats.name",
+                ( fun () -> if shown() then Screen.changeNew Stats.StatsScreen Screen.Type.Stats Transitions.Flags.Default ),
+                Icons.stats)
+                .Tooltip(Tooltip.Info("menu.stats"))
             )
         |+ NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
         |+ HotkeyAction("screenshot", fun () ->

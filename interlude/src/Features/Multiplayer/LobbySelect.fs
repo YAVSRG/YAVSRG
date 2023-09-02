@@ -14,7 +14,7 @@ type CreateLobbyPage() as this =
     inherit Page()
     
 
-    let value = Setting.simple (Network.username + "'s Lobby")
+    let value = Setting.simple (Network.credentials.Username + "'s Lobby")
     let submit() = Lobby.create value.Value
     let submit_button = PageButton("confirm.yes", (fun () -> submit(); Menu.Back()))
     

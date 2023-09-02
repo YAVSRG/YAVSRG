@@ -56,11 +56,12 @@
     <Compile Include="UI\Screen\Background.fs" />
     <Compile Include="UI\Screen\Transitions.fs" />
     <Compile Include="UI\Screen\Screen.fs" />
-    <Compile Include="Features\Stats.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\Wiki.fs" />
     <Compile Include="Features\Online\Network.fs" />
     <Compile Include="Features\Online\Login.fs" />
+    <Compile Include="Features\Stats\Stats.fs" />
+    <Compile Include="Features\Stats\Screen.fs" />
     <Compile Include="Features\Import\Mounts.fs" />
     <Compile Include="Features\Import\Shared.fs" />
     <Compile Include="Features\Import\EtternaPacks.fs" />

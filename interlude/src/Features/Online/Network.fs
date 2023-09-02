@@ -54,7 +54,6 @@ module Network =
         | LoggedIn
 
     let mutable status = NotConnected
-    let mutable username = "" // todo: useless because if LoggedIn you can use Credentials.Username
 
     type LobbyPlayer =
         {
@@ -181,9 +180,8 @@ module Network =
                     Logging.Info(sprintf "Logged in as %s" name)
                     credentials.Username <- name
                     API.Client.authenticate credentials.Token
-                    username <- name
                     status <- LoggedIn
-                    if Screen.currentType <> Screen.Type.SplashScreen then Notifications.system_feedback(Icons.connected, Localisation.localiseWith [username] "notification.network.login", "")
+                    if Screen.currentType <> Screen.Type.SplashScreen then Notifications.system_feedback(Icons.connected, Localisation.localiseWith [name] "notification.network.login", "")
                     Events.successful_login_ev.Trigger name
                 | Downstream.LOGIN_FAILED reason -> 
                     credentials.Token <- ""
