@@ -48,6 +48,8 @@ module Icons =
     let leaderboard = Feather.flag
     let no_leaderboard = Feather.cloud_off
 
+    let stats = Feather.bar_chart
+
     let options = Feather.settings
     let import = Feather.download
     let wiki = Feather.book

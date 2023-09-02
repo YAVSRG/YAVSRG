@@ -48,33 +48,47 @@ type TopBanner(data: ScoreInfoProvider) as this =
         base.Draw()
 
 type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
-    inherit StaticWidget(NodeType.None)
+    inherit StaticContainer(NodeType.None)
+
+    override this.Init(parent) =
+        this
+        |+ Text(sprintf "%s  %iK Results" Icons.stats data.Chart.Keys, Position = Position.SliceTop(120.0f).Margin(10.0f, 0.0f), Align = Alignment.CENTER)
+        |+ Text((fun () -> sprintf "%s %s  •  %s" Icons.mods data.Mods data.Ruleset.Name), Position = Position.TrimTop(120.0f).SliceTop(40.0f), Align = Alignment.CENTER)
+        |+ Text(sprintf "%s %.2f" Icons.star data.Difficulty.Physical,
+            Position = Position.TrimTop(530.0f).SliceTop(70.0f).Margin(10.0f, 0.0f),
+            Align = Alignment.LEFT)
+        |+ Text((fun () -> sprintf "%ix" data.Scoring.State.BestCombo),
+            Position = Position.TrimTop(530.0f).SliceTop(70.0f).Margin(10.0f, 0.0f),
+            Align = Alignment.CENTER)
+        |+ Text(sprintf "%.2f" data.Physical, 
+            Position = Position.TrimTop(530.0f).SliceTop(70.0f).Margin(10.0f, 0.0f),
+            Align = Alignment.RIGHT)
+        |* Text((fun () -> sprintf "M: %.1fms | SD: %.1fms" (!stats).Mean (!stats).StandardDeviation), 
+            Position = Position.TrimTop(600.0f).SliceTop(40.0f).Margin(10.0f, 0.0f),
+            Align = Alignment.RIGHT)
+        base.Init(parent)
 
     override this.Draw() =
-        Draw.rect (this.Bounds.Expand(5.0f, -10.0f)) Colors.white.O2
-        Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
-
-        let title = this.Bounds.SliceTop(100.0f).Shrink(5.0f, 20.0f)
-        Draw.rect title Colors.shadow_2.O2
-        Text.drawFillB(Style.font, sprintf "%iK Results  •  %s" data.Chart.Keys data.Ruleset.Name, title, Colors.text, Alignment.CENTER)
-        let mods = title.Translate(0.0f, 70.0f)
-        Draw.rect mods Colors.shadow_2.O2
-        Text.drawFillB(Style.font, data.Mods, mods, Colors.text, Alignment.CENTER)
+        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
+        Background.draw (this.Bounds.SliceTop(120.0f), !*Palette.DARKER, 2.0f)
+        Background.draw (this.Bounds.TrimTop(120.0f).SliceTop(40.0f), !*Palette.DARK, 2.0f)
+        Background.draw (this.Bounds.TrimTop(160.0f), (Color.FromArgb(40, 40, 40)), 2.0f)
+        base.Draw()
 
         // accuracy info
-        let counters = Rect.Box(this.Bounds.Left + 5.0f, this.Bounds.Top + 160.0f, this.Bounds.Width - 10.0f, 350.0f)
-        Draw.rect counters (Color.FromArgb(127, Color.Black))
+        let counters = Rect.Box(this.Bounds.Left + 10.0f, this.Bounds.Top + 160.0f + 10.0f, this.Bounds.Width - 20.0f, 350.0f)
 
         let judgeCounts = data.Scoring.State.Judgements
         let judgements = data.Ruleset.Judgements |> Array.indexed
-        let h = (counters.Height - 20.0f) / float32 judgements.Length
-        let mutable y = counters.Top + 10.0f
+        let h = counters.Height / float32 judgements.Length
+        let mutable y = counters.Top
         for i, j in judgements do
-            let b = Rect.Create(counters.Left + 10.0f, y, counters.Right - 10.0f, y + h)
+            let b = Rect.Create(counters.Left, y, counters.Right, y + h)
             Draw.rect b (Color.FromArgb(40, j.Color))
-            Draw.rect (b.SliceLeft((counters.Width - 20.0f) * (float32 judgeCounts.[i] / float32 (!stats).JudgementCount))) (Color.FromArgb(127, j.Color))
-            Text.drawFillB(Style.font, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Colors.text, 0.0f)
+            Draw.rect (b.SliceLeft(counters.Width * (float32 judgeCounts.[i] / float32 (!stats).JudgementCount))) (Color.FromArgb(127, j.Color))
+            Text.drawFillB(Style.font, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Colors.text, Alignment.LEFT)
             y <- y + h
+
         
 type Grade(grade: Grade.GradeResult ref, data: ScoreInfoProvider) =
     inherit StaticContainer(NodeType.None)
@@ -188,7 +202,7 @@ type Results(grade, lamp, improvements, previous_personal_bests, scoreData) =
     inherit StaticContainer(NodeType.None)
 
     override this.Init(parent) =
-        this
+        StaticContainer(NodeType.None, Position = { Position.Default with Left = 0.35f %+ 0.0f })
         |+ Grade(grade, scoreData, 
             Position = Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f))
         |+ Accuracy(grade, improvements, previous_personal_bests, scoreData,
@@ -198,25 +212,26 @@ type Results(grade, lamp, improvements, previous_personal_bests, scoreData) =
                 Top = 0.0f %+ 40.0f
                 Bottom = 0.0f %+ 200.0f
             })
-        |* Lamp(lamp, improvements, previous_personal_bests, scoreData,
+        |+ Lamp(lamp, improvements, previous_personal_bests, scoreData,
             Position = {
                 Left = 0.5f %+ 100.0f ^+ 20.0f
                 Right = 1.0f %- 40.0f
                 Top = 0.0f %+ 40.0f
                 Bottom = 0.0f %+ 200.0f
             })
+        |> this.Add
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.TrimLeft(5.0f).SliceTop(160.0f).TrimTop(5.0f)) Colors.shadow_2.O2
-        Draw.rect (this.Bounds.TrimLeft(5.0f).TrimTop(160.0f).SliceTop(5.0f)) Colors.white
+        Draw.rect (this.Bounds.SliceTop(160.0f).TrimTop(5.0f)) Colors.shadow_2.O2
+        Draw.rect (this.Bounds.TrimTop(160.0f).SliceTop(5.0f)) Colors.white
         base.Draw()
 
 type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: ScoreGraph, refresh: unit -> unit) as this =
     inherit StaticContainer(NodeType.None)
     
     do
-        graph.Position <- { Left = 0.35f %+ 20.0f; Top = 0.0f %+ 25.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 65.0f }
+        graph.Position <- { Left = 0.35f %+ 30.0f; Top = 0.0f %+ 25.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 65.0f }
         this
         |+ graph
         |+ StylishButton(
@@ -238,37 +253,6 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
 
         Draw.rect (this.Bounds.TrimTop 5.0f) (Palette.color(127, 0.5f, 0.0f))
         Draw.rect (this.Bounds.SliceTop 5.0f) Colors.white.O2
-        
-        // stats
-        let spacing = (this.Bounds.Height - 40.0f - 180.0f) / 2.0f
-        let b = this.Bounds.SliceLeft(this.Bounds.Width * 0.35f).SliceTop(100.0f)
-        let l = b.SliceLeft(b.Width * 0.5f).Shrink(5.0f, 20.0f)
-        let r = b.SliceRight(b.Width * 0.5f).Shrink(5.0f, 20.0f)
-
-        Draw.rect l Colors.shadow_2.O2
-        let hit, total = (!stats).Notes
-        Text.drawFillB(Style.font, sprintf "Notes: %i/%i" hit total, l.Shrink(5.0f), Colors.text, Alignment.CENTER)
-
-        let l = l.Translate(0.0f, 60.0f + spacing)
-        Draw.rect l Colors.shadow_2.O2
-        let hit, total = (!stats).Holds
-        Text.drawFillB(Style.font, sprintf "Holds: %i/%i" hit total, l.Shrink(5.0f), Colors.text, Alignment.CENTER)
-        
-        let l = l.Translate(0.0f, 60.0f + spacing)
-        Draw.rect l Colors.shadow_2.O2
-        let hit, total = (!stats).Releases
-        Text.drawFillB(Style.font, sprintf "Releases: %i/%i" hit total, l.Shrink(5.0f), Colors.text, Alignment.CENTER)
-
-        Draw.rect r Colors.shadow_2.O2
-        Text.drawFillB(Style.font, sprintf "Combo: %ix" data.Scoring.State.BestCombo, r.Shrink(5.0f), Colors.text, Alignment.CENTER)
-        
-        let r = r.Translate(0.0f, 60.0f + spacing)
-        Draw.rect r Colors.shadow_2.O2
-        Text.drawFillB(Style.font, sprintf "Mean: %.1fms (%.1f - %.1f)" (!stats).Mean (!stats).EarlyMean (!stats).LateMean, r.Shrink(5.0f),Colors.text, Alignment.CENTER)
-                
-        let r = r.Translate(0.0f, 60.0f + spacing)
-        Draw.rect r Colors.shadow_2.O2
-        Text.drawFillB(Style.font, sprintf "Stdev: %.1fms" (!stats).StandardDeviation, r.Shrink(5.0f), Colors.text, Alignment.CENTER)
 
         // graph background
         Draw.rect (graph.Bounds.Expand(5.0f, 5.0f)) Color.White
