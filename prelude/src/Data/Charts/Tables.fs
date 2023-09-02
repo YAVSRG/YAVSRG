@@ -179,6 +179,42 @@ module Table =
         save()
         true
 
+    open Prelude.Data.Scores
+
+    let ratings() =
+        if _current.IsNone then Seq.empty else
+        seq {
+            for level in _current.Value.Table.Levels do
+                for chart in level.Charts do
+                    let grade_achieved = 
+                        match Scores.getData chart.Hash with
+                        | Some d -> 
+                            if d.Bests.ContainsKey(_current.Value.Table.RulesetId) then
+                                let bests = d.Bests.[_current.Value.Table.RulesetId]
+                                let grade, rate = bests.Grade.Best
+                                if rate >= 1.0f then Some grade
+                                else 
+                                    let grade2, rate2 = bests.Grade.Fastest
+                                    if rate2 >= 1.0f then Some grade2
+                                    else None
+                            else None
+                        | None -> None
+                    match grade_achieved with
+                    | None -> ()
+                    | Some -1 | Some 0 -> yield chart, 0.0
+                    | Some 1 -> yield chart, max 0.0 (float level.Rank - 5.0) // C-
+                    | Some 2 -> yield chart, max 0.0 (float level.Rank - 4.0) // C
+                    | Some 3 -> yield chart, max 0.0 (float level.Rank - 3.0) // B-
+                    | Some 4 -> yield chart, max 0.0 (float level.Rank - 2.0) // B
+                    | Some 5 -> yield chart, max 0.0 (float level.Rank - 1.0) // A-
+                    | Some 6 -> yield chart, float level.Rank // A
+                    | Some 7 -> yield chart, float level.Rank + 0.5 // A+
+                    | Some 8 -> yield chart, float level.Rank + 1.0 // S-
+                    | Some 9 -> yield chart, float level.Rank + 1.5 // S
+                    | Some 10 -> yield chart, float level.Rank + 2.0 // S+
+                    | _ -> yield chart, 0.0
+        } |> Seq.sortByDescending snd
+
 [<Json.AutoCodec>]
 type TableIndexEntry = { Name: string; Description: string; File: string; Version: int }
 [<Json.AutoCodec>]
