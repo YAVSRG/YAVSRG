@@ -340,31 +340,33 @@ module Cache =
 
     open Prelude.Backbeat.Archive
     open Prelude.Data.WebServices
+    open System.Net.Http
 
+    let private httpclient = new HttpClient()
     let cdn_download (folder: string) (hash: string) (chart: Chart, song: Song) (cache: Cache) =
         async {
             let header = Archive.make_chart_header (chart, song)
-            let yav_path = Path.Combine(getDataPath "Downloads", hash)
-            let! success = download_file.RequestAsync("https://cdn.yavsrg.net/" + hash, yav_path, ignore)
-            if not success then return false else
-            
-            use fs = File.OpenRead yav_path
-            use br = new BinaryReader(fs)
-            match Chart.readHeadless chart.Keys header yav_path br with
-            | None -> return false
-            | Some chart_data ->
-
-            let actual_hash = Chart.hash chart_data
-            if actual_hash <> hash then Logging.Error(sprintf "Downloaded chart hash was '%s', expected '%s'" actual_hash hash); return false else
-
             try
+                let! response = httpclient.GetAsync("https://cdn.yavsrg.net/" + hash) |> Async.AwaitTask
+                if not response.IsSuccessStatusCode then return false else
+
+                use! stream = response.Content.ReadAsStreamAsync() |> Async.AwaitTask
+                use br = new BinaryReader(stream)
+                match Chart.readHeadless chart.Keys header "" br with
+                | None -> return false
+                | Some chart_data ->
+
+                let actual_hash = Chart.hash chart_data
+                if actual_hash <> hash then failwithf "Downloaded chart hash was '%s', expected '%s'" actual_hash hash
+
                 if File.Exists(asset_path chart.BackgroundFile cache) |> not then
 
                     let bg_path = Path.Combine(getDataPath "Downloads", chart.BackgroundFile)
                     let! success = download_file.RequestAsync("https://cdn.yavsrg.net/assets/" + chart.BackgroundFile, bg_path, ignore)
 
                     let actual_bg_hash = hash_asset bg_path cache
-                    if chart.BackgroundFile <> actual_bg_hash then Logging.Warn(sprintf "Downloaded background hash was '%s', expected '%s'" actual_bg_hash chart.BackgroundFile)
+                    if chart.BackgroundFile <> actual_bg_hash then 
+                        failwithf "Downloaded background hash was '%s', expected '%s'" actual_bg_hash chart.BackgroundFile
 
                 if File.Exists(asset_path chart.AudioFile cache) |> not then
 
@@ -372,14 +374,15 @@ module Cache =
                     let! success = download_file.RequestAsync("https://cdn.yavsrg.net/assets/" + chart.AudioFile, audio_path, ignore)
 
                     let actual_audio_hash = hash_asset audio_path cache
-                    if chart.AudioFile <> actual_audio_hash then Logging.Warn(sprintf "Downloaded audio hash was '%s', expected '%s'" actual_audio_hash chart.AudioFile)
+                    if chart.AudioFile <> actual_audio_hash then 
+                        failwithf "Downloaded audio hash was '%s', expected '%s'" actual_audio_hash chart.AudioFile
 
                 add_new folder [chart_data] cache
 
                 Logging.Debug(sprintf "Installed '%s' from CDN" song.FormattedTitle)
 
                 return true
-            with err -> return false
+            with err -> Logging.Error(err.Message, err); return false
         }
 
     let cdn_download_service =
