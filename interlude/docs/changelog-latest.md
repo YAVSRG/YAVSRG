@@ -1,12 +1,20 @@
-0.7.4
+0.7.5
 ====
 
-Some online features just for you
+UI improvement update
 
-# New features
-- If you are logged in, scores you set are automatically submitted to the server and go on your profile
-- Some limited charts now have leaderboards (again requires a logged-in account)
-- You can set your profile color via the discord bot, this shows up in multiplayer chat
+# Bug fixes:
+- Your leaderboard score now gets replaced if you upload a better score
+- Can view leaderboards even without the intended ruleset selected
 
-More leaderboards for table charts will roll out as long as no problems come up
+# Improvements:
+- Score screen looks a little bit better :)
+
+# New features:
+- Added a 'Stats' screen, displaying some stats that have been tracked since 0.6.21
+- Stats screen shows breakdown of your table grades if available (still under construction)
+
+More stats stuff will come, hopefully it provides a motive for you to farm the table and therefore report balance issues
+
+Also, nearly every chart in Crescent now has a leaderboard available
 
