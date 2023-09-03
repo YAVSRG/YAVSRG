@@ -49,6 +49,7 @@ module Icons =
     let no_leaderboard = Feather.cloud_off
 
     let stats = Feather.bar_chart
+    let stats_2 = Feather.trending_up
 
     let options = Feather.settings
     let import = Feather.download
