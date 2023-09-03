@@ -177,6 +177,9 @@ module Collect =
         Cache.save backbeat_cache
         slurp_folder [ChartSource.CommunityPack {| PackId = community_pack_id |}] pack_name
 
+    let slurp_osu () =
+        slurp_folder [] "osu!"
+
     let rec try_download_mirrors(mirrors, filepath) : Async<bool> =
         async {
             match mirrors with
@@ -225,6 +228,24 @@ module Collect =
                 return true
             | false ->
                 Logging.Error "All mirrors failed."
+                return false
+        }
+
+    let download_osu_set(set_id: int) =
+        async {
+            let zip = Path.Combine(ARCHIVE_PATH, "tmp", "osu-" + string set_id + ".osz")
+            let folder = Path.Combine(ARCHIVE_PATH, "tmp", "osu-" + string set_id)
+            match! try_download_mirrors([sprintf "https://api.chimu.moe/v1/download/%i?n=1" set_id], zip) with
+            | true ->
+                if Directory.Exists folder then Logging.Info (sprintf "Looks like this pack was already extracted to %s" folder)
+                else ZipFile.ExtractToDirectory(zip, folder)
+                cache_song_folder 
+                    { ConversionOptions.Default with MoveAssets = false; PackName = "osu!" }
+                    folder
+                Cache.save backbeat_cache
+                return true
+            | false -> 
+                Logging.Error "Download failed."
                 return false
         }
 

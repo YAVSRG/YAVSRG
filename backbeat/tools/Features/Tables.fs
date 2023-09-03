@@ -211,10 +211,10 @@ module Tables =
 
                 // otherwise look in Interlude client's cache for it
                 match Cache.by_hash chart.Hash interlude_cache with
-                | _
-                //| Some cc -> 
-                    //Cache.replicate table.Name cc interlude_cache backbeat_cache
-                    //Logging.Info(sprintf "-> %s" chart.Id)
+                | Some cc -> 
+                    match Cache.load cc interlude_cache with
+                    | Some ch -> Logging.Info(sprintf "source for missing chart '%s': %A" chart.Id ch.Header.ChartSource)
+                    | None -> Logging.Error(sprintf "Error loading '%s'" chart.Id)
                 | None -> Logging.Info(sprintf "Chart missing from both backbeat and your local client: %s" chart.Id)
         Cache.save backbeat_cache
         Collect.slurp_folder [] table.Name
