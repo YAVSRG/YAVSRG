@@ -81,8 +81,8 @@ type Toolbar() =
                 .Tooltip(Tooltip.Info("menu.wiki").Hotkey("wiki"))
             |+ ToolbarButton(
                 L"menu.stats.name",
-                ( fun () -> if shown() then Screen.changeNew Stats.StatsScreen Screen.Type.Stats Transitions.Flags.Default ),
-                Icons.stats)
+                ( fun () -> if shown() then Screen.changeNew StatsScreen Screen.Type.Stats Transitions.Flags.Default ),
+                Icons.stats_2)
                 .Tooltip(Tooltip.Info("menu.stats"))
             )
         |+ NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
