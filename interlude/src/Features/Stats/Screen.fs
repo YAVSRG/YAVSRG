@@ -190,7 +190,6 @@ type private TableStats() =
             )
         |> Seq.sortBy(fun (l, _) -> l.Rank)
         |> Array.ofSeq
-    let biggest_level = table_level_data |> Array.map (fun (l, d) -> d |> Array.map snd |> Array.sum) |> Array.max |> float32
 
     override this.Init(parent) =
         
@@ -201,6 +200,7 @@ type private TableStats() =
 
                 let flow = FlowContainer.Vertical<TableLevelStats>(30.0f)
                 let scroll = ScrollContainer.Flow(flow, Position = Position.TrimTop(120.0f).Margin(40.0f))
+                let biggest_level = table_level_data |> Array.map (fun (l, d) -> d |> Array.map snd |> Array.sum) |> Array.max |> float32
                 for (l, d) in table_level_data do
                     flow.Add(TableLevelStats(l, d, ruleset, d |> Array.map snd |> Array.sum |> fun t -> float32 t / biggest_level))
 
