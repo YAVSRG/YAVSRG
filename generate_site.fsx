@@ -38,7 +38,7 @@ module MarkdownToHtml =
         | Strong (body, _) -> sprintf "<strong>%s</strong>" (spans body)
         | Emphasis (body, _) -> sprintf "<em>%s</em>" (spans body)
         | DirectLink (body, link, title, _) -> sprintf "<a class=\"underline\" href=\"%s\">%s</a>" link (spans body)
-        | DirectImage (body, link, title, _) -> sprintf "<img class=\"feature\" src=\"%s\" alt=\"%s\">%s</img>" link (Option.defaultValue "" title) body
+        | DirectImage (body, link, title, _) -> sprintf "<img class=\"feature\" src=\"%s\" alt=\"%s\" />" link (Option.defaultValue "" title)
         | IndirectImage (body, link, key, _) -> ""
         | IndirectLink (body, original, key, _) -> ""
         | AnchorLink (link, _) -> ""
