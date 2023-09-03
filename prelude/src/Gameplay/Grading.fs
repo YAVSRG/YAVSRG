@@ -10,16 +10,6 @@ type Improvement<'T> =
     | New
     | None
 
-module Improvement =
-
-    let map (f: 'T -> 'U) (i: Improvement<'T>) =
-        match i with
-        | Improvement.FasterBetter (r, i) -> Improvement.FasterBetter (r, f i)
-        | Improvement.Faster r -> Improvement.Faster r
-        | Improvement.Better i -> Improvement.Better (f i)
-        | Improvement.New -> Improvement.New
-        | Improvement.None -> Improvement.None
-
 [<Json.AutoCodec>]
 type PersonalBests<'T> = { Best: 'T * float32; Fastest: 'T * float32 }
 
@@ -75,3 +65,35 @@ module PersonalBests =
         if r1 < rate then
             if r2 < rate then None else Some p2
         else Some p1
+
+// todo: to be implemented soon
+type PersonalBestsV2<'T> = (float32 * 'T) list
+
+module PersonalBestsV2 =
+
+    let rec get (minimum_rate: float32) (bests: PersonalBestsV2<'T>) =
+        match bests with
+        | [] -> None
+        | (rate, value) :: xs -> if rate <= minimum_rate then Some value else get minimum_rate xs
+
+    let inline add (rate: float32, value: 'T) (bests: PersonalBestsV2<'T>) : PersonalBestsV2<'T> * Improvement<'T> =
+        let rec remove_worse_breakpoints (v: 'T) (bests: PersonalBestsV2<'T>) =
+            match bests with
+            | [] -> []
+            | (_, value) :: xs when value <= v -> remove_worse_breakpoints v xs
+            | xs -> xs
+        let rec loop (xs: PersonalBestsV2<'T>) : PersonalBestsV2<'T> * Improvement<'T> =
+            match xs with
+            | [] -> (rate, value) :: [], Improvement.New
+            | (r, v) :: xs ->
+                if rate < r then
+                    let res, imp = loop xs in (r, v) :: res, imp
+                elif rate = r && value > v then
+                    (rate, value) :: remove_worse_breakpoints value xs, Improvement.Better (value - v)
+                elif rate = r then
+                    (r, v) :: xs, Improvement.None
+                else
+                    if value > v then (rate, value) :: remove_worse_breakpoints value xs, Improvement.FasterBetter(rate - r, value - v)
+                    elif value = v then (rate, value) :: remove_worse_breakpoints value xs, Improvement.Faster(rate - r)
+                    else (rate, value) :: (r, v) :: xs, Improvement.New
+        loop bests
