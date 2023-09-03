@@ -1,19 +1,21 @@
 ### Guidelines for emoji in commit messages
 
-✨ = Feature or improvement users can see
+🎓 - Localisation changes
 
-🧱 = Feature or improvement the codebase sees but not users
+🌸 - UI improvement
 
-📘 = Tools, documentation, infrastructure users can see
+👽️ = Bug fix
 
-📓 = Tools, documentation, infrastructure the codebase/developers see but not users
+✨ = New user-facing feature
 
-👽️ = Bug fixes
+🧱 = New codebase feature/feature otherwise not reaching all users
 
-🏷️ = Release tag when triggering CI
+⚙️ - Developer tooling
 
-🚧 = WIP, latest commit not necessarily suitable for release
+⚡️ = CI pipelines
 
-💡 = Banger code/idea alert
+📘 = Documentation, wikis
 
-💚 = Automated commits, community content, etc
+🏷️ = Releases
+
+💚 = Community content & Automated commits
