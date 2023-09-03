@@ -66,34 +66,36 @@ module PersonalBests =
             if r2 < rate then None else Some p2
         else Some p1
 
-// todo: to be implemented soon
-type PersonalBestsV2<'T> = (float32 * 'T) list
+type PersonalBestsV2<'T> = ('T * float32) list
 
 module PersonalBestsV2 =
 
     let rec get (minimum_rate: float32) (bests: PersonalBestsV2<'T>) =
         match bests with
         | [] -> None
-        | (rate, value) :: xs -> if rate <= minimum_rate then Some value else get minimum_rate xs
+        | (value, rate) :: xs -> 
+            if rate = minimum_rate then Some value 
+            elif rate < minimum_rate then None
+            else get minimum_rate xs |> function None -> Some value | Some x -> Some x
 
-    let inline add (rate: float32, value: 'T) (bests: PersonalBestsV2<'T>) : PersonalBestsV2<'T> * Improvement<'T> =
+    let inline update (value: 'T, rate: float32) (bests: PersonalBestsV2<'T>) : PersonalBestsV2<'T> * Improvement<'T> =
         let rec remove_worse_breakpoints (v: 'T) (bests: PersonalBestsV2<'T>) =
             match bests with
             | [] -> []
-            | (_, value) :: xs when value <= v -> remove_worse_breakpoints v xs
+            | (value, _) :: xs when value <= v -> remove_worse_breakpoints v xs
             | xs -> xs
         let rec loop (xs: PersonalBestsV2<'T>) : PersonalBestsV2<'T> * Improvement<'T> =
             match xs with
-            | [] -> (rate, value) :: [], Improvement.New
-            | (r, v) :: xs ->
+            | [] -> (value, rate) :: [], Improvement.New
+            | (v, r) :: xs ->
                 if rate < r then
-                    let res, imp = loop xs in (r, v) :: res, imp
+                    let res, imp = loop xs in (v, r) :: res, imp
                 elif rate = r && value > v then
-                    (rate, value) :: remove_worse_breakpoints value xs, Improvement.Better (value - v)
+                    (value, rate) :: remove_worse_breakpoints value xs, Improvement.Better (value - v)
                 elif rate = r then
-                    (r, v) :: xs, Improvement.None
+                    (v, r) :: xs, Improvement.None
                 else
-                    if value > v then (rate, value) :: remove_worse_breakpoints value xs, Improvement.FasterBetter(rate - r, value - v)
-                    elif value = v then (rate, value) :: remove_worse_breakpoints value xs, Improvement.Faster(rate - r)
-                    else (rate, value) :: (r, v) :: xs, Improvement.New
+                    if value > v then (value, rate) :: remove_worse_breakpoints value xs, Improvement.FasterBetter(rate - r, value - v)
+                    elif value = v then (value, rate) :: remove_worse_breakpoints value xs, Improvement.Faster(rate - r)
+                    else (value, rate) :: (v, r) :: xs, Improvement.New
         loop bests
