@@ -199,21 +199,23 @@ module Table =
                                     else None
                             else None
                         | None -> None
-                    match grade_achieved with
-                    | None -> ()
-                    | Some -1 | Some 0 -> yield chart, 0.0
-                    | Some 1 -> yield chart, max 0.0 (float level.Rank - 5.0) // C-
-                    | Some 2 -> yield chart, max 0.0 (float level.Rank - 4.0) // C
-                    | Some 3 -> yield chart, max 0.0 (float level.Rank - 3.0) // B-
-                    | Some 4 -> yield chart, max 0.0 (float level.Rank - 2.0) // B
-                    | Some 5 -> yield chart, max 0.0 (float level.Rank - 1.0) // A-
-                    | Some 6 -> yield chart, float level.Rank // A
-                    | Some 7 -> yield chart, float level.Rank + 0.5 // A+
-                    | Some 8 -> yield chart, float level.Rank + 1.0 // S-
-                    | Some 9 -> yield chart, float level.Rank + 1.5 // S
-                    | Some 10 -> yield chart, float level.Rank + 2.0 // S+
-                    | _ -> yield chart, 0.0
-        } |> Seq.sortByDescending snd
+                    let score = 
+                        match grade_achieved with
+                        | None -> None
+                        | Some -1 | Some 0 -> Some 0.0
+                        | Some 1 -> Some <| max 0.0 (float level.Rank - 5.0) // C-
+                        | Some 2 -> Some <| max 0.0 (float level.Rank - 4.0) // C
+                        | Some 3 -> Some <| max 0.0 (float level.Rank - 3.0) // B-
+                        | Some 4 -> Some <| max 0.0 (float level.Rank - 2.0) // B
+                        | Some 5 -> Some <| max 0.0 (float level.Rank - 1.0) // A-
+                        | Some 6 -> Some <| float level.Rank // A
+                        | Some 7 -> Some <| float level.Rank + 0.5 // A+
+                        | Some 8 -> Some <| float level.Rank + 1.0 // S-
+                        | Some 9 -> Some <| float level.Rank + 1.5 // S
+                        | Some 10 -> Some <| float level.Rank + 2.0 // S+
+                        | _ -> None
+                    yield level, chart, grade_achieved, score
+        }
 
 [<Json.AutoCodec>]
 type TableIndexEntry = { Name: string; Description: string; File: string; Version: int }
