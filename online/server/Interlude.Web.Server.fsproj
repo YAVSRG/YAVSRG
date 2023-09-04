@@ -27,7 +27,8 @@
     <Compile Include="Online\Lobbies.fs" />
     <Compile Include="Online\Online.fs" />
     <Compile Include="Bot\Constants.fs" />
-    <Compile Include="Bot\Commands.fs" />
+    <Compile Include="Bot\UserCommands.fs" />
+    <Compile Include="Bot\AdminCommands.fs" />
     <Compile Include="Bot\Bot.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

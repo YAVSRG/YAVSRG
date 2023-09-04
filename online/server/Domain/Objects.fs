@@ -102,10 +102,10 @@ module User =
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
 
-    // todo: a pagination system when there are >100 users
-    let all() =
-        ft.Search("idx:users", Query("*").SetSortBy("date_signed_up", false).Limit(0, 100)).Documents
+    let list(page: int) =
+        ft.Search("idx:users", Query("*").SetSortBy("date_signed_up", true).Limit(page * 15, 15)).Documents
         |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
+        |> Array.ofSeq
 
 module Friends =
     
@@ -160,6 +160,11 @@ module Score =
         results
         |> Seq.map (fun d -> Text.Json.JsonSerializer.Deserialize<Score>(d.Item "json"))
         |> Array.ofSeq
+
+    let exists (userId: int64) (timestamp: int64) =
+        ft.Search("idx:scores", Query(sprintf "@user_id:[%i %i] @timestamp:[%i %i]" userId userId timestamp timestamp)).Documents
+        |> Seq.isEmpty
+        |> not
 
 module Leaderboard =
 

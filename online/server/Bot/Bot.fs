@@ -25,7 +25,7 @@ module Bot =
                 | Some (id, user) ->
                     try
                         do! 
-                            Commands.user_dispatch
+                            UserCommands.dispatch
                                 client
                                 (id, user)
                                 message
@@ -56,7 +56,7 @@ module Bot =
                 | Some (id, user) when user.Badges.Contains(Badge.DEVELOPER) -> 
                     try
                         do! 
-                            Commands.admin_dispatch
+                            AdminCommands.dispatch
                                 client
                                 (id, user)
                                 message
@@ -81,6 +81,29 @@ module Bot =
             | _ -> ()
         }
 
+    let on_button_executed(comp: SocketMessageComponent) =
+        task {
+            let cmd = comp.Data.CustomId.Split(' ', 2, StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
+            match User.by_discord_id(comp.User.Id) with
+            | Some (id, user) ->
+                try
+                    do! 
+                        AdminCommands.interaction
+                            client
+                            (id, user)
+                            comp
+                            (cmd.[0].ToLower())
+                            (
+                                if cmd.Length > 1 then 
+                                    cmd.[1].Split("$", StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries) |> List.ofArray 
+                                else []
+                            )
+                with err ->
+                    Logging.Error(sprintf "Error handling button click '%s': %O" comp.Data.CustomId err)
+                    do! comp.Message.AddReactionAsync(Emoji.Parse(":alien:"))
+            | None -> ()
+        }
+
     let start() =
         try
 
@@ -96,6 +119,8 @@ module Bot =
             client.add_MessageReceived(fun msg -> on_message msg)
             //client.add_Log(fun log -> on_log log)
             client.add_InteractionCreated(fun i -> on_interaction_created i)
+
+            client.add_ButtonExecuted(fun x -> on_button_executed x)
         
             client.LoginAsync(TokenType.Bot, SECRETS.DiscordBotToken)
             |> Async.AwaitTask
