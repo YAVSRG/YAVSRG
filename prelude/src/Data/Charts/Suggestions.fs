@@ -16,14 +16,6 @@ type ChallengeLevel =
 
 module Suggestion =
 
-    let private estimate_challenge_level (rulesetId: string) (data: ChartSaveData) =
-        match data.Bests.TryGetValue rulesetId with
-        | true, d ->
-            if fst d.Accuracy.Best > 0.965 then TooEasy
-            elif fst d.Accuracy.Best < 0.945 then TooHard
-            else JustRight
-        | false, _ -> if (DateTime.UtcNow - data.LastPlayed).TotalDays < 7.0 then TooHard else JustRight
-
     let mutable recommended_recently = Set.empty
 
     let get_suggestions (chart: Chart) (cacheData: CachedChart) (filter: Filter) =

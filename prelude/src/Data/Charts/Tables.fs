@@ -189,14 +189,8 @@ module Table =
                     let grade_achieved = 
                         match Scores.getData chart.Hash with
                         | Some d -> 
-                            if d.Bests.ContainsKey(_current.Value.Table.RulesetId) then
-                                let bests = d.Bests.[_current.Value.Table.RulesetId]
-                                let grade, rate = bests.Grade.Best
-                                if rate >= 1.0f then Some grade
-                                else 
-                                    let grade2, rate2 = bests.Grade.Fastest
-                                    if rate2 >= 1.0f then Some grade2
-                                    else None
+                            if d.PersonalBests.ContainsKey(_current.Value.Table.RulesetId) then
+                                PersonalBests.get_best_above 1.0f d.PersonalBests.[_current.Value.Table.RulesetId].Grade
                             else None
                         | None -> None
                     let score = 

@@ -35,7 +35,7 @@
     <Compile Include="Gameplay\Rulesets.fs" />
     <Compile Include="Gameplay\Metrics.fs" />
     <Compile Include="Gameplay\Difficulty.fs" />
-    <Compile Include="Gameplay\Grading.fs" />
+    <Compile Include="Gameplay\PersonalBests.fs" />
     <Compile Include="Content\Storage.fs" />
     <Compile Include="Content\Themes.fs" />
     <Compile Include="Content\HUD.fs" />

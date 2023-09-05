@@ -38,7 +38,7 @@ type ChartSaveData =
         mutable Offset: Time
         [<Json.Required>]
         Scores: List<Score>
-        Bests: Dictionary<string, Bests>
+        PersonalBests: Dictionary<string, Bests>
         mutable LastPlayed: DateTime
         mutable Comment: string
     }
@@ -46,7 +46,7 @@ type ChartSaveData =
         {
             Offset = c.FirstNote
             Scores = List<Score>()
-            Bests = Dictionary<string, Bests>()
+            PersonalBests = Dictionary<string, Bests>()
             LastPlayed = DateTime.UnixEpoch
             Comment = ""
         }
@@ -197,10 +197,10 @@ module Scores =
     let saveScoreWithPbs (d: ChartSaveData) (rulesetId: string) (score: ScoreInfoProvider) : ImprovementFlags =
         saveScore d score
 
-        if d.Bests.ContainsKey rulesetId then
-            let newBests, flags = Bests.update score d.Bests.[rulesetId]
-            d.Bests.[rulesetId] <- newBests
+        if d.PersonalBests.ContainsKey rulesetId then
+            let newBests, flags = Bests.update score d.PersonalBests.[rulesetId]
+            d.PersonalBests.[rulesetId] <- newBests
             flags
         else
-            d.Bests.Add(rulesetId, Bests.create score)
+            d.PersonalBests.Add(rulesetId, Bests.create score)
             { Lamp = Improvement.New; Accuracy = Improvement.New; Grade = Improvement.New }
