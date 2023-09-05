@@ -4,13 +4,14 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
+open Prelude.Gameplay
 open Prelude.Data.Charts.Tables
+open Prelude.Data.Charts.Sorting
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
-open Prelude.Data.Charts.Sorting
 
 // todo: remove or repurpose this
 type private EditLevelPage(level: Level) as this =
@@ -24,12 +25,10 @@ type private EditLevelPage(level: Level) as this =
             match Prelude.Data.Scores.Scores.getData c.Hash with
             | Some d -> 
                 let ruleset_id = Table.current().Value.RulesetId
-                if d.Bests.ContainsKey(ruleset_id) then
-                    let (accuracy, rate) = d.Bests.[ruleset_id].Accuracy.Best
-                    if System.MathF.Round(rate, 2) > 0.99f then total <- total + accuracy
-                    else
-                        let (accuracy, rate) = d.Bests.[ruleset_id].Accuracy.Fastest
-                        if System.MathF.Round(rate, 2) > 0.99f then total <- total + accuracy
+                if d.PersonalBests.ContainsKey(ruleset_id) then
+                    match PersonalBests.get_best_above 1.0f d.PersonalBests.[ruleset_id].Accuracy with
+                    | Some accuracy -> total <- total + accuracy
+                    | None -> ()
             | None -> ()
         total / float level.Charts.Count
 

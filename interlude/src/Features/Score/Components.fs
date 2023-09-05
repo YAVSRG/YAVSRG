@@ -136,19 +136,18 @@ type Accuracy(grade: Grade.GradeResult ref, improvements: ImprovementFlags ref, 
             | Improvement.FasterBetter (r, b) ->  sprintf "%s  •  +%.2f%%  •  +%gx" new_record (b * 100.0) (System.MathF.Round(r, 2)), Colors.text_pink_2
             | Improvement.None ->
                 match (!previous_personal_bests) with
-                | Some pbs -> 
-                    let rb, r = pbs.Accuracy.Fastest
-                    let summary, distance_from_pb = 
-                        if r < data.ScoreInfo.rate then sprintf "%.2f%% (%.2fx)" (rb * 100.0) r, (rb - data.Scoring.Value)
-                        elif r = data.ScoreInfo.rate then sprintf "%.2f%%" (rb * 100.0), (rb - data.Scoring.Value)
-                        else 
-                            let rb, r = pbs.Accuracy.Best
-                            if r <> data.ScoreInfo.rate then sprintf "%.2f%% (%.2fx)" (rb * 100.0) r, (rb - data.Scoring.Value)
-                            else sprintf "%.2f%%" (rb * 100.0), (rb - data.Scoring.Value)
-                    if distance_from_pb < 0.001 then
-                        sprintf "Your record: %s" summary, (Colors.grey_2.O2, Colors.black)
-                    else
-                        sprintf "%.2f%% from record: %s" (distance_from_pb * 100.0) summary, (Colors.grey_2.O2, Colors.black)
+                | Some pbs ->
+                    match PersonalBests.get_best_above_with_rate data.ScoreInfo.rate pbs.Accuracy with
+                    | Some (v, r) ->
+
+                        let summary, distance_from_pb = 
+                            if r > data.ScoreInfo.rate then sprintf "%.2f%% (%.2fx)" (v * 100.0) r, (v - data.Scoring.Value)
+                            else sprintf "%.2f%%" (v * 100.0), (v - data.Scoring.Value)
+
+                        if distance_from_pb < 0.0001 then sprintf "Your record: %s" summary, (Colors.grey_2.O2, Colors.black)
+                        else sprintf "%.2f%% from record: %s" (distance_from_pb * 100.0) summary, (Colors.grey_2.O2, Colors.black)
+
+                    | None -> "--", (Colors.grey_2.O2, Colors.black)
                 | None -> "--", (Colors.grey_2.O2, Colors.black)
         Text.drawFillB(Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceBottom(LOWER_SIZE), color, Alignment.CENTER)
         base.Draw()
@@ -185,16 +184,17 @@ type Lamp(lamp: Lamp.LampResult ref, improvements: ImprovementFlags ref, previou
                 sprintf "%s  •  %s > %s  •  +%gx" new_record old_lamp new_lamp (System.MathF.Round(r, 2)), (Colors.text_pink_2)
             | Improvement.None ->
                 match (!previous_personal_bests) with
-                | Some pbs -> 
-                    let rb, r = pbs.Lamp.Fastest
-                    let summary = 
-                        if r < data.ScoreInfo.rate then sprintf "%s (%.2fx)" (data.Ruleset.LampName rb) r
-                        elif r = data.ScoreInfo.rate then data.Ruleset.LampName rb
-                        else 
-                            let rb, r = pbs.Lamp.Best
-                            if r <> data.ScoreInfo.rate then sprintf "%s (%.2fx)" (data.Ruleset.LampName rb) r
-                            else data.Ruleset.LampName rb
-                    sprintf "Your record: %s" summary, (Colors.grey_2.O2, Colors.black)
+                | Some pbs ->
+                    match PersonalBests.get_best_above_with_rate data.ScoreInfo.rate pbs.Lamp with
+                    | Some (v, r) ->
+
+                        let summary = 
+                            if r > data.ScoreInfo.rate then sprintf "%s (%.2fx)" (data.Ruleset.LampName v) r
+                            else data.Ruleset.LampName v
+
+                        sprintf "Your record: %s" summary, (Colors.grey_2.O2, Colors.black)
+
+                    | None -> "--", (Colors.grey_2.O2, Colors.black)
                 | None -> "--", (Colors.grey_2.O2, Colors.black)
         Text.drawFillB(Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceBottom(LOWER_SIZE), color, Alignment.CENTER)
         base.Draw()

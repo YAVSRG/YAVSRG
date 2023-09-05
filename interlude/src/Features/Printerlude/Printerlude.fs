@@ -124,12 +124,7 @@ module Printerlude =
                     Logging.Info "Cleaned up."
                 with err -> Logging.Error ("Error while cleaning up after export", err)
 
-        let fix_personal_bests() =
-            for entry in Prelude.Data.Scores.Scores.data.Entries.Values do
-                if entry.Bests.ContainsKey("SC(J4)BC581C") then
-                    entry.Bests.["SC(J4)548E5A"] <- entry.Bests.["SC(J4)BC581C"]
-                if entry.Bests.ContainsKey("Wife3(J4)E92BD3") then
-                    entry.Bests.["Wife3(J4)1AFE7B"] <- entry.Bests.["Wife3(J4)E92BD3"]
+        let fix_personal_bests() = ()
         
         let register_commands (ctx: ShellContext) = 
             ctx

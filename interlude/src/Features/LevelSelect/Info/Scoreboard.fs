@@ -130,11 +130,11 @@ module Scoreboard =
                         | Some b ->
                             sync( fun () -> 
                                 if 
-                                    not (req.ChartSaveData.Value.Bests.ContainsKey req.RulesetId) 
-                                    || b <> req.ChartSaveData.Value.Bests[req.RulesetId] 
+                                    not (req.ChartSaveData.Value.PersonalBests.ContainsKey req.RulesetId) 
+                                    || b <> req.ChartSaveData.Value.PersonalBests.[req.RulesetId] 
                                 then
                                     LevelSelect.refresh_details()
-                                req.ChartSaveData.Value.Bests[req.RulesetId] <- b
+                                    req.ChartSaveData.Value.PersonalBests.[req.RulesetId] <- b
                             )
                 }
             fun () ->

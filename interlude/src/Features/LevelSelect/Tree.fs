@@ -62,9 +62,14 @@ module Tree =
     /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
     let mutable private scrollTo = ScrollTo.Nothing
 
-    let private getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) (format: 'T -> string) =
-        if r1 < rate.Value then ( p2, r2, (if r2 < rate.Value then Color.FromArgb(127, Color.White) else colorFunc p2), format p2 )
-        else ( p1, r1, colorFunc p1, format p1 )
+    let private getPb (bests: PersonalBests<'T>) (colorFunc: 'T -> Color) (format: 'T -> string) =
+        match PersonalBests.get_best_above_with_rate rate.Value bests with
+        | Some (v, r) -> Some (v, r, colorFunc v, format v)
+        | None ->
+        
+        match PersonalBests.get_best_below_with_rate rate.Value bests with
+        | Some (v, r) -> Some (v, r, Colors.white.O2, format v)
+        | None -> None
     
     let switchChart(cc, context, groupName) =
         match Cache.load cc cache with
@@ -113,10 +118,10 @@ module Tree =
             localCacheFlag <- cacheFlag
             if chartData.IsNone then chartData <- Scores.getData cc.Hash
             match chartData with
-            | Some d when d.Bests.ContainsKey Rulesets.current_hash ->
-                personal_bests <- Some d.Bests.[Rulesets.current_hash]
-                grade <- Some <| getPb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName
-                lamp <- Some <| getPb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
+            | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
+                personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
+                grade <- getPb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName
+                lamp <- getPb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
             | _ -> ()
             color <- colorFunc personal_bests
             markers <-

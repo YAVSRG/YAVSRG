@@ -18,18 +18,11 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
     let lamp = ref <| Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
     let stats = ref <| ScoreScreenStats.Generate scoreData.Scoring.HitEvents
     let previous_personal_bests = 
-        if Gameplay.Chart.saveData.Value.Bests.ContainsKey Rulesets.current_hash then 
-            Some Gameplay.Chart.saveData.Value.Bests.[Rulesets.current_hash]
+        if Gameplay.Chart.saveData.Value.PersonalBests.ContainsKey Rulesets.current_hash then 
+            Some Gameplay.Chart.saveData.Value.PersonalBests.[Rulesets.current_hash]
         else None
         |> ref
     let originalRuleset = options.SelectedRuleset.Value
-
-    let getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (textFunc: 'T -> string) =
-        let rate = scoreData.ScoreInfo.rate
-        if rate > r2 then sprintf "%s (%.2fx)" (textFunc p2) r2
-        elif rate = r2 then textFunc p2
-        elif rate <> r1 then sprintf "%s (%.2fx)" (textFunc p1) r1
-        else textFunc p1
 
     let graph = new ScoreGraph(scoreData)
 
