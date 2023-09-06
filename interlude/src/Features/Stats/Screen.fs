@@ -5,6 +5,7 @@ open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Gameplay
 open Prelude.Data.Charts
+open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
 open Interlude.Utils
 open Interlude.UI
@@ -170,6 +171,19 @@ type private TableLevelStats(level: Level, data: (int * int) array, ruleset: Rul
             Draw.rect (Rect.Create(x, b.Top, x + w, b.Bottom)) (ruleset.GradeColor grade)
             x <- x + w
 
+type private TableScore(chart: TableChart, grade: int, rating: float, ruleset: Ruleset) =
+    inherit StaticWidget(NodeType.None)
+
+    let name = match Cache.by_hash chart.Hash Library.cache with Some cc -> cc.Title | None -> sprintf "<%s>" chart.Id
+    let grade_name = ruleset.GradeName grade
+    let grade_color = ruleset.GradeColor grade
+
+    override this.Draw() =
+        Draw.rect this.Bounds Colors.black.O2
+        Text.drawFillB(Style.font, name, this.Bounds.Shrink(10.0f, 5.0f), Colors.text, Alignment.LEFT)
+        Text.drawFillB(Style.font, grade_name, this.Bounds.TrimRight(100.0f).SliceRight(100.0f).Shrink(10.0f, 5.0f), (grade_color, Colors.shadow_2), Alignment.CENTER)
+        Text.drawFillB(Style.font, sprintf "%.2f" rating, this.Bounds.Shrink(10.0f, 5.0f), Colors.text, Alignment.RIGHT)
+
 type private TableStats() =
     inherit StaticContainer(NodeType.None)
 
@@ -198,17 +212,32 @@ type private TableStats() =
             match Interlude.Content.Rulesets.try_get_by_hash t.RulesetId with
             | Some ruleset ->
 
-                let flow = FlowContainer.Vertical<TableLevelStats>(30.0f)
-                let scroll = ScrollContainer.Flow(flow, Position = Position.TrimTop(120.0f).Margin(40.0f))
+                let table_breakdown_items = FlowContainer.Vertical<TableLevelStats>(30.0f)
+                let table_breakdown = ScrollContainer.Flow(table_breakdown_items)
                 let biggest_level = table_level_data |> Array.map (fun (l, d) -> d |> Array.map snd |> Array.sum) |> Array.max |> float32
                 for (l, d) in table_level_data do
-                    flow.Add(TableLevelStats(l, d, ruleset, d |> Array.map snd |> Array.sum |> fun t -> float32 t / biggest_level))
+                    table_breakdown_items.Add(TableLevelStats(l, d, ruleset, d |> Array.map snd |> Array.sum |> fun t -> float32 t / biggest_level))
+
+                let table_bests_items = FlowContainer.Vertical<TableScore>(50.0f)
+                let table_bests = ScrollContainer.Flow(table_bests_items)
+                for (chart, grade, rating) in top_scores do
+                    table_bests_items.Add(TableScore(chart, grade, rating, ruleset))
+
+                let swap = SwapContainer(Current = table_breakdown, Position = Position.TrimTop(120.0f).Margin(40.0f))
 
                 this
                 |+ Text(t.Name, Position = Position.SliceTop(120.0f).Margin(40.0f, 10.0f), Align = Alignment.LEFT)
                 |+ Text("Skill level", Position = Position.Row(10.0f, 40.0f).Margin(40.0f, 0.0f), Align = Alignment.RIGHT)
                 |+ Text(sprintf "%.2f" table_rating, Position = Position.Row(50.0f, 60.0f).Margin(40.0f, 0.0f), Align = Alignment.RIGHT)
-                |* scroll
+                |+ Button(
+                    fun () -> 
+                        if swap.Current = table_breakdown then
+                            sprintf "%s %s" Icons.stats_2 "Breakdown"
+                        else sprintf "%s %s" Icons.stats_2 "Ratings"
+                    , fun () -> if swap.Current = table_breakdown then swap.Current <- table_bests else swap.Current <- table_breakdown
+                    ,
+                    Position = Position.Box(0.0f, 0.0f, 40.0f, 110.0f, 200.0f, 50.0f))
+                |* swap
             | None -> this |* EmptyState(Icons.x, "Missing ruleset")
         | None -> 
             this
