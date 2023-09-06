@@ -3,6 +3,7 @@
 open System
 open StackExchange.Redis
 open NRedisStack.Search
+open NRedisStack.Search.Aggregation
 open NRedisStack.Search.Literals.Enums
 open Percyqaz.Common
 open Interlude.Web.Server.Domain.Redis
@@ -165,6 +166,39 @@ module Score =
         ft.Search("idx:scores", Query(sprintf "@user_id:[%i %i] @timestamp:[%i %i]" userId userId timestamp timestamp)).Documents
         |> Seq.isEmpty
         |> not
+
+    let get_best_score (userId: int64) (ruleset_id: string) (rate: float32) (hash: string) : Score option =
+        let results = ft.Search("idx:scores", 
+            Query(
+                sprintf "@user_id:[%i %i] @rate:[%f 2.0] @hash:{%s} @ruleset_id:{%s}" 
+                    userId
+                    userId
+                    rate
+                    hash
+                    (ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
+             ).SetSortBy("score", false).Limit(0, 1)).Documents
+        results
+        |> Seq.tryHead
+        |> Option.map (fun d -> Text.Json.JsonSerializer.Deserialize<Score>(d.Item "json"))
+
+    // ft.aggregate idx:scores "@user_id:[4 4]" verbatim groupby 1 @hash reduce max 1 grade as best_grade
+    // todo: filter to table hashes when there are more scores for non-table than table (soon)
+
+    let aggregate_table_grades (userId: int64) (ruleset_id: string) (rate: float32) =
+        let results = Collections.Generic.Dictionary<string, int>()
+        ft.Aggregate("idx:scores", 
+            AggregationRequest(
+                sprintf "@user_id:[%i %i] @rate:[%f 2.0] @ruleset_id:{%s}" 
+                    userId
+                    userId
+                    rate
+                    (ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
+            ).Verbatim().GroupBy("@hash", Reducers.Max("grade").As("best_grade"))).GetResults()
+        |> Seq.iter (fun result -> 
+            let mutable g = 0
+            result.["best_grade"].TryParse(&g) |> ignore
+            results.[result.["hash"].ToString()] <- g)
+        results
 
 module Leaderboard =
 
@@ -334,3 +368,15 @@ module Migrations =
 
             db.StringIncrement("migration", 2L) |> ignore
             Logging.Debug("Migration 2 OK")
+            
+        if migration < 4L then
+            Logging.Debug("Performing migration 3")
+            
+            ft.Alter(
+                "idx:scores",
+                Schema()
+                    .AddTagField(FieldName("$.ChartId", "hash"), false)
+            ) |> ignore
+            
+            db.StringIncrement("migration", 1L) |> ignore
+            Logging.Debug("Migration 3 OK")

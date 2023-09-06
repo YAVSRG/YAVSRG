@@ -52,21 +52,34 @@ module Save =
             let hash = request.ChartId.ToUpper()
 
             match Charts.by_hash hash with
-            | None -> response.ReplyJson(false) // doesn't exist in database
+            | None -> response.ReplyJson(false)
             | Some (chart_info, song) ->
+
+            let timestamp = (System.DateTimeOffset.op_Implicit request.Timestamp).ToUnixTimeMilliseconds()
+            if Score.exists userId timestamp then
+                Logging.Debug(sprintf "Score with timestamp by this user exists: %i" timestamp)
+                return response.ReplyJson(true) 
+            else
 
             match! fetch_chart.RequestAsync(hash) with
             | None -> failwithf "Couldn't get note data for chart %s" hash
             | Some chart ->
 
             match Mods.check request.Mods with
-            | Error _ -> response.MakeErrorResponse(400) |> ignore
+            | Error _ -> 
+                Logging.Debug("Rejecting score with invalid mods")
+                response.MakeErrorResponse(400) |> ignore
             | Ok status when status >= Mods.ModStatus.Unstored -> response.ReplyJson(false)
             | Ok _ ->
 
+            // todo: zip bomb prevention?
             let replay = Replay.decompress request.Replay
             let modChart = Mods.getModChart request.Mods chart
             let rate = System.MathF.Round(request.Rate, 2)
+
+            if rate < 0.5f || rate > 2.0f then 
+                Logging.Debug("Rejecting score with invalid rate")
+                response.MakeErrorResponse(400) |> ignore else
 
             for ruleset_id in Score.SHORT_TERM_RULESET_LIST do
                 let ruleset = Charts.rulesets.[ruleset_id]
@@ -84,11 +97,10 @@ module Save =
                         Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
                         Rate = rate
                         Mods = request.Mods
-                        Timestamp = (System.DateTimeOffset.op_Implicit request.Timestamp).ToUnixTimeMilliseconds()
+                        Timestamp = timestamp
                     }
 
-                let score_id = Score.save_new score
-                Logging.Info(sprintf "Saved score #%i - %.2f%% on %s by %s" score_id (score.Score * 100.0) song.FormattedTitle user.Username)
+                Score.save_new score |> ignore
 
                 if rate >= 1.0f && (match Leaderboard.score userId hash ruleset_id with Some s -> s < score.Score | None -> true) then
                     match Leaderboard.Replay.create (request.Replay, rate, request.Mods, request.Timestamp) with

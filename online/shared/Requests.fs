@@ -81,6 +81,29 @@ module Charts =
                     Scores: Score array
                 }
 
+module Tables =
+
+    /// requires login token as Authorization header
+    /// url parameters:
+    ///  user - name of user to get records for
+    module Records =
+
+        let ROUTE = (GET, "/tables/records")
+
+        [<Json.AutoCodec>]
+        type Score =
+            {
+                Id: string
+                Hash: string
+                Grade: int
+            }
+
+        [<Json.AutoCodec>]
+        type Response =
+            {
+                Scores: Score array
+            }
+
 module Friends =
 
     /// requires login token as Authorization header

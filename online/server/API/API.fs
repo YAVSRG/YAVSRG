@@ -23,11 +23,13 @@ module API =
         add_endpoint Charts.Scores.Save.ROUTE Charts.Scores.Save.handle
         add_endpoint Charts.Scores.Leaderboard.ROUTE Charts.Scores.Leaderboard.handle
 
-        add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
+        add_endpoint Tables.Records.ROUTE Tables.Records.handle
 
         add_endpoint Friends.List.ROUTE Friends.List.handle
         add_endpoint Friends.Add.ROUTE Friends.Add.handle
         add_endpoint Friends.Remove.ROUTE Friends.Remove.handle
+
+        add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
 
     let handle_request(method: HttpMethod, route: string, body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) =
         async {
