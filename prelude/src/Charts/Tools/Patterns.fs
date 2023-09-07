@@ -503,3 +503,22 @@ module Patterns =
         |> Seq.sortByDescending (fun x -> x.Score )
         |> List.ofSeq
         |> List.truncate 10
+
+    let categorise_chart (report: PatternReportEntry list) =
+        let isJack = fun e -> match e.Pattern with Jack _ -> true | _ -> false
+        let isStream = fun e -> match e.Pattern with Stream _ -> true | _ -> false
+        let jacks = report |> List.filter isJack
+        let streams = report |> List.filter isStream
+
+        let total = report |> List.sumBy (fun e -> e.Score)
+        let streamTotal = streams |> List.sumBy (fun e -> e.Score)
+        let jackTotal = jacks |> List.sumBy (fun e -> e.Score)
+
+        if streamTotal / total > 0.3f && jackTotal / total > 0.3f then
+            "Hybrid"
+        elif streamTotal / total > 0.4f then
+            (List.head streams).Pattern.ToString()
+        elif jackTotal / total > 0.4f then 
+            (List.head jacks).Pattern.ToString()
+        else "Unknown"
+

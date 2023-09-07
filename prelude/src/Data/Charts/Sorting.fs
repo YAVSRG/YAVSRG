@@ -116,6 +116,10 @@ module Sorting =
             "artist", fun (c, _) -> 0, firstCharacter c.Artist
             "creator", fun (c, _) -> 0, firstCharacter c.Creator
             "keymode", fun (c, _) -> c.Keys, c.Keys.ToString() + "K"
+            "patterns", fun (c, _) -> 
+                match Library.patterns.TryGetValue(c.Hash) with
+                | true, report -> 0, Patterns.categorise_chart report
+                | false, _ -> -1, "Not analysed"
         ]
 
     let private compareBy (f: CachedChart -> IComparable) = fun a b -> f(fst a).CompareTo <| f(fst b)
