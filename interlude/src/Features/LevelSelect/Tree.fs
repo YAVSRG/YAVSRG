@@ -274,6 +274,8 @@ module Tree =
     let mutable filter: Filter = []
     let mutable private groups: GroupItem list = []
     let mutable private lastItem : ChartItem option = None
+    let mutable isEmpty = false
+
 
     let refresh() =
         // fetch groups
@@ -313,6 +315,7 @@ module Tree =
                     |> fun l -> GroupItem(groupName, l, library_groups.[(sortIndex, groupName)].Context)
                 )
             |> List.ofSeq
+        isEmpty <- List.isEmpty groups
         cacheFlag <- 0
         expandedGroup <- selectedGroup
         scrollTo <- ScrollTo.Chart

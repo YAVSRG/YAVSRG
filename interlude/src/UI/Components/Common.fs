@@ -8,6 +8,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
+open Interlude.UI
 open Interlude.Utils
 
 type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
@@ -82,6 +83,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
             colorFunc
         )
 
+// todo: rename or merge into SearchBox as this is exclusively used for searches
 type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as this =
     inherit Frame(NodeType.Switch(fun _ -> this.TextEntry))
 
@@ -103,7 +105,7 @@ type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as thi
                     | "none" -> match setting.Value with "" -> prompt | _ -> ""
                     | b ->
                         match setting.Value with
-                        | "" -> Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
+                        | "" -> Icons.search + " " + Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
                         | _ -> ""
                 ,
                 Color = textEntry.ColorFunc,

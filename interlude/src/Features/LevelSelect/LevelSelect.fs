@@ -10,7 +10,7 @@ open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Suggestions
-open Interlude.Content
+open Prelude.Data.Charts.Tables
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Utils
@@ -62,6 +62,27 @@ type LevelSelectScreen() =
         |+ ActionBar(random_chart, Position = { Left = 1.0f %- 805.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 605.0f; Bottom = 0.0f %+ 90.0f })
 
         |+ LibraryModeSettings()
+
+        |+ Conditional((fun () -> Tree.isEmpty),
+            StaticContainer(NodeType.None)
+            |+ Conditional((fun () -> 
+                Tree.filter <> []), 
+                EmptyState(Icons.search, L"levelselect.empty.search"))
+            |+ Conditional((fun () -> 
+                Tree.filter = []
+                && options.LibraryMode.Value = LibraryMode.Table
+                && Table.current().IsNone), 
+                EmptyState(Icons.table, L"levelselect.empty.no_table"))
+            |+ Conditional((fun () -> 
+                Tree.filter = []
+                && options.LibraryMode.Value = LibraryMode.Collections), 
+                EmptyState(Icons.collections, L"levelselect.empty.no_collections"))
+            |+ Conditional((fun () -> 
+                Tree.filter = []
+                && options.LibraryMode.Value = LibraryMode.All), 
+                EmptyState(Icons.folder, L"levelselect.empty.no_charts")),
+            Position = { Position.TrimTop(170.0f) with Left = 0.5f %+ 0.0f }
+           )
 
         |* infoPanel
 

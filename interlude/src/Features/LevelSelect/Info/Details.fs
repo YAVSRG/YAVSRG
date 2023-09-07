@@ -36,6 +36,9 @@ type Details(display: Setting<Display>) =
         base.Draw()
 
         let mutable b = this.Bounds.SliceTop(40.0f).Shrink(10.0f, 0.0f).Translate(0.0f, 50.0f)
-        for entry in Gameplay.Chart.patterns.Value do
+        match Gameplay.Chart.patterns with
+        | None -> ()
+        | Some p ->
+            for entry in p do
             Text.drawFillB(Style.font, sprintf "%i BPM %O" entry.BPM entry.Pattern, b, Colors.text_subheading, Alignment.CENTER)
             b <- b.Translate(0.0f, 45.0f)

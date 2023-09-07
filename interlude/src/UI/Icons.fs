@@ -7,6 +7,7 @@ module Icons =
     let check = Feather.check
     let x = Feather.x
     let screenshot = Feather.image
+    let search = Feather.search
 
     let heart2 = Feather.heart_on
     let heart = Feather.heart
