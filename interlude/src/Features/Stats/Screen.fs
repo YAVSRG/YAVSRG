@@ -229,14 +229,15 @@ type private TableStats() =
                 |+ Text(t.Name, Position = Position.SliceTop(120.0f).Margin(40.0f, 10.0f), Align = Alignment.LEFT)
                 |+ Text(L"stats.table.skill_level", Position = Position.Row(10.0f, 40.0f).Margin(40.0f, 0.0f), Align = Alignment.RIGHT)
                 |+ Text(sprintf "%.2f" table_rating, Position = Position.Row(50.0f, 60.0f).Margin(40.0f, 0.0f), Align = Alignment.RIGHT)
-                |+ Button(
-                    fun () -> 
+                |+ StylishButton(
+                    fun () -> if swap.Current = table_breakdown then swap.Current <- table_bests else swap.Current <- table_breakdown
+                    , fun () -> 
                         if swap.Current = table_breakdown then
                             sprintf "%s %s" Icons.stats_2 (L"stats.table.breakdown")
                         else sprintf "%s %s" Icons.stats_2 (L"stats.table.ratings")
-                    , fun () -> if swap.Current = table_breakdown then swap.Current <- table_bests else swap.Current <- table_breakdown
-                    ,
-                    Position = Position.Box(0.0f, 0.0f, 40.0f, 110.0f, 200.0f, 50.0f))
+                    , !%Palette.MAIN_100,
+                    TiltRight = false,
+                    Position = Position.Row(110.0f, 50.0f).Margin(40.0f, 0.0f).SliceRight(250.0f))
                 |* swap
             | None -> this |* EmptyState(Icons.x, L"stats.table.missing_ruleset")
         | None -> 

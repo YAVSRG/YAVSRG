@@ -22,6 +22,7 @@ module Logo =
         let counter = Animation.Counter(10000000.0)
 
         override this.Draw() =
+            if state = Hidden then () else
             base.Draw()
             let w = this.Bounds.Width
 
@@ -142,5 +143,5 @@ module Logo =
     let display = Display(Position = { Left = 0.5f %- 300.0f; Top = 0.5f %+ 1000.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 1600.0f })
 
     let moveCentre () = state <- Centre; display.Move (-400.0f, -400.0f, 400.0f, 400.0f)
-    let moveOffscreen () = state <- Hidden; display.Move (-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
+    let moveOffscreen () = state <- Hidden; display.Move (-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f); display.SnapPosition()
     let moveMenu () = state <- Menu; display.Move (-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)

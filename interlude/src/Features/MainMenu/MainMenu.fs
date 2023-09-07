@@ -43,9 +43,7 @@ type private MenuButton(onClick, label: string, pos) as this =
 type MainMenuScreen() as this =
     inherit Screen.T()
 
-    let playFunc() =
-        Logo.moveOffscreen()
-        Screen.change Screen.Type.LevelSelect Transitions.Flags.UnderLogo
+    let playFunc() = Screen.change Screen.Type.LevelSelect Transitions.Flags.Default
 
     let play = MenuButton (playFunc, L"menu.play.name", Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f))
     let options = MenuButton (OptionsMenuRoot.show, L"menu.options.name", Position.Box(0.0f, 0.5f, -100.0f, -50.0f, 1230.0f, 100.0f))
@@ -97,7 +95,7 @@ type MainMenuScreen() as this =
         play.Pop(); options.Pop(); quit.Pop()
 
     override this.OnExit next =
-        Logo.moveOffscreen()
+        if next <> Screen.Type.SplashScreen then Logo.moveOffscreen()
         splashAnim.Target <- 0.0f; splashAnim.Snap()
         Background.dim 0.7f
 
