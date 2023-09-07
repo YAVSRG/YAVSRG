@@ -156,7 +156,7 @@ type DynamicContainer(nodeType) =
 
     override this.Position with set(value) = pos.Position <- value; if not this.Initialised then pos.Snap()
 
-    member this.SnapPosition() = pos.Snap()
+    member this.SnapPosition() = pos.Snap(); if this.Initialised then this.UpdateBounds()
 
     member private this.UpdateBounds() =
         this.Bounds <- Position.calculate pos.Position this.Parent.Bounds
