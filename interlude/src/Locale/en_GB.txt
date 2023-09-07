@@ -307,6 +307,7 @@ levelselect.groupby.lamp=Lamp
 levelselect.groupby.name=Chart grouping
 levelselect.groupby.none=None
 levelselect.groupby.pack=Pack
+levelselect.groupby.patterns=Patterns
 levelselect.groupby.reverse_hint=Reverse group ordering
 levelselect.groupby.title=Title
 levelselect.groupby.tooltip=Choose how charts are grouped.
