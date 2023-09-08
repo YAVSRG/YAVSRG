@@ -43,7 +43,7 @@ module Printerlude =
             | None -> failwith "Select a chart"
             | Some c -> Interlude.Chart.diff cmp c
 
-        let show_version() =
+        let show_version (ctx: ShellContext) () =
             ctx.WriteLine(sprintf "You are running %s" Utils.version)
             ctx.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latestVersionName)
 
@@ -128,7 +128,6 @@ module Printerlude =
         
         let register_commands (ctx: ShellContext) = 
             ctx
-                .WithCommand("version", "Shows info about the current game version", show_version)
                 .WithCommand("exit", "Exits the game", fun () -> UI.Screen.exit <- true)
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
                 .WithCommand("export_osz", "Export current chart as osz", export_osz)
@@ -142,14 +141,19 @@ module Printerlude =
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
                 .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
 
+        let register_ipc_commands (ctx: ShellContext) =
+            ctx
+                .WithCommand("version", "Shows info about the current game version", show_version ctx)
+
     let private ms = new MemoryStream()
     let private context_output = new StreamReader(ms)
     let private context_writer = new StreamWriter(ms)
 
     ctx <-
         { ShellContext.Empty with IO = { In = stdin; Out = context_writer } }
-        |> Themes.register_commands
+        |> Utils.register_ipc_commands
         |> Utils.register_commands
+        |> Themes.register_commands
 
     let exec(s: string) =
         let msPos = ms.Position
@@ -158,4 +162,10 @@ module Printerlude =
         ms.Position <- msPos
         Terminal.add_message (context_output.ReadToEnd())
 
-    let init() = Terminal.exec_command <- exec
+    let mutable ipc_shutdown_token : System.Threading.CancellationTokenSource option = None
+
+    let init(instance: int) =
+        Terminal.exec_command <- exec
+        if instance <> 0 then ipc_shutdown_token <- Some (IPC.start_server_thread "Interlude" (ShellContext.Empty |> Utils.register_ipc_commands))
+
+    let shutdown() = ipc_shutdown_token |> Option.iter (fun token -> token.Cancel())

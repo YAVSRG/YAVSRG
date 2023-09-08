@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -123,7 +123,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Percyqaz.Shell" Version="0.6.0" />
+    <PackageReference Include="Percyqaz.Shell" Version="0.6.2" />
   </ItemGroup>
 
   <ItemGroup>

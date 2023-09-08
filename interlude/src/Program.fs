@@ -2,6 +2,7 @@
 open System.Threading
 open System.Diagnostics
 open Percyqaz.Common
+open Percyqaz.Shell
 open Percyqaz.Flux
 open Percyqaz.Flux.Windowing
 open Interlude
@@ -25,7 +26,7 @@ let launch(instance: int) =
     Window.afterInit.Add(fun () -> 
         Content.init Options.options.Theme.Value Options.options.Noteskin.Value
         Options.Hotkeys.init Options.options.Hotkeys
-        Printerlude.init()
+        Printerlude.init(instance)
     )
     Window.onUnload.Add(Gameplay.save)
     Window.onFileDrop.Add(fun path -> 
@@ -46,6 +47,7 @@ let launch(instance: int) =
 
     Options.save()
     Network.shutdown()
+    Printerlude.shutdown()
 
     Logging.Shutdown()
 
@@ -54,15 +56,27 @@ let main argv =
     let m = new Mutex(true, "Interlude")
 
     if argv.Length > 0 then
-        printfn "Command line arguments to Interlude not yet supported."
 
-    elif m.WaitOne(TimeSpan.Zero, true) then
-        launch(0)
-        m.ReleaseMutex()
+        if m.WaitOne(TimeSpan.Zero, true) then
+            printfn "Interlude is not running!"
+            m.ReleaseMutex()
 
-    elif Prelude.Common.DEV_MODE then
-        let instances = Process.GetProcessesByName "Interlude" |> Array.length
-        launch(instances - 1)
+        else
+            if argv.Length > 0 then
+                String.concat " " argv
+                |> Shell.IPC.send "Interlude"
+                |> printfn "%s"
+
     else
-        printfn "Interlude is already running."
+
+        if m.WaitOne(TimeSpan.Zero, true) then
+            launch(0)
+            m.ReleaseMutex()
+
+        elif Prelude.Common.DEV_MODE then
+            let instances = Process.GetProcessesByName "Interlude" |> Array.length
+            launch(instances - 1)
+        else
+            // todo: command to maximise/show Interlude window when already running
+            printfn "Interlude is already running!"
     0
