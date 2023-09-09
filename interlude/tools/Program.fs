@@ -11,8 +11,9 @@ let ctx =
 
 [<EntryPoint>]
 let main argv =
-    if argv.Length > 0 then ctx.Evaluate(String.concat " " argv)
+    let io = IOContext.Console
+    if argv.Length > 0 then ctx.Evaluate io (String.concat " " argv)
     else
         printfn "== Interlude Tools CLI =="
-        repl ctx
+        repl io ctx
     0

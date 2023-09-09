@@ -58,14 +58,14 @@ let main argv =
     if argv.Length > 0 then
 
         if m.WaitOne(TimeSpan.Zero, true) then
-            printfn "Interlude is not running!"
+            printfn "Error: Interlude is not running!"
             m.ReleaseMutex()
 
         else
             if argv.Length > 0 then
-                String.concat " " argv
-                |> Shell.IPC.send "Interlude"
-                |> printfn "%s"
+                match Shell.IPC.send "Interlude" (String.concat " " argv) with
+                | Some success -> printfn "%s" success
+                | None -> printfn "Error: Connection timed out!"
 
     else
 
