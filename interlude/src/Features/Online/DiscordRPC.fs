@@ -10,7 +10,7 @@ module DiscordRPC =
     let init() =
 
         client.OnReady.Add (fun msg -> Logging.Info("Connected to discord rich presence"))
-        client.RegisterUriScheme(null, null) |> ignore
+        //client.RegisterUriScheme(null, null) |> ignore
         client.Initialize() |> ignore
 
     let in_menus(details: string) =
