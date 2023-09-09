@@ -12,8 +12,9 @@ let ctx =
 [<EntryPoint>]
 let main argv =
     use logging = Backbeat.Utils.init()
-    if argv.Length > 0 then ctx.Evaluate(String.concat " " argv)
+    let io = IOContext.Console
+    if argv.Length > 0 then ctx.Evaluate io (String.concat " " argv)
     else
         printfn "== Backbeat CLI =="
-        repl ctx
+        repl io ctx
     0
