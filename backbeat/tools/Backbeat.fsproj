@@ -21,10 +21,10 @@
 
   <ItemGroup>
     <PackageReference Include="Backblaze.Client" Version="1.0.1" />
-    <PackageReference Include="Percyqaz.Shell" Version="0.5.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
     <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
   </ItemGroup>
 

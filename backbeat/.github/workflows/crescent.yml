@@ -14,6 +14,11 @@ jobs:
         
     - uses: actions/checkout@v3
       with:
+        repository: percyqaz/Percyqaz.Shell
+        path: Percyqaz.Shell
+        
+    - uses: actions/checkout@v3
+      with:
         repository: YAVSRG/Prelude
         path: Prelude
         
