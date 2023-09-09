@@ -131,6 +131,7 @@ type LobbyScreen() =
         if not in_lobby then Lobby.refresh_list()
         if in_lobby then SelectedChart.update Network.lobby.Value.Chart
         Song.onFinish <- SongFinishAction.Loop
+        DiscordRPC.in_menus("Multiplayer lobby")
     override this.OnExit(_) = ()
 
     override this.OnBack() = 

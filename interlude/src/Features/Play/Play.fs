@@ -87,6 +87,7 @@ module PlayScreen =
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
                 base.OnEnter(previous)
+                DiscordRPC.playing_timed("Playing", Gameplay.Chart.cacheInfo.Value.Title, Gameplay.Chart.cacheInfo.Value.Length / Gameplay.rate.Value)
 
             override this.OnExit(next) =
                 if next = Screen.Type.Score then Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
@@ -186,6 +187,7 @@ module PlayScreen =
                 if options.AutoCalibrateOffset.Value then  AutomaticSync.apply(scoring)
                 if next <> Screen.Type.Score then Lobby.abandon_play()
                 base.OnExit(next)
+                DiscordRPC.playing_timed("Multiplayer", Gameplay.Chart.cacheInfo.Value.Title, Gameplay.Chart.cacheInfo.Value.Length / Gameplay.rate.Value)
 
             override this.Update(elapsedTime, bounds) =
                 Stats.session.PlayTime <- Stats.session.PlayTime + elapsedTime

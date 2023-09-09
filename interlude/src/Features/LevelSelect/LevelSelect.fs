@@ -131,6 +131,7 @@ type LevelSelectScreen() =
         if Cache.recache_service.Status <> Async.ServiceStatus.Idle then
             Notifications.system_feedback(Icons.system_notification, L"notification.recache_running.title", L"notification.recache_running.body")
         refresh()
+        DiscordRPC.in_menus("Choosing a song")
 
     override this.OnExit next = Input.removeInputMethod()
 

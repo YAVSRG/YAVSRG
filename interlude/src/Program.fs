@@ -27,6 +27,7 @@ let launch(instance: int) =
         Content.init Options.options.Theme.Value Options.options.Noteskin.Value
         Options.Hotkeys.init Options.options.Hotkeys
         Printerlude.init(instance)
+        DiscordRPC.init()
     )
     Window.onUnload.Add(Gameplay.save)
     Window.onFileDrop.Add(fun path -> 
@@ -47,12 +48,18 @@ let launch(instance: int) =
 
     Options.save()
     Network.shutdown()
+    DiscordRPC.shutdown()
     Printerlude.shutdown()
 
     Logging.Shutdown()
 
 [<EntryPoint>]
 let main argv =
+    if not (IO.File.Exists("bass.dll")) && not (IO.File.Exists("libbass.iso")) then
+        printfn "Looks like Interlude was launched from the wrong starting directory!"
+        -1
+    else
+
     let m = new Mutex(true, "Interlude")
 
     if argv.Length > 0 then

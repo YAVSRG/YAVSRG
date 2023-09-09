@@ -91,7 +91,9 @@ type ImportScreen() as this =
             |+ ImportScreen.container
         )
 
-    override this.OnEnter _ = tabs.Focus()
+    override this.OnEnter _ = 
+        tabs.Focus()
+        DiscordRPC.in_menus("Importing new content")
     override this.OnExit _ = ()
     override this.OnBack() = 
         if Network.lobby.IsSome then Some Screen.Type.Lobby

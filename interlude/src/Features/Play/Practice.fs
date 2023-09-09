@@ -13,6 +13,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Features
+open Interlude.Features.Online
 open Interlude.Features.Stats
 open Interlude.Features.Play.HUD
 
@@ -295,6 +296,7 @@ module PracticeScreen =
                 base.OnEnter(p)
                 Song.seek(practice_point)
                 Song.pause()
+                DiscordRPC.playing("Practice mode", Gameplay.Chart.cacheInfo.Value.Title)
 
             override this.OnBack() =
                 if not options_mode then

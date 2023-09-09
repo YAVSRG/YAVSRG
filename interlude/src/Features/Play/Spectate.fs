@@ -108,6 +108,7 @@ module SpectateScreen =
 
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
+                DiscordRPC.playing("Spectating", Gameplay.Chart.cacheInfo.Value.Title)
                 Song.pause()
 
             override this.OnExit(next) =

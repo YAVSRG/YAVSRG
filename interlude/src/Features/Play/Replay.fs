@@ -14,6 +14,7 @@ open Interlude.UI
 open Interlude.Options
 open Interlude.Utils
 open Interlude.Features
+open Interlude.Features.Online
 open Interlude.Features.Play.HUD
 
 [<RequireQualifiedAccess>]
@@ -166,6 +167,10 @@ module ReplayScreen =
                 this
                 |+ InputOverlay(chart.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, show_input_overlay)
                 |* ControlOverlay(is_auto, fun t -> let now = Song.time() in Song.seek t; if t < now then seek_backwards this)
+
+            override this.OnEnter p =
+                DiscordRPC.playing("Watching a replay", Gameplay.Chart.cacheInfo.Value.Title)
+                base.OnEnter p
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)

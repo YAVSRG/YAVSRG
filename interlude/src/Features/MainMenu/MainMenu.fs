@@ -11,6 +11,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude.UI
 open Interlude.UI.Components
+open Interlude.Features.Online
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 
@@ -93,6 +94,7 @@ type MainMenuScreen() as this =
         Song.onFinish <- SongFinishAction.Loop
         splashAnim.Target <- 1.0f
         play.Pop(); options.Pop(); quit.Pop()
+        DiscordRPC.in_menus("Main menu")
 
     override this.OnExit next =
         if next <> Screen.Type.SplashScreen then Logo.moveOffscreen()

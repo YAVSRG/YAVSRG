@@ -284,7 +284,8 @@ type StatsScreen() =
         |* Tabs(Position = { Position.Default with Left = 0.35f %+ 0.0f }.Margin(40.0f))
         base.Init parent
 
-    override this.OnEnter _ = ()
+    override this.OnEnter _ = 
+        DiscordRPC.in_menus("Admiring stats")
     override this.OnExit _ = ()
     override this.OnBack() = 
         if Network.lobby.IsSome then Some Screen.Type.Lobby

@@ -47,6 +47,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
 
     override this.OnEnter prev =
         Screen.Toolbar.hide()
+        DiscordRPC.in_menus("Admiring a score")
 
     override this.OnExit next =
         options.SelectedRuleset.Set originalRuleset
