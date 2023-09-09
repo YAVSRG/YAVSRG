@@ -27,7 +27,7 @@ let launch(instance: int) =
         Content.init Options.options.Theme.Value Options.options.Noteskin.Value
         Options.Hotkeys.init Options.options.Hotkeys
         Printerlude.init(instance)
-        DiscordRPC.init()
+        //DiscordRPC.init()
     )
     Window.onUnload.Add(Gameplay.save)
     Window.onFileDrop.Add(fun path -> 
@@ -48,7 +48,7 @@ let launch(instance: int) =
 
     Options.save()
     Network.shutdown()
-    DiscordRPC.shutdown()
+    //DiscordRPC.shutdown()
     Printerlude.shutdown()
 
     Logging.Shutdown()
