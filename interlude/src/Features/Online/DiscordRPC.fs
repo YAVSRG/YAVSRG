@@ -5,7 +5,7 @@ open DiscordRPC
 
 module DiscordRPC =
 
-    let private client = new DiscordRpcClient("420320424199716864", Logger = Logging.ConsoleLogger())
+    let private client = new DiscordRpcClient("420320424199716864", Logger = Logging.NullLogger())
 
     let init() =
 
