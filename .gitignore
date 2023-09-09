@@ -4,6 +4,7 @@
 
 ./Percyqaz.Common
 ./Percyqaz.Flux
+./Percyqaz.Shell
 ./Prelude
 ./Interlude.Noteskins
 ./Interlude

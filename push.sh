@@ -1,6 +1,9 @@
 cd Percyqaz.Common
 (git status | grep "ahead of" -c) && git push
 cd ..
+cd Percyqaz.Shell
+(git status | grep "ahead of" -c) && git push
+cd ..
 cd Percyqaz.Flux 
 (git status | grep "ahead of" -c) && git push
 cd ..
