@@ -123,16 +123,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Percyqaz.Shell" Version="0.6.2" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="7.0.400" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Interlude.Web\shared\Interlude.Web.Shared.fsproj" />
     <ProjectReference Include="..\..\Percyqaz.Flux\src\Percyqaz.Flux.fsproj" />
+    <ProjectReference Include="..\..\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
     <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
   </ItemGroup>
 
