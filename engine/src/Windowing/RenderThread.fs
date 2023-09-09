@@ -40,6 +40,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     member this.Start() =
         let thread = Thread(this.Loop)
         Percyqaz.Flux.Utils.UITHREAD <- thread.ManagedThreadId
+        thread.Priority <- ThreadPriority.Highest
         thread.Start()
         
     member this.DispatchFrame() =
