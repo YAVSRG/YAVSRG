@@ -23,11 +23,22 @@ let launch(instance: int) =
     try Options.load(instance)
     with err -> Logging.Critical("Fatal error loading game config", err); crashSplash(); Console.ReadLine() |> ignore
     
+    let mutable has_shutdown = false
+    let shutdown() =
+        if has_shutdown then () else
+        Options.save()
+        Network.shutdown()
+        //DiscordRPC.shutdown()
+        Printerlude.shutdown()
+        Logging.Shutdown()
+    
     Window.afterInit.Add(fun () -> 
         Content.init Options.options.Theme.Value Options.options.Noteskin.Value
         Options.Hotkeys.init Options.options.Hotkeys
         Printerlude.init(instance)
         //DiscordRPC.init()
+
+        AppDomain.CurrentDomain.ProcessExit.Add (fun args -> shutdown())
     )
     Window.onUnload.Add(Gameplay.save)
     Window.onFileDrop.Add(fun path -> 
@@ -46,12 +57,7 @@ let launch(instance: int) =
             Some icon
         )
 
-    Options.save()
-    Network.shutdown()
-    //DiscordRPC.shutdown()
-    Printerlude.shutdown()
-
-    Logging.Shutdown()
+    shutdown()
 
 [<EntryPoint>]
 let main argv =

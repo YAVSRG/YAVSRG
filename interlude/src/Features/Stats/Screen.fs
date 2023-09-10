@@ -18,6 +18,7 @@ type private BasicStats() =
     override this.Init(parent) =
         this
         |+ Text((if Network.credentials.Username <> "" then Network.credentials.Username else L"stats.name_placeholder"), Position = Position.SliceTop(140.0f).Margin(40.0f, 10.0f), Align = Alignment.LEFT)
+        
         |+ Text(L"stats.total.title",
             Position = Position.Row(140.0f, 70.0f).Margin(40.0f, 0.0f), Align = Alignment.LEFT)
 
@@ -83,7 +84,6 @@ type private BasicStats() =
             Position = Position.Row(460.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
-
 
 
         |+ Text(L"stats.session.title",
@@ -199,7 +199,7 @@ type private TableStats() =
                 data
                 |> Seq.map (fun (_, _, g, _) -> Option.defaultValue -1 g) 
                 |> Seq.countBy id
-                |> Seq.sortDescending 
+                |> Seq.sortDescending
                 |> Array.ofSeq)
             )
         |> Seq.sortBy(fun (l, _) -> l.Rank)
