@@ -2,11 +2,11 @@
     "Rulesets": {
         "osu-od-0": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 151.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 0
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 188, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -81,12 +81,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -116,11 +110,11 @@
         }, 
         "osu-od-1": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 148.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 1
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 185, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -195,12 +189,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -230,11 +218,11 @@
         }, 
         "osu-od-10": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 121.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 10
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 158, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -309,12 +297,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -344,11 +326,11 @@
         }, 
         "osu-od-2": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 145.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 2
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 182, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -423,12 +405,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -458,11 +434,11 @@
         }, 
         "osu-od-3": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 142.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 3
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 179, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -537,12 +513,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -572,11 +542,11 @@
         }, 
         "osu-od-4": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 139.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 4
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 176, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -651,12 +621,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -686,11 +650,11 @@
         }, 
         "osu-od-5": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 136.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 5
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 173, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -765,12 +729,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -800,11 +758,11 @@
         }, 
         "osu-od-6": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 133.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 6
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 170, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -879,12 +837,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -914,11 +866,11 @@
         }, 
         "osu-od-7": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 130.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 7
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 167, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -993,12 +945,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -1028,11 +974,11 @@
         }, 
         "osu-od-8": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 127.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 8
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 164, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -1107,12 +1053,6 @@
                     "Name": "1KK"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -1142,11 +1082,11 @@
         }, 
         "osu-od-9": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 124.5, 
                 "HoldNoteBehaviour": {
                     "Osu": 9
                 }, 
-                "MissWindow": 180, 
+                "MissWindow": 161, 
                 "Points": {
                     "Weights": [300, [300, 300, 200, 100, 50, 0]]
                 }, 
@@ -1220,12 +1160,6 @@
                     "JudgementThreshold": 0, 
                     "Name": "1KK"
                 }]
-            }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.033, -0.066], 
-                "StartingHealth": 1
             }, 
             "Judgements": [{
                 "BreaksCombo": false, 
@@ -1363,12 +1297,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -1504,12 +1432,6 @@
                     "JudgementThreshold": 0, 
                     "Name": "MFC"
                 }]
-            }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
             }, 
             "Judgements": [{
                 "BreaksCombo": false, 
@@ -1647,12 +1569,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -1788,12 +1704,6 @@
                     "JudgementThreshold": 0, 
                     "Name": "MFC"
                 }]
-            }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
             }, 
             "Judgements": [{
                 "BreaksCombo": false, 
@@ -1931,12 +1841,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -2072,12 +1976,6 @@
                     "JudgementThreshold": 0, 
                     "Name": "MFC"
                 }]
-            }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
             }, 
             "Judgements": [{
                 "BreaksCombo": false, 
@@ -2215,12 +2113,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -2356,12 +2248,6 @@
                     "JudgementThreshold": 0, 
                     "Name": "MFC"
                 }]
-            }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
             }, 
             "Judgements": [{
                 "BreaksCombo": false, 
@@ -2499,12 +2385,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -2534,7 +2414,7 @@
         }, 
         "wife-j1": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 150, 
                 "HoldNoteBehaviour": "JustBreakCombo", 
                 "MissWindow": 180, 
                 "Points": {
@@ -2656,12 +2536,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -2691,7 +2565,7 @@
         }, 
         "wife-j2": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 150, 
                 "HoldNoteBehaviour": "JustBreakCombo", 
                 "MissWindow": 180, 
                 "Points": {
@@ -2813,12 +2687,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -2848,7 +2716,7 @@
         }, 
         "wife-j3": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 150, 
                 "HoldNoteBehaviour": "JustBreakCombo", 
                 "MissWindow": 180, 
                 "Points": {
@@ -2970,12 +2838,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -3005,7 +2867,7 @@
         }, 
         "wife-j4": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 150, 
                 "HoldNoteBehaviour": "JustBreakCombo", 
                 "MissWindow": 180, 
                 "Points": {
@@ -3127,12 +2989,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -3162,7 +3018,7 @@
         }, 
         "wife-j5": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 150, 
                 "HoldNoteBehaviour": "JustBreakCombo", 
                 "MissWindow": 180, 
                 "Points": {
@@ -3284,12 +3140,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -3319,7 +3169,7 @@
         }, 
         "wife-j6": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 150, 
                 "HoldNoteBehaviour": "JustBreakCombo", 
                 "MissWindow": 180, 
                 "Points": {
@@ -3441,12 +3291,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -3476,7 +3320,7 @@
         }, 
         "wife-j7": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 150, 
                 "HoldNoteBehaviour": "JustBreakCombo", 
                 "MissWindow": 180, 
                 "Points": {
@@ -3598,12 +3442,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -3633,7 +3471,7 @@
         }, 
         "wife-j8": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 150, 
                 "HoldNoteBehaviour": "JustBreakCombo", 
                 "MissWindow": 180, 
                 "Points": {
@@ -3755,12 +3593,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -3790,7 +3622,7 @@
         }, 
         "wife-j9": {
             "Accuracy": {
-                "CbrushWindow": 180, 
+                "CbrushWindow": 150, 
                 "HoldNoteBehaviour": "JustBreakCombo", 
                 "MissWindow": 180, 
                 "Points": {
@@ -3912,12 +3744,6 @@
                     "Name": "MFC"
                 }]
             }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.008, 0.004, 0, -0.04, -0.08], 
-                "StartingHealth": 0.5
-            }, 
             "Judgements": [{
                 "BreaksCombo": false, 
                 "Color": [255, 0, 255, 255], 
@@ -4034,12 +3860,6 @@
                     "JudgementThreshold": 0, 
                     "Name": "PFC"
                 }]
-            }, 
-            "Health": {
-                "ClearThreshold": 0, 
-                "OnlyFailAtEnd": false, 
-                "Points": [0.008, 0.004, 0, -0.08], 
-                "StartingHealth": 0.5
             }, 
             "Judgements": [{
                 "BreaksCombo": false, 
