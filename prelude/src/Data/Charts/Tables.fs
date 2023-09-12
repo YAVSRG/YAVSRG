@@ -96,6 +96,21 @@ type Table =
             | None -> ()
         removed
 
+    member this.Rating (grade: int) (level: Level, chart: TableChart) =
+        match grade with
+        | -1 | 0 -> 0.0
+        | 1 -> max 0.0 (float level.Rank - 5.0) // C-
+        | 2 -> max 0.0 (float level.Rank - 4.0) // C
+        | 3 -> max 0.0 (float level.Rank - 3.0) // B-
+        | 4 -> max 0.0 (float level.Rank - 2.0) // B
+        | 5 -> max 0.0 (float level.Rank - 1.0) // A-
+        | 6 -> float level.Rank // A
+        | 7 -> float level.Rank + 0.5 // A+
+        | 8 -> float level.Rank + 1.0 // S-
+        | 9 -> float level.Rank + 1.5 // S
+        | 10 -> float level.Rank + 2.0 // S+
+        | _ -> 0.0
+
 module Table =
 
     type Loaded = { File: string; Table: Table }
@@ -182,32 +197,24 @@ module Table =
     open Prelude.Data.Scores
 
     let ratings() =
-        if _current.IsNone then Seq.empty else
+        match _current with
+        | None -> Seq.empty
+        | Some { Table = table } ->
+
         seq {
-            for level in _current.Value.Table.Levels do
+            for level in table.Levels do
                 for chart in level.Charts do
                     let grade_achieved = 
                         match Scores.getData chart.Hash with
                         | Some d -> 
-                            if d.PersonalBests.ContainsKey(_current.Value.Table.RulesetId) then
-                                PersonalBests.get_best_above 1.0f d.PersonalBests.[_current.Value.Table.RulesetId].Grade
+                            if d.PersonalBests.ContainsKey table.RulesetId then
+                                PersonalBests.get_best_above 1.0f d.PersonalBests.[table.RulesetId].Grade
                             else None
                         | None -> None
                     let score = 
                         match grade_achieved with
                         | None -> None
-                        | Some -1 | Some 0 -> Some 0.0
-                        | Some 1 -> Some <| max 0.0 (float level.Rank - 5.0) // C-
-                        | Some 2 -> Some <| max 0.0 (float level.Rank - 4.0) // C
-                        | Some 3 -> Some <| max 0.0 (float level.Rank - 3.0) // B-
-                        | Some 4 -> Some <| max 0.0 (float level.Rank - 2.0) // B
-                        | Some 5 -> Some <| max 0.0 (float level.Rank - 1.0) // A-
-                        | Some 6 -> Some <| float level.Rank // A
-                        | Some 7 -> Some <| float level.Rank + 0.5 // A+
-                        | Some 8 -> Some <| float level.Rank + 1.0 // S-
-                        | Some 9 -> Some <| float level.Rank + 1.5 // S
-                        | Some 10 -> Some <| float level.Rank + 2.0 // S+
-                        | _ -> None
+                        | Some i -> Some <| table.Rating i (level, chart)
                     yield level, chart, grade_achieved, score
         }
 
