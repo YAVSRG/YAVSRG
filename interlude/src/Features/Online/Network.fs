@@ -42,7 +42,6 @@ type Credentials =
         else Credentials.Default
     member this.Save() =
         JSON.ToFile (Credentials.Location, true) this
-        File.SetAttributes(Credentials.Location, FileAttributes.Hidden)
 
 module Network =
 
