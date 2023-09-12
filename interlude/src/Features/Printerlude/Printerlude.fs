@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Printerlude
 
 open System.IO
+open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Percyqaz.Common
@@ -88,7 +89,40 @@ module Printerlude =
                     Logging.Info "Cleaned up."
                 with err -> Logging.Error ("Error while cleaning up after export", err)
 
-        let fix_personal_bests() = ()
+        let private personal_best_fixer =
+            { new Async.Service<string, unit>() with
+                override this.Handle(ruleset_id) = 
+                    async {
+                        match Content.Rulesets.try_get_by_hash ruleset_id with
+                        | None -> ()
+                        | Some ruleset ->
+
+                        for hash in Prelude.Data.Scores.Scores.data.Entries.Keys |> Seq.toArray do
+                            let data = Prelude.Data.Scores.Scores.data.Entries.[hash]
+                            if data.Scores.Count = 0 then () else
+
+                            match Cache.by_hash hash Library.cache with
+                            | None -> ()
+                            | Some cc ->
+
+                            match Cache.load cc Library.cache with
+                            | None -> ()
+                            | Some chart ->
+
+                            for score in data.Scores do
+                                let info = Prelude.Data.Scores.ScoreInfoProvider(score, chart, ruleset)
+                                if data.PersonalBests.ContainsKey ruleset_id then
+                                    let newBests, _ = Prelude.Data.Scores.Bests.update info data.PersonalBests.[ruleset_id]
+                                    data.PersonalBests.[ruleset_id] <- newBests
+                                else
+                                    data.PersonalBests.[ruleset_id] <- Prelude.Data.Scores.Bests.create info
+                        Logging.Info(sprintf "Finished processing personal bests for %s" ruleset.Name)
+                    }
+            }
+
+        let fix_personal_bests () = 
+            personal_best_fixer.Request(Content.Rulesets.current_hash, ignore)
+            Logging.Info("Queued a reprocess of personal bests")
         
         let register_commands (ctx: ShellContext) = 
             ctx
