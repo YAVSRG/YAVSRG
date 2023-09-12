@@ -386,7 +386,7 @@ module PrefabRulesets =
                 Accuracy = 
                     {
                         MissWindow = 180.0f<ms>
-                        CbrushWindow = 180.0f<ms>
+                        CbrushWindow = 150.0f<ms>
                         Timegates = DP.windows judge false
                         Points = AccuracyPoints.WifeCurve judge
                         HoldNoteBehaviour = HoldNoteBehaviour.JustBreakCombo
@@ -455,8 +455,8 @@ module PrefabRulesets =
                     |]
                 Accuracy = 
                     {
-                        MissWindow = 180.0f<ms>
-                        CbrushWindow = 180.0f<ms>
+                        MissWindow = 188.0f<ms> - od * 3.0f<ms>
+                        CbrushWindow = 151.5f<ms> - od * 3.0f<ms>
                         Timegates = windows od
                         Points = AccuracyPoints.Weights (300.0, [|300.0; 300.0; 200.0; 100.0; 50.0; 0.0|])
                         HoldNoteBehaviour = HoldNoteBehaviour.Osu od
