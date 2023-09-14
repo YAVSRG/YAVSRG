@@ -105,8 +105,7 @@ module Grade =
             AccuracyNeeded: float option
         }
 
-    let calculateWithTarget (grades: Grade array) (state: AccuracySystemState) : GradeResult =
-        let percent = state.PointsScored / state.MaxPointsScored
+    let calculate_with_target (grades: Grade array) (percent: float) : GradeResult =
 
         let rec loop (achieved: int) =
             if achieved + 1 = grades.Length then // got max grade already
@@ -119,7 +118,7 @@ module Grade =
         loop -1
 
     let calculate (grades: Grade array) (state: AccuracySystemState) =
-        (calculateWithTarget grades state).Grade
+        (calculate_with_target grades (state.PointsScored / state.MaxPointsScored)).Grade
 
 /// Lamps are awarded at the end of the score as a summarising "tag" to indicate certain accomplishments
 /// Examples: You didn't miss a single note, so you get a "Full Combo" tag, you only got "Perfect" judgements, so you get a "Perfect Full Combo" tag

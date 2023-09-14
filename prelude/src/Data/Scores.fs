@@ -112,6 +112,8 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
         grade <- ValueOption.defaultWith (fun () -> Grade.calculate ruleset.Grading.Grades this.Scoring.State) grade |> ValueSome
         grade.Value
 
+    member this.Accuracy = this.Scoring.State.PointsScored / this.Scoring.State.MaxPointsScored
+
     member this.Physical =
         perf <- ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf |> ValueSome
         fst perf.Value
