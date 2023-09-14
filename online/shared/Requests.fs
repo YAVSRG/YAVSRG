@@ -95,6 +95,7 @@ module Tables =
             {
                 Id: string
                 Hash: string
+                Score: float
                 Grade: int
             }
 

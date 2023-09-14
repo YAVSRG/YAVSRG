@@ -25,14 +25,21 @@ module Records =
                     Scores = [||]
                 } : Tables.Records.Response)
             | Some table -> 
-                let grades = Score.aggregate_table_grades targetUserId Score.SHORT_TERM_RULESET_LIST.[0] 1.0f
+                let scores = Score.aggregate_table_scores targetUserId Score.SHORT_TERM_RULESET_LIST.[0] 1.0f
                 let charts = table.Levels |> Seq.map (fun level -> level.Charts) |> Seq.concat
+                let ruleset = Charts.rulesets.[Score.SHORT_TERM_RULESET_LIST.[0]]
                 response.ReplyJson(
                 {
                     Scores = 
                         charts
                         |> Seq.choose (fun chart -> 
-                            if grades.ContainsKey(chart.Hash) then Some ({ Hash = chart.Hash; Id = chart.Id; Grade = grades.[chart.Hash] } : Tables.Records.Score) else None)
+                            if scores.ContainsKey(chart.Hash) then 
+                                Some ({ 
+                                    Hash = chart.Hash
+                                    Id = chart.Id
+                                    Score = scores.[chart.Hash]
+                                    Grade = (Prelude.Gameplay.Grade.calculate_with_target ruleset.Grading.Grades scores.[chart.Hash]).Grade
+                                } : Tables.Records.Score) else None)
                         |> Array.ofSeq
                 } : Tables.Records.Response)
         }

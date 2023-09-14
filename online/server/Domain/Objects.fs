@@ -184,8 +184,8 @@ module Score =
     // ft.aggregate idx:scores "@user_id:[4 4]" verbatim groupby 1 @hash reduce max 1 grade as best_grade
     // todo: filter to table hashes when there are more scores for non-table than table (soon)
 
-    let aggregate_table_grades (userId: int64) (ruleset_id: string) (rate: float32) =
-        let results = Collections.Generic.Dictionary<string, int>()
+    let aggregate_table_scores (userId: int64) (ruleset_id: string) (rate: float32) =
+        let results = Collections.Generic.Dictionary<string, float>()
         ft.Aggregate("idx:scores", 
             AggregationRequest(
                 sprintf "@user_id:[%i %i] @rate:[%f 2.0] @ruleset_id:{%s}" 
@@ -193,10 +193,10 @@ module Score =
                     userId
                     rate
                     (ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
-            ).Verbatim().GroupBy("@hash", Reducers.Max("grade").As("best_grade"))).GetResults()
+            ).Verbatim().GroupBy("@hash", Reducers.Max("score").As("best_score"))).GetResults()
         |> Seq.iter (fun result -> 
-            let mutable g = 0
-            result.["best_grade"].TryParse(&g) |> ignore
+            let mutable g = 0.0
+            result.["best_score"].TryParse(&g) |> ignore
             results.[result.["hash"].ToString()] <- g)
         results
 
