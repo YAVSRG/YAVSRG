@@ -1,1 +1,1 @@
-﻿Command to leaderboard all crescent charts (except missing ones)
+﻿API for getting someone's full table scores for compariso
