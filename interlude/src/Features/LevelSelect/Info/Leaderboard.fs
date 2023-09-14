@@ -227,7 +227,7 @@ type Leaderboard(display: Setting<Display>) as this =
         |+ HotkeyAction("scoreboard", fun () -> if flowContainer.Focused then Selection.clear() else flowContainer.Focus())
         |+ Conditional((fun () -> state.Value = State.EmptyLeaderboard), EmptyState(Icons.leaderboard, L"levelselect.info.leaderboard.empty", Subtitle = L"levelselect.info.leaderboard.empty.subtitle"))
         |+ Conditional((fun () -> state.Value = State.NoLeaderboard), EmptyState(Icons.no_leaderboard, L"levelselect.info.leaderboard.unavailable"))
-        |* Conditional((fun () -> state.Value = State.Offline), EmptyState(Icons.connected, L"levelselect.info.leaderboard.offline"))
+        |* Conditional((fun () -> state.Value = State.Offline), EmptyState(Icons.connected, L"misc.offline"))
 
     member this.Refresh() =
         let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""

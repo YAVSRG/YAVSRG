@@ -62,6 +62,7 @@
     <Compile Include="Features\Online\Network.fs" />
     <Compile Include="Features\Online\Login.fs" />
     <Compile Include="Features\Stats\Stats.fs" />
+    <Compile Include="Features\Stats\Tables.fs" />
     <Compile Include="Features\Stats\Screen.fs" />
     <Compile Include="Features\Import\Mounts.fs" />
     <Compile Include="Features\Import\Shared.fs" />

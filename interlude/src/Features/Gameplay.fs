@@ -203,7 +203,7 @@ module Gameplay =
                 replays.Clear()
     
             let private player_status(username, status) =
-                if status = Web.Shared.Packets.LobbyPlayerStatus.Playing then
+                if status = LobbyPlayerStatus.Playing then
                     let chart = Chart.withMods.Value
                     let replay = Network.lobby.Value.Players.[username].Replay
                     replays.Add(username, 

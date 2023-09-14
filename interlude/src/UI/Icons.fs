@@ -51,6 +51,7 @@ module Icons =
 
     let stats = Feather.bar_chart
     let stats_2 = Feather.trending_up
+    let cloud = Feather.cloud
 
     let options = Feather.settings
     let import = Feather.download

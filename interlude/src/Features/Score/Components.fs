@@ -53,8 +53,8 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
 
     override this.Init(parent) =
         this
-        |+ Text(sprintf "%s  %iK Results" Icons.stats data.Chart.Keys, Position = Position.SliceTop(120.0f).Margin(10.0f, 0.0f), Align = Alignment.CENTER)
-        |+ Text((fun () -> sprintf "%s %s  •  %s" Icons.mods data.Mods data.Ruleset.Name), Position = Position.TrimTop(120.0f).SliceTop(40.0f), Align = Alignment.CENTER)
+        |+ Text(sprintf "%s  %iK Results" Icons.stats data.Chart.Keys, Position = Position.SliceTop(90.0f).Margin(10.0f, 0.0f), Align = Alignment.CENTER)
+        |+ Text((fun () -> sprintf "%s %s  •  %s" Icons.mods data.Mods data.Ruleset.Name), Position = Position.TrimTop(90.0f).SliceTop(70.0f), Align = Alignment.CENTER)
         |+ Text(sprintf "%s %.2f" Icons.star data.Difficulty.Physical,
             Position = Position.TrimTop(530.0f).SliceTop(70.0f).Margin(10.0f, 0.0f),
             Align = Alignment.LEFT)
@@ -71,8 +71,7 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
 
     override this.Draw() =
         Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
-        Background.draw (this.Bounds.SliceTop(120.0f), !*Palette.DARKER, 2.0f)
-        Background.draw (this.Bounds.TrimTop(120.0f).SliceTop(40.0f), !*Palette.DARK, 2.0f)
+        Background.draw (this.Bounds.SliceTop(160.0f), !*Palette.DARKER, 2.0f)
         Background.draw (this.Bounds.TrimTop(160.0f), (Color.FromArgb(40, 40, 40)), 2.0f)
         base.Draw()
 

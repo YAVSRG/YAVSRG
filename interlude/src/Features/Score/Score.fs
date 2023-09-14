@@ -14,7 +14,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
     inherit Screen()
 
     let personal_bests = ref pbs
-    let grade = ref <| Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
+    let grade = ref <| Grade.calculate_with_target scoreData.Ruleset.Grading.Grades scoreData.Accuracy
     let lamp = ref <| Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
     let stats = ref <| ScoreScreenStats.Generate scoreData.Scoring.HitEvents
     let previous_personal_bests = 
@@ -28,7 +28,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
 
     let refresh() =
         personal_bests := ImprovementFlags.Default
-        grade := Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
+        grade := Grade.calculate_with_target scoreData.Ruleset.Grading.Grades scoreData.Accuracy
         lamp := Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
         stats := ScoreScreenStats.Generate scoreData.Scoring.HitEvents
         previous_personal_bests := None
