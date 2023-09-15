@@ -39,6 +39,7 @@ module Save =
 
     let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
         async {
+            // authorisation, validation, etc
             let userId, user = authorize headers
 
             match JSON.FromString body with
@@ -72,14 +73,17 @@ module Save =
             | Ok status when status >= Mods.ModStatus.Unstored -> response.ReplyJson(false)
             | Ok _ ->
 
-            // todo: zip bomb prevention?
-            let replay = Replay.decompress request.Replay
-            let modChart = Mods.getModChart request.Mods chart
             let rate = System.MathF.Round(request.Rate, 2)
 
             if rate < 0.5f || rate > 2.0f then 
                 Logging.Debug("Rejecting score with invalid rate")
                 response.MakeErrorResponse(400) |> ignore else
+
+            // actually calculate what score was obtained
+
+            // todo: zip bomb prevention?
+            let replay = Replay.decompress request.Replay
+            let modChart = Mods.getModChart request.Mods chart
 
             for ruleset_id in Score.SHORT_TERM_RULESET_LIST do
                 let ruleset = Charts.rulesets.[ruleset_id]
@@ -108,6 +112,8 @@ module Save =
                         Leaderboard.Replay.save hash ruleset_id userId replay
                         Leaderboard.add_score hash ruleset_id userId score.Score
                     | Error _ -> ()
+
+                // todo: if ruleset and chart match a table, aggregate your new table rating and save to leaderboard
 
             response.ReplyJson(true)
         }

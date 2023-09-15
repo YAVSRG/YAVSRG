@@ -274,11 +274,11 @@ module Leaderboard =
             (User.by_ids userIds |> Array.map (Option.map (fun x -> x.Username)))
             (Replay.get_chart_scores hash ruleset userIds)
 
-    let position (userId: int64) (hash: string) (ruleset: string) =
+    let position (userId: int64) (hash: string) (ruleset: string) : int64 option =
         let result = db.SortedSetRank(key hash ruleset, userId, Order.Descending)
         if result.HasValue then Some result.Value else None
 
-    let score (userId: int64) (hash: string) (ruleset: string) =
+    let score (userId: int64) (hash: string) (ruleset: string) : float option =
         let result = db.SortedSetScore(key hash ruleset, userId)
         if result.HasValue then Some result.Value else None
 
@@ -292,6 +292,37 @@ module Leaderboard =
         db.SetScan(existence_key hash)
         |> Seq.map (fun v -> v.ToString())
         |> Array.ofSeq
+
+module TableRanking =
+
+    let key (id: string) = RedisKey(sprintf "tableranking:%s" id)
+
+    let rank (id: string) (userId: int64) : int64 option =
+        let result = db.SortedSetRank(key id, userId, Order.Descending)
+        if result.HasValue then Some result.Value else None
+        
+    let rating (id: string) (userId: int64) : float option =
+        let result = db.SortedSetScore(key id, userId)
+        if result.HasValue then Some result.Value else None
+
+    let update (id: string) (userId: int64) (rating: float) : int64 =
+        db.SortedSetAdd(key id, userId, rating) |> ignore
+        let result = db.SortedSetRank(key id, userId, Order.Descending)
+        result.Value
+
+    let get_top_50_ids (id: string) =
+        db.SortedSetRangeByRankWithScores(key id, 0, 50, Order.Descending)
+        |> Array.map (fun v ->
+            let mutable r = 0L
+            let _ = v.Element.TryParse(&r)
+            r, v.Score)
+
+    let get_top_50_info (id: string) =
+        let userIds = get_top_50_ids id
+        let users = userIds |> Array.map fst |> User.by_ids |> Array.map (Option.map (fun x -> x.Username))
+        Array.zip
+            users
+            (userIds |> Array.map snd)
 
 module Aggregate =
     
