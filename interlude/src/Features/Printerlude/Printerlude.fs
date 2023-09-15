@@ -4,7 +4,6 @@ open System.IO
 open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
-open Percyqaz.Common
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
@@ -89,6 +88,39 @@ module Printerlude =
                     Logging.Info "Cleaned up."
                 with err -> Logging.Error ("Error while cleaning up after export", err)
 
+        let private sync_table_scores() =
+            match Tables.Table.current() with
+            | None -> ()
+            | Some t ->
+                    
+            Web.Shared.API.Client.get<Web.Shared.Requests.Tables.Records.Response>(
+                snd Web.Shared.Requests.Tables.Records.ROUTE + "?user=" + System.Uri.EscapeDataString(Interlude.Features.Online.Network.credentials.Username),
+                function
+                | None -> ()
+                | Some res ->
+                    let lookup = res.Scores |> Seq.map (fun s -> s.Hash, s.Score) |> Map.ofSeq
+                    for level in t.Levels do
+                        for chart in level.Charts do
+                            if 
+                                Prelude.Data.Scores.Scores.data.Entries.ContainsKey(chart.Hash)
+                                && Prelude.Data.Scores.Scores.data.Entries.[chart.Hash].PersonalBests.ContainsKey(t.RulesetId)
+                                && 
+                                    Prelude.Data.Scores.Scores.data.Entries.[chart.Hash].PersonalBests.[t.RulesetId].Accuracy
+                                    |> Prelude.Gameplay.PersonalBests.get_best_above 1.0f
+                                    |> Option.defaultValue 0.0
+                                    |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
+                            then
+                                for score in Prelude.Data.Scores.Scores.data.Entries.[chart.Hash].Scores do
+                                    Web.Shared.API.Client.post("charts/scores",
+                                    ({ 
+                                        ChartId = chart.Hash
+                                        Replay = score.replay
+                                        Rate = score.rate
+                                        Mods = score.selectedMods
+                                        Timestamp = score.time
+                                    }: Web.Shared.Requests.Charts.Scores.Save.Request), ignore)
+            )
+
         let private personal_best_fixer =
             { new Async.Service<string, unit>() with
                 override this.Handle(ruleset_id) = 
@@ -130,6 +162,7 @@ module Printerlude =
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
                 .WithCommand("export_osz", "Export current chart as osz", export_osz)
                 .WithCommand("fix_personal_bests", "Fix personal best display values", fix_personal_bests)
+                .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
                 .WithIOCommand("local_server", "Switch to local development server", "flag", 
                     fun (io: IOContext) (b: bool) -> 
                         Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
