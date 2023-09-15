@@ -57,14 +57,13 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
                                     |+ Text(
                                         (if delta <> 0.0 then sprintf "+%.2f%%" (abs delta * 100.0) else ""),
                                         Color = K Colors.text_green,
-                                        Position = Position.Margin(100.0f, 0.0f),
+                                        Position = Position.Margin(150.0f, 0.0f),
                                         Align = if delta > 0 then Alignment.LEFT else Alignment.RIGHT)
                                     |+ Text(
                                         (match their_score with None -> "--" | Some (grade, acc) -> sprintf "%.2f%%" (acc * 100.0)),
                                         Color = K (ruleset.GradeColor (match their_score with None -> -1 | Some (grade, acc) -> grade), Colors.shadow_2),
                                         Align = Alignment.RIGHT)
                                 )
-                        contents.Add(Button(K "Back", on_back))
                     | None -> status <- FriendCompareState.ServerError
             )
         else status <- FriendCompareState.Offline
@@ -73,7 +72,9 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
         |+ Conditional((fun () -> status = FriendCompareState.Loading), EmptyState(Icons.cloud, L"misc.loading"))
         |+ Conditional((fun () -> status = FriendCompareState.Offline), EmptyState(Icons.connected, L"misc.offline"))
         |+ Conditional((fun () -> status = FriendCompareState.ServerError), EmptyState(Icons.connected, "Server error"))
-        |* ScrollContainer.Flow(contents, Position = Position.Margin(10.0f, 0.0f))
+        |+ Text("Comparing to " + name, Align = Alignment.RIGHT, Position = Position.SliceTop(50.0f).Margin(20.0f, 0.0f))
+        |+ Button(K (Icons.back + " Back"), on_back, Position = Position.Box(0.0f, 0.0f, 200.0f, 50.0f))
+        |* ScrollContainer.Flow(contents, Position = Position.Margin(10.0f, 0.0f).TrimTop(55.0f))
 
         base.Init parent
 
