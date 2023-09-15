@@ -10,6 +10,8 @@ module Records =
     let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
         async {
             let userId, _ = authorize headers
+
+            // todo: table id parameter that selects which table we are asking about
             
             if not (query_params.ContainsKey "user") then
                 response.MakeErrorResponse(400, "'user' is required") |> ignore
