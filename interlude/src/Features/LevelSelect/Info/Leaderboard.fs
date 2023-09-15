@@ -130,7 +130,7 @@ module Leaderboard =
                                         selectedMods = score.Mods
                                         layout = options.Playstyles.[req.Chart.Keys - 3]
                                         keycount = req.Chart.Keys
-                                    } : Score), req.Chart, req.Ruleset)
+                                    } : Score), req.Chart, req.Ruleset, Player = Some score.Username)
                                 yield score, data
                         }
                     member this.Callback((score: LeaderboardScore, data: ScoreInfoProvider)) =
