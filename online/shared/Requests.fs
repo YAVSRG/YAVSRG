@@ -86,6 +86,7 @@ module Tables =
     /// requires login token as Authorization header
     /// url parameters:
     ///  user - name of user to get records for
+    ///  table - id of table to get records for e.g 'crescent' or 'mizu'
     module Records =
 
         let ROUTE = (GET, "/tables/records")

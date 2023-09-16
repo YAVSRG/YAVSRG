@@ -16,10 +16,16 @@ module Records =
             if not (query_params.ContainsKey "user") then
                 response.MakeErrorResponse(400, "'user' is required") |> ignore
             else
+                
+            if not (query_params.ContainsKey "table") then
+                response.MakeErrorResponse(400, "'table' is required") |> ignore
+            else
 
             match User.by_username query_params.["user"].[0] with
             | None -> response.MakeErrorResponse(404) |> ignore
-            | Some (targetUserId, targetUser) ->
+            | Some (targetUserId, _) ->
+
+            if query_params.["table"].[0] <> "crescent" then response.MakeErrorResponse(404) |> ignore else
 
             match Charts.crescent with
             | None -> response.ReplyJson(

@@ -46,9 +46,7 @@ module Save =
             | Error e -> 
                 Logging.Error(sprintf "Error parsing body for api/charts/scores: %s" e.Message)
                 response.MakeErrorResponse(400) |> ignore
-            | Ok (request : Charts.Scores.Save.Request) ->
-            
-            // todo: basic clamp on how much data can be sent in one request (about 10kb?)
+            | Ok (request : Charts.Scores.Save.Request) -> // todo: basic clamp on how much data can be sent in one request (about 10kb?)
 
             let hash = request.ChartId.ToUpper()
 
@@ -81,8 +79,7 @@ module Save =
 
             // actually calculate what score was obtained
 
-            // todo: zip bomb prevention?
-            let replay = Replay.decompress request.Replay
+            let replay = Replay.decompress request.Replay // todo: zip bomb prevention?
             let modChart = Mods.getModChart request.Mods chart
 
             for ruleset_id in Score.SHORT_TERM_RULESET_LIST do
