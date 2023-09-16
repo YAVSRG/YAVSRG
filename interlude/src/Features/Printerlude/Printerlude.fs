@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Prelude.Common
+open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Interlude
@@ -27,7 +28,6 @@ module Printerlude =
     module private Utils =
 
         open Prelude.Charts.Formats
-        open Prelude.Charts.Tools.Patterns
         open System.IO.Compression
 
         let mutable cmp = None
@@ -94,7 +94,10 @@ module Printerlude =
             | Some t ->
                     
             Web.Shared.API.Client.get<Web.Shared.Requests.Tables.Records.Response>(
-                snd Web.Shared.Requests.Tables.Records.ROUTE + "?user=" + System.Uri.EscapeDataString(Interlude.Features.Online.Network.credentials.Username),
+                sprintf "%s?user=%s&table=%s" 
+                    (snd Web.Shared.Requests.Tables.Records.ROUTE)
+                    (System.Uri.EscapeDataString Interlude.Features.Online.Network.credentials.Username)
+                    (System.Uri.EscapeDataString <| t.Name.ToLower()), 
                 function
                 | None -> ()
                 | Some res ->
@@ -102,15 +105,15 @@ module Printerlude =
                     for level in t.Levels do
                         for chart in level.Charts do
                             if 
-                                Prelude.Data.Scores.Scores.data.Entries.ContainsKey(chart.Hash)
-                                && Prelude.Data.Scores.Scores.data.Entries.[chart.Hash].PersonalBests.ContainsKey(t.RulesetId)
+                                Scores.data.Entries.ContainsKey(chart.Hash)
+                                && Scores.data.Entries.[chart.Hash].PersonalBests.ContainsKey(t.RulesetId)
                                 && 
-                                    Prelude.Data.Scores.Scores.data.Entries.[chart.Hash].PersonalBests.[t.RulesetId].Accuracy
+                                    Scores.data.Entries.[chart.Hash].PersonalBests.[t.RulesetId].Accuracy
                                     |> Prelude.Gameplay.PersonalBests.get_best_above 1.0f
                                     |> Option.defaultValue 0.0
                                     |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
                             then
-                                for score in Prelude.Data.Scores.Scores.data.Entries.[chart.Hash].Scores do
+                                for score in Scores.data.Entries.[chart.Hash].Scores do
                                     Web.Shared.API.Client.post("charts/scores",
                                     ({ 
                                         ChartId = chart.Hash
@@ -129,8 +132,8 @@ module Printerlude =
                         | None -> ()
                         | Some ruleset ->
 
-                        for hash in Prelude.Data.Scores.Scores.data.Entries.Keys |> Seq.toArray do
-                            let data = Prelude.Data.Scores.Scores.data.Entries.[hash]
+                        for hash in Scores.data.Entries.Keys |> Seq.toArray do
+                            let data = Scores.data.Entries.[hash]
                             if data.Scores.Count = 0 then () else
 
                             match Cache.by_hash hash Library.cache with
@@ -142,12 +145,12 @@ module Printerlude =
                             | Some chart ->
 
                             for score in data.Scores do
-                                let info = Prelude.Data.Scores.ScoreInfoProvider(score, chart, ruleset)
+                                let info = ScoreInfoProvider(score, chart, ruleset)
                                 if data.PersonalBests.ContainsKey ruleset_id then
-                                    let newBests, _ = Prelude.Data.Scores.Bests.update info data.PersonalBests.[ruleset_id]
+                                    let newBests, _ = Bests.update info data.PersonalBests.[ruleset_id]
                                     data.PersonalBests.[ruleset_id] <- newBests
                                 else
-                                    data.PersonalBests.[ruleset_id] <- Prelude.Data.Scores.Bests.create info
+                                    data.PersonalBests.[ruleset_id] <- Bests.create info
                         Logging.Info(sprintf "Finished processing personal bests for %s" ruleset.Name)
                     }
             }

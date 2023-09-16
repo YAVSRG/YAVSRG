@@ -32,7 +32,11 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
         let contents = FlowContainer.Vertical<Widget>(50.0f)
 
         if Network.status = Network.Status.LoggedIn then
-            Client.get<Tables.Records.Response>(snd Tables.Records.ROUTE + "?user=" + System.Uri.EscapeDataString(name), 
+            Client.get<Tables.Records.Response>(
+                sprintf "%s?user=%s&table=%s" 
+                    (snd Tables.Records.ROUTE)
+                    (System.Uri.EscapeDataString name)
+                    (System.Uri.EscapeDataString <| Table.current().Value.Name.ToLower()), 
                 fun response -> sync <| fun () ->
                     match response with
                     | Some data ->
