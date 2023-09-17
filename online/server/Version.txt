@@ -1,1 +1,1 @@
-﻿API for getting someone's full table scores for compariso
+﻿Table leaderboards and comparison
