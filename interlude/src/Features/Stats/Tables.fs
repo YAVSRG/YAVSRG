@@ -15,17 +15,57 @@ open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Shared.API
 
-
-type private FriendCompareState =
+type private WebRequestState =
     | Offline = 0
     | Loading = 1
     | ServerError = 2
     | Loaded = 3
 
+type private Leaderboard() =
+    inherit StaticContainer(NodeType.None)
+
+    let mutable status = WebRequestState.Loading
+
+    override this.Init(parent) =
+
+        let contents = FlowContainer.Vertical<Widget>(70.0f)
+
+        if Network.status = Network.Status.LoggedIn then
+            Client.get<Tables.Leaderboard.Response>(
+                sprintf "%s?table=%s" 
+                    (snd Tables.Leaderboard.ROUTE)
+                    (System.Uri.EscapeDataString <| Table.current().Value.Name.ToLower()),
+                fun response -> sync <| fun () ->
+                    match response with
+                    | Some data ->
+                        status <- WebRequestState.Loaded
+                        for player in data.Players do
+                            contents.Add (
+                                StaticContainer(NodeType.None)
+                                |+ Text(player.Username, Color = K (Color.FromArgb player.Color, Colors.shadow_2), Align = Alignment.LEFT, Position = Position.Margin(100.0f, 5.0f))
+                                |+ Text("#" + player.Rank.ToString(), Align = Alignment.LEFT, Position = Position.Margin(10.0f, 5.0f))
+                                |+ Text(sprintf "%.2f" player.Rating, Align = Alignment.RIGHT, Position = Position.Margin(10.0f, 5.0f))
+                            )
+                    | None -> status <- WebRequestState.ServerError
+            )
+        else status <- WebRequestState.Offline
+
+        this
+        |+ Conditional((fun () -> status = WebRequestState.Loading), EmptyState(Icons.cloud, L"misc.loading"))
+        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, "Server error"))
+        |* ScrollContainer.Flow(contents)
+
+        base.Init parent
+
+    override this.Draw() =
+        Draw.rect this.Bounds Colors.black.O2
+        base.Draw()
+
 type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart * (int * float) option) array) array, name: string, on_back: unit -> unit) =
     inherit StaticContainer(NodeType.None)
 
-    let mutable status = FriendCompareState.Loading
+    let mutable status = WebRequestState.Loading
 
     override this.Init(parent) =
 
@@ -40,7 +80,7 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
                 fun response -> sync <| fun () ->
                     match response with
                     | Some data ->
-                        status <- FriendCompareState.Loaded
+                        status <- WebRequestState.Loaded
                         let their_scores = 
                             data.Scores
                             |> Seq.map (fun score -> score.Hash, (score.Grade, score.Score))
@@ -55,7 +95,7 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
                                     StaticContainer(NodeType.None)
                                     |+ Text(name, Align = Alignment.CENTER, Position = Position.Margin(0.0f, 5.0f))
                                     |+ Text(
-                                        (match your_score with None -> "--" | Some (grade, acc) -> sprintf "%.2f%%" (acc * 100.0)),
+                                        (match your_score with None -> "--" | Some (_, acc) -> sprintf "%.2f%%" (acc * 100.0)),
                                         Color = K (ruleset.GradeColor (match your_score with None -> -1 | Some (grade, acc) -> grade), Colors.shadow_2),
                                         Align = Alignment.LEFT)
                                     |+ Text(
@@ -64,18 +104,18 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
                                         Position = Position.Margin(150.0f, 0.0f),
                                         Align = if delta > 0 then Alignment.LEFT else Alignment.RIGHT)
                                     |+ Text(
-                                        (match their_score with None -> "--" | Some (grade, acc) -> sprintf "%.2f%%" (acc * 100.0)),
+                                        (match their_score with None -> "--" | Some (_, acc) -> sprintf "%.2f%%" (acc * 100.0)),
                                         Color = K (ruleset.GradeColor (match their_score with None -> -1 | Some (grade, acc) -> grade), Colors.shadow_2),
                                         Align = Alignment.RIGHT)
                                 )
-                    | None -> status <- FriendCompareState.ServerError
+                    | None -> status <- WebRequestState.ServerError
             )
-        else status <- FriendCompareState.Offline
+        else status <- WebRequestState.Offline
 
         this
-        |+ Conditional((fun () -> status = FriendCompareState.Loading), EmptyState(Icons.cloud, L"misc.loading"))
-        |+ Conditional((fun () -> status = FriendCompareState.Offline), EmptyState(Icons.connected, L"misc.offline"))
-        |+ Conditional((fun () -> status = FriendCompareState.ServerError), EmptyState(Icons.connected, "Server error"))
+        |+ Conditional((fun () -> status = WebRequestState.Loading), EmptyState(Icons.cloud, L"misc.loading"))
+        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, "Server error"))
         |+ Text("Comparing to " + name, Align = Alignment.RIGHT, Position = Position.SliceTop(50.0f).Margin(20.0f, 0.0f))
         |+ Button(K (Icons.back + " Back"), on_back, Position = Position.Box(0.0f, 0.0f, 200.0f, 50.0f))
         |* ScrollContainer.Flow(contents, Position = Position.Margin(10.0f, 0.0f).TrimTop(55.0f))
@@ -86,7 +126,7 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
 type private FriendComparer(ruleset: Ruleset, score_data: (Level * TableChart * int option * float option) array) =
     inherit StaticContainer(NodeType.None)
 
-    let mutable status = FriendCompareState.Loading
+    let mutable status = WebRequestState.Loading
     let mutable friends : Friends.List.Friend array option = None
 
     let rs_hash = Ruleset.hash ruleset
@@ -120,16 +160,16 @@ type private FriendComparer(ruleset: Ruleset, score_data: (Level * TableChart * 
                                     fun () -> swap.Current <- CompareFriend(ruleset, data_by_level, f.Username, fun () -> swap.Current <- friends_list)
                                 )
                             )
-                        status <- FriendCompareState.Loaded
-                    | None -> status <- FriendCompareState.ServerError
+                        status <- WebRequestState.Loaded
+                    | None -> status <- WebRequestState.ServerError
             )
-        else status <- FriendCompareState.Offline
+        else status <- WebRequestState.Offline
 
         this
-        |+ Conditional((fun () -> status = FriendCompareState.Loading), EmptyState(Icons.cloud, L"misc.loading"))
-        |+ Conditional((fun () -> status = FriendCompareState.Offline), EmptyState(Icons.connected, L"misc.offline"))
-        |+ Conditional((fun () -> status = FriendCompareState.ServerError), EmptyState(Icons.connected, "Server error"))
-        |+ Conditional((fun () -> status = FriendCompareState.Loaded && friends.Value.Length = 0), EmptyState(Icons.multiplayer, L"stats.table.friends.empty", Subtitle = L"stats.table.friends.empty.subtitle"))
+        |+ Conditional((fun () -> status = WebRequestState.Loading), EmptyState(Icons.cloud, L"misc.loading"))
+        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, "Server error"))
+        |+ Conditional((fun () -> status = WebRequestState.Loaded && friends.Value.Length = 0), EmptyState(Icons.multiplayer, L"stats.table.friends.empty", Subtitle = L"stats.table.friends.empty.subtitle"))
         |* swap
 
         base.Init parent
@@ -221,7 +261,7 @@ type private TableStats() =
                         GridContainer(50.0f, 4, Position = Position.Row(110.0f, 50.0f).Margin(40.0f, 0.0f), Spacing = (25.0f, 0.0f))
                         |+ (button(sprintf "%s %s" Icons.stats (L"stats.table.breakdown"), table_breakdown) |> fun b -> b.TiltLeft <- false; b)
                         |+ button(sprintf "%s %s" Icons.stats_2 (L"stats.table.ratings"), table_bests)
-                        |+ button(sprintf "%s %s" Icons.sparkle (L"stats.table.leaderboard"), EmptyState(Icons.stats, L"misc.nyi"))
+                        |+ button(sprintf "%s %s" Icons.sparkle (L"stats.table.leaderboard"), Leaderboard())
                         |+ (button(sprintf "%s %s" Icons.multiplayer (L"stats.table.friends"), FriendComparer(ruleset, score_data)) |> fun b -> b.TiltRight <- false; b)
                     )
                 |* swap
