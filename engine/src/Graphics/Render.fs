@@ -127,7 +127,7 @@ module Render =
         GL.Enable(EnableCap.VertexArray)
         GL.Enable(EnableCap.Texture2D)
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
-        GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha)
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
         Shader.on Shader.main
         //for i = 0 to 15 do

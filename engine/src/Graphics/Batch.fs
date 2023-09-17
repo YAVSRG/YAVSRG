@@ -14,12 +14,12 @@ module Batch =
             X: float32; Y: float32
             U: float32; V: float32
             R: uint8; G: uint8; B: uint8; A: uint8
-            //T: int32
+            T: int32
         }
 
     let mutable active = false
     
-    let CAPACITY = 256
+    let CAPACITY = 512
     let VERTICES_PER_ELEMENT = 6
     let VERTEX_COUNT = CAPACITY * VERTICES_PER_ELEMENT // 2 triangles per quad
     let VERTEX_SIZE = sizeof<Vertex>
@@ -39,7 +39,7 @@ module Batch =
     VertexArrayObject.vertexAttribPointer (2, 4, VertexAttribPointerType.UnsignedByte, true, VERTEX_SIZE, sizeof<float32> * 4)
     // 1 int in slot 3, for tex unit
     // 4 bytes for padding sake
-    //VertexArrayObject.vertexAttribPointer (3, 1, VertexAttribPointerType.Int, false, VERTEX_SIZE, sizeof<float32> * 4 + 4)
+    VertexArrayObject.vertexAttribPointer (3, 1, VertexAttribPointerType.Int, false, VERTEX_SIZE, sizeof<float32> * 4 + 4)
 
     let mutable vcount = 0
     let mutable bcount = 0
@@ -58,7 +58,7 @@ module Batch =
                 X = pos.X; Y = pos.Y;
                 U = uv.X; V = uv.Y;
                 R = color.R; G = color.G; B = color.B; A = color.A
-                //T = texUnit
+                T = texUnit
             }
         vcount <- vcount + 1
 
