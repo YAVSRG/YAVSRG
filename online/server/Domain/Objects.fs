@@ -184,6 +184,22 @@ module Score =
     // ft.aggregate idx:scores "@user_id:[4 4]" verbatim groupby 1 @hash reduce max 1 grade as best_grade
     // todo: filter to table hashes when there are more scores for non-table than table (soon)
 
+    let aggregate_table_grades (userId: int64) (ruleset_id: string) (rate: float32) =
+        let results = Collections.Generic.Dictionary<string, int>()
+        ft.Aggregate("idx:scores", 
+            AggregationRequest(
+                sprintf "@user_id:[%i %i] @rate:[%f 2.0] @ruleset_id:{%s}" 
+                    userId
+                    userId
+                    rate
+                    (ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
+            ).Verbatim().GroupBy("@hash", Reducers.Max("grade").As("best_grade"))).GetResults()
+        |> Seq.iter (fun result -> 
+            let mutable g = 0
+            result.["best_grade"].TryParse(&g) |> ignore
+            results.[result.["hash"].ToString()] <- g)
+        results
+
     let aggregate_table_scores (userId: int64) (ruleset_id: string) (rate: float32) =
         let results = Collections.Generic.Dictionary<string, float>()
         ft.Aggregate("idx:scores", 
@@ -195,9 +211,9 @@ module Score =
                     (ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
             ).Verbatim().GroupBy("@hash", Reducers.Max("score").As("best_score"))).GetResults()
         |> Seq.iter (fun result -> 
-            let mutable g = 0.0
-            result.["best_score"].TryParse(&g) |> ignore
-            results.[result.["hash"].ToString()] <- g)
+            let mutable a = 0.0
+            result.["best_score"].TryParse(&a) |> ignore
+            results.[result.["hash"].ToString()] <- a)
         results
 
 module Leaderboard =
@@ -216,21 +232,13 @@ module Leaderboard =
         let key (hash: string) (ruleset: string) (userId: int64) = RedisKey(sprintf "leaderboard.score:%s:%s:%i" hash ruleset userId)
 
         let create (replay: string, rate: float32, mods: Mods.ModState, timestamp: DateTime) =
-            let rate = MathF.Round(rate, 2)
-            try
-                if rate < 1.0f then failwith "This score is unranked because it was played at a lower rate than 1.0x"
-                match Mods.check mods with
-                | Ok Mods.ModStatus.Ranked ->
-                    Ok {
-                        Replay = replay
-                        Rate = rate
-                        Mods = mods
-                        Timestamp = (DateTimeOffset.op_Implicit timestamp).ToUnixTimeMilliseconds()
-                        UploadTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                    }
-                | Ok _ -> failwith "This score is unranked because of mods, cannot be stored online"
-                | Error reason -> failwithf "Mods are invalid: %s" reason
-            with err -> Error err.Message
+            {
+                Replay = replay
+                Rate = MathF.Round(rate, 2)
+                Mods = mods
+                Timestamp = (DateTimeOffset.op_Implicit timestamp).ToUnixTimeMilliseconds()
+                UploadTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            }
 
         let save (hash: string) (ruleset: string) (userId: int64) (score: Replay) =
             json.Set(key hash ruleset userId, "$", score) |> ignore
@@ -258,6 +266,8 @@ module Leaderboard =
 
     let add_score (hash: string) (ruleset: string) (userId: int64) (score: float) =
         db.SortedSetAdd(key hash ruleset, userId, score) |> ignore
+        let result = db.SortedSetRank(key hash ruleset, userId, Order.Descending)
+        result.Value
 
     let get_top_20_ids (hash: string) (ruleset: string) =
         db.SortedSetRangeByRankWithScores(key hash ruleset, 0, 20, Order.Descending)
@@ -274,11 +284,19 @@ module Leaderboard =
             (User.by_ids userIds |> Array.map (Option.map (fun x -> x.Username)))
             (Replay.get_chart_scores hash ruleset userIds)
 
-    let position (userId: int64) (hash: string) (ruleset: string) : int64 option =
+    let user_by_rank (hash: string) (ruleset: string) (rank: int64) =
+        db.SortedSetRangeByRankWithScores(key hash ruleset, rank, rank + 1L, Order.Descending)
+        |> Seq.tryExactlyOne
+        |> Option.map (fun v ->
+            let mutable r = 0L
+            let _ = v.Element.TryParse(&r)
+            r, v.Score)
+
+    let rank (hash: string) (ruleset: string) (userId: int64)  : int64 option =
         let result = db.SortedSetRank(key hash ruleset, userId, Order.Descending)
         if result.HasValue then Some result.Value else None
 
-    let score (userId: int64) (hash: string) (ruleset: string) : float option =
+    let score (hash: string) (ruleset: string) (userId: int64) : float option =
         let result = db.SortedSetScore(key hash ruleset, userId)
         if result.HasValue then Some result.Value else None
 
@@ -319,7 +337,7 @@ module TableRanking =
 
     let get_top_50_info (id: string) =
         let userIds = get_top_50_ids id
-        let users = userIds |> Array.map fst |> User.by_ids |> Array.map (Option.map (fun x -> x.Username))
+        let users = userIds |> Array.map fst |> User.by_ids |> Array.map (Option.map (fun x -> x.Username, x.Color))
         Array.zip
             users
             (userIds |> Array.map snd)

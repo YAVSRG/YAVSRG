@@ -69,7 +69,7 @@ module Save =
                 Logging.Debug("Rejecting score with invalid mods")
                 response.MakeErrorResponse(400) |> ignore
             | Ok status when status >= Mods.ModStatus.Unstored -> response.ReplyJson(false)
-            | Ok _ ->
+            | Ok mod_status ->
 
             let rate = System.MathF.Round(request.Rate, 2)
 
@@ -81,6 +81,9 @@ module Save =
 
             let replay = Replay.decompress request.Replay // todo: zip bomb prevention?
             let modChart = Mods.getModChart request.Mods chart
+
+            let mutable leaderboard_change : Charts.Scores.Save.LeaderboardChange option = None
+            let mutable table_change : Charts.Scores.Save.TableChange option = None
 
             for ruleset_id in Score.SHORT_TERM_RULESET_LIST do
                 let ruleset = Charts.rulesets.[ruleset_id]
@@ -103,14 +106,39 @@ module Save =
 
                 Score.save_new score |> ignore
 
-                if rate >= 1.0f && (match Leaderboard.score userId hash ruleset_id with Some s -> s < score.Score | None -> true) then
-                    match Leaderboard.Replay.create (request.Replay, rate, request.Mods, request.Timestamp) with
-                    | Ok replay ->
-                        Leaderboard.Replay.save hash ruleset_id userId replay
-                        Leaderboard.add_score hash ruleset_id userId score.Score
-                    | Error _ -> ()
+                let old_score = Leaderboard.score hash ruleset_id userId
+                if mod_status = Mods.ModStatus.Ranked && rate >= 1.0f && (match old_score with Some s -> s < score.Score | None -> true) then
+                    let old_rank = Leaderboard.rank hash ruleset_id userId
+                    let replay = Leaderboard.Replay.create (request.Replay, rate, request.Mods, request.Timestamp)
+                    Leaderboard.Replay.save hash ruleset_id userId replay
+                    let new_rank = Leaderboard.add_score hash ruleset_id userId score.Score
+                    leaderboard_change <- Some { RulesetId = ruleset_id; OldRank = old_rank; NewRank = new_rank }
 
-                // todo: if ruleset and chart match a table, aggregate your new table rating and save to leaderboard
+                    // if ruleset and chart match a table, aggregate your new table rating and save to leaderboard
+                    match Charts.crescent with
+                    | None -> ()
+                    | Some table -> 
+                        if table.RulesetId <> ruleset_id || not (table.Contains request.ChartId) then () else
 
-            response.ReplyJson(true)
+                        let grades = Score.aggregate_table_grades userId ruleset_id 1.0f
+                        let rating =
+                            table.Levels
+                            |> Seq.map (fun l -> l.Charts |> Seq.map (fun c -> l, c))
+                            |> Seq.concat
+                            |> Seq.choose (fun (level, chart) -> 
+                                if grades.ContainsKey(chart.Hash) then Some (table.Rating grades.[chart.Hash] (level, chart))
+                                else None)
+                            |> Seq.sortDescending
+                            |> Seq.truncate 50
+                            |> fun s -> if Seq.isEmpty s then 0.0 else Seq.average s
+
+                        let old_position = 
+                            match TableRanking.rank "crescent" userId with
+                            | Some pos -> Some (pos, (TableRanking.rating "crescent" userId).Value)
+                            | None -> None
+
+                        let new_rank = TableRanking.update "crescent" userId rating
+                        table_change <- Some { Table = "crescent"; OldPosition = old_position; NewPosition = new_rank, rating }
+
+            response.ReplyJson({ LeaderboardChange = leaderboard_change; TableChange = table_change } : Charts.Scores.Save.Response)
         }

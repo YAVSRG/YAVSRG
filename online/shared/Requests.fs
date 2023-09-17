@@ -54,6 +54,31 @@ module Charts =
                     Mods: Prelude.Gameplay.Mods.ModState
                     Timestamp: System.DateTime
                 }
+
+            [<Json.AutoCodec>]
+            type LeaderboardChange =
+                {
+                    RulesetId: string
+                    OldRank: int64 option
+                    NewRank: int64
+                }
+
+            [<Json.AutoCodec>]
+            type TableChange =
+                {
+                    Table: string
+                    OldPosition: (int64 * float) option
+                    NewPosition: (int64 * float)
+                }
+
+            [<Json.AutoCodec>]
+            type Response =
+                {
+                    // todo: in future, one chart could be in multiple leaderboards
+                    LeaderboardChange: LeaderboardChange option
+                    // todo: in future, one chart could be in multiple tables
+                    TableChange: TableChange option
+                }
                 
         /// requires login token as Authorization header
         /// url parameters:
@@ -104,6 +129,28 @@ module Tables =
         type Response =
             {
                 Scores: Score array
+            }
+    
+    /// requires login token as Authorization header
+    /// url parameters:
+    ///  table - id of table to get ranking for e.g 'crescent' or 'mizu'
+    module Leaderboard =
+
+        let ROUTE = (GET, "/tables/ranking")
+
+        [<Json.AutoCodec>]
+        type Player =
+            {
+                Username: string
+                Color: int32
+                Rank: int
+                Rating: float
+            }
+
+        [<Json.AutoCodec>]
+        type Response =
+            {
+                Players: Player array
             }
 
 module Friends =

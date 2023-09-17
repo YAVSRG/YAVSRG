@@ -4,7 +4,6 @@ open System.Collections.Generic
 open NetCoreServer
 open Percyqaz.Common
 open Prelude
-open Interlude.Web.Shared.API
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 
@@ -24,6 +23,7 @@ module API =
         add_endpoint Charts.Scores.Leaderboard.ROUTE Charts.Scores.Leaderboard.handle
 
         add_endpoint Tables.Records.ROUTE Tables.Records.handle
+        add_endpoint Tables.Leaderboard.ROUTE Tables.Leaderboard.handle
 
         add_endpoint Friends.List.ROUTE Friends.List.handle
         add_endpoint Friends.Add.ROUTE Friends.Add.handle
