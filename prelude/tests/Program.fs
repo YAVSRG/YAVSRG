@@ -21,7 +21,8 @@ let main argv =
     Console.BufferHeight <- 32766
     Logging.Info "Welcome to the Prelude test track"
 
-    Imports.main()
+    //Imports.main()
+    OsuScoreMigration.main()
 
     Logging.Info "Test track complete!"
 

@@ -42,6 +42,7 @@
     <Compile Include="Content\Noteskins.fs" />
     <Compile Include="Content\NoteskinConverter.fs" />
     <Compile Include="Backbeat\Archive.fs" />
+    <Compile Include="Data\osu!.fs" />
     <Compile Include="Data\Web.fs" />
     <Compile Include="Data\Scores.fs" />
     <Compile Include="Data\Charts\Caching.fs" />

@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="Tests\Caramell.fs" />
+    <Compile Include="Tests\OsuScoreMigration.fs" />
     <Compile Include="Tests\Sail.fs" />
     <Compile Include="Tests\Trendy.fs" />
     <Compile Include="Tests\Imports.fs" />
