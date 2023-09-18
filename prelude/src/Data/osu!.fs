@@ -44,9 +44,9 @@ module ``osu!`` =
             Hash: string
             Filename: string
             Status: byte
-            Hitcircles: int
-            Sliders: int
-            Spinners: int
+            Hitcircles: int16
+            Sliders: int16
+            Spinners: int16
             LastModified: int64
             ApproachRate: float32
             CircleSize: float32
@@ -85,9 +85,66 @@ module ``osu!`` =
             DisableStoryboard: bool
             DisableVideo: bool
             VisualOverride: bool
-            LastModified2: int64
+            LastModified2: int
             ManiaScrollSpeed: byte
         }
+        static member Read (db_version: int) (br: BinaryReader) =
+            {
+                Size = if db_version < 20191106 then read_int br |> Some else None
+                Artist = read_string br
+                ArtistUnicode = read_string br
+                Title = read_string br
+                TitleUnicode = read_string br
+                Creator = read_string br
+                Difficulty = read_string br
+                AudioFile = read_string br
+                Hash = read_string br
+                Filename = read_string br
+                Status = read_byte br
+                Hitcircles = read_short br
+                Sliders = read_short br
+                Spinners = read_short br
+                LastModified = read_long br
+                ApproachRate = read_single br
+                CircleSize = read_single br
+                HPDrain = read_single br
+                OverallDifficulty = read_single br
+                SliderVelocity = read_double br
+                StandardModeStarRatings = Array.init (read_int br) (fun i -> read_int_double_pair br)
+                TaikoModeStarRatings = Array.init (read_int br) (fun i -> read_int_double_pair br)
+                CatchModeStarRatings = Array.init (read_int br) (fun i -> read_int_double_pair br)
+                ManiaModeStarRatings = Array.init (read_int br) (fun i -> read_int_double_pair br)
+                DrainTimeSeconds = read_int br
+                TotalTimeMilliseconds = read_int br
+                PreviewTimeMilliseconds = read_int br
+                TimingPoints = Array.init (read_int br) (fun i -> read_timing_point br)
+                DifficultyID = read_int br
+                BeatmapID = read_int br
+                ThreadID = read_int br
+                StandardModeGrade = read_byte br
+                TaikoModeGrade = read_byte br
+                CatchModeGrade = read_byte br
+                ManiaModeGrade = read_byte br
+                LocalOffset = read_short br
+                StackLeniency = read_single br
+                Mode = read_byte br
+                Source = read_string br
+                Tags = read_string br
+                OnlineOffset = read_short br
+                TitleFont = read_string br
+                Unplayed = read_bool br
+                LastPlayed = read_long br
+                IsOsz2 = read_bool br
+                FolderName = read_string br
+                LastRepositoryCheck = read_long br
+                IgnoreBeatmapSound = read_bool br
+                IgnoreBeatmapSkin = read_bool br
+                DisableStoryboard = read_bool br
+                DisableVideo = read_bool br
+                VisualOverride = read_bool br
+                LastModified2 = read_int br
+                ManiaScrollSpeed = read_byte br
+            }
 
     type OsuDatabase =
         {
@@ -99,6 +156,17 @@ module ``osu!`` =
             Beatmaps: OsuDatabase_Beatmap array
             UserPermissions: int
         }
+        static member Read (br: BinaryReader) =
+            let version = read_int br
+            {
+                Version = version
+                FolderCount = read_int br
+                AccountUnlocked = read_bool br
+                AccountUnlockDate = read_long br |> DateTime
+                PlayerName = read_string br
+                Beatmaps = Array.init (read_int br) (fun i -> OsuDatabase_Beatmap.Read version br)
+                UserPermissions = read_int br
+            }
 
     type ScoreDatabase_Score =
         {
