@@ -310,37 +310,40 @@ module RulesetUtils =
         else miss_weight
 
     let osu_ln_judgement (od: float32) (headDelta: Time) (endDelta: Time) (overhold: bool) (dropped: bool) : JudgementId =
-        let absolute = Time.abs endDelta * 0.5f
+        let tailDelta = Time.abs endDelta
         let headDelta = Time.abs headDelta
 
-        if
-            absolute < 16.5f<ms> * 1.2f &&
-            absolute + headDelta < 16.5f<ms> * 2.4f &&
-            headDelta < 151.5f<ms> - od * 3.0f<ms> &&
-            not dropped
-        then 0 // 300g
-        elif
-            absolute < (64.5f<ms> - od * 3.0f<ms>) * 1.1f &&
-            absolute + headDelta < (64.5f<ms> - od * 3.0f<ms>) * 2.2f &&
-            headDelta < 151.5f<ms> - od * 3.0f<ms> &&
-            not dropped
-        then 1 // 300
-        elif 
-            ((absolute < 97.5f<ms> - od * 3.0f<ms> &&
-            absolute + headDelta < (97.5f<ms> - od * 3.0f<ms>) * 2.0f &&
-            headDelta < 151.5f<ms> - od * 3.0f<ms>) || overhold) &&
-            not dropped
-        then 2 // 200
-        elif
-            absolute < 127.5f<ms> - od * 3.0f<ms> &&
-            absolute + headDelta < (127.5f<ms> - od * 3.0f<ms>) * 2.0f &&
-            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
-            not dropped
-        then 3 // 100
-        elif
-            overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>
-        then 4 // 50
-        else 5 // MISS
+        if not dropped && not overhold then
+
+            let window_320 = 16.5f<ms> * 1.2f
+            let window_300 = (64.5f<ms> - od * 3.0f<ms>) * 1.1f
+            let window_200 = 97.5f<ms> - od * 3.0f<ms>
+            let window_100 = 127.5f<ms> - od * 3.0f<ms>
+            let window_50 = 151.5f<ms> - od * 3.0f<ms>
+
+            let mean = (tailDelta + headDelta) * 0.5f
+
+            if endDelta < -window_50 then 5
+
+            elif headDelta < window_320 && mean < window_320 then 0 // 300g
+            elif headDelta < window_300 && mean < window_300 then 1 // 300
+            elif  headDelta < window_200 && mean < window_200 then 2 // 200
+            elif headDelta < window_100 && mean < window_100 then 3 // 100
+            elif headDelta < window_50 && mean < window_50 then 4 // 50
+            else 5 // miss
+
+        elif dropped then 
+        
+            let window_hit = 151.5f<ms> - od * 3.0f<ms>
+            if tailDelta < window_hit then 4 else 5
+
+        else
+            let window_overhold_200 = 42.5f<ms> - od * 3.0f<ms>
+            let window_overhold_100 = 103.5f<ms> - od * 3.0f<ms>
+
+            if headDelta < window_overhold_200 then 2 // 200
+            elif headDelta < window_overhold_100 then 3 // 100
+            else 4 // 50
 
 module PrefabRulesets =
 
