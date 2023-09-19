@@ -2,8 +2,72 @@
 
 open System
 open System.IO
+open Prelude.Gameplay.Mods
 
 module ``osu!`` =
+
+    type Mods =
+        | None = 0
+        | NoFail = 1
+        | Easy = 2
+        | TouchDevice = 4
+        | Hidden = 8
+        | HardRock = 16
+        | SuddenDeath = 32
+        | DoubleTime = 64
+        | Relax = 128
+        | HalfTime = 256
+        | Nightcore = 512 // always used with DT
+        | Flashlight = 1024
+        | Autoplay = 2048
+        | SpunOut = 4096
+        | Autopilot = 8192
+        | Perfect = 16384
+        | Key4 = 32768
+        | Key5 = 65536
+        | Key6 = 131072
+        | Key7 = 262144
+        | Key8 = 524288
+        | FadeIn = 1048576
+        | Random = 2097152
+        | Cinema = 4194304
+        | TargetPractice = 8388608
+        | Key9 = 16777216
+        | Coop = 33554432
+        | Key1 = 67108864
+        | Key3 = 134217728
+        | Key2 = 268435456
+        | ScoreV2 = 536870912
+        | Mirror = 1073741824
+    module Mods =
+        let allowable_mods = 
+                Mods.NoFail
+            ||| Mods.Easy
+            ||| Mods.Hidden
+            ||| Mods.HardRock
+            ||| Mods.SuddenDeath
+            ||| Mods.DoubleTime
+            ||| Mods.HalfTime
+            ||| Mods.Nightcore
+            ||| Mods.Flashlight
+            ||| Mods.Perfect
+            ||| Mods.FadeIn
+            ||| Mods.ScoreV2
+            ||| Mods.Mirror
+
+        let to_interlude_rate_and_mods (mods: Mods) : (float32 * ModState) option =
+            if mods &&& allowable_mods <> mods then None else
+
+            let rate =
+                if mods &&& Mods.DoubleTime = Mods.DoubleTime then 1.5f
+                elif mods &&& Mods.HalfTime = Mods.HalfTime then 0.75f
+                else 1.0f
+
+            let mod_state =
+                seq {
+                    if mods &&& Mods.Mirror = Mods.Mirror then yield ("mirror", 0)
+                } |> Map.ofSeq
+            Some (rate, mod_state)
     
     let private read_byte (br: BinaryReader) = br.ReadByte()
     let private read_short (br: BinaryReader) = br.ReadInt16()
@@ -25,6 +89,9 @@ module ``osu!`` =
         assert(br.ReadByte() = 0x0Duy)
         let double = read_double br
         int, double
+
+    let write_string (bw: BinaryWriter) (s: string) =
+        if s = "" then bw.Write(0x00uy) else bw.Write(0x0buy); bw.Write s
 
     let private read_timing_point (br: BinaryReader) = br.ReadBytes(17) |> ignore
 
@@ -178,13 +245,15 @@ module ``osu!`` =
             Count300: int16
             Count100: int16
             Count50: int16
-            CountGeki: int16 // = 320s in mania
-            CountKatu: int16 // = 200s in mania
+            /// = 320s in mania
+            CountGeki: int16
+            /// = 200s in mania
+            CountKatu: int16
             CountMiss: int16
             Score: int
             MaxCombo: int16
             PerfectCombo: bool
-            ModsUsed: int
+            ModsUsed: Mods
             LifeBarGraph: string
             Timestamp: int64
             CompressedReplayBytes: byte array option
@@ -207,7 +276,7 @@ module ``osu!`` =
                 Score = read_int br
                 MaxCombo = read_short br
                 PerfectCombo = read_bool br
-                ModsUsed = read_int br
+                ModsUsed = read_int br |> enum
                 LifeBarGraph = read_string br
                 Timestamp = read_long br |> timestamp_0001_to_1601
                 CompressedReplayBytes =
@@ -215,6 +284,28 @@ module ``osu!`` =
                     if length < 0 then None else Some <| br.ReadBytes length
                 OnlineScoreID = read_long br
             }
+        member this.Write (bw: BinaryWriter) =
+            bw.Write this.Mode
+            bw.Write this.Version
+            write_string bw this.BeatmapHash
+            write_string bw this.Player
+            write_string bw this.ReplayHash
+            bw.Write this.Count300
+            bw.Write this.Count100
+            bw.Write this.Count50
+            bw.Write this.CountGeki
+            bw.Write this.CountKatu
+            bw.Write this.CountMiss
+            bw.Write this.Score
+            bw.Write this.MaxCombo
+            bw.Write this.PerfectCombo
+            bw.Write (int this.ModsUsed)
+            write_string bw this.LifeBarGraph
+            bw.Write (DateTime.FromFileTimeUtc(this.Timestamp).Ticks)
+            match this.CompressedReplayBytes with
+            | Some b -> bw.Write b.Length; bw.Write b
+            | None -> bw.Write -1
+            bw.Write this.OnlineScoreID
 
     type ScoreDatabase_Beatmap =
         {
