@@ -41,7 +41,7 @@ module AutomaticSync =
         let mean = sum / count * Gameplay.rate.Value
 
         let firstNote = Gameplay.Chart.current.Value.FirstNote
-        let recommendedOffset = Gameplay.Chart.saveData.Value.Offset - firstNote - mean * 1.2f
+        let recommendedOffset = if count < 10.0f then offset.Value else Gameplay.Chart.saveData.Value.Offset - firstNote - mean * 1.25f
         offset.Set recommendedOffset
 
 type Timeline(chart: Chart, on_seek: Time -> unit) =
