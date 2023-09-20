@@ -328,3 +328,41 @@ module ``osu!`` =
                 Version = read_int br
                 Beatmaps = Array.init (read_int br) (fun i -> ScoreDatabase_Beatmap.Read br)
             }
+
+    open Prelude
+    open System.Text
+    open SevenZip.Compression
+    open Prelude.Charts.Formats.Interlude
+    open Prelude.Gameplay
+
+    let decode_replay (replay: ScoreDatabase_Score, chart: Chart) : ReplayData =
+        let input = new MemoryStream(replay.CompressedReplayBytes.Value)
+        let output = new MemoryStream()
+
+        let props = Array.zeroCreate 5
+        input.Read(props, 0, 5) |> ignore
+
+        let lengthBytes = Array.zeroCreate 8
+        input.Read(lengthBytes, 0, 8) |> ignore
+
+        let dec = LZMA.Decoder()
+        dec.SetDecoderProperties props
+
+        dec.Code(input, output, replay.CompressedReplayBytes.Value.Length, BitConverter.ToInt64(lengthBytes, 0), null)
+        output.Flush()
+        let string_data =
+            output.ToArray()
+            |> Encoding.UTF8.GetString
+
+        let mutable time = -chart.FirstNote
+        let mutable last_state = 256us
+        seq {
+            for entry in string_data.Split(",", StringSplitOptions.RemoveEmptyEntries) do
+                let parts = entry.Split("|")
+                if parts.[0] <> "-12345" then
+                    time <- time + float32 parts.[0] * 1.0f<ms>
+                    let state = uint16 parts.[1]
+                    if state <> last_state then
+                        yield struct (time, uint16 parts.[1])
+                        last_state <- state
+        } |> Array.ofSeq

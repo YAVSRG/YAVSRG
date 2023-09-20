@@ -150,7 +150,9 @@ module ``osu!`` =
         sv |> Array.ofList |> Array.rev
 
     let private rateRegex = Regex("""((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)x)""");
-    let looks_like_a_rate (b: Beatmap) : bool = rateRegex.IsMatch b.Metadata.Version
+    let detect_rate_mod (difficulty_name: string) : string option = 
+        let m = rateRegex.Match difficulty_name
+        if m.Success then Some m.Value else None
 
     let toInterlude (b: Beatmap) (action: ConversionAction) : Chart =
         let keys = b.Difficulty.CircleSize |> int
@@ -567,7 +569,7 @@ module Utilities =
                 if 
                     map.General.Mode = GameMode.Mania
                     && (let keys = map.Difficulty.CircleSize |> int in 3 <= keys && keys <= 10)
-                    && not (``osu!``.looks_like_a_rate map)
+                    && not (``osu!``.detect_rate_mod(map.Metadata.Version).IsSome)
                     && map.Objects.Length >= 20
                 then
                     [ ``osu!``.toInterlude (loadBeatmapFile action.Source) action ]
