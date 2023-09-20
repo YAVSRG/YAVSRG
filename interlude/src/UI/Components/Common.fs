@@ -157,3 +157,45 @@ type EmptyState(icon: string, text: string) =
         Text.drawFillB(Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
         Text.drawFillB(Style.font, text, this.Bounds.Shrink(30.0f, 100.0f).TrimTop(175.0f).SliceTop(60.0f), color, Alignment.CENTER)
         Text.drawFillB(Style.font, this.Subtitle, this.Bounds.Shrink(30.0f, 100.0f).TrimTop(230.0f).SliceTop(40.0f), color, Alignment.CENTER)
+
+type LoadingState() = 
+    inherit StaticWidget(NodeType.None)
+
+    let animation = Animation.Counter(250.0)
+
+    let animation_frames = 
+        [|
+            Percyqaz.Flux.Resources.Feather.cloud_snow
+            Percyqaz.Flux.Resources.Feather.cloud_drizzle
+            Percyqaz.Flux.Resources.Feather.cloud_rain
+            Percyqaz.Flux.Resources.Feather.cloud_drizzle
+        |]
+
+    member val Text = L"misc.loading" with get, set
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        animation.Update elapsedTime
+
+    override this.Draw() =
+        let color = (!*Palette.LIGHT, !*Palette.DARKER)
+        let icon = animation_frames.[animation.Loops % animation_frames.Length]
+        Text.drawFillB(Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
+        Text.drawFillB(Style.font, this.Text, this.Bounds.Shrink(30.0f, 100.0f).TrimTop(175.0f).SliceTop(60.0f), color, Alignment.CENTER)
+
+type NewAndShiny() =
+    inherit StaticWidget(NodeType.None)
+
+    member val Icon = Icons.alert with get, set
+
+    override this.Draw() =
+        let x, y = this.Bounds.Right, this.Bounds.Bottom // todo: alignment options
+        let r = 18f
+        let angle = MathF.PI / 15.0f
+        let vec i = 
+            let angle = float32 i * angle
+            let struct (a, b) = MathF.SinCos(angle)
+            (x + r * a, y - r * b)
+        for i = 0 to 29 do
+            Draw.quad (Quad.createv(x, y)(x, y)(vec i)(vec (i+1))) (Quad.colorOf Colors.red_accent) Sprite.DefaultQuad
+        Text.drawFillB(Style.font, this.Icon, Rect.Box(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)

@@ -415,6 +415,7 @@ misc.hotkeyhint=Hotkey
 misc.nyi=Not yet implemented
 misc.search=Press %0 to %1
 misc.wip=WORK IN PROGRESS: This feature or area is under construction!
+misc.server_error=Server error
 mod.auto.desc=Plays the chart for you.
 mod.auto.name=Auto
 mod.inverse.desc=Swaps notes with hold releases.

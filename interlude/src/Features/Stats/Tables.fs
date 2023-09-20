@@ -51,9 +51,9 @@ type private Leaderboard() =
         else status <- WebRequestState.Offline
 
         this
-        |+ Conditional((fun () -> status = WebRequestState.Loading), EmptyState(Icons.cloud, L"misc.loading"))
+        |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
         |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
-        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, "Server error"))
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, L"misc.server_error"))
         |* ScrollContainer.Flow(contents)
 
         base.Init parent
@@ -113,9 +113,9 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
         else status <- WebRequestState.Offline
 
         this
-        |+ Conditional((fun () -> status = WebRequestState.Loading), EmptyState(Icons.cloud, L"misc.loading"))
+        |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
         |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
-        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, "Server error"))
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, L"misc.server_error"))
         |+ Text("Comparing to " + name, Align = Alignment.RIGHT, Position = Position.SliceTop(50.0f).Margin(20.0f, 0.0f))
         |+ Button(K (Icons.back + " Back"), on_back, Position = Position.Box(0.0f, 0.0f, 200.0f, 50.0f))
         |* ScrollContainer.Flow(contents, Position = Position.Margin(10.0f, 0.0f).TrimTop(55.0f))
@@ -166,9 +166,9 @@ type private FriendComparer(ruleset: Ruleset, score_data: (Level * TableChart * 
         else status <- WebRequestState.Offline
 
         this
-        |+ Conditional((fun () -> status = WebRequestState.Loading), EmptyState(Icons.cloud, L"misc.loading"))
+        |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
         |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
-        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, "Server error"))
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, L"misc.server_error"))
         |+ Conditional((fun () -> status = WebRequestState.Loaded && friends.Value.Length = 0), EmptyState(Icons.multiplayer, L"stats.table.friends.empty", Subtitle = L"stats.table.friends.empty.subtitle"))
         |* swap
 

@@ -47,7 +47,7 @@ module Mounts =
                             import <- true
                             mount.LastImported <- System.DateTime.UnixEpoch
                             Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "") )
-                    .Pos(400.0f)
+                    .Pos(370.0f)
                     .Tooltip(Tooltip.Info("mount.importall"))
             )
 
@@ -63,21 +63,21 @@ module Mounts =
             Logging.Info("Checking for new osu! songs to import..")
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then import_mounted_source.Request(mount, ignore)
-            else Logging.Warn("osu! Songs folder has moved or can no longer be found.\n This will break any mounted songs, and you will need to set up the link again.")
+            else Logging.Warn("osu! Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again.")
         | None -> ()
         match options.StepmaniaMount.Value with
         | Some mount -> 
             Logging.Info("Checking for new Stepmania songs to import..")
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then import_mounted_source.Request(mount, ignore)
-            else Logging.Warn("Stepmania Songs folder has moved or can no longer be found.\n This will break any mounted songs, and you will need to set up the link again.")
+            else Logging.Warn("Stepmania Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again.")
         | None -> ()
         match options.EtternaMount.Value with
         | Some mount ->
             Logging.Info("Checking for new Etterna songs to import..")
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then import_mounted_source.Request(mount, ignore)
-            else Logging.Warn("Etterna Songs folder has moved or can no longer be found.\n This will break any mounted songs, and you will need to set up the link again.")
+            else Logging.Warn("Etterna Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again.")
         | None -> ()
 
     type CreateDialog(mountType: Game, setting: Setting<MountedChartSource option>) as this =
