@@ -54,6 +54,8 @@ module Types =
         let last (arr: TimeArray<'T>) = if arr.Length > 0 then Some arr.[arr.Length - 1] else None
         let first (arr: TimeArray<'T>) = if arr.Length > 0 then Some arr.[0] else None
 
+        let scale (scale: float32) (arr: TimeArray<'T>) = arr |> Array.map (fun { Time = time; Data = d } -> { Time = time * scale; Data = d })
+
         // greatest index i where arr.[i] <= time
         // if no such index because you are before all events, -1
         let find_left time (arr: TimeArray<'T>) =

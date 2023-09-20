@@ -289,3 +289,10 @@ module Interlude =
             for i = 0 to (min xs.Length ys.Length) - 1 do
                 if xs.[i] <> ys.[i] then printfn "! %A %A %f %f" xs.[i] ys.[i] (left.Notes.[i].Time - left_offset) (right.Notes.[i].Time - right_offset)
             printfn "%f : %f" (left.LastNote - left.FirstNote) (right.LastNote - right.FirstNote)
+
+        let scale (scale: float32) (chart: Chart) =
+            { chart with 
+                Notes = TimeArray.scale scale chart.Notes
+                BPM = TimeArray.scale scale chart.BPM
+                SV = TimeArray.scale scale chart.SV
+            }

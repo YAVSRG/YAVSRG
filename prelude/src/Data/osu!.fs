@@ -335,7 +335,7 @@ module ``osu!`` =
     open Prelude.Charts.Formats.Interlude
     open Prelude.Gameplay
 
-    let decode_replay (replay: ScoreDatabase_Score, chart: Chart) : ReplayData =
+    let decode_replay (replay: ScoreDatabase_Score, chart: Chart, rate: float32) : ReplayData =
         let input = new MemoryStream(replay.CompressedReplayBytes.Value)
         let output = new MemoryStream()
 
@@ -360,7 +360,7 @@ module ``osu!`` =
             for entry in string_data.Split(",", StringSplitOptions.RemoveEmptyEntries) do
                 let parts = entry.Split("|")
                 if parts.[0] <> "-12345" then
-                    time <- time + float32 parts.[0] * 1.0f<ms>
+                    time <- time + float32 parts.[0] * rate * 1.0f<ms>
                     let state = uint16 parts.[1]
                     if state <> last_state then
                         yield struct (time, uint16 parts.[1])
