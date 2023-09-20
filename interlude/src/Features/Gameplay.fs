@@ -186,7 +186,7 @@ module Gameplay =
                         }: Requests.Charts.Scores.Save.Request), ignore)
                 Scores.saveScoreWithPbs Chart.saveData.Value Content.Rulesets.current_hash data
             else
-                Scores.saveScore Chart.saveData.Value data
+                Scores.saveScore Chart.saveData.Value data.ScoreInfo
                 ImprovementFlags.Default
         else ImprovementFlags.Default
 

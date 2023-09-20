@@ -88,6 +88,8 @@ module Printerlude =
                     Logging.Info "Cleaned up."
                 with err -> Logging.Error ("Error while cleaning up after export", err)
 
+        let private import_osu_scores() = Import.Mounts.import_osu_scores()
+
         let private sync_table_scores() =
             match Tables.Table.current() with
             | None -> ()
@@ -166,6 +168,7 @@ module Printerlude =
                 .WithCommand("export_osz", "Export current chart as osz", export_osz)
                 .WithCommand("fix_personal_bests", "Fix personal best display values", fix_personal_bests)
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
+                .WithCommand("import_osu_scores", "Import your local scores from osu!mania", import_osu_scores)
                 .WithIOCommand("local_server", "Switch to local development server", "flag", 
                     fun (io: IOContext) (b: bool) -> 
                         Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")

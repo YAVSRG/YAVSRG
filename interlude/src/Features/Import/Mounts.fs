@@ -207,3 +207,90 @@ module Mounts =
         |+ Text(L"imports.drag_and_drop_hint",
             Align = Alignment.CENTER,
             Position = Position.Row(740.0f, 80.0f) )
+
+    open System
+    open System.Text
+    open Prelude.Charts.Formats.``osu!``
+    open Prelude.Charts.Formats.Interlude
+    open Prelude.Charts.Formats.Conversions
+    open Prelude.Gameplay
+    open Prelude.Data.``osu!``
+    open Prelude.Data.Scores
+    open Prelude.Data.Charts
+    open Prelude.Data.Charts.Caching
+
+    let import_osu_scores() =
+        match options.OsuMount.Value with
+        | None -> Logging.Warn "Requires osu! Songs folder to be mounted"
+        | Some m ->
+
+        Logging.Info "Reading osu! database ..."
+        let scores =
+            use file = Path.Combine(m.SourceFolder, "..", "scores.db") |> File.OpenRead
+            use reader = new BinaryReader(file, Encoding.UTF8)
+            ScoreDatabase.Read(reader)
+
+        let main_db =
+            use file = Path.Combine(m.SourceFolder, "..", "osu!.db") |> File.OpenRead
+            use reader = new BinaryReader(file, Encoding.UTF8)
+            OsuDatabase.Read(reader)
+
+        Logging.Info (sprintf "Read %s's osu! database containing %i maps" main_db.PlayerName main_db.Beatmaps.Length)
+
+        let mutable chart_count = 0
+        let mutable score_count = 0
+
+        for beatmap_data in main_db.Beatmaps |> Seq.filter (fun b -> b.Mode = 3uy) do
+            let osu_file = Path.Combine(m.SourceFolder, beatmap_data.FolderName, beatmap_data.Filename)
+            match
+                try
+                    loadBeatmapFile osu_file
+                    |> fun b -> ``osu!``.toInterlude b { Config = ConversionOptions.Default; Source = osu_file }
+                    |> Some
+                with _ -> None
+            with
+            | None -> ()
+            | Some chart ->
+
+            let chart_hash = Chart.hash chart
+
+            match Cache.by_hash chart_hash Library.cache with
+            | None -> 
+                let rm = ``osu!``.detect_rate_mod beatmap_data.Difficulty
+                Logging.Warn(sprintf "Scores for %s [%s] not imported - Detected rate: %A" beatmap_data.TitleUnicode beatmap_data.Difficulty rm)
+            | Some _ ->
+
+            chart_count <- chart_count + 1
+
+            match scores.Beatmaps |> Seq.tryFind (fun b -> b.Hash = beatmap_data.Hash) with
+            | Some scores ->
+                for score in scores.Scores do
+                    let replay_file = Path.Combine(m.SourceFolder, "..", "Data", "r", sprintf "%s-%i.osr" score.BeatmapHash score.Timestamp)
+                    use file = File.OpenRead replay_file
+                    use br = new BinaryReader(file)
+                    let replay_info = ScoreDatabase_Score.Read br
+
+                    match Mods.to_interlude_rate_and_mods replay_info.ModsUsed with
+                    | None -> () // score is invalid for import in some way, skip
+                    | Some (rate, mods) ->
+
+                    let replay_data = decode_replay (replay_info, chart)
+
+                    let score : Score = 
+                        { 
+                            time = DateTime.FromFileTimeUtc(replay_info.Timestamp)
+                            replay = Replay.compress replay_data
+                            rate = rate
+                            selectedMods = mods
+                            layout = Layout.Layout.LeftTwo
+                            keycount = chart.Keys
+                        }
+
+                    let data = Scores.getOrCreateData chart
+                    if data.Scores |> Seq.exists (fun s -> s.time.Ticks = score.time.Ticks) then () // skip
+                    else
+                        score_count <- score_count + 1
+                        data.Scores.Add(score)
+
+            | None -> ()
+        Logging.Info(sprintf "Finished importing osu! scores (%i scores from %i maps)" score_count chart_count)
