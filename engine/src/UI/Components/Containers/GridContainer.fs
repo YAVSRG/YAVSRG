@@ -214,5 +214,5 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             child.Init this
             refresh <- true
 
-    static member (|+) (parent: #GridContainer<'T>, child: 'T) = parent.Add child; parent
-    static member (|*) (parent: #GridContainer<'T>, child: 'T) = parent.Add child
+    static member (|+) (parent: #GridContainer<_>, child: #Widget) = parent.Add child; parent
+    static member (|*) (parent: #GridContainer<_>, child: #Widget) = parent.Add child
