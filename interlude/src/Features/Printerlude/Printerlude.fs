@@ -88,7 +88,7 @@ module Printerlude =
                     Logging.Info "Cleaned up."
                 with err -> Logging.Error ("Error while cleaning up after export", err)
 
-        let private import_osu_scores() = Import.Mounts.import_osu_scores()
+        let private import_osu_scores() = Import.Scores.import_osu_scores_service.Request((), ignore)
 
         let private sync_table_scores() =
             match Tables.Table.current() with

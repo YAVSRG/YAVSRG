@@ -64,6 +64,7 @@
     <Compile Include="Features\Stats\Stats.fs" />
     <Compile Include="Features\Stats\Tables.fs" />
     <Compile Include="Features\Stats\Screen.fs" />
+    <Compile Include="Features\Import\Scores.fs" />
     <Compile Include="Features\Import\Mounts.fs" />
     <Compile Include="Features\Import\Shared.fs" />
     <Compile Include="Features\Import\EtternaPacks.fs" />
