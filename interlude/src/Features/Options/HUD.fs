@@ -599,39 +599,89 @@ type EditEarlyLateMeterPage() as this =
                 LateColor = late_color.Value
             }
 
-type EditHUDPage() as this =
+type RateModMeterPage() as this =
     inherit Page()
+
+    let data = HUDOptions.get<HUD.RateModMeter>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = HUD.RateModMeter.Default.Position
+
+    let show_mods = Setting.simple data.ShowMods
+
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.drawFillB(Style.font, (if show_mods.Value then "1.00x, Mirror" else "1.00x"), bounds, Colors.text_subheading, Alignment.CENTER)
+        }
 
     do
         this.Content(
-            column()
-            |+ PageButton("hud.accuracymeter", fun () -> Menu.ShowPage EditAccuracyMeterPage)
-                .Pos(200.0f)
-                .Tooltip(Tooltip.Info("hud.accuracymeter"))
-            |+ PageButton("hud.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage)
-                .Pos(270.0f)
-                .Tooltip(Tooltip.Info("hud.hitmeter"))
-            |+ PageButton("hud.combo", fun () -> Menu.ShowPage EditComboMeterPage)
-                .Pos(340.0f)
-                .Tooltip(Tooltip.Info("hud.combo"))
-            |+ PageButton("hud.skipbutton", fun () -> Menu.ShowPage EditSkipButtonPage)
-                .Pos(410.0f)
-                .Tooltip(Tooltip.Info("hud.skipbutton"))
-            |+ PageButton("hud.progressmeter", fun () -> Menu.ShowPage EditProgressMeterPage)
-                .Pos(480.0f)
-                .Tooltip(Tooltip.Info("hud.progressmeter"))
-            |+ PageButton("hud.pacemaker", fun () -> Menu.ShowPage EditPacemakerPage)
+            positionEditor pos default_pos
+            |+ PageSetting(
+                "hud.ratemodmeter.showmods",
+                Selector<_>.FromBool(show_mods) )
                 .Pos(550.0f)
-                .Tooltip(Tooltip.Info("hud.pacemaker"))
-            |+ PageButton("hud.judgementcounts", fun () -> Menu.ShowPage EditJudgementCountsPage)
-                .Pos(620.0f)
-                .Tooltip(Tooltip.Info("hud.judgementcounts"))
-            |+ PageButton("hud.judgementmeter", fun () -> Menu.ShowPage EditJudgementMeterPage)
-                .Pos(690.0f)
-                .Tooltip(Tooltip.Info("hud.judgementmeter"))
-            |+ PageButton("hud.earlylatemeter", fun () -> Menu.ShowPage EditEarlyLateMeterPage)
-                .Pos(760.0f)
-                .Tooltip(Tooltip.Info("hud.earlylatemeter"))
+                .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
+            |+ preview
+        )
+
+    override this.Title = L"hud.ratemodmeter.name"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        HUDOptions.set<HUD.RateModMeter>
+            { data with
+                Position = pos.Value
+                ShowMods = show_mods.Value
+            }
+
+type BPMMeterPage() as this =
+    inherit Page()
+
+    let data = HUDOptions.get<HUD.BPMMeter>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = HUD.BPMMeter.Default.Position
+
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.drawFillB(Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER)
+        }
+
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ preview
+        )
+
+    override this.Title = L"hud.bpmmeter.name"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        HUDOptions.set<HUD.BPMMeter>
+            { data with
+                Position = pos.Value
+            }
+
+type EditHUDPage() as this =
+    inherit Page()
+
+    let grid = GridContainer<_>(PRETTYHEIGHT, 2, Spacing = (20.0f, 20.0f), Position = Position.Margin(100.0f, 200.0f))
+
+    do
+        this.Content(
+            grid
+            |+ PageButton("hud.accuracymeter", fun () -> Menu.ShowPage EditAccuracyMeterPage).Tooltip(Tooltip.Info("hud.accuracymeter"))
+            |+ PageButton("hud.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage).Tooltip(Tooltip.Info("hud.hitmeter"))
+            |+ PageButton("hud.combo", fun () -> Menu.ShowPage EditComboMeterPage).Tooltip(Tooltip.Info("hud.combo"))
+            |+ PageButton("hud.skipbutton", fun () -> Menu.ShowPage EditSkipButtonPage).Tooltip(Tooltip.Info("hud.skipbutton"))
+            |+ PageButton("hud.progressmeter", fun () -> Menu.ShowPage EditProgressMeterPage).Tooltip(Tooltip.Info("hud.progressmeter"))
+            |+ PageButton("hud.pacemaker", fun () -> Menu.ShowPage EditPacemakerPage).Tooltip(Tooltip.Info("hud.pacemaker"))
+            |+ PageButton("hud.judgementcounts", fun () -> Menu.ShowPage EditJudgementCountsPage).Tooltip(Tooltip.Info("hud.judgementcounts"))
+            |+ PageButton("hud.judgementmeter", fun () -> Menu.ShowPage EditJudgementMeterPage).Tooltip(Tooltip.Info("hud.judgementmeter"))
+            |+ PageButton("hud.earlylatemeter", fun () -> Menu.ShowPage EditEarlyLateMeterPage).Tooltip(Tooltip.Info("hud.earlylatemeter"))
+            |+ PageButton("hud.ratemodmeter", fun () -> Menu.ShowPage RateModMeterPage).Tooltip(Tooltip.Info("hud.ratemodmeter"))
+            |+ PageButton("hud.bpmmeter", fun () -> Menu.ShowPage BPMMeterPage).Tooltip(Tooltip.Info("hud.bpmmeter"))
         )
 
     override this.Title = L"hud.name"
