@@ -269,6 +269,51 @@ module HUD =
                 AnimationTime = 200.0
             }
 
+    [<Json.AutoCodec(false)>]
+    type RateModMeter =
+        { 
+            Position: WidgetPosition
+            ShowMods: bool
+        }
+        static member Default =
+            {
+                Position =
+                    {
+                        Enabled = false
+                        Float = false
+                        Left = -100.0f
+                        LeftA = 0.5f
+                        Top = -70.0f
+                        TopA = 1.0f
+                        Right = 100.0f
+                        RightA = 0.5f
+                        Bottom = -40.0f
+                        BottomA = 1.0f
+                    }
+                ShowMods = true
+            }
+
+    [<Json.AutoCodec(false)>]
+    type BPMMeter =
+        { 
+            Position: WidgetPosition
+        }
+        static member Default =
+            {
+                Position =
+                    {
+                        Enabled = false
+                        Float = false
+                        Left = -100.0f
+                        LeftA = 0.5f
+                        Top = -40.0f
+                        TopA = 1.0f
+                        Right = 100.0f
+                        RightA = 0.5f
+                        Bottom = -10.0f
+                        BottomA = 1.0f
+                    }
+            }
+
     //song info
-    //mod info
     //clock
