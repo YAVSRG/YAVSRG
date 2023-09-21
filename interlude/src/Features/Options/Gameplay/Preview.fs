@@ -45,6 +45,7 @@ type NoteskinPreview(scale: float32) as this =
             renderer <- createRenderer()
 
     override this.Update(elapsedTime, moved) =
+        this.Bounds <- Viewport.bounds
         renderer.Update(elapsedTime, moved)
         base.Update(elapsedTime, moved)
 
@@ -57,6 +58,7 @@ type NoteskinPreview(scale: float32) as this =
 
     override this.Init(parent: Widget) =
         base.Init parent
+        this.Bounds <- Viewport.bounds
         renderer.Init this
 
     member this.Destroy() =
