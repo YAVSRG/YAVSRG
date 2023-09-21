@@ -34,7 +34,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         try
             while not (GLFW.WindowShouldClose window.WindowPtr) do
                 let timeUntilNextFrameMs = this.DispatchFrame()
-                if timeUntilNextFrameMs > 1.0 then Thread.Sleep(TimeSpan.FromMilliseconds(timeUntilNextFrameMs - 1.0))
+                if timeUntilNextFrameMs > 0.5 then Thread.Sleep(TimeSpan.FromMilliseconds(timeUntilNextFrameMs - 0.5))
         with fatal_err -> Logging.Critical("Fatal crash in UI thread", fatal_err); window.Close()
 
     member this.Start() =
