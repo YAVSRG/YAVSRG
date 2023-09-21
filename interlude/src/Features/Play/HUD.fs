@@ -359,3 +359,44 @@ type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
         base.Update(elapsedTime, moved)
         for s, _ in Multiplayer.replays.Values do
             s.Update(state.CurrentChartTime() - Web.Shared.Packets.MULTIPLAYER_REPLAY_DELAY_MS * 2.0f<ms>)
+
+type RateModMeter(conf: HUD.RateModMeter, state) as this =
+    inherit StaticContainer(NodeType.None)
+
+    do
+        let text = 
+            if conf.ShowMods then Mods.getModString(Gameplay.rate.Value, Gameplay.selectedMods.Value, Gameplay.autoplay)
+            else sprintf "%.2fx" Gameplay.rate.Value
+        this
+        |* Text(
+            text,
+            Color = K Colors.text_subheading,
+            Align = Alignment.CENTER)
+
+type BPMMeter(conf: HUD.BPMMeter, state) as this =
+    inherit StaticContainer(NodeType.None)
+
+    let firstNote = Gameplay.Chart.withMods.Value.Notes.[0].Time
+    let mutable i = 0
+    let bpms = Gameplay.Chart.withMods.Value.BPM
+    let mutable last_seen_time = -Time.infinity
+
+    do
+        this
+        |* Text(
+            (fun () -> let msPerBeat = bpms.[i].Data.MsPerBeat in sprintf "%.0f BPM" (60000.0f<ms/minute> / msPerBeat)),
+            Color = K Colors.text_subheading,
+            Align = Alignment.CENTER)
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        let now = state.CurrentChartTime()
+
+        if now < last_seen_time then
+            i <- 0
+        last_seen_time <- now
+
+        while i + 1 < bpms.Length && (bpms[i + 1].Time - firstNote) < now do i <- i + 1
+
+
+

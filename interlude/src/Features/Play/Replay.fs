@@ -163,6 +163,8 @@ module ReplayScreen =
                     add_widget JudgementCounts
                     add_widget JudgementMeter
                     add_widget EarlyLateMeter
+                    add_widget RateModMeter
+                    add_widget BPMMeter
 
                 this
                 |+ InputOverlay(chart.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, show_input_overlay)

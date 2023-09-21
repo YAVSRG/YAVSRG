@@ -83,6 +83,8 @@ module PlayScreen =
                 add_widget JudgementCounts
                 add_widget JudgementMeter
                 add_widget EarlyLateMeter
+                add_widget RateModMeter
+                add_widget BPMMeter
 
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
@@ -175,6 +177,8 @@ module PlayScreen =
                 add_widget JudgementCounts
                 add_widget JudgementMeter
                 add_widget EarlyLateMeter
+                add_widget RateModMeter
+                add_widget BPMMeter
                 add_widget MultiplayerScoreTracker
 
             override this.OnEnter(previous) =

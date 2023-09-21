@@ -317,6 +317,8 @@ module Options =
             load_id<JudgementCounts>()
             load_id<JudgementMeter>()
             load_id<EarlyLateMeter>()
+            load_id<RateModMeter>()
+            load_id<BPMMeter>()
                     
         let get<'T>() = 
             let id = typeof<'T>.Name

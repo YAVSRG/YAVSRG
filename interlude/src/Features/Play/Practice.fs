@@ -289,6 +289,8 @@ module PracticeScreen =
                 add_widget JudgementCounts
                 add_widget JudgementMeter
                 add_widget EarlyLateMeter
+                add_widget RateModMeter
+                add_widget BPMMeter
 
                 this.Add(Conditional((fun () -> options_mode), options_ui))
 

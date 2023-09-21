@@ -101,6 +101,8 @@ module SpectateScreen =
                 add_widget JudgementCounts
                 add_widget JudgementMeter
                 add_widget EarlyLateMeter
+                add_widget RateModMeter
+                add_widget BPMMeter
                 add_widget MultiplayerScoreTracker
 
                 this
