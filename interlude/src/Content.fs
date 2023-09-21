@@ -78,7 +78,7 @@ module Content =
                 current <- loaded.[id]
                 current_hash <- Ruleset.hash current
 
-        let install(new_id, ruleset) =
+        let install (new_id, ruleset) =
             loaded.Remove new_id |> ignore
             loaded.Add(new_id, ruleset)
             if id = new_id then 
@@ -258,18 +258,22 @@ module Content =
             
             Current.switch Current.id
 
-        /// Returns id * Display name pairs
-        let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
+        /// Returns id * Noteskin pairs
+        let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value)) |> Array.ofSeq
 
         let extractCurrent() : bool =
-            let id = Current.config.Name + "_extracted"
-            let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
+            match Current.instance.Source with
+            | Folder s ->
+                Logging.Warn "This noteskin is already extracted!"
+                false
+            | Zip (archive, source) ->
+
+            let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(Current.config.Name, "")
             let target = Path.Combine(getDataPath "Noteskins", id)
             if id <> "" && not (Directory.Exists target) then
                 Current.instance.ExtractToFolder(target)
                 load()
                 Current.switch id
-                Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
                 true
             else false
 
@@ -293,7 +297,7 @@ module Content =
         let rec tryImport (path: string) (keymodes: int list) : bool =
             match path with
             | OsuSkinFolder ->
-                let id = Guid.NewGuid().ToString()
+                let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
                 try
                     OsuSkin.Converter.convert path (Path.Combine(getDataPath "Noteskins", id)) keymodes
                     load()
@@ -316,6 +320,11 @@ module Content =
         let noteRotation keys =
             let rotations = if Current.config.UseRotation then Current.config.Rotations.[keys - 3] else Array.zeroCreate keys
             fun k -> Quad.rotateDeg (rotations.[k])
+        
+        let preview_loader =
+            { new Async.Service<Noteskin, (Bitmap * TextureConfig) option>() with
+                override this.Handle(ns) = async { return ns.GetTexture "note" }
+            }
 
     let init (themeId: string) (noteskinId: string) =
         Themes.Current.id <- themeId

@@ -19,7 +19,7 @@ type NoteskinCard(data: RepoEntry) as this =
         Border = (fun () -> if this.Focused then Colors.pink_accent else Colors.grey_2.O3))
             
     let mutable status = 
-        if Noteskins.list() |> Array.map snd |> Array.contains data.Name then Installed else NotDownloaded
+        if Noteskins.list() |> Seq.map snd |> Seq.map (fun ns -> ns.Config.Name) |> Seq.contains data.Name then Installed else NotDownloaded
 
     let mutable preview : Sprite option = None
     let imgFade = Animation.Fade 0.0f

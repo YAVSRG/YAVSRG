@@ -110,6 +110,7 @@
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
     <Compile Include="Features\Options\Gameplay\Preview.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
+    <Compile Include="Features\Options\Noteskins\Editor.fs" />
     <Compile Include="Features\Options\Noteskins\Noteskins.fs" />
     <Compile Include="Features\Options\HUD.fs" />
     <Compile Include="Features\Options\Advanced.fs" />
