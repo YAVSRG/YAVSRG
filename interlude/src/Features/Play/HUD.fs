@@ -384,7 +384,7 @@ type BPMMeter(conf: HUD.BPMMeter, state) as this =
     do
         this
         |* Text(
-            (fun () -> let msPerBeat = bpms.[i].Data.MsPerBeat in sprintf "%.0f BPM" (60000.0f<ms/minute> / msPerBeat)),
+            (fun () -> let msPerBeat = bpms.[i].Data.MsPerBeat / Gameplay.rate.Value in sprintf "%.0f BPM" (60000.0f<ms/minute> / msPerBeat)),
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER)
 
