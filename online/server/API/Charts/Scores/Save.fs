@@ -130,7 +130,8 @@ module Save =
                                 else None)
                             |> Seq.sortDescending
                             |> Seq.truncate 50
-                            |> fun s -> if Seq.isEmpty s then 0.0 else Seq.average s
+                            |> Seq.sum
+                            |> fun total -> total / 50.0
 
                         let old_position = 
                             match TableRanking.rank "crescent" userId with
