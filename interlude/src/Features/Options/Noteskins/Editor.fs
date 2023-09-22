@@ -111,9 +111,6 @@ type EditNoteskinPage() as this =
             |+ PageSetting("noteskins.edit.notecolors", colors)
                 .Pos(700.0f, Viewport.vwidth - 200.0f, 120.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.notecolors"))
-            |+ PageButton.Once("noteskins.edit.export", fun () -> if not (Noteskins.exportCurrent()) then Notifications.error(L"notification.export_noteskin_failure.title", L"notification.export_noteskin_failure.body"))
-                .Pos(820.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.export"))
         )
         
     override this.Title = data.Name
