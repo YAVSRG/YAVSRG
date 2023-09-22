@@ -73,7 +73,6 @@ module ``osu!`` =
     let private read_short (br: BinaryReader) = br.ReadInt16()
     let private read_int (br: BinaryReader) = br.ReadInt32()
     let private read_long (br: BinaryReader) = br.ReadInt64()
-    let private read_leb128 (br: BinaryReader) : bigint = failwith "nyi"
     let private read_single (br: BinaryReader) = br.ReadSingle()
     let private read_double (br: BinaryReader) = br.ReadDouble()
     let private read_bool (br: BinaryReader) = br.ReadByte() <> 0x00uy

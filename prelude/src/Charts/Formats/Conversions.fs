@@ -152,7 +152,12 @@ module ``osu!`` =
     let private rateRegex = Regex("""((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)x)""");
     let detect_rate_mod (difficulty_name: string) : float32 option = 
         let m = rateRegex.Match difficulty_name
-        if m.Success then Some (m.Value.Trim([|' '; 'x'|]).Replace(',', '.') |> float32) else None
+        if m.Success then 
+            let r = m.Value.Trim([|' '; 'x'|]).Replace(',', '.')
+            match Single.TryParse r with
+            | true, r -> Some r
+            | false, _ -> None
+        else None
 
     let toInterlude (b: Beatmap) (action: ConversionAction) : Chart =
         let keys = b.Difficulty.CircleSize |> int
