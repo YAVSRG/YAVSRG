@@ -197,7 +197,7 @@ module Options =
             Preset2 = Setting.simple None
             Preset3 = Setting.simple None
 
-            VanishingNotes = Setting.simple false
+            VanishingNotes = Setting.simple true
             AutoCalibrateOffset = Setting.simple false
             AdvancedRecommendations = Setting.simple false
             ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
