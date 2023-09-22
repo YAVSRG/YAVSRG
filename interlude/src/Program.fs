@@ -1,4 +1,5 @@
 ﻿open System
+open System.IO
 open System.Threading
 open System.Diagnostics
 open Percyqaz.Common
@@ -14,7 +15,7 @@ open Interlude.Features.Online
 
 let launch(instance: int) =
     Logging.Verbosity <- if Prelude.Common.DEV_MODE then LoggingLevel.DEBUG else LoggingLevel.INFO
-    Logging.LogFile <- Some "log.txt"
+    Logging.LogFile <- Some (Path.Combine("Logs", sprintf "log-%s.txt" (DateTime.Today.ToString("yyyyMMdd"))))
 
     Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
@@ -61,7 +62,7 @@ let launch(instance: int) =
 
 [<EntryPoint>]
 let main argv =
-    if not (IO.File.Exists("bass.dll")) && not (IO.File.Exists("libbass.iso")) then
+    if not (File.Exists("bass.dll")) && not (File.Exists("libbass.iso")) then
         printfn "Looks like Interlude was launched from the wrong starting directory!"
         -1
     else
