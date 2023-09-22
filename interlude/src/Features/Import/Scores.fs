@@ -4,6 +4,7 @@ open System
 open System.Text
 open System.IO
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Prelude.Charts.Formats.``osu!``
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.Conversions
@@ -16,7 +17,6 @@ open Prelude.Data.Charts.Library.Imports
 open Interlude.Options
 
 module Scores =
-
 
     let private import_osu_scores() =
         match options.OsuMount.Value with
@@ -113,9 +113,10 @@ module Scores =
                         keycount = chart.Keys
                     }
 
-                let data = Scores.getOrCreateData chart
-                if data.Scores.RemoveAll(fun s -> s.time.ToUniversalTime().Ticks = score.time.ToUniversalTime().Ticks) = 0 then score_count <- score_count + 1
-                data.Scores.Add(score) 
+                sync <| fun () ->
+                    let data = Scores.getOrCreateData chart
+                    if data.Scores.RemoveAll(fun s -> s.time.ToUniversalTime().Ticks = score.time.ToUniversalTime().Ticks) = 0 then score_count <- score_count + 1
+                    data.Scores.Add(score)
 
         Logging.Info(sprintf "Finished importing osu! scores (%i scores from %i maps)" score_count chart_count)
 
