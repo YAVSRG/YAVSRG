@@ -89,7 +89,13 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
                             contents.Add(Text("-- " + level.Name + " --", Align = Alignment.CENTER, Color = K Colors.text_greyout))
                             for chart, your_score in your_scores do
                                 let their_score = Map.tryFind chart.Hash their_scores
-                                let name = match Cache.by_hash chart.Hash Library.cache with Some cc -> cc.Title | None -> sprintf "<%s>" chart.Id
+                                let name =
+                                    match Cache.by_key (sprintf "%s/%s" (Table.current().Value.Name) chart.Hash) Library.cache with
+                                    | Some cc -> cc.Title
+                                    | None ->
+                                    match Cache.by_hash chart.Hash Library.cache with
+                                    | Some cc -> cc.Title
+                                    | None -> sprintf "<%s>" chart.Id
                                 let delta = if your_score.IsSome && their_score.IsSome then snd your_score.Value - snd their_score.Value else 0.0
                                 contents.Add (
                                     StaticContainer(NodeType.None)

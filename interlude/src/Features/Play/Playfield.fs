@@ -89,7 +89,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
             if vanishing_notes then 
                 let space_needed = hitposition + noteHeight
                 let time_needed = space_needed / scale
-                now - time_needed // todo: this is true only with no SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im a laze
+                now - time_needed // todo: this is true at 1.0x SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im a laze
             else now
 
         // note_seek = index of the next row to appear, or notes.Length if none left
