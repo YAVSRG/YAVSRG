@@ -78,7 +78,7 @@ module OsuScoreMigration =
             OnlineScoreID = 0
         }
 
-    let main() =
+    let import_scores() =
 
         Logging.Info "Reading osu database ..."
         use file = Path.Combine(Data.Charts.Library.Imports.osuSongFolder, "..", "scores.db") |> File.OpenRead
@@ -175,3 +175,12 @@ module OsuScoreMigration =
         | None -> printfn "didnt find the map"
             
         Console.ReadLine() |> ignore
+
+    let main() =
+        Logging.Info "Reading osu database ..."
+
+        use file = Path.Combine("C:/Users/percy/Downloads/osu!.db") |> File.OpenRead
+        use reader = new BinaryReader(file, Text.Encoding.UTF8)
+        let main_db = OsuDatabase.Read(reader)
+
+        printfn "%A" main_db

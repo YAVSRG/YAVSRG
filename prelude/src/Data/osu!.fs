@@ -69,18 +69,20 @@ module ``osu!`` =
                     if mods &&& Mods.Mirror = Mods.Mirror then yield ("mirror", 0)
                 } |> Map.ofSeq
             Some (rate, mod_state)
+
+    let inline private debug x = x //printfn "%A" x; x
     
     let private read_byte (br: BinaryReader) = br.ReadByte()
     let private read_short (br: BinaryReader) = br.ReadInt16()
-    let private read_int (br: BinaryReader) = br.ReadInt32()
-    let private read_long (br: BinaryReader) = br.ReadInt64()
-    let private read_single (br: BinaryReader) = br.ReadSingle()
-    let private read_double (br: BinaryReader) = br.ReadDouble()
+    let private read_int (br: BinaryReader) = br.ReadInt32() |> debug
+    let private read_long (br: BinaryReader) = br.ReadInt64() |> debug
+    let private read_single (br: BinaryReader) = br.ReadSingle() |> debug
+    let private read_double (br: BinaryReader) = br.ReadDouble() |> debug
     let private read_bool (br: BinaryReader) = br.ReadByte() <> 0x00uy
     let private read_string (br: BinaryReader) =
         let b = br.ReadByte()
         if b = 0x00uy then ""
-        elif b = 0x0buy then br.ReadString()
+        elif b = 0x0buy then br.ReadString() |> debug
         else failwith "Unknown byte while reading string"
 
     let private read_int_double_pair (br: BinaryReader) =
@@ -227,7 +229,7 @@ module ``osu!`` =
             Version: int
             FolderCount: int
             AccountUnlocked: bool
-            AccountUnlockDate: DateTime
+            AccountUnlockDate: int64
             PlayerName: string
             Beatmaps: OsuDatabase_Beatmap array
             UserPermissions: int
@@ -238,7 +240,7 @@ module ``osu!`` =
                 Version = version
                 FolderCount = read_int br
                 AccountUnlocked = read_bool br
-                AccountUnlockDate = read_long br |> DateTime
+                AccountUnlockDate = read_long br
                 PlayerName = read_string br
                 Beatmaps = 
                     let count = read_int br
