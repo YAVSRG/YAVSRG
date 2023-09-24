@@ -39,6 +39,8 @@ module Scores =
 
         Logging.Info (sprintf "Read %s's osu! database containing %i maps, starting import .." main_db.PlayerName main_db.Beatmaps.Length)
 
+        let chart_map = main_db.Beatmaps |> Seq.filter (fun b -> b.Mode = 3uy) |> Seq.map (fun b -> b.Hash, b) |> Map.ofSeq
+
         let mutable chart_count = 0
         let mutable score_count = 0
 
@@ -62,7 +64,7 @@ module Scores =
             | Some _ -> Some (chart, chart_hash, 1.0f)
 
         for beatmap_score_data in scores.Beatmaps |> Seq.where (fun b -> b.Scores.Length > 0 && b.Scores.[0].Mode = 3uy) do
-            match main_db.Beatmaps |> Seq.tryFind (fun b -> b.Hash = beatmap_score_data.Hash && b.Mode = 3uy) with
+            match Map.tryFind beatmap_score_data.Hash chart_map with
             | None -> ()
             | Some beatmap_data ->
 
