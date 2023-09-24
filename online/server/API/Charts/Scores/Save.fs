@@ -56,7 +56,6 @@ module Save =
 
             let timestamp = (System.DateTimeOffset.op_Implicit request.Timestamp).ToUnixTimeMilliseconds()
             if Score.exists userId timestamp then
-                Logging.Debug(sprintf "Score with timestamp by this user exists: %i" timestamp)
                 return response.ReplyJson(true) 
             else
 
