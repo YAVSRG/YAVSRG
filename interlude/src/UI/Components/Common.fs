@@ -29,7 +29,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
             Align = Alignment.LEFT, 
             Color = this.ColorFunc)
         |* HotkeyAction(hotkey, toggle)
-        if this.Clickable then this.Add (Clickable.Focus this)
+        if this.Clickable then this.Add (let c = Clickable.Focus this in c.OnRightClick <- (fun () -> setting.Set ""); c)
 
     override this.OnSelected() =
         base.OnSelected()
