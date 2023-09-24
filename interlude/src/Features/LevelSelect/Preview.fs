@@ -57,7 +57,7 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
             let start = chart.FirstNote - Song.LEADIN_TIME
             let newTime = start + (chart.LastNote - start) * percent
             Song.seek newTime
-        if (!|"preview").Tapped() || (!|"exit").Tapped() then this.Close()
+        if (!|"preview").Tapped() || (!|"exit").Tapped() || Mouse.rightClick() then this.Close()
         elif (!|"select").Tapped() then this.Close(); LevelSelect.play()
         elif (!|"uprate_small").Tapped() then changeRate(0.01f)
         elif (!|"uprate_half").Tapped() then changeRate(0.05f)
