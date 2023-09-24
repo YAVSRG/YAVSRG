@@ -418,7 +418,11 @@ module Tree =
         elif (!|"context_menu").Tapped() && Chart.cacheInfo.IsSome then
             ChartContextMenu(Chart.cacheInfo.Value, Chart.context).Show()
 
-        scrollPos.Target <- Math.Min (Math.Max (scrollPos.Target + Mouse.scroll() * 100.0f, total_height - tree_height - origin), 20.0f + origin)
+        let lo = total_height - tree_height - origin
+        let hi = 20.0f + origin
+        scrollPos.Target <- min hi (max lo (scrollPos.Target + Mouse.scroll() * 100.0f))
+        if scrollPos.Value < lo then scrollPos.Value <- lo
+        elif scrollPos.Value > hi then scrollPos.Value <- hi
 
     let draw(origin: float32, originB: float32) =
         Stencil.create false
