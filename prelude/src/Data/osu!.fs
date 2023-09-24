@@ -86,9 +86,9 @@ module ``osu!`` =
         else failwith "Unknown byte while reading string"
 
     let private read_int_double_pair (br: BinaryReader) =
-        assert(br.ReadByte() = 0x08uy)
+        if br.ReadByte() <> 0x08uy then failwith "Got unexpected byte"
         let int = read_int br
-        assert(br.ReadByte() = 0x0Duy)
+        if br.ReadByte() <> 0x0Duy then failwith "Got unexpected byte"
         let double = read_double br
         int, double
 
