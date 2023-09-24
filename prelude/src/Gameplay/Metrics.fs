@@ -158,6 +158,15 @@ type IScoreMetric
     member this.Update (relativeTime: ChartTime) =
         this.PollReplay relativeTime // calls HandleKeyDown and HandleKeyUp appropriately
         this.HandlePassive relativeTime
+        if this.Finished && snapshots.Count > 0 then
+            snapshots.Add
+                { 
+                    Time = snapshots.[snapshots.Count - 1].Time
+                    PointsScored = this.State.PointsScored
+                    MaxPointsScored = this.State.MaxPointsScored
+                    Combo = this.State.CurrentCombo
+                    Lamp = Lamp.calculate ruleset.Grading.Lamps this.State
+                }
 
     member private this.HandlePassive (relativeTime: ChartTime) =
         let now = firstNote + relativeTime
