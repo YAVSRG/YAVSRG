@@ -22,6 +22,7 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
         |+ LaneCover()
 
     let volume = Volume()
+    let mutable dragging = false
 
     override this.Init(parent: Widget) =
         base.Init parent
@@ -53,11 +54,19 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
         volume.Update(elapsedTime, moved)
         playfield.Update(elapsedTime, moved)
         if this.Bounds.Bottom - Mouse.y() < 200.0f && Mouse.leftClick() then
+            dragging <- true
+            Song.pause()
+
+        if dragging then
             let percent = (Mouse.x() - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
             let start = chart.FirstNote - Song.LEADIN_TIME
             let newTime = start + (chart.LastNote - start) * percent
             Song.seek newTime
-        if (!|"preview").Tapped() || (!|"exit").Tapped() || Mouse.rightClick() then this.Close()
+
+        if not (Mouse.held Mouse.LEFT) then
+            dragging <- false
+            Song.resume()
+        if (!|"preview").Tapped() || (!|"exit").Tapped() || Mouse.released Mouse.RIGHT then this.Close()
         elif (!|"select").Tapped() then this.Close(); LevelSelect.play()
         elif (!|"uprate_small").Tapped() then changeRate(0.01f)
         elif (!|"uprate_half").Tapped() then changeRate(0.05f)
@@ -65,3 +74,7 @@ type Preview(chart: Chart, changeRate: float32 -> unit) =
         elif (!|"downrate_small").Tapped() then changeRate(-0.01f)
         elif (!|"downrate_half").Tapped() then changeRate(-0.05f)
         elif (!|"downrate").Tapped() then changeRate(-0.1f)
+
+    override this.Close() = 
+        if dragging then Song.resume()
+        base.Close()
