@@ -201,7 +201,7 @@ type private TableLevelStats(level: Level, data: (int * int) array, ruleset: Rul
             Draw.rect (Rect.Create(x, b.Top, x + w, b.Bottom)) (ruleset.GradeColor grade)
             x <- x + w
 
-type private TableScore(chart: TableChart, grade: int, rating: float, ruleset: Ruleset) =
+type private TableScore(position: int, chart: TableChart, grade: int, rating: float, ruleset: Ruleset) =
     inherit StaticWidget(NodeType.None)
 
     let name = match Cache.by_hash chart.Hash Library.cache with Some cc -> cc.Title | None -> sprintf "<%s>" chart.Id
@@ -209,17 +209,18 @@ type private TableScore(chart: TableChart, grade: int, rating: float, ruleset: R
     let grade_color = ruleset.GradeColor grade
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.black.O2
-        Text.drawFillB(Style.font, name, this.Bounds.Shrink(10.0f, 5.0f), Colors.text, Alignment.LEFT)
+        Draw.rect this.Bounds (if position % 10 < 5 then Colors.black.O2 else Colors.shadow_2.O2)
+        let text_color = if position < 50 then Colors.text else Colors.text_greyout
+        Text.drawFillB(Style.font, name, this.Bounds.Shrink(10.0f, 5.0f), text_color, Alignment.LEFT)
         Text.drawFillB(Style.font, grade_name, this.Bounds.TrimRight(100.0f).SliceRight(100.0f).Shrink(10.0f, 5.0f), (grade_color, Colors.shadow_2), Alignment.CENTER)
-        Text.drawFillB(Style.font, sprintf "%.2f" rating, this.Bounds.Shrink(10.0f, 5.0f), Colors.text, Alignment.RIGHT)
+        Text.drawFillB(Style.font, sprintf "%.2f" rating, this.Bounds.Shrink(10.0f, 5.0f), text_color, Alignment.RIGHT)
 
 type private TableStats() =
     inherit StaticContainer(NodeType.None)
 
     let score_data = Table.ratings() |> Array.ofSeq
-    let top_scores = score_data |> Seq.choose (fun (_, c, g, s) -> if s.IsSome then Some (c, g.Value, s.Value) else None) |> Seq.sortByDescending (fun (_, _, s) -> s) |> Seq.truncate 50 |> Array.ofSeq
-    let table_rating = top_scores |> Array.sumBy (fun (_, _, s) -> s) |> fun total -> total / 50.0
+    let top_scores = score_data |> Seq.choose (fun (_, c, g, s) -> if s.IsSome then Some (c, g.Value, s.Value) else None) |> Seq.sortByDescending (fun (_, _, s) -> s) |> Seq.truncate 100 |> Array.ofSeq
+    let table_rating = top_scores |> Seq.truncate 50 |> Seq.sumBy (fun (_, _, s) -> s) |> fun total -> total / 50.0
 
     let table_level_data = 
         score_data 
@@ -250,8 +251,8 @@ type private TableStats() =
 
                 let table_bests_items = FlowContainer.Vertical<TableScore>(50.0f)
                 let table_bests = ScrollContainer.Flow(table_bests_items)
-                for (chart, grade, rating) in top_scores do
-                    table_bests_items.Add(TableScore(chart, grade, rating, ruleset))
+                for i, (chart, grade, rating) in top_scores |> Array.indexed do
+                    table_bests_items.Add(TableScore(i, chart, grade, rating, ruleset))
 
                 let swap = SwapContainer(Current = table_breakdown, Position = Position.TrimTop(120.0f).Margin(40.0f))
 
