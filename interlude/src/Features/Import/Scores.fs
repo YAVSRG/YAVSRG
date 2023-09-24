@@ -23,14 +23,17 @@ module Scores =
         | None -> Logging.Warn "Requires osu! Songs folder to be mounted"
         | Some m ->
 
-        Logging.Info "Reading osu! database .."
         let scores =
             use file = Path.Combine(m.SourceFolder, "..", "scores.db") |> File.OpenRead
+            Logging.Info "Reading scores database .."
             use reader = new BinaryReader(file, Encoding.UTF8)
             ScoreDatabase.Read(reader)
 
+        Logging.Info (sprintf "Read score data, containing info about %i maps" scores.Beatmaps.Length)
+        
         let main_db =
             use file = Path.Combine(m.SourceFolder, "..", "osu!.db") |> File.OpenRead
+            Logging.Info "Reading osu! database .."
             use reader = new BinaryReader(file, Encoding.UTF8)
             OsuDatabase.Read(reader)
 
