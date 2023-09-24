@@ -25,12 +25,16 @@ let launch(instance: int) =
     with err -> Logging.Critical("Fatal error loading game config", err); crashSplash(); Console.ReadLine() |> ignore
     
     let mutable has_shutdown = false
-    let shutdown() =
+    let shutdown(unexpected) =
         if has_shutdown then () else
+        Gameplay.save()
         Options.save()
         Network.shutdown()
         //DiscordRPC.shutdown()
         Printerlude.shutdown()
+        if unexpected then 
+            crashSplash()
+            Logging.Critical("The game crashed or quit abnormally, but was able to shut down correctly")
         Logging.Shutdown()
     
     Window.afterInit.Add(fun () -> 
@@ -39,9 +43,8 @@ let launch(instance: int) =
         Printerlude.init(instance)
         //DiscordRPC.init()
 
-        AppDomain.CurrentDomain.ProcessExit.Add (fun args -> shutdown())
+        AppDomain.CurrentDomain.ProcessExit.Add (fun args -> shutdown(true))
     )
-    Window.onUnload.Add(Gameplay.save)
     Window.onFileDrop.Add(fun path -> 
         if not (Content.Noteskins.tryImport path [4; 7]) then 
             if not (Import.dropFile path) then
@@ -58,7 +61,7 @@ let launch(instance: int) =
             Some icon
         )
 
-    shutdown()
+    shutdown(false)
 
 [<EntryPoint>]
 let main argv =
