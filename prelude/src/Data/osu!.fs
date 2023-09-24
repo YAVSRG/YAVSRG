@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open Percyqaz.Common
 open Prelude.Gameplay.Mods
 
 module ``osu!`` =
@@ -89,6 +90,11 @@ module ``osu!`` =
         let double = read_double br
         int, double
 
+    let private read_star_ratings (br: BinaryReader) =
+        let count = read_int br
+        if count < 0 then failwith "Something has gone wrong reading star ratings (meaning misaligned bytes earlier on)"
+        Array.init count (fun i -> read_int_double_pair br)
+
     let write_string (bw: BinaryWriter) (s: string) =
         if s = "" then bw.Write(0x00uy) else bw.Write(0x0buy); bw.Write s
 
@@ -155,62 +161,66 @@ module ``osu!`` =
             ManiaScrollSpeed: byte
         }
         static member Read (db_version: int) (br: BinaryReader) =
-            {
-                Size = if db_version < 20191106 then read_int br |> Some else None
-                Artist = read_string br
-                ArtistUnicode = read_string br
-                Title = read_string br
-                TitleUnicode = read_string br
-                Creator = read_string br
-                Difficulty = read_string br
-                AudioFile = read_string br
-                Hash = read_string br
-                Filename = read_string br
-                Status = read_byte br
-                Hitcircles = read_short br
-                Sliders = read_short br
-                Spinners = read_short br
-                LastModified = read_long br
-                ApproachRate = read_single br
-                CircleSize = read_single br
-                HPDrain = read_single br
-                OverallDifficulty = read_single br
-                SliderVelocity = read_double br
-                StandardModeStarRatings = Array.init (read_int br) (fun i -> read_int_double_pair br)
-                TaikoModeStarRatings = Array.init (read_int br) (fun i -> read_int_double_pair br)
-                CatchModeStarRatings = Array.init (read_int br) (fun i -> read_int_double_pair br)
-                ManiaModeStarRatings = Array.init (read_int br) (fun i -> read_int_double_pair br)
-                DrainTimeSeconds = read_int br
-                TotalTimeMilliseconds = read_int br
-                PreviewTimeMilliseconds = read_int br
-                TimingPoints = Array.init (read_int br) (fun i -> read_timing_point br)
-                DifficultyID = read_int br
-                BeatmapID = read_int br
-                ThreadID = read_int br
-                StandardModeGrade = read_byte br
-                TaikoModeGrade = read_byte br
-                CatchModeGrade = read_byte br
-                ManiaModeGrade = read_byte br
-                LocalOffset = read_short br
-                StackLeniency = read_single br
-                Mode = read_byte br
-                Source = read_string br
-                Tags = read_string br
-                OnlineOffset = read_short br
-                TitleFont = read_string br
-                Unplayed = read_bool br
-                LastPlayed = read_long br
-                IsOsz2 = read_bool br
-                FolderName = read_string br
-                LastRepositoryCheck = read_long br
-                IgnoreBeatmapSound = read_bool br
-                IgnoreBeatmapSkin = read_bool br
-                DisableStoryboard = read_bool br
-                DisableVideo = read_bool br
-                VisualOverride = read_bool br
-                LastModified2 = read_int br
-                ManiaScrollSpeed = read_byte br
-            }
+            try
+                {
+                    Size = if db_version < 20191106 then read_int br |> Some else None
+                    Artist = read_string br
+                    ArtistUnicode = read_string br
+                    Title = read_string br
+                    TitleUnicode = read_string br
+                    Creator = read_string br
+                    Difficulty = read_string br
+                    AudioFile = read_string br
+                    Hash = read_string br
+                    Filename = read_string br
+                    Status = read_byte br
+                    Hitcircles = read_short br
+                    Sliders = read_short br
+                    Spinners = read_short br
+                    LastModified = read_long br
+                    ApproachRate = read_single br
+                    CircleSize = read_single br
+                    HPDrain = read_single br
+                    OverallDifficulty = read_single br
+                    SliderVelocity = read_double br
+                    StandardModeStarRatings = read_star_ratings br
+                    TaikoModeStarRatings = read_star_ratings br
+                    CatchModeStarRatings = read_star_ratings br
+                    ManiaModeStarRatings = read_star_ratings br
+                    DrainTimeSeconds = read_int br
+                    TotalTimeMilliseconds = read_int br
+                    PreviewTimeMilliseconds = read_int br
+                    TimingPoints = Array.init (read_int br) (fun i -> read_timing_point br)
+                    DifficultyID = read_int br
+                    BeatmapID = read_int br
+                    ThreadID = read_int br
+                    StandardModeGrade = read_byte br
+                    TaikoModeGrade = read_byte br
+                    CatchModeGrade = read_byte br
+                    ManiaModeGrade = read_byte br
+                    LocalOffset = read_short br
+                    StackLeniency = read_single br
+                    Mode = read_byte br
+                    Source = read_string br
+                    Tags = read_string br
+                    OnlineOffset = read_short br
+                    TitleFont = read_string br
+                    Unplayed = read_bool br
+                    LastPlayed = read_long br
+                    IsOsz2 = read_bool br
+                    FolderName = read_string br
+                    LastRepositoryCheck = read_long br
+                    IgnoreBeatmapSound = read_bool br
+                    IgnoreBeatmapSkin = read_bool br
+                    DisableStoryboard = read_bool br
+                    DisableVideo = read_bool br
+                    VisualOverride = read_bool br
+                    LastModified2 = read_int br
+                    ManiaScrollSpeed = read_byte br
+                }
+            with err ->
+                Logging.Error(sprintf "Exception occured at position %i" br.BaseStream.Position)
+                reraise()
 
     type OsuDatabase =
         {
@@ -230,7 +240,10 @@ module ``osu!`` =
                 AccountUnlocked = read_bool br
                 AccountUnlockDate = read_long br |> DateTime
                 PlayerName = read_string br
-                Beatmaps = Array.init (read_int br) (fun i -> OsuDatabase_Beatmap.Read version br)
+                Beatmaps = 
+                    let count = read_int br
+                    Logging.Info (sprintf "osu! Database header says there are %i beatmaps to read" count)
+                    Array.init count (fun i -> OsuDatabase_Beatmap.Read version br)
                 UserPermissions = read_int br
             }
 

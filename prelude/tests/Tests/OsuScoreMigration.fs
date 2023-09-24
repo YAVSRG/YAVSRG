@@ -171,7 +171,7 @@ module OsuScoreMigration =
                 bw.Flush()
                 bw.Close()
 
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true)).WaitForExit()
+                System.Diagnostics.Process.Start(new Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true)).WaitForExit()
         | None -> printfn "didnt find the map"
             
         Console.ReadLine() |> ignore
