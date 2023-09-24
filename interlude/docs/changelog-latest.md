@@ -1,14 +1,10 @@
-0.7.8.2
+0.7.8.3
 ====
 
-# Various bug fixes and small feature requests
-- You can right click to leave chart preview
-- You can now hold left click to scrobble through a chart when previewing
-- Improved stability of logging when the game crashes
-- Improved game's crash recovery in many situations where the process exits suddenly
-- Engine now technically supports negative hold trim values in noteskins
-- Improved performance of osu! score import
-- Score screen graphs correctly reflect final state in the last line
-- 'Ratings' tab on table stats now shows top 100, with visual improvements
-- Fixed bug where wrong chart names displayed in 'Ratings' tab on table stats
+The rare triple release in one day!
+
+# Fixes in this patch
+- Finally found and fixed the bug everyone was having with osu! score imports. **Should** now be working for everyone that experienced issues
+- Right-click to clear search boxes (applies everywhere, not just level select)
+- Fixed that awkward second and a half after searching where level select is fast scrolling to bring the results into view
 
