@@ -10,25 +10,17 @@
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-    <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
-    <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup>
     <Optimize>True</Optimize>
     <Tailcalls>True</Tailcalls>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>True</Optimize>
-	<Tailcalls>True</Tailcalls>
-  </PropertyGroup>
 	
-    <PropertyGroup>
-	    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
-    </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+  </PropertyGroup>
 
   <ItemGroup>
     <Content Include="Locale\en_GB.txt">
