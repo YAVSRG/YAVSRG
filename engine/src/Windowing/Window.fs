@@ -144,9 +144,8 @@ type Window(config: Config, title: string, root: Root) as this =
                 Window.action_queue <- []
             )
             this.ProcessInputEvents()
-            GLFW.PollEvents()
+            GLFW.WaitEvents()
             InputThread.poll(this.KeyboardState, this.MouseState)
-            Thread.Sleep(TimeSpan.FromMilliseconds(0.5))
 
         this.OnUnload()
     
