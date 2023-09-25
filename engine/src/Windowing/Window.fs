@@ -73,7 +73,7 @@ type Window(config: Config, title: string, root: Root) as this =
                     Monitors.GetMonitorFromWindow(this)
             else Monitors.GetMonitorFromWindow(this)
 
-        renderThread.RenderFrequency <- float config.FrameLimit.Value
+        renderThread.RenderFrequency <- if float config.FrameLimit.Value <> 0.0 then Unlimited else Smart
 
         match config.WindowMode.Value with
 

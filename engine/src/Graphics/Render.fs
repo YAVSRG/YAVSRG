@@ -4,6 +4,7 @@ open System
 open System.Drawing
 open OpenTK.Graphics.OpenGL
 open OpenTK.Mathematics
+open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 
 (*
@@ -94,8 +95,14 @@ module FBO =
 
 module Render =
 
-    /// Frames drawn * Ticks taken to draw them (10 million ticks = 1 second)
-    let mutable FPS : int * int64 = (0, 0L)
+    module Performance =
+        
+        let mutable framecount_tickcount = (0, 1L)
+        let mutable visual_latency = 0.0
+        let mutable swap_time = 0.0
+        let mutable update_time = 0.0
+        let mutable draw_time = 0.0
+        let mutable elapsed_time = 0.0
 
     let start() = 
         GL.Clear(ClearBufferMask.ColorBufferBit)
@@ -120,7 +127,11 @@ module Render =
         FBO.init()
 
     let init() =
-        Logging.Debug(sprintf "GL Version: %s | %s | U:%i T:%i" (GL.GetString StringName.Version) (GL.GetString StringName.Renderer) Sprite.MAX_TEXTURE_UNITS Sprite.MAX_TEXTURE_SIZE)
+        let mutable major = 0
+        let mutable minor = 0
+        let mutable rev = 0
+        GLFW.GetVersion(&major, &minor, &rev)
+        Logging.Debug(sprintf "GL Version: %s | %s | U:%i T:%i | GLFW Version: %i.%i.%i" (GL.GetString StringName.Version) (GL.GetString StringName.Renderer) Sprite.MAX_TEXTURE_UNITS Sprite.MAX_TEXTURE_SIZE major minor rev)
 
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
