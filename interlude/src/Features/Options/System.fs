@@ -138,7 +138,7 @@ module System =
             this.Content(
                 column()
 
-                |+ PageSetting("system.framelimit", Selector.FromEnum (config.FrameLimit |> Setting.trigger mark_changed))
+                |+ PageSetting("system.framelimit", Selector.FromEnum (config.RenderMode |> Setting.trigger mark_changed))
                     .Pos(340.0f)
                     .Tooltip(Tooltip.Info("system.framelimit"))
 
