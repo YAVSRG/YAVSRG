@@ -23,14 +23,10 @@ module WindowResolution =
             2715, 1527
         |]
 
+
 type FrameLimit =
-    | ``30`` = 30
-    | ``60`` = 60
-    | ``120`` = 120
-    | ``240`` = 240
-    | ``480`` = 480
-    | ``720`` = 720
     | Unlimited = 0
+    | Smart = 1
 
 type Config = 
     {
@@ -38,7 +34,7 @@ type Config =
         Locale: string
         WindowMode: Setting<WindowType>
         WindowResolution: Setting<int * int>
-        FrameLimit: Setting<FrameLimit>
+        RenderMode: Setting<FrameLimit>
         FullscreenRefreshRateOverride: Setting<int>
         Display: Setting<int>
         AudioDevice: Setting<int>
@@ -49,7 +45,7 @@ type Config =
             Locale = "en_GB.txt"
             WindowMode = Setting.simple WindowType.Borderless
             WindowResolution = Setting.simple (1024, 768)
-            FrameLimit = Setting.simple FrameLimit.``480``
+            RenderMode = Setting.simple FrameLimit.Smart
             FullscreenRefreshRateOverride = Setting.simple 0
             Display = Setting.simple 0
             AudioDevice = Setting.simple -1

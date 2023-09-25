@@ -48,6 +48,7 @@ type Window(config: Config, title: string, root: Root) as this =
     let renderThread = RenderThread(this, config.AudioDevice.Value, root, WindowEvents.afterInit.Trigger)
 
     let mutable resize_callback = fun (w, h) -> ()
+    let mutable refresh_rate = 60
 
     do
         base.Title <- title
@@ -73,7 +74,8 @@ type Window(config: Config, title: string, root: Root) as this =
                     Monitors.GetMonitorFromWindow(this)
             else Monitors.GetMonitorFromWindow(this)
 
-        renderThread.RenderFrequency <- if float config.FrameLimit.Value <> 0.0 then Unlimited else Smart
+        refresh_rate <- monitor.CurrentVideoMode.RefreshRate
+        renderThread.RenderMode <- config.RenderMode.Value
 
         match config.WindowMode.Value with
 
@@ -100,7 +102,8 @@ type Window(config: Config, title: string, root: Root) as this =
         | WindowType.``Borderless Fullscreen`` ->
             base.WindowState <- WindowState.Normal
             base.WindowBorder <- WindowBorder.Hidden
-            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
+            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min, monitor.ClientArea.Max)
+            base.CenterWindow()
 
         | _ -> Logging.Error "Tried to change to invalid window mode"
 
@@ -118,7 +121,7 @@ type Window(config: Config, title: string, root: Root) as this =
         if e.Height <> 0 then
             sync ( fun () -> 
                 if this.WindowBorder = WindowBorder.Resizable then resize_callback(this.ClientSize.X, this.ClientSize.Y)
-                renderThread.OnResize this.ClientSize
+                renderThread.OnResize(this.ClientSize, refresh_rate)
             )
 
     override this.OnFileDrop e =

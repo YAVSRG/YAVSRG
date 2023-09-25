@@ -2,11 +2,14 @@
 
 open System.Drawing
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 
 type PerformanceMonitor() =
     inherit StaticWidget(NodeType.None)
 
+    let bind = Bind.Key (OpenTK.Windowing.GraphicsLibraryFramework.Keys.F12, (true, true, true))
+
+    let mutable enable = false
     let mutable i = 0
     let mutable frame_times = Array.zeroCreate<float> 600
     let mutable draw_times = Array.zeroCreate<float> 600
@@ -18,17 +21,22 @@ type PerformanceMonitor() =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
 
-        i <- (i + 599) % 600
-        frame_times.[i] <- Render.Performance.elapsed_time
-        draw_times.[i] <- Render.Performance.draw_time
-        update_times.[i] <- Render.Performance.update_time
-        swap_times.[i] <- Render.Performance.swap_time
-        latencies.[i] <- Render.Performance.visual_latency
+        if bind.Tapped() then enable <- not enable
 
-        let (frames, ticks) = Render.Performance.framecount_tickcount
-        fps <- float frames / (float ticks / 10_000_000.0)
+        if enable then
+            i <- (i + 599) % 600
+            frame_times.[i] <- Render.Performance.elapsed_time
+            draw_times.[i] <- Render.Performance.draw_time
+            update_times.[i] <- Render.Performance.update_time
+            swap_times.[i] <- Render.Performance.swap_time
+            latencies.[i] <- Render.Performance.visual_latency
+
+            let (frames, ticks) = Render.Performance.framecount_tickcount
+            fps <- float frames / (float ticks / 10_000_000.0)
 
     override this.Draw() =
+        if not enable then () else
+
         let step = this.Bounds.Width / 600.0f
 
         let draw_graphs j =
@@ -45,4 +53,5 @@ type PerformanceMonitor() =
             draw_graphs b
 
         Text.drawB(Style.font, sprintf "%.3f FPS" fps, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 20.0f, (Color.White, Color.DarkRed))
-        Text.drawB(Style.font, sprintf "%.1fms Latency" Render.Performance.visual_latency, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 55.0f, (Color.White, Color.DarkGreen))
+        Text.drawB(Style.font, sprintf "%.1fms display latency" Render.Performance.visual_latency, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 60.0f, (Color.White, Color.DarkGreen))
+        Text.drawB(Style.font, sprintf "%.1fms swap time" Render.Performance.swap_time, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 100.0f, (Color.White, Color.DarkBlue))

@@ -14,12 +14,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Common
 
-[<Struct>]
-type RenderFrequency =
-    | Unlimited
-    | Smart
-    //| SmartLowLatency
-
 type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit: unit -> unit) =
     
     let mutable resized = false
@@ -29,19 +23,13 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     let total_frame_timer = Stopwatch.StartNew()
     let mutable next_frame_time = 0.0
     let mutable monitor_refresh_period = 1000.0 / 59.997
+    let mutable vsync = false
 
-    let mutable running_sync_test = false
-    let mutable sync_samples = ResizeArray<float>()
-    let mutable sync_last_interval = 0.0
+    member val RenderMode = FrameLimit.Smart with get, set
 
-    member val RenderFrequency = Smart with get, set
-
-    member this.OnResize(newSize: Vector2i) =
+    member this.OnResize(newSize: Vector2i, refresh_rate: int) =
         Render.resize(newSize.X, newSize.Y)
-        if this.RenderFrequency = Smart then
-            running_sync_test <- true
-            sync_samples.Clear()
-            GLFW.SwapInterval -1
+        monitor_refresh_period <- 1000.0 / float refresh_rate
         resized <- true
 
     member private this.Loop() =
@@ -58,6 +46,10 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         thread.Start()
         
     member this.DispatchFrame() =
+
+        if vsync <> (this.RenderMode = FrameLimit.Smart) then
+            GLFW.SwapInterval (if vsync then 0 else -1)
+            vsync <- this.RenderMode = FrameLimit.Smart
 
         let elapsedTime = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
@@ -77,7 +69,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         // Draw
         // Estimated latency between this frame being drawn and sent to the monitor is calculated
         // Note rendering is adjusted to be further in the future, so it is displaying the right point in time when it arrives on the monitor
-        if this.RenderFrequency = Smart && not running_sync_test then 
+        if this.RenderMode = FrameLimit.Smart then 
             Render.Performance.visual_latency <- next_frame_time - total_frame_timer.Elapsed.TotalMilliseconds
         else Render.Performance.visual_latency <- 0.0
 
@@ -89,28 +81,11 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         Render.Performance.draw_time <- after_draw - before_draw
 
         // Frame limiting
-        if this.RenderFrequency = Smart && not running_sync_test then
-
-            let now = total_frame_timer.Elapsed.TotalMilliseconds
-            let wait_time = next_frame_time - now
-            if wait_time > 0.0 then 
-                Thread.Sleep(TimeSpan.FromMilliseconds(wait_time))
-                next_frame_time <- next_frame_time + monitor_refresh_period
-            else
-                next_frame_time <- now + monitor_refresh_period / 2.0
-
         let before_swap = total_frame_timer.Elapsed.TotalMilliseconds
         if not root.ShouldExit then window.Context.SwapBuffers()
         let after_swap = total_frame_timer.Elapsed.TotalMilliseconds
-
-        if running_sync_test then 
-            let sample = after_swap - sync_last_interval
-            if abs (sample - monitor_refresh_period) < 0.75 * monitor_refresh_period then
-                sync_samples.Add sample
-            sync_last_interval <- after_swap
-            if sync_samples.Count > 600 then
-                Logging.Debug(sprintf "True period more like %.5f compared to estimated %.5f" (Seq.average sync_samples) monitor_refresh_period)
-                running_sync_test <- false
+        Render.Performance.swap_time <- after_swap - before_swap
+        next_frame_time <- after_swap + monitor_refresh_period
         
         // Performance profiling
         fps_count <- fps_count + 1
@@ -119,7 +94,6 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
             Render.Performance.framecount_tickcount <- (fps_count, time)
             fps_timer.Restart()
             fps_count <- 0
-        Render.Performance.swap_time <- after_swap - before_swap
         Render.Performance.elapsed_time <- elapsedTime
 
     member this.Init() =
