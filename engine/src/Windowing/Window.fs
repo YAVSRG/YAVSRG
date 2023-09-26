@@ -1,5 +1,6 @@
 ﻿namespace Percyqaz.Flux.Windowing
 
+open System
 open System.Threading
 open OpenTK
 open OpenTK.Mathematics
@@ -50,7 +51,7 @@ type Window(config: Config, title: string, root: Root) as this =
     do
         base.Title <- title
         base.VSync <- VSyncMode.Off
-        base.CursorState <- CursorState.Grabbed
+        base.CursorState <- if OperatingSystem.IsMacOS() then CursorState.Grabbed else CursorState.Hidden
 
     member this.ApplyConfig(config: Config) =
 
