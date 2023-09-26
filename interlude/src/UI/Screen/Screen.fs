@@ -102,6 +102,8 @@ module Screen =
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
 
+            perf.Update (elapsedTime, moved)
+
             Background.update elapsedTime
             if currentType <> Type.Play || Dialog.exists() then Notifications.display.Update (elapsedTime, moved)
             if Viewport.vwidth > 0.0f then
@@ -110,7 +112,6 @@ module Screen =
             Palette.accentColor.Target <- Content.accentColor
             Dialog.display.Update (elapsedTime, moved)
 
-            perf.Update (elapsedTime, moved)
             toolbar.Update (elapsedTime, moved)
             globalAnimation.Update elapsedTime
             logo.Update (elapsedTime, moved)
