@@ -40,7 +40,7 @@ module Window =
 
 [<Sealed>]
 type Window(config: Config, title: string, root: Root) as this =
-    inherit NativeWindow(NativeWindowSettings(StartVisible = false, NumberOfSamples = 24))
+    inherit NativeWindow(NativeWindowSettings(StartVisible = false, NumberOfSamples = 24, Flags = ContextFlags.ForwardCompatible, Profile = ContextProfile.Core))
 
     let renderThread = RenderThread(this, config.AudioDevice.Value, root, WindowEvents.afterInit.Trigger)
 
@@ -50,7 +50,7 @@ type Window(config: Config, title: string, root: Root) as this =
     do
         base.Title <- title
         base.VSync <- VSyncMode.Off
-        base.CursorState <- CursorState.Hidden
+        base.CursorState <- CursorState.Grabbed
 
     member this.ApplyConfig(config: Config) =
 
