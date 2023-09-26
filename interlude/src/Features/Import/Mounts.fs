@@ -73,23 +73,26 @@ module Mounts =
         // todo: ingame notification if mount has moved
         match options.OsuMount.Value with
         | Some mount ->
-            Logging.Info("Checking for new osu! songs to import..")
             if Directory.Exists mount.SourceFolder then
-                if mount.ImportOnStartup then import_mounted_source.Request(mount, ignore)
+                if mount.ImportOnStartup then
+                    Logging.Info "Checking for new osu! songs to import.."
+                    import_mounted_source.Request(mount, ignore)
             else Logging.Warn("osu! Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again.")
         | None -> ()
         match options.StepmaniaMount.Value with
         | Some mount -> 
-            Logging.Info("Checking for new Stepmania songs to import..")
             if Directory.Exists mount.SourceFolder then
-                if mount.ImportOnStartup then import_mounted_source.Request(mount, ignore)
+                if mount.ImportOnStartup then 
+                    Logging.Info "Checking for new Stepmania songs to import.."
+                    import_mounted_source.Request(mount, ignore)
             else Logging.Warn("Stepmania Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again.")
         | None -> ()
         match options.EtternaMount.Value with
         | Some mount ->
-            Logging.Info("Checking for new Etterna songs to import..")
             if Directory.Exists mount.SourceFolder then
-                if mount.ImportOnStartup then import_mounted_source.Request(mount, ignore)
+                if mount.ImportOnStartup then 
+                    Logging.Info "Checking for new Etterna songs to import.."
+                    import_mounted_source.Request(mount, ignore)
             else Logging.Warn("Etterna Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again.")
         | None -> ()
 
