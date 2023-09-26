@@ -132,13 +132,14 @@ module Render =
         let mutable rev = 0
         GLFW.GetVersion(&major, &minor, &rev)
         let smoother_vsync_support = GLFW.ExtensionSupported("GLX_EXT_swap_control_tear") || GLFW.ExtensionSupported("WGL_EXT_swap_control_tear")
-        Logging.Debug(sprintf "GL Version: %s | %s | U:%i T:%i | GLFW Version: %i.%i.%i %s"
+        Logging.Debug(sprintf "GL %s | %s | U:%i T:%i | GLFW %i.%i.%i%s | C:%i"
             (GL.GetString StringName.Version)
             (GL.GetString StringName.Renderer)
             Sprite.MAX_TEXTURE_UNITS
             Sprite.MAX_TEXTURE_SIZE
             major minor rev
             (if smoother_vsync_support then "*" else "")
+            Environment.ProcessorCount
             )
 
         GL.Disable(EnableCap.CullFace)
