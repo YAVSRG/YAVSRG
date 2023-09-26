@@ -1,6 +1,4 @@
-﻿#nowarn "9"
-
-namespace Percyqaz.Flux.Windowing
+﻿namespace Percyqaz.Flux.Windowing
 
 open System.Threading
 open OpenTK
@@ -98,8 +96,8 @@ type Window(config: Config, title: string, root: Root) as this =
         | WindowType.Fullscreen ->
             base.WindowState <- WindowState.Fullscreen
             let monitor = monitor.Handle.ToUnsafePtr<Monitor>()
-            let modePtr = GLFW.GetVideoMode(monitor)
-            let mode = NativeInterop.NativePtr.read modePtr
+            let modes = GLFW.GetVideoModes(monitor)
+            let mode = modes.[modes.Length - 1]
             GLFW.SetWindowMonitor(this.WindowPtr, monitor, 0, 0, mode.Width, mode.Height, max config.FullscreenRefreshRateOverride.Value mode.RefreshRate)
 
         | WindowType.``Borderless Fullscreen`` ->

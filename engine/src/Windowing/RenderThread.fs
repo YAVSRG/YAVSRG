@@ -22,7 +22,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     let last_frame_timer = Stopwatch()
     let total_frame_timer = Stopwatch.StartNew()
     let mutable next_frame_time = 0.0
-    let mutable monitor_refresh_period = 1000.0 / 59.997
+    let mutable monitor_refresh_period = 1000.0 / 60.0
     let mutable vsync = false
 
     member val RenderMode = FrameLimit.Smart with get, set
@@ -30,6 +30,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     member this.OnResize(newSize: Vector2i, refresh_rate: int) =
         Render.resize(newSize.X, newSize.Y)
         monitor_refresh_period <- 1000.0 / float refresh_rate
+        GLFW.SwapInterval (if vsync then -1 else 0)
         resized <- true
 
     member private this.Loop() =
@@ -47,10 +48,6 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         
     member this.DispatchFrame() =
 
-        if vsync <> (this.RenderMode = FrameLimit.Smart) then
-            GLFW.SwapInterval (if vsync then 0 else -1)
-            vsync <- this.RenderMode = FrameLimit.Smart
-
         let elapsedTime = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
         
@@ -65,13 +62,14 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         let after_update = total_frame_timer.Elapsed.TotalMilliseconds
         Render.Performance.update_time <- after_update - before_update
         if root.ShouldExit then window.Close()
+
+        if vsync <> (this.RenderMode = FrameLimit.Smart) then
+            vsync <- this.RenderMode = FrameLimit.Smart
+            GLFW.SwapInterval (if vsync then -1 else 0)
         
         // Draw
         // Estimated latency between this frame being drawn and sent to the monitor is calculated
         // Note rendering is adjusted to be further in the future, so it is displaying the right point in time when it arrives on the monitor
-        if this.RenderMode = FrameLimit.Smart then 
-            Render.Performance.visual_latency <- next_frame_time - total_frame_timer.Elapsed.TotalMilliseconds
-        else Render.Performance.visual_latency <- 0.0
 
         let before_draw = total_frame_timer.Elapsed.TotalMilliseconds
         Render.start()
@@ -85,6 +83,11 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         if not root.ShouldExit then window.Context.SwapBuffers()
         let after_swap = total_frame_timer.Elapsed.TotalMilliseconds
         Render.Performance.swap_time <- after_swap - before_swap
+
+        if this.RenderMode = FrameLimit.Smart then 
+            Render.Performance.visual_latency <- after_swap - next_frame_time
+        else Render.Performance.visual_latency <- 0.0
+
         next_frame_time <- after_swap + monitor_refresh_period
         
         // Performance profiling
@@ -100,5 +103,10 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         Devices.init audioDevice
         Render.init()
         Render.resize(window.ClientSize.X, window.ClientSize.Y)
+        Render.Performance.frame_compensation <- 
+            fun () -> 
+                if this.RenderMode = FrameLimit.Smart then 
+                    float32 (next_frame_time - total_frame_timer.Elapsed.TotalMilliseconds) * 1.0f<ms>
+                else 0.0f<ms>
         root.Init()
         afterInit()

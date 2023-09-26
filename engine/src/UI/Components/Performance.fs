@@ -25,7 +25,10 @@ type PerformanceMonitor() =
         base.Update(elapsedTime, moved)
 
         if all_bind.Tapped() then enable <- not enable; enable_graph <- enable
-        if graph_bind.Tapped() then enable_graph <- not enable_graph; if enable_graph then enable <- true
+        if graph_bind.Tapped() then
+            if enable then
+                enable_graph <- not enable_graph
+            else enable <- true
 
         if enable then
             i <- (i + 599) % 600
@@ -41,8 +44,10 @@ type PerformanceMonitor() =
     override this.Draw() =
         if enable then
             Text.drawB(Style.font, sprintf "%.3f FPS" fps, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 20.0f, (Color.White, Color.DarkRed))
-            Text.drawB(Style.font, sprintf "%.1fms display latency" Render.Performance.visual_latency, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 60.0f, (Color.White, Color.DarkGreen))
-            Text.drawB(Style.font, sprintf "%.1fms swap time" Render.Performance.swap_time, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 100.0f, (Color.White, Color.DarkBlue))
+            Text.drawB(Style.font, sprintf "%.1fms playfield latency" Render.Performance.visual_latency, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 60.0f, (Color.White, Color.DarkGreen))
+            Text.drawB(Style.font, sprintf "%.1fms UI latency" (Render.Performance.frame_compensation()), 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 100.0f, (Color.White, Color.Black))
+            Text.drawB(Style.font, sprintf "%.1fms swap time" Render.Performance.swap_time, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 140.0f, (Color.White, Color.DarkBlue))
+            Text.drawB(Style.font, sprintf "%O to hide overlay" all_bind, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 180.0f, Colors.text_subheading)
         
         if enable_graph then
 

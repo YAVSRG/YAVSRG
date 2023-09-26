@@ -104,6 +104,8 @@ module Render =
         let mutable draw_time = 0.0
         let mutable elapsed_time = 0.0
 
+        let mutable frame_compensation : unit -> Time = K 0.0f<ms>
+
     let start() = 
         GL.Clear(ClearBufferMask.ColorBufferBit)
         Batch.start()
