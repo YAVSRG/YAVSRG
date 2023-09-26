@@ -1,4 +1,3 @@
-
 <img src="https://user-images.githubusercontent.com/21290233/165412641-5f857e96-901b-48dc-867e-e509ca123a3b.png" align="left">
   
 # **YAVSRG :: Interlude**

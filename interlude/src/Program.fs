@@ -17,7 +17,8 @@ let launch(instance: int) =
     Logging.Verbosity <- if Prelude.Common.DEV_MODE then LoggingLevel.DEBUG else LoggingLevel.INFO
     Logging.LogFile <- Some (Path.Combine("Logs", sprintf "log-%s.txt" (DateTime.Today.ToString("yyyyMMdd"))))
 
-    Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
+    if Environment.OSVersion.Platform = PlatformID.Win32NT then
+        Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
     let crashSplash = Utils.randomSplash("CrashSplashes.txt") >> (fun s -> Logging.Critical s)
 
@@ -65,11 +66,6 @@ let launch(instance: int) =
 
 [<EntryPoint>]
 let main argv =
-    if not (File.Exists("bass.dll")) && not (File.Exists("libbass.iso")) then
-        printfn "Looks like Interlude was launched from the wrong starting directory!"
-        -1
-    else
-
     let m = new Mutex(true, "Interlude")
 
     if argv.Length > 0 then

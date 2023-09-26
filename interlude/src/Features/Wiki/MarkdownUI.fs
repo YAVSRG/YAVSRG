@@ -314,7 +314,7 @@ module private Paragraph =
         | Span (body, _) -> Spans(max_width, body, Span.Settings.Default)
         | ListBlock (kind, items, _) -> ListBlock(max_width, List.map (createMultiple (max_width - ListBlock.INDENT)) items)
         | HorizontalRule (char, _) -> HorizontalRule(max_width)
-        | CodeBlock (code, _, language, _, _) -> CodeBlock(max_width, code, language)
+        | CodeBlock (code, _, language, _, _, _) -> CodeBlock(max_width, code, language)
         | YamlFrontmatter _
         | TableBlock _ // todo
         | OutputBlock _
