@@ -27,7 +27,6 @@ module Launch =
             use window = window.Value
             try
                 window.Run()
-                Logging.Info "Stopping"
             with err -> Logging.Critical("Fatal error in window thread", err); crashed <- true
             window.Close()
             if crashed then ignore(Console.ReadLine()) 

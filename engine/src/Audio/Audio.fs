@@ -11,12 +11,11 @@ module private Helpers =
 
 type Song =
     {
-        Path: string
         ID: int
         Frequency: int // in hz
         Duration: float32<ms>
     }
-    static member Default = { Path = ""; ID = 0; Frequency = 1; Duration = 1000.0f<ms> }
+    static member Default = { ID = 0; Frequency = 1; Duration = 1000.0f<ms> }
     static member FromFile(file: string) =
         //let ID = Bass.CreateStream(file, int64 0, int64 0, BassFlags.Decode); //loads file
         let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan)
@@ -28,7 +27,7 @@ type Song =
             let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength ID) * 1000.0
             let Frequency = d.Frequency
             //let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
-            { Path = file; ID = ID; Frequency = Frequency; Duration = float32 Duration * 1.0f<ms> }
+            { ID = ID; Frequency = Frequency; Duration = float32 Duration * 1.0f<ms> }
     member this.Free() = Bass.StreamFree this.ID |> bassError
 
 [<RequireQualifiedAccess>]
@@ -41,6 +40,9 @@ module Song =
 
     let LEADIN_TIME = 2000.0f<ms>
     
+    let mutable load_path : string option = None
+    let mutable load_id = -1
+
     let mutable nowplaying : Song = Song.Default
     let private timer = new Stopwatch()
     let mutable private timerStart = 0.0f<ms>
@@ -122,27 +124,27 @@ module Song =
     let private sync(action: unit -> unit) =
         lock sync_obj <| fun () -> sync_list <- action :: sync_list
 
-    let change (path: string option, offset: Time, rate: float32, (preview, chart_last_note)) =
-        let isDifferentFile = path <> Some nowplaying.Path
+    let change (path: string option, offset: Time, new_rate: float32, (preview, chart_last_note)) =
+        let isDifferentFile = path <> load_path
+        load_path <- path
         preview_point <- preview
         last_note <- chart_last_note
+        changeLocalOffset offset
+        changeRate new_rate
         if isDifferentFile then
             if playing() then pause()
             timerStart <- -infinityf * 1.0f<ms>
             if nowplaying.ID <> 0 then
                 nowplaying.Free()
             channelPlaying <- false
-            song_loader.Request(path, 
-                fun song ->
+            load_id <- song_loader.Request(path,
+                fun (id, song) ->
                     sync <| fun () ->
-                        nowplaying <- song
-                        changeLocalOffset offset
-                        changeRate rate
-                        playFrom preview_point
+                        if id = load_id then
+                            nowplaying <- song
+                            changeRate rate
+                            playFrom preview_point
             )
-        else
-            changeLocalOffset offset
-            changeRate rate
 
     let update() =
 
