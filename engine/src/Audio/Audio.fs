@@ -33,10 +33,9 @@ type Song =
 
 [<RequireQualifiedAccess>]
 type SongFinishAction =
-    | Loop
+    | LoopFromPreview
+    | LoopFromBeginning
     | Wait
-    | Stop
-    | Callback of (unit -> unit)
 
 module Song = 
 
@@ -50,6 +49,8 @@ module Song =
     let mutable localOffset = 0.0f<ms>
     let mutable private globalOffset = 0.0f<ms>
     let mutable onFinish = SongFinishAction.Wait
+    let mutable private preview_point = 0.0f<ms>
+    let mutable private last_note = 0.0f<ms>
 
     let duration() = nowplaying.Duration
 
@@ -105,20 +106,47 @@ module Song =
     let changeLocalOffset(offset) = localOffset <- offset
     let changeGlobalOffset(offset) = globalOffset <- offset
 
-    let change (path: string option, offset, rate) : bool =
+    let private song_loader =
+        { new Async.SwitchService<string option, Song>() with
+            override this.Handle(path) =
+                async {
+                    return 
+                        match path with
+                        | Some p -> Song.FromFile p
+                        | None -> Song.Default
+                }
+        }
+
+    let private sync_obj = obj()
+    let mutable private sync_list = []
+    let private sync(action: unit -> unit) =
+        lock sync_obj <| fun () -> sync_list <- action :: sync_list
+
+    let change (path: string option, offset: Time, rate: float32, (preview, chart_last_note)) =
         let isDifferentFile = path <> Some nowplaying.Path
+        preview_point <- preview
+        last_note <- chart_last_note
         if isDifferentFile then
             if playing() then pause()
             timerStart <- -infinityf * 1.0f<ms>
             if nowplaying.ID <> 0 then
                 nowplaying.Free()
             channelPlaying <- false
-            nowplaying <- match path with Some p -> Song.FromFile p | None -> Song.Default
-        changeLocalOffset offset
-        changeRate rate
-        isDifferentFile
+            song_loader.Request(path, 
+                fun song ->
+                    sync <| fun () ->
+                        nowplaying <- song
+                        changeLocalOffset offset
+                        changeRate rate
+                        playFrom preview_point
+            )
+        else
+            changeLocalOffset offset
+            changeRate rate
 
     let update() =
+
+        lock sync_obj <| fun () -> (for action in sync_list do action()); sync_list <- []
 
         let t = time()
         if (t >= 0.0f<ms> && t < nowplaying.Duration && not channelPlaying) then
@@ -128,10 +156,9 @@ module Song =
         elif t > nowplaying.Duration then
             channelPlaying <- false
             match onFinish with
-            | SongFinishAction.Loop -> playFrom 0.0f<ms>
+            | SongFinishAction.LoopFromPreview -> if t >= last_note then playFrom preview_point
+            | SongFinishAction.LoopFromBeginning -> if t >= last_note then playFrom 0.0f<ms>
             | SongFinishAction.Wait -> ()
-            | SongFinishAction.Stop -> pause() // todo: don't pause every frame
-            | SongFinishAction.Callback f -> f()
 
 type SoundEffect =
     {
