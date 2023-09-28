@@ -5,12 +5,12 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Prelude.Common
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts.Tools
 open Prelude.Charts.Tools.Patterns
 open Interlude.UI.Menu
 open Interlude.Features.Play
 
-type Preview(chart: Chart, changeRate: float32 -> unit) =
+type Preview(chart: ModChart, changeRate: float32 -> unit) =
     inherit Dialog()
 
     let density_graph_1, density_graph_2 = Analysis.nps_cps 100 chart

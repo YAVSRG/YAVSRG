@@ -21,14 +21,14 @@ module Comments =
     let private textEntry = 
         { new TextEntry( 
             Setting.make
-                (fun s -> match Chart.saveData with Some d -> d.Comment <- s | _ -> ())
-                (fun () -> match Chart.saveData with Some d -> d.Comment | _ -> ""),
+                (fun s -> match Chart.SAVE_DATA with Some d -> d.Comment <- s | _ -> ())
+                (fun () -> match Chart.SAVE_DATA with Some d -> d.Comment | _ -> ""),
             "comment",
             Position = Position.Margin(20.0f, 10.0f),
             Clickable = false) with 
             override this.OnDeselected() =
                 base.OnDeselected()
-                match Chart.saveData with Some d -> d.Comment <- d.Comment.Trim() | _ -> ()
+                match Chart.SAVE_DATA with Some d -> d.Comment <- d.Comment.Trim() | _ -> ()
                 LevelSelect.refresh_details()
         }
 
@@ -41,7 +41,7 @@ module Comments =
                 Position = Position.Default.Margin(200.0f, 0.0f).TrimBottom(15.0f).TrimTop(60.0f))
             |+ textEntry
            )
-        |+ Text((fun () -> match Chart.current with Some c -> Localisation.localiseWith [c.Header.Title] "levelselect.comments.label" | _ -> ""),
+        |+ Text((fun () -> match Chart.CACHE_DATA with Some c -> Localisation.localiseWith [c.Title] "levelselect.comments.label" | _ -> ""),
             Color = K Colors.text,
             Align = Alignment.CENTER,
             Position = Position.SliceTop 55.0f)
@@ -92,7 +92,8 @@ type ActionBar(random_chart) =
         this
         |+ ActionButton(Icons.practice,
             (fun () ->
-            if Chart.current.IsSome then
+            // todo: wait until load if not
+            if Chart.WITH_MODS.IsSome then
                 Screen.changeNew 
                     (fun () -> PracticeScreen.practice_screen(0.0f<ms>))
                     Screen.Type.Practice

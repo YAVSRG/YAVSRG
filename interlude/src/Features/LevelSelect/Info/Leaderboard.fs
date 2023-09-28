@@ -133,28 +133,29 @@ module Leaderboard =
                                     } : Score), req.Chart, req.Ruleset, Player = Some score.Username)
                                 yield score, data
                         }
-                    member this.Callback((score: LeaderboardScore, data: ScoreInfoProvider)) =
+                    member this.Callback(_, (score: LeaderboardScore, data: ScoreInfoProvider)) =
                         let sc = LeaderboardCard(score, data)
                         sync(fun () -> container.Add sc)
-                    member this.JobCompleted(req: Request) = ()
+                    member this.JobCompleted((_, req: Request)) = ()
                 }
             fun (state: Setting<State>) ->
                 if Network.status <> Network.Status.LoggedIn then state.Set State.Offline else
                 state.Set State.Loading
-                let hash, ruleset_id = Chart.cacheInfo.Value.Hash, Content.Rulesets.current_hash
+                let hash, ruleset_id = Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash
                 API.Client.get<Requests.Charts.Scores.Leaderboard.Response>(sprintf "charts/scores?chart=%s&ruleset=%s" hash ruleset_id,
                     function
                     | Some reply ->
-                        if (hash, ruleset_id) <> (Chart.cacheInfo.Value.Hash, Content.Rulesets.current_hash) then () else
+                        if (hash, ruleset_id) <> (Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash) then () else
 
                         worker.Request
                             {
                                 Scores = reply.Scores
                                 RulesetId = Content.Rulesets.current_hash
                                 Ruleset = Content.Rulesets.current
-                                Chart = Chart.current.Value
-                                Hash = Chart.cacheInfo.Value.Hash
+                                Chart = Chart.CHART.Value
+                                Hash = Chart.CACHE_DATA.Value.Hash
                             }
+                        |> ignore
                         state.Set (if reply.Scores.Length > 0 then State.Loaded else State.EmptyLeaderboard)
                     | None -> 
                         // worker is requested anyway because it ensures any loading scores get swallowed and the scoreboard is cleared
@@ -163,9 +164,10 @@ module Leaderboard =
                                 Scores = [||]
                                 RulesetId = Content.Rulesets.current_hash
                                 Ruleset = Content.Rulesets.current
-                                Chart = Chart.current.Value
-                                Hash = Chart.cacheInfo.Value.Hash
+                                Chart = Chart.CHART.Value
+                                Hash = Chart.CACHE_DATA.Value.Hash
                             }
+                        |> ignore
                         state.Set State.NoLeaderboard
                 )
 
@@ -230,7 +232,10 @@ type Leaderboard(display: Setting<Display>) as this =
         |* Conditional((fun () -> state.Value = State.Offline), EmptyState(Icons.connected, L"misc.offline"))
 
     member this.Refresh() =
-        let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""
+        let h = match Chart.CACHE_DATA with Some c -> c.Hash | None -> ""
+        
+        Chart.wait_for_load <| fun () ->
+
         if h <> chart || scoring <> Content.Rulesets.current_hash then
             chart <- h
             scoring <- Content.Rulesets.current_hash

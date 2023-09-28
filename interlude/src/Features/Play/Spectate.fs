@@ -38,7 +38,7 @@ module SpectateScreen =
 
         override this.Init(parent) =
             this
-            |+ Timeline(Gameplay.Chart.current.Value, on_seek)
+            |+ Timeline(Gameplay.Chart.WITH_MODS.Value, on_seek)
             |* Controls(who, cycle, Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
             base.Init parent
 
@@ -56,7 +56,7 @@ module SpectateScreen =
 
     let spectate_screen(username: string) =
 
-        let chart = Gameplay.Chart.withMods.Value
+        let chart = Gameplay.Chart.WITH_MODS.Value
 
         let mutable currently_spectating = username
         let mutable scoring = fst Gameplay.Online.Multiplayer.replays.[username]
@@ -81,7 +81,6 @@ module SpectateScreen =
             screen.State.ChangeScoring scoring
 
         let firstNote = chart.Notes.[0].Time
-        let lastNote = chart.Notes.[chart.Notes.Length - 1].Time
         let ruleset = Rulesets.current
 
         let mutable wait_for_load = 1000.0
@@ -110,7 +109,7 @@ module SpectateScreen =
 
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
-                DiscordRPC.playing("Spectating", Gameplay.Chart.cacheInfo.Value.Title)
+                DiscordRPC.playing("Spectating", Gameplay.Chart.CACHE_DATA.Value.Title)
                 Song.pause()
 
             override this.OnExit(next) =

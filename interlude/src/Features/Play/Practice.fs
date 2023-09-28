@@ -93,12 +93,12 @@ module PracticeScreen =
         type UI() =
             inherit StaticContainer(NodeType.None)
 
-            let firstNote = Gameplay.Chart.current.Value.FirstNote
+            let firstNote = Gameplay.Chart.CHART.Value.FirstNote
 
             let local_audio_offset = 
                 Setting.make
-                    (fun v -> Gameplay.Chart.saveData.Value.Offset <- v + firstNote; Song.changeLocalOffset(v))
-                    (fun () -> (Gameplay.Chart.saveData.Value.Offset - firstNote))
+                    (fun v -> Gameplay.Chart.SAVE_DATA.Value.Offset <- v + firstNote; Song.changeLocalOffset(v))
+                    (fun () -> (Gameplay.Chart.SAVE_DATA.Value.Offset - firstNote))
                 |> Setting.bound -200.0f<ms> 200.0f<ms>
             let mutable local_audio_offset_suggestion = local_audio_offset.Value
 
@@ -226,7 +226,7 @@ module PracticeScreen =
     
     let rec practice_screen (practice_point: Time) =
 
-        let chart = Gameplay.Chart.withMods.Value
+        let chart = Gameplay.Chart.WITH_MODS.Value
         let lastNote = chart.Notes.[chart.Notes.Length - 1].Time - 5.0f<ms> - Song.LEADIN_TIME * Gameplay.rate.Value
         let mutable practice_point = min lastNote practice_point
 
@@ -274,7 +274,7 @@ module PracticeScreen =
 
         let options_ui =
             StaticContainer(NodeType.None)
-            |+ Timeline(Gameplay.Chart.current.Value, fun t -> practice_point <- min lastNote t; Song.seek t)
+            |+ Timeline(Gameplay.Chart.WITH_MODS.Value, fun t -> practice_point <- min lastNote t; Song.seek t)
             |+ Callout.frame (info_callout) ( fun (w, h) -> Position.Box(0.0f, 0.0f, 20.0f, 20.0f, w, h + 40.0f) )
             |+ sync_ui
 
@@ -298,7 +298,7 @@ module PracticeScreen =
                 base.OnEnter(p)
                 Song.seek(practice_point)
                 Song.pause()
-                DiscordRPC.playing("Practice mode", Gameplay.Chart.cacheInfo.Value.Title)
+                DiscordRPC.playing("Practice mode", Gameplay.Chart.CACHE_DATA.Value.Title)
 
             override this.OnBack() =
                 if not options_mode then

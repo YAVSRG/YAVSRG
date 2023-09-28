@@ -40,7 +40,7 @@ module CollectionManager =
         then
             if options.LibraryMode.Value <> LibraryMode.All then LevelSelect.refresh_all() else LevelSelect.refresh_details()
             Notifications.action_feedback (Icons.remove_from_collection, Localisation.localiseWith [cc.Title; name] "collections.removed", "")
-            if Some cc = Chart.cacheInfo then Chart.context <- LibraryContext.None
+            if Some cc = Chart.CACHE_DATA then Chart.LIBRARY_CTX <- LibraryContext.None
             true
         else false
 

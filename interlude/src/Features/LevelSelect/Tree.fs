@@ -3,7 +3,6 @@
 open System
 open System.Linq
 open OpenTK.Mathematics
-open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -14,14 +13,10 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
-open Prelude.Data.Charts.Library
 open Interlude.UI
-open Interlude.Utils
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
-open Interlude.Features.Play
-open Interlude.Features.Online
 
 [<Struct>]
 [<RequireQualifiedAccess>]
@@ -72,15 +67,12 @@ module Tree =
         | None -> None
     
     let switchChart(cc, context, groupName) =
-        match Cache.load cc cache with
-        | Some c ->
-            Chart.change(cc, context, c)
-            Selection.clear()
-            selectedChart <- cc.Key
-            expandedGroup <- groupName
-            selectedGroup <- groupName
-            scrollTo <- ScrollTo.Chart
-        | None -> Notifications.error(L"notification.chart_load_failed.title", L"notification.chart_load_failed.body")
+        Chart.change(cc, context)
+        Selection.clear()
+        selectedChart <- cc.Key
+        expandedGroup <- groupName
+        selectedGroup <- groupName
+        scrollTo <- ScrollTo.Chart
    
     [<AbstractClass>]
     type private TreeItem() =
@@ -137,7 +129,7 @@ module Tree =
                 | _ -> ""
 
         override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.4f, top, Viewport.vwidth, top + CHART_HEIGHT)
-        override this.Selected = selectedChart = cc.Key && (context = LibraryContext.None || Chart.context = context)
+        override this.Selected = selectedChart = cc.Key && (context = LibraryContext.None || Chart.LIBRARY_CTX = context)
         override this.Spacing = 5.0f
         member this.Chart = cc
 
@@ -303,9 +295,9 @@ module Tree =
                     library_groups.[(sortIndex, groupName)].Charts
                     |> Seq.map
                         ( fun (cc, context) ->
-                            match Chart.cacheInfo with
+                            match Chart.CACHE_DATA with
                             | None -> ()
-                            | Some c -> if c.Key = cc.Key && (context = LibraryContext.None || context = Chart.context) then selectedChart <- c.Key; selectedGroup <- groupName
+                            | Some c -> if c.Key = cc.Key && (context = LibraryContext.None || context = Chart.LIBRARY_CTX) then selectedChart <- c.Key; selectedGroup <- groupName
                             let i = ChartItem(groupName, cc, context)
                             lastItem <- Some i
                             i
@@ -415,8 +407,8 @@ module Tree =
         if (!|"down").Tapped() && expandedGroup = "" && selectedGroup <> "" then
             expandedGroup <- selectedGroup
             scrollTo <- ScrollTo.Pack expandedGroup
-        elif (!|"context_menu").Tapped() && Chart.cacheInfo.IsSome then
-            ChartContextMenu(Chart.cacheInfo.Value, Chart.context).Show()
+        elif (!|"context_menu").Tapped() && Chart.CACHE_DATA.IsSome then
+            ChartContextMenu(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX).Show()
 
         let lo = total_height - tree_height - origin
         let hi = 20.0f + origin

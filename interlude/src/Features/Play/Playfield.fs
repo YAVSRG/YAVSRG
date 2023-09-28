@@ -65,7 +65,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                 Bottom = Position.max
             }
 
-    new (state: PlayState, vanishing_notes) = Playfield(Gameplay.Chart.colored(), state, vanishing_notes)
+    new (state: PlayState, vanishing_notes) = Playfield(Gameplay.Chart.WITH_COLORS.Value, state, vanishing_notes)
 
     member this.ColumnWidth = column_width
     member this.ColumnPositions = columnPositions

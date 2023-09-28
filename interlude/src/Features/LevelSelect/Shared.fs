@@ -22,23 +22,24 @@ module LevelSelect =
     do Interlude.Features.Import.Import.charts_updated.Add refresh_all
 
     let play() =
+        
+        Chart.wait_for_load <| fun () ->
+
         if Network.lobby.IsSome then
-            Lobby.select_chart(Chart.cacheInfo.Value, rate.Value, selectedMods.Value)
+            Lobby.select_chart(Chart.CACHE_DATA.Value, rate.Value, selectedMods.Value)
             Screen.change Screen.Type.Lobby Transitions.Flags.Default
         else
-            match Chart.saveData with
-            | Some data ->
-                data.LastPlayed <- DateTime.UtcNow
-                Screen.changeNew
-                    ( fun () -> 
-                        if autoplay then ReplayScreen.replay_screen(ReplayMode.Auto) :> Screen.T
-                        else PlayScreen.play_screen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
-                    ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
-                    Transitions.Flags.Default
-            | None -> Logging.Warn "There is no chart selected"
+            Chart.SAVE_DATA.Value.LastPlayed <- DateTime.UtcNow
+            Screen.changeNew
+                ( fun () -> 
+                    if autoplay then ReplayScreen.replay_screen(ReplayMode.Auto) :> Screen.T
+                    else PlayScreen.play_screen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
+                ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
+                Transitions.Flags.Default
 
     let challengeScore(_rate, _mods, replay) =
-        match Chart.saveData with
+        // todo: not having save data should be impossible
+        match Chart.SAVE_DATA with
         | Some data ->
             data.LastPlayed <- DateTime.UtcNow
             rate.Set _rate

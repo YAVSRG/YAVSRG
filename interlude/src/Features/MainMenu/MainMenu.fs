@@ -91,7 +91,7 @@ type MainMenuScreen() as this =
         Logo.moveMenu()
         Background.dim 0.0f
         Screen.Toolbar.show()
-        Song.onFinish <- SongFinishAction.Loop
+        Song.onFinish <- SongFinishAction.LoopFromBeginning
         splashAnim.Target <- 1.0f
         play.Pop(); options.Pop(); quit.Pop()
         DiscordRPC.in_menus("Main menu")

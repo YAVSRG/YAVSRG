@@ -25,8 +25,8 @@ module AutomaticSync =
 
     let offset = 
         Setting.make
-            (fun v -> Gameplay.Chart.saveData.Value.Offset <- v + Gameplay.Chart.current.Value.FirstNote; Song.changeLocalOffset v)
-            (fun () -> Gameplay.Chart.saveData.Value.Offset - Gameplay.Chart.current.Value.FirstNote)
+            (fun v -> Gameplay.Chart.SAVE_DATA.Value.Offset <- v + Gameplay.Chart.CHART.Value.FirstNote; Song.changeLocalOffset v)
+            (fun () -> Gameplay.Chart.SAVE_DATA.Value.Offset - Gameplay.Chart.CHART.Value.FirstNote)
         |> Setting.roundt 0
 
     let apply(scoring: IScoreMetric) =
@@ -40,11 +40,11 @@ module AutomaticSync =
             | _ -> ()
         let mean = sum / count * Gameplay.rate.Value
 
-        let firstNote = Gameplay.Chart.current.Value.FirstNote
-        let recommendedOffset = if count < 10.0f then offset.Value else Gameplay.Chart.saveData.Value.Offset - firstNote - mean * 1.25f
+        let firstNote = Gameplay.Chart.CHART.Value.FirstNote
+        let recommendedOffset = if count < 10.0f then offset.Value else Gameplay.Chart.SAVE_DATA.Value.Offset - firstNote - mean * 1.25f
         offset.Set recommendedOffset
 
-type Timeline(chart: Chart, on_seek: Time -> unit) =
+type Timeline(chart: ModChart, on_seek: Time -> unit) =
     inherit StaticWidget(NodeType.None)
 
     let density_graph_1, density_graph_2 = Analysis.nps_cps 200 chart

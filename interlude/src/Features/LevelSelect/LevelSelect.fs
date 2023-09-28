@@ -30,8 +30,12 @@ type LevelSelectScreen() =
         Tree.refresh()
 
     let random_chart() =
-        if options.AdvancedRecommendations.Value then
-            match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value Tree.filter with
+
+        Chart.wait_for_load <| fun () ->
+
+        // todo: remove need for chart load
+        if options.AdvancedRecommendations.Value && Chart.CACHE_DATA.IsSome then
+            match Suggestion.get_suggestion Chart.CHART.Value Chart.CACHE_DATA.Value Tree.filter with
             | Some c -> Tree.switchChart(c, LibraryContext.None, ""); refresh()
             | None -> ()
         else
@@ -46,12 +50,12 @@ type LevelSelectScreen() =
 
         this
         |+ Text(
-            (fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.Title),
+            (fun () -> match Chart.CACHE_DATA with None -> "" | Some c -> c.Title),
             Align = Alignment.CENTER,
             Position = { Left = 0.0f %+ 30.0f; Top = 0.0f %+ 20.0f; Right = 0.4f %- 30.0f; Bottom = 0.0f %+ 100.0f })
 
         |+ Text(
-            (fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.DifficultyName),
+            (fun () -> match Chart.CACHE_DATA with None -> "" | Some c -> c.DifficultyName),
             Align = Alignment.CENTER,
             Position = { Left = 0.0f %+ 30.0f; Top = 0.0f %+ 90.0f; Right = 0.4f %- 30.0f; Bottom = 0.0f %+ 140.0f })
 
@@ -86,7 +90,7 @@ type LevelSelectScreen() =
 
         |* infoPanel
 
-        Chart.onChange.Add infoPanel.Refresh
+        Chart.on_chart_change.Add infoPanel.Refresh
         Comments.init this
 
         LevelSelect.on_refresh_all.Add refresh
@@ -127,7 +131,7 @@ type LevelSelectScreen() =
         Comments.draw()
 
     override this.OnEnter prev =
-        Song.onFinish <- SongFinishAction.Callback (fun () -> Song.playFrom Chart.current.Value.Header.PreviewTime)
+        Song.onFinish <- SongFinishAction.LoopFromPreview
         if Cache.recache_service.Status <> Async.ServiceStatus.Idle then
             Notifications.system_feedback(Icons.system_notification, L"notification.recache_running.title", L"notification.recache_running.body")
         refresh()

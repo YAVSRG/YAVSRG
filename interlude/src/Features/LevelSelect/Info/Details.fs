@@ -36,7 +36,7 @@ type Details(display: Setting<Display>) =
         base.Draw()
 
         let mutable b = this.Bounds.SliceTop(40.0f).Shrink(10.0f, 0.0f).Translate(0.0f, 50.0f)
-        match Gameplay.Chart.patterns with
+        match Gameplay.Chart.PATTERNS with
         | None -> ()
         | Some p ->
             for entry in p do

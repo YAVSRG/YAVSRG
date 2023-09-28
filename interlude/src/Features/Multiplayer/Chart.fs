@@ -43,45 +43,34 @@ type ContextMenu(cc: CachedChart) as this =
 module SelectedChart =
 
     let mutable chart = None
-    let mutable found = false
-    let mutable difficulty = ""
-    let mutable length = ""
-    let mutable bpm = ""
-    let mutable notecounts = ""
+    let selected() =
+        match Chart.CACHE_DATA, chart with
+        | Some cc, Some chart -> cc.Hash = chart.Hash
+        | _ -> false
+    let loaded() =
+        selected() && Chart.WITH_MODS.IsSome
 
-    let update(c: LobbyChart option) =
+    let ensure_selected() =
+        match chart with
+        | None -> ()
+        | Some chart ->
+            if selected() then
+                rate.Set chart.Rate
+                selectedMods.Set (chart.Mods |> Map.ofArray |> Map.filter (fun id _ -> modList.ContainsKey id))
+            else
+                match Cache.by_hash chart.Hash Library.cache with
+                | None -> 
+                    Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash)
+                    Lobby.missing_chart()
+                | Some cc -> 
+                    Chart.change(cc, Collections.LibraryContext.None)
+                    rate.Set chart.Rate
+                    selectedMods.Set (chart.Mods |> Map.ofArray |> Map.filter (fun id _ -> modList.ContainsKey id))
+
+    let switch(c: LobbyChart option) =
         
         chart <- c
-        match c with
-        | None ->
-            found <- true
-            difficulty <- ""
-            length <- ""
-            bpm <- ""
-            notecounts <- ""
-        | Some chart ->
-            found <- 
-                match Cache.by_hash chart.Hash Library.cache with
-                | Some cc -> 
-                    match Cache.load cc Library.cache with 
-                    | Some c -> 
-                        Chart.change(cc, Collections.LibraryContext.None, c)
-                        rate.Set chart.Rate
-                        selectedMods.Set (chart.Mods |> Map.ofArray |> Map.filter (fun id _ -> modList.ContainsKey id))
-                        true
-                    | None -> false
-                | None -> Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash); false
-            if found then
-                difficulty <- sprintf "%s %.2f" Icons.star (match Chart.rating with None -> 0.0 | Some d -> d.Physical)
-                length <- Chart.format_duration()
-                bpm <- Chart.format_bpm()
-                notecounts <- Chart.format_notecounts()
-            else
-                Lobby.missing_chart()
-                difficulty <- ""
-                length <- ""
-                bpm <- ""
-                notecounts <- ""
+        ensure_selected()
 
 type SelectedChart() =
     inherit StaticContainer(NodeType.None)
@@ -89,16 +78,16 @@ type SelectedChart() =
     override this.Init(parent: Widget) =
         
         this
-        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> L"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
-        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Artist + "  •  " + c.Creator | None -> ""), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
-        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DifficultyName else "???"), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        //|+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> L"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
+        //|+ Text((fun () -> match SelectedChart.chart with Some c -> c.Artist + "  •  " + c.Creator | None -> ""), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        //|+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DifficultyName else "???"), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
 
-        |+ Text((fun () -> SelectedChart.difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Text((fun () -> SelectedChart.length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Text((fun () -> SelectedChart.bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Text((fun () -> if SelectedChart.found then getModString(rate.Value, selectedMods.Value, false) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
-        |+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
-        |+ Text((fun () -> if SelectedChart.found then "" else L"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        //|+ Text((fun () -> SelectedChart.difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        //|+ Text((fun () -> SelectedChart.length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        //|+ Text((fun () -> SelectedChart.bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        //|+ Text((fun () -> if SelectedChart.found then getModString(rate.Value, selectedMods.Value, false) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        //|+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        //|+ Text((fun () -> if SelectedChart.found then "" else L"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
         |+ Clickable(
             fun () -> 
@@ -112,8 +101,7 @@ type SelectedChart() =
         |+ Conditional(
             (fun () -> 
                 Network.lobby.IsSome
-                && SelectedChart.found
-                && SelectedChart.chart.IsSome
+                && SelectedChart.loaded()
                 && not Network.lobby.Value.GameInProgress
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.NotReady),
 
@@ -127,7 +115,7 @@ type SelectedChart() =
             )
 
         |+ Conditional(
-            (fun () -> Network.lobby.IsSome && SelectedChart.found && Network.lobby.Value.GameInProgress),
+            (fun () -> Network.lobby.IsSome && SelectedChart.loaded() && Network.lobby.Value.GameInProgress),
                 StylishButton(
                 (fun () ->
                     let username = Network.lobby.Value.Players.Keys.First(fun p -> Network.lobby.Value.Players.[p].Status = LobbyPlayerStatus.Playing)
@@ -143,7 +131,7 @@ type SelectedChart() =
             )
         
         |+ Conditional(
-            (fun () -> Network.lobby.IsSome && SelectedChart.found && SelectedChart.chart.IsSome && not Network.lobby.Value.GameInProgress),
+            (fun () -> Network.lobby.IsSome && SelectedChart.loaded() && not Network.lobby.Value.GameInProgress),
 
             StylishButton(
                 (fun () -> 
@@ -186,15 +174,15 @@ type SelectedChart() =
             )
         )
 
-        SelectedChart.update Network.lobby.Value.Chart
-        Network.Events.join_lobby.Add(fun () -> SelectedChart.update None)
-        Network.Events.change_chart.Add(fun () -> if Screen.currentType = Screen.Type.Lobby then SelectedChart.update Network.lobby.Value.Chart)
+        SelectedChart.switch Network.lobby.Value.Chart
+        Network.Events.join_lobby.Add(fun () -> SelectedChart.switch None)
+        Network.Events.change_chart.Add(fun () -> if Screen.currentType = Screen.Type.Lobby then SelectedChart.switch Network.lobby.Value.Chart) // todo: not always
 
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.SliceTop(70.0f)) (if SelectedChart.found then (!*Palette.DARK).O4a 180 else Color.FromArgb(180, 100, 100, 100))
-        Draw.rect (this.Bounds.SliceTop(100.0f).SliceBottom(30.0f)) (if SelectedChart.found then (!*Palette.DARKER).O4a 180 else Color.FromArgb(180, 50, 50, 50))
-        Draw.rect (this.Bounds.SliceTop(100.0f).SliceLeft(5.0f)) (if SelectedChart.found then !*Palette.MAIN else Colors.white)
+        Draw.rect (this.Bounds.SliceTop(70.0f)) (if SelectedChart.loaded() then (!*Palette.DARK).O4a 180 else Color.FromArgb(180, 100, 100, 100))
+        Draw.rect (this.Bounds.SliceTop(100.0f).SliceBottom(30.0f)) (if SelectedChart.loaded() then (!*Palette.DARKER).O4a 180 else Color.FromArgb(180, 50, 50, 50))
+        Draw.rect (this.Bounds.SliceTop(100.0f).SliceLeft(5.0f)) (if SelectedChart.loaded() then !*Palette.MAIN else Colors.white)
 
         base.Draw()

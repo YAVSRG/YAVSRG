@@ -179,7 +179,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
     inherit StaticWidget(NodeType.None)
 
     let duration = 
-        let chart = Gameplay.Chart.colored()
+        let chart = Gameplay.Chart.WITH_MODS.Value
         chart.Notes.[chart.Notes.Length - 1].Time - chart.Notes.[0].Time
 
     override this.Draw() =
@@ -218,7 +218,7 @@ type SkipButton(conf: HUD.SkipButton, state) =
     let text = Localisation.localiseWith [(!|"skip").ToString()] "play.skiphint"
     let mutable active = true
         
-    let firstNote = Gameplay.Chart.colored().Notes.[0].Time
+    let firstNote = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -376,9 +376,9 @@ type RateModMeter(conf: HUD.RateModMeter, state) as this =
 type BPMMeter(conf: HUD.BPMMeter, state) as this =
     inherit StaticContainer(NodeType.None)
 
-    let firstNote = Gameplay.Chart.withMods.Value.Notes.[0].Time
+    let firstNote = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
     let mutable i = 0
-    let bpms = Gameplay.Chart.withMods.Value.BPM
+    let bpms = Gameplay.Chart.WITH_MODS.Value.BPM
     let mutable last_seen_time = -Time.infinity
 
     do

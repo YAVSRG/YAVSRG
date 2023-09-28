@@ -18,8 +18,8 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
     let lamp = ref <| Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
     let stats = ref <| ScoreScreenStats.Generate scoreData.Scoring.HitEvents
     let previous_personal_bests = 
-        if Gameplay.Chart.saveData.Value.PersonalBests.ContainsKey Rulesets.current_hash then 
-            Some Gameplay.Chart.saveData.Value.PersonalBests.[Rulesets.current_hash]
+        if Gameplay.Chart.SAVE_DATA.Value.PersonalBests.ContainsKey Rulesets.current_hash then 
+            Some Gameplay.Chart.SAVE_DATA.Value.PersonalBests.[Rulesets.current_hash]
         else None
         |> ref
     let originalRuleset = options.SelectedRuleset.Value

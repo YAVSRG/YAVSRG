@@ -106,7 +106,7 @@ module ReplayScreen =
                 Color = K Colors.text,
                 Align = Alignment.CENTER,
                 Position = Position.SliceTop(70.0f).Margin(30.0f, 10.0f).SliceLeft(440.0f))
-            |+ Timeline(Gameplay.Chart.current.Value, on_seek)
+            |+ Timeline(Gameplay.Chart.WITH_MODS.Value, on_seek)
             |* Controls(Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 60.0f))
             base.Init parent
 
@@ -127,7 +127,7 @@ module ReplayScreen =
         let replay_data, is_auto, rate, chart =
             match mode with
             | ReplayMode.Auto -> 
-                let chart = Gameplay.Chart.withMods.Value
+                let chart = Gameplay.Chart.WITH_MODS.Value
                 StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider,
                 true,
                 Gameplay.rate.Value,
@@ -171,7 +171,7 @@ module ReplayScreen =
                 |* ControlOverlay(is_auto, fun t -> let now = Song.time() in Song.seek t; if t < now then seek_backwards this)
 
             override this.OnEnter p =
-                DiscordRPC.playing("Watching a replay", Gameplay.Chart.cacheInfo.Value.Title)
+                DiscordRPC.playing("Watching a replay", Gameplay.Chart.CACHE_DATA.Value.Title)
                 base.OnEnter p
 
             override this.Update(elapsedTime, bounds) =

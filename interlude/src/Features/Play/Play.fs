@@ -29,7 +29,7 @@ module PlayScreen =
     
     let rec play_screen (pacemakerMode: PacemakerMode) =
         
-        let chart = Gameplay.Chart.withMods.Value
+        let chart = Gameplay.Chart.WITH_MODS.Value
         let ruleset = Rulesets.current
         let firstNote = chart.Notes.[0].Time
         let liveplay = LiveReplayProvider firstNote
@@ -89,7 +89,7 @@ module PlayScreen =
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
                 base.OnEnter(previous)
-                DiscordRPC.playing_timed("Playing", Gameplay.Chart.cacheInfo.Value.Title, Gameplay.Chart.cacheInfo.Value.Length / Gameplay.rate.Value)
+                DiscordRPC.playing_timed("Playing", Gameplay.Chart.CACHE_DATA.Value.Title, Gameplay.Chart.CACHE_DATA.Value.Length / Gameplay.rate.Value)
 
             override this.OnExit(next) =
                 if next = Screen.Type.Score then Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
@@ -123,10 +123,10 @@ module PlayScreen =
                             let sd =
                                 ScoreInfoProvider (
                                     Gameplay.makeScore((liveplay :> IReplayProvider).GetFullReplay(), this.Chart.Keys),
-                                    Gameplay.Chart.current.Value,
+                                    Gameplay.Chart.CHART.Value,
                                     this.State.Ruleset,
-                                    ModChart = Gameplay.Chart.withMods.Value,
-                                    Difficulty = Gameplay.Chart.rating.Value
+                                    ModChart = Gameplay.Chart.WITH_MODS.Value,
+                                    Difficulty = Gameplay.Chart.RATING.Value
                                 )
                             (sd, Gameplay.setScore (pacemakerMet this.State) sd)
                             |> ScoreScreen
@@ -142,7 +142,7 @@ module PlayScreen =
 
     let multiplayer_screen() =
         
-        let chart = Gameplay.Chart.withMods.Value
+        let chart = Gameplay.Chart.WITH_MODS.Value
         let ruleset = Rulesets.current
         let firstNote = chart.Notes.[0].Time
         let liveplay = LiveReplayProvider firstNote
@@ -191,7 +191,7 @@ module PlayScreen =
                 if options.AutoCalibrateOffset.Value then  AutomaticSync.apply(scoring)
                 if next <> Screen.Type.Score then Lobby.abandon_play()
                 base.OnExit(next)
-                DiscordRPC.playing_timed("Multiplayer", Gameplay.Chart.cacheInfo.Value.Title, Gameplay.Chart.cacheInfo.Value.Length / Gameplay.rate.Value)
+                DiscordRPC.playing_timed("Multiplayer", Gameplay.Chart.CACHE_DATA.Value.Title, Gameplay.Chart.CACHE_DATA.Value.Length / Gameplay.rate.Value)
 
             override this.Update(elapsedTime, bounds) =
                 Stats.session.PlayTime <- Stats.session.PlayTime + elapsedTime
@@ -220,10 +220,10 @@ module PlayScreen =
                             let sd =
                                 ScoreInfoProvider (
                                     Gameplay.makeScore((liveplay :> IReplayProvider).GetFullReplay(), this.Chart.Keys),
-                                    Gameplay.Chart.current.Value,
+                                    Gameplay.Chart.CHART.Value,
                                     this.State.Ruleset,
-                                    ModChart = Gameplay.Chart.withMods.Value,
-                                    Difficulty = Gameplay.Chart.rating.Value
+                                    ModChart = Gameplay.Chart.WITH_MODS.Value,
+                                    Difficulty = Gameplay.Chart.RATING.Value
                                 )
                             (sd, Gameplay.setScore true sd)
                             |> ScoreScreen

@@ -121,10 +121,10 @@ module Scoreboard =
                                             | Some b -> fst(Bests.update s b))
                                     yield s
                             }
-                    member this.Callback(score: ScoreInfoProvider) =
+                    member this.Callback(_, score: ScoreInfoProvider) =
                         let sc = ScoreCard score
                         sync(fun () -> container.Add sc)
-                    member this.JobCompleted(req: Request) =
+                    member this.JobCompleted((_, req: Request)) =
                         match req.NewBests with
                         | None -> ()
                         | Some b ->
@@ -142,8 +142,8 @@ module Scoreboard =
                     {
                         RulesetId = Content.Rulesets.current_hash
                         Ruleset = Content.Rulesets.current
-                        CurrentChart = Chart.current.Value
-                        ChartSaveData = Chart.saveData
+                        CurrentChart = Chart.CHART.Value
+                        ChartSaveData = Chart.SAVE_DATA
                         NewBests = None
                     }
 
@@ -218,10 +218,13 @@ type Scoreboard(display: Setting<Display>) as this =
         |* Conditional((fun () -> count = 0), EmptyState(Icons.empty_scoreboard, L"levelselect.info.scoreboard.empty"))
 
     member this.Refresh() =
-        let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""
-        if (match Chart.saveData with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
+        let h = match Chart.CACHE_DATA with Some c -> c.Hash | None -> ""
+
+        Chart.wait_for_load <| fun () ->
+
+        if (match Chart.SAVE_DATA with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
             chart <- h
-            load_scores_async()
+            load_scores_async() |> ignore
         elif scoring <> Content.Rulesets.current_hash then
             flowContainer.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
             scoring <- Content.Rulesets.current_hash

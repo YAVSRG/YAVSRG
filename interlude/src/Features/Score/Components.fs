@@ -26,7 +26,7 @@ type TopBanner(data: ScoreInfoProvider) as this =
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 75.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 130.0f })
             // todo: bug in multiplayer when looking at a previous score for chart A while on chart B
-        |+ Text(sprintf "From %s" (match Gameplay.Chart.cacheInfo with Some c -> c.Folder | None -> "a mysterious source"),
+        |+ Text(sprintf "From %s" (match Gameplay.Chart.CACHE_DATA with Some c -> c.Folder | None -> "a mysterious source"),
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 125.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 165.0f })
 

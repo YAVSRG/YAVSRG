@@ -127,12 +127,12 @@ type LibraryModeSettings() =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
 
-        if Chart.cacheInfo.IsSome then
+        if Chart.CACHE_DATA.IsSome then
 
-            if (!|"add_to_collection").Tapped() then CollectionManager.Current.quick_add(Chart.cacheInfo.Value) |> ignore
-            elif (!|"remove_from_collection").Tapped() then CollectionManager.Current.quick_remove(Chart.cacheInfo.Value, Chart.context) |> ignore
-            elif (!|"move_up_in_collection").Tapped() then CollectionManager.reorder_up(Chart.context)
-            elif (!|"move_down_in_collection").Tapped() then CollectionManager.reorder_down(Chart.context)
+            if (!|"add_to_collection").Tapped() then CollectionManager.Current.quick_add(Chart.CACHE_DATA.Value) |> ignore
+            elif (!|"remove_from_collection").Tapped() then CollectionManager.Current.quick_remove(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX) |> ignore
+            elif (!|"move_up_in_collection").Tapped() then CollectionManager.reorder_up(Chart.LIBRARY_CTX)
+            elif (!|"move_down_in_collection").Tapped() then CollectionManager.reorder_down(Chart.LIBRARY_CTX)
 
             elif (!|"collections").Tapped() then Menu.ShowPage SelectCollectionPage.Editor
             elif (!|"table").Tapped() then Menu.ShowPage ManageTablesPage

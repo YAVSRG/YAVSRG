@@ -118,7 +118,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
         ConfirmPage(
             Localisation.localiseWith [scoreName] "misc.confirmdelete",
             fun () ->
-                Chart.saveData.Value.Scores.Remove score.ScoreInfo |> ignore
+                Chart.SAVE_DATA.Value.Scores.Remove score.ScoreInfo |> ignore
                 LevelSelect.refresh_all()
                 Notifications.action_feedback (Icons.delete, Localisation.localiseWith [scoreName] "notification.deleted", "")
                 if is_submenu then Menu.Back()

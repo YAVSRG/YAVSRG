@@ -62,7 +62,7 @@ type Lobby() =
             Position = { Position.SliceTop(90.0f).Margin(10.0f) with Right = 0.4f %- 0.0f })
         |+ PlayerList(Position = { Left = 0.0f %+ 50.0f; Right = 0.4f %- 50.0f; Top = 0.0f %+ 100.0f; Bottom = 1.0f %- 100.0f })
         |+ StylishButton(
-                (fun () -> if Network.lobby.IsSome && SelectedChart.chart.IsSome && SelectedChart.found then Preview(Gameplay.Chart.current.Value, ignore).Show()),
+                (fun () -> if Network.lobby.IsSome && SelectedChart.loaded() then Preview(Gameplay.Chart.WITH_MODS.Value, ignore).Show()),
                 K (sprintf "%s %s" Icons.preview (L"levelselect.preview.name")),
                 !%Palette.MAIN_100,
                 TiltLeft = false,
@@ -129,8 +129,8 @@ type LobbyScreen() =
         in_lobby <- Network.lobby.IsSome
         swap.Current <- if in_lobby then main :> Widget else list
         if not in_lobby then Lobby.refresh_list()
-        if in_lobby then SelectedChart.update Network.lobby.Value.Chart
-        Song.onFinish <- SongFinishAction.Loop
+        if in_lobby then SelectedChart.switch Network.lobby.Value.Chart
+        Song.onFinish <- SongFinishAction.LoopFromPreview
         DiscordRPC.in_menus("Multiplayer lobby")
     override this.OnExit(_) = ()
 

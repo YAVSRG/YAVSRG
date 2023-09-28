@@ -22,9 +22,6 @@ type ChartInfo() as this =
     let scoreboard = Scoreboard(display, Position = Position.TrimBottom 120.0f)
     let online = Leaderboard(display, Position = Position.TrimBottom 120.0f)
     let details = Details(display, Position = Position.TrimBottom 120.0f)
-    let mutable length = ""
-    let mutable bpm = ""
-    let mutable notecounts = ""
 
     let changeRate v = 
         rate.Value <- rate.Value + v
@@ -37,24 +34,24 @@ type ChartInfo() as this =
         |+ Conditional((fun () -> display.Value = Display.Details), details)
 
         |+ Text(
-            fun () -> sprintf "%s %.2f" Icons.star (match Chart.rating with None -> 0.0 | Some d -> d.Physical)
+            fun () -> sprintf "%s %.2f" Icons.star (match Chart.RATING with None -> 0.0 | Some d -> d.Physical)
             ,
-            Color = (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> physicalColor d.Physical),
+            Color = (fun () -> Color.White, match Chart.RATING with None -> Color.Black | Some d -> physicalColor d.Physical),
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 0.33f %- 10.0f; Bottom = 1.0f %- 100.0f })
 
         |+ Text(
-            (fun () -> bpm),
+            (fun () -> Chart.FMT_BPM),
             Align = Alignment.CENTER,
             Position = { Left = 0.33f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 0.66f %- 10.0f; Bottom = 1.0f %- 100.0f })
 
         |+ Text(
-            (fun () -> length),
+            (fun () -> Chart.FMT_DURATION),
             Align = Alignment.RIGHT,
             Position = { Left = 0.66f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 100.0f })
 
         |+ Text(
-            (fun () -> notecounts),
+            (fun () -> match Chart.FMT_NOTECOUNTS with Some s -> s | None -> ""),
             Align = Alignment.RIGHT,
             Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 100.0f; Right = 1.0f %- 17.0f; Bottom = 1.0f %- 60.0f })
 
@@ -74,7 +71,10 @@ type ChartInfo() as this =
            )
             
         |+ StylishButton(
-            (fun () -> match Chart.current with Some c -> Preview(c, changeRate).Show() | None -> ()),
+            (fun () ->
+                Chart.wait_for_load <| fun () ->
+                Preview(Chart.WITH_MODS.Value, changeRate).Show()
+            ),
             K (Icons.preview + " " + L"levelselect.preview.name"),
             !%Palette.MAIN_100,
             Hotkey = "preview",
@@ -95,9 +95,6 @@ type ChartInfo() as this =
         LevelSelect.on_refresh_details.Add this.Refresh
 
     member this.Refresh() =
-        length <- Chart.format_duration()
-        bpm <- Chart.format_bpm()
-        notecounts <- Chart.format_notecounts()
         match display.Value with
         | Display.Local -> scoreboard.Refresh()
         | Display.Online -> online.Refresh()

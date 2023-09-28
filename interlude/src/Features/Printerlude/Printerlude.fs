@@ -32,14 +32,14 @@ module Printerlude =
 
         let mutable cmp = None
         let cmp_1() =
-            match Gameplay.Chart.current with
+            match Gameplay.Chart.CHART with
             | None -> failwith "Select a chart"
             | Some c -> cmp <- Some c
         let cmp_2() =
             match cmp with
             | None -> failwith "Use cmp_1 first"
             | Some cmp ->
-            match Gameplay.Chart.current with
+            match Gameplay.Chart.CHART with
             | None -> failwith "Select a chart"
             | Some c -> Interlude.Chart.diff cmp c
 
@@ -48,8 +48,8 @@ module Printerlude =
             io.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latestVersionName)
 
         let export_osz() =
-            match Gameplay.Chart.current with
-            | None -> failwith "No chart to export"
+            match Gameplay.Chart.CHART with
+            | None -> failwith "No chart loaded to export"
             | Some c ->
                 // todo: move into prelude
                 let beatmap = Conversions.Interlude.toOsu c
