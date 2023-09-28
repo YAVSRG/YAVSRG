@@ -161,7 +161,7 @@ module Gameplay =
                             let with_colors = getColoredChart (Content.noteskinConfig().NoteColors) with_mods
                             yield fun () -> WITH_COLORS <- Some with_colors
                         }
-                override this.Callback(id, action) = System.Threading.Thread.Sleep(3000); sync (fun () -> if id = LOADER_REQUEST then action())
+                override this.Callback(id, action) = sync (fun () -> if id = LOADER_REQUEST then action())
                 override this.JobCompleted((id, cc)) = 
                     sync <| fun () -> 
                         if id = LOADER_REQUEST then 
@@ -211,7 +211,8 @@ module Gameplay =
                 LOADER_REQUEST <- loader.Request Recolor
 
         let wait_for_load(action) =
-            if WITH_COLORS.IsSome then action()
+            if CACHE_DATA.IsNone then ()
+            elif WITH_COLORS.IsSome then action()
             else on_load_finished <- action :: on_load_finished
     
     module Collections =
@@ -311,35 +312,38 @@ module Gameplay =
 
                     Chart.wait_for_load <| fun () ->
 
-                    let chart = Chart.WITH_MODS.Value
+                    let chart = Chart.CHART.Value
+                    let with_mods = Chart.WITH_MODS.Value
                     let replay = Network.lobby.Value.Players.[username].Replay
                     replays.Add(username, 
                         let metric =
                             Metrics.createScoreMetric
                                 Content.Rulesets.current
-                                chart.Keys
+                                with_mods.Keys
                                 replay
-                                chart.Notes
+                                with_mods.Notes
                                 Chart._rate.Value
                         metric,
                         fun () ->
                             if not (replay :> IReplayProvider).Finished then replay.Finish()
                             ScoreInfoProvider(
-                                makeScore((replay :> IReplayProvider).GetFullReplay(), chart.Keys),
-                                Chart.CHART.Value,
+                                makeScore((replay :> IReplayProvider).GetFullReplay(), with_mods.Keys),
+                                chart,
                                 Content.Rulesets.current,
                                 Player = Some username
                             )
                     )
     
             let add_own_replay(s: IScoreMetric, replay: LiveReplayProvider) =
+                let chart = Chart.CHART.Value
+                let with_mods = Chart.WITH_MODS.Value
                 replays.Add(Network.credentials.Username, 
                     (s, 
                         fun () -> 
                             if not (replay :> IReplayProvider).Finished then replay.Finish()
                             ScoreInfoProvider(
-                                makeScore((replay :> IReplayProvider).GetFullReplay(), Chart.WITH_MODS.Value.Keys),
-                                Chart.CHART.Value,
+                                makeScore((replay :> IReplayProvider).GetFullReplay(), with_mods.Keys),
+                                chart,
                                 Content.Rulesets.current
                             )
                     ))

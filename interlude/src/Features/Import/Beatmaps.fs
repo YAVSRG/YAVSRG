@@ -197,6 +197,8 @@ module Beatmaps =
         let mutable statuses = Set.singleton "Ranked"
         let mutable when_at_bottom : (unit -> unit) option = None
 
+        let mutable search_id = -1
+
         let rec search (filter: Filter) (page: int) =
             when_at_bottom <- None
             let mutable s = "https://osusearch.com/api/search?modes=Mania&key=&query_order=" + (if descending_order.Value then "" else "-") + query_order.Value + "&statuses=" + String.concat "," statuses
@@ -218,17 +220,17 @@ module Beatmaps =
             ) filter
             s <- s + "&title=" + Uri.EscapeDataString title
             s <- s + "&offset=" + page.ToString()
-
-            download_json_switch.Request(s,
+            search_id <- download_json_switch.Request(s,
                 fun data ->
                 match data with
-                | Some d -> 
+                | id, Some d -> 
                     sync(fun () ->
-                        for p in d.beatmaps do items.Add(BeatmapImportCard p)
-                        if d.result_count < 0 || d.result_count > d.beatmaps.Count then
-                            when_at_bottom <- Some (fun () -> search filter (page + 1))
+                        if id = search_id then
+                            for p in d.beatmaps do items.Add(BeatmapImportCard p)
+                            if d.result_count < 0 || d.result_count > d.beatmaps.Count then
+                                when_at_bottom <- Some (fun () -> search filter (page + 1))
                     )
-                | None -> ()
+                | id, None -> ()
             )
 
         let begin_search (filter: Filter) =

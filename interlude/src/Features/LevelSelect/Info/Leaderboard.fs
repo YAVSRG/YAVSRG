@@ -115,6 +115,8 @@ module Leaderboard =
             }
             override this.ToString() = "<leaderboard calculation>"
 
+        let mutable last_request = -1
+
         let handle (container: FlowContainer.Vertical<LeaderboardCard>) =
             let worker =
                 { new Async.SwitchServiceSeq<Request, LeaderboardScore * ScoreInfoProvider>() with
@@ -133,9 +135,9 @@ module Leaderboard =
                                     } : Score), req.Chart, req.Ruleset, Player = Some score.Username)
                                 yield score, data
                         }
-                    member this.Callback(_, (score: LeaderboardScore, data: ScoreInfoProvider)) =
+                    member this.Callback(id, (score: LeaderboardScore, data: ScoreInfoProvider)) =
                         let sc = LeaderboardCard(score, data)
-                        sync(fun () -> container.Add sc)
+                        sync(fun () -> if id = last_request then container.Add sc)
                     member this.JobCompleted((_, req: Request)) = ()
                 }
             fun (state: Setting<State>) ->
@@ -147,7 +149,7 @@ module Leaderboard =
                     | Some reply ->
                         if (hash, ruleset_id) <> (Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash) then () else
 
-                        worker.Request
+                        last_request <- worker.Request
                             {
                                 Scores = reply.Scores
                                 RulesetId = Content.Rulesets.current_hash
@@ -155,11 +157,10 @@ module Leaderboard =
                                 Chart = Chart.CHART.Value
                                 Hash = Chart.CACHE_DATA.Value.Hash
                             }
-                        |> ignore
                         state.Set (if reply.Scores.Length > 0 then State.Loaded else State.EmptyLeaderboard)
                     | None -> 
                         // worker is requested anyway because it ensures any loading scores get swallowed and the scoreboard is cleared
-                        worker.Request
+                        last_request <- worker.Request
                             {
                                 Scores = [||]
                                 RulesetId = Content.Rulesets.current_hash
@@ -167,7 +168,6 @@ module Leaderboard =
                                 Chart = Chart.CHART.Value
                                 Hash = Chart.CACHE_DATA.Value.Hash
                             }
-                        |> ignore
                         state.Set State.NoLeaderboard
                 )
 

@@ -21,6 +21,8 @@ module LevelSelect =
 
     do Interlude.Features.Import.Import.charts_updated.Add refresh_all
 
+    let mutable chart_selection_locked = false
+
     let play() =
         
         Chart.wait_for_load <| fun () ->
@@ -30,6 +32,7 @@ module LevelSelect =
             Screen.change Screen.Type.Lobby Transitions.Flags.Default
         else
             Chart.SAVE_DATA.Value.LastPlayed <- DateTime.UtcNow
+            chart_selection_locked <- true
             Screen.changeNew
                 ( fun () -> 
                     if autoplay then ReplayScreen.replay_screen(ReplayMode.Auto) :> Screen.T
@@ -38,7 +41,6 @@ module LevelSelect =
                 Transitions.Flags.Default
 
     let challengeScore(_rate, _mods, replay) =
-        // todo: not having save data should be impossible
         match Chart.SAVE_DATA with
         | Some data ->
             data.LastPlayed <- DateTime.UtcNow

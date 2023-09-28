@@ -38,11 +38,12 @@ module Background =
                             return None
                     }
             }
+        let mutable last_id = -1
         fun (path: string option) ->
             List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background
-            worker.Request(path,
+            last_id <- worker.Request(path,
                 function
-                | Some bmp ->
+                | id, Some bmp ->
                     let col =
                         if Content.themeConfig().OverrideAccentColor then Content.themeConfig().DefaultAccentColor else
                             let vibrance (c: Color) = Math.Abs(int c.R - int c.B) + Math.Abs(int c.B - int c.G) + Math.Abs(int c.G - int c.R)
@@ -55,15 +56,17 @@ module Background =
                             |> Seq.maxBy vibrance
                             |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else Content.themeConfig().DefaultAccentColor
                     sync(fun () ->
-                        let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background"
-                        bmp.Dispose()
-                        Content.accentColor <- col
-                        background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
+                        if id = last_id then
+                            let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background"
+                            bmp.Dispose()
+                            Content.accentColor <- col
+                            background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
                     )
-                | None ->
+                | id, None ->
                     sync(fun () ->
-                        background <- (Content.getTexture "background", Animation.Fade(0.0f, Target = 1.0f), true) :: background
-                        Content.accentColor <- Content.themeConfig().DefaultAccentColor
+                        if id = last_id then
+                            background <- (Content.getTexture "background", Animation.Fade(0.0f, Target = 1.0f), true) :: background
+                            Content.accentColor <- Content.themeConfig().DefaultAccentColor
                     )
             )
 

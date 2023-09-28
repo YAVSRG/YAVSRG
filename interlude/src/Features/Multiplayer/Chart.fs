@@ -78,16 +78,16 @@ type SelectedChart() =
     override this.Init(parent: Widget) =
         
         this
-        //|+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> L"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
-        //|+ Text((fun () -> match SelectedChart.chart with Some c -> c.Artist + "  •  " + c.Creator | None -> ""), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
-        //|+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DifficultyName else "???"), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> L"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Artist + "  •  " + c.Creator | None -> ""), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> if SelectedChart.loaded() then Chart.CACHE_DATA.Value.DifficultyName else "???"), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
 
-        //|+ Text((fun () -> SelectedChart.difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        //|+ Text((fun () -> SelectedChart.length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        //|+ Text((fun () -> SelectedChart.bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        //|+ Text((fun () -> if SelectedChart.found then getModString(rate.Value, selectedMods.Value, false) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
-        //|+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
-        //|+ Text((fun () -> if SelectedChart.found then "" else L"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> if SelectedChart.loaded() then sprintf "%s %.2f" Icons.star Chart.RATING.Value.Physical else ""), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> if SelectedChart.loaded() then Chart.FMT_DURATION else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> if SelectedChart.loaded() then Chart.FMT_BPM else ""), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> if SelectedChart.loaded() then getModString(rate.Value, selectedMods.Value, false) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        |+ Text((fun () -> if SelectedChart.loaded() then Chart.FMT_NOTECOUNTS.Value else ""), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        |+ Text((fun () -> if SelectedChart.loaded() || SelectedChart.chart.IsNone then "" else L"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
         |+ Clickable(
             fun () -> 

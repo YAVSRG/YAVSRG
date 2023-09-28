@@ -36,6 +36,7 @@ let launch(instance: int) =
         if unexpected then 
             crashSplash()
             Logging.Critical("The game crashed or quit abnormally, but was able to shut down correctly")
+        else Logging.Info("Thank you for playing")
         Logging.Shutdown()
     
     Window.afterInit.Add(fun () -> 
