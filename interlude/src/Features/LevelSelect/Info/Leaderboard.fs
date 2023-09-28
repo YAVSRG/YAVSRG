@@ -105,7 +105,7 @@ module Leaderboard =
 
     module Loader =
 
-        type private Request =
+        type Request =
             {
                 Scores: LeaderboardScore array
                 RulesetId: string
@@ -115,61 +115,59 @@ module Leaderboard =
             }
             override this.ToString() = "<leaderboard calculation>"
 
-        let mutable last_request = -1
+        let container = FlowContainer.Vertical(75.0f, Spacing = Style.PADDING * 3.0f)
 
-        let handle (container: FlowContainer.Vertical<LeaderboardCard>) =
-            let worker =
-                { new Async.SwitchServiceSeq<Request, LeaderboardScore * ScoreInfoProvider>() with
-                    member this.Handle(req: Request) =
-                        sync container.Clear
-                        seq { 
-                            for score in req.Scores do
-                                let data = ScoreInfoProvider(
-                                    ({ 
-                                        time = score.Timestamp
-                                        replay = score.Replay
-                                        rate = score.Rate
-                                        selectedMods = score.Mods
-                                        layout = options.Playstyles.[req.Chart.Keys - 3]
-                                        keycount = req.Chart.Keys
-                                    } : Score), req.Chart, req.Ruleset, Player = Some score.Username)
-                                yield score, data
+        let score_loader =
+            { new Async.SwitchServiceSeq<Request, LeaderboardCard>() with
+                member this.Process(req: Request) =
+                    seq {
+                        for score in req.Scores do
+                            let data = ScoreInfoProvider(
+                                ({ 
+                                    time = score.Timestamp
+                                    replay = score.Replay
+                                    rate = score.Rate
+                                    selectedMods = score.Mods
+                                    layout = options.Playstyles.[req.Chart.Keys - 3]
+                                    keycount = req.Chart.Keys
+                                } : Score), req.Chart, req.Ruleset, Player = Some score.Username)
+                            yield LeaderboardCard(score, data)
+                    }
+                member this.Handle(lc: LeaderboardCard) = container.Add lc
+            }
+
+        let load (state: Setting<State>) =
+            if Network.status <> Network.Status.LoggedIn then state.Set State.Offline else
+            state.Set State.Loading
+            let hash, ruleset_id = Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash
+            API.Client.get<Requests.Charts.Scores.Leaderboard.Response>(sprintf "charts/scores?chart=%s&ruleset=%s" hash ruleset_id,
+                function
+                | Some reply ->
+                    if (hash, ruleset_id) <> (Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash) then () else
+
+                    score_loader.Request
+                        {
+                            Scores = reply.Scores
+                            RulesetId = Content.Rulesets.current_hash
+                            Ruleset = Content.Rulesets.current
+                            Chart = Chart.CHART.Value
+                            Hash = Chart.CACHE_DATA.Value.Hash
                         }
-                    member this.Callback(id, (score: LeaderboardScore, data: ScoreInfoProvider)) =
-                        let sc = LeaderboardCard(score, data)
-                        sync(fun () -> if id = last_request then container.Add sc)
-                    member this.JobCompleted((_, req: Request)) = ()
-                }
-            fun (state: Setting<State>) ->
-                if Network.status <> Network.Status.LoggedIn then state.Set State.Offline else
-                state.Set State.Loading
-                let hash, ruleset_id = Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash
-                API.Client.get<Requests.Charts.Scores.Leaderboard.Response>(sprintf "charts/scores?chart=%s&ruleset=%s" hash ruleset_id,
-                    function
-                    | Some reply ->
-                        if (hash, ruleset_id) <> (Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash) then () else
-
-                        last_request <- worker.Request
-                            {
-                                Scores = reply.Scores
-                                RulesetId = Content.Rulesets.current_hash
-                                Ruleset = Content.Rulesets.current
-                                Chart = Chart.CHART.Value
-                                Hash = Chart.CACHE_DATA.Value.Hash
-                            }
-                        state.Set (if reply.Scores.Length > 0 then State.Loaded else State.EmptyLeaderboard)
-                    | None -> 
-                        // worker is requested anyway because it ensures any loading scores get swallowed and the scoreboard is cleared
-                        last_request <- worker.Request
-                            {
-                                Scores = [||]
-                                RulesetId = Content.Rulesets.current_hash
-                                Ruleset = Content.Rulesets.current
-                                Chart = Chart.CHART.Value
-                                Hash = Chart.CACHE_DATA.Value.Hash
-                            }
-                        state.Set State.NoLeaderboard
-                )
+                    container.Clear()
+                    state.Set (if reply.Scores.Length > 0 then State.Loaded else State.EmptyLeaderboard)
+                | None -> 
+                    // worker is requested anyway because it ensures any loading scores get swallowed and the scoreboard is cleared
+                    score_loader.Request
+                        {
+                            Scores = [||]
+                            RulesetId = Content.Rulesets.current_hash
+                            Ruleset = Content.Rulesets.current
+                            Chart = Chart.CHART.Value
+                            Hash = Chart.CACHE_DATA.Value.Hash
+                        }
+                    container.Clear()
+                    state.Set State.NoLeaderboard
+            )
 
 open Leaderboard
 
@@ -183,12 +181,7 @@ type Leaderboard(display: Setting<Display>) as this =
 
     let filter = Setting.simple Filter.None
     let sort = Setting.map enum int options.ScoreSortMode
-
-    let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.PADDING * 3.0f)
-    let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.PADDING, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
-
-    let loader = Loader.handle flowContainer
-    let load_leaderboard_async = fun () -> loader state
+    let scrollContainer = ScrollContainer.Flow(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
 
     do
         this
@@ -226,10 +219,14 @@ type Leaderboard(display: Setting<Display>) as this =
             Position = { Left = 0.66f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 50.0f })
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scrollContainer
-        |+ HotkeyAction("scoreboard", fun () -> if flowContainer.Focused then Selection.clear() else flowContainer.Focus())
+        |+ HotkeyAction("scoreboard", fun () -> if Loader.container.Focused then Selection.clear() else Loader.container.Focus())
         |+ Conditional((fun () -> state.Value = State.EmptyLeaderboard), EmptyState(Icons.leaderboard, L"levelselect.info.leaderboard.empty", Subtitle = L"levelselect.info.leaderboard.empty.subtitle"))
         |+ Conditional((fun () -> state.Value = State.NoLeaderboard), EmptyState(Icons.no_leaderboard, L"levelselect.info.leaderboard.unavailable"))
         |* Conditional((fun () -> state.Value = State.Offline), EmptyState(Icons.connected, L"misc.offline"))
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        Loader.score_loader.Join()
 
     member this.Refresh() =
         let h = match Chart.CACHE_DATA with Some c -> c.Hash | None -> ""
@@ -239,4 +236,4 @@ type Leaderboard(display: Setting<Display>) as this =
         if h <> chart || scoring <> Content.Rulesets.current_hash then
             chart <- h
             scoring <- Content.Rulesets.current_hash
-            load_leaderboard_async()
+            Loader.load state

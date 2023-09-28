@@ -93,7 +93,7 @@ module Scoreboard =
 
     module Loader =
 
-        type private Request =
+        type Request =
             {
                 RulesetId: string
                 Ruleset: Ruleset
@@ -103,49 +103,51 @@ module Scoreboard =
             }
             override this.ToString() = "<scoreboard calculation>"
 
-        let handle (container: FlowContainer.Vertical<ScoreCard>) =
-            let worker =
-                { new Async.SwitchServiceSeq<Request, ScoreInfoProvider>() with
-                    member this.Handle(req: Request) =
-                        match req.ChartSaveData with
-                        | None -> Seq.empty
-                        | Some d ->
-                            sync container.Clear
-                            seq { 
-                                for score in d.Scores do
-                                    let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
-                                    if s.ModStatus = Mods.ModStatus.Ranked then
-                                        req.NewBests <- Some (
-                                            match req.NewBests with
-                                            | None -> Bests.create s
-                                            | Some b -> fst(Bests.update s b))
-                                    yield s
-                            }
-                    member this.Callback(_, score: ScoreInfoProvider) =
-                        let sc = ScoreCard score
-                        sync(fun () -> container.Add sc)
-                    member this.JobCompleted((_, req: Request)) =
+        let container = FlowContainer.Vertical(75.0f, Spacing = Style.PADDING * 3.0f)
+
+        let score_loader =
+            { new Async.SwitchServiceSeq<Request, unit -> unit>() with
+            member this.Process(req: Request) =
+                match req.ChartSaveData with
+                | None -> Seq.empty
+                | Some d ->
+                    sync container.Clear
+                    seq { 
+                        for score in d.Scores do
+                            let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
+                            if s.ModStatus = Mods.ModStatus.Ranked then
+                                req.NewBests <- Some (
+                                    match req.NewBests with
+                                    | None -> Bests.create s
+                                    | Some b -> fst(Bests.update s b))
+                            let sc = ScoreCard s
+                            yield fun () -> container.Add sc
+
                         match req.NewBests with
                         | None -> ()
                         | Some b ->
-                            sync( fun () -> 
+                            yield fun () ->
                                 if 
                                     not (req.ChartSaveData.Value.PersonalBests.ContainsKey req.RulesetId) 
                                     || b <> req.ChartSaveData.Value.PersonalBests.[req.RulesetId] 
                                 then
                                     LevelSelect.refresh_details()
                                     req.ChartSaveData.Value.PersonalBests.[req.RulesetId] <- b
-                            )
-                }
-            fun () ->
-                worker.Request
-                    {
-                        RulesetId = Content.Rulesets.current_hash
-                        Ruleset = Content.Rulesets.current
-                        CurrentChart = Chart.CHART.Value
-                        ChartSaveData = Chart.SAVE_DATA
-                        NewBests = None
+                            
                     }
+            member this.Handle(action) = action()
+        }
+
+        let load() =
+            score_loader.Request
+                {
+                    RulesetId = Content.Rulesets.current_hash
+                    Ruleset = Content.Rulesets.current
+                    CurrentChart = Chart.CHART.Value
+                    ChartSaveData = Chart.SAVE_DATA
+                    NewBests = None
+                }
+            container.Clear()
 
 open Scoreboard
 
@@ -173,12 +175,10 @@ type Scoreboard(display: Setting<Display>) as this =
         | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selectedMods.Value)
         | _ -> K true
 
-    let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.PADDING * 3.0f, Sort = sorter(), Filter = filterer())
-    let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.PADDING, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
-
-    let load_scores_async = Loader.handle flowContainer
+    let scrollContainer = ScrollContainer.Flow(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
 
     do
+        Loader.container.Sort <- sorter()
         this
         |+ StylishButton(
             (fun () -> display.Set Display.Online),
@@ -195,7 +195,7 @@ type Scoreboard(display: Setting<Display>) as this =
                 Sort.Performance, L"levelselect.info.scoreboard.sort.performance"
                 Sort.Time, L"levelselect.info.scoreboard.sort.time"
             |],
-            sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
+            sort |> Setting.trigger (fun _ -> Loader.container.Sort <- sorter()),
             !%Palette.DARK_100,
             Hotkey = "scoreboard_sort",
             Position = { Left = 0.33f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.66f %- 25.0f; Bottom = 0.0f %+ 50.0f })
@@ -214,8 +214,12 @@ type Scoreboard(display: Setting<Display>) as this =
             Position = { Left = 0.66f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 50.0f })
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scrollContainer
-        |+ HotkeyAction("scoreboard", fun () -> if flowContainer.Focused then Selection.clear() else flowContainer.Focus())
+        |+ HotkeyAction("scoreboard", fun () -> if Loader.container.Focused then Selection.clear() else Loader.container.Focus())
         |* Conditional((fun () -> count = 0), EmptyState(Icons.empty_scoreboard, L"levelselect.info.scoreboard.empty"))
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        Loader.score_loader.Join()
 
     member this.Refresh() =
         let h = match Chart.CACHE_DATA with Some c -> c.Hash | None -> ""
@@ -224,8 +228,8 @@ type Scoreboard(display: Setting<Display>) as this =
 
         if (match Chart.SAVE_DATA with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
             chart <- h
-            load_scores_async() |> ignore
+            Loader.load()
         elif scoring <> Content.Rulesets.current_hash then
-            flowContainer.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
+            Loader.container.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
             scoring <- Content.Rulesets.current_hash
-        flowContainer.Filter <- filterer()
+        Loader.container.Filter <- filterer()

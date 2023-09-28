@@ -63,8 +63,6 @@ module Gameplay =
                     elif n = NoteType.HOLDHEAD then notes <- notes + 1; lnotes <- lnotes + 1
             sprintf "%iK | %i Notes | %.0f%% Holds" chart.Keys notes (100.0f * float32 lnotes / float32 notes)
 
-        let mutable LOADER_REQUEST = -1
-
         let mutable CACHE_DATA : CachedChart option = None
         let mutable FMT_DURATION : string = format_duration None
         let mutable FMT_BPM : string = format_bpm None
@@ -90,9 +88,9 @@ module Gameplay =
         let mutable on_load_finished = []
 
         type private LoadRequest = Load of CachedChart | Update of bool | Recolor
-        let private loader =
+        let private chart_loader =
             { new Async.SwitchServiceSeq<LoadRequest, unit -> unit>() with
-                override this.Handle(req) =
+                override this.Process(req) =
                     match req with
                     | Load cc ->
                         seq {
@@ -131,6 +129,11 @@ module Gameplay =
                                 PATTERNS <- Some patterns
                                 FMT_NOTECOUNTS <- Some note_counts
                                 chart_change_ev.Trigger()
+
+                            yield fun () ->
+                                for action in on_load_finished do 
+                                    action()
+                                on_load_finished <- []
                         }
                     | Update is_interrupted_load ->
                         seq {
@@ -151,6 +154,11 @@ module Gameplay =
                                 PATTERNS <- Some patterns
                                 FMT_NOTECOUNTS <- Some note_counts
                                 if is_interrupted_load then chart_change_ev.Trigger()
+
+                            yield fun () ->
+                                for action in on_load_finished do 
+                                    action()
+                                on_load_finished <- []
                         }
                     | Recolor ->
                         seq {
@@ -160,14 +168,13 @@ module Gameplay =
                             
                             let with_colors = getColoredChart (Content.noteskinConfig().NoteColors) with_mods
                             yield fun () -> WITH_COLORS <- Some with_colors
+                            
+                            yield fun () ->
+                                for action in on_load_finished do 
+                                    action()
+                                on_load_finished <- []
                         }
-                override this.Callback(id, action) = sync (fun () -> if id = LOADER_REQUEST then action())
-                override this.JobCompleted((id, cc)) = 
-                    sync <| fun () -> 
-                        if id = LOADER_REQUEST then 
-                            for action in on_load_finished do 
-                                action()
-                            on_load_finished <- []
+                override this.Handle(action) = action()
             }
 
         let change(cc: CachedChart, ctx: LibraryContext) =
@@ -187,7 +194,7 @@ module Gameplay =
 
             WITH_COLORS <- None
 
-            LOADER_REQUEST <- loader.Request(Load cc)
+            chart_loader.Request(Load cc)
 
         let update() =
             if CHART.IsSome then
@@ -201,19 +208,21 @@ module Gameplay =
 
                 WITH_COLORS <- None
 
-                LOADER_REQUEST <- loader.Request (Update is_interrupted)
+                chart_loader.Request (Update is_interrupted)
                 
         let recolor() =
             if WITH_MODS.IsSome then
                 
                 WITH_COLORS <- None
 
-                LOADER_REQUEST <- loader.Request Recolor
+                chart_loader.Request Recolor
 
         let wait_for_load(action) =
             if CACHE_DATA.IsNone then ()
             elif WITH_COLORS.IsSome then action()
             else on_load_finished <- action :: on_load_finished
+
+        do sync_forever chart_loader.Join
     
     module Collections =
         

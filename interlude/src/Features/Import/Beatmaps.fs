@@ -181,12 +181,7 @@ type private SortingDropdown(options: (string * string) seq, label: string, sett
 
 module Beatmaps =
 
-    let download_json_switch = 
-        { new Async.SwitchService<string, BeatmapSearch option>()
-            with override this.Handle(url) = WebServices.download_json_async<BeatmapSearch>(url)
-        }
-
-    type BeatmapSearch() as this =
+    type Beatmaps() as this =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
 
         let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
@@ -197,41 +192,44 @@ module Beatmaps =
         let mutable statuses = Set.singleton "Ranked"
         let mutable when_at_bottom : (unit -> unit) option = None
 
-        let mutable search_id = -1
+        let json_downloader = 
+            { new Async.SwitchService<string * (unit -> unit), BeatmapSearch option * (unit -> unit)>() with 
+                override this.Process((url, action_at_bottom)) = 
+                    async {
+                        let! res = WebServices.download_json_async<BeatmapSearch>(url)
+                        return res, action_at_bottom
+                    }
+                override this.Handle((data: BeatmapSearch option, action_at_bottom)) =
+                    match data with
+                    | Some d -> 
+                        for p in d.beatmaps do items.Add(BeatmapImportCard p)
+                        if d.result_count < 0 || d.result_count > d.beatmaps.Count then
+                            when_at_bottom <- Some action_at_bottom
+                    | None -> ()
+            }
 
         let rec search (filter: Filter) (page: int) =
             when_at_bottom <- None
-            let mutable s = "https://osusearch.com/api/search?modes=Mania&key=&query_order=" + (if descending_order.Value then "" else "-") + query_order.Value + "&statuses=" + String.concat "," statuses
+            let mutable url = "https://osusearch.com/api/search?modes=Mania&key=&query_order=" + (if descending_order.Value then "" else "-") + query_order.Value + "&statuses=" + String.concat "," statuses
             let mutable invalid = false
             let mutable title = ""
             List.iter(
                 function
                 | Impossible -> invalid <- true
-                | String "#p" -> s <- s + "&premium_mappers=true"
+                | String "#p" -> url <- url + "&premium_mappers=true"
                 | String s -> match title with "" -> title <- s | t -> title <- t + " " + s
                 | Equals ("k", n)
                 | Equals ("key", n)
-                | Equals ("keys", n) -> match Int32.TryParse n with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
+                | Equals ("keys", n) -> match Int32.TryParse n with (true, i) -> url <- url + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
                 | Equals ("m", m)
                 | Equals ("c", m)
                 | Equals ("creator", m)
-                | Equals ("mapper", m) -> s <- s + "&mapper=" + m
+                | Equals ("mapper", m) -> url <- url + "&mapper=" + m
                 | _ -> ()
             ) filter
-            s <- s + "&title=" + Uri.EscapeDataString title
-            s <- s + "&offset=" + page.ToString()
-            search_id <- download_json_switch.Request(s,
-                fun data ->
-                match data with
-                | id, Some d -> 
-                    sync(fun () ->
-                        if id = search_id then
-                            for p in d.beatmaps do items.Add(BeatmapImportCard p)
-                            if d.result_count < 0 || d.result_count > d.beatmaps.Count then
-                                when_at_bottom <- Some (fun () -> search filter (page + 1))
-                    )
-                | id, None -> ()
-            )
+            url <- url + "&title=" + Uri.EscapeDataString title
+            url <- url + "&offset=" + page.ToString()
+            json_downloader.Request(url, (fun () -> search filter (page + 1)))
 
         let begin_search (filter: Filter) =
             search filter 0
@@ -290,6 +288,7 @@ module Beatmaps =
             base.Init parent
 
         override this.Update(elapsedTime, moved) =
+            json_downloader.Join()
             base.Update(elapsedTime, moved)
             if when_at_bottom.IsSome && scroll.PositionPercent > 0.9f then
                 when_at_bottom.Value()
@@ -297,4 +296,4 @@ module Beatmaps =
     
         member private this.Items = items
 
-    let tab = BeatmapSearch()
+    let tab = Beatmaps()
