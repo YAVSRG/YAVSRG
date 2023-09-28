@@ -53,7 +53,7 @@ module Analysis =
         }
         |> Array.ofSeq
 
-    let nps_cps (samples: int) (chart: Chart) : int array * int array =
+    let nps_cps (samples: int) (chart: Charts.Tools.ModChart) : int array * int array =
         let mutable i = 0
         let mutable notes = 0
         let mutable rows = 0

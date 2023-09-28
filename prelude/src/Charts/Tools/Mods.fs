@@ -12,6 +12,8 @@ type ModChart =
         SV: TimeArray<float32>
         ModsUsed: string list
     }
+    member this.FirstNote = this.Notes.[0].Time
+    member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
 
 module ModChart =
     

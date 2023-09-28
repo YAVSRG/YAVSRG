@@ -21,6 +21,7 @@ module Suggestion =
     let get_suggestions (chart: Chart) (cacheData: CachedChart) (filter: Filter) =
     
         recommended_recently <- Set.add cacheData.Hash recommended_recently
+        // todo: use pattern cache here
         let patterns = Patterns.generate_pattern_report (1.0f, chart)
         
         let min_difficulty = cacheData.Physical - 0.5

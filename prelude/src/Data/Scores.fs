@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Collections.Generic
+open System.Collections.Concurrent
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude
@@ -171,11 +172,11 @@ module Scores =
     [<Json.AutoCodec(false)>]
     type Data =
         {
-            Entries: Dictionary<string, ChartSaveData>
+            Entries: ConcurrentDictionary<string, ChartSaveData>
         }
         static member Default =
             {
-                Entries = new Dictionary<string, ChartSaveData>()
+                Entries = new ConcurrentDictionary<string, ChartSaveData>()
             }
 
     let data : Data =
@@ -186,7 +187,7 @@ module Scores =
 
     let getOrCreateData (chart: Chart) =
         let hash = Chart.hash chart
-        if hash |> data.Entries.ContainsKey |> not then data.Entries.Add(hash, ChartSaveData.FromChart chart)
+        if not (data.Entries.ContainsKey hash) then data.Entries.[hash] <- ChartSaveData.FromChart chart
         data.Entries.[hash]
 
     let getData (hash: string) =

@@ -27,8 +27,8 @@
     <Compile Include="Charts\Formats\StepMania.fs" />
     <Compile Include="Charts\Formats\osu!.fs" />
     <Compile Include="Charts\Formats\Conversions.fs" />
-    <Compile Include="Charts\Tools\Patterns.fs" />
     <Compile Include="Charts\Tools\Mods.fs" />
+    <Compile Include="Charts\Tools\Patterns.fs" />
     <Compile Include="Charts\Tools\NoteColors.fs" />
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\Replays.fs" />

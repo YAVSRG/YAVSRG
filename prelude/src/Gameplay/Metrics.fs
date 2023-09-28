@@ -391,7 +391,7 @@ module Metrics =
     let createScoreMetric ruleset keys (replay: IReplayProvider) notes rate : ScoreMetric =
         ScoreMetric(ruleset, keys, replay, notes, rate)
 
-    let createDummyMetric (chart: Chart) : ScoreMetric =
+    let createDummyMetric (chart: Charts.Tools.ModChart) : ScoreMetric =
         let ruleset = PrefabRulesets.SC.create 4
         createScoreMetric 
             ruleset
