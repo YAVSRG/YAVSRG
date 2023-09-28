@@ -7,6 +7,8 @@ module Root =
     let internal ROOT_ANIMATION = Animation.Group()
 
     let sync (action: unit -> unit) = ROOT_ANIMATION.Add(Animation.Action action)
+    let sync_forever (action: unit -> unit) = ROOT_ANIMATION.Add(Animation.ActionLoop action)
+
 [<AbstractClass>]
 type Root() =
     inherit Widget(NodeType.None)

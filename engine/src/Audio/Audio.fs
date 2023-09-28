@@ -41,7 +41,6 @@ module Song =
     let LEADIN_TIME = 2000.0f<ms>
     
     let mutable load_path : string option = None
-    let mutable load_id = -1
 
     let mutable nowplaying : Song = Song.Default
     let private timer = new Stopwatch()
@@ -110,19 +109,18 @@ module Song =
 
     let private song_loader =
         { new Async.SwitchService<string option, Song>() with
-            override this.Handle(path) =
+            override this.Process(path) =
                 async {
                     return 
                         match path with
                         | Some p -> Song.FromFile p
                         | None -> Song.Default
                 }
+            override this.Handle(song) =
+                nowplaying <- song
+                changeRate rate
+                playFrom preview_point
         }
-
-    let private sync_obj = obj()
-    let mutable private sync_list = []
-    let private sync(action: unit -> unit) =
-        lock sync_obj <| fun () -> sync_list <- action :: sync_list
 
     let change (path: string option, offset: Time, new_rate: float32, (preview, chart_last_note)) =
         let isDifferentFile = path <> load_path
@@ -137,18 +135,11 @@ module Song =
             if nowplaying.ID <> 0 then
                 nowplaying.Free()
             channelPlaying <- false
-            load_id <- song_loader.Request(path,
-                fun (id, song) ->
-                    sync <| fun () ->
-                        if id = load_id then
-                            nowplaying <- song
-                            changeRate rate
-                            playFrom preview_point
-            )
+            song_loader.Request(path)
 
     let update() =
 
-        lock sync_obj <| fun () -> (for action in sync_list do action()); sync_list <- []
+        song_loader.Join()
 
         let t = time()
         if (t >= 0.0f<ms> && t < nowplaying.Duration && not channelPlaying) then

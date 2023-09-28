@@ -92,6 +92,11 @@ module Animation =
         override this.Update(_) = action()
         override this.Complete = true
 
+    type ActionLoop(action) =
+        inherit Animation()
+        override this.Update(_) = action()
+        override this.Complete = false
+
     type Delay(milliseconds) =
         inherit Animation()
         let mutable elapsed = 0.0
