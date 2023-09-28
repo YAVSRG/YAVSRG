@@ -54,7 +54,7 @@ module Gameplay =
                 elif Math.Abs(a - b) < 5 || b > 9000 then sprintf "%s %i" Icons.bpm a
                 else sprintf "%s %i-%i" Icons.bpm a b
         
-        let private format_notecounts(chart: Chart) =
+        let private format_notecounts(chart: ModChart) =
             let mutable notes = 0
             let mutable lnotes = 0
             for { Data = nr } in chart.Notes do
@@ -120,7 +120,7 @@ module Gameplay =
                             let with_colors = getColoredChart (Content.noteskinConfig().NoteColors) with_mods
                             let rating = RatingReport(with_mods.Notes, _rate.Value, options.Playstyles.[with_mods.Keys - 3], with_mods.Keys)
                             let patterns = Patterns.generate_pattern_report (_rate.Value, chart)
-                            let note_counts = format_notecounts chart
+                            let note_counts = format_notecounts with_mods
 
                             yield fun () ->
                                 WITH_MODS <- Some with_mods
@@ -145,7 +145,7 @@ module Gameplay =
                             let with_colors = getColoredChart (Content.noteskinConfig().NoteColors) with_mods
                             let rating = RatingReport(with_mods.Notes, _rate.Value, options.Playstyles.[with_mods.Keys - 3], with_mods.Keys)
                             let patterns = Patterns.generate_pattern_report (_rate.Value, chart)
-                            let note_counts = format_notecounts chart
+                            let note_counts = format_notecounts with_mods
 
                             yield fun () ->
                                 WITH_MODS <- Some with_mods
