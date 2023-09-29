@@ -67,7 +67,7 @@ module Tree =
         | None -> None
     
     let switchChart(cc, context, groupName) =
-        if LevelSelect.chart_selection_locked then () else
+        if Transitions.active then () else
         Chart.change(cc, context)
         Selection.clear()
         selectedChart <- cc.Key

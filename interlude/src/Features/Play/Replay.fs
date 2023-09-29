@@ -137,7 +137,6 @@ module ReplayScreen =
                 false,
                 rate,
                 modchart
-        Gameplay.rate.Value <- rate
 
         let firstNote = chart.Notes.[0].Time
         let ruleset = Rulesets.current

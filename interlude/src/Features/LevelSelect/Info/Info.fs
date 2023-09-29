@@ -24,6 +24,7 @@ type ChartInfo() as this =
     let details = Details(display, Position = Position.TrimBottom 120.0f)
 
     let changeRate v = 
+        if Transitions.active then () else
         rate.Value <- rate.Value + v
         LevelSelect.refresh_details()
 
