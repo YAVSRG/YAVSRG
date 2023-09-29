@@ -111,7 +111,6 @@ module Scoreboard =
                 match req.ChartSaveData with
                 | None -> Seq.empty
                 | Some d ->
-                    sync container.Clear
                     seq { 
                         for score in d.Scores do
                             let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
