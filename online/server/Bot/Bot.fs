@@ -83,25 +83,26 @@ module Bot =
 
     let on_button_executed(comp: SocketMessageComponent) =
         task {
-            let cmd = comp.Data.CustomId.Split(' ', 2, StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
-            match User.by_discord_id(comp.User.Id) with
-            | Some (id, user) ->
-                try
-                    do! 
-                        AdminCommands.interaction
-                            client
-                            (id, user)
-                            comp
-                            (cmd.[0].ToLower())
-                            (
-                                if cmd.Length > 1 then 
-                                    cmd.[1].Split("$", StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries) |> List.ofArray 
-                                else []
-                            )
-                with err ->
-                    Logging.Error(sprintf "Error handling button click '%s': %O" comp.Data.CustomId err)
-                    do! comp.Message.AddReactionAsync(Emoji.Parse(":alien:"))
-            | None -> ()
+            if comp.Channel.Id = ADMIN_CHANNEL_ID || comp.Channel.Id = MAIN_CHANNEL_ID then
+                let cmd = comp.Data.CustomId.Split(' ', 2, StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
+                match User.by_discord_id(comp.User.Id) with
+                | Some (id, user) ->
+                    try
+                        do! 
+                            AdminCommands.interaction
+                                client
+                                (id, user)
+                                comp
+                                (cmd.[0].ToLower())
+                                (
+                                    if cmd.Length > 1 then 
+                                        cmd.[1].Split("$", StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries) |> List.ofArray 
+                                    else []
+                                )
+                    with err ->
+                        Logging.Error(sprintf "Error handling button click '%s': %O" comp.Data.CustomId err)
+                        do! comp.Message.AddReactionAsync(Emoji.Parse(":alien:"))
+                | None -> ()
         }
 
     let start() =
@@ -112,7 +113,7 @@ module Bot =
             client.add_Ready(fun () -> 
                 task {
                     if not startup_message_shown then
-                        let! _ = (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(sprintf "Server restarted [%s]" TAGLINE)
+                        let! _ = (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(sprintf "I've just restarted! Running \"%s\"" TAGLINE)
                         startup_message_shown <- true
                     return ()
                 })
