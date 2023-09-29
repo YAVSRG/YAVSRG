@@ -93,7 +93,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         // Performance profiling
         fps_count <- fps_count + 1
         let time = fps_timer.ElapsedTicks
-        if time > 10_000_000L then
+        if time > Stopwatch.Frequency then
             Render.Performance.framecount_tickcount <- (fps_count, time)
             fps_timer.Restart()
             fps_count <- 0
