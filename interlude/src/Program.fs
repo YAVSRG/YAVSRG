@@ -67,7 +67,7 @@ let launch(instance: int) =
 
 [<EntryPoint>]
 let main argv =
-    if not (File.Exists("bass.dll")) && not (File.Exists("libbass.iso") && not (File.Exists("libbass.dylib"))) then
+    if not (File.Exists("bass.dll")) && not (File.Exists("libbass.iso")) && not (File.Exists("libbass.dylib")) then
         printfn "Looks like Interlude was launched from the wrong starting directory!"
         -1
     else
