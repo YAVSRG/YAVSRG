@@ -39,9 +39,10 @@ module Window =
     let sync (a: WindowAction) = lock (lockObj) (fun () -> action_queue <- action_queue @ [a])
     let mutable monitors = [||]
 
+
 [<Sealed>]
 type Window(config: Config, title: string, root: Root) as this =
-    inherit NativeWindow(NativeWindowSettings(StartVisible = false, NumberOfSamples = 24, Flags = ContextFlags.ForwardCompatible, Profile = ContextProfile.Core))
+    inherit NativeWindow(NativeWindowSettings(StartVisible = false, NumberOfSamples = (if OperatingSystem.IsMacOS() then 0 else 24), Flags = ContextFlags.ForwardCompatible, Profile = ContextProfile.Core))
 
     let renderThread = RenderThread(this, config.AudioDevice.Value, root, WindowEvents.afterInit.Trigger)
 

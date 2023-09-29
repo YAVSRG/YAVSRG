@@ -1,6 +1,5 @@
 ﻿namespace Percyqaz.Flux.Windowing
 
-open System
 open System.Threading
 open System.Diagnostics
 open OpenTK

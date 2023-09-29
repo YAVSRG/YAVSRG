@@ -31,7 +31,11 @@ module Fonts =
 
         let renderOptions = new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
         let textOptions = let x = new TextOptions() in x.FallbackFonts.AddRange(fallbacks); x
-        let drawOptions = new DrawingOptions(TextOptions = textOptions)
+        let drawOptions = 
+            new DrawingOptions(
+                TextOptions = textOptions,
+                GraphicsOptions = new GraphicsOptions(Antialias = true, AntialiasSubpixelDepth = 24)
+            )
 
         let codepointToString(c: int32) : string = Char.ConvertFromUtf32 c
 
