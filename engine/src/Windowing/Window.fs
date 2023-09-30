@@ -1,9 +1,8 @@
 ﻿namespace Percyqaz.Flux.Windowing
 
 open System
-open System.Threading
+open FSharp.NativeInterop
 open OpenTK
-open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.Common
 open OpenTK.Windowing.GraphicsLibraryFramework
@@ -11,6 +10,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+
+#nowarn "9"
 
 module private WindowEvents =
 
@@ -48,6 +49,7 @@ type Window(config: Config, title: string, root: Root) as this =
 
     let mutable resize_callback = fun (w, h) -> ()
     let mutable refresh_rate = 60
+    let mutable was_fullscreen = false
 
     do
         base.Title <- title
@@ -73,43 +75,79 @@ type Window(config: Config, title: string, root: Root) as this =
                     Monitors.GetMonitorFromWindow(this)
             else Monitors.GetMonitorFromWindow(this)
 
-        refresh_rate <- monitor.CurrentVideoMode.RefreshRate
         renderThread.RenderMode <- config.RenderMode.Value
 
-        let was_fullscreen = base.WindowState = WindowState.Fullscreen
+        let monitorPtr = monitor.Handle.ToUnsafePtr<Monitor>()
 
-        match config.WindowMode.Value with
+        if was_fullscreen then
 
-        | WindowType.Windowed ->
-            base.WindowState <- WindowState.Normal
-            if was_fullscreen then Thread.Sleep(100)
-            let width, height = config.WindowResolution.Value
-            base.WindowBorder <- WindowBorder.Fixed
-            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y, monitor.ClientArea.Min.X + width, monitor.ClientArea.Min.Y + height)
-            base.CenterWindow()
+            match config.WindowMode.Value with
 
-        | WindowType.Borderless ->
-            base.WindowState <- WindowState.Normal
-            if was_fullscreen then Thread.Sleep(100)
-            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
-            base.WindowBorder <- WindowBorder.Hidden
-            base.WindowState <- WindowState.Maximized
+            | WindowType.Windowed ->
+                let width, height = config.WindowResolution.Value
+                GLFW.SetWindowMonitor(this.WindowPtr, NativePtr.nullPtr<Monitor>, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y, width, height, 0)
+                base.CenterWindow()
+                base.WindowBorder <- WindowBorder.Fixed
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
 
-        | WindowType.Fullscreen ->
-            base.WindowState <- WindowState.Fullscreen
-            let monitor = monitor.Handle.ToUnsafePtr<Monitor>()
-            let modes = GLFW.GetVideoModes(monitor)
-            let mode = modes.[modes.Length - 1]
-            GLFW.SetWindowMonitor(this.WindowPtr, monitor, 0, 0, mode.Width, mode.Height, max config.FullscreenRefreshRateOverride.Value mode.RefreshRate)
+            | WindowType.Borderless ->
+                GLFW.SetWindowMonitor(this.WindowPtr, NativePtr.nullPtr<Monitor>, monitor.ClientArea.Min.X - 1, monitor.ClientArea.Min.Y - 1, monitor.ClientArea.Size.X + 1, monitor.ClientArea.Size.Y + 1, 0)
+                base.WindowBorder <- WindowBorder.Hidden
+                GLFW.HideWindow(this.WindowPtr)
+                GLFW.MaximizeWindow(this.WindowPtr)
+                GLFW.ShowWindow(this.WindowPtr)
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
 
-        | WindowType.``Borderless Fullscreen`` ->
-            base.WindowState <- WindowState.Normal
-            if was_fullscreen then Thread.Sleep(100)
-            base.WindowBorder <- WindowBorder.Hidden
-            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min, monitor.ClientArea.Max)
-            base.CenterWindow()
+            | WindowType.``Borderless Fullscreen`` ->
+                GLFW.SetWindowMonitor(this.WindowPtr, NativePtr.nullPtr<Monitor>, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y, monitor.ClientArea.Size.X, monitor.ClientArea.Size.Y, 0)
+                base.WindowBorder <- WindowBorder.Hidden
+                base.CenterWindow()
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
 
-        | _ -> Logging.Error "Tried to change to invalid window mode"
+            | WindowType.Fullscreen ->
+                let modes = GLFW.GetVideoModes(monitorPtr)
+                let mode = modes.[modes.Length - 1]
+                refresh_rate <- max config.FullscreenRefreshRateOverride.Value mode.RefreshRate
+                GLFW.SetWindowMonitor(this.WindowPtr, monitorPtr, 0, 0, mode.Width, mode.Height, refresh_rate)
+
+            | _ -> Logging.Error "Tried to change to invalid window mode"
+
+        else
+            
+            match config.WindowMode.Value with
+
+            | WindowType.Windowed ->
+                base.WindowBorder <- WindowBorder.Fixed
+                let width, height = config.WindowResolution.Value
+                GLFW.SetWindowSize(this.WindowPtr, width, height)
+                base.CenterWindow()
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
+
+            | WindowType.Borderless ->
+                base.WindowBorder <- WindowBorder.Hidden
+                GLFW.HideWindow(this.WindowPtr)
+                GLFW.SetWindowPos(this.WindowPtr, monitor.ClientArea.Min.X - 1, monitor.ClientArea.Min.Y - 1)
+                GLFW.SetWindowSize(this.WindowPtr, monitor.ClientArea.Size.X + 1, monitor.ClientArea.Size.Y + 1)
+                GLFW.MaximizeWindow(this.WindowPtr)
+                GLFW.ShowWindow(this.WindowPtr)
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
+
+            | WindowType.``Borderless Fullscreen`` ->
+                base.WindowBorder <- WindowBorder.Hidden
+                GLFW.SetWindowPos(this.WindowPtr, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y)
+                GLFW.SetWindowSize(this.WindowPtr, monitor.ClientArea.Size.X, monitor.ClientArea.Size.Y)
+                base.CenterWindow()
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
+
+            | WindowType.Fullscreen ->
+                let modes = GLFW.GetVideoModes(monitorPtr)
+                let mode = modes.[modes.Length - 1]
+                refresh_rate <- max config.FullscreenRefreshRateOverride.Value mode.RefreshRate
+                GLFW.SetWindowMonitor(this.WindowPtr, monitorPtr, 0, 0, mode.Width, mode.Height, refresh_rate)
+
+            | _ -> Logging.Error "Tried to change to invalid window mode"
+
+        was_fullscreen <- config.WindowMode.Value = WindowType.Fullscreen
 
     member this.EnableResize(callback) =
         if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Fixed then
