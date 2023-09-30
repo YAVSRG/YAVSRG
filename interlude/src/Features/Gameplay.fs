@@ -97,8 +97,9 @@ module Gameplay =
                             match Cache.load cc Library.cache with
                             | None ->
                                 // set error state
-                                Notifications.error(L"notification.chart_load_failed.title", L"notification.chart_load_failed.body")
                                 Background.load None
+                                Notifications.error(L"notification.chart_load_failed.title", L"notification.chart_load_failed.body")
+                                yield fun () -> on_load_finished <- []
                             | Some chart ->
 
                             Background.load (Cache.background_path chart Library.cache)

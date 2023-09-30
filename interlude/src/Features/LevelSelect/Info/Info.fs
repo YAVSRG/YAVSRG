@@ -23,6 +23,9 @@ type ChartInfo() as this =
     let online = Leaderboard(display, Position = Position.TrimBottom 120.0f)
     let details = Details(display, Position = Position.TrimBottom 120.0f)
 
+    let mutable rating = 0.0
+    let mutable notecounts = ""
+
     let changeRate v = 
         if Transitions.active then () else
         rate.Value <- rate.Value + v
@@ -35,9 +38,8 @@ type ChartInfo() as this =
         |+ Conditional((fun () -> display.Value = Display.Details), details)
 
         |+ Text(
-            fun () -> sprintf "%s %.2f" Icons.star (match Chart.RATING with None -> 0.0 | Some d -> d.Physical)
-            ,
-            Color = (fun () -> Color.White, match Chart.RATING with None -> Color.Black | Some d -> physicalColor d.Physical),
+            (fun () -> sprintf "%s %.2f" Icons.star rating),
+            Color = (fun () -> Color.White, physicalColor rating),
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 0.33f %- 10.0f; Bottom = 1.0f %- 100.0f })
 
@@ -52,7 +54,7 @@ type ChartInfo() as this =
             Position = { Left = 0.66f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 100.0f })
 
         |+ Text(
-            (fun () -> match Chart.FMT_NOTECOUNTS with Some s -> s | None -> ""),
+            (fun () -> notecounts),
             Align = Alignment.RIGHT,
             Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 100.0f; Right = 1.0f %- 17.0f; Bottom = 1.0f %- 60.0f })
 
@@ -100,6 +102,10 @@ type ChartInfo() as this =
         | Display.Local -> scoreboard.Refresh()
         | Display.Online -> online.Refresh()
         | _ -> ()
+
+        Chart.wait_for_load <| fun () ->
+            rating <- Chart.RATING.Value.Physical
+            notecounts <- Chart.FMT_NOTECOUNTS.Value
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
