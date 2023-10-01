@@ -122,10 +122,10 @@ module Content =
             let reload() =
                 for id in Storage.themeTextures do
                     match instance.GetTexture id with
-                    | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
+                    | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id (id = "rain" || id = "logo" || id = "background") |> Sprites.add id
                     | None ->
                         match loaded.["*default"].GetTexture id with
-                        | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
+                        | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id (id = "rain" || id = "logo" || id = "background") |> Sprites.add id
                         | None -> failwithf "Failed to load texture '%s' from *default" id
 
                 for id in Storage.themeSounds do
@@ -218,7 +218,7 @@ module Content =
             let reload() =
                 for id in Storage.noteskinTextures do
                     match instance.GetTexture id with
-                    | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
+                    | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id false |> Sprites.add id
                     | None -> 
                         Logging.Warn(sprintf "Noteskin texture '%s' didn't load properly, so it will appear as a white square ingame." id)
                         Sprite.Default |> Sprites.add id

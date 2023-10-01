@@ -51,7 +51,7 @@ module Background =
             member this.Handle(res) =
                 match res with
                 | Some (bmp, col) ->
-                    let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background"
+                    let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background" false
                     bmp.Dispose()
                     Content.accentColor <- col
                     background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
