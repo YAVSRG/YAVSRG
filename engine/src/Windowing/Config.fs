@@ -35,7 +35,7 @@ type Config =
         WindowMode: Setting<WindowType>
         WindowResolution: Setting<int * int>
         RenderMode: Setting<FrameLimit>
-        FullscreenRefreshRateOverride: Setting<int>
+        RefreshRateOverride: Setting<int option>
         Display: Setting<int>
         AudioDevice: Setting<int>
     }
@@ -46,7 +46,7 @@ type Config =
             WindowMode = Setting.simple WindowType.Borderless
             WindowResolution = Setting.simple (1024, 768)
             RenderMode = Setting.simple FrameLimit.Smart
-            FullscreenRefreshRateOverride = Setting.simple 0
+            RefreshRateOverride = Setting.simple None
             Display = Setting.simple 0
             AudioDevice = Setting.simple -1
         }

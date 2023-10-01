@@ -107,7 +107,7 @@ type Window(config: Config, title: string, root: Root) as this =
             | WindowType.Fullscreen ->
                 let modes = GLFW.GetVideoModes(monitorPtr)
                 let mode = modes.[modes.Length - 1]
-                refresh_rate <- max config.FullscreenRefreshRateOverride.Value mode.RefreshRate
+                refresh_rate <- Option.defaultValue mode.RefreshRate config.RefreshRateOverride.Value
                 GLFW.SetWindowMonitor(this.WindowPtr, monitorPtr, 0, 0, mode.Width, mode.Height, refresh_rate)
 
             | _ -> Logging.Error "Tried to change to invalid window mode"
@@ -142,12 +142,14 @@ type Window(config: Config, title: string, root: Root) as this =
             | WindowType.Fullscreen ->
                 let modes = GLFW.GetVideoModes(monitorPtr)
                 let mode = modes.[modes.Length - 1]
-                refresh_rate <- max config.FullscreenRefreshRateOverride.Value mode.RefreshRate
+                refresh_rate <- Option.defaultValue mode.RefreshRate config.RefreshRateOverride.Value
                 GLFW.SetWindowMonitor(this.WindowPtr, monitorPtr, 0, 0, mode.Width, mode.Height, refresh_rate)
 
             | _ -> Logging.Error "Tried to change to invalid window mode"
 
         was_fullscreen <- config.WindowMode.Value = WindowType.Fullscreen
+
+        sync <| fun () -> renderThread.RenderModeChanged(Option.defaultValue refresh_rate config.RefreshRateOverride.Value)
 
     member this.EnableResize(callback) =
         if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Fixed then
@@ -163,7 +165,7 @@ type Window(config: Config, title: string, root: Root) as this =
         if e.Height <> 0 then
             sync ( fun () -> 
                 if this.WindowBorder = WindowBorder.Resizable then resize_callback(this.ClientSize.X, this.ClientSize.Y)
-                renderThread.OnResize(this.ClientSize, refresh_rate)
+                renderThread.OnResize(this.ClientSize)
             )
 
     override this.OnFileDrop e =
