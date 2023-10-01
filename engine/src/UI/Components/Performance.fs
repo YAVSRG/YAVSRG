@@ -39,7 +39,7 @@ type PerformanceMonitor() =
             latencies.[i] <- Render.Performance.visual_latency
 
             let (frames, ticks) = Render.Performance.framecount_tickcount
-            fps <- float frames / (float ticks / 10_000_000.0)
+            fps <- float frames / (float ticks / float Stopwatch.Frequency)
 
     override this.Draw() =
         if enable then
