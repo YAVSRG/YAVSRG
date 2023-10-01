@@ -92,7 +92,7 @@ module Fonts =
                             img.DrawText(drawOptions, codepointToString glyph.Code, font, SixLabors.ImageSharp.Color.White, new PointF(glyph.Offset, rowspacing * float32 i))
                             |> ignore
                     )
-            let sprite = Sprite.upload (img, 1, 1, true) |> Sprite.cache "FONT"
+            let sprite = Sprite.upload (img, 1, 1, true) |> Sprite.cache "FONT" false
             for i, row in List.indexed glyphs do
                 for glyph in row do
                     fontLookup.Add

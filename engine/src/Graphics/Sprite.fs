@@ -51,11 +51,13 @@ module Sprite =
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, int TextureMagFilter.Nearest)
         { ID = id; TextureUnit = 0; Width = width; Height = height; Rows = rows; Columns = columns }
 
-    let cache (source: string) (sprite: Sprite) : Sprite =
-        { 1 .. (MAX_TEXTURE_UNITS - 1) }
+    let cache (source: string) (low_priority: bool) (sprite: Sprite) : Sprite =
+        if low_priority && MAX_TEXTURE_UNITS = 16 then sprite else
+
+        seq { 1 .. (MAX_TEXTURE_UNITS - 1) }
         |> Seq.tryFind (fun i -> not texUnit_inUse.[i])
         |> function
-            | None -> Logging.Debug "Can't cache this sprite, all texture units are full"; sprite
+            | None -> Logging.Debug (sprintf "Can't cache '%s', all texture units are full" source); sprite
             | Some i ->
                 texUnit_cache.[i] <- sprite.ID
                 texUnit_inUse.[i] <- true
@@ -64,14 +66,14 @@ module Sprite =
                 GL.BindTexture(TextureTarget.Texture2D, sprite.ID)
                 GL.ActiveTexture(TextureUnit.Texture0)
 
-                //Logging.Debug(sprintf "Cached sprite (%s) with ID %i to index %i" source sprite.ID i)
+                Logging.Debug(sprintf "Cached sprite (%s) with ID %i to index %i" source sprite.ID i)
                 { sprite with TextureUnit = i }
 
     let Default =
         use img = new Image<PixelFormats.Rgba32>(1, 1)
         img.[0, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
         upload (img, 1, 1, false)
-        |> cache "BLANK"
+        |> cache "BLANK" false
 
     let DefaultQuad : SpriteQuad = struct (Default, Quad.ofRect Rect.ONE)
 
