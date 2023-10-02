@@ -31,6 +31,7 @@ module Window =
 
     let lockObj = obj()
     let mutable action_queue = []
+    let mutable is_focused = true
 
     type WindowAction =
         | ApplyConfig of Config
@@ -167,6 +168,9 @@ type Window(config: Config, title: string, root: Root) as this =
                 if this.WindowBorder = WindowBorder.Resizable then resize_callback(this.ClientSize.X, this.ClientSize.Y)
                 renderThread.OnResize(this.ClientSize)
             )
+
+    override this.OnFocusedChanged e =
+        renderThread.IsFocused <- e.IsFocused
 
     override this.OnFileDrop e =
         Array.iter WindowEvents.onFileDrop.Trigger e.FileNames

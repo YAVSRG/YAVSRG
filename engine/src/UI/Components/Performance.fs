@@ -45,7 +45,7 @@ type PerformanceMonitor() =
         if enable then
             Text.drawB(Style.font, sprintf "%.3f FPS" fps, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 20.0f, (Color.White, Color.DarkRed))
             Text.drawB(Style.font, sprintf "%.1fms playfield latency" Render.Performance.visual_latency, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 60.0f, (Color.White, Color.DarkGreen))
-            Text.drawB(Style.font, sprintf "%.1fms UI latency" (Render.Performance.frame_compensation()), 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 100.0f, (Color.White, Color.Black))
+            Text.drawB(Style.font, sprintf "%.1fms frame compensation" (Render.Performance.frame_compensation()), 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 100.0f, (Color.White, Color.Black))
             Text.drawB(Style.font, sprintf "%.1fms swap time" Render.Performance.swap_time, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 140.0f, (Color.White, Color.DarkBlue))
             Text.drawB(Style.font, sprintf "%O to hide overlay" all_bind, 30.0f, this.Bounds.Left + 20.0f, this.Bounds.Top + 180.0f, Colors.text_subheading)
         

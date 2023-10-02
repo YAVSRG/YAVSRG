@@ -67,10 +67,12 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     let mutable next_frame_time = 0.0
     let mutable refresh_period = 1000.0 / 60.0
     let mutable vsync = false
+    let mutable is_focused = true
 
     let VSYNC_FAIL_THRESHOLD = 3
     let mutable vsync_fails = 0
 
+    member this.IsFocused with set v = is_focused <- v; vsync_fails <- -1
     member val RenderMode = FrameLimit.Smart with get, set
 
     member this.OnResize(newSize: Vector2i) =
@@ -150,7 +152,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
             if vsync then
                 let actual_fps = float fps_count / (float time / float Stopwatch.Frequency)
                 let expected_fps = 1000.0 / refresh_period
-                if abs (actual_fps - expected_fps) > 5.0 then vsync_fails <- vsync_fails + 1
+                if abs (actual_fps - expected_fps) > 5.0 && is_focused then vsync_fails <- vsync_fails + 1
                 if vsync_fails >= VSYNC_FAIL_THRESHOLD then
                     Logging.Debug(sprintf "Turning off VSync: Was giving %.1f FPS but expected was %.1f FPS" actual_fps expected_fps)
                     vsync <- false
@@ -167,7 +169,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         Render.Performance.frame_compensation <- 
             fun () -> 
                 if this.RenderMode = FrameLimit.Smart then 
-                    float32 (refresh_period + next_frame_time - total_frame_timer.Elapsed.TotalMilliseconds) * 1.0f<ms>
+                    float32 (next_frame_time - refresh_period - total_frame_timer.Elapsed.TotalMilliseconds) * 1.0f<ms>
                 else 0.0f<ms>
         root.Init()
         afterInit()
