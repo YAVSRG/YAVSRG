@@ -73,15 +73,16 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         animation.Update elapsedTime
-        let newtime = Song.time()
-        if newtime < time then reset()
-        time <- newtime
 
     override this.Draw() =
         let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = this.Bounds
 
         let scale = options.ScrollSpeed.Value / Gameplay.rate.Value * 1.0f</ms>
         let hitposition = float32 options.HitPosition.Value
+
+        let newtime = Song.time()
+        if newtime < time then reset()
+        time <- newtime
 
         let playfieldHeight = bottom - top + (max 0.0f holdnoteTrim)
         let now = Song.timeWithOffset() + Render.Performance.frame_compensation() + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
