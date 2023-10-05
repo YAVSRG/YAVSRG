@@ -15,6 +15,66 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Common
 
+module Scanline =
+
+    let mutable private _hAdapter = 0
+    let mutable private _VinPnSourceId = 0
+
+    [<Struct>]
+    [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
+    type D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME =
+        {
+            [<MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)>] pDeviceName : string
+            mutable hAdapter: int32
+            mutable AdapterLuid: int32
+            mutable VinPnSourceId: int32
+        }
+
+    [<DllImport("gdi32.dll")>]
+    extern uint D3DKMTOpenAdapterFromGdiDisplayName(D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME& info)
+
+    let open_adapter(gdi_name: string) =
+        let mutable info = { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME> with pDeviceName = gdi_name }
+        if D3DKMTOpenAdapterFromGdiDisplayName &info <> 0u then Logging.Error("Error getting adapter handle by GDI name")
+        _hAdapter <- info.hAdapter
+        _VinPnSourceId <- info.VinPnSourceId
+
+    let close_adapter() = "nyi"
+
+    [<Struct>]
+    [<StructLayout(LayoutKind.Sequential)>]
+    type D3DKMT_GETSCANLINE =
+        {
+            hAdapter: int32
+            VinPnSourceId: int32
+            mutable InVerticalBlank: bool
+            mutable ScanLine: uint
+        }
+
+    [<DllImport("gdi32.dll")>]
+    extern uint D3DKMTGetScanLine(D3DKMT_GETSCANLINE& info)
+
+    let get() =
+        let mutable info = { Unchecked.defaultof<D3DKMT_GETSCANLINE> with hAdapter = _hAdapter; VinPnSourceId = _VinPnSourceId }
+        if D3DKMTGetScanLine &info <> 0u then Logging.Error("Error getting scanline from video adapter")
+        info.ScanLine, info.InVerticalBlank
+    
+    [<Struct>]
+    [<StructLayout(LayoutKind.Sequential)>]
+    type D3DKMT_WAITFORVERTICALBLANKEVENT =
+        {
+            hAdapter: int32
+            hDevice: int32
+            VinPnSourceId: int32
+        }
+    
+    [<DllImport("gdi32.dll")>]
+    extern uint D3DKMTWaitForVerticalBlankEvent(D3DKMT_WAITFORVERTICALBLANKEVENT& info)
+
+    let wait() =
+        let mutable info = { hAdapter = _hAdapter; hDevice = 0; VinPnSourceId = _VinPnSourceId }
+        if D3DKMTWaitForVerticalBlankEvent &info <> 0u then Logging.Error("Error waiting for vblank event")
+
 module Timing =
 
     [<DllImport("winmm.dll")>]
@@ -66,13 +126,9 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     let total_frame_timer = Stopwatch.StartNew()
     let mutable next_frame_time = 0.0
     let mutable refresh_period = 1000.0 / 60.0
-    let mutable vsync = false
     let mutable is_focused = true
 
-    let VSYNC_FAIL_THRESHOLD = 3
-    let mutable vsync_fails = 0
-
-    member this.IsFocused with set v = is_focused <- v; vsync_fails <- -1
+    member this.IsFocused with set v = is_focused <- v
     member val RenderMode = FrameLimit.Smart with get, set
 
     member this.OnResize(newSize: Vector2i) =
@@ -81,9 +137,6 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
 
     member this.RenderModeChanged(refresh_rate: int) =
         refresh_period <- 1000.0 / float refresh_rate
-        vsync <- this.RenderMode = FrameLimit.Smart
-        vsync_fails <- 0
-        GLFW.SwapInterval (if vsync then -1 else 0)
 
     member private this.Loop() =
         window.Context.MakeCurrent()
@@ -99,6 +152,8 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         thread.Start()
         
     member this.DispatchFrame() =
+    
+        if this.RenderMode = FrameLimit.Smart then Scanline.wait()
 
         let elapsed_time = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
@@ -123,10 +178,6 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         let after_draw = total_frame_timer.Elapsed.TotalMilliseconds
         Render.Performance.draw_time <- after_draw - before_draw
 
-        // Frame limiting
-        if this.RenderMode = FrameLimit.Smart && not vsync then
-            Timing.sleep_accurate(total_frame_timer, next_frame_time)
-
         let before_swap = total_frame_timer.Elapsed.TotalMilliseconds
         if not root.ShouldExit then window.Context.SwapBuffers()
         let after_swap = total_frame_timer.Elapsed.TotalMilliseconds
@@ -134,29 +185,17 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
 
         if this.RenderMode = FrameLimit.Smart then 
             Render.Performance.visual_latency <- after_swap - next_frame_time
-        else Render.Performance.visual_latency <- 0.0
-
-        if vsync then
-            next_frame_time <- after_swap + refresh_period
+            next_frame_time <- before_update + refresh_period
         else
             while next_frame_time < after_swap do
                 next_frame_time <- next_frame_time + refresh_period
+            Render.Performance.visual_latency <- 0.0
         
         // Performance profiling
         fps_count <- fps_count + 1
         let time = fps_timer.ElapsedTicks
         if time > Stopwatch.Frequency then
             Render.Performance.framecount_tickcount <- (fps_count, time)
-
-            // Automatically turn off vsync when it is doing the wrong thing, switch to software timer
-            if vsync then
-                let actual_fps = float fps_count / (float time / float Stopwatch.Frequency)
-                let expected_fps = 1000.0 / refresh_period
-                if abs (actual_fps - expected_fps) > 5.0 && is_focused then vsync_fails <- vsync_fails + 1
-                if vsync_fails >= VSYNC_FAIL_THRESHOLD then
-                    Logging.Debug(sprintf "Turning off VSync: Was giving %.1f FPS but expected was %.1f FPS" actual_fps expected_fps)
-                    vsync <- false
-                    GLFW.SwapInterval 0
 
             fps_timer.Restart()
             fps_count <- 0
@@ -168,8 +207,8 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         Render.resize(window.ClientSize.X, window.ClientSize.Y)
         Render.Performance.frame_compensation <- 
             fun () -> 
-                if this.RenderMode = FrameLimit.Smart then 
-                    float32 (next_frame_time - refresh_period - total_frame_timer.Elapsed.TotalMilliseconds) * 1.0f<ms>
-                else 0.0f<ms>
+                if this.RenderMode = FrameLimit.Smart then
+                    float32 (next_frame_time - total_frame_timer.Elapsed.TotalMilliseconds) * 1.0f<ms>
+                else float32 (next_frame_time - total_frame_timer.Elapsed.TotalMilliseconds) * 1.0f<ms>
         root.Init()
         afterInit()

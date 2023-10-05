@@ -149,6 +149,9 @@ type Window(config: Config, title: string, root: Root) as this =
             | _ -> Logging.Error "Tried to change to invalid window mode"
 
         was_fullscreen <- config.WindowMode.Value = WindowType.Fullscreen
+        
+        let monitor = GLFW.GetWin32Adapter(monitorPtr)
+        Scanline.open_adapter monitor
 
         sync <| fun () -> renderThread.RenderModeChanged(Option.defaultValue refresh_rate config.RefreshRateOverride.Value)
 
