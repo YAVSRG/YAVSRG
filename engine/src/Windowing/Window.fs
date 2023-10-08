@@ -150,8 +150,7 @@ type Window(config: Config, title: string, root: Root) as this =
 
         was_fullscreen <- config.WindowMode.Value = WindowType.Fullscreen
         
-        let monitor = GLFW.GetWin32Adapter(monitorPtr)
-        Scanline.open_adapter monitor
+        FrameTimeStrategies.open_adapter (GLFW.GetWin32Adapter monitorPtr) (GLFW.GetWin32Monitor monitorPtr)
 
         sync <| fun () -> renderThread.RenderModeChanged(Option.defaultValue refresh_rate config.RefreshRateOverride.Value)
 

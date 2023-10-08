@@ -15,10 +15,12 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Common
 
-module Scanline =
+module FrameTimeStrategies =
+    
+    type MonitorEnumProc = delegate of IntPtr * IntPtr * IntPtr * IntPtr -> bool
 
-    let mutable private _hAdapter = 0
-    let mutable private _VinPnSourceId = 0
+    [<DllImport("user32.dll")>]
+    extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumProc lpfnEnum, IntPtr dwData)
 
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
@@ -30,16 +32,29 @@ module Scanline =
             mutable VinPnSourceId: int32
         }
 
+    [<DllImport("gdi32.dll", SetLastError = true)>]
+    extern int32 CreateDC(string lpszDriver, string lpszDevice, string lpszOutput, IntPtr lpInitData)
+    [<DllImport("gdi32.dll", SetLastError = true)>]
+    extern bool DeleteDC(IntPtr hdc)
+
     [<DllImport("gdi32.dll")>]
     extern uint D3DKMTOpenAdapterFromGdiDisplayName(D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME& info)
 
-    let open_adapter(gdi_name: string) =
-        let mutable info = { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME> with pDeviceName = gdi_name }
-        if D3DKMTOpenAdapterFromGdiDisplayName &info <> 0u then Logging.Error("Error getting adapter handle by GDI name")
-        _hAdapter <- info.hAdapter
-        _VinPnSourceId <- info.VinPnSourceId
+    [<Struct>]
+    [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
+    type D3DKMT_OPENADAPTERFROMHDC =
+        {
+            hDc: IntPtr
+            mutable hAdapter: int32
+            mutable AdapterLuid: int32
+            mutable VinPnSourceId: int32
+        }
+        
+    [<DllImport("gdi32.dll")>]
+    extern uint D3DKMTOpenAdapterFromHdc(D3DKMT_OPENADAPTERFROMHDC& info)
 
-    let close_adapter() = "nyi"
+    [<DllImport("gdi32.dll")>]
+    extern uint D3DKMTCloseAdapter(int32 hAdapter)
 
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential)>]
@@ -53,11 +68,6 @@ module Scanline =
 
     [<DllImport("gdi32.dll")>]
     extern uint D3DKMTGetScanLine(D3DKMT_GETSCANLINE& info)
-
-    let get() =
-        let mutable info = { Unchecked.defaultof<D3DKMT_GETSCANLINE> with hAdapter = _hAdapter; VinPnSourceId = _VinPnSourceId }
-        if D3DKMTGetScanLine &info <> 0u then Logging.Error("Error getting scanline from video adapter")
-        info.ScanLine, info.InVerticalBlank
     
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential)>]
@@ -71,16 +81,70 @@ module Scanline =
     [<DllImport("gdi32.dll")>]
     extern uint D3DKMTWaitForVerticalBlankEvent(D3DKMT_WAITFORVERTICALBLANKEVENT& info)
 
-    let wait() =
-        let mutable info = { hAdapter = _hAdapter; hDevice = 0; VinPnSourceId = _VinPnSourceId }
-        if D3DKMTWaitForVerticalBlankEvent &info <> 0u then Logging.Error("Error waiting for vblank event")
-
-module Timing =
-
     [<DllImport("winmm.dll")>]
     extern uint private timeBeginPeriod(int msec)
     [<DllImport("winmm.dll")>]
     extern uint private timeEndPeriod(int msec)
+    
+    (* GET DISPLAY HANDLE INFO *)
+
+    let get_display_handle(glfw_monitor_name: string) =
+
+        let mutable handles = List.empty
+        let mutable i = 0
+        let f = MonitorEnumProc(fun h _ _ _ -> i <- i + 1; handles <- ((sprintf "\\\\.\\DISPLAY%i" i), h) :: handles; true)
+        EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, f, IntPtr.Zero) |> ignore
+
+        match handles |> List.tryFind (fun (name, h) -> glfw_monitor_name.StartsWith name) with
+        | Some (name, h) -> 
+            let hDc = CreateDC(null, name, null, 0)
+            if hDc = 0 then Logging.Error("Failed to get hDC for monitor")
+            hDc, 0
+        | None -> 0, 0
+
+    let mutable private _hAdapter = 0
+    let mutable private _VinPnSourceId = 0
+    let mutable private _hDevice = 0
+
+    let close_adapter() = 
+        if _hAdapter <> 0 then 
+            if D3DKMTCloseAdapter(_hAdapter) <> 0u then Logging.Error("Error closing adapter after use")
+
+    let open_adapter (gdi_adapter_name: string) (glfw_monitor_name: string) =
+        close_adapter()
+        let hDc, hDevice = get_display_handle glfw_monitor_name
+        if hDc = 0 then
+            let mutable info = { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME> with pDeviceName = gdi_adapter_name }
+            if D3DKMTOpenAdapterFromGdiDisplayName &info <> 0u then Logging.Error("Error getting adapter handle by GDI name")
+            _hAdapter <- info.hAdapter
+            _VinPnSourceId <- info.VinPnSourceId
+            _hDevice <- hDevice
+        else
+            let mutable info = { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMHDC> with hDc = hDc }
+            if D3DKMTOpenAdapterFromHdc &info <> 0u then Logging.Error("Error getting adapter handle by hDc")
+            _hAdapter <- info.hAdapter
+            _VinPnSourceId <- info.VinPnSourceId
+            _hDevice <- hDevice
+
+            if not (DeleteDC hDc) then Logging.Error("Error deleting hDc after use")
+
+    (* USING OPEN ADAPTER TO GET SYNC INFORMATION *)
+
+    let get_scanline() =
+        let mutable info = { Unchecked.defaultof<D3DKMT_GETSCANLINE> with hAdapter = _hAdapter; VinPnSourceId = _VinPnSourceId }
+        if D3DKMTGetScanLine &info <> 0u then Logging.Error("Error getting scanline from video adapter")
+        info.ScanLine, info.InVerticalBlank
+
+    let wait_for_vblank() =
+        let mutable info = { hAdapter = _hAdapter; hDevice = _hDevice; VinPnSourceId = _VinPnSourceId }
+        let status = D3DKMTWaitForVerticalBlankEvent &info
+        if status <> 0u then
+            Logging.Error(sprintf "Error waiting for vblank (%i)" status)
+            printfn "%A" (get_scanline())
+            false
+        else true
+
+    (* THREAD SLEEPING STRATEGIES *)
 
     let NATIVE_SLEEP_TRUST_THRESHOLD_MS =
         if OperatingSystem.IsWindows() then 1.0 else 0.125
@@ -91,6 +155,7 @@ module Timing =
     /// Strategy is to natively sleep the thread as far as it can be trusted, then spin-wait until it's time
     /// Native sleep can still wake up much later if threads are busy
     /// CPU intensive
+    /// Works on all operating systems
     let sleep_accurate : Stopwatch * float -> unit =
         if OperatingSystem.IsWindows() then
 
@@ -116,6 +181,10 @@ module Timing =
                 while timer.Elapsed.TotalMilliseconds < until do
                     spin_wait.SpinOnce -1
 
+type Strategy =
+    | Unlimited
+    | DriverSync
+    | SleepSpin
 
 type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit: unit -> unit) =
     
@@ -127,6 +196,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     let mutable next_frame_time = 0.0
     let mutable refresh_period = 1000.0 / 60.0
     let mutable is_focused = true
+    let mutable strategy = DriverSync
 
     member this.IsFocused with set v = is_focused <- v
     member val RenderMode = FrameLimit.Smart with get, set
@@ -137,6 +207,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
 
     member this.RenderModeChanged(refresh_rate: int) =
         refresh_period <- 1000.0 / float refresh_rate
+        strategy <- if this.RenderMode = FrameLimit.Smart then DriverSync else Unlimited
 
     member private this.Loop() =
         window.Context.MakeCurrent()
@@ -153,7 +224,8 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         
     member this.DispatchFrame() =
     
-        if this.RenderMode = FrameLimit.Smart then Scanline.wait()
+        if strategy = DriverSync && not (FrameTimeStrategies.wait_for_vblank()) then
+            strategy <- SleepSpin
 
         let elapsed_time = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
