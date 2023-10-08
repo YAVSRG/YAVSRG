@@ -27,13 +27,14 @@ module FrameTimeStrategies =
     type D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME =
         {
             [<MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)>] pDeviceName : string
-            mutable hAdapter: int32
-            mutable AdapterLuid: int32
-            mutable VinPnSourceId: int32
+            mutable hAdapter: uint
+            mutable AdapterLuidLowPart: uint64
+            mutable AdapterLuidHighPart: int64
+            mutable VinPnSourceId: uint
         }
 
     [<DllImport("gdi32.dll", SetLastError = true)>]
-    extern int32 CreateDC(string lpszDriver, string lpszDevice, string lpszOutput, IntPtr lpInitData)
+    extern IntPtr CreateDC(string lpszDriver, string lpszDevice, string lpszOutput, IntPtr lpInitData)
     [<DllImport("gdi32.dll", SetLastError = true)>]
     extern bool DeleteDC(IntPtr hdc)
 
@@ -45,23 +46,31 @@ module FrameTimeStrategies =
     type D3DKMT_OPENADAPTERFROMHDC =
         {
             hDc: IntPtr
-            mutable hAdapter: int32
-            mutable AdapterLuid: int32
-            mutable VinPnSourceId: int32
+            mutable hAdapter: uint
+            mutable AdapterLuidLowPart: uint64
+            mutable AdapterLuidHighPart: int64
+            mutable VinPnSourceId: uint
         }
         
     [<DllImport("gdi32.dll")>]
     extern uint D3DKMTOpenAdapterFromHdc(D3DKMT_OPENADAPTERFROMHDC& info)
 
+    [<Struct>]
+    [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
+    type D3DKMT_CLOSEADAPTER =
+        {
+            hAdapter: uint
+        }
+
     [<DllImport("gdi32.dll")>]
-    extern uint D3DKMTCloseAdapter(int32 hAdapter)
+    extern uint D3DKMTCloseAdapter(D3DKMT_CLOSEADAPTER& info)
 
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential)>]
     type D3DKMT_GETSCANLINE =
         {
-            hAdapter: int32
-            VinPnSourceId: int32
+            hAdapter: uint
+            VinPnSourceId: uint
             mutable InVerticalBlank: bool
             mutable ScanLine: uint
         }
@@ -73,9 +82,9 @@ module FrameTimeStrategies =
     [<StructLayout(LayoutKind.Sequential)>]
     type D3DKMT_WAITFORVERTICALBLANKEVENT =
         {
-            hAdapter: int32
-            hDevice: int32
-            VinPnSourceId: int32
+            hAdapter: uint
+            hDevice: uint
+            VinPnSourceId: uint
         }
     
     [<DllImport("gdi32.dll")>]
@@ -99,16 +108,17 @@ module FrameTimeStrategies =
         | Some (name, h) -> 
             let hDc = CreateDC(null, name, null, 0)
             if hDc = 0 then Logging.Error("Failed to get hDC for monitor")
-            hDc, 0
-        | None -> 0, 0
+            hDc, 0u
+        | None -> 0, 0u
 
-    let mutable private _hAdapter = 0
-    let mutable private _VinPnSourceId = 0
-    let mutable private _hDevice = 0
+    let mutable private _hAdapter = 0u
+    let mutable private _VinPnSourceId = 0u
+    let mutable private _hDevice = 0u
 
     let close_adapter() = 
-        if _hAdapter <> 0 then 
-            if D3DKMTCloseAdapter(_hAdapter) <> 0u then Logging.Error("Error closing adapter after use")
+        if _hAdapter <> 0u then
+            let mutable info = { hAdapter = _hAdapter }
+            if D3DKMTCloseAdapter(&info) <> 0u then Logging.Error("Error closing adapter after use")
 
     let open_adapter (gdi_adapter_name: string) (glfw_monitor_name: string) =
         close_adapter()
