@@ -98,8 +98,8 @@ module Render =
     module Performance =
         
         let mutable framecount_tickcount = (0, 1L)
-        let mutable visual_latency = 0.0
-        let mutable swap_time = 0.0
+        let mutable visual_latency_lo = 0.0
+        let mutable visual_latency_hi = 0.0
         let mutable update_time = 0.0
         let mutable draw_time = 0.0
         let mutable elapsed_time = 0.0

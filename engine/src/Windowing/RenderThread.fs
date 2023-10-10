@@ -28,7 +28,7 @@ module FrameTimeStrategies =
         {
             [<MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)>] pDeviceName : string
             mutable hAdapter: uint
-            mutable AdapterLuidLowPart: uint64
+            mutable AdapterLuidLowPart: uint
             mutable AdapterLuidHighPart: int64
             mutable VinPnSourceId: uint
         }
@@ -39,7 +39,7 @@ module FrameTimeStrategies =
     extern bool DeleteDC(IntPtr hdc)
 
     [<DllImport("gdi32.dll")>]
-    extern uint D3DKMTOpenAdapterFromGdiDisplayName(D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME& info)
+    extern int64 D3DKMTOpenAdapterFromGdiDisplayName(D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME& info)
 
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
@@ -47,13 +47,13 @@ module FrameTimeStrategies =
         {
             hDc: IntPtr
             mutable hAdapter: uint
-            mutable AdapterLuidLowPart: uint64
+            mutable AdapterLuidLowPart: uint
             mutable AdapterLuidHighPart: int64
             mutable VinPnSourceId: uint
         }
         
     [<DllImport("gdi32.dll")>]
-    extern uint D3DKMTOpenAdapterFromHdc(D3DKMT_OPENADAPTERFROMHDC& info)
+    extern int64 D3DKMTOpenAdapterFromHdc(D3DKMT_OPENADAPTERFROMHDC& info)
 
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
@@ -63,7 +63,7 @@ module FrameTimeStrategies =
         }
 
     [<DllImport("gdi32.dll")>]
-    extern uint D3DKMTCloseAdapter(D3DKMT_CLOSEADAPTER& info)
+    extern int64 D3DKMTCloseAdapter(D3DKMT_CLOSEADAPTER& info)
 
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential)>]
@@ -76,7 +76,7 @@ module FrameTimeStrategies =
         }
 
     [<DllImport("gdi32.dll")>]
-    extern uint D3DKMTGetScanLine(D3DKMT_GETSCANLINE& info)
+    extern int64 D3DKMTGetScanLine(D3DKMT_GETSCANLINE& info)
     
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential)>]
@@ -88,12 +88,12 @@ module FrameTimeStrategies =
         }
     
     [<DllImport("gdi32.dll")>]
-    extern uint D3DKMTWaitForVerticalBlankEvent(D3DKMT_WAITFORVERTICALBLANKEVENT& info)
+    extern int64 D3DKMTWaitForVerticalBlankEvent(D3DKMT_WAITFORVERTICALBLANKEVENT& info)
 
     [<DllImport("winmm.dll")>]
-    extern uint private timeBeginPeriod(int msec)
+    extern int64 private timeBeginPeriod(int msec)
     [<DllImport("winmm.dll")>]
-    extern uint private timeEndPeriod(int msec)
+    extern int64 private timeEndPeriod(int msec)
     
     (* GET DISPLAY HANDLE INFO *)
 
@@ -118,20 +118,20 @@ module FrameTimeStrategies =
     let close_adapter() = 
         if _hAdapter <> 0u then
             let mutable info = { hAdapter = _hAdapter }
-            if D3DKMTCloseAdapter(&info) <> 0u then Logging.Error("Error closing adapter after use")
+            if D3DKMTCloseAdapter(&info) <> 0l then Logging.Error("Error closing adapter after use")
 
     let open_adapter (gdi_adapter_name: string) (glfw_monitor_name: string) =
         close_adapter()
         let hDc, hDevice = get_display_handle glfw_monitor_name
         if hDc = 0 then
             let mutable info = { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME> with pDeviceName = gdi_adapter_name }
-            if D3DKMTOpenAdapterFromGdiDisplayName &info <> 0u then Logging.Error("Error getting adapter handle by GDI name")
+            if D3DKMTOpenAdapterFromGdiDisplayName &info <> 0l then Logging.Error("Error getting adapter handle by GDI name")
             _hAdapter <- info.hAdapter
             _VinPnSourceId <- info.VinPnSourceId
             _hDevice <- hDevice
         else
             let mutable info = { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMHDC> with hDc = hDc }
-            if D3DKMTOpenAdapterFromHdc &info <> 0u then Logging.Error("Error getting adapter handle by hDc")
+            if D3DKMTOpenAdapterFromHdc &info <> 0l then Logging.Error("Error getting adapter handle by hDc")
             _hAdapter <- info.hAdapter
             _VinPnSourceId <- info.VinPnSourceId
             _hDevice <- hDevice
@@ -142,15 +142,16 @@ module FrameTimeStrategies =
 
     let get_scanline() =
         let mutable info = { Unchecked.defaultof<D3DKMT_GETSCANLINE> with hAdapter = _hAdapter; VinPnSourceId = _VinPnSourceId }
-        if D3DKMTGetScanLine &info <> 0u then Logging.Error("Error getting scanline from video adapter")
-        info.ScanLine, info.InVerticalBlank
+        if D3DKMTGetScanLine &info <> 0l then 
+            Logging.Error("Error getting scanline from video adapter")
+            None
+        else Some (info.ScanLine, info.InVerticalBlank)
 
     let wait_for_vblank() =
         let mutable info = { hAdapter = _hAdapter; hDevice = _hDevice; VinPnSourceId = _VinPnSourceId }
         let status = D3DKMTWaitForVerticalBlankEvent &info
-        if status <> 0u then
+        if status <> 0l then
             Logging.Error(sprintf "Error waiting for vblank (%i)" status)
-            printfn "%A" (get_scanline())
             false
         else true
 
@@ -193,8 +194,9 @@ module FrameTimeStrategies =
 
 type Strategy =
     | Unlimited
-    | DriverSync
-    | SleepSpin
+    | DwmSync
+    | CpuTimingScanlineCorrection
+    | CpuTiming
 
 type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit: unit -> unit) =
     
@@ -203,10 +205,18 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     let fps_timer = Stopwatch()
     let last_frame_timer = Stopwatch()
     let total_frame_timer = Stopwatch.StartNew()
-    let mutable next_frame_time = 0.0
-    let mutable refresh_period = 1000.0 / 60.0
+    let mutable est_present_of_next_frame = 0.0
+    let mutable present_of_last_frame = 0.0
+    let mutable start_of_frame = 0.0
+    let mutable frame_is_ready = 0.0
+    let mutable monitor_y = 1080.0
+    let mutable est_refresh_period = 1000.0 / 60.0
     let mutable is_focused = true
-    let mutable strategy = DriverSync
+    let mutable strategy = Unlimited
+
+    let SCANLINE_OFFSET = 0.15
+
+    let now() = total_frame_timer.Elapsed.TotalMilliseconds
 
     member this.IsFocused with set v = is_focused <- v
     member val RenderMode = FrameLimit.Smart with get, set
@@ -215,9 +225,15 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         Render.resize(newSize.X, newSize.Y)
         resized <- true
 
-    member this.RenderModeChanged(refresh_rate: int) =
-        refresh_period <- 1000.0 / float refresh_rate
-        strategy <- if this.RenderMode = FrameLimit.Smart then DriverSync else Unlimited
+    member this.RenderModeChanged(refresh_rate: int, monitor_height: int, fullscreen: bool) =
+        est_refresh_period <- 1000.0 / float refresh_rate
+        monitor_y <- float monitor_height
+        strategy <- 
+            if this.RenderMode = FrameLimit.Smart then 
+                if OperatingSystem.IsWindows() then
+                    if fullscreen then CpuTimingScanlineCorrection else DwmSync
+                else CpuTiming
+            else Unlimited
 
     member private this.Loop() =
         window.Context.MakeCurrent()
@@ -234,51 +250,78 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         
     member this.DispatchFrame() =
     
-        if strategy = DriverSync && not (FrameTimeStrategies.wait_for_vblank()) then
-            strategy <- SleepSpin
+        // Before frame strategies
+        match strategy with
+
+        | Unlimited ->
+            present_of_last_frame <- now()
+            Render.Performance.visual_latency_lo <- 0.0
+            Render.Performance.visual_latency_hi <- 1.0
+
+        | DwmSync ->
+            if not (FrameTimeStrategies.wait_for_vblank()) then
+                Logging.Warn("Switching to CPU timing instead")
+                strategy <- CpuTiming
+            present_of_last_frame <- now()
+            Render.Performance.visual_latency_lo <- present_of_last_frame - frame_is_ready
+            Render.Performance.visual_latency_hi <- present_of_last_frame - start_of_frame
+            est_present_of_next_frame <- present_of_last_frame + est_refresh_period
+
+        | CpuTimingScanlineCorrection ->
+            present_of_last_frame <- now()
+            Render.Performance.visual_latency_lo <- 0.0
+            Render.Performance.visual_latency_hi <- est_refresh_period
+            let correction =
+                match FrameTimeStrategies.get_scanline() with
+                | Some (i, _) ->
+                    float i / monitor_y * est_refresh_period + SCANLINE_OFFSET * est_refresh_period
+                | None ->
+                    Logging.Warn("Switching to CPU timing without scanline correction")
+                    strategy <- CpuTiming
+                    0.0
+            est_present_of_next_frame <- est_present_of_next_frame - correction
+            while est_present_of_next_frame < present_of_last_frame do
+                est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
+
+            FrameTimeStrategies.sleep_accurate(total_frame_timer, est_present_of_next_frame - present_of_last_frame + start_of_frame)
+
+        | CpuTiming ->
+            present_of_last_frame <- now()
+            Render.Performance.visual_latency_lo <- 0.0
+            Render.Performance.visual_latency_hi <- est_refresh_period
+            while est_present_of_next_frame < present_of_last_frame do
+                est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
+            FrameTimeStrategies.sleep_accurate(total_frame_timer, est_present_of_next_frame - present_of_last_frame + start_of_frame)
 
         let elapsed_time = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
         
         // Update
-        let before_update = total_frame_timer.Elapsed.TotalMilliseconds
+        start_of_frame <- now()
         Input.begin_frame_events()
         ROOT_ANIMATION.Update elapsed_time
         root.Update (elapsed_time, resized)
         resized <- false
         Input.finish_frame_events()
         Devices.update elapsed_time
-        let after_update = total_frame_timer.Elapsed.TotalMilliseconds
-        Render.Performance.update_time <- after_update - before_update
+        Render.Performance.update_time <- now() - start_of_frame
         if root.ShouldExit then window.Close()
         
         // Draw
-        let before_draw = total_frame_timer.Elapsed.TotalMilliseconds
+        let before_draw = now()
         Render.start()
         if Viewport.rheight > 0 then root.Draw()
         Render.finish()
-        let after_draw = total_frame_timer.Elapsed.TotalMilliseconds
-        Render.Performance.draw_time <- after_draw - before_draw
+        frame_is_ready <- now()
+        Render.Performance.draw_time <- frame_is_ready - before_draw
 
-        let before_swap = total_frame_timer.Elapsed.TotalMilliseconds
         if not root.ShouldExit then window.Context.SwapBuffers()
-        let after_swap = total_frame_timer.Elapsed.TotalMilliseconds
-        Render.Performance.swap_time <- after_swap - before_swap
-
-        if this.RenderMode = FrameLimit.Smart then 
-            Render.Performance.visual_latency <- after_swap - next_frame_time
-            next_frame_time <- before_update + refresh_period
-        else
-            while next_frame_time < after_swap do
-                next_frame_time <- next_frame_time + refresh_period
-            Render.Performance.visual_latency <- 0.0
         
         // Performance profiling
         fps_count <- fps_count + 1
         let time = fps_timer.ElapsedTicks
         if time > Stopwatch.Frequency then
             Render.Performance.framecount_tickcount <- (fps_count, time)
-
             fps_timer.Restart()
             fps_count <- 0
         Render.Performance.elapsed_time <- elapsed_time
@@ -289,8 +332,8 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         Render.resize(window.ClientSize.X, window.ClientSize.Y)
         Render.Performance.frame_compensation <- 
             fun () -> 
-                if this.RenderMode = FrameLimit.Smart then
-                    float32 (next_frame_time - total_frame_timer.Elapsed.TotalMilliseconds) * 1.0f<ms>
-                else float32 (next_frame_time - total_frame_timer.Elapsed.TotalMilliseconds) * 1.0f<ms>
+                if strategy <> Unlimited then
+                    float32 (est_present_of_next_frame - now()) * 1.0f<ms>
+                else 0.0f<ms>
         root.Init()
         afterInit()
