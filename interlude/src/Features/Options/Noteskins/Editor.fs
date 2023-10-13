@@ -87,6 +87,82 @@ type NoteColorPicker(color: Setting<byte>) as this =
             elif (!|"left").Tapped() then bk()
             elif (!|"right").Tapped() then fd()
 
+type HoldNoteSettingsPage() as this =
+    inherit Page() 
+
+    let data = Noteskins.Current.config
+
+    let hold_note_trim = Setting.bounded data.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
+    let use_tail_texture = Setting.simple data.UseHoldTailTexture
+    let flip_hold_tail = Setting.simple data.FlipHoldTail
+    let dropped_color = Setting.simple data.DroppedHoldColor
+
+    let head = getTexture "holdhead"
+    let body = getTexture "holdbody"
+    let tail = getTexture "holdtail"
+
+    do
+        this.Content(
+            column()
+            |+ PageSetting("noteskins.edit.holdnotetrim", Slider(hold_note_trim))
+                .Pos(200.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
+            |+ PageSetting("noteskins.edit.usetailtexture", Selector<_>.FromBool(use_tail_texture))
+                .Pos(300.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.usetailtexture"))
+            |+ PageSetting("noteskins.edit.flipholdtail", Selector<_>.FromBool(flip_hold_tail))
+                .Pos(370.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.flipholdtail"))
+            |+ PageSetting("noteskins.edit.droppedholdcolor", ColorPicker(dropped_color, true))
+                .Pos(470.0f, PRETTYWIDTH, PRETTYHEIGHT * 2f)
+                .Tooltip(Tooltip.Info("noteskins.edit.droppedholdcolor"))
+        )
+
+    override this.Draw() =
+        base.Draw()
+
+        let COLUMN_WIDTH = 120.0f
+        let mutable left = this.Bounds.Right - 50.0f - COLUMN_WIDTH
+        let bottom = this.Bounds.Bottom - 100.0f
+        let top = this.Bounds.CenterY - 100.0f
+
+        let draw_ln_preview(label: string, color: Color, downscroll: bool) =
+
+            Draw.rect (Rect.Create(left, top, left + COLUMN_WIDTH, bottom)) Colors.black.O2
+
+            let headpos = if downscroll then bottom - COLUMN_WIDTH else top
+            let tailpos = if downscroll then top + hold_note_trim.Value * COLUMN_WIDTH else bottom - COLUMN_WIDTH - hold_note_trim.Value * COLUMN_WIDTH
+
+            Draw.sprite <| Rect.Create(left, min headpos tailpos + COLUMN_WIDTH * 0.5f, left + COLUMN_WIDTH, max headpos tailpos + COLUMN_WIDTH * 0.5f) <| color <| body
+            Draw.sprite <| Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH) <| color <| head
+            Draw.sprite 
+                <| 
+                    (
+                        Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
+                        |> if flip_hold_tail.Value && downscroll then fun (r: Rect) -> r.Shrink(0.0f, r.Height) else id
+                    )
+                <| color 
+                <| (if use_tail_texture.Value then tail else head)
+
+            Text.drawFillB(Style.font, label, Rect.Box(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
+
+            left <- left - COLUMN_WIDTH - 50.0f
+
+        draw_ln_preview("Upscroll", Color.White, false)
+        draw_ln_preview("Dropped", dropped_color.Value, not options.Upscroll.Value)
+        draw_ln_preview("Downscroll", Color.White, true)
+
+
+    override this.Title = L"noteskins.edit.holdnotes.name"
+    override this.OnClose() =
+        Noteskins.Current.changeConfig
+            { Noteskins.Current.config with
+                HoldNoteTrim = hold_note_trim.Value
+                UseHoldTailTexture = use_tail_texture.Value
+                FlipHoldTail = flip_hold_tail.Value
+                DroppedHoldColor = dropped_color.Value
+            }
+
 type PlayfieldSettingsPage() as this =
     inherit Page()
 
@@ -172,7 +248,6 @@ type EditNoteskinPage(from_hotkey: bool) as this =
     let data = Noteskins.Current.config
         
     let name = Setting.simple data.Name
-    let holdNoteTrim = Setting.bounded data.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
     let keycount = Setting.simple options.KeymodePreference.Value
     let mutable noteColors = data.NoteColors
         
@@ -198,12 +273,14 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                 column()
                 |+ PageSetting("noteskins.edit.noteskinname", TextEntry(name, "none"))
                     .Pos(200.0f)
-                |+ PageSetting("noteskins.edit.holdnotetrim", Slider(holdNoteTrim))
-                    .Pos(270.0f)
-                    .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
+
                 |+ PageButton("noteskins.edit.playfield", fun () -> PlayfieldSettingsPage().Show())
-                    .Pos(370.0f)
+                    .Pos(300.0f)
                     .Tooltip(Tooltip.Info("noteskins.edit.playfield"))
+                |+ PageButton("noteskins.edit.holdnotes", fun () -> HoldNoteSettingsPage().Show())
+                    .Pos(370.0f)
+                    .Tooltip(Tooltip.Info("noteskins.edit.holdnotes"))
+
                 |+ PageSetting("generic.keymode",
                         Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors)) )
                     .Pos(490.0f)
@@ -249,6 +326,5 @@ type EditNoteskinPage(from_hotkey: bool) as this =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with
                 Name = name.Value
-                HoldNoteTrim = holdNoteTrim.Value
                 NoteColors = noteColors
             }
