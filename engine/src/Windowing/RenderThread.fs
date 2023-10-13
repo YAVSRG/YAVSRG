@@ -108,12 +108,11 @@ module FrameTimeStrategies =
         | Some (name, h) -> 
             let hDc = CreateDC(null, name, null, 0)
             if hDc = 0 then Logging.Error("Failed to get hDC for monitor")
-            hDc, 0u
-        | None -> 0, 0u
+            hDc
+        | None -> 0
 
     let mutable private _hAdapter = 0u
     let mutable private _VinPnSourceId = 0u
-    let mutable private _hDevice = 0u
 
     let close_adapter() = 
         if _hAdapter <> 0u then
@@ -122,19 +121,17 @@ module FrameTimeStrategies =
 
     let open_adapter (gdi_adapter_name: string) (glfw_monitor_name: string) =
         close_adapter()
-        let hDc, hDevice = get_display_handle glfw_monitor_name
+        let hDc = get_display_handle glfw_monitor_name
         if hDc = 0 then
             let mutable info = { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME> with pDeviceName = gdi_adapter_name }
             if D3DKMTOpenAdapterFromGdiDisplayName &info <> 0l then Logging.Error("Error getting adapter handle by GDI name")
             _hAdapter <- info.hAdapter
             _VinPnSourceId <- info.VinPnSourceId
-            _hDevice <- hDevice
         else
             let mutable info = { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMHDC> with hDc = hDc }
             if D3DKMTOpenAdapterFromHdc &info <> 0l then Logging.Error("Error getting adapter handle by hDc")
             _hAdapter <- info.hAdapter
             _VinPnSourceId <- info.VinPnSourceId
-            _hDevice <- hDevice
 
             if not (DeleteDC hDc) then Logging.Error("Error deleting hDc after use")
 
@@ -148,7 +145,7 @@ module FrameTimeStrategies =
         else Some (info.ScanLine, info.InVerticalBlank)
 
     let wait_for_vblank() =
-        let mutable info = { hAdapter = _hAdapter; hDevice = _hDevice; VinPnSourceId = _VinPnSourceId }
+        let mutable info = { hAdapter = _hAdapter; hDevice = 0u; VinPnSourceId = _VinPnSourceId }
         let status = D3DKMTWaitForVerticalBlankEvent &info
         if status <> 0l then
             Logging.Error(sprintf "Error waiting for vblank (%i)" status)
@@ -197,6 +194,7 @@ type Strategy =
     | DwmSync
     | CpuTimingScanlineCorrection
     | CpuTiming
+    | CpuTiming4x
 
 type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit: unit -> unit) =
     
@@ -214,7 +212,8 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
     let mutable is_focused = true
     let mutable strategy = Unlimited
 
-    let SCANLINE_OFFSET = 0.15
+    let DESIRED_SCANLINE_POSITION = -0.05
+    let SCANLINE_CORRECTION_STRENGTH = 0.1
 
     let now() = total_frame_timer.Elapsed.TotalMilliseconds
 
@@ -274,7 +273,10 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
             let correction =
                 match FrameTimeStrategies.get_scanline() with
                 | Some (i, _) ->
-                    float i / monitor_y * est_refresh_period + SCANLINE_OFFSET * est_refresh_period
+                    let line_pc = float i / monitor_y
+                    let line_pc = if line_pc > 0.5 then line_pc - 1.0 else line_pc
+                    let desired_pc = DESIRED_SCANLINE_POSITION
+                    (line_pc - desired_pc) * est_refresh_period * SCANLINE_CORRECTION_STRENGTH
                 | None ->
                     Logging.Warn("Switching to CPU timing without scanline correction")
                     strategy <- CpuTiming
@@ -282,7 +284,6 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
             est_present_of_next_frame <- est_present_of_next_frame - correction
             while est_present_of_next_frame < present_of_last_frame do
                 est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
-
             FrameTimeStrategies.sleep_accurate(total_frame_timer, est_present_of_next_frame - present_of_last_frame + start_of_frame)
 
         | CpuTiming ->
@@ -291,6 +292,14 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
             Render.Performance.visual_latency_hi <- est_refresh_period
             while est_present_of_next_frame < present_of_last_frame do
                 est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
+            FrameTimeStrategies.sleep_accurate(total_frame_timer, est_present_of_next_frame - present_of_last_frame + start_of_frame)
+            
+        | CpuTiming4x ->
+            present_of_last_frame <- now()
+            Render.Performance.visual_latency_lo <- 0.0
+            Render.Performance.visual_latency_hi <- est_refresh_period
+            while est_present_of_next_frame < present_of_last_frame do
+                est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period / 4.0
             FrameTimeStrategies.sleep_accurate(total_frame_timer, est_present_of_next_frame - present_of_last_frame + start_of_frame)
 
         let elapsed_time = last_frame_timer.Elapsed.TotalMilliseconds
