@@ -92,10 +92,11 @@ type PlayfieldSettingsPage() as this =
 
     let data = Noteskins.Current.config
     
+    let enable_column_Light = Setting.simple data.EnableColumnLight
     let column_width = Setting.bounded data.ColumnWidth 10.0f 300.0f |> Setting.roundf 0
     let column_spacing = Setting.bounded data.ColumnSpacing 0.0f 100.0f |> Setting.roundf 0
+    let fill_gaps = Setting.simple data.FillColumnGaps
     let playfield_color = Setting.simple data.PlayfieldColor
-    let enable_column_Light = Setting.simple data.EnableColumnLight
     let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
     let align_offset = Setting.percentf (snd data.PlayfieldAlignment)
 
@@ -111,14 +112,17 @@ type PlayfieldSettingsPage() as this =
             |+ PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
                 .Pos(340.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
+            |+ PageSetting("noteskins.edit.fillcolumngaps", Selector<_>.FromBool(fill_gaps))
+                .Pos(410.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.fillcolumngaps"))
             |+ PageSetting("noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
-                .Pos(440.0f)
+                .Pos(510.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
             |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
-                .Pos(510.0f)
+                .Pos(580.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
             |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true))
-                .Pos(610.0f, PRETTYWIDTH, PRETTYHEIGHT * 2f)
+                .Pos(680.0f, PRETTYWIDTH, PRETTYHEIGHT * 2f)
                 .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
         )
 
@@ -139,9 +143,12 @@ type PlayfieldSettingsPage() as this =
         let start = preview_bounds.Width * align_anchor.Value - pw * align_offset.Value
         let mutable left = start
 
-        for i = 1 to keys do
-            Draw.rect(preview_bounds.TrimLeft(left).SliceLeft(column_width.Value * PREVIEW_SCALE)) playfield_color.Value
-            left <- left + (column_width.Value + column_spacing.Value) * PREVIEW_SCALE
+        if fill_gaps.Value then
+            Draw.rect(preview_bounds.TrimLeft(left).SliceLeft(pw)) playfield_color.Value
+        else
+            for i = 1 to keys do
+                Draw.rect(preview_bounds.TrimLeft(left).SliceLeft(column_width.Value * PREVIEW_SCALE)) playfield_color.Value
+                left <- left + (column_width.Value + column_spacing.Value) * PREVIEW_SCALE
 
         Draw.rect <| Rect.Box(preview_bounds.Left + start, preview_bounds.CenterY - 2.5f, pw * align_offset.Value, 5f) <| Colors.cyan_accent.O2
         Draw.rect <| Rect.Box(preview_bounds.Left + start + pw, preview_bounds.CenterY - 2.5f, pw * (align_offset.Value - 1.0f), 5f) <| Colors.red_accent.O2
@@ -154,6 +161,7 @@ type PlayfieldSettingsPage() as this =
                 EnableColumnLight = enable_column_Light.Value
                 ColumnWidth = column_width.Value
                 ColumnSpacing = column_spacing.Value
+                FillColumnGaps = fill_gaps.Value
                 PlayfieldColor = playfield_color.Value
                 PlayfieldAlignment = align_anchor.Value, align_offset.Value
             }

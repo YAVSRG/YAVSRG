@@ -30,6 +30,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
     let noteHeight = column_width
     let holdnoteTrim = column_width * Content.noteskinConfig().HoldNoteTrim
     let playfieldColor = Content.noteskinConfig().PlayfieldColor
+    let fill_column_gaps = Content.noteskinConfig().FillColumnGaps
 
     let tailsprite = Content.getTexture(if Content.noteskinConfig().UseHoldTailTexture then "holdtail" else "holdhead")
     let animation = Animation.Counter (Content.noteskinConfig().AnimationFrameTime)
@@ -125,8 +126,9 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
         let begin_pos = column_pos
 
         // draw column backdrops and receptors
+        if fill_column_gaps then Draw.rect this.Bounds playfieldColor
         for k in 0 .. (keys - 1) do
-            Draw.rect (Rect.Create(left + columnPositions.[k], top, left + columnPositions.[k] + column_width, bottom)) playfieldColor
+            if not fill_column_gaps then Draw.rect (Rect.Create(left + columnPositions.[k], top, left + columnPositions.[k] + column_width, bottom)) playfieldColor
             hold_states.[k] <- if holds_offscreen.[k] < 0 then NoHold else HeadOffscreen holds_offscreen.[k]
             Draw.quad // receptor
                 (
