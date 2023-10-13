@@ -60,6 +60,8 @@ type NoteskinConfig =
         ColumnWidth: float32
         /// Sets the spacing of columns, in pixels
         ColumnSpacing: float32
+        /// If true, spacing between columns is filled instead of having a gap
+        FillColumnGaps: bool
         // todo: group every animation thing under an animations object
         /// ???
         ColumnLightTime: float32
@@ -92,6 +94,7 @@ type NoteskinConfig =
             DroppedHoldColor = Color.FromArgb(255, 150, 150, 150)
             ColumnWidth = 150.0f
             ColumnSpacing = 0.0f
+            FillColumnGaps = false
             ColumnLightTime = 0.4f
             EnableColumnLight = true
             AnimationFrameTime = 200.0
