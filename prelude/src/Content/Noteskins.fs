@@ -43,7 +43,7 @@ type NoteskinConfig =
         /// Contains settings for the color scheme of notes
         NoteColors: ColorConfig
 
-        /// Hold tail textures are oriented for upscroll. Set this to true if you want them to be flipped when not playing in downscroll mode.
+        /// Hold tail textures are oriented for upscroll. Set this to true if you want them to be flipped when playing in downscroll mode.
         FlipHoldTail: bool
         /// Set to false if you want to use the `holdhead` texture for hold tails too
         UseHoldTailTexture: bool
