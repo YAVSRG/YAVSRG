@@ -97,10 +97,11 @@ type NoteskinsPage() as this =
                     if Noteskins.extractCurrent() then refresh()
                     else Logging.Error "Noteskin folder already exists"
                 )).Show()
-        | Folder _ -> Menu.ShowPage { new EditNoteskinPage() with override this.OnClose() = base.OnClose(); refresh() }
+        | Folder _ -> Menu.ShowPage { new EditNoteskinPage(false) with override this.OnClose() = base.OnClose(); refresh() }
 
     and refresh() =
         grid.Clear()
+        preview.Refresh()
 
         for id, noteskin in Noteskins.list() do
             grid |* NoteskinButton(id, noteskin, preview.Refresh)
@@ -130,7 +131,6 @@ type NoteskinsPage() as this =
                     Screen.change Screen.Type.Import Transitions.Flags.Default
                 ))
                 .Pos(900.0f)
-                .Tooltip(Tooltip.Info("noteskins.get_more"))
         )
         this |* preview
 

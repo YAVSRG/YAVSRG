@@ -87,6 +87,7 @@ type Toolbar() =
                 .Tooltip(Tooltip.Info("menu.stats"))
             )
         |+ NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
+        |+ HotkeyAction("edit_noteskin", fun () -> if shown() && Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then Noteskins.EditNoteskinPage(true).Show())
         |+ HotkeyAction("screenshot", fun () ->
             let id =  DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
             let path = Path.Combine(getDataPath "Screenshots", id)

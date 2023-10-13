@@ -9,6 +9,9 @@ open Prelude.Common
 open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Options
+open Interlude.Features
+open Interlude.Utils
+open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
 
@@ -84,16 +87,84 @@ type NoteColorPicker(color: Setting<byte>) as this =
             elif (!|"left").Tapped() then bk()
             elif (!|"right").Tapped() then fd()
 
-type EditNoteskinPage() as this =
+type PlayfieldSettingsPage() as this =
+    inherit Page()
+
+    let data = Noteskins.Current.config
+    
+    let column_width = Setting.bounded data.ColumnWidth 10.0f 300.0f |> Setting.roundf 0
+    let column_spacing = Setting.bounded data.ColumnSpacing 0.0f 100.0f |> Setting.roundf 0
+    let playfield_color = Setting.simple data.PlayfieldColor
+    let enable_column_Light = Setting.simple data.EnableColumnLight
+    let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
+    let align_offset = Setting.percentf (snd data.PlayfieldAlignment)
+
+    do
+        this.Content(
+            column()
+            |+ PageSetting("noteskins.edit.enablecolumnlight", Selector<_>.FromBool enable_column_Light)
+                .Pos(200.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.enablecolumnlight"))
+            |+ PageSetting("noteskins.edit.columnwidth", Slider(column_width, Step = 1f))
+                .Pos(270.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
+            |+ PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
+                .Pos(340.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
+            |+ PageSetting("noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
+                .Pos(440.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
+            |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
+                .Pos(510.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
+            |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true))
+                .Pos(610.0f, PRETTYWIDTH, PRETTYHEIGHT * 2f)
+                .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
+        )
+
+    override this.Draw() =
+        base.Draw()
+
+        let PREVIEW_SCALE = 0.35f
+        let preview_bounds = Rect.Box(this.Bounds.Right - 50.0f - this.Bounds.Width * PREVIEW_SCALE, this.Bounds.Bottom - 50.0f - this.Bounds.Height * PREVIEW_SCALE, this.Bounds.Width * PREVIEW_SCALE, this.Bounds.Height * PREVIEW_SCALE)
+        let keys = match Gameplay.Chart.CACHE_DATA with Some c -> c.Keys | None -> 4
+
+        let frame = preview_bounds.Expand Style.PADDING
+        Draw.rect (frame.SliceLeft Style.PADDING) Colors.white
+        Draw.rect (frame.SliceTop Style.PADDING) Colors.white
+        Draw.rect (frame.SliceRight Style.PADDING) Colors.white
+        Draw.rect (frame.SliceBottom Style.PADDING) Colors.white
+
+        let pw = (float32 keys * column_width.Value + float32 (keys - 1) * column_spacing.Value) * PREVIEW_SCALE
+        let start = preview_bounds.Width * align_anchor.Value - pw * align_offset.Value
+        let mutable left = start
+
+        for i = 1 to keys do
+            Draw.rect(preview_bounds.TrimLeft(left).SliceLeft(column_width.Value * PREVIEW_SCALE)) playfield_color.Value
+            left <- left + (column_width.Value + column_spacing.Value) * PREVIEW_SCALE
+
+        Draw.rect <| Rect.Box(preview_bounds.Left + start, preview_bounds.CenterY - 2.5f, pw * align_offset.Value, 5f) <| Colors.cyan_accent.O2
+        Draw.rect <| Rect.Box(preview_bounds.Left + start + pw, preview_bounds.CenterY - 2.5f, pw * (align_offset.Value - 1.0f), 5f) <| Colors.red_accent.O2
+        Draw.rect <| Rect.Box(preview_bounds.Left + preview_bounds.Width * align_anchor.Value - 2.5f, preview_bounds.Top, 5f, preview_bounds.Height) <| Colors.green_accent.O2
+
+    override this.Title = L"noteskins.edit.playfield.name"
+    override this.OnClose() =
+        Noteskins.Current.changeConfig
+            { Noteskins.Current.config with
+                EnableColumnLight = enable_column_Light.Value
+                ColumnWidth = column_width.Value
+                ColumnSpacing = column_spacing.Value
+                PlayfieldColor = playfield_color.Value
+                PlayfieldAlignment = align_anchor.Value, align_offset.Value
+            }
+
+type EditNoteskinPage(from_hotkey: bool) as this =
     inherit Page()
 
     let data = Noteskins.Current.config
         
     let name = Setting.simple data.Name
     let holdNoteTrim = Setting.bounded data.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
-    let columnWidth = Setting.bounded data.ColumnWidth 10.0f 300.0f |> Setting.roundf 0
-    let columnSpacing = Setting.bounded data.ColumnSpacing 0.0f 100.0f |> Setting.roundf 0
-    let enableColumnLight = Setting.simple data.EnableColumnLight
     let keycount = Setting.simple options.KeymodePreference.Value
     let mutable noteColors = data.NoteColors
         
@@ -118,19 +189,13 @@ type EditNoteskinPage() as this =
             |+ (
                 column()
                 |+ PageSetting("noteskins.edit.noteskinname", TextEntry(name, "none"))
-                    .Pos(100.0f)
+                    .Pos(200.0f)
                 |+ PageSetting("noteskins.edit.holdnotetrim", Slider(holdNoteTrim))
-                    .Pos(170.0f)
+                    .Pos(270.0f)
                     .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
-                |+ PageSetting("noteskins.edit.enablecolumnlight", Selector<_>.FromBool enableColumnLight)
-                    .Pos(240.0f)
-                    .Tooltip(Tooltip.Info("noteskins.edit.enablecolumnlight"))
-                |+ PageSetting("noteskins.edit.columnwidth", Slider(columnWidth, Step = 1f))
-                    .Pos(310.0f)
-                    .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
-                |+ PageSetting("noteskins.edit.columnspacing",Slider(columnSpacing, Step = 1f))
-                    .Pos(390.0f)
-                    .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
+                |+ PageButton("noteskins.edit.playfield", fun () -> PlayfieldSettingsPage().Show())
+                    .Pos(370.0f)
+                    .Tooltip(Tooltip.Info("noteskins.edit.playfield"))
                 |+ PageSetting("generic.keymode",
                         Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors)) )
                     .Pos(490.0f)
@@ -166,15 +231,16 @@ type EditNoteskinPage() as this =
             //    |+ TextureCard("receptorlighting", (fun () -> NoteTextureEditPage().Show()))
             //    )
         )
+        this.Add (Conditional((fun () -> not from_hotkey),
+            Callout.frame (Callout.Small.Icon(Icons.info).Title(L"noteskins.edit.hotkey_hint").Hotkey("edit_noteskin")) 
+                ( fun (w, h) -> Position.SliceTop(h + 40.0f + 40.0f).SliceRight(w + 40.0f).Margin(20.0f, 20.0f) )
+            ))
         
     override this.Title = data.Name
     override this.OnClose() =
         Noteskins.Current.changeConfig
-            { data with
+            { Noteskins.Current.config with
                 Name = name.Value
                 HoldNoteTrim = holdNoteTrim.Value
-                EnableColumnLight = enableColumnLight.Value
                 NoteColors = noteColors
-                ColumnWidth = columnWidth.Value
-                ColumnSpacing = columnSpacing.Value
             }
