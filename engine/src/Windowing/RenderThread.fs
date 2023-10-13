@@ -194,7 +194,6 @@ type Strategy =
     | DwmSync
     | CpuTimingScanlineCorrection
     | CpuTiming
-    | CpuTiming4x
 
 type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit: unit -> unit) =
     
@@ -292,14 +291,6 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
             Render.Performance.visual_latency_hi <- est_refresh_period
             while est_present_of_next_frame < present_of_last_frame do
                 est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
-            FrameTimeStrategies.sleep_accurate(total_frame_timer, est_present_of_next_frame - present_of_last_frame + start_of_frame)
-            
-        | CpuTiming4x ->
-            present_of_last_frame <- now()
-            Render.Performance.visual_latency_lo <- 0.0
-            Render.Performance.visual_latency_hi <- est_refresh_period
-            while est_present_of_next_frame < present_of_last_frame do
-                est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period / 4.0
             FrameTimeStrategies.sleep_accurate(total_frame_timer, est_present_of_next_frame - present_of_last_frame + start_of_frame)
 
         let elapsed_time = last_frame_timer.Elapsed.TotalMilliseconds
