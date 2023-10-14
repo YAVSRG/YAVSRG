@@ -8,12 +8,15 @@ open Percyqaz.Shell
 
 module Check =
 
-    let rec walk_fs_files(dir: string) : string seq =
+    let rec walk_fs_files(dir: string) : (string * string) seq =
         seq {
             for file in Directory.GetFiles(dir) do
-                yield File.ReadAllText file
+                if Path.GetExtension(file).ToLower() = ".fs" then
+                    yield file, File.ReadAllText file
             for dir in Directory.GetDirectories(dir) do
-                yield! walk_fs_files dir
+                let name = Path.GetFileName dir
+                if name <> "bin" && name <> "obj" then
+                    yield! walk_fs_files dir
         }
 
     let check_locale(name: string) =
@@ -28,58 +31,67 @@ module Check =
                 ) lines
             mapping
 
-        let referenced =
-            let found = new List<string>()
-            let matches (reg: string) (input: string) =
-                seq {
-                    for m in Regex(reg.Trim()).Matches(input) do
-                        yield (m.Groups.[1].Value)
-                }
-            for file_contents in walk_fs_files INTERLUDE_SOURCE_PATH do
+        let mutable sources = Map.empty<string, string>
+        let mutable found = Set.empty<string>
 
-                for m in matches """ L"([a-z\-_\.]*)" """ file_contents do
-                    found.Add m
+        let find x source = 
+            if not (found.Contains x) then
+                found <- Set.add x found
+                sources <- Map.add x source sources
+        let matches (reg: string) (input: string) =
+            seq {
+                for m in Regex(reg.Trim()).Matches(input) do
+                    yield m.Index, (m.Groups.[1].Value)
+            }
+        for filename, file_contents in walk_fs_files INTERLUDE_SOURCE_PATH do
 
-                for m in matches """ PageSetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do
-                    found.Add (sprintf "%s.name" m)
+            for position, m in matches """ L"([a-z\-_\.]*)" """ file_contents do
+                find m (sprintf "%s (position %i)" filename position)
 
-                for m in matches """ PageButton\(\s*"([a-z\-_\.]*)" """ file_contents do
-                    found.Add (sprintf "%s.name" m)
+            for position, m in matches """ PageSetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do
+                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
 
-                for m in matches """ CaseSelector\(\s*"([a-z\-_\.]*)" """ file_contents do
-                    found.Add (sprintf "%s.name" m)
+            for position, m in matches """ PageButton\(\s*"([a-z\-_\.]*)" """ file_contents do
+                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
+
+            for position, m in matches """ CaseSelector\(\s*"([a-z\-_\.]*)" """ file_contents do
+                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
                     
-                for m in matches """ PageButton.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
-                    found.Add (sprintf "%s.name" m)
+            for position, m in matches """ PageButton.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
+                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
 
-                for m in matches """ Tooltip.Info\("([a-z\-_\.]*)" """ file_contents do
-                    found.Add (sprintf "%s.name" m)
-                    found.Add (sprintf "%s.tooltip" m)
+            for position, m in matches """ Tooltip.Info\("([a-z\-_\.]*)" """ file_contents do
+                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
+                find (sprintf "%s.tooltip" m) (sprintf "%s (position %i)" filename position)
 
-                for m in matches """ localise\s*"([a-z\-_\.]*)" """ file_contents do
-                    found.Add m
+            for position, m in matches """ localise\s*"([a-z\-_\.]*)" """ file_contents do
+                find m (sprintf "%s (position %i)" filename position)
 
-                for m in matches """ localiseWith\s*\[.*\]\s*"([a-z\-_\.]*)" """ file_contents do
-                    found.Add m
+            for position, m in matches """ localiseWith\s*\[.*\]\s*"([a-z\-_\.]*)" """ file_contents do
+                find m (sprintf "%s (position %i)" filename position)
 
-                for m in Seq.append ["exit"; "select"; "up"; "down"; "left"; "right"] (matches """ Hotkeys.register "([a-z0-9\-_\.]*)" """ file_contents) do
-                    found.Add (sprintf "hotkeys.%s.name" m)
-                    found.Add (sprintf "hotkeys.%s.tooltip" m)
+            for m in Seq.append ["exit"; "select"; "up"; "down"; "left"; "right"] (matches """ Hotkeys.register "([a-z0-9\-_\.]*)" """ file_contents |> Seq.map snd) do
+                find (sprintf "hotkeys.%s.name" m) "Hotkeys"
+                find (sprintf "hotkeys.%s.tooltip" m) "Hotkeys"
 
-                for m in Seq.append ["auto"; "pacemaker"] Prelude.Gameplay.Mods.modList.Keys do
-                    found.Add (sprintf "mod.%s.name" m)
-                    found.Add (sprintf "mod.%s.desc" m)
+            for m in Seq.append ["auto"; "pacemaker"] Prelude.Gameplay.Mods.modList.Keys do
+                find (sprintf "mod.%s.name" m) "Mods"
+                find (sprintf "mod.%s.desc" m) "Mods"
 
-                for m in Prelude.Data.Charts.Sorting.groupBy.Keys do
-                    found.Add (sprintf "levelselect.groupby.%s" m)
+            for i = 0 to 9 do
+                find (sprintf "noteskins.edit.notecolors.chord.%i" i) "Note color tooltips"
+                find (sprintf "noteskins.edit.notecolors.column.%i" i) "Note color tooltips"
+                if i < 9 then find (sprintf "noteskins.edit.notecolors.ddr.%i" i) "Note color tooltips"
 
-                for m in Prelude.Data.Charts.Sorting.sortBy.Keys do
-                    found.Add (sprintf "levelselect.sortby.%s" m)
-            found
+            for m in Prelude.Data.Charts.Sorting.groupBy.Keys do
+                find (sprintf "levelselect.groupby.%s" m) "Level select grouping"
 
-        for m in referenced |> Seq.distinct |> Seq.sort do
+            for m in Prelude.Data.Charts.Sorting.sortBy.Keys do
+                find (sprintf "levelselect.sortby.%s" m) "Level select sorting"
+
+        for m in found |> Seq.sort do
             if locale.ContainsKey m then locale.Remove m |> ignore
-            else printfn "Missing locale key: %s" m
+            else printfn "Missing locale key: %s -- %s" m sources.[m]
 
         for m in locale.Keys do
             printfn "Unused locale key: %s" m
