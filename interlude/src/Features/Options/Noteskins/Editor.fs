@@ -57,7 +57,9 @@ type TextureCard(id: string, on_click: unit -> unit) as this =
 
     override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
-type NoteColorPicker(color: Setting<byte>) as this =
+// ----
+
+type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as this =
     inherit StaticContainer(NodeType.Leaf)
     
     let sprite = getTexture "note"
@@ -68,6 +70,9 @@ type NoteColorPicker(color: Setting<byte>) as this =
     
     do 
         this
+        |+ Tooltip(Callout.Normal
+            .Title(sprintf "%s: %O" (L"noteskins.edit.notecolors.name") style)
+            .Body(L (sprintf "noteskins.edit.notecolors.%s.%i" (style.ToString().ToLower()) index)))
         |* Clickable((fun () -> (if not this.Selected then this.Select()); fd ()), OnHover = fun b -> if b && not this.Focused then this.Focus())
 
     override this.OnFocus() = Style.hover.Play(); base.OnFocus()
@@ -87,159 +92,62 @@ type NoteColorPicker(color: Setting<byte>) as this =
             elif (!|"left").Tapped() then bk()
             elif (!|"right").Tapped() then fd()
 
-type HoldNoteSettingsPage() as this =
-    inherit Page() 
-
-    let data = Noteskins.Current.config
-
-    let hold_note_trim = Setting.bounded data.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
-    let use_tail_texture = Setting.simple data.UseHoldTailTexture
-    let flip_hold_tail = Setting.simple data.FlipHoldTail
-    let dropped_color = Setting.simple data.DroppedHoldColor
-
-    let head = getTexture "holdhead"
-    let body = getTexture "holdbody"
-    let tail = getTexture "holdtail"
-
-    do
-        this.Content(
-            column()
-            |+ PageSetting("noteskins.edit.holdnotetrim", Slider(hold_note_trim))
-                .Pos(200.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
-            |+ PageSetting("noteskins.edit.usetailtexture", Selector<_>.FromBool(use_tail_texture))
-                .Pos(300.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.usetailtexture"))
-            |+ PageSetting("noteskins.edit.flipholdtail", Selector<_>.FromBool(flip_hold_tail))
-                .Pos(370.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.flipholdtail"))
-            |+ PageSetting("noteskins.edit.droppedholdcolor", ColorPicker(dropped_color, true))
-                .Pos(470.0f, PRETTYWIDTH, PRETTYHEIGHT * 2f)
-                .Tooltip(Tooltip.Info("noteskins.edit.droppedholdcolor"))
-        )
-
-    override this.Draw() =
-        base.Draw()
-
-        let COLUMN_WIDTH = 120.0f
-        let mutable left = this.Bounds.Right - 50.0f - COLUMN_WIDTH
-        let bottom = this.Bounds.Bottom - 100.0f
-        let top = this.Bounds.CenterY - 100.0f
-
-        let draw_ln_preview(label: string, color: Color, downscroll: bool) =
-
-            Draw.rect (Rect.Create(left, top, left + COLUMN_WIDTH, bottom)) Colors.black.O2
-
-            let headpos = if downscroll then bottom - COLUMN_WIDTH else top
-            let tailpos = if downscroll then top + hold_note_trim.Value * COLUMN_WIDTH else bottom - COLUMN_WIDTH - hold_note_trim.Value * COLUMN_WIDTH
-
-            Draw.sprite <| Rect.Create(left, min headpos tailpos + COLUMN_WIDTH * 0.5f, left + COLUMN_WIDTH, max headpos tailpos + COLUMN_WIDTH * 0.5f) <| color <| body
-            Draw.sprite <| Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH) <| color <| head
-            Draw.sprite 
-                <| 
-                    (
-                        Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
-                        |> if flip_hold_tail.Value && downscroll then fun (r: Rect) -> r.Shrink(0.0f, r.Height) else id
-                    )
-                <| color 
-                <| (if use_tail_texture.Value then tail else head)
-
-            Text.drawFillB(Style.font, label, Rect.Box(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
-
-            left <- left - COLUMN_WIDTH - 50.0f
-
-        draw_ln_preview("Upscroll", Color.White, false)
-        draw_ln_preview("Dropped", dropped_color.Value, not options.Upscroll.Value)
-        draw_ln_preview("Downscroll", Color.White, true)
-
-
-    override this.Title = L"noteskins.edit.holdnotes.name"
-    override this.OnClose() =
-        Noteskins.Current.changeConfig
-            { Noteskins.Current.config with
-                HoldNoteTrim = hold_note_trim.Value
-                UseHoldTailTexture = use_tail_texture.Value
-                FlipHoldTail = flip_hold_tail.Value
-                DroppedHoldColor = dropped_color.Value
-            }
-
-type PlayfieldSettingsPage() as this =
+type ColorSettingsPage() as this =
     inherit Page()
-
-    let data = Noteskins.Current.config
     
-    let enable_column_Light = Setting.simple data.EnableColumnLight
-    let column_width = Setting.bounded data.ColumnWidth 10.0f 300.0f |> Setting.roundf 0
-    let column_spacing = Setting.bounded data.ColumnSpacing 0.0f 100.0f |> Setting.roundf 0
-    let fill_gaps = Setting.simple data.FillColumnGaps
-    let playfield_color = Setting.simple data.PlayfieldColor
-    let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
-    let align_offset = Setting.percentf (snd data.PlayfieldAlignment)
+    let data = Noteskins.Current.config
+    let keycount = Setting.simple options.KeymodePreference.Value
+    let mutable noteColors = data.NoteColors
+    
+    let g keycount i =
+        let k = if noteColors.UseGlobalColors then 0 else int keycount - 2
+        Setting.make
+            (fun v -> noteColors.Colors.[k].[i] <- v)
+            (fun () -> noteColors.Colors.[k].[i])
+
+    let NOTE_WIDTH = 120.0f
+
+    let colors, refreshColors =
+        refreshRow
+            (fun () -> ColorScheme.count (int keycount.Value) noteColors.Style)
+            (fun i k ->
+                let x = -60.0f * float32 k
+                let n = float32 i
+                NoteColorPicker(g keycount.Value i, noteColors.Style, i, 
+                    Position = { Position.Default with Left = 0.5f %+ (x + NOTE_WIDTH * n); Right = 0.5f %+ (x + NOTE_WIDTH * n + NOTE_WIDTH) })
+            )
 
     do
         this.Content(
             column()
-            |+ PageSetting("noteskins.edit.enablecolumnlight", Selector<_>.FromBool enable_column_Light)
+            |+ PageSetting("noteskins.edit.globalcolors",
+                    Selector<_>.FromBool(
+                        Setting.make
+                            (fun v -> noteColors <- { noteColors with UseGlobalColors = v })
+                            (fun () -> noteColors.UseGlobalColors)
+                        |> Setting.trigger (ignore >> refreshColors)) )
                 .Pos(200.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.enablecolumnlight"))
-            |+ PageSetting("noteskins.edit.columnwidth", Slider(column_width, Step = 1f))
+                .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
+            |+ PageSetting("generic.keymode",
+                    Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors)) )
                 .Pos(270.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
-            |+ PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
-                .Pos(340.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
-            |+ PageSetting("noteskins.edit.fillcolumngaps", Selector<_>.FromBool(fill_gaps))
-                .Pos(410.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.fillcolumngaps"))
-            |+ PageSetting("noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
-                .Pos(510.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
-            |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
-                .Pos(580.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
-            |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true))
-                .Pos(680.0f, PRETTYWIDTH, PRETTYHEIGHT * 2f)
-                .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
-        )
-
-    override this.Draw() =
-        base.Draw()
-
-        let PREVIEW_SCALE = 0.35f
-        let preview_bounds = Rect.Box(this.Bounds.Right - 50.0f - this.Bounds.Width * PREVIEW_SCALE, this.Bounds.Bottom - 50.0f - this.Bounds.Height * PREVIEW_SCALE, this.Bounds.Width * PREVIEW_SCALE, this.Bounds.Height * PREVIEW_SCALE)
-        let keys = match Gameplay.Chart.CACHE_DATA with Some c -> c.Keys | None -> 4
-
-        let frame = preview_bounds.Expand Style.PADDING
-        Draw.rect (frame.SliceLeft Style.PADDING) Colors.white
-        Draw.rect (frame.SliceTop Style.PADDING) Colors.white
-        Draw.rect (frame.SliceRight Style.PADDING) Colors.white
-        Draw.rect (frame.SliceBottom Style.PADDING) Colors.white
-
-        let pw = (float32 keys * column_width.Value + float32 (keys - 1) * column_spacing.Value) * PREVIEW_SCALE
-        let start = preview_bounds.Width * align_anchor.Value - pw * align_offset.Value
-        let mutable left = start
-
-        if fill_gaps.Value then
-            Draw.rect(preview_bounds.TrimLeft(left).SliceLeft(pw)) playfield_color.Value
-        else
-            for i = 1 to keys do
-                Draw.rect(preview_bounds.TrimLeft(left).SliceLeft(column_width.Value * PREVIEW_SCALE)) playfield_color.Value
-                left <- left + (column_width.Value + column_spacing.Value) * PREVIEW_SCALE
-
-        Draw.rect <| Rect.Box(preview_bounds.Left + start, preview_bounds.CenterY - 2.5f, pw * align_offset.Value, 5f) <| Colors.cyan_accent.O2
-        Draw.rect <| Rect.Box(preview_bounds.Left + start + pw, preview_bounds.CenterY - 2.5f, pw * (align_offset.Value - 1.0f), 5f) <| Colors.red_accent.O2
-        Draw.rect <| Rect.Box(preview_bounds.Left + preview_bounds.Width * align_anchor.Value - 2.5f, preview_bounds.Top, 5f, preview_bounds.Height) <| Colors.green_accent.O2
-
-    override this.Title = L"noteskins.edit.playfield.name"
+            |+ PageSetting("noteskins.edit.colorstyle",
+                    Selector.FromEnum(
+                        Setting.make
+                            (fun v -> noteColors <- { noteColors with Style = v })
+                            (fun () -> noteColors.Style)
+                        |> Setting.trigger (ignore >> refreshColors)) )
+                .Pos(370.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
+            |+ PageSetting("noteskins.edit.notecolors", colors)
+                .Pos(470.0f, Viewport.vwidth - 200.0f, NOTE_WIDTH)
+            )
+        
+    override this.Title = L"noteskins.edit.colors.name"
     override this.OnClose() =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with
-                EnableColumnLight = enable_column_Light.Value
-                ColumnWidth = column_width.Value
-                ColumnSpacing = column_spacing.Value
-                FillColumnGaps = fill_gaps.Value
-                PlayfieldColor = playfield_color.Value
-                PlayfieldAlignment = align_anchor.Value, align_offset.Value
+                NoteColors = noteColors
             }
 
 type EditNoteskinPage(from_hotkey: bool) as this =
@@ -248,23 +156,6 @@ type EditNoteskinPage(from_hotkey: bool) as this =
     let data = Noteskins.Current.config
         
     let name = Setting.simple data.Name
-    let keycount = Setting.simple options.KeymodePreference.Value
-    let mutable noteColors = data.NoteColors
-        
-    let g keycount i =
-        let k = if noteColors.UseGlobalColors then 0 else int keycount - 2
-        Setting.make
-            (fun v -> noteColors.Colors.[k].[i] <- v)
-            (fun () -> noteColors.Colors.[k].[i])
-
-    let colors, refreshColors =
-        refreshRow
-            (fun () -> ColorScheme.count (int keycount.Value) noteColors.Style)
-            (fun i k ->
-                let x = -60.0f * float32 k
-                let n = float32 i
-                NoteColorPicker(g keycount.Value i, Position = { Position.Default with Left = 0.5f %+ (x + 120.0f * n); Right = 0.5f %+ (x + 120.0f * n + 120.0f) })
-            )
 
     do
         this.Content(
@@ -280,29 +171,9 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                 |+ PageButton("noteskins.edit.holdnotes", fun () -> HoldNoteSettingsPage().Show())
                     .Pos(370.0f)
                     .Tooltip(Tooltip.Info("noteskins.edit.holdnotes"))
-
-                |+ PageSetting("generic.keymode",
-                        Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors)) )
-                    .Pos(490.0f)
-                |+ PageSetting("noteskins.edit.globalcolors",
-                        Selector<_>.FromBool(
-                            Setting.make
-                                (fun v -> noteColors <- { noteColors with UseGlobalColors = v })
-                                (fun () -> noteColors.UseGlobalColors)
-                            |> Setting.trigger (ignore >> refreshColors)) )
-                    .Pos(560.0f)
-                    .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
-                |+ PageSetting("noteskins.edit.colorstyle",
-                        Selector.FromEnum(
-                            Setting.make
-                                (fun v -> noteColors <- { noteColors with Style = v })
-                                (fun () -> noteColors.Style)
-                            |> Setting.trigger (ignore >> refreshColors)) )
-                    .Pos(630.0f)
-                    .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
-                |+ PageSetting("noteskins.edit.notecolors", colors)
-                    .Pos(700.0f, Viewport.vwidth - 200.0f, 120.0f)
-                    .Tooltip(Tooltip.Info("noteskins.edit.notecolors"))
+                |+ PageButton("noteskins.edit.colors", fun () -> ColorSettingsPage().Show())
+                    .Pos(440.0f)
+                    .Tooltip(Tooltip.Info("noteskins.edit.colors"))
                 )
             //|+ (
             //    GridContainer<TextureCard>(200.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f), Position = { Position.Margin(50.0f) with Left = 1.0f %- 470.0f })
@@ -326,5 +197,4 @@ type EditNoteskinPage(from_hotkey: bool) as this =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with
                 Name = name.Value
-                NoteColors = noteColors
             }
