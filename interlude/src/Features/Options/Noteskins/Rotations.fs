@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.OptionsMenu.Noteskins
 
-open Prelude.Charts.Tools.NoteColors
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
@@ -10,7 +9,6 @@ open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Options
 open Interlude.Utils
-open Interlude.UI
 open Interlude.UI.Menu
 
 type RotationPicker(rotation: Setting<float>) as this =
@@ -57,7 +55,7 @@ type RotationSettingsPage() as this =
     let mutable rotations = data.Rotations
     
     let g keycount i =
-        let k = int keycount - 2
+        let k = int keycount - 3
         Setting.make
             (fun v -> rotations.[k].[i] <- v)
             (fun () -> rotations.[k].[i])

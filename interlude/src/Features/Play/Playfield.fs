@@ -26,13 +26,18 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
     let column_width = Content.noteskinConfig().ColumnWidth
     let column_spacing = Content.noteskinConfig().ColumnSpacing
 
-    let columnPositions = Array.init keys (fun i -> float32 i * (column_width + column_spacing))
-    let noteHeight = column_width
-    let holdnoteTrim = column_width * Content.noteskinConfig().HoldNoteTrim
-    let playfieldColor = Content.noteskinConfig().PlayfieldColor
+    let column_positions = Array.init keys (fun i -> float32 i * (column_width + column_spacing))
+    let note_height = column_width
+    let holdnote_trim = column_width * Content.noteskinConfig().HoldNoteTrim
+    let playfield_color = Content.noteskinConfig().PlayfieldColor
     let fill_column_gaps = Content.noteskinConfig().FillColumnGaps
 
-    let tailsprite = Content.getTexture(if Content.noteskinConfig().UseHoldTailTexture then "holdtail" else "holdhead")
+    let receptor = Content.getTexture "receptor"
+    let holdtail = Content.getTexture "holdtail"
+    let holdhead = Content.getTexture "holdhead"
+    let holdbody = Content.getTexture "holdbody"
+    let note = Content.getTexture "note"
+    let useholdtail = Content.noteskinConfig().UseHoldTailTexture
     let animation = Animation.Counter (Content.noteskinConfig().AnimationFrameTime)
 
     let sv = chart.SV
@@ -56,7 +61,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
     let scrollDirectionFlip = fun q -> if not (Content.noteskinConfig().FlipHoldTail) || options.Upscroll.Value then q else Quad.flip q
 
     do
-        let width = Array.mapi (fun i n -> n + column_width) columnPositions |> Array.max
+        let width = Array.mapi (fun i n -> n + column_width) column_positions |> Array.max
         let (screenAlign, columnAlign) = Content.noteskinConfig().PlayfieldAlignment
         this.Position <-
             { 
@@ -69,7 +74,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
     new (state: PlayState, vanishing_notes) = Playfield(Gameplay.Chart.WITH_COLORS.Value, state, vanishing_notes)
 
     member this.ColumnWidth = column_width
-    member this.ColumnPositions = columnPositions
+    member this.ColumnPositions = column_positions
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
@@ -85,11 +90,11 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
         if newtime < time then reset()
         time <- newtime
 
-        let playfieldHeight = bottom - top + (max 0.0f holdnoteTrim)
+        let playfieldHeight = bottom - top + (max 0.0f holdnote_trim)
         let now = Song.timeWithOffset() + Render.Performance.frame_compensation() + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
         let begin_time = 
             if vanishing_notes then 
-                let space_needed = hitposition + noteHeight
+                let space_needed = hitposition + note_height
                 let time_needed = space_needed / scale
                 now - time_needed // todo: this is true at 1.0x SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im a laze
             else now
@@ -126,69 +131,70 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
         let begin_pos = column_pos
 
         // draw column backdrops and receptors
-        if fill_column_gaps then Draw.rect this.Bounds playfieldColor
+        if fill_column_gaps then Draw.rect this.Bounds playfield_color
         for k in 0 .. (keys - 1) do
-            if not fill_column_gaps then Draw.rect (Rect.Create(left + columnPositions.[k], top, left + columnPositions.[k] + column_width, bottom)) playfieldColor
+            if not fill_column_gaps then Draw.rect (Rect.Create(left + column_positions.[k], top, left + column_positions.[k] + column_width, bottom)) playfield_color
             hold_states.[k] <- if holds_offscreen.[k] < 0 then NoHold else HeadOffscreen holds_offscreen.[k]
             Draw.quad // receptor
                 (
-                    Rect.Box(left + columnPositions.[k], hitposition, column_width, noteHeight)
+                    Rect.Box(left + column_positions.[k], hitposition, column_width, note_height)
                     |> scrollDirectionPos bottom
                     |> Quad.ofRect
                     |> rotation k
                 )
-                (Color.White |> Quad.colorOf)
-                (Sprite.gridUV (animation.Loops, if (state.Scoring.KeyState |> Bitmask.hasBit k) then 1 else 0) (Content.getTexture "receptor"))
+                (Quad.colorOf Color.White)
+                (Sprite.gridUV (animation.Loops, if (state.Scoring.KeyState |> Bitmask.hasBit k) then 1 else 0) receptor)
 
         let inline draw_note(k, pos, color) =
             Draw.quad
                 (
                     Quad.ofRect ( 
-                        Rect.Box(left + columnPositions.[k], pos, column_width, noteHeight)
+                        Rect.Box(left + column_positions.[k], pos, column_width, note_height)
                         |> scrollDirectionPos bottom
                     )
                     |> rotation k
                 )
                 (Quad.colorOf Color.White)
-                (Sprite.gridUV (animation.Loops, color) (Content.getTexture "note"))
+                (Sprite.gridUV (animation.Loops, color) note)
 
         let inline draw_head(k, pos, color, tint) =
             Draw.quad
                 (
                     Quad.ofRect ( 
-                        Rect.Box(left + columnPositions.[k], pos, column_width, noteHeight)
+                        Rect.Box(left + column_positions.[k], pos, column_width, note_height)
                         |> scrollDirectionPos bottom
                     )
                     |> rotation k
                 )
                 (Quad.colorOf tint)
-                (Sprite.gridUV (animation.Loops, color) (Content.getTexture "holdhead"))
+                (Sprite.gridUV (animation.Loops, color) holdhead)
 
         let inline draw_body(k, pos_a, pos_b, color, tint) =
             Draw.quad
                 (
                     Quad.ofRect ( 
                         Rect.Create(
-                            left + columnPositions.[k],
-                            pos_a + noteHeight * 0.5f,
-                            left + columnPositions.[k] + column_width,
-                            pos_b + noteHeight * 0.5f + 2.0f)
+                            left + column_positions.[k],
+                            pos_a + note_height * 0.5f,
+                            left + column_positions.[k] + column_width,
+                            pos_b + note_height * 0.5f + 2.0f)
                         |> scrollDirectionPos bottom
                     )
                 )
                 (Quad.colorOf tint)
-                (Sprite.gridUV (animation.Loops, color) (Content.getTexture "holdbody"))
+                (Sprite.gridUV (animation.Loops, color) holdbody)
 
         let inline draw_tail(k, pos, clip, color, tint) =
             Draw.quad
                 (
                     Quad.ofRect ( 
-                        Rect.Create(left + columnPositions.[k], max clip pos, left + columnPositions.[k] + column_width, pos + noteHeight)
+                        Rect.Create(left + column_positions.[k], max clip pos, left + column_positions.[k] + column_width, pos + note_height)
                         |> scrollDirectionPos bottom
                     )
+                    |> if useholdtail then id else rotation k
                 )
                 (Quad.colorOf tint)
-                (Sprite.gridUV (animation.Loops, color) tailsprite |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
+                (Sprite.gridUV (animation.Loops, color) (if useholdtail then holdtail else holdhead) |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
         // todo: also put a cap at -playfieldHeight when *negative sv comes into play
@@ -222,13 +228,13 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                         if vanishing_notes && hold_state = HoldState.Released then () else
 
                         let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
-                        let tailpos = column_pos - holdnoteTrim
+                        let tailpos = column_pos - holdnote_trim
                         let headpos = if hold_state.ShowInReceptor then hitposition else begin_pos
                         let head_and_body_color = let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
 
                         if headpos < tailpos then
                             draw_body(k, headpos, tailpos, head_and_body_color, tint)
-                        if headpos - tailpos < noteHeight * 0.5f then
+                        if headpos - tailpos < note_height * 0.5f then
                             draw_tail(k, tailpos, headpos, int color.[k], tint)
                         if not vanishing_notes || hold_state.ShowInReceptor then
                             draw_head(k, headpos, head_and_body_color, tint)
@@ -240,13 +246,13 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                         if vanishing_notes && hold_state = HoldState.Released then () else
                         
                         let tint = if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then Content.noteskinConfig().DroppedHoldColor else Color.White
-                        let tailpos = column_pos - holdnoteTrim
+                        let tailpos = column_pos - holdnote_trim
                         let headpos = if hold_state.ShowInReceptor then max hitposition headpos else headpos
                         let head_and_body_color = let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
                         
                         if headpos < tailpos then
                             draw_body(k, headpos, tailpos, head_and_body_color, tint)
-                        if headpos - tailpos < noteHeight * 0.5f then
+                        if headpos - tailpos < note_height * 0.5f then
                             draw_tail(k, tailpos, headpos, int color.[k], tint)
                         draw_head(k, headpos, head_and_body_color, tint)
 
