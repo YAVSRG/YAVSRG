@@ -54,6 +54,9 @@ module Check =
             for position, m in matches """ PageButton\(\s*"([a-z\-_\.]*)" """ file_contents do
                 find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
 
+            for position, m in matches """ PageTextEntry\(\s*"([a-z\-_\.]*)" """ file_contents do
+                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
+
             for position, m in matches """ CaseSelector\(\s*"([a-z\-_\.]*)" """ file_contents do
                 find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
                     

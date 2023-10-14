@@ -22,7 +22,7 @@ type InvitePlayerPage() as this =
     do
         this.Content(
             column()
-            |+ PageSetting("invite_to_lobby.username", TextEntry(value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0), "none")).Pos(200.0f)
+            |+ PageTextEntry("invite_to_lobby.username", value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0)).Pos(200.0f)
             |+ submit_button.Pos(300.0f)
         )
     

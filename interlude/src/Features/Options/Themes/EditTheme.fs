@@ -17,8 +17,7 @@ type EditThemePage() as this =
     do
         this.Content(
             column()
-            |+ PageSetting("themes.edittheme.themename", TextEntry(name, "none"))
-                .Pos(200.0f)
+            |+ PageTextEntry("themes.edittheme.themename", name).Pos(200.0f)
         )
 
     override this.Title = data.Name

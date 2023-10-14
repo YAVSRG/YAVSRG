@@ -83,17 +83,25 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
             colorFunc
         )
 
-// todo: rename or merge into SearchBox as this is exclusively used for searches
-type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as this =
+type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit Frame(NodeType.Switch(fun _ -> this.TextEntry))
+    let searchTimer = new Diagnostics.Stopwatch()
 
     let textEntry = 
-        TextEntry(setting, bind, 
+        TextEntry(s |> Setting.trigger (fun _ -> this.StartSearch()), "search", 
             Position = Position.Margin(10.0f, 0.0f),
             ColorFunc = fun () -> (if this.TextEntry.Selected then Colors.white else !*Palette.LIGHT), !*Palette.DARKER
         )
 
-    do
+    member val DebounceTime = 400L with get, set
+
+    new(s: Setting<string>, callback: Filter -> unit) = SearchBox(s, fun () -> callback(Filter.parse s.Value))
+
+    member private this.StartSearch() = searchTimer.Restart()
+
+    member private this.TextEntry : TextEntry = textEntry
+
+    override this.Init(parent) =
         this.Fill <- fun () -> if this.TextEntry.Selected then Colors.yellow_accent.O1 else !*Palette.DARK
         this.Border <- fun () -> if this.TextEntry.Selected then Colors.yellow_accent else !*Palette.LIGHT
 
@@ -101,31 +109,15 @@ type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as thi
         |+ textEntry
         |* Text(
                 fun () ->
-                    match bind with
-                    | "none" -> match setting.Value with "" -> prompt | _ -> ""
-                    | b ->
-                        match setting.Value with
-                        | "" -> Icons.search + " " + Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
-                        | _ -> ""
+                    match s.Value with
+                    | "" -> Icons.search + " " + Localisation.localiseWith [(!|"search").ToString()] "misc.search"
+                    | _ -> ""
                 ,
                 Color = textEntry.ColorFunc,
                 Align = Alignment.LEFT,
                 Position = Position.Margin(10.0f, 0.0f))
 
-    member private this.TextEntry : TextEntry = textEntry
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-
-type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
-    inherit TextEntryBox(s |> Setting.trigger(fun _ -> this.StartSearch()), "search", "search")
-    let searchTimer = new Diagnostics.Stopwatch()
-
-    member val DebounceTime = 400L with get, set
-
-    new(s: Setting<string>, callback: Filter -> unit) = SearchBox(s, fun () -> callback(Filter.parse s.Value))
-
-    member private this.StartSearch() = searchTimer.Restart()
+        base.Init parent
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

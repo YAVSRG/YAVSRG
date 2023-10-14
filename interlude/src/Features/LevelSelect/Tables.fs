@@ -35,7 +35,7 @@ type private EditLevelPage(level: Level) as this =
     do
         let content =
             column()
-            |+ PageSetting("table.level_name", TextEntry(new_name, "none"))
+            |+ PageTextEntry("table.level_name", new_name)
                 .Pos(200.0f)
             |+ Text(sprintf "Progress: %.2f%%" (level_progress * 100.0), Align = Alignment.LEFT, Position = Position.Box(0.0f, 0.0f, 100.0f, 300.0f, PRETTYWIDTH, PRETTYHEIGHT))
 

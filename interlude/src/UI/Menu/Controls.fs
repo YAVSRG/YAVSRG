@@ -215,6 +215,19 @@ type PageButton(name, action) as this =
         ref <- button
         button
 
+type PageTextEntry(name, setting) =
+    inherit PageSetting(name, 
+        let te = TextEntry(setting, "none") in
+        te
+        |+ Frame(NodeType.None, 
+            Position = Position.Default.Margin(-15.0f, -5.0f),
+            Fill = K Color.Transparent,
+            Border = fun () -> 
+                if te.Selected then Colors.pink_accent
+                elif te.Focused then Colors.yellow_accent 
+                else Colors.grey_2)
+    )
+
 type CaseSelector(name: string, cases: string array, controls: Widget array array, setting: Setting<int>) as this =
     inherit StaticWidget(NodeType.Switch(fun _ -> this._selector()))
 

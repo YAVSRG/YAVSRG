@@ -106,7 +106,7 @@ type EditPresetPage(setting: Setting<Preset option>) as this =
     do
         this.Content(
             column()
-            |+ PageSetting("gameplay.preset.name", TextEntry(name, "none"))
+            |+ PageTextEntry("gameplay.preset.name", name)
                 .Pos(200.0f)
             |+ PageSetting("gameplay.preset.locked", Selector<_>.FromBool(locked))
                 .Pos(270.0f)

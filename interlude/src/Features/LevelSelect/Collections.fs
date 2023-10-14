@@ -81,7 +81,7 @@ type private CreateFolderPage() as this =
     do
         this.Content(
             column()
-            |+ PageSetting("collections.edit.folder_name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(200.0f)
             |+ PageSetting("collections.edit.icon",
                 Selector( CreateFolderPage.Icons,
                 icon)).Pos(300.0f)
@@ -109,7 +109,7 @@ type private CreatePlaylistPage() as this =
     do
         this.Content(
             column()
-            |+ PageSetting("collections.edit.playlist_name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(200.0f)
             |+ PageSetting("collections.edit.icon",
                 Selector( CreatePlaylistPage.Icons,
                 icon)).Pos(300.0f)
@@ -136,7 +136,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
     do
         let content = 
             column()
-            |+ PageSetting("collections.edit.folder_name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(200.0f)
             |+ PageSetting("collections.edit.icon",
                 Selector( CreateFolderPage.Icons,
                 folder.Icon)).Pos(270.0f)
@@ -185,7 +185,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
     do
         let content =
             column()
-            |+ PageSetting("collections.edit.playlist_name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(200.0f)
             |+ PageSetting("collections.edit.icon",
                 Selector( CreatePlaylistPage.Icons,
                 playlist.Icon)).Pos(270.0f)

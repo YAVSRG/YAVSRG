@@ -563,9 +563,9 @@ type EditEarlyLateMeterPage() as this =
                 Slider(animation_time, Step = 5f) )
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("hud.earlylatemeter.animationtime"))
-            |+ PageSetting(
+            |+ PageTextEntry(
                 "hud.earlylatemeter.earlytext",
-                TextEntry(early_text, "none") )
+                early_text)
                 .Pos(620.0f)
                 .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext"))
             |+ PageSetting(
@@ -573,9 +573,9 @@ type EditEarlyLateMeterPage() as this =
                 ColorPicker(early_color, false) )
                 .Pos(690.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
                 .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
-            |+ PageSetting(
+            |+ PageTextEntry(
                 "hud.earlylatemeter.latetext",
-                TextEntry(late_text, "none") )
+                late_text)
                 .Pos(795.0f)
                 .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
             |+ PageSetting(

@@ -102,6 +102,8 @@
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
     <Compile Include="Features\Options\Gameplay\Preview.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
+    <Compile Include="Features\Options\Noteskins\Rotations.fs" />
+    <Compile Include="Features\Options\Noteskins\Colors.fs" />
     <Compile Include="Features\Options\Noteskins\HoldNotes.fs" />
     <Compile Include="Features\Options\Noteskins\Playfield.fs" />
     <Compile Include="Features\Options\Noteskins\Editor.fs" />
