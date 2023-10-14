@@ -38,7 +38,6 @@ type NoteskinConfig =
     {
         Name: string
         Author: string
-        Version: string
 
         /// Contains settings for the color scheme of notes
         NoteColors: ColorConfig
@@ -62,12 +61,11 @@ type NoteskinConfig =
         ColumnSpacing: float32
         /// If true, spacing between columns is filled instead of having a gap
         FillColumnGaps: bool
-        // todo: group every animation thing under an animations object
+
         /// ???
         ColumnLightTime: float32
         /// Set to false to disable column lighting when keys are pressed
         EnableColumnLight: bool
-
         /// ???
         AnimationFrameTime: float
         /// Config for explosion animations
@@ -85,7 +83,6 @@ type NoteskinConfig =
         {
             Name = "Unnamed Noteskin"
             Author = "Unknown"
-            Version = "1.0.0"
             FlipHoldTail = true
             UseHoldTailTexture = true
             HoldNoteTrim = 0.0f

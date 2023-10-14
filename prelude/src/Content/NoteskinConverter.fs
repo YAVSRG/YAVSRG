@@ -549,7 +549,6 @@ module OsuSkin =
                 { NoteskinConfig.Default with
                     Name = ini.General.Name
                     Author = ini.General.Author
-                    Version = ini.General.Version
                     NoteColors = colorConfig
                     FlipHoldTail = flipholdtail
                     UseHoldTailTexture = useholdtail
