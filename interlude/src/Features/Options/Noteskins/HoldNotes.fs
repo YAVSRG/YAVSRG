@@ -23,6 +23,7 @@ type HoldNoteSettingsPage() as this =
     let head = getTexture "holdhead"
     let body = getTexture "holdbody"
     let tail = getTexture "holdtail"
+    let animation = Animation.Counter (data.AnimationFrameTime)
 
     do
         this.Content(
@@ -56,16 +57,28 @@ type HoldNoteSettingsPage() as this =
             let headpos = if downscroll then bottom - COLUMN_WIDTH else top
             let tailpos = if downscroll then top + hold_note_trim.Value * COLUMN_WIDTH else bottom - COLUMN_WIDTH - hold_note_trim.Value * COLUMN_WIDTH
 
-            Draw.sprite <| Rect.Create(left, min headpos tailpos + COLUMN_WIDTH * 0.5f, left + COLUMN_WIDTH, max headpos tailpos + COLUMN_WIDTH * 0.5f) <| color <| body
-            Draw.sprite <| Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH) <| color <| head
-            Draw.sprite 
-                <| 
-                    (
-                        Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
-                        |> if flip_hold_tail.Value && downscroll then fun (r: Rect) -> r.Shrink(0.0f, r.Height) else id
-                    )
-                <| color 
-                <| (if use_tail_texture.Value then tail else head)
+            Draw.quad
+                (
+                    Rect.Create(left, min headpos tailpos + COLUMN_WIDTH * 0.5f, left + COLUMN_WIDTH, max headpos tailpos + COLUMN_WIDTH * 0.5f)
+                    |> Quad.ofRect
+                )
+                (Quad.colorOf color)
+                (Sprite.gridUV(animation.Loops, 0) body)
+            Draw.quad
+                (
+                    Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH)
+                    |> Quad.ofRect
+                )
+                (Quad.colorOf color)
+                (Sprite.gridUV(animation.Loops, 0) head)
+            Draw.quad
+                (
+                    Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
+                    |> if flip_hold_tail.Value && downscroll then fun (r: Rect) -> r.Shrink(0.0f, r.Height) else id
+                    |> Quad.ofRect
+                )
+                (Quad.colorOf color)
+                (Sprite.gridUV(animation.Loops, 0) (if use_tail_texture.Value then tail else head))
 
             Text.drawFillB(Style.font, label, Rect.Box(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
 
@@ -75,6 +88,9 @@ type HoldNoteSettingsPage() as this =
         draw_ln_preview("Dropped", dropped_color.Value, not options.Upscroll.Value)
         draw_ln_preview("Downscroll", Color.White, true)
 
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        animation.Update elapsedTime
 
     override this.Title = L"noteskins.edit.holdnotes.name"
     override this.OnClose() =

@@ -15,7 +15,6 @@ type PlayfieldSettingsPage() as this =
 
     let data = Noteskins.Current.config
     
-    let enable_column_Light = Setting.simple data.EnableColumnLight
     let column_width = Setting.bounded data.ColumnWidth 10.0f 300.0f |> Setting.roundf 0
     let column_spacing = Setting.bounded data.ColumnSpacing 0.0f 100.0f |> Setting.roundf 0
     let fill_gaps = Setting.simple data.FillColumnGaps
@@ -26,26 +25,26 @@ type PlayfieldSettingsPage() as this =
     do
         this.Content(
             column()
-            |+ PageSetting("noteskins.edit.enablecolumnlight", Selector<_>.FromBool enable_column_Light)
-                .Pos(200.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.enablecolumnlight"))
             |+ PageSetting("noteskins.edit.columnwidth", Slider(column_width, Step = 1f))
-                .Pos(270.0f)
+                .Pos(200.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
             |+ PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
-                .Pos(340.0f)
+                .Pos(270.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
+
             |+ PageSetting("noteskins.edit.fillcolumngaps", Selector<_>.FromBool(fill_gaps))
-                .Pos(410.0f)
+                .Pos(370.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.fillcolumngaps"))
+
             |+ PageSetting("noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
-                .Pos(510.0f)
+                .Pos(470.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
             |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
-                .Pos(580.0f)
+                .Pos(540.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
+
             |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true))
-                .Pos(680.0f, PRETTYWIDTH, PRETTYHEIGHT * 2f)
+                .Pos(640.0f, PRETTYWIDTH, PRETTYHEIGHT * 2f)
                 .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
         )
 
@@ -81,7 +80,6 @@ type PlayfieldSettingsPage() as this =
     override this.OnClose() =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with
-                EnableColumnLight = enable_column_Light.Value
                 ColumnWidth = column_width.Value
                 ColumnSpacing = column_spacing.Value
                 FillColumnGaps = fill_gaps.Value

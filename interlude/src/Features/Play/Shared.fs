@@ -160,7 +160,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                         else Rect.Box(this.Bounds.Left + (columnwidth + ns.ColumnSpacing) * float32 k, this.Bounds.Bottom - columnwidth, columnwidth, columnwidth)
                     )
                         .Expand((ns.Explosions.Scale - 1.0f) * columnwidth * 0.5f)
-                        .Expand(ns.Explosions.ExpandAmount * (1.0f - p) * columnwidth, ns.Explosions.ExpandAmount * (1.0f - p) * columnwidth)
+                        .Expand(ns.Explosions.ExpandAmount * (1.0f - p) * columnwidth)
                 match mem.[k] with
                 | Hit e ->
                     let color = 

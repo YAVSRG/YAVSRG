@@ -9,6 +9,7 @@ open Interlude.Content
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.OptionsMenu.Gameplay
 
 type NoteTextureEditPage() as this =
     inherit Page()
@@ -59,6 +60,8 @@ type EditNoteskinPage(from_hotkey: bool) as this =
         
     let name = Setting.simple data.Name
 
+    let preview = NoteskinPreview 0.35f
+
     do
         this.Content(
             SwitchContainer.Row<Widget>()
@@ -67,18 +70,22 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                 |+ PageTextEntry("noteskins.edit.noteskinname", name)
                     .Pos(200.0f)
 
-                |+ PageButton("noteskins.edit.playfield", fun () -> PlayfieldSettingsPage().Show())
+                |+ PageButton("noteskins.edit.playfield", fun () -> { new PlayfieldSettingsPage() with override this.OnClose() = preview.Refresh(); base.OnClose() }.Show())
                     .Pos(300.0f)
                     .Tooltip(Tooltip.Info("noteskins.edit.playfield"))
-                |+ PageButton("noteskins.edit.holdnotes", fun () -> HoldNoteSettingsPage().Show())
+                |+ PageButton("noteskins.edit.holdnotes", fun () -> { new HoldNoteSettingsPage() with override this.OnClose() = preview.Refresh(); base.OnClose() }.Show())
                     .Pos(370.0f)
                     .Tooltip(Tooltip.Info("noteskins.edit.holdnotes"))
-                |+ PageButton("noteskins.edit.colors", fun () -> ColorSettingsPage().Show())
+                |+ PageButton("noteskins.edit.colors", fun () -> { new ColorSettingsPage() with override this.OnClose() = preview.Refresh(); base.OnClose() }.Show())
                     .Pos(440.0f)
                     .Tooltip(Tooltip.Info("noteskins.edit.colors"))
-                |+ PageButton("noteskins.edit.rotations", fun () -> RotationSettingsPage().Show())
+                |+ PageButton("noteskins.edit.rotations", fun () -> { new RotationSettingsPage() with override this.OnClose() = preview.Refresh(); base.OnClose() }.Show())
                     .Pos(510.0f)
                     .Tooltip(Tooltip.Info("noteskins.edit.rotations"))
+                |+ PageButton("noteskins.edit.animations", fun () -> { new AnimationSettingsPage() with override this.OnClose() = preview.Refresh(); base.OnClose() }.Show())
+                    .Pos(580.0f)
+                    .Tooltip(Tooltip.Info("noteskins.edit.animations"))
+                |+ preview
                 )
             //|+ (
             //    GridContainer<TextureCard>(200.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f), Position = { Position.Margin(50.0f) with Left = 1.0f %- 470.0f })
