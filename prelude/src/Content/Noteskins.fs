@@ -11,7 +11,7 @@ open Prelude.Charts.Tools.NoteColors
 [<Json.AutoCodec>]
 type ExplosionColors =
     | Column
-    | Judgement
+    | Judgements
 
 [<Json.AutoCodec(false)>]
 type Explosions =
