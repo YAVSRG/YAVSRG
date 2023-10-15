@@ -462,10 +462,8 @@ module SkinConversions =
         type ColumnTextures = { Note: string; Head: string; Body: string; Tail: string }
 
         let check_before_convert (source: string) =
-            try
-                parseSkinINI (Path.Combine (source, "skin.ini")) |> Ok
-            with err ->
-                Error err.Message
+            try parseSkinINI (Path.Combine (source, "skin.ini")) |> Ok
+            with err -> Error err.Message
 
         let convert (ini: OsuSkinIni) (source: string) (target: string) (keymode: int) =
 
@@ -473,7 +471,6 @@ module SkinConversions =
             Directory.CreateDirectory target |> ignore
 
             let textures = ResizeArray<ColumnTextures>()
-            let colorConfig : ColorConfig = { ColorConfig.Default with Style = ColorScheme.Column; UseGlobalColors = false }
 
             // Identify textures used by noteskin
             let keymode_settings = List.tryFind (fun m -> m.Keys = keymode) ini.Mania |> Option.defaultValue (Mania.Default keymode)
@@ -512,23 +509,30 @@ module SkinConversions =
 
             let mutable flipholdtail = false
             let mutable useholdtail = true
-            square_images "note" (textures |> Seq.map (fun x -> x.Note) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
-            square_images "holdhead" (textures |> Seq.map (fun x -> x.Head) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
-            square_images "holdbody" (textures |> Seq.map (fun x -> x.Body) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
-            try
-                square_images "holdtail" (textures |> Seq.map (fun x -> x.Tail) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
+            try square_images "note" (textures |> Seq.map (fun x -> x.Note) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
+            with err -> Logging.Warn("Error converting note textures", err)
+
+            try square_images "holdhead" (textures |> Seq.map (fun x -> x.Head) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
+            with err -> Logging.Warn("Error converting hold head textures", err) 
+
+            try square_images "holdbody" (textures |> Seq.map (fun x -> x.Body) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
+            with err -> Logging.Warn("Error converting hold body textures", err)
+
+            try square_images "holdtail" (textures |> Seq.map (fun x -> x.Tail) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
             with err ->
-                Logging.Debug("Error in holdtail textures - Using hold head textures for compatibility")
+                Logging.Warn("Error in holdtail textures - Using hold head textures for compatibility", err)
                 flipholdtail <- true
                 useholdtail <- false
 
-            // Generate receptors
-            let receptor_base = getTextureFilenames (textures.[0].Note, source) |> List.head |> load_bmp
-            // todo: square these images
-            (grayscale 0.5f receptor_base).Save(Path.Combine(target, "receptor-0-0.png"))
-            (grayscale 1.0f receptor_base).Save(Path.Combine(target, "receptor-1-0.png"))
-            JSON.ToFile (Path.Combine(target, "receptor.json"), false)
-                { Rows = 2; Columns = 1; Mode = Loose }
+            try
+                // Generate receptors
+                let receptor_base = getTextureFilenames (textures.[0].Note, source) |> List.head |> load_bmp
+                // todo: square these images
+                (grayscale 0.5f receptor_base).Save(Path.Combine(target, "receptor-0-0.png"))
+                (grayscale 1.0f receptor_base).Save(Path.Combine(target, "receptor-1-0.png"))
+                JSON.ToFile (Path.Combine(target, "receptor.json"), false)
+                    { Rows = 2; Columns = 1; Mode = Loose }
+            with err -> Logging.Warn("Error generating receptors", err)
             
             // Point color data at textures correctly
             let textureIds = Array.zeroCreate 10
@@ -536,7 +540,8 @@ module SkinConversions =
             for k = 0 to (keymode - 1) do
                 let tex = { Note = keymode_settings.NoteImageΔ.[k]; Head = keymode_settings.NoteImageΔH.[k]; Body = keymode_settings.NoteImageΔL.[k]; Tail = keymode_settings.NoteImageΔT.[k] }
                 textureIds.[k] <- byte (textures.IndexOf tex)
-
+                
+            let colorConfig : ColorConfig = { ColorConfig.Default with Style = ColorScheme.Column; UseGlobalColors = false }
             colorConfig.Colors.[keymode - 2] <- textureIds
 
             // Generate noteskin.json
@@ -550,7 +555,6 @@ module SkinConversions =
                     HoldNoteTrim = 0.0f
                     PlayfieldColor = keymode_settings.ColourΔ.[0]
                     ColumnWidth = 1080f / 512f * float32 keymode_settings.ColumnWidth.[0]
-                    AnimationFrameTime = 1000.0/60.0
+                    AnimationFrameTime = 1000.0 / 60.0
                 }
-
             JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config
