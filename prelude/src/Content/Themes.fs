@@ -87,10 +87,7 @@ type Theme(storage) as this =
                     | None -> ()
                 | _ -> ()
         }
-        
-    static member FromZipFile (file: string) = 
-        let stream = File.OpenRead file
-        new Theme(Zip (new ZipArchive(stream), Some file))
-    static member FromZipStream (stream: Stream) = new Theme(Zip (new ZipArchive(stream), None))
+
+    static member FromZipStream (stream: Stream) = new Theme(Embedded (new ZipArchive(stream)))
     static member FromPath (path: string) = new Theme(Folder path)
     static member FromFolderName (name: string) = Theme.FromPath(getDataPath (Path.Combine ("Themes", name)))

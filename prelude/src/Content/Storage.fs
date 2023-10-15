@@ -22,16 +22,18 @@ type TextureConfig =
     static member Default = { Columns = 1; Rows = 1; Mode = Grid }
 
 type StorageType = 
-    | Zip of ZipArchive * source: string option
+    | Embedded of ZipArchive
     | Folder of string
     override this.ToString() =
         match this with
-        | Zip (_, f) -> match f with Some f -> Path.GetFileName f | None -> "[Embedded Assets]"
+        | Embedded _ -> "[Embedded Assets]"
         | Folder f -> Path.GetFileName f + "/"
 
 type Storage(storage: StorageType) =
 
     member this.Source = storage
+
+    member this.IsEmbedded = match storage with Embedded _ -> true | _ -> false
 
     /// Returns stream for requested file, or None if that file doesn't exist
     /// Can throw exceptions for other IO errors
@@ -39,7 +41,7 @@ type Storage(storage: StorageType) =
         let p = Path.Combine(path)
         try
             match storage with
-            | Zip (z, _) -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open() |> Some
+            | Embedded z -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open() |> Some
             | Folder f ->
                 let p = Path.Combine(f, p)
                 File.OpenRead p :> Stream |> Some
@@ -55,7 +57,7 @@ type Storage(storage: StorageType) =
     member this.GetFiles ([<ParamArray>] path: string array) =
         let p = Path.Combine(path)
         match storage with
-        | Zip (z, _) ->
+        | Embedded z ->
             let p = p.Replace(Path.DirectorySeparatorChar, '/')
             seq {
                 for e in z.Entries do
@@ -70,7 +72,7 @@ type Storage(storage: StorageType) =
     member this.GetFolders ([<ParamArray>] path: string array) =
         let p = Path.Combine path
         match storage with
-        | Zip (z, _) ->
+        | Embedded z ->
             let p = p.Replace (Path.DirectorySeparatorChar, '/')
             seq {
                 for e in z.Entries do
@@ -181,7 +183,7 @@ type Storage(storage: StorageType) =
 
     member this.WriteJson<'T> (data: 'T, [<ParamArray>] path: string array) =
         match storage with
-        | Zip _ -> () // Zip archive is read-only
+        | Embedded _ -> () // Zip archive is read-only
         | Folder f ->
             let target = Path.Combine (f, Path.Combine path)
             target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
@@ -189,7 +191,7 @@ type Storage(storage: StorageType) =
 
     member this.SplitTexture (name: string, [<ParamArray>] path: string array) =
         match storage with
-        | Zip _ -> failwith "Not supported for zipped content"
+        | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
             let info : TextureConfig = this.GetJsonOrDefault (false, Array.append path [|name + ".json"|])
             match info.Mode with
@@ -209,7 +211,7 @@ type Storage(storage: StorageType) =
 
     member this.StitchTexture (name: string, [<ParamArray>] path: string array) =
         match storage with
-        | Zip _ -> failwith "Not supported for zipped content"
+        | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
             let info : TextureConfig = this.GetJsonOrDefault (false, Array.append path [|name + ".json"|])
             match info.Mode with
@@ -225,13 +227,13 @@ type Storage(storage: StorageType) =
     member this.ExtractToFolder targetPath =
         Directory.CreateDirectory targetPath |> ignore
         match storage with
-        | Zip (z, _) -> z.ExtractToDirectory targetPath
+        | Embedded z -> z.ExtractToDirectory targetPath
         | Folder f -> failwith "Can only extract zip to folder"
         
     member this.CompressToZip target : bool =
         if File.Exists target then File.Delete target
         match storage with
-        | Zip (z, _) -> Logging.Error("Exporting already zipped content as an archive is not implemented"); false
+        | Embedded z -> Logging.Error("Exporting already zipped content as an archive is not implemented"); false
         | Folder f -> 
             try 
                 ZipFile.CreateFromDirectory(f, target)

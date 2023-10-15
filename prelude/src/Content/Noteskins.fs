@@ -140,10 +140,7 @@ type Noteskin(storage) as this =
         | Ok res -> res
         | Error err -> Logging.Error(sprintf "Error loading noteskin texture '%s': %s" name err.Message); None
         
-    static member FromZipFile (file: string) = 
-        let stream = File.OpenRead file
-        new Noteskin(Zip (new ZipArchive(stream), Some file))
-    static member FromZipStream (stream: Stream) = new Noteskin(Zip (new ZipArchive(stream), None))
+    static member FromZipStream (stream: Stream) = new Noteskin(Embedded (new ZipArchive(stream)))
     static member FromPath (path: string) = new Noteskin(Folder path)
 
 module Noteskin =
