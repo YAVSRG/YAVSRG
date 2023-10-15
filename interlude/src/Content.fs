@@ -241,14 +241,6 @@ module Content =
             for (id, ns) in defaults do
                 loaded.Add(id, ns)
 
-            let add (source: string) =
-                let id = Path.GetFileName source
-                try 
-                    let ns = Noteskin.FromPath source
-                    loaded.Add(id, ns)
-                    Logging.Debug(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
-                with err -> Logging.Error("  Failed to load noteskin '" + id + "'", err)
-
             for zip in Directory.EnumerateFiles(getDataPath "Noteskins") |> Seq.filter (fun p -> Path.GetExtension(p).ToLower() = ".isk") do
                 let target = Path.GetFileNameWithoutExtension zip
                 if Directory.Exists(target) then
@@ -260,7 +252,12 @@ module Content =
                     File.Delete zip
                     
             for source in Directory.EnumerateDirectories(getDataPath "Noteskins") do 
-                add source
+                let id = Path.GetFileName source
+                try 
+                    let ns = Noteskin.FromPath source
+                    loaded.Add(id, ns)
+                    Logging.Debug(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
+                with err -> Logging.Error("  Failed to load noteskin '" + id + "'", err)
 
             Logging.Info(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count defaults.Length)
             
