@@ -47,10 +47,7 @@ let launch(instance: int) =
 
         AppDomain.CurrentDomain.ProcessExit.Add (fun args -> shutdown(true))
     )
-    Window.onFileDrop.Add(fun path -> 
-        if not (Content.Noteskins.tryImport path [4; 7]) then 
-            if not (Import.dropFile path) then
-                Logging.Warn("Unrecognised file dropped: " + path))
+    Window.onFileDrop.Add(Import.handle_file_drop)
 
     use icon_stream = Utils.getResourceStream("icon.png")
     use icon = Utils.Bitmap.load icon_stream

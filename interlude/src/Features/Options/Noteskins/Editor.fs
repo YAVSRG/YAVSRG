@@ -9,6 +9,7 @@ open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Utils
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Gameplay
 
@@ -84,6 +85,7 @@ type TextureEditPage(texture_id) as this =
         this.Content(
             column()
             |+ TextureEditGrid(sprite, 8, 8, Position = Position.Box(0.5f, 0.0f, -400.0f, 100.0f, 800.0f, 800.0f))
+            |+ WIP()
         )
         
     override this.Title = "Texture: " + texture_id

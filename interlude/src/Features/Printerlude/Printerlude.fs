@@ -22,8 +22,6 @@ module Printerlude =
                 .WithCommand("themes_reload", "Reload the current theme and noteskin", fun () -> Content.Themes.load(); Content.Noteskins.load())
                 .WithCommand("noteskin_stitch", "Stitch a noteskin texture", "id", fun id -> Content.Noteskins.Current.instance.StitchTexture id)
                 .WithCommand("noteskin_split", "Split a noteskin texture", "id", fun id -> Content.Noteskins.Current.instance.SplitTexture id)
-                .WithIOCommand("import_noteskin", "Import a noteskin from an existing source", "path", "keymodes", 
-                    fun io path keymodes -> if not (Content.Noteskins.tryImport path keymodes) then io.WriteLine("Nothing found to import"))
 
     module private Utils =
 

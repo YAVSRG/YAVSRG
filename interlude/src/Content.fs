@@ -11,7 +11,6 @@ open Percyqaz.Flux.Audio
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data.Content
-open Prelude.Data.Content.Noteskin
 
 module Content =
 
@@ -121,7 +120,7 @@ module Content =
                 config <- instance.Config
 
             let reload() =
-                for id in Storage.themeTextures do
+                for id in Storage.THEME_TEXTURES do
                     match instance.GetTexture id with
                     | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id (id = "rain" || id = "logo" || id = "background") |> Sprites.add id
                     | None ->
@@ -129,7 +128,7 @@ module Content =
                         | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id (id = "rain" || id = "logo" || id = "background") |> Sprites.add id
                         | None -> failwithf "Failed to load texture '%s' from *default" id
 
-                for id in Storage.themeSounds do
+                for id in Storage.THEME_SOUNDS do
                     match instance.GetSound id with
                     | Some stream -> SoundEffect.FromStream (id, stream) |> Sounds.add id
                     | None -> 
@@ -217,7 +216,7 @@ module Content =
                 config <- instance.Config
 
             let reload() =
-                for id in Storage.noteskinTextures do
+                for id in Storage.NOTESKIN_TEXTURES do
                     match instance.GetTexture id with
                     | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id false |> Sprites.add id
                     | None -> 
@@ -290,29 +289,6 @@ module Content =
                     Utils.openDirectory(getDataPath "Exports")
                     true
                 else false
-
-        let rec tryImport (path: string) (keymodes: int list) : bool =
-            match path with
-            | OsuSkinFolder ->
-                let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
-                try
-                    OsuSkin.Converter.convert path (Path.Combine(getDataPath "Noteskins", id)) keymodes
-                    load()
-                    true
-                with err -> Logging.Error("Something went wrong converting this skin!", err); true
-            | InterludeSkinArchive ->
-                try 
-                    File.Copy(path, Path.Combine(getDataPath "Noteskins", Path.GetFileName path))
-                    load()
-                    true
-                with err -> Logging.Error("Something went wrong when moving this skin!", err); true
-            | OsuSkinArchive ->
-                let dir = Path.ChangeExtension(path, null)
-                System.IO.Compression.ZipFile.ExtractToDirectory(path, dir)
-                let result = tryImport dir keymodes
-                Directory.Delete(dir, true)
-                result
-            | Unknown -> false
 
         let noteRotation keys =
             let rotations = if Current.config.UseRotation then Current.config.Rotations.[keys - 3] else Array.zeroCreate keys

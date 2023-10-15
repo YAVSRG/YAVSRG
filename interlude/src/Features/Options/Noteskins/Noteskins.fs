@@ -67,12 +67,12 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
     override this.OnFocus() = Style.hover.Play(); base.OnFocus()
         
     override this.Draw() =
+        if this.IsCurrent then Draw.rect this.Bounds Colors.pink_accent.O1
+        elif this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O1
         match preview with
         | Some p -> 
             Draw.sprite (this.Bounds.SliceLeft 100.0f) (Colors.white.O4a imgFade.Alpha) p
         | None -> ()
-        if this.IsCurrent then Draw.rect this.Bounds Colors.pink_accent.O1
-        elif this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O1
         base.Draw()
 
 type NoteskinsPage() as this =
