@@ -35,7 +35,7 @@ type NoteskinCard(data: RepoEntry) as this =
     member this.Download() =
         if status = NotDownloaded || status = DownloadFailed then
             status <- Downloading
-            let target = Path.Combine(getDataPath "Noteskins", System.Guid.NewGuid().ToString() + ".isk")
+            let target = Path.Combine(getDataPath "Noteskins", System.Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(data.Name, "") + ".isk")
             WebServices.download_file.Request((data.Download, target, ignore), 
                 fun success -> 
                     if success then 

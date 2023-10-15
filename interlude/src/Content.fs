@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.IO.Compression
 open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -240,19 +241,26 @@ module Content =
             for (id, ns) in defaults do
                 loaded.Add(id, ns)
 
-            let add (source: string) (isZip: bool) =
+            let add (source: string) =
                 let id = Path.GetFileName source
                 try 
-                    let ns = if isZip then Noteskin.FromZipFile source else Noteskin.FromPath source
+                    let ns = Noteskin.FromPath source
                     loaded.Add(id, ns)
                     Logging.Debug(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
                 with err -> Logging.Error("  Failed to load noteskin '" + id + "'", err)
 
-            for source in Directory.EnumerateDirectories(getDataPath "Noteskins") do add source false
-            for source in 
-                Directory.EnumerateFiles(getDataPath "Noteskins")
-                |> Seq.filter (fun p -> Path.GetExtension(p).ToLower() = ".isk")
-                do add source true
+            for zip in Directory.EnumerateFiles(getDataPath "Noteskins") |> Seq.filter (fun p -> Path.GetExtension(p).ToLower() = ".isk") do
+                let target = Path.GetFileNameWithoutExtension zip
+                if Directory.Exists(target) then
+                    Logging.Info(sprintf "%s has already been extracted, deleting" (Path.GetFileName zip))
+                    File.Delete zip
+                else
+                    Logging.Info(sprintf "Extracting %s to a folder" (Path.GetFileName zip))
+                    ZipFile.ExtractToDirectory(zip, Path.ChangeExtension(zip, null))
+                    File.Delete zip
+                    
+            for source in Directory.EnumerateDirectories(getDataPath "Noteskins") do 
+                add source
 
             Logging.Info(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count defaults.Length)
             
@@ -261,24 +269,23 @@ module Content =
         /// Returns id * Noteskin pairs
         let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value)) |> Array.ofSeq
 
-        let extractCurrent() : bool =
-            match Current.instance.Source with
-            | Folder s ->
-                Logging.Warn "This noteskin is already extracted!"
-                false
-            | Zip (archive, source) ->
+        let create_from_embedded(username: string option) : bool =
+            if not Current.instance.IsEmbedded then failwith "Current skin must be an embedded default"
 
-            let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(Current.config.Name, "")
+            let skin_name = match username with Some u -> sprintf "%s's skin" u | None -> "Your skin"
+            let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(skin_name, "")
             let target = Path.Combine(getDataPath "Noteskins", id)
             if id <> "" && not (Directory.Exists target) then
                 Current.instance.ExtractToFolder(target)
                 load()
                 Current.switch id
+                Current.changeConfig { Current.config with Name = skin_name; Author = Option.defaultValue "Unknown" username }
                 true
             else false
 
-        let exportCurrent() =
+        let export_current() =
             match Current.instance.Source with
+            | Embedded _ -> failwith "Current skin must not be an embedded default"
             | Folder f ->
                 let name = Path.GetFileName f
                 let target = Path.Combine(getDataPath "Exports", name + ".isk")
@@ -286,13 +293,6 @@ module Content =
                     Utils.openDirectory(getDataPath "Exports")
                     true
                 else false
-            | Zip (z, Some source) ->
-                let name = Path.GetFileName source
-                let target = Path.Combine(getDataPath "Exports", name)
-                File.Copy(source, target)
-                Utils.openDirectory(getDataPath "Exports")
-                true
-            | Zip (z, None) -> Logging.Error "Cannot export embedded skin"; false
 
         let rec tryImport (path: string) (keymodes: int list) : bool =
             match path with

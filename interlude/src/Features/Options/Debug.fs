@@ -27,7 +27,7 @@ module Debug =
         let tryEditTheme() =
             let theme = Themes.Current.instance
             match theme.Source with
-            | Zip (_, None) ->
+            | Embedded _ ->
                 ConfirmPage(
                     Localisation.localiseWith [theme.Config.Name] "themes.confirmextractdefault",
                     (fun () -> 
@@ -36,7 +36,6 @@ module Debug =
                     )
                 ).Show()
             | Folder _ -> EditThemePage().Show()
-            | Zip (_, Some file) -> failwith "impossible as user themes are always folders"
 
         do
             refresh()

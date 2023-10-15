@@ -93,7 +93,7 @@ type Toolbar() =
                 shown()
                 && Screen.currentType <> Screen.Type.Play
                 && Screen.currentType <> Screen.Type.Replay
-                && (match Interlude.Content.Noteskins.Current.instance.Source with StorageType.Zip _ -> false | _ -> true)
+                && (not Interlude.Content.Noteskins.Current.instance.IsEmbedded)
             then Noteskins.EditNoteskinPage(true).Show())
         |+ HotkeyAction("screenshot", fun () ->
             let id =  DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
