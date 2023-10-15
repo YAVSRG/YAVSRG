@@ -16,6 +16,7 @@ type ExplosionColors =
 [<Json.AutoCodec(false)>]
 type Explosions =
     {
+        Enable: bool
         Scale: float32
         FadeTime: float32
         ExpandAmount: float32
@@ -25,6 +26,7 @@ type Explosions =
     }
     static member Default =
         {
+            Enable = true
             Scale = 1.0f
             FadeTime = 1.0f
             ExpandAmount = 0.15f
