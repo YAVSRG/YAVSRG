@@ -78,10 +78,11 @@ module Animation =
         let mutable loops = 0
         override this.Update(elapsedMillis) =
             elapsed <- elapsed + elapsedMillis
-            while elapsed >= milliseconds do
-                elapsed <- elapsed - milliseconds
+            while elapsed >= this.Interval do
+                elapsed <- elapsed - this.Interval
                 loops <- loops + 1
         override this.Complete = false
+        member val Interval = milliseconds with get, set
         member this.Time = elapsed
         member this.Loops = loops
 
