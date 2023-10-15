@@ -8,7 +8,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools
 open Prelude.Charts.Tools.Patterns
 open Prelude.Gameplay
@@ -114,7 +113,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     let timers = Array.zeroCreate keys
     let mem = Array.zeroCreate keys
     let holding = Array.create keys false
-    let explodeTime = Math.Min(0.99f, ns.Explosions.FadeTime)
+    let explodeTime = Math.Clamp(ns.Explosions.FadeTime, 0f, 0.99f)
     let animation = Animation.Counter ns.Explosions.AnimationFrameTime
     let rotation = Noteskins.noteRotation keys
 
@@ -238,7 +237,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
         if noteskinConfig().EnableColumnLight then
             playfield.Add(new ColumnLighting(chart.Keys, noteskinConfig(), state))
 
-        if noteskinConfig().Explosions.FadeTime >= 0.0f then
+        if noteskinConfig().Explosions.Enable then
             playfield.Add(new Explosions(chart.Keys, noteskinConfig(), state))
 
         playfield.Add(LaneCover())
