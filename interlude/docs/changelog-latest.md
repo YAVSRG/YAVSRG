@@ -1,13 +1,21 @@
-0.7.9.2
+0.7.10
 ====
 
-It's been a little while without an update, I've been looking into even more ways to improve how frames look on your monitor
+Noteskins update!
 
-# Even more engine improvements
-- Reduced the file size of screenshots
-- 'Smart' frame cap should look and work even better when on Windows (or running in WINE)
-- Unlimited frame cap is Still the exact same as ever for people who prefer it
-- Removed some debug messages
+# New stuff
+- Hit Ctrl+E to quick-open the noteskin editing menu
+- Noteskin editing menu has had a major rework, including:
+	- Editing playfield screen position, column spacing, etc
+	- Editing animation speeds and settings
+	- Editing note rotation values per column
+	- Better tooltip explanations and previewing overall
+- Score screen mean/SD only includes taps, not releases. Tooltip information shows the values for releases
+- osu! Skin conversion now has some UI instead of just running (and failing) silently - More to come
+- Some other skinning stuff in the works
 
-If you are running Interlude on your non-primary monitor you may see some issues in the new Smart frame cap, if so please report them in the discord
+# Fixes and improvements
+- Fixed an unreported bug where hold note tails don't rotate with UseHoldTailTexture turned off
+- Text entries in menus have a box around them so you can see them even when empty
+- Various minor UI improvements
 
