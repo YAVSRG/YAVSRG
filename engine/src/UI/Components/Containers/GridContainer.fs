@@ -6,7 +6,7 @@ open Percyqaz.Flux.Input
 
 type private GridItem<'T when 'T :> Widget> =
     {
-        Widget : 'T
+        Widget: 'T
         mutable Visible: bool
         mutable X: int
         mutable Y: int
@@ -195,10 +195,10 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
         if this.Focused then
 
-            if this.CanUp() && (!|"up").Tapped() then this.Up()
-            if this.CanDown() && (!|"down").Tapped() then this.Down()
-            if this.CanLeft() && (!|"left").Tapped() then this.Left()
-            if this.CanRight() && (!|"right").Tapped() then this.Right()
+            if (!|"up").Tapped() && this.CanUp() then this.Up()
+            if (!|"down").Tapped() && this.CanDown() then this.Down()
+            if (!|"left").Tapped() && this.CanLeft() then this.Left()
+            if (!|"right").Tapped() && this.CanRight() then this.Right()
             if (!|"select").Tapped() then
                 match this.WhoIsFocused with
                 | Some i -> last_selected <- i; children.[i].Widget.Select()
