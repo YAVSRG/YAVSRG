@@ -23,7 +23,7 @@ type AnimationSettingsPage() as this =
     // todo: setting to enable explosions
     // todo: replace column and explosion fade percentages with a real timing system
     // todo: option to disable fading of explosions
-    // todo: add previews of explosions, hold explosions, column lights
+    // todo: add preview of column lights
     let explosion_animation_time = Setting.bounded data.Explosions.AnimationFrameTime 10.0 1000.0
     let explosion_fade_time = Setting.percentf data.Explosions.FadeTime
     let explosion_scale = Setting.bounded data.Explosions.Scale 0.5f 2.0f
@@ -35,9 +35,13 @@ type AnimationSettingsPage() as this =
     let noteexplosion = getTexture "noteexplosion"
     let holdexplosion = getTexture "holdexplosion"
     let receptor = getTexture "receptor"
+    let mutable test_event_i = 0
+
+    let test_events = Animation.Counter 1000.0
     let note_frames = Animation.Counter (data.AnimationFrameTime)
     let explosion_frames = Animation.Counter (data.Explosions.AnimationFrameTime)
     let explosion_fade = Animation.Fade 0.0f
+    let hold_explosion_fade = Animation.Fade 0.0f
 
     do
         this.Content(
@@ -75,12 +79,23 @@ type AnimationSettingsPage() as this =
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
+
         explosion_fade.Update elapsedTime
+        hold_explosion_fade.Update elapsedTime
         explosion_frames.Update elapsedTime
         note_frames.Update elapsedTime
+        test_events.Update elapsedTime
 
-        if (!|"skip").Tapped() then
+        if test_event_i < test_events.Loops then
+            test_event_i <- test_events.Loops
             explosion_fade.Value <- 1.0f
+
+            if test_event_i % 2 = 0 then
+                hold_explosion_fade.Target <- 0.0f
+                hold_explosion_fade.Value <- 1.0f
+            else
+                hold_explosion_fade.Target <- 1.0f
+                hold_explosion_fade.Snap()
 
     override this.Draw() =
         base.Draw()
@@ -90,26 +105,61 @@ type AnimationSettingsPage() as this =
         let mutable bottom = this.Bounds.Bottom - 50.0f - COLUMN_WIDTH
 
         // draw note explosion example
+        do
+            Draw.quad
+                (
+                    Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                    |> Quad.ofRect
+                )
+                (Quad.colorOf Color.White)
+                (Sprite.gridUV(note_frames.Loops, 0) receptor)
+            let threshold = max 0.0f (1.0f - explosion_fade_time.Value)
+            let p = (explosion_fade.Value - threshold) / explosion_fade_time.Value |> min 1.0f |> max 0.0f
+            let a = 255.0f * p |> int
+            Draw.quad
+                (
+                    Rect
+                        .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                        .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
+                        .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
+                    |> Quad.ofRect
+                )
+                (Quad.colorOf (Color.White.O4a a))
+                (Sprite.gridUV(explosion_frames.Loops, 0) noteexplosion)
+
+        // draw hold explosion example
+        bottom <- bottom - COLUMN_WIDTH * 2.0f
+        do
+            Draw.quad
+                (
+                    Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                    |> Quad.ofRect
+                )
+                (Quad.colorOf Color.White)
+                (Sprite.gridUV(note_frames.Loops, 0) receptor)
+            let threshold = max 0.0f (1.0f - explosion_fade_time.Value)
+            let p = (hold_explosion_fade.Value - threshold) / explosion_fade_time.Value |> min 1.0f |> max 0.0f
+            let a = 255.0f * p |> int
+            Draw.quad
+                (
+                    Rect
+                        .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                        .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
+                        .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
+                    |> Quad.ofRect
+                )
+                (Quad.colorOf (Color.White.O4a a))
+                (Sprite.gridUV(explosion_frames.Loops, 0) holdexplosion)
+
+        // draw note animation example
+        bottom <- bottom - COLUMN_WIDTH * 2.0f
         Draw.quad
             (
                 Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                 |> Quad.ofRect
             )
             (Quad.colorOf Color.White)
-            (Sprite.gridUV(note_frames.Loops, 0) receptor)
-        let threshold = max 0.0f (1.0f - explosion_fade_time.Value)
-        let p = (explosion_fade.Value - threshold) / explosion_fade_time.Value |> min 1.0f |> max 0.0f
-        let a = 255.0f * p |> int
-        Draw.quad
-            (
-                Rect
-                    .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                    .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
-                    .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
-                |> Quad.ofRect
-            )
-            (Quad.colorOf (Color.White.O4a a))
-            (Sprite.gridUV(explosion_frames.Loops, 0) noteexplosion)
+            (Sprite.gridUV(note_frames.Loops, 0) note)
 
     override this.Title = L"noteskins.edit.animations.name"
     override this.OnClose() =
