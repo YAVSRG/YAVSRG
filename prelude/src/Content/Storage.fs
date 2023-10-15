@@ -245,6 +245,6 @@ type Storage(storage: StorageType) =
 
 module Storage =
     
-    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "receptorlighting"|]
-    let themeTextures = [|"background"; "rain"; "logo"; "cursor"|]
-    let themeSounds = [|"hello"; "click"; "hover"; "text-open"; "text-close"; "key"; "notify-error"; "notify-info"; "notify-system"; "notify-task" |]
+    let NOTESKIN_TEXTURES = [|"note"; "noteexplosion"; "receptor"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "receptorlighting"|]
+    let THEME_TEXTURES = [|"background"; "rain"; "logo"; "cursor"|]
+    let THEME_SOUNDS = [|"hello"; "click"; "hover"; "text-open"; "text-close"; "key"; "notify-error"; "notify-info"; "notify-system"; "notify-task" |]

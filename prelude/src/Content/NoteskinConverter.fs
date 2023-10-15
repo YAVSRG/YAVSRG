@@ -404,7 +404,7 @@ module OsuSkin =
             List.fold f (Mania.Default keys) settings
         | _ -> failwith "mania block did not specify keycount"
 
-    type SkinData = { General: General; Colours: Colours; Fonts: Fonts; Mania: Mania list }
+    type OsuSkinIni = { General: General; Colours: Colours; Fonts: Fonts; Mania: Mania list }
 
     let skinIniParser =
         tuple5
@@ -431,10 +431,12 @@ module OsuSkin =
         match runParserOnFile skinIniParser () file System.Text.Encoding.UTF8 with
         | Success (s, _, _) -> s
         | Failure (e, _, _) -> failwith e
-            
-    // constructor can throw an exception!
 
-    module Converter =
+module SkinConversions =
+
+    open OsuSkin
+
+    module Osu =
 
         let getTextureFilenames(id: string, path: string) : string list =
 
@@ -459,10 +461,13 @@ module OsuSkin =
 
         type ColumnTextures = { Note: string; Head: string; Body: string; Tail: string }
 
-        let convert (source: string) (target: string) (keymodes: int list) =
-            if keymodes.IsEmpty then failwith "Specify at least 1 keymode to convert"
-            
-            let ini = parseSkinINI (Path.Combine (source, "skin.ini"))
+        let check_before_convert (source: string) =
+            try
+                parseSkinINI (Path.Combine (source, "skin.ini")) |> Ok
+            with err ->
+                Error err.Message
+
+        let convert (ini: OsuSkinIni) (source: string) (target: string) (keymode: int) =
 
             if Directory.Exists target then failwith "a folder with this name already exists!"
             Directory.CreateDirectory target |> ignore
@@ -471,14 +476,13 @@ module OsuSkin =
             let colorConfig : ColorConfig = { ColorConfig.Default with Style = ColorScheme.Column; UseGlobalColors = false }
 
             // Identify textures used by noteskin
-            for keys in keymodes do
-                let mania = List.tryFind (fun m -> m.Keys = keys) ini.Mania |> Option.defaultValue (Mania.Default keys)
+            let keymode_settings = List.tryFind (fun m -> m.Keys = keymode) ini.Mania |> Option.defaultValue (Mania.Default keymode)
 
-                for k = 0 to (keys - 1) do
-                    let tex = { Note = mania.NoteImageΔ.[k]; Head = mania.NoteImageΔH.[k]; Body = mania.NoteImageΔL.[k]; Tail = mania.NoteImageΔT.[k] }
-                    if not (textures.Contains tex) then textures.Add tex
+            for k = 0 to (keymode - 1) do
+                let tex = { Note = keymode_settings.NoteImageΔ.[k]; Head = keymode_settings.NoteImageΔH.[k]; Body = keymode_settings.NoteImageΔL.[k]; Tail = keymode_settings.NoteImageΔT.[k] }
+                if not (textures.Contains tex) then textures.Add tex
 
-            let loadbmp f =
+            let load_bmp f =
                 use s = File.Open(f, FileMode.Open)
                 Bitmap.load s
 
@@ -487,7 +491,7 @@ module OsuSkin =
             let square_images (name: string) (files: string list list) =
                 let animation_frames = List.map List.length files |> List.max
                 let colors = List.length files
-                let images = files |> List.map (List.map loadbmp)
+                let images = files |> List.map (List.map load_bmp)
                 let width = images.Head.Head.Width
 
                 // todo: warn if widths don't match
@@ -519,7 +523,7 @@ module OsuSkin =
                 useholdtail <- false
 
             // Generate receptors
-            let receptor_base = getTextureFilenames (textures.[0].Note, source) |> List.head |> loadbmp
+            let receptor_base = getTextureFilenames (textures.[0].Note, source) |> List.head |> load_bmp
             // todo: square these images
             (grayscale 0.5f receptor_base).Save(Path.Combine(target, "receptor-0-0.png"))
             (grayscale 1.0f receptor_base).Save(Path.Combine(target, "receptor-1-0.png"))
@@ -527,24 +531,15 @@ module OsuSkin =
                 { Rows = 2; Columns = 1; Mode = Loose }
             
             // Point color data at textures correctly
-            for keys in keymodes do
-                let mania = List.tryFind (fun m -> m.Keys = keys) ini.Mania |> Option.defaultValue (Mania.Default keys)
+            let textureIds = Array.zeroCreate 10
 
-                let textureIds = Array.zeroCreate 10
+            for k = 0 to (keymode - 1) do
+                let tex = { Note = keymode_settings.NoteImageΔ.[k]; Head = keymode_settings.NoteImageΔH.[k]; Body = keymode_settings.NoteImageΔL.[k]; Tail = keymode_settings.NoteImageΔT.[k] }
+                textureIds.[k] <- byte (textures.IndexOf tex)
 
-                for k = 0 to (keys - 1) do
-                    let tex = { Note = mania.NoteImageΔ.[k]; Head = mania.NoteImageΔH.[k]; Body = mania.NoteImageΔL.[k]; Tail = mania.NoteImageΔT.[k] }
-                    textureIds.[k] <- byte (textures.IndexOf tex)
-
-                colorConfig.Colors.[keys - 2] <- textureIds
+            colorConfig.Colors.[keymode - 2] <- textureIds
 
             // Generate noteskin.json
-            let primaryKeymode = 
-                List.head keymodes
-                |> fun keys -> 
-                    List.tryFind (fun m -> m.Keys = keys) ini.Mania
-                    |> Option.defaultValue (Mania.Default keys)
-
             let config : NoteskinConfig =
                 { NoteskinConfig.Default with
                     Name = ini.General.Name
@@ -553,8 +548,8 @@ module OsuSkin =
                     FlipHoldTail = flipholdtail
                     UseHoldTailTexture = useholdtail
                     HoldNoteTrim = 0.0f
-                    PlayfieldColor = primaryKeymode.ColourΔ.[0]
-                    ColumnWidth = 1080f / 512f * float32 primaryKeymode.ColumnWidth.[0]
+                    PlayfieldColor = keymode_settings.ColourΔ.[0]
+                    ColumnWidth = 1080f / 512f * float32 keymode_settings.ColumnWidth.[0]
                     AnimationFrameTime = 1000.0/60.0
                 }
 
