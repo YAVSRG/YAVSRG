@@ -10,10 +10,13 @@ type ScoreScreenStats =
         Holds: int * int
         Releases: int * int
 
-        Mean: Time
-        StandardDeviation: Time
-        EarlyMean: Time
-        LateMean: Time
+        TapMean: Time
+        TapStandardDeviation: Time
+        TapEarlyPercent: float
+
+        ReleaseMean: Time
+        ReleaseStandardDeviation: Time
+        ReleaseEarlyPercent: float
 
         JudgementCount: int
     }
@@ -21,12 +24,14 @@ type ScoreScreenStats =
         let inc (x: int ref) = x.Value <- x.Value + 1
         let (++) (x: Time ref) (t: Time) = x.Value <- x.Value + t
 
-        let sum = ref 0.0f<ms>
-        let sumOfSq = ref 0.0f<ms>
-        let earlySum = ref 0.0f<ms>
-        let lateSum = ref 0.0f<ms>
-
-        let judgementCount = ref 0
+        let taps = ref 1
+        let earlyTaps = ref 0
+        let tap_sum = ref 0.0f<ms>
+        let tap_sumOfSq = ref 0.0f<ms>
+        let releases = ref 1
+        let earlyReleases = ref 0
+        let release_sum = ref 0.0f<ms>
+        let release_sumOfSq = ref 0.0f<ms>
         
         let notesHit = ref 0
         let notesCount = ref 0
@@ -34,9 +39,6 @@ type ScoreScreenStats =
         let holdsCount = ref 0
         let releasesReleased = ref 0
         let releasesCount = ref 0
-
-        let earlyHitCount = ref 0
-        let lateHitCount = ref 0
 
         for ev in events do
             match ev.Guts with
@@ -48,44 +50,38 @@ type ScoreScreenStats =
                     if not e.Missed then inc notesHit
                     inc notesCount
                 if e.Judgement.IsSome then
-                    inc judgementCount
+                    inc taps
+                    if e.Delta < 0.0f<ms> then inc earlyTaps
                     if not e.Missed then
-                        if e.Delta < 0.0f<ms> then
-                            earlySum ++ e.Delta
-                            inc earlyHitCount
-                        else
-                            lateSum ++ e.Delta
-                            inc lateHitCount
-                        sum ++ e.Delta
-                        sumOfSq ++ e.Delta * float32 e.Delta
+                        tap_sum ++ e.Delta
+                        tap_sumOfSq ++ e.Delta * float32 e.Delta
+
             | Release e ->
                 if not e.Missed then inc releasesReleased
                 inc releasesCount
+                if e.Delta < 0.0f<ms> then inc earlyReleases
                 if e.Judgement.IsSome then
-                    inc judgementCount
+                    inc releases
                     if not e.Missed then
-                        if e.Delta < 0.0f<ms> then
-                            earlySum ++ e.Delta
-                            inc earlyHitCount
-                        else
-                            lateSum ++ e.Delta
-                            inc lateHitCount
-                        sum ++ e.Delta
-                        sumOfSq ++ e.Delta * float32 e.Delta
+                        release_sum ++ e.Delta
+                        release_sumOfSq ++ e.Delta * float32 e.Delta
 
-        let judgementCount = max 1 judgementCount.Value
-        let mean = sum.Value / float32 judgementCount
+        let tap_mean = tap_sum.Value / float32 taps.Value
+        let release_mean = release_sum.Value / float32 releases.Value
         {
             Notes = notesHit.Value, notesCount.Value
             Holds = holdsHeld.Value, holdsCount.Value
             Releases = releasesReleased.Value, releasesCount.Value
 
-            Mean = mean
-            EarlyMean = earlySum.Value / (max 1.0f (float32 earlyHitCount.Value))
-            LateMean = lateSum.Value / (max 1.0f (float32 lateHitCount.Value))
-            StandardDeviation = System.MathF.Sqrt( ((sumOfSq.Value / float32 judgementCount * 1.0f<ms>) - mean * mean) |> float32 ) * 1.0f<ms>
+            TapMean = tap_mean
+            TapStandardDeviation = System.MathF.Sqrt( ((tap_sumOfSq.Value / float32 taps.Value * 1.0f<ms>) - tap_mean * tap_mean) |> float32 ) * 1.0f<ms>
+            TapEarlyPercent = float earlyTaps.Value / float taps.Value
 
-            JudgementCount = judgementCount
+            ReleaseMean = release_mean
+            ReleaseStandardDeviation = System.MathF.Sqrt( ((release_sumOfSq.Value / float32 releases.Value * 1.0f<ms>) - release_mean * release_mean) |> float32 ) * 1.0f<ms>
+            ReleaseEarlyPercent = float earlyReleases.Value / float releases.Value
+
+            JudgementCount = taps.Value + releases.Value - 2
         }
 
 module ScoreScreenHelpers =

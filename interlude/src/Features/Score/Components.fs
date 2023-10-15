@@ -9,6 +9,7 @@ open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
+open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Features
@@ -64,7 +65,15 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
         |+ Text(sprintf "%.2f" data.Physical, 
             Position = Position.TrimTop(530.0f).SliceTop(70.0f).Margin(10.0f, 0.0f),
             Align = Alignment.RIGHT)
-        |* Text((fun () -> sprintf "M: %.1fms | SD: %.1fms" (!stats).Mean (!stats).StandardDeviation), 
+        // todo: update this on ruleset change
+        |+ Tooltip(Callout.Normal
+            .Icon(Icons.stats_2)
+            .Title("Taps")
+            .Body(sprintf "M: %.1fms | SD: %.1fms | %.1f%% early" (!stats).TapMean (!stats).TapStandardDeviation (100.0 * (!stats).TapEarlyPercent))
+            .Title("Releases")
+            .Body(sprintf "M: %.1fms | SD: %.1fms | %.1f%% early" (!stats).ReleaseMean (!stats).ReleaseStandardDeviation (100.0 * (!stats).ReleaseEarlyPercent)),
+            Position = Position.TrimTop(600.0f).SliceTop(40.0f).Margin(10.0f, 0.0f))
+        |* Text((fun () -> sprintf "M: %.1fms | SD: %.1fms" (!stats).TapMean (!stats).TapStandardDeviation), 
             Position = Position.TrimTop(600.0f).SliceTop(40.0f).Margin(10.0f, 0.0f),
             Align = Alignment.RIGHT)
         base.Init(parent)
