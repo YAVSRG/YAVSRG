@@ -73,7 +73,16 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                         Align = Alignment.CENTER,
                         Position = Position.Box(0.0f, 0.0f, float32 c * (size + 10.0f), -90.0f, size, 40.0f)), c + 2, 0)
 
-                    grid.Add(DeleteButton((fun () -> printfn "delete frame %i" c),
+                    grid.Add(DeleteButton(
+                        (fun () ->
+                            ConfirmPage(
+                                sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
+                                fun () -> 
+                                    Noteskins.Current.instance.DeleteTextureColumn(c, texture_id)
+                                    Noteskins.Current.reload_texture(texture_id)
+                                    this.Refresh()
+                                ).Show()
+                        ),
                         Position = Position.Box(0.0f, 0.0f, float32 c * (size + 10.0f), -50.0f, size, 40.0f)), c + 2, 1)
 
             grid.Add(Text(K (sprintf "Color %i" (r + 1)),
@@ -81,7 +90,16 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                 Align = Alignment.RIGHT,
                 Position = Position.Box(0.0f, 0.0f, -250.0f, float32 r * (size + 10.0f), 200.0f, size).Margin(10.0f, size * 0.5f - 20.0f)), 0, r + 1)
 
-            grid.Add(DeleteButton((fun () -> printfn "delete color %i" r),
+            grid.Add(DeleteButton(
+                (fun () ->
+                    ConfirmPage(
+                        sprintf "Really PERMANENTLY delete color %i?" (r + 1),
+                        fun () -> 
+                            Noteskins.Current.instance.DeleteTextureRow(r, texture_id)
+                            Noteskins.Current.reload_texture(texture_id)
+                            this.Refresh()
+                        ).Show()
+                ),
                 VerticalPad = size * 0.5f - 20.0f,
                 Position = Position.Box(0.0f, 0.0f, -50.0f, float32 r * (size + 10.0f), 40.0f, size).Margin(0.0f, size * 0.5f - 20.0f)), 1, r + 2)
 
