@@ -166,7 +166,7 @@ module Mounts =
                 (fun () -> CreateDialog(mountType, setting).Show()),
                 Position = Position.SliceBottom(60.0f).Margin 5.0f)
         let editButtons =
-            SwitchContainer.Row<Button>(Position = Position.SliceBottom(60.0f).Margin 5.0f)
+            NavigationContainer.Row<Button>(Position = Position.SliceBottom(60.0f).Margin 5.0f)
             |+ Button(sprintf "%s %s" Icons.edit (L"imports.mount.edit"),
                 (fun () -> EditorPage(setting).Show()),
                 Position = { Position.Default with Right = 0.5f %+ 0.0f })
@@ -210,7 +210,7 @@ module Mounts =
             this.WhoShouldFocus.Draw()
 
     let tab =
-        SwitchContainer.Column<Widget>()
+        NavigationContainer.Column<Widget>()
         |+ Control(Game.Osu, options.OsuMount,
             Position = Position.Row(100.0f, 200.0f) )
         |+ Control(Game.Stepmania, options.StepmaniaMount,

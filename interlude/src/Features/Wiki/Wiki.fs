@@ -62,7 +62,7 @@ module Wiki =
         let mutable flow = Unchecked.defaultof<ScrollContainer>
 
         let buttons = 
-            SwitchContainer.Row(Position = Position.SliceTop(70.0f).Margin(250.0f, 10.0f))
+            NavigationContainer.Row(Position = Position.SliceTop(70.0f).Margin(250.0f, 10.0f))
             |+ IconButton(L"menu.back", Icons.back, 50.0f,
                 fun () ->
                     match page_history with

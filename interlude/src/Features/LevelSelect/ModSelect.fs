@@ -45,7 +45,7 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
 type private ModSelectPage(onClose) as this =
     inherit Page()
 
-    let grid = GridContainer<Widget>(100.0f, 3, Spacing = (30f, 30f), Position = Position.Margin(100.0f, 200.0f), WrapNavigation = false)
+    let grid = GridFlowContainer<Widget>(100.0f, 3, Spacing = (30f, 30f), Position = Position.Margin(100.0f, 200.0f), WrapNavigation = false)
 
     do 
         grid
@@ -69,7 +69,7 @@ type private ModSelectPage(onClose) as this =
 
     do
         this.Content(
-            SwitchContainer.Column<Widget>()
+            NavigationContainer.Column<Widget>()
             |+ grid
             |+ PageButton("gameplay.pacemaker", fun () -> PacemakerPage().Show())
                 .Pos(500.0f)

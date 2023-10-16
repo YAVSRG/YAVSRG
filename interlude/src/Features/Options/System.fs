@@ -53,7 +53,7 @@ module System =
 
         do
             let hotkeyEditor hk =
-                SwitchContainer.Row<Widget>()
+                NavigationContainer.Row<Widget>()
                 |+ Keybinder(hk, Position = Position.TrimRight PRETTYHEIGHT)
                 |+ Button(Icons.reset, (fun () -> Hotkeys.reset hk), Position = Position.SliceRight PRETTYHEIGHT)
 

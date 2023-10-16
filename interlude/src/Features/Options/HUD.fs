@@ -666,7 +666,7 @@ type BPMMeterPage() as this =
 type EditHUDPage() as this =
     inherit Page()
 
-    let grid = GridContainer<_>(PRETTYHEIGHT, 2, Spacing = (20.0f, 20.0f), Position = Position.Margin(100.0f, 200.0f))
+    let grid = GridFlowContainer<_>(PRETTYHEIGHT, 2, Spacing = (20.0f, 20.0f), Position = Position.Margin(100.0f, 200.0f))
 
     do
         this.Content(

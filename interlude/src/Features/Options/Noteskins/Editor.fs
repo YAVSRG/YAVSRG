@@ -9,7 +9,6 @@ open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Gameplay
 
@@ -20,7 +19,7 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
         this 
         |+ Frame(NodeType.None, 
             Fill = (fun () -> if selected.[x].[y] then Colors.pink_accent.O2 elif this.Focused then Colors.yellow_accent.O2 else Color.Transparent),
-            Border = (fun () -> if this.Focused then Colors.white elif selected.[x].[y] then Colors.pink_accent else Color.Transparent)
+            Border = (fun () -> if this.Focused then Colors.white.O3 elif selected.[x].[y] then Colors.pink_accent else Color.Transparent)
             )
         |* Clickable(this.Select, OnHover = fun b -> if b then if Mouse.held Mouse.LEFT then this.Select() else this.Focus())
         base.Init parent
@@ -31,11 +30,20 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
         base.Draw()
         Draw.quad (this.Bounds |> Quad.ofRect) (Quad.colorOf Color.White) (Sprite.gridUV (x, y) sprite)
 
+type DeleteButton(onClick) =
+    inherit Button(K Icons.delete, onClick, Floating = true)
+
+    member val VerticalPad = 0.0f with get, set
+
+    override this.Draw() =
+        if this.Focused then Draw.rect (this.Bounds.Expand(0.0f, this.VerticalPad)) Colors.yellow_accent.O2
+        base.Draw()
+
 type TextureEditGrid(sprite: Sprite, max_frames: int, max_colors: int) as this =
     inherit StaticContainer(NodeType.Switch (fun () -> this.Items))
 
     let mutable selected : bool array array = [||]
-    let mutable items : GridContainer<_> = Unchecked.defaultof<_>
+    let mutable items : NavigationContainer.Grid<Widget> = Unchecked.defaultof<_>
 
     member this.Refresh() =
         if sprite.Columns <> selected.Length || sprite.Rows <> selected.[0].Length then
@@ -45,14 +53,58 @@ type TextureEditGrid(sprite: Sprite, max_frames: int, max_colors: int) as this =
                 ((this.Bounds.Width - 10.0f * float32 (sprite.Columns - 1)) / float32 sprite.Columns) 
                 ((this.Bounds.Height - 10.0f * float32 (sprite.Rows - 1)) / float32 sprite.Rows)
         let grid_width = size * float32 sprite.Columns + 10.0f * float32 (sprite.Columns - 1)
-        items <- GridContainer(size, sprite.Columns, 
-            Spacing = (10.0f, 10.0f),
-            Position = Position.Box(0.5f, 0.0f, -grid_width * 0.5f, 0.0f, grid_width, this.Bounds.Height))
-        items.Init this
+        items <- NavigationContainer.Grid(WrapNavigation = false, Floating = true, Position = Position.Box(0.5f, 0.0f, -grid_width * 0.5f, 0.0f, grid_width, this.Bounds.Height))
+        
+        let grid = NavigationContainer.Grid<Widget>(WrapNavigation = false, Floating = true)
 
         for r = 0 to sprite.Rows - 1 do
             for c = 0 to sprite.Columns - 1 do
-                items.Add(TextureEditGridItem(sprite, c, r, selected))
+
+                grid.Add(
+                    TextureEditGridItem(sprite, c, r, selected, Position = Position.Box(0.0f, 0.0f, float32 c * (size + 10.0f), float32 r * (size + 10.0f), size, size)),
+                    c + 2,
+                    r + 2)
+
+                if r = 0 then
+                    grid.Add(Text(K (sprintf "Frame %i" (c + 1)),
+                        Color = K Colors.text_subheading,
+                        Align = Alignment.CENTER,
+                        Position = Position.Box(0.0f, 0.0f, float32 c * (size + 10.0f), -90.0f, size, 40.0f)), c + 2, 0)
+
+                    grid.Add(DeleteButton((fun () -> printfn "delete frame %i" c),
+                        Position = Position.Box(0.0f, 0.0f, float32 c * (size + 10.0f), -50.0f, size, 40.0f)), c + 2, 1)
+
+            grid.Add(Text(K (sprintf "Color %i" (r + 1)),
+                Color = K Colors.text_subheading,
+                Align = Alignment.RIGHT,
+                Position = Position.Box(0.0f, 0.0f, -250.0f, float32 r * (size + 10.0f), 200.0f, size).Margin(10.0f, size * 0.5f - 20.0f)), 0, r + 1)
+
+            grid.Add(DeleteButton((fun () -> printfn "delete color %i" r),
+                VerticalPad = size * 0.5f - 20.0f,
+                Position = Position.Box(0.0f, 0.0f, -50.0f, float32 r * (size + 10.0f), 40.0f, size).Margin(0.0f, size * 0.5f - 20.0f)), 1, r + 2)
+
+        items.Add(grid, 0, 0)
+
+        if sprite.Rows < max_colors then
+            items.Add(
+                { new Button(K (sprintf "%s %s" Icons.add "Add color"), (fun () -> printfn "add color"), 
+                    Floating = true,
+                    Position = Position.Margin(0.0f, -50.0f).SliceBottom(40.0f)) with 
+                    override this.Draw() = 
+                        if this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O2
+                        base.Draw() 
+                }, 0, 1)
+
+        if sprite.Columns < max_frames then
+            items.Add(
+                { new Button(K Icons.add, (fun () -> printfn "add frame"), 
+                    Floating = true,
+                    Position = Position.Margin(-50.0f, 0.0f).SliceRight(40.0f)) with 
+                    override this.Draw() = 
+                        if this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O2
+                        base.Draw() 
+                }, 1, 0)
+        items.Init this
 
     member this.SelectedTextures =
         seq {
@@ -84,8 +136,7 @@ type TextureEditPage(texture_id) as this =
     do
         this.Content(
             column()
-            |+ TextureEditGrid(sprite, 8, 8, Position = Position.Box(0.5f, 0.0f, -400.0f, 100.0f, 800.0f, 800.0f))
-            |+ WIP()
+            |+ TextureEditGrid(sprite, 16, 16, Position = Position.Box(0.5f, 0.0f, -375.0f, 200.0f, 750.0f, 750.0f))
         )
         
     override this.Title = "Texture: " + texture_id
@@ -139,7 +190,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                 .Pos(580.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.animations"))
             |+ (
-                GridContainer<TextureCard>(150.0f, 4, 
+                GridFlowContainer<TextureCard>(150.0f, 4, 
                     WrapNavigation = false,
                     Spacing = (15.0f, 15.0f),
                     Position = Position.Box(0.0f, 0.0f, 100.0f, 680.0f, 645.0f, 315.0f))

@@ -2,7 +2,6 @@
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
@@ -10,11 +9,11 @@ open Interlude.UI
 [<AutoOpen>]
 module Helpers =
 
-    let column() = SwitchContainer.Column<Widget>()
-    let row() = SwitchContainer.Row<Widget>()
+    let column() = NavigationContainer.Column<Widget>()
+    let row() = NavigationContainer.Row<Widget>()
 
     let refreshRow number cons =
-        let r = SwitchContainer.Row()
+        let r = NavigationContainer.Row()
         let refresh() =
             r.Clear()
             let n = number()

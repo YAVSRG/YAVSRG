@@ -265,7 +265,7 @@ type private TableStats() =
                 |+ Text(sprintf "%.2f" table_rating, Position = Position.Row(50.0f, 60.0f).Margin(40.0f, 0.0f), Align = Alignment.RIGHT)
                 |+
                     (
-                        GridContainer(50.0f, 4, Position = Position.Row(110.0f, 50.0f).Margin(40.0f, 0.0f), Spacing = (25.0f, 0.0f))
+                        GridFlowContainer(50.0f, 4, Position = Position.Row(110.0f, 50.0f).Margin(40.0f, 0.0f), Spacing = (25.0f, 0.0f))
                         |+ (button(sprintf "%s %s" Icons.stats (L"stats.table.breakdown"), table_breakdown) |> fun b -> b.TiltLeft <- false; b)
                         |+ button(sprintf "%s %s" Icons.stats_2 (L"stats.table.ratings"), table_bests)
                         |+ button(sprintf "%s %s" Icons.sparkle (L"stats.table.leaderboard"), Leaderboard())

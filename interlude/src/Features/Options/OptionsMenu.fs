@@ -50,7 +50,7 @@ module OptionsMenuRoot =
             let _, h = Callout.measure tooltip_hint
 
             this.Content(
-                GridContainer<Widget>(button_size, 3,
+                GridFlowContainer<Widget>(button_size, 3,
                     Spacing = (50.0f, h + 120.0f),
                     Position = 
                         { 

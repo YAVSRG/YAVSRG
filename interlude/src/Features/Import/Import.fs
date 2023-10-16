@@ -86,7 +86,7 @@ type ImportScreen() as this =
     do
         this
         |* (
-            SwitchContainer.Row<Widget>()
+            NavigationContainer.Row<Widget>()
             |+ tabs
             |+ ImportScreen.container
         )

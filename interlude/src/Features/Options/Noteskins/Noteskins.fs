@@ -79,7 +79,7 @@ type NoteskinsPage() as this =
     inherit Page()
 
     let preview = NoteskinPreview 0.35f
-    let grid = GridContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
+    let grid = GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
     let rec tryEditNoteskin() =
         let ns = Noteskins.Current.instance
@@ -103,7 +103,7 @@ type NoteskinsPage() as this =
     do
         refresh()
         this.Content(
-            SwitchContainer.Column<Widget>()
+            NavigationContainer.Column<Widget>()
             |+
                 (
                     FlowContainer.LeftToRight<Widget>(250.0f, Position = Position.Row(230.0f, 50.0f).Margin(100.0f, 0.0f))
