@@ -8,6 +8,7 @@ type Button(text: unit -> string, onClick: unit -> unit) as this =
 
     member val Hotkey : Hotkey = "none" with get, set
     member val Disabled : unit -> bool = K false with get, set
+    member val Floating = false with get, set
 
     new(text: string, onClick: unit -> unit) = Button(K text, onClick)
 
@@ -22,7 +23,9 @@ type Button(text: unit -> string, onClick: unit -> unit) as this =
                 if this.Disabled() then Colors.text_greyout
                 elif this.Focused then Colors.text_yellow_2
                 else Colors.text)
-        |+ Clickable((fun () -> if not (this.Disabled()) then this.Select()), OnHover = fun b -> if b && not (this.Disabled()) then this.Focus())
+        |+ Clickable((fun () -> if not (this.Disabled()) then this.Select()), 
+            Floating = this.Floating,
+            OnHover = fun b -> if b && not (this.Disabled()) then this.Focus())
         |* HotkeyAction(this.Hotkey, fun () -> Style.click.Play(); onClick())
         base.Init parent
 

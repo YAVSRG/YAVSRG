@@ -4,7 +4,7 @@ open System.Linq
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 
-type private GridItem<'T when 'T :> Widget> =
+type private GridFlowItem<'T when 'T :> Widget> =
     {
         Widget: 'T
         mutable Visible: bool
@@ -13,14 +13,14 @@ type private GridItem<'T when 'T :> Widget> =
     }
 
 /// Container that automatically positions its contents packed in a grid arrangement
-type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
+type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     inherit StaticWidget(NodeType.Switch (fun _ -> this.WhoShouldFocus))
     
     let mutable spacing = 0.0f, 0.0f
     let mutable filter : 'T -> bool = K true
     let mutable refresh = false
     let mutable last_selected = 0
-    let children = ResizeArray<GridItem<'T>>()
+    let children = ResizeArray<GridFlowItem<'T>>()
 
     let mutable content_height = 0.0f
     let contentChangeEvent = Event<float32>()
@@ -46,7 +46,7 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             spacing <- value
             refresh <- true
     
-    member private this.WhoIsFocused : int option = Seq.tryFindIndex (fun (c: GridItem<'T>) -> c.Widget.Focused) children
+    member private this.WhoIsFocused : int option = Seq.tryFindIndex (fun (c: GridFlowItem<'T>) -> c.Widget.Focused) children
     member private this.WhoShouldFocus =
         if children.Count = 0 then failwithf "Tried to focus this %O with no children" this
         if last_selected >= children.Count then last_selected <- 0
@@ -77,10 +77,10 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             let c = children.[i]
             let rows = (children.Count + columns - 1) / columns
             let mutable p = (c.Y - 1) %% rows
-            let mutable found = Seq.tryFindIndex(fun (item: GridItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable && item.Visible) children
+            let mutable found = Seq.tryFindIndex(fun (item: GridFlowItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable && item.Visible) children
             while found.IsNone && p <> c.Y do
                 p <- (p - 1) %% rows
-                found <- Seq.tryFindIndex(fun (item: GridItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable && item.Visible) children
+                found <- Seq.tryFindIndex(fun (item: GridFlowItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable && item.Visible) children
             match found with
             | Some i -> 
                 last_selected <- i
@@ -94,10 +94,10 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             let c = children.[i]
             let rows = (children.Count + columns - 1) / columns
             let mutable p = (c.Y + 1) %% rows
-            let mutable found = Seq.tryFindIndex(fun (item: GridItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable && item.Visible) children
+            let mutable found = Seq.tryFindIndex(fun (item: GridFlowItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable && item.Visible) children
             while found.IsNone && p <> c.Y do
                 p <- (p + 1) %% rows
-                found <- Seq.tryFindIndex(fun (item: GridItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable && item.Visible) children
+                found <- Seq.tryFindIndex(fun (item: GridFlowItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable && item.Visible) children
             match found with
             | Some i -> 
                 last_selected <- i
@@ -110,10 +110,10 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         | Some i ->
             let c = children.[i]
             let mutable p = (c.X - 1) %% columns
-            let mutable found = Seq.tryFindIndex(fun (item: GridItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable && item.Visible) children
+            let mutable found = Seq.tryFindIndex(fun (item: GridFlowItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable && item.Visible) children
             while found.IsNone && p <> c.X do
                 p <- (p - 1) %% columns
-                found <- Seq.tryFindIndex(fun (item: GridItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable && item.Visible) children
+                found <- Seq.tryFindIndex(fun (item: GridFlowItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable && item.Visible) children
             match found with
             | Some i -> 
                 last_selected <- i
@@ -126,10 +126,10 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         | Some i ->
             let c = children.[i]
             let mutable p = (c.X + 1) %% columns
-            let mutable found = Seq.tryFindIndex(fun (item: GridItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable && item.Visible) children
+            let mutable found = Seq.tryFindIndex(fun (item: GridFlowItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable && item.Visible) children
             while found.IsNone && p <> c.X do
                 p <- (p + 1) %% columns
-                found <- Seq.tryFindIndex(fun (item: GridItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable && item.Visible) children
+                found <- Seq.tryFindIndex(fun (item: GridFlowItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable && item.Visible) children
             match found with
             | Some i -> 
                 last_selected <- i
@@ -149,7 +149,7 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
-            children.Any(fun (item: GridItem<'T>) -> item.X = c.X && item.Y < c.Y && item.Widget.Focusable && item.Visible)
+            children.Any(fun (item: GridFlowItem<'T>) -> item.X = c.X && item.Y < c.Y && item.Widget.Focusable && item.Visible)
         | None -> false
     
     member private this.CanDown() =
@@ -158,7 +158,7 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
-            children.Any(fun (item: GridItem<'T>) -> item.X = c.X && item.Y > c.Y && item.Widget.Focusable && item.Visible)
+            children.Any(fun (item: GridFlowItem<'T>) -> item.X = c.X && item.Y > c.Y && item.Widget.Focusable && item.Visible)
         | None -> false
     
     member private this.CanLeft() =
@@ -167,7 +167,7 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
-            children.Any(fun (item: GridItem<'T>) -> item.X < c.X && item.Y = c.Y && item.Widget.Focusable && item.Visible)
+            children.Any(fun (item: GridFlowItem<'T>) -> item.X < c.X && item.Y = c.Y && item.Widget.Focusable && item.Visible)
         | None -> false
         
     member private this.CanRight() =
@@ -176,7 +176,7 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         match this.WhoIsFocused with
         | Some i ->
             let c = children.[i]
-            children.Any(fun (item: GridItem<'T>) -> item.X > c.X && item.Y = c.Y && item.Widget.Focusable && item.Visible)
+            children.Any(fun (item: GridFlowItem<'T>) -> item.X > c.X && item.Y = c.Y && item.Widget.Focusable && item.Visible)
         | None -> false
 
     override this.Update(elapsedTime, moved) =
@@ -214,5 +214,5 @@ type GridContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             child.Init this
             refresh <- true
 
-    static member (|+) (parent: #GridContainer<_>, child: #Widget) = parent.Add child; parent
-    static member (|*) (parent: #GridContainer<_>, child: #Widget) = parent.Add child
+    static member (|+) (parent: #GridFlowContainer<_>, child: #Widget) = parent.Add child; parent
+    static member (|*) (parent: #GridFlowContainer<_>, child: #Widget) = parent.Add child
