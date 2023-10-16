@@ -107,6 +107,7 @@
     <Compile Include="Features\Options\Noteskins\Colors.fs" />
     <Compile Include="Features\Options\Noteskins\Rotations.fs" />
     <Compile Include="Features\Options\Noteskins\Animations.fs" />
+    <Compile Include="Features\Options\Noteskins\Textures.fs" />
     <Compile Include="Features\Options\Noteskins\Editor.fs" />
     <Compile Include="Features\Options\Noteskins\Noteskins.fs" />
     <Compile Include="Features\Options\HUD.fs" />

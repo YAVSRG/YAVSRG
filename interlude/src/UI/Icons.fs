@@ -31,6 +31,11 @@ module Icons =
     let unselected = Feather.circle
     let reset = Feather.refresh_ccw
 
+    let horizontal_flip = Feather.corner_down_left
+    let vertical_flip = Feather.corner_left_up
+    let rotate_cw = Feather.rotate_cw
+    let rotate_ccw = Feather.rotate_ccw
+
     let goal = Feather.flag
     let playlist = Feather.list
     let comment = Feather.message_square

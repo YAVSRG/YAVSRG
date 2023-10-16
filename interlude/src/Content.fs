@@ -231,6 +231,13 @@ module Content =
                     config <- instance.Config
                 reload()
 
+            let reload_texture(id: string) =
+                match instance.GetTexture id with
+                | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id false |> Sprites.add id
+                | None -> 
+                    Logging.Warn(sprintf "Noteskin texture '%s' didn't load properly, so it will appear as a white square ingame." id)
+                    Sprite.Default |> Sprites.add id
+
         // Loading into memory
 
         let load () =
