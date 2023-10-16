@@ -317,6 +317,42 @@ type Storage(storage: StorageType) =
                 File.Copy(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row src_col), Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row info.Columns))
             this.WriteTextureConfig({ info with Columns = info.Columns + 1 }, name, path)
         with err -> Logging.Error("Error adding texture column", err)
+    
+    member this.DeleteTextureRow (row: int, name: string, [<ParamArray>] path: string array) =
+        match storage with
+        | Embedded _ -> failwith "Not supported for zipped content"
+        | Folder f ->
+    
+        let info : TextureConfig = this.GetTextureConfig (name, path)
+        match info.Mode with
+        | Grid -> failwith "Not supported for stitched textures"
+        | Loose ->
+        
+        try
+            for col = 0 to info.Columns - 1 do
+                File.Delete(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
+                for mrow = row + 1 to info.Rows - 1 do
+                    File.Move(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name mrow col), Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name (mrow - 1) col))
+            this.WriteTextureConfig({ info with Rows = info.Rows - 1 }, name, path)
+        with err -> Logging.Error("Error removing texture row", err)
+    
+    member this.DeleteTextureColumn (col: int, name: string, [<ParamArray>] path: string array) =
+        match storage with
+        | Embedded _ -> failwith "Not supported for zipped content"
+        | Folder f ->
+    
+        let info : TextureConfig = this.GetTextureConfig (name, path)
+        match info.Mode with
+        | Grid -> failwith "Not supported for stitched textures"
+        | Loose ->
+        
+        try
+            for row = 0 to info.Rows - 1 do
+                File.Delete(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
+                for mcol = col + 1 to info.Columns - 1 do
+                    File.Move(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row mcol), Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row (mcol - 1)))
+            this.WriteTextureConfig({ info with Columns = info.Columns - 1 }, name, path)
+        with err -> Logging.Error("Error removing texture column", err)
 
 module Storage =
     
