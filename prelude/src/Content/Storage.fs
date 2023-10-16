@@ -31,6 +31,8 @@ type StorageType =
 
 type Storage(storage: StorageType) =
 
+    let mutable texture_config_cache : Map<string, TextureConfig> = Map.empty
+
     member this.Source = storage
 
     member this.IsEmbedded = match storage with Embedded _ -> true | _ -> false
@@ -84,8 +86,92 @@ type Storage(storage: StorageType) =
             let target = Path.Combine(f, p)
             Directory.CreateDirectory target |> ignore
             Directory.EnumerateDirectories target |> Seq.map Path.GetFileName
+    
+    /// Gets the specified JSON file, or returns None
+    /// None is returned with silent fail if the file did not exist
+    /// None is returned with an error logged if something goes wrong while reading the file
+    member this.TryGetJson<'T> (writeBack: bool, [<ParamArray>] path: string array) : 'T option =
+        let json =
+            match this.TryReadFile path with
+            | Some stream ->
+                use tr = new StreamReader(stream)
+                let result =
+                    tr.ReadToEnd()
+                    |> JSON.FromString<'T>
+                    |> 
+                        function
+                        | Ok v -> Some v
+                        | Error err -> 
+                            Logging.Error (sprintf "Failed to load %s in: %O" (String.concat "/" path) storage, err)
+                            None
+                stream.Dispose()
+                result
+            | None -> None
+        if writeBack && json.IsSome then this.WriteJson<'T> (json.Value, path)
+        json
+    
+    /// Gets the specified JSON file, or returns the default instance
+    /// File is not written back if there was a problem with an existing file
+    member this.GetJsonOrDefault<'T> (writeBack: bool, [<ParamArray>] path: string array) : 'T =
+        let json, faultInFile =
+            match this.TryReadFile path with
+            | Some stream ->
+                use tr = new StreamReader(stream)
+                let result =
+                    tr.ReadToEnd()
+                    |> JSON.FromString<'T>
+                    |> 
+                        function
+                        | Ok v -> v, false
+                        | Error err -> 
+                            Logging.Error (sprintf "JSON error reading '%s' in: %O\n  Data was wrong or not formatted properly (Check you aren't missing a comma)\n  Using default values instead" (String.concat "/" path) storage, err)
+                            JSON.Default<'T>(), true
+                stream.Dispose()
+                result
+            | None -> JSON.Default<'T>(), false
+        if writeBack && not faultInFile then this.WriteJson (json, path)
+        json
+    
+    member this.WriteJson<'T> (data: 'T, [<ParamArray>] path: string array) =
+        match storage with
+        | Embedded _ -> () // Zip archive is read-only
+        | Folder f ->
+            let target = Path.Combine (f, Path.Combine path)
+            target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
+            JSON.ToFile(target, true) data
+    
+    member this.ExtractToFolder targetPath =
+        Directory.CreateDirectory targetPath |> ignore
+        match storage with
+        | Embedded z -> z.ExtractToDirectory targetPath
+        | Folder _ -> failwith "Can only extract zip to folder"
+            
+    member this.CompressToZip target : bool =
+        if File.Exists target then File.Delete target
+        match storage with
+        | Embedded _ -> Logging.Error("Exporting already zipped content as an archive is not implemented"); false
+        | Folder f -> 
+            try 
+                ZipFile.CreateFromDirectory(f, target)
+                true
+            with
+            | :? DirectoryNotFoundException as e -> Logging.Error("Couldn't export archive because the folder moved. Did you move it while the game was open?", e); false
+            | :? IOException as e -> Logging.Error("IO exception while exporting archive", e); false
+            | _ -> reraise()
 
     // Texture loading
+
+    member private this.GetTextureConfig (name: string, [<ParamArray>] path: string array) =
+        let id = String.concat "/" path + "/" + name
+        if not (texture_config_cache.ContainsKey id) then 
+            let info : TextureConfig = this.GetJsonOrDefault (false, Array.append path [|name + ".json"|])
+            texture_config_cache <- texture_config_cache.Add(id, info)
+        texture_config_cache.[id]
+
+    member private this.WriteTextureConfig (info: TextureConfig, name: string, path: string array) =
+        let id = String.concat "/" path + "/" + name
+        texture_config_cache <- texture_config_cache.Add(id, info)
+        this.WriteJson<TextureConfig>(info, Array.append path [|name + ".json"|])
 
     member private this.LoadGridTexture (config: TextureConfig, name: string, path: string array) : Bitmap option =
         if config.Columns < 1 then failwith "Columns must be a positive number"
@@ -121,7 +207,7 @@ type Storage(storage: StorageType) =
         Some atlas
 
     member internal this.LoadTexture (name: string, [<ParamArray>] path: string array) : Result<(Bitmap * TextureConfig) option, exn> =
-        let info : TextureConfig = this.GetJsonOrDefault (false, Array.append path [|name + ".json"|])
+        let info : TextureConfig = this.GetTextureConfig (name, path)
         match info.Mode with
         | Grid -> 
             try
@@ -131,69 +217,16 @@ type Storage(storage: StorageType) =
             with err -> Error err
         | Loose ->
             try 
-                match this.LoadLooseTextures (info, name, path)with
+                match this.LoadLooseTextures (info, name, path) with
                 | Some img -> Ok (Some (img, info))
                 | None -> Ok None
             with err -> Error err
-
-    /// Gets the specified JSON file, or returns None
-    /// None is returned with silent fail if the file did not exist
-    /// None is returned with an error logged if something goes wrong while reading the file
-    member this.TryGetJson<'T> (writeBack: bool, [<ParamArray>] path: string array) : 'T option =
-        let json =
-            match this.TryReadFile path with
-            | Some stream ->
-                use tr = new StreamReader(stream)
-                let result =
-                    tr.ReadToEnd()
-                    |> JSON.FromString<'T>
-                    |> 
-                        function
-                        | Ok v -> Some v
-                        | Error err -> 
-                            Logging.Error (sprintf "Failed to load %s in: %O" (String.concat "/" path) storage, err)
-                            None
-                stream.Dispose()
-                result
-            | None -> None
-        if writeBack && json.IsSome then this.WriteJson<'T> (json.Value, path)
-        json
-
-    /// Gets the specified JSON file, or returns the default instance
-    /// File is not written back if there was a problem with an existing file
-    member this.GetJsonOrDefault<'T> (writeBack: bool, [<ParamArray>] path: string array) : 'T =
-        let json, faultInFile =
-            match this.TryReadFile path with
-            | Some stream ->
-                use tr = new StreamReader(stream)
-                let result =
-                    tr.ReadToEnd()
-                    |> JSON.FromString<'T>
-                    |> 
-                        function
-                        | Ok v -> v, false
-                        | Error err -> 
-                            Logging.Error (sprintf "JSON error reading '%s' in: %O\n  Data was wrong or not formatted properly (Check you aren't missing a comma)\n  Using default values instead" (String.concat "/" path) storage, err)
-                            JSON.Default<'T>(), true
-                stream.Dispose()
-                result
-            | None -> JSON.Default<'T>(), false
-        if writeBack && not faultInFile then this.WriteJson (json, path)
-        json
-
-    member this.WriteJson<'T> (data: 'T, [<ParamArray>] path: string array) =
-        match storage with
-        | Embedded _ -> () // Zip archive is read-only
-        | Folder f ->
-            let target = Path.Combine (f, Path.Combine path)
-            target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
-            JSON.ToFile(target, true) data
 
     member this.SplitTexture (name: string, [<ParamArray>] path: string array) =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-            let info : TextureConfig = this.GetJsonOrDefault (false, Array.append path [|name + ".json"|])
+            let info : TextureConfig = this.GetTextureConfig (name, path)
             match info.Mode with
             | Grid -> 
                 let img = Option.get (this.LoadGridTexture (info, name, path))
@@ -206,14 +239,14 @@ type Storage(storage: StorageType) =
                             context.DrawImage(img, Point(-col * w, -row * h), 1.0f) |> ignore )
                         tex.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
                 File.Delete(Path.Combine(f, Path.Combine path, sprintf "%s.png" name))
-                this.WriteJson({ info with Mode = Loose }, Array.append path [|name + ".json"|])
-            | Loose -> failwithf "Texture '%s' is already split" name
+                this.WriteTextureConfig({ info with Mode = Loose }, name, path)
+            | Loose -> ()
 
     member this.StitchTexture (name: string, [<ParamArray>] path: string array) =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-            let info : TextureConfig = this.GetJsonOrDefault (false, Array.append path [|name + ".json"|])
+            let info : TextureConfig = this.GetTextureConfig (name, path)
             match info.Mode with
             | Loose -> 
                 let img = Option.get (this.LoadLooseTextures(info, name, path))
@@ -221,27 +254,69 @@ type Storage(storage: StorageType) =
                 for row in 0 .. info.Rows - 1 do
                     for col in 0 .. info.Columns - 1 do
                         File.Delete(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
-                this.WriteJson({ info with Mode = Grid }, Array.append path [|name + ".json"|])
-            | Grid -> failwithf "Texture '%s' is already stitched" name
+                this.WriteTextureConfig({ info with Mode = Loose }, name, path)
+            | Grid -> ()
 
-    member this.ExtractToFolder targetPath =
-        Directory.CreateDirectory targetPath |> ignore
+    member private this.MutateTexture ((col, row), action, name: string, [<ParamArray>] path: string array) =
         match storage with
-        | Embedded z -> z.ExtractToDirectory targetPath
-        | Folder f -> failwith "Can only extract zip to folder"
+        | Embedded _ -> failwith "Not supported for zipped content"
+        | Folder f ->
+
+        let info : TextureConfig = this.GetTextureConfig (name, path)
+        match info.Mode with
+        | Grid -> failwith "Not supported for stitched textures"
+        | Loose -> 
+
+        let img = 
+            match this.TryReadFile (Array.append path [|sprintf "%s-%i-%i.png" name row col|]) with
+            | Some stream -> let i = Bitmap.load stream in stream.Dispose(); i
+            | None -> failwithf "Couldn't load texture file (%i,%i)" row col
+        img.Mutate<PixelFormats.Rgba32> ( fun context -> action context |> ignore )
+        img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
+
+    member this.VerticalFlipTexture ((col, row), name: string, [<ParamArray>] path: string array) =
+        this.MutateTexture((col, row), (fun ctx -> ctx.Flip FlipMode.Vertical), name, path)
+
+    member this.HorizontalFlipTexture ((col, row), name: string, [<ParamArray>] path: string array) =
+        this.MutateTexture((col, row), (fun ctx -> ctx.Flip FlipMode.Horizontal), name, path)
+
+    member this.RotateClockwise ((col, row), name: string, [<ParamArray>] path: string array) =
+        this.MutateTexture((col, row), (fun ctx -> ctx.Rotate(RotateMode.Rotate90)), name, path)
+
+    member this.RotateAnticlockwise ((col, row), name: string, [<ParamArray>] path: string array) =
+        this.MutateTexture((col, row), (fun ctx -> ctx.Rotate(RotateMode.Rotate270)), name, path)
+    
+    member this.AddTextureRow (src_row: int, name: string, [<ParamArray>] path: string array) =
+        match storage with
+        | Embedded _ -> failwith "Not supported for zipped content"
+        | Folder f ->
+    
+        let info : TextureConfig = this.GetTextureConfig (name, path)
+        match info.Mode with
+        | Grid -> failwith "Not supported for stitched textures"
+        | Loose ->
         
-    member this.CompressToZip target : bool =
-        if File.Exists target then File.Delete target
+        try
+            for col = 0 to info.Columns - 1 do
+                File.Copy(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name src_row col), Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name info.Rows col))
+            this.WriteTextureConfig({ info with Rows = info.Rows + 1 }, name, path)
+        with err -> Logging.Error("Error adding texture row", err)
+    
+    member this.AddTextureColumn (src_col: int, name: string, [<ParamArray>] path: string array) =
         match storage with
-        | Embedded z -> Logging.Error("Exporting already zipped content as an archive is not implemented"); false
-        | Folder f -> 
-            try 
-                ZipFile.CreateFromDirectory(f, target)
-                true
-            with
-            | :? DirectoryNotFoundException as e -> Logging.Error("Couldn't export archive because the folder moved. Did you move it while the game was open?", e); false
-            | :? IOException as e -> Logging.Error("IO exception while exporting archive", e); false
-            | _ -> reraise()
+        | Embedded _ -> failwith "Not supported for zipped content"
+        | Folder f ->
+    
+        let info : TextureConfig = this.GetTextureConfig (name, path)
+        match info.Mode with
+        | Grid -> failwith "Not supported for stitched textures"
+        | Loose ->
+
+        try
+            for row = 0 to info.Rows - 1 do
+                File.Copy(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row src_col), Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row info.Columns))
+            this.WriteTextureConfig({ info with Columns = info.Columns + 1 }, name, path)
+        with err -> Logging.Error("Error adding texture column", err)
 
 module Storage =
     
