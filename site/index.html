@@ -19,62 +19,93 @@
 
       <div class="container flex flex-col mx-auto space-y-4">
 
+        <div id="default-carousel" class="relative frame text-20 text-center w-full p-10" data-carousel="slide">
+          <div style="aspect-ratio: 1920/1040;" class="relative overflow-hidden rounded-md">
+              <div class="hidden duration-500 ease-in-out" data-carousel-item>
+                  <img src="levelselect.jpg" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
+                  <div class="overlay"></div>
+                  <div class="absolute left-0 bottom-0 flex flex-col m-4">
+                    <p class="text-50 text-left text-green">Your new home</p>
+                    <p class="text-20 text-left">Everything you need for casual or serious play in one place</p>
+                  </div>
+              </div>
+              <div class="hidden duration-500 ease-in-out" data-carousel-item>
+                  <img src="import.png" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
+                  <div class="overlay"></div>
+                  <div class="absolute left-0 bottom-0 flex flex-col m-4">
+                    <p class="text-50 text-left text-green">Easy to set up</p>
+                    <p class="text-20 text-left">Ingame downloader for noteskins, charts and more</p>
+                  </div>
+              </div>
+              <div class="hidden duration-500 ease-in-out" data-carousel-item>
+                  <img src="tooltips.png" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
+                  <div class="overlay"></div>
+                  <div class="absolute left-0 bottom-0 flex flex-col m-4">
+                    <p class="text-50 text-left text-green">Easy to find things</p>
+                    <p class="text-20 text-left">Press the / key while hovering over most things for information and tips</p>
+                  </div>
+              </div>
+              <div class="hidden duration-500 ease-in-out" data-carousel-item>
+                  <img src="hud.png" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
+                  <div class="overlay"></div>
+                  <div class="absolute left-0 bottom-0 flex flex-col m-4">
+                    <p class="text-50 text-left text-green">Make yourself comfortable</p>
+                    <p class="text-20 text-left">Customise and reposition the gameplay HUD to your liking</p>
+                  </div>
+              </div>
+              <div class="hidden duration-500 ease-in-out" data-carousel-item>
+                  <img src="practice.png" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
+                  <div class="overlay"></div>
+                  <div class="absolute left-0 bottom-0 flex flex-col m-4">
+                    <p class="text-50 text-left text-green">Make yourself comfortable</p>
+                    <p class="text-20 text-left">Tools for practising charts and getting the correct audio sync</p>
+                  </div>
+              </div>
+              <div class="hidden duration-500 ease-in-out" data-carousel-item>
+                  <img src="stats.jpg" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
+                  <div class="overlay"></div>
+                  <div class="absolute left-0 bottom-0 flex flex-col m-4">
+                    <p class="text-50 text-left text-green">Much more..</p>
+                    <p class="text-20 text-left">Leaderboard rankings, stats, multiplayer currently in development</p>
+                  </div>
+              </div>
+          </div>
+          <button type="button" class="absolute px-10 top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+              <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+                  <svg class="w-4 h-4 text-white dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+                  </svg>
+                  <span class="sr-only">Previous</span>
+              </span>
+          </button>
+          <button type="button" class="absolute px-10 top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+              <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+                  <svg class="w-4 h-4 text-white dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                  </svg>
+                  <span class="sr-only">Next</span>
+              </span>
+          </button>
+        </div>
+
         <div class="flex flex-row space-x-4 justify-between">
 
-          <div class="frame text-center text-20 w-56 p-4">
+          <div class="frame text-center text-20 w-40 p-4 flex flex-col justify-center">
             <img class="rounded-full border-4 border-white" src="pfp.png"/>
-            <a href="https://github.com/percyqaz" class="text-30 hover:underline">Percyqaz</a>
-            <p class="leading-8 text-grey">Maker of Interlude</p>
+            <a href="https://github.com/percyqaz" class="text-20 hover:underline">Percyqaz</a>
+            <p class="leading-8 py-2">Maker of Interlude</p>
           </div>
 
           <div class="frame text-20 w-full py-4 px-6">
             <h1 class="text-30">Interlude</h1>
             <p>
-            Interlude is a hobby project I originally started working on for fun in 2018.
-              <br/>In 2021 I finished university, so I've gotten back into steadily working on the project.
+            Interlude is a hobby project I've been working on for fun since 2018; It's the culmination of many years of game development knowledge and experience playing VSRGs.
             <br/>
-            The aim is to make a VSRG client the way I like it, packed with cool ideas to provide my "ideal VSRG experience" - If you like the same things as me, you will surely like this client too.
+            <br/>
+            My aim is to make a VSRG client the way I like it, packed with cool ideas and quality of life to provide my "ideal VSRG experience" - If you like the same things as me, you will surely like this client too.
             </p>
-            <div class="flex flex-row justify-end items-center">
-              <a href="https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip" class="button mt-4 px-4 py-3">Download Interlude</a>
-            </div>
           </div>
 
-        </div>
-
-        <div class="frame text-20 text-center w-full p-4">
-          <h1 class="text-30">Features</h1>
-          <p class="leading-8 mb-4">
-            Everything you would normally expect to be a setting in a rhythm game, Interlude has it.
-            <br/>This includes custom skins for your notes, and more advanced features like lane covers or pacemakers.
-          </p>
-          <img class="feature" src="options.png"/>
-        </div>
-        
-        <div class="frame text-20 text-center w-full p-4">
-          <h1 class="text-30">User interface</h1>
-          <p class="leading-8 mb-4">I'm no designer, and yet I'm proud to say I've trial-and-errored my way into a design language that suits me.
-            <br/>You should find yourself quite comfortable, but if you have suggestions for improvements, please share them in the discord!
-          </p>
-          <img class="feature" src="levelselect.png"/>
-        </div>
-
-        <div class="frame text-20 text-center w-full p-4">
-          <h1 class="text-30">Ingame help</h1>
-          <p class="leading-8 mb-4">
-            Don't know what a button does? Forgotten how something works?
-            <br/>I know I have. That's why I've built helpful tooltips into the game.
-            Just press the / key while hovering over most things to see an explanation of what it is and how to use it
-          </p>
-          <img class="feature" src="tooltips.gif"/>
-        </div>
-
-        <div class="frame text-20 text-center w-full p-4">
-          <h1 class="text-30">Customise your HUD</h1>
-          <p class="leading-8 mb-4">
-            You can reposition the gameplay HUD elements however you like, and also change a variety of settings about what they display.
-          </p>
-          <img class="feature" src="hud.png"/>
         </div>
 
         <div class="frame text-20 text-center w-full p-4 mb-0">
@@ -83,14 +114,14 @@
 
           <p class="leading-8 mb-8">
             Interlude can only grow to its full potential with your help.
-            <br/>The best way to help out is to join the community and provide feature requests/playtesting feedback.
+            <br/>The best way to help out is to join the community and suggest new features or improvements.
           </p>
 
-          <a href="https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip" class="mx-auto button text-30 mt-8 px-4 py-3">Download Interlude</a>
-
-          <div class="w-3/4 lg:w-1/2 mx-auto flex flex-row justify-between mt-8">
-            <a href="https://discord.gg/tA22tWR" class="px-4 py-2 hover:underline">Join the Discord</a>
-            <a href="https://github.com/YAVSRG/Interlude" class="px-4 py-2 hover:underline">Follow on GitHub</a>
+          <div class="w-full flex flex-col lg:flex-row justify-center gap-y-4 gap-x-20 items-center">
+            <a href="https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip" class="lg:hidden button text-30 text-green px-6 py-1 w-56">Play now</a>
+            <a href="https://discord.gg/tA22tWR" class="button px-6 py-1">Join the Discord</a>
+            <a href="https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip" class="hidden lg:block button text-30 text-green px-6 py-1 w-56">Play now</a>
+            <a href="https://github.com/YAVSRG/Interlude" class="button px-6 py-1">Follow on GitHub</a>
           </div>
 
         </div>
@@ -112,5 +143,7 @@
     </footer>
 
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
 </body>
 </html>
