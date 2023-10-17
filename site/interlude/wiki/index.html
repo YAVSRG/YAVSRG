@@ -7,30 +7,14 @@
     <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
     <link href="../../style.css" rel="stylesheet"/>
     <link rel="icon" type="image/x-icon" href="../../favicon.ico"/>
-    <script src="https://unpkg.com/feather-icons"></script>
   </head>
   <body class="background-2 akrobat flex flex-row">
-    <!-- sidebar -->
-    <span class="open-sidebar absolute lg:hidden m-3 p-2 frame top-5 left-4 cursor-pointer" onclick="toggleSidebar()">
-      <i data-feather="chevrons-right" class="feather w-12 h-12"></i>
-    </span>
-    <div class="sidebar fixed lg:relative top-0 bottom-0 lg:left-0 px-4 overflow-y-auto">
-      <div class="text-30">
-        <div class="mx-4 mt-4 flex flex-row justify-between mx-auto items-center space-x-6">
-          <h1 class="pt-1 lg:mx-auto">Interlude Wiki</h1>
-          <i data-feather="x" class="cursor-pointer lg:hidden" onclick="toggleSidebar()"></i>
-        </div>
-      </div>
-      <div class="text-20">
-        <hr/><div class="ml-3"><h2>Getting started</h2><ul class="ml-8 list-disc"><li class=""><a href="adding_songs.html">Adding songs</a></li><li class=""><a href="how_to_play.html">How to play</a></li></ul></div>
-      </div>
-    </div>
-    
 		<div class="flex flex-col h-screen w-full justify-between">
+      
       <div class="mx-4">
         <!-- content -->
         <div class="w-full p-10 space-y-8">
-          <div class="frame text-20 container flex flex-col mx-auto p-4"><h1 class="text-30">Welcome to the Interlude Wiki!</h1><p class="leading-8 mb-4">This is the place to go for extended information on how a particular feature works.</p><p class="leading-8 mb-4">Always remember that <strong>lots of information</strong> is available directly from the game client by pressing <code>/</code> while hovering over buttons, settings, etc.<br/>If there is information available in this way, your <strong>cursor will turn white!</strong></p><p class="leading-8 mb-4">I will try my best to keep this Wiki up-to-date and relevant, if you see something that doesn't look quite right or you want more information about a particular feature then be sure to let me know <a class="underline" href="https://discord.gg/tA22tWR">in the Discord</a>.</p></div>
+          <div class="frame text-20 container flex flex-col mx-auto p-4"><h1 class="text-30">Welcome to the Interlude Wiki!</h1><p class="leading-8 mb-4">This is the place to go for extended information on how a particular feature works.</p><p class="leading-8 mb-4">Always remember that <strong>lots of information</strong> is available directly from the game client by pressing <code>/</code> while hovering over buttons, settings, etc.<br/>If there is information available in this way, your <strong>cursor will turn white!</strong></p><p class="leading-8 mb-4">I will try my best to keep this Wiki up-to-date and relevant, if you see something that doesn't look quite right or you want more information about a particular feature then be sure to let me know <a class="underline" href="https://discord.gg/tA22tWR">in the Discord</a>.</p></div><div class="frame text-20 container flex flex-col mx-auto p-4"><h1 class="text-30">Table of contents</h1><hr/><div class="ml-3"><h2>Getting started</h2><ul class="ml-8 list-disc"><li class=""><a href="adding_songs.html">Adding songs</a></li></ul></div><hr/><div class="ml-3"><h2>Getting started!</h2><ul class="ml-8 list-disc"><li class=""><a href="how_to_play.html">How to play</a></li></ul></div></div>
         </div>
       </div>
 			
@@ -46,14 +30,7 @@
 			  <a href="../../privacy_policy.html" class="hover:underline">Privacy</a>
 			  <a href="mailto:dmca@yavsrg.net" class="hover:underline">DMCA</a>
 			</footer>
-		</div>
 
-    <script type="text/javascript">
-      function toggleSidebar() {
-        document.querySelector(".sidebar").classList.toggle("hidden");
-        document.querySelector(".open-sidebar").classList.toggle("lg:hidden");
-      }
-      feather.replace()
-    </script>
+		</div>
   </body>
 </html>

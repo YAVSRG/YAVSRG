@@ -1,1 +1,1 @@
-dotnet fsi generate_site.fsx
+dotnet fsi generate_site.fsx || bash

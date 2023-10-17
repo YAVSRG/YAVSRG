@@ -86,35 +86,57 @@ File.ReadAllText("./Interlude/docs/changelog.md")
 |> Array.map MarkdownToHtml.render_document
 |> build_mpage "./site/interlude/changelog.html" "Changelog"
 
-let title (filename: string) =
-    let clean = filename.Replace(".md", "").Replace("_", " ")
-    clean.[0].ToString().ToUpper() + clean.Substring(1)
+//// WIKI GENERATOR
 
-let wiki_folders = 
-    Directory.EnumerateDirectories("./Interlude/docs/wiki/")
-    |> Seq.map (fun path -> (Path.GetFileName path, Directory.EnumerateFiles path |> Seq.map Path.GetFileName))
+type WikiPage = { Title: string; Folder: string; Html: string; Filename: string }
 
-let wiki_section (item: string, items: seq<string>) =
-    sprintf "<hr/><div class=\"ml-3\"><h2>%s</h2><ul class=\"ml-8 list-disc\">%s</ul></div>"
-        item
-        (items |> Seq.map (fun s -> sprintf "<li class=\"\"><a href=\"%s\">%s</a></li>" (s.Replace(".md", ".html")) (title s)) |> String.concat "")
-
-let wiki_sidebar_content = wiki_folders |> Seq.map wiki_section |> String.concat ""
-
-let wiki_template = File.ReadAllText("./site_data/wiki.html")
-for f, items in wiki_folders do
-    for i in items do
-        let content = 
-            File.ReadAllText("./Interlude/docs/wiki/" + f + "/" + i)
-                .Split([|"::::"|], System.StringSplitOptions.TrimEntries)
+let parse_wiki_file(path: string) =
+    let text = File.ReadAllText(path).Replace("\r", "")
+    let split = text.Split("---", 3, System.StringSplitOptions.TrimEntries)
+    if split.Length <> 3 || split.[0] <> "" then failwithf "Problem with format of wiki file: %s" path
+    
+    let header_info =
+        try
+            let header = split.[1].Split("\n") |> Array.map (fun line -> let parts = line.Split(":", System.StringSplitOptions.TrimEntries) in (parts.[0], parts.[1])) |> Map.ofSeq
+            if not (header.ContainsKey "title") then failwith "Page is missing 'title'"
+            if not (header.ContainsKey "folder") then failwith "Page is missing 'folder'"
+            header
+        with err -> failwithf "Problem parsing header of file: %s (%O)" path err
+    
+    let html = 
+            split.[2].Split("::::", System.StringSplitOptions.TrimEntries)
             |> Array.map (Markdown.Parse >> MarkdownToHtml.render_document)
             |> Array.map (sprintf "<div class=\"frame text-20 container flex flex-col mx-auto p-4\">%s</div>")
             |> String.concat ""
+
+    { 
+        Title = header_info.["title"]
+        Folder = header_info.["folder"]
+        Html = html
+        Filename = Path.GetFileNameWithoutExtension(path)
+    }
+
+let wiki_pages = 
+    Directory.EnumerateFiles("./Interlude/docs/wiki/")
+    |> Seq.filter(fun f -> f.EndsWith ".md" && not (f.EndsWith "index.md"))
+    |> Seq.map parse_wiki_file
+    |> Array.ofSeq
+    
+let wiki_section (folder: string, pages: seq<WikiPage>) =
+    sprintf "<hr/><div class=\"ml-3\"><h2>%s</h2><ul class=\"ml-8 list-disc\">%s</ul></div>"
+        folder
+        (pages |> Seq.map (fun page -> sprintf "<li class=\"\"><a href=\"%s\">%s</a></li>" (page.Filename + ".html") page.Title) |> String.concat "")
+
+let wiki_sidebar_content =
+        wiki_pages |> Seq.groupBy (fun p -> p.Folder) |> Seq.map wiki_section |> String.concat ""
+        |> sprintf "<div class=\"frame text-20 container flex flex-col mx-auto p-4\"><h1 class=\"text-30\">Table of contents</h1>%s</div>"
+
+let wiki_template = File.ReadAllText("./site_data/wiki.html")
+for page in wiki_pages do
         wiki_template
-            .Replace("{{title}}", sprintf "%s - Interlude Wiki" (title i))
-            .Replace("{{content}}", content)
-            .Replace("{{sidebar}}", wiki_sidebar_content)
-        |> fun t -> File.WriteAllText("./site/interlude/wiki/" + i.Replace(".md", ".html"), t)
+            .Replace("{{title}}", sprintf "%s - Interlude Wiki" page.Title)
+            .Replace("{{content}}", page.Html)
+        |> fun t -> File.WriteAllText("./site/interlude/wiki/" + page.Filename + ".html", t)
 
 let content = 
     File.ReadAllText("./Interlude/docs/wiki/index.md")
@@ -124,6 +146,5 @@ let content =
     |> String.concat ""
 wiki_template
     .Replace("{{title}}", "Interlude Wiki")
-    .Replace("{{content}}", content)
-    .Replace("{{sidebar}}", wiki_sidebar_content)
+    .Replace("{{content}}", content + wiki_sidebar_content)
 |> fun t -> File.WriteAllText("./site/interlude/wiki/index.html", t)
