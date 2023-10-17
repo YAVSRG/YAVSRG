@@ -1,3 +1,7 @@
+---
+title: How to play
+folder: Getting started
+---
 # The basics
 
 While you play a song, **notes** will scroll along **columns**, towards the **receptors** at the end.

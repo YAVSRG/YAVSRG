@@ -1,3 +1,7 @@
+---
+title: Adding songs
+folder: Getting started
+---
 # Adding songs
 
 To get more songs to play, visit the **Import** screen.

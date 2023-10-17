@@ -234,11 +234,15 @@ type private Paragraphs(max_width: float32, paragraphs: IParagraph list) as this
     override this.Width = max_width
     override this.Height = height
     
-    override this.Draw() = if this.VisibleBounds.Visible then base.Draw()
+    override this.Draw() = 
+        if this.VisibleBounds.Visible then 
+            Draw.rect this.Bounds Colors.cyan.O2
+            base.Draw()
 
 module Heading =
     
-    let MARGIN = 10.0f
+    let MARGIN_X = 18.0f
+    let MARGIN_Y = 10.0f
 
     let rec getText (body: MarkdownSpan list) =
         match body.Head with
@@ -254,17 +258,17 @@ module Heading =
 type private Heading(max_width, size, body: MarkdownSpan list) as this =
     inherit IParagraph()
 
-    let contents = Spans(max_width - Heading.MARGIN * 2.0f, body, { Span.Settings.Default with Size = Span.SIZE + 2.0f * System.MathF.Pow(4.0f - float32 size, 2.0f) })
+    let contents = Spans(max_width - Heading.MARGIN_X * 2.0f, body, { Span.Settings.Default with Size = Span.SIZE + 2.0f * System.MathF.Pow(4.0f - float32 size, 2.0f) })
     let text = Heading.getText body
 
     do
-        contents.Position <- Position.Box(0.0f, 0.0f, Heading.MARGIN, Heading.MARGIN, contents.Width, contents.Height)
+        contents.Position <- Position.Box(0.0f, 0.0f, Heading.MARGIN_X, Heading.MARGIN_Y, contents.Width, contents.Height)
         this
-        |+ Frame(NodeType.None, Fill = K (Color.FromArgb(127, 0, 0, 0)), Border = K Color.Transparent)
+        |+ Frame(NodeType.None, Position = Position.Margin(Style.PADDING), Fill = K Colors.cyan, Border = K Colors.cyan_accent)
         |* contents
     
     override this.Width = max_width
-    override this.Height = contents.Height + Heading.MARGIN * 2.0f
+    override this.Height = contents.Height + Heading.MARGIN_Y * 2.0f
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
@@ -287,15 +291,15 @@ type HorizontalRule(max_width) =
 type CodeBlock(max_width, code, language) as this =
     inherit IParagraph()
 
-    let contents = Spans(max_width - Heading.MARGIN * 4.0f, [ Literal(code, None) ], { Span.Settings.Default with Size = Span.SIZE - 3.0f; CodeBlock = true })
+    let contents = Spans(max_width - Heading.MARGIN_X * 4.0f, [ Literal(code, None) ], { Span.Settings.Default with Size = Span.SIZE - 3.0f; CodeBlock = true })
     do
-        contents.Position <- Position.Box(0.0f, 0.0f, Heading.MARGIN * 2.0f, Heading.MARGIN * 2.0f, contents.Width, contents.Height)
+        contents.Position <- Position.Box(0.0f, 0.0f, Heading.MARGIN_X * 2.0f, Heading.MARGIN_Y * 2.0f, contents.Width, contents.Height)
         this
         |+ Frame(NodeType.None, Fill = K (Color.FromArgb(127, 127, 127, 127)), Border = K Color.Transparent)
         |* contents
     
     override this.Width = max_width
-    override this.Height = contents.Height + Heading.MARGIN * 4.0f
+    override this.Height = contents.Height + Heading.MARGIN_Y * 4.0f
     
     override this.Draw() = if this.VisibleBounds.Visible then base.Draw()
 
