@@ -1,5 +1,5 @@
 ---
-title: Migrating from osu!mania
+title: osu!mania
 folder: Migrating
 ---
 # Migrating from osu!mania
@@ -53,6 +53,7 @@ On the Level select menu, you can open Practice mode to play a section of the se
 If you're used to another game, you should adjust all offsets with the game audio muted at first, and then change audio offset last.
 
 Suggested order to make changes:
+
 - Mute game audio while playing a section of a chart in practice mode
 - Once scroll speed looks right to you, adjusting hitposition until it looks right
 - Once hitposition looks right to you, adjust visual offset if needed
