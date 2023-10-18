@@ -4,7 +4,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data
-open Interlude.UI
 open Interlude.Utils
 open FSharp.Formatting.Markdown
 
@@ -60,14 +59,13 @@ module private Span =
 
     let create_fragment (max_width: float32) (text: string) (settings: Settings) =
         let fg = 
-            if settings.Strong then Palette.color(255, 1.0f, 0.8f)
-            else Color.White
-        let bg =
-            if settings.Emphasis then Color.Gray
-            elif settings.InlineCode || settings.CodeBlock then Color.DarkGray
-            else Color.Black
+            if settings.Strong then Colors.green_accent
+            elif settings.Emphasis then Colors.red_accent
+            elif settings.InlineCode || settings.CodeBlock then Colors.grey_1
+            else Colors.white
+        let bg = Colors.black
         let highlight =
-            if settings.InlineCode then Some (Color.FromArgb(127, Color.Silver))
+            if settings.InlineCode then Some (Colors.shadow_2.O2)
             else None
 
         let mutable text = text.Replace("&gt;", ">").Replace("&lt;", "<")
@@ -143,15 +141,17 @@ type private Image(width, title, url) as this =
 type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as this =
     inherit IParagraph()
 
+    let MARGIN = 15.0f
+    let max_width = max_width - MARGIN
     let mutable height = 0.0f
 
     do
-        let mutable x = 0.0f
+        let mutable x = MARGIN
         let mutable y = 0.0f
         let mutable lineHeight = 0.0f
 
         let newLine() =
-            x <- 0.0f
+            x <- MARGIN
             y <- y + lineHeight
             lineHeight <- 0.0f
 
@@ -216,7 +216,7 @@ type private ListBlock(max_width: float32, paragraphs: IParagraph list) as this 
     
     override this.Draw() = if this.VisibleBounds.Visible then base.Draw()
 
-type private Paragraphs(max_width: float32, paragraphs: IParagraph list) as this =
+type private Paragraphs(nested: bool, max_width: float32, paragraphs: IParagraph list) as this =
     inherit IParagraph()
 
     let SPACING = Span.SIZE
@@ -236,7 +236,7 @@ type private Paragraphs(max_width: float32, paragraphs: IParagraph list) as this
     
     override this.Draw() = 
         if this.VisibleBounds.Visible then 
-            Draw.rect this.Bounds Colors.cyan.O2
+            if not nested then Draw.rect this.Bounds Colors.cyan.O2
             base.Draw()
 
 module Heading =
@@ -316,7 +316,7 @@ module private Paragraph =
         | Heading (size, body, _) -> Heading(max_width, size, body)
         | Paragraph (body, _) -> Spans(max_width, body, Span.Settings.Default)
         | Span (body, _) -> Spans(max_width, body, Span.Settings.Default)
-        | ListBlock (kind, items, _) -> ListBlock(max_width, List.map (createMultiple (max_width - ListBlock.INDENT)) items)
+        | ListBlock (kind, items, _) -> ListBlock(max_width, List.map (createMultiple true (max_width - ListBlock.INDENT)) items)
         | HorizontalRule (char, _) -> HorizontalRule(max_width)
         | CodeBlock (code, _, language, _, _, _) -> CodeBlock(max_width, code, language)
         | YamlFrontmatter _
@@ -328,9 +328,9 @@ module private Paragraph =
         | EmbedParagraphs _
         | InlineHtmlBlock _ -> empty()
 
-    and createMultiple (max_width: float32) (ps: MarkdownParagraphs) : IParagraph =
-        Paragraphs(max_width, List.map (create max_width) ps)
+    and createMultiple (nested: bool) (max_width: float32) (ps: MarkdownParagraphs) : IParagraph =
+        Paragraphs(nested, max_width, List.map (create max_width) ps)
 
 module MarkdownUI =
 
-    let build (max_width: float32) (doc: MarkdownDocument) = Paragraph.createMultiple max_width doc.Paragraphs
+    let build (max_width: float32) (doc: MarkdownDocument) = Paragraph.createMultiple false max_width doc.Paragraphs
