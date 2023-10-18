@@ -74,7 +74,7 @@ module Utils =
         open Prelude.Data
 
         // this doesn't just copy a folder to a destination, but renames any existing/duplicates of the same name to .old
-        let rec private copyFolder source dest =
+        let rec private swap_update_files source dest =
             Directory.EnumerateFiles source
             |> Seq.iter
                 (fun s ->
@@ -89,7 +89,7 @@ module Utils =
                 ( fun d ->
                     let targetd = Path.Combine(dest, Path.GetFileName d)
                     Directory.CreateDirectory targetd |> ignore
-                    copyFolder d targetd
+                    swap_update_files d targetd
                 )
 
         [<Json.AutoCodec>]
@@ -110,10 +110,13 @@ module Utils =
                 assets: GithubAsset list
             }
 
+        let mutable restart_on_exit = false
+
         let mutable latestVersionName = "<Unknown, server could not be reached>"
         let mutable latestRelease = None
-        let mutable updateAvailable = false
-        let mutable updateDownloaded = false
+        let mutable update_available = false
+        let mutable update_started = false
+        let mutable update_complete = false
 
         let private handleUpdate(release: GithubRelease) =
             latestRelease <- Some release
@@ -130,36 +133,37 @@ module Utils =
             let pcurrent = parseVer current
             let pincoming = parseVer incoming
 
-            if pincoming > pcurrent then Logging.Info(sprintf "Update available (%s)!" incoming); updateAvailable <- true
+            if pincoming > pcurrent then Logging.Info(sprintf "Update available (%s)!" incoming); update_available <- true
             elif pincoming < pcurrent then Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)
             else Logging.Info "Game is up to date."
 
-        let checkForUpdates() =
+        let check_for_updates() =
             WebServices.download_json("https://api.github.com/repos/YAVSRG/Interlude/releases/latest", fun (d: GithubRelease option) -> if d.IsSome then handleUpdate d.Value)
 
             let path = getInterludeLocation()
-            let folderPath = Path.Combine(path, "update")
-            if Directory.Exists folderPath then Directory.Delete(folderPath, true)
+            let folder_path = Path.Combine(path, "update")
+            if Directory.Exists folder_path then Directory.Delete(folder_path, true)
 
-        let applyUpdate(callback) =
-            if not updateAvailable then failwith "No update available to install"
-            if updateDownloaded then () else
+        let apply_update(callback) =
+            if not update_available then failwith "No update available to install"
+            if update_started then () else
 
-            updateDownloaded <- true
+            update_started <- true
 
             let download_url = latestRelease.Value.assets.Head.browser_download_url
             let path = getInterludeLocation()
-            let zipPath = Path.Combine(path, "update.zip")
-            let folderPath = Path.Combine(path, "update")
-            File.Delete zipPath
-            if Directory.Exists folderPath then Directory.Delete(folderPath, true)
-            WebServices.download_file.Request((download_url, zipPath, ignore),
+            let zip_path = Path.Combine(path, "update.zip")
+            let folder_path = Path.Combine(path, "update")
+            File.Delete zip_path
+            if Directory.Exists folder_path then Directory.Delete(folder_path, true)
+            WebServices.download_file.Request((download_url, zip_path, ignore),
                 fun success ->
                     if success then
-                        ZipFile.ExtractToDirectory(zipPath, folderPath)
-                        File.Delete zipPath
-                        copyFolder folderPath path
+                        ZipFile.ExtractToDirectory(zip_path, folder_path)
+                        File.Delete zip_path
+                        swap_update_files folder_path path
                         callback()
+                        update_complete <- true
             )
 
     type Drawing.Color with

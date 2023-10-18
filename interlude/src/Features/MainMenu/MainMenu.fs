@@ -63,20 +63,13 @@ type MainMenuScreen() as this =
         |+ play
         |+ options
         |+ quit
-        |+ Text((fun () -> if AutoUpdate.updateDownloaded then L"menu.updatehint" else ""),
-            Color = K Colors.text_subheading,
-            Align = Alignment.RIGHT,
-            Position = Position.Box(1.0f, 1.0f, 490.0f, 40.0f).Translate(-500.0f, -95.0f))
         |+ (
-            let b = StylishButton(
+            StylishButton(
                 Wiki.show_changelog,
                 K (Icons.star + " " + L"menu.changelog"),
                 !%Palette.MAIN_100,
                 TiltRight = false,
                 Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-300.0f, -50.0f) )
-            let c = b.TextColor
-            b.TextColor <- fun () -> if AutoUpdate.updateAvailable then Color.Yellow, Color.Black else c()
-            b
         )
         |* StylishButton(
             (fun () -> openUrl("https://discord.gg/tA22tWR")),
@@ -85,7 +78,7 @@ type MainMenuScreen() as this =
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-625.0f, -50.0f) )
         
     override this.OnEnter prev =
-        if AutoUpdate.updateAvailable then Notifications.system_feedback (Icons.system_notification, L"notification.update_available.title", L"notification.update_available.body")
+        if AutoUpdate.update_available then Notifications.system_feedback (Icons.system_notification, L"notification.update_available.title", L"notification.update_available.body")
         if prev = Screen.Type.SplashScreen && firstLaunch then Wiki.show()
         splashText <- newSplash()
         Logo.moveMenu()

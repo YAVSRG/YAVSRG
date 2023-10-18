@@ -125,6 +125,7 @@ type Toolbar() =
                 Presets.load s
                 Notifications.action_feedback(Icons.system_notification, L"notification.preset_loaded", s.Name)
             | _ -> () )
+        |+ Conditional((fun () -> Screen.currentType = Screen.Type.MainMenu && AutoUpdate.update_available), Updater(Position = Position.Box(0.5f, 1.0f, -250.0f, -HEIGHT * 1.5f, 500.0f, HEIGHT)))
         |* Volume(Position = Position.Margin(0.0f, HEIGHT))
 
     override this.Draw() = 

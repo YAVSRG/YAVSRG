@@ -52,11 +52,11 @@ module Debug =
                 |+ PageButton.Once(
                         "debug.downloadupdate",
                         ( fun () ->
-                            if AutoUpdate.updateAvailable then
-                                AutoUpdate.applyUpdate(fun () -> Notifications.system_feedback(Icons.system_notification, L"notification.update_installed.title", L"notification.update_installed.body"))
+                            if AutoUpdate.update_available then
+                                AutoUpdate.apply_update(fun () -> Notifications.system_feedback(Icons.system_notification, L"notification.update_installed.title", L"notification.update_installed.body"))
                                 Notifications.system_feedback(Icons.system_notification, L"notification.update_installing.title", L"notification.update_installing.body")
                         ),
-                        Enabled = (AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded) )
+                        Enabled = (AutoUpdate.update_available && not AutoUpdate.update_started) )
                     .Pos(270.0f)
                 |+ themes
                     .Pos(580.0f)

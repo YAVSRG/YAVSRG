@@ -127,16 +127,7 @@ module Wiki =
                 ,
                 Position = Position.SliceRight(300.0f))
 
-        do 
-            Heading.scrollHandler <- fun w -> flow.Scroll(w.Bounds.Top - flow.Bounds.Top)
-            // todo: move to main menu/toolbar
-            if AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded then
-                buttons |* IconButton(L"wiki.downloadupdate", Icons.download, 50.0f,
-                fun () -> 
-                    AutoUpdate.applyUpdate(fun () -> Notifications.system_feedback(Icons.system_notification, L"notification.update_installed.title", L"notification.update_installed.body"))
-                    Notifications.system_feedback(Icons.system_notification, L"notification.update_installing.title", L"notification.update_installing.body")
-                ,
-                Position = Position.Column(500.0f, 270.0f))
+        do Heading.scrollHandler <- fun w -> flow.Scroll(w.Bounds.Top - flow.Bounds.Top)
         
         member private this.UpdateContent() =
             let con = StaticContainer(NodeType.None)

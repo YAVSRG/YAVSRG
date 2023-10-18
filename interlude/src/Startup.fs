@@ -148,7 +148,7 @@ module Startup =
                 if rate <> Gameplay.rate.Value then
                     Gameplay.rate.Value <- rate
                 Screen.changeNew (fun () -> ReplayScreen.replay_screen(ReplayMode.Replay (modchart, rate, data)) :> Screen.T) Screen.Type.Replay Transitions.Flags.Default
-        Utils.AutoUpdate.checkForUpdates()
+        Utils.AutoUpdate.check_for_updates()
         Mounts.handleStartupImports()
         
         Logging.Subscribe

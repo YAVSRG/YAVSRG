@@ -2,6 +2,7 @@
 open System.IO
 open System.Threading
 open System.Diagnostics
+open System.Reflection
 open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Flux
@@ -88,6 +89,13 @@ let main argv =
         if m.WaitOne(TimeSpan.Zero, true) then
             launch(0)
             m.ReleaseMutex()
+
+            if Utils.AutoUpdate.restart_on_exit then
+                m.Dispose()
+                if OperatingSystem.IsWindows() then
+                    let executable = Assembly.GetEntryAssembly().Location.Replace(".dll", ".exe")
+                    let launch_dir = Path.GetDirectoryName executable
+                    Process.Start(ProcessStartInfo(executable, WorkingDirectory = launch_dir, UseShellExecute = true)) |> ignore
 
         elif Prelude.Common.DEV_MODE then
             let instances = Process.GetProcessesByName "Interlude" |> Array.length
