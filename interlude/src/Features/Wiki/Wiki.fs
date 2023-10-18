@@ -8,6 +8,7 @@ open Percyqaz.Flux.Graphics
 open Prelude.Data
 open Interlude.Utils
 open Interlude.UI
+open Interlude.UI.Components
 open FSharp.Formatting.Markdown
 
 module Wiki =
@@ -20,15 +21,16 @@ module Wiki =
         | WikiPage of WikiPage
         | Changelog
 
-
     module Cache =
         
         let mutable changelog_content: MarkdownDocument array option = None
         let mutable index_content: MarkdownDocument array option = None
         let mutable index_table_of_contents: Map<string, WikiPage list> = Map.empty
         let mutable page_cache_by_filename: Map<string, MarkdownDocument array option> = Map.empty
+        let mutable pages_by_filename: Map<string, WikiPage> = Map.empty
 
-    let mutable private page_history = []
+    let mutable private loading = false
+    let mutable private page_history = [WikiIndex]
     let mutable private current_page = WikiIndex
     let mutable private content : MarkdownDocument array option = None
     let mutable private page_changed : unit -> unit = ignore
@@ -46,9 +48,10 @@ module Wiki =
                                 | Some toc -> 
                                     Cache.index_table_of_contents <- toc
                                     Cache.page_cache_by_filename <- toc |> Map.toSeq |> Seq.map snd |> Seq.concat |> Seq.map (fun p -> p.Filename, None) |> Map.ofSeq
+                                    Cache.pages_by_filename <- toc |> Map.toSeq |> Seq.map snd |> Seq.concat |> Seq.map (fun p -> p.Filename, p) |> Map.ofSeq
                                     Cache.index_content <- Some [|Markdown.Parse md|]
-                                | None -> () // log error
-                            | None -> () // log error
+                                | None -> ()
+                            | None -> ()
                         return Cache.index_content |> Option.defaultValue [||]
 
                     | WikiPage p ->
@@ -57,7 +60,7 @@ module Wiki =
                             | Some md ->
                                 let sections = md.Split("---", 3, System.StringSplitOptions.TrimEntries).[2].Split("::::", System.StringSplitOptions.TrimEntries)
                                 Cache.page_cache_by_filename <- Cache.page_cache_by_filename.Add(p.Filename, Some (sections |> Array.map Markdown.Parse))
-                            | None -> () // log error
+                            | None -> ()
                         return Cache.page_cache_by_filename.[p.Filename] |> Option.defaultValue [||]
 
                     | Changelog ->
@@ -65,27 +68,29 @@ module Wiki =
                             match! WebServices.download_string.RequestAsync("https://raw.githubusercontent.com/YAVSRG/Interlude/main/docs/changelog.md") with
                             | Some md -> 
                                 Cache.changelog_content <- Some [|Markdown.Parse md|]
-                            | None -> () // log error
+                            | None -> ()
                         return Cache.changelog_content |> Option.defaultValue [||]
                 }       
 
         }
 
-            //if page.Contains('#') then
-                //Heading.scrollTo <- page.Substring(page.LastIndexOf '#' + 1).Replace('-', ' ')
-                //page.Substring(0, page.LastIndexOf '#')
+    // todo: reimplement links to specific headers
+    //if page.Contains('#') then
+        //Heading.scrollTo <- page.Substring(page.LastIndexOf '#' + 1).Replace('-', ' ')
+        //page.Substring(0, page.LastIndexOf '#')
 
     let load_resource (res) =
-        page_history <- res :: (List.except [res] page_history)
-        current_page <- res
-        page_loader.Request(res, fun md -> content <- Some md; sync page_changed)
+        if not loading then
+            loading <- true
+            page_history <- res :: (List.except [res] page_history)
+            current_page <- res
+            page_loader.Request(res, fun md -> content <- Some md; loading <- false; sync page_changed)
 
     do
-        //LinkHandler.add { 
-        //    Prefix = "https://github.com/YAVSRG/Interlude/wiki/"
-        //    Action = fun s -> s.Replace("https://github.com/YAVSRG/Interlude/wiki/", "") |> load_wiki_page
-        //}
-        load_resource WikiIndex
+        LinkHandler.add { 
+            Condition = fun url -> Cache.pages_by_filename.ContainsKey(url.Replace(".html", "", System.StringComparison.InvariantCultureIgnoreCase))
+            Action = fun url -> Cache.pages_by_filename.[url.Replace(".html", "", System.StringComparison.InvariantCultureIgnoreCase)] |> WikiPage |> load_resource
+        }
 
     type Browser() as this =
         inherit Dialog()
@@ -112,7 +117,7 @@ module Wiki =
                     | WikiIndex -> sprintf "%s Home" Icons.wiki
                 ),
                 Align = Alignment.LEFT,
-                Position = Position.Column(200.0f, 200.0f))
+                Position = Position.Column(200.0f, 900.0f))
             |+ IconButton(L"wiki.openinbrowser", Icons.open_in_browser, 50.0f,
                 fun () -> 
                     match current_page with
@@ -124,6 +129,7 @@ module Wiki =
 
         do 
             Heading.scrollHandler <- fun w -> flow.Scroll(w.Bounds.Top - flow.Bounds.Top)
+            // todo: move to main menu/toolbar
             if AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded then
                 buttons |* IconButton(L"wiki.downloadupdate", Icons.download, 50.0f,
                 fun () -> 
@@ -136,7 +142,7 @@ module Wiki =
             let con = StaticContainer(NodeType.None)
             let mutable y = 0.0f
             let max_width = 1400.0f
-            let spacing = 30.0f
+            let spacing = 45.0f
             match content with
             | Some paragraphs ->
                 for paragraph in paragraphs do
@@ -144,7 +150,30 @@ module Wiki =
                     markdown.Position <- Position.Box(0.0f, 0.0f, 0.0f, y, max_width, markdown.Height)
                     con.Add(markdown)
                     y <- y + markdown.Height + spacing
-            | None -> ()
+
+                if current_page = WikiIndex then
+                    let fcount = float32 Cache.index_table_of_contents.Keys.Count
+                    let folders = FlowContainer.LeftToRight<_>((max_width - 10.0f - (fcount - 1.0f) * 20.0f) / fcount, Spacing = 20.0f, Position = Position.TrimTop(70.0f))
+
+                    for key in Cache.index_table_of_contents.Keys do
+                        let pages = Cache.index_table_of_contents.[key]
+
+                        let links = FlowContainer.Vertical(50.0f, Position = Position.TrimTop(60.0f))
+                        for p in pages do
+                            links.Add(Button(p.Title, fun () -> load_resource (WikiPage p)))
+                        folders.Add(
+                            Frame(NodeType.Switch(fun () -> links), Fill = K Colors.cyan, Border = K Colors.cyan_accent)
+                            |+ Text(key, Position = Position.SliceTop(60.0f))
+                            |+ links
+                        )
+
+                    con.Add(
+                        StaticContainer(NodeType.Switch(fun () -> folders), Position = Position.Box(0.0f, 0.0f, 0.0f, y, max_width, 400.0f))
+                        |+ Text("Table of contents", Position = Position.SliceTop(70.0f))
+                        |+ folders
+                    )
+                    y <- y + 400.0f + spacing
+            | None -> con.Add(LoadingState())
             flow <- ScrollContainer(con, y - spacing, Position = Position.Margin((Viewport.vwidth - 1400.0f) * 0.5f, 80.0f))
             flow.Init this
         
@@ -152,6 +181,7 @@ module Wiki =
             base.Init parent
             buttons.Init this
             this.UpdateContent()
+            if content.IsNone && current_page = WikiIndex then load_resource WikiIndex
             page_changed <- this.UpdateContent
         
         override this.Update(elapsedTime, moved) =

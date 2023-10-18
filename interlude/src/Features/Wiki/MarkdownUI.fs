@@ -9,7 +9,7 @@ open FSharp.Formatting.Markdown
 
 type LinkHandler =
     {
-        Prefix: string
+        Condition: string -> bool
         Action: string -> unit
     }
 
@@ -23,7 +23,7 @@ module LinkHandler =
         let mutable handled = false
 
         for handler in handlers do
-            if not handled && url.StartsWith(handler.Prefix, System.StringComparison.InvariantCultureIgnoreCase) then
+            if not handled && handler.Condition url then
                 handler.Action url
                 handled <- true
 
