@@ -133,7 +133,7 @@ module Wiki =
             let con = StaticContainer(NodeType.None)
             let mutable y = 0.0f
             let max_width = 1400.0f
-            let spacing = 45.0f
+            let spacing = 35.0f
             match content with
             | Some paragraphs ->
                 for paragraph in paragraphs do
@@ -144,7 +144,7 @@ module Wiki =
 
                 if current_page = WikiIndex then
                     let fcount = float32 Cache.index_table_of_contents.Keys.Count
-                    let folders = FlowContainer.LeftToRight<_>((max_width - 10.0f - (fcount - 1.0f) * 20.0f) / fcount, Spacing = 20.0f, Position = Position.TrimTop(70.0f))
+                    let folders = FlowContainer.LeftToRight<_>((max_width - 10.0f - (fcount - 1.0f) * 20.0f) / fcount, Spacing = 20.0f, Position = Position.TrimTop(80.0f).Margin(5.0f, 0.0f))
 
                     for key in Cache.index_table_of_contents.Keys do
                         let pages = Cache.index_table_of_contents.[key]
@@ -153,14 +153,14 @@ module Wiki =
                         for p in pages do
                             links.Add(Button(p.Title, fun () -> load_resource (WikiPage p)))
                         folders.Add(
-                            Frame(NodeType.Switch(fun () -> links), Fill = K Colors.cyan, Border = K Colors.cyan_accent)
-                            |+ Text(key, Position = Position.SliceTop(60.0f))
+                            Frame(NodeType.Switch(fun () -> links), Fill = K Colors.cyan.O2, Border = K Colors.cyan_accent)
+                            |+ Text(key, Position = Position.SliceTop(60.0f), Color = K Colors.text_subheading)
                             |+ links
                         )
 
                     con.Add(
                         StaticContainer(NodeType.Switch(fun () -> folders), Position = Position.Box(0.0f, 0.0f, 0.0f, y, max_width, 400.0f))
-                        |+ Text("Table of contents", Position = Position.SliceTop(70.0f))
+                        |+ Text(Icons.wiki2 + " Table of contents", Position = Position.SliceTop(70.0f).Margin(20.0f, 0.0f), Align = Alignment.LEFT)
                         |+ folders
                     )
                     y <- y + 400.0f + spacing

@@ -68,7 +68,7 @@ module private Span =
             if settings.InlineCode then Some (Colors.shadow_2.O2)
             else None
 
-        let mutable text = text.Replace("&gt;", ">").Replace("&lt;", "<")
+        let mutable text = text.Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&")
         let mutable remainingText = ""
         let mutable width = (Text.measure(Style.font, text)) * settings.Size
         let height = settings.Size / 0.6f
@@ -230,6 +230,7 @@ type private Paragraphs(nested: bool, max_width: float32, paragraphs: IParagraph
             this.Add p
             y <- y + p.Height + SPACING
         height <- max 0.0f (y - SPACING)
+        if not nested then height <- height + 10.0f
 
     override this.Width = max_width
     override this.Height = height
@@ -241,7 +242,7 @@ type private Paragraphs(nested: bool, max_width: float32, paragraphs: IParagraph
 
 module Heading =
     
-    let MARGIN_X = 18.0f
+    let MARGIN_X = 13.0f
     let MARGIN_Y = 10.0f
 
     let rec getText (body: MarkdownSpan list) =
@@ -264,7 +265,6 @@ type private Heading(max_width, size, body: MarkdownSpan list) as this =
     do
         contents.Position <- Position.Box(0.0f, 0.0f, Heading.MARGIN_X, Heading.MARGIN_Y, contents.Width, contents.Height)
         this
-        |+ Frame(NodeType.None, Position = Position.Margin(Style.PADDING), Fill = K Colors.cyan, Border = K Colors.cyan_accent)
         |* contents
     
     override this.Width = max_width
@@ -276,7 +276,11 @@ type private Heading(max_width, size, body: MarkdownSpan list) as this =
             Heading.scrollTo <- ""
             Heading.scrollHandler this
             
-    override this.Draw() = if this.VisibleBounds.Visible then base.Draw()
+    override this.Draw() = 
+        if this.VisibleBounds.Visible then
+            Draw.rect this.Bounds Colors.cyan
+            Draw.rect (this.Bounds.SliceBottom(5.0f)) Colors.cyan_accent
+            base.Draw()
 
 type HorizontalRule(max_width) =
     inherit IParagraph()
@@ -286,7 +290,7 @@ type HorizontalRule(max_width) =
 
     override this.Draw() =
         if this.VisibleBounds.Visible then () else
-        Draw.rect (this.Bounds.SliceTop(5.0f).Translate(0.0f, this.Bounds.Height / 2.0f - 2.5f)) (Color.FromArgb(127, 255, 255, 255))
+        Draw.rect (this.Bounds.SliceTop(5.0f).Translate(0.0f, this.Bounds.Height / 2.0f - 2.5f)) Colors.white.O2
 
 type CodeBlock(max_width, code, language) as this =
     inherit IParagraph()
@@ -295,7 +299,7 @@ type CodeBlock(max_width, code, language) as this =
     do
         contents.Position <- Position.Box(0.0f, 0.0f, Heading.MARGIN_X * 2.0f, Heading.MARGIN_Y * 2.0f, contents.Width, contents.Height)
         this
-        |+ Frame(NodeType.None, Fill = K (Color.FromArgb(127, 127, 127, 127)), Border = K Color.Transparent)
+        |+ Frame(NodeType.None, Fill = K Colors.shadow_2.O2, Border = K Color.Transparent)
         |* contents
     
     override this.Width = max_width
