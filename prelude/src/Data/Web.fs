@@ -176,11 +176,14 @@ module WebServices =
 // todo: place in IO services file + have zip extractor/creator service
 module ImageServices =
 
-    open SixLabors.ImageSharp.Formats.Png
+    open SixLabors.ImageSharp.Formats.Jpeg
     
     let save_image =
         { new Async.Service<Bitmap * string, unit>() with
-            override this.Handle((image, path)) = image.SaveAsPngAsync(path, PngEncoder(ColorType = PngColorType.Palette)) |> Async.AwaitTask
+            override this.Handle((image, path)) = 
+                image.SaveAsJpegAsync(path, 
+                    JpegEncoder(Quality = 90)
+                ) |> Async.AwaitTask
         }
 
     let get_cached_image =
