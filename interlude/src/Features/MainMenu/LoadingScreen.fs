@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features.MainMenu
 
 open System
-open System.Drawing
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
@@ -22,20 +21,20 @@ type LoadingScreen() =
         Logo.moveCentre()
         Screen.Toolbar.hide()
         match prev with
-        | Screen.Type.MainMenu ->
-            closing <- true
-            audio_fade.Snap()
-            animation.Add (Animation.Delay 1000.0)
-            animation.Add (Animation.Action (fun () -> audio_fade.Target <- 0.0f))
-            animation.Add (Animation.Delay 1200.0)
-            animation.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
-        | _ ->
+        | Screen.Type.SplashScreen ->
             if Network.target_ip.ToString() <> "0.0.0.0" then Network.connect()
             animation.Add (Animation.Action (fun () -> Content.Sounds.getSound("hello").Play()))
             animation.Add (Animation.Delay 1000.0)
             animation.Add (Animation.Action (fun () -> audio_fade.Target <- 1.0f))
             animation.Add (Animation.Delay 1200.0)
             animation.Add (Animation.Action (fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo))
+        | _ ->
+            closing <- true
+            audio_fade.Snap()
+            animation.Add (Animation.Delay 1000.0)
+            animation.Add (Animation.Action (fun () -> audio_fade.Target <- 0.0f))
+            animation.Add (Animation.Delay 1200.0)
+            animation.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
 
     override this.OnExit _ =
         if not closing then Devices.change_volume (Options.options.AudioVolume.Value, Options.options.AudioVolume.Value)

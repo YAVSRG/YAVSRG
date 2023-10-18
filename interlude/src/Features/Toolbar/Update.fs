@@ -11,20 +11,20 @@ type Updater() as this =
     do this |* Clickable.Focus this
 
     override this.Draw() =
-        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.shadow_2
-        Draw.rect this.Bounds Colors.green_shadow
+        let area = this.Bounds.TrimBottom(15.0f)
+        Draw.rect area (Colors.shadow_1.O2)
 
         if AutoUpdate.update_complete then
-            Text.drawFillB(Style.font, Icons.reset + " Restart game", this.Bounds.Shrink(20.0f, 5.0f), (if this.Focused then Colors.text_yellow_2 else Colors.text_green_2), Alignment.CENTER)
+            Text.drawFillB(Style.font, Icons.reset + " Restart game", area.Shrink(20.0f, 5.0f), (if this.Focused then Colors.text_yellow_2 else Colors.text_green_2), Alignment.CENTER)
         elif AutoUpdate.update_started then
-            Text.drawFillB(Style.font, Icons.download + " Installing update..", this.Bounds.Shrink(20.0f, 5.0f), Colors.text_yellow_2, Alignment.CENTER)
+            Text.drawFillB(Style.font, Icons.download + " Installing update..", area.Shrink(20.0f, 5.0f), Colors.text_yellow_2, Alignment.CENTER)
         else 
-            Text.drawFillB(Style.font, Icons.download + " Install update", this.Bounds.Shrink(20.0f, 5.0f), (if this.Focused then Colors.text_yellow_2 else Colors.text_green_2), Alignment.CENTER)
+            Text.drawFillB(Style.font, Icons.download + " Install update", area.Shrink(20.0f, 5.0f), (if this.Focused then Colors.text_yellow_2 else Colors.text_green_2), Alignment.CENTER)
 
     member this.Click() =
         if AutoUpdate.update_complete then
             AutoUpdate.restart_on_exit <- true
-            Screen.back Transitions.Flags.Default
+            Screen.change Screen.Type.SplashScreen Transitions.Flags.UnderLogo
         elif AutoUpdate.update_started then
             ()
         else 
