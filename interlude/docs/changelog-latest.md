@@ -1,21 +1,12 @@
-0.7.10
+0.7.10.1
 ====
 
-Noteskins update!
-
 # New stuff
-- Hit Ctrl+E to quick-open the noteskin editing menu
-- Noteskin editing menu has had a major rework, including:
-	- Editing playfield screen position, column spacing, etc
-	- Editing animation speeds and settings
-	- Editing note rotation values per column
-	- Better tooltip explanations and previewing overall
-- Score screen mean/SD only includes taps, not releases. Tooltip information shows the values for releases
-- osu! Skin conversion now has some UI instead of just running (and failing) silently - More to come
-- Some other skinning stuff in the works
+- Ingame wiki has had a major makeover
+- Ingame wiki now uses the new site wiki, which has been updated a little
+- The 'WIP' texture editor pages when editing noteskins have been fleshed out, allowing you to rotate, flip, add and remove individual textures
+- The button to update the game has been improved, and can restart the game on successful update
+- Fixed bug in screenshots after the file size fix of 0.7.9.2
 
-# Fixes and improvements
-- Fixed an unreported bug where hold note tails don't rotate with UseHoldTailTexture turned off
-- Text entries in menus have a box around them so you can see them even when empty
-- Various minor UI improvements
+Also check the site out, I've updated it to look a bit fancier
 
