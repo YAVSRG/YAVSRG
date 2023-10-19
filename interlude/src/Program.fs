@@ -29,6 +29,7 @@ let launch(instance: int) =
     let mutable has_shutdown = false
     let shutdown(unexpected) =
         if has_shutdown then () else
+        has_shutdown <- true
         Gameplay.save()
         Options.save()
         Network.shutdown()
