@@ -47,6 +47,35 @@ module Import =
         override this.Title = ini.General.Name
         override this.OnClose() = ()
 
+    type ConfirmUnlinkedSongsImport(path) as this =
+        inherit Page()
+
+        let info = Callout.Normal.Icon(Icons.alert).Title(L"unlinkedsongsimport.info.title").Body(L"unlinkedsongsimport.info.body")
+
+        do
+            this.Content(
+                column()
+                |+ PageButton.Once("unlinkedsongsimport.link_intended", 
+                    fun () -> 
+                        Screen.change Screen.Type.Import Transitions.Flags.Default
+                        Menu.Back()
+                    ).Pos(500.0f)
+                |+ PageButton.Once("unlinkedsongsimport.confirm", 
+                    fun () -> 
+                        Library.Imports.auto_convert.Request((path, false), 
+                            fun success -> 
+                                if success then
+                                    Notifications.action_feedback(Icons.check, L"notification.import_success", "")
+                                    charts_updated_ev.Trigger()
+                                else Notifications.error(L"notification.import_failure", ""))
+                        Menu.Back())
+                    .Pos(600.0f)
+                |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h + 40.0f))
+            )
+            
+        override this.Title = L"unlinkedsongsimport.name"
+        override this.OnClose() = ()
+
     let import_osu_noteskin (path: string) =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
         match SkinConversions.Osu.check_before_convert path with
@@ -78,6 +107,10 @@ module Import =
             // todo: clean up extracted noteskin in downloads
 
         | Unknown -> // Treat it as a chart/pack/library import
+
+            if Directory.Exists path && Path.GetFileName path = "Songs" then
+                ConfirmUnlinkedSongsImport(path).Show()
+            else
 
             Library.Imports.auto_convert.Request((path, false), 
                 fun success -> 

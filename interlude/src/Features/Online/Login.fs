@@ -61,7 +61,7 @@ type LoginPage() as this =
     let c = Network.Events.login_failed.Subscribe(fun _ -> waiting_for_browser <- false)
     let d = Network.Events.registration_failed.Subscribe(fun _ -> waiting_for_browser <- false)
 
-    let info = Callout.Small.Icon(Icons.connected).Title("Waiting for Discord authentication in browser...")
+    let info = Callout.Small.Icon(Icons.connected).Title(L"login.waiting_for_discord")
 
     do
         this.Content(
