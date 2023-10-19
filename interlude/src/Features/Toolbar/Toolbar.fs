@@ -98,7 +98,7 @@ type Toolbar() =
             let id =  DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
             let path = Path.Combine(getDataPath "Screenshots", id)
             let img = Render.screenshot()
-            ImageServices.save_image.Request((img, path), img.Dispose)
+            ImageServices.save_image_jpg.Request((img, path), img.Dispose)
             Notifications.action_feedback_button(Icons.screenshot, L"notification.screenshot", id, L"notification.screenshot.open_folder", fun () -> openDirectory(getDataPath "Screenshots")) )
         |+ HotkeyAction("reload_themes", fun () -> 
             first_init <- true
