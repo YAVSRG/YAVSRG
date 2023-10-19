@@ -17,8 +17,6 @@ It will first try to auto detect the folder for the respective game, but if that
 
 By linking your libraries instead of fully importing them, audio files and background images are not copied, so the Interlude version of the song library should only be a few MB (saves on drive space if you play both). There is also an option to automatically import newly added charts whenever Interlude launches.
 
-Note: *if you drop your Songs folder onto the game normally (not using the linking menu), it will import them all without linking (copying audio files and all), which may not be what you wanted*
-
 It may take a few minutes to complete the import, but it will work in the background and you can play what songs have already been imported.
 
 You can also download new Etterna packs ingame via the Import screen.
