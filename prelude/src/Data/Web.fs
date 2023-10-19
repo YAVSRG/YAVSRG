@@ -178,12 +178,18 @@ module ImageServices =
 
     open SixLabors.ImageSharp.Formats.Jpeg
     
-    let save_image =
+    let save_image_jpg =
         { new Async.Service<Bitmap * string, unit>() with
             override this.Handle((image, path)) = 
                 image.SaveAsJpegAsync(path, 
                     JpegEncoder(Quality = 90)
                 ) |> Async.AwaitTask
+        }
+        
+    let save_image_png =
+        { new Async.Service<Bitmap * string, unit>() with
+            override this.Handle((image, path)) = 
+                image.SaveAsPngAsync(path) |> Async.AwaitTask
         }
 
     let get_cached_image =
@@ -199,7 +205,7 @@ module ImageServices =
                         return! Image.LoadAsync<PixelFormats.Rgba32>(cachedFileName) |> Async.AwaitTask
                     else
                         let! image = WebServices.download_image.RequestAsync(url)
-                        save_image.Request((image, cachedFileName), ignore)
+                        save_image_png.Request((image, cachedFileName), ignore)
                         return image
                 }
         }
