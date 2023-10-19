@@ -42,7 +42,12 @@ module private Span =
         | None -> t
 
     let link_fragment (text: string, link: string) =
-        Button(text, fun () -> LinkHandler.handle link)
+        { new Button(text, fun () -> LinkHandler.handle link) with
+            override this.Draw() =
+                Draw.rect (this.Bounds.SliceBottom(2.0f).Translate(2.0f, 2.0f)) Colors.shadow_2
+                Draw.rect (this.Bounds.SliceBottom(2.0f)) (if this.Focused then Colors.yellow_accent else Colors.white)
+                base.Draw()
+        }
 
     let SIZE = 22.0f
     type Settings =
