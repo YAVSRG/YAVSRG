@@ -22,7 +22,7 @@ module Records =
             else
 
             match User.by_username query_params.["user"].[0] with
-            | None -> response.MakeErrorResponse(404) |> ignore
+            | None -> raise NotFoundException
             | Some (targetUserId, _) ->
 
             if query_params.["table"].[0] <> "crescent" then response.MakeErrorResponse(404) |> ignore else

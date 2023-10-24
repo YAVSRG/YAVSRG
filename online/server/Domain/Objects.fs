@@ -15,6 +15,7 @@ module Badge =
     let DONATOR = "donator"
     let MODERATOR = "moderator"
     let EARLYTESTER = "early-tester"
+    let TABLE_EDITOR = "table-editor"
 
     let badge_color(badge: Badge) : int32 list =
         match badge with
@@ -342,6 +343,43 @@ module TableRanking =
             users
             (userIds |> Array.map snd)
 
+// todo: table move suggestion
+type TableAddSuggestion =
+    {
+        UserId: int64
+        ChartId: string
+        OsuBeatmapId: int
+        EtternaPackId: int
+        Artist: string
+        Title: string
+        Difficulty: string
+        TableFor: string
+        SuggestedLevel: int
+        Timestamp: int64
+    }
+
+module TableAddSuggestion =
+
+    let key (id: int64) = RedisKey(sprintf "table_suggest_add:%i" id)
+
+    let private save(id, suggestion: TableAddSuggestion) =
+        json.Set(key id, "$", suggestion) |> ignore
+    
+    let save_new(suggestion: TableAddSuggestion) : int64 =
+        let new_id = db.StringIncrement("count:table_suggest_add", 1L)
+        save(new_id, suggestion)
+        new_id
+        
+    let exists(chart_id: string, table_for: string) =
+        ft.Search("idx:table_suggest_add", Query(sprintf "@chart_id:{%s} @table_for:{%s}" chart_id table_for).SetSortBy("timestamp", true)).Documents
+        |> Seq.isEmpty
+        |> not
+
+    let list(table_for: string) =
+        ft.Search("idx:table_suggest_add", Query(sprintf "@table_for:{%s}" table_for).SetSortBy("timestamp", true).Limit(0, 100)).Documents
+        |> Seq.map (fun d -> Text.Json.JsonSerializer.Deserialize<TableAddSuggestion>(d.Item "json"))
+        |> Array.ofSeq
+
 module Aggregate =
     
     let delete_user(userId: int64) =
@@ -387,8 +425,8 @@ module Migrations =
                     .On(IndexDataType.JSON)
                     .Prefix("user:"),
                 Schema()
-                    .AddTagField(new FieldName("$.Username", "username"), true)
-                    .AddNumericField(new FieldName("$.DiscordId", "discord_id"), false)
+                    .AddTagField(FieldName("$.Username", "username"), true)
+                    .AddNumericField(FieldName("$.DiscordId", "discord_id"), false)
                     .AddNumericField(FieldName("$.DateSignedUp", "date_signed_up"), true)
                     .AddNumericField(FieldName("$.LastLogin", "last_login"), true)
                     .AddTagField(FieldName("$.AuthToken", "auth_token"), false)
@@ -406,8 +444,8 @@ module Migrations =
                     .On(IndexDataType.JSON)
                     .Prefix("score:"),
                 Schema()
-                    .AddTagField(new FieldName("$.RulesetId", "ruleset_id"), false)
-                    .AddNumericField(new FieldName("$.UserId", "user_id"), false)
+                    .AddTagField(FieldName("$.RulesetId", "ruleset_id"), false)
+                    .AddNumericField(FieldName("$.UserId", "user_id"), false)
                     .AddNumericField(FieldName("$.Timestamp", "timestamp"), true)
                     .AddNumericField(FieldName("$.Score", "score"), true)
                     .AddNumericField(FieldName("$.Grade", "grade"), true)
@@ -429,3 +467,21 @@ module Migrations =
             
             db.StringIncrement("migration", 1L) |> ignore
             Logging.Debug("Migration 3 OK")
+
+        if migration < 5L then
+            Logging.Debug("Performing migration 4")
+            
+            ft.Create(
+                "idx:table_suggest_add",
+                FTCreateParams()
+                    .On(IndexDataType.JSON)
+                    .Prefix("table_suggest_add:"),
+                Schema()
+                    .AddTagField(FieldName("$.TableFor", "table_for"), false)
+                    .AddNumericField(FieldName("$.UserId", "user_id"), false)
+                    .AddNumericField(FieldName("$.Timestamp", "timestamp"), true)
+            ) |> ignore
+            
+            db.StringIncrement("migration", 1L) |> ignore
+            Logging.Debug("Migration 4 OK")
+            

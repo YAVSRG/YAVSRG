@@ -126,10 +126,7 @@ module Tables =
             }
 
         [<Json.AutoCodec>]
-        type Response =
-            {
-                Scores: Score array
-            }
+        type Response = { Scores: Score array }
     
     /// requires login token as Authorization header
     /// url parameters:
@@ -148,10 +145,110 @@ module Tables =
             }
 
         [<Json.AutoCodec>]
+        type Response = { Players: Player array }
+    
+    /// requires login token as Authorization header
+    module Suggest =
+    
+        let ROUTE = (POST, "/tables/suggestions")
+
+        [<Json.AutoCodec>]
+        type Request =
+            {
+                ChartId: string
+                OsuBeatmapId: int
+                EtternaPackId: int
+                Artist: string
+                Title: string
+                Difficulty: string
+                TableFor: string
+                SuggestedLevel: int
+            }
+    
+    /// url parameters:
+    ///  table - id of table to get ranking for e.g 'crescent' or 'mizu'
+    module Suggestions =
+    
+        let ROUTE = (GET, "/tables/suggestions")
+        
+        [<Json.AutoCodec>]
+        type Suggestion = 
+            {
+                ChartId: string
+                OsuBeatmapId: int
+                EtternaPackId: int
+                Artist: string
+                Title: string
+                Difficulty: string
+                SuggestedLevel: int
+            }
+
+        [<Json.AutoCodec>]
+        type Response = { Suggestions: Suggestion array }
+
+module Players =
+
+    /// requires login token as Authorization header
+    module Online =
+
+        let ROUTE = (GET, "/players/online")
+
+        [<Json.AutoCodec>]
+        type Player =
+            {
+                Username: string
+                Color: int
+            }
+
+        [<Json.AutoCodec>]
         type Response =
             {
                 Players: Player array
             }
+        
+    /// requires login token as Authorization header
+    /// url parameters:
+    ///  user - OPTIONAL: name of user to view profile of (not case sensitive)
+    module Profile =
+
+        let ROUTE = (GET, "/players/profile")
+
+        [<Json.AutoCodec>]
+        type Badge =
+            {
+                Name: string
+                Colors: int32 list
+            }
+                
+        [<Json.AutoCodec>]
+        type RecentScore =
+            {
+                Artist: string
+                Title: string
+                Difficulty: string
+                Score: float
+                Lamp: string
+                Mods: string
+                Timestamp: int64
+            }
+
+        [<Json.AutoCodec>]
+        type Response =
+            {
+                Username: string
+                Color: int
+                Badges: Badge array
+                RecentScores: RecentScore array
+                DateSignedUp: int64
+            }
+    
+    /// requires login token as Authorization header
+    module ProfileOptions =
+
+        let ROUTE = (POST, "/players/profile/options")
+
+        [<Json.AutoCodec>]
+        type Request = { Color: int }
 
 module Friends =
 
@@ -171,7 +268,6 @@ module Friends =
             {
                 Friends: Friend array
             }
-
         
     /// requires login token as Authorization header
     module Add =

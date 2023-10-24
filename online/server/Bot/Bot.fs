@@ -74,13 +74,6 @@ module Bot =
                     do! message.AddReactionAsync(Emoji.Parse(":skull:"))
         }
 
-    let on_interaction_created(interaction: SocketInteraction) =
-        task {
-            match interaction with
-            | :? SocketMessageComponent as s -> Logging.Info(s.Data.CustomId)
-            | _ -> ()
-        }
-
     let on_button_executed(comp: SocketMessageComponent) =
         task {
             if comp.Channel.Id = ADMIN_CHANNEL_ID || comp.Channel.Id = MAIN_CHANNEL_ID then
@@ -119,7 +112,6 @@ module Bot =
                 })
             client.add_MessageReceived(fun msg -> on_message msg)
             //client.add_Log(fun log -> on_log log)
-            client.add_InteractionCreated(fun i -> on_interaction_created i)
 
             client.add_ButtonExecuted(fun x -> on_button_executed x)
         

@@ -17,7 +17,7 @@ module Leaderboard =
 
             let table_id = query_params.["table"].[0]
             
-            if table_id <> "crescent" then response.MakeErrorResponse(404) |> ignore else
+            if table_id <> "crescent" then raise NotFoundException else
             
             let info = TableRanking.get_top_50_info "crescent"
 

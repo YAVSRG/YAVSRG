@@ -24,6 +24,12 @@ module API =
 
         add_endpoint Tables.Records.ROUTE Tables.Records.handle
         add_endpoint Tables.Leaderboard.ROUTE Tables.Leaderboard.handle
+        add_endpoint Tables.Suggest.ROUTE Tables.Suggest.handle
+        add_endpoint Tables.Suggestions.ROUTE Tables.Suggestions.handle
+
+        add_endpoint Players.Online.ROUTE Players.Online.handle
+        add_endpoint Players.Profile.ROUTE Players.Profile.handle
+        add_endpoint Players.ProfileOptions.ROUTE Players.ProfileOptions.handle
 
         add_endpoint Friends.List.ROUTE Friends.List.handle
         add_endpoint Friends.Add.ROUTE Friends.Add.handle
@@ -39,9 +45,10 @@ module API =
                     do! handler(body, query_params, headers, response)
                 with
                 | :? NotAuthorizedException -> response.MakeErrorResponse(401, "Needs authorization token") |> ignore
+                | :? NotFoundException -> response.MakeErrorResponse(404, "Not found") |> ignore
                 | :? AuthorizeFailedException -> response.MakeErrorResponse(403, "Bad authorization token") |> ignore
                 | err -> 
                     Logging.Error(sprintf "Error in %O %s: %O" method route err)
                     response.MakeErrorResponse(500, "Internal error") |> ignore
-            else response.MakeErrorResponse(404, "Not found") |> ignore
+            else response.MakeErrorResponse(404, "Route not found") |> ignore
         }

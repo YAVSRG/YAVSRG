@@ -16,6 +16,7 @@ module Utils =
             |> ignore
 
     exception NotAuthorizedException
+    exception NotFoundException
     exception AuthorizeFailedException
 
     let authorize (header: Map<string, string>) =
