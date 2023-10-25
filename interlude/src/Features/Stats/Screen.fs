@@ -3,10 +3,6 @@
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Prelude.Gameplay
-open Prelude.Data.Charts
-open Prelude.Data.Charts.Caching
-open Prelude.Data.Charts.Tables
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components

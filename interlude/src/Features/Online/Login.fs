@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.UI.Menu
 
 type RegisterPage(discord_tag) as this =
