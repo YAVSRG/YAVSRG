@@ -1,11 +1,7 @@
 ﻿namespace Interlude.Web.Shared.Requests
 
 open Percyqaz.Json
-
-type HttpMethod =
-    | GET
-    | POST
-    | DELETE
+open Interlude.Web.Shared.API
 
 module Auth =
     
@@ -37,6 +33,9 @@ module Charts =
             {
                 Info: Info option
             }
+
+        let get(chart: string, callback: Response option -> unit) = 
+            Client.get<Response>(snd ROUTE + "?chart=" + chart, callback)
             
     module Scores =
 
@@ -79,6 +78,9 @@ module Charts =
                     // todo: in future, one chart could be in multiple tables
                     TableChange: TableChange option
                 }
+
+            let post(request: Request, callback: Response option -> unit) = 
+                Client.post_return<Request, Response>(snd ROUTE, request, callback)
                 
         /// requires login token as Authorization header
         /// url parameters:
@@ -105,6 +107,9 @@ module Charts =
                     RulesetId: string
                     Scores: Score array
                 }
+            
+            let get(chart: string, ruleset: string, callback: Response option -> unit) = 
+                Client.get<Response>(snd ROUTE + "?chart=" + chart + "&ruleset=" + escape ruleset, callback)
 
 module Tables =
 
@@ -127,6 +132,9 @@ module Tables =
 
         [<Json.AutoCodec>]
         type Response = { Scores: Score array }
+        
+        let get(user: string, table: string, callback: Response option -> unit) = 
+            Client.get<Response>(snd ROUTE + "?user=" + escape user + "&table=" + escape table, callback)
     
     /// requires login token as Authorization header
     /// url parameters:
@@ -146,6 +154,9 @@ module Tables =
 
         [<Json.AutoCodec>]
         type Response = { Players: Player array }
+        
+        let get(table: string, callback: Response option -> unit) = 
+            Client.get<Response>(snd ROUTE + "?table=" + escape table, callback)
     
     /// requires login token as Authorization header
     module Suggest =
@@ -164,6 +175,9 @@ module Tables =
                 TableFor: string
                 SuggestedLevel: int
             }
+            
+        let post(request: Request, callback: bool -> unit) =
+            Client.post<Request>(snd ROUTE, request, callback)
     
     /// url parameters:
     ///  table - id of table to get ranking for e.g 'crescent' or 'mizu'
@@ -185,6 +199,9 @@ module Tables =
 
         [<Json.AutoCodec>]
         type Response = { Suggestions: Suggestion array }
+        
+        let get(table: string, callback: Response option -> unit) = 
+            Client.get<Response>(snd ROUTE + "?table=" + escape table, callback)
 
 module Players =
 
@@ -205,6 +222,9 @@ module Players =
             {
                 Players: Player array
             }
+            
+        let get(callback: Response option -> unit) = 
+            Client.get<Response>(snd ROUTE, callback)
         
     /// requires login token as Authorization header
     /// url parameters:
@@ -241,6 +261,12 @@ module Players =
                 RecentScores: RecentScore array
                 DateSignedUp: int64
             }
+            
+        let get_me(callback: Response option -> unit) = 
+            Client.get<Response>(snd ROUTE, callback)
+
+        let get(user: string, callback: Response option -> unit) =
+            Client.get<Response>(snd ROUTE + "?user=" + escape user, callback)
     
     /// requires login token as Authorization header
     module ProfileOptions =
@@ -249,6 +275,9 @@ module Players =
 
         [<Json.AutoCodec>]
         type Request = { Color: int }
+        
+        let post(request: Request, callback: bool -> unit) =
+            Client.post<Request>(snd ROUTE, request, callback)
 
 module Friends =
 
@@ -261,6 +290,7 @@ module Friends =
         type Friend =
             {
                 Username: string
+                Color: int
             }
 
         [<Json.AutoCodec>]
@@ -268,6 +298,9 @@ module Friends =
             {
                 Friends: Friend array
             }
+            
+        let get(callback: Response option -> unit) =
+            Client.get<Response>(snd ROUTE, callback)
         
     /// requires login token as Authorization header
     module Add =
@@ -277,12 +310,18 @@ module Friends =
         [<Json.AutoCodec>]
         type Request = { User: string }
 
+        let post(request: Request, callback: bool -> unit) =
+            Client.post<Request>(snd ROUTE, request, callback)
+
     /// requires login token as Authorization header
     /// url parameters:
     ///  user - name of user to add as friend (not case sensitive)
     module Remove =
             
         let ROUTE = (DELETE, "/friends")
+
+        let delete(user: string, callback: bool -> unit) =
+            Client.delete(snd ROUTE + "?user=" + escape user, callback)
 
 module Health =
 
@@ -292,3 +331,6 @@ module Health =
 
         [<Json.AutoCodec>]
         type Response = { Status: string }
+
+        let get(callback: Response option -> unit) =
+            Client.get<Response>(snd ROUTE, callback)

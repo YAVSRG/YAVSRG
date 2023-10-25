@@ -7,9 +7,15 @@ open System.Net.Sockets
 open NetCoreServer
 open Percyqaz.Common
 open Prelude
-open Interlude.Web.Shared.Requests
 
 module API =
+
+    let escape = System.Uri.EscapeDataString
+
+    type HttpMethod =
+        | GET
+        | POST
+        | DELETE
 
     type Config =
         {
@@ -86,7 +92,7 @@ module API =
                 with override this.Handle(action) = async { do! action client }
             }
 
-        let get<'T>(route: string, callback: 'T option -> unit) =
+        let internal get<'T>(route: string, callback: 'T option -> unit) =
             queue.Request (
                 fun client -> async {
                     try
@@ -101,7 +107,7 @@ module API =
                 , ignore
             )
 
-        let post<'T>(route: string, request: 'T, callback: bool -> unit) =
+        let internal post<'T>(route: string, request: 'T, callback: bool -> unit) =
             queue.Request (
                 fun client -> async {
                     try
@@ -111,8 +117,23 @@ module API =
                 }
                 , ignore
             )
+
+        let internal post_return<'T, 'U>(route: string, request: 'T, callback: 'U option -> unit) =
+            queue.Request (
+                fun client -> async {
+                    try
+                        let! response = client.PostAsync(route, new Http.StringContent(JSON.ToString request, Text.Encoding.UTF8, "application/json")) |> Async.AwaitTask
+                        if response.IsSuccessStatusCode then
+                            match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                            | Ok res -> callback (Some res)
+                            | Error err -> Logging.Error(sprintf "Error getting %s: %s" route err.Message); callback None
+                        else callback None
+                    with :? Http.HttpRequestException | :? AggregateException -> callback None
+                }
+                , ignore
+            )
             
-        let delete<'T>(route: string, callback: bool -> unit) =
+        let internal delete(route: string, callback: bool -> unit) =
             queue.Request (
                 fun client -> async {
                     try

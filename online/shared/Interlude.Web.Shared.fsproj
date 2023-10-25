@@ -10,8 +10,8 @@
     <Compile Include="Packets.fs" />
     <Compile Include="Client.fs" />
     <Compile Include="Server.fs" />
-    <Compile Include="Requests.fs" />
     <Compile Include="API.fs" />
+    <Compile Include="Requests.fs" />
   </ItemGroup>
 
   <ItemGroup>

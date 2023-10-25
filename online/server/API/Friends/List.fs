@@ -14,6 +14,6 @@ module List =
             let friends = Friends.friends_list userId
             response.ReplyJson(
                 {
-                    Friends = friends |> Array.choose (Option.map (fun x -> { Username =  x.Username } )) 
+                    Friends = friends |> Array.choose (Option.map (fun x -> { Username =  x.Username; Color = x.Color |> Option.defaultValue Badge.DEFAULT_COLOR } )) 
                 } : Friends.List.Response)
         }

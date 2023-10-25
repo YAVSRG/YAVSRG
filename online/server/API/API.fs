@@ -4,6 +4,7 @@ open System.Collections.Generic
 open NetCoreServer
 open Percyqaz.Common
 open Prelude
+open Interlude.Web.Shared.API
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 
