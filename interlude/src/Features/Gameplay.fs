@@ -25,6 +25,7 @@ open Interlude.UI
 open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Web.Shared
+open Interlude.Web.Shared.Requests
 
 module Gameplay =
 
@@ -291,14 +292,15 @@ module Gameplay =
         then
             if data.ModStatus = ModStatus.Ranked then
                 if Network.status = Network.Status.LoggedIn then
-                    API.Client.post("charts/scores", 
+                    Charts.Scores.Save.post(
                         ({ 
                             ChartId = Chart.CACHE_DATA.Value.Hash
                             Replay = data.ScoreInfo.replay
                             Rate = data.ScoreInfo.rate
                             Mods = data.ScoreInfo.selectedMods
                             Timestamp = data.ScoreInfo.time
-                        }: Requests.Charts.Scores.Save.Request), ignore)
+                        }),
+                        ignore)
                 Scores.saveScoreWithPbs Chart.SAVE_DATA.Value Content.Rulesets.current_hash data
             else
                 Scores.saveScore Chart.SAVE_DATA.Value data.ScoreInfo

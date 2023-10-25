@@ -12,6 +12,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
 open Prelude.Backbeat.Archive
 open Interlude.Web.Shared
+open Interlude.Web.Shared.Requests
 open Interlude.UI
 
 type private TableStatus =
@@ -95,7 +96,7 @@ type TableCard(id: string, desc: string, table: Table) as this =
                         | None -> yield chart.Id, chart.Hash
             }
         for id, hash in missing_charts do
-            API.Client.get("charts/identify?chart=" + hash,
+            Charts.Identify.get(hash,
                 function
                 | Some (d: Requests.Charts.Identify.Response) ->
                     match d.Info with

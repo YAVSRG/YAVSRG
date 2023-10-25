@@ -10,6 +10,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Interlude
 open Interlude.Features
+open Interlude.Web.Shared.Requests
 
 module Printerlude =
 
@@ -93,11 +94,9 @@ module Printerlude =
             | None -> ()
             | Some t ->
                     
-            Web.Shared.API.Client.get<Web.Shared.Requests.Tables.Records.Response>(
-                sprintf "%s?user=%s&table=%s" 
-                    (snd Web.Shared.Requests.Tables.Records.ROUTE)
-                    (System.Uri.EscapeDataString Interlude.Features.Online.Network.credentials.Username)
-                    (System.Uri.EscapeDataString <| t.Name.ToLower()), 
+            Tables.Records.get(
+                Interlude.Features.Online.Network.credentials.Username, 
+                t.Name.ToLower(),
                 function
                 | None -> ()
                 | Some res ->
@@ -114,7 +113,7 @@ module Printerlude =
                                     |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
                             then
                                 for score in Scores.data.Entries.[chart.Hash].Scores do
-                                    Web.Shared.API.Client.post("charts/scores",
+                                    Charts.Scores.Save.post(
                                     ({ 
                                         ChartId = chart.Hash
                                         Replay = score.replay

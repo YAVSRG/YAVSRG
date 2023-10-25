@@ -28,7 +28,7 @@ type private OnlineList() =
         let contents = FlowContainer.Vertical<Widget>(50.0f)
 
         if Network.status = Network.Status.LoggedIn then
-            Client.get<Players.Online.Response>(snd Players.Online.ROUTE,
+            Players.Online.get(
                 fun response -> sync <| fun () ->
                     match response with
                     | Some data ->
@@ -61,7 +61,7 @@ type private FriendList() =
         let contents = FlowContainer.Vertical<Widget>(50.0f)
 
         if Network.status = Network.Status.LoggedIn then
-            Client.get<Friends.List.Response>(snd Friends.List.ROUTE,
+            Friends.List.get(
                 fun response -> sync <| fun () ->
                     match response with
                     | Some data ->

@@ -31,10 +31,7 @@ type private Leaderboard() =
         let contents = FlowContainer.Vertical<Widget>(70.0f)
 
         if Network.status = Network.Status.LoggedIn then
-            Client.get<Tables.Leaderboard.Response>(
-                sprintf "%s?table=%s" 
-                    (snd Tables.Leaderboard.ROUTE)
-                    (System.Uri.EscapeDataString <| Table.current().Value.Name.ToLower()),
+            Tables.Leaderboard.get(Table.current().Value.Name.ToLower(),
                 fun response -> sync <| fun () ->
                     match response with
                     | Some data ->
@@ -72,11 +69,9 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
         let contents = FlowContainer.Vertical<Widget>(50.0f)
 
         if Network.status = Network.Status.LoggedIn then
-            Client.get<Tables.Records.Response>(
-                sprintf "%s?user=%s&table=%s" 
-                    (snd Tables.Records.ROUTE)
-                    (System.Uri.EscapeDataString name)
-                    (System.Uri.EscapeDataString <| Table.current().Value.Name.ToLower()), 
+            Tables.Records.get(
+                name,
+                Table.current().Value.Name.ToLower(), 
                 fun response -> sync <| fun () ->
                     match response with
                     | Some data ->
@@ -155,7 +150,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (Level * TableChart * 
         let swap = SwapContainer(Current = friends_list)
 
         if Network.status = Network.Status.LoggedIn then
-            Client.get<Friends.List.Response>(snd Friends.List.ROUTE, 
+            Friends.List.get(
                 fun response -> sync <| fun () ->
                     match response with
                     | Some data -> 

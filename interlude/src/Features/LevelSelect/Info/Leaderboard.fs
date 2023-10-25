@@ -19,6 +19,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Score
 open Interlude.Features.Online
 open Interlude.Web.Shared
+open Interlude.Web.Shared.Requests
 
 module Leaderboard =
 
@@ -140,7 +141,7 @@ module Leaderboard =
             if Network.status <> Network.Status.LoggedIn then state.Set State.Offline else
             state.Set State.Loading
             let hash, ruleset_id = Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash
-            API.Client.get<Requests.Charts.Scores.Leaderboard.Response>(sprintf "charts/scores?chart=%s&ruleset=%s" hash ruleset_id,
+            Charts.Scores.Leaderboard.get(hash, ruleset_id,
                 function
                 | Some reply ->
                     if (hash, ruleset_id) <> (Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash) then () else
