@@ -62,7 +62,6 @@ module Fonts =
                     for c in chars do
                         if Char.IsHighSurrogate c then
                             highSurrogate <- c
-                            printfn "hs"
                         else
                             let code = if Char.IsLowSurrogate c then Char.ConvertToUtf32(highSurrogate, c) else int32 c
                             let size = TextMeasurer.Measure(codepointToString code, renderOptions)
