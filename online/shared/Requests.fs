@@ -291,6 +291,7 @@ module Friends =
             {
                 Username: string
                 Color: int
+                Online: bool
             }
 
         [<Json.AutoCodec>]

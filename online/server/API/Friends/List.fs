@@ -4,6 +4,7 @@ open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Online
 
 module List =
 
@@ -11,9 +12,17 @@ module List =
         async {
             let userId, _ = authorize headers
 
-            let friends = Friends.friends_list userId
+            let friends = Friends.friends_list userId |> Array.choose id
+            let! online = LoggedInUsers.find_sessions(friends |> Array.map (fun u -> u.Username))
             response.ReplyJson(
                 {
-                    Friends = friends |> Array.choose (Option.map (fun x -> { Username =  x.Username; Color = x.Color |> Option.defaultValue Badge.DEFAULT_COLOR } )) 
+                    Friends = 
+                        Array.zip friends online
+                        |> Array.map (fun (friend, session) -> 
+                            { 
+                                Username = friend.Username
+                                Color = friend.Color |> Option.defaultValue Badge.DEFAULT_COLOR
+                                Online = session.IsSome
+                            } ) 
                 } : Friends.List.Response)
         }

@@ -259,7 +259,8 @@ module Lobby =
                             let! username = ensure_logged_in sender
                             let lobby_id, lobby = ensure_in_lobby sender
 
-                            match! LoggedInUsers.find_session recipient with
+                            let! session_ids = LoggedInUsers.find_sessions [|recipient|]
+                            match session_ids.[0] with
                             | None -> user_error sender "User not found"
                             | Some recipient_id ->
 
@@ -492,7 +493,8 @@ module Lobby =
 
                             if lobby.Host <> player then user_error player "You are not host"
 
-                            match! LoggedInUsers.find_session newhost with
+                            let! session_ids = LoggedInUsers.find_sessions [|newhost|]
+                            match session_ids.[0] with
                             | None -> user_error player "User is not in this lobby"
                             | Some newhost_id ->
                             if player = newhost_id then malice player "Hosting yourself"

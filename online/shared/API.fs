@@ -10,7 +10,7 @@ open Prelude
 
 module API =
 
-    let escape = System.Uri.EscapeDataString
+    let escape = Uri.EscapeDataString
 
     type HttpMethod =
         | GET

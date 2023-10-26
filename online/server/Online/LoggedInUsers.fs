@@ -123,14 +123,14 @@ module LoggedInUsers =
             }
         service.RequestAsync
 
-    let find_session =
+    let find_sessions =
         let service = 
-            { new Async.Service<string, Guid option>() with
+            { new Async.Service<string array, Guid option array>() with
                 override this.Handle(req) =
                     async {
-                        let ok, id = lock lock_obj <| fun () -> usernames.TryGetValue req
-                        if ok then return Some id
-                        else return None
+                        return
+                            lock lock_obj <| fun () ->
+                            Array.map (fun username -> match usernames.TryGetValue username with true, id -> Some id | false, _ -> None) req
                     }
             }
         service.RequestAsync
