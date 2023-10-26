@@ -40,6 +40,7 @@
     <Compile Include="UI\Callouts.fs" />
     <Compile Include="UI\Components\Common.fs" />
     <Compile Include="UI\Components\Dropdown.fs" />
+    <Compile Include="UI\Components\Web.fs" />
     <Compile Include="UI\Menu\Volume.fs" />
     <Compile Include="UI\Menu\Helpers.fs" />
     <Compile Include="UI\Menu\Controls.fs" />

@@ -670,3 +670,5 @@ unlinkedsongsimport.info.title=Import 'Songs' folder
 unlinkedsongsimport.name=Unlinked Songs import
 unlinkedsongsimport.info.body=This folder looks like the Songs library of another game.\nSome automatic linking features will not work if you import without using the mount menu.\n\nWant to continue importing without setting up a link anyway?
 login.waiting_for_discord=Waiting for Discord authentication in browser...
+online.players.online=Online
+online.players.friends=Friends

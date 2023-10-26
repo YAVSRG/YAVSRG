@@ -57,7 +57,7 @@ type NetworkStatus() =
             ]
         | Network.LoggedIn -> [
                 Icons.multiplayer + " Multiplayer", fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default
-                //Icons.multiplayer + " Players", fun () -> PlayersPage().Show()
+                Icons.multiplayer + " Players", fun () -> PlayersPage().Show()
                 Icons.logout + " Log out", Network.logout
             ]
 
