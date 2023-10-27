@@ -1628,6 +1628,15 @@
         "Tags": [], 
         "Title": "Zettai Tokken Shuchou Shimasu!"
     }, 
+    "airuei/framework": {
+        "AlternativeTitles": [], 
+        "Artists": ["Airuei"], 
+        "OtherArtists": [], 
+        "Remixers": [], 
+        "Source": null, 
+        "Tags": ["Chordjack", "CJ", "Jacks", "future", "bass", "soundcloud"], 
+        "Title": "Framework"
+    }, 
     "aitsukinakuru/presenter": {
         "AlternativeTitles": [], 
         "Artists": ["Aitsuki Nakuru"], 
@@ -16564,8 +16573,8 @@
         "Artists": ["Halozy"], 
         "OtherArtists": [], 
         "Remixers": [], 
-        "Source": null, 
-        "Tags": [], 
+        "Source": "東方花映塚　～ Phantasmagoria of Flower View.", 
+        "Tags": ["東方Project", "Touhou", "2hu", "video", "game", "Kaeidzuka", "魂の花", "～", "Another", "Dream...", "Flower", "Soul", "オリエンタルダークフライト", "Oriental", "Dark", "Flight", "Marisa", "Kirisame", "sumijun", "nayuta", "7uta", "864", "One", "Four", "Three", "例大祭", "Reitaisai", "12", "ZUN", "Team", "Shanghai", "Alice", "Angki", "by-ad", "AchsanLovers", "Sherly", "Japanese", "Electronic", "Trance", "Dance", "EDM", "Pop", "j-pop", "jpop"], 
         "Title": "143"
     }, 
     "halozy/brilliantcolors": {
