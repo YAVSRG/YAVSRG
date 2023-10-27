@@ -1,12 +1,16 @@
-0.7.10.1
+0.7.11
 ====
 
-# New stuff
-- Ingame wiki has had a major makeover
-- Ingame wiki now uses the new site wiki, which has been updated a little
-- The 'WIP' texture editor pages when editing noteskins have been fleshed out, allowing you to rotate, flip, add and remove individual textures
-- The button to update the game has been improved, and can restart the game on successful update
-- Fixed bug in screenshots after the file size fix of 0.7.9.2
+# New features
+- NEW ingame overlay to find/search for players and view their profiles
+	- Can be found in the top-right dropdown, hotkey is `F9` by default
+	- In this overlay you can also change your name color and manage your friends list
+- Added a prompt when dragging a Songs folder onto Interlude, to check if you want to link it rather than plain import
+- Links in the ingame wiki are underlined
 
-Also check the site out, I've updated it to look a bit fancier
+# Bug fixes
+- Fixed transparency of noteskin previews on Import menu
+- Fixed a bug causing the game to shut down twice, making it hang for a bit before closing
+
+Also updated the wiki with some new pages :)
 
