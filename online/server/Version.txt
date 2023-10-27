@@ -1,1 +1,1 @@
-﻿the version where my local instance doesn't fight over message interactions
+﻿Added player searching and online player list to API
