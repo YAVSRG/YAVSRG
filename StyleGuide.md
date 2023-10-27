@@ -10,9 +10,9 @@ Would recommend matching the primary branch on the original repo unless I see a 
 I like to put emoji in commit messages  
 You don't have to care about them in PRs I can just squash with an emoji commit message
 
-🎓 - Localisation changes
+🎓 = Localisation changes
 
-🌸 - UI improvement
+🌸 = UI improvement
 
 👽️ = Bug fix
 
@@ -20,7 +20,7 @@ You don't have to care about them in PRs I can just squash with an emoji commit 
 
 🧱 = New codebase feature/feature otherwise not reaching all users
 
-⚙️ - Developer tooling
+⚙️ = Developer tooling
 
 ⚡️ = CI pipelines
 
