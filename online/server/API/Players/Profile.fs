@@ -11,14 +11,14 @@ module Profile =
         async {
             let userId, user = authorize headers
 
-            let userId, user =
+            let target_userId, target_user =
                 if query_params.ContainsKey("user") then
                     match User.by_username query_params.["user"].[0] with
                     | Some (userId, user) -> userId, user
                     | None -> raise NotFoundException
                 else userId, user
 
-            let recent_scores = Score.get_recent userId
+            let recent_scores = Score.get_recent target_userId
 
             let scores : Players.Profile.RecentScore array =
                 recent_scores 
@@ -46,13 +46,18 @@ module Profile =
                             Timestamp = s.Timestamp
                         }
                 )
+
+            let isFriend = target_user.Username <> user.Username && Friends.has_friend(userId, target_userId)
+            let isMutualFriend = isFriend && Friends.has_friend(target_userId, userId)
                     
             response.ReplyJson(
                 {
-                    Username = user.Username
-                    Color = user.Color |> Option.defaultValue Badge.DEFAULT_COLOR
-                    Badges = user.Badges |> Seq.map (fun b -> { Players.Profile.Badge.Name = b; Players.Profile.Badge.Colors = Badge.badge_color b }) |> Array.ofSeq
+                    Username = target_user.Username
+                    Color = target_user.Color |> Option.defaultValue Badge.DEFAULT_COLOR
+                    Badges = target_user.Badges |> Seq.map (fun b -> { Players.Profile.Badge.Name = b; Players.Profile.Badge.Colors = Badge.badge_color b }) |> Array.ofSeq
                     RecentScores = scores
-                    DateSignedUp = user.DateSignedUp
+                    DateSignedUp = target_user.DateSignedUp
+                    IsFriend = isFriend
+                    IsMutualFriend = isMutualFriend
                 } : Players.Profile.Response)
         }

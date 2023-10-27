@@ -29,6 +29,7 @@ module API =
         add_endpoint Tables.Suggestions.ROUTE Tables.Suggestions.handle
 
         add_endpoint Players.Online.ROUTE Players.Online.handle
+        add_endpoint Players.Search.ROUTE Players.Search.handle
         add_endpoint Players.Profile.ROUTE Players.Profile.handle
         add_endpoint Players.ProfileOptions.ROUTE Players.ProfileOptions.handle
 

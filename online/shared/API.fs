@@ -107,17 +107,6 @@ module API =
                 , ignore
             )
 
-        let internal post<'T>(route: string, request: 'T, callback: bool -> unit) =
-            queue.Request (
-                fun client -> async {
-                    try
-                        let! response = client.PostAsync(route, new Http.StringContent(JSON.ToString request, Text.Encoding.UTF8, "application/json")) |> Async.AwaitTask
-                        callback response.IsSuccessStatusCode
-                    with :? Http.HttpRequestException | :? AggregateException -> callback false
-                }
-                , ignore
-            )
-
         let internal post_return<'T, 'U>(route: string, request: 'T, callback: 'U option -> unit) =
             queue.Request (
                 fun client -> async {
@@ -126,20 +115,26 @@ module API =
                         if response.IsSuccessStatusCode then
                             match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
                             | Ok res -> callback (Some res)
-                            | Error err -> Logging.Error(sprintf "Error getting %s: %s" route err.Message); callback None
+                            | Error err -> Logging.Error(sprintf "Error reading post %s: %s" route err.Message); callback None
                         else callback None
                     with :? Http.HttpRequestException | :? AggregateException -> callback None
                 }
                 , ignore
             )
+
+        let internal post<'T>(route: string, request: 'T, callback: bool option -> unit) = post_return<'T, bool>(route, request, callback)
             
-        let internal delete(route: string, callback: bool -> unit) =
+        let internal delete(route: string, callback: bool option -> unit) =
             queue.Request (
                 fun client -> async {
                     try
                         let! response = client.DeleteAsync(route) |> Async.AwaitTask
-                        callback response.IsSuccessStatusCode
-                    with :? Http.HttpRequestException | :? AggregateException  -> callback false
+                        if response.IsSuccessStatusCode then
+                            match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                            | Ok res -> callback (Some res)
+                            | Error err -> Logging.Error(sprintf "Error reading delete %s: %s" route err.Message); callback None
+                        else callback None
+                    with :? Http.HttpRequestException | :? AggregateException -> callback None
                 }
                 , ignore
             )

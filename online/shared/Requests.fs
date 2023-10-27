@@ -176,7 +176,7 @@ module Tables =
                 SuggestedLevel: int
             }
             
-        let post(request: Request, callback: bool -> unit) =
+        let post(request: Request, callback: bool option -> unit) =
             Client.post<Request>(snd ROUTE, request, callback)
     
     /// url parameters:
@@ -225,6 +225,30 @@ module Players =
             
         let get(callback: Response option -> unit) = 
             Client.get<Response>(snd ROUTE, callback)
+
+    
+    /// requires login token as Authorization header
+    /// url parameters:
+    ///  query - partial name of user to find matches for
+    module Search =
+
+        let ROUTE = (GET, "/players/search")
+
+        [<Json.AutoCodec>]
+        type Player =
+            {
+                Username: string
+                Color: int
+            }
+
+        [<Json.AutoCodec>]
+        type Response =
+            {
+                Matches: Player array
+            }
+            
+        let get(query: string, callback: Response option -> unit) = 
+            Client.get<Response>(snd ROUTE + "?query=" + escape query, callback)
         
     /// requires login token as Authorization header
     /// url parameters:
@@ -260,6 +284,8 @@ module Players =
                 Badges: Badge array
                 RecentScores: RecentScore array
                 DateSignedUp: int64
+                IsFriend: bool
+                IsMutualFriend: bool
             }
             
         let get_me(callback: Response option -> unit) = 
@@ -276,7 +302,7 @@ module Players =
         [<Json.AutoCodec>]
         type Request = { Color: int }
         
-        let post(request: Request, callback: bool -> unit) =
+        let post(request: Request, callback: bool option -> unit) =
             Client.post<Request>(snd ROUTE, request, callback)
 
 module Friends =
@@ -311,7 +337,7 @@ module Friends =
         [<Json.AutoCodec>]
         type Request = { User: string }
 
-        let post(request: Request, callback: bool -> unit) =
+        let post(request: Request, callback: bool option -> unit) =
             Client.post<Request>(snd ROUTE, request, callback)
 
     /// requires login token as Authorization header
@@ -321,7 +347,7 @@ module Friends =
             
         let ROUTE = (DELETE, "/friends")
 
-        let delete(user: string, callback: bool -> unit) =
+        let delete(user: string, callback: bool option -> unit) =
             Client.delete(snd ROUTE + "?user=" + escape user, callback)
 
 module Health =

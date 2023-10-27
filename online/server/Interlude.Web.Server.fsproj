@@ -29,6 +29,7 @@
     <Compile Include="API\Friends\Add.fs" />
     <Compile Include="API\Friends\Remove.fs" />
     <Compile Include="API\Players\ProfileOptions.fs" />
+    <Compile Include="API\Players\Search.fs" />
     <Compile Include="API\Players\Profile.fs" />
     <Compile Include="API\Players\Online.fs" />
     <Compile Include="API\Health\HealthCheck.fs" />

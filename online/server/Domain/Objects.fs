@@ -43,7 +43,7 @@ module User =
     let id (key: string) = key.Substring(5) |> int64
     let key (id: int64) = RedisKey("user:" + id.ToString())
     let escape (query: string) = 
-        let regex = System.Text.RegularExpressions.Regex("[^a-zA-Z0-9'\\-_\\s]")
+        let regex = Text.RegularExpressions.Regex("[^a-zA-Z0-9'\\-_\\s]")
         regex.Replace(query, "").Replace("'", "\\'").Replace("-", "\\-").Trim()
 
     let create(username, discord_id) =
@@ -103,6 +103,14 @@ module User =
         let results = ft.Search("idx:users", Query(sprintf "@username:{%s}" username)).Documents
         Seq.tryExactlyOne results
         |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
+
+    let search_by_username(query: string) =
+        let query = escape query
+        if query = "" then [||] else
+
+        ft.Search("idx:users", Query(sprintf "@username:{*%s*}" query)).Documents
+        |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
+        |> Array.ofSeq
 
     let list(page: int) =
         ft.Search("idx:users", Query("*").SetSortBy("date_signed_up", true).Limit(page * 15, 15)).Documents
