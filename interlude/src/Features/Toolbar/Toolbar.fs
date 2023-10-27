@@ -13,33 +13,13 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Utils
 open Interlude.Options
+open Interlude.UI.Components
 open Interlude.UI.Screen.Toolbar
 open Interlude.Features
 open Interlude.Features.Stats
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 open Interlude.Features.Printerlude
-
-type ToolbarButton(label, action, icon) =
-    inherit StaticContainer(NodeType.Button (fun () -> Style.click.Play(); action()))
-
-    member val Hotkey = "none" with get, set
-    member val HoverIcon = icon with get, set
-
-    override this.Init(parent) =
-         this 
-         |+ Clickable.Focus this
-         |* HotkeyAction(this.Hotkey, fun () -> Style.click.Play(); action())
-         base.Init parent
-
-    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
-    
-    override this.Draw() =
-         let area = this.Bounds.TrimBottom(15.0f)
-         let text = sprintf "%s %s" (if this.Focused then this.HoverIcon else icon) label
-         Draw.rect area (Colors.shadow_1.O2)
-         Text.drawFillB(Style.font, text, area.Shrink(10.0f, 5.0f), ((if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2), Alignment.CENTER)
-         base.Draw()
 
 type Toolbar() =
     inherit Widget(NodeType.None)
@@ -61,26 +41,26 @@ type Toolbar() =
             Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 160.0f, HEIGHT - 10.0f))
         |+ (
             FlowContainer.LeftToRight(180.0f, Spacing = 10.0f, AllowNavigation = false, Position = Position.SliceTop(HEIGHT).TrimLeft(20.0f))
-            |+ ToolbarButton(
+            |+ InlaidButton(
                 L"menu.options.name",
                 ( fun () -> if shown() && Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ),
                 Icons.options,
                 Hotkey = "options")
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
-            |+ ToolbarButton(
+            |+ InlaidButton(
                 L"menu.import.name",
                 ( fun () -> if shown() then Screen.change Screen.Type.Import Transitions.Flags.Default ),
                 Icons.import,
                 Hotkey = "import")
                 .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
-            |+ ToolbarButton(
+            |+ InlaidButton(
                 L"menu.wiki.name",
                 ( fun () -> if shown() then Wiki.show() ),
                 Icons.wiki,
                 HoverIcon = Icons.wiki2,
                 Hotkey = "wiki")
                 .Tooltip(Tooltip.Info("menu.wiki").Hotkey("wiki"))
-            |+ ToolbarButton(
+            |+ InlaidButton(
                 L"menu.stats.name",
                 ( fun () -> if shown() then Screen.changeNew StatsScreen Screen.Type.Stats Transitions.Flags.Default ),
                 Icons.stats_2)

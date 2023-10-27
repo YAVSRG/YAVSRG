@@ -83,6 +83,29 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
             colorFunc
         )
 
+type InlaidButton(label, action, icon) =
+    inherit StaticContainer(NodeType.Button (fun () -> Style.click.Play(); action()))
+
+    member val Hotkey = "none" with get, set
+    member val HoverText = label with get, set
+    member val HoverIcon = icon with get, set
+    member val UnfocusedColor = Colors.text_greyout with get, set
+
+    override this.Init(parent) =
+         this 
+         |+ Clickable.Focus this
+         |* HotkeyAction(this.Hotkey, fun () -> Style.click.Play(); action())
+         base.Init parent
+
+    override this.OnFocus() = Style.hover.Play(); base.OnFocus()
+    
+    override this.Draw() =
+         let area = this.Bounds.TrimBottom(15.0f)
+         let text = if this.Focused then sprintf "%s %s" this.HoverIcon this.HoverText else sprintf "%s %s" icon label
+         Draw.rect area (Colors.shadow_1.O2)
+         Text.drawFillB(Style.font, text, area.Shrink(10.0f, 5.0f), (if this.Focused then Colors.text_yellow_2 else this.UnfocusedColor), Alignment.CENTER)
+         base.Draw()
+
 type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit Frame(NodeType.Switch(fun _ -> this.TextEntry))
     let searchTimer = new Diagnostics.Stopwatch()

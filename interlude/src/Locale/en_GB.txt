@@ -672,3 +672,4 @@ unlinkedsongsimport.info.body=This folder looks like the Songs library of anothe
 login.waiting_for_discord=Waiting for Discord authentication in browser...
 online.players.online=Online
 online.players.friends=Friends
+online.players.search=Search

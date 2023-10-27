@@ -101,3 +101,5 @@ module Icons =
     let not_ready = Feather.x
     let invite = Feather.mail
     let countdown = Feather.clock
+    let add_friend = Feather.user_plus
+    let remove_friend = Feather.user_minus
