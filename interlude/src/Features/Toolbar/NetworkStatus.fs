@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Toolbar
 
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
@@ -44,6 +43,9 @@ type NetworkStatus() =
 
         if Mouse.hover this.Bounds && Mouse.leftClick() then this.ToggleDropdown()
 
+        if Network.status = Network.LoggedIn && (!|"player_list").Tapped() then
+            PlayersPage().Show()
+
     member this.MenuItems : (string * (unit -> unit)) seq =
         match Network.status with
         | Network.NotConnected -> [ Icons.connecting + " Connect", fun () -> Network.connect() ]
@@ -57,7 +59,7 @@ type NetworkStatus() =
             ]
         | Network.LoggedIn -> [
                 Icons.multiplayer + " Multiplayer", fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default
-                Icons.multiplayer + " Players", fun () -> PlayersPage().Show()
+                Icons.search + " Players", fun () -> PlayersPage().Show()
                 Icons.logout + " Log out", Network.logout
             ]
 

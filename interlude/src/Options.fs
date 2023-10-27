@@ -233,6 +233,7 @@ module Options =
             Hotkeys.register "wiki" (ctrl Keys.H)
             Hotkeys.register "console" (mk Keys.GraveAccent)
             Hotkeys.register "edit_noteskin" (ctrl Keys.E)
+            Hotkeys.register "player_list" (mk Keys.F9)
             
             Hotkeys.register "library_mode" (mk Keys.D1)
             Hotkeys.register "add_to_collection" (mk Keys.RightBracket)

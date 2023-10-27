@@ -10,7 +10,7 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Web.Shared.Requests
 
-module Players =
+module private Players =
 
     let mutable current_player = None
     let mutable player_changed = ignore
@@ -22,7 +22,7 @@ module Players =
 
     let update_friends_list() = friends_changed()
 
-type RecentScores(scores: Players.Profile.RecentScore array) =
+type private RecentScores(scores: Players.Profile.RecentScore array) =
     inherit StaticWidget(NodeType.None)
 
     let scores = scores |> Array.map (fun score -> score, (DateTimeOffset.Now - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp) |> formatTimeOffset) + " ago")
@@ -44,7 +44,7 @@ type RecentScores(scores: Players.Profile.RecentScore array) =
 
             y <- y + h
 
-type PlayerButton(username, color) =
+type private PlayerButton(username, color) =
     inherit StaticContainer(NodeType.Button(fun () -> Players.switch (Some username)))
 
     override this.Init(parent) =
@@ -147,7 +147,7 @@ type private SearchList() =
         Draw.rect this.Bounds Colors.shadow_2.O2
         base.Draw()
 
-type PlayerList() =
+type private PlayerList() =
     inherit StaticContainer(NodeType.None)
 
     let online = OnlineList()
@@ -305,6 +305,7 @@ type PlayersPage() as this =
         |+ PlayerList(Position = { Position.Default with Right = 0.35f %+ 40.0f }.Margin(40.0f))
         |+ Profile(Position = { Position.Default with Left = 0.35f %- 0.0f }.Margin(40.0f))
         |+ HotkeyAction("exit", this.Close)
+        |+ HotkeyAction("player_list", this.Close)
 
     override this.Init(parent) =
         base.Init parent
