@@ -63,6 +63,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
             ))
         
     override this.Title = data.Name
+    override this.OnDestroy() = preview.Destroy()
     override this.OnClose() =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with
