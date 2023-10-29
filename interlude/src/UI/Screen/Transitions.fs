@@ -116,7 +116,7 @@ module Transitions =
     let private diamondWipe inbound amount bounds =
         let s = 150.0f
         let size x =
-            let f = Math.Clamp(((if inbound then amount else 1.0f - amount) - (x - 2.0f * s) / Viewport.vwidth) / (4.0f * s / Viewport.vwidth), 0.0f, 1.0f)
+            let f = Math.Clamp(((4.0f * s + Viewport.vwidth) * (if inbound then amount else 1.0f - amount) - x) / (4.0f * s), 0.0f, 1.0f)
             if inbound then f * s * 0.5f else (1.0f - f) * s * 0.5f
         let diamond x y =
             let r = size x
