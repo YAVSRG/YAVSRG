@@ -10,7 +10,6 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Features
 
