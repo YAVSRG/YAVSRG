@@ -124,3 +124,22 @@ I don't know a way to do this - The tearing you get is in exchange for low visua
 Your monitor or graphics drivers may have some special settings or modes that can help with this!
 
 Remember that VSync will introduce some visual latency, in which case you may get better results by using 'Smart' frame limit instead.
+
+::::
+
+## Streaming or recording the game
+
+You're probably using OBS.
+
+OBS captures frames directly from the game so it doesn't see the exact same thing the monitor sees.  
+Because of this and how the game tries to sync with your monitor, you may see stuttering or glitching in your recorded video that you don't see on your monitor.
+
+I'm still looking into this and don't want to offer any misinformation, but what works for me is:
+
+- Smart frame limit
+- Borderless windowed mode
+- In OBS, use a 'Display Capture' instead of a 'Game Capture'
+- In OBS, right-click on the stream preview and *disable it*
+- I also ran OBS with high system priority, in admin mode, but try without this step first
+
+With those settings I was able to record/stream perfectly smooth 60fps gameplay on my 60hz monitor without visual artifacts.
