@@ -44,7 +44,7 @@ module Printerlude =
 
         let show_version (io: IOContext) =
             io.WriteLine(sprintf "You are running %s" Utils.version)
-            io.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latestVersionName)
+            io.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latest_version_name)
 
         let export_osz() =
             match Gameplay.Chart.CHART with

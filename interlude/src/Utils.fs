@@ -9,10 +9,10 @@ open Prelude.Common
 
 module Utils =
 
-    let getInterludeLocation() = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
+    let get_interlude_location() = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
 
     /// Numeric version e.g. "0.5.16"
-    let smallVersion =
+    let short_version =
         let v = Assembly.GetExecutingAssembly().GetName()
         if v.Version.Revision <> 0 then v.Version.ToString(4) else v.Version.ToString(3)
 
@@ -20,8 +20,8 @@ module Utils =
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
         if DEV_MODE then
-            sprintf "%s %s (dev build)" v.Name smallVersion
-        else sprintf "%s %s" v.Name smallVersion
+            sprintf "%s %s (dev build)" v.Name short_version
+        else sprintf "%s %s" v.Name short_version
 
     /// K for Konst/Kestrel -- K x is shorthand for a function that ignores its input and returns x
     /// Named after the FP combinator
@@ -112,23 +112,23 @@ module Utils =
 
         let mutable restart_on_exit = false
 
-        let mutable latestVersionName = "<Unknown, server could not be reached>"
-        let mutable latestRelease = None
+        let mutable latest_version_name = "<Unknown, server could not be reached>"
+        let mutable latest_release = None
         let mutable update_available = false
         let mutable update_started = false
         let mutable update_complete = false
 
-        let private handleUpdate(release: GithubRelease) =
-            latestRelease <- Some release
+        let private handle_update(release: GithubRelease) =
+            latest_release <- Some release
 
             let parseVer (s: string) =
                 let s = s.Split(".")
                 if s.Length > 3 then (int s.[0], int s.[1], int s.[2], int s.[3])
                 else (int s.[0], int s.[1], int s.[2], 0)
 
-            let current = smallVersion
+            let current = short_version
             let incoming = release.tag_name.Substring(1)
-            latestVersionName <- incoming
+            latest_version_name <- incoming
 
             let pcurrent = parseVer current
             let pincoming = parseVer incoming
@@ -138,11 +138,13 @@ module Utils =
             else Logging.Info "Game is up to date."
 
         let check_for_updates() =
-            WebServices.download_json("https://api.github.com/repos/YAVSRG/Interlude/releases/latest", fun (d: GithubRelease option) -> if d.IsSome then handleUpdate d.Value)
+            if OperatingSystem.IsWindows() then
+                WebServices.download_json("https://api.github.com/repos/YAVSRG/Interlude/releases/latest", fun (d: GithubRelease option) -> if d.IsSome then handle_update d.Value)
 
-            let path = getInterludeLocation()
-            let folder_path = Path.Combine(path, "update")
-            if Directory.Exists folder_path then Directory.Delete(folder_path, true)
+                let path = get_interlude_location()
+                let folder_path = Path.Combine(path, "update")
+                if Directory.Exists folder_path then Directory.Delete(folder_path, true)
+            else Logging.Info "Auto-updater not availble for macOS / Linux"
 
         let apply_update(callback) =
             if not update_available then failwith "No update available to install"
@@ -150,8 +152,8 @@ module Utils =
 
             update_started <- true
 
-            let download_url = latestRelease.Value.assets.Head.browser_download_url
-            let path = getInterludeLocation()
+            let download_url = latest_release.Value.assets.Head.browser_download_url
+            let path = get_interlude_location()
             let zip_path = Path.Combine(path, "update.zip")
             let folder_path = Path.Combine(path, "update")
             File.Delete zip_path
