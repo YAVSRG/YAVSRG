@@ -76,6 +76,7 @@ module Screen =
 
     let screenContainer = ScreenContainer()
     
+    // todo: return a bool indicating success
     let changeNew (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
         if not Song.loading && (screenType <> currentType || screenType = Type.Play) then
             Transitions.tryStart((fun () -> 

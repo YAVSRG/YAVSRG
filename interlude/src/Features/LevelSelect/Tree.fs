@@ -41,6 +41,8 @@ module Tree =
     let mutable private currently_drag_scrolling = false
     let mutable private drag_scroll_distance = 0.0f
     let mutable private drag_scroll_position = 0.0f
+    let mutable private click_cooldown = 0.0
+
     let private DRAG_THRESHOLD = 40.0f
     let private DRAG_LEFTCLICK_SCALE = 1.75f
 
@@ -87,10 +89,10 @@ module Tree =
             top + bounds.Height + this.Spacing
 
         member this.LeftClick(origin) =
-            Mouse.released Mouse.LEFT && drag_scroll_distance <= DRAG_THRESHOLD && Mouse.y() > origin
+            click_cooldown <= 0 && Mouse.released Mouse.LEFT && drag_scroll_distance <= DRAG_THRESHOLD && Mouse.y() > origin
 
         member this.RightClick(origin) =
-            Mouse.released Mouse.RIGHT && drag_scroll_distance <= DRAG_THRESHOLD && Mouse.y() > origin
+            click_cooldown <= 0 && Mouse.released Mouse.RIGHT && drag_scroll_distance <= DRAG_THRESHOLD && Mouse.y() > origin
 
     let CHART_HEIGHT = 90.0f
     let GROUP_HEIGHT = 65.0f
@@ -312,6 +314,7 @@ module Tree =
         cacheFlag <- 0
         expandedGroup <- selectedGroup
         scrollTo <- ScrollTo.Chart
+        click_cooldown <- 500.0
 
     do 
         LevelSelect.on_refresh_all.Add refresh
@@ -401,6 +404,7 @@ module Tree =
         let my = Mouse.y()
         if currently_drag_scrolling then dragScroll(origin, total_height, tree_height)
         elif my < originB && my > origin && (Mouse.leftClick() || Mouse.rightClick()) then begin_dragScroll()
+        if click_cooldown > 0.0 then click_cooldown <- click_cooldown - elapsedTime
 
         if (!|"up").Tapped() && expandedGroup <> "" then
             scrollTo <- ScrollTo.Pack expandedGroup
