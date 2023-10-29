@@ -251,40 +251,52 @@ module Beatmaps =
         override this.Focusable = items.Focusable
     
         override this.Init(parent) =
-            begin_search filter
             this
-            |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> filter <- f; sync(fun () -> begin_search filter)), Position = Position.SliceTop 60.0f ))
-            |+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
-            |+ scroll
-            |+ (
-                let r = status_button "Ranked" { Position.TrimTop(65.0f).SliceTop(50.0f) with Right = 0.18f %- 25.0f } Colors.cyan
-                r.TiltLeft <- false
-                r
-               )
-            |+ status_button 
-                "Qualified"
-                { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.18f %+ 0.0f; Right = 0.36f %- 25.0f }
-                Colors.green
-            |+ status_button 
-                "Loved"
-                { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.36f %+ 0.0f; Right = 0.54f %- 25.0f }
-                Colors.pink
-            |+ status_button 
-                "Unranked"
-                { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.54f %+ 0.0f; Right = 0.72f %- 25.0f }
-                Colors.grey_2
-            |* SortingDropdown(
-                [
-                    "play_count", "Play count"
-                    "date", "Date"
-                    "difficulty", "Difficulty"
-                    "favorites", "Favourites"
-                ],
-                "Sort",
-                query_order |> Setting.trigger (fun _ -> begin_search filter),
-                descending_order |> Setting.trigger (fun _ -> begin_search filter),
-                "sort_mode",
-                Position = { Left = 0.72f %+ 0.0f; Top = 0.0f %+ 65.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 115.0f })
+            |+ EmptyState(Icons.connection_failed, "osu!search is down :(")
+            |+ Text("You'll have to download charts manually for the time being", Position = Position.Row(400.0f, 50.0f))
+            |+ 
+                (
+                    GridFlowContainer(50.0f, 4, Spacing = (20.0f, 0.0f), Position = Position.Row(460.0f, 50.0f))
+                    |+ Button("osu! (official)", fun () -> openUrl "https://osu.ppy.sh/beatmapsets?m=3")
+                    |+ Button("NeriNyan", fun () -> openUrl "https://nerinyan.moe/main?m=3")
+                    |+ Button("osu.direct", fun () -> openUrl "https://osu.direct/browse?mode=3")
+                    |+ Button("chimu.moe", fun () -> openUrl "https://chimu.moe/en/beatmaps?mode=3&offset=0&size=40&status=1")
+                )
+            |* Text(L"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
+            //begin_search filter
+            //this
+            //|+ (SearchBox(Setting.simple "", (fun (f: Filter) -> filter <- f; sync(fun () -> begin_search filter)), Position = Position.SliceTop 60.0f ))
+            //|+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
+            //|+ scroll
+            //|+ (
+            //    let r = status_button "Ranked" { Position.TrimTop(65.0f).SliceTop(50.0f) with Right = 0.18f %- 25.0f } Colors.cyan
+            //    r.TiltLeft <- false
+            //    r
+            //   )
+            //|+ status_button 
+            //    "Qualified"
+            //    { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.18f %+ 0.0f; Right = 0.36f %- 25.0f }
+            //    Colors.green
+            //|+ status_button 
+            //    "Loved"
+            //    { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.36f %+ 0.0f; Right = 0.54f %- 25.0f }
+            //    Colors.pink
+            //|+ status_button 
+            //    "Unranked"
+            //    { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.54f %+ 0.0f; Right = 0.72f %- 25.0f }
+            //    Colors.grey_2
+            //|* SortingDropdown(
+            //    [
+            //        "play_count", "Play count"
+            //        "date", "Date"
+            //        "difficulty", "Difficulty"
+            //        "favorites", "Favourites"
+            //    ],
+            //    "Sort",
+            //    query_order |> Setting.trigger (fun _ -> begin_search filter),
+            //    descending_order |> Setting.trigger (fun _ -> begin_search filter),
+            //    "sort_mode",
+            //    Position = { Left = 0.72f %+ 0.0f; Top = 0.0f %+ 65.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 115.0f })
             base.Init parent
 
         override this.Update(elapsedTime, moved) =
@@ -293,6 +305,10 @@ module Beatmaps =
             if when_at_bottom.IsSome && scroll.PositionPercent > 0.9f then
                 when_at_bottom.Value()
                 when_at_bottom <- None
+
+        override this.Draw() =
+            Draw.rect (this.Bounds.SliceTop(540.0f).TrimTop(80.0f)) Colors.black.O2
+            base.Draw()
     
         member private this.Items = items
 
