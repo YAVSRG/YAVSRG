@@ -1,7 +1,9 @@
 ﻿namespace Interlude.Features.OptionsMenu
 
+open Prelude.Data.Charts.Library
 open Interlude.Utils
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Menu
 
 module Advanced =
@@ -21,8 +23,13 @@ module Advanced =
                 |+ PageSetting("advanced.autocalibrateoffset", Selector<_>.FromBool options.AutoCalibrateOffset)
                     .Pos(340.0f)
                     .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
-                |+ PageSetting("advanced.advancedrecommendations", Selector<_>.FromBool options.AdvancedRecommendations)
+                |+ PageButton.Once("advanced.buildpatterncache", fun () -> 
+                        cache_patterns.Request((), fun () -> Notifications.system_feedback(Icons.system_notification, L"notification.pattern_cache_complete.title", ""))
+                        Notifications.system_feedback(Icons.system_notification, L"notification.pattern_cache_started.title", L"notification.pattern_cache_started.body"))
                     .Pos(410.0f)
+                    .Tooltip(Tooltip.Info("advanced.buildpatterncache"))
+                |+ PageSetting("advanced.advancedrecommendations", Selector<_>.FromBool options.AdvancedRecommendations)
+                    .Pos(480.0f)
                     .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
             )
         override this.Title = L"advanced.name"
