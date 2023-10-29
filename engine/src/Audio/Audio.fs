@@ -41,6 +41,7 @@ module Song =
     let LEADIN_TIME = 2000.0f<ms>
     
     let mutable load_path : string option = None
+    let mutable loading = false
 
     let mutable nowplaying : Song = Song.Default
     let private timer = new Stopwatch()
@@ -117,6 +118,7 @@ module Song =
                         | None -> Song.Default
                 }
             override this.Handle(song) =
+                loading <- false
                 nowplaying <- song
                 changeRate rate
                 playFrom preview_point
@@ -135,6 +137,7 @@ module Song =
             if nowplaying.ID <> 0 then
                 nowplaying.Free()
             channelPlaying <- false
+            loading <- true
             song_loader.Request(path)
 
     let update() =
