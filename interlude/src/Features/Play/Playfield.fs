@@ -86,10 +86,6 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
         let scale = options.ScrollSpeed.Value / Gameplay.rate.Value * 1.0f</ms>
         let hitposition = float32 options.HitPosition.Value
 
-        let newtime = Song.time()
-        if newtime < time then reset()
-        time <- newtime
-
         let playfieldHeight = bottom - top + (max 0.0f holdnote_trim)
         let now = Song.timeWithOffset() + Render.Performance.frame_compensation() + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
         let begin_time = 
@@ -294,3 +290,6 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
             | NoHold -> ()
 
         base.Draw()
+        
+        if now < time then reset()
+        time <- now
