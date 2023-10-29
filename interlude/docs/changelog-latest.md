@@ -1,16 +1,19 @@
-0.7.11
+0.7.11.1
 ====
 
-# New features
-- NEW ingame overlay to find/search for players and view their profiles
-	- Can be found in the top-right dropdown, hotkey is `F9` by default
-	- In this overlay you can also change your name color and manage your friends list
-- Added a prompt when dragging a Songs folder onto Interlude, to check if you want to link it rather than plain import
-- Links in the ingame wiki are underlined
+A patch with a few bug fixes just in time for releasing the game trailer
 
+# New feature
+- Under 'Advanced' settings you can now update your cache of patterns
+  This is so you can try the pattern analysis features like searching or grouping by pattern
+  
 # Bug fixes
-- Fixed transparency of noteskin previews on Import menu
-- Fixed a bug causing the game to shut down twice, making it hang for a bit before closing
+- Fixed a crash related to the noteskin editor
+- Fixed a bug where noteskin previews didn't update correctly
+- Fixed the LN stuck in preview glitch
+- Fixed a race-condition related exploit in audio loading
+- Fixed clicking on a grouping/sorting dropdown option also clicking a chart immediately after
 
-Also updated the wiki with some new pages :)
+Ingame osu! downloads are currently down - Page on imports screen now points you to some manual mirror sites
+It will be back soon :)
 
