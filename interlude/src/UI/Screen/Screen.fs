@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI
 
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
@@ -76,7 +77,7 @@ module Screen =
     let screenContainer = ScreenContainer()
     
     let changeNew (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
-        if (screenType <> currentType || screenType = Type.Play) then
+        if not Song.loading && (screenType <> currentType || screenType = Type.Play) then
             Transitions.tryStart((fun () -> 
                 let s = thunk()
                 current.OnExit screenType

@@ -3,6 +3,7 @@
 open System.Linq
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Charts
@@ -131,7 +132,7 @@ type SelectedChart() =
             )
         
         |+ Conditional(
-            (fun () -> Network.lobby.IsSome && SelectedChart.loaded() && not Network.lobby.Value.GameInProgress),
+            (fun () -> Network.lobby.IsSome && SelectedChart.loaded() && not Song.loading && not Network.lobby.Value.GameInProgress),
 
             StylishButton(
                 (fun () -> 
