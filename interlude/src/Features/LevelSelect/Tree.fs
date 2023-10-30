@@ -36,7 +36,7 @@ module Tree =
     let mutable private expandedGroup = ""
     
     let private scrollPos = Animation.Fade 300.0f
-    let private scroll(amount: float32) = scrollPos.Target <- scrollPos.Target + amount
+    let private scroll(amount: float32) = scrollPos.Target <- scrollPos.Value + amount
 
     let mutable private currently_drag_scrolling = false
     let mutable private drag_scroll_distance = 0.0f
