@@ -76,15 +76,11 @@ module Song =
     let playLeadIn() = playFrom(-LEADIN_TIME * rate)
 
     let seek(time) =
-        if (time >= 0.0f<ms> && time < duration()) then
-            if playing() then playFrom time
-            else
-                Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
-                timer.Reset()
-                timerStart <- time
-        elif timer.IsRunning then 
+        if playing() then
             playFrom time
-        else 
+        else
+            if (time >= 0.0f<ms> && time < duration()) then
+                Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
             timer.Reset()
             timerStart <- time
 
@@ -99,11 +95,12 @@ module Song =
         timer.Start()
 
     let changeRate(newRate) =
+        let didRateChange = rate <> newRate
         let time = time()
         rate <- newRate
         //if (true) then Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0) |> bassError
         Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Frequency, float32 nowplaying.Frequency * rate) |> bassError
-        seek time
+        if didRateChange then seek time
 
     let changeLocalOffset(offset) = localOffset <- offset
     let changeGlobalOffset(offset) = globalOffset <- offset
