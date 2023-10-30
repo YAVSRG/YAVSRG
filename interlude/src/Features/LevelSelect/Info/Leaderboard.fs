@@ -137,10 +137,11 @@ module Leaderboard =
                 member this.Handle(lc: LeaderboardCard) = container.Add lc
             }
 
-        let load (state: Setting<State>) =
+        let load (state: Setting<State>) (chart: Chart) =
             if Network.status <> Network.Status.LoggedIn then state.Set State.Offline else
             state.Set State.Loading
             let hash, ruleset_id = Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash
+            container.Clear()
             Charts.Scores.Leaderboard.get(hash, ruleset_id,
                 function
                 | Some reply ->
@@ -151,10 +152,9 @@ module Leaderboard =
                             Scores = reply.Scores
                             RulesetId = Content.Rulesets.current_hash
                             Ruleset = Content.Rulesets.current
-                            Chart = Chart.CHART.Value
+                            Chart = chart
                             Hash = Chart.CACHE_DATA.Value.Hash
                         }
-                    container.Clear()
                     state.Set (if reply.Scores.Length > 0 then State.Loaded else State.EmptyLeaderboard)
                 | None -> 
                     // worker is requested anyway because it ensures any loading scores get swallowed and the scoreboard is cleared
@@ -163,10 +163,9 @@ module Leaderboard =
                             Scores = [||]
                             RulesetId = Content.Rulesets.current_hash
                             Ruleset = Content.Rulesets.current
-                            Chart = Chart.CHART.Value
+                            Chart = chart
                             Hash = Chart.CACHE_DATA.Value.Hash
                         }
-                    container.Clear()
                     state.Set State.NoLeaderboard
             )
 
@@ -237,4 +236,4 @@ type Leaderboard(display: Setting<Display>) as this =
         if h <> chart || scoring <> Content.Rulesets.current_hash then
             chart <- h
             scoring <- Content.Rulesets.current_hash
-            Loader.load state
+            Loader.load state Chart.CHART.Value
