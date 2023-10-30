@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.IO.Compression
 open System.Net
 open System.Net.Http
 open System.Threading.Tasks
@@ -21,6 +22,20 @@ module WebServices =
                 try
                     let! s = download_string_client.GetStringAsync(url) |> Async.AwaitTask
                     return Some s
+                with err -> 
+                    Logging.Error(sprintf "Could not reach %s" url, err)
+                    return None
+            }
+        }
+
+    let download_compressed_string = 
+        { new Async.Service<string, string option>() with
+            override this.Handle(url: string) = async {
+                try
+                    use! stream = download_string_client.GetStreamAsync(url) |> Async.AwaitTask
+                    use brotliStream = new BrotliStream(stream, CompressionMode.Decompress)
+                    use br = new StreamReader(brotliStream)
+                    return Some (br.ReadToEnd())
                 with err -> 
                     Logging.Error(sprintf "Could not reach %s" url, err)
                     return None
