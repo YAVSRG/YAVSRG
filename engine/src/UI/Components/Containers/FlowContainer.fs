@@ -100,7 +100,8 @@ module FlowContainer =
         member this.Clear() = children.Clear()
 
         override this.Draw() =
-            for { Widget = c; Visible = visible } in children do
+            for i = children.Count - 1 downto 0 do
+                let { Widget = c; Visible = visible } = children.[i]
                 if visible && (this.Floating || c.VisibleBounds.Visible) then c.Draw()
         
         override this.Update(elapsedTime, moved) =
