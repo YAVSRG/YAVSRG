@@ -13,40 +13,46 @@ open Prelude.Data.Charts.Sorting
 open Prelude.Data
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Menu
 open Interlude.Utils
 
-type BeatmapStatus =
-    | PENDING = 0
-    | RANKED = 1
-    | QUALIFIED = 3
-    | LOVED = 4
-    | WORK_IN_PROGRESS = -1
-    | GRAVEYARD = -2
+[<Json.AutoCodec>]
+type NeriNyanBeatmap =
+    {
+        id: int
+        difficulty_rating: float
+        cs: float
+        version: string
+        mode: string
+    }
 
 [<Json.AutoCodec>]
-type BeatmapData =
+type NeriNyanBeatmapset =
     {
-        difficulty_cs: float //key count
-        difficulty: float
-        bpm: int
-        favorites: int
-        play_count: int
-        mapper: string
+        id: int
         artist: string
         title: string
-        beatmapset_id: int
-        beatmap_status: BeatmapStatus
+        creator: string
+        favourite_count: int
+        play_count: int
+        status: string
+        beatmaps: NeriNyanBeatmap array
     }
     
 [<Json.AutoCodec>]
-type BeatmapSearch =
+type NeriNyanBeatmapSearch = NeriNyanBeatmapset array
+
+[<Json.AutoCodec>]
+type NeriNyanBeatmapSearchRequest =
     {
-        result_count: int
-        beatmaps: ResizeArray<BeatmapData>
+        m: string
+        page: int
+        query: string
+        ranked: string
+        sort: string
+        cs: {| min: float; max: float |}
     }
 
-type private BeatmapImportCard(data: BeatmapData) as this =
+type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
     inherit StaticContainer(NodeType.Button(fun () -> Style.click.Play(); this.Download()))
             
     let mutable status = NotDownloaded
@@ -54,7 +60,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     let download() =
         if status = NotDownloaded || status = DownloadFailed then
             let target = Path.Combine(getDataPath "Downloads", Guid.NewGuid().ToString() + ".osz")
-            WebServices.download_file.Request((sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.beatmapset_id, target, fun p -> progress <- p),
+            WebServices.download_file.Request((sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.id, target, fun p -> progress <- p),
                 fun completed ->
                     if completed then Library.Imports.auto_convert.Request((target, true),
                         fun b ->
@@ -68,14 +74,30 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             status <- Downloading
 
     let fill, border, ranked_status =
-        match data.beatmap_status with
-        | BeatmapStatus.RANKED -> Colors.cyan, Colors.cyan_accent, "Ranked"
-        | BeatmapStatus.QUALIFIED -> Colors.green, Colors.green_accent, "Qualified"
-        | BeatmapStatus.LOVED -> Colors.pink, Colors.pink_accent, "Loved"
-        | BeatmapStatus.PENDING -> Colors.grey_2, Colors.grey_1, "Pending"
-        | BeatmapStatus.WORK_IN_PROGRESS -> Colors.grey_2, Colors.grey_1, "WIP"
-        | BeatmapStatus.GRAVEYARD
+        match data.status with
+        | "ranked" -> Colors.cyan, Colors.cyan_accent, "Ranked"
+        | "qualified" -> Colors.green, Colors.green_accent, "Qualified"
+        | "loved" -> Colors.pink, Colors.pink_accent, "Loved"
+        | "pending" -> Colors.grey_2, Colors.grey_1, "Pending"
+        | "wip" -> Colors.grey_2, Colors.grey_1, "WIP"
+        | "graveyard"
         | _ -> Colors.grey_2, Colors.grey_1, "Graveyard"
+
+    let beatmaps = data.beatmaps |> Array.filter (fun x -> x.mode = "mania")
+
+    let keymodes_string = 
+        let modes =
+            beatmaps
+            |> Seq.map (fun bm -> int bm.cs)
+            |> Seq.distinct
+            |> Seq.sort
+            |> Array.ofSeq
+        if modes.Length > 3 then
+            sprintf "%i-%iK" modes.[0] modes.[modes.Length - 1]
+        else
+            modes
+            |> Seq.map (fun k -> sprintf "%iK" k)
+            |> String.concat ", "
 
     do
 
@@ -96,21 +118,12 @@ type private BeatmapImportCard(data: BeatmapData) as this =
         | Downloading -> Draw.rect (this.Bounds.SliceLeft(this.Bounds.Width * progress)) Colors.white.O1
         | _ -> ()
 
-        Text.drawFillB(Style.font, data.title, this.Bounds.SliceTop(50.0f).Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
-        Text.drawFillB(Style.font, data.artist + "  •  " + data.mapper, this.Bounds.SliceBottom(45.0f).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.LEFT)
+        Text.drawFillB(Style.font, data.title, this.Bounds.SliceTop(45.0f).Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
+        Text.drawFillB(Style.font, data.artist + "  •  " + data.creator, this.Bounds.SliceBottom(45.0f).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.LEFT)
 
         let status_bounds = this.Bounds.SliceBottom(40.0f).SliceRight(150.0f).Shrink(5.0f, 0.0f)
         Draw.rect status_bounds Colors.shadow_2.O2
         Text.drawFillB(Style.font, ranked_status, status_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), (border, Colors.shadow_2), Alignment.CENTER)
-
-        let stat x text =
-            let stat_bounds = this.Bounds.SliceBottom(40.0f).TrimRight(x).SliceRight(145.0f)
-            Draw.rect stat_bounds Colors.shadow_2.O2
-            Text.drawFillB(Style.font, text, stat_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), Colors.text_subheading, Alignment.CENTER)
-
-        stat 150.0f (sprintf "%s %i" Icons.heart data.favorites)
-        stat 300.0f (sprintf "%s %i" Icons.play data.play_count)
-        stat 450.0f (sprintf "%iK" (int data.difficulty_cs))
 
         let download_bounds = this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(5.0f, 0.0f)
         Draw.rect download_bounds Colors.shadow_2.O2
@@ -132,6 +145,24 @@ type private BeatmapImportCard(data: BeatmapData) as this =
                 | Installed -> Colors.text_green
             ),
             Alignment.CENTER)
+
+        let stat x text =
+            let stat_bounds = this.Bounds.SliceBottom(40.0f).TrimRight(x).SliceRight(145.0f)
+            Draw.rect stat_bounds Colors.shadow_2.O2
+            Text.drawFillB(Style.font, text, stat_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f), Colors.text_subheading, Alignment.CENTER)
+
+        stat 150.0f (sprintf "%s %i" Icons.heart data.favourite_count)
+        stat 300.0f (sprintf "%s %i" Icons.play data.play_count)
+        stat 450.0f keymodes_string
+
+        if this.Focused && Mouse.x() > this.Bounds.Right - 600.0f then
+            let popover_bounds = Rect.Box(this.Bounds.Right - 900.0f, this.Bounds.Bottom + 10.0f, 600.0f, 45.0f * float32 beatmaps.Length)
+            Draw.rect popover_bounds Colors.shadow_2.O3
+            let mutable y = 0.0f
+            for beatmap in beatmaps do
+                Text.drawFillB(Style.font, beatmap.version, popover_bounds.SliceTop(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f), Colors.text, Alignment.LEFT)
+                Text.drawFillB(Style.font, sprintf "%.2f*" beatmap.difficulty_rating, popover_bounds.SliceTop(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f), Colors.text, Alignment.RIGHT)
+                y <- y + 45.0f
 
     member private this.Download() = download()
 
@@ -187,48 +218,60 @@ module Beatmaps =
         let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
         let scroll = ScrollContainer.Flow(items, Margin = Style.PADDING, Position = Position.TrimTop(125.0f).TrimBottom(65.0f))
         let mutable filter : Filter = []
-        let query_order = Setting.simple "date"
+        let query_order = Setting.simple "updated"
         let descending_order = Setting.simple true
         let mutable statuses = Set.singleton "Ranked"
         let mutable when_at_bottom : (unit -> unit) option = None
 
         let json_downloader = 
-            { new Async.SwitchService<string * (unit -> unit), BeatmapSearch option * (unit -> unit)>() with 
+            { new Async.SwitchService<string * (unit -> unit), NeriNyanBeatmapSearch option * (unit -> unit)>() with 
                 override this.Process((url, action_at_bottom)) = 
                     async {
-                        let! res = WebServices.download_json_async<BeatmapSearch>(url)
-                        return res, action_at_bottom
+                        match! WebServices.download_compressed_string.RequestAsync(url) with
+                        | Some bad_json ->
+                            let fixed_json = System.Text.RegularExpressions.Regex.Replace(bad_json, @"[^\u0000-\u007F]+", "")
+                            try
+                                let data = System.Text.Json.JsonSerializer.Deserialize<NeriNyanBeatmapSearch>(fixed_json)
+                                return Some data, action_at_bottom
+                            with err ->
+                                Logging.Error("Failed to parse json data from " + url, err)
+                                return None, action_at_bottom
+                        | None -> return None, action_at_bottom
                     }
-                override this.Handle((data: BeatmapSearch option, action_at_bottom)) =
+                override this.Handle((data: NeriNyanBeatmapSearch option, action_at_bottom)) =
                     match data with
                     | Some d -> 
-                        for p in d.beatmaps do items.Add(BeatmapImportCard p)
-                        if d.result_count < 0 || d.result_count > d.beatmaps.Count then
+                        for p in d do items.Add(BeatmapImportCard p)
+                        if d.Length >= 50 then
                             when_at_bottom <- Some action_at_bottom
                     | None -> ()
             }
 
         let rec search (filter: Filter) (page: int) =
             when_at_bottom <- None
-            let mutable url = "https://osusearch.com/api/search?modes=Mania&key=&query_order=" + (if descending_order.Value then "" else "-") + query_order.Value + "&statuses=" + String.concat "," statuses
+            let mutable request =
+                {
+                    m = "mania"
+                    page = page
+                    query = ""
+                    ranked = (String.concat "," statuses).ToLower()
+                    sort = query_order.Value + if descending_order.Value then "_desc" else "_asc"
+                    cs = {|min = 3.0; max = 10.0|}
+                }
             let mutable invalid = false
-            let mutable title = ""
             List.iter(
                 function
                 | Impossible -> invalid <- true
-                | String "#p" -> url <- url + "&premium_mappers=true"
-                | String s -> match title with "" -> title <- s | t -> title <- t + " " + s
+                | String s -> request <- { request with query = match request.query with "" -> s | t -> request.query + " " + s }
                 | Equals ("k", n)
                 | Equals ("key", n)
-                | Equals ("keys", n) -> match Int32.TryParse n with (true, i) -> url <- url + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
-                | Equals ("m", m)
-                | Equals ("c", m)
-                | Equals ("creator", m)
-                | Equals ("mapper", m) -> url <- url + "&mapper=" + m
+                | Equals ("keys", n) -> match Int32.TryParse n with (true, i) -> request <- { request with cs = {| min = float i; max = float i |} } | _ -> ()
                 | _ -> ()
             ) filter
-            url <- url + "&title=" + Uri.EscapeDataString title
-            url <- url + "&offset=" + page.ToString()
+            let url =
+                "https://api.nerinyan.moe/search?b64="
+                + (request |> JSON.ToString |> fun s -> s.Replace("\n", "") |> System.Text.Encoding.UTF8.GetBytes |> Convert.ToBase64String |> Uri.EscapeDataString)
+                + "&ps=50"
             json_downloader.Request(url, (fun () -> search filter (page + 1)))
 
         let begin_search (filter: Filter) =
@@ -251,52 +294,52 @@ module Beatmaps =
         override this.Focusable = items.Focusable
     
         override this.Init(parent) =
-            this
-            |+ EmptyState(Icons.connection_failed, "osu!search is down :(")
-            |+ Text("You'll have to download charts manually for the time being", Position = Position.Row(400.0f, 50.0f))
-            |+ 
-                (
-                    GridFlowContainer(50.0f, 4, Spacing = (20.0f, 0.0f), Position = Position.Row(460.0f, 50.0f))
-                    |+ Button("osu! (official)", fun () -> openUrl "https://osu.ppy.sh/beatmapsets?m=3")
-                    |+ Button("NeriNyan", fun () -> openUrl "https://nerinyan.moe/main?m=3")
-                    |+ Button("osu.direct", fun () -> openUrl "https://osu.direct/browse?mode=3")
-                    |+ Button("chimu.moe", fun () -> openUrl "https://chimu.moe/en/beatmaps?mode=3&offset=0&size=40&status=1")
-                )
-            |* Text(L"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
-            //begin_search filter
             //this
-            //|+ (SearchBox(Setting.simple "", (fun (f: Filter) -> filter <- f; sync(fun () -> begin_search filter)), Position = Position.SliceTop 60.0f ))
-            //|+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
-            //|+ scroll
-            //|+ (
-            //    let r = status_button "Ranked" { Position.TrimTop(65.0f).SliceTop(50.0f) with Right = 0.18f %- 25.0f } Colors.cyan
-            //    r.TiltLeft <- false
-            //    r
-            //   )
-            //|+ status_button 
-            //    "Qualified"
-            //    { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.18f %+ 0.0f; Right = 0.36f %- 25.0f }
-            //    Colors.green
-            //|+ status_button 
-            //    "Loved"
-            //    { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.36f %+ 0.0f; Right = 0.54f %- 25.0f }
-            //    Colors.pink
-            //|+ status_button 
-            //    "Unranked"
-            //    { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.54f %+ 0.0f; Right = 0.72f %- 25.0f }
-            //    Colors.grey_2
-            //|* SortingDropdown(
-            //    [
-            //        "play_count", "Play count"
-            //        "date", "Date"
-            //        "difficulty", "Difficulty"
-            //        "favorites", "Favourites"
-            //    ],
-            //    "Sort",
-            //    query_order |> Setting.trigger (fun _ -> begin_search filter),
-            //    descending_order |> Setting.trigger (fun _ -> begin_search filter),
-            //    "sort_mode",
-            //    Position = { Left = 0.72f %+ 0.0f; Top = 0.0f %+ 65.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 115.0f })
+            //|+ EmptyState(Icons.connection_failed, "osu!search is down :(")
+            //|+ Text("You'll have to download charts manually for the time being", Position = Position.Row(400.0f, 50.0f))
+            //|+ 
+            //    (
+            //        GridFlowContainer(50.0f, 4, Spacing = (20.0f, 0.0f), Position = Position.Row(460.0f, 50.0f))
+            //        |+ Button("osu! (official)", fun () -> openUrl "https://osu.ppy.sh/beatmapsets?m=3")
+            //        |+ Button("NeriNyan", fun () -> openUrl "https://nerinyan.moe/main?m=3")
+            //        |+ Button("osu.direct", fun () -> openUrl "https://osu.direct/browse?mode=3")
+            //        |+ Button("chimu.moe", fun () -> openUrl "https://chimu.moe/en/beatmaps?mode=3&offset=0&size=40&status=1")
+            //    )
+            //|* Text(L"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
+            begin_search filter
+            this
+            |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> filter <- f; sync(fun () -> begin_search filter)), Position = Position.SliceTop 60.0f ))
+            |+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
+            |+ scroll
+            |+ (
+                let r = status_button "Ranked" { Position.TrimTop(65.0f).SliceTop(50.0f) with Right = 0.18f %- 25.0f } Colors.cyan
+                r.TiltLeft <- false
+                r
+               )
+            |+ status_button 
+                "Qualified"
+                { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.18f %+ 0.0f; Right = 0.36f %- 25.0f }
+                Colors.green
+            |+ status_button 
+                "Loved"
+                { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.36f %+ 0.0f; Right = 0.54f %- 25.0f }
+                Colors.pink
+            |+ status_button 
+                "Unranked"
+                { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.54f %+ 0.0f; Right = 0.72f %- 25.0f }
+                Colors.grey_2
+            |* SortingDropdown(
+                [
+                    "plays", "Play count"
+                    "updated", "Date"
+                    "difficulty", "Difficulty"
+                    "favourites", "Favourites"
+                ],
+                "Sort",
+                query_order |> Setting.trigger (fun _ -> begin_search filter),
+                descending_order |> Setting.trigger (fun _ -> begin_search filter),
+                "sort_mode",
+                Position = { Left = 0.72f %+ 0.0f; Top = 0.0f %+ 65.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 115.0f })
             base.Init parent
 
         override this.Update(elapsedTime, moved) =
@@ -306,9 +349,9 @@ module Beatmaps =
                 when_at_bottom.Value()
                 when_at_bottom <- None
 
-        override this.Draw() =
-            Draw.rect (this.Bounds.SliceTop(540.0f).TrimTop(80.0f)) Colors.black.O2
-            base.Draw()
+        //override this.Draw() =
+        //    Draw.rect (this.Bounds.SliceTop(540.0f).TrimTop(80.0f)) Colors.black.O2
+        //    base.Draw()
     
         member private this.Items = items
 
