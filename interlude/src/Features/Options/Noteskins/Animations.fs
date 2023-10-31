@@ -15,14 +15,22 @@ type AnimationSettingsPage() as this =
     let data = Noteskins.Current.config
 
     let enable_column_light = Setting.simple data.EnableColumnLight
-    let column_light_time = Setting.bounded data.ColumnLightTime 0.1f 1.0f |> Setting.roundf 2
+
+    let column_light_time =
+        Setting.bounded data.ColumnLightTime 0.1f 1.0f |> Setting.roundf 2
+
     let note_animation_time = Setting.bounded data.AnimationFrameTime 10.0 1000.0
 
     // todo: replace column and explosion fade percentages with a real timing system
     // todo: option to disable fading of explosions
     let enable_explosions = Setting.simple data.Explosions.Enable
-    let explosion_animation_time = Setting.bounded data.Explosions.AnimationFrameTime 10.0 1000.0
-    let explosion_fade_time = Setting.bounded data.Explosions.FadeTime 0.1f 1.0f |> Setting.roundf 2
+
+    let explosion_animation_time =
+        Setting.bounded data.Explosions.AnimationFrameTime 10.0 1000.0
+
+    let explosion_fade_time =
+        Setting.bounded data.Explosions.FadeTime 0.1f 1.0f |> Setting.roundf 2
+
     let explosion_scale = Setting.bounded data.Explosions.Scale 0.5f 2.0f
     let explosion_expand = Setting.percentf data.Explosions.ExpandAmount
     let explosion_on_miss = Setting.simple data.Explosions.ExplodeOnMiss
@@ -36,14 +44,14 @@ type AnimationSettingsPage() as this =
     let mutable test_event_i = 0
 
     let test_events = Animation.Counter 1000.0
-    let note_frames = Animation.Counter (data.AnimationFrameTime)
-    let explosion_frames = Animation.Counter (data.Explosions.AnimationFrameTime)
+    let note_frames = Animation.Counter(data.AnimationFrameTime)
+    let explosion_frames = Animation.Counter(data.Explosions.AnimationFrameTime)
     let explosion_fade = Animation.Fade 0.0f
     let hold_explosion_fade = Animation.Fade 0.0f
 
     do
         this.Content(
-            column()
+            column ()
             |+ PageSetting("noteskins.edit.enablecolumnlight", Selector<_>.FromBool enable_column_light)
                 .Pos(200.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.enablecolumnlight"))
@@ -51,14 +59,30 @@ type AnimationSettingsPage() as this =
                 .Pos(270.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.columnlighttime"))
 
-            |+ PageSetting("noteskins.edit.animationtime", Slider(note_animation_time |> Setting.trigger (fun v -> note_frames.Interval <- max 10.0 v) |> Setting.f32, Step = 1f))
+            |+ PageSetting(
+                "noteskins.edit.animationtime",
+                Slider(
+                    note_animation_time
+                    |> Setting.trigger (fun v -> note_frames.Interval <- max 10.0 v)
+                    |> Setting.f32,
+                    Step = 1f
+                )
+            )
                 .Pos(370.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.animationtime"))
 
             |+ PageSetting("noteskins.edit.enableexplosions", Selector<_>.FromBool enable_explosions)
                 .Pos(470.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.enableexplosions"))
-            |+ PageSetting("noteskins.edit.explosionanimationtime", Slider(explosion_animation_time |> Setting.trigger (fun v -> explosion_frames.Interval <- max 10.0 v) |> Setting.f32, Step = 1f))
+            |+ PageSetting(
+                "noteskins.edit.explosionanimationtime",
+                Slider(
+                    explosion_animation_time
+                    |> Setting.trigger (fun v -> explosion_frames.Interval <- max 10.0 v)
+                    |> Setting.f32,
+                    Step = 1f
+                )
+            )
                 .Pos(540.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.explosionanimationtime"))
             |+ PageSetting("noteskins.edit.explosionfadetime", Slider.Percent(explosion_fade_time))
@@ -73,7 +97,13 @@ type AnimationSettingsPage() as this =
             |+ PageSetting("noteskins.edit.explodeonmiss", Selector<_>.FromBool(explosion_on_miss))
                 .Pos(820.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.explodeonmiss"))
-            |+ PageSetting("noteskins.edit.explosioncolors", Selector([|ExplosionColors.Column, "Column"; ExplosionColors.Judgements, "Judgements"|], explosion_colors))
+            |+ PageSetting(
+                "noteskins.edit.explosioncolors",
+                Selector(
+                    [| ExplosionColors.Column, "Column"; ExplosionColors.Judgements, "Judgements" |],
+                    explosion_colors
+                )
+            )
                 .Pos(890.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.explosioncolors"))
         )
@@ -108,83 +138,92 @@ type AnimationSettingsPage() as this =
 
         // draw note explosion example
         Draw.quad
-            (
-                Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                |> Quad.ofRect
-            )
-            (Quad.colorOf Color.White)
-            (Sprite.gridUV(note_frames.Loops, 0) receptor)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+            (Quad.color Color.White)
+            (Sprite.with_uv (note_frames.Loops, 0) receptor)
+
         if enable_explosions.Value then
             let threshold = max 0.0f (1.0f - explosion_fade_time.Value)
-            let p = (explosion_fade.Value - threshold) / explosion_fade_time.Value |> min 1.0f |> max 0.0f
+
+            let p =
+                (explosion_fade.Value - threshold) / explosion_fade_time.Value
+                |> min 1.0f
+                |> max 0.0f
+
             let a = 255.0f * p |> int
+
             Draw.quad
-                (
-                    Rect
-                        .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                        .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
-                        .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
-                    |> Quad.ofRect
-                )
-                (Quad.colorOf (Color.White.O4a a))
-                (Sprite.gridUV(explosion_frames.Loops, 0) noteexplosion)
+                (Rect
+                    .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                    .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
+                    .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
+                 |> Quad.ofRect)
+                (Quad.color (Color.White.O4a a))
+                (Sprite.with_uv (explosion_frames.Loops, 0) noteexplosion)
 
         // draw hold explosion example
         bottom <- bottom - COLUMN_WIDTH * 2.0f
+
         Draw.quad
-            (
-                Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                |> Quad.ofRect
-            )
-            (Quad.colorOf Color.White)
-            (Sprite.gridUV(note_frames.Loops, 0) receptor)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+            (Quad.color Color.White)
+            (Sprite.with_uv (note_frames.Loops, 0) receptor)
+
         if enable_explosions.Value then
             let threshold = max 0.0f (1.0f - explosion_fade_time.Value)
-            let p = (hold_explosion_fade.Value - threshold) / explosion_fade_time.Value |> min 1.0f |> max 0.0f
+
+            let p =
+                (hold_explosion_fade.Value - threshold) / explosion_fade_time.Value
+                |> min 1.0f
+                |> max 0.0f
+
             let a = 255.0f * p |> int
+
             Draw.quad
-                (
-                    Rect
-                        .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                        .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
-                        .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
-                    |> Quad.ofRect
-                )
-                (Quad.colorOf (Color.White.O4a a))
-                (Sprite.gridUV(explosion_frames.Loops, 0) holdexplosion)
+                (Rect
+                    .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                    .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
+                    .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
+                 |> Quad.ofRect)
+                (Quad.color (Color.White.O4a a))
+                (Sprite.with_uv (explosion_frames.Loops, 0) holdexplosion)
 
         // draw note animation example
         bottom <- bottom - COLUMN_WIDTH * 2.0f
+
         Draw.quad
-            (
-                Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                |> Quad.ofRect
-            )
-            (Quad.colorOf Color.White)
-            (Sprite.gridUV(note_frames.Loops, 0) note)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+            (Quad.color Color.White)
+            (Sprite.with_uv (note_frames.Loops, 0) note)
 
         // draw column light example
         bottom <- bottom + COLUMN_WIDTH * 4.0f
         left <- left - COLUMN_WIDTH * 1.5f
+
         Draw.quad
-            (
-                Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                |> Quad.ofRect
-            )
-            (Quad.colorOf Color.White)
-            (Sprite.gridUV(note_frames.Loops, int hold_explosion_fade.Target) receptor)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+            (Quad.color Color.White)
+            (Sprite.with_uv (note_frames.Loops, int hold_explosion_fade.Target) receptor)
+
         if enable_column_light.Value then
             let threshold = max 0.0f (1.0f - column_light_time.Value)
-            let p = (hold_explosion_fade.Value - threshold) / column_light_time.Value |> min 1.0f |> max 0.0f
+
+            let p =
+                (hold_explosion_fade.Value - threshold) / column_light_time.Value
+                |> min 1.0f
+                |> max 0.0f
+
             let a = 255.0f * p |> int |> min 255 |> max 0
+
             Draw.sprite
-                (
-                    Sprite.alignedBoxX(left + COLUMN_WIDTH * 0.5f, bottom, 0.5f, 1.0f, COLUMN_WIDTH * p, 1.0f / p) columnlighting
-                )
+                (Sprite.aligned_box_x
+                    (left + COLUMN_WIDTH * 0.5f, bottom, 0.5f, 1.0f, COLUMN_WIDTH * p, 1.0f / p)
+                    columnlighting)
                 (Color.White.O4a a)
                 columnlighting
 
-    override this.Title = L"noteskins.edit.animations.name"
+    override this.Title = L "noteskins.edit.animations.name"
+
     override this.OnClose() =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with
@@ -192,13 +231,10 @@ type AnimationSettingsPage() as this =
                 ColumnLightTime = column_light_time.Value
                 AnimationFrameTime = note_animation_time.Value
                 Explosions =
-                    {
-                        Enable = enable_explosions.Value
-                        Scale = explosion_scale.Value
-                        FadeTime = explosion_fade_time.Value
-                        ExpandAmount = explosion_expand.Value
-                        ExplodeOnMiss = explosion_on_miss.Value
-                        AnimationFrameTime = explosion_animation_time.Value
-                        Colors = explosion_colors.Value
-                    }
-            }
+                    { Enable = enable_explosions.Value
+                      Scale = explosion_scale.Value
+                      FadeTime = explosion_fade_time.Value
+                      ExpandAmount = explosion_expand.Value
+                      ExplodeOnMiss = explosion_on_miss.Value
+                      AnimationFrameTime = explosion_animation_time.Value
+                      Colors = explosion_colors.Value } }

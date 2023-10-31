@@ -32,7 +32,7 @@ module Scoreboard =
         | CurrentRate = 1
         | CurrentMods = 2
 
-    type ScoreCard(data: ScoreInfoProvider) as this =
+    type ScoreCard(data: ScoreInfoProvider) =
         inherit Frame(NodeType.Button((fun () -> 
             Screen.changeNew 
                 (fun () -> new ScoreScreen(data, ImprovementFlags.Default) :> Screen)
@@ -43,10 +43,13 @@ module Scoreboard =
         let animation = Animation.seq [Animation.Delay 150; fade]
 
         do
-            this.Fill <- fun () -> if this.Focused then Colors.yellow_accent.O1a fade.Alpha else (!*Palette.DARK).O2a fade.Alpha
-            this.Border <- fun () -> if this.Focused then Colors.yellow_accent.O4a fade.Alpha else (!*Palette.LIGHT).O2a fade.Alpha
+            // called off main thread to pre-calculate these values
             ignore data.Physical
             ignore data.Lamp
+
+        override this.Init(parent) =
+            this.Fill <- fun () -> if this.Focused then Colors.yellow_accent.O1a fade.Alpha else (!*Palette.DARK).O2a fade.Alpha
+            this.Border <- fun () -> if this.Focused then Colors.yellow_accent.O4a fade.Alpha else (!*Palette.LIGHT).O2a fade.Alpha
 
             let text_color = fun () -> let a = fade.Alpha in (Colors.white.O4a a, Colors.shadow_1.O4a a)
             let text_subcolor = fun () -> let a = fade.Alpha in (Colors.grey_1.O4a a, Colors.shadow_2.O4a a)
@@ -80,6 +83,8 @@ module Scoreboard =
 
             |* Clickable(this.Select,
                 OnRightClick = fun () -> ScoreContextMenu(data).Show())
+
+            base.Init parent
 
         member this.Data = data
 

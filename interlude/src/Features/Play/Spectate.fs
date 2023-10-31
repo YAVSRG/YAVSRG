@@ -21,9 +21,15 @@ module SpectateScreen =
 
         override this.Init(parent) =
             this
-            |+ Text("Currently spectating", Color = K Colors.text_subheading, Align = Alignment.CENTER, Position = Position.SliceTop(40.0f))
+            |+ Text(
+                "Currently spectating",
+                Color = K Colors.text_subheading,
+                Align = Alignment.CENTER,
+                Position = Position.SliceTop(40.0f)
+            )
             |+ Text(who, Color = K Colors.text, Align = Alignment.CENTER, Position = Position.TrimTop(40.0f))
             |* Clickable(cycle)
+
             base.Init parent
 
         override this.Draw() =
@@ -37,24 +43,31 @@ module SpectateScreen =
         let mutable show_timeout = 3000.0
 
         override this.Init(parent) =
-            this
-            |+ Timeline(Gameplay.Chart.WITH_MODS.Value, on_seek)
+            this |+ Timeline(Gameplay.Chart.WITH_MODS.Value, on_seek)
             |* Controls(who, cycle, Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
+
             base.Init parent
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
-            if Mouse.moved_recently() then
+
+            if Mouse.moved_recently () then
                 show <- true
                 this.Position <- Position.Default
                 show_timeout <- 1500.0
             elif show then
                 show_timeout <- show_timeout - elapsedTime
+
                 if show_timeout < 0.0 then
                     show <- false
-                    this.Position <- { Position.Default with Top = 0.0f %- 300.0f; Bottom = 1.0f %+ 100.0f }
 
-    let spectate_screen(username: string) =
+                    this.Position <-
+                        { Position.Default with
+                            Top = 0.0f %- 300.0f
+                            Bottom = 1.0f %+ 100.0f
+                        }
+
+    let spectate_screen (username: string) =
 
         let chart = Gameplay.Chart.WITH_MODS.Value
 
@@ -62,9 +75,10 @@ module SpectateScreen =
         let mutable scoring = fst Gameplay.Online.Multiplayer.replays.[username]
         let mutable replay_data = Network.lobby.Value.Players.[username].Replay
 
-        let cycle_spectator(screen: IPlayScreen) =
+        let cycle_spectator (screen: IPlayScreen) =
             let users_available_to_spectate =
                 let players = Network.lobby.Value.Players
+
                 players.Keys
                 |> Seq.filter (fun p -> players.[p].Status = LobbyPlayerStatus.Playing)
                 |> Array.ofSeq
@@ -77,7 +91,7 @@ module SpectateScreen =
             currently_spectating <- next_user
             scoring <- fst Gameplay.Online.Multiplayer.replays.[next_user]
             replay_data <- Network.lobby.Value.Players.[next_user].Replay
-            Song.seek(replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
+            Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
             screen.State.ChangeScoring scoring
 
         let firstNote = chart.Notes.[0].Time
@@ -86,12 +100,13 @@ module SpectateScreen =
         let mutable wait_for_load = 1000.0
         let mutable exiting = false
 
-        Lobby.start_spectating()
+        Lobby.start_spectating ()
 
         { new IPlayScreen(chart, PacemakerInfo.None, ruleset, scoring) with
             override this.AddWidgets() =
-                let inline add_widget x = add_widget (this, this.Playfield, this.State) x
-                
+                let inline add_widget x =
+                    add_widget (this, this.Playfield, this.State) x
+
                 add_widget ComboMeter
                 add_widget SkipButton
                 add_widget ProgressMeter
@@ -105,33 +120,42 @@ module SpectateScreen =
                 add_widget MultiplayerScoreTracker
 
                 this
-                |* ControlOverlay(ignore, (fun () -> currently_spectating), fun () -> if Network.lobby.IsSome then cycle_spectator this)
+                |* ControlOverlay(
+                    ignore,
+                    (fun () -> currently_spectating),
+                    fun () ->
+                        if Network.lobby.IsSome then
+                            cycle_spectator this
+                )
 
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
-                DiscordRPC.playing("Spectating", Gameplay.Chart.CACHE_DATA.Value.Title)
-                Song.pause()
+                DiscordRPC.playing ("Spectating", Gameplay.Chart.CACHE_DATA.Value.Title)
+                Song.pause ()
 
             override this.OnExit(next) =
                 base.OnExit(next)
-                Song.resume()
+                Song.resume ()
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
 
                 if wait_for_load > 0.0 then
                     wait_for_load <- wait_for_load - elapsedTime
+
                     if wait_for_load <= 0 then
-                        Song.seek(replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
-                        Song.resume()
+                        Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
+                        Song.resume ()
                 else
 
-                let now = Song.timeWithOffset()
+                let now = Song.time_with_offset ()
                 let chartTime = now - firstNote
 
                 if replay_data.Time() - chartTime < MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms> then
-                    if Song.playing() then Song.pause()
-                elif not (Song.playing()) then Song.resume()
+                    if Song.playing () then
+                        Song.pause ()
+                elif not (Song.playing ()) then
+                    Song.resume ()
 
                 scoring.Update chartTime
 

@@ -11,7 +11,7 @@ open Interlude.Utils
 open Interlude.UI.Menu
 
 type HoldNoteSettingsPage() as this =
-    inherit Page() 
+    inherit Page()
 
     let data = Noteskins.Current.config
 
@@ -23,11 +23,11 @@ type HoldNoteSettingsPage() as this =
     let head = getTexture "holdhead"
     let body = getTexture "holdbody"
     let tail = getTexture "holdtail"
-    let animation = Animation.Counter (data.AnimationFrameTime)
+    let animation = Animation.Counter(data.AnimationFrameTime)
 
     do
         this.Content(
-            column()
+            column ()
             |+ PageSetting("noteskins.edit.holdnotetrim", Slider(hold_note_trim))
                 .Pos(200.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
@@ -50,54 +50,68 @@ type HoldNoteSettingsPage() as this =
         let bottom = this.Bounds.Bottom - 100.0f
         let top = this.Bounds.CenterY - 100.0f
 
-        let draw_ln_preview(label: string, color: Color, downscroll: bool) =
+        let draw_ln_preview (label: string, color: Color, downscroll: bool) =
 
             Draw.rect (Rect.Create(left, top, left + COLUMN_WIDTH, bottom)) Colors.black.O2
 
             let headpos = if downscroll then bottom - COLUMN_WIDTH else top
-            let tailpos = if downscroll then top + hold_note_trim.Value * COLUMN_WIDTH else bottom - COLUMN_WIDTH - hold_note_trim.Value * COLUMN_WIDTH
+
+            let tailpos =
+                if downscroll then
+                    top + hold_note_trim.Value * COLUMN_WIDTH
+                else
+                    bottom - COLUMN_WIDTH - hold_note_trim.Value * COLUMN_WIDTH
 
             Draw.quad
-                (
-                    Rect.Create(left, min headpos tailpos + COLUMN_WIDTH * 0.5f, left + COLUMN_WIDTH, max headpos tailpos + COLUMN_WIDTH * 0.5f)
-                    |> Quad.ofRect
-                )
-                (Quad.colorOf color)
-                (Sprite.gridUV(animation.Loops, 0) body)
-            Draw.quad
-                (
-                    Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH)
-                    |> Quad.ofRect
-                )
-                (Quad.colorOf color)
-                (Sprite.gridUV(animation.Loops, 0) head)
-            Draw.quad
-                (
-                    Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
-                    |> if flip_hold_tail.Value && downscroll then fun (r: Rect) -> r.Shrink(0.0f, r.Height) else id
-                    |> Quad.ofRect
-                )
-                (Quad.colorOf color)
-                (Sprite.gridUV(animation.Loops, 0) (if use_tail_texture.Value then tail else head))
+                (Rect.Create(
+                    left,
+                    min headpos tailpos + COLUMN_WIDTH * 0.5f,
+                    left + COLUMN_WIDTH,
+                    max headpos tailpos + COLUMN_WIDTH * 0.5f
+                 )
+                 |> Quad.ofRect)
+                (Quad.color color)
+                (Sprite.with_uv (animation.Loops, 0) body)
 
-            Text.drawFillB(Style.font, label, Rect.Box(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
+            Draw.quad
+                (Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+                (Quad.color color)
+                (Sprite.with_uv (animation.Loops, 0) head)
+
+            Draw.quad
+                (Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
+                 |> if flip_hold_tail.Value && downscroll then
+                        fun (r: Rect) -> r.Shrink(0.0f, r.Height)
+                    else
+                        id
+                 |> Quad.ofRect)
+                (Quad.color color)
+                (Sprite.with_uv (animation.Loops, 0) (if use_tail_texture.Value then tail else head))
+
+            Text.drawFillB (
+                Style.font,
+                label,
+                Rect.Box(left, bottom, COLUMN_WIDTH, 30.0f),
+                Colors.text,
+                Alignment.CENTER
+            )
 
             left <- left - COLUMN_WIDTH - 50.0f
 
-        draw_ln_preview("Upscroll", Color.White, false)
-        draw_ln_preview("Dropped", dropped_color.Value, not options.Upscroll.Value)
-        draw_ln_preview("Downscroll", Color.White, true)
+        draw_ln_preview ("Upscroll", Color.White, false)
+        draw_ln_preview ("Dropped", dropped_color.Value, not options.Upscroll.Value)
+        draw_ln_preview ("Downscroll", Color.White, true)
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         animation.Update elapsedTime
 
-    override this.Title = L"noteskins.edit.holdnotes.name"
+    override this.Title = L "noteskins.edit.holdnotes.name"
+
     override this.OnClose() =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with
                 HoldNoteTrim = hold_note_trim.Value
                 UseHoldTailTexture = use_tail_texture.Value
                 FlipHoldTail = flip_hold_tail.Value
-                DroppedHoldColor = dropped_color.Value
-            }
+                DroppedHoldColor = dropped_color.Value }
