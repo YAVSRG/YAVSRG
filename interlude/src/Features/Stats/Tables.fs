@@ -71,7 +71,7 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
         if Network.status = Network.Status.LoggedIn then
             Tables.Records.get(
                 name,
-                Table.current().Value.Name.ToLower(), 
+                Table.current().Value.Name.ToLower(), // todo: better system for getting table id
                 fun response -> sync <| fun () ->
                     match response with
                     | Some data ->

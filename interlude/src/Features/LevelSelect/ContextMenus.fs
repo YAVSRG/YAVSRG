@@ -13,6 +13,7 @@ open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Score
+open Interlude.Web.Shared.Requests
 
 type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     inherit Page()
@@ -45,6 +46,33 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 Icon = Icons.remove_from_collection,
                 Text = Localisation.localiseWith [name] "chart.remove_from_collection.name"
             )
+
+        match Table.current() with
+        | Some table ->
+            if Network.status = Network.Status.LoggedIn && Chart.CHART.IsSome then
+                let chart = Chart.CHART.Value
+                content
+                |* PageButton.Once(
+                    "chart.suggest_for_table",
+                    (fun () ->
+                        Tables.Suggest.post(
+                            {
+                                ChartId = cc.Hash
+                                OsuBeatmapId = match chart.Header.ChartSource with Osu(_, id) -> id | _ -> -1
+                                EtternaPackId = match chart.Header.ChartSource with Stepmania(pack) -> pack | _ -> -1
+                                Artist = cc.Artist
+                                Title = cc.Title
+                                Difficulty = cc.DifficultyName
+                                TableFor = table.Name.ToLower()
+                                SuggestedLevel = 0
+                            },
+                            function
+                            | Some true -> Notifications.action_feedback(Icons.add_to_collection, "Suggestion sent!", "")
+                            | _ -> Notifications.error("Error sending suggestion", "")
+                        )
+                    )
+                )
+        | None -> ()
 
         this.Content content
 

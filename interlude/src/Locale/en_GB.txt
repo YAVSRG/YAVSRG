@@ -11,6 +11,7 @@ advanced.vanishingnotes.tooltip=When enabled, unhit notes scroll past the recept
 chart.add_to_collection.name=Add to collection
 chart.delete.name=Delete chart
 chart.remove_from_collection.name=Remove from %0
+chart.suggest_for_table.name=Suggest for current table
 collections.added=Added %0 to '%1'
 collections.addhint=Press %0 to quick-add a chart to the selected collection.
 collections.create_folder.name=Create folder
