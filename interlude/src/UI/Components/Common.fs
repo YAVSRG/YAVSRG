@@ -198,6 +198,23 @@ type LoadingState() =
         Text.drawFillB(Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
         Text.drawFillB(Style.font, this.Text, this.Bounds.Shrink(30.0f, 100.0f).TrimTop(175.0f).SliceTop(60.0f), color, Alignment.CENTER)
 
+type LoadingIndicator() =
+    inherit StaticWidget(NodeType.None)
+
+    let animation = Animation.Counter(1500.0)
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        animation.Update elapsedTime
+
+    override this.Draw() =
+        let tick_width = this.Bounds.Width * 0.2f
+
+        let pos = -tick_width + (this.Bounds.Width + tick_width) * float32 animation.Time / 1500.0f
+
+        Draw.rect this.Bounds !*Palette.DARK
+        Draw.rect (Rect.Create(this.Bounds.Left + max 0.0f pos, this.Bounds.Top, this.Bounds.Left + min this.Bounds.Width (pos + tick_width), this.Bounds.Bottom)) !*Palette.LIGHT
+
 type NewAndShiny() =
     inherit StaticWidget(NodeType.None)
 

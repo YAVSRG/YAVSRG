@@ -1,6 +1,8 @@
 ﻿namespace Interlude.Features.Import
 
 open System
+open System.Text.RegularExpressions
+open System.Text.Json
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Json
@@ -216,22 +218,23 @@ module Beatmaps =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
 
         let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
-        let scroll = ScrollContainer.Flow(items, Margin = Style.PADDING, Position = Position.TrimTop(125.0f).TrimBottom(65.0f))
+        let scroll = ScrollContainer.Flow(items, Margin = Style.PADDING, Position = Position.TrimTop(120.0f).TrimBottom(65.0f))
         let mutable filter : Filter = []
         let query_order = Setting.simple "updated"
         let descending_order = Setting.simple true
         let mutable statuses = Set.singleton "Ranked"
         let mutable when_at_bottom : (unit -> unit) option = None
+        let mutable loading = false
 
         let json_downloader = 
             { new Async.SwitchService<string * (unit -> unit), NeriNyanBeatmapSearch option * (unit -> unit)>() with 
                 override this.Process((url, action_at_bottom)) = 
                     async {
-                        match! WebServices.download_compressed_string.RequestAsync(url) with
+                        match! WebServices.download_string.RequestAsync(url) with
                         | Some bad_json ->
-                            let fixed_json = System.Text.RegularExpressions.Regex.Replace(bad_json, @"[^\u0000-\u007F]+", "")
+                            let fixed_json = Regex.Replace(bad_json, @"[^\u0000-\u007F]+", "")
                             try
-                                let data = System.Text.Json.JsonSerializer.Deserialize<NeriNyanBeatmapSearch>(fixed_json)
+                                let data = JsonSerializer.Deserialize<NeriNyanBeatmapSearch>(fixed_json)
                                 return Some data, action_at_bottom
                             with err ->
                                 Logging.Error("Failed to parse json data from " + url, err)
@@ -244,10 +247,12 @@ module Beatmaps =
                         for p in d do items.Add(BeatmapImportCard p)
                         if d.Length >= 50 then
                             when_at_bottom <- Some action_at_bottom
+                        loading <- false
                     | None -> ()
             }
 
         let rec search (filter: Filter) (page: int) =
+            loading <- true
             when_at_bottom <- None
             let mutable request =
                 {
@@ -309,6 +314,7 @@ module Beatmaps =
             begin_search filter
             this
             |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> filter <- f; sync(fun () -> begin_search filter)), Position = Position.SliceTop 60.0f ))
+            |+ Conditional((fun () -> loading), LoadingIndicator(Position = Position.Row(115.0f, 5.0f)))
             |+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
             |+ scroll
             |+ (
@@ -328,6 +334,7 @@ module Beatmaps =
                 "Unranked"
                 { Position.TrimTop(65.0f).SliceTop(50.0f) with Left = 0.54f %+ 0.0f; Right = 0.72f %- 25.0f }
                 Colors.grey_2
+            |+ Conditional((fun () -> not loading && items.Count = 0), EmptyState(Icons.search, L"imports.beatmaps.no_results", Position = Position.TrimTop(120.0f)))
             |* SortingDropdown(
                 [
                     "plays", "Play count"
@@ -348,10 +355,6 @@ module Beatmaps =
             if when_at_bottom.IsSome && scroll.PositionPercent > 0.9f then
                 when_at_bottom.Value()
                 when_at_bottom <- None
-
-        //override this.Draw() =
-        //    Draw.rect (this.Bounds.SliceTop(540.0f).TrimTop(80.0f)) Colors.black.O2
-        //    base.Draw()
     
         member private this.Items = items
 
