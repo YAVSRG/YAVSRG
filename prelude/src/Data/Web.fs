@@ -14,8 +14,12 @@ open Prelude.Common
 module WebServices =
 
     let private download_string_client =
-        let w = new HttpClient()
-        w.DefaultRequestHeaders.Add("User-Agent", "Interlude"); w
+        let h = new HttpClientHandler()
+        h.AutomaticDecompression <- DecompressionMethods.Deflate ||| DecompressionMethods.GZip
+        let w = new HttpClient(h)
+        w.DefaultRequestHeaders.Add("User-Agent", "Interlude")
+        w.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate")
+        w
     let download_string = 
         { new Async.Service<string, string option>() with
             override this.Handle(url: string) = async {
@@ -28,20 +32,6 @@ module WebServices =
             }
         }
 
-    let download_compressed_string = 
-        { new Async.Service<string, string option>() with
-            override this.Handle(url: string) = async {
-                try
-                    use! stream = download_string_client.GetStreamAsync(url) |> Async.AwaitTask
-                    use brotliStream = new BrotliStream(stream, CompressionMode.Decompress)
-                    use br = new StreamReader(brotliStream)
-                    return Some (br.ReadToEnd())
-                with err -> 
-                    Logging.Error(sprintf "Could not reach %s" url, err)
-                    return None
-            }
-        }
-        
     let private download_image_client = new HttpClient()
     let download_image =
         { new Async.Service<string, Bitmap>() with
