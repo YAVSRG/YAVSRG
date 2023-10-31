@@ -63,10 +63,6 @@ type LevelSelectScreen() =
             Position = { Left = 1.0f %- 580.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- (30.0f + Style.PADDING); Bottom = 0.0f %+ 90.0f })
             .Tooltip(Tooltip.Info("levelselect.search", "search"))
 
-        |+ ActionBar(random_chart, Position = { Left = 1.0f %- 805.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 605.0f; Bottom = 0.0f %+ 90.0f })
-
-        |+ LibraryModeSettings()
-
         |+ Conditional((fun () -> Tree.isEmpty),
             StaticContainer(NodeType.None)
             |+ Conditional((fun () -> 
@@ -87,6 +83,10 @@ type LevelSelectScreen() =
                 EmptyState(Icons.folder, L"levelselect.empty.no_charts")),
             Position = { Position.TrimTop(170.0f) with Left = 0.5f %+ 0.0f }
            )
+
+        |+ ActionBar(random_chart, Position = { Left = 1.0f %- 805.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 605.0f; Bottom = 0.0f %+ 90.0f })
+
+        |+ LibraryModeSettings()
 
         |* infoPanel
 
