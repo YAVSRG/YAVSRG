@@ -6,22 +6,28 @@ open Percyqaz.Flux.Graphics
 module Root =
     let internal ROOT_ANIMATION = Animation.Group()
 
-    let sync (action: unit -> unit) = ROOT_ANIMATION.Add(Animation.Action action)
-    let sync_forever (action: unit -> unit) = ROOT_ANIMATION.Add(Animation.ActionLoop action)
+    let sync (action: unit -> unit) =
+        ROOT_ANIMATION.Add(Animation.Action action)
+
+    let sync_forever (action: unit -> unit) =
+        ROOT_ANIMATION.Add(Animation.ActionLoop action)
 
 [<AbstractClass>]
 type Root() =
     inherit Widget(NodeType.None)
 
-    override this.Position with set(value) = failwith "root position is tied to the bounds of the screen"
+    override this.Position
+        with set (value) = failwith "root position is tied to the bounds of the screen"
+
     member val ShouldExit = false with get, set
 
     override this.Init(parent: Widget) = failwith "call .Init() instead"
-    abstract member Init : unit -> unit
+    abstract member Init: unit -> unit
+
     default this.Init() =
         this.Bounds <- Viewport.bounds
         this.VisibleBounds <- Viewport.bounds
-        ROOT_ANIMATION.Add Palette.accentColor
+        ROOT_ANIMATION.Add Palette.accent_color
 
     override this.FocusTree = []
 

@@ -15,21 +15,21 @@ open Percyqaz.Flux.Graphics
 
 module private WindowEvents =
 
-    let onLoad = Event<unit>()
-    let afterInit = Event<unit>()
-    let onUnload = Event<unit>()
-    let onFileDrop = Event<string>()
-    let onResize = Event<unit>()
+    let on_load = Event<unit>()
+    let after_init = Event<unit>()
+    let on_unload = Event<unit>()
+    let on_file_drop = Event<string>()
+    let on_resize = Event<unit>()
 
 module Window =
-    
-    let onLoad = WindowEvents.onLoad.Publish
-    let afterInit = WindowEvents.afterInit.Publish
-    let onUnload = WindowEvents.onUnload.Publish
-    let onFileDrop = WindowEvents.onFileDrop.Publish
-    let onResize = WindowEvents.onResize.Publish
 
-    let lockObj = obj()
+    let on_load = WindowEvents.on_load.Publish
+    let after_init = WindowEvents.after_init.Publish
+    let on_unload = WindowEvents.on_unload.Publish
+    let on_file_drop = WindowEvents.on_file_drop.Publish
+    let on_resize = WindowEvents.on_resize.Publish
+
+    let LOCK_OBJ = obj ()
     let mutable action_queue = []
     let mutable is_focused = true
 
@@ -38,15 +38,26 @@ module Window =
         | EnableResize of callback: ((int * int) -> unit)
         | DisableResize
 
-    let sync (a: WindowAction) = lock (lockObj) (fun () -> action_queue <- action_queue @ [a])
+    let sync (a: WindowAction) =
+        lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ a ])
+
     let mutable monitors = [||]
 
 
 [<Sealed>]
-type Window(config: Config, title: string, root: Root) as this =
-    inherit NativeWindow(NativeWindowSettings(StartVisible = false, NumberOfSamples = (if OperatingSystem.IsMacOS() then 0 else 24), Flags = ContextFlags.ForwardCompatible, Profile = ContextProfile.Core))
+type Window(config: Config, title: string, ui_root: Root) as this =
+    inherit
+        NativeWindow(
+            NativeWindowSettings(
+                StartVisible = false,
+                NumberOfSamples = (if OperatingSystem.IsMacOS() then 0 else 24),
+                Flags = ContextFlags.ForwardCompatible,
+                Profile = ContextProfile.Core
+            )
+        )
 
-    let renderThread = RenderThread(this, config.AudioDevice.Value, root, WindowEvents.afterInit.Trigger)
+    let render_thread =
+        RenderThread(this, config.AudioDevice.Value, ui_root, WindowEvents.after_init.Trigger)
 
     let mutable resize_callback = fun (w, h) -> ()
     let mutable refresh_rate = 60
@@ -56,7 +67,12 @@ type Window(config: Config, title: string, root: Root) as this =
     do
         base.Title <- title
         base.VSync <- VSyncMode.Off
-        base.CursorState <- if OperatingSystem.IsMacOS() then CursorState.Grabbed else CursorState.Hidden
+
+        base.CursorState <-
+            if OperatingSystem.IsMacOS() then
+                CursorState.Grabbed
+            else
+                CursorState.Hidden
 
     member this.ApplyConfig(config: Config) =
 
@@ -73,11 +89,12 @@ type Window(config: Config, title: string, root: Root) as this =
                 try
                     monitor_list.[config.Display.Value]
                 with err ->
-                    Logging.Error (sprintf "Failed to get display info for monitor %i" config.Display.Value)
+                    Logging.Error(sprintf "Failed to get display info for monitor %i" config.Display.Value)
                     Monitors.GetMonitorFromWindow(this)
-            else Monitors.GetMonitorFromWindow(this)
+            else
+                Monitors.GetMonitorFromWindow(this)
 
-        renderThread.RenderMode <- config.RenderMode.Value
+        render_thread.RenderMode <- config.RenderMode.Value
 
         let monitorPtr = monitor.Handle.ToUnsafePtr<Monitor>()
 
@@ -87,14 +104,33 @@ type Window(config: Config, title: string, root: Root) as this =
 
             | WindowType.Windowed ->
                 let width, height = config.WindowResolution.Value
-                GLFW.SetWindowMonitor(this.WindowPtr, NativePtr.nullPtr<Monitor>, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y, width, height, 0)
+
+                GLFW.SetWindowMonitor(
+                    this.WindowPtr,
+                    NativePtr.nullPtr<Monitor>,
+                    monitor.ClientArea.Min.X,
+                    monitor.ClientArea.Min.Y,
+                    width,
+                    height,
+                    0
+                )
+
                 base.CenterWindow()
                 base.WindowBorder <- WindowBorder.Fixed
                 refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
                 monitor_height <- monitor.ClientArea.Size.Y
 
             | WindowType.Borderless ->
-                GLFW.SetWindowMonitor(this.WindowPtr, NativePtr.nullPtr<Monitor>, monitor.ClientArea.Min.X - 1, monitor.ClientArea.Min.Y - 1, monitor.ClientArea.Size.X + 1, monitor.ClientArea.Size.Y + 1, 0)
+                GLFW.SetWindowMonitor(
+                    this.WindowPtr,
+                    NativePtr.nullPtr<Monitor>,
+                    monitor.ClientArea.Min.X - 1,
+                    monitor.ClientArea.Min.Y - 1,
+                    monitor.ClientArea.Size.X + 1,
+                    monitor.ClientArea.Size.Y + 1,
+                    0
+                )
+
                 base.WindowBorder <- WindowBorder.Hidden
                 GLFW.HideWindow(this.WindowPtr)
                 GLFW.MaximizeWindow(this.WindowPtr)
@@ -103,7 +139,16 @@ type Window(config: Config, title: string, root: Root) as this =
                 monitor_height <- monitor.ClientArea.Size.Y
 
             | WindowType.``Borderless Fullscreen`` ->
-                GLFW.SetWindowMonitor(this.WindowPtr, NativePtr.nullPtr<Monitor>, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y, monitor.ClientArea.Size.X, monitor.ClientArea.Size.Y, 0)
+                GLFW.SetWindowMonitor(
+                    this.WindowPtr,
+                    NativePtr.nullPtr<Monitor>,
+                    monitor.ClientArea.Min.X,
+                    monitor.ClientArea.Min.Y,
+                    monitor.ClientArea.Size.X,
+                    monitor.ClientArea.Size.Y,
+                    0
+                )
+
                 base.WindowBorder <- WindowBorder.Hidden
                 base.CenterWindow()
                 refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
@@ -119,7 +164,7 @@ type Window(config: Config, title: string, root: Root) as this =
             | _ -> Logging.Error "Tried to change to invalid window mode"
 
         else
-            
+
             match config.WindowMode.Value with
 
             | WindowType.Windowed ->
@@ -158,63 +203,80 @@ type Window(config: Config, title: string, root: Root) as this =
             | _ -> Logging.Error "Tried to change to invalid window mode"
 
         was_fullscreen <- config.WindowMode.Value = WindowType.Fullscreen
-        
-        if OperatingSystem.IsWindows() then FrameTimeStrategies.open_adapter (GLFW.GetWin32Adapter monitorPtr) (GLFW.GetWin32Monitor monitorPtr)
 
-        sync <| fun () -> renderThread.RenderModeChanged(Option.defaultValue refresh_rate config.RefreshRateOverride.Value, monitor_height, config.WindowMode.Value = WindowType.Fullscreen || config.WindowMode.Value = WindowType.``Borderless Fullscreen``)
+        if OperatingSystem.IsWindows() then
+            FrameTimeStrategies.open_adapter (GLFW.GetWin32Adapter monitorPtr) (GLFW.GetWin32Monitor monitorPtr)
+
+        sync
+        <| fun () ->
+            render_thread.RenderModeChanged(
+                Option.defaultValue refresh_rate config.RefreshRateOverride.Value,
+                monitor_height,
+                config.WindowMode.Value = WindowType.Fullscreen
+                || config.WindowMode.Value = WindowType.``Borderless Fullscreen``
+            )
 
     member this.EnableResize(callback) =
         if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Fixed then
             base.WindowBorder <- WindowBorder.Resizable
+
         resize_callback <- callback
 
     member this.DisableResize() =
-        if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Resizable then
+        if
+            base.WindowState = WindowState.Normal
+            && base.WindowBorder = WindowBorder.Resizable
+        then
             base.WindowBorder <- WindowBorder.Fixed
 
     override this.OnResize e =
         base.OnResize e
+
         if e.Height <> 0 then
-            sync ( fun () -> 
-                if this.WindowBorder = WindowBorder.Resizable then resize_callback(this.ClientSize.X, this.ClientSize.Y)
-                renderThread.OnResize(this.ClientSize)
+            sync (fun () ->
+                if this.WindowBorder = WindowBorder.Resizable then
+                    resize_callback (this.ClientSize.X, this.ClientSize.Y)
+
+                render_thread.OnResize(this.ClientSize)
             )
 
-    override this.OnFocusedChanged e =
-        renderThread.IsFocused <- e.IsFocused
+    override this.OnFocusedChanged e = render_thread.IsFocused <- e.IsFocused
 
     override this.OnFileDrop e =
-        Array.iter WindowEvents.onFileDrop.Trigger e.FileNames
+        Array.iter WindowEvents.on_file_drop.Trigger e.FileNames
 
     member this.Run() =
         this.OnLoad()
         this.OnResize(ResizeEventArgs(this.Size))
-        
+
         this.Context.MakeNoneCurrent()
-        renderThread.Start()
+        render_thread.Start()
 
         while not (GLFW.WindowShouldClose this.WindowPtr) do
-            lock (Window.lockObj) (fun () ->
-                for a in Window.action_queue do
-                    match a with
-                    | Window.ApplyConfig c -> this.ApplyConfig c
-                    | Window.EnableResize c -> this.EnableResize c
-                    | Window.DisableResize -> this.DisableResize()
-                Window.action_queue <- []
-            )
+            lock
+                (Window.LOCK_OBJ)
+                (fun () ->
+                    for a in Window.action_queue do
+                        match a with
+                        | Window.ApplyConfig c -> this.ApplyConfig c
+                        | Window.EnableResize c -> this.EnableResize c
+                        | Window.DisableResize -> this.DisableResize()
+
+                    Window.action_queue <- []
+                )
+
             this.ProcessInputEvents()
             GLFW.PollEvents()
-            InputThread.poll(this.KeyboardState, this.MouseState)
+            InputThread.poll (this.KeyboardState, this.MouseState)
 
         this.OnUnload()
-    
+
     member this.OnLoad() =
         this.ApplyConfig config
-        Fonts.init()
+        Fonts.init ()
         Input.init this
-        Hotkeys.init()
-        WindowEvents.onLoad.Trigger()
+        Hotkeys.init ()
+        WindowEvents.on_load.Trigger()
         base.IsVisible <- true
 
-    member this.OnUnload() =
-        WindowEvents.onUnload.Trigger()
+    member this.OnUnload() = WindowEvents.on_unload.Trigger()

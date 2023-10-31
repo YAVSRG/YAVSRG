@@ -30,7 +30,7 @@ module Colors =
     let cyan_shadow = Color.FromArgb 0xFF_084251
     let text_cyan = cyan_accent, cyan_shadow
     let text_cyan_2 = cyan_accent, shadow_1
-    
+
     let red_accent = Color.FromArgb 0xFF_ef5d57
     let red = Color.FromArgb 0xFF_9c3736
     let red_shadow = Color.FromArgb 0xFF_6e190d
@@ -42,7 +42,7 @@ module Colors =
     let pink_shadow = Color.FromArgb 0xFF_6c2d4d
     let text_pink = pink_accent, pink_shadow
     let text_pink_2 = pink_accent, shadow_1
-    
+
     let blue_accent = Color.FromArgb 0xFF_0032ff
     let blue = Color.FromArgb 0xFF_001696
     let blue_shadow = Color.FromArgb 0xFF_000450
@@ -63,9 +63,9 @@ module ColorExtensions =
         member this.O1 = Color.FromArgb(63, this)
         member this.O2 = Color.FromArgb(127, this)
         member this.O3 = Color.FromArgb(223, this)
-        
+
 module Style =
-        
+
     let PADDING = 5.0f
     let mutable font = Unchecked.defaultof<SpriteFont>
 
@@ -86,54 +86,111 @@ type PaletteColor =
         White: float32
     }
     member this.Lerp (other: PaletteColor) (amount: float32) =
-        { 
+        {
             Alpha = lerp amount (float32 this.Alpha) (float32 other.Alpha) |> int
             Brightness = lerp amount this.Brightness other.Brightness
             White = lerp amount this.White other.White
         }
 
 module Palette =
-    
-    let accentColor = Animation.Color Color.Blue
-    let changePrimaryColor col = accentColor.Target <- col
-        
+
+    let accent_color = Animation.Color Color.Blue
+    let set_accent_color col = accent_color.Target <- col
+
     let color (alpha, brightness, white) =
-        let accentColor = accentColor.Value
-        let r = float32 accentColor.R
-        let g = float32 accentColor.G
-        let b = float32 accentColor.B
+        let accent_color = accent_color.Value
+        let r = float32 accent_color.R
+        let g = float32 accent_color.G
+        let b = float32 accent_color.B
         let rd = (255.0f - r * brightness) * white
         let gd = (255.0f - g * brightness) * white
         let bd = (255.0f - b * brightness) * white
-        Color.FromArgb(alpha,
+
+        Color.FromArgb(
+            alpha,
             int ((r + rd) * brightness) |> min 255,
             int ((g + gd) * brightness) |> min 255,
-            int ((b + bd) * brightness) |> min 255)
+            int ((b + bd) * brightness) |> min 255
+        )
 
-    let WHITE = { Alpha = 255; Brightness = 1f; White = 1f }
+    let WHITE =
+        {
+            Alpha = 255
+            Brightness = 1f
+            White = 1f
+        }
 
-    let DARKER = { Alpha = 255; Brightness = 0.25f; White = 0.15f }
-    let DARK = { Alpha = 255; Brightness = 0.5f; White = 0.2f }
-    let DARK_100 = { Alpha = 100; Brightness = 0.5f; White = 0.2f }
-    let MAIN = { Alpha = 255; Brightness = 0.9f; White = 0.0f }
-    let MAIN_100 = { Alpha = 100; Brightness = 0.9f; White = 0.0f }
-    let HIGHLIGHT_100 = { Alpha = 100; Brightness = 1.0f; White = 0.0f }
-    let LIGHT = { Alpha = 255; Brightness = 1.0f; White = 0.45f }
-    let LIGHTER = { Alpha = 255; Brightness = 1.0f; White = 0.7f }
+    let DARKER =
+        {
+            Alpha = 255
+            Brightness = 0.25f
+            White = 0.15f
+        }
+
+    let DARK =
+        {
+            Alpha = 255
+            Brightness = 0.5f
+            White = 0.2f
+        }
+
+    let DARK_100 =
+        {
+            Alpha = 100
+            Brightness = 0.5f
+            White = 0.2f
+        }
+
+    let MAIN =
+        {
+            Alpha = 255
+            Brightness = 0.9f
+            White = 0.0f
+        }
+
+    let MAIN_100 =
+        {
+            Alpha = 100
+            Brightness = 0.9f
+            White = 0.0f
+        }
+
+    let HIGHLIGHT_100 =
+        {
+            Alpha = 100
+            Brightness = 1.0f
+            White = 0.0f
+        }
+
+    let LIGHT =
+        {
+            Alpha = 255
+            Brightness = 1.0f
+            White = 0.45f
+        }
+
+    let LIGHTER =
+        {
+            Alpha = 255
+            Brightness = 1.0f
+            White = 0.7f
+        }
 
     let HOVER = { LIGHT with Alpha = 127 }
     let SELECTED = { LIGHTER with Alpha = 127 }
 
     let transition (f: Animation.Fade) (a: PaletteColor) (b: PaletteColor) =
-        fun () -> 
+        fun () ->
             let p = a.Lerp b f.Value
             color (p.Alpha, p.Brightness, p.White)
 
-    let text (a: unit -> Color) (b: unit -> Color) = fun () -> (a(), b())
+    let text (a: unit -> Color) (b: unit -> Color) = fun () -> (a (), b ())
 
 [<AutoOpen>]
 module PaletteOperators =
 
-    let (!%) (p: PaletteColor) = fun () -> Palette.color (p.Alpha, p.Brightness, p.White)
-    
-    let (!*) (p: PaletteColor) = Palette.color (p.Alpha, p.Brightness, p.White)
+    let (!%) (p: PaletteColor) =
+        fun () -> Palette.color (p.Alpha, p.Brightness, p.White)
+
+    let (!*) (p: PaletteColor) =
+        Palette.color (p.Alpha, p.Brightness, p.White)

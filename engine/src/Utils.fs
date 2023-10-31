@@ -8,21 +8,28 @@ open SixLabors.ImageSharp
 
 module Utils =
 
-    let getResourceStream name =
-        Assembly.GetCallingAssembly().GetManifestResourceStream("Percyqaz.Flux.Resources." + name)
+    let get_resource_stream name =
+        Assembly
+            .GetCallingAssembly()
+            .GetManifestResourceStream("Percyqaz.Flux.Resources." + name)
 
-    let getResourceText name =
-        use s = getResourceStream name
+    let get_resource_text name =
+        use s = get_resource_stream name
         use tr = new StreamReader(s)
         tr.ReadToEnd()
 
     type Bitmap = Image<PixelFormats.Rgba32>
+
     module Bitmap =
         let load (stream: Stream) : Bitmap = Bitmap.Load<PixelFormats.Rgba32> stream
+
     type Color = Drawing.Color
 
     let lerp x a b : float32 = (b - a) * x + a
 
-    let mutable internal UITHREAD = 0
+    let mutable internal UI_THREAD = -1
 
-    let isUiThread() = Thread.CurrentThread.ManagedThreadId = UITHREAD
+    let is_ui_thread () =
+        UI_THREAD < 0 || Thread.CurrentThread.ManagedThreadId = UI_THREAD
+
+    let inline require_ui_thread () = assert(is_ui_thread())

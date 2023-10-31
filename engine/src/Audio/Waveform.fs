@@ -7,8 +7,8 @@ open Percyqaz.Common
 module Waveform =
 
     [<Struct>]
-    type Point = 
-        { 
+    type Point =
+        {
             Left: float32
             Right: float32
             mutable Low: float32
@@ -34,22 +34,35 @@ module Waveform =
     let private high_min = 2000f
     let private high_max = 12000f
 
-    let pt l r = { Left = l * l; Right = r * r; Low = 0.0f; Mid = 0.0f; High = 0.0f }
+    let pt l r =
+        {
+            Left = l * l
+            Right = r * r
+            Low = 0.0f
+            Mid = 0.0f
+            High = 0.0f
+        }
 
-    let intensity(info: ChannelInfo, bins: float32 array, startFrequency : float32, endFrequency: float32) =
-        let startBin = int <| float32 fft_bins * 2f * startFrequency / float32 info.Frequency
-        let endBin = int <| float32 fft_bins * 2f * endFrequency / float32 info.Frequency
+    let intensity (info: ChannelInfo, bins: float32 array, start_frequency: float32, end_frequency: float32) =
+        let start_bin =
+            int <| float32 fft_bins * 2f * start_frequency / float32 info.Frequency
 
-        let startBin = Math.Clamp(startBin, 0, bins.Length);
-        let endBin = Math.Clamp(endBin, 0, bins.Length);
+        let end_bin = int <| float32 fft_bins * 2f * end_frequency / float32 info.Frequency
+
+        let start_bin = Math.Clamp(start_bin, 0, bins.Length)
+        let end_bin = Math.Clamp(end_bin, 0, bins.Length)
 
         let mutable value = 0f
-        for i in startBin .. endBin - 1 do
+
+        for i in start_bin .. end_bin - 1 do
             value <- value + bins.[i]
+
         value
 
-    let generate(file: string) =
-        let decode_stream = Bass.CreateStream(file, 0L, 0L, BassFlags.Decode ||| BassFlags.Float)
+    let generate (file: string) =
+        let decode_stream =
+            Bass.CreateStream(file, 0L, 0L, BassFlags.Decode ||| BassFlags.Float)
+
         let info = Bass.ChannelGetInfo(decode_stream)
         let right_channel_offset = if info.Channels > 1 then 1 else 0
         let length = Bass.ChannelGetLength(decode_stream)
@@ -63,14 +76,17 @@ module Waveform =
 
         // amplitude analysis
         let mutable read = 1
+
         while read > 0 do
             read <- Bass.ChannelGetData(decode_stream, sample_buffer, bytes_per_iteration)
             let samples_read = read / 4
             let mutable i = 0
+
             while i < samples_read && point_index < point_count do
                 let mutable left = 0.0f
                 let mutable right = 0.0f
                 let mutable j = i
+
                 while j < i + samples_per_point do
                     left <- max left (abs sample_buffer.[j])
                     right <- max right (abs sample_buffer.[j + right_channel_offset])
@@ -90,13 +106,14 @@ module Waveform =
         let mutable point_index = 0
         let mutable byte_index = 0
         let mutable read = 1
+
         while read > 0 do
             read <- Bass.ChannelGetData(decode_stream, bins, int fft_samples)
             byte_index <- byte_index + read
 
-            let lo = intensity(info, bins, low_min, mid_min)
-            let mid = intensity(info, bins, mid_min, high_min)
-            let hi = intensity(info, bins, high_min, high_max)
+            let lo = intensity (info, bins, low_min, mid_min)
+            let mid = intensity (info, bins, mid_min, high_min)
+            let hi = intensity (info, bins, high_min, high_max)
 
             while point_index < points.Length && point_index * bytes_per_point < byte_index do
                 points.[point_index].Low <- lo
@@ -106,8 +123,12 @@ module Waveform =
 
         Bass.StreamFree(decode_stream) |> ignore
 
-        let points_per_second = (float32 info.Frequency * float32 info.Channels / float32 samples_per_point)
+        let points_per_second =
+            (float32 info.Frequency * float32 info.Channels / float32 samples_per_point)
+
         let ms_per_point = 1000.0f<ms> / points_per_second
 
-        { Points = points; MsPerPoint = ms_per_point }
-            
+        {
+            Points = points
+            MsPerPoint = ms_per_point
+        }

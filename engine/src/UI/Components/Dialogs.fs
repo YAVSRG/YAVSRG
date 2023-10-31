@@ -13,13 +13,13 @@ type Dialog() =
     let mutable closed = false
     member this.Closed = closed
 
-    abstract member Close : unit -> unit
+    abstract member Close: unit -> unit
     default this.Close() = closed <- true
 
 module Dialog =
-    
-    let mutable private current : Dialog option = None
-    
+
+    let mutable private current: Dialog option = None
+
     let fade = Animation.Fade 0.0f
 
     type Display() =
@@ -28,20 +28,24 @@ module Dialog =
         override this.Draw() =
             if fade.Value > 0.0f then
                 Draw.rect this.Bounds (Color.FromArgb(int (225f * fade.Value), 35, 35, 35))
+
                 match current with
                 | Some d -> d.Draw()
                 | None -> ()
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
-            fade.Update elapsedTime
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            fade.Update elapsed_ms
+
             match current with
             | Some d ->
-                d.Update(elapsedTime, moved)
+                d.Update(elapsed_ms, moved)
+
                 if d.Closed then
                     current <- None
                     fade.Target <- 0.0f
-                else Input.finish_frame_events()
+                else
+                    Input.finish_frame_events ()
             | None -> ()
 
     let display = Display()
@@ -52,10 +56,17 @@ module Dialog =
             Logging.Warn(sprintf "Nested dialogs not supported, Already showing %O." existing)
             d.Init display
             d.Close()
-        | None -> current <- Some d; d.Init display; fade.Target <- 1.0f
+        | None ->
+            current <- Some d
+            d.Init display
+            fade.Target <- 1.0f
 
-    let exists() = current.IsSome
+    let exists () = current.IsSome
 
-    let close() = match current with Some d -> d.Close() | None -> ()
+    let close () =
+        match current with
+        | Some d -> d.Close()
+        | None -> ()
 
-type Dialog with member this.Show() = Dialog.show this
+type Dialog with
+    member this.Show() = Dialog.show this

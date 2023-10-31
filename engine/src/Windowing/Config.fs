@@ -8,8 +8,9 @@ type WindowType =
     | Fullscreen = 2
     | ``Borderless Fullscreen`` = 3
 
+// todo: possibly separately to the window resolutions, would be nice to detect available FullscreenResolutions for the current monitor
 module WindowResolution =
-    let presets : (int * int) array =
+    let presets: (int * int) array =
         [|
             800, 600
             1024, 768
@@ -28,7 +29,7 @@ type FrameLimit =
     | Unlimited = 0
     | Smart = 1
 
-type Config = 
+type Config =
     {
         WorkingDirectory: string
         Locale: string
@@ -39,7 +40,7 @@ type Config =
         Display: Setting<int>
         AudioDevice: Setting<int>
     }
-    static member Default = 
+    static member Default =
         {
             WorkingDirectory = ""
             Locale = "en_GB.txt"
