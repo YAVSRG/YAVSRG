@@ -51,12 +51,12 @@ module Save =
             let hash = request.ChartId.ToUpper()
 
             match Charts.by_hash hash with
-            | None -> response.ReplyJson(false)
+            | None -> response.ReplyJson(None)
             | Some (chart_info, song) ->
 
             let timestamp = (System.DateTimeOffset.op_Implicit request.Timestamp).ToUnixTimeMilliseconds()
             if Score.exists userId timestamp then
-                return response.ReplyJson(true) 
+                return response.ReplyJson(None) 
             else
 
             match! fetch_chart.RequestAsync(hash) with
@@ -67,7 +67,7 @@ module Save =
             | Error _ -> 
                 Logging.Debug("Rejecting score with invalid mods")
                 response.MakeErrorResponse(400) |> ignore
-            | Ok status when status >= Mods.ModStatus.Unstored -> response.ReplyJson(false)
+            | Ok status when status >= Mods.ModStatus.Unstored -> response.ReplyJson(None)
             | Ok mod_status ->
 
             let rate = System.MathF.Round(request.Rate, 2)
@@ -140,5 +140,5 @@ module Save =
                         let new_rank = TableRanking.update "crescent" userId rating
                         table_change <- Some { Table = "crescent"; OldPosition = old_position; NewPosition = new_rank, rating }
 
-            response.ReplyJson({ LeaderboardChange = leaderboard_change; TableChange = table_change } : Charts.Scores.Save.Response)
+            response.ReplyJson(Some { LeaderboardChange = leaderboard_change; TableChange = table_change } : Charts.Scores.Save.Response)
         }

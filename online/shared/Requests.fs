@@ -71,13 +71,15 @@ module Charts =
                 }
 
             [<Json.AutoCodec>]
-            type Response =
+            type ScoreEffect =
                 {
                     // todo: in future, one chart could be in multiple leaderboards
                     LeaderboardChange: LeaderboardChange option
                     // todo: in future, one chart could be in multiple tables
                     TableChange: TableChange option
                 }
+
+            type Response = ScoreEffect option
 
             let post(request: Request, callback: Response option -> unit) = 
                 Client.post_return<Request, Response>(snd ROUTE, request, callback)
