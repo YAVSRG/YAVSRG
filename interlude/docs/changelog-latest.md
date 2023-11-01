@@ -1,19 +1,21 @@
-0.7.11.1
+0.7.12
 ====
 
-A patch with a few bug fixes just in time for releasing the game trailer
+Thank you all for the support as Interlude launches its open beta!
+Here's some new stuff based on feedback I got this week
 
-# New feature
-- Under 'Advanced' settings you can now update your cache of patterns
-  This is so you can try the pattern analysis features like searching or grouping by pattern
-  
+# New features
+- Ingame osu!mania beatmap downloads are back and improved, thanks to NeriNyan's API
+- Under system settings you can pick a video mode for your monitor
+
 # Bug fixes
-- Fixed a crash related to the noteskin editor
-- Fixed a bug where noteskin previews didn't update correctly
-- Fixed the LN stuck in preview glitch
-- Fixed a race-condition related exploit in audio loading
-- Fixed clicking on a grouping/sorting dropdown option also clicking a chart immediately after
+- Fixed a crash related to viewing online leaderboards
+- Fixed an error when importing stepmania files with no notes in them
+- Fixed a visual bug in screen transitions, thanks to @9382
+- Fixed some audio bugs when switching to another chart using the same audio file, thanks to @9382
+- Fixed level select wheel over-scrolling if you queue up several actions at once, thanks to @9382
+- Fixed a minor bug in online score saving
+- Fixed a minor visual bug in level select
 
-Ingame osu! downloads are currently down - Page on imports screen now points you to some manual mirror sites
-It will be back soon :)
+I'm also part way through massively cleaning up and refactoring code YAVSRG-wide so there will be some actual consistency in the code style, and contributing will be easier
 
