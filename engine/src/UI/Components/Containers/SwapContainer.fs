@@ -7,7 +7,7 @@ type SwapContainer() as this =
     inherit StaticWidget(NodeType.Switch(fun () -> this.Current))
 
     let mutable current: Widget = Unchecked.defaultof<_>
-    let mutable justSwapped = false
+    let mutable swapped_last_frame = false
 
     override this.Focusable = current.Focusable
 
@@ -22,7 +22,7 @@ type SwapContainer() as this =
                 else
                     assert (current.Parent = this)
 
-            justSwapped <- true
+            swapped_last_frame <- true
 
     override this.Init(parent) =
         base.Init parent
@@ -34,14 +34,14 @@ type SwapContainer() as this =
 
     override this.Draw() = current.Draw()
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_time, moved) =
+        base.Update(elapsed_time, moved)
 
         let moved =
-            if justSwapped then
-                justSwapped <- false
+            if swapped_last_frame then
+                swapped_last_frame <- false
                 true
             else
                 moved
 
-        current.Update(elapsedTime, moved)
+        current.Update(elapsed_time, moved)

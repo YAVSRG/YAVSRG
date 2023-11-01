@@ -308,19 +308,19 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
         if this.Focused then
 
-            if this.CanUp() && (!| "up").Tapped() then
+            if this.CanUp() && (+."up").Tapped() then
                 this.Up()
 
-            if this.CanDown() && (!| "down").Tapped() then
+            if this.CanDown() && (+."down").Tapped() then
                 this.Down()
 
-            if this.CanLeft() && (!| "left").Tapped() then
+            if this.CanLeft() && (+."left").Tapped() then
                 this.Left()
 
-            if this.CanRight() && (!| "right").Tapped() then
+            if this.CanRight() && (+."right").Tapped() then
                 this.Right()
 
-            if (!| "select").Tapped() then
+            if (+."select").Tapped() then
                 match this.WhoIsFocused with
                 | Some i ->
                     last_selected <- i

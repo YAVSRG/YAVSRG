@@ -74,7 +74,7 @@ type HotkeyAction(hotkey: Hotkey, action) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (!|hotkey).Tapped() then
+        if (+.hotkey).Tapped() then
             action ()
 
     override this.Draw() = ()

@@ -4,8 +4,8 @@ open Percyqaz.Flux.Utils
 open Percyqaz.Flux.Graphics
 
 [<AbstractClass>]
-type Widget(nodeType) =
-    inherit ISelection(nodeType)
+type Widget(node_type) =
+    inherit ISelection(node_type)
 
     let mutable _parent = None
     let mutable focused = false

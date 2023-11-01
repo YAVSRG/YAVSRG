@@ -56,4 +56,4 @@ module Hotkeys =
 module Helpers =
 
     // The hotkey lookup operator
-    let inline (!|) (id: string) = Hotkeys.get id
+    let (~+.) (id: string) = Hotkeys.get id

@@ -218,13 +218,13 @@ module FlowContainer =
                 content_change_ev.Trigger content_height
 
         override this.Navigate() =
-            if (!| "up").Tapped() then
+            if (+."up").Tapped() then
                 this.Previous()
 
-            if (!| "down").Tapped() then
+            if (+."down").Tapped() then
                 this.Next()
 
-            if (!| "select").Tapped() then
+            if (+."select").Tapped() then
                 this.SelectFocusedChild()
 
     [<Sealed>]
@@ -250,13 +250,13 @@ module FlowContainer =
                 content_change_ev.Trigger content_width
 
         override this.Navigate() =
-            if (!| "left").Tapped() then
+            if (+."left").Tapped() then
                 this.Previous()
 
-            if (!| "right").Tapped() then
+            if (+."right").Tapped() then
                 this.Next()
 
-            if (!| "select").Tapped() then
+            if (+."select").Tapped() then
                 this.SelectFocusedChild()
 
     [<Sealed>]
@@ -289,11 +289,11 @@ module FlowContainer =
                     content_change_ev.Trigger content_width
 
         override this.Navigate() =
-            if (!| "left").Tapped() then
+            if (+."left").Tapped() then
                 this.Next()
 
-            if (!| "right").Tapped() then
+            if (+."right").Tapped() then
                 this.Previous()
 
-            if (!| "select").Tapped() then
+            if (+."select").Tapped() then
                 this.SelectFocusedChild()
