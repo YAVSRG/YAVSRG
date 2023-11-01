@@ -387,6 +387,8 @@ module Stepmania =
                 }
             let filepath = Path.Combine (path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
             let (notes, bpm) = convert_measures keys diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
+            
+            if notes.Length = 0 then failwith "Stepmania chart has no notes"
 
             {
                 Keys = keys
