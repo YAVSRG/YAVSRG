@@ -24,6 +24,13 @@ module WindowResolution =
             2715, 1527
         |]
 
+[<Struct; StructuralEquality; StructuralComparison>]
+type FullscreenVideoMode =
+    {
+        Width: int
+        Height: int
+        RefreshRate: int
+    }
 
 type FrameLimit =
     | Unlimited = 0
@@ -35,8 +42,8 @@ type Config =
         Locale: string
         WindowMode: Setting<WindowType>
         WindowResolution: Setting<int * int>
+        FullscreenVideoMode: Setting<FullscreenVideoMode>
         RenderMode: Setting<FrameLimit>
-        RefreshRateOverride: Setting<int option>
         Display: Setting<int>
         AudioDevice: Setting<int>
     }
@@ -46,8 +53,14 @@ type Config =
             Locale = "en_GB.txt"
             WindowMode = Setting.simple WindowType.Borderless
             WindowResolution = Setting.simple (1024, 768)
+            FullscreenVideoMode =
+                Setting.simple
+                    {
+                        Width = 1920
+                        Height = 1080
+                        RefreshRate = 60
+                    }
             RenderMode = Setting.simple FrameLimit.Smart
-            RefreshRateOverride = Setting.simple None
             Display = Setting.simple 0
             AudioDevice = Setting.simple -1
         }

@@ -210,8 +210,8 @@ module FlowContainer =
             for { Widget = c; Visible = visible } in children do
                 if visible then
                     c.Position <- Position.Row(t, this.ItemSize)
-                    t <- t + this.ItemSize + this.Spacing
                     b <- t + this.ItemSize
+                    t <- t + this.ItemSize + this.Spacing
 
             if b <> content_height then
                 content_height <- b
@@ -242,8 +242,8 @@ module FlowContainer =
             for { Widget = c; Visible = visible } in children do
                 if visible then
                     c.Position <- Position.Column(l, this.ItemSize)
-                    l <- l + this.ItemSize + this.Spacing
                     r <- l + this.ItemSize
+                    l <- l + this.ItemSize + this.Spacing
 
             if r <> content_width then
                 content_width <- r
@@ -281,8 +281,8 @@ module FlowContainer =
                             Bottom = Position.max
                         }
 
-                    r <- r + this.ItemSize + this.Spacing
                     l <- r + this.ItemSize
+                    r <- r + this.ItemSize + this.Spacing
 
                 if l <> content_width then
                     content_width <- l

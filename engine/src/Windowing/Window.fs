@@ -13,6 +13,13 @@ open Percyqaz.Flux.Graphics
 
 #nowarn "9"
 
+type MonitorDetails =
+    {
+        Id: int
+        FriendlyName: string
+        DisplayModes: FullscreenVideoMode array
+    }
+
 module private WindowEvents =
 
     let on_load = Event<unit>()
@@ -41,7 +48,9 @@ module Window =
     let sync (a: WindowAction) =
         lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ a ])
 
-    let mutable monitors = [||]
+    let mutable internal _monitors: MonitorDetails list = []
+
+    let get_monitors () = lock (LOCK_OBJ) (fun () -> _monitors)
 
 
 [<Sealed>]
@@ -78,11 +87,25 @@ type Window(config: Config, title: string, ui_root: Root) as this =
 
         let monitor_list = Monitors.GetMonitors()
 
-        Window.monitors <-
+        Window._monitors <-
             monitor_list
             |> Seq.indexed
-            |> Seq.map (fun (i, m) -> i, sprintf "%i: %s" (i + 1) m.Name)
-            |> Array.ofSeq
+            |> Seq.map (fun (i, m) ->
+                {
+                    Id = i
+                    FriendlyName = sprintf "%i: %s" (i + 1) m.Name
+                    DisplayModes =
+                        GLFW.GetVideoModes(m.Handle.ToUnsafePtr<Monitor>())
+                        |> Array.map (fun glfw_mode ->
+                            {
+                                Width = glfw_mode.Width
+                                Height = glfw_mode.Height
+                                RefreshRate = glfw_mode.RefreshRate
+                            }
+                        )
+                }
+            )
+            |> List.ofSeq
 
         let monitor =
             if config.WindowMode.Value <> WindowType.Windowed then
@@ -96,7 +119,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
 
         render_thread.RenderMode <- config.RenderMode.Value
 
-        let monitorPtr = monitor.Handle.ToUnsafePtr<Monitor>()
+        let monitor_ptr = monitor.Handle.ToUnsafePtr<Monitor>()
 
         if was_fullscreen then
 
@@ -117,7 +140,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
 
                 base.CenterWindow()
                 base.WindowBorder <- WindowBorder.Fixed
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
                 monitor_height <- monitor.ClientArea.Size.Y
 
             | WindowType.Borderless ->
@@ -135,7 +158,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 GLFW.HideWindow(this.WindowPtr)
                 GLFW.MaximizeWindow(this.WindowPtr)
                 GLFW.ShowWindow(this.WindowPtr)
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
                 monitor_height <- monitor.ClientArea.Size.Y
 
             | WindowType.``Borderless Fullscreen`` ->
@@ -151,15 +174,24 @@ type Window(config: Config, title: string, ui_root: Root) as this =
 
                 base.WindowBorder <- WindowBorder.Hidden
                 base.CenterWindow()
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
                 monitor_height <- monitor.ClientArea.Size.Y
 
             | WindowType.Fullscreen ->
-                let modes = GLFW.GetVideoModes(monitorPtr)
-                let mode = modes.[modes.Length - 1]
-                refresh_rate <- Option.defaultValue mode.RefreshRate config.RefreshRateOverride.Value
-                GLFW.SetWindowMonitor(this.WindowPtr, monitorPtr, 0, 0, mode.Width, mode.Height, refresh_rate)
-                monitor_height <- mode.Height
+                let requested_mode = config.FullscreenVideoMode.Value
+
+                GLFW.SetWindowMonitor(
+                    this.WindowPtr,
+                    monitor_ptr,
+                    0,
+                    0,
+                    requested_mode.Width,
+                    requested_mode.Height,
+                    requested_mode.RefreshRate
+                )
+
+                monitor_height <- requested_mode.Height
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | _ -> Logging.Error "Tried to change to invalid window mode"
 
@@ -172,7 +204,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 let width, height = config.WindowResolution.Value
                 GLFW.SetWindowSize(this.WindowPtr, width, height)
                 base.CenterWindow()
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
                 monitor_height <- monitor.ClientArea.Size.Y
 
             | WindowType.Borderless ->
@@ -182,7 +214,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 GLFW.SetWindowSize(this.WindowPtr, monitor.ClientArea.Size.X + 1, monitor.ClientArea.Size.Y + 1)
                 GLFW.MaximizeWindow(this.WindowPtr)
                 GLFW.ShowWindow(this.WindowPtr)
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
                 monitor_height <- monitor.ClientArea.Size.Y
 
             | WindowType.``Borderless Fullscreen`` ->
@@ -190,27 +222,36 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 GLFW.SetWindowPos(this.WindowPtr, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y)
                 GLFW.SetWindowSize(this.WindowPtr, monitor.ClientArea.Size.X, monitor.ClientArea.Size.Y)
                 base.CenterWindow()
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitorPtr)).RefreshRate
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
                 monitor_height <- monitor.ClientArea.Size.Y
 
             | WindowType.Fullscreen ->
-                let modes = GLFW.GetVideoModes(monitorPtr)
-                let mode = modes.[modes.Length - 1]
-                refresh_rate <- Option.defaultValue mode.RefreshRate config.RefreshRateOverride.Value
-                monitor_height <- mode.Height
-                GLFW.SetWindowMonitor(this.WindowPtr, monitorPtr, 0, 0, mode.Width, mode.Height, refresh_rate)
+                let requested_mode = config.FullscreenVideoMode.Value
+
+                GLFW.SetWindowMonitor(
+                    this.WindowPtr,
+                    monitor_ptr,
+                    0,
+                    0,
+                    requested_mode.Width,
+                    requested_mode.Height,
+                    requested_mode.RefreshRate
+                )
+
+                monitor_height <- requested_mode.Height
+                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | _ -> Logging.Error "Tried to change to invalid window mode"
 
         was_fullscreen <- config.WindowMode.Value = WindowType.Fullscreen
 
         if OperatingSystem.IsWindows() then
-            FrameTimeStrategies.open_adapter (GLFW.GetWin32Adapter monitorPtr) (GLFW.GetWin32Monitor monitorPtr)
+            FrameTimeStrategies.open_adapter (GLFW.GetWin32Adapter monitor_ptr) (GLFW.GetWin32Monitor monitor_ptr)
 
         sync
         <| fun () ->
             render_thread.RenderModeChanged(
-                Option.defaultValue refresh_rate config.RefreshRateOverride.Value,
+                refresh_rate,
                 monitor_height,
                 config.WindowMode.Value = WindowType.Fullscreen
                 || config.WindowMode.Value = WindowType.``Borderless Fullscreen``
