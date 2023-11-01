@@ -687,3 +687,5 @@ unlinkedsongsimport.info.title=Import 'Songs' folder
 unlinkedsongsimport.link_intended.name=No, I want to link my Songs folder
 unlinkedsongsimport.name=Unlinked Songs import
 wiki.openinbrowser=Open in browser
+system.videomode.name=Video mode
+system.videomode.tooltip=Allows you to select the resolution and framerate that is used in fullscreen mode.

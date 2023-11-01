@@ -268,6 +268,7 @@ module Options =
         // Register decoding rules for Percyqaz.Flux config
         JSON
             .WithAutoCodec<Percyqaz.Flux.Windowing.Config>(false)
+            .WithAutoCodec<Percyqaz.Flux.Windowing.FullscreenVideoMode>()
             .WithAutoCodec<Percyqaz.Flux.Input.Bind>()
         |> ignore
 
