@@ -4,7 +4,7 @@ open Percyqaz.Json
 open Interlude.Web.Shared.API
 
 module Auth =
-    
+
     /// url parameters:
     ///  code - given by discord auth to identify you
     ///  state - given by server to identify which Interlude client is logging in
@@ -29,14 +29,11 @@ module Charts =
             }
 
         [<Json.AutoCodec>]
-        type Response =
-            {
-                Info: Info option
-            }
+        type Response = { Info: Info option }
 
-        let get(chart: string, callback: Response option -> unit) = 
-            Client.get<Response>(snd ROUTE + "?chart=" + chart, callback)
-            
+        let get (chart: string, callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE + "?chart=" + chart, callback)
+
     module Scores =
 
         /// requires login token as Authorization header
@@ -81,9 +78,9 @@ module Charts =
 
             type Response = ScoreEffect option
 
-            let post(request: Request, callback: Response option -> unit) = 
-                Client.post_return<Request, Response>(snd ROUTE, request, callback)
-                
+            let post (request: Request, callback: Response option -> unit) =
+                Client.post_return<Request, Response> (snd ROUTE, request, callback)
+
         /// requires login token as Authorization header
         /// url parameters:
         ///  chart - hash of chart to get details for
@@ -109,9 +106,9 @@ module Charts =
                     RulesetId: string
                     Scores: Score array
                 }
-            
-            let get(chart: string, ruleset: string, callback: Response option -> unit) = 
-                Client.get<Response>(snd ROUTE + "?chart=" + chart + "&ruleset=" + escape ruleset, callback)
+
+            let get (chart: string, ruleset: string, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + "?chart=" + chart + "&ruleset=" + escape ruleset, callback)
 
 module Tables =
 
@@ -134,10 +131,10 @@ module Tables =
 
         [<Json.AutoCodec>]
         type Response = { Scores: Score array }
-        
-        let get(user: string, table: string, callback: Response option -> unit) = 
-            Client.get<Response>(snd ROUTE + "?user=" + escape user + "&table=" + escape table, callback)
-    
+
+        let get (user: string, table: string, callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE + "?user=" + escape user + "&table=" + escape table, callback)
+
     /// requires login token as Authorization header
     /// url parameters:
     ///  table - id of table to get ranking for e.g 'crescent' or 'mizu'
@@ -156,13 +153,13 @@ module Tables =
 
         [<Json.AutoCodec>]
         type Response = { Players: Player array }
-        
-        let get(table: string, callback: Response option -> unit) = 
-            Client.get<Response>(snd ROUTE + "?table=" + escape table, callback)
-    
+
+        let get (table: string, callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
+
     /// requires login token as Authorization header
     module Suggest =
-    
+
         let ROUTE = (POST, "/tables/suggestions")
 
         [<Json.AutoCodec>]
@@ -177,18 +174,18 @@ module Tables =
                 TableFor: string
                 SuggestedLevel: int
             }
-            
-        let post(request: Request, callback: bool option -> unit) =
-            Client.post<Request>(snd ROUTE, request, callback)
-    
+
+        let post (request: Request, callback: bool option -> unit) =
+            Client.post<Request> (snd ROUTE, request, callback)
+
     /// url parameters:
     ///  table - id of table to get ranking for e.g 'crescent' or 'mizu'
     module Suggestions =
-    
+
         let ROUTE = (GET, "/tables/suggestions")
-        
+
         [<Json.AutoCodec>]
-        type Suggestion = 
+        type Suggestion =
             {
                 ChartId: string
                 OsuBeatmapId: int
@@ -201,9 +198,9 @@ module Tables =
 
         [<Json.AutoCodec>]
         type Response = { Suggestions: Suggestion array }
-        
-        let get(table: string, callback: Response option -> unit) = 
-            Client.get<Response>(snd ROUTE + "?table=" + escape table, callback)
+
+        let get (table: string, callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
 
 module Players =
 
@@ -213,22 +210,15 @@ module Players =
         let ROUTE = (GET, "/players/online")
 
         [<Json.AutoCodec>]
-        type Player =
-            {
-                Username: string
-                Color: int
-            }
+        type Player = { Username: string; Color: int }
 
         [<Json.AutoCodec>]
-        type Response =
-            {
-                Players: Player array
-            }
-            
-        let get(callback: Response option -> unit) = 
-            Client.get<Response>(snd ROUTE, callback)
+        type Response = { Players: Player array }
 
-    
+        let get (callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE, callback)
+
+
     /// requires login token as Authorization header
     /// url parameters:
     ///  query - partial name of user to find matches for
@@ -237,21 +227,14 @@ module Players =
         let ROUTE = (GET, "/players/search")
 
         [<Json.AutoCodec>]
-        type Player =
-            {
-                Username: string
-                Color: int
-            }
+        type Player = { Username: string; Color: int }
 
         [<Json.AutoCodec>]
-        type Response =
-            {
-                Matches: Player array
-            }
-            
-        let get(query: string, callback: Response option -> unit) = 
-            Client.get<Response>(snd ROUTE + "?query=" + escape query, callback)
-        
+        type Response = { Matches: Player array }
+
+        let get (query: string, callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE + "?query=" + escape query, callback)
+
     /// requires login token as Authorization header
     /// url parameters:
     ///  user - OPTIONAL: name of user to view profile of (not case sensitive)
@@ -260,12 +243,8 @@ module Players =
         let ROUTE = (GET, "/players/profile")
 
         [<Json.AutoCodec>]
-        type Badge =
-            {
-                Name: string
-                Colors: int32 list
-            }
-                
+        type Badge = { Name: string; Colors: int32 list }
+
         [<Json.AutoCodec>]
         type RecentScore =
             {
@@ -289,13 +268,13 @@ module Players =
                 IsFriend: bool
                 IsMutualFriend: bool
             }
-            
-        let get_me(callback: Response option -> unit) = 
-            Client.get<Response>(snd ROUTE, callback)
 
-        let get(user: string, callback: Response option -> unit) =
-            Client.get<Response>(snd ROUTE + "?user=" + escape user, callback)
-    
+        let get_me (callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE, callback)
+
+        let get (user: string, callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE + "?user=" + escape user, callback)
+
     /// requires login token as Authorization header
     module ProfileOptions =
 
@@ -303,9 +282,9 @@ module Players =
 
         [<Json.AutoCodec>]
         type Request = { Color: int }
-        
-        let post(request: Request, callback: bool option -> unit) =
-            Client.post<Request>(snd ROUTE, request, callback)
+
+        let post (request: Request, callback: bool option -> unit) =
+            Client.post<Request> (snd ROUTE, request, callback)
 
 module Friends =
 
@@ -323,34 +302,31 @@ module Friends =
             }
 
         [<Json.AutoCodec>]
-        type Response =
-            {
-                Friends: Friend array
-            }
-            
-        let get(callback: Response option -> unit) =
-            Client.get<Response>(snd ROUTE, callback)
-        
+        type Response = { Friends: Friend array }
+
+        let get (callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE, callback)
+
     /// requires login token as Authorization header
     module Add =
-        
+
         let ROUTE = (POST, "/friends")
 
         [<Json.AutoCodec>]
         type Request = { User: string }
 
-        let post(request: Request, callback: bool option -> unit) =
-            Client.post<Request>(snd ROUTE, request, callback)
+        let post (request: Request, callback: bool option -> unit) =
+            Client.post<Request> (snd ROUTE, request, callback)
 
     /// requires login token as Authorization header
     /// url parameters:
     ///  user - name of user to add as friend (not case sensitive)
     module Remove =
-            
+
         let ROUTE = (DELETE, "/friends")
 
-        let delete(user: string, callback: bool option -> unit) =
-            Client.delete(snd ROUTE + "?user=" + escape user, callback)
+        let delete (user: string, callback: bool option -> unit) =
+            Client.delete (snd ROUTE + "?user=" + escape user, callback)
 
 module Health =
 
@@ -361,5 +337,5 @@ module Health =
         [<Json.AutoCodec>]
         type Response = { Status: string }
 
-        let get(callback: Response option -> unit) =
-            Client.get<Response>(snd ROUTE, callback)
+        let get (callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE, callback)
