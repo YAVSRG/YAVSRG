@@ -98,10 +98,7 @@ type Table =
             |> not
         then
             false
-        else if
-
-            chart.Keys <> this.Keymode
-        then
+        else if chart.Keys <> this.Keymode then
             false
         else
 
@@ -257,7 +254,7 @@ module Table =
             for level in table.Levels do
                 for chart in level.Charts do
                     let grade_achieved =
-                        match Scores.getData chart.Hash with
+                        match Scores.get chart.Hash with
                         | Some d ->
                             if d.PersonalBests.ContainsKey table.RulesetId then
                                 PersonalBests.get_best_above 1.0f d.PersonalBests.[table.RulesetId].Grade

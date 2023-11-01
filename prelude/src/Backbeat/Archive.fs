@@ -7,6 +7,7 @@ open Prelude
 open Prelude.Charts.Formats.Interlude
 
 type ArtistName = string
+
 [<Json.AutoCodec>]
 type VerifiedArtist =
     {
@@ -16,38 +17,48 @@ type VerifiedArtist =
 // store of artists that are confirmed to exist, with the correct STYLiSATION of their name
 [<Json.AutoCodec>]
 type VerifiedArtists =
-    { 
+    {
         Artists: Dictionary<string, VerifiedArtist>
         Aliases: Dictionary<string, string list>
     }
     // all-lowercase string map to correct stylised artist name, if exists
     member this.FixerMapping() =
         let d = Dictionary<string, string>()
+
         for a in this.Artists.Keys do
             let v = this.Artists.[a]
             d.Add(a.ToLower(), a)
+
             for alt in v.Alternatives do
                 d.Add(alt.ToLower(), a)
+
             if v.IsJapaneseFullName then
                 let split = a.Split(' ', 2)
                 d.Add((split.[1] + " " + split.[0]).ToLower(), a)
+
         d
     // case-sensitive mapping of what strings map to what parsed artist
     member this.ParserMapping() =
         let d = Dictionary<string, string>()
+
         for a in this.Artists.Keys do
             let v = this.Artists.[a]
             d.Add(a, a)
+
             for alt in v.Alternatives do
                 d.Add(alt, a)
+
             if v.IsJapaneseFullName then
                 let split = a.Split(' ', 2)
                 d.Add((split.[1] + " " + split.[0]), a)
+
         for alias in this.Aliases.Keys do
             d.Add(alias, alias)
+
         d
 
 type SongId = string
+
 [<Json.AutoCodec>]
 type Song =
     {
@@ -61,12 +72,17 @@ type Song =
     }
     member this.FormattedArtists =
         String.concat ", " this.Artists
-        + if this.OtherArtists <> [] then " ft. " + String.concat ", " this.OtherArtists else ""
+        + if this.OtherArtists <> [] then
+              " ft. " + String.concat ", " this.OtherArtists
+          else
+              ""
+
     member this.FormattedTitle = this.FormattedArtists + " - " + this.Title
 
 type Songs = Dictionary<SongId, Song>
 
 type StepmaniaPackId = int
+
 [<Json.AutoCodec>]
 type StepmaniaPack =
     {
@@ -74,7 +90,9 @@ type StepmaniaPack =
         Mirrors: string list
         Size: int64
     }
+
 type CommunityPackId = int
+
 [<Json.AutoCodec>]
 type CommunityPack =
     {
@@ -86,7 +104,7 @@ type CommunityPack =
 
 [<Json.AutoCodec>]
 type Packs =
-    { 
+    {
         Stepmania: Dictionary<StepmaniaPackId, StepmaniaPack>
         Community: Dictionary<CommunityPackId, CommunityPack>
     }
@@ -110,7 +128,7 @@ type Chart =
         Tags: string list
         Duration: Time
         Notecount: int
-        BPM: (float32<ms/beat> * float32<ms/beat>)
+        BPM: (float32<ms / beat> * float32<ms / beat>)
         PreviewTime: Time
         BackgroundFile: string // sha256
         AudioFile: string // sha256
@@ -138,7 +156,7 @@ module Archive =
             AudioFile = Asset chart.AudioFile
             ChartSource =
                 match chart.Sources with
-                | Osu d :: _ -> Origin.Osu (d.BeatmapSetId, d.BeatmapId)
+                | Osu d :: _ -> Origin.Osu(d.BeatmapSetId, d.BeatmapId)
                 | Stepmania d :: _ -> Origin.Stepmania d
                 | _ -> Origin.Unknown
         }
@@ -146,16 +164,13 @@ module Archive =
     module DownloadUrl =
 
         let into_base64 (str: string) =
-            str
-            |> Text.Encoding.UTF8.GetBytes
-            |> Convert.ToBase64String
+            str |> Text.Encoding.UTF8.GetBytes |> Convert.ToBase64String
 
         let from_base64 (str: string) =
-            str
-            |> Convert.FromBase64String
-            |> Text.Encoding.UTF8.GetString
+            str |> Convert.FromBase64String |> Text.Encoding.UTF8.GetString
 
-        let create(str: string) =
+        let create (str: string) =
             str.Replace("https://", "").Replace("http://", "") |> into_base64
 
-        let unpickle(str: string) = "https://" + Uri.EscapeUriString(from_base64 str)
+        let unpickle (str: string) =
+            "https://" + Uri.EscapeUriString(from_base64 str)

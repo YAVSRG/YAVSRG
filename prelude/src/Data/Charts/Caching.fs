@@ -65,7 +65,7 @@ module Cache =
         save_important_json_file (Path.Combine(cache.RootPath, "cache.json")) cache.Entries
 
     let create_entry (folder_name: string) (file_time: DateTime) (chart: Chart) =
-        let lastNote = chart.LastNote
+        let last_note = chart.LastNote
         let rating = RatingReport(chart.Notes, 1.0f, Layout.Spread, chart.Keys)
 
         {
@@ -78,9 +78,9 @@ module Cache =
             Folder = folder_name
             Hash = Chart.hash chart
             Keys = chart.Keys
-            Length = lastNote - chart.FirstNote
+            Length = last_note - chart.FirstNote
             DateAdded = file_time
-            BPM = Interlude.minMaxBPM (List.ofSeq chart.BPM) lastNote
+            BPM = Interlude.minMaxBPM (List.ofSeq chart.BPM) last_note
             DifficultyName = chart.Header.DiffName
             Physical = rating.Physical
             BackgroundFile =
@@ -140,6 +140,8 @@ module Cache =
         | Asset s -> Path.Combine(cache.RootPath, ".assets", s.Substring(0, 2), s) |> Some
         | Missing -> None
 
+    /// Behold the beauty of this codebase
+    /// Yes Fantomas keeps it in this format and it was originally written like this
     let recache_service =
         { new Async.Service<Cache, unit>() with
             override this.Handle(cache: Cache) =
@@ -428,7 +430,7 @@ module Cache =
             File.Delete path
     // todo: remove assets IF they aren't used by anything else in the cache
 
-    let deleteMany (cs: CachedChart seq) (cache: Cache) = Seq.iter (fun c -> delete c cache) cs
+    let delete_many (cs: CachedChart seq) (cache: Cache) = Seq.iter (fun c -> delete c cache) cs
 
     // Download protocol
 

@@ -16,6 +16,7 @@ module Library =
 
     type Patterns = ConcurrentDictionary<string, Prelude.Charts.Tools.Patterns.Patterns.PatternReportEntry list>
 
+    // todo: function to load these as it's unpredictable having it load static like this
     let cache: Cache = Cache.from_path (get_game_folder "Songs")
 
     let collections =

@@ -2,7 +2,6 @@
 
 open System
 open System.IO
-open System.IO.Compression
 open System.Net
 open System.Net.Http
 open System.Threading.Tasks
@@ -14,12 +13,12 @@ open Prelude.Common
 module WebServices =
 
     let private download_string_client =
-        let h = new HttpClientHandler()
-        h.AutomaticDecompression <- DecompressionMethods.Deflate ||| DecompressionMethods.GZip
-        let w = new HttpClient(h)
-        w.DefaultRequestHeaders.Add("User-Agent", "Interlude")
-        w.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate")
-        w
+        let handler = new HttpClientHandler()
+        handler.AutomaticDecompression <- DecompressionMethods.Deflate ||| DecompressionMethods.GZip
+        let client = new HttpClient(handler)
+        client.DefaultRequestHeaders.Add("User-Agent", "Interlude")
+        client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate")
+        client
 
     let download_string =
         { new Async.Service<string, string option>() with
@@ -217,16 +216,16 @@ module ImageServices =
         { new Async.Service<string, Bitmap>() with
             override this.Handle(url: string) =
                 async {
-                    let cachedFileName =
+                    let cached_file_name =
                         let uri = new Uri(url)
                         let name = Uri.UnescapeDataString(uri.Segments[uri.Segments.Length - 1])
                         Path.Combine(get_game_folder ("Downloads"), name)
 
-                    if File.Exists(cachedFileName) then
-                        return! Image.LoadAsync<PixelFormats.Rgba32>(cachedFileName) |> Async.AwaitTask
+                    if File.Exists(cached_file_name) then
+                        return! Image.LoadAsync<PixelFormats.Rgba32>(cached_file_name) |> Async.AwaitTask
                     else
                         let! image = WebServices.download_image.RequestAsync(url)
-                        save_image_png.Request((image, cachedFileName), ignore)
+                        save_image_png.Request((image, cached_file_name), ignore)
                         return image
                 }
         }

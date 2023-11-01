@@ -231,6 +231,7 @@ module Scores =
                 Entries = new ConcurrentDictionary<string, ChartSaveData>()
             }
 
+    // todo: function to load this as it's unpredictable having it load static like this
     let data: Data =
         load_important_json_file "Scores" (Path.Combine(get_game_folder "Data", "scores.json")) true
         |> fun d ->
@@ -240,7 +241,7 @@ module Scores =
     let save () =
         save_important_json_file (Path.Combine(get_game_folder "Data", "scores.json")) data
 
-    let getOrCreateData (chart: Chart) =
+    let get_or_create (chart: Chart) =
         let hash = Chart.hash chart
 
         if not (data.Entries.ContainsKey hash) then
@@ -248,18 +249,18 @@ module Scores =
 
         data.Entries.[hash]
 
-    let getData (hash: string) =
+    let get (hash: string) =
         if hash |> data.Entries.ContainsKey |> not then
             None
         else
             Some data.Entries.[hash]
 
-    let saveScore (d: ChartSaveData) (score: Score) =
+    let save_score (d: ChartSaveData) (score: Score) =
         d.Scores.Add score
         save ()
 
-    let saveScoreWithPbs (d: ChartSaveData) (rulesetId: string) (score: ScoreInfoProvider) : ImprovementFlags =
-        saveScore d score.ScoreInfo
+    let save_score_pbs (d: ChartSaveData) (rulesetId: string) (score: ScoreInfoProvider) : ImprovementFlags =
+        save_score d score.ScoreInfo
 
         if d.PersonalBests.ContainsKey rulesetId then
             let newBests, flags = Bests.update score d.PersonalBests.[rulesetId]
