@@ -246,6 +246,11 @@ module Gameplay =
             chart_loader.Request(Load cc)
 
         let update () =
+            if CACHE_DATA.IsSome then
+
+                FMT_DURATION <- format_duration CACHE_DATA
+                FMT_BPM <- format_bpm CACHE_DATA
+
             if CHART.IsSome then
 
                 let is_interrupted = WITH_MODS.IsNone
