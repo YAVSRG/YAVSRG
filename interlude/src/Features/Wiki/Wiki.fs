@@ -287,7 +287,7 @@ module Wiki =
             buttons.Update(elapsed_ms, moved)
             flow.Update(elapsed_ms, moved)
 
-            if Mouse.left_click () || (+."exit").Tapped() then
+            if Mouse.left_click () || (%%"exit").Tapped() then
                 this.Close()
 
         override this.Draw() =

@@ -9,17 +9,20 @@ open Interlude.UI
 [<AutoOpen>]
 module Helpers =
 
-    let column() = NavigationContainer.Column<Widget>()
-    let row() = NavigationContainer.Row<Widget>()
+    let column () = NavigationContainer.Column<Widget>()
+    let row () = NavigationContainer.Row<Widget>()
 
     let refreshRow number cons =
         let r = NavigationContainer.Row()
-        let refresh() =
+
+        let refresh () =
             r.Clear()
-            let n = number()
+            let n = number ()
+
             for i in 0 .. (n - 1) do
                 r.Add(cons i n)
-        refresh()
+
+        refresh ()
         r, refresh
 
     let PRETTYTEXTWIDTH = 425.0f
@@ -30,12 +33,15 @@ type Tooltip(content: Callout) =
     inherit StaticWidget(NodeType.None)
 
     let content = content.Icon(Icons.info)
-    
+
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
+
         if Mouse.hover this.Bounds then
             Notifications.tooltip_available <- true
-            if (+."tooltip").Tapped() then Notifications.tooltip ((+."tooltip"), this, content)
+
+            if (%%"tooltip").Tapped() then
+                Notifications.tooltip ((%%"tooltip"), this, content)
 
     override this.Draw() = ()
 

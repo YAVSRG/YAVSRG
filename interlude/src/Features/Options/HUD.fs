@@ -38,10 +38,10 @@ module private Helpers =
             base.Update(elapsed_ms, moved)
 
             if this.Selected then
-                let u = (+. "up").Tapped()
-                let d = (+. "down").Tapped()
-                let l = (+. "left").Tapped()
-                let r = (+. "right").Tapped()
+                let u = (%%"up").Tapped()
+                let d = (%%"down").Tapped()
+                let l = (%%"left").Tapped()
+                let r = (%%"right").Tapped()
 
                 if u || d || l || r then
                     repeat <- 0
@@ -60,10 +60,10 @@ module private Helpers =
                         this.Right()
 
                 if repeat >= 0 then
-                    let u = (+. "up").Pressed()
-                    let d = (+. "down").Pressed()
-                    let l = (+. "left").Pressed()
-                    let r = (+. "right").Pressed()
+                    let u = (%%"up").Pressed()
+                    let d = (%%"down").Pressed()
+                    let l = (%%"left").Pressed()
+                    let r = (%%"right").Pressed()
 
                     time <- time + elapsed_ms
 
@@ -387,7 +387,7 @@ type EditSkipButtonPage() as this =
     let pos = Setting.simple data.Position
     let default_pos = HUD.SkipButton.Default.Position
 
-    let preview_text = [ (+. "skip").ToString() ] %> "play.skiphint"
+    let preview_text = [ (%%"skip").ToString() ] %> "play.skiphint"
 
     let preview =
         { new ConfigPreview(0.5f, pos) with

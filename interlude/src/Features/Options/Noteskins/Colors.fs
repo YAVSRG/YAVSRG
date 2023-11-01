@@ -39,7 +39,8 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as th
                 (if not this.Selected then
                      this.Select())
 
-                fd ()),
+                fd ()
+            ),
             OnHover =
                 fun b ->
                     if b && not this.Focused then
@@ -64,13 +65,13 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as th
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (+."up").Tapped() then
+            if (%%"up").Tapped() then
                 fd ()
-            elif (+."down").Tapped() then
+            elif (%%"down").Tapped() then
                 bk ()
-            elif (+."left").Tapped() then
+            elif (%%"left").Tapped() then
                 bk ()
-            elif (+."right").Tapped() then
+            elif (%%"right").Tapped() then
                 fd ()
 
 type ColorSettingsPage() as this =
@@ -87,19 +88,23 @@ type ColorSettingsPage() as this =
     let NOTE_WIDTH = 120.0f
 
     let colors, refreshColors =
-        refreshRow (fun () -> ColorScheme.count (int keycount.Value) noteColors.Style) (fun i k ->
-            let x = -60.0f * float32 k
-            let n = float32 i
+        refreshRow
+            (fun () -> ColorScheme.count (int keycount.Value) noteColors.Style)
+            (fun i k ->
+                let x = -60.0f * float32 k
+                let n = float32 i
 
-            NoteColorPicker(
-                g keycount.Value i,
-                noteColors.Style,
-                i,
-                Position =
-                    { Position.Default with
-                        Left = 0.5f %+ (x + NOTE_WIDTH * n)
-                        Right = 0.5f %+ (x + NOTE_WIDTH * n + NOTE_WIDTH) }
-            ))
+                NoteColorPicker(
+                    g keycount.Value i,
+                    noteColors.Style,
+                    i,
+                    Position =
+                        { Position.Default with
+                            Left = 0.5f %+ (x + NOTE_WIDTH * n)
+                            Right = 0.5f %+ (x + NOTE_WIDTH * n + NOTE_WIDTH)
+                        }
+                )
+            )
 
     do
         this.Content(
@@ -108,8 +113,9 @@ type ColorSettingsPage() as this =
                 "noteskins.edit.globalcolors",
                 Selector<_>
                     .FromBool(
-                        Setting.make (fun v -> noteColors <- { noteColors with UseGlobalColors = v }) (fun () ->
-                            noteColors.UseGlobalColors)
+                        Setting.make
+                            (fun v -> noteColors <- { noteColors with UseGlobalColors = v })
+                            (fun () -> noteColors.UseGlobalColors)
                         |> Setting.trigger (ignore >> refreshColors)
                     )
             )
@@ -139,4 +145,5 @@ type ColorSettingsPage() as this =
     override this.OnClose() =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with
-                NoteColors = noteColors }
+                NoteColors = noteColors
+            }

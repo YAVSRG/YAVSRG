@@ -152,7 +152,7 @@ module Screen =
             logo.Update(elapsed_ms, moved)
             screenContainer.Update(elapsed_ms, moved)
 
-            if (+."exit").Tapped() then
+            if (%%"exit").Tapped() then
                 back Transitions.Flags.UnderLogo
 
             if exit then

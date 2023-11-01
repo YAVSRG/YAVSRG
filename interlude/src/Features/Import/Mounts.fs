@@ -201,7 +201,7 @@ module Mounts =
             text.Update(elapsed_ms, moved)
             button.Update(elapsed_ms, moved)
 
-            if (+. "exit").Tapped() then
+            if (%%"exit").Tapped() then
                 this.Close()
 
         override this.Draw() =
@@ -266,7 +266,8 @@ module Mounts =
                                 "--"
                             else
                                 s.LastImported.ToString()
-                        ] %> "imports.mount.lastimported"
+                        ]
+                        %> "imports.mount.lastimported"
                     | None -> %"imports.mount.notlinked"
                 , Color = K Colors.text_subheading
                 , Position = Position.SliceTop(145.0f).TrimTop(85.0f)

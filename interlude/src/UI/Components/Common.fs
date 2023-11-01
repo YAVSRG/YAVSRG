@@ -224,7 +224,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
         |* Text(
             fun () ->
                 match s.Value with
-                | "" -> Icons.search + " " + [ (+. "search").ToString() ] %> "misc.search"
+                | "" -> Icons.search + " " + [ (%%"search").ToString() ] %> "misc.search"
                 | _ -> ""
             , Color = textEntry.ColorFunc
             , Align = Alignment.LEFT

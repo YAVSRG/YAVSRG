@@ -208,7 +208,7 @@ type Toolbar() =
             else
                 moved || expandAmount.Moving
 
-        if shown () && (+."toolbar").Tapped() then
+        if shown () && (%%"toolbar").Tapped() then
             userCollapse <- not userCollapse
             expandAmount.Target <- if userCollapse then 0.0f else 1.0f
 

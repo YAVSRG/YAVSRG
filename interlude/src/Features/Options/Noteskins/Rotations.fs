@@ -37,13 +37,15 @@ type RotationPicker(rotation: Setting<float>) as this =
                 (if not this.Selected then
                      this.Select())
 
-                fd ()),
+                fd ()
+            ),
             OnRightClick =
                 (fun () ->
                     (if not this.Selected then
                          this.Select())
 
-                    bk ()),
+                    bk ()
+                ),
             OnHover =
                 fun b ->
                     if b && not this.Focused then
@@ -71,13 +73,13 @@ type RotationPicker(rotation: Setting<float>) as this =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (+."up").Tapped() then
+            if (%%"up").Tapped() then
                 fd ()
-            elif (+."down").Tapped() then
+            elif (%%"down").Tapped() then
                 bk ()
-            elif (+."left").Tapped() then
+            elif (%%"left").Tapped() then
                 bk ()
-            elif (+."right").Tapped() then
+            elif (%%"right").Tapped() then
                 fd ()
 
 type RotationSettingsPage() as this =
@@ -97,17 +99,21 @@ type RotationSettingsPage() as this =
     let NOTE_WIDTH = 120.0f
 
     let _rotations, refreshRotations =
-        refreshRow (fun () -> int keycount.Value) (fun i k ->
-            let x = -60.0f * float32 k
-            let n = float32 i
+        refreshRow
+            (fun () -> int keycount.Value)
+            (fun i k ->
+                let x = -60.0f * float32 k
+                let n = float32 i
 
-            RotationPicker(
-                g keycount.Value i,
-                Position =
-                    { Position.Default with
-                        Left = 0.5f %+ (x + NOTE_WIDTH * n)
-                        Right = 0.5f %+ (x + NOTE_WIDTH * n + NOTE_WIDTH) }
-            ))
+                RotationPicker(
+                    g keycount.Value i,
+                    Position =
+                        { Position.Default with
+                            Left = 0.5f %+ (x + NOTE_WIDTH * n)
+                            Right = 0.5f %+ (x + NOTE_WIDTH * n + NOTE_WIDTH)
+                        }
+                )
+            )
 
     do
         this.Content(
@@ -131,4 +137,5 @@ type RotationSettingsPage() as this =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with
                 Rotations = rotations
-                UseRotation = use_rotation.Value }
+                UseRotation = use_rotation.Value
+            }

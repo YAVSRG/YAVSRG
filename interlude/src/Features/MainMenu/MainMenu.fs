@@ -188,5 +188,5 @@ type MainMenuScreen() as this =
             else
                 0.0f
 
-        if (+. "select").Tapped() then
+        if (%%"select").Tapped() then
             playFunc ()

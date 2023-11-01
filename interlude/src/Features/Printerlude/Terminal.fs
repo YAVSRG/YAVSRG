@@ -166,14 +166,14 @@ module Terminal =
             )
 
     let update () =
-        if shown && (+. "exit").Tapped() then
+        if shown && (%%"exit").Tapped() then
             hide ()
 
         if
             options.EnableConsole.Value
             && not shown
             && Screen.currentType <> Screen.Type.Play
-            && (+. "console").Tapped()
+            && (%%"console").Tapped()
         then
             show ()
 

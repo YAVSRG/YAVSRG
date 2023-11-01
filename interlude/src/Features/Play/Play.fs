@@ -154,7 +154,7 @@ module PlayScreen =
 
                     this.State.Scoring.Update chartTime
 
-                if (+. "retry").Tapped() then
+                if (%%"retry").Tapped() then
                     Screen.changeNew
                         (fun () -> play_screen (pacemakerMode) :> Screen.T)
                         Screen.Type.Play

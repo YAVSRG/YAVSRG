@@ -67,7 +67,7 @@ type Dropdown(items: (string * (Color * Color) * (unit -> unit)) seq, on_close: 
         base.Update(elapsed_ms, moved)
 
         if
-            (+."exit").Tapped()
+            (%%"exit").Tapped()
             || not this.Focused
             || Mouse.left_click ()
             || Mouse.right_click ()

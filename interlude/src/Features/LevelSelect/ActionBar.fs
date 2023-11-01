@@ -70,7 +70,7 @@ module Comments =
     let update (elapsed_ms, moved) =
         fade.Update elapsed_ms
 
-        if textEntry.Selected && ((+. "exit").Tapped() || (+. "select").Tapped()) then
+        if textEntry.Selected && ((%%"exit").Tapped() || (%%"select").Tapped()) then
             Selection.clear ()
 
         editor.Update(elapsed_ms, moved)

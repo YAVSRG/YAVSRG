@@ -31,7 +31,7 @@ module System =
         do
             this
             |+ Text(
-                (fun () -> (+.hotkey).ToString()),
+                (fun () -> (%%hotkey).ToString()),
                 Color =
                     (fun () ->
                         (if this.Selected then Colors.pink_accent

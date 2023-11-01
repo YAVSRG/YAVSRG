@@ -134,5 +134,5 @@ type ModSelect(onClose) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (+. "autoplay").Tapped() then
+        if (%%"autoplay").Tapped() then
             autoplay <- not autoplay

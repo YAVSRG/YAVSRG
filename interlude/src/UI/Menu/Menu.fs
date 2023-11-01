@@ -167,7 +167,7 @@ and Menu(topLevel: Page) as this =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (+. "exit").Tapped() then
+        if (%%"exit").Tapped() then
             Selection.up ()
 
         let mutable i = 0
