@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Play.HUD
 
 open System
+open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input

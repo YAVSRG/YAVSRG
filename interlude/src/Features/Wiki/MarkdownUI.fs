@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Wiki
 
+open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common

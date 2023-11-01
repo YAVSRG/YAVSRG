@@ -18,7 +18,6 @@ open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
 open Interlude.Features.Online
-open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests
 
 module Leaderboard =
@@ -43,7 +42,7 @@ module Leaderboard =
         | CurrentRate = 1
         | CurrentMods = 2
 
-    type LeaderboardScore = Requests.Charts.Scores.Leaderboard.Score
+    type LeaderboardScore = Charts.Scores.Leaderboard.Score
 
     type LeaderboardCard(score: LeaderboardScore, data: ScoreInfoProvider) =
         inherit Frame(NodeType.Button((fun () -> 

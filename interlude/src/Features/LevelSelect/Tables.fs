@@ -17,7 +17,7 @@ open Interlude.UI.Menu
 type private EditLevelPage(level: Level) as this =
     inherit Page()
 
-    let new_name = Setting.simple level.Name |> Setting.alphaNum
+    let new_name = Setting.simple level.Name |> Setting.alphanumeric
 
     let level_progress =
         let mutable total = 0.0

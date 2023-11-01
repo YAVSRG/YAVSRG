@@ -1,12 +1,12 @@
 ﻿namespace Interlude.UI
 
+open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude
-open Interlude.Utils
 open Interlude.UI
 
 module Screen =

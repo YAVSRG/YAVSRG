@@ -23,13 +23,6 @@ module Utils =
             sprintf "%s %s (dev build)" v.Name short_version
         else sprintf "%s %s" v.Name short_version
 
-    /// K for Konst/Kestrel -- K x is shorthand for a function that ignores its input and returns x
-    /// Named after the FP combinator
-    let K x _ = x
-
-    /// F for Fork -- Combinator to fork two actions. Returns a function that executes them both on the input
-    let F (f: 'T -> unit) (g: 'T -> unit) = fun t -> f t; g t
-
     /// L for localise -- Shorthand to get the localised text from a locale string id
     let L = Localisation.localise
 

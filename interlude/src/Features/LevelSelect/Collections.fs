@@ -75,7 +75,7 @@ module CollectionManager =
 type private CreateFolderPage() as this =
     inherit Page()
 
-    let new_name = Setting.simple "Folder" |> Setting.alphaNum
+    let new_name = Setting.simple "Folder" |> Setting.alphanumeric
     let icon = Setting.simple Icons.heart
 
     do
@@ -103,7 +103,7 @@ type private CreateFolderPage() as this =
 type private CreatePlaylistPage() as this =
     inherit Page()
 
-    let new_name = Setting.simple "Playlist" |> Setting.alphaNum
+    let new_name = Setting.simple "Playlist" |> Setting.alphanumeric
     let icon = Setting.simple Icons.heart
 
     do
@@ -131,7 +131,7 @@ type private CreatePlaylistPage() as this =
 type private EditFolderPage(name: string, folder: Folder) as this =
     inherit Page()
 
-    let new_name = Setting.simple name |> Setting.alphaNum
+    let new_name = Setting.simple name |> Setting.alphanumeric
 
     do
         let content = 
@@ -180,7 +180,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
 type private EditPlaylistPage(name: string, playlist: Playlist) as this =
     inherit Page()
 
-    let new_name = Setting.simple name |> Setting.alphaNum
+    let new_name = Setting.simple name |> Setting.alphanumeric
 
     do
         let content =
