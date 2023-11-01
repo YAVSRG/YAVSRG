@@ -38,13 +38,13 @@ module Stats =
 
     // storage
 
-    let mutable total : Stats = Stats.Default
-    let mutable session : Stats = Stats.Default
+    let mutable total: Stats = Stats.Default
+    let mutable session: Stats = Stats.Default
 
-    let init() = 
-        total <- loadImportantJsonFile "Stats" (Path.Combine(getDataPath "Data", "stats.json")) false
+    let init () =
+        total <- load_important_json_file "Stats" (Path.Combine(get_game_folder "Data", "stats.json")) false
 
-    let save() =
+    let save () =
         total.PlayTime <- total.PlayTime + session.PlayTime
         total.PracticeTime <- total.PracticeTime + session.PracticeTime
         total.GameTime <- total.GameTime + session.GameTime
@@ -56,7 +56,7 @@ module Stats =
         total.PlaysQuit <- total.PlaysQuit + session.PlaysQuit
 
         session <- Stats.Default
-        saveImportantJsonFile (Path.Combine(getDataPath "Data", "stats.json")) total
+        save_important_json_file (Path.Combine(get_game_folder "Data", "stats.json")) total
 
     // helpers
 
@@ -65,18 +65,20 @@ module Stats =
         let minutes = seconds / 60.0
         let hours = minutes / 60.0
         let days = hours / 24.0
-        
+
         if days > 1 then
             sprintf "%id %02ih %02im" (floor days |> int) (floor (hours % 24.0) |> int) (floor (minutes % 60.0) |> int)
-        elif hours > 1 then 
+        elif hours > 1 then
             sprintf "%ih %02im" (floor hours |> int) (floor (minutes % 60.0) |> int)
-        else sprintf "%im %02is" (floor minutes |> int) (floor (seconds % 60.0) |> int)
+        else
+            sprintf "%im %02is" (floor minutes |> int) (floor (seconds % 60.0) |> int)
 
     let format_short_time (time: float) =
         let seconds = time / 1000.0
         let minutes = seconds / 60.0
         let hours = minutes / 60.0
 
-        if hours > 1 then 
+        if hours > 1 then
             sprintf "%i:%02i:%02i" (floor hours |> int) (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)
-        else sprintf "%02i:%02i" (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)
+        else
+            sprintf "%02i:%02i" (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)

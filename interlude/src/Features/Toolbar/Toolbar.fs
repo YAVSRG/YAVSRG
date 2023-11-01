@@ -114,7 +114,7 @@ type Toolbar() =
             "screenshot",
             fun () ->
                 let id = DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
-                let path = Path.Combine(getDataPath "Screenshots", id)
+                let path = Path.Combine(get_game_folder "Screenshots", id)
                 let img = Render.screenshot ()
                 ImageServices.save_image_jpg.Request((img, path), img.Dispose)
 
@@ -123,7 +123,7 @@ type Toolbar() =
                     %"notification.screenshot",
                     id,
                     %"notification.screenshot.open_folder",
-                    fun () -> open_directory (getDataPath "Screenshots")
+                    fun () -> open_directory (get_game_folder "Screenshots")
                 )
         )
         |+ HotkeyAction(

@@ -84,7 +84,7 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
             let struct (t, b) = replayData.[peek]
 
             for k = 0 to keys - 1 do
-                if Bitmask.hasBit k b then
+                if Bitmask.has_key k b then
                     keys_down.[k] <- true
                     keys_times.[k] <- t
                 else
@@ -96,7 +96,7 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
                 let struct (t, b) = replayData.[peek]
 
                 for k = 0 to keys - 1 do
-                    if Bitmask.hasBit k b then
+                    if Bitmask.has_key k b then
                         if not keys_down.[k] then
                             keys_down.[k] <- true
                             keys_times.[k] <- t

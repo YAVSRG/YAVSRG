@@ -191,7 +191,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                 (Quad.color Color.White)
                 (Sprite.with_uv
                     (animation.Loops,
-                     if (state.Scoring.KeyState |> Bitmask.hasBit k) then
+                     if (state.Scoring.KeyState |> Bitmask.has_key k) then
                          1
                      else
                          0)

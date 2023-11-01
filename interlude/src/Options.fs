@@ -128,93 +128,154 @@ module Options =
             AdvancedRecommendations: Setting<bool>
             ScoreGraphMode: Setting<ScoreGraphMode>
         }
-        static member Default = {
-            VisualOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
-            AudioOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
-            AudioVolume = Setting.percent 0.05
-            CurrentChart = Setting.simple ""
-            Theme = Setting.simple "*default"
+        static member Default =
+            {
+                VisualOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
+                AudioOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
+                AudioVolume = Setting.percent 0.05
+                CurrentChart = Setting.simple ""
+                Theme = Setting.simple "*default"
 
-            ScrollSpeed = Setting.bounded 2.05f 1.0f 5.0f |> Setting.roundf 2
-            HitPosition = Setting.bounded 0.0f -300.0f 600.0f
-            HitLighting = Setting.simple false
-            Upscroll = Setting.simple false
-            BackgroundDim = Setting.percentf 0.5f
-            LaneCover = 
-                {
-                    Enabled = Setting.simple false
-                    Sudden = Setting.percentf 0.0f
-                    Hidden = Setting.percentf 0.45f
-                    FadeLength = Setting.bounded 200f 0f 500f
-                    Color = Setting.simple Color.Black
-                }
-            Noteskin = Setting.simple "*defaultBar.isk"
-            KeymodePreference = Setting.simple Keymode.``4K``
-            UseKeymodePreference = Setting.simple false
+                ScrollSpeed = Setting.bounded 2.05f 1.0f 5.0f |> Setting.roundf 2
+                HitPosition = Setting.bounded 0.0f -300.0f 600.0f
+                HitLighting = Setting.simple false
+                Upscroll = Setting.simple false
+                BackgroundDim = Setting.percentf 0.5f
+                LaneCover =
+                    {
+                        Enabled = Setting.simple false
+                        Sudden = Setting.percentf 0.0f
+                        Hidden = Setting.percentf 0.45f
+                        FadeLength = Setting.bounded 200f 0f 500f
+                        Color = Setting.simple Color.Black
+                    }
+                Noteskin = Setting.simple "*defaultBar.isk"
+                KeymodePreference = Setting.simple Keymode.``4K``
+                UseKeymodePreference = Setting.simple false
 
-            // playstyles are hints to the difficulty calc on how the hands are positioned
-            // will be removed when difficulty calc gets scrapped
-            // there is no way to edit these
-            Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-            SelectedRuleset = 
-                Setting.simple Content.Rulesets.DEFAULT_ID
-                |> Setting.trigger (fun t -> 
-                    if Content.first_init then Percyqaz.Flux.UI.Root.sync(fun () -> Content.Rulesets.switch t)
-                    else Content.Rulesets.switch t
-                )
-            FailCondition = Setting.simple FailType.EndOfSong
-            Pacemakers = Dictionary<string, Pacemaker>()
-            SaveScoreIfUnderPace = Setting.simple true
+                // playstyles are hints to the difficulty calc on how the hands are positioned
+                // will be removed when difficulty calc gets scrapped
+                // there is no way to edit these
+                Playstyles =
+                    [|
+                        Layout.OneHand
+                        Layout.Spread
+                        Layout.LeftOne
+                        Layout.Spread
+                        Layout.LeftOne
+                        Layout.Spread
+                        Layout.LeftOne
+                        Layout.Spread
+                    |]
+                SelectedRuleset =
+                    Setting.simple Content.Rulesets.DEFAULT_ID
+                    |> Setting.trigger (fun t ->
+                        if Content.first_init then
+                            Percyqaz.Flux.UI.Root.sync (fun () -> Content.Rulesets.switch t)
+                        else
+                            Content.Rulesets.switch t
+                    )
+                FailCondition = Setting.simple FailType.EndOfSong
+                Pacemakers = Dictionary<string, Pacemaker>()
+                SaveScoreIfUnderPace = Setting.simple true
 
-            OsuMount = Setting.simple None
-            StepmaniaMount = Setting.simple None
-            EtternaMount = Setting.simple None
+                OsuMount = Setting.simple None
+                StepmaniaMount = Setting.simple None
+                EtternaMount = Setting.simple None
 
-            ChartSortMode = Setting.simple "Title"
-            ChartSortReverse = Setting.simple false
-            ChartGroupMode = Setting.simple "Pack"
-            LibraryMode = Setting.simple LibraryMode.All
-            ChartGroupReverse = Setting.simple false
-            ScoreSortMode = Setting.simple 0
-            
-            SelectedCollection = Setting.simple None
-            Table = Setting.simple None
+                ChartSortMode = Setting.simple "Title"
+                ChartSortReverse = Setting.simple false
+                ChartGroupMode = Setting.simple "Pack"
+                LibraryMode = Setting.simple LibraryMode.All
+                ChartGroupReverse = Setting.simple false
+                ScoreSortMode = Setting.simple 0
 
-            EnableConsole = Setting.simple false
-            Hotkeys = Dictionary<Hotkey, Bind>()
-            GameplayBinds = [|
-                [|mk Keys.Left; mk Keys.Down; mk Keys.Right|]
-                [|mk Keys.Z; mk Keys.X; mk Keys.Period; mk Keys.Slash|]
-                [|mk Keys.Z; mk Keys.X; mk Keys.Space; mk Keys.Period; mk Keys.Slash|]
-                [|mk Keys.Z; mk Keys.X; mk Keys.C; mk Keys.Comma; mk Keys.Period; mk Keys.Slash|]
-                [|mk Keys.Z; mk Keys.X; mk Keys.C; mk Keys.Space; mk Keys.Comma; mk Keys.Period; mk Keys.Slash|]
-                [|mk Keys.Z; mk Keys.X; mk Keys.C; mk Keys.V; mk Keys.Comma; mk Keys.Period; mk Keys.Slash; mk Keys.RightShift|]
-                [|mk Keys.Z; mk Keys.X; mk Keys.C; mk Keys.V; mk Keys.Space; mk Keys.Comma; mk Keys.Period; mk Keys.Slash; mk Keys.RightShift|]
-                [|mk Keys.CapsLock; mk Keys.Q; mk Keys.W; mk Keys.E; mk Keys.V; mk Keys.Space; mk Keys.K; mk Keys.L; mk Keys.Semicolon; mk Keys.Apostrophe|]
-            |]
+                SelectedCollection = Setting.simple None
+                Table = Setting.simple None
 
-            Preset1 = Setting.simple None
-            Preset2 = Setting.simple None
-            Preset3 = Setting.simple None
+                EnableConsole = Setting.simple false
+                Hotkeys = Dictionary<Hotkey, Bind>()
+                GameplayBinds =
+                    [|
+                        [| mk Keys.Left; mk Keys.Down; mk Keys.Right |]
+                        [| mk Keys.Z; mk Keys.X; mk Keys.Period; mk Keys.Slash |]
+                        [| mk Keys.Z; mk Keys.X; mk Keys.Space; mk Keys.Period; mk Keys.Slash |]
+                        [|
+                            mk Keys.Z
+                            mk Keys.X
+                            mk Keys.C
+                            mk Keys.Comma
+                            mk Keys.Period
+                            mk Keys.Slash
+                        |]
+                        [|
+                            mk Keys.Z
+                            mk Keys.X
+                            mk Keys.C
+                            mk Keys.Space
+                            mk Keys.Comma
+                            mk Keys.Period
+                            mk Keys.Slash
+                        |]
+                        [|
+                            mk Keys.Z
+                            mk Keys.X
+                            mk Keys.C
+                            mk Keys.V
+                            mk Keys.Comma
+                            mk Keys.Period
+                            mk Keys.Slash
+                            mk Keys.RightShift
+                        |]
+                        [|
+                            mk Keys.Z
+                            mk Keys.X
+                            mk Keys.C
+                            mk Keys.V
+                            mk Keys.Space
+                            mk Keys.Comma
+                            mk Keys.Period
+                            mk Keys.Slash
+                            mk Keys.RightShift
+                        |]
+                        [|
+                            mk Keys.CapsLock
+                            mk Keys.Q
+                            mk Keys.W
+                            mk Keys.E
+                            mk Keys.V
+                            mk Keys.Space
+                            mk Keys.K
+                            mk Keys.L
+                            mk Keys.Semicolon
+                            mk Keys.Apostrophe
+                        |]
+                    |]
 
-            VanishingNotes = Setting.simple true
-            AutoCalibrateOffset = Setting.simple false
-            AdvancedRecommendations = Setting.simple false
-            ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
-        }
+                Preset1 = Setting.simple None
+                Preset2 = Setting.simple None
+                Preset3 = Setting.simple None
 
-    let mutable internal config : Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>
+                VanishingNotes = Setting.simple true
+                AutoCalibrateOffset = Setting.simple false
+                AdvancedRecommendations = Setting.simple false
+                ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
+            }
 
-    do 
+    let mutable internal config: Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>
+
+    do
         // Register decoding rules for Percyqaz.Flux config
-        JSON.WithAutoCodec<Percyqaz.Flux.Windowing.Config>(false)
-            .WithAutoCodec<Percyqaz.Flux.Input.Bind>() |> ignore
+        JSON
+            .WithAutoCodec<Percyqaz.Flux.Windowing.Config>(false)
+            .WithAutoCodec<Percyqaz.Flux.Input.Bind>()
+        |> ignore
 
-    let mutable options : GameOptions = Unchecked.defaultof<_>
+    let mutable options: GameOptions = Unchecked.defaultof<_>
 
     module Hotkeys =
 
-        let init(d: Dictionary<Hotkey, Bind>) =
+        let init (d: Dictionary<Hotkey, Bind>) =
             Hotkeys.register "search" (mk Keys.Tab)
             Hotkeys.register "toolbar" (ctrl Keys.T)
             Hotkeys.register "tooltip" (mk Keys.Slash)
@@ -227,14 +288,14 @@ module Options =
             Hotkeys.register "next_group" (mk Keys.PageDown)
             Hotkeys.register "start" (mk Keys.Home)
             Hotkeys.register "end" (mk Keys.End)
-            
+
             Hotkeys.register "import" (ctrl Keys.I)
             Hotkeys.register "options" (ctrl Keys.O)
             Hotkeys.register "wiki" (ctrl Keys.H)
             Hotkeys.register "console" (mk Keys.GraveAccent)
             Hotkeys.register "edit_noteskin" (ctrl Keys.E)
             Hotkeys.register "player_list" (mk Keys.F9)
-            
+
             Hotkeys.register "library_mode" (mk Keys.D1)
             Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
             Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
@@ -271,7 +332,7 @@ module Options =
             Hotkeys.register "ruleset_picker" (shift Keys.D)
             Hotkeys.register "random_chart" (mk Keys.R)
             Hotkeys.register "autoplay" (ctrl Keys.A)
-            Hotkeys.register "reload_themes" (Key (Keys.S, (true, true, true)))
+            Hotkeys.register "reload_themes" (Key(Keys.S, (true, true, true)))
 
             Hotkeys.register "skip" (mk Keys.Space)
             Hotkeys.register "retry" (ctrl Keys.R)
@@ -280,62 +341,73 @@ module Options =
             Hotkeys.register "preset2" (ctrl Keys.F2)
             Hotkeys.register "preset3" (ctrl Keys.F3)
 
-            options <- { options with Hotkeys = Hotkeys.import d }
+            options <-
+                { options with
+                    Hotkeys = Hotkeys.import d
+                }
 
     let private configPath = Path.GetFullPath "config.json"
     let firstLaunch = not (File.Exists configPath)
 
     module HUDOptions =
-        
+
         open Prelude.Data.Content.HUD
-        
+
         let private cache = Dictionary<string, obj>()
-        
-        let private load_id<'T>() =
+
+        let private load_id<'T> () =
             let id = typeof<'T>.Name
             cache.Remove(id) |> ignore
 
-            let path = Path.Combine(getDataPath "Data", "HUD", id + ".json")
+            let path = Path.Combine(get_game_folder "Data", "HUD", id + ".json")
+
             if File.Exists path then
                 match JSON.FromFile<'T>(path) with
                 | Ok v -> cache.Add(id, v)
                 | Error e ->
-                    Logging.Error(sprintf "Error while loading config for gameplay widget '%s'\n  If you edited the file manually, you may have made a mistake or need to close the file in your text editor" id)
-                    cache.Add(id, JSON.Default<'T>())
-            else 
-                let default_value = JSON.Default<'T>()
-                JSON.ToFile(path, true) default_value
-                cache.Add(id, default_value)
-        
-        let load() =
-            Directory.CreateDirectory(Path.Combine(getDataPath "Data", "HUD")) |> ignore
+                    Logging.Error(
+                        sprintf
+                            "Error while loading config for gameplay widget '%s'\n  If you edited the file manually, you may have made a mistake or need to close the file in your text editor"
+                            id
+                    )
 
-            load_id<AccuracyMeter>()
-            load_id<HitMeter>()
-            load_id<Combo>()
-            load_id<SkipButton>()
-            load_id<ProgressMeter>()
-            load_id<Pacemaker>()
-            load_id<JudgementCounts>()
-            load_id<JudgementMeter>()
-            load_id<EarlyLateMeter>()
-            load_id<RateModMeter>()
-            load_id<BPMMeter>()
-                    
-        let get<'T>() = 
+                    cache.Add(id, JSON.Default<'T>())
+            else
+                let default_value = JSON.Default<'T>()
+                JSON.ToFile (path, true) default_value
+                cache.Add(id, default_value)
+
+        let load () =
+            Directory.CreateDirectory(Path.Combine(get_game_folder "Data", "HUD")) |> ignore
+
+            load_id<AccuracyMeter> ()
+            load_id<HitMeter> ()
+            load_id<Combo> ()
+            load_id<SkipButton> ()
+            load_id<ProgressMeter> ()
+            load_id<Pacemaker> ()
+            load_id<JudgementCounts> ()
+            load_id<JudgementMeter> ()
+            load_id<EarlyLateMeter> ()
+            load_id<RateModMeter> ()
+            load_id<BPMMeter> ()
+
+        let get<'T> () =
             let id = typeof<'T>.Name
+
             if cache.ContainsKey id then
                 cache.[id] :?> 'T
-            else failwithf "config not loaded: %s" id
-        
-        let set<'T>(value: 'T) =
+            else
+                failwithf "config not loaded: %s" id
+
+        let set<'T> (value: 'T) =
             let id = typeof<'T>.Name
             cache.[id] <- value
-            JSON.ToFile(Path.Combine(getDataPath "Data", "HUD", id + ".json"), true) value
+            JSON.ToFile (Path.Combine(get_game_folder "Data", "HUD", id + ".json"), true) value
 
     module Presets =
 
-        let create(name: string) : Preset =
+        let create (name: string) : Preset =
             {
                 Name = name
                 Locked = false
@@ -348,40 +420,51 @@ module Options =
                 Noteskin = options.Noteskin.Value
             }
 
-        let load(preset: Preset) =
+        let load (preset: Preset) =
             options.VisualOffset.Set preset.VisualOffset
             options.ScrollSpeed.Set preset.ScrollSpeed
             options.HitPosition.Set preset.HitPosition
             options.Upscroll.Set preset.Upscroll
             options.LaneCover.LoadPreset preset.LaneCover
+
             if Content.Noteskins.loaded.ContainsKey preset.Noteskin then
                 options.Noteskin.Set preset.Noteskin
                 Content.Noteskins.Current.switch preset.Noteskin
-            else Logging.Error(sprintf "Noteskin '%s' use in this preset has been moved or isn't available" preset.Noteskin)
+            else
+                Logging.Error(
+                    sprintf "Noteskin '%s' use in this preset has been moved or isn't available" preset.Noteskin
+                )
 
-    let load(instance: int) =
-        config <- loadImportantJsonFile "Config" configPath true
-        Localisation.loadFile config.Locale
-        if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
+    let load (instance: int) =
+        config <- load_important_json_file "Config" configPath true
+        Localisation.load_file config.Locale
+
+        if config.WorkingDirectory <> "" then
+            Directory.SetCurrentDirectory config.WorkingDirectory
+
         if instance > 0 then
             let newPath = (Directory.GetCurrentDirectory() + "-instance" + instance.ToString())
             Directory.CreateDirectory newPath |> ignore
             Directory.SetCurrentDirectory newPath
             Logging.Info(sprintf "DEV MODE MULTIPLE INSTANCE: %s" (Directory.GetCurrentDirectory()))
-        options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) true
-        
-        Directory.CreateDirectory (getDataPath "Songs") |> ignore
+
+        options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
+
+        Directory.CreateDirectory(get_game_folder "Songs") |> ignore
         // todo: similar how tos in Rulesets, Themes, Noteskins
-        File.WriteAllText(Path.Combine(getDataPath "Songs", "HOW_TO_ADD_SONGS.txt"),
-            "Dragging and dropping things into this folder won't work.\n" +
-            "Instead, drag and drop things onto the *game window* while it's open and it will import.\n" +
-            "Does this folder have stuff in, but they don't show up in game?\n" +
-            "Check they are .yav files, and then go to Options > Debug > Rebuild cache and let that run.")
+        File.WriteAllText(
+            Path.Combine(get_game_folder "Songs", "HOW_TO_ADD_SONGS.txt"),
+            "Dragging and dropping things into this folder won't work.\n"
+            + "Instead, drag and drop things onto the *game window* while it's open and it will import.\n"
+            + "Does this folder have stuff in, but they don't show up in game?\n"
+            + "Check they are .yav files, and then go to Options > Debug > Rebuild cache and let that run."
+        )
 
-        HUDOptions.load()
+        HUDOptions.load ()
 
-    let save() =
+    let save () =
         try
-            JSON.ToFile(configPath, true) config
-            JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options
-        with err -> Logging.Critical("Failed to write options/config to file.", err)
+            JSON.ToFile (configPath, true) config
+            JSON.ToFile (Path.Combine(get_game_folder "Data", "options.json"), true) options
+        with err ->
+            Logging.Critical("Failed to write options/config to file.", err)

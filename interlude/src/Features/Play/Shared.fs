@@ -113,7 +113,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
 
         Array.iteri
             (fun k (s: Animation.Fade) ->
-                if state.Scoring.KeyState |> Bitmask.hasBit k then
+                if state.Scoring.KeyState |> Bitmask.has_key k then
                     s.Value <- 1.0f
             )
             sliders
@@ -184,7 +184,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
         sliders |> Array.iter (fun s -> s.Update elapsed_ms)
 
         for k = 0 to (keys - 1) do
-            if holding.[k] && state.Scoring.KeyState |> Bitmask.hasBit k |> not then
+            if holding.[k] && state.Scoring.KeyState |> Bitmask.has_key k |> not then
                 holding.[k] <- false
                 sliders.[k].Target <- 0.0f
 

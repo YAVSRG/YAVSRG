@@ -145,9 +145,9 @@ module PlayScreen =
                                 Logging.Debug("Received input event from the future")
                             else
                                 if isRelease then
-                                    inputKeyState <- Bitmask.unsetBit column inputKeyState
+                                    inputKeyState <- Bitmask.unset_key column inputKeyState
                                 else
-                                    inputKeyState <- Bitmask.setBit column inputKeyState
+                                    inputKeyState <- Bitmask.set_key column inputKeyState
 
                                 liveplay.Add(time, inputKeyState)
                     )
@@ -285,9 +285,9 @@ module PlayScreen =
                                 Logging.Debug("Received input event from the future")
                             else
                                 if isRelease then
-                                    inputKeyState <- Bitmask.unsetBit column inputKeyState
+                                    inputKeyState <- Bitmask.unset_key column inputKeyState
                                 else
-                                    inputKeyState <- Bitmask.setBit column inputKeyState
+                                    inputKeyState <- Bitmask.set_key column inputKeyState
 
                                 liveplay.Add(time, inputKeyState)
                     )

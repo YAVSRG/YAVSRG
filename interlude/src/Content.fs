@@ -97,12 +97,12 @@ module Content =
                 current <- ruleset
                 current_hash <- Ruleset.hash current
 
-            JSON.ToFile (Path.Combine(getDataPath "Rulesets", new_id + ".ruleset"), true) ruleset
+            JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
 
         let load () =
             loaded.Clear()
 
-            let path = getDataPath "Rulesets"
+            let path = get_game_folder "Rulesets"
             let default_path = Path.Combine(path, DEFAULT_ID + ".ruleset")
 
             if not (File.Exists default_path) then
@@ -203,7 +203,7 @@ module Content =
             loaded.Clear()
             loaded.Add("*default", defaultTheme)
 
-            for source in Directory.EnumerateDirectories(getDataPath "Themes") do
+            for source in Directory.EnumerateDirectories(get_game_folder "Themes") do
                 let id = Path.GetFileName source
 
                 try
@@ -222,7 +222,7 @@ module Content =
 
         let createNew (id: string) : bool =
             let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
-            let target = Path.Combine(getDataPath "Themes", id)
+            let target = Path.Combine(get_game_folder "Themes", id)
 
             if id <> "" && not (Directory.Exists target) then
                 defaultTheme.ExtractToFolder(target)
@@ -231,7 +231,8 @@ module Content =
 
                 Current.changeConfig
                     { Current.config with
-                        Name = Current.config.Name + " (Extracted)" }
+                        Name = Current.config.Name + " (Extracted)"
+                    }
 
                 true
             else
@@ -315,7 +316,7 @@ module Content =
                 loaded.Add(id, ns)
 
             for zip in
-                Directory.EnumerateFiles(getDataPath "Noteskins")
+                Directory.EnumerateFiles(get_game_folder "Noteskins")
                 |> Seq.filter (fun p -> Path.GetExtension(p).ToLower() = ".isk") do
                 let target = Path.GetFileNameWithoutExtension zip
 
@@ -327,7 +328,7 @@ module Content =
                     ZipFile.ExtractToDirectory(zip, Path.ChangeExtension(zip, null))
                     File.Delete zip
 
-            for source in Directory.EnumerateDirectories(getDataPath "Noteskins") do
+            for source in Directory.EnumerateDirectories(get_game_folder "Noteskins") do
                 let id = Path.GetFileName source
 
                 try
@@ -355,7 +356,7 @@ module Content =
                 | None -> "Your skin"
 
             let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(skin_name, "")
-            let target = Path.Combine(getDataPath "Noteskins", id)
+            let target = Path.Combine(get_game_folder "Noteskins", id)
 
             if id <> "" && not (Directory.Exists target) then
                 Current.instance.ExtractToFolder(target)
@@ -365,7 +366,8 @@ module Content =
                 Current.changeConfig
                     { Current.config with
                         Name = skin_name
-                        Author = Option.defaultValue "Unknown" username }
+                        Author = Option.defaultValue "Unknown" username
+                    }
 
                 true
             else
@@ -376,10 +378,10 @@ module Content =
             | Embedded _ -> failwith "Current skin must not be an embedded default"
             | Folder f ->
                 let name = Path.GetFileName f
-                let target = Path.Combine(getDataPath "Exports", name + ".isk")
+                let target = Path.Combine(get_game_folder "Exports", name + ".isk")
 
                 if Current.instance.CompressToZip target then
-                    Utils.open_directory (getDataPath "Exports")
+                    Utils.open_directory (get_game_folder "Exports")
                     true
                 else
                     false
@@ -395,7 +397,8 @@ module Content =
 
         let preview_loader =
             { new Async.Service<Noteskin, (Bitmap * TextureConfig) option>() with
-                override this.Handle(ns) = async { return ns.GetTexture "note" } }
+                override this.Handle(ns) = async { return ns.GetTexture "note" }
+            }
 
     let init (themeId: string) (noteskinId: string) =
         Themes.Current.id <- themeId

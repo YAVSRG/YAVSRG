@@ -69,7 +69,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
     let download () =
         if status = NotDownloaded || status = DownloadFailed then
             let target =
-                Path.Combine(getDataPath "Downloads", Guid.NewGuid().ToString() + ".osz")
+                Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
 
             WebServices.download_file.Request(
                 (sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.id, target, (fun p -> progress <- p)),

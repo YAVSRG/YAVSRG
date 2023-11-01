@@ -59,7 +59,7 @@ type NoteskinCard(data: RepoEntry) as this =
 
             let target =
                 Path.Combine(
-                    getDataPath "Noteskins",
+                    get_game_folder "Noteskins",
                     System.Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(data.Name, "")
                     + ".isk"
                 )
