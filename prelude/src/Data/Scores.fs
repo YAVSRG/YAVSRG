@@ -72,68 +72,118 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
     let mutable lamp = ValueNone
     let mutable grade = ValueNone
 
-    member val Player : string option = None with get, set
+    member val Player: string option = None with get, set
 
     member this.ScoreInfo = score
     member this.Chart = chart
 
     member this.ReplayData =
-        replayData <- ValueOption.defaultWith (fun () -> Replay.decompress score.replay) replayData |> ValueSome
+        replayData <-
+            ValueOption.defaultWith (fun () -> Replay.decompress score.replay) replayData
+            |> ValueSome
+
         replayData.Value
 
     member this.ModChart
-        with get() =
-            modchart <- ValueOption.defaultWith (fun () -> getModChart score.selectedMods chart) modchart |> ValueSome
+        with get () =
+            modchart <-
+                ValueOption.defaultWith (fun () -> getModChart score.selectedMods chart) modchart
+                |> ValueSome
+
             modchart.Value
-        and set(value) = modchart <- ValueSome value
+        and set (value) = modchart <- ValueSome value
 
     member this.Ruleset
-        with get() = ruleset
-        and set(value) = if value <> ruleset then ruleset <- value; metrics <- ValueNone; lamp <- ValueNone; grade <- ValueNone
+        with get () = ruleset
+        and set (value) =
+            if value <> ruleset then
+                ruleset <- value
+                metrics <- ValueNone
+                lamp <- ValueNone
+                grade <- ValueNone
+
     member this.Scoring =
         metrics <-
-            ValueOption.defaultWith (fun () -> 
-                let m = Metrics.createScoreMetric ruleset this.ModChart.Keys (StoredReplayProvider this.ReplayData) this.ModChart.Notes score.rate 
-                m.Update Time.infinity; m)
+            ValueOption.defaultWith
+                (fun () ->
+                    let m =
+                        Metrics.createScoreMetric
+                            ruleset
+                            this.ModChart.Keys
+                            (StoredReplayProvider this.ReplayData)
+                            this.ModChart.Notes
+                            score.rate
+
+                    m.Update Time.infinity
+                    m
+                )
                 metrics
             |> ValueSome
+
         metrics.Value
 
     member this.Difficulty
-        with get() =
-            difficulty <- ValueOption.defaultWith (fun () -> RatingReport (this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys)) difficulty |> ValueSome
+        with get () =
+            difficulty <-
+                ValueOption.defaultWith
+                    (fun () -> RatingReport(this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys))
+                    difficulty
+                |> ValueSome
+
             difficulty.Value
-        and set(value) = difficulty <- ValueSome value
+        and set (value) = difficulty <- ValueSome value
 
     member this.Lamp =
-        lamp <- ValueOption.defaultWith (fun () -> Lamp.calculate ruleset.Grading.Lamps this.Scoring.State) lamp |> ValueSome
+        lamp <-
+            ValueOption.defaultWith (fun () -> Lamp.calculate ruleset.Grading.Lamps this.Scoring.State) lamp
+            |> ValueSome
+
         lamp.Value
 
     member this.Grade =
-        grade <- ValueOption.defaultWith (fun () -> Grade.calculate ruleset.Grading.Grades this.Scoring.State) grade |> ValueSome
+        grade <-
+            ValueOption.defaultWith (fun () -> Grade.calculate ruleset.Grading.Grades this.Scoring.State) grade
+            |> ValueSome
+
         grade.Value
 
-    member this.Accuracy = this.Scoring.State.PointsScored / this.Scoring.State.MaxPointsScored
+    member this.Accuracy =
+        this.Scoring.State.PointsScored / this.Scoring.State.MaxPointsScored
 
     member this.Physical =
-        perf <- ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf |> ValueSome
+        perf <-
+            ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf
+            |> ValueSome
+
         fst perf.Value
+
     member this.Technical =
-        perf <- ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf |> ValueSome
+        perf <-
+            ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf
+            |> ValueSome
+
         snd perf.Value
 
     member this.Mods =
         modstring <-
-            ValueOption.defaultWith
-                (fun () -> getModString(score.rate, score.selectedMods, false))
-                modstring |> ValueSome
+            ValueOption.defaultWith (fun () -> getModString (score.rate, score.selectedMods, false)) modstring
+            |> ValueSome
+
         modstring.Value
 
     member this.ModStatus =
         modstatus <-
             ValueOption.defaultWith
-                (fun () -> score.selectedMods |> ModState.enumerate |> Seq.map (fun (_, m, _) -> m.Status) |> List.ofSeq |> fun l -> ModStatus.Ranked :: l |> List.max)
-                modstatus |> ValueSome
+                (fun () ->
+                    score.selectedMods
+                    |> ModState.enumerate
+                    |> Seq.map (fun (_, m, _) -> m.Status)
+                    |> List.ofSeq
+                    |> fun l -> ModStatus.Ranked :: l |> List.max
+                )
+                modstatus
+            |> ValueSome
+
         modstatus.Value
 
 [<Json.AutoCodec>]
@@ -143,7 +193,7 @@ type ImprovementFlags =
         Accuracy: Improvement<float>
         Grade: Improvement<int>
     }
-    static member Default = 
+    static member Default =
         {
             Lamp = Improvement.None
             Accuracy = Improvement.None
@@ -154,11 +204,13 @@ module Bests =
 
     let update (score: ScoreInfoProvider) (existing: Bests) : Bests * ImprovementFlags =
         let l, lp = PersonalBests.update (score.Lamp, score.ScoreInfo.rate) existing.Lamp
-        let a, ap = PersonalBests.update (score.Scoring.Value, score.ScoreInfo.rate) existing.Accuracy
+
+        let a, ap =
+            PersonalBests.update (score.Scoring.Value, score.ScoreInfo.rate) existing.Accuracy
+
         let g, gp = PersonalBests.update (score.Grade, score.ScoreInfo.rate) existing.Grade
-        
-        { Lamp = l; Accuracy = a; Grade = g },
-        { Lamp = lp; Accuracy = ap; Grade = gp }
+
+        { Lamp = l; Accuracy = a; Grade = g }, { Lamp = lp; Accuracy = ap; Grade = gp }
 
     let create (score: ScoreInfoProvider) : Bests =
         {
@@ -179,23 +231,32 @@ module Scores =
                 Entries = new ConcurrentDictionary<string, ChartSaveData>()
             }
 
-    let data : Data =
-        loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) true
-        |> fun d -> Logging.Info (sprintf "Loaded scores for %i charts." d.Entries.Keys.Count); d
+    let data: Data =
+        load_important_json_file "Scores" (Path.Combine(get_game_folder "Data", "scores.json")) true
+        |> fun d ->
+            Logging.Info(sprintf "Loaded scores for %i charts." d.Entries.Keys.Count)
+            d
 
-    let save() = saveImportantJsonFile (Path.Combine(getDataPath "Data", "scores.json")) data
+    let save () =
+        save_important_json_file (Path.Combine(get_game_folder "Data", "scores.json")) data
 
     let getOrCreateData (chart: Chart) =
         let hash = Chart.hash chart
-        if not (data.Entries.ContainsKey hash) then data.Entries.[hash] <- ChartSaveData.FromChart chart
+
+        if not (data.Entries.ContainsKey hash) then
+            data.Entries.[hash] <- ChartSaveData.FromChart chart
+
         data.Entries.[hash]
 
     let getData (hash: string) =
-        if hash |> data.Entries.ContainsKey |> not then None else Some data.Entries.[hash]
+        if hash |> data.Entries.ContainsKey |> not then
+            None
+        else
+            Some data.Entries.[hash]
 
     let saveScore (d: ChartSaveData) (score: Score) =
         d.Scores.Add score
-        save()
+        save ()
 
     let saveScoreWithPbs (d: ChartSaveData) (rulesetId: string) (score: ScoreInfoProvider) : ImprovementFlags =
         saveScore d score.ScoreInfo
@@ -206,4 +267,9 @@ module Scores =
             flags
         else
             d.PersonalBests.Add(rulesetId, Bests.create score)
-            { Lamp = Improvement.New; Accuracy = Improvement.New; Grade = Improvement.New }
+
+            {
+                Lamp = Improvement.New
+                Accuracy = Improvement.New
+                Grade = Improvement.New
+            }
