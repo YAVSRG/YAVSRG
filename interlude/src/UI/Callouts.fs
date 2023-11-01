@@ -122,7 +122,7 @@ module Callout =
             match c._Icon with
             | Some i ->
                 let icon_size = min (if c.IsSmall then 30.0f else 50.0f) height
-                Text.drawB (Style.font, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.7f, col)
+                Text.draw_b (Style.font, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.7f, col)
                 x + icon_size + x_padding * 2.0f, width - icon_size - x_padding * 3.0f
             | None -> x + x_padding, width - x_padding * 2.0f
 
@@ -134,22 +134,25 @@ module Callout =
             match b with
             | CalloutContent.Header s ->
                 let size = header_size c.IsSmall
-                Text.drawB (Style.font, s, size, x, y, col)
+                Text.draw_b (Style.font, s, size, x, y, col)
                 y <- y + size
             | CalloutContent.Body xs ->
                 let size = text_size c.IsSmall
                 let tspacing = text_spacing c.IsSmall
 
                 for line in xs do
-                    Text.drawB (Style.font, line, size, x, y, col)
+                    Text.draw_b (Style.font, line, size, x, y, col)
                     y <- y + size
                     y <- y + tspacing
 
                 y <- y - tspacing
             | CalloutContent.Hotkey(desc, hotkey) ->
                 let size = text_size c.IsSmall
-                let text = sprintf "%s: %O" (Option.defaultValue default_hotkey_text desc) (+.hotkey)
-                Text.drawB (Style.font, text, size, x, y, (Colors.cyan_accent.O4a a, Colors.shadow_2.O4a a))
+
+                let text =
+                    sprintf "%s: %O" (Option.defaultValue default_hotkey_text desc) (+.hotkey)
+
+                Text.draw_b (Style.font, text, size, x, y, (Colors.cyan_accent.O4a a, Colors.shadow_2.O4a a))
                 y <- y + size
             | CalloutContent.Button(label, _) ->
                 y <- y + spacing
@@ -164,7 +167,7 @@ module Callout =
                     else
                         col
 
-                Text.drawJustB (
+                Text.draw_aligned_b (
                     Style.font,
                     label,
                     tsize,

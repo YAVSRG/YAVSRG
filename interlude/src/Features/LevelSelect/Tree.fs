@@ -204,8 +204,26 @@ module Tree =
 
                 if color.A > 0uy then
                     Draw.rect (Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom)) accent
-                    Text.drawJustB (Style.font, formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
-                    Text.drawJustB (Style.font, rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
+
+                    Text.draw_aligned_b (
+                        Style.font,
+                        formatted,
+                        20.0f,
+                        right - pos,
+                        top + 8.0f,
+                        (color, Color.Black),
+                        0.5f
+                    )
+
+                    Text.draw_aligned_b (
+                        Style.font,
+                        rateLabel,
+                        14.0f,
+                        right - pos,
+                        top + 35.0f,
+                        (color, Color.Black),
+                        0.5f
+                    )
 
             if personal_bests.IsSome then
                 disp grade.Value 290.0f
@@ -213,9 +231,9 @@ module Tree =
 
             // draw text
             Draw.rect (bounds.SliceBottom 25.0f) Colors.shadow_1.O1
-            Text.drawB (Style.font, cc.Title, 23.0f, left + 5f, top, Colors.text)
+            Text.draw_b (Style.font, cc.Title, 23.0f, left + 5f, top, Colors.text)
 
-            Text.drawB (
+            Text.draw_b (
                 Style.font,
                 sprintf "%s  •  %s" cc.Artist cc.Creator,
                 18.0f,
@@ -224,7 +242,7 @@ module Tree =
                 Colors.text_subheading
             )
             // todo: option between subtitle preference, source preference and just always showing difficulty name
-            Text.drawB (
+            Text.draw_b (
                 Style.font,
                 cc.Subtitle |> Option.defaultValue cc.DifficultyName,
                 15.0f,
@@ -233,12 +251,12 @@ module Tree =
                 Colors.text_subheading
             )
 
-            Text.drawJustB (Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
+            Text.draw_aligned_b (Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
             if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
                 Draw.rect bounds (Palette.color (Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
 
-                Text.drawFillB (
+                Text.fill_b (
                     Style.font,
                     chartData.Value.Comment,
                     bounds.Shrink(30.0f, 15.0f),
@@ -261,7 +279,7 @@ module Tree =
                     if this.Selected then LevelSelect.play () else this.Select()
                 elif this.RightClick(origin) then
                     ChartContextMenu(cc, context).Show()
-                elif (+."delete").Tapped() then
+                elif (+. "delete").Tapped() then
                     ChartContextMenu.ConfirmDelete(cc, false)
             else
                 hover.Target <- 0.0f
@@ -301,7 +319,7 @@ module Tree =
                  else
                      Palette.color (100, 0.7f, 0.0f))
 
-            Text.drawFillB (Style.font, name, bounds.Shrink 5.0f, Colors.text, 0.5f)
+            Text.fill_b (Style.font, name, bounds.Shrink 5.0f, Colors.text, 0.5f)
 
         member this.Draw(top, origin, originB) =
             let b = this.CheckBounds(top, origin, originB, this.OnDraw)
@@ -324,7 +342,15 @@ module Tree =
                 let b2 = b + float32 items.Count * h
 
                 if b < origin && b2 > origin then
-                    Text.drawJustB (Style.font, name, 20.0f, Viewport.vwidth - 20f, origin + 10.0f, Colors.text, 1.0f)
+                    Text.draw_aligned_b (
+                        Style.font,
+                        name,
+                        20.0f,
+                        Viewport.vwidth - 20f,
+                        origin + 10.0f,
+                        Colors.text,
+                        1.0f
+                    )
 
                 b2
             else
@@ -340,7 +366,7 @@ module Tree =
                          scrollTo <- ScrollTo.Pack name)
                 elif this.RightClick(origin) then
                     GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
-                elif (+."delete").Tapped() then
+                elif (+. "delete").Tapped() then
                     GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
 
         member this.Update(top, origin, originB, elapsed_ms) =
@@ -562,14 +588,14 @@ module Tree =
             if click_cooldown > 0.0 then
                 click_cooldown <- click_cooldown - elapsed_ms
 
-            if (+."up").Tapped() && expandedGroup <> "" then
+            if (+. "up").Tapped() && expandedGroup <> "" then
                 scrollTo <- ScrollTo.Pack expandedGroup
                 expandedGroup <- ""
 
-            if (+."down").Tapped() && expandedGroup = "" && selectedGroup <> "" then
+            if (+. "down").Tapped() && expandedGroup = "" && selectedGroup <> "" then
                 expandedGroup <- selectedGroup
                 scrollTo <- ScrollTo.Pack expandedGroup
-            elif (+."context_menu").Tapped() && Chart.CACHE_DATA.IsSome then
+            elif (+. "context_menu").Tapped() && Chart.CACHE_DATA.IsSome then
                 ChartContextMenu(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX).Show()
 
             let lo = total_height - tree_height - origin

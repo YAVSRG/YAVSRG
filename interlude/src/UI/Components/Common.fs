@@ -95,7 +95,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
             (colorFunc () |> Quad.color)
             Sprite.DefaultQuad
 
-        Text.drawFillB (Style.font, labelFunc (), this.Bounds, this.TextColor(), 0.5f)
+        Text.fill_b (Style.font, labelFunc (), this.Bounds, this.TextColor(), 0.5f)
         base.Draw()
 
     override this.Init(parent: Widget) =
@@ -166,7 +166,7 @@ type InlaidButton(label, action, icon) =
 
         Draw.rect area (Colors.shadow_1.O2)
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             text,
             area.Shrink(10.0f, 5.0f),
@@ -224,10 +224,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
         |* Text(
             fun () ->
                 match s.Value with
-                | "" ->
-                    Icons.search
-                    + " "
-                    + [ (+."search").ToString() ] %> "misc.search"
+                | "" -> Icons.search + " " + [ (+. "search").ToString() ] %> "misc.search"
                 | _ -> ""
             , Color = textEntry.ColorFunc
             , Align = Alignment.LEFT
@@ -263,7 +260,7 @@ type WIP() as this =
                 (Rect.Box(this.Bounds.Left + w * float32 i, this.Bounds.Bottom - 10.0f, w, 10.0f))
                 (if i % 2 = 1 then Color.Yellow else Color.Black)
 
-        Text.drawFillB (Style.font, text, this.Bounds.Shrink(20.0f), Colors.text, Alignment.CENTER)
+        Text.fill_b (Style.font, text, this.Bounds.Shrink(20.0f), Colors.text, Alignment.CENTER)
 
 type EmptyState(icon: string, text: string) =
     inherit StaticWidget(NodeType.None)
@@ -272,9 +269,9 @@ type EmptyState(icon: string, text: string) =
 
     override this.Draw() =
         let color = (!*Palette.LIGHT, !*Palette.DARKER)
-        Text.drawFillB (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
+        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             text,
             this.Bounds.Shrink(30.0f, 100.0f).TrimTop(175.0f).SliceTop(60.0f),
@@ -282,7 +279,7 @@ type EmptyState(icon: string, text: string) =
             Alignment.CENTER
         )
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             this.Subtitle,
             this.Bounds.Shrink(30.0f, 100.0f).TrimTop(230.0f).SliceTop(40.0f),
@@ -312,9 +309,9 @@ type LoadingState() =
     override this.Draw() =
         let color = (!*Palette.LIGHT, !*Palette.DARKER)
         let icon = animation_frames.[animation.Loops % animation_frames.Length]
-        Text.drawFillB (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
+        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             this.Text,
             this.Bounds.Shrink(30.0f, 100.0f).TrimTop(175.0f).SliceTop(60.0f),
@@ -370,4 +367,4 @@ type NewAndShiny() =
                 (Quad.color Colors.red_accent)
                 Sprite.DefaultQuad
 
-        Text.drawFillB (Style.font, this.Icon, Rect.Box(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)
+        Text.fill_b (Style.font, this.Icon, Rect.Box(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)

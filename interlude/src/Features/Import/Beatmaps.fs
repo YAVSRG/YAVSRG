@@ -141,7 +141,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
         | Downloading -> Draw.rect (this.Bounds.SliceLeft(this.Bounds.Width * progress)) Colors.white.O1
         | _ -> ()
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             data.title,
             this.Bounds.SliceTop(45.0f).Shrink(10.0f, 0.0f),
@@ -149,7 +149,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
             Alignment.LEFT
         )
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             data.artist + "  •  " + data.creator,
             this.Bounds.SliceBottom(45.0f).Shrink(10.0f, 5.0f),
@@ -162,7 +162,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
 
         Draw.rect status_bounds Colors.shadow_2.O2
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             ranked_status,
             status_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f),
@@ -175,7 +175,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
 
         Draw.rect download_bounds Colors.shadow_2.O2
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             (match status with
              | NotDownloaded -> Icons.download + " Download"
@@ -195,7 +195,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
             let stat_bounds = this.Bounds.SliceBottom(40.0f).TrimRight(x).SliceRight(145.0f)
             Draw.rect stat_bounds Colors.shadow_2.O2
 
-            Text.drawFillB (
+            Text.fill_b (
                 Style.font,
                 text,
                 stat_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f),
@@ -220,7 +220,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
             let mutable y = 0.0f
 
             for beatmap in beatmaps do
-                Text.drawFillB (
+                Text.fill_b (
                     Style.font,
                     beatmap.version,
                     popover_bounds.SliceTop(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f),
@@ -228,7 +228,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
                     Alignment.LEFT
                 )
 
-                Text.drawFillB (
+                Text.fill_b (
                     Style.font,
                     sprintf "%.2f*" beatmap.difficulty_rating,
                     popover_bounds.SliceTop(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f),

@@ -23,16 +23,16 @@ type NetworkStatus() =
             | Network.LoggedIn -> Icons.connected + "  " + Network.credentials.Username, Colors.green_accent
 
         Draw.rect area (Colors.shadow_1.O2)
-        Text.drawFillB (Style.font, text, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)
+        Text.fill_b (Style.font, text, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)
 
         if Network.credentials.Host = "localhost" then
-            Text.drawFillB (Style.font, "LOCALHOST", this.Bounds.SliceBottom(20.0f), Colors.text, Alignment.CENTER)
+            Text.fill_b (Style.font, "LOCALHOST", this.Bounds.SliceBottom(20.0f), Colors.text, Alignment.CENTER)
 
         if Screen.currentType <> Screen.Type.Lobby && Network.lobby.IsSome then
             let area = area.Translate(-300.0f, 0.0f)
             Draw.rect area (Colors.shadow_1.O2)
 
-            Text.drawFillB (
+            Text.fill_b (
                 Style.font,
                 Icons.multiplayer + "  In a lobby",
                 area.Shrink(10.0f, 5.0f),
@@ -54,7 +54,7 @@ type NetworkStatus() =
         if Mouse.hover this.Bounds && Mouse.left_click () then
             this.ToggleDropdown()
 
-        if Network.status = Network.LoggedIn && (+."player_list").Tapped() then
+        if Network.status = Network.LoggedIn && (+. "player_list").Tapped() then
             PlayersPage().Show()
 
     member this.MenuItems: (string * (unit -> unit)) seq =

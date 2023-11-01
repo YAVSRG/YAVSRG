@@ -141,7 +141,7 @@ module Terminal =
         Draw.rect (bounds.TrimBottom 70.0f) (Colors.shadow_1.O3)
         Draw.rect (bounds.SliceBottom 65.0f) (Colors.shadow_2.O3)
 
-        Text.drawB (
+        Text.draw_b (
             font.Value,
             "> " + currentLine.Value,
             30.0f,
@@ -155,7 +155,7 @@ module Terminal =
             (fun () ->
                 for i, line in Seq.indexed Log.visible do
                     if i < 19 then
-                        Text.drawB (
+                        Text.draw_b (
                             font.Value,
                             line,
                             20.0f,
@@ -166,14 +166,14 @@ module Terminal =
             )
 
     let update () =
-        if shown && (+."exit").Tapped() then
+        if shown && (+. "exit").Tapped() then
             hide ()
 
         if
             options.EnableConsole.Value
             && not shown
             && Screen.currentType <> Screen.Type.Play
-            && (+."console").Tapped()
+            && (+. "console").Tapped()
         then
             show ()
 

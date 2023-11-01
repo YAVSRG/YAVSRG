@@ -196,7 +196,7 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
                 255
                 - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
 
-            Text.drawFill (
+            Text.fill (
                 Style.font,
                 state.Ruleset.JudgementName tier,
                 this.Bounds,
@@ -228,7 +228,7 @@ type EarlyLateMeter(conf: HUD.EarlyLateMeter, state: PlayState) =
                 255
                 - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
 
-            Text.drawFill (
+            Text.fill (
                 Style.font,
                 (if early then conf.EarlyText else conf.LateText),
                 this.Bounds,
@@ -265,7 +265,7 @@ type ComboMeter(conf: HUD.Combo, state: PlayState) =
         let amt =
             popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
 
-        Text.drawFill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
+        Text.fill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
 
 type ProgressMeter(conf: HUD.ProgressMeter, state) =
     inherit StaticWidget(NodeType.None)
@@ -318,7 +318,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
             | HUD.ProgressMeterLabel.Percentage -> sprintf "%.0f%%" (pc * 100.0f)
             | _ -> ""
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             text,
             this.Bounds.Expand(0.0f, 40.0f).SliceBottom(40.0f),
@@ -329,7 +329,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
 type SkipButton(conf: HUD.SkipButton, state) =
     inherit StaticWidget(NodeType.None)
 
-    let text = [ (+."skip").ToString() ] %> "play.skiphint"
+    let text = [ (+. "skip").ToString() ] %> "play.skiphint"
     let mutable active = true
 
     let firstNote = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
@@ -338,7 +338,7 @@ type SkipButton(conf: HUD.SkipButton, state) =
         base.Update(elapsed_ms, moved)
 
         if active && state.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
-            if (+."skip").Tapped() then
+            if (+. "skip").Tapped() then
                 Song.pause ()
                 Song.play_from (firstNote - Song.LEADIN_TIME)
         else
@@ -346,7 +346,7 @@ type SkipButton(conf: HUD.SkipButton, state) =
 
     override this.Draw() =
         if active then
-            Text.drawFillB (Style.font, text, this.Bounds, Colors.text, Alignment.CENTER)
+            Text.fill_b (Style.font, text, this.Bounds, Colors.text, Alignment.CENTER)
 
 type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
     inherit StaticWidget(NodeType.None)
@@ -414,7 +414,7 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
         | PacemakerInfo.None -> ()
         | PacemakerInfo.Accuracy _
         | PacemakerInfo.Replay _ ->
-            Text.drawFillB (
+            Text.fill_b (
                 Style.font,
                 Icons.goal,
                 this.Bounds
@@ -452,7 +452,7 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
                 else
                     Icons.failure
 
-            Text.drawFillB (Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
+            Text.fill_b (Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
 
 type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
     inherit StaticWidget(NodeType.None)
@@ -493,9 +493,9 @@ type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
                         j.Color
                     ))
 
-            Text.drawFillB (Style.font, j.Name, r, (Color.White, Color.Black), Alignment.LEFT)
+            Text.fill_b (Style.font, j.Name, r, (Color.White, Color.Black), Alignment.LEFT)
 
-            Text.drawFillB (
+            Text.fill_b (
                 Style.font,
                 state.Scoring.State.Judgements.[i].ToString(),
                 r,
@@ -523,7 +523,7 @@ type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
                     Color.White
 
             Text.draw (Style.font, username, 20.0f, x, y, c)
-            Text.drawJust (Style.font, s.FormatAccuracy(), 20.0f, x - 10.0f, y, c, 1.0f)
+            Text.draw_aligned (Style.font, s.FormatAccuracy(), 20.0f, x - 10.0f, y, c, 1.0f)
             y <- y + 25.0f
         )
 

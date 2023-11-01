@@ -154,7 +154,7 @@ module PlayScreen =
 
                     this.State.Scoring.Update chartTime
 
-                if (+."retry").Tapped() then
+                if (+. "retry").Tapped() then
                     Screen.changeNew
                         (fun () -> play_screen (pacemakerMode) :> Screen.T)
                         Screen.Type.Play
@@ -183,7 +183,7 @@ module PlayScreen =
                 base.Draw()
 
                 if options.AutoCalibrateOffset.Value && this.State.CurrentChartTime() < 0.0f<ms> then
-                    Text.drawB (
+                    Text.draw_b (
                         Style.font,
                         sprintf "Local offset: %.0fms" AutomaticSync.offset.Value,
                         20.0f,

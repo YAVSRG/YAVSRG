@@ -162,12 +162,12 @@ and Menu(topLevel: Page) as this =
             stack.[i].Value.Draw()
             i <- i + 1
 
-        Text.drawFillB (Style.font, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Colors.text, 0.0f)
+        Text.fill_b (Style.font, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Colors.text, 0.0f)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (+."exit").Tapped() then
+        if (+. "exit").Tapped() then
             Selection.up ()
 
         let mutable i = 0

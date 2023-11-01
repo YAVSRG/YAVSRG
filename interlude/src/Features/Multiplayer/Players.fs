@@ -66,8 +66,8 @@ type Player(name: string, player: Network.LobbyPlayer) =
 
         Draw.rect this.Bounds fill.O3
 
-        Text.drawFillB (Style.font, name, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
-        Text.drawFillB (Style.font, icon, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.RIGHT)
+        Text.fill_b (Style.font, name, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
+        Text.fill_b (Style.font, icon, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.RIGHT)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -78,10 +78,7 @@ type Player(name: string, player: Network.LobbyPlayer) =
             && Mouse.hover this.Bounds
             && Mouse.left_click ()
         then
-            ConfirmPage(
-                [ name ] %> "lobby.confirm_transfer_host",
-                fun () -> Lobby.transfer_host name
-            )
+            ConfirmPage([ name ] %> "lobby.confirm_transfer_host", (fun () -> Lobby.transfer_host name))
                 .Show()
 
     member this.Name = name
@@ -131,7 +128,7 @@ type PlayerList() =
 
         Draw.rect user_bounds fill.O3
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             Network.credentials.Username,
             user_bounds.Shrink(10.0f, 0.0f),
@@ -139,7 +136,7 @@ type PlayerList() =
             Alignment.LEFT
         )
 
-        Text.drawFillB (
+        Text.fill_b (
             Style.font,
             (if
                  (match Network.lobby with

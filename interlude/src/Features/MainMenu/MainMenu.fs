@@ -155,7 +155,7 @@ type MainMenuScreen() as this =
         let a1 = splashSubAnim.Value * splashAnim.Value * 255.0f |> int
         let a2 = splashAnim.Alpha
 
-        Text.drawJustB (
+        Text.draw_aligned_b (
             Style.font,
             ss,
             20.0f,
@@ -165,7 +165,7 @@ type MainMenuScreen() as this =
             Alignment.CENTER
         )
 
-        Text.drawJustB (
+        Text.draw_aligned_b (
             Style.font,
             s,
             40.0f,
@@ -188,5 +188,5 @@ type MainMenuScreen() as this =
             else
                 0.0f
 
-        if (+."select").Tapped() then
+        if (+. "select").Tapped() then
             playFunc ()

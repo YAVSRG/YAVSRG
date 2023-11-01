@@ -149,7 +149,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
 
             Draw.rect box Colors.shadow_2.O2
 
-            Text.drawFillB (
+            Text.fill_b (
                 Style.font,
                 (if ss.MaxPointsScored = 0.0 then
                      100.0
@@ -161,7 +161,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 Alignment.LEFT
             )
 
-            Text.drawFillB (
+            Text.fill_b (
                 Style.font,
                 ss.Combo |> sprintf "%ix",
                 box.TrimTop(box_h * 0.5f).Expand(-20.0f, -5.0f),

@@ -88,13 +88,7 @@ type HoldNoteSettingsPage() as this =
                 (Quad.color color)
                 (Sprite.with_uv (animation.Loops, 0) (if use_tail_texture.Value then tail else head))
 
-            Text.drawFillB (
-                Style.font,
-                label,
-                Rect.Box(left, bottom, COLUMN_WIDTH, 30.0f),
-                Colors.text,
-                Alignment.CENTER
-            )
+            Text.fill_b (Style.font, label, Rect.Box(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
 
             left <- left - COLUMN_WIDTH - 50.0f
 
@@ -114,4 +108,5 @@ type HoldNoteSettingsPage() as this =
                 HoldNoteTrim = hold_note_trim.Value
                 UseHoldTailTexture = use_tail_texture.Value
                 FlipHoldTail = flip_hold_tail.Value
-                DroppedHoldColor = dropped_color.Value }
+                DroppedHoldColor = dropped_color.Value
+            }

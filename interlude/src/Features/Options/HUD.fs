@@ -38,10 +38,10 @@ module private Helpers =
             base.Update(elapsed_ms, moved)
 
             if this.Selected then
-                let u = (+."up").Tapped()
-                let d = (+."down").Tapped()
-                let l = (+."left").Tapped()
-                let r = (+."right").Tapped()
+                let u = (+. "up").Tapped()
+                let d = (+. "down").Tapped()
+                let l = (+. "left").Tapped()
+                let r = (+. "right").Tapped()
 
                 if u || d || l || r then
                     repeat <- 0
@@ -60,10 +60,10 @@ module private Helpers =
                         this.Right()
 
                 if repeat >= 0 then
-                    let u = (+."up").Pressed()
-                    let d = (+."down").Pressed()
-                    let l = (+."left").Pressed()
-                    let r = (+."right").Pressed()
+                    let u = (+. "up").Pressed()
+                    let d = (+. "down").Pressed()
+                    let l = (+. "left").Pressed()
+                    let r = (+. "right").Pressed()
 
                     time <- time + elapsed_ms
 
@@ -96,8 +96,9 @@ module private Helpers =
             "hud.generic.enable",
             Selector<_>
                 .FromBool(
-                    Setting.make (fun v -> setting.Set { setting.Value with Enabled = v }) (fun () ->
-                        setting.Value.Enabled)
+                    Setting.make
+                        (fun v -> setting.Set { setting.Value with Enabled = v })
+                        (fun () -> setting.Value.Enabled)
                 )
         )
             .Pos(100.0f)
@@ -117,26 +118,31 @@ module private Helpers =
                 override this.Up() =
                     { setting.Value with
                         Top = setting.Value.Top - 5.0f
-                        Bottom = setting.Value.Bottom - 5.0f }
+                        Bottom = setting.Value.Bottom - 5.0f
+                    }
                     |> setting.Set
 
                 override this.Down() =
                     { setting.Value with
                         Top = setting.Value.Top + 5.0f
-                        Bottom = setting.Value.Bottom + 5.0f }
+                        Bottom = setting.Value.Bottom + 5.0f
+                    }
                     |> setting.Set
 
                 override this.Left() =
                     { setting.Value with
                         Left = setting.Value.Left - 5.0f
-                        Right = setting.Value.Right - 5.0f }
+                        Right = setting.Value.Right - 5.0f
+                    }
                     |> setting.Set
 
                 override this.Right() =
                     { setting.Value with
                         Left = setting.Value.Left + 5.0f
-                        Right = setting.Value.Right + 5.0f }
-                    |> setting.Set }
+                        Right = setting.Value.Right + 5.0f
+                    }
+                    |> setting.Set
+            }
         )
             .Pos(240.0f)
             .Tooltip(Tooltip.Info("hud.generic.move"))
@@ -146,23 +152,28 @@ module private Helpers =
             { new PositionEditor(Icons.grow) with
                 override this.Up() =
                     { setting.Value with
-                        Top = setting.Value.Top - 5.0f }
+                        Top = setting.Value.Top - 5.0f
+                    }
                     |> setting.Set
 
                 override this.Down() =
                     { setting.Value with
-                        Bottom = setting.Value.Bottom + 5.0f }
+                        Bottom = setting.Value.Bottom + 5.0f
+                    }
                     |> setting.Set
 
                 override this.Left() =
                     { setting.Value with
-                        Left = setting.Value.Left - 5.0f }
+                        Left = setting.Value.Left - 5.0f
+                    }
                     |> setting.Set
 
                 override this.Right() =
                     { setting.Value with
-                        Right = setting.Value.Right + 5.0f }
-                    |> setting.Set }
+                        Right = setting.Value.Right + 5.0f
+                    }
+                    |> setting.Set
+            }
         )
             .Pos(310.0f)
             .Tooltip(Tooltip.Info("hud.generic.grow"))
@@ -172,23 +183,28 @@ module private Helpers =
             { new PositionEditor(Icons.shrink) with
                 override this.Up() =
                     { setting.Value with
-                        Bottom = setting.Value.Bottom - 5.0f }
+                        Bottom = setting.Value.Bottom - 5.0f
+                    }
                     |> setting.Set
 
                 override this.Down() =
                     { setting.Value with
-                        Top = setting.Value.Top + 5.0f }
+                        Top = setting.Value.Top + 5.0f
+                    }
                     |> setting.Set
 
                 override this.Left() =
                     { setting.Value with
-                        Right = setting.Value.Right - 5.0f }
+                        Right = setting.Value.Right - 5.0f
+                    }
                     |> setting.Set
 
                 override this.Right() =
                     { setting.Value with
-                        Left = setting.Value.Left + 5.0f }
-                    |> setting.Set }
+                        Left = setting.Value.Left + 5.0f
+                    }
+                    |> setting.Set
+            }
         )
             .Pos(380.0f)
             .Tooltip(Tooltip.Info("hud.generic.shrink"))
@@ -198,7 +214,8 @@ module private Helpers =
             fun () ->
                 setting.Value <-
                     { default_pos with
-                        Enabled = setting.Value.Enabled }
+                        Enabled = setting.Value.Enabled
+                    }
         )
             .Pos(450.0f)
             .Tooltip(Tooltip.Info("hud.generic.reset"))
@@ -217,10 +234,11 @@ type EditAccuracyMeterPage() as this =
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFill (Style.font, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
+                Text.fill (Style.font, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
 
                 if show_name.Value then
-                    Text.drawFill (Style.font, "SC+ J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f) }
+                    Text.fill (Style.font, "SC+ J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f)
+        }
 
     do
         this.Content(
@@ -242,7 +260,8 @@ type EditAccuracyMeterPage() as this =
             {
                 Position = pos.Value
                 GradeColors = grade_colors.Value
-                ShowName = show_name.Value }
+                ShowName = show_name.Value
+            }
 
 type EditHitMeterPage() as this =
     inherit Page()
@@ -274,7 +293,8 @@ type EditHitMeterPage() as this =
                         bounds.CenterX + thickness.Value / 2.0f,
                         bounds.Bottom
                     ))
-                    Color.White }
+                    Color.White
+        }
 
     do
         this.Content(
@@ -311,7 +331,8 @@ type EditHitMeterPage() as this =
                 ShowNonJudgements = show_non_judgements.Value
                 Thickness = thickness.Value
                 ReleasesExtraHeight = release_thickness.Value
-                AnimationTime = animation_time.Value }
+                AnimationTime = animation_time.Value
+            }
 
 type EditComboMeterPage() as this =
     inherit Page()
@@ -328,7 +349,8 @@ type EditComboMeterPage() as this =
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFill (Style.font, "727", bounds, Color.White, Alignment.CENTER) }
+                Text.fill (Style.font, "727", bounds, Color.White, Alignment.CENTER)
+        }
 
     do
         this.Content(
@@ -354,7 +376,8 @@ type EditComboMeterPage() as this =
                 Position = pos.Value
                 LampColors = lamp_colors.Value
                 Pop = pop_amount.Value
-                Growth = growth_amount.Value }
+                Growth = growth_amount.Value
+            }
 
 type EditSkipButtonPage() as this =
     inherit Page()
@@ -364,13 +387,13 @@ type EditSkipButtonPage() as this =
     let pos = Setting.simple data.Position
     let default_pos = HUD.SkipButton.Default.Position
 
-    let preview_text =
-        [ (+."skip").ToString() ] %> "play.skiphint"
+    let preview_text = [ (+. "skip").ToString() ] %> "play.skiphint"
 
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFillB (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER) }
+                Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
+        }
 
     do this.Content(positionEditor pos default_pos |+ preview)
 
@@ -432,13 +455,14 @@ type EditProgressMeterPage() as this =
                     | HUD.ProgressMeterLabel.Percentage -> "60%"
                     | _ -> ""
 
-                Text.drawFillB (
+                Text.fill_b (
                     Style.font,
                     text,
                     bounds.Expand(0.0f, 20.0f).SliceBottom(20.0f),
                     Colors.text_subheading,
                     Alignment.CENTER
-                ) }
+                )
+        }
 
     do
         this.Content(
@@ -461,7 +485,8 @@ type EditProgressMeterPage() as this =
                 Position = pos.Value
                 Label = label.Value
                 Color = color.Value
-                BackgroundColor = background_color.Value }
+                BackgroundColor = background_color.Value
+            }
 
 type EditPacemakerPage() as this =
     inherit Page()
@@ -474,7 +499,8 @@ type EditPacemakerPage() as this =
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFillB (Style.font, Icons.goal, bounds, Colors.text, Alignment.CENTER) }
+                Text.fill_b (Style.font, Icons.goal, bounds, Colors.text, Alignment.CENTER)
+        }
 
     do this.Content(positionEditor pos default_pos |+ preview)
 
@@ -497,7 +523,8 @@ type EditJudgementCountsPage() as this =
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Draw.rect bounds (Color.FromArgb(127, 255, 255, 255)) }
+                Draw.rect bounds (Color.FromArgb(127, 255, 255, 255))
+        }
 
     do
         this.Content(
@@ -515,7 +542,8 @@ type EditJudgementCountsPage() as this =
         HUDOptions.set<HUD.JudgementCounts>
             {
                 Position = pos.Value
-                AnimationTime = animation_time.Value }
+                AnimationTime = animation_time.Value
+            }
 
 type EditJudgementMeterPage() as this =
     inherit Page()
@@ -536,7 +564,8 @@ type EditJudgementMeterPage() as this =
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFill (Style.font, rs.JudgementName 0, bounds, rs.JudgementColor 0, Alignment.CENTER) }
+                Text.fill (Style.font, rs.JudgementName 0, bounds, rs.JudgementColor 0, Alignment.CENTER)
+        }
 
     do
         this.Content(
@@ -568,7 +597,8 @@ type EditJudgementMeterPage() as this =
                 Position = pos.Value
                 AnimationTime = animation_time.Value
                 IgnorePerfectJudgements = ignore_perfect_judgements.Value
-                PrioritiseLowerJudgements = prioritise_lower_judgements.Value }
+                PrioritiseLowerJudgements = prioritise_lower_judgements.Value
+            }
 
 type EditEarlyLateMeterPage() as this =
     inherit Page()
@@ -589,7 +619,8 @@ type EditEarlyLateMeterPage() as this =
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFill (Style.font, early_text.Value, bounds, early_color.Value, Alignment.CENTER) }
+                Text.fill (Style.font, early_text.Value, bounds, early_color.Value, Alignment.CENTER)
+        }
 
     do
         this.Content(
@@ -623,7 +654,8 @@ type EditEarlyLateMeterPage() as this =
                 EarlyText = early_text.Value
                 EarlyColor = early_color.Value
                 LateText = late_text.Value
-                LateColor = late_color.Value }
+                LateColor = late_color.Value
+            }
 
 type RateModMeterPage() as this =
     inherit Page()
@@ -638,13 +670,14 @@ type RateModMeterPage() as this =
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFillB (
+                Text.fill_b (
                     Style.font,
                     (if show_mods.Value then "1.00x, Mirror" else "1.00x"),
                     bounds,
                     Colors.text_subheading,
                     Alignment.CENTER
-                ) }
+                )
+        }
 
     do
         this.Content(
@@ -662,7 +695,8 @@ type RateModMeterPage() as this =
         HUDOptions.set<HUD.RateModMeter>
             {
                 Position = pos.Value
-                ShowMods = show_mods.Value }
+                ShowMods = show_mods.Value
+            }
 
 type BPMMeterPage() as this =
     inherit Page()
@@ -675,7 +709,8 @@ type BPMMeterPage() as this =
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.drawFillB (Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER) }
+                Text.fill_b (Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER)
+        }
 
     do this.Content(positionEditor pos default_pos |+ preview)
 
