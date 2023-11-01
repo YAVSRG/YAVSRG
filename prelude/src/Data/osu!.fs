@@ -40,9 +40,10 @@ module ``osu!`` =
         | Key2 = 268435456
         | ScoreV2 = 536870912
         | Mirror = 1073741824
+
     module Mods =
-        let allowable_mods = 
-                Mods.NoFail
+        let allowable_mods =
+            Mods.NoFail
             ||| Mods.Easy
             ||| Mods.Hidden
             ||| Mods.HardRock
@@ -57,21 +58,24 @@ module ``osu!`` =
             ||| Mods.Mirror
 
         let to_interlude_rate_and_mods (mods: Mods) : (float32 * ModState) option =
-            if mods &&& allowable_mods <> mods then None else
+            if mods &&& allowable_mods <> mods then
+                None
+            else
 
-            let rate =
-                if mods &&& Mods.DoubleTime = Mods.DoubleTime then 1.5f
-                elif mods &&& Mods.HalfTime = Mods.HalfTime then 0.75f
-                else 1.0f
+                let rate =
+                    if mods &&& Mods.DoubleTime = Mods.DoubleTime then 1.5f
+                    elif mods &&& Mods.HalfTime = Mods.HalfTime then 0.75f
+                    else 1.0f
 
-            let mod_state =
-                seq {
-                    if mods &&& Mods.Mirror = Mods.Mirror then yield ("mirror", 0)
-                } |> Map.ofSeq
-            Some (rate, mod_state)
+                let mod_state =
+                    seq {
+                        if mods &&& Mods.Mirror = Mods.Mirror then
+                            yield ("mirror", 0)
+                    }
+                    |> Map.ofSeq
 
-    let inline private debug x = x //printfn "%A" x; x
-    
+                Some(rate, mod_state)
+
     let private read_byte (br: BinaryReader) = br.ReadByte()
     let private read_short (br: BinaryReader) = br.ReadInt16()
     let private read_int (br: BinaryReader) = br.ReadInt32() |> debug
@@ -79,26 +83,40 @@ module ``osu!`` =
     let private read_single (br: BinaryReader) = br.ReadSingle() |> debug
     let private read_double (br: BinaryReader) = br.ReadDouble() |> debug
     let private read_bool (br: BinaryReader) = br.ReadByte() <> 0x00uy
+
     let private read_string (br: BinaryReader) =
         let b = br.ReadByte()
+
         if b = 0x00uy then ""
         elif b = 0x0buy then br.ReadString() |> debug
         else failwith "Unknown byte while reading string"
 
     let private read_int_double_pair (br: BinaryReader) =
-        if br.ReadByte() <> 0x08uy then failwith "Got unexpected byte"
+        if br.ReadByte() <> 0x08uy then
+            failwith "Got unexpected byte"
+
         let int = read_int br
-        if br.ReadByte() <> 0x0Duy then failwith "Got unexpected byte"
+
+        if br.ReadByte() <> 0x0Duy then
+            failwith "Got unexpected byte"
+
         let double = read_double br
         int, double
 
     let private read_star_ratings (br: BinaryReader) =
         let count = read_int br
-        if count < 0 then failwith "Something has gone wrong reading star ratings (meaning misaligned bytes earlier on)"
+
+        if count < 0 then
+            failwith "Something has gone wrong reading star ratings (meaning misaligned bytes earlier on)"
+
         Array.init count (fun i -> read_int_double_pair br)
 
     let write_string (bw: BinaryWriter) (s: string) =
-        if s = "" then bw.Write(0x00uy) else bw.Write(0x0buy); bw.Write s
+        if s = "" then
+            bw.Write(0x00uy)
+        else
+            bw.Write(0x0buy)
+            bw.Write s
 
     let private read_timing_point (br: BinaryReader) = br.ReadBytes(17) |> ignore
 
@@ -222,7 +240,7 @@ module ``osu!`` =
                 }
             with err ->
                 Logging.Error(sprintf "Exception occured at position %i" br.BaseStream.Position)
-                reraise()
+                reraise ()
 
     type OsuDatabase =
         {
@@ -234,17 +252,18 @@ module ``osu!`` =
             Beatmaps: OsuDatabase_Beatmap array
             UserPermissions: int
         }
-        static member Read (br: BinaryReader) =
+        static member Read(br: BinaryReader) =
             let version = read_int br
+
             {
                 Version = version
                 FolderCount = read_int br
                 AccountUnlocked = read_bool br
                 AccountUnlockDate = read_long br
                 PlayerName = read_string br
-                Beatmaps = 
+                Beatmaps =
                     let count = read_int br
-                    Logging.Info (sprintf "osu! Database header says there are %i beatmaps to read" count)
+                    Logging.Info(sprintf "osu! Database header says there are %i beatmaps to read" count)
                     Array.init count (fun i -> OsuDatabase_Beatmap.Read version br)
                 UserPermissions = read_int br
             }
@@ -272,9 +291,9 @@ module ``osu!`` =
             Timestamp: int64
             CompressedReplayBytes: byte array option
             OnlineScoreID: int64
-            // if you have target practice scores in your database, suck it up
+        // if you have target practice scores in your database, suck it up
         }
-        static member Read (br: BinaryReader) =
+        static member Read(br: BinaryReader) =
             {
                 Mode = read_byte br
                 Version = read_int br
@@ -298,7 +317,8 @@ module ``osu!`` =
                     if length < 0 then None else Some <| br.ReadBytes length
                 OnlineScoreID = read_long br
             }
-        member this.Write (bw: BinaryWriter) =
+
+        member this.Write(bw: BinaryWriter) =
             bw.Write this.Mode
             bw.Write this.Version
             write_string bw this.BeatmapHash
@@ -313,12 +333,16 @@ module ``osu!`` =
             bw.Write this.Score
             bw.Write this.MaxCombo
             bw.Write this.PerfectCombo
-            bw.Write (int this.ModsUsed)
+            bw.Write(int this.ModsUsed)
             write_string bw this.LifeBarGraph
-            bw.Write (DateTime.FromFileTimeUtc(this.Timestamp).Ticks)
+            bw.Write(DateTime.FromFileTimeUtc(this.Timestamp).Ticks)
+
             match this.CompressedReplayBytes with
-            | Some b -> bw.Write b.Length; bw.Write b
+            | Some b ->
+                bw.Write b.Length
+                bw.Write b
             | None -> bw.Write -1
+
             bw.Write this.OnlineScoreID
 
     type ScoreDatabase_Beatmap =
@@ -326,7 +350,7 @@ module ``osu!`` =
             Hash: string
             Scores: ScoreDatabase_Score array
         }
-        static member Read (br: BinaryReader) =
+        static member Read(br: BinaryReader) =
             {
                 Hash = read_string br
                 Scores = Array.init (read_int br) (fun i -> ScoreDatabase_Score.Read br)
@@ -337,7 +361,7 @@ module ``osu!`` =
             Version: int
             Beatmaps: ScoreDatabase_Beatmap array
         }
-        static member Read (br: BinaryReader) =
+        static member Read(br: BinaryReader) =
             {
                 Version = read_int br
                 Beatmaps = Array.init (read_int br) (fun i -> ScoreDatabase_Beatmap.Read br)
@@ -364,19 +388,21 @@ module ``osu!`` =
 
         dec.Code(input, output, replay.CompressedReplayBytes.Value.Length, BitConverter.ToInt64(lengthBytes, 0), null)
         output.Flush()
-        let string_data =
-            output.ToArray()
-            |> Encoding.UTF8.GetString
+        let string_data = output.ToArray() |> Encoding.UTF8.GetString
 
         let mutable time = -chart.FirstNote
         let mutable last_state = 256us
+
         seq {
             for entry in string_data.Split(",", StringSplitOptions.RemoveEmptyEntries) do
                 let parts = entry.Split("|")
+
                 if parts.[0] <> "-12345" then
                     time <- time + float32 parts.[0] * rate * 1.0f<ms>
                     let state = uint16 parts.[1]
+
                     if state <> last_state then
                         yield struct (time, uint16 parts.[1])
                         last_state <- state
-        } |> Array.ofSeq
+        }
+        |> Array.ofSeq
