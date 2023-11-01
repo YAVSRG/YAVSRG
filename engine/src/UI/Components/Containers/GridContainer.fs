@@ -291,8 +291,8 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 )
             | None -> false
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved || refresh)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved || refresh)
 
         let moved =
             if moved || refresh then
@@ -304,7 +304,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
         for { Widget = c; Visible = visible } in children do
             if visible && (moved || this.Floating || c.VisibleBounds.Visible) then
-                c.Update(elapsedTime, moved)
+                c.Update(elapsed_ms, moved)
 
         if this.Focused then
 
