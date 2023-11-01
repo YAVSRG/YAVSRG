@@ -53,7 +53,5 @@ module Hotkeys =
             d.Add(k, hotkeys.[k])
 
 [<AutoOpen>]
-module Helpers =
-
-    // The hotkey lookup operator
-    let (~+.) (id: string) = Hotkeys.get id
+module LookupOperator =
+    let inline (~%%) (id: string) = Hotkeys.get id

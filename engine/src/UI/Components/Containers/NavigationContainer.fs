@@ -112,13 +112,13 @@ module NavigationContainer =
         inherit Base<'T>()
 
         override this.Navigate() =
-            if (+."up").Tapped() then
+            if (%%"up").Tapped() then
                 this.Previous()
 
-            if (+."down").Tapped() then
+            if (%%"down").Tapped() then
                 this.Next()
 
-            if (+."select").Tapped() then
+            if (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
     [<Sealed>]
@@ -126,13 +126,13 @@ module NavigationContainer =
         inherit Base<'T>()
 
         override this.Navigate() =
-            if (+."left").Tapped() then
+            if (%%"left").Tapped() then
                 this.Previous()
 
-            if (+."right").Tapped() then
+            if (%%"right").Tapped() then
                 this.Next()
 
-            if (+."select").Tapped() then
+            if (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
     type private GridSwitchItem<'T when 'T :> Widget> = { Widget: 'T; X: int; Y: int }
@@ -351,19 +351,19 @@ module NavigationContainer =
 
             if this.Focused then
 
-                if this.CanUp() && (+."up").Tapped() then
+                if this.CanUp() && (%%"up").Tapped() then
                     this.Up()
 
-                if this.CanDown() && (+."down").Tapped() then
+                if this.CanDown() && (%%"down").Tapped() then
                     this.Down()
 
-                if this.CanLeft() && (+."left").Tapped() then
+                if this.CanLeft() && (%%"left").Tapped() then
                     this.Left()
 
-                if this.CanRight() && (+."right").Tapped() then
+                if this.CanRight() && (%%"right").Tapped() then
                     this.Right()
 
-                if (+."select").Tapped() then
+                if (%%"select").Tapped() then
                     match this.WhoIsFocused with
                     | Some i ->
                         last_selected <- i
