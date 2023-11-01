@@ -1,5 +1,7 @@
 ﻿namespace Interlude.Web.Shared
 
+#nowarn "3370"
+
 open System
 
 [<Struct>]
