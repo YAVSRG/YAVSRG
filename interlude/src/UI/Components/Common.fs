@@ -227,7 +227,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
                 | "" ->
                     Icons.search
                     + " "
-                    + Localisation.localiseWith [ (!| "search").ToString() ] "misc.search"
+                    + Localisation.localiseWith [ (+."search").ToString() ] "misc.search"
                 | _ -> ""
             , Color = textEntry.ColorFunc
             , Align = Alignment.LEFT

@@ -143,7 +143,7 @@ module Mounts =
             base.Update(elapsedTime, bounds)
             text.Update(elapsedTime, bounds)
             button.Update(elapsedTime, bounds)
-            if (!|"exit").Tapped() then this.Close()
+            if (+."exit").Tapped() then this.Close()
 
         override this.Draw() =
             text.Draw()

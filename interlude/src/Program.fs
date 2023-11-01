@@ -27,7 +27,7 @@ let launch (instance: int) =
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
     let crashSplash =
-        Utils.randomSplash ("CrashSplashes.txt") >> (fun s -> Logging.Critical s)
+        Utils.splash_message_picker ("CrashSplashes.txt") >> (fun s -> Logging.Critical s)
 
     try
         Options.load (instance)
@@ -68,7 +68,7 @@ let launch (instance: int) =
 
     Window.on_file_drop.Add(Import.handle_file_drop)
 
-    use icon_stream = Utils.getResourceStream ("icon.png")
+    use icon_stream = Utils.get_resource_stream ("icon.png")
     use icon = Utils.Bitmap.load icon_stream
 
     Launch.entryPoint (Options.config, "Interlude", Startup.ui_entry_point (), Some icon)

@@ -110,9 +110,9 @@ type ChartInfo() as this =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
 
-        if (!|"uprate_small").Tapped() then changeRate(0.01f)
-        elif (!|"uprate_half").Tapped() then changeRate(0.05f)
-        elif (!|"uprate").Tapped() then changeRate(0.1f)
-        elif (!|"downrate_small").Tapped() then changeRate(-0.01f)
-        elif (!|"downrate_half").Tapped() then changeRate(-0.05f)
-        elif (!|"downrate").Tapped() then changeRate(-0.1f)
+        if (+."uprate_small").Tapped() then changeRate(0.01f)
+        elif (+."uprate_half").Tapped() then changeRate(0.05f)
+        elif (+."uprate").Tapped() then changeRate(0.1f)
+        elif (+."downrate_small").Tapped() then changeRate(-0.01f)
+        elif (+."downrate_half").Tapped() then changeRate(-0.05f)
+        elif (+."downrate").Tapped() then changeRate(-0.1f)

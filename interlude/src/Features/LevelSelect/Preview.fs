@@ -72,22 +72,22 @@ type Preview(chart: ModChart, changeRate: float32 -> unit) =
             dragging <- false
             Song.resume ()
 
-        if (!| "preview").Tapped() || (!| "exit").Tapped() || Mouse.released Mouse.RIGHT then
+        if (+."preview").Tapped() || (+."exit").Tapped() || Mouse.released Mouse.RIGHT then
             this.Close()
-        elif (!| "select").Tapped() then
+        elif (+."select").Tapped() then
             this.Close()
             LevelSelect.play ()
-        elif (!| "uprate_small").Tapped() then
+        elif (+."uprate_small").Tapped() then
             changeRate (0.01f)
-        elif (!| "uprate_half").Tapped() then
+        elif (+."uprate_half").Tapped() then
             changeRate (0.05f)
-        elif (!| "uprate").Tapped() then
+        elif (+."uprate").Tapped() then
             changeRate (0.1f)
-        elif (!| "downrate_small").Tapped() then
+        elif (+."downrate_small").Tapped() then
             changeRate (-0.01f)
-        elif (!| "downrate_half").Tapped() then
+        elif (+."downrate_half").Tapped() then
             changeRate (-0.05f)
-        elif (!| "downrate").Tapped() then
+        elif (+."downrate").Tapped() then
             changeRate (-0.1f)
 
     override this.Close() =

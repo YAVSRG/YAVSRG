@@ -123,7 +123,7 @@ type Toolbar() =
                     L "notification.screenshot",
                     id,
                     L "notification.screenshot.open_folder",
-                    fun () -> openDirectory (getDataPath "Screenshots")
+                    fun () -> open_directory (getDataPath "Screenshots")
                 )
         )
         |+ HotkeyAction(
@@ -208,7 +208,7 @@ type Toolbar() =
             else
                 moved || expandAmount.Moving
 
-        if shown () && (!| "toolbar").Tapped() then
+        if shown () && (+."toolbar").Tapped() then
             userCollapse <- not userCollapse
             expandAmount.Target <- if userCollapse then 0.0f else 1.0f
 

@@ -115,7 +115,7 @@ type NoteskinsPage() as this =
             |+ Text("Current", Position = Position.Row(100.0f, 50.0f).Margin(100.0f, 0.0f), Color = K Colors.text_subheading, Align = Alignment.LEFT)
             |+ Text((fun () -> Noteskins.Current.config.Name), Position = Position.Row(130.0f, 100.0f).Margin(100.0f, 0.0f), Color = K Colors.text, Align = Alignment.LEFT)
             |+ ScrollContainer.Grid(grid, Position = { Left = 0.0f %+ 100.0f; Right = 0.6f %- 0.0f; Top = 0.0f %+ 320.0f; Bottom = 1.0f %- 270.0f })
-            |+ PageButton("noteskins.open_folder", fun () -> openDirectory (getDataPath "Noteskins"))
+            |+ PageButton("noteskins.open_folder", fun () -> open_directory (getDataPath "Noteskins"))
                 .Pos(830.0f)
                 .Tooltip(Tooltip.Info("noteskins.open_folder"))
             |+ PageButton("noteskins.get_more", 

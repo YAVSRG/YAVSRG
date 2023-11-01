@@ -54,7 +54,7 @@ type NetworkStatus() =
         if Mouse.hover this.Bounds && Mouse.left_click () then
             this.ToggleDropdown()
 
-        if Network.status = Network.LoggedIn && (!| "player_list").Tapped() then
+        if Network.status = Network.LoggedIn && (+."player_list").Tapped() then
             PlayersPage().Show()
 
     member this.MenuItems: (string * (unit -> unit)) seq =

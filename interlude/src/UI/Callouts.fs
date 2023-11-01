@@ -146,9 +146,9 @@ module Callout =
                     y <- y + tspacing
 
                 y <- y - tspacing
-            | CalloutContent.Hotkey(desc, hk) ->
+            | CalloutContent.Hotkey(desc, hotkey) ->
                 let size = text_size c.IsSmall
-                let text = sprintf "%s: %O" (Option.defaultValue default_hotkey_text desc) (!|hk)
+                let text = sprintf "%s: %O" (Option.defaultValue default_hotkey_text desc) (+.hotkey)
                 Text.drawB (Style.font, text, size, x, y, (Colors.cyan_accent.O4a a, Colors.shadow_2.O4a a))
                 y <- y + size
             | CalloutContent.Button(label, _) ->

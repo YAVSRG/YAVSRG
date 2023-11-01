@@ -71,13 +71,13 @@ type RotationPicker(rotation: Setting<float>) as this =
         base.Update(elapsedTime, moved)
 
         if this.Selected then
-            if (!| "up").Tapped() then
+            if (+."up").Tapped() then
                 fd ()
-            elif (!| "down").Tapped() then
+            elif (+."down").Tapped() then
                 bk ()
-            elif (!| "left").Tapped() then
+            elif (+."left").Tapped() then
                 bk ()
-            elif (!| "right").Tapped() then
+            elif (+."right").Tapped() then
                 fd ()
 
 type RotationSettingsPage() as this =

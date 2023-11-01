@@ -164,7 +164,7 @@ module Network =
                 | Downstream.HANDSHAKE_SUCCESS -> if credentials.Token <> "" then this.Send(Upstream.LOGIN credentials.Token)
                 | Downstream.DISCORD_AUTH_URL url ->
                     if not (url.StartsWith("https://discord.com/api/oauth2")) then Logging.Error(sprintf "Got a strange auth link! %s" url)
-                    else openUrl url
+                    else open_url url
                 | Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag ->
                     Logging.Debug("Linking an account with: " + discord_tag)
                     Events.waiting_registration_ev.Trigger discord_tag

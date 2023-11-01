@@ -53,7 +53,7 @@ module Comments =
 
     let update(elapsedTime, moved) =
         fade.Update elapsedTime
-        if textEntry.Selected && ((!|"exit").Tapped() || (!|"select").Tapped()) then Selection.clear()
+        if textEntry.Selected && ((+."exit").Tapped() || (+."select").Tapped()) then Selection.clear()
         editor.Update(elapsedTime, moved)
 
     let draw() = 

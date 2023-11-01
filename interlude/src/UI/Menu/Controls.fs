@@ -61,10 +61,10 @@ type Slider(setting: Setting.Bounded<float32>) as this =
                 set_percent amt
             elif dragging then Style.click.Play(); dragging <- false
 
-            if (!|"left").Tapped() then add (-step)
-            elif (!|"right").Tapped() then add (step)
-            elif (!|"up").Tapped() then add (step * 5.0f)
-            elif (!|"down").Tapped() then add (-step * 5.0f)
+            if (+."left").Tapped() then add (-step)
+            elif (+."right").Tapped() then add (step)
+            elif (+."up").Tapped() then add (step * 5.0f)
+            elif (+."down").Tapped() then add (-step * 5.0f)
 
     override this.Draw() =
         let v = get_percent()
@@ -106,10 +106,10 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if this.Selected then
-            if (!|"left").Tapped() then bk()
-            elif (!|"right").Tapped() then fd()
-            elif (!|"up").Tapped() then fd()
-            elif (!|"down").Tapped() then bk()
+            if (+."left").Tapped() then bk()
+            elif (+."right").Tapped() then fd()
+            elif (+."up").Tapped() then fd()
+            elif (+."down").Tapped() then bk()
 
     static member FromEnum(setting: Setting<'T>) =
         let names = Enum.GetNames(typeof<'T>)
@@ -286,9 +286,9 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
                 control.Update(elapsedTime, false)
 
         if this.Focused then
-            if not selector.Focused && (!|"up").Tapped() then this.Previous()
-            elif (!|"down").Tapped() then this.Next()
-            elif (!|"select").Tapped() then this.SelectFocusedChild()
+            if not selector.Focused && (+."up").Tapped() then this.Previous()
+            elif (+."down").Tapped() then this.Next()
+            elif (+."select").Tapped() then this.SelectFocusedChild()
 
     override this.Init(parent: Widget) =
         base.Init parent

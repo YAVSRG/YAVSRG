@@ -28,7 +28,7 @@ module LinkHandler =
                 handler.Action url
                 handled <- true
 
-        if not handled then openUrl url
+        if not handled then open_url url
 
 module private Span =
 

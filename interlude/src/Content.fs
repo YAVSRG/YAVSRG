@@ -15,7 +15,7 @@ open Prelude.Data.Content
 module Content =
 
     let private defaultTheme =
-        Theme.FromZipStream <| Utils.getResourceStream "default.zip"
+        Theme.FromZipStream <| Utils.get_resource_stream "default.zip"
 
     let mutable accentColor = ThemeConfig.Default.DefaultAccentColor
 
@@ -245,7 +245,7 @@ module Content =
             let skins = [ "defaultBar.isk"; "defaultArrow.isk"; "defaultOrb.isk" ]
 
             skins
-            |> List.map Utils.getResourceStream
+            |> List.map Utils.get_resource_stream
             |> List.map Noteskin.FromZipStream
             |> List.zip (List.map (fun s -> "*" + s) skins)
 
@@ -379,7 +379,7 @@ module Content =
                 let target = Path.Combine(getDataPath "Exports", name + ".isk")
 
                 if Current.instance.CompressToZip target then
-                    Utils.openDirectory (getDataPath "Exports")
+                    Utils.open_directory (getDataPath "Exports")
                     true
                 else
                     false

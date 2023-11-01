@@ -26,24 +26,22 @@ module Utils =
     /// L for localise -- Shorthand to get the localised text from a locale string id
     let L = Localisation.localise
 
-    let getResourceStream name =
+    let get_resource_stream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)
 
-    let getResourceText name =
-        use s = getResourceStream name
+    let get_resource_text name =
+        use s = get_resource_stream name
         use tr = new StreamReader(s)
         tr.ReadToEnd()
 
-    let randomSplash(name) =
+    let splash_message_picker(name) =
         let r = new Random()
-        let text = getResourceText name
+        let text = get_resource_text name
         let lines = text.Split("\n")
 
         fun () -> lines.[r.Next lines.Length]
 
-    let idPrint x = printfn "%A" x; x
-
-    let formatTimeOffset (ts: TimeSpan) =
+    let format_timespan (ts: TimeSpan) =
        if ts.TotalDays > 365.0 then sprintf "%.0fy" (ts.TotalDays / 365.0)
        elif ts.TotalDays > 30.0 then sprintf "%.0fmo" (ts.TotalDays / 30.0)
        elif ts.TotalDays > 7.0 then sprintf "%.0fw" (ts.TotalDays / 7.0)
@@ -52,12 +50,12 @@ module Utils =
        elif ts.TotalMinutes > 1.0 then sprintf "%.0fm" ts.TotalMinutes
        else sprintf "%.0fs" ts.TotalSeconds
 
-    let openDirectory (path: string) =
+    let open_directory (path: string) =
         ProcessStartInfo("file://" + System.IO.Path.GetFullPath path, UseShellExecute = true)
         |> Process.Start
         |> ignore
 
-    let openUrl (url: string) =
+    let open_url (url: string) =
         try Process.Start (ProcessStartInfo (url, UseShellExecute=true)) |> ignore
         with err -> Logging.Debug ("Failed to open url in browser: " + url, err)
 
@@ -70,12 +68,12 @@ module Utils =
         let rec private swap_update_files source dest =
             Directory.EnumerateFiles source
             |> Seq.iter
-                (fun s ->
-                    let fDest = Path.Combine(dest, Path.GetFileName s)
-                    try File.Copy(s, fDest, true)
+                (fun source ->
+                    let target = Path.Combine(dest, Path.GetFileName source)
+                    try File.Copy(source, target, true)
                     with :? IOException as err ->
-                        File.Move(fDest, s + ".old", true)
-                        File.Copy(s, fDest, true)
+                        File.Move(target, source + ".old", true)
+                        File.Copy(source, target, true)
                 )
             Directory.EnumerateDirectories source
             |> Seq.iter
@@ -114,7 +112,7 @@ module Utils =
         let private handle_update(release: GithubRelease) =
             latest_release <- Some release
 
-            let parseVer (s: string) =
+            let parse_version (s: string) =
                 let s = s.Split(".")
                 if s.Length > 3 then (int s.[0], int s.[1], int s.[2], int s.[3])
                 else (int s.[0], int s.[1], int s.[2], 0)
@@ -123,8 +121,8 @@ module Utils =
             let incoming = release.tag_name.Substring(1)
             latest_version_name <- incoming
 
-            let pcurrent = parseVer current
-            let pincoming = parseVer incoming
+            let pcurrent = parse_version current
+            let pincoming = parse_version incoming
 
             if pincoming > pcurrent then Logging.Info(sprintf "Update available (%s)!" incoming); update_available <- true
             elif pincoming < pcurrent then Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)

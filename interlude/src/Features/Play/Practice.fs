@@ -107,9 +107,9 @@ module PracticeScreen =
             override this.Update(elapsedTime, moved) =
                 base.Update(elapsedTime, moved)
 
-                if this.Focused && not this.Selected && (!| "right").Tapped() then
+                if this.Focused && not this.Selected && (+."right").Tapped() then
                     this.Select()
-                elif this.Selected && (!| "left").Tapped() then
+                elif this.Selected && (+."left").Tapped() then
                     this.Focus()
 
         type UI() =
@@ -138,7 +138,7 @@ module PracticeScreen =
             let mutable hit_position_suggestion = hit_position.Value
 
             let accept_suggestion_hint =
-                Localisation.localiseWith [ (!| "accept_suggestion").ToString() ] "practice.suggestions.accepthint"
+                Localisation.localiseWith [ (+."accept_suggestion").ToString() ] "practice.suggestions.accepthint"
 
             let about_right_hint = Icons.check + " " + L "practice.suggestions.aboutright"
 
@@ -387,10 +387,10 @@ module PracticeScreen =
                 if not options_mode then
                     Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsedTime
 
-                if (!| "retry").Tapped() then
+                if (+."retry").Tapped() then
                     if options_mode then play (this) else restart (this)
 
-                elif (!| "accept_suggestion").Tapped() then
+                elif (+."accept_suggestion").Tapped() then
                     if options_mode then
                         sync_ui.AcceptSuggestion()
                     else
@@ -398,7 +398,7 @@ module PracticeScreen =
                         sync_ui.AcceptSuggestion()
                         play (this)
 
-                elif options_mode && (!| "skip").Tapped() then
+                elif options_mode && (+."skip").Tapped() then
                     play (this)
 
                 elif not (liveplay :> IReplayProvider).Finished then

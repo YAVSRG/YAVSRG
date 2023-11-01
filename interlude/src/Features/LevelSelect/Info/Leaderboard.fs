@@ -82,7 +82,7 @@ module Leaderboard =
                 Position = { Left = 0.0f %+ 5.0f; Top = 0.6f %- 5.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 2.0f })
 
             |+ Text(
-                K (formatTimeOffset(DateTime.UtcNow - data.ScoreInfo.time.ToUniversalTime())),
+                K (format_timespan(DateTime.UtcNow - data.ScoreInfo.time.ToUniversalTime())),
                 Color = text_subcolor,
                 Align = Alignment.RIGHT,
                 Position = { Left = 0.5f %+ 0.0f; Top = 0.6f %- 5.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 2.0f })
@@ -105,8 +105,8 @@ module Leaderboard =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             animation.Update elapsedTime
-            if Mouse.hover this.Bounds && (!|"delete").Tapped() then ScoreContextMenu.ConfirmDeleteScore(data, false)
-            elif this.Focused && (!|"context_menu").Tapped() then ScoreContextMenu(data).Show()
+            if Mouse.hover this.Bounds && (+."delete").Tapped() then ScoreContextMenu.ConfirmDeleteScore(data, false)
+            elif this.Focused && (+."context_menu").Tapped() then ScoreContextMenu(data).Show()
 
     module Loader =
 

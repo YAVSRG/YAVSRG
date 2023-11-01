@@ -261,7 +261,7 @@ module Tree =
                     if this.Selected then LevelSelect.play () else this.Select()
                 elif this.RightClick(origin) then
                     ChartContextMenu(cc, context).Show()
-                elif (!| "delete").Tapped() then
+                elif (+."delete").Tapped() then
                     ChartContextMenu.ConfirmDelete(cc, false)
             else
                 hover.Target <- 0.0f
@@ -340,7 +340,7 @@ module Tree =
                          scrollTo <- ScrollTo.Pack name)
                 elif this.RightClick(origin) then
                     GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
-                elif (!| "delete").Tapped() then
+                elif (+."delete").Tapped() then
                     GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
 
         member this.Update(top, origin, originB, elapsedTime) =
@@ -562,14 +562,14 @@ module Tree =
             if click_cooldown > 0.0 then
                 click_cooldown <- click_cooldown - elapsedTime
 
-            if (!| "up").Tapped() && expandedGroup <> "" then
+            if (+."up").Tapped() && expandedGroup <> "" then
                 scrollTo <- ScrollTo.Pack expandedGroup
                 expandedGroup <- ""
 
-            if (!| "down").Tapped() && expandedGroup = "" && selectedGroup <> "" then
+            if (+."down").Tapped() && expandedGroup = "" && selectedGroup <> "" then
                 expandedGroup <- selectedGroup
                 scrollTo <- ScrollTo.Pack expandedGroup
-            elif (!| "context_menu").Tapped() && Chart.CACHE_DATA.IsSome then
+            elif (+."context_menu").Tapped() && Chart.CACHE_DATA.IsSome then
                 ChartContextMenu(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX).Show()
 
             let lo = total_height - tree_height - origin

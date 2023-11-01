@@ -38,7 +38,7 @@ type Tooltip(content: Callout) =
         base.Update(elapsedTime, bounds)
         if Mouse.hover this.Bounds then
             Notifications.tooltip_available <- true
-            if (!|"tooltip").Tapped() then Notifications.tooltip ((!|"tooltip"), this, content)
+            if (+."tooltip").Tapped() then Notifications.tooltip ((+."tooltip"), this, content)
 
     override this.Draw() = ()
 

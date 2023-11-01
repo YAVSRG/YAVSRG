@@ -25,7 +25,7 @@ module private Players =
 type private RecentScores(scores: Players.Profile.RecentScore array) =
     inherit StaticWidget(NodeType.None)
 
-    let scores = scores |> Array.map (fun score -> score, (DateTimeOffset.Now - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp) |> formatTimeOffset) + " ago")
+    let scores = scores |> Array.map (fun score -> score, (DateTimeOffset.Now - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp) |> format_timespan) + " ago")
 
     override this.Draw() =
         Draw.rect this.Bounds Colors.shadow_2.O2

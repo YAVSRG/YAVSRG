@@ -329,7 +329,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
 type SkipButton(conf: HUD.SkipButton, state) =
     inherit StaticWidget(NodeType.None)
 
-    let text = Localisation.localiseWith [ (!| "skip").ToString() ] "play.skiphint"
+    let text = Localisation.localiseWith [ (+."skip").ToString() ] "play.skiphint"
     let mutable active = true
 
     let firstNote = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
@@ -338,7 +338,7 @@ type SkipButton(conf: HUD.SkipButton, state) =
         base.Update(elapsedTime, bounds)
 
         if active && state.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
-            if (!| "skip").Tapped() then
+            if (+."skip").Tapped() then
                 Song.pause ()
                 Song.play_from (firstNote - Song.LEADIN_TIME)
         else

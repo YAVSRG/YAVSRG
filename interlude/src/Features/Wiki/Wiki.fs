@@ -201,9 +201,9 @@ module Wiki =
                 , 50.0f
                 , fun () ->
                     match current_page with
-                    | WikiIndex -> openUrl ("https://yavsrg.net/interlude/wiki/index.html")
-                    | WikiPage p -> openUrl ("https://yavsrg.net/interlude/wiki/" + p.Filename + ".html")
-                    | Changelog -> openUrl ("https://yavsrg.net/interlude/changelog.html")
+                    | WikiIndex -> open_url ("https://yavsrg.net/interlude/wiki/index.html")
+                    | WikiPage p -> open_url ("https://yavsrg.net/interlude/wiki/" + p.Filename + ".html")
+                    | Changelog -> open_url ("https://yavsrg.net/interlude/changelog.html")
                 , Position = Position.SliceRight(300.0f)
             )
 
@@ -287,7 +287,7 @@ module Wiki =
             buttons.Update(elapsedTime, moved)
             flow.Update(elapsedTime, moved)
 
-            if Mouse.left_click () || (!| "exit").Tapped() then
+            if Mouse.left_click () || (+."exit").Tapped() then
                 this.Close()
 
         override this.Draw() =

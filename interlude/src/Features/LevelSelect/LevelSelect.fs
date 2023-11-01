@@ -162,20 +162,20 @@ type LevelSelectScreen() =
 
         Comments.update (elapsedTime, moved)
 
-        if (!| "select").Tapped() then
+        if (+."select").Tapped() then
             LevelSelect.play ()
 
-        elif (!| "next").Tapped() then
+        elif (+."next").Tapped() then
             Tree.next ()
-        elif (!| "previous").Tapped() then
+        elif (+."previous").Tapped() then
             Tree.previous ()
-        elif (!| "next_group").Tapped() then
+        elif (+."next_group").Tapped() then
             Tree.nextGroup ()
-        elif (!| "previous_group").Tapped() then
+        elif (+."previous_group").Tapped() then
             Tree.previousGroup ()
-        elif (!| "start").Tapped() then
+        elif (+."start").Tapped() then
             Tree.beginGroup ()
-        elif (!| "end").Tapped() then
+        elif (+."end").Tapped() then
             Tree.endGroup ()
 
         Tree.update (this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsedTime)

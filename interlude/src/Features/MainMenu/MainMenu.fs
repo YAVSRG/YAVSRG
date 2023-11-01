@@ -90,7 +90,7 @@ type MainMenuScreen() as this =
         )
 
     let newSplash =
-        randomSplash "MenuSplashes.txt"
+        splash_message_picker "MenuSplashes.txt"
         >> fun s -> s.Split '¬'
         >> fun l -> if l.Length > 1 then l.[0], l.[1] else l.[0], ""
 
@@ -111,7 +111,7 @@ type MainMenuScreen() as this =
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-300.0f, -50.0f)
         ))
         |* StylishButton(
-            (fun () -> openUrl ("https://discord.gg/tA22tWR")),
+            (fun () -> open_url ("https://discord.gg/tA22tWR")),
             K(Icons.comment + " " + L "menu.discord"),
             !%Palette.DARK_100,
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-625.0f, -50.0f)
@@ -188,5 +188,5 @@ type MainMenuScreen() as this =
             else
                 0.0f
 
-        if (!| "select").Tapped() then
+        if (+."select").Tapped() then
             playFunc ()

@@ -129,16 +129,16 @@ type LibraryModeSettings() =
 
         if Chart.CACHE_DATA.IsSome then
 
-            if (!|"add_to_collection").Tapped() then CollectionManager.Current.quick_add(Chart.CACHE_DATA.Value) |> ignore
-            elif (!|"remove_from_collection").Tapped() then CollectionManager.Current.quick_remove(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX) |> ignore
-            elif (!|"move_up_in_collection").Tapped() then CollectionManager.reorder_up(Chart.LIBRARY_CTX)
-            elif (!|"move_down_in_collection").Tapped() then CollectionManager.reorder_down(Chart.LIBRARY_CTX)
+            if (+."add_to_collection").Tapped() then CollectionManager.Current.quick_add(Chart.CACHE_DATA.Value) |> ignore
+            elif (+."remove_from_collection").Tapped() then CollectionManager.Current.quick_remove(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX) |> ignore
+            elif (+."move_up_in_collection").Tapped() then CollectionManager.reorder_up(Chart.LIBRARY_CTX)
+            elif (+."move_down_in_collection").Tapped() then CollectionManager.reorder_down(Chart.LIBRARY_CTX)
 
-            elif (!|"collections").Tapped() then Menu.ShowPage SelectCollectionPage.Editor
-            elif (!|"table").Tapped() then Menu.ShowPage ManageTablesPage
-            elif (!|"reverse_sort_mode").Tapped() then 
+            elif (+."collections").Tapped() then Menu.ShowPage SelectCollectionPage.Editor
+            elif (+."table").Tapped() then Menu.ShowPage ManageTablesPage
+            elif (+."reverse_sort_mode").Tapped() then 
                 Setting.app not options.ChartSortReverse
                 LevelSelect.refresh_all()
-            elif (!|"reverse_group_mode").Tapped() then 
+            elif (+."reverse_group_mode").Tapped() then 
                 Setting.app not options.ChartGroupReverse
                 LevelSelect.refresh_all()

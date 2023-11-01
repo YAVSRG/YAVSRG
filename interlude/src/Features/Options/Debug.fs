@@ -64,7 +64,7 @@ module Debug =
                 |+ PageButton("themes.edittheme", tryEditTheme)
                     .Pos(650.0f)
                     .Tooltip(Tooltip.Info("themes.edittheme"))
-                |+ PageButton("themes.showthemesfolder", fun () -> openDirectory (getDataPath "Themes"))
+                |+ PageButton("themes.showthemesfolder", fun () -> open_directory (getDataPath "Themes"))
                     .Pos(720.0f)
                     .Tooltip(Tooltip.Info("themes.showthemesfolder"))
             )

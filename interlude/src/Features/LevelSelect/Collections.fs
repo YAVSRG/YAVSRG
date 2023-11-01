@@ -162,9 +162,9 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                else
                 Text(Localisation.localiseWith [match options.SelectedCollection.Value with Some s -> s | None -> "--"] "collections.selected.other",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
-            |+ Text(Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint",
+            |+ Text(Localisation.localiseWith [(+."add_to_collection").ToString()] "collections.addhint",
                 Position = Position.SliceBottom(190.0f).SliceTop(70.0f))
-            |+ Text(Localisation.localiseWith [(!|"remove_from_collection").ToString()] "collections.removehint",
+            |+ Text(Localisation.localiseWith [(+."remove_from_collection").ToString()] "collections.removehint",
                 Position = Position.SliceBottom(120.0f).SliceTop(70.0f))
 
         this.Content content
@@ -212,9 +212,9 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                else
                 Text(Localisation.localiseWith [match options.SelectedCollection.Value with Some s -> s | None -> "[None]"] "collections.selected.other",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
-            |+ Text(Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint",
+            |+ Text(Localisation.localiseWith [(+."add_to_collection").ToString()] "collections.addhint",
                 Position = Position.SliceBottom(190.0f).SliceTop(70.0f))
-            |+ Text(Localisation.localiseWith [(!|"remove_from_collection").ToString()] "collections.removehint",
+            |+ Text(Localisation.localiseWith [(+."remove_from_collection").ToString()] "collections.removehint",
                 Position = Position.SliceBottom(120.0f).SliceTop(70.0f))
 
         this.Content content

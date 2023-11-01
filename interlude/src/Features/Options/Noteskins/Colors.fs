@@ -64,13 +64,13 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as th
         base.Update(elapsedTime, moved)
 
         if this.Selected then
-            if (!| "up").Tapped() then
+            if (+."up").Tapped() then
                 fd ()
-            elif (!| "down").Tapped() then
+            elif (+."down").Tapped() then
                 bk ()
-            elif (!| "left").Tapped() then
+            elif (+."left").Tapped() then
                 bk ()
-            elif (!| "right").Tapped() then
+            elif (+."right").Tapped() then
                 fd ()
 
 type ColorSettingsPage() as this =

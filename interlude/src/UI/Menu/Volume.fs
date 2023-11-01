@@ -6,7 +6,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
-open Interlude.UI
 
 type Volume() =
     inherit StaticWidget(NodeType.None)
@@ -19,7 +18,7 @@ type Volume() =
         fade.Update elapsedTime
         slider.Update elapsedTime
 
-        if (!|"volume").Pressed() then
+        if (+."volume").Pressed() then
             fade.Target <- 1.0f
             Setting.app ((+) (float (Mouse.scroll()) * 0.02)) options.AudioVolume
             Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)

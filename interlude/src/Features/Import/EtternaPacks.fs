@@ -78,7 +78,7 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 400.0f; Bottom = Position.max })
         |+ Button(Icons.open_in_browser,
-            fun () -> openUrl(sprintf "https://etternaonline.com/pack/%i" id)
+            fun () -> open_url(sprintf "https://etternaonline.com/pack/%i" id)
             ,
             Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
         |* Button(Icons.download, download,
