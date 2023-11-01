@@ -126,7 +126,7 @@ module Tree =
             localCacheFlag <- cacheFlag
 
             if chartData.IsNone then
-                chartData <- Scores.getData cc.Hash
+                chartData <- Scores.get cc.Hash
 
             match chartData with
             | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->

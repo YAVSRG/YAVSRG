@@ -217,7 +217,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (Level * TableChart * 
     let rs_hash = Ruleset.hash ruleset
 
     let score_of (hash: string) =
-        (Scores.getData hash).Value.PersonalBests.[rs_hash].Accuracy
+        (Scores.get hash).Value.PersonalBests.[rs_hash].Accuracy
         |> PersonalBests.get_best_above 1.0f
         |> Option.get
 

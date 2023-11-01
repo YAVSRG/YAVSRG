@@ -10,6 +10,8 @@ open Interlude.UI
 open Interlude.Features
 open Interlude.Features.Online
 
+#nowarn "3370"
+
 type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
     inherit Screen()
 

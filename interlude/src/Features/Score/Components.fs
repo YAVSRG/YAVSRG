@@ -15,6 +15,8 @@ open Interlude.Utils
 open Interlude.Features
 open Interlude.Features.Stats
 
+#nowarn "3370"
+
 type TopBanner(data: ScoreInfoProvider) as this =
     inherit StaticContainer(NodeType.None)
 

@@ -122,7 +122,7 @@ module Gameplay =
 
                             Background.load (Cache.background_path chart Library.cache)
 
-                            let save_data = Scores.getOrCreateData chart
+                            let save_data = Scores.get_or_create chart
 
                             yield
                                 fun () ->
@@ -354,9 +354,9 @@ module Gameplay =
                         ignore
                     )
 
-                Scores.saveScoreWithPbs Chart.SAVE_DATA.Value Content.Rulesets.current_hash data
+                Scores.save_score_pbs Chart.SAVE_DATA.Value Content.Rulesets.current_hash data
             else
-                Scores.saveScore Chart.SAVE_DATA.Value data.ScoreInfo
+                Scores.save_score Chart.SAVE_DATA.Value data.ScoreInfo
                 ImprovementFlags.Default
         else
             ImprovementFlags.Default
