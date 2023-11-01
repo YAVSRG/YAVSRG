@@ -28,43 +28,45 @@ module Fonts =
 
     [<AllowNullLiteral>]
     type SpriteFont(font: Font, fallbacks: FontFamily list) =
-        let fontLookup = new Dictionary<int32, SpriteQuad>()
+        let char_lookup = new Dictionary<int32, SpriteQuad>()
 
-        let renderOptions =
+        let render_options =
             new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
 
-        let textOptions =
+        let text_options =
             let x = new TextOptions() in
             x.FallbackFonts.AddRange(fallbacks)
             x
 
-        let drawOptions =
+        let draw_options =
             new DrawingOptions(
-                TextOptions = textOptions,
+                TextOptions = text_options,
                 GraphicsOptions = new GraphicsOptions(Antialias = true, AntialiasSubpixelDepth = 24)
             )
 
-        let codepointToString (c: int32) : string = Char.ConvertFromUtf32 c
+        let code_to_string (c: int32) : string = Char.ConvertFromUtf32 c
 
-        let genChar (c: int32) =
-            let s = codepointToString c
-            let size = TextMeasurer.Measure(s, renderOptions)
+        let render_char (c: int32) =
+            let s = code_to_string c
+            let size = TextMeasurer.Measure(s, render_options)
             use img = new Bitmap(max 1 (int size.Width), max 1 (int size.Height))
 
             try
                 img.Mutate<PixelFormats.Rgba32>(fun img ->
-                    img.DrawText(drawOptions, s, font, SixLabors.ImageSharp.Color.White, new PointF(0f, 0f))
+                    img.DrawText(draw_options, s, font, SixLabors.ImageSharp.Color.White, new PointF(0f, 0f))
                     |> ignore
                 )
             with err ->
                 Logging.Error(sprintf "Exception occurred rendering glyph with code point %i" (int c), err)
 
-            fontLookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.with_uv (0, 0))
+            char_lookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.with_uv (0, 0))
 
-        let genAtlas () =
-            let rowspacing = SCALE * 1.6f
+        // render a font texture atlas, containing common characters + icons
+        // characters outside this set are dynamically generated on use
+        let render_atlas () =
+            let row_spacing = SCALE * 1.6f
 
-            let getRowGlyphs chars =
+            let row_glyph_info chars =
                 let mutable w = 0.0f
                 let mutable highSurrogate: char = ' '
 
@@ -79,7 +81,7 @@ module Fonts =
                                 else
                                     int32 c
 
-                            let size = TextMeasurer.Measure(codepointToString code, renderOptions)
+                            let size = TextMeasurer.Measure(code_to_string code, render_options)
                             w <- w + size.Width + 2.0f
 
                             yield
@@ -91,15 +93,15 @@ module Fonts =
                 }
                 |> List.ofSeq
 
-            let chunks =
+            let rows =
                 "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!\"£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\r\n•∞"
                 + Feather.CONCAT
                 |> Seq.chunkBySize 30
                 |> Seq.map (String)
 
-            let glyphs = Seq.map getRowGlyphs chunks |> List.ofSeq
+            let glyphs = Seq.map row_glyph_info rows |> List.ofSeq
 
-            let h = float32 glyphs.Length * rowspacing
+            let h = float32 glyphs.Length * row_spacing
 
             let w =
                 glyphs
@@ -117,11 +119,11 @@ module Fonts =
                 for glyph in row do
                     img.Mutate<PixelFormats.Rgba32>(fun img ->
                         img.DrawText(
-                            drawOptions,
-                            codepointToString glyph.Code,
+                            draw_options,
+                            code_to_string glyph.Code,
                             font,
                             SixLabors.ImageSharp.Color.White,
-                            new PointF(glyph.Offset, rowspacing * float32 i)
+                            new PointF(glyph.Offset, row_spacing * float32 i)
                         )
                         |> ignore
                     )
@@ -130,7 +132,7 @@ module Fonts =
 
             for i, row in List.indexed glyphs do
                 for glyph in row do
-                    fontLookup.Add(
+                    char_lookup.Add(
                         glyph.Code,
                         struct ({ sprite with
                                     Height = int glyph.Height
@@ -138,32 +140,32 @@ module Fonts =
                                 },
                                 (Rect.Box(
                                     glyph.Offset / w,
-                                    (rowspacing * float32 i) / h,
+                                    (row_spacing * float32 i) / h,
                                     glyph.Width / w,
                                     glyph.Height / h
                                  )
                                  |> Quad.ofRect))
                     )
 
-        do genAtlas ()
+        do render_atlas ()
 
         member this.Char(c: int32) =
-            if not <| fontLookup.ContainsKey c then
-                genChar c
+            if not <| char_lookup.ContainsKey c then
+                render_char c
 
-            fontLookup.[c]
+            char_lookup.[c]
 
         member this.Dispose() =
-            fontLookup.Values |> Seq.iter (fun struct (s, _) -> Sprite.destroy s)
+            char_lookup.Values |> Seq.iter (fun struct (s, _) -> Sprite.destroy s)
 
         member val CharSpacing = -0.04f with get, set
         member val SpaceWidth = 0.25f with get, set
         member val ShadowDepth = 0.09f with get, set
 
+
     let collection = new FontCollection()
 
-    let add (stream: Stream) =
-        let family = collection.Install stream in ()
+    let add (stream: Stream) = collection.Install stream |> ignore
 
     let create (name: string) =
         let found, family = collection.TryFind name
@@ -190,8 +192,6 @@ open Fonts
 
 module Text =
 
-    let private FONTSCALE = SCALE
-
     let measure (font: SpriteFont, text: string) : float32 =
         let mutable width = -font.CharSpacing
         let mutable highSurrogate = ' '
@@ -212,32 +212,32 @@ module Text =
                         int32 thisChar
 
                 let struct (s, _) = font.Char code
-                width <- width + (float32 s.Width) / FONTSCALE + font.CharSpacing
+                width <- width + (float32 s.Width) / SCALE + font.CharSpacing
 
             i <- i + 1
 
         width
 
-    let drawB (font: SpriteFont, text: string, scale, x, y, (fg, bg)) =
-        let scale2 = scale / FONTSCALE
-        let shadowAdjust = font.ShadowDepth * scale
+    let draw_b (font: SpriteFont, text: string, scale, x, y, (fg, bg)) =
+        let scale2 = scale / SCALE
+        let shadow_spacing = font.ShadowDepth * scale
         let mutable x = x
-        let mutable highSurrogate = ' '
+        let mutable high_surrogate = ' '
         let mutable i = 0
 
         while i < text.Length do
-            let thisChar = text.[i]
+            let this_char = text.[i]
 
-            if thisChar = ' ' then
+            if this_char = ' ' then
                 x <- x + font.SpaceWidth * scale
-            elif Char.IsHighSurrogate thisChar then
-                highSurrogate <- thisChar
+            elif Char.IsHighSurrogate this_char then
+                high_surrogate <- this_char
             else
                 let code =
-                    if Char.IsLowSurrogate thisChar then
-                        Char.ConvertToUtf32(highSurrogate, thisChar)
+                    if Char.IsLowSurrogate this_char then
+                        Char.ConvertToUtf32(high_surrogate, this_char)
                     else
-                        int32 thisChar
+                        int32 this_char
 
                 let struct (s, q) = font.Char code
                 let w = float32 s.Width * scale2
@@ -245,7 +245,7 @@ module Text =
                 let r = Rect.Box(x, y, w, h)
 
                 if (bg: Color).A <> 0uy then
-                    Draw.quad (Quad.ofRect (r.Translate(shadowAdjust, shadowAdjust))) (Quad.color bg) struct (s, q)
+                    Draw.quad (Quad.ofRect (r.Translate(shadow_spacing, shadow_spacing))) (Quad.color bg) struct (s, q)
 
                 Draw.quad (Quad.ofRect r) (Quad.color fg) struct (s, q)
                 x <- x + w + font.CharSpacing * scale
@@ -253,15 +253,15 @@ module Text =
             i <- i + 1
 
     let draw (font, text, scale, x, y, color) =
-        drawB (font, text, scale, x, y, (color, Color.Transparent))
+        draw_b (font, text, scale, x, y, (color, Color.Transparent))
 
-    let drawJust (font: SpriteFont, text, scale, x, y, color, just: float32) =
+    let draw_aligned (font: SpriteFont, text, scale, x, y, color, just: float32) =
         draw (font, text, scale, x - measure (font, text) * scale * just, y, color)
 
-    let drawJustB (font: SpriteFont, text, scale, x, y, color, just: float32) =
-        drawB (font, text, scale, x - measure (font, text) * scale * just, y, color)
+    let draw_aligned_b (font: SpriteFont, text, scale, x, y, color, just: float32) =
+        draw_b (font, text, scale, x - measure (font, text) * scale * just, y, color)
 
-    let drawFillB (font: SpriteFont, text: string, bounds: Rect, color: Color * Color, just: float32) =
+    let fill_b (font: SpriteFont, text: string, bounds: Rect, color: Color * Color, just: float32) =
         let w = measure (font, text)
         let scale = Math.Min(bounds.Height * 0.6f, (bounds.Width / w))
 
@@ -270,7 +270,7 @@ module Text =
             + just * (bounds.Right - scale * w * 0.5f)
             - w * scale * 0.5f
 
-        drawB (font, text, scale, x, bounds.CenterY - scale * 0.75f, color)
+        draw_b (font, text, scale, x, bounds.CenterY - scale * 0.75f, color)
 
-    let drawFill (font, text, bounds, color, just) =
-        drawFillB (font, text, bounds, (color, Color.Transparent), just)
+    let fill (font, text, bounds, color, just) =
+        fill_b (font, text, bounds, (color, Color.Transparent), just)

@@ -34,8 +34,8 @@ type SwapContainer() as this =
 
     override this.Draw() = current.Draw()
 
-    override this.Update(elapsed_time, moved) =
-        base.Update(elapsed_time, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         let moved =
             if swapped_last_frame then
@@ -44,4 +44,4 @@ type SwapContainer() as this =
             else
                 moved
 
-        current.Update(elapsed_time, moved)
+        current.Update(elapsed_ms, moved)

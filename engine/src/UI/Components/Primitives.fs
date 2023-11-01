@@ -25,7 +25,7 @@ type Text(text_func) =
     member val Color = K Colors.text with get, set
 
     override this.Draw() =
-        Text.drawFillB (Style.font, text_func (), this.Bounds, this.Color(), this.Align)
+        Text.fill_b (Style.font, text_func (), this.Bounds, this.Color(), this.Align)
 
     override this.Init(parent) = base.Init parent
 

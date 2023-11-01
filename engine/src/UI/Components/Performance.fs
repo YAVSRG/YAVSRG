@@ -46,7 +46,7 @@ type PerformanceMonitor() =
 
     override this.Draw() =
         if enable then
-            Text.drawB (
+            Text.draw_b (
                 Style.font,
                 sprintf "%.3f FPS" fps,
                 30.0f,
@@ -55,7 +55,7 @@ type PerformanceMonitor() =
                 (Color.White, Color.DarkRed)
             )
 
-            Text.drawB (
+            Text.draw_b (
                 Style.font,
                 sprintf
                     "%.1f - %.1fms playfield latency"
@@ -67,7 +67,7 @@ type PerformanceMonitor() =
                 (Color.White, Color.DarkGreen)
             )
 
-            Text.drawB (
+            Text.draw_b (
                 Style.font,
                 sprintf "%.1fms frame compensation" (Render.Performance.frame_compensation ()),
                 30.0f,
@@ -76,7 +76,7 @@ type PerformanceMonitor() =
                 (Color.White, Color.Black)
             )
 
-            Text.drawB (
+            Text.draw_b (
                 Style.font,
                 sprintf "%O to hide overlay" all_bind,
                 30.0f,
