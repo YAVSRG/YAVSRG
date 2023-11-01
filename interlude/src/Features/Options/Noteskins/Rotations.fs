@@ -125,7 +125,7 @@ type RotationSettingsPage() as this =
                 .Pos(370.0f, Viewport.vwidth - 200.0f, NOTE_WIDTH)
         )
 
-    override this.Title = L "noteskins.edit.rotations.name"
+    override this.Title = %"noteskins.edit.rotations.name"
 
     override this.OnClose() =
         Noteskins.Current.changeConfig

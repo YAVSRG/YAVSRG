@@ -227,7 +227,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
                 | "" ->
                     Icons.search
                     + " "
-                    + Localisation.localiseWith [ (+."search").ToString() ] "misc.search"
+                    + [ (+."search").ToString() ] %> "misc.search"
                 | _ -> ""
             , Color = textEntry.ColorFunc
             , Align = Alignment.LEFT
@@ -246,7 +246,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
 type WIP() as this =
     inherit StaticWidget(NodeType.None)
 
-    let text = L "misc.wip"
+    let text = %"misc.wip"
 
     do this.Position <- Position.SliceBottom(100.0f)
 
@@ -303,7 +303,7 @@ type LoadingState() =
             Percyqaz.Flux.Resources.Feather.cloud_drizzle
         |]
 
-    member val Text = L "misc.loading" with get, set
+    member val Text = %"misc.loading" with get, set
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

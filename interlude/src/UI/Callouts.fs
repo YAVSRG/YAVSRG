@@ -81,7 +81,7 @@ module Callout =
     let text_size is_small = if is_small then 18.0f else 25.0f
     let text_spacing is_small = if is_small then 8.0f else 10.0f
 
-    let default_hotkey_text = L "misc.hotkeyhint"
+    let default_hotkey_text = %"misc.hotkeyhint"
 
     let measure (c: Callout) : float32 * float32 =
         let spacing = spacing c.IsSmall

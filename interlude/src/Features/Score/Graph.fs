@@ -28,7 +28,7 @@ type ScoreGraphSettingsPage() as this =
                 .Pos(300.0f)
         )
 
-    override this.Title = L "score.graph.settings"
+    override this.Title = %"score.graph.settings"
     override this.OnClose() = ()
 
 type ScoreGraph(data: ScoreInfoProvider) =

@@ -73,19 +73,19 @@ type MainMenuScreen() as this =
         Screen.change Screen.Type.LevelSelect Transitions.Flags.Default
 
     let play =
-        MenuButton(playFunc, L "menu.play.name", Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f))
+        MenuButton(playFunc, %"menu.play.name", Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f))
 
     let options =
         MenuButton(
             OptionsMenuRoot.show,
-            L "menu.options.name",
+            %"menu.options.name",
             Position.Box(0.0f, 0.5f, -100.0f, -50.0f, 1230.0f, 100.0f)
         )
 
     let quit =
         MenuButton(
             (fun () -> Screen.back Transitions.Flags.UnderLogo),
-            L "menu.quit.name",
+            %"menu.quit.name",
             Position.Box(0.0f, 0.5f, -100.0f, 100.0f, 1160.0f, 100.0f)
         )
 
@@ -105,14 +105,14 @@ type MainMenuScreen() as this =
         |+ quit
         |+ (StylishButton(
             Wiki.show_changelog,
-            K(Icons.star + " " + L "menu.changelog"),
+            K(Icons.star + " " + %"menu.changelog"),
             !%Palette.MAIN_100,
             TiltRight = false,
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-300.0f, -50.0f)
         ))
         |* StylishButton(
             (fun () -> open_url ("https://discord.gg/tA22tWR")),
-            K(Icons.comment + " " + L "menu.discord"),
+            K(Icons.comment + " " + %"menu.discord"),
             !%Palette.DARK_100,
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-625.0f, -50.0f)
         )
@@ -121,8 +121,8 @@ type MainMenuScreen() as this =
         if AutoUpdate.update_available then
             Notifications.system_feedback (
                 Icons.system_notification,
-                L "notification.update_available.title",
-                L "notification.update_available.body"
+                %"notification.update_available.title",
+                %"notification.update_available.body"
             )
 
         if prev = Screen.Type.SplashScreen && firstLaunch then

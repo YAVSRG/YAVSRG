@@ -28,5 +28,5 @@ type Updater() as this =
         elif AutoUpdate.update_started then
             ()
         else 
-            Notifications.system_feedback(Icons.system_notification, L"notification.update_installing.title", L"notification.update_installing.body")
-            AutoUpdate.apply_update(fun () -> Notifications.system_feedback(Icons.system_notification, L"notification.update_installed.title", L"notification.update_installed.body"))
+            Notifications.system_feedback(Icons.system_notification, %"notification.update_installing.title", %"notification.update_installing.body")
+            AutoUpdate.apply_update(fun () -> Notifications.system_feedback(Icons.system_notification, %"notification.update_installed.title", %"notification.update_installed.body"))

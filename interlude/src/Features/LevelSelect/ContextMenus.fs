@@ -8,6 +8,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
@@ -44,7 +45,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                     if CollectionManager.remove_from(name, Library.collections.Get(name).Value, cc, context) then Menu.Back()
                 ),
                 Icon = Icons.remove_from_collection,
-                Text = Localisation.localiseWith [name] "chart.remove_from_collection.name"
+                Text = [name] %> "chart.remove_from_collection.name"
             )
 
         match Table.current() with
@@ -82,7 +83,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     static member ConfirmDelete(cc, is_submenu) =
         let chartName = sprintf "%s [%s]" cc.Title cc.DifficultyName
         ConfirmPage(
-            Localisation.localiseWith [chartName] "misc.confirmdelete",
+            [chartName] %> "misc.confirmdelete",
             fun () ->
                 Cache.delete cc Library.cache
                 LevelSelect.refresh_all()
@@ -105,7 +106,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
     static member ConfirmDelete(name, charts, is_submenu) =
         let groupName = sprintf "%s (%i charts)" name (Seq.length charts)
         ConfirmPage(
-            Localisation.localiseWith [groupName] "misc.confirmdelete",
+            [groupName] %> "misc.confirmdelete",
             fun () ->
                 Cache.deleteMany charts Library.cache
                 LevelSelect.refresh_all()
@@ -144,10 +145,10 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
     static member ConfirmDeleteScore(score, is_submenu) =
         let scoreName = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
         ConfirmPage(
-            Localisation.localiseWith [scoreName] "misc.confirmdelete",
+            [scoreName] %> "misc.confirmdelete",
             fun () ->
                 Chart.SAVE_DATA.Value.Scores.Remove score.ScoreInfo |> ignore
                 LevelSelect.refresh_all()
-                Notifications.action_feedback (Icons.delete, Localisation.localiseWith [scoreName] "notification.deleted", "")
+                Notifications.action_feedback (Icons.delete, [scoreName] %> "notification.deleted", "")
                 if is_submenu then Menu.Back()
         ).Show()

@@ -76,11 +76,11 @@ type private ModSelectPage(onClose) as this =
                 .Tooltip(Tooltip.Info("gameplay.pacemaker"))
         )
 
-    override this.Title = L"mods.name"
+    override this.Title = %"mods.name"
     override this.OnClose() = onClose()
 
 type ModSelect(onClose) =
-    inherit StylishButton((fun () -> ModSelectPage(onClose).Show()), K (sprintf "%s %s" Icons.mods (L"levelselect.mods.name")), (fun () -> Palette.color(100, 0.5f, 0.0f)), Hotkey = "mods")
+    inherit StylishButton((fun () -> ModSelectPage(onClose).Show()), K (sprintf "%s %s" Icons.mods (%"levelselect.mods.name")), (fun () -> Palette.color(100, 0.5f, 0.0f)), Hotkey = "mods")
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

@@ -79,7 +79,7 @@ type SelectedChart() =
     override this.Init(parent: Widget) =
         
         this
-        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> L"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> %"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
         |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Artist + "  •  " + c.Creator | None -> ""), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
         |+ Text((fun () -> if SelectedChart.loaded() then Chart.CACHE_DATA.Value.DifficultyName else "???"), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
 
@@ -88,7 +88,7 @@ type SelectedChart() =
         |+ Text((fun () -> if SelectedChart.loaded() then Chart.FMT_BPM else ""), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> if SelectedChart.loaded() then getModString(rate.Value, selectedMods.Value, false) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> if SelectedChart.loaded() then Chart.FMT_NOTECOUNTS.Value else ""), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
-        |+ Text((fun () -> if SelectedChart.loaded() || SelectedChart.chart.IsNone then "" else L"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> if SelectedChart.loaded() || SelectedChart.chart.IsNone then "" else %"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
         |+ Clickable(
             fun () -> 
@@ -109,8 +109,8 @@ type SelectedChart() =
             StylishButton(
                 (fun () -> Network.lobby.Value.Spectate <- not Network.lobby.Value.Spectate),
                 (fun () -> 
-                    if Network.lobby.Value.Spectate then sprintf "%s %s" Icons.preview (L"lobby.spectator")
-                    else sprintf "%s %s" Icons.play (L"lobby.player")),
+                    if Network.lobby.Value.Spectate then sprintf "%s %s" Icons.preview (%"lobby.spectator")
+                    else sprintf "%s %s" Icons.play (%"lobby.player")),
                 !%Palette.MAIN_100,
                 Position = { Position.SliceBottom(50.0f) with Right = 0.5f %- 25.0f })
             )
@@ -125,7 +125,7 @@ type SelectedChart() =
                         Screen.Type.Replay
                         Transitions.Flags.Default
                 ),
-                K (sprintf "%s %s" Icons.preview (L"lobby.spectate")),
+                K (sprintf "%s %s" Icons.preview (%"lobby.spectate")),
                 !%Palette.DARK_100,
                 TiltRight = false,
                 Position = { Position.SliceBottom(50.0f) with Left = 0.5f %- 0.0f })
@@ -148,10 +148,10 @@ type SelectedChart() =
                         match l.ReadyStatus with
                         | ReadyFlag.NotReady -> 
                             if Network.lobby.Value.Spectate then 
-                                sprintf "%s %s" Icons.preview (L"lobby.ready") 
+                                sprintf "%s %s" Icons.preview (%"lobby.ready") 
                             else 
-                                sprintf "%s %s" Icons.ready (L"lobby.ready")
-                        | _ -> sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")
+                                sprintf "%s %s" Icons.ready (%"lobby.ready")
+                        | _ -> sprintf "%s %s" Icons.not_ready (%"lobby.not_ready")
                     | None -> "!"),
                 !%Palette.DARK_100,
                 TiltRight = false,
@@ -168,8 +168,8 @@ type SelectedChart() =
             StylishButton(
                 (fun () -> if Network.lobby.Value.Countdown then Lobby.cancel_round() else Lobby.start_round()),
                 (fun () -> 
-                    if Network.lobby.Value.Countdown then sprintf "%s %s" Icons.connection_failed (L"lobby.cancel_game")
-                    else sprintf "%s %s" Icons.play (L"lobby.start_game")),
+                    if Network.lobby.Value.Countdown then sprintf "%s %s" Icons.connection_failed (%"lobby.cancel_game")
+                    else sprintf "%s %s" Icons.play (%"lobby.start_game")),
                 !%Palette.MAIN_100,
                 Position = { Position.SliceBottom(50.0f) with Right = 0.5f %- 25.0f }
             )

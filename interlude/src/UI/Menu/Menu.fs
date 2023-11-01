@@ -83,7 +83,7 @@ and Menu(topLevel: Page) as this =
 
     let back_button =
         IconButton(
-            L "menu.back",
+            %"menu.back",
             Icons.back,
             60.0f,
             Menu.Back,
@@ -204,7 +204,7 @@ type ConfirmPage(prompt: string, yes: unit -> unit) as this =
             |+ Text(prompt, Position = Position.Row(100.0f, PRETTYHEIGHT))
         )
 
-    override this.Title = L "confirm"
+    override this.Title = %"confirm"
     override this.OnClose() = ()
 
 type Page with

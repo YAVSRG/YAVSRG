@@ -49,8 +49,8 @@ type private Leaderboard() =
 
         this
         |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
-        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
-        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, L"misc.server_error"))
+        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, %"misc.offline"))
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, %"misc.server_error"))
         |* ScrollContainer.Flow(contents)
 
         base.Init parent
@@ -115,8 +115,8 @@ type private CompareFriend(ruleset: Ruleset, data_by_level: (Level * (TableChart
 
         this
         |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
-        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
-        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, L"misc.server_error"))
+        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, %"misc.offline"))
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, %"misc.server_error"))
         |+ Text("Comparing to " + name, Align = Alignment.RIGHT, Position = Position.SliceTop(50.0f).Margin(20.0f, 0.0f))
         |+ Button(K (Icons.back + " Back"), on_back, Position = Position.Box(0.0f, 0.0f, 200.0f, 50.0f))
         |* ScrollContainer.Flow(contents, Position = Position.Margin(10.0f, 0.0f).TrimTop(55.0f))
@@ -168,9 +168,9 @@ type private FriendComparer(ruleset: Ruleset, score_data: (Level * TableChart * 
 
         this
         |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
-        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
-        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, L"misc.server_error"))
-        |+ Conditional((fun () -> status = WebRequestState.Loaded && friends.Value.Length = 0), EmptyState(Icons.multiplayer, L"stats.table.friends.empty", Subtitle = L"stats.table.friends.empty.subtitle"))
+        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, %"misc.offline"))
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, %"misc.server_error"))
+        |+ Conditional((fun () -> status = WebRequestState.Loaded && friends.Value.Length = 0), EmptyState(Icons.multiplayer, %"stats.table.friends.empty", Subtitle = %"stats.table.friends.empty.subtitle"))
         |* swap
 
         base.Init parent
@@ -256,19 +256,19 @@ type private TableStats() =
 
                 this
                 |+ Text(t.Name, Position = Position.SliceTop(120.0f).Margin(40.0f, 10.0f), Align = Alignment.LEFT)
-                |+ Text(L"stats.table.skill_level", Position = Position.Row(10.0f, 40.0f).Margin(40.0f, 0.0f), Align = Alignment.RIGHT)
+                |+ Text(%"stats.table.skill_level", Position = Position.Row(10.0f, 40.0f).Margin(40.0f, 0.0f), Align = Alignment.RIGHT)
                 |+ Text(sprintf "%.2f" table_rating, Position = Position.Row(50.0f, 60.0f).Margin(40.0f, 0.0f), Align = Alignment.RIGHT)
                 |+
                     (
                         GridFlowContainer(50.0f, 4, Position = Position.Row(110.0f, 50.0f).Margin(40.0f, 0.0f), Spacing = (25.0f, 0.0f))
-                        |+ (button(sprintf "%s %s" Icons.stats (L"stats.table.breakdown"), table_breakdown) |> fun b -> b.TiltLeft <- false; b)
-                        |+ button(sprintf "%s %s" Icons.stats_2 (L"stats.table.ratings"), table_bests)
-                        |+ button(sprintf "%s %s" Icons.sparkle (L"stats.table.leaderboard"), Leaderboard())
-                        |+ (button(sprintf "%s %s" Icons.multiplayer (L"stats.table.friends"), FriendComparer(ruleset, score_data)) |> fun b -> b.TiltRight <- false; b)
+                        |+ (button(sprintf "%s %s" Icons.stats (%"stats.table.breakdown"), table_breakdown) |> fun b -> b.TiltLeft <- false; b)
+                        |+ button(sprintf "%s %s" Icons.stats_2 (%"stats.table.ratings"), table_bests)
+                        |+ button(sprintf "%s %s" Icons.sparkle (%"stats.table.leaderboard"), Leaderboard())
+                        |+ (button(sprintf "%s %s" Icons.multiplayer (%"stats.table.friends"), FriendComparer(ruleset, score_data)) |> fun b -> b.TiltRight <- false; b)
                     )
                 |* swap
-            | None -> this |* EmptyState(Icons.x, L"stats.table.missing_ruleset")
+            | None -> this |* EmptyState(Icons.x, %"stats.table.missing_ruleset")
         | None -> 
             this
-            |* EmptyState(Icons.table, L"stats.table.no_table")
+            |* EmptyState(Icons.table, %"stats.table.no_table")
         base.Init parent

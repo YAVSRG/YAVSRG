@@ -138,14 +138,14 @@ module PracticeScreen =
             let mutable hit_position_suggestion = hit_position.Value
 
             let accept_suggestion_hint =
-                Localisation.localiseWith [ (+."accept_suggestion").ToString() ] "practice.suggestions.accepthint"
+                [ (+."accept_suggestion").ToString() ] %> "practice.suggestions.accepthint"
 
-            let about_right_hint = Icons.check + " " + L "practice.suggestions.aboutright"
+            let about_right_hint = Icons.check + " " + %"practice.suggestions.aboutright"
 
             let suggestion_text () =
                 Text(fun () ->
                     if not suggested then
-                        L "practice.suggestions.hint"
+                        %"practice.suggestions.hint"
                     elif mean < 5.0f<ms> && mean > -5.0f<ms> then
                         about_right_hint
                     else
@@ -181,28 +181,28 @@ module PracticeScreen =
                 this
                 |+ Panel(
                     FlowContainer.Vertical<ModeButton>(50.0f, Spacing = 10.0f)
-                    |+ ModeButton(L "gameplay.hitposition.name", Mode.HIT_POSITION, this.AcceptSuggestion)
-                    |+ ModeButton(L "gameplay.scrollspeed.name", Mode.SCROLL_SPEED, this.AcceptSuggestion)
-                    |+ ModeButton(L "system.visualoffset.name", Mode.VISUAL_OFFSET, this.AcceptSuggestion)
-                    |+ ModeButton(L "practice.localoffset.name", Mode.AUDIO_OFFSET, this.AcceptSuggestion),
+                    |+ ModeButton(%"gameplay.hitposition.name", Mode.HIT_POSITION, this.AcceptSuggestion)
+                    |+ ModeButton(%"gameplay.scrollspeed.name", Mode.SCROLL_SPEED, this.AcceptSuggestion)
+                    |+ ModeButton(%"system.visualoffset.name", Mode.VISUAL_OFFSET, this.AcceptSuggestion)
+                    |+ ModeButton(%"practice.localoffset.name", Mode.AUDIO_OFFSET, this.AcceptSuggestion),
                     Position = Position.Box(0.0f, 0.0f, 20.0f, 350.0f, 300.0f, 230.0f)
                 )
                 |+ Conditional(
                     (fun () -> mode.Audio = 0 && options.AudioVolume.Value > 0.0),
                     Callout.frame
-                        (Callout.Small.Icon(Icons.audio_mute).Body(L "practice.mute_mandatory_hint"))
+                        (Callout.Small.Icon(Icons.audio_mute).Body(%"practice.mute_mandatory_hint"))
                         (fun (w, h) -> Position.Box(0.0f, 0.0f, 340.0f, 450.0f, w, h + 40.0f))
                 )
                 |+ Conditional(
                     (fun () -> mode.Audio = 1 && options.AudioVolume.Value > 0.0),
                     Callout.frame
-                        (Callout.Small.Icon(Icons.audio_mute).Body(L "practice.mute_hint"))
+                        (Callout.Small.Icon(Icons.audio_mute).Body(%"practice.mute_hint"))
                         (fun (w, h) -> Position.Box(0.0f, 0.0f, 340.0f, 450.0f, w, h + 40.0f))
                 )
                 |+ Conditional(
                     (fun () -> mode.Audio = 2 && options.AudioVolume.Value = 0.0),
                     Callout.frame
-                        (Callout.Small.Icon(Icons.audio_on).Body(L "practice.unmute_hint"))
+                        (Callout.Small.Icon(Icons.audio_on).Body(%"practice.unmute_hint"))
                         (fun (w, h) -> Position.Box(0.0f, 0.0f, 340.0f, 450.0f, w, h + 40.0f))
                 )
                 |+ Conditional(
@@ -259,13 +259,13 @@ module PracticeScreen =
     let info_callout =
         Callout.Small
             .Icon(Icons.practice)
-            .Title(L "practice.info.title")
-            .Body(L "practice.info.desc")
-            .Hotkey(L "practice.info.play", "skip")
-            .Hotkey(L "practice.info.restart", "retry")
-            .Hotkey(L "practice.info.options", "exit")
-            .Body(L "practice.info.sync")
-            .Hotkey(L "practice.info.accept_suggestion", "accept_suggestion")
+            .Title(%"practice.info.title")
+            .Body(%"practice.info.desc")
+            .Hotkey(%"practice.info.play", "skip")
+            .Hotkey(%"practice.info.restart", "retry")
+            .Hotkey(%"practice.info.options", "exit")
+            .Body(%"practice.info.sync")
+            .Hotkey(%"practice.info.accept_suggestion", "accept_suggestion")
 
     let rec practice_screen (practice_point: Time) =
 

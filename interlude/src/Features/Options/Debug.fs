@@ -29,7 +29,7 @@ module Debug =
             match theme.Source with
             | Embedded _ ->
                 ConfirmPage(
-                    Localisation.localiseWith [theme.Config.Name] "themes.confirmextractdefault",
+                    [theme.Config.Name] %> "themes.confirmextractdefault",
                     (fun () -> 
                         if Themes.createNew(theme.Config.Name + "_extracted") then () 
                         else Logging.Error "Theme folder already exists"
@@ -45,16 +45,16 @@ module Debug =
                 |+ PageButton.Once(
                         "debug.rebuildcache",
                         fun () -> 
-                            Caching.Cache.recache_service.Request(Library.cache, fun () -> Notifications.task_feedback(Icons.folder, L"notification.recache_complete", ""))
-                            Notifications.action_feedback(Icons.folder, L"notification.recache", "") )
+                            Caching.Cache.recache_service.Request(Library.cache, fun () -> Notifications.task_feedback(Icons.folder, %"notification.recache_complete", ""))
+                            Notifications.action_feedback(Icons.folder, %"notification.recache", "") )
                     .Pos(200.0f)
                     .Tooltip(Tooltip.Info("debug.rebuildcache"))
                 |+ PageButton.Once(
                         "debug.downloadupdate",
                         ( fun () ->
                             if AutoUpdate.update_available then
-                                AutoUpdate.apply_update(fun () -> Notifications.system_feedback(Icons.system_notification, L"notification.update_installed.title", L"notification.update_installed.body"))
-                                Notifications.system_feedback(Icons.system_notification, L"notification.update_installing.title", L"notification.update_installing.body")
+                                AutoUpdate.apply_update(fun () -> Notifications.system_feedback(Icons.system_notification, %"notification.update_installed.title", %"notification.update_installed.body"))
+                                Notifications.system_feedback(Icons.system_notification, %"notification.update_installing.title", %"notification.update_installing.body")
                         ),
                         Enabled = (AutoUpdate.update_available && not AutoUpdate.update_started) )
                     .Pos(270.0f)
@@ -68,5 +68,5 @@ module Debug =
                     .Pos(720.0f)
                     .Tooltip(Tooltip.Info("themes.showthemesfolder"))
             )
-        override this.Title = L"debug.name"
+        override this.Title = %"debug.name"
         override this.OnClose() = ()

@@ -122,7 +122,7 @@ type ManageTablesPage() as this =
 
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
 
-    override this.Title = L"table.name"
+    override this.Title = %"table.name"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh()
 
@@ -147,6 +147,6 @@ type SelectTableLevelPage(action: Level -> unit) as this =
 
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
 
-    override this.Title = L"table.name"
+    override this.Title = %"table.name"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh()

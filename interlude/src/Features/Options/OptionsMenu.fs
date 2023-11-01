@@ -42,8 +42,8 @@ module OptionsMenuRoot =
         let tooltip_hint = 
             Callout.Normal
                 .Icon(Icons.info)
-                .Title(L"options.ingame_help.name")
-                .Body(L"options.ingame_help.hint")
+                .Title(%"options.ingame_help.name")
+                .Body(%"options.ingame_help.hint")
                 .Hotkey("tooltip")
 
         do
@@ -60,35 +60,35 @@ module OptionsMenuRoot =
                             Bottom = 0.5f %+ (60.0f + h * 0.5f + button_size) })
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.gameplay)
-                        .Title(L"gameplay.name"),
+                        .Title(%"gameplay.name"),
                     fun () -> Gameplay.GameplayPage().Show())
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.noteskins)
-                        .Title(L"noteskins.name"),
+                        .Title(%"noteskins.name"),
                     fun () -> Noteskins.NoteskinsPage().Show())
                     .Tooltip(Tooltip.Info("noteskins"))
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.mods)
-                        .Title(L"hud.name"),
+                        .Title(%"hud.name"),
                     fun () -> HUD.EditHUDPage().Show())
                     .Tooltip(Tooltip.Info("hud"))
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.system)
-                        .Title(L"system.name"),
+                        .Title(%"system.name"),
                     fun () -> System.SystemPage().Show())
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.heart)
-                        .Title(L"advanced.name"),
+                        .Title(%"advanced.name"),
                     fun () -> Advanced.AdvancedPage().Show())
                 |+ TileButton(Callout.Normal
                         .Icon(Icons.debug)
-                        .Title(L"debug.name"),
+                        .Title(%"debug.name"),
                     fun () -> Debug.DebugPage().Show())
             )
             this |* Callout.frame (tooltip_hint) 
                 ( fun (w, h) -> { Left = 0.0f %+ 200.0f; Right = 1.0f %- 200.0f; Top = 0.5f %- (20.0f + h * 0.5f); Bottom = 0.5f %+ (20.0f + h * 0.5f) } )
 
-        override this.Title = L"options.name"
+        override this.Title = %"options.name"
         override this.OnClose() = LevelSelect.refresh_all()
 
     let show() = Menu.ShowPage OptionsPage

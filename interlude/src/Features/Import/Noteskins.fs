@@ -40,7 +40,7 @@ type NoteskinCard(data: RepoEntry) as this =
                 fun success -> 
                     if success then 
                         sync Noteskins.load
-                        Notifications.task_feedback (Icons.download, L"notification.install_noteskin", data.Name)
+                        Notifications.task_feedback (Icons.download, %"notification.install_noteskin", data.Name)
                         status <- Installed
                     else status <- DownloadFailed
             )
@@ -115,7 +115,7 @@ module Noteskins =
             )
             this
             |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> grid.Filter <- NoteskinCard.Filter f), Position = Position.SliceTop 60.0f ))
-            |+ Text(L"imports.noteskins.hint", Position = Position.SliceBottom 55.0f)
+            |+ Text(%"imports.noteskins.hint", Position = Position.SliceBottom 55.0f)
             |* scroll
             base.Init parent
 

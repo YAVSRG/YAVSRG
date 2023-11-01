@@ -49,7 +49,7 @@ module Rulesets =
                 container |* RulesetButton(id, rs)
             this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 150.0f)) )
 
-        override this.Title = L"gameplay.rulesets.name"
+        override this.Title = %"gameplay.rulesets.name"
         override this.OnClose() = ()
     
     type QuickSwitcher(setting: Setting<string>) =
@@ -125,15 +125,15 @@ type PacemakerPage() as this =
                 .Pos(200.0f)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
             |+ CaseSelector("gameplay.pacemaker.type", 
-                [|L"gameplay.pacemaker.accuracy.name"; L"gameplay.pacemaker.lamp.name"|],
+                [|%"gameplay.pacemaker.accuracy.name"; %"gameplay.pacemaker.lamp.name"|],
                 [|
                     [| PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)).Pos(370.0f) |]
                     [| PageSetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(370.0f) |]
                 |], utype).Pos(300.0f)
-            |+ Text(L"gameplay.pacemaker.hint", Align = Alignment.CENTER, Position = Position.SliceBottom(100.0f).TrimBottom(40.0f))
+            |+ Text(%"gameplay.pacemaker.hint", Align = Alignment.CENTER, Position = Position.SliceBottom(100.0f).TrimBottom(40.0f))
         )
 
-    override this.Title = L"gameplay.pacemaker.name"
+    override this.Title = %"gameplay.pacemaker.name"
     override this.OnClose() = 
         match utype.Value with
         | 0 -> options.Pacemakers.[rulesetId] <- Pacemaker.Accuracy accuracy.Value

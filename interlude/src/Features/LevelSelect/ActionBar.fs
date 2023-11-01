@@ -41,7 +41,7 @@ module Comments =
                 Position = Position.Default.Margin(200.0f, 0.0f).TrimBottom(15.0f).TrimTop(60.0f))
             |+ textEntry
            )
-        |+ Text((fun () -> match Chart.CACHE_DATA with Some c -> Localisation.localiseWith [c.Title] "levelselect.comments.label" | _ -> ""),
+        |+ Text((fun () -> match Chart.CACHE_DATA with Some c -> [c.Title] %> "levelselect.comments.label" | _ -> ""),
             Color = K Colors.text,
             Align = Alignment.CENTER,
             Position = Position.SliceTop 55.0f)
@@ -113,7 +113,7 @@ type ActionBar(random_chart) =
             (fun () -> Comments.fade.Target = 1.0f),
             Hotkey = "show_comments",
             Position = Position.Column(140.0f, 60.0f))
-            .Tooltip(Tooltip.Info("levelselect.show_comments").Hotkey("show_comments").Hotkey(L"levelselect.show_comments.hint", "comment"))
+            .Tooltip(Tooltip.Info("levelselect.show_comments").Hotkey("show_comments").Hotkey(%"levelselect.show_comments.hint", "comment"))
         base.Init parent
 
     override this.Draw() =

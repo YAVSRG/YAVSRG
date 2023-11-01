@@ -52,7 +52,7 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
                     if completed then Library.Imports.convert_stepmania_pack_zip.Request((target, id),
                         fun b ->
                             if b then charts_updated_ev.Trigger()
-                            Notifications.task_feedback (Icons.download, L"notification.install_pack", data.name)
+                            Notifications.task_feedback (Icons.download, %"notification.install_pack", data.name)
                             File.Delete target
                             status <- if b then Installed else DownloadFailed
                     )
@@ -143,4 +143,4 @@ module EtternaPacks =
             )
         StaticContainer(NodeType.Switch(K searchContainer))
         |+ searchContainer
-        |+ Text(L"imports.disclaimer.etterna", Position = Position.SliceBottom(55.0f))
+        |+ Text(%"imports.disclaimer.etterna", Position = Position.SliceBottom(55.0f))

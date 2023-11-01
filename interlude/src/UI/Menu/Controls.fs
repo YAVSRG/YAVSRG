@@ -154,7 +154,7 @@ type PageSetting(name, widget: Widget) as this =
     override this.Init(parent) =
         this
         |* Text(
-            K (L (sprintf "%s.name" name) + ":"),
+            K (%(sprintf "%s.name" name) + ":"),
             Color = (fun () -> (if this.Focused then Colors.text_yellow_2 else Colors.text)),
             Align = Alignment.LEFT,
             Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH - 10.0f, PRETTYHEIGHT).Margin(Style.PADDING))
@@ -176,7 +176,7 @@ type PageButton(name, action) as this =
     inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then Style.click.Play(); action()))
 
     member val Icon = "" with get, set
-    member val Text = L (sprintf "%s.name" name) with get, set
+    member val Text = %(sprintf "%s.name" name) with get, set
 
     override this.Init(parent: Widget) =
         this

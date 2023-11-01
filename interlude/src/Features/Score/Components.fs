@@ -120,7 +120,7 @@ type Accuracy(grade: Grade.GradeResult ref, improvements: ImprovementFlags ref, 
     inherit StaticContainer(NodeType.None)
 
     let LOWER_SIZE = 40.0f
-    let new_record = sprintf "%s %s" Icons.sparkle (L"score.new_record")
+    let new_record = sprintf "%s %s" Icons.sparkle (%"score.new_record")
 
     override this.Init(parent) =
         this
@@ -164,7 +164,7 @@ type Lamp(lamp: Lamp.LampResult ref, improvements: ImprovementFlags ref, previou
     inherit StaticContainer(NodeType.None)
 
     let LOWER_SIZE = 40.0f
-    let new_record = sprintf "%s %s" Icons.sparkle (L"score.new_record")
+    let new_record = sprintf "%s %s" Icons.sparkle (%"score.new_record")
 
     override this.Init(parent) =
         this
@@ -246,12 +246,12 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
         |+ Text(version, Position = Position.SliceBottom(50.0f).Margin(20.0f, 5.0f), Color = K Colors.text_subheading, Align = Alignment.LEFT)
         |+ StylishButton(
             (fun () -> { new ScoreGraphSettingsPage() with override this.OnClose() = graph.Refresh() }.Show()),
-            sprintf "%s %s" Icons.edit (L"score.graph.settings") |> K,
+            sprintf "%s %s" Icons.edit (%"score.graph.settings") |> K,
             !%Palette.MAIN_100,
             Position = { Left = 0.55f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.7f %- 25.0f; Bottom = 1.0f %- 0.0f })
         |+ StylishButton(
             (fun () -> ScoreScreenHelpers.watchReplay (data.ModChart, data.ScoreInfo.rate, data.ReplayData)),
-            sprintf "%s %s" Icons.watch (L"score.watch_replay.name") |> K,
+            sprintf "%s %s" Icons.watch (%"score.watch_replay.name") |> K,
             !%Palette.DARK_100,
             Position = { Left = 0.7f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.85f %- 25.0f; Bottom = 1.0f %- 0.0f })
         |* Rulesets.QuickSwitcher(

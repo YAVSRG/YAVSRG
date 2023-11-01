@@ -42,7 +42,7 @@ type Toolbar() =
             Position = Position.Box(1.0f, 1.0f, -305.0f, -HEIGHT * 0.5f, 300.0f, HEIGHT * 0.5f)
         )
         |+ IconButton(
-            L "menu.back",
+            %"menu.back",
             Icons.back,
             HEIGHT,
             (fun () -> Screen.back Transitions.Flags.UnderLogo),
@@ -55,7 +55,7 @@ type Toolbar() =
                 Position = Position.SliceTop(HEIGHT).TrimLeft(20.0f)
             )
             |+ InlaidButton(
-                L "menu.options.name",
+                %"menu.options.name",
                 (fun () ->
                     if
                         shown ()
@@ -69,7 +69,7 @@ type Toolbar() =
             )
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
             |+ InlaidButton(
-                L "menu.import.name",
+                %"menu.import.name",
                 (fun () ->
                     if shown () then
                         Screen.change Screen.Type.Import Transitions.Flags.Default
@@ -79,7 +79,7 @@ type Toolbar() =
             )
                 .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
             |+ InlaidButton(
-                L "menu.wiki.name",
+                %"menu.wiki.name",
                 (fun () ->
                     if shown () then
                         Wiki.show ()
@@ -90,7 +90,7 @@ type Toolbar() =
             )
                 .Tooltip(Tooltip.Info("menu.wiki").Hotkey("wiki"))
             |+ InlaidButton(
-                L "menu.stats.name",
+                %"menu.stats.name",
                 (fun () ->
                     if shown () then
                         Screen.changeNew StatsScreen Screen.Type.Stats Transitions.Flags.Default
@@ -120,9 +120,9 @@ type Toolbar() =
 
                 Notifications.action_feedback_button (
                     Icons.screenshot,
-                    L "notification.screenshot",
+                    %"notification.screenshot",
                     id,
-                    L "notification.screenshot.open_folder",
+                    %"notification.screenshot.open_folder",
                     fun () -> open_directory (getDataPath "Screenshots")
                 )
         )
@@ -133,7 +133,7 @@ type Toolbar() =
                 Noteskins.load ()
                 Themes.load ()
                 first_init <- false
-                Notifications.action_feedback (Icons.system_notification, L "notification.reload_themes", "")
+                Notifications.action_feedback (Icons.system_notification, %"notification.reload_themes", "")
         )
         |+ HotkeyAction(
             "preset1",
@@ -141,7 +141,7 @@ type Toolbar() =
                 match options.Preset1.Value with
                 | Some s when Screen.currentType <> Screen.Type.Play ->
                     Presets.load s
-                    Notifications.action_feedback (Icons.system_notification, L "notification.preset_loaded", s.Name)
+                    Notifications.action_feedback (Icons.system_notification, %"notification.preset_loaded", s.Name)
                 | _ -> ()
         )
         |+ HotkeyAction(
@@ -150,7 +150,7 @@ type Toolbar() =
                 match options.Preset2.Value with
                 | Some s when Screen.currentType <> Screen.Type.Play ->
                     Presets.load s
-                    Notifications.action_feedback (Icons.system_notification, L "notification.preset_loaded", s.Name)
+                    Notifications.action_feedback (Icons.system_notification, %"notification.preset_loaded", s.Name)
                 | _ -> ()
         )
         |+ HotkeyAction(
@@ -159,7 +159,7 @@ type Toolbar() =
                 match options.Preset3.Value with
                 | Some s when Screen.currentType <> Screen.Type.Play ->
                     Presets.load s
-                    Notifications.action_feedback (Icons.system_notification, L "notification.preset_loaded", s.Name)
+                    Notifications.action_feedback (Icons.system_notification, %"notification.preset_loaded", s.Name)
                 | _ -> ()
         )
         |+ Conditional(

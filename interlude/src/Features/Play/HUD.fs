@@ -329,7 +329,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
 type SkipButton(conf: HUD.SkipButton, state) =
     inherit StaticWidget(NodeType.None)
 
-    let text = Localisation.localiseWith [ (+."skip").ToString() ] "play.skiphint"
+    let text = [ (+."skip").ToString() ] %> "play.skiphint"
     let mutable active = true
 
     let firstNote = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time

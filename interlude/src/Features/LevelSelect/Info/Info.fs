@@ -67,10 +67,10 @@ type ChartInfo() as this =
            )
            .Tooltip(
             Tooltip.Info("levelselect.selected_mods")
-                .Hotkey(L"levelselect.selected_mods.mods.hint", "mods")
-                .Body(L"levelselect.selected_mods.rate.hint")
-                .Hotkey(L"levelselect.selected_mods.uprate.hint", "uprate")
-                .Hotkey(L"levelselect.selected_mods.downrate.hint", "downrate")
+                .Hotkey(%"levelselect.selected_mods.mods.hint", "mods")
+                .Body(%"levelselect.selected_mods.rate.hint")
+                .Hotkey(%"levelselect.selected_mods.uprate.hint", "uprate")
+                .Hotkey(%"levelselect.selected_mods.downrate.hint", "downrate")
            )
             
         |+ StylishButton(
@@ -78,7 +78,7 @@ type ChartInfo() as this =
                 Chart.wait_for_load <| fun () ->
                 Preview(Chart.WITH_MODS.Value, changeRate).Show()
             ),
-            K (Icons.preview + " " + L"levelselect.preview.name"),
+            K (Icons.preview + " " + %"levelselect.preview.name"),
             !%Palette.MAIN_100,
             Hotkey = "preview",
             TiltLeft = false,
@@ -92,7 +92,7 @@ type ChartInfo() as this =
         |* Rulesets.QuickSwitcher(
             options.SelectedRuleset |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             Position = { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f })
-            .Tooltip(Tooltip.Info("levelselect.rulesets", "ruleset_switch").Hotkey(L"levelselect.rulesets.picker_hint", "ruleset_picker"))
+            .Tooltip(Tooltip.Info("levelselect.rulesets", "ruleset_switch").Hotkey(%"levelselect.rulesets.picker_hint", "ruleset_picker"))
 
         LevelSelect.on_refresh_all.Add this.Refresh
         LevelSelect.on_refresh_details.Add this.Refresh

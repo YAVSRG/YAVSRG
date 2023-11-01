@@ -44,8 +44,8 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render: 'T -
 
         this
         |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
-        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, L"misc.offline"))
-        |* Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, L"misc.server_error"))
+        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, %"misc.offline"))
+        |* Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, %"misc.server_error"))
 
         base.Init parent
         content.Init this

@@ -234,7 +234,7 @@ type EditAccuracyMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = L "hud.accuracymeter.name"
+    override this.Title = %"hud.accuracymeter.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -300,7 +300,7 @@ type EditHitMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = L "hud.hitmeter.name"
+    override this.Title = %"hud.hitmeter.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -345,7 +345,7 @@ type EditComboMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = L "hud.combo.name"
+    override this.Title = %"hud.combo.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -365,7 +365,7 @@ type EditSkipButtonPage() as this =
     let default_pos = HUD.SkipButton.Default.Position
 
     let preview_text =
-        Localisation.localiseWith [ (+."skip").ToString() ] "play.skiphint"
+        [ (+."skip").ToString() ] %> "play.skiphint"
 
     let preview =
         { new ConfigPreview(0.5f, pos) with
@@ -374,7 +374,7 @@ type EditSkipButtonPage() as this =
 
     do this.Content(positionEditor pos default_pos |+ preview)
 
-    override this.Title = L "hud.skipbutton.name"
+    override this.Title = %"hud.skipbutton.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -452,7 +452,7 @@ type EditProgressMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = L "hud.progressmeter.name"
+    override this.Title = %"hud.progressmeter.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -478,7 +478,7 @@ type EditPacemakerPage() as this =
 
     do this.Content(positionEditor pos default_pos |+ preview)
 
-    override this.Title = L "hud.pacemaker.name"
+    override this.Title = %"hud.pacemaker.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -508,7 +508,7 @@ type EditJudgementCountsPage() as this =
             |+ preview
         )
 
-    override this.Title = L "hud.judgementcounts.name"
+    override this.Title = %"hud.judgementcounts.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -559,7 +559,7 @@ type EditJudgementMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = L "hud.judgementmeter.name"
+    override this.Title = %"hud.judgementmeter.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -612,7 +612,7 @@ type EditEarlyLateMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = L "hud.earlylatemeter.name"
+    override this.Title = %"hud.earlylatemeter.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -655,7 +655,7 @@ type RateModMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = L "hud.ratemodmeter.name"
+    override this.Title = %"hud.ratemodmeter.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -679,7 +679,7 @@ type BPMMeterPage() as this =
 
     do this.Content(positionEditor pos default_pos |+ preview)
 
-    override this.Title = L "hud.bpmmeter.name"
+    override this.Title = %"hud.bpmmeter.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
@@ -718,5 +718,5 @@ type EditHUDPage() as this =
                 .Tooltip(Tooltip.Info("hud.bpmmeter"))
         )
 
-    override this.Title = L "hud.name"
+    override this.Title = %"hud.name"
     override this.OnClose() = ()

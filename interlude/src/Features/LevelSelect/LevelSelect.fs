@@ -114,22 +114,22 @@ type LevelSelectScreen() =
         |+ Conditional(
             (fun () -> Tree.isEmpty),
             StaticContainer(NodeType.None)
-            |+ Conditional((fun () -> Tree.filter <> []), EmptyState(Icons.search, L "levelselect.empty.search"))
+            |+ Conditional((fun () -> Tree.filter <> []), EmptyState(Icons.search, %"levelselect.empty.search"))
             |+ Conditional(
                 (fun () ->
                     Tree.filter = []
                     && options.LibraryMode.Value = LibraryMode.Table
                     && Table.current().IsNone
                 ),
-                EmptyState(Icons.table, L "levelselect.empty.no_table")
+                EmptyState(Icons.table, %"levelselect.empty.no_table")
             )
             |+ Conditional(
                 (fun () -> Tree.filter = [] && options.LibraryMode.Value = LibraryMode.Collections),
-                EmptyState(Icons.collections, L "levelselect.empty.no_collections")
+                EmptyState(Icons.collections, %"levelselect.empty.no_collections")
             )
             |+ Conditional(
                 (fun () -> Tree.filter = [] && options.LibraryMode.Value = LibraryMode.All),
-                EmptyState(Icons.folder, L "levelselect.empty.no_charts")
+                EmptyState(Icons.folder, %"levelselect.empty.no_charts")
             ),
             Position =
                 { Position.TrimTop(170.0f) with
@@ -224,8 +224,8 @@ type LevelSelectScreen() =
         if Cache.recache_service.Status <> Async.ServiceStatus.Idle then
             Notifications.system_feedback (
                 Icons.system_notification,
-                L "notification.recache_running.title",
-                L "notification.recache_running.body"
+                %"notification.recache_running.title",
+                %"notification.recache_running.body"
             )
 
         refresh ()

@@ -23,8 +23,9 @@ module Utils =
             sprintf "%s %s (dev build)" v.Name short_version
         else sprintf "%s %s" v.Name short_version
 
-    /// L for localise -- Shorthand to get the localised text from a locale string id
-    let L = Localisation.localise
+    /// Shorthand operator to get the localised text from a locale string id
+    let (~%) = Localisation.localise
+    let inline (%>) (args: string list) (localisation_key: string) = Localisation.localiseWith args localisation_key
 
     let get_resource_stream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)

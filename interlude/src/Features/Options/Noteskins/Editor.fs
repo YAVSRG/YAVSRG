@@ -56,7 +56,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
             |+ preview
         )
         this.Add (Conditional((fun () -> not from_hotkey),
-            Callout.frame (Callout.Small.Icon(Icons.info).Title(L"noteskins.edit.hotkey_hint").Hotkey("edit_noteskin")) 
+            Callout.frame (Callout.Small.Icon(Icons.info).Title(%"noteskins.edit.hotkey_hint").Hotkey("edit_noteskin")) 
                 ( fun (w, h) -> Position.SliceTop(h + 40.0f + 40.0f).SliceRight(w + 40.0f).Margin(20.0f, 20.0f) )
             ))
         

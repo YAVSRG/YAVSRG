@@ -83,7 +83,7 @@ module System =
             container.Add(
                 PageButton(
                     "system.hotkeys.reset",
-                    (fun () -> ConfirmPage(L "system.hotkeys.reset.confirm", Hotkeys.reset_all).Show()),
+                    (fun () -> ConfirmPage(%"system.hotkeys.reset.confirm", Hotkeys.reset_all).Show()),
                     Icon = Icons.reset
                 )
             )
@@ -97,7 +97,7 @@ module System =
 
             this.Content scrollContainer
 
-        override this.Title = L "system.hotkeys.name"
+        override this.Title = %"system.hotkeys.name"
         override this.OnClose() = ()
 
     type Resolution(setting: Setting<int * int>) as this =
@@ -230,7 +230,7 @@ module System =
                 Conditional(
                     (fun () -> has_changed),
                     Callout.frame
-                        (Callout.Small.Icon(Icons.system).Title(L "system.window_changes_hint"))
+                        (Callout.Small.Icon(Icons.system).Title(%"system.window_changes_hint"))
                         (fun (w, h) -> Position.SliceTop(h + 40.0f + 40.0f).SliceRight(w + 40.0f).Margin(20.0f, 20.0f))
                 )
             )
@@ -239,4 +239,4 @@ module System =
             Window.sync (Window.DisableResize)
             Window.sync (Window.ApplyConfig config)
 
-        override this.Title = L "system.name"
+        override this.Title = %"system.name"

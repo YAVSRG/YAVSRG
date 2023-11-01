@@ -165,9 +165,9 @@ type private PlayerList() =
         |+ 
             (
                 GridFlowContainer(50.0f, 3, Position = Position.SliceTop(50.0f))
-                |+ button(L"online.players.online", online)
-                |+ button(L"online.players.friends", friends)
-                |+ button(L"online.players.search", search)
+                |+ button(%"online.players.online", online)
+                |+ button(%"online.players.friends", friends)
+                |+ button(%"online.players.search", search)
             )
         |* swap
         base.Init parent

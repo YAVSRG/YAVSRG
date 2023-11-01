@@ -173,7 +173,7 @@ module Wiki =
                 Position = Position.SliceTop(70.0f).Margin((Viewport.vwidth - 1400.0f) * 0.5f, 10.0f)
             )
             |+ IconButton(
-                L "menu.back"
+                %"menu.back"
                 , Icons.back
                 , 50.0f
                 , fun () ->
@@ -196,7 +196,7 @@ module Wiki =
                 Position = Position.Column(200.0f, 900.0f)
             )
             |+ IconButton(
-                L "wiki.openinbrowser"
+                %"wiki.openinbrowser"
                 , Icons.open_in_browser
                 , 50.0f
                 , fun () ->

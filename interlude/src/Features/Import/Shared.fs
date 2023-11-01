@@ -50,7 +50,7 @@ module Import =
     type ConfirmUnlinkedSongsImport(path) as this =
         inherit Page()
 
-        let info = Callout.Normal.Icon(Icons.alert).Title(L"unlinkedsongsimport.info.title").Body(L"unlinkedsongsimport.info.body")
+        let info = Callout.Normal.Icon(Icons.alert).Title(%"unlinkedsongsimport.info.title").Body(%"unlinkedsongsimport.info.body")
 
         do
             this.Content(
@@ -65,15 +65,15 @@ module Import =
                         Library.Imports.auto_convert.Request((path, false), 
                             fun success -> 
                                 if success then
-                                    Notifications.action_feedback(Icons.check, L"notification.import_success", "")
+                                    Notifications.action_feedback(Icons.check, %"notification.import_success", "")
                                     charts_updated_ev.Trigger()
-                                else Notifications.error(L"notification.import_failure", ""))
+                                else Notifications.error(%"notification.import_failure", ""))
                         Menu.Back())
                     .Pos(600.0f)
                 |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h + 40.0f))
             )
             
-        override this.Title = L"unlinkedsongsimport.name"
+        override this.Title = %"unlinkedsongsimport.name"
         override this.OnClose() = ()
 
     let import_osu_noteskin (path: string) =
@@ -115,9 +115,9 @@ module Import =
             Library.Imports.auto_convert.Request((path, false), 
                 fun success -> 
                     if success then
-                        Notifications.action_feedback(Icons.check, L"notification.import_success", "")
+                        Notifications.action_feedback(Icons.check, %"notification.import_success", "")
                         charts_updated_ev.Trigger()
-                    else Notifications.error(L"notification.import_failure", "")
+                    else Notifications.error(%"notification.import_failure", "")
             )
 
 // todo: only etterna packs use this old one so just move it to there

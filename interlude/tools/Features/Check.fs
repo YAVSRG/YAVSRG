@@ -45,7 +45,7 @@ module Check =
             }
         for filename, file_contents in walk_fs_files INTERLUDE_SOURCE_PATH do
 
-            for position, m in matches """ L"([a-z\-_\.]*)" """ file_contents do
+            for position, m in matches """ %"([a-z\-_\.]*)" """ file_contents do
                 find m (sprintf "%s (position %i)" filename position)
 
             for position, m in matches """ PageSetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do

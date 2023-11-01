@@ -25,7 +25,7 @@ type CreateLobbyPage() as this =
             |+ submit_button.Pos(300.0f)
         )
     
-    override this.Title = L"create_lobby.name"
+    override this.Title = %"create_lobby.name"
     override this.OnClose() = ()
 
 type InviteCard(sender: string, lobby: System.Guid) =
@@ -61,7 +61,7 @@ type InviteList() =
             //    | Screen.Type.MainMenu -> true
             //    | _ -> false
             //then
-            //    Notifications.add(Localisation.localiseWith [name] "notification.invited_to_lobby.title", NotificationType.Info)
+            //    Notifications.add([name] %> "notification.invited_to_lobby.title", NotificationType.Info)
         )
 
     override this.Init(parent) =
@@ -74,7 +74,7 @@ type LobbyInfoCard(info: LobbyInfo) =
     override this.Init(parent) =
         this
         |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
-        |+ Text((match info.CurrentlyPlaying with None -> L"lobby.no_song_selected" | Some s -> s), Color = K Colors.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Text((match info.CurrentlyPlaying with None -> %"lobby.no_song_selected" | Some s -> s), Color = K Colors.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
         |+ Clickable(fun () -> Lobby.join info.Id)
         |* Text(info.Players.ToString() + " " + Icons.multiplayer, Color = K Colors.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
         base.Init parent
@@ -104,9 +104,9 @@ type LobbyList() =
     override this.Init(parent) =
         this
         |+ container
-        |+ Conditional((fun () -> no_lobbies), EmptyState(Icons.multiplayer, L"lobby_list.none", Subtitle = L"lobby_list.none.subtitle"))
-        |+ IconButton(L"lobby_list.create", Icons.add, 60.0f, create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(250.0f))
-        |+ IconButton(L"lobby_list.refresh", Icons.reset, 60.0f, Lobby.refresh_list, Position = Position.SliceBottom(60.0f).SliceRight(250.0f))
+        |+ Conditional((fun () -> no_lobbies), EmptyState(Icons.multiplayer, %"lobby_list.none", Subtitle = %"lobby_list.none.subtitle"))
+        |+ IconButton(%"lobby_list.create", Icons.add, 60.0f, create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(250.0f))
+        |+ IconButton(%"lobby_list.refresh", Icons.reset, 60.0f, Lobby.refresh_list, Position = Position.SliceBottom(60.0f).SliceRight(250.0f))
         |* SearchBox(searchtext, (fun () -> container.Filter <- fun l -> l.Name.ToLower().Contains searchtext.Value), Position = Position.SliceTop 60.0f)
         
         base.Init parent

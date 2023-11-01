@@ -117,7 +117,7 @@ type LanecoverPage() as this =
             |+ preview
         )
 
-    override this.Title = L "gameplay.lanecover.name"
+    override this.Title = %"gameplay.lanecover.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = ()
 
@@ -192,19 +192,19 @@ type GameplayPage() as this =
             Position = Position.SliceTop(40.0f)
         )
         |+ Button(
-            L "gameplay.preset.load",
+            %"gameplay.preset.load",
             (fun () ->
                 match setting.Value with
                 | Some s ->
                     ConfirmPage(
-                        Localisation.localiseWith [ s.Name ] "gameplay.preset.load.prompt",
+                        [ s.Name ] %> "gameplay.preset.load.prompt",
                         fun () ->
                             Presets.load s
                             preview.Refresh()
 
                             Notifications.action_feedback (
                                 Icons.system_notification,
-                                L "notification.preset_loaded",
+                                %"notification.preset_loaded",
                                 s.Name
                             )
                     )
@@ -219,23 +219,23 @@ type GameplayPage() as this =
                     .Margin(40.0f, 0.0f)
         )
         |+ Button(
-            L "gameplay.preset.save",
+            %"gameplay.preset.save",
             (fun () ->
                 if setting.Value.IsNone then
                     let name = sprintf "Preset %i" i
                     setting.Value <- Presets.create (name) |> Some
-                    Notifications.action_feedback (Icons.system_notification, L "notification.preset_saved", name)
+                    Notifications.action_feedback (Icons.system_notification, %"notification.preset_saved", name)
                 else
                     let name = setting.Value.Value.Name
 
                     ConfirmPage(
-                        Localisation.localiseWith [ name ] "gameplay.preset.save.prompt",
+                        [ name ] %> "gameplay.preset.save.prompt",
                         fun () ->
                             setting.Value <- Presets.create (name) |> Some
 
                             Notifications.action_feedback (
                                 Icons.system_notification,
-                                L "notification.preset_saved",
+                                %"notification.preset_saved",
                                 name
                             )
                     )
@@ -298,7 +298,7 @@ type GameplayPage() as this =
                 .Tooltip(Tooltip.Info("gameplay.lanecover"))
             |+ PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerPage))
                 .Pos(790.0f)
-                .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(L "gameplay.pacemaker.hint"))
+                .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
             |+ PageButton("gameplay.rulesets", (fun () -> Menu.ShowPage Rulesets.FavouritesPage))
                 .Pos(860.0f)
                 .Tooltip(Tooltip.Info("gameplay.rulesets"))
@@ -308,6 +308,6 @@ type GameplayPage() as this =
             |+ presetButtons 3 options.Preset3
         )
 
-    override this.Title = L "gameplay.name"
+    override this.Title = %"gameplay.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = ()

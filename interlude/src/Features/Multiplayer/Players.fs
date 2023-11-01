@@ -39,7 +39,7 @@ type InvitePlayerPage() as this =
             |+ submit_button.Pos(300.0f)
         )
 
-    override this.Title = L "invite_to_lobby.name"
+    override this.Title = %"invite_to_lobby.name"
     override this.OnClose() = ()
 
 type Player(name: string, player: Network.LobbyPlayer) =
@@ -79,7 +79,7 @@ type Player(name: string, player: Network.LobbyPlayer) =
             && Mouse.left_click ()
         then
             ConfirmPage(
-                Localisation.localiseWith [ name ] "lobby.confirm_transfer_host",
+                [ name ] %> "lobby.confirm_transfer_host",
                 fun () -> Lobby.transfer_host name
             )
                 .Show()
@@ -104,7 +104,7 @@ type PlayerList() =
                 other_players.Add(Player(username, l.Players.[username]))
 
         other_players.Add(
-            Button(sprintf "%s %s" Icons.invite (L "lobby.send_invite"), (fun () -> Menu.ShowPage InvitePlayerPage))
+            Button(sprintf "%s %s" Icons.invite (%"lobby.send_invite"), (fun () -> Menu.ShowPage InvitePlayerPage))
         )
 
     override this.Init(parent) =

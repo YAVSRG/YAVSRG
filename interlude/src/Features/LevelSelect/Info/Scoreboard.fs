@@ -195,9 +195,9 @@ type Scoreboard(display: Setting<Display>) as this =
         |+ StylishButton.Selector(
             Icons.sort,
             [|
-                Sort.Accuracy, L"levelselect.info.scoreboard.sort.accuracy"
-                Sort.Performance, L"levelselect.info.scoreboard.sort.performance"
-                Sort.Time, L"levelselect.info.scoreboard.sort.time"
+                Sort.Accuracy, %"levelselect.info.scoreboard.sort.accuracy"
+                Sort.Performance, %"levelselect.info.scoreboard.sort.performance"
+                Sort.Time, %"levelselect.info.scoreboard.sort.time"
             |],
             sort |> Setting.trigger (fun _ -> Loader.container.Sort <- sorter()),
             !%Palette.DARK_100,
@@ -207,9 +207,9 @@ type Scoreboard(display: Setting<Display>) as this =
         |+ StylishButton.Selector(
             Icons.filter,
             [|
-                Filter.None, L"levelselect.info.scoreboard.filter.none"
-                Filter.CurrentRate, L"levelselect.info.scoreboard.filter.currentrate"
-                Filter.CurrentMods, L"levelselect.info.scoreboard.filter.currentmods"
+                Filter.None, %"levelselect.info.scoreboard.filter.none"
+                Filter.CurrentRate, %"levelselect.info.scoreboard.filter.currentrate"
+                Filter.CurrentMods, %"levelselect.info.scoreboard.filter.currentmods"
             |],
             filter |> Setting.trigger (fun _ -> this.Refresh()),
             !%Palette.MAIN_100,
@@ -219,7 +219,7 @@ type Scoreboard(display: Setting<Display>) as this =
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scrollContainer
         |+ HotkeyAction("scoreboard", fun () -> if Loader.container.Focused then Selection.clear() else Loader.container.Focus())
-        |* Conditional((fun () -> count = 0), EmptyState(Icons.empty_scoreboard, L"levelselect.info.scoreboard.empty"))
+        |* Conditional((fun () -> count = 0), EmptyState(Icons.empty_scoreboard, %"levelselect.info.scoreboard.empty"))
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

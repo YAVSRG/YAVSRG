@@ -200,9 +200,9 @@ type Leaderboard(display: Setting<Display>) as this =
         |+ StylishButton.Selector(
             Icons.sort,
             [|
-                Sort.Accuracy, L"levelselect.info.scoreboard.sort.accuracy"
-                Sort.Performance, L"levelselect.info.scoreboard.sort.performance"
-                Sort.Time, L"levelselect.info.scoreboard.sort.time"
+                Sort.Accuracy, %"levelselect.info.scoreboard.sort.accuracy"
+                Sort.Performance, %"levelselect.info.scoreboard.sort.performance"
+                Sort.Time, %"levelselect.info.scoreboard.sort.time"
             |],
             sort,
             !%Palette.DARK_100,
@@ -212,9 +212,9 @@ type Leaderboard(display: Setting<Display>) as this =
         |+ StylishButton.Selector(
             Icons.filter,
             [|
-                Filter.None, L"levelselect.info.scoreboard.filter.none"
-                Filter.CurrentRate, L"levelselect.info.scoreboard.filter.currentrate"
-                Filter.CurrentMods, L"levelselect.info.scoreboard.filter.currentmods"
+                Filter.None, %"levelselect.info.scoreboard.filter.none"
+                Filter.CurrentRate, %"levelselect.info.scoreboard.filter.currentrate"
+                Filter.CurrentMods, %"levelselect.info.scoreboard.filter.currentmods"
             |],
             filter,
             !%Palette.MAIN_100,
@@ -224,9 +224,9 @@ type Leaderboard(display: Setting<Display>) as this =
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scrollContainer
         |+ HotkeyAction("scoreboard", fun () -> if Loader.container.Focused then Selection.clear() else Loader.container.Focus())
-        |+ Conditional((fun () -> state.Value = State.EmptyLeaderboard), EmptyState(Icons.leaderboard, L"levelselect.info.leaderboard.empty", Subtitle = L"levelselect.info.leaderboard.empty.subtitle"))
-        |+ Conditional((fun () -> state.Value = State.NoLeaderboard), EmptyState(Icons.no_leaderboard, L"levelselect.info.leaderboard.unavailable"))
-        |* Conditional((fun () -> state.Value = State.Offline), EmptyState(Icons.connected, L"misc.offline"))
+        |+ Conditional((fun () -> state.Value = State.EmptyLeaderboard), EmptyState(Icons.leaderboard, %"levelselect.info.leaderboard.empty", Subtitle = %"levelselect.info.leaderboard.empty.subtitle"))
+        |+ Conditional((fun () -> state.Value = State.NoLeaderboard), EmptyState(Icons.no_leaderboard, %"levelselect.info.leaderboard.unavailable"))
+        |* Conditional((fun () -> state.Value = State.Offline), EmptyState(Icons.connected, %"misc.offline"))
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

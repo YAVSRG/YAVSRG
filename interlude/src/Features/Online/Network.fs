@@ -160,7 +160,7 @@ module Network =
                 match packet with
                 | Downstream.DISCONNECT reason ->
                     Logging.Info(sprintf "Disconnected from server: %s" reason)
-                    sync <| fun () -> Notifications.error(L"notification.network.disconnected", reason)
+                    sync <| fun () -> Notifications.error(%"notification.network.disconnected", reason)
                 | Downstream.HANDSHAKE_SUCCESS -> if credentials.Token <> "" then this.Send(Upstream.LOGIN credentials.Token)
                 | Downstream.DISCORD_AUTH_URL url ->
                     if not (url.StartsWith("https://discord.com/api/oauth2")) then Logging.Error(sprintf "Got a strange auth link! %s" url)
@@ -170,7 +170,7 @@ module Network =
                     Events.waiting_registration_ev.Trigger discord_tag
                 | Downstream.REGISTRATION_FAILED reason ->
                     Logging.Info(sprintf "Registration failed: %s" reason)
-                    Notifications.error(L"notification.network.registrationfailed", reason)
+                    Notifications.error(%"notification.network.registrationfailed", reason)
                     Events.registration_failed_ev.Trigger reason
                 | Downstream.AUTH_TOKEN token -> 
                     credentials.Token <- token
@@ -180,12 +180,12 @@ module Network =
                     credentials.Username <- name
                     API.Client.authenticate credentials.Token
                     status <- LoggedIn
-                    if Screen.currentType <> Screen.Type.SplashScreen then Notifications.system_feedback(Icons.connected, Localisation.localiseWith [name] "notification.network.login", "")
+                    if Screen.currentType <> Screen.Type.SplashScreen then Notifications.system_feedback(Icons.connected, [name] %> "notification.network.login", "")
                     Events.successful_login_ev.Trigger name
                 | Downstream.LOGIN_FAILED reason -> 
                     credentials.Token <- ""
                     Logging.Info(sprintf "Login failed: %s" reason)
-                    if Screen.currentType <> Screen.Type.SplashScreen then Notifications.error(L"notification.network.loginfailed", reason)
+                    if Screen.currentType <> Screen.Type.SplashScreen then Notifications.error(%"notification.network.loginfailed", reason)
                     Events.login_failed_ev.Trigger reason
 
                 | Downstream.LOBBY_LIST lobbies -> sync <| fun () ->

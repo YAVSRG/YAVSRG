@@ -76,7 +76,7 @@ type PlayfieldSettingsPage() as this =
         Draw.rect <| Rect.Box(preview_bounds.Left + start + pw, preview_bounds.CenterY - 2.5f, pw * (align_offset.Value - 1.0f), 5f) <| Colors.red_accent.O2
         Draw.rect <| Rect.Box(preview_bounds.Left + preview_bounds.Width * align_anchor.Value - 2.5f, preview_bounds.Top, 5f, preview_bounds.Height) <| Colors.green_accent.O2
 
-    override this.Title = L"noteskins.edit.playfield.name"
+    override this.Title = %"noteskins.edit.playfield.name"
     override this.OnClose() =
         Noteskins.Current.changeConfig
             { Noteskins.Current.config with

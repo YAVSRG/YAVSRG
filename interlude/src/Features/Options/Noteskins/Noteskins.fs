@@ -85,7 +85,7 @@ type NoteskinsPage() as this =
         let ns = Noteskins.Current.instance
         if ns.IsEmbedded then
             ConfirmPage(
-                Localisation.localiseWith [ns.Config.Name] "noteskins.confirm_extract_default", 
+                [ns.Config.Name] %> "noteskins.confirm_extract_default", 
                 (fun () -> 
                     if Noteskins.create_from_embedded(if Network.credentials.Username <> "" then Some Network.credentials.Username else None) then refresh()
                     else Logging.Error "Noteskin folder already exists"
@@ -107,9 +107,9 @@ type NoteskinsPage() as this =
             |+
                 (
                     FlowContainer.LeftToRight<Widget>(250.0f, Position = Position.Row(230.0f, 50.0f).Margin(100.0f, 0.0f))
-                    |+ Button(Icons.edit + " " + L"noteskins.edit.name", tryEditNoteskin).Tooltip(Tooltip.Info("noteskins.edit"))
-                    |+ Button(Icons.edit + " " + L"noteskins.edit.export.name", 
-                        fun () -> if not (Noteskins.export_current()) then Notifications.error(L"notification.export_noteskin_failure.title", L"notification.export_noteskin_failure.body"))
+                    |+ Button(Icons.edit + " " + %"noteskins.edit.name", tryEditNoteskin).Tooltip(Tooltip.Info("noteskins.edit"))
+                    |+ Button(Icons.edit + " " + %"noteskins.edit.export.name", 
+                        fun () -> if not (Noteskins.export_current()) then Notifications.error(%"notification.export_noteskin_failure.title", %"notification.export_noteskin_failure.body"))
                         .Tooltip(Tooltip.Info("noteskins.edit.export"))
                 )
             |+ Text("Current", Position = Position.Row(100.0f, 50.0f).Margin(100.0f, 0.0f), Color = K Colors.text_subheading, Align = Alignment.LEFT)
@@ -128,7 +128,7 @@ type NoteskinsPage() as this =
         )
         this |* preview
 
-    override this.Title = L"noteskins.name"
+    override this.Title = %"noteskins.name"
     override this.OnDestroy() = 
         preview.Destroy()
         PreviewCleanup.clear()

@@ -113,8 +113,8 @@ module Gameplay =
                                 Background.load None
 
                                 Notifications.error (
-                                    L "notification.chart_load_failed.title",
-                                    L "notification.chart_load_failed.body"
+                                    %"notification.chart_load_failed.title",
+                                    %"notification.chart_load_failed.body"
                                 )
 
                                 yield fun () -> on_load_finished <- []

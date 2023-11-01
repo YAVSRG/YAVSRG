@@ -66,12 +66,12 @@ type LibraryModeSettings() =
             options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             "group_mode"
-        ).Tooltip(Tooltip.Info("levelselect.groupby", "group_mode").Hotkey(L"levelselect.groupby.reverse_hint", "reverse_group_mode"))
+        ).Tooltip(Tooltip.Info("levelselect.groupby", "group_mode").Hotkey(%"levelselect.groupby.reverse_hint", "reverse_group_mode"))
 
     let manage_collections =
         StylishButton(
             (fun () -> Menu.ShowPage SelectCollectionPage.Editor),
-            K (sprintf "%s %s" Icons.collections (L"levelselect.collections.name")),
+            K (sprintf "%s %s" Icons.collections (%"levelselect.collections.name")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         ).Tooltip(Tooltip.Info("levelselect.collections", "group_mode"))
@@ -79,7 +79,7 @@ type LibraryModeSettings() =
     let manage_tables =
         StylishButton(
             (fun () -> Menu.ShowPage ManageTablesPage),
-            K (sprintf "%s %s" Icons.edit (L"levelselect.table.name")),
+            K (sprintf "%s %s" Icons.edit (%"levelselect.table.name")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         ).Tooltip(Tooltip.Info("levelselect.table", "group_mode"))
@@ -96,11 +96,11 @@ type LibraryModeSettings() =
     override this.Init(parent) =
         this
         |+ StylishButton.Selector(
-            sprintf "%s %s:" Icons.collections (L"levelselect.librarymode"),
+            sprintf "%s %s:" Icons.collections (%"levelselect.librarymode"),
             [|
-                LibraryMode.All, L"levelselect.librarymode.all"
-                LibraryMode.Collections, L"levelselect.librarymode.collections"
-                LibraryMode.Table, L"levelselect.librarymode.table"
+                LibraryMode.All, %"levelselect.librarymode.all"
+                LibraryMode.Collections, %"levelselect.librarymode.collections"
+                LibraryMode.Table, %"levelselect.librarymode.table"
             |],
             options.LibraryMode |> Setting.trigger (fun _ -> LevelSelect.refresh_all(); update_swap()),
             !%Palette.DARK_100,
@@ -116,7 +116,7 @@ type LibraryModeSettings() =
             options.ChartSortReverse |> Setting.map not not |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             "sort_mode",
             Position = { Left = 0.6f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.8f %- 25.0f; Bottom = 0.0f %+ 170.0f })
-            .Tooltip(Tooltip.Info("levelselect.sortby", "sort_mode").Hotkey(L"levelselect.sortby.reverse_hint", "reverse_sort_mode"))
+            .Tooltip(Tooltip.Info("levelselect.sortby", "sort_mode").Hotkey(%"levelselect.sortby.reverse_hint", "reverse_sort_mode"))
         
         |* swap
 

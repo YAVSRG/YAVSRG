@@ -14,12 +14,12 @@ type private BasicStats() =
 
     override this.Init(parent) =
         this
-        |+ Text((if Network.credentials.Username <> "" then Network.credentials.Username else L"stats.name_placeholder"), Position = Position.SliceTop(140.0f).Margin(40.0f, 10.0f), Align = Alignment.LEFT)
+        |+ Text((if Network.credentials.Username <> "" then Network.credentials.Username else %"stats.name_placeholder"), Position = Position.SliceTop(140.0f).Margin(40.0f, 10.0f), Align = Alignment.LEFT)
         
-        |+ Text(L"stats.total.title",
+        |+ Text(%"stats.total.title",
             Position = Position.Row(140.0f, 70.0f).Margin(40.0f, 0.0f), Align = Alignment.LEFT)
 
-        |+ Text(L"stats.gametime", 
+        |+ Text(%"stats.gametime", 
             Position = Position.Row(210.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -28,7 +28,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
 
-        |+ Text(L"stats.playtime", 
+        |+ Text(%"stats.playtime", 
             Position = Position.Row(250.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -37,7 +37,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
 
-        |+ Text(L"stats.notes_hit", 
+        |+ Text(%"stats.notes_hit", 
             Position = Position.Row(290.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -46,7 +46,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
 
-        |+ Text(L"stats.plays_started", 
+        |+ Text(%"stats.plays_started", 
             Position = Position.Row(340.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -55,7 +55,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
             
-        |+ Text(L"stats.plays_retried", 
+        |+ Text(%"stats.plays_retried", 
             Position = Position.Row(380.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -64,7 +64,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
 
-        |+ Text(L"stats.plays_completed", 
+        |+ Text(%"stats.plays_completed", 
             Position = Position.Row(420.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -73,7 +73,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
         
-        |+ Text(L"stats.plays_quit", 
+        |+ Text(%"stats.plays_quit", 
             Position = Position.Row(460.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -83,10 +83,10 @@ type private BasicStats() =
             Align = Alignment.RIGHT)
 
 
-        |+ Text(L"stats.session.title",
+        |+ Text(%"stats.session.title",
             Position = Position.Row(500.0f, 70.0f).Margin(40.0f, 0.0f), Align = Alignment.LEFT)
 
-        |+ Text(L"stats.gametime", 
+        |+ Text(%"stats.gametime", 
             Position = Position.Row(570.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -95,7 +95,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
 
-        |+ Text(L"stats.playtime", 
+        |+ Text(%"stats.playtime", 
             Position = Position.Row(610.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -104,7 +104,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
 
-        |+ Text(L"stats.notes_hit", 
+        |+ Text(%"stats.notes_hit", 
             Position = Position.Row(650.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -113,7 +113,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
 
-        |+ Text(L"stats.plays_started", 
+        |+ Text(%"stats.plays_started", 
             Position = Position.Row(700.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -122,7 +122,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
             
-        |+ Text(L"stats.plays_retried", 
+        |+ Text(%"stats.plays_retried", 
             Position = Position.Row(740.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -131,7 +131,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
 
-        |+ Text(L"stats.plays_completed", 
+        |+ Text(%"stats.plays_completed", 
             Position = Position.Row(780.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -140,7 +140,7 @@ type private BasicStats() =
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT)
         
-        |+ Text(L"stats.plays_quit", 
+        |+ Text(%"stats.plays_quit", 
             Position = Position.Row(820.0f, 40.0f).Margin(40.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT)
@@ -155,8 +155,8 @@ type private Tabs() =
     inherit StaticContainer(NodeType.None)
 
     let table = TableStats()
-    let skillsets = EmptyState(Icons.stats, L"misc.nyi")
-    let goals = EmptyState(Icons.stats, L"misc.nyi")
+    let skillsets = EmptyState(Icons.stats, %"misc.nyi")
+    let goals = EmptyState(Icons.stats, %"misc.nyi")
 
     let swap = SwapContainer(Current = table, Position = Position.TrimTop 50.0f)
 
@@ -169,7 +169,7 @@ type private Tabs() =
         |+ 
             (
                 FlowContainer.LeftToRight(200.0f, Position = Position.SliceTop(50.0f))
-                |+ button(L"stats.table.name", table)
+                |+ button(%"stats.table.name", table)
                 |+ button("Skillsets", skillsets)
                 |+ button("Goals", goals)
             )

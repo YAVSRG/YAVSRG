@@ -38,7 +38,7 @@ type RegisterPage(discord_tag) as this =
             |+ submit_button.Pos(890.0f)
         )
     
-    override this.Title = L"register.name"
+    override this.Title = %"register.name"
     override this.OnClose() = handler.Dispose()
 
 type LoginPage() as this =
@@ -60,7 +60,7 @@ type LoginPage() as this =
     let c = Network.Events.login_failed.Subscribe(fun _ -> waiting_for_browser <- false)
     let d = Network.Events.registration_failed.Subscribe(fun _ -> waiting_for_browser <- false)
 
-    let info = Callout.Small.Icon(Icons.connected).Title(L"login.waiting_for_discord")
+    let info = Callout.Small.Icon(Icons.connected).Title(%"login.waiting_for_discord")
 
     do
         this.Content(
@@ -74,5 +74,5 @@ type LoginPage() as this =
                 )
         )
 
-    override this.Title = L"login.name"
+    override this.Title = %"login.name"
     override this.OnClose() = a.Dispose(); b.Dispose(); c.Dispose(); d.Dispose()

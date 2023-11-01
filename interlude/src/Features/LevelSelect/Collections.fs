@@ -25,7 +25,7 @@ module CollectionManager =
             | Playlist p -> p.Add (cc, rate.Value, selectedMods.Value)
         then
             if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh_all() else LevelSelect.refresh_details()
-            Notifications.action_feedback (Icons.add_to_collection, Localisation.localiseWith [cc.Title; name] "collections.added", "")
+            Notifications.action_feedback (Icons.add_to_collection, [cc.Title; name] %> "collections.added", "")
             true
         else false
 
@@ -39,7 +39,7 @@ module CollectionManager =
                 | _ -> p.RemoveSingle cc
         then
             if options.LibraryMode.Value <> LibraryMode.All then LevelSelect.refresh_all() else LevelSelect.refresh_details()
-            Notifications.action_feedback (Icons.remove_from_collection, Localisation.localiseWith [cc.Title; name] "collections.removed", "")
+            Notifications.action_feedback (Icons.remove_from_collection, [cc.Title; name] %> "collections.removed", "")
             if Some cc = Chart.CACHE_DATA then Chart.LIBRARY_CTX <- LibraryContext.None
             true
         else false
@@ -89,7 +89,7 @@ type private CreateFolderPage() as this =
                 (fun () -> if collections.CreateFolder(new_name.Value, icon.Value).IsSome then Collections.select new_name.Value; Menu.Back() )).Pos(400.0f)
         )
 
-    override this.Title = L"collections.create_folder.name"
+    override this.Title = %"collections.create_folder.name"
     override this.OnClose() = ()
 
     static member Icons = 
@@ -117,7 +117,7 @@ type private CreatePlaylistPage() as this =
                 (fun () -> if collections.CreatePlaylist(new_name.Value, icon.Value).IsSome then Collections.select new_name.Value; Menu.Back() )).Pos(400.0f)
         )
 
-    override this.Title = L"collections.create_playlist.name"
+    override this.Title = %"collections.create_playlist.name"
     override this.OnClose() = ()
 
     static member Icons =
@@ -142,7 +142,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                 folder.Icon)).Pos(270.0f)
             |+ PageButton("collections.edit.delete", 
                 (fun () -> 
-                    ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", 
+                    ConfirmPage([name] %> "misc.confirmdelete", 
                         fun () ->
                             if collections.Delete name then 
                                 if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh_all()
@@ -157,14 +157,14 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                 .Tooltip(Tooltip.Info("collections.edit.select"))
 
             |+ if options.SelectedCollection.Value = Some name then
-                Text(L"collections.selected.this",
+                Text(%"collections.selected.this",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
                else
-                Text(Localisation.localiseWith [match options.SelectedCollection.Value with Some s -> s | None -> "--"] "collections.selected.other",
+                Text([match options.SelectedCollection.Value with Some s -> s | None -> "--"] %> "collections.selected.other",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
-            |+ Text(Localisation.localiseWith [(+."add_to_collection").ToString()] "collections.addhint",
+            |+ Text([(+."add_to_collection").ToString()] %> "collections.addhint",
                 Position = Position.SliceBottom(190.0f).SliceTop(70.0f))
-            |+ Text(Localisation.localiseWith [(+."remove_from_collection").ToString()] "collections.removehint",
+            |+ Text([(+."remove_from_collection").ToString()] %> "collections.removehint",
                 Position = Position.SliceBottom(120.0f).SliceTop(70.0f))
 
         this.Content content
@@ -191,7 +191,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                 playlist.Icon)).Pos(270.0f)
             |+ PageButton("collections.edit.delete", 
                 (fun () -> 
-                    ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", 
+                    ConfirmPage([name] %> "misc.confirmdelete", 
                         fun () -> 
                             if collections.Delete name then 
                                 if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh_all()
@@ -207,14 +207,14 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                 .Tooltip(Tooltip.Info("collections.edit.select"))
             
             |+ if options.SelectedCollection.Value = Some name then
-                Text(L"collections.selected.this",
+                Text(%"collections.selected.this",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
                else
-                Text(Localisation.localiseWith [match options.SelectedCollection.Value with Some s -> s | None -> "[None]"] "collections.selected.other",
+                Text([match options.SelectedCollection.Value with Some s -> s | None -> "[None]"] %> "collections.selected.other",
                 Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
-            |+ Text(Localisation.localiseWith [(+."add_to_collection").ToString()] "collections.addhint",
+            |+ Text([(+."add_to_collection").ToString()] %> "collections.addhint",
                 Position = Position.SliceBottom(190.0f).SliceTop(70.0f))
-            |+ Text(Localisation.localiseWith [(+."remove_from_collection").ToString()] "collections.removehint",
+            |+ Text([(+."remove_from_collection").ToString()] %> "collections.removehint",
                 Position = Position.SliceBottom(120.0f).SliceTop(70.0f))
 
         this.Content content
@@ -284,7 +284,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
 
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
 
-    override this.Title = L"collections.name"
+    override this.Title = %"collections.name"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh()
 

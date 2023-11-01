@@ -34,7 +34,7 @@ type LobbySettingsPage(settings: LobbySettings) as this =
                 .Tooltip(Tooltip.Info("lobby.auto_countdown"))
         )
 
-    override this.Title = L "lobby.name"
+    override this.Title = %"lobby.name"
 
     override this.OnClose() =
         Lobby.settings
@@ -82,7 +82,7 @@ type Lobby() =
                 if Network.lobby.IsSome && SelectedChart.loaded () then
                     Preview(Gameplay.Chart.WITH_MODS.Value, ignore).Show()
             ),
-            K(sprintf "%s %s" Icons.preview (L "levelselect.preview.name")),
+            K(sprintf "%s %s" Icons.preview (%"levelselect.preview.name")),
             !%Palette.MAIN_100,
             TiltLeft = false,
             Hotkey = "preview",
@@ -94,7 +94,7 @@ type Lobby() =
             .Tooltip(Tooltip.Info("levelselect.preview"))
         |+ StylishButton(
             ignore,
-            K(sprintf "%s %s" Icons.mods (L "levelselect.mods.name")),
+            K(sprintf "%s %s" Icons.mods (%"levelselect.mods.name")),
             !%Palette.DARK_100,
             Hotkey = "mods",
             Position =
@@ -118,7 +118,7 @@ type Lobby() =
             .Tooltip(
                 Tooltip
                     .Info("levelselect.rulesets", "ruleset_switch")
-                    .Hotkey(L "levelselect.rulesets.picker_hint", "ruleset_picker")
+                    .Hotkey(%"levelselect.rulesets.picker_hint", "ruleset_picker")
             )
         |+ SelectedChart(
             Position =
