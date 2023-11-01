@@ -60,8 +60,8 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as th
 
         Draw.quad (Quad.ofRect this.Bounds) (Quad.color Color.White) (Sprite.with_uv (3, int color.Value) sprite)
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if this.Selected then
             if (+."up").Tapped() then

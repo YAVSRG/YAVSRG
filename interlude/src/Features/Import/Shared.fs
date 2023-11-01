@@ -129,8 +129,8 @@ type SearchContainerLoader(taskWithCallback: (unit -> unit) -> unit) =
     override this.Draw() =
         if not loading then taskWithCallback(fun () -> sync(fun () -> (this.Parent :?> FlowContainer.Vertical<Widget>).Remove this)); loading <- true
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
 type PopulateFunc = SearchContainer -> (unit -> unit) -> unit
 and FilterFunc = SearchContainer -> Filter -> unit

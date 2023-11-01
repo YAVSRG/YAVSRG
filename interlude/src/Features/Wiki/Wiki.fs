@@ -282,10 +282,10 @@ module Wiki =
 
             page_changed <- this.UpdateContent
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
-            buttons.Update(elapsedTime, moved)
-            flow.Update(elapsedTime, moved)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            buttons.Update(elapsed_ms, moved)
+            flow.Update(elapsed_ms, moved)
 
             if Mouse.left_click () || (+."exit").Tapped() then
                 this.Close()

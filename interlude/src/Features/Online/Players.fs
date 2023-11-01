@@ -314,6 +314,6 @@ type PlayersPage() as this =
     override this.Draw() =
         contents.Draw()
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        contents.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        contents.Update(elapsed_ms, moved)

@@ -67,8 +67,8 @@ type RotationPicker(rotation: Setting<float>) as this =
 
         base.Draw()
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if this.Selected then
             if (+."up").Tapped() then

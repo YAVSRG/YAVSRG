@@ -256,9 +256,9 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
         base.Init parent
         this.Refresh()
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        items.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        items.Update(elapsed_ms, moved)
 
     override this.Draw() =
         base.Draw()

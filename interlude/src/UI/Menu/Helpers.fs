@@ -34,8 +34,8 @@ type Tooltip(content: Callout) =
 
     let content = content.Icon(Icons.info)
     
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         if Mouse.hover this.Bounds then
             Notifications.tooltip_available <- true
             if (+."tooltip").Tapped() then Notifications.tooltip ((+."tooltip"), this, content)

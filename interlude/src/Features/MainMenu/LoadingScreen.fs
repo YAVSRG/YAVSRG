@@ -39,10 +39,10 @@ type LoadingScreen() =
     override this.OnExit _ =
         if not closing then Devices.change_volume (Options.options.AudioVolume.Value, Options.options.AudioVolume.Value)
 
-    override this.Update (elapsedTime, bounds) =
-        base.Update (elapsedTime, bounds)
-        audio_fade.Update elapsedTime
-        animation.Update elapsedTime
+    override this.Update (elapsed_ms, moved) =
+        base.Update (elapsed_ms, moved)
+        audio_fade.Update elapsed_ms
+        animation.Update elapsed_ms
         Devices.change_volume (Options.options.AudioVolume.Value, Options.options.AudioVolume.Value * float audio_fade.Value)
         
     override this.Draw() =

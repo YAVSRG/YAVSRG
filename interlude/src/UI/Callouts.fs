@@ -76,10 +76,10 @@ type Callout =
 module Callout =
 
     let x_padding = 30.0f
-    let spacing isSmall = if isSmall then 10.0f else 15.0f
-    let header_size isSmall = if isSmall then 25.0f else 35.0f
-    let text_size isSmall = if isSmall then 18.0f else 25.0f
-    let text_spacing isSmall = if isSmall then 8.0f else 10.0f
+    let spacing is_small = if is_small then 10.0f else 15.0f
+    let header_size is_small = if is_small then 25.0f else 35.0f
+    let text_size is_small = if is_small then 18.0f else 25.0f
+    let text_spacing is_small = if is_small then 8.0f else 10.0f
 
     let default_hotkey_text = L "misc.hotkeyhint"
 
@@ -154,8 +154,8 @@ module Callout =
             | CalloutContent.Button(label, _) ->
                 y <- y + spacing
                 let tsize = text_size c.IsSmall
-                let buttonSize = tsize + spacing * 2.0f
-                let bounds = Rect.Box(x, y, width, buttonSize)
+                let button_size = tsize + spacing * 2.0f
+                let bounds = Rect.Box(x, y, width, button_size)
                 Draw.rect bounds (Colors.shadow_2.O2a a)
 
                 let text_col =
@@ -169,12 +169,12 @@ module Callout =
                     label,
                     tsize,
                     x + width * 0.5f,
-                    y + buttonSize * 0.5f - tsize * 0.8f,
+                    y + button_size * 0.5f - tsize * 0.8f,
                     text_col,
                     Alignment.CENTER
                 )
 
-                y <- y + buttonSize
+                y <- y + button_size
 
             y <- y + spacing
 
@@ -201,13 +201,13 @@ module Callout =
             | CalloutContent.Button(_, action) ->
                 y <- y + spacing
                 let tsize = text_size c.IsSmall
-                let buttonSize = tsize + spacing * 2.0f
-                let bounds = Rect.Box(x, y, width, buttonSize)
+                let button_size = tsize + spacing * 2.0f
+                let bounds = Rect.Box(x, y, width, button_size)
 
                 if Mouse.hover bounds && Mouse.left_click () then
                     action ()
 
-                y <- y + buttonSize
+                y <- y + button_size
 
             y <- y + spacing
 
@@ -219,8 +219,8 @@ module Callout =
                 base.Draw()
                 draw (this.Bounds.Left, this.Bounds.Top + 20.0f, w, h, Colors.text, callout)
 
-            override this.Update(elapsedTime, moved) =
-                base.Update(elapsedTime, moved)
+            override this.Update(elapsed_ms, moved) =
+                base.Update(elapsed_ms, moved)
                 update (this.Bounds.Left, this.Bounds.Top + 20.0f, w, h, callout)
         }
 
@@ -252,13 +252,13 @@ module Notifications =
     type Display() =
         inherit Overlay(NodeType.None)
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
 
             match current_tooltip with
             | None -> ()
             | Some t ->
-                t.Fade.Update elapsedTime
+                t.Fade.Update elapsed_ms
 
                 if t.Fade.Target <> 0.0f then
                     if t.Bind.Released() then
@@ -295,8 +295,8 @@ module Notifications =
                 Callout.update (bounds.Left, bounds.Top + padding, width, height, i.Data)
                 y <- y + (height + padding * 2.0f + 15.0f) * i.Fade.Value
 
-                i.Duration <- i.Duration - elapsedTime
-                i.Fade.Update elapsedTime
+                i.Duration <- i.Duration - elapsed_ms
+                i.Fade.Update elapsed_ms
 
                 if i.Fade.Target <> 0.0f then
                     if i.Duration <= 0.0 then

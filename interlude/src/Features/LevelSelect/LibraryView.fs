@@ -49,10 +49,10 @@ type private ModeDropdown(options: (string * string) seq, label: string, setting
         | Some d -> d.Draw()
         | None -> ()
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         match this.Dropdown with
-        | Some d -> d.Update(elapsedTime, moved)
+        | Some d -> d.Update(elapsed_ms, moved)
         | None -> ()
     
 type LibraryModeSettings() =
@@ -124,8 +124,8 @@ type LibraryModeSettings() =
         base.Init parent
         
     
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if Chart.CACHE_DATA.IsSome then
 

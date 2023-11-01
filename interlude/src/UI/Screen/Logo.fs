@@ -164,8 +164,8 @@ module Logo =
                     Bottom = 0.5f %+ b
                 }
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
 
             if moved then
                 match state with
@@ -173,7 +173,7 @@ module Logo =
                 | Hidden -> this.Move(-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
                 | Menu -> this.Move(-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)
 
-            counter.Update elapsedTime
+            counter.Update elapsed_ms
 
     let display =
         Display(

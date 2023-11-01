@@ -34,8 +34,8 @@ module private Helpers =
             base.Init parent
             this |+ Text(icon, Align = Alignment.LEFT) |* Clickable.Focus this
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
 
             if this.Selected then
                 let u = (+."up").Tapped()
@@ -65,7 +65,7 @@ module private Helpers =
                     let l = (+."left").Pressed()
                     let r = (+."right").Pressed()
 
-                    time <- time + elapsedTime
+                    time <- time + elapsed_ms
 
                     if (float repeat * REPEAT_INTERVAL + REPEAT_DELAY < time) then
                         repeat <- repeat + 1

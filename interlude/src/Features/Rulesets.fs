@@ -84,10 +84,10 @@ module Rulesets =
             | Some d -> d.Draw()
             | None -> ()
     
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
             match this.Dropdown with
-            | Some d -> d.Update(elapsedTime, moved)
+            | Some d -> d.Update(elapsed_ms, moved)
             | None -> ()
 
 type PacemakerPage() as this =

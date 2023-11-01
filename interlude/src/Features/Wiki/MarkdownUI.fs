@@ -276,8 +276,8 @@ type private Heading(max_width, size, body: MarkdownSpan list) as this =
     override this.Width = max_width
     override this.Height = contents.Height + Heading.MARGIN_Y * 2.0f
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         if Heading.scrollTo <> "" && text.Contains(Heading.scrollTo, System.StringComparison.InvariantCultureIgnoreCase) then
             Heading.scrollTo <- ""
             Heading.scrollHandler this

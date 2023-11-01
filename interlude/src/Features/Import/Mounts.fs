@@ -139,10 +139,10 @@ module Mounts =
                         this.Close()
                 |> Some
 
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            text.Update(elapsedTime, bounds)
-            button.Update(elapsedTime, bounds)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            text.Update(elapsed_ms, moved)
+            button.Update(elapsed_ms, moved)
             if (+."exit").Tapped() then this.Close()
 
         override this.Draw() =
@@ -201,9 +201,9 @@ module Mounts =
         member private this.WhoShouldFocus : Widget =
             if setting.Value.IsSome then editButtons else createButton
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
-            this.WhoShouldFocus.Update(elapsedTime, moved)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            this.WhoShouldFocus.Update(elapsed_ms, moved)
 
         override this.Draw() =
             base.Draw()

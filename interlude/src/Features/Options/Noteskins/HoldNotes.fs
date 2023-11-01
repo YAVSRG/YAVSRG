@@ -102,9 +102,9 @@ type HoldNoteSettingsPage() as this =
         draw_ln_preview ("Dropped", dropped_color.Value, not options.Upscroll.Value)
         draw_ln_preview ("Downscroll", Color.White, true)
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        animation.Update elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        animation.Update elapsed_ms
 
     override this.Title = L "noteskins.edit.holdnotes.name"
 

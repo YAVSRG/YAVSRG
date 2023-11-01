@@ -177,10 +177,10 @@ type MainMenuScreen() as this =
 
         base.Draw()
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        splashAnim.Update elapsedTime
-        splashSubAnim.Update elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        splashAnim.Update elapsed_ms
+        splashSubAnim.Update elapsed_ms
 
         splashSubAnim.Target <-
             if Mouse.hover (this.Bounds.Expand(-400.0f, 0.0f).SliceTop(100.0f)) then

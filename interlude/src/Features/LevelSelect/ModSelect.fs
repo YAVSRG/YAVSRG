@@ -82,7 +82,7 @@ type private ModSelectPage(onClose) as this =
 type ModSelect(onClose) =
     inherit StylishButton((fun () -> ModSelectPage(onClose).Show()), K (sprintf "%s %s" Icons.mods (L"levelselect.mods.name")), (fun () -> Palette.color(100, 0.5f, 0.0f)), Hotkey = "mods")
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         if (+."autoplay").Tapped() then
             autoplay <- not autoplay

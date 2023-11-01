@@ -50,9 +50,9 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render: 'T -
         base.Init parent
         content.Init this
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        if status = WebRequestState.Loaded then content.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        if status = WebRequestState.Loaded then content.Update(elapsed_ms, moved)
 
     override this.Draw() =
         base.Draw()

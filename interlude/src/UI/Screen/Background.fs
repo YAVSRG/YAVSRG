@@ -91,19 +91,19 @@ module Background =
         List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background
         loader.Request(path)
 
-    let update elapsedTime =
+    let update elapsed_ms =
 
         loader.Join()
 
-        parallaxX.Update(elapsedTime)
-        parallaxY.Update(elapsedTime)
-        parallaxZ.Update(elapsedTime)
-        dimPercent.Update(elapsedTime)
+        parallaxX.Update elapsed_ms
+        parallaxY.Update elapsed_ms
+        parallaxZ.Update elapsed_ms
+        dimPercent.Update elapsed_ms
 
         background <-
             List.filter
                 (fun (sprite, fade, isDefault) ->
-                    fade.Update elapsedTime |> ignore
+                    fade.Update elapsed_ms |> ignore
 
                     if fade.Target = 0.0f && fade.Value < 0.01f then
                         if not isDefault then

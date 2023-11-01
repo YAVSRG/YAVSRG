@@ -81,8 +81,8 @@ type Timeline(chart: ModChart, on_seek: Time -> unit) =
         let x = b.Width * percent
         Draw.rect (b.SliceBottom(5.0f).SliceLeft x) Colors.blue_accent
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if this.Bounds.Bottom - Mouse.y () < 200.0f && Mouse.left_click () then
             let percent =
@@ -107,9 +107,9 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
                 Bottom = 1.0f %- hitpos
             }
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        sliders |> Array.iter (fun s -> s.Update elapsedTime)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        sliders |> Array.iter (fun s -> s.Update elapsed_ms)
 
         Array.iteri
             (fun k (s: Animation.Fade) ->
@@ -178,10 +178,10 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
         state.SubscribeToHits handleEvent
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        animation.Update elapsedTime
-        sliders |> Array.iter (fun s -> s.Update elapsedTime)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        animation.Update elapsed_ms
+        sliders |> Array.iter (fun s -> s.Update elapsed_ms)
 
         for k = 0 to (keys - 1) do
             if holding.[k] && state.Scoring.KeyState |> Bitmask.hasBit k |> not then

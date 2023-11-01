@@ -51,10 +51,10 @@ module Comments =
     let init(parent: Widget) =
         editor.Init parent
 
-    let update(elapsedTime, moved) =
-        fade.Update elapsedTime
+    let update(elapsed_ms, moved) =
+        fade.Update elapsed_ms
         if textEntry.Selected && ((+."exit").Tapped() || (+."select").Tapped()) then Selection.clear()
-        editor.Update(elapsedTime, moved)
+        editor.Update(elapsed_ms, moved)
 
     let draw() = 
         if textEntry.Selected then

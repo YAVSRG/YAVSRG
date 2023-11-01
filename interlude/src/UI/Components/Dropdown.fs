@@ -63,8 +63,8 @@ type Dropdown(items: (string * (Color * Color) * (unit -> unit)) seq, on_close: 
     new(items: (string * (unit -> unit)) seq, on_close: unit -> unit) =
         Dropdown(items |> Seq.map (fun (label, action) -> (label, Colors.text, action)), on_close)
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if
             (+."exit").Tapped()

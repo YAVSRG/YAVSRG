@@ -157,10 +157,10 @@ type LevelSelectScreen() =
 
         LevelSelect.on_refresh_all.Add refresh
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
-        Comments.update (elapsedTime, moved)
+        Comments.update (elapsed_ms, moved)
 
         if (+."select").Tapped() then
             LevelSelect.play ()
@@ -178,7 +178,7 @@ type LevelSelectScreen() =
         elif (+."end").Tapped() then
             Tree.endGroup ()
 
-        Tree.update (this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsedTime)
+        Tree.update (this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsed_ms)
 
     override this.Draw() =
 

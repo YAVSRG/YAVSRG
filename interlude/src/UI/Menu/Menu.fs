@@ -28,11 +28,11 @@ type Page() as this =
         this.Add(w)
         content <- Some w
 
-    override this.Update(elapsedTime, moved) =
+    override this.Update(elapsed_ms, moved) =
         if isCurrent && not content.Value.Focused then
             Menu.Back()
 
-        base.Update(elapsedTime, moved)
+        base.Update(elapsed_ms, moved)
 
     member this.View(returning: bool) =
         this.Position <- Position.Default
@@ -164,8 +164,8 @@ and Menu(topLevel: Page) as this =
 
         Text.drawFillB (Style.font, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Colors.text, 0.0f)
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if (+."exit").Tapped() then
             Selection.up ()
@@ -173,7 +173,7 @@ and Menu(topLevel: Page) as this =
         let mutable i = 0
 
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
-            stack.[i].Value.Update(elapsedTime, moved)
+            stack.[i].Value.Update(elapsed_ms, moved)
             i <- i + 1
 
         if List.isEmpty namestack then
@@ -185,8 +185,8 @@ and Menu(topLevel: Page) as this =
 
             this.Close()
 
-        back_button.Update(elapsedTime, moved)
-        volume.Update(elapsedTime, moved)
+        back_button.Update(elapsed_ms, moved)
+        volume.Update(elapsed_ms, moved)
 
     override this.Close() =
         base.Close()

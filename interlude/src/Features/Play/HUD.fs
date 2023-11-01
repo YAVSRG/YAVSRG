@@ -65,9 +65,9 @@ type AccuracyMeter(conf: HUD.AccuracyMeter, state) as this =
                     }
             )
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        color.Update elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        color.Update elapsed_ms
 
 [<Struct>]
 type private HitMeterHit =
@@ -108,8 +108,8 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
                     }
         )
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if w = 0.0f then
             w <- this.Bounds.Width
@@ -254,10 +254,10 @@ type ComboMeter(conf: HUD.Combo, state: PlayState) =
             popAnimation.Value <- conf.Pop
         )
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        color.Update elapsedTime
-        popAnimation.Update elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        color.Update elapsed_ms
+        popAnimation.Update elapsed_ms
 
     override this.Draw() =
         let combo = state.Scoring.State.CurrentCombo
@@ -334,8 +334,8 @@ type SkipButton(conf: HUD.SkipButton, state) =
 
     let firstNote = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if active && state.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
             if (+."skip").Tapped() then
@@ -383,8 +383,8 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
                     Rulesets.current.Judgements.[judgement].Color
 
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         match state.Pacemaker with
         | PacemakerInfo.None -> ()
@@ -394,8 +394,8 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
                 update_flag_position ()
                 position_cooldown.Reset()
 
-            flag_position.Update elapsedTime
-            position_cooldown.Update elapsedTime
+            flag_position.Update elapsed_ms
+            position_cooldown.Update elapsed_ms
         | PacemakerInfo.Replay score ->
             if position_cooldown.Complete then
                 score.Update(state.CurrentChartTime())
@@ -403,11 +403,11 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
                 update_flag_position ()
                 position_cooldown.Reset()
 
-            flag_position.Update elapsedTime
-            position_cooldown.Update elapsedTime
+            flag_position.Update elapsed_ms
+            position_cooldown.Update elapsed_ms
         | PacemakerInfo.Judgement(_, _) -> ()
 
-        color.Update elapsedTime
+        color.Update elapsed_ms
 
     override this.Draw() =
         match state.Pacemaker with
@@ -471,11 +471,11 @@ type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
                     judgementAnimations[x.Judgement.Value].Reset()
         )
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         for j in judgementAnimations do
-            j.Update elapsedTime
+            j.Update elapsed_ms
 
     override this.Draw() =
         let h = this.Bounds.Height / float32 judgementAnimations.Length
@@ -527,8 +527,8 @@ type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
             y <- y + 25.0f
         )
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         for s, _ in Multiplayer.replays.Values do
             s.Update(
@@ -567,8 +567,8 @@ type BPMMeter(conf: HUD.BPMMeter, state) as this =
             Align = Alignment.CENTER
         )
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         let now = state.CurrentChartTime()
 
         if now < last_seen_time then

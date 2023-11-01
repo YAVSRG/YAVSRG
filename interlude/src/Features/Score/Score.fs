@@ -42,8 +42,8 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
         |+ BottomBanner(stats, scoreData, graph, refresh, Position = { Position.Default with Top = 0.75f %- 0.0f })
         |* Sidebar(stats, scoreData, Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 215.0f; Right = 0.35f %- 0.0f; Bottom = 1.0f %- 60.0f})
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
     override this.OnEnter prev =
         Screen.Toolbar.hide()

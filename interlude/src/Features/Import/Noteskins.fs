@@ -45,9 +45,9 @@ type NoteskinCard(data: RepoEntry) as this =
                     else status <- DownloadFailed
             )
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        imgFade.Update elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        imgFade.Update elapsed_ms
 
     override this.Draw() =
         base.Draw()

@@ -107,8 +107,8 @@ type ChartInfo() as this =
             rating <- Chart.RATING.Value.Physical
             notecounts <- Chart.FMT_NOTECOUNTS.Value
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if (+."uprate_small").Tapped() then changeRate(0.01f)
         elif (+."uprate_half").Tapped() then changeRate(0.05f)

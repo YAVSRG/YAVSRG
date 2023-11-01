@@ -49,15 +49,15 @@ module SpectateScreen =
 
             base.Init parent
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
 
             if Mouse.moved_recently () then
                 show <- true
                 this.Position <- Position.Default
                 show_timeout <- 1500.0
             elif show then
-                show_timeout <- show_timeout - elapsedTime
+                show_timeout <- show_timeout - elapsed_ms
 
                 if show_timeout < 0.0 then
                     show <- false
@@ -138,11 +138,11 @@ module SpectateScreen =
                 base.OnExit(next)
                 Song.resume ()
 
-            override this.Update(elapsedTime, bounds) =
-                base.Update(elapsedTime, bounds)
+            override this.Update(elapsed_ms, moved) =
+                base.Update(elapsed_ms, moved)
 
                 if wait_for_load > 0.0 then
-                    wait_for_load <- wait_for_load - elapsedTime
+                    wait_for_load <- wait_for_load - elapsed_ms
 
                     if wait_for_load <= 0 then
                         Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)

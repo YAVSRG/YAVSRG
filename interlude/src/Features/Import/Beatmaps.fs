@@ -206,10 +206,10 @@ type private SortingDropdown(options: (string * string) seq, label: string, sett
         | Some d -> d.Draw()
         | None -> ()
     
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         match this.Dropdown with
-        | Some d -> d.Update(elapsedTime, moved)
+        | Some d -> d.Update(elapsed_ms, moved)
         | None -> ()
 
 module Beatmaps =
@@ -349,9 +349,9 @@ module Beatmaps =
                 Position = { Left = 0.72f %+ 0.0f; Top = 0.0f %+ 65.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 115.0f })
             base.Init parent
 
-        override this.Update(elapsedTime, moved) =
+        override this.Update(elapsed_ms, moved) =
             json_downloader.Join()
-            base.Update(elapsedTime, moved)
+            base.Update(elapsed_ms, moved)
             if when_at_bottom.IsSome && scroll.PositionPercent > 0.9f then
                 when_at_bottom.Value()
                 when_at_bottom <- None

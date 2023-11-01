@@ -12,11 +12,11 @@ type Volume() =
     let fade = Animation.Fade 0.0f
     let slider = Animation.Fade 0.0f
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
-        fade.Update elapsedTime
-        slider.Update elapsedTime
+        fade.Update elapsed_ms
+        slider.Update elapsed_ms
 
         if (+."volume").Pressed() then
             fade.Target <- 1.0f

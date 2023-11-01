@@ -108,15 +108,15 @@ type AnimationSettingsPage() as this =
                 .Tooltip(Tooltip.Info("noteskins.edit.explosioncolors"))
         )
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
-        explosion_fade.Update elapsedTime
-        explosion_fade.Update elapsedTime
-        hold_explosion_fade.Update elapsedTime
-        explosion_frames.Update elapsedTime
-        note_frames.Update elapsedTime
-        test_events.Update elapsedTime
+        explosion_fade.Update elapsed_ms
+        explosion_fade.Update elapsed_ms
+        hold_explosion_fade.Update elapsed_ms
+        explosion_frames.Update elapsed_ms
+        note_frames.Update elapsed_ms
+        test_events.Update elapsed_ms
 
         if test_event_i < test_events.Loops then
             test_event_i <- test_events.Loops

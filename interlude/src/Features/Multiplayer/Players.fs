@@ -69,8 +69,8 @@ type Player(name: string, player: Network.LobbyPlayer) =
         Text.drawFillB (Style.font, name, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
         Text.drawFillB (Style.font, icon, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.RIGHT)
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if
             Network.lobby.IsSome

@@ -47,8 +47,8 @@ type Slider(setting: Setting.Bounded<float32>) as this =
 
     override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         let bounds = this.Bounds.TrimLeft TEXTWIDTH
         if this.Selected || Mouse.hover this.Bounds then
             let s = Mouse.scroll()
@@ -103,8 +103,8 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
 
     override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         if this.Selected then
             if (+."left").Tapped() then bk()
             elif (+."right").Tapped() then fd()
@@ -168,9 +168,9 @@ type PageSetting(name, widget: Widget) as this =
         base.Draw()
         widget.Draw()
     
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        widget.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        widget.Update(elapsed_ms, moved)
 
 type PageButton(name, action) as this =
     inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then Style.click.Play(); action()))
@@ -273,17 +273,17 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
         for c in current_controls do
             c.Draw()
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         if moved then
-            selector.Update(elapsedTime, true)
+            selector.Update(elapsed_ms, true)
             for case in controls do
                 for control in case do
-                    control.Update(elapsedTime, true)
+                    control.Update(elapsed_ms, true)
         else
-            selector.Update(elapsedTime, false)
+            selector.Update(elapsed_ms, false)
             for control in controls.[setting.Value] do
-                control.Update(elapsedTime, false)
+                control.Update(elapsed_ms, false)
 
         if this.Focused then
             if not selector.Focused && (+."up").Tapped() then this.Previous()
@@ -367,9 +367,9 @@ type ColorPicker(s: Setting<Color>, allowAlpha: bool) as this =
                 Sprite.DefaultQuad
             Draw.rect (Rect.Box (alpha_picker.Left, alpha_picker.Top + A * (alpha_picker.Height - 5.0f), alpha_picker.Width, 5.0f)) Color.White
 
-    override this.Update(elapsedTime, moved) =
+    override this.Update(elapsed_ms, moved) =
 
-        base.Update(elapsedTime, moved)
+        base.Update(elapsed_ms, moved)
         
         let saturation_value_picker = this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(200.0f).Shrink(5.0f)
         let hue_picker = this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(230.0f).TrimLeft(200.0f).Shrink(5.0f)

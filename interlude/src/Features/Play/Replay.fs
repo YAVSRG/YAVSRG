@@ -152,15 +152,15 @@ module ReplayScreen =
 
             base.Init parent
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
 
             if Mouse.moved_recently () then
                 show <- true
                 this.Position <- Position.Default
                 show_timeout <- 1500.0
             elif show then
-                show_timeout <- show_timeout - elapsedTime
+                show_timeout <- show_timeout - elapsed_ms
 
                 if show_timeout < 0.0 then
                     show <- false
@@ -232,8 +232,8 @@ module ReplayScreen =
                 DiscordRPC.playing ("Watching a replay", Gameplay.Chart.CACHE_DATA.Value.Title)
                 base.OnEnter p
 
-            override this.Update(elapsedTime, bounds) =
-                base.Update(elapsedTime, bounds)
+            override this.Update(elapsed_ms, moved) =
+                base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
                 let chartTime = now - firstNote
 

@@ -198,8 +198,8 @@ type Toolbar() =
         container.Draw()
         Terminal.draw ()
 
-    override this.Update(elapsedTime, moved) =
-        Stats.session.GameTime <- Stats.session.GameTime + elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        Stats.session.GameTime <- Stats.session.GameTime + elapsed_ms
 
         let moved =
             if wasHidden <> hidden then
@@ -227,7 +227,7 @@ type Toolbar() =
                 else
                     this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
 
-        container.Update(elapsedTime, moved)
+        container.Update(elapsed_ms, moved)
 
     override this.Init(parent: Widget) =
         base.Init parent

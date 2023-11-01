@@ -132,11 +132,11 @@ type Chat() =
         Draw.rect(this.Bounds.SliceBottom 50.0f) Colors.shadow_2.O3
         base.Draw()
 
-    override this.Update(elapsedTime, moved) =
+    override this.Update(elapsed_ms, moved) =
         if (+."select").Tapped() then
             if chatline.Selected && current_message.Value <> "" then 
                 Lobby.chat current_message.Value
                 current_message.Set ""
             else chatline.Select()
 
-        base.Update(elapsedTime, moved)
+        base.Update(elapsed_ms, moved)

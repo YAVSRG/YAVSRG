@@ -104,8 +104,8 @@ module PracticeScreen =
 
                 base.Draw()
 
-            override this.Update(elapsedTime, moved) =
-                base.Update(elapsedTime, moved)
+            override this.Update(elapsed_ms, moved) =
+                base.Update(elapsed_ms, moved)
 
                 if this.Focused && not this.Selected && (+."right").Tapped() then
                     this.Select()
@@ -380,12 +380,12 @@ module PracticeScreen =
                     Song.resume ()
                     base.OnBack()
 
-            override this.Update(elapsedTime, bounds) =
+            override this.Update(elapsed_ms, moved) =
                 let now = Song.time_with_offset ()
                 let chartTime = now - firstNote
 
                 if not options_mode then
-                    Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsedTime
+                    Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsed_ms
 
                 if (+."retry").Tapped() then
                     if options_mode then play (this) else restart (this)
@@ -415,7 +415,7 @@ module PracticeScreen =
 
                     this.State.Scoring.Update chartTime
 
-                base.Update(elapsedTime, bounds)
+                base.Update(elapsed_ms, moved)
 
                 if this.State.Scoring.Finished && not options_mode then
                     pause (this)

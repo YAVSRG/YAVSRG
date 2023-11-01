@@ -66,7 +66,7 @@ module Screen =
         override this.Position
             with set _ = failwith "Not permitted"
 
-        override this.Update(elapsedTime, moved) =
+        override this.Update(elapsed_ms, moved) =
             let moved = moved || Toolbar.moving ()
 
             if moved then
@@ -78,7 +78,7 @@ module Screen =
 
                 this.VisibleBounds <- Viewport.bounds
 
-            current.Update(elapsedTime, moved)
+            current.Update(elapsed_ms, moved)
 
         override this.Init(parent: Widget) =
             base.Init parent
@@ -130,27 +130,27 @@ module Screen =
 
         let perf = PerformanceMonitor()
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
 
-            perf.Update(elapsedTime, moved)
+            perf.Update(elapsed_ms, moved)
 
-            Background.update elapsedTime
+            Background.update elapsed_ms
 
             if currentType <> Type.Play || Dialog.exists () then
-                Notifications.display.Update(elapsedTime, moved)
+                Notifications.display.Update(elapsed_ms, moved)
 
             if Viewport.vwidth > 0.0f then
                 let x, y = Mouse.pos ()
                 Background.setParallaxPos (x / Viewport.vwidth, y / Viewport.vheight)
 
             Palette.accent_color.Target <- Content.accentColor
-            Dialog.display.Update(elapsedTime, moved)
+            Dialog.display.Update(elapsed_ms, moved)
 
-            toolbar.Update(elapsedTime, moved)
-            globalAnimation.Update elapsedTime
-            logo.Update(elapsedTime, moved)
-            screenContainer.Update(elapsedTime, moved)
+            toolbar.Update(elapsed_ms, moved)
+            globalAnimation.Update elapsed_ms
+            logo.Update(elapsed_ms, moved)
+            screenContainer.Update(elapsed_ms, moved)
 
             if (+."exit").Tapped() then
                 back Transitions.Flags.UnderLogo

@@ -51,10 +51,10 @@ type Preview(chart: ModChart, changeRate: float32 -> unit) =
 
         volume.Draw()
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        volume.Update(elapsedTime, moved)
-        playfield.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        volume.Update(elapsed_ms, moved)
+        playfield.Update(elapsed_ms, moved)
 
         if this.Bounds.Bottom - Mouse.y () < 200.0f && Mouse.left_click () then
             dragging <- true

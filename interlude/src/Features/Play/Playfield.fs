@@ -95,9 +95,9 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
     member this.ColumnWidth = column_width
     member this.ColumnPositions = column_positions
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        animation.Update elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        animation.Update elapsed_ms
 
     override this.Draw() =
         let {

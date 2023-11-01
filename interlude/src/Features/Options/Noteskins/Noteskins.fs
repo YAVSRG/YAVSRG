@@ -60,9 +60,9 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
         |* Clickable.Focus this
         base.Init parent
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        imgFade.Update elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        imgFade.Update elapsed_ms
         
     override this.OnFocus() = Style.hover.Play(); base.OnFocus()
         

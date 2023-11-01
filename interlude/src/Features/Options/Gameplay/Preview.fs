@@ -44,10 +44,10 @@ type NoteskinPreview(scale: float32) as this =
             Gameplay.Chart.recolor()
             Gameplay.Chart.wait_for_load <| fun () -> renderer <- createRenderer()
 
-    override this.Update(elapsedTime, moved) =
+    override this.Update(elapsed_ms, moved) =
         this.Bounds <- Viewport.bounds
-        renderer.Update(elapsedTime, moved)
-        base.Update(elapsedTime, moved)
+        renderer.Update(elapsed_ms, moved)
+        base.Update(elapsed_ms, moved)
 
     override this.Draw() =
         fbo.Bind true

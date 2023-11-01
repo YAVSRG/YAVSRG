@@ -102,9 +102,9 @@ module Leaderboard =
 
         override this.OnFocus() = Style.hover.Play(); base.OnFocus()
 
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            animation.Update elapsedTime
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            animation.Update elapsed_ms
             if Mouse.hover this.Bounds && (+."delete").Tapped() then ScoreContextMenu.ConfirmDeleteScore(data, false)
             elif this.Focused && (+."context_menu").Tapped() then ScoreContextMenu(data).Show()
 
@@ -228,8 +228,8 @@ type Leaderboard(display: Setting<Display>) as this =
         |+ Conditional((fun () -> state.Value = State.NoLeaderboard), EmptyState(Icons.no_leaderboard, L"levelselect.info.leaderboard.unavailable"))
         |* Conditional((fun () -> state.Value = State.Offline), EmptyState(Icons.connected, L"misc.offline"))
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         Loader.score_loader.Join()
 
     member this.Refresh() =

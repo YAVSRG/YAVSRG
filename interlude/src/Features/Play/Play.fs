@@ -130,9 +130,9 @@ module PlayScreen =
 
                 base.OnExit(next)
 
-            override this.Update(elapsedTime, bounds) =
-                Stats.session.PlayTime <- Stats.session.PlayTime + elapsedTime
-                base.Update(elapsedTime, bounds)
+            override this.Update(elapsed_ms, moved) =
+                Stats.session.PlayTime <- Stats.session.PlayTime + elapsed_ms
+                base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
                 let chartTime = now - firstNote
 
@@ -267,9 +267,9 @@ module PlayScreen =
                     Gameplay.Chart.CACHE_DATA.Value.Length / Gameplay.rate.Value
                 )
 
-            override this.Update(elapsedTime, bounds) =
-                Stats.session.PlayTime <- Stats.session.PlayTime + elapsedTime
-                base.Update(elapsedTime, bounds)
+            override this.Update(elapsed_ms, moved) =
+                Stats.session.PlayTime <- Stats.session.PlayTime + elapsed_ms
+                base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
                 let chartTime = now - firstNote
 

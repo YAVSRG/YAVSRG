@@ -249,7 +249,7 @@ module Tree =
         member this.Draw(top, origin, originB) =
             this.CheckBounds(top, origin, originB, this.OnDraw)
 
-        member private this.OnUpdate(origin, bounds, elapsedTime) =
+        member private this.OnUpdate(origin, bounds, elapsed_ms) =
 
             if localCacheFlag < cacheFlag then
                 updateCachedInfo ()
@@ -266,14 +266,14 @@ module Tree =
             else
                 hover.Target <- 0.0f
 
-            hover.Update(elapsedTime) |> ignore
+            hover.Update(elapsed_ms) |> ignore
 
-        member this.Update(top, origin, originB, elapsedTime) =
+        member this.Update(top, origin, originB, elapsed_ms) =
             if scrollTo = ScrollTo.Chart && groupName = selectedGroup && this.Selected then
                 scroll (-top + 500.0f)
                 scrollTo <- ScrollTo.Nothing
 
-            this.CheckBounds(top, origin, originB, (fun b -> this.OnUpdate(origin, b, elapsedTime)))
+            this.CheckBounds(top, origin, originB, (fun b -> this.OnUpdate(origin, b, elapsed_ms)))
 
     type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: LibraryGroupContext) =
         inherit TreeItem()
@@ -330,7 +330,7 @@ module Tree =
             else
                 b
 
-        member private this.OnUpdate(origin, bounds, elapsedTime) =
+        member private this.OnUpdate(origin, bounds, elapsed_ms) =
             if Mouse.hover bounds then
                 if this.LeftClick(origin) then
                     if this.Expanded then
@@ -343,7 +343,7 @@ module Tree =
                 elif (+."delete").Tapped() then
                     GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
 
-        member this.Update(top, origin, originB, elapsedTime) =
+        member this.Update(top, origin, originB, elapsed_ms) =
             match scrollTo with
             | ScrollTo.Pack s when s = name ->
                 if this.Expanded then
@@ -355,7 +355,7 @@ module Tree =
             | _ -> ()
 
             let b =
-                this.CheckBounds(top, origin, originB, (fun b -> this.OnUpdate(origin, b, elapsedTime)))
+                this.CheckBounds(top, origin, originB, (fun b -> this.OnUpdate(origin, b, elapsed_ms)))
 
             if this.Expanded then
                 let h = CHART_HEIGHT + 5.0f
@@ -369,7 +369,7 @@ module Tree =
                 let mutable p = b + float32 index * h
 
                 while (scrollTo <> ScrollTo.Nothing || p < originB) && index < items.Count do
-                    p <- items.[index].Update(p, origin, originB, elapsedTime)
+                    p <- items.[index].Update(p, origin, originB, elapsed_ms)
                     index <- index + 1
 
                 b + float32 items.Count * (CHART_HEIGHT + 5.0f)
@@ -539,15 +539,15 @@ module Tree =
         else
             finish_dragScroll ()
 
-    let update (origin: float32, originB: float32, elapsedTime: float) =
-        scrollPos.Update(elapsedTime) |> ignore
+    let update (origin: float32, originB: float32, elapsed_ms: float) =
+        scrollPos.Update(elapsed_ms) |> ignore
 
         if Dialog.exists () then
             ()
         else
 
             let bottomEdge =
-                List.fold (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsedTime)) scrollPos.Value groups
+                List.fold (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsed_ms)) scrollPos.Value groups
 
             let total_height = originB - origin
             let tree_height = bottomEdge - scrollPos.Value
@@ -560,7 +560,7 @@ module Tree =
                 begin_dragScroll ()
 
             if click_cooldown > 0.0 then
-                click_cooldown <- click_cooldown - elapsedTime
+                click_cooldown <- click_cooldown - elapsed_ms
 
             if (+."up").Tapped() && expandedGroup <> "" then
                 scrollTo <- ScrollTo.Pack expandedGroup

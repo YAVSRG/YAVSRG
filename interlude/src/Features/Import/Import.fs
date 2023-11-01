@@ -40,13 +40,13 @@ type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Servi
             Percyqaz.Flux.Resources.Feather.cloud_drizzle
         |]
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
         if service.Status <> Async.ServiceStatus.Idle then
             fade.Target <- 1.0f
-            animation.Update elapsedTime
+            animation.Update elapsed_ms
         else fade.Target <- 0.0f
-        fade.Update elapsedTime
+        fade.Update elapsed_ms
 
     override this.Draw() =
         let icon = animation_frames.[animation.Loops % animation_frames.Length]

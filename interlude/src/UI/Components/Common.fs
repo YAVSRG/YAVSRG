@@ -63,9 +63,9 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
         Style.text_close.Play()
         Input.remove_input_method ()
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        ticker.Update(elapsedTime)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        ticker.Update(elapsed_ms)
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
     inherit
@@ -236,8 +236,8 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
 
         base.Init parent
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
 
         if searchTimer.ElapsedMilliseconds > this.DebounceTime then
             searchTimer.Reset()
@@ -305,9 +305,9 @@ type LoadingState() =
 
     member val Text = L "misc.loading" with get, set
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        animation.Update elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        animation.Update elapsed_ms
 
     override this.Draw() =
         let color = (!*Palette.LIGHT, !*Palette.DARKER)
@@ -327,9 +327,9 @@ type LoadingIndicator() =
 
     let animation = Animation.Counter(1500.0)
 
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        animation.Update elapsedTime
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        animation.Update elapsed_ms
 
     override this.Draw() =
         let tick_width = this.Bounds.Width * 0.2f
