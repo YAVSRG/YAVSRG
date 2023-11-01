@@ -48,6 +48,9 @@ module Check =
             for position, m in matches """ %"([a-z\-_\.]*)" """ file_contents do
                 find m (sprintf "%s (position %i)" filename position)
 
+            for position, m in matches """ %> "([a-z\-_\.]*)" """ file_contents do
+                find m (sprintf "%s (position %i)" filename position)
+
             for position, m in matches """ PageSetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do
                 find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
 
