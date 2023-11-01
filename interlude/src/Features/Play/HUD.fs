@@ -309,7 +309,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
         let text =
             match conf.Label with
             | HUD.ProgressMeterLabel.Countdown ->
-                let time_left = duration - now
+                let time_left = (duration - now) / Gameplay.rate.Value
 
                 sprintf
                     "%i:%02i"
@@ -332,7 +332,7 @@ type SkipButton(conf: HUD.SkipButton, state) =
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"
     let mutable active = true
 
-    let firstNote = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
+    let first_note = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -340,7 +340,7 @@ type SkipButton(conf: HUD.SkipButton, state) =
         if active && state.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
             if (%%"skip").Tapped() then
                 Song.pause ()
-                Song.play_from (firstNote - Song.LEADIN_TIME)
+                Song.play_from (first_note - Song.LEADIN_TIME)
         else
             active <- false
 
