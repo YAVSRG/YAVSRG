@@ -42,10 +42,10 @@ module NoteColors =
             ModsUsed: string list
         }
 
-    let private roughlyDivisible (a: Time) (b: Time) = Time.abs(a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
+    let private roughly_divisible (a: Time) (b: Time) = Time.abs(a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
 
     let private ddr_func (delta: Time) (msPerBeat: float32<ms/beat>) : int =
-        List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughlyDivisible delta (msPerBeat / n)) [0..7]
+        List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughly_divisible delta (msPerBeat / n)) [0..7]
         |> Option.defaultValue DDRValues.Length
 
     let column_colors (colorData: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
@@ -53,7 +53,7 @@ module NoteColors =
         let c = [| for i in 0 .. (mc.Keys - 1) -> colorData.[i] |]
         mc.Notes |> TimeArray.map (fun nr -> struct (nr, c))
 
-    let chord_colors (colorData: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
+    let chord_colors (color_data: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
         
         let mutable previous_colors : ColorData = Array.zeroCreate mc.Keys
 
@@ -64,15 +64,15 @@ module NoteColors =
                 if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then index <- index + 1
             index <- max 0 index
             
-            let colors = Array.create mc.Keys colorData.[index]
+            let colors = Array.create mc.Keys color_data.[index]
             for k = 0 to mc.Keys - 1 do
                 if nr.[k] = NoteType.HOLDBODY || nr.[k] = NoteType.HOLDTAIL then colors.[k] <- previous_colors.[k]
-                else previous_colors.[k] <- colorData.[index]
+                else previous_colors.[k] <- color_data.[index]
 
             struct (nr, colors)
         )
 
-    let ddr_colors (colorData: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
+    let ddr_colors (color_data: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
 
         let mutable previous_colors : ColorData = Array.zeroCreate mc.Keys
 
@@ -89,20 +89,20 @@ module NoteColors =
 
             let ddr_color = ddr_func (time - bpm_time) bpm_mspb
 
-            let colors = Array.create mc.Keys colorData.[ddr_color]
+            let colors = Array.create mc.Keys color_data.[ddr_color]
             for k = 0 to mc.Keys - 1 do
                 if nr.[k] = NoteType.HOLDBODY || nr.[k] = NoteType.HOLDTAIL then colors.[k] <- previous_colors.[k]
-                else previous_colors.[k] <- colorData.[ddr_color]
+                else previous_colors.[k] <- color_data.[ddr_color]
 
             { Time = time; Data = struct (nr, colors) }
         )
 
-    let applyScheme (scheme: ColorScheme) (colorData: ColorData) (mc: ModChart) =
+    let apply_scheme (scheme: ColorScheme) (color_data: ColorData) (mc: ModChart) =
         let colored_notes = 
             match scheme with
-            | ColorScheme.Column -> column_colors colorData mc
-            | ColorScheme.Chord -> chord_colors colorData mc
-            | ColorScheme.DDR -> ddr_colors colorData mc
+            | ColorScheme.Column -> column_colors color_data mc
+            | ColorScheme.Chord -> chord_colors color_data mc
+            | ColorScheme.DDR -> ddr_colors color_data mc
             | _ -> column_colors (Array.zeroCreate mc.Keys) mc
         { Keys = mc.Keys; Notes = colored_notes; BPM = mc.BPM; SV = mc.SV; ModsUsed = mc.ModsUsed }
 
@@ -128,6 +128,6 @@ module NoteColors =
                         ColorConfig.Default.Colors
             }
 
-    let getColoredChart (config: ColorConfig) (chart: ModChart) : ColorizedChart =
+    let apply_coloring (config: ColorConfig) (chart: ModChart) : ColorizedChart =
         let index = if config.UseGlobalColors then 0 else chart.Keys - 2
-        applyScheme config.Style config.Colors.[index] chart
+        apply_scheme config.Style config.Colors.[index] chart

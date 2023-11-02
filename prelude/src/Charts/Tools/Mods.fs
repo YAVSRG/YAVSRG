@@ -17,7 +17,7 @@ type ModChart =
 
 module ModChart =
     
-    let ofChart (chart: Chart) =
+    let from_chart (chart: Chart) =
         {
             Keys = chart.Keys
             Notes = chart.Notes

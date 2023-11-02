@@ -6,34 +6,44 @@ open Prelude.Common
 [<Json.AutoCodec(false)>]
 type WidgetPosition =
     {
-        Enabled: bool; Float: bool
-        Left: float32; LeftA: float32
-        Top: float32; TopA: float32
-        Right: float32; RightA: float32
-        Bottom: float32; BottomA: float32
+        Enabled: bool
+        Float: bool
+        Left: float32
+        LeftA: float32
+        Top: float32
+        TopA: float32
+        Right: float32
+        RightA: float32
+        Bottom: float32
+        BottomA: float32
     }
     static member Default =
         {
-            Enabled = false; Float = true
-            Left = 0.0f; LeftA = 0.0f
-            Top = 0.0f; TopA = 0.0f
-            Right = 0.0f; RightA = 1.0f
-            Bottom = 0.0f; BottomA = 1.0f
+            Enabled = false
+            Float = true
+            Left = 0.0f
+            LeftA = 0.0f
+            Top = 0.0f
+            TopA = 0.0f
+            Right = 0.0f
+            RightA = 1.0f
+            Bottom = 0.0f
+            BottomA = 1.0f
         }
 
 module HUD =
 
     [<Json.AutoCodec(false)>]
-    type AccuracyMeter = 
-        { 
+    type AccuracyMeter =
+        {
             Position: WidgetPosition
             GradeColors: bool
             ShowName: bool
         }
-        static member Default = 
+        static member Default =
             {
                 Position =
-                    { 
+                    {
                         Enabled = true
                         Float = false
                         Left = -100.0f
@@ -48,7 +58,7 @@ module HUD =
                 GradeColors = true
                 ShowName = true
             }
-    
+
     [<Json.AutoCodec(false)>]
     type HitMeter =
         {
@@ -60,10 +70,10 @@ module HUD =
             ReleasesExtraHeight: float32
             HalfScaleReleases: bool
         }
-        static member Default = 
+        static member Default =
             {
                 Position =
-                    { 
+                    {
                         Enabled = true
                         Float = false
                         Left = -300.0f
@@ -91,10 +101,10 @@ module HUD =
             Pop: float32
             LampColors: bool
         }
-        static member Default = 
+        static member Default =
             {
                 Position =
-                    { 
+                    {
                         Enabled = true
                         Float = false
                         Left = -100.0f
@@ -113,7 +123,9 @@ module HUD =
 
     [<Json.AutoCodec(false)>]
     type SkipButton =
-        { Position: WidgetPosition }
+        {
+            Position: WidgetPosition
+        }
         static member Default =
             {
                 Position =
@@ -139,9 +151,9 @@ module HUD =
             IgnorePerfectJudgements: bool
             PrioritiseLowerJudgements: bool
         }
-        static member Default = 
+        static member Default =
             {
-                Position = 
+                Position =
                     {
                         Enabled = false
                         Float = false
@@ -169,9 +181,9 @@ module HUD =
             LateText: string
             LateColor: Color
         }
-        static member Default = 
+        static member Default =
             {
-                Position = 
+                Position =
                     {
                         Enabled = false
                         Float = false
@@ -190,7 +202,7 @@ module HUD =
                 LateText = "Slow"
                 LateColor = Color.FromArgb(235, 52, 52)
             }
-        
+
     [<RequireQualifiedAccess>]
     type ProgressMeterLabel =
         | None = 0
@@ -199,7 +211,7 @@ module HUD =
 
     [<Json.AutoCodec(false)>]
     type ProgressMeter =
-        { 
+        {
             Position: WidgetPosition
             Color: Color
             BackgroundColor: Color
@@ -227,7 +239,9 @@ module HUD =
 
     [<Json.AutoCodec(false)>]
     type Pacemaker =
-        { Position: WidgetPosition }
+        {
+            Position: WidgetPosition
+        }
         static member Default =
             {
                 Position =
@@ -247,7 +261,7 @@ module HUD =
 
     [<Json.AutoCodec(false)>]
     type JudgementCounts =
-        { 
+        {
             Position: WidgetPosition
             AnimationTime: float
         }
@@ -271,7 +285,7 @@ module HUD =
 
     [<Json.AutoCodec(false)>]
     type RateModMeter =
-        { 
+        {
             Position: WidgetPosition
             ShowMods: bool
         }
@@ -295,7 +309,7 @@ module HUD =
 
     [<Json.AutoCodec(false)>]
     type BPMMeter =
-        { 
+        {
             Position: WidgetPosition
         }
         static member Default =
@@ -315,5 +329,5 @@ module HUD =
                     }
             }
 
-    //song info
-    //clock
+// todo: song info
+// todo: real time clock

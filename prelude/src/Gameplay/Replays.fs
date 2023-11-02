@@ -30,10 +30,10 @@ module InternalScore =
 
     let inline offsetOf (struct (t, _, _): InternalScoreDataRow) = t
 
-    let createDefault (missWindow: Time) (keys: int) (notes: TimeArray<NoteRow>) : InternalScoreData =
+    let create_gameplay (miss_window: Time) (keys: int) (notes: TimeArray<NoteRow>) : InternalScoreData =
         notes
         |> Array.map (fun { Time = time; Data = nr } ->
-            let times = Array.create keys missWindow
+            let times = Array.create keys miss_window
             let statuses = Array.create keys HitStatus.NOTHING
 
             for k = 0 to (keys - 1) do
@@ -47,9 +47,8 @@ module InternalScore =
             struct (time, times, statuses)
         )
 
-    // used for debug/test purposes, and not called normally.
-    // creates what the internal data should look like after a "perfect" play
-    let createAuto (keys: int) (notes: TimeArray<NoteRow>) : InternalScoreData =
+    // used for debugging and test rigs as what the internal data should look like after a "perfect" play
+    let create_autoplay (keys: int) (notes: TimeArray<NoteRow>) : InternalScoreData =
         notes
         |> Array.map (fun { Time = time; Data = nr } ->
             let times = Array.zeroCreate keys
@@ -78,9 +77,9 @@ module Replay =
 
     let decompress (data: string) : ReplayData =
         let compressed = Convert.FromBase64String data
-        use inputStream = new MemoryStream(compressed)
-        use gZipStream = new GZipStream(inputStream, CompressionMode.Decompress)
-        use br = new BinaryReader(gZipStream)
+        use input_stream = new MemoryStream(compressed)
+        use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
+        use br = new BinaryReader(gzip_stream)
 
         let count: int = br.ReadInt32()
         let output = Array.zeroCreate count
@@ -91,9 +90,9 @@ module Replay =
         output
 
     let compress (data: ReplayData) : string =
-        use outputStream = new MemoryStream()
-        use gZipStream = new GZipStream(outputStream, CompressionLevel.Optimal)
-        use bw = new BinaryWriter(gZipStream)
+        use output_stream = new MemoryStream()
+        use gzip_stream = new GZipStream(output_stream, CompressionLevel.Optimal)
+        use bw = new BinaryWriter(gzip_stream)
 
         bw.Write data.Length
 
@@ -102,17 +101,17 @@ module Replay =
             bw.Write buttons
 
         bw.Flush()
-        Convert.ToBase64String(outputStream.ToArray())
+        Convert.ToBase64String(output_stream.ToArray())
 
-    // this replay is fed into score calculation when Auto-play is enabled
-    let perfectReplay (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
-        let timeUntilNext i =
+    // the replay generated when Auto-play is enabled
+    let perfect_replay (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
+        let time_until_next i =
             if i >= notes.Length - 1 then
                 50.0f<ms>
             else
                 notes.[i + 1].Time - notes.[i].Time
 
-        let firstNote = notes.[0].Time
+        let first_note = notes.[0].Time
 
         seq {
             let mutable i = 0
@@ -120,7 +119,7 @@ module Replay =
 
             while i < notes.Length do
                 let { Time = time; Data = nr } = notes.[i]
-                let delay = timeUntilNext i
+                let delay = time_until_next i
                 let mutable hit = held
 
                 for k = 0 to (keys - 1) do
@@ -133,8 +132,8 @@ module Replay =
                         hit <- Bitmask.unset_key k hit
                         held <- Bitmask.unset_key k held
 
-                yield struct (time - firstNote, hit)
-                yield struct (time - firstNote + delay * 0.5f, held)
+                yield struct (time - first_note, hit)
+                yield struct (time - first_note + delay * 0.5f, held)
                 i <- i + 1
         }
         |> Array.ofSeq
@@ -174,7 +173,7 @@ type StoredReplayProvider(data: ReplayData) =
     new(data: string) = StoredReplayProvider(Replay.decompress data)
 
     static member AutoPlay(keys, noteData) =
-        Replay.perfectReplay keys noteData |> StoredReplayProvider
+        Replay.perfect_replay keys noteData |> StoredReplayProvider
 
 type LiveReplayProvider(firstNote: Time) =
     let mutable i = 0
@@ -277,7 +276,7 @@ type OnlineReplayProvider() =
 [<AbstractClass>]
 type ReplayConsumer(keys: int, replay: IReplayProvider) =
 
-    let mutable currentState: Bitmask = 0us
+    let mutable current_pressed_keys: Bitmask = 0us
 
     member this.PollReplay(time: ChartTime) =
         while replay.HasNext time do
@@ -286,13 +285,13 @@ type ReplayConsumer(keys: int, replay: IReplayProvider) =
 
     member this.HandleReplayRow(time, keystates) =
         for k = 0 to (keys - 1) do
-            if Bitmask.has_key k currentState && not (Bitmask.has_key k keystates) then
+            if Bitmask.has_key k current_pressed_keys && not (Bitmask.has_key k keystates) then
                 this.HandleKeyUp(time, k)
-            elif Bitmask.has_key k keystates && not (Bitmask.has_key k currentState) then
+            elif Bitmask.has_key k keystates && not (Bitmask.has_key k current_pressed_keys) then
                 this.HandleKeyDown(time, k)
 
-        currentState <- keystates
+        current_pressed_keys <- keystates
 
-    member this.KeyState = currentState
+    member this.KeyState = current_pressed_keys
     abstract member HandleKeyDown: ChartTime * int -> unit
     abstract member HandleKeyUp: ChartTime * int -> unit

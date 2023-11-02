@@ -43,8 +43,8 @@ module Mods =
             Priority: int
         }
     
-    let modList = new Dictionary<string, Mod>()
-    let registerMod id obj = modList.Add (id, obj)
+    let available_mods = new Dictionary<string, Mod>()
+    let add_mod id obj = available_mods.Add (id, obj)
 
     module ModState =
         
@@ -53,86 +53,84 @@ module Mods =
 
         let r = new Random()
 
-        let getModName id = Localisation.localise ("mod." + id + ".name")
-        let getModDesc id = Localisation.localise ("mod." + id + ".desc")
+        let get_mod_name id = Localisation.localise ("mod." + id + ".name")
+        let get_mod_desc id = Localisation.localise ("mod." + id + ".desc")
 
-        let cycleState id (mods: ModState) : ModState =
+        let cycle id (mods: ModState) : ModState =
             if (mods.ContainsKey id) then
                 let state = mods.[id] + 1
-                if state = modList.[id].States || modList.[id].RandomSeed then Map.remove id mods
+                if state = available_mods.[id].States || available_mods.[id].RandomSeed then Map.remove id mods
                 else Map.add id state mods
             else
-                let state = if modList.[id].RandomSeed then r.Next(modList.[id].States) else 0
-                List.fold (fun m i -> Map.remove i m) (Map.add id state mods) modList.[id].Exclusions
+                let state = if available_mods.[id].RandomSeed then r.Next(available_mods.[id].States) else 0
+                List.fold (fun m i -> Map.remove i m) (Map.add id state mods) available_mods.[id].Exclusions
 
         let enumerate (mods: ModState) = 
             mods
             |> Map.toSeq
             |> Seq.choose (fun (id, state) -> 
-                    if modList.ContainsKey id then Some (id, modList.[id], state)
+                    if available_mods.ContainsKey id then Some (id, available_mods.[id], state)
                     else Logging.Error(sprintf "Unrecognised mod id: %s" id); None
                 )
             |> Seq.sortBy (fun (id, m, state) -> m.Priority)
 
-    let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Apply = (fun _ mc -> mc, false); Priority = 0 }
+    let private EMPTY_MOD = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Apply = (fun _ mc -> mc, false); Priority = 0 }
 
-    registerMod "mirror"
-        { defaultMod with
+    add_mod "mirror"
+        { EMPTY_MOD with
             Status = ModStatus.Ranked
             Apply = fun _ mc -> Mirror.apply mc
         }
 
-    registerMod "nosv"
-        { defaultMod with
+    add_mod "nosv"
+        { EMPTY_MOD with
             Status = ModStatus.Unranked
             Apply = fun _ mc -> NoSV.apply mc
         }
         
-    registerMod "noln"
-        { defaultMod with
+    add_mod "noln"
+        { EMPTY_MOD with
             Status = ModStatus.Unranked
             Exclusions = ["inverse"]
             Apply = fun _ mc -> NoLN.apply mc
         }
 
-    registerMod "inverse"
-        { defaultMod with
+    add_mod "inverse"
+        { EMPTY_MOD with
             Status = ModStatus.Unranked
             States = 1
             Exclusions = ["noln"]
             Apply = fun s mc -> Inverse.apply (s > 0) mc
         }
 
-    //todo: randomiser with seed
+    // todo: randomiser mod with seed
 
     (*
         Mod application pipeline
     *)
 
-    let private applyMods (mods: ModState) (chart: Chart) : ModChart =
-        let mutable modChart = ModChart.ofChart chart
+    let apply_mods (mods: ModState) (chart: Chart) : ModChart =
+        let mutable modchart = ModChart.from_chart chart
 
         for id, m, state in ModState.enumerate mods do
-            let mc, mod_was_applied = m.Apply state modChart
-            modChart <- { mc with ModsUsed = if mod_was_applied then modChart.ModsUsed @ [id] else modChart.ModsUsed }
+            let mc, mod_was_applied = m.Apply state modchart
+            modchart <- { mc with ModsUsed = if mod_was_applied then modchart.ModsUsed @ [id] else modchart.ModsUsed }
 
-        modChart
+        modchart
 
-    let getModChart (mods: ModState) (chart: Chart) : ModChart = applyMods mods chart
-
-    let getModString(rate: float32, selectedMods: ModState, autoPlay: bool) = 
-        String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (fun (id, _, _) -> id) |> Seq.map (ModState.getModName) |> List.ofSeq))
-        + if autoPlay then ", " + ModState.getModName "auto" else ""
+    let format_mods(rate: float32, mods: ModState, autoplay: bool) = 
+        String.Join(", ", sprintf "%.2fx" rate :: (mods |> ModState.enumerate |> Seq.map (fun (id, _, _) -> id) |> Seq.map (ModState.get_mod_name) |> List.ofSeq))
+        + if autoplay then ", " + ModState.get_mod_name "auto" else ""
 
     let check (mods: ModState) =
         try
             let mutable status = ModStatus.Ranked
             for m in mods.Keys do
-                if modList.ContainsKey m then
-                    status <- max status modList.[m].Status
-                    if mods.[m] >= modList.[m].States then failwithf "Mod '%s' in invalid state %i" m mods.[m]
+                if available_mods.ContainsKey m then
+                    status <- max status available_mods.[m].Status
+                    if mods.[m] >= available_mods.[m].States then failwithf "Mod '%s' in invalid state %i" m mods.[m]
                         
-                    for e in modList.[m].Exclusions do
+                    for e in available_mods.[m].Exclusions do
                         if mods.ContainsKey e then failwithf "Mods '%s' and '%s' cannot both be selected" m e
                 else failwithf "No such mod '%s'" m
             Ok status

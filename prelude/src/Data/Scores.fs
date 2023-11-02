@@ -87,7 +87,7 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
     member this.ModChart
         with get () =
             modchart <-
-                ValueOption.defaultWith (fun () -> getModChart score.selectedMods chart) modchart
+                ValueOption.defaultWith (fun () -> apply_mods score.selectedMods chart) modchart
                 |> ValueSome
 
             modchart.Value
@@ -107,7 +107,7 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
             ValueOption.defaultWith
                 (fun () ->
                     let m =
-                        Metrics.createScoreMetric
+                        Metrics.create
                             ruleset
                             this.ModChart.Keys
                             (StoredReplayProvider this.ReplayData)
@@ -152,21 +152,21 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
 
     member this.Physical =
         perf <-
-            ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf
+            ValueOption.defaultWith (fun () -> calculate_score_rating this.Difficulty score.keycount this.Scoring) perf
             |> ValueSome
 
         fst perf.Value
 
     member this.Technical =
         perf <-
-            ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf
+            ValueOption.defaultWith (fun () -> calculate_score_rating this.Difficulty score.keycount this.Scoring) perf
             |> ValueSome
 
         snd perf.Value
 
     member this.Mods =
         modstring <-
-            ValueOption.defaultWith (fun () -> getModString (score.rate, score.selectedMods, false)) modstring
+            ValueOption.defaultWith (fun () -> format_mods (score.rate, score.selectedMods, false)) modstring
             |> ValueSome
 
         modstring.Value

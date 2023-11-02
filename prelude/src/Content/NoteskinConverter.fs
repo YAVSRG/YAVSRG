@@ -13,26 +13,26 @@ module OsuSkin =
     open FParsec
     open Prelude.Charts.Formats.``osu!``
 
-    let parseBool = int >> fun x -> x <> 0
+    let parse_bool = int >> fun x -> x <> 0
 
-    let parseRGB (s: string) : Color =
-        match s.Split (",") |> List.ofArray |> List.map int with
+    let parse_rgb (s: string) : Color =
+        match s.Split(",") |> List.ofArray |> List.map int with
         | r :: g :: b :: _ -> Color.FromArgb(r, g, b)
         | _ -> failwith "not enough numbers given for RGB"
 
-    let parseRGBa (s: string) : Color =
-        match s.Split (",") |> List.ofArray |> List.map int with
+    let parse_rgba (s: string) : Color =
+        match s.Split(",") |> List.ofArray |> List.map int with
         | r :: g :: b :: a :: _ -> Color.FromArgb(a, r, g, b)
         | r :: g :: b :: _ -> Color.FromArgb(255, r, g, b)
         | _ -> failwith "not enough numbers given for RGBa"
 
-    let parseInts (s: string) =
+    let parse_ints (s: string) =
         match run (spaces >>. (sepBy pint32 (pchar ',' .>> spaces))) s with
-        | Success (xs, _, _) -> xs
-        | Failure (e, _, _) -> failwith e
+        | Success(xs, _, _) -> xs
+        | Failure(e, _, _) -> failwith e
 
     type General =
-        { 
+        {
             Name: string
             Author: string
             Version: string
@@ -51,7 +51,7 @@ module OsuSkin =
             SpinnerFrequencyModulate: bool
             SpinnerNoBlink: bool
         }
-        static member Default : General =
+        static member Default: General =
             {
                 Name = ""
                 Author = ""
@@ -72,7 +72,7 @@ module OsuSkin =
                 SpinnerNoBlink = false
             }
 
-    let private readGeneral ((title, settings): Header) : General =
+    let private parse_general ((title, settings): Header) : General =
         assert (title = "General")
 
         let f (s: General) (key, value) =
@@ -80,27 +80,69 @@ module OsuSkin =
             | "Name" -> { s with Name = value }
             | "Author" -> { s with Author = value }
             | "Version" -> { s with Version = value }
-            | "AnimationFramerate" -> { s with AnimationFramerate = int value }
-            | "AllowSliderBallTint" -> { s with AllowSliderBallTint = parseBool value }
-            | "ComboBurstRandom" -> { s with ComboBurstRandom = parseBool value }
-            | "CursorCentre" -> { s with CursorCentre = parseBool value }
-            | "CursorExpand" -> { s with CursorExpand = parseBool value }
-            | "CursorRotate" -> { s with CursorRotate = parseBool value }
-            | "CursorTrailRotate" -> { s with CursorTrailRotate = parseBool value }
-            | "CustomComboBurstSounds" -> { s with CustomComboBurstSounds = parseInts value }
+            | "AnimationFramerate" ->
+                { s with
+                    AnimationFramerate = int value
+                }
+            | "AllowSliderBallTint" ->
+                { s with
+                    AllowSliderBallTint = parse_bool value
+                }
+            | "ComboBurstRandom" ->
+                { s with
+                    ComboBurstRandom = parse_bool value
+                }
+            | "CursorCentre" ->
+                { s with
+                    CursorCentre = parse_bool value
+                }
+            | "CursorExpand" ->
+                { s with
+                    CursorExpand = parse_bool value
+                }
+            | "CursorRotate" ->
+                { s with
+                    CursorRotate = parse_bool value
+                }
+            | "CursorTrailRotate" ->
+                { s with
+                    CursorTrailRotate = parse_bool value
+                }
+            | "CustomComboBurstSounds" ->
+                { s with
+                    CustomComboBurstSounds = parse_ints value
+                }
             | "HitCircleOverlayAboveNumer"
-            | "HitCircleOverlayAboveNumber" -> { s with HitCircleOverlayAboveNumber = parseBool value }
-            | "LayeredHitSounds" -> { s with LayeredHitSounds = parseBool value }
-            | "SliderBallFlip" -> { s with SliderBallFlip = parseBool value }
-            | "SpinnerFadePlayfield" -> { s with SpinnerFadePlayfield = parseBool value }
-            | "SpinnerFrequencyModulate" -> { s with SpinnerFrequencyModulate = parseBool value }
-            | "SpinnerNoBlink" -> { s with SpinnerNoBlink = parseBool value }
+            | "HitCircleOverlayAboveNumber" ->
+                { s with
+                    HitCircleOverlayAboveNumber = parse_bool value
+                }
+            | "LayeredHitSounds" ->
+                { s with
+                    LayeredHitSounds = parse_bool value
+                }
+            | "SliderBallFlip" ->
+                { s with
+                    SliderBallFlip = parse_bool value
+                }
+            | "SpinnerFadePlayfield" ->
+                { s with
+                    SpinnerFadePlayfield = parse_bool value
+                }
+            | "SpinnerFrequencyModulate" ->
+                { s with
+                    SpinnerFrequencyModulate = parse_bool value
+                }
+            | "SpinnerNoBlink" ->
+                { s with
+                    SpinnerNoBlink = parse_bool value
+                }
             | _ -> s
 
         List.fold f General.Default settings
 
     type Colours =
-        { 
+        {
             Combo1: Color option
             Combo2: Color option
             Combo3: Color option
@@ -119,8 +161,8 @@ module OsuSkin =
             SpinnerBackground: Color
             StarBreakAdditive: Color
         }
-        static member Default : Colours =
-            { 
+        static member Default: Colours =
+            {
                 Combo1 = Some <| Color.FromArgb(255, 192, 0)
                 Combo2 = Some <| Color.FromArgb(0, 202, 0)
                 Combo3 = Some <| Color.FromArgb(18, 124, 255)
@@ -140,10 +182,10 @@ module OsuSkin =
                 StarBreakAdditive = Color.FromArgb(255, 182, 193)
             }
 
-    let private readColours ((title, settings): Header) : Colours = Colours.Default
+    let private parse_colours ((title, settings): Header) : Colours = Colours.Default
 
     type Fonts =
-        { 
+        {
             HitCirclePrefix: string
             HitCircleOverlap: int
             ScorePrefix: string
@@ -152,7 +194,7 @@ module OsuSkin =
             ComboOverlap: int
         }
         static member Default =
-            { 
+            {
                 HitCirclePrefix = "default"
                 HitCircleOverlap = -2
                 ScorePrefix = "score"
@@ -161,24 +203,24 @@ module OsuSkin =
                 ComboOverlap = -2
             }
 
-    let private readFonts ((title, settings): Header) : Fonts = Fonts.Default
+    let private parse_fonts ((title, settings): Header) : Fonts = Fonts.Default
 
     type CatchTheBeat =
-        { 
+        {
             HyperDash: Color
             HyperDashFruit: Color
             HyperDashAfterImage: Color
         }
         static member Default =
-            { 
+            {
                 HyperDash = Color.Red
                 HyperDashFruit = Color.Red
                 HyperDashAfterImage = Color.Red
             }
 
-    let private readCatchTheBeat ((title, settings): Header) : CatchTheBeat = CatchTheBeat.Default
+    let private parse_ctb ((title, settings): Header) : CatchTheBeat = CatchTheBeat.Default
 
-    let maniaDefaultTextures k format =
+    let mania_default_textures k format =
         match k with
         | 1 -> [| "S" |]
         | 2 -> [| "1"; "1" |]
@@ -194,7 +236,7 @@ module OsuSkin =
         |> Array.map (sprintf format)
 
     type Mania =
-        { 
+        {
             Keys: int
             ColumnStart: int
             ColumnRight: int
@@ -258,7 +300,7 @@ module OsuSkin =
             Hit300g: string
         }
         static member Default k =
-            { 
+            {
                 Keys = k
                 ColumnStart = 136
                 ColumnRight = 19
@@ -271,8 +313,8 @@ module OsuSkin =
                 WidthForNoteHeightScale = None
                 HitPosition = 402
                 LightPosition = 413
-                ScorePosition = 80 //not default but cant find it
-                ComboPosition = 180 //^
+                ScorePosition = 80 // 80 isn't the correct default, can't find the true default value online
+                ComboPosition = 180 // ^ likewise
                 JudgementLine = false
                 SpecialStyle = "0"
                 ComboBurstStyle = 1
@@ -299,12 +341,12 @@ module OsuSkin =
                 ColourKeyWarning = Color.Black
                 ColourHold = Color.FromArgb(255, 191, 51, 255)
                 ColourBreak = Color.Red
-                KeyImageΔ = maniaDefaultTextures k "mania-key%s"
-                KeyImageΔD = maniaDefaultTextures k "mania-key%sD"
-                NoteImageΔ = maniaDefaultTextures k "mania-note%s"
-                NoteImageΔH = maniaDefaultTextures k "mania-note%sH"
-                NoteImageΔL = maniaDefaultTextures k "mania-note%sL"
-                NoteImageΔT = maniaDefaultTextures k "mania-note%sT"
+                KeyImageΔ = mania_default_textures k "mania-key%s"
+                KeyImageΔD = mania_default_textures k "mania-key%sD"
+                NoteImageΔ = mania_default_textures k "mania-note%s"
+                NoteImageΔH = mania_default_textures k "mania-note%sH"
+                NoteImageΔL = mania_default_textures k "mania-note%sL"
+                NoteImageΔT = mania_default_textures k "mania-note%sT"
                 StageLeft = "mania-stage-left"
                 StageRight = "mania-stage-right"
                 StageBottom = "mania-stage-bottom" // ?
@@ -323,15 +365,15 @@ module OsuSkin =
 
     let (|P_0|_|) (keys: int) (pre: string) (suff: string) (target: string) =
         match run (pstring pre >>. (pint32 .>> pstring suff) .>> eof) target with
-        | Success (n, _, _) -> if 0 <= n && n < keys then Some n else None
-        | Failure (_, _, _) -> None
+        | Success(n, _, _) -> if 0 <= n && n < keys then Some n else None
+        | Failure(_, _, _) -> None
 
     let (|P_1|_|) (keys: int) (pre: string) (suff: string) (target: string) =
         match run (pstring pre >>. (pint32 .>> pstring suff) .>> eof) target with
-        | Success (n, _, _) -> if 0 < n && n <= keys then Some (n - 1) else None
-        | Failure (_, _, _) -> None
+        | Success(n, _, _) -> if 0 < n && n <= keys then Some(n - 1) else None
+        | Failure(_, _, _) -> None
 
-    let private readMania ((title, settings): Header) : Mania =
+    let private parse_mania ((title, settings): Header) : Mania =
         assert (title = "Mania")
 
         match settings with
@@ -342,49 +384,127 @@ module OsuSkin =
                 match key with
                 | "ColumnStart" -> { s with ColumnStart = int value }
                 | "ColumnRight" -> { s with ColumnRight = int value }
-                | "ColumnSpacing" -> { s with ColumnSpacing = parseInts value }
-                | "ColumnWidth" -> { s with ColumnWidth = parseInts value }
-                | "ColumnLineWidth" -> { s with ColumnLineWidth = parseInts value }
+                | "ColumnSpacing" ->
+                    { s with
+                        ColumnSpacing = parse_ints value
+                    }
+                | "ColumnWidth" ->
+                    { s with
+                        ColumnWidth = parse_ints value
+                    }
+                | "ColumnLineWidth" ->
+                    { s with
+                        ColumnLineWidth = parse_ints value
+                    }
                 | "BarlineHeight" -> { s with BarlineHeight = float value }
-                | "LightingNWidth" -> { s with LightingNWidth = parseInts value }
-                | "LightingLWidth" -> { s with LightingLWidth = parseInts value }
-                | "WidthForNoteHeightScale" -> { s with WidthForNoteHeightScale = Some (int value) }
+                | "LightingNWidth" ->
+                    { s with
+                        LightingNWidth = parse_ints value
+                    }
+                | "LightingLWidth" ->
+                    { s with
+                        LightingLWidth = parse_ints value
+                    }
+                | "WidthForNoteHeightScale" ->
+                    { s with
+                        WidthForNoteHeightScale = Some(int value)
+                    }
                 | "HitPosition" -> { s with HitPosition = int value }
                 | "LightPosition" -> { s with LightPosition = int value }
                 | "ScorePosition" -> { s with ScorePosition = int value }
                 | "ComboPosition" -> { s with ComboPosition = int value }
-                | "JudgementLine" -> { s with JudgementLine = parseBool value }
+                | "JudgementLine" ->
+                    { s with
+                        JudgementLine = parse_bool value
+                    }
                 | "SpecialStyle" -> { s with SpecialStyle = value }
                 | "ComboBurstStyle" -> { s with ComboBurstStyle = int value }
-                | "SplitStages" -> { s with SplitStages = Some (parseBool value) }
+                | "SplitStages" ->
+                    { s with
+                        SplitStages = Some(parse_bool value)
+                    }
                 | "StageSeparation" -> { s with StageSeparation = int value }
-                | "SeparateScore" -> { s with SeparateScore = parseBool value }
-                | "KeysUnderNotes" -> { s with KeysUnderNotes = parseBool value }
-                | "UpsideDown" -> { s with UpsideDown = parseBool value }
-                | "KeyFlipWhenUpsideDown" -> { s with KeyFlipWhenUpsideDown = parseBool value }
-                | P_0 keys "KeyFlipWhenUpsideDown" "" n -> s.KeyFlipWhenUpsideDownΔ.[n] <- parseBool value; s
-                | "NoteFlipWhenUpsideDown" -> { s with NoteFlipWhenUpsideDown = parseBool value }
-                | P_0 keys "KeyFlipWhenUpsideDown" "D" n -> s.KeyFlipWhenUpsideDownΔD.[n] <- parseBool value; s
-                | P_0 keys "NoteFlipWhenUpsideDown" "" n -> s.NoteFlipWhenUpsideDownΔ.[n] <- parseBool value; s
-                | P_0 keys "NoteFlipWhenUpsideDown" "H" n -> s.NoteFlipWhenUpsideDownΔH.[n] <- parseBool value; s
-                | P_0 keys "NoteFlipWhenUpsideDown" "L" n -> s.NoteFlipWhenUpsideDownΔL.[n] <- parseBool value; s
-                | P_0 keys "NoteFlipWhenUpsideDown" "T" n -> s.NoteFlipWhenUpsideDownΔT.[n] <- parseBool value; s
+                | "SeparateScore" ->
+                    { s with
+                        SeparateScore = parse_bool value
+                    }
+                | "KeysUnderNotes" ->
+                    { s with
+                        KeysUnderNotes = parse_bool value
+                    }
+                | "UpsideDown" -> { s with UpsideDown = parse_bool value }
+                | "KeyFlipWhenUpsideDown" ->
+                    { s with
+                        KeyFlipWhenUpsideDown = parse_bool value
+                    }
+                | P_0 keys "KeyFlipWhenUpsideDown" "" n ->
+                    s.KeyFlipWhenUpsideDownΔ.[n] <- parse_bool value
+                    s
+                | "NoteFlipWhenUpsideDown" ->
+                    { s with
+                        NoteFlipWhenUpsideDown = parse_bool value
+                    }
+                | P_0 keys "KeyFlipWhenUpsideDown" "D" n ->
+                    s.KeyFlipWhenUpsideDownΔD.[n] <- parse_bool value
+                    s
+                | P_0 keys "NoteFlipWhenUpsideDown" "" n ->
+                    s.NoteFlipWhenUpsideDownΔ.[n] <- parse_bool value
+                    s
+                | P_0 keys "NoteFlipWhenUpsideDown" "H" n ->
+                    s.NoteFlipWhenUpsideDownΔH.[n] <- parse_bool value
+                    s
+                | P_0 keys "NoteFlipWhenUpsideDown" "L" n ->
+                    s.NoteFlipWhenUpsideDownΔL.[n] <- parse_bool value
+                    s
+                | P_0 keys "NoteFlipWhenUpsideDown" "T" n ->
+                    s.NoteFlipWhenUpsideDownΔT.[n] <- parse_bool value
+                    s
                 | "NoteBodyStyle" -> { s with NoteBodyStyle = int value }
-                | P_0 keys "NoteBodyStyle" "" n -> s.NoteBodyStyleΔ.[n] <- int value; s
-                | P_1 keys "Colour" "" n -> s.ColourΔ.[n] <- parseRGBa value; s
-                | P_1 keys "ColourLight" "" n -> s.ColourLightΔ.[n] <- parseRGB value; s
-                | "ColourColumnLine" -> { s with ColourColumnLine = parseRGBa value }
-                | "ColourBarline" -> { s with ColourBarline = parseRGBa value }
-                | "ColourJudgementLine" -> { s with ColourJudgementLine = parseRGB value }
-                | "ColourKeyWarning" -> { s with ColourKeyWarning = parseRGB value }
-                | "ColourHold" -> { s with ColourHold = parseRGBa value }
-                | "ColourBreak" -> { s with ColourBreak = parseRGB value }
-                | P_0 keys "KeyImage" "" n -> s.KeyImageΔ.[n] <- value; s
-                | P_0 keys "KeyImage" "D" n -> s.KeyImageΔD.[n] <- value; s
-                | P_0 keys "NoteImage" "" n -> s.NoteImageΔ.[n] <- value; s
-                | P_0 keys "NoteImage" "H" n -> s.NoteImageΔH.[n] <- value; s
-                | P_0 keys "NoteImage" "L" n -> s.NoteImageΔL.[n] <- value; s
-                | P_0 keys "NoteImage" "T" n -> s.NoteImageΔT.[n] <- value; s
+                | P_0 keys "NoteBodyStyle" "" n ->
+                    s.NoteBodyStyleΔ.[n] <- int value
+                    s
+                | P_1 keys "Colour" "" n ->
+                    s.ColourΔ.[n] <- parse_rgba value
+                    s
+                | P_1 keys "ColourLight" "" n ->
+                    s.ColourLightΔ.[n] <- parse_rgb value
+                    s
+                | "ColourColumnLine" ->
+                    { s with
+                        ColourColumnLine = parse_rgba value
+                    }
+                | "ColourBarline" ->
+                    { s with
+                        ColourBarline = parse_rgba value
+                    }
+                | "ColourJudgementLine" ->
+                    { s with
+                        ColourJudgementLine = parse_rgb value
+                    }
+                | "ColourKeyWarning" ->
+                    { s with
+                        ColourKeyWarning = parse_rgb value
+                    }
+                | "ColourHold" -> { s with ColourHold = parse_rgba value }
+                | "ColourBreak" -> { s with ColourBreak = parse_rgb value }
+                | P_0 keys "KeyImage" "" n ->
+                    s.KeyImageΔ.[n] <- value
+                    s
+                | P_0 keys "KeyImage" "D" n ->
+                    s.KeyImageΔD.[n] <- value
+                    s
+                | P_0 keys "NoteImage" "" n ->
+                    s.NoteImageΔ.[n] <- value
+                    s
+                | P_0 keys "NoteImage" "H" n ->
+                    s.NoteImageΔH.[n] <- value
+                    s
+                | P_0 keys "NoteImage" "L" n ->
+                    s.NoteImageΔL.[n] <- value
+                    s
+                | P_0 keys "NoteImage" "T" n ->
+                    s.NoteImageΔT.[n] <- value
+                    s
                 | "StageLeft" -> { s with StageLeft = value }
                 | "StageRight" -> { s with StageRight = value }
                 | "StageBottom" -> { s with StageBottom = value }
@@ -404,9 +524,15 @@ module OsuSkin =
             List.fold f (Mania.Default keys) settings
         | _ -> failwith "mania block did not specify keycount"
 
-    type OsuSkinIni = { General: General; Colours: Colours; Fonts: Fonts; Mania: Mania list }
+    type OsuSkinIni =
+        {
+            General: General
+            Colours: Colours
+            Fonts: Fonts
+            Mania: Mania list
+        }
 
-    let skinIniParser =
+    let private skin_ini_parser =
         tuple5
             (parseHeader "General" .>> spaces)
             (opt (parseHeader "Colours" .>> spaces))
@@ -414,23 +540,17 @@ module OsuSkin =
             (opt (parseHeader "CatchTheBeat" .>> spaces))
             (many (parseHeader "Mania" .>> spaces))
         |>> fun (g, c, f, ctb, ms) ->
-                { 
-                    General = readGeneral g
-                    Colours =
-                        c
-                        |> Option.map readColours
-                        |> Option.defaultValue Colours.Default
-                    Fonts =
-                        f
-                        |> Option.map readFonts
-                        |> Option.defaultValue Fonts.Default
-                    Mania = List.map readMania ms
-                }
+            {
+                General = parse_general g
+                Colours = c |> Option.map parse_colours |> Option.defaultValue Colours.Default
+                Fonts = f |> Option.map parse_fonts |> Option.defaultValue Fonts.Default
+                Mania = List.map parse_mania ms
+            }
 
-    let parseSkinINI file =
-        match runParserOnFile skinIniParser () file System.Text.Encoding.UTF8 with
-        | Success (s, _, _) -> s
-        | Failure (e, _, _) -> failwith e
+    let parse_skin_ini file =
+        match runParserOnFile skin_ini_parser () file System.Text.Encoding.UTF8 with
+        | Success(s, _, _) -> s
+        | Failure(e, _, _) -> failwith e
 
 module SkinConversions =
 
@@ -438,46 +558,74 @@ module SkinConversions =
 
     module Osu =
 
-        let getTextureFilenames(id: string, path: string) : string list =
+        let get_texture_filenames (id: string, path: string) : string list =
 
             let file = Path.Combine(path, id)
-            if File.Exists(file + "@2x.png") then [file + "@2x.png"]
-            elif File.Exists(file + ".png") then [file + ".png"]
+
+            if File.Exists(file + "@2x.png") then
+                [ file + "@2x.png" ]
+            elif File.Exists(file + ".png") then
+                [ file + ".png" ]
             else
                 let rec f i =
                     if File.Exists(file + "-" + i.ToString() + "@2x.png") then
                         file + "-" + i.ToString() + "@2x.png" :: f (i + 1)
                     elif File.Exists(file + "-" + i.ToString() + ".png") then
                         file + "-" + i.ToString() + ".png" :: f (i + 1)
-                    else []
+                    else
+                        []
+
                 let result = f 0
-                if result.IsEmpty then failwithf "could not find texture in skin folder for %A" id
+
+                if result.IsEmpty then
+                    failwithf "could not find texture in skin folder for %A" id
+
                 result
 
         let grayscale (brightness: float32) (img: Bitmap) : Bitmap =
             let newimg = img.Clone()
-            newimg.Mutate(fun i ->  i.Grayscale().Brightness(brightness) |> ignore)
+            newimg.Mutate(fun i -> i.Grayscale().Brightness(brightness) |> ignore)
             newimg
 
-        type ColumnTextures = { Note: string; Head: string; Body: string; Tail: string }
+        type ColumnTextures =
+            {
+                Note: string
+                Head: string
+                Body: string
+                Tail: string
+            }
 
         let check_before_convert (source: string) =
-            try parseSkinINI (Path.Combine (source, "skin.ini")) |> Ok
-            with err -> Error err.Message
+            try
+                parse_skin_ini (Path.Combine(source, "skin.ini")) |> Ok
+            with err ->
+                Error err.Message
 
         let convert (ini: OsuSkinIni) (source: string) (target: string) (keymode: int) =
 
-            if Directory.Exists target then failwith "a folder with this name already exists!"
+            if Directory.Exists target then
+                failwith "a folder with this name already exists!"
+
             Directory.CreateDirectory target |> ignore
 
             let textures = ResizeArray<ColumnTextures>()
 
             // Identify textures used by noteskin
-            let keymode_settings = List.tryFind (fun m -> m.Keys = keymode) ini.Mania |> Option.defaultValue (Mania.Default keymode)
+            let keymode_settings =
+                List.tryFind (fun m -> m.Keys = keymode) ini.Mania
+                |> Option.defaultValue (Mania.Default keymode)
 
             for k = 0 to (keymode - 1) do
-                let tex = { Note = keymode_settings.NoteImageΔ.[k]; Head = keymode_settings.NoteImageΔH.[k]; Body = keymode_settings.NoteImageΔL.[k]; Tail = keymode_settings.NoteImageΔT.[k] }
-                if not (textures.Contains tex) then textures.Add tex
+                let tex =
+                    {
+                        Note = keymode_settings.NoteImageΔ.[k]
+                        Head = keymode_settings.NoteImageΔH.[k]
+                        Body = keymode_settings.NoteImageΔL.[k]
+                        Tail = keymode_settings.NoteImageΔT.[k]
+                    }
+
+                if not (textures.Contains tex) then
+                    textures.Add tex
 
             let load_bmp f =
                 use s = File.Open(f, FileMode.Open)
@@ -497,10 +645,15 @@ module SkinConversions =
                     for column = 0 to (animation_frames - 1) do
                         let image = let r = images.[row] in r[column % r.Length]
                         use squarebmp = new Bitmap(width, width)
-                        squarebmp.Mutate(fun img -> img.DrawImage(image, Point(0, (-image.Height + width) / 2), 1.0f) |> ignore)
+
+                        squarebmp.Mutate(fun img ->
+                            img.DrawImage(image, Point(0, (-image.Height + width) / 2), 1.0f) |> ignore
+                        )
+
                         squarebmp.Save(Path.Combine(target, sprintf "%s-%i-%i.png" name row column))
 
-                JSON.ToFile (Path.Combine(target, name + ".json"), false)
+                JSON.ToFile
+                    (Path.Combine(target, name + ".json"), false)
                     {
                         Rows = colors
                         Columns = animation_frames
@@ -509,16 +662,44 @@ module SkinConversions =
 
             let mutable flipholdtail = false
             let mutable useholdtail = true
-            try square_images "note" (textures |> Seq.map (fun x -> x.Note) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
-            with err -> Logging.Warn("Error converting note textures", err)
 
-            try square_images "holdhead" (textures |> Seq.map (fun x -> x.Head) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
-            with err -> Logging.Warn("Error converting hold head textures", err) 
+            try
+                square_images
+                    "note"
+                    (textures
+                     |> Seq.map (fun x -> x.Note)
+                     |> Seq.map (fun x -> get_texture_filenames (x, source))
+                     |> List.ofSeq)
+            with err ->
+                Logging.Warn("Error converting note textures", err)
 
-            try square_images "holdbody" (textures |> Seq.map (fun x -> x.Body) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
-            with err -> Logging.Warn("Error converting hold body textures", err)
+            try
+                square_images
+                    "holdhead"
+                    (textures
+                     |> Seq.map (fun x -> x.Head)
+                     |> Seq.map (fun x -> get_texture_filenames (x, source))
+                     |> List.ofSeq)
+            with err ->
+                Logging.Warn("Error converting hold head textures", err)
 
-            try square_images "holdtail" (textures |> Seq.map (fun x -> x.Tail) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
+            try
+                square_images
+                    "holdbody"
+                    (textures
+                     |> Seq.map (fun x -> x.Body)
+                     |> Seq.map (fun x -> get_texture_filenames (x, source))
+                     |> List.ofSeq)
+            with err ->
+                Logging.Warn("Error converting hold body textures", err)
+
+            try
+                square_images
+                    "holdtail"
+                    (textures
+                     |> Seq.map (fun x -> x.Tail)
+                     |> Seq.map (fun x -> get_texture_filenames (x, source))
+                     |> List.ofSeq)
             with err ->
                 Logging.Warn("Error in holdtail textures - Using hold head textures for compatibility", err)
                 flipholdtail <- true
@@ -526,30 +707,43 @@ module SkinConversions =
 
             try
                 // Generate receptors
-                let receptor_base = getTextureFilenames (textures.[0].Note, source) |> List.head |> load_bmp
+                let receptor_base =
+                    get_texture_filenames (textures.[0].Note, source) |> List.head |> load_bmp
                 // todo: square these images
                 (grayscale 0.5f receptor_base).Save(Path.Combine(target, "receptor-0-0.png"))
                 (grayscale 1.0f receptor_base).Save(Path.Combine(target, "receptor-1-0.png"))
-                JSON.ToFile (Path.Combine(target, "receptor.json"), false)
-                    { Rows = 2; Columns = 1; Mode = Loose }
-            with err -> Logging.Warn("Error generating receptors", err)
-            
+                JSON.ToFile (Path.Combine(target, "receptor.json"), false) { Rows = 2; Columns = 1; Mode = Loose }
+            with err ->
+                Logging.Warn("Error generating receptors", err)
+
             // Point color data at textures correctly
             let textureIds = Array.zeroCreate 10
 
             for k = 0 to (keymode - 1) do
-                let tex = { Note = keymode_settings.NoteImageΔ.[k]; Head = keymode_settings.NoteImageΔH.[k]; Body = keymode_settings.NoteImageΔL.[k]; Tail = keymode_settings.NoteImageΔT.[k] }
+                let tex =
+                    {
+                        Note = keymode_settings.NoteImageΔ.[k]
+                        Head = keymode_settings.NoteImageΔH.[k]
+                        Body = keymode_settings.NoteImageΔL.[k]
+                        Tail = keymode_settings.NoteImageΔT.[k]
+                    }
+
                 textureIds.[k] <- byte (textures.IndexOf tex)
-                
-            let colorConfig : ColorConfig = { ColorConfig.Default with Style = ColorScheme.Column; UseGlobalColors = false }
-            colorConfig.Colors.[keymode - 2] <- textureIds
+
+            let color_config: ColorConfig =
+                { ColorConfig.Default with
+                    Style = ColorScheme.Column
+                    UseGlobalColors = false
+                }
+
+            color_config.Colors.[keymode - 2] <- textureIds
 
             // Generate noteskin.json
-            let config : NoteskinConfig =
+            let config: NoteskinConfig =
                 { NoteskinConfig.Default with
                     Name = ini.General.Name
                     Author = ini.General.Author
-                    NoteColors = colorConfig
+                    NoteColors = color_config
                     FlipHoldTail = flipholdtail
                     UseHoldTailTexture = useholdtail
                     HoldNoteTrim = 0.0f
@@ -557,4 +751,5 @@ module SkinConversions =
                     ColumnWidth = 1080f / 512f * float32 keymode_settings.ColumnWidth.[0]
                     AnimationFrameTime = 1000.0 / 60.0
                 }
+
             JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config

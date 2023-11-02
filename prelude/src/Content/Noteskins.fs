@@ -100,56 +100,77 @@ type NoteskinConfig =
             Explosions = Explosions.Default
             NoteColors = ColorConfig.Default
             UseRotation = false
-            Rotations = [|
-                [|90.0; 0.0; 270.0|]
-                [|90.0; 0.0; 180.0; 270.0|]
-                [|45.0; 135.0; 0.0; 225.0; 315.0|]
-                [|90.0; 135.0; 0.0; 180.0; 225.0; 270.0|]
-                [|135.0; 90.0; 45.0; 0.0; 315.0; 270.0; 225.0|]
-                [|90.0; 0.0; 180.0; 270.0; 90.0; 0.0; 180.0; 270.0|]
-                // todo: agree on rotations for 9b (popn doesn't have any so maybe all 0s is standard)
-                [|0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0|]
-                [|45.0; 135.0; 0.0; 225.0; 315.0; 45.0; 135.0; 0.0; 225.0; 315.0|]
-            |]
+            Rotations =
+                [|
+                    [| 90.0; 0.0; 270.0 |]
+                    [| 90.0; 0.0; 180.0; 270.0 |]
+                    [| 45.0; 135.0; 0.0; 225.0; 315.0 |]
+                    [| 90.0; 135.0; 0.0; 180.0; 225.0; 270.0 |]
+                    [| 135.0; 90.0; 45.0; 0.0; 315.0; 270.0; 225.0 |]
+                    [| 90.0; 0.0; 180.0; 270.0; 90.0; 0.0; 180.0; 270.0 |]
+                    // todo: agree on rotations for 9b (popn doesn't have any so maybe all 0s is standard)
+                    [| 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0 |]
+                    [| 45.0; 135.0; 0.0; 225.0; 315.0; 45.0; 135.0; 0.0; 225.0; 315.0 |]
+                |]
         }
+
     member this.Validate =
         { this with
             NoteColors = this.NoteColors.Validate
             Rotations =
-                if this.Rotations.Length = 8 && Array.indexed this.Rotations |> Array.forall (fun (i, a) -> a.Length = 3 + i) then this.Rotations
+                if
+                    this.Rotations.Length = 8
+                    && Array.indexed this.Rotations |> Array.forall (fun (i, a) -> a.Length = 3 + i)
+                then
+                    this.Rotations
                 else
-                    Logging.Error("Problem with noteskin: Rotations are not in the right format - Please use the ingame editor")
+                    Logging.Error(
+                        "Problem with noteskin: Rotations are not in the right format - Please use the ingame editor"
+                    )
+
                     NoteskinConfig.Default.Rotations
         }
 
 type Noteskin(storage) as this =
     inherit Storage(storage)
-        
-    let mutable config : NoteskinConfig = NoteskinConfig.Default
-    do config <-
-        match this.TryGetJson<NoteskinConfig> (true, "noteskin.json") with
-        | Some data -> data.Validate
-        | None -> failwith "noteskin.json was missing or didn't load properly"
-        
+
+    let mutable config: NoteskinConfig = NoteskinConfig.Default
+
+    do
+        config <-
+            match this.TryGetJson<NoteskinConfig>(true, "noteskin.json") with
+            | Some data -> data.Validate
+            | None -> failwith "noteskin.json was missing or didn't load properly"
+
     member this.Config
-        with set conf = config <- conf; this.WriteJson (config, "noteskin.json")
+        with set conf =
+            config <- conf
+            this.WriteJson(config, "noteskin.json")
         and get () = config
-            
-    member this.GetTexture (name: string) : (Bitmap * TextureConfig) option =
+
+    member this.GetTexture(name: string) : (Bitmap * TextureConfig) option =
         match this.LoadTexture name with
         | Ok res -> res
-        | Error err -> Logging.Error(sprintf "Error loading noteskin texture '%s': %s" name err.Message); None
-        
-    static member FromZipStream (stream: Stream) = new Noteskin(Embedded (new ZipArchive(stream)))
-    static member FromPath (path: string) = new Noteskin(Folder path)
+        | Error err ->
+            Logging.Error(sprintf "Error loading noteskin texture '%s': %s" name err.Message)
+            None
+
+    static member FromZipStream(stream: Stream) =
+        new Noteskin(Embedded(new ZipArchive(stream)))
+
+    static member FromPath(path: string) = new Noteskin(Folder path)
 
 module Noteskin =
-    
+
     let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|Unknown|) (path: string) =
         if Directory.Exists path then
-            if File.Exists (Path.Combine(path, "skin.ini")) then OsuSkinFolder else Unknown
+            if File.Exists(Path.Combine(path, "skin.ini")) then
+                OsuSkinFolder
+            else
+                Unknown
         else
             let s = Path.GetExtension(path).ToLower()
+
             match s with
             | ".isk" -> InterludeSkinArchive
             | ".osk" -> OsuSkinArchive
@@ -164,7 +185,4 @@ module Noteskin =
         }
 
     [<Json.AutoCodec>]
-    type Repo =
-        {
-            Noteskins: RepoEntry list
-        }
+    type Repo = { Noteskins: RepoEntry list }

@@ -134,7 +134,8 @@ module Layout =
 
 (*
     Difficulty calculation
-    this is all old and bad and i will be rewriting it properly - this is just a port of the C# version
+    To be one day scrapped as it gets overshadowed by a better system for picking what to play
+    Is just a port of the original C# version I wrote when I was 18
 *)
 
 module Difficulty =
@@ -312,7 +313,7 @@ module Difficulty =
     let private performanceFunc b value deviation delta =
         staminaFunc b (value * confidenceValue deviation) delta
 
-    let technicalColor v =
+    let technical_color v =
         try
             let a = Math.Min(1.0, v * 0.1)
             let b = Math.Min(1.0, Math.Max(1.0, v * 0.1) - 1.0)
@@ -320,7 +321,7 @@ module Difficulty =
         with _ ->
             Color.Blue
 
-    let physicalColor v =
+    let physical_color v =
         try
             let a = Math.Min(1.0, v * 0.1)
             let b = Math.Min(1.0, Math.Max(1.0, v * 0.1) - 1.0)
@@ -330,7 +331,7 @@ module Difficulty =
 
     type PerformanceMetricState = Time array * float * float array * float * float array
 
-    let getRatings (rr: RatingReport) (keys: int) (scoring: IScoreMetric) =
+    let calculate_score_rating (rr: RatingReport) (keys: int) (scoring: IScoreMetric) =
         let lastTimes = Array.create keys 0.0f<ms>
         let mutable pv = 0.01
         let mutable tv = 0.01

@@ -89,13 +89,13 @@ module Analysis =
 
     let run (rate: float32) (chart: Chart) : RowInfo list =
     
-        let { Time = firstNote; Data = row } = (TimeArray.first chart.Notes).Value
+        let { Time = first_note; Data = row } = (TimeArray.first chart.Notes).Value
         let density = density_data rate chart
         let mutable previous_row =
             seq {0 .. chart.Keys - 1}
             |> Seq.filter (fun x -> row.[x] = NoteType.NORMAL || row.[x] = NoteType.HOLDHEAD)
             |> Array.ofSeq
-        let mutable previous_time = firstNote
+        let mutable previous_time = first_note
 
         let mutable index = 0
 
@@ -133,7 +133,7 @@ module Analysis =
                                 elif hi > 0 then Direction.Outwards
                                 else Direction.None
                         Roll = pmin > cmax || pmax < cmin
-                        Time = (t - firstNote) / (rate * 1.0f<rate>)
+                        Time = (t - first_note) / (rate * 1.0f<rate>)
                         MsPerBeat = (t - previous_time) * 4.0f</beat> / rate
                         Density = density.[index]
                     }
@@ -511,14 +511,14 @@ module Patterns =
         let streams = report |> List.filter isStream
 
         let total = report |> List.sumBy (fun e -> e.Score)
-        let streamTotal = streams |> List.sumBy (fun e -> e.Score)
-        let jackTotal = jacks |> List.sumBy (fun e -> e.Score)
+        let stream_total = streams |> List.sumBy (fun e -> e.Score)
+        let jack_total = jacks |> List.sumBy (fun e -> e.Score)
 
-        if streamTotal / total > 0.3f && jackTotal / total > 0.3f then
+        if stream_total / total > 0.3f && jack_total / total > 0.3f then
             "Hybrid"
-        elif streamTotal / total > 0.4f then
+        elif stream_total / total > 0.4f then
             (List.head streams).Pattern.ToString()
-        elif jackTotal / total > 0.4f then 
+        elif jack_total / total > 0.4f then 
             (List.head jacks).Pattern.ToString()
         else "Unknown"
 

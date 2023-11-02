@@ -11,6 +11,7 @@ open Prelude.Gameplay
     Default config values for themes, textures, noteskins, widget layouts
 *)
 
+// todo: themes let you override the hard coded palette values in Percyqaz.Flux.UI.Style for UI color themes
 [<Json.AutoCodec(false)>]
 type ThemeConfig =
     {
