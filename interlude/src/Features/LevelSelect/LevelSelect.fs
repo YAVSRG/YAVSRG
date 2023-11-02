@@ -50,11 +50,13 @@ type LevelSelectScreen() =
                 | Some c ->
                     Tree.switchChart (c, LibraryContext.None, "")
                     refresh ()
-                | None -> ()
+                | None -> () // todo: notification when no chart found
             else
-                let c = Suggestion.get_random Tree.filter
-                Tree.switchChart (c, LibraryContext.None, "")
-                refresh ()
+                match Suggestion.get_random Tree.filter with
+                | Some c ->
+                    Tree.switchChart (c, LibraryContext.None, "")
+                    refresh ()
+                | None -> () // todo: notification when no chart found
 
     override this.Init(parent: Widget) =
         base.Init parent

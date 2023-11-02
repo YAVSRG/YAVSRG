@@ -138,8 +138,8 @@ module Gameplay =
                                     SAVE_DATA <- Some save_data
                             // if chart is loaded we can safely restart from this point for different rates and mods
 
-                            let with_mods = getModChart _selectedMods.Value chart
-                            let with_colors = getColoredChart (Content.noteskinConfig().NoteColors) with_mods
+                            let with_mods = apply_mods _selectedMods.Value chart
+                            let with_colors = apply_coloring (Content.noteskinConfig().NoteColors) with_mods
 
                             let rating =
                                 RatingReport(
@@ -174,8 +174,8 @@ module Gameplay =
                             | None -> failwith "impossible"
                             | Some chart ->
 
-                            let with_mods = getModChart _selectedMods.Value chart
-                            let with_colors = getColoredChart (Content.noteskinConfig().NoteColors) with_mods
+                            let with_mods = apply_mods _selectedMods.Value chart
+                            let with_colors = apply_coloring (Content.noteskinConfig().NoteColors) with_mods
 
                             let rating =
                                 RatingReport(
@@ -212,7 +212,7 @@ module Gameplay =
                             | None -> failwith "impossible"
                             | Some with_mods ->
 
-                            let with_colors = getColoredChart (Content.noteskinConfig().NoteColors) with_mods
+                            let with_colors = apply_coloring (Content.noteskinConfig().NoteColors) with_mods
                             yield fun () -> WITH_COLORS <- Some with_colors
 
                             yield
@@ -389,7 +389,7 @@ module Gameplay =
                         replays.Add(
                             username,
                             let metric =
-                                Metrics.createScoreMetric
+                                Metrics.create
                                     Content.Rulesets.current
                                     with_mods.Keys
                                     replay
@@ -438,18 +438,15 @@ module Gameplay =
         Stats.save ()
 
     let init () =
-        try
-            let cc =
-                match Cache.by_key options.CurrentChart.Value Library.cache with
-                | Some cc -> cc
-                | None ->
-                    Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
-                    Suggestions.Suggestion.get_random []
-
-            Chart.change (cc, LibraryContext.None)
-        with err ->
-            Logging.Debug "No charts installed"
-            Background.load None
+        match Cache.by_key options.CurrentChart.Value Library.cache with
+        | Some cc -> Chart.change (cc, LibraryContext.None)
+        | None ->
+            Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
+            match Suggestions.Suggestion.get_random [] with
+            | Some cc -> Chart.change (cc, LibraryContext.None)
+            | None -> 
+                Logging.Debug "No charts installed"
+                Background.load None
 
         Table.init options.Table.Value
 
