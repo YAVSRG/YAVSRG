@@ -28,7 +28,7 @@ type ChartInfo() as this =
     let mutable rating = 0.0
     let mutable notecounts = ""
 
-    let changeRate v =
+    let change_rate v =
         if Transitions.active then
             ()
         else
@@ -43,7 +43,7 @@ type ChartInfo() as this =
 
         |+ Text(
             (fun () -> sprintf "%s %.2f" Icons.star rating),
-            Color = (fun () -> Color.White, physicalColor rating),
+            Color = (fun () -> Color.White, physical_color rating),
             Align = Alignment.LEFT,
             Position =
                 {
@@ -100,7 +100,7 @@ type ChartInfo() as this =
                         Bottom = 1.0f %- 60.0f
                     }
             )
-            |+ Text((fun () -> getModString (rate.Value, selectedMods.Value, autoplay)), Align = Alignment.LEFT))
+            |+ Text((fun () -> format_mods (rate.Value, selectedMods.Value, autoplay)), Align = Alignment.LEFT))
             .Tooltip(
                 Tooltip
                     .Info("levelselect.selected_mods")
@@ -113,7 +113,7 @@ type ChartInfo() as this =
         |+ StylishButton(
             (fun () ->
                 Chart.wait_for_load
-                <| fun () -> Preview(Chart.WITH_MODS.Value, changeRate).Show()
+                <| fun () -> Preview(Chart.WITH_MODS.Value, change_rate).Show()
             ),
             K(Icons.preview + " " + %"levelselect.preview.name"),
             !%Palette.MAIN_100,
@@ -176,14 +176,14 @@ type ChartInfo() as this =
         base.Update(elapsed_ms, moved)
 
         if (%%"uprate_small").Tapped() then
-            changeRate (0.01f)
+            change_rate (0.01f)
         elif (%%"uprate_half").Tapped() then
-            changeRate (0.05f)
+            change_rate (0.05f)
         elif (%%"uprate").Tapped() then
-            changeRate (0.1f)
+            change_rate (0.1f)
         elif (%%"downrate_small").Tapped() then
-            changeRate (-0.01f)
+            change_rate (-0.01f)
         elif (%%"downrate_half").Tapped() then
-            changeRate (-0.05f)
+            change_rate (-0.05f)
         elif (%%"downrate").Tapped() then
-            changeRate (-0.1f)
+            change_rate (-0.1f)

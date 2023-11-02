@@ -190,12 +190,11 @@ module ReplayScreen =
 
         let mutable replay_data = replay_data
 
-        let mutable scoring =
-            createScoreMetric ruleset chart.Keys replay_data chart.Notes rate
+        let mutable scoring = create ruleset chart.Keys replay_data chart.Notes rate
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplayProvider(replay_data.GetFullReplay())
-            scoring <- createScoreMetric ruleset chart.Keys replay_data chart.Notes rate
+            scoring <- create ruleset chart.Keys replay_data chart.Notes rate
             screen.State.ChangeScoring scoring
 
         { new IPlayScreen(chart, PacemakerInfo.None, ruleset, scoring) with

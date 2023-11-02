@@ -57,7 +57,7 @@ module SelectedChart =
         | Some chart ->
             if selected() then
                 rate.Set chart.Rate
-                selectedMods.Set (chart.Mods |> Map.ofArray |> Map.filter (fun id _ -> modList.ContainsKey id))
+                selectedMods.Set (chart.Mods |> Map.ofArray |> Map.filter (fun id _ -> available_mods.ContainsKey id))
             else
                 match Cache.by_hash chart.Hash Library.cache with
                 | None -> 
@@ -66,7 +66,7 @@ module SelectedChart =
                 | Some cc -> 
                     Chart.change(cc, Collections.LibraryContext.None)
                     rate.Set chart.Rate
-                    selectedMods.Set (chart.Mods |> Map.ofArray |> Map.filter (fun id _ -> modList.ContainsKey id))
+                    selectedMods.Set (chart.Mods |> Map.ofArray |> Map.filter (fun id _ -> available_mods.ContainsKey id))
 
     let switch(c: LobbyChart option) =
         
@@ -86,7 +86,7 @@ type SelectedChart() =
         |+ Text((fun () -> if SelectedChart.loaded() then sprintf "%s %.2f" Icons.star Chart.RATING.Value.Physical else ""), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> if SelectedChart.loaded() then Chart.FMT_DURATION else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> if SelectedChart.loaded() then Chart.FMT_BPM else ""), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Text((fun () -> if SelectedChart.loaded() then getModString(rate.Value, selectedMods.Value, false) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        |+ Text((fun () -> if SelectedChart.loaded() then format_mods(rate.Value, selectedMods.Value, false) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> if SelectedChart.loaded() then Chart.FMT_NOTECOUNTS.Value else ""), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> if SelectedChart.loaded() || SelectedChart.chart.IsNone then "" else %"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 

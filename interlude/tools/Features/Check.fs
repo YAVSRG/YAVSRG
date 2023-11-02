@@ -90,7 +90,7 @@ module Check =
                 find (sprintf "hotkeys.%s.name" m) "Hotkeys"
                 find (sprintf "hotkeys.%s.tooltip" m) "Hotkeys"
 
-            for m in Seq.append [ "auto"; "pacemaker" ] Prelude.Gameplay.Mods.modList.Keys do
+            for m in Seq.append [ "auto"; "pacemaker" ] Prelude.Gameplay.Mods.available_mods.Keys do
                 find (sprintf "mod.%s.name" m) "Mods"
                 find (sprintf "mod.%s.desc" m) "Mods"
 

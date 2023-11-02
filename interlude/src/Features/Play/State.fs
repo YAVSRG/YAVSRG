@@ -20,7 +20,8 @@ type PlayState =
         Pacemaker: PacemakerInfo
     }
     static member Dummy(chart) =
-        let s = Metrics.createDummyMetric chart
+        let s = Metrics.create_dummy chart
+
         {
             Ruleset = s.Ruleset
             Scoring = s
@@ -28,13 +29,15 @@ type PlayState =
             CurrentChartTime = fun () -> 0.0f<ms>
             Pacemaker = PacemakerInfo.None
         }
+
     member this.SubscribeToHits(handler: HitEvent<HitEventGuts> -> unit) =
-        let mutable obj : IDisposable = this.Scoring.OnHit.Subscribe handler
-        this.ScoringChanged.Publish.Add(
-            fun () ->
-                obj.Dispose()
-                obj <- this.Scoring.OnHit.Subscribe handler
+        let mutable obj: IDisposable = this.Scoring.OnHit.Subscribe handler
+
+        this.ScoringChanged.Publish.Add(fun () ->
+            obj.Dispose()
+            obj <- this.Scoring.OnHit.Subscribe handler
         )
+
     member this.ChangeScoring(scoring) =
         this.Scoring <- scoring
         this.ScoringChanged.Trigger()

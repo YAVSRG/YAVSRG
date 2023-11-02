@@ -543,7 +543,7 @@ type RateModMeter(conf: HUD.RateModMeter, state) as this =
     do
         let text =
             if conf.ShowMods then
-                Mods.getModString (Gameplay.rate.Value, Gameplay.selectedMods.Value, Gameplay.autoplay)
+                Mods.format_mods (Gameplay.rate.Value, Gameplay.selectedMods.Value, Gameplay.autoplay)
             else
                 sprintf "%.2fx" Gameplay.rate.Value
 

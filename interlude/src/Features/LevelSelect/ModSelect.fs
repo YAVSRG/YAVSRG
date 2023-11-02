@@ -27,13 +27,13 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
         this
         |+ Clickable.Focus this
         |+ Text(
-            ModState.getModName id,
+            ModState.get_mod_name id,
             Color = (fun () -> (if this.Focused then Colors.yellow_accent else Colors.white), Colors.shadow_1),
             Position = Position.SliceTop(TOP_HEIGHT).Margin(20.0f, 0.0f),
             Align = Alignment.LEFT
         )
         |* Text(
-            ModState.getModDesc id,
+            ModState.get_mod_desc id,
             Color = (fun () -> (if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2),
             Position = Position.TrimTop(TOP_HEIGHT).Margin(20.0f, 0.0f),
             Align = Alignment.LEFT
@@ -88,7 +88,7 @@ type private ModSelectPage(onClose) as this =
             (fun _ -> autoplay <- not autoplay)
         )
 
-        for id in modList.Keys do
+        for id in available_mods.Keys do
             grid
             |* ModSelector(
                 id,
@@ -99,7 +99,7 @@ type private ModSelectPage(onClose) as this =
                     else
                         -1
                 ),
-                (fun _ -> Setting.app (ModState.cycleState id) selectedMods)
+                (fun _ -> Setting.app (ModState.cycle id) selectedMods)
             )
 
         grid

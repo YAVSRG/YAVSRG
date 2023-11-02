@@ -34,15 +34,14 @@ module PlayScreen =
         let firstNote = chart.Notes.[0].Time
         let liveplay = LiveReplayProvider firstNote
 
-        let scoring =
-            createScoreMetric ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
+        let scoring = create ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
 
         let pacemakerInfo =
             match pacemakerMode with
             | PacemakerMode.None -> PacemakerInfo.None
             | PacemakerMode.Score(rate, replay) ->
                 let replayData = StoredReplayProvider(replay) :> IReplayProvider
-                let scoring = createScoreMetric ruleset chart.Keys replayData chart.Notes rate
+                let scoring = create ruleset chart.Keys replayData chart.Notes rate
                 PacemakerInfo.Replay scoring
             | PacemakerMode.Setting ->
                 let setting =
@@ -200,8 +199,7 @@ module PlayScreen =
         let firstNote = chart.Notes.[0].Time
         let liveplay = LiveReplayProvider firstNote
 
-        let scoring =
-            createScoreMetric ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
+        let scoring = create ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
 
         let binds = options.GameplayBinds.[chart.Keys - 3]
         let mutable inputKeyState = 0us

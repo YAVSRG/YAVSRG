@@ -295,7 +295,7 @@ module PracticeScreen =
         let mutable liveplay = LiveReplayProvider firstNote
 
         let mutable scoring =
-            createScoreMetric Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
+            create Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
 
         scoring.OnHit.Add(fun h ->
             match h.Guts with
@@ -313,7 +313,7 @@ module PracticeScreen =
 
         let restart (screen: IPlayScreen) =
             liveplay <- LiveReplayProvider firstNote
-            scoring <- createScoreMetric Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
+            scoring <- create Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
             ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
             screen.State.ChangeScoring scoring
 
