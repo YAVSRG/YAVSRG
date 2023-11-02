@@ -6,21 +6,22 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude
+open Prelude.Data.Scores
 open Prelude.Charts.Tools
 open Prelude.Gameplay
 open Prelude.Gameplay.Metrics
 open Interlude.Content
 open Interlude.UI
 open Interlude.Options
-open Interlude.Utils
 open Interlude.Features
 open Interlude.Features.Online
 open Interlude.Features.Play.HUD
+open Interlude.Features.Score
 
 [<RequireQualifiedAccess>]
 type ReplayMode =
     | Auto
-    | Replay of chart: ModChart * rate: float32 * ReplayData
+    | Replay of score: Score * chart: ModChart * rate: float32 * ReplayData
 
 type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Playfield, enable: Setting<bool>) =
     inherit StaticWidget(NodeType.None)
@@ -182,7 +183,7 @@ module ReplayScreen =
                 true,
                 Gameplay.rate.Value,
                 chart
-            | ReplayMode.Replay(modchart, rate, data) ->
+            | ReplayMode.Replay(score, modchart, rate, data) ->
                 StoredReplayProvider(data) :> IReplayProvider, false, rate, modchart
 
         let firstNote = chart.Notes.[0].Time
@@ -240,5 +241,23 @@ module ReplayScreen =
                     scoring.Update chartTime
 
                 if replay_data.Finished then
-                    Screen.back Transitions.Flags.Default
+                    match mode with
+                    | ReplayMode.Auto -> Screen.back Transitions.Flags.Default |> ignore
+                    | ReplayMode.Replay(score, _, _, _) ->
+                        Screen.change_new
+                            (fun () ->
+                                let sd =
+                                    ScoreInfoProvider(
+                                        score,
+                                        Gameplay.Chart.CHART.Value,
+                                        this.State.Ruleset,
+                                        ModChart = Gameplay.Chart.WITH_MODS.Value,
+                                        Difficulty = Gameplay.Chart.RATING.Value
+                                    )
+
+                                new ScoreScreen(sd, ImprovementFlags.Default) :> Screen
+                            )
+                            Screen.Type.Score
+                            Transitions.Flags.Default
+                        |> ignore
         }

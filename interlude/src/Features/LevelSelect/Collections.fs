@@ -22,7 +22,7 @@ module CollectionManager =
         if
             match collection with
             | Folder c -> c.Add cc
-            | Playlist p -> p.Add(cc, rate.Value, selectedMods.Value)
+            | Playlist p -> p.Add(cc, rate.Value, selected_mods.Value)
         then
             if options.LibraryMode.Value = LibraryMode.Collections then
                 LevelSelect.refresh_all ()

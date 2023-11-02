@@ -158,7 +158,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
             |+ PageButton(
                 "score.watch_replay",
                 (fun () ->
-                    ScoreScreenHelpers.watchReplay (score.ModChart, score.ScoreInfo.rate, score.ReplayData)
+                    ScoreScreenHelpers.watch_replay (score.ScoreInfo, score.ModChart, score.ReplayData)
                     Menu.Back()
                 ),
                 Icon = Icons.watch

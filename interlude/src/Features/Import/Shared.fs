@@ -69,7 +69,7 @@ module Import =
                     .Once(
                         "unlinkedsongsimport.link_intended",
                         fun () ->
-                            Screen.change Screen.Type.Import Transitions.Flags.Default
+                            Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
                             Menu.Back()
                     )
                     .Pos(500.0f)

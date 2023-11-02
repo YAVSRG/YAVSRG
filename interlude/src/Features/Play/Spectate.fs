@@ -162,5 +162,5 @@ module SpectateScreen =
 
                 if this.State.Scoring.Finished && not exiting then
                     exiting <- true
-                    Screen.back Transitions.Flags.Default
+                    Screen.back Transitions.Flags.Default |> ignore
         }

@@ -186,15 +186,15 @@ module Logo =
                 }
         )
 
-    let moveCentre () =
+    let move_center () =
         state <- Centre
         display.Move(-400.0f, -400.0f, 400.0f, 400.0f)
 
-    let moveOffscreen () =
+    let move_offscreen () =
         state <- Hidden
         display.Move(-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
         display.SnapPosition()
 
-    let moveMenu () =
+    let move_menu () =
         state <- Menu
         display.Move(-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)

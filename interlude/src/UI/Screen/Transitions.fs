@@ -227,20 +227,24 @@ module Transitions =
 
             draw_internal flags inbound amount bounds
 
-    let tryStart (func: unit -> unit, _flags: Flags) : Animation =
-        if not active then
-            active <- true
-            flags <- _flags
+    let animate (func: unit -> unit, _flags: Flags) : Animation =
+        if active then
+            failwith "Should not be called while a transition is already in progress"
 
-            Animation.seq
-                [ in_timer
-                  Animation.Action(fun () ->
-                      func ()
-                      out_timer.FrameSkip())
-                  out_timer
-                  Animation.Action(fun () ->
-                      in_timer.Reset()
-                      out_timer.Reset()
-                      active <- false) ]
-        else
-            Animation.Action(ignore)
+        active <- true
+        flags <- _flags
+
+        Animation.seq
+            [
+                in_timer
+                Animation.Action(fun () ->
+                    func ()
+                    out_timer.FrameSkip()
+                )
+                out_timer
+                Animation.Action(fun () ->
+                    in_timer.Reset()
+                    out_timer.Reset()
+                    active <- false
+                )
+            ]

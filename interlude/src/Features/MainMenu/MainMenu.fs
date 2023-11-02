@@ -16,12 +16,12 @@ open Interlude.Features.Online
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 
-type private MenuButton(onClick, label: string, pos) as this =
+type private MenuButton(on_click, label: string, pos) as this =
     inherit
         DynamicContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                onClick ()
+                on_click ()
             )
         )
 
@@ -65,15 +65,16 @@ type private MenuButton(onClick, label: string, pos) as this =
         this.Position <- pos
 
 // Menu screen
+// todo: cool redesign with news feed and stuff
 
 type MainMenuScreen() as this =
     inherit Screen.T()
 
-    let playFunc () =
-        Screen.change Screen.Type.LevelSelect Transitions.Flags.Default
+    let play_action () =
+        Screen.change Screen.Type.LevelSelect Transitions.Flags.Default |> ignore
 
     let play =
-        MenuButton(playFunc, %"menu.play.name", Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f))
+        MenuButton(play_action, %"menu.play.name", Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f))
 
     let options =
         MenuButton(
@@ -84,19 +85,22 @@ type MainMenuScreen() as this =
 
     let quit =
         MenuButton(
-            (fun () -> Screen.back Transitions.Flags.UnderLogo),
+            (fun () ->
+                if Screen.back Transitions.Flags.UnderLogo then
+                    Logo.move_center ()
+            ),
             %"menu.quit.name",
             Position.Box(0.0f, 0.5f, -100.0f, 100.0f, 1160.0f, 100.0f)
         )
 
-    let newSplash =
+    let choose_splash =
         splash_message_picker "MenuSplashes.txt"
         >> fun s -> s.Split '¬'
         >> fun l -> if l.Length > 1 then l.[0], l.[1] else l.[0], ""
 
-    let mutable splashText = "", ""
-    let splashAnim = Animation.Fade 0.0f
-    let splashSubAnim = Animation.Fade 0.0f
+    let mutable splash_text = "", ""
+    let splash_fade = Animation.Fade 0.0f
+    let splash_subtitle_fade = Animation.Fade 0.0f
 
     do
         this
@@ -128,12 +132,12 @@ type MainMenuScreen() as this =
         if prev = Screen.Type.SplashScreen && firstLaunch then
             Wiki.show ()
 
-        splashText <- newSplash ()
-        Logo.moveMenu ()
+        splash_text <- choose_splash ()
+        Logo.move_menu ()
         Background.dim 0.0f
         Toolbar.show ()
         Song.on_finish <- SongFinishAction.LoopFromBeginning
-        splashAnim.Target <- 1.0f
+        splash_fade.Target <- 1.0f
         play.Pop()
         options.Pop()
         quit.Pop()
@@ -141,26 +145,26 @@ type MainMenuScreen() as this =
 
     override this.OnExit next =
         if next <> Screen.Type.SplashScreen then
-            Logo.moveOffscreen ()
+            Logo.move_offscreen ()
 
-        splashAnim.Target <- 0.0f
-        splashAnim.Snap()
+        splash_fade.Target <- 0.0f
+        splash_fade.Snap()
         Background.dim 0.7f
 
     override this.OnBack() = Some Screen.Type.SplashScreen
 
     override this.Draw() =
         let c = this.Bounds.CenterX
-        let (s, ss) = splashText
-        let a1 = splashSubAnim.Value * splashAnim.Value * 255.0f |> int
-        let a2 = splashAnim.Alpha
+        let (s, ss) = splash_text
+        let a1 = splash_subtitle_fade.Value * splash_fade.Value * 255.0f |> int
+        let a2 = splash_fade.Alpha
 
         Text.draw_aligned_b (
             Style.font,
             ss,
             20.0f,
             c,
-            this.Bounds.Top + 50.0f + 30.0f * splashSubAnim.Value,
+            this.Bounds.Top + 50.0f + 30.0f * splash_subtitle_fade.Value,
             (Colors.white.O4a a1, Palette.color (a1, 0.5f, 0.0f)),
             Alignment.CENTER
         )
@@ -170,7 +174,7 @@ type MainMenuScreen() as this =
             s,
             40.0f,
             c,
-            this.Bounds.Top - 60.0f + 80.0f * splashAnim.Value,
+            this.Bounds.Top - 60.0f + 80.0f * splash_fade.Value,
             (Colors.white.O4a a2, Palette.color (a2, 0.5f, 0.0f)),
             Alignment.CENTER
         )
@@ -179,14 +183,14 @@ type MainMenuScreen() as this =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        splashAnim.Update elapsed_ms
-        splashSubAnim.Update elapsed_ms
+        splash_fade.Update elapsed_ms
+        splash_subtitle_fade.Update elapsed_ms
 
-        splashSubAnim.Target <-
+        splash_subtitle_fade.Target <-
             if Mouse.hover (this.Bounds.Expand(-400.0f, 0.0f).SliceTop(100.0f)) then
                 1.0f
             else
                 0.0f
 
         if (%%"select").Tapped() then
-            playFunc ()
+            play_action ()

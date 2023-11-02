@@ -17,11 +17,11 @@ module Background =
 
     let dim (amount: float32) = dim_percent.Target <- amount
 
-    let setParallaxPos (x: float32, y: float32) =
+    let set_parallax_pos (x: float32, y: float32) =
         parallaxX.Target <- x
         parallaxY.Target <- y
 
-    let setParallaxAmount (amount: float32) = parallaxZ.Target <- amount
+    let set_parallax_amount (amount: float32) = parallaxZ.Target <- amount
 
     let mutable private background: (Sprite * Animation.Fade * bool) list = []
 

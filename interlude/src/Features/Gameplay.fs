@@ -30,12 +30,12 @@ open Interlude.Web.Shared.Requests
 module Gameplay =
 
     let mutable autoplay = false
-    let mutable enablePacemaker = false
+    let mutable enable_pacemaker = false
 
     module Chart =
 
         let _rate = Setting.rate 1.0f
-        let _selectedMods = Setting.simple Map.empty
+        let _selected_mods = Setting.simple Map.empty
 
         let private format_duration (cc: CachedChart option) =
             match cc with
@@ -138,7 +138,7 @@ module Gameplay =
                                     SAVE_DATA <- Some save_data
                             // if chart is loaded we can safely restart from this point for different rates and mods
 
-                            let with_mods = apply_mods _selectedMods.Value chart
+                            let with_mods = apply_mods _selected_mods.Value chart
                             let with_colors = apply_coloring (Content.noteskinConfig().NoteColors) with_mods
 
                             let rating =
@@ -174,7 +174,7 @@ module Gameplay =
                             | None -> failwith "impossible"
                             | Some chart ->
 
-                            let with_mods = apply_mods _selectedMods.Value chart
+                            let with_mods = apply_mods _selected_mods.Value chart
                             let with_colors = apply_coloring (Content.noteskinConfig().NoteColors) with_mods
 
                             let rating =
@@ -284,17 +284,17 @@ module Gameplay =
 
         let mutable current: Collection option = None
 
-        let notifyChangeRate v =
+        let on_rate_changed v =
             match Chart.LIBRARY_CTX with
             | LibraryContext.Playlist(_, _, d) -> d.Rate.Value <- v
             | _ -> ()
 
-        let notifyChangeMods mods =
+        let on_mods_changed mods =
             match Chart.LIBRARY_CTX with
             | LibraryContext.Playlist(_, _, d) -> d.Mods.Value <- mods
             | _ -> ()
 
-        let notifyChangeChart (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
+        let on_chart_changed (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
             match Chart.LIBRARY_CTX with
             | LibraryContext.Playlist(_, _, d) ->
                 rate.Value <- d.Rate.Value
@@ -317,34 +317,34 @@ module Gameplay =
     let rate =
         Chart._rate
         |> Setting.trigger (fun v ->
-            Collections.notifyChangeRate v
+            Collections.on_rate_changed v
             Song.change_rate v
             Chart.update ()
         )
 
-    let selectedMods =
-        Chart._selectedMods
+    let selected_mods =
+        Chart._selected_mods
         |> Setting.trigger (fun mods ->
-            Collections.notifyChangeMods mods
+            Collections.on_mods_changed mods
             Chart.update ()
         )
 
-    do Chart.on_chart_change.Add(fun () -> Collections.notifyChangeChart rate selectedMods)
+    do Chart.on_chart_change.Add(fun () -> Collections.on_chart_changed rate selected_mods)
 
-    let makeScore (replayData, keys) : Score =
+    let make_score (replay_data, keys) : Score =
         {
             time = DateTime.UtcNow
-            replay = Replay.compress replayData
+            replay = Replay.compress replay_data
             rate = rate.Value
-            selectedMods = selectedMods.Value |> ModState.filter Chart.WITH_MODS.Value
+            selectedMods = selected_mods.Value |> ModState.filter Chart.WITH_MODS.Value
             layout = options.Playstyles.[keys - 3]
             keycount = keys
         }
 
-    let setScore (pacemakerMet: bool) (data: ScoreInfoProvider) : ImprovementFlags =
+    let set_score (met_pacemaker: bool) (data: ScoreInfoProvider) : ImprovementFlags =
         if
             data.ModStatus < ModStatus.Unstored
-            && (options.SaveScoreIfUnderPace.Value || pacemakerMet)
+            && (options.SaveScoreIfUnderPace.Value || met_pacemaker)
         then
             if data.ModStatus = ModStatus.Ranked then
                 if Network.status = Network.Status.LoggedIn then
@@ -402,7 +402,7 @@ module Gameplay =
                                     replay.Finish()
 
                                 ScoreInfoProvider(
-                                    makeScore ((replay :> IReplayProvider).GetFullReplay(), with_mods.Keys),
+                                    make_score ((replay :> IReplayProvider).GetFullReplay(), with_mods.Keys),
                                     chart,
                                     Content.Rulesets.current,
                                     Player = Some username
@@ -421,7 +421,7 @@ module Gameplay =
                              replay.Finish()
 
                          ScoreInfoProvider(
-                             makeScore ((replay :> IReplayProvider).GetFullReplay(), with_mods.Keys),
+                             make_score ((replay :> IReplayProvider).GetFullReplay(), with_mods.Keys),
                              chart,
                              Content.Rulesets.current
                          ))
@@ -442,9 +442,10 @@ module Gameplay =
         | Some cc -> Chart.change (cc, LibraryContext.None)
         | None ->
             Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
+
             match Suggestions.Suggestion.get_random [] with
             | Some cc -> Chart.change (cc, LibraryContext.None)
-            | None -> 
+            | None ->
                 Logging.Debug "No charts installed"
                 Background.load None
 

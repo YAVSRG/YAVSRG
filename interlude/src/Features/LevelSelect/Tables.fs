@@ -143,7 +143,7 @@ type ManageTablesPage() as this =
             (fun () ->
                 Menu.Exit()
                 Interlude.Features.Import.ImportScreen.switch_to_tables ()
-                Screen.change Screen.Type.Import Transitions.Flags.Default
+                Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
             ),
             Icon = Icons.download
         )

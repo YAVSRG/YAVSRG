@@ -107,6 +107,7 @@ type Chat() =
                                 (fun () -> ScoreScreen(data, ImprovementFlags.Default) :> Screen)
                                 Screen.Type.Score
                                 Transitions.Flags.Default
+                            |> ignore
                         ),
                         OnHover =
                             fun b ->

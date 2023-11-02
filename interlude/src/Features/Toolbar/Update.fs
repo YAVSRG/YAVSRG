@@ -48,7 +48,7 @@ type Updater() as this =
     member this.Click() =
         if AutoUpdate.update_complete then
             AutoUpdate.restart_on_exit <- true
-            Screen.change Screen.Type.SplashScreen Transitions.Flags.UnderLogo
+            Screen.change Screen.Type.SplashScreen Transitions.Flags.UnderLogo |> ignore
         elif AutoUpdate.update_started then
             ()
         else

@@ -53,6 +53,7 @@ module Leaderboard =
                             (fun () -> new ScoreScreen(data, ImprovementFlags.Default) :> Screen)
                             Screen.Type.Score
                             Transitions.Flags.Default
+                        |> ignore
                     )
                 )
             )

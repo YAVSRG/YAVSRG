@@ -136,6 +136,7 @@ type ActionBar(random_chart) =
                         (fun () -> PracticeScreen.practice_screen (0.0f<ms>))
                         Screen.Type.Practice
                         Transitions.Flags.Default
+                    |> ignore
             ),
             (K false),
             Hotkey = "practice_mode",

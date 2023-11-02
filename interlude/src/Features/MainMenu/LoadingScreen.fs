@@ -18,7 +18,7 @@ type LoadingScreen() =
     let animation = Animation.Sequence()
 
     override this.OnEnter(prev: Screen.Type) =
-        Logo.moveCentre ()
+        Logo.move_center ()
         Toolbar.hide ()
 
         match prev with
@@ -30,14 +30,17 @@ type LoadingScreen() =
             animation.Add(Animation.Delay 1000.0)
             animation.Add(Animation.Action(fun () -> audio_fade.Target <- 1.0f))
             animation.Add(Animation.Delay 1200.0)
-            animation.Add(Animation.Action(fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo))
+
+            animation.Add(
+                Animation.Action(fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo |> ignore)
+            )
         | _ ->
             closing <- true
             audio_fade.Snap()
             animation.Add(Animation.Delay 1000.0)
             animation.Add(Animation.Action(fun () -> audio_fade.Target <- 0.0f))
             animation.Add(Animation.Delay 1200.0)
-            animation.Add(Animation.Action(fun () -> Screen.back Transitions.Flags.Default))
+            animation.Add(Animation.Action(fun () -> Screen.back Transitions.Flags.Default |> ignore))
 
     override this.OnExit _ =
         if not closing then

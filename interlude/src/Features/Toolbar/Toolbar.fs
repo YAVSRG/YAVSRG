@@ -46,7 +46,7 @@ type Toolbar() =
             %"menu.back",
             Icons.back,
             HEIGHT,
-            (fun () -> Screen.back Transitions.Flags.UnderLogo),
+            (fun () -> Screen.back Transitions.Flags.UnderLogo |> ignore),
             Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 160.0f, HEIGHT - 10.0f)
         )
         |+ (FlowContainer.LeftToRight(
@@ -73,7 +73,7 @@ type Toolbar() =
                 %"menu.import.name",
                 (fun () ->
                     if not Toolbar.hidden then
-                        Screen.change Screen.Type.Import Transitions.Flags.Default
+                        Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
                 ),
                 Icons.import,
                 Hotkey = "import"
@@ -94,7 +94,7 @@ type Toolbar() =
                 %"menu.stats.name",
                 (fun () ->
                     if not Toolbar.hidden then
-                        Screen.change_new StatsScreen Screen.Type.Stats Transitions.Flags.Default
+                        Screen.change_new StatsScreen Screen.Type.Stats Transitions.Flags.Default |> ignore
                 ),
                 Icons.stats_2
             )

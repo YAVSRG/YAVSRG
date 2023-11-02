@@ -200,15 +200,18 @@ module Startup =
                 LevelSelectScreen()
             |]
 
-        ScoreScreenHelpers.watchReplay <-
-            fun (modchart, rate, data) ->
+        ScoreScreenHelpers.watch_replay <-
+            fun (score: Score, modchart, data) ->
+                let rate = score.rate
+
                 if rate <> Gameplay.rate.Value then
                     Gameplay.rate.Value <- rate
 
                 Screen.change_new
-                    (fun () -> ReplayScreen.replay_screen (ReplayMode.Replay(modchart, rate, data)) :> Screen.T)
+                    (fun () -> ReplayScreen.replay_screen (ReplayMode.Replay(score, modchart, rate, data)) :> Screen.T)
                     Screen.Type.Replay
                     Transitions.Flags.Default
+                |> ignore
 
         Utils.AutoUpdate.check_for_updates ()
         Mounts.import_mounts_on_startup ()

@@ -423,7 +423,7 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
                 }
         )
         |+ StylishButton(
-            (fun () -> ScoreScreenHelpers.watchReplay (data.ModChart, data.ScoreInfo.rate, data.ReplayData)),
+            (fun () -> ScoreScreenHelpers.watch_replay (data.ScoreInfo, data.ModChart, data.ReplayData)),
             sprintf "%s %s" Icons.watch (%"score.watch_replay.name") |> K,
             !%Palette.DARK_100,
             Position =

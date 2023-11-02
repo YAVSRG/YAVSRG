@@ -144,10 +144,15 @@ type Lobby() =
                 Screen.current_type = Screen.Type.Lobby
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.Play
             then
-                Screen.change_new
-                    (fun () -> PlayScreen.multiplayer_screen ())
-                    Screen.Type.Play
-                    Transitions.Flags.Default
+                if
+                    Screen.change_new
+                        (fun () -> PlayScreen.multiplayer_screen ())
+                        Screen.Type.Play
+                        Transitions.Flags.Default
+                    |> not
+                then
+                    Logging.Warn("Missed the start of the lobby song because you were changing screen")
+
         )
 
         Network.Events.player_status.Add(fun (username, status) ->
@@ -156,10 +161,14 @@ type Lobby() =
                 && Screen.current_type = Screen.Type.Lobby
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.Spectate
             then
-                Screen.change_new
-                    (fun () -> SpectateScreen.spectate_screen username)
-                    Screen.Type.Replay
-                    Transitions.Flags.Default
+                if
+                    Screen.change_new
+                        (fun () -> SpectateScreen.spectate_screen username)
+                        Screen.Type.Replay
+                        Transitions.Flags.Default
+                    |> not
+                then
+                    Logging.Warn("Missed the start of spectating because you were changing screen")
         )
 
         Network.Events.lobby_settings_updated.Add(fun () -> lobby_title <- Network.lobby.Value.Settings.Value.Name)

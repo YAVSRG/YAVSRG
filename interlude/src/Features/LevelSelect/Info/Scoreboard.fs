@@ -41,6 +41,7 @@ module Scoreboard =
                             (fun () -> new ScoreScreen(data, ImprovementFlags.Default) :> Screen)
                             Screen.Type.Score
                             Transitions.Flags.Default
+                        |> ignore
                     )
                 )
             )
@@ -244,7 +245,7 @@ type Scoreboard(display: Setting<Display>) as this =
     let filterer () : ScoreCard -> bool =
         match filter.Value with
         | Filter.CurrentRate -> (fun a -> a.Data.ScoreInfo.rate = rate.Value)
-        | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selectedMods.Value)
+        | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selected_mods.Value)
         | _ -> K true
 
     let scrollContainer =

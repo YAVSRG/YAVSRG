@@ -94,20 +94,20 @@ type private ModSelectPage(onClose) as this =
                 id,
                 [| Icons.check |],
                 (fun _ ->
-                    if selectedMods.Value.ContainsKey id then
-                        selectedMods.Value.[id]
+                    if selected_mods.Value.ContainsKey id then
+                        selected_mods.Value.[id]
                     else
                         -1
                 ),
-                (fun _ -> Setting.app (ModState.cycle id) selectedMods)
+                (fun _ -> Setting.app (ModState.cycle id) selected_mods)
             )
 
         grid
         |* ModSelector(
             "pacemaker",
             [| Icons.check |],
-            (fun _ -> if enablePacemaker then 0 else -1),
-            (fun _ -> enablePacemaker <- not enablePacemaker)
+            (fun _ -> if enable_pacemaker then 0 else -1),
+            (fun _ -> enable_pacemaker <- not enable_pacemaker)
         )
 
     do

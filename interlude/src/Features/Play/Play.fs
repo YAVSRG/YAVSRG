@@ -158,6 +158,7 @@ module PlayScreen =
                         (fun () -> play_screen (pacemakerMode) :> Screen.T)
                         Screen.Type.Play
                         Transitions.Flags.Default
+                    |> ignore
 
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
                     liveplay.Finish()
@@ -166,17 +167,21 @@ module PlayScreen =
                         (fun () ->
                             let sd =
                                 ScoreInfoProvider(
-                                    Gameplay.makeScore ((liveplay :> IReplayProvider).GetFullReplay(), this.Chart.Keys),
+                                    Gameplay.make_score (
+                                        (liveplay :> IReplayProvider).GetFullReplay(),
+                                        this.Chart.Keys
+                                    ),
                                     Gameplay.Chart.CHART.Value,
                                     this.State.Ruleset,
                                     ModChart = Gameplay.Chart.WITH_MODS.Value,
                                     Difficulty = Gameplay.Chart.RATING.Value
                                 )
 
-                            (sd, Gameplay.setScore (pacemakerMet this.State) sd) |> ScoreScreen
+                            (sd, Gameplay.set_score (pacemakerMet this.State) sd) |> ScoreScreen
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default
+                    |> ignore
 
             override this.Draw() =
                 base.Draw()
@@ -301,15 +306,19 @@ module PlayScreen =
                         (fun () ->
                             let sd =
                                 ScoreInfoProvider(
-                                    Gameplay.makeScore ((liveplay :> IReplayProvider).GetFullReplay(), this.Chart.Keys),
+                                    Gameplay.make_score (
+                                        (liveplay :> IReplayProvider).GetFullReplay(),
+                                        this.Chart.Keys
+                                    ),
                                     Gameplay.Chart.CHART.Value,
                                     this.State.Ruleset,
                                     ModChart = Gameplay.Chart.WITH_MODS.Value,
                                     Difficulty = Gameplay.Chart.RATING.Value
                                 )
 
-                            (sd, Gameplay.setScore true sd) |> ScoreScreen
+                            (sd, Gameplay.set_score true sd) |> ScoreScreen
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default
+                    |> ignore
         }

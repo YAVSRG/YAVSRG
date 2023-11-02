@@ -187,8 +187,9 @@ type NoteskinsPage() as this =
                 "noteskins.get_more",
                 (fun () ->
                     Menu.Exit()
-                    Interlude.Features.Import.ImportScreen.switch_to_noteskins ()
-                    Screen.change Screen.Type.Import Transitions.Flags.Default
+
+                    if Screen.change Screen.Type.Import Transitions.Flags.Default then
+                        Interlude.Features.Import.ImportScreen.switch_to_noteskins ()
                 )
             )
                 .Pos(900.0f)

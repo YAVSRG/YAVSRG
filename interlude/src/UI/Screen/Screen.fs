@@ -96,13 +96,16 @@ module Screen =
 
     let screen_container = ScreenContainer()
 
-    // todo: return a bool indicating success
-    let change_new (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
-        if not Song.loading && (screenType <> current_type || screenType = Type.Play) then
-            Transitions.tryStart (
+    let change_new (thunk: unit -> #T) (screen_type: Type) (flags: Transitions.Flags) : bool =
+        if
+            not Song.loading
+            && (screen_type <> current_type || screen_type = Type.Play)
+            && not Transitions.active
+        then
+            Transitions.animate (
                 (fun () ->
                     let s = thunk ()
-                    current.OnExit screenType
+                    current.OnExit screen_type
 
                     if not s.Initialised then
                         s.Init screen_container
@@ -110,20 +113,24 @@ module Screen =
                         s.Update(0.0, true)
 
                     s.OnEnter current_type
-                    current_type <- screenType
+                    current_type <- screen_type
                     current <- s
                 ),
                 flags
             )
             |> animations.Add
 
-    let change (screenType: Type) (flags: Transitions.Flags) =
-        change_new (K screens.[int screenType]) screenType flags
+            true
+        else
+            false
 
-    let back (flags: Transitions.Flags) =
+    let change (screen_type: Type) (flags: Transitions.Flags) =
+        change_new (K screens.[int screen_type]) screen_type flags
+
+    let back (flags: Transitions.Flags) : bool =
         match current.OnBack() with
         | Some t -> change t flags
-        | None -> ()
+        | None -> false
 
     type ScreenRoot(toolbar: Widget) =
         inherit Root()
@@ -143,7 +150,7 @@ module Screen =
 
             if Viewport.vwidth > 0.0f then
                 let x, y = Mouse.pos ()
-                Background.setParallaxPos (x / Viewport.vwidth, y / Viewport.vheight)
+                Background.set_parallax_pos (x / Viewport.vwidth, y / Viewport.vheight)
 
             Palette.accent_color.Target <- Content.accentColor
             Dialog.display.Update(elapsed_ms, moved)
@@ -154,7 +161,7 @@ module Screen =
             screen_container.Update(elapsed_ms, moved)
 
             if (%%"exit").Tapped() then
-                back Transitions.Flags.UnderLogo
+                back Transitions.Flags.UnderLogo |> ignore
 
             if exit then
                 this.ShouldExit <- true
@@ -162,6 +169,7 @@ module Screen =
         override this.Draw() =
             if current_type <> Type.Play || Options.options.BackgroundDim.Value < 1.0f then
                 Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
+
             screen_container.Draw()
             logo.Draw()
             toolbar.Draw()
