@@ -244,6 +244,7 @@ type RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_
     let total_frame_timer = Stopwatch.StartNew()
     let mutable est_present_of_next_frame = 0.0
     let mutable present_of_last_frame = 0.0
+    let mutable swap_of_last_frame = 0.0
     let mutable start_of_frame = 0.0
     let mutable frame_is_ready = 0.0
     let mutable monitor_y = 1080.0
@@ -298,7 +299,6 @@ type RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_
 
     member this.DispatchFrame() =
 
-        // Before frame strategies
         match strategy with
 
         | Unlimited ->
@@ -317,11 +317,11 @@ type RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_
             est_present_of_next_frame <- present_of_last_frame + est_refresh_period
 
         | CpuTimingScanlineCorrection ->
-            present_of_last_frame <- now ()
+            present_of_last_frame <- swap_of_last_frame
             Render.Performance.visual_latency_lo <- 0.0
             Render.Performance.visual_latency_hi <- est_refresh_period
 
-            let correction =
+            let scanline_correction =
                 match FrameTimeStrategies.get_scanline () with
                 | Some(i, _) ->
                     let line_pc = float i / monitor_y
@@ -333,18 +333,18 @@ type RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_
                     strategy <- CpuTiming
                     0.0
 
-            est_present_of_next_frame <- est_present_of_next_frame - correction
+            est_present_of_next_frame <- est_present_of_next_frame - scanline_correction
 
             while est_present_of_next_frame < present_of_last_frame do
                 est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
 
             FrameTimeStrategies.sleep_accurate (
                 total_frame_timer,
-                est_present_of_next_frame - present_of_last_frame + start_of_frame
+                est_present_of_next_frame
             )
 
         | CpuTiming ->
-            present_of_last_frame <- now ()
+            present_of_last_frame <- swap_of_last_frame
             Render.Performance.visual_latency_lo <- 0.0
             Render.Performance.visual_latency_hi <- est_refresh_period
 
@@ -353,7 +353,7 @@ type RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_
 
             FrameTimeStrategies.sleep_accurate (
                 total_frame_timer,
-                est_present_of_next_frame - present_of_last_frame + start_of_frame
+                est_present_of_next_frame
             )
 
         let elapsed_ms = last_frame_timer.Elapsed.TotalMilliseconds
@@ -385,6 +385,7 @@ type RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_
 
         if not ui_root.ShouldExit then
             window.Context.SwapBuffers()
+            swap_of_last_frame <- now ()
 
         // Performance profiling
         fps_count <- fps_count + 1
