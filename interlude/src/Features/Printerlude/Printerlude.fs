@@ -65,6 +65,10 @@ module Printerlude =
             io.WriteLine(sprintf "You are running %s" Utils.version)
             io.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latest_version_name)
 
+        let timescale (io: IOContext) (v: float) =
+            UI.Screen.timescale <- System.Math.Clamp(v, 0.01, 10.0)
+            io.WriteLine(sprintf "Entering warp speed (%.2f%%)" (Interlude.UI.Screen.timescale * 100.0))
+
         let export_osz () =
             match Gameplay.Chart.CHART with
             | None -> failwith "No chart loaded to export"
@@ -225,6 +229,12 @@ module Printerlude =
                         Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
                         Online.Network.credentials.Api <- (if b then "localhost" else "api.yavsrg.net")
                         io.WriteLine("Restart your game to apply server change.")
+                )
+                .WithIOCommand(
+                    "timescale",
+                    "Sets the timescale of all UI animations, for testing",
+                    "speed",
+                    timescale
                 )
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
                 .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)

@@ -154,7 +154,7 @@ module PlayScreen =
                     this.State.Scoring.Update chartTime
 
                 if (%%"retry").Tapped() then
-                    Screen.changeNew
+                    Screen.change_new
                         (fun () -> play_screen (pacemakerMode) :> Screen.T)
                         Screen.Type.Play
                         Transitions.Flags.Default
@@ -162,7 +162,7 @@ module PlayScreen =
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
                     liveplay.Finish()
 
-                    Screen.changeNew
+                    Screen.change_new
                         (fun () ->
                             let sd =
                                 ScoreInfoProvider(
@@ -297,7 +297,7 @@ module PlayScreen =
                     send_replay_packet (now)
                     Lobby.finish_playing ()
 
-                    Screen.changeNew
+                    Screen.change_new
                         (fun () ->
                             let sd =
                                 ScoreInfoProvider(

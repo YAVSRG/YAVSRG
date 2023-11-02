@@ -9,6 +9,18 @@ open Prelude.Common
 open Interlude
 open Interlude.UI
 
+module Toolbar =
+    let HEIGHT = 70.0f
+    let slideout_amount = Animation.Fade 1.0f
+    let mutable hidden = false
+    let mutable was_hidden = false
+
+    let hide () = hidden <- true
+    let show () = hidden <- false
+
+    let moving () =
+        was_hidden <> hidden || slideout_amount.Moving
+
 module Screen =
 
     type Type =
@@ -30,22 +42,13 @@ module Screen =
         abstract member OnExit: Type -> unit
         abstract member OnBack: unit -> Type option
 
-    module Toolbar =
-        let HEIGHT = 70.0f
-        let expandAmount = Animation.Fade 1.0f
-        let mutable hidden = false
-        let mutable wasHidden = false
-
-        let hide () = hidden <- true
-        let show () = hidden <- false
-
-        let moving () =
-            wasHidden <> hidden || expandAmount.Moving
-
-    let globalAnimation = Animation.fork [ Palette.accent_color; Toolbar.expandAmount ]
+    let animations = Animation.fork [ Palette.accent_color; Toolbar.slideout_amount ]
 
     let logo = Logo.display
 
+    let mutable timescale = 1.0
+    let mutable exit = false
+    let mutable current_type = Type.SplashScreen
     let mutable private current = Unchecked.defaultof<T>
     let private screens: T array = Array.zeroCreate 5
 
@@ -56,9 +59,6 @@ module Screen =
             screens.[i] <- _screens.[i]
 
         current <- screens.[0]
-
-    let mutable exit = false
-    let mutable currentType = Type.SplashScreen
 
     type ScreenContainer() =
         inherit Widget(NodeType.None)
@@ -74,7 +74,7 @@ module Screen =
                     if Toolbar.hidden then
                         Viewport.bounds
                     else
-                        Viewport.bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.expandAmount.Value)
+                        Viewport.bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.slideout_amount.Value)
 
                 this.VisibleBounds <- Viewport.bounds
 
@@ -87,38 +87,38 @@ module Screen =
                 if Toolbar.hidden then
                     Viewport.bounds
                 else
-                    Viewport.bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.expandAmount.Value)
+                    Viewport.bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.slideout_amount.Value)
 
             this.VisibleBounds <- Viewport.bounds
             current.Init this
 
         override this.Draw() = current.Draw()
 
-    let screenContainer = ScreenContainer()
+    let screen_container = ScreenContainer()
 
     // todo: return a bool indicating success
-    let changeNew (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
-        if not Song.loading && (screenType <> currentType || screenType = Type.Play) then
+    let change_new (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
+        if not Song.loading && (screenType <> current_type || screenType = Type.Play) then
             Transitions.tryStart (
                 (fun () ->
                     let s = thunk ()
                     current.OnExit screenType
 
                     if not s.Initialised then
-                        s.Init screenContainer
+                        s.Init screen_container
                     else
                         s.Update(0.0, true)
 
-                    s.OnEnter currentType
-                    currentType <- screenType
+                    s.OnEnter current_type
+                    current_type <- screenType
                     current <- s
                 ),
                 flags
             )
-            |> globalAnimation.Add
+            |> animations.Add
 
     let change (screenType: Type) (flags: Transitions.Flags) =
-        changeNew (K screens.[int screenType]) screenType flags
+        change_new (K screens.[int screenType]) screenType flags
 
     let back (flags: Transitions.Flags) =
         match current.OnBack() with
@@ -131,13 +131,14 @@ module Screen =
         let perf = PerformanceMonitor()
 
         override this.Update(elapsed_ms, moved) =
+            let elapsed_ms = elapsed_ms * timescale
             base.Update(elapsed_ms, moved)
 
             perf.Update(elapsed_ms, moved)
 
             Background.update elapsed_ms
 
-            if currentType <> Type.Play || Dialog.exists () then
+            if current_type <> Type.Play || Dialog.exists () then
                 Notifications.display.Update(elapsed_ms, moved)
 
             if Viewport.vwidth > 0.0f then
@@ -148,9 +149,9 @@ module Screen =
             Dialog.display.Update(elapsed_ms, moved)
 
             toolbar.Update(elapsed_ms, moved)
-            globalAnimation.Update elapsed_ms
+            animations.Update elapsed_ms
             logo.Update(elapsed_ms, moved)
-            screenContainer.Update(elapsed_ms, moved)
+            screen_container.Update(elapsed_ms, moved)
 
             if (%%"exit").Tapped() then
                 back Transitions.Flags.UnderLogo
@@ -159,9 +160,9 @@ module Screen =
                 this.ShouldExit <- true
 
         override this.Draw() =
-            if currentType <> Type.Play || Options.options.BackgroundDim.Value < 1.0f then
+            if current_type <> Type.Play || Options.options.BackgroundDim.Value < 1.0f then
                 Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
-            screenContainer.Draw()
+            screen_container.Draw()
             logo.Draw()
             toolbar.Draw()
 
@@ -173,7 +174,7 @@ module Screen =
 
             Dialog.display.Draw()
 
-            if currentType <> Type.Play || Dialog.exists () then
+            if current_type <> Type.Play || Dialog.exists () then
                 Notifications.display.Draw()
                 let x, y = Mouse.pos ()
 
@@ -194,7 +195,7 @@ module Screen =
             toolbar.Init this
             Notifications.display.Init this
             Dialog.display.Init this
-            screenContainer.Init this
+            screen_container.Init this
             perf.Init this
             current.OnEnter Type.SplashScreen
 

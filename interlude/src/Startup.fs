@@ -205,7 +205,7 @@ module Startup =
                 if rate <> Gameplay.rate.Value then
                     Gameplay.rate.Value <- rate
 
-                Screen.changeNew
+                Screen.change_new
                     (fun () -> ReplayScreen.replay_screen (ReplayMode.Replay(modchart, rate, data)) :> Screen.T)
                     Screen.Type.Replay
                     Transitions.Flags.Default

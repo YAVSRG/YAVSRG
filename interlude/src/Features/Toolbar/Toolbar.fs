@@ -14,7 +14,6 @@ open Interlude.UI.Menu
 open Interlude.Utils
 open Interlude.Options
 open Interlude.UI.Components
-open Interlude.UI.Screen.Toolbar
 open Interlude.Features
 open Interlude.Features.Stats
 open Interlude.Features.Wiki
@@ -24,7 +23,8 @@ open Interlude.Features.Printerlude
 type Toolbar() =
     inherit Widget(NodeType.None)
 
-    let shown () = not hidden
+    let HEIGHT = Toolbar.HEIGHT
+
     let mutable userCollapse = false
 
     let container = StaticContainer(NodeType.None)
@@ -59,9 +59,9 @@ type Toolbar() =
                 %"menu.options.name",
                 (fun () ->
                     if
-                        shown ()
-                        && Screen.currentType <> Screen.Type.Play
-                        && Screen.currentType <> Screen.Type.Replay
+                        not Toolbar.hidden
+                        && Screen.current_type <> Screen.Type.Play
+                        && Screen.current_type <> Screen.Type.Replay
                     then
                         OptionsMenuRoot.show ()
                 ),
@@ -72,7 +72,7 @@ type Toolbar() =
             |+ InlaidButton(
                 %"menu.import.name",
                 (fun () ->
-                    if shown () then
+                    if not Toolbar.hidden then
                         Screen.change Screen.Type.Import Transitions.Flags.Default
                 ),
                 Icons.import,
@@ -82,7 +82,7 @@ type Toolbar() =
             |+ InlaidButton(
                 %"menu.wiki.name",
                 (fun () ->
-                    if shown () then
+                    if not Toolbar.hidden then
                         Wiki.show ()
                 ),
                 Icons.wiki,
@@ -93,8 +93,8 @@ type Toolbar() =
             |+ InlaidButton(
                 %"menu.stats.name",
                 (fun () ->
-                    if shown () then
-                        Screen.changeNew StatsScreen Screen.Type.Stats Transitions.Flags.Default
+                    if not Toolbar.hidden then
+                        Screen.change_new StatsScreen Screen.Type.Stats Transitions.Flags.Default
                 ),
                 Icons.stats_2
             )
@@ -104,9 +104,9 @@ type Toolbar() =
             "edit_noteskin",
             fun () ->
                 if
-                    shown ()
-                    && Screen.currentType <> Screen.Type.Play
-                    && Screen.currentType <> Screen.Type.Replay
+                    not Toolbar.hidden
+                    && Screen.current_type <> Screen.Type.Play
+                    && Screen.current_type <> Screen.Type.Replay
                     && (not Interlude.Content.Noteskins.Current.instance.IsEmbedded)
                 then
                     Noteskins.EditNoteskinPage(true).Show()
@@ -140,7 +140,7 @@ type Toolbar() =
             "preset1",
             fun () ->
                 match options.Preset1.Value with
-                | Some s when Screen.currentType <> Screen.Type.Play ->
+                | Some s when Screen.current_type <> Screen.Type.Play ->
                     Presets.load s
                     Notifications.action_feedback (Icons.system_notification, %"notification.preset_loaded", s.Name)
                 | _ -> ()
@@ -149,7 +149,7 @@ type Toolbar() =
             "preset2",
             fun () ->
                 match options.Preset2.Value with
-                | Some s when Screen.currentType <> Screen.Type.Play ->
+                | Some s when Screen.current_type <> Screen.Type.Play ->
                     Presets.load s
                     Notifications.action_feedback (Icons.system_notification, %"notification.preset_loaded", s.Name)
                 | _ -> ()
@@ -158,7 +158,7 @@ type Toolbar() =
             "preset3",
             fun () ->
                 match options.Preset3.Value with
-                | Some s when Screen.currentType <> Screen.Type.Play ->
+                | Some s when Screen.current_type <> Screen.Type.Play ->
                     Presets.load s
                     Notifications.action_feedback (Icons.system_notification, %"notification.preset_loaded", s.Name)
                 | _ -> ()
@@ -170,7 +170,7 @@ type Toolbar() =
         |* volume
 
     override this.Draw() =
-        if hidden then volume.Draw() else
+        if Toolbar.hidden then volume.Draw() else
         let {
                 Rect.Left = l
                 Top = t
@@ -182,12 +182,12 @@ type Toolbar() =
         Draw.rect (Rect.Create(l, t, r, t + HEIGHT)) !*Palette.MAIN_100
         Draw.rect (Rect.Create(l, b - HEIGHT, r, b)) !*Palette.MAIN_100
 
-        if expandAmount.Value > 0.01f then
+        if Toolbar.slideout_amount.Value > 0.01f then
             let s = this.Bounds.Width / 48.0f
 
             for i in 0..47 do
                 let level =
-                    System.Math.Min((Devices.waveform.[i] + 0.01f) * expandAmount.Value * 0.4f, HEIGHT)
+                    System.Math.Min((Devices.waveform.[i] + 0.01f) * Toolbar.slideout_amount.Value * 0.4f, HEIGHT)
 
                 Draw.rect
                     (Rect.Create(l + float32 i * s + 2.0f, t, l + (float32 i + 1.0f) * s - 2.0f, t + level))
@@ -204,27 +204,27 @@ type Toolbar() =
         Stats.session.GameTime <- Stats.session.GameTime + elapsed_ms
 
         let moved =
-            if wasHidden <> hidden then
-                wasHidden <- hidden
+            if Toolbar.was_hidden <> Toolbar.hidden then
+                Toolbar.was_hidden <- Toolbar.hidden
                 true
             else
-                moved || expandAmount.Moving
+                moved || Toolbar.slideout_amount.Moving
 
-        if shown () && (%%"toolbar").Tapped() then
+        if not Toolbar.hidden && (%%"toolbar").Tapped() then
             userCollapse <- not userCollapse
-            expandAmount.Target <- if userCollapse then 0.0f else 1.0f
+            Toolbar.slideout_amount.Target <- if userCollapse then 0.0f else 1.0f
 
         Terminal.update ()
 
         if moved then
             this.Bounds <-
-                if hidden then
+                if Toolbar.hidden then
                     this.Parent.Bounds.Expand(0.0f, HEIGHT)
                 else
-                    this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - expandAmount.Value))
+                    this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - Toolbar.slideout_amount.Value))
 
             this.VisibleBounds <-
-                if hidden then
+                if Toolbar.hidden then
                     this.Parent.Bounds
                 else
                     this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
@@ -235,13 +235,13 @@ type Toolbar() =
         base.Init parent
 
         this.Bounds <-
-            if hidden then
+            if Toolbar.hidden then
                 this.Parent.Bounds.Expand(0.0f, HEIGHT)
             else
-                this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - expandAmount.Value))
+                this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - Toolbar.slideout_amount.Value))
 
         this.VisibleBounds <-
-            if hidden then
+            if Toolbar.hidden then
                 this.Parent.Bounds
             else
                 this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)

@@ -30,7 +30,7 @@ module LevelSelect =
             Screen.change Screen.Type.Lobby Transitions.Flags.Default
         else
             Chart.SAVE_DATA.Value.LastPlayed <- DateTime.UtcNow
-            Screen.changeNew
+            Screen.change_new
                 ( fun () -> 
                     if autoplay then ReplayScreen.replay_screen(ReplayMode.Auto) :> Screen.T
                     else PlayScreen.play_screen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
@@ -43,7 +43,7 @@ module LevelSelect =
             data.LastPlayed <- DateTime.UtcNow
             rate.Set _rate
             selectedMods.Set _mods
-            Screen.changeNew
+            Screen.change_new
                 ( fun () -> PlayScreen.play_screen(PacemakerMode.Score (rate.Value, replay)) )
                 ( Screen.Type.Play )
                 Transitions.Flags.Default

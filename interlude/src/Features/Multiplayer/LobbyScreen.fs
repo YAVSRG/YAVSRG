@@ -141,10 +141,10 @@ type Lobby() =
 
         Network.Events.game_start.Add(fun () ->
             if
-                Screen.currentType = Screen.Type.Lobby
+                Screen.current_type = Screen.Type.Lobby
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.Play
             then
-                Screen.changeNew
+                Screen.change_new
                     (fun () -> PlayScreen.multiplayer_screen ())
                     Screen.Type.Play
                     Transitions.Flags.Default
@@ -153,10 +153,10 @@ type Lobby() =
         Network.Events.player_status.Add(fun (username, status) ->
             if
                 status = LobbyPlayerStatus.Playing
-                && Screen.currentType = Screen.Type.Lobby
+                && Screen.current_type = Screen.Type.Lobby
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.Spectate
             then
-                Screen.changeNew
+                Screen.change_new
                     (fun () -> SpectateScreen.spectate_screen username)
                     Screen.Type.Replay
                     Transitions.Flags.Default

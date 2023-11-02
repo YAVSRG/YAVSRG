@@ -131,7 +131,7 @@ type MainMenuScreen() as this =
         splashText <- newSplash ()
         Logo.moveMenu ()
         Background.dim 0.0f
-        Screen.Toolbar.show ()
+        Toolbar.show ()
         Song.on_finish <- SongFinishAction.LoopFromBeginning
         splashAnim.Target <- 1.0f
         play.Pop()

@@ -172,7 +172,7 @@ module Terminal =
         if
             options.EnableConsole.Value
             && not shown
-            && Screen.currentType <> Screen.Type.Play
+            && Screen.current_type <> Screen.Type.Play
             && (%%"console").Tapped()
         then
             show ()

@@ -28,7 +28,7 @@ type NetworkStatus() =
         if Network.credentials.Host = "localhost" then
             Text.fill_b (Style.font, "LOCALHOST", this.Bounds.SliceBottom(20.0f), Colors.text, Alignment.CENTER)
 
-        if Screen.currentType <> Screen.Type.Lobby && Network.lobby.IsSome then
+        if Screen.current_type <> Screen.Type.Lobby && Network.lobby.IsSome then
             let area = area.Translate(-300.0f, 0.0f)
             Draw.rect area (Colors.shadow_1.O2)
 
@@ -87,8 +87,8 @@ type NetworkStatus() =
 
             d.Position <-
                 Position
-                    .SliceTop(d.Height + Screen.Toolbar.HEIGHT)
-                    .TrimTop(Screen.Toolbar.HEIGHT)
+                    .SliceTop(d.Height + this.Bounds.Height)
+                    .TrimTop(this.Bounds.Height)
                     .Margin(Style.PADDING, 0.0f)
 
             d.Init this

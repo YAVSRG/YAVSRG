@@ -19,7 +19,7 @@ type LoadingScreen() =
 
     override this.OnEnter(prev: Screen.Type) =
         Logo.moveCentre ()
-        Screen.Toolbar.hide ()
+        Toolbar.hide ()
 
         match prev with
         | Screen.Type.SplashScreen ->

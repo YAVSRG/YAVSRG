@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Data.Scores
 open Interlude.Utils
@@ -133,7 +132,7 @@ type ActionBar(random_chart) =
             (fun () ->
                 // todo: wait until load if not
                 if Chart.WITH_MODS.IsSome then
-                    Screen.changeNew
+                    Screen.change_new
                         (fun () -> PracticeScreen.practice_screen (0.0f<ms>))
                         Screen.Type.Practice
                         Transitions.Flags.Default

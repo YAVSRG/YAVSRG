@@ -120,7 +120,7 @@ type SelectedChart() =
                 StylishButton(
                 (fun () ->
                     let username = Network.lobby.Value.Players.Keys.First(fun p -> Network.lobby.Value.Players.[p].Status = LobbyPlayerStatus.Playing)
-                    Screen.changeNew 
+                    Screen.change_new 
                         (fun () -> SpectateScreen.spectate_screen username)
                         Screen.Type.Replay
                         Transitions.Flags.Default
@@ -177,7 +177,7 @@ type SelectedChart() =
 
         SelectedChart.switch Network.lobby.Value.Chart
         Network.Events.join_lobby.Add(fun () -> SelectedChart.switch None)
-        Network.Events.change_chart.Add(fun () -> if Screen.currentType = Screen.Type.Lobby then SelectedChart.switch Network.lobby.Value.Chart) // todo: not always
+        Network.Events.change_chart.Add(fun () -> if Screen.current_type = Screen.Type.Lobby then SelectedChart.switch Network.lobby.Value.Chart) // todo: not always
 
         base.Init parent
 

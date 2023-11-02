@@ -37,7 +37,7 @@ module Scoreboard =
             Frame(
                 NodeType.Button(
                     (fun () ->
-                        Screen.changeNew
+                        Screen.change_new
                             (fun () -> new ScoreScreen(data, ImprovementFlags.Default) :> Screen)
                             Screen.Type.Score
                             Transitions.Flags.Default

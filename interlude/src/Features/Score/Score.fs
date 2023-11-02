@@ -91,14 +91,14 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
     override this.Update(elapsed_ms, moved) = base.Update(elapsed_ms, moved)
 
     override this.OnEnter prev =
-        Screen.Toolbar.hide ()
+        Toolbar.hide ()
         DiscordRPC.in_menus ("Admiring a score")
 
     override this.OnExit next =
         options.SelectedRuleset.Set originalRuleset
         scoreData.Ruleset <- Rulesets.current
         graph.Dispose()
-        Screen.Toolbar.show ()
+        Toolbar.show ()
 
     override this.OnBack() =
         if Network.lobby.IsSome then

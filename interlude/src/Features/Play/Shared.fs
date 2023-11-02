@@ -349,7 +349,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
     override this.OnEnter(prev) =
         Dialog.close ()
         Background.dim (float32 options.BackgroundDim.Value)
-        Screen.Toolbar.hide ()
+        Toolbar.hide ()
         Song.change_rate Gameplay.rate.Value
         Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
         Song.on_finish <- SongFinishAction.Wait
@@ -361,7 +361,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
         Background.dim 0.7f
 
         if next <> Screen.Type.Score then
-            Screen.Toolbar.show ()
+            Toolbar.show ()
 
     override this.OnBack() =
         if Network.lobby.IsSome then

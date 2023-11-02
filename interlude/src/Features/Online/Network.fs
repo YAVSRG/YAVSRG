@@ -208,7 +208,7 @@ module Network =
                         API.Client.authenticate credentials.Token
                         status <- LoggedIn
 
-                        if Screen.currentType <> Screen.Type.SplashScreen then
+                        if Screen.current_type <> Screen.Type.SplashScreen then
                             Notifications.system_feedback (
                                 Icons.connected,
                                 [ name ] %> "notification.network.login",
@@ -220,7 +220,7 @@ module Network =
                     credentials.Token <- ""
                     Logging.Info(sprintf "Login failed: %s" reason)
 
-                    if Screen.currentType <> Screen.Type.SplashScreen then
+                    if Screen.current_type <> Screen.Type.SplashScreen then
                         Notifications.error (%"notification.network.loginfailed", reason)
 
                     Events.login_failed_ev.Trigger reason
