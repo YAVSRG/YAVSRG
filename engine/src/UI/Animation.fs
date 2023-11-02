@@ -28,7 +28,7 @@ module Animation =
                 value <- v
                 time <- 1500.0
 
-        member this.Alpha = int (255.0f * value)
+        member this.Alpha = int (MathF.Round(255.0f * value))
 
         member this.Target
             with get () = target
