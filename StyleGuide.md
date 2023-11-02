@@ -32,5 +32,5 @@ You don't have to care about them in PRs I can just squash with an emoji commit 
 
 ### Code formatting/style
 
-Try to follow [default F# guidelines](https://learn.microsoft.com/en-us/dotnet/fsharp/style-guide/)  
-A lot of the style in the codebase all over the place so don't worry about it too deeply - I will add more guidelines if needed later
+Try to follow the existing format style, but there will soon be a script to run Fantomas formatting on all code so don't worry and just submit the PR :)
+Prefer `snake_case` variable names over `camelCase`
