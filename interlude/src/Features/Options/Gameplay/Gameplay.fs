@@ -299,9 +299,6 @@ type GameplayPage() as this =
             |+ PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerPage))
                 .Pos(790.0f)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
-            |+ PageButton("gameplay.rulesets", (fun () -> Menu.ShowPage Rulesets.FavouritesPage))
-                .Pos(860.0f)
-                .Tooltip(Tooltip.Info("gameplay.rulesets"))
             |+ preview
             |+ presetButtons 1 options.Preset1
             |+ presetButtons 2 options.Preset2

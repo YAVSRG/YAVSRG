@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Import
 
-open System.IO
 open Percyqaz.Common
 open Percyqaz.Json
 open Percyqaz.Flux.Graphics
@@ -165,25 +164,25 @@ type TableCard(id: string, desc: string, table: Table) as this =
         Draw.rect button_bounds Colors.shadow_2.O2
 
         Text.fill_b (
-            Style.font,
-            (match status with
-             | NotInstalled -> Icons.download + " Install"
-             | UpdateAvailable -> Icons.download + " Update available"
-             | MissingCharts -> sprintf "%s Download missing charts (%i)" Icons.download missing
-             | InstallingCharts -> sprintf "%s Installing missing charts (%i)" Icons.download missing
-             | UpToDate -> Icons.check + " Up to date!"),
-            button_bounds.Shrink Style.PADDING,
-            (match status with
-             | InstallingCharts -> Colors.text_cyan_2
-             | NotInstalled -> if this.Focused then Colors.text_yellow_2 else Colors.text
-             | MissingCharts ->
-                 if this.Focused then
-                     Colors.text_yellow_2
-                 else
-                     Colors.text_green_2
-             | UpdateAvailable -> Colors.text_yellow_2
-             | UpToDate -> Colors.text_green),
-            Alignment.CENTER
+            Style.font
+            , match status with
+              | NotInstalled -> Icons.download + " Install"
+              | UpdateAvailable -> Icons.download + " Update available"
+              | MissingCharts -> sprintf "%s Download missing charts (%i)" Icons.download missing
+              | InstallingCharts -> sprintf "%s Installing missing charts (%i)" Icons.download missing
+              | UpToDate -> Icons.check + " Up to date!"
+            , button_bounds.Shrink Style.PADDING
+            , match status with
+              | InstallingCharts -> Colors.text_cyan_2
+              | NotInstalled -> if this.Focused then Colors.text_yellow_2 else Colors.text
+              | MissingCharts ->
+                  if this.Focused then
+                      Colors.text_yellow_2
+                  else
+                      Colors.text_green_2
+              | UpdateAvailable -> Colors.text_yellow_2
+              | UpToDate -> Colors.text_green
+            , Alignment.CENTER
         )
 
     member this.Name = table.Name

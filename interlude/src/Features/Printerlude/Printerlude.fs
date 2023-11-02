@@ -67,7 +67,7 @@ module Printerlude =
 
         let timescale (io: IOContext) (v: float) =
             UI.Screen.timescale <- System.Math.Clamp(v, 0.01, 10.0)
-            io.WriteLine(sprintf "Entering warp speed (%.2f%%)" (Interlude.UI.Screen.timescale * 100.0))
+            io.WriteLine(sprintf "Entering warp speed (%.0f%%)" (UI.Screen.timescale * 100.0))
 
         let export_osz () =
             match Gameplay.Chart.CHART with
@@ -77,8 +77,8 @@ module Printerlude =
                 let beatmap = Conversions.Interlude.toOsu c
                 let exportName = ``osu!``.getBeatmapFilename beatmap
                 let path = get_game_folder "Exports"
-                let beatmapFile = Path.Combine(path, exportName)
-                ``osu!``.saveBeatmapFile beatmapFile beatmap
+                let beatmap_file = Path.Combine(path, exportName)
+                ``osu!``.saveBeatmapFile beatmap_file beatmap
 
                 let target_audio_file =
                     match c.Header.AudioFile with
@@ -107,7 +107,7 @@ module Printerlude =
 
                 use fs = File.Create(Path.Combine(path, Path.ChangeExtension(exportName, ".osz")))
                 use archive = new ZipArchive(fs, ZipArchiveMode.Create, true)
-                archive.CreateEntryFromFile(beatmapFile, Path.GetFileName beatmapFile) |> ignore
+                archive.CreateEntryFromFile(beatmap_file, Path.GetFileName beatmap_file) |> ignore
 
                 match target_audio_file with
                 | Some p -> archive.CreateEntryFromFile(p, Path.GetFileName p) |> ignore
@@ -128,7 +128,7 @@ module Printerlude =
                     | Some p -> File.Delete p
                     | _ -> ()
 
-                    File.Delete beatmapFile
+                    File.Delete beatmap_file
                     Logging.Info "Cleaned up."
                 with err ->
                     Logging.Error("Error while cleaning up after export", err)

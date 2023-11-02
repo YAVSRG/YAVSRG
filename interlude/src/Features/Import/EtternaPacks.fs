@@ -191,9 +191,9 @@ module EtternaPacks =
             )
 
     let tab =
-        let searchContainer =
+        let search_container =
             SearchContainer(
-                (fun searchContainer callback ->
+                (fun search_container callback ->
                     WebServices.download_json (
                         "https://api.etternaonline.com/v2/packs/",
                         fun data ->
@@ -201,17 +201,17 @@ module EtternaPacks =
                             | Some(d: {| data: ResizeArray<EOPack> |}) ->
                                 sync (fun () ->
                                     for p in d.data do
-                                        searchContainer.Items.Add(SMImportCard(p.id, p.attributes))
+                                        search_container.Items.Add(SMImportCard(p.id, p.attributes))
                                 )
                             | None -> ()
 
                             callback ()
                     )
                 ),
-                (fun searchContainer filter -> searchContainer.Items.Filter <- SMImportCard.Filter filter),
+                (fun search_container filter -> search_container.Items.Filter <- SMImportCard.Filter filter),
                 Position = Position.TrimBottom(60.0f)
             )
 
-        StaticContainer(NodeType.Switch(K searchContainer))
-        |+ searchContainer
+        StaticContainer(NodeType.Switch(K search_container))
+        |+ search_container
         |+ Text(%"imports.disclaimer.etterna", Position = Position.SliceBottom(55.0f))

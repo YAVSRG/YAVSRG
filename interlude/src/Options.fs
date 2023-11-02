@@ -330,7 +330,6 @@ module Options =
             Hotkeys.register "preview" (mk Keys.A)
             Hotkeys.register "mods" (mk Keys.S)
             Hotkeys.register "ruleset_switch" (mk Keys.D)
-            Hotkeys.register "ruleset_picker" (shift Keys.D)
             Hotkeys.register "random_chart" (mk Keys.R)
             Hotkeys.register "autoplay" (ctrl Keys.A)
             Hotkeys.register "reload_themes" (Key(Keys.S, (true, true, true)))

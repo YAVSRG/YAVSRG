@@ -42,7 +42,7 @@ type NoteskinCard(data: RepoEntry) as this =
             NotDownloaded
 
     let mutable preview: Sprite option = None
-    let imgFade = Animation.Fade 0.0f
+    let preview_fade = Animation.Fade 0.0f
 
     do
         this
@@ -77,7 +77,7 @@ type NoteskinCard(data: RepoEntry) as this =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        imgFade.Update elapsed_ms
+        preview_fade.Update elapsed_ms
 
     override this.Draw() =
         base.Draw()
@@ -88,7 +88,7 @@ type NoteskinCard(data: RepoEntry) as this =
             let img_bounds =
                 Rect.Box(this.Bounds.CenterX - 160.0f, this.Bounds.Top + 75.0f, 320.0f, 240.0f)
 
-            Draw.sprite img_bounds (Colors.white.O4a imgFade.Alpha) p
+            Draw.sprite img_bounds (Colors.white.O4a preview_fade.Alpha) p
         | None -> ()
 
         Text.fill_b (
@@ -109,7 +109,7 @@ type NoteskinCard(data: RepoEntry) as this =
 
     member this.LoadPreview(img: Bitmap) =
         preview <- Some <| Sprite.upload (img, 1, 1, true)
-        imgFade.Target <- 1.0f
+        preview_fade.Target <- 1.0f
 
     member this.Name = data.Name
 

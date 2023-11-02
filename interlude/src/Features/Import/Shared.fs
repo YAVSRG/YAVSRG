@@ -180,17 +180,17 @@ and SearchContainer(populate: PopulateFunc, handleFilter: FilterFunc, itemheight
     let scroll =
         ScrollContainer.Flow(flow, Margin = Style.PADDING, Position = Position.TrimTop 70.0f)
 
-    let searchBox =
+    let search_box =
         SearchBox(Setting.simple "", (fun (f: Filter) -> handleFilter this f), Position = Position.SliceTop 60.0f)
 
     do
         flow |* SearchContainerLoader(populate this)
-        this |+ searchBox |* scroll
+        this |+ search_box |* scroll
 
     new(populate, handleFilter) = SearchContainer(populate, handleFilter, 80.0f)
 
     member this.Items = flow
-    member private this.SearchBox = searchBox
+    member private this.SearchBox = search_box
 
 type DownloadStatus =
     | NotDownloaded

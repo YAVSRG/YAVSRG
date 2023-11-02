@@ -77,17 +77,17 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
         Draw.rect (this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(20.0f, 0.0f)) Colors.shadow_2.O2
 
         Text.fill_b (
-            Style.font,
-            (match status with
-             | NotInstalled -> Icons.download + " Install"
-             | UpdateAvailable -> Icons.download + " Update available"
-             | UpToDate -> Icons.check + " Installed"),
-            this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.PADDING),
-            (match status with
-             | NotInstalled -> if this.Focused then Colors.text_yellow_2 else Colors.text
-             | UpdateAvailable -> Colors.text_yellow_2
-             | UpToDate -> Colors.text_green),
-            Alignment.CENTER
+            Style.font
+            , match status with
+              | NotInstalled -> Icons.download + " Install"
+              | UpdateAvailable -> Icons.download + " Update available"
+              | UpToDate -> Icons.check + " Installed"
+            , this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.PADDING)
+            , match status with
+              | NotInstalled -> if this.Focused then Colors.text_yellow_2 else Colors.text
+              | UpdateAvailable -> Colors.text_yellow_2
+              | UpToDate -> Colors.text_green
+            , Alignment.CENTER
         )
 
     member this.Name = ruleset.Name

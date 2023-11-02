@@ -12,16 +12,14 @@ open Interlude.UI
 
 module Terminal =
 
-    let private lockObj = obj ()
+    let private LOCK_OBJ = obj ()
 
     let mutable exec_command = fun (c: string) -> ()
 
     module Log =
+
         let mutable private pos = 0
         let mutable private log: ResizeArray<string> = ResizeArray()
-        let upKey = Bind.mk Keys.PageUp
-        let downKey = Bind.mk Keys.PageDown
-        let homeKey = Bind.mk Keys.End
 
         let mutable visible: string seq = []
 
@@ -29,7 +27,7 @@ module Terminal =
 
         let add (s: string) =
             lock
-                lockObj
+                LOCK_OBJ
                 (fun () ->
                     try
                         for line in s.Split('\n', StringSplitOptions.RemoveEmptyEntries) do
@@ -72,24 +70,29 @@ module Terminal =
 
     let add_message (s: string) = Log.add s
 
-    let private currentLine = Setting.simple ""
-    let private sendKey = Bind.mk Keys.Enter
+    let private current_line = Setting.simple ""
+
+    let private log_up_key = Bind.mk Keys.PageUp
+    let private log_down_key = Bind.mk Keys.PageDown
+    let private log_home_key = Bind.mk Keys.End
+
+    let private cmd_up_key = Bind.mk Keys.Up
+    let private cmd_down_key = Bind.mk Keys.Down
+    let private cmd_send_key = Bind.mk Keys.Enter
 
     module private History =
         let mutable private pos = -1
         let mutable private history: string list = []
-        let upKey = Bind.mk Keys.Up
-        let downKey = Bind.mk Keys.Down
 
         let up () =
             if history.Length - 1 > pos then
                 pos <- pos + 1
-                currentLine.Value <- history.[pos]
+                current_line.Value <- history.[pos]
 
         let down () =
             if pos > 0 then
                 pos <- pos - 1
-                currentLine.Value <- history.[pos]
+                current_line.Value <- history.[pos]
 
         let add (l) =
             history <- l :: history
@@ -104,24 +107,24 @@ module Terminal =
     let private show () =
         shown <- true
 
-        let rec addInput () =
+        let rec add_input () =
             Input.set_text_input (
-                currentLine,
+                current_line,
                 fun () ->
                     if shown then
-                        sync addInput
+                        sync add_input
             )
 
-        addInput ()
+        add_input ()
 
-    let dropfile (path: string) =
+    let drop_file (path: string) =
         let path = path.Replace("""\""", """\\""")
-        let v = currentLine.Value
+        let v = current_line.Value
 
         if v.Length = 0 || Char.IsWhiteSpace(v.[v.Length - 1]) then
-            currentLine.Set(sprintf "%s\"%s\"" v path)
+            current_line.Set(sprintf "%s\"%s\"" v path)
         else
-            currentLine.Set(sprintf "%s \"%s\"" v path)
+            current_line.Set(sprintf "%s \"%s\"" v path)
 
     let font =
         lazy
@@ -143,7 +146,7 @@ module Terminal =
 
         Text.draw_b (
             font.Value,
-            "> " + currentLine.Value,
+            "> " + current_line.Value,
             30.0f,
             bounds.Left + 20.0f,
             bounds.Bottom - 50.0f,
@@ -151,7 +154,7 @@ module Terminal =
         )
 
         lock
-            lockObj
+            LOCK_OBJ
             (fun () ->
                 for i, line in Seq.indexed Log.visible do
                     if i < 19 then
@@ -182,22 +185,22 @@ module Terminal =
         else
 
         lock
-            lockObj
+            LOCK_OBJ
             (fun () ->
-                if sendKey.Tapped() && currentLine.Value <> "" then
-                    add_message ("> " + currentLine.Value)
-                    exec_command currentLine.Value
-                    History.add currentLine.Value
+                if cmd_send_key.Tapped() && current_line.Value <> "" then
+                    add_message ("> " + current_line.Value)
+                    exec_command current_line.Value
+                    History.add current_line.Value
                     Log.home ()
-                    currentLine.Value <- ""
-                elif History.upKey.Tapped() then
+                    current_line.Value <- ""
+                elif cmd_up_key.Tapped() then
                     History.up ()
-                elif History.downKey.Tapped() then
+                elif cmd_down_key.Tapped() then
                     History.down ()
-                elif Log.upKey.Tapped() then
+                elif log_up_key.Tapped() then
                     Log.up ()
-                elif Log.downKey.Tapped() then
+                elif log_down_key.Tapped() then
                     Log.down ()
-                elif Log.homeKey.Tapped() then
+                elif log_home_key.Tapped() then
                     Log.home ()
             )

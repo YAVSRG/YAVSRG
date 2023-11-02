@@ -100,7 +100,7 @@ module Mounts =
                     fun () -> Notifications.task_feedback (Icons.add_to_collection, %"notification.import_success", "")
                 )
 
-    let handleStartupImports () =
+    let import_mounts_on_startup () =
         // todo: ingame notification if mount has moved
         match options.OsuMount.Value with
         | Some mount ->
@@ -138,12 +138,12 @@ module Mounts =
                 )
         | None -> ()
 
-    type CreateDialog(mountType: Game, setting: Setting<MountedChartSource option>) as this =
+    type CreateDialog(game: Game, setting: Setting<MountedChartSource option>) as this =
         inherit Dialog()
 
         let text =
             Text(
-                match mountType with
+                match game with
                 | Game.Osu -> %"imports.mount.create.osu.hint"
                 | Game.Stepmania -> %"imports.mount.create.stepmania.hint"
                 | Game.Etterna -> %"imports.mount.create.etterna.hint"
@@ -162,7 +162,7 @@ module Mounts =
             Button(
                 %"imports.mount.create.auto",
                 (fun () ->
-                    match mountType with
+                    match game with
                     | Game.Osu -> osuSongFolder
                     | Game.Stepmania -> stepmaniaPackFolder
                     | Game.Etterna -> etternaPackFolder
@@ -181,7 +181,7 @@ module Mounts =
         do
             dropFunc <-
                 fun path ->
-                    match mountType, path with
+                    match game, path with
                     | Game.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack("osu!", path) |> Some
                     | Game.Osu, _ -> Notifications.error (%"imports.mount.create.osu.error", "")
                     | Game.Stepmania, FolderOfPacks
@@ -217,17 +217,17 @@ module Mounts =
             text.Init this
             button.Init this
 
-    type Control(mountType: Game, setting: Setting<MountedChartSource option>) as this =
+    type Control(game: Game, setting: Setting<MountedChartSource option>) as this =
         inherit Frame(NodeType.Switch(fun _ -> this.WhoShouldFocus))
 
-        let createButton =
+        let create_button =
             Button(
                 sprintf "%s %s" Icons.import_local (%"imports.mount.create"),
-                (fun () -> CreateDialog(mountType, setting).Show()),
+                (fun () -> CreateDialog(game, setting).Show()),
                 Position = Position.SliceBottom(60.0f).Margin 5.0f
             )
 
-        let editButtons =
+        let edit_buttons =
             NavigationContainer.Row<Button>(Position = Position.SliceBottom(60.0f).Margin 5.0f)
             |+ Button(
                 sprintf "%s %s" Icons.edit (%"imports.mount.edit"),
@@ -249,7 +249,7 @@ module Mounts =
         override this.Init(parent: Widget) =
             this
             |+ Text(
-                match mountType with
+                match game with
                 | Game.Osu -> "osu!mania"
                 | Game.Stepmania -> "Stepmania"
                 | Game.Etterna -> "Etterna"
@@ -275,11 +275,11 @@ module Mounts =
             )
 
             base.Init parent
-            createButton.Init this
-            editButtons.Init this
+            create_button.Init this
+            edit_buttons.Init this
 
         member private this.WhoShouldFocus: Widget =
-            if setting.Value.IsSome then editButtons else createButton
+            if setting.Value.IsSome then edit_buttons else create_button
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)

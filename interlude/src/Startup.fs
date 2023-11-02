@@ -211,7 +211,7 @@ module Startup =
                     Transitions.Flags.Default
 
         Utils.AutoUpdate.check_for_updates ()
-        Mounts.handleStartupImports ()
+        Mounts.import_mounts_on_startup ()
 
         Logging.Subscribe(fun (level, main, details) -> sprintf "[%A] %s" level main |> Terminal.add_message)
         |> ignore
