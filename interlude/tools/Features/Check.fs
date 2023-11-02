@@ -52,7 +52,7 @@ module Check =
 
         for filename, file_contents in walk_fs_files INTERLUDE_SOURCE_PATH do
 
-            for position, m in matches """ %"([a-z\-_\.]*)" """ file_contents do
+            for position, m in matches """ [^%]%"([a-z\-_\.]*)" """ file_contents do
                 find m (sprintf "%s (position %i)" filename position)
 
             for position, m in matches """ %> "([a-z\-_\.]*)" """ file_contents do
@@ -70,10 +70,10 @@ module Check =
             for position, m in matches """ CaseSelector\(\s*"([a-z\-_\.]*)" """ file_contents do
                 find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
 
-            for position, m in matches """ PageButton.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
+            for position, m in matches """ PageButton\s*.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
                 find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
 
-            for position, m in matches """ Tooltip.Info\("([a-z\-_\.]*)" """ file_contents do
+            for position, m in matches """ Tooltip\s*.Info\("([a-z\-_\.]*)" """ file_contents do
                 find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
                 find (sprintf "%s.tooltip" m) (sprintf "%s (position %i)" filename position)
 
