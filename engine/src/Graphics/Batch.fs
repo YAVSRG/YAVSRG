@@ -110,7 +110,7 @@ module Batch =
 module Stencil =
     let mutable depth = 0
 
-    let create (alpha_masking) =
+    let start_stencilling (alpha_masking) =
         Batch.draw ()
 
         if depth = 0 then
@@ -124,7 +124,7 @@ module Stencil =
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
         depth <- depth + 1
 
-    let draw () =
+    let start_drawing () =
         Batch.draw ()
 
         GL.ColorMask(true, true, true, true)
