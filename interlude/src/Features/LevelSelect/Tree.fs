@@ -420,10 +420,14 @@ module Tree =
                 }
 
             match options.LibraryMode.Value with
-            | LibraryMode.Collections -> getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
-            | LibraryMode.Table -> getTableGroups sortBy.[options.ChartSortMode.Value] filter
+            | LibraryMode.Collections -> get_collection_groups sorting_modes.[options.ChartSortMode.Value] filter
+            | LibraryMode.Table -> get_table_groups sorting_modes.[options.ChartSortMode.Value] filter
             | LibraryMode.All ->
-                getGroups ctx groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
+                get_groups
+                    ctx
+                    grouping_modes.[options.ChartGroupMode.Value]
+                    sorting_modes.[options.ChartSortMode.Value]
+                    filter
         // if exactly 1 result, switch to it
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()
@@ -438,25 +442,25 @@ module Tree =
 
         groups <-
             library_groups.Keys
-            |> Seq.sort
+            |> Seq.sortBy(fun (index, group_name) -> (index, group_name.ToLower()))
             |> if options.ChartGroupReverse.Value then Seq.rev else id
-            |> Seq.map (fun (sortIndex, groupName) ->
-                library_groups.[(sortIndex, groupName)].Charts
+            |> Seq.map (fun (index, group_name) ->
+                library_groups.[(index, group_name)].Charts
                 |> Seq.map (fun (cc, context) ->
                     match Chart.CACHE_DATA with
                     | None -> ()
                     | Some c ->
                         if c.Key = cc.Key && (context = LibraryContext.None || context = Chart.LIBRARY_CTX) then
                             selectedChart <- c.Key
-                            selectedGroup <- groupName
+                            selectedGroup <- group_name
 
-                    let i = ChartItem(groupName, cc, context)
+                    let i = ChartItem(group_name, cc, context)
                     lastItem <- Some i
                     i
                 )
                 |> if options.ChartSortReverse.Value then Seq.rev else id
                 |> ResizeArray
-                |> fun l -> GroupItem(groupName, l, library_groups.[(sortIndex, groupName)].Context)
+                |> fun l -> GroupItem(group_name, l, library_groups.[(index, group_name)].Context)
             )
             |> List.ofSeq
 
