@@ -91,9 +91,9 @@ module Suggestion =
             recommended_recently <- Set.add res.Hash recommended_recently
             Some res
 
-    let get_random (filter: Filter) =
+    let get_random (filter: Filter) : CachedChart option =
         let rand = Random()
 
         let charts = Filter.apply filter Library.cache.Entries.Values |> Array.ofSeq
 
-        charts.[rand.Next charts.Length]
+        if charts.Length > 0 then Some charts.[rand.Next charts.Length] else None
