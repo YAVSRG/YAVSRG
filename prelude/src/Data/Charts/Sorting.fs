@@ -15,7 +15,7 @@ module Sorting =
     open Prelude.Data.Charts.Caching
     open FParsec
 
-    let private firstCharacter (s: string) =
+    let private first_character (s: string) =
         if s.Length = 0 then
             "?"
         elif Char.IsLetterOrDigit s.[0] then
@@ -23,34 +23,34 @@ module Sorting =
         else
             "?"
 
-    let dateLastPlayed (c: CachedChart, _) =
+    let format_date_last_played (c: CachedChart, _) =
         match Data.Scores.Scores.get c.Hash with
         | Some d ->
-            let daysAgo = (DateTime.Today - d.LastPlayed).TotalDays
+            let days_ago = (DateTime.Today - d.LastPlayed).TotalDays
 
-            if daysAgo < 0 then 0, "Today"
-            elif daysAgo < 1 then 1, "Yesterday"
-            elif daysAgo < 7 then 2, "This week"
-            elif daysAgo < 30 then 3, "This month"
-            elif daysAgo < 60 then 4, "A month ago"
-            elif daysAgo < 90 then 5, "2 months ago"
-            elif daysAgo < 120 then 6, "3 months ago"
-            elif daysAgo < 210 then 7, "6 months ago"
-            elif daysAgo < 3600 then 8, "A long time ago"
+            if days_ago < 0 then 0, "Today"
+            elif days_ago < 1 then 1, "Yesterday"
+            elif days_ago < 7 then 2, "This week"
+            elif days_ago < 30 then 3, "This month"
+            elif days_ago < 60 then 4, "A month ago"
+            elif days_ago < 90 then 5, "2 months ago"
+            elif days_ago < 120 then 6, "3 months ago"
+            elif days_ago < 210 then 7, "6 months ago"
+            elif days_ago < 3600 then 8, "A long time ago"
             else 9, "Never"
         | None -> 9, "Never"
 
-    let dateInstalled (c: CachedChart, _) =
-        let daysAgo = (DateTime.Today - c.DateAdded).TotalDays
+    let format_date_added (c: CachedChart, _) =
+        let days_ago = (DateTime.Today - c.DateAdded).TotalDays
 
-        if daysAgo < 0 then 0, "Today"
-        elif daysAgo < 1 then 1, "Yesterday"
-        elif daysAgo < 7 then 2, "This week"
-        elif daysAgo < 30 then 3, "This month"
-        elif daysAgo < 60 then 4, "A month ago"
-        elif daysAgo < 90 then 5, "2 months ago"
-        elif daysAgo < 120 then 6, "3 months ago"
-        elif daysAgo < 210 then 7, "6 months ago"
+        if days_ago < 0 then 0, "Today"
+        elif days_ago < 1 then 1, "Yesterday"
+        elif days_ago < 7 then 2, "This week"
+        elif days_ago < 30 then 3, "This month"
+        elif days_ago < 60 then 4, "A month ago"
+        elif days_ago < 90 then 5, "2 months ago"
+        elif days_ago < 120 then 6, "3 months ago"
+        elif days_ago < 210 then 7, "6 months ago"
         else 8, "A long time ago"
 
     type GroupContext =
@@ -101,7 +101,7 @@ module Sorting =
         else
             false
 
-    let gradeAchieved (c: CachedChart, ctx: GroupContext) =
+    let grade_achieved (c: CachedChart, ctx: GroupContext) =
         match Data.Scores.Scores.get c.Hash with
         | Some d ->
             if d.PersonalBests.ContainsKey ctx.RulesetId then
@@ -112,7 +112,7 @@ module Sorting =
                 -2, "No grade achieved"
         | None -> -2, "No grade achieved"
 
-    let lampAchieved (c: CachedChart, ctx: GroupContext) =
+    let lamp_achieved (c: CachedChart, ctx: GroupContext) =
         match Data.Scores.Scores.get c.Hash with
         | Some d ->
             if d.PersonalBests.ContainsKey ctx.RulesetId then
@@ -125,18 +125,18 @@ module Sorting =
 
     type GroupMethod = CachedChart * GroupContext -> int * string
 
-    let groupBy: IDictionary<string, GroupMethod> =
+    let grouping_modes: IDictionary<string, GroupMethod> =
         dict
             [
                 "none", (fun (c, _) -> 0, "No grouping")
                 "pack", (fun (c, _) -> 0, c.Folder)
-                "date_played", dateLastPlayed
-                "date_installed", dateInstalled
-                "grade", gradeAchieved
-                "lamp", lampAchieved
-                "title", (fun (c, _) -> 0, firstCharacter c.Title)
-                "artist", (fun (c, _) -> 0, firstCharacter c.Artist)
-                "creator", (fun (c, _) -> 0, firstCharacter c.Creator)
+                "date_played", format_date_last_played
+                "date_installed", format_date_added
+                "grade", grade_achieved
+                "lamp", lamp_achieved
+                "title", (fun (c, _) -> 0, first_character c.Title)
+                "artist", (fun (c, _) -> 0, first_character c.Artist)
+                "creator", (fun (c, _) -> 0, first_character c.Creator)
                 "keymode", (fun (c, _) -> c.Keys, c.Keys.ToString() + "K")
                 "patterns",
                 fun (c, _) ->
@@ -145,11 +145,11 @@ module Sorting =
                     | false, _ -> -1, "Not analysed"
             ]
 
-    let private compareBy (f: CachedChart -> IComparable) =
+    let private compare_by (f: CachedChart -> IComparable) =
         fun a b -> f(fst a).CompareTo <| f (fst b)
 
-    let private thenCompareBy (f: CachedChart -> IComparable) cmp =
-        let cmp2 = compareBy f
+    let private then_compare_by (f: CachedChart -> IComparable) cmp =
+        let cmp2 = compare_by f
 
         fun a b ->
             match cmp a b with
@@ -158,18 +158,18 @@ module Sorting =
 
     type SortMethod = Comparison<CachedChart * Collections.LibraryContext>
 
-    let sortBy: IDictionary<string, SortMethod> =
+    let sorting_modes: IDictionary<string, SortMethod> =
         dict
             [
-                "difficulty", Comparison(compareBy (fun x -> x.Physical))
+                "difficulty", Comparison(compare_by (fun x -> x.Physical))
                 "bpm",
                 Comparison(
-                    compareBy (fun x -> let (a, b) = x.BPM in (1f / a, 1f / b))
-                    |> thenCompareBy (fun x -> x.Physical)
+                    compare_by (fun x -> let (a, b) = x.BPM in (1f / a, 1f / b))
+                    |> then_compare_by (fun x -> x.Physical)
                 )
-                "title", Comparison(compareBy (fun x -> x.Title) |> thenCompareBy (fun x -> x.Physical))
-                "artist", Comparison(compareBy (fun x -> x.Artist) |> thenCompareBy (fun x -> x.Physical))
-                "creator", Comparison(compareBy (fun x -> x.Creator) |> thenCompareBy (fun x -> x.Physical))
+                "title", Comparison(compare_by (fun x -> x.Title) |> then_compare_by (fun x -> x.Physical))
+                "artist", Comparison(compare_by (fun x -> x.Artist) |> then_compare_by (fun x -> x.Physical))
+                "creator", Comparison(compare_by (fun x -> x.Creator) |> then_compare_by (fun x -> x.Physical))
             ]
 
     type FilterPart =
@@ -260,7 +260,12 @@ module Sorting =
 
     type LexSortedGroups = Dictionary<int * string, Group>
 
-    let getGroups (ctx: GroupContext) (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+    let get_groups
+        (ctx: GroupContext)
+        (grouping: GroupMethod)
+        (sorting: SortMethod)
+        (filter: Filter)
+        : LexSortedGroups =
 
         let groups = new Dictionary<int * string, Group>()
 
@@ -288,7 +293,7 @@ module Sorting =
 
         groups
 
-    let getCollectionGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+    let get_collection_groups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
 
         let groups = new Dictionary<int * string, Group>()
 
@@ -356,7 +361,7 @@ module Sorting =
 
         groups
 
-    let getTableGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+    let get_table_groups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
 
         match Table.current () with
