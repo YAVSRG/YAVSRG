@@ -143,14 +143,14 @@ module Transitions =
                 (Quad.color Color.Transparent)
                 Sprite.DefaultQuad
 
-        Stencil.create false
+        Stencil.start_stencilling false
 
         for x in 0 .. (Viewport.vwidth / s |> float |> Math.Ceiling |> int) do
             for y in 0 .. (Viewport.vheight / s |> float |> Math.Ceiling |> int) do
                 diamond (s * float32 x) (s * float32 y)
                 diamond (0.5f * s + s * float32 x) (0.5f * s + s * float32 y)
 
-        Stencil.draw ()
+        Stencil.start_drawing ()
         Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
         Stencil.finish ()
 
@@ -195,12 +195,12 @@ module Transitions =
                     (Quad.color Color.Transparent)
                     Sprite.DefaultQuad
 
-        Stencil.create false
+        Stencil.start_stencilling false
 
         for i = 0 to number_of_stripes - 1 do
             stripe i
 
-        Stencil.draw ()
+        Stencil.start_drawing ()
         Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
         Stencil.finish ()
 

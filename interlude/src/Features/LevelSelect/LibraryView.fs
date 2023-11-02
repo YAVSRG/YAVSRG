@@ -84,7 +84,7 @@ type LibraryModeSettings() =
 
     let group_selector =
         ModeDropdown(
-            groupBy.Keys
+            grouping_modes.Keys
             |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.groupby." + id))),
             "Group",
             options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
@@ -161,7 +161,7 @@ type LibraryModeSettings() =
             .Tooltip(Tooltip.Info("levelselect.librarymode", "library_mode"))
 
         |+ ModeDropdown(
-            sortBy.Keys
+            sorting_modes.Keys
             |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.sortby." + id))),
             "Sort",
             options.ChartSortMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),

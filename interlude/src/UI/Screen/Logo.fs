@@ -74,7 +74,7 @@ module Logo =
                         (Quad.color Colors.blue)
                         Sprite.DefaultQuad
 
-                    Stencil.create (true)
+                    Stencil.start_stencilling (true)
 
                     Draw.quad
                         (Quad.createv
@@ -107,7 +107,7 @@ module Logo =
 
                     Draw.sprite breathe_bounds Colors.white (Content.getTexture "logo")
 
-                    Stencil.draw ()
+                    Stencil.start_drawing ()
                     //chart background
                     Draw.rect breathe_bounds Colors.cyan_accent
                     let rain = Content.getTexture "rain"

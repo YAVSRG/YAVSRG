@@ -28,17 +28,20 @@ type ScrollTo =
 module Tree =
 
     /// Group's name = this string => Selected chart is in this group
-    let mutable private selectedGroup = ""
+    let mutable private selected_group = ""
     /// Chart's filepath = this string && contextIndex match => It's the selected chart
-    let mutable private selectedChart = ""
+    let mutable private selected_chart = ""
     /// Group's name = this string => That group is expanded in level select
     /// Only one group can be expanded at a time, and it is independent of the "selected" group
-    let mutable private expandedGroup = ""
+    let mutable private expanded_group = ""
 
-    let private scrollPos = Animation.Fade 300.0f
+    let private scroll_pos = Animation.Fade 300.0f
 
     let private scroll (amount: float32) =
-        scrollPos.Target <- scrollPos.Value + amount
+        scroll_pos.Target <- scroll_pos.Value + amount
+
+    /// Set this value to have it "consumed" in the next frame by a level select item with sufficient knowledge to do so
+    let mutable private scroll_to = ScrollTo.Nothing
 
     let mutable private currently_drag_scrolling = false
     let mutable private drag_scroll_distance = 0.0f
@@ -50,36 +53,33 @@ module Tree =
 
     /// Increment the flag to recalculate cached data on tree items
     /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
-    let mutable private cacheFlag = 0
+    let mutable private cache_flag = 0
 
     // future todo: different color settings?
-    let private colorFunc: Bests option -> Color =
+    let private color_func: Bests option -> Color =
         function
         | None -> Colors.grey_2.O2
         | Some b -> Colors.white.O2
 
-    /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
-    let mutable private scrollTo = ScrollTo.Nothing
-
-    let private getPb (bests: PersonalBests<'T>) (colorFunc: 'T -> Color) (format: 'T -> string) =
+    let private get_pb (bests: PersonalBests<'T>) (color_func: 'T -> Color) (format: 'T -> string) =
         match PersonalBests.get_best_above_with_rate rate.Value bests with
-        | Some(v, r) -> Some(v, r, colorFunc v, format v)
+        | Some(v, r) -> Some(v, r, color_func v, format v)
         | None ->
 
         match PersonalBests.get_best_below_with_rate rate.Value bests with
         | Some(v, r) -> Some(v, r, Colors.white.O2, format v)
         | None -> None
 
-    let switchChart (cc, context, groupName) =
+    let switch_chart (cc, context, group_name) =
         if Transitions.active then
             ()
         else
             Chart.change (cc, context)
             Selection.clear ()
-            selectedChart <- cc.Key
-            expandedGroup <- groupName
-            selectedGroup <- groupName
-            scrollTo <- ScrollTo.Chart
+            selected_chart <- cc.Key
+            expanded_group <- group_name
+            selected_group <- group_name
+            scroll_to <- ScrollTo.Chart
 
     [<AbstractClass>]
     type private TreeItem() =
@@ -110,32 +110,32 @@ module Tree =
     let CHART_HEIGHT = 90.0f
     let GROUP_HEIGHT = 65.0f
 
-    type private ChartItem(groupName: string, cc: CachedChart, context: LibraryContext) =
+    type private ChartItem(group_name: string, cc: CachedChart, context: LibraryContext) =
         inherit TreeItem()
 
         let hover = Animation.Fade 0.0f
-        let mutable localCacheFlag = -1
+        let mutable last_cached_flag = -1
         let mutable color = Color.Transparent
-        let mutable chartData = None
+        let mutable chart_save_data = None
         let mutable personal_bests: Bests option = None
         let mutable grade = None
         let mutable lamp = None
         let mutable markers = ""
 
-        let updateCachedInfo () =
-            localCacheFlag <- cacheFlag
+        let update_cached_info () =
+            last_cached_flag <- cache_flag
 
-            if chartData.IsNone then
-                chartData <- Scores.get cc.Hash
+            if chart_save_data.IsNone then
+                chart_save_data <- Scores.get cc.Hash
 
-            match chartData with
+            match chart_save_data with
             | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
                 personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
-                grade <- getPb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName
-                lamp <- getPb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
+                grade <- get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName
+                lamp <- get_pb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
             | _ -> ()
 
-            color <- colorFunc personal_bests
+            color <- color_func personal_bests
 
             markers <-
                 if options.LibraryMode.Value <> LibraryMode.Collections then
@@ -145,7 +145,7 @@ module Tree =
                     | None -> ""
                 else
                     ""
-                + match chartData with
+                + match chart_save_data with
                   | Some c when c.Comment <> "" -> Icons.comment
                   | _ -> ""
 
@@ -153,13 +153,13 @@ module Tree =
             Rect.Create(Viewport.vwidth * 0.4f, top, Viewport.vwidth, top + CHART_HEIGHT)
 
         override this.Selected =
-            selectedChart = cc.Key
+            selected_chart = cc.Key
             && (context = LibraryContext.None || Chart.LIBRARY_CTX = context)
 
         override this.Spacing = 5.0f
         member this.Chart = cc
 
-        member this.Select() = switchChart (cc, context, groupName)
+        member this.Select() = switch_chart (cc, context, group_name)
 
         member private this.OnDraw(bounds: Rect) =
             let {
@@ -180,22 +180,22 @@ module Tree =
                  else
                      Colors.shadow_1.O2)
 
-            let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
+            let stripe_length = (right - left) * (0.4f + 0.6f * hover.Value)
 
             Draw.quad
                 (Quad.create
                  <| new Vector2(left, top)
-                 <| new Vector2(left + stripeLength, top)
-                 <| new Vector2(left + stripeLength, bottom - 25.0f)
+                 <| new Vector2(left + stripe_length, top)
+                 <| new Vector2(left + stripe_length, bottom - 25.0f)
                  <| new Vector2(left, bottom - 25.0f))
                 (struct (accent, Color.Transparent, Color.Transparent, accent))
                 Sprite.DefaultQuad
 
             let border = bounds.Expand(5.0f, 0.0f)
-            let borderColor = if this.Selected then !*Palette.LIGHT else color
+            let border_color = if this.Selected then !*Palette.LIGHT else color
 
-            if borderColor.A > 0uy then
-                Draw.rect (border.SliceLeft 5.0f) borderColor
+            if border_color.A > 0uy then
+                Draw.rect (border.SliceLeft 5.0f) border_color
 
             // draw pbs
             let disp (data: 'T * float32 * Color * string) (pos: float32) =
@@ -253,12 +253,12 @@ module Tree =
 
             Text.draw_aligned_b (Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
-            if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
+            if Comments.fade.Value > 0.01f && chart_save_data.IsSome && chart_save_data.Value.Comment <> "" then
                 Draw.rect bounds (Palette.color (Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
 
                 Text.fill_b (
                     Style.font,
-                    chartData.Value.Comment,
+                    chart_save_data.Value.Comment,
                     bounds.Shrink(30.0f, 15.0f),
                     (Colors.white.O4a Comments.fade.Alpha, Colors.shadow_1.O4a Comments.fade.Alpha),
                     Alignment.CENTER
@@ -269,8 +269,8 @@ module Tree =
 
         member private this.OnUpdate(origin, bounds, elapsed_ms) =
 
-            if localCacheFlag < cacheFlag then
-                updateCachedInfo ()
+            if last_cached_flag < cache_flag then
+                update_cached_info ()
 
             if Mouse.hover bounds then
                 hover.Target <- 1.0f
@@ -287,9 +287,9 @@ module Tree =
             hover.Update(elapsed_ms) |> ignore
 
         member this.Update(top, origin, originB, elapsed_ms) =
-            if scrollTo = ScrollTo.Chart && groupName = selectedGroup && this.Selected then
+            if scroll_to = ScrollTo.Chart && group_name = selected_group && this.Selected then
                 scroll (-top + 500.0f)
-                scrollTo <- ScrollTo.Nothing
+                scroll_to <- ScrollTo.Nothing
 
             this.CheckBounds(top, origin, originB, (fun b -> this.OnUpdate(origin, b, elapsed_ms)))
 
@@ -299,11 +299,11 @@ module Tree =
         override this.Bounds(top) =
             Rect.Create(Viewport.vwidth * 0.5f, top, Viewport.vwidth - 15.0f, top + GROUP_HEIGHT)
 
-        override this.Selected = selectedGroup = name
+        override this.Selected = selected_group = name
         override this.Spacing = 20.0f
 
         member this.Items = items
-        member this.Expanded = expandedGroup = name
+        member this.Expanded = expanded_group = name
 
         member this.SelectFirst() = items.First().Select()
         member this.SelectLast() = items.Last().Select()
@@ -328,14 +328,14 @@ module Tree =
                 let h = CHART_HEIGHT + 5.0f
 
                 let mutable index =
-                    if scrollTo <> ScrollTo.Nothing then
+                    if scroll_to <> ScrollTo.Nothing then
                         0
                     else
                         (origin - b) / h |> floor |> int |> max 0
 
                 let mutable p = b + float32 index * h
 
-                while (scrollTo <> ScrollTo.Nothing || p < originB) && index < items.Count do
+                while (scroll_to <> ScrollTo.Nothing || p < originB) && index < items.Count do
                     p <- items.[index].Draw(p, origin, originB)
                     index <- index + 1
 
@@ -360,24 +360,24 @@ module Tree =
             if Mouse.hover bounds then
                 if this.LeftClick(origin) then
                     if this.Expanded then
-                        expandedGroup <- ""
+                        expanded_group <- ""
                     else
-                        (expandedGroup <- name
-                         scrollTo <- ScrollTo.Pack name)
+                        (expanded_group <- name
+                         scroll_to <- ScrollTo.Pack name)
                 elif this.RightClick(origin) then
                     GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
                 elif (%%"delete").Tapped() then
                     GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
 
         member this.Update(top, origin, originB, elapsed_ms) =
-            match scrollTo with
+            match scroll_to with
             | ScrollTo.Pack s when s = name ->
                 if this.Expanded then
                     scroll (-top + origin + 185.0f)
                 else
                     scroll (-top + origin + 400.0f)
 
-                scrollTo <- ScrollTo.Nothing
+                scroll_to <- ScrollTo.Nothing
             | _ -> ()
 
             let b =
@@ -387,14 +387,14 @@ module Tree =
                 let h = CHART_HEIGHT + 5.0f
 
                 let mutable index =
-                    if scrollTo <> ScrollTo.Nothing then
+                    if scroll_to <> ScrollTo.Nothing then
                         0
                     else
                         (origin - b) / h |> floor |> int |> max 0
 
                 let mutable p = b + float32 index * h
 
-                while (scrollTo <> ScrollTo.Nothing || p < originB) && index < items.Count do
+                while (scroll_to <> ScrollTo.Nothing || p < originB) && index < items.Count do
                     p <- items.[index].Update(p, origin, originB, elapsed_ms)
                     index <- index + 1
 
@@ -405,8 +405,8 @@ module Tree =
 
     let mutable filter: Filter = []
     let mutable private groups: GroupItem list = []
-    let mutable private lastItem: ChartItem option = None
-    let mutable isEmpty = false
+    let mutable private last_item: ChartItem option = None
+    let mutable is_empty = false
 
 
     let refresh () =
@@ -435,10 +435,10 @@ module Tree =
             if library_groups.[g].Charts.Count = 1 then
                 let cc, context = library_groups.[g].Charts.[0]
 
-                if cc.Key <> selectedChart then
-                    switchChart (cc, context, snd g)
+                if cc.Key <> selected_chart then
+                    switch_chart (cc, context, snd g)
         // build groups ui
-        lastItem <- None
+        last_item <- None
 
         groups <-
             library_groups.Keys
@@ -451,11 +451,11 @@ module Tree =
                     | None -> ()
                     | Some c ->
                         if c.Key = cc.Key && (context = LibraryContext.None || context = Chart.LIBRARY_CTX) then
-                            selectedChart <- c.Key
-                            selectedGroup <- group_name
+                            selected_chart <- c.Key
+                            selected_group <- group_name
 
                     let i = ChartItem(group_name, cc, context)
-                    lastItem <- Some i
+                    last_item <- Some i
                     i
                 )
                 |> if options.ChartSortReverse.Value then Seq.rev else id
@@ -464,18 +464,18 @@ module Tree =
             )
             |> List.ofSeq
 
-        isEmpty <- List.isEmpty groups
-        cacheFlag <- 0
-        expandedGroup <- selectedGroup
-        scrollTo <- ScrollTo.Chart
+        is_empty <- List.isEmpty groups
+        cache_flag <- 0
+        expanded_group <- selected_group
+        scroll_to <- ScrollTo.Chart
         click_cooldown <- 500.0
 
     do
         LevelSelect.on_refresh_all.Add refresh
-        LevelSelect.on_refresh_details.Add(fun () -> cacheFlag <- cacheFlag + 1)
+        LevelSelect.on_refresh_details.Add(fun () -> cache_flag <- cache_flag + 1)
 
     let previous () =
-        match lastItem with
+        match last_item with
         | Some l ->
             let mutable searching = true
             let mutable last = l
@@ -493,26 +493,26 @@ module Tree =
         | None -> ()
 
     let next () =
-        match lastItem with
+        match last_item with
         | Some l ->
             let mutable found = false
-            let mutable goNext = l.Selected
+            let mutable select_the_next_one = l.Selected
 
             for g in groups do
                 for c in g.Items do
-                    if goNext then
+                    if select_the_next_one then
                         c.Select()
-                        goNext <- false
+                        select_the_next_one <- false
                         found <- true
                     elif c.Selected then
-                        goNext <- true
+                        select_the_next_one <- true
 
             if not found then
                 groups.First().Items.First().Select()
         | None -> ()
 
-    let previousGroup () =
-        match lastItem with
+    let previous_group () =
+        match last_item with
         | Some _ ->
             let mutable looping = true
             let mutable last = groups.Last()
@@ -525,113 +525,116 @@ module Tree =
                     last <- g
         | None -> ()
 
-    let nextGroup () =
-        match lastItem with
+    let next_group () =
+        match last_item with
         | Some _ ->
-            let mutable goNext = groups.Last().Selected
+            let mutable select_the_next_one = groups.Last().Selected
 
             for g in groups do
-                if goNext then
+                if select_the_next_one then
                     g.SelectFirst()
-                    goNext <- false
+                    select_the_next_one <- false
                 elif g.Selected then
-                    goNext <- true
+                    select_the_next_one <- true
         | None -> ()
 
-    let beginGroup () =
+    let top_of_group () =
         for g in groups do
             if g.Selected then
                 g.SelectFirst()
 
-    let endGroup () =
+    let bottom_of_group () =
         for g in groups do
             if g.Selected then
                 g.SelectLast()
 
-    let begin_dragScroll () =
+    let start_drag_scroll () =
         currently_drag_scrolling <- true
         drag_scroll_position <- Mouse.y ()
         drag_scroll_distance <- 0.0f
 
-    let finish_dragScroll () = currently_drag_scrolling <- false
+    let finish_drag_scroll () = currently_drag_scrolling <- false
 
-    let dragScroll (origin, total_height, tree_height) =
+    let update_drag_scroll (origin, total_height, tree_height) =
         let d = Mouse.y () - drag_scroll_position
         drag_scroll_position <- Mouse.y ()
         drag_scroll_distance <- drag_scroll_distance + abs d
 
         if Mouse.held Mouse.RIGHT then
             if drag_scroll_distance > DRAG_THRESHOLD then
-                scrollPos.Target <- -(Mouse.y () - origin) / total_height * tree_height
+                scroll_pos.Target <- -(Mouse.y () - origin) / total_height * tree_height
         elif Mouse.held Mouse.LEFT then
             if drag_scroll_distance > DRAG_THRESHOLD then
-                scrollPos.Target <- scrollPos.Target + d * DRAG_LEFTCLICK_SCALE
+                scroll_pos.Target <- scroll_pos.Target + d * DRAG_LEFTCLICK_SCALE
         else
-            finish_dragScroll ()
+            finish_drag_scroll ()
 
     let update (origin: float32, originB: float32, elapsed_ms: float) =
-        scrollPos.Update(elapsed_ms) |> ignore
+        scroll_pos.Update(elapsed_ms) |> ignore
 
         if Dialog.exists () then
             ()
         else
 
-            let bottomEdge =
-                List.fold (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsed_ms)) scrollPos.Value groups
+            let bottom_edge =
+                List.fold (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsed_ms)) scroll_pos.Value groups
 
             let total_height = originB - origin
-            let tree_height = bottomEdge - scrollPos.Value
+            let tree_height = bottom_edge - scroll_pos.Value
 
             let my = Mouse.y ()
 
             if currently_drag_scrolling then
-                dragScroll (origin, total_height, tree_height)
+                update_drag_scroll (origin, total_height, tree_height)
             elif my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
-                begin_dragScroll ()
+                start_drag_scroll ()
 
             if click_cooldown > 0.0 then
                 click_cooldown <- click_cooldown - elapsed_ms
 
-            if (%%"up").Tapped() && expandedGroup <> "" then
-                scrollTo <- ScrollTo.Pack expandedGroup
-                expandedGroup <- ""
+            if (%%"up").Tapped() && expanded_group <> "" then
+                scroll_to <- ScrollTo.Pack expanded_group
+                expanded_group <- ""
 
-            if (%%"down").Tapped() && expandedGroup = "" && selectedGroup <> "" then
-                expandedGroup <- selectedGroup
-                scrollTo <- ScrollTo.Pack expandedGroup
+            if (%%"down").Tapped() && expanded_group = "" && selected_group <> "" then
+                expanded_group <- selected_group
+                scroll_to <- ScrollTo.Pack expanded_group
             elif (%%"context_menu").Tapped() && Chart.CACHE_DATA.IsSome then
                 ChartContextMenu(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX).Show()
 
             let lo = total_height - tree_height - origin
             let hi = 20.0f + origin
-            scrollPos.Target <- min hi (max lo (scrollPos.Target + Mouse.scroll () * 100.0f))
+            scroll_pos.Target <- min hi (max lo (scroll_pos.Target + Mouse.scroll () * 100.0f))
 
-            if scrollPos.Value < lo then
-                scrollPos.Value <- lo
-            elif scrollPos.Value > hi then
-                scrollPos.Value <- hi
+            if scroll_pos.Value < lo then
+                scroll_pos.Value <- lo
+            elif scroll_pos.Value > hi then
+                scroll_pos.Value <- hi
 
     let draw (origin: float32, originB: float32) =
-        Stencil.create false
-        Draw.rect (Rect.Create(0.0f, origin, Viewport.vwidth, originB)) Color.Transparent
-        Stencil.draw ()
 
-        let bottomEdge =
-            List.fold (fun t (i: GroupItem) -> i.Draw(t, origin, originB)) scrollPos.Value groups
+        Stencil.start_stencilling false
+
+        Draw.rect (Rect.Create(0.0f, origin, Viewport.vwidth, originB)) Color.Transparent
+
+        Stencil.start_drawing ()
+
+        let bottom_edge =
+            List.fold (fun t (i: GroupItem) -> i.Draw(t, origin, originB)) scroll_pos.Value groups
 
         Stencil.finish ()
 
         let total_height = originB - origin
-        let tree_height = bottomEdge - scrollPos.Value
+        let tree_height = bottom_edge - scroll_pos.Value
         let lb = total_height - tree_height - origin
         let ub = 20.0f + origin
-        let scrollPos = -(scrollPos.Value - ub) / (ub - lb) * (total_height - 40.0f)
+        let scroll_bar_pos = -(scroll_pos.Value - ub) / (ub - lb) * (total_height - 40.0f)
 
         Draw.rect
             (Rect.Create(
                 Viewport.vwidth - 10.0f,
-                origin + 10.0f + scrollPos,
+                origin + 10.0f + scroll_bar_pos,
                 Viewport.vwidth - 5.0f,
-                origin + 30.0f + scrollPos
+                origin + 30.0f + scroll_bar_pos
             ))
             Color.White

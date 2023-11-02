@@ -48,21 +48,21 @@ type LevelSelectScreen() =
             if options.AdvancedRecommendations.Value && Chart.CACHE_DATA.IsSome then
                 match Suggestion.get_suggestion Chart.CHART.Value Chart.CACHE_DATA.Value Tree.filter with
                 | Some c ->
-                    Tree.switchChart (c, LibraryContext.None, "")
+                    Tree.switch_chart (c, LibraryContext.None, "")
                     refresh ()
                 | None -> () // todo: notification when no chart found
             else
                 match Suggestion.get_random Tree.filter with
                 | Some c ->
-                    Tree.switchChart (c, LibraryContext.None, "")
+                    Tree.switch_chart (c, LibraryContext.None, "")
                     refresh ()
                 | None -> () // todo: notification when no chart found
 
     override this.Init(parent: Widget) =
         base.Init parent
 
-        Setting.app (fun s -> if sortBy.ContainsKey s then s else "title") options.ChartSortMode
-        Setting.app (fun s -> if groupBy.ContainsKey s then s else "pack") options.ChartGroupMode
+        Setting.app (fun s -> if sorting_modes.ContainsKey s then s else "title") options.ChartSortMode
+        Setting.app (fun s -> if grouping_modes.ContainsKey s then s else "pack") options.ChartGroupMode
 
         this
         |+ Text(
@@ -114,7 +114,7 @@ type LevelSelectScreen() =
             .Tooltip(Tooltip.Info("levelselect.search", "search"))
 
         |+ Conditional(
-            (fun () -> Tree.isEmpty),
+            (fun () -> Tree.is_empty),
             StaticContainer(NodeType.None)
             |+ Conditional((fun () -> Tree.filter <> []), EmptyState(Icons.search, %"levelselect.empty.search"))
             |+ Conditional(
@@ -172,13 +172,13 @@ type LevelSelectScreen() =
         elif (%%"previous").Tapped() then
             Tree.previous ()
         elif (%%"next_group").Tapped() then
-            Tree.nextGroup ()
+            Tree.next_group ()
         elif (%%"previous_group").Tapped() then
-            Tree.previousGroup ()
+            Tree.previous_group ()
         elif (%%"start").Tapped() then
-            Tree.beginGroup ()
+            Tree.top_of_group ()
         elif (%%"end").Tapped() then
-            Tree.endGroup ()
+            Tree.bottom_of_group ()
 
         Tree.update (this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsed_ms)
 
