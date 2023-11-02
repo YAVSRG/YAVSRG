@@ -282,8 +282,8 @@ module Notifications =
                     else
                         outline.Bottom + 50.0f
 
-                let calloutBounds = Rect.Box(x, y, width, height + 60.0f)
-                Callout.update (calloutBounds.Left, calloutBounds.Top + 30.0f, width, height, t.Data)
+                let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
+                Callout.update (callout_bounds.Left, callout_bounds.Top + 30.0f, width, height, t.Data)
 
             let padding = 20.0f
             let mutable y = this.Bounds.Top + 80.0f
@@ -363,17 +363,17 @@ module Notifications =
                     else
                         outline.Bottom + 50.0f
 
-                let calloutBounds = Rect.Box(x, y, width, height + 60.0f)
-                Draw.rect calloutBounds (Colors.cyan.O3a t.Fade.Alpha)
-                let frameBounds = calloutBounds.Expand(5.0f)
+                let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
+                Draw.rect callout_bounds (Colors.cyan.O3a t.Fade.Alpha)
+                let frameBounds = callout_bounds.Expand(5.0f)
                 Draw.rect (frameBounds.SliceTop 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
                 Draw.rect (frameBounds.SliceBottom 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
                 Draw.rect (frameBounds.SliceLeft 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
                 Draw.rect (frameBounds.SliceRight 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
 
                 Callout.draw (
-                    calloutBounds.Left,
-                    calloutBounds.Top + 30.0f,
+                    callout_bounds.Left,
+                    callout_bounds.Top + 30.0f,
                     width,
                     height,
                     (Colors.white.O4a t.Fade.Alpha, Colors.shadow_1.O4a t.Fade.Alpha),

@@ -33,7 +33,7 @@ module Debug =
                 ConfirmPage(
                     [ theme.Config.Name ] %> "themes.confirmextractdefault",
                     (fun () ->
-                        if Themes.createNew (theme.Config.Name + "_extracted") then
+                        if Themes.create_new (theme.Config.Name + "_extracted") then
                             ()
                         else
                             Logging.Error "Theme folder already exists"

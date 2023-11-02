@@ -20,9 +20,9 @@ type HoldNoteSettingsPage() as this =
     let flip_hold_tail = Setting.simple data.FlipHoldTail
     let dropped_color = Setting.simple data.DroppedHoldColor
 
-    let head = getTexture "holdhead"
-    let body = getTexture "holdbody"
-    let tail = getTexture "holdtail"
+    let head = get_texture "holdhead"
+    let body = get_texture "holdbody"
+    let tail = get_texture "holdtail"
     let animation = Animation.Counter(data.AnimationFrameTime)
 
     do
@@ -103,7 +103,7 @@ type HoldNoteSettingsPage() as this =
     override this.Title = %"noteskins.edit.holdnotes.name"
 
     override this.OnClose() =
-        Noteskins.Current.changeConfig
+        Noteskins.Current.save_config
             { Noteskins.Current.config with
                 HoldNoteTrim = hold_note_trim.Value
                 UseHoldTailTexture = use_tail_texture.Value

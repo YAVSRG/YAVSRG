@@ -14,7 +14,7 @@ open Interlude.UI.Menu
 type RotationPicker(rotation: Setting<float>) as this =
     inherit StaticContainer(NodeType.Leaf)
 
-    let sprite = getTexture "note"
+    let sprite = get_texture "note"
 
     let fd () =
         Setting.app (fun x -> (x + 22.5) % 360.0) rotation
@@ -134,7 +134,7 @@ type RotationSettingsPage() as this =
     override this.Title = %"noteskins.edit.rotations.name"
 
     override this.OnClose() =
-        Noteskins.Current.changeConfig
+        Noteskins.Current.save_config
             { Noteskins.Current.config with
                 Rotations = rotations
                 UseRotation = use_rotation.Value

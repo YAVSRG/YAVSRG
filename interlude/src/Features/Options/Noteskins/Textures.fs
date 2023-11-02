@@ -75,7 +75,7 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
     let mutable items: NavigationContainer.Grid<Widget> = Unchecked.defaultof<_>
 
     member this.Refresh() =
-        sprite <- getTexture texture_id
+        sprite <- get_texture texture_id
 
         if sprite.Columns <> selected.Length || sprite.Rows <> selected.[0].Length then
             selected <- Array.init sprite.Columns (fun _ -> Array.zeroCreate sprite.Rows)
@@ -353,7 +353,7 @@ type TextureCard(id: string, on_click: unit -> unit) as this =
         )
 
     // todo: refresh on return from editor
-    let sprite = getTexture id
+    let sprite = get_texture id
 
     do
         this

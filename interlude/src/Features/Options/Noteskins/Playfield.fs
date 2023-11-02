@@ -78,7 +78,7 @@ type PlayfieldSettingsPage() as this =
 
     override this.Title = %"noteskins.edit.playfield.name"
     override this.OnClose() =
-        Noteskins.Current.changeConfig
+        Noteskins.Current.save_config
             { Noteskins.Current.config with
                 ColumnWidth = column_width.Value
                 ColumnSpacing = column_spacing.Value

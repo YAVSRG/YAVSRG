@@ -16,7 +16,7 @@ open Interlude.UI.Menu
 type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as this =
     inherit StaticContainer(NodeType.Leaf)
 
-    let sprite = getTexture "note"
+    let sprite = get_texture "note"
     let n = byte sprite.Rows
 
     let fd () =
@@ -143,7 +143,7 @@ type ColorSettingsPage() as this =
     override this.Title = %"noteskins.edit.colors.name"
 
     override this.OnClose() =
-        Noteskins.Current.changeConfig
+        Noteskins.Current.save_config
             { Noteskins.Current.config with
                 NoteColors = noteColors
             }

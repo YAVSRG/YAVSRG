@@ -139,7 +139,7 @@ module Gameplay =
                             // if chart is loaded we can safely restart from this point for different rates and mods
 
                             let with_mods = apply_mods _selected_mods.Value chart
-                            let with_colors = apply_coloring (Content.noteskinConfig().NoteColors) with_mods
+                            let with_colors = apply_coloring (Content.noteskin_config().NoteColors) with_mods
 
                             let rating =
                                 RatingReport(
@@ -175,7 +175,7 @@ module Gameplay =
                             | Some chart ->
 
                             let with_mods = apply_mods _selected_mods.Value chart
-                            let with_colors = apply_coloring (Content.noteskinConfig().NoteColors) with_mods
+                            let with_colors = apply_coloring (Content.noteskin_config().NoteColors) with_mods
 
                             let rating =
                                 RatingReport(
@@ -212,7 +212,7 @@ module Gameplay =
                             | None -> failwith "impossible"
                             | Some with_mods ->
 
-                            let with_colors = apply_coloring (Content.noteskinConfig().NoteColors) with_mods
+                            let with_colors = apply_coloring (Content.noteskin_config().NoteColors) with_mods
                             yield fun () -> WITH_COLORS <- Some with_colors
 
                             yield

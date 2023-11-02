@@ -207,7 +207,7 @@ module Wiki =
                 , Position = Position.SliceRight(300.0f)
             )
 
-        do Heading.scrollHandler <- fun w -> flow.Scroll(w.Bounds.Top - flow.Bounds.Top)
+        do Heading.scroll_handler <- fun w -> flow.Scroll(w.Bounds.Top - flow.Bounds.Top)
 
         member private this.UpdateContent() =
             let con = StaticContainer(NodeType.None)

@@ -36,11 +36,11 @@ type AnimationSettingsPage() as this =
     let explosion_on_miss = Setting.simple data.Explosions.ExplodeOnMiss
     let explosion_colors = Setting.simple data.Explosions.Colors
 
-    let note = getTexture "note"
-    let noteexplosion = getTexture "noteexplosion"
-    let holdexplosion = getTexture "holdexplosion"
-    let receptor = getTexture "receptor"
-    let columnlighting = getTexture "receptorlighting"
+    let note = get_texture "note"
+    let noteexplosion = get_texture "noteexplosion"
+    let holdexplosion = get_texture "holdexplosion"
+    let receptor = get_texture "receptor"
+    let columnlighting = get_texture "receptorlighting"
     let mutable test_event_i = 0
 
     let test_events = Animation.Counter 1000.0
@@ -225,7 +225,7 @@ type AnimationSettingsPage() as this =
     override this.Title = %"noteskins.edit.animations.name"
 
     override this.OnClose() =
-        Noteskins.Current.changeConfig
+        Noteskins.Current.save_config
             { Noteskins.Current.config with
                 EnableColumnLight = enable_column_light.Value
                 ColumnLightTime = column_light_time.Value

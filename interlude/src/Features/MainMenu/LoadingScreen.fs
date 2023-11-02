@@ -26,7 +26,7 @@ type LoadingScreen() =
             if Network.target_ip.ToString() <> "0.0.0.0" then
                 Network.connect ()
 
-            animation.Add(Animation.Action(fun () -> Content.Sounds.getSound("hello").Play()))
+            animation.Add(Animation.Action(fun () -> Content.Sounds.get("hello").Play()))
             animation.Add(Animation.Delay 1000.0)
             animation.Add(Animation.Action(fun () -> audio_fade.Target <- 1.0f))
             animation.Add(Animation.Delay 1200.0)

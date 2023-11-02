@@ -22,7 +22,7 @@ type EditThemePage() as this =
 
     override this.Title = data.Name
     override this.OnClose() =
-        Themes.Current.changeConfig
+        Themes.Current.save_config
             { data with
                 Name = name.Value
             }

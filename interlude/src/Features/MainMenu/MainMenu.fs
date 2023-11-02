@@ -129,7 +129,7 @@ type MainMenuScreen() as this =
                 %"notification.update_available.body"
             )
 
-        if prev = Screen.Type.SplashScreen && firstLaunch then
+        if prev = Screen.Type.SplashScreen && first_launch then
             Wiki.show ()
 
         splash_text <- choose_splash ()

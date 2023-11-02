@@ -25,7 +25,7 @@ type Toolbar() =
 
     let HEIGHT = Toolbar.HEIGHT
 
-    let mutable userCollapse = false
+    let mutable collapsed_by_user = false
 
     let container = StaticContainer(NodeType.None)
     let volume = Volume(Position = Position.Margin(0.0f, HEIGHT))
@@ -211,8 +211,8 @@ type Toolbar() =
                 moved || Toolbar.slideout_amount.Moving
 
         if not Toolbar.hidden && (%%"toolbar").Tapped() then
-            userCollapse <- not userCollapse
-            Toolbar.slideout_amount.Target <- if userCollapse then 0.0f else 1.0f
+            collapsed_by_user <- not collapsed_by_user
+            Toolbar.slideout_amount.Target <- if collapsed_by_user then 0.0f else 1.0f
 
         Terminal.update ()
 

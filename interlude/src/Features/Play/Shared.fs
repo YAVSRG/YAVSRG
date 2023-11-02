@@ -95,7 +95,7 @@ type Timeline(chart: ModChart, on_seek: Time -> unit) =
 type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
     inherit StaticWidget(NodeType.None)
     let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
-    let sprite = getTexture "receptorlighting"
+    let sprite = get_texture "receptorlighting"
     let lightTime = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
 
     do
@@ -151,7 +151,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     let holding = Array.create keys false
     let explodeTime = Math.Clamp(ns.Explosions.FadeTime, 0f, 0.99f)
     let animation = Animation.Counter ns.Explosions.AnimationFrameTime
-    let rotation = Noteskins.noteRotation keys
+    let rotation = Noteskins.note_rotation keys
 
     let handleEvent (ev: HitEvent<HitEventGuts>) =
         match ev.Guts with
@@ -235,7 +235,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                         (Quad.color (Color.FromArgb(a, Color.White)))
                         (Sprite.with_uv
                             (frame, color)
-                            (Content.getTexture (if e.IsHold then "holdexplosion" else "noteexplosion")))
+                            (Content.get_texture (if e.IsHold then "holdexplosion" else "noteexplosion")))
                 | _ -> ()
 
         Array.iteri f sliders
@@ -327,11 +327,11 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
     do
         this.Add playfield
 
-        if noteskinConfig().EnableColumnLight then
-            playfield.Add(new ColumnLighting(chart.Keys, noteskinConfig (), state))
+        if noteskin_config().EnableColumnLight then
+            playfield.Add(new ColumnLighting(chart.Keys, noteskin_config (), state))
 
-        if noteskinConfig().Explosions.Enable then
-            playfield.Add(new Explosions(chart.Keys, noteskinConfig (), state))
+        if noteskin_config().Explosions.Enable then
+            playfield.Add(new Explosions(chart.Keys, noteskin_config (), state))
 
         playfield.Add(LaneCover())
 

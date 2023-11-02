@@ -14,10 +14,10 @@ open Prelude.Data.Content
 
 module Content =
 
-    let private defaultTheme =
+    let private DEFAULT_THEME =
         Theme.FromZipStream <| Utils.get_resource_stream "default.zip"
 
-    let mutable accentColor = ThemeConfig.Default.DefaultAccentColor
+    let mutable accent_color = ThemeConfig.Default.DefaultAccentColor
 
     let mutable first_init = true
 
@@ -25,7 +25,7 @@ module Content =
 
         let private cache = new Dictionary<string, Sprite>()
 
-        let getTexture (id: string) =
+        let get (id: string) =
             if cache.ContainsKey id then
                 cache.[id]
             else
@@ -42,7 +42,7 @@ module Content =
 
         let private cache = new Dictionary<string, SoundEffect>()
 
-        let getSound (id: string) =
+        let get (id: string) =
             if cache.ContainsKey id then
                 cache.[id]
             else
@@ -128,10 +128,10 @@ module Content =
         module Current =
 
             let mutable id = "*default"
-            let mutable instance = defaultTheme
+            let mutable instance = DEFAULT_THEME
             let mutable config = instance.Config
 
-            let changeConfig (new_config: ThemeConfig) =
+            let save_config (new_config: ThemeConfig) =
                 instance.Config <- new_config
                 config <- instance.Config
 
@@ -159,9 +159,9 @@ module Content =
                         | None -> failwithf "Failed to load sound '%s' from *default" id
 
                 if config.OverrideAccentColor then
-                    accentColor <- config.DefaultAccentColor
+                    accent_color <- config.DefaultAccentColor
 
-                for font in defaultTheme.GetFonts() do
+                for font in DEFAULT_THEME.GetFonts() do
                     Fonts.add font
 
                 for font in instance.GetFonts() do
@@ -172,16 +172,16 @@ module Content =
 
                 Style.font <- Fonts.create config.Font
 
-                Style.click <- Sounds.getSound "click"
-                Style.hover <- Sounds.getSound "hover"
-                Style.text_close <- Sounds.getSound "text-close"
-                Style.text_open <- Sounds.getSound "text-open"
-                Style.key <- Sounds.getSound "key"
+                Style.click <- Sounds.get "click"
+                Style.hover <- Sounds.get "hover"
+                Style.text_close <- Sounds.get "text-close"
+                Style.text_open <- Sounds.get "text-open"
+                Style.key <- Sounds.get "key"
 
-                Style.notify_error <- Sounds.getSound "notify-error"
-                Style.notify_info <- Sounds.getSound "notify-info"
-                Style.notify_system <- Sounds.getSound "notify-system"
-                Style.notify_task <- Sounds.getSound "notify-task"
+                Style.notify_error <- Sounds.get "notify-error"
+                Style.notify_info <- Sounds.get "notify-info"
+                Style.notify_system <- Sounds.get "notify-system"
+                Style.notify_task <- Sounds.get "notify-task"
 
             let switch (new_id: string) =
                 let new_id =
@@ -201,7 +201,7 @@ module Content =
 
         let load () =
             loaded.Clear()
-            loaded.Add("*default", defaultTheme)
+            loaded.Add("*default", DEFAULT_THEME)
 
             for source in Directory.EnumerateDirectories(get_game_folder "Themes") do
                 let id = Path.GetFileName source
@@ -220,16 +220,16 @@ module Content =
         let list () =
             loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 
-        let createNew (id: string) : bool =
+        let create_new (id: string) : bool =
             let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
             let target = Path.Combine(get_game_folder "Themes", id)
 
             if id <> "" && not (Directory.Exists target) then
-                defaultTheme.ExtractToFolder(target)
+                DEFAULT_THEME.ExtractToFolder(target)
                 load ()
                 Current.switch id
 
-                Current.changeConfig
+                Current.save_config
                     { Current.config with
                         Name = Current.config.Name + " (Extracted)"
                     }
@@ -242,7 +242,7 @@ module Content =
 
         let loaded: Dictionary<string, Noteskin> = new Dictionary<string, Noteskin>()
 
-        let private defaults =
+        let private DEFAULTS =
             let skins = [ "defaultBar.isk"; "defaultArrow.isk"; "defaultOrb.isk" ]
 
             skins
@@ -252,11 +252,11 @@ module Content =
 
         module Current =
 
-            let mutable id = fst defaults.[0]
-            let mutable instance = snd defaults.[0]
+            let mutable id = fst DEFAULTS.[0]
+            let mutable instance = snd DEFAULTS.[0]
             let mutable config = instance.Config
 
-            let changeConfig (new_config: NoteskinConfig) =
+            let save_config (new_config: NoteskinConfig) =
                 instance.Config <- new_config
                 config <- instance.Config
 
@@ -312,7 +312,7 @@ module Content =
 
             loaded.Clear()
 
-            for (id, ns) in defaults do
+            for (id, ns) in DEFAULTS do
                 loaded.Add(id, ns)
 
             for zip in
@@ -338,7 +338,7 @@ module Content =
                 with err ->
                     Logging.Error("  Failed to load noteskin '" + id + "'", err)
 
-            Logging.Info(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count defaults.Length)
+            Logging.Info(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count DEFAULTS.Length)
 
             Current.switch Current.id
 
@@ -363,7 +363,7 @@ module Content =
                 load ()
                 Current.switch id
 
-                Current.changeConfig
+                Current.save_config
                     { Current.config with
                         Name = skin_name
                         Author = Option.defaultValue "Unknown" username
@@ -386,7 +386,7 @@ module Content =
                 else
                     false
 
-        let noteRotation keys =
+        let note_rotation keys =
             let rotations =
                 if Current.config.UseRotation then
                     Current.config.Rotations.[keys - 3]
@@ -400,15 +400,15 @@ module Content =
                 override this.Handle(ns) = async { return ns.GetTexture "note" }
             }
 
-    let init (themeId: string) (noteskinId: string) =
-        Themes.Current.id <- themeId
-        Noteskins.Current.id <- noteskinId
+    let init (theme_id: string) (noteskin_id: string) =
+        Themes.Current.id <- theme_id
+        Noteskins.Current.id <- noteskin_id
         Logging.Info "===== Loading game content ====="
         Noteskins.load ()
         Themes.load ()
         Rulesets.load ()
         first_init <- false
 
-    let inline getTexture (id: string) = Sprites.getTexture id
-    let inline noteskinConfig () = Noteskins.Current.config
-    let inline themeConfig () = Themes.Current.config
+    let inline get_texture (id: string) = Sprites.get id
+    let inline noteskin_config () = Noteskins.Current.config
+    let inline theme_config () = Themes.Current.config

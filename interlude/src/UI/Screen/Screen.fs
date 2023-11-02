@@ -152,7 +152,7 @@ module Screen =
                 let x, y = Mouse.pos ()
                 Background.set_parallax_pos (x / Viewport.vwidth, y / Viewport.vheight)
 
-            Palette.accent_color.Target <- Content.accentColor
+            Palette.accent_color.Target <- Content.accent_color
             Dialog.display.Update(elapsed_ms, moved)
 
             toolbar.Update(elapsed_ms, moved)
@@ -187,12 +187,12 @@ module Screen =
                 let x, y = Mouse.pos ()
 
                 Draw.sprite
-                    (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize))
+                    (Rect.Box(x, y, Content.theme_config().CursorSize, Content.theme_config().CursorSize))
                     (if Notifications.tooltip_available then
                          Colors.white
                      else
                          Palette.color (255, 1.0f, 0.5f))
-                    (Content.getTexture "cursor")
+                    (Content.get_texture "cursor")
 
             perf.Draw()
 

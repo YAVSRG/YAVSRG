@@ -37,8 +37,8 @@ module Background =
                             let! (bmp: Bitmap) = Image.LoadAsync file |> Async.AwaitTask
 
                             let col =
-                                if Content.themeConfig().OverrideAccentColor then
-                                    Content.themeConfig().DefaultAccentColor
+                                if Content.theme_config().OverrideAccentColor then
+                                    Content.theme_config().DefaultAccentColor
                                 else
                                     let vibrance (c: Color) =
                                         Math.Abs(int c.R - int c.B)
@@ -63,7 +63,7 @@ module Background =
                                         if vibrance c > 127 then
                                             Color.FromArgb(255, c)
                                         else
-                                            Content.themeConfig().DefaultAccentColor
+                                            Content.theme_config().DefaultAccentColor
 
                             return Some(bmp, col)
                         with err ->
@@ -78,14 +78,14 @@ module Background =
                         Sprite.upload (bmp, 1, 1, true) |> Sprite.cache "loaded background" false
 
                     bmp.Dispose()
-                    Content.accentColor <- col
+                    Content.accent_color <- col
                     background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
                 | None ->
                     background <-
-                        (Content.getTexture "background", Animation.Fade(0.0f, Target = 1.0f), true)
+                        (Content.get_texture "background", Animation.Fade(0.0f, Target = 1.0f), true)
                         :: background
 
-                    Content.accentColor <- Content.themeConfig().DefaultAccentColor }
+                    Content.accent_color <- Content.theme_config().DefaultAccentColor }
 
     let load (path: string option) =
         List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background

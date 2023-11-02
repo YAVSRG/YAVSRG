@@ -105,12 +105,12 @@ module Logo =
                         (Quad.color Colors.cyan_accent)
                         Sprite.DefaultQuad
 
-                    Draw.sprite breathe_bounds Colors.white (Content.getTexture "logo")
+                    Draw.sprite breathe_bounds Colors.white (Content.get_texture "logo")
 
                     Stencil.start_drawing ()
                     //chart background
                     Draw.rect breathe_bounds Colors.cyan_accent
-                    let rain = Content.getTexture "rain"
+                    let rain = Content.get_texture "rain"
                     let v = float32 counter.Time
                     let q = Quad.ofRect breathe_bounds
 
@@ -153,7 +153,7 @@ module Logo =
                         prev <- level
 
                     Stencil.finish ()
-                    Draw.sprite breathe_bounds Colors.white (Content.getTexture "logo")
+                    Draw.sprite breathe_bounds Colors.white (Content.get_texture "logo")
 
         member this.Move(l, t, r, b) =
             this.Position <-

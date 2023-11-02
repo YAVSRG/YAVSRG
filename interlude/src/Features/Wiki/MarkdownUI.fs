@@ -188,20 +188,20 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
         let mutable y = 0.0f
         let mutable lineHeight = 0.0f
 
-        let newLine () =
+        let new_line () =
             x <- MARGIN
             y <- y + lineHeight
             lineHeight <- 0.0f
 
         for (text, settings, info) in Span.get_fragments settings spans do
             match info with
-            | Span.FragmentInfo.Linebreak -> newLine ()
+            | Span.FragmentInfo.Linebreak -> new_line ()
             | Span.FragmentInfo.Image url ->
                 let img = Image(max_width - x, text, url)
                 lineHeight <- max lineHeight img.Height
                 img.Position <- Position.Box(0.0f, 0.0f, x, y, img.Width, img.Height)
                 this |* img
-                newLine ()
+                new_line ()
             | Span.FragmentInfo.Normal ->
 
             let fragment, (width, height), remaining =
@@ -210,7 +210,7 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
             lineHeight <- max lineHeight height
 
             if width + x > max_width then
-                newLine ()
+                new_line ()
 
             fragment.Position <- Position.Box(0.0f, 0.0f, x, y, width, height)
             x <- x + width
@@ -219,7 +219,7 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
             let mutable _remaining = remaining
 
             while _remaining <> "" do
-                newLine ()
+                new_line ()
 
                 let fragment, (width, height), remaining =
                     Span.create_fragment (max_width - x) _remaining settings
@@ -227,14 +227,14 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
                 lineHeight <- max lineHeight height
 
                 if width + x > max_width then
-                    newLine ()
+                    new_line ()
 
                 fragment.Position <- Position.Box(0.0f, 0.0f, x, y, width, height)
                 this.Add fragment
                 x <- x + width
                 _remaining <- remaining
 
-        newLine ()
+        new_line ()
         height <- y
 
     override this.Width = max_width
@@ -313,16 +313,16 @@ module Heading =
     let MARGIN_X = 13.0f
     let MARGIN_Y = 10.0f
 
-    let rec getText (body: MarkdownSpan list) =
+    let rec extract_text (body: MarkdownSpan list) =
         match body.Head with
         | Literal(text, _) -> text
         | Strong(body, _)
         | Emphasis(body, _)
-        | DirectLink(body, _, _, _) -> getText body
+        | DirectLink(body, _, _, _) -> extract_text body
         | _ -> ""
 
-    let mutable scrollTo = ""
-    let mutable scrollHandler: Widget -> unit = ignore
+    let mutable scroll_to = ""
+    let mutable scroll_handler: Widget -> unit = ignore
 
 type private Heading(max_width, size, body: MarkdownSpan list) as this =
     inherit IParagraph()
@@ -336,7 +336,7 @@ type private Heading(max_width, size, body: MarkdownSpan list) as this =
             }
         )
 
-    let text = Heading.getText body
+    let text = Heading.extract_text body
 
     do
         contents.Position <-
@@ -351,11 +351,11 @@ type private Heading(max_width, size, body: MarkdownSpan list) as this =
         base.Update(elapsed_ms, moved)
 
         if
-            Heading.scrollTo <> ""
-            && text.Contains(Heading.scrollTo, System.StringComparison.InvariantCultureIgnoreCase)
+            Heading.scroll_to <> ""
+            && text.Contains(Heading.scroll_to, System.StringComparison.InvariantCultureIgnoreCase)
         then
-            Heading.scrollTo <- ""
-            Heading.scrollHandler this
+            Heading.scroll_to <- ""
+            Heading.scroll_handler this
 
     override this.Draw() =
         if this.VisibleBounds.Visible then
