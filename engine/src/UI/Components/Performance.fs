@@ -84,6 +84,15 @@ type PerformanceMonitor() =
                 this.Bounds.Top + 150.0f,
                 Colors.text_subheading
             )
+            
+            Text.draw_b (
+                Style.font,
+                sprintf "%O to toggle graph" graph_bind,
+                30.0f,
+                this.Bounds.Left + 20.0f,
+                this.Bounds.Top + 190.0f,
+                Colors.text_subheading
+            )
 
         if enable_graph then
 
