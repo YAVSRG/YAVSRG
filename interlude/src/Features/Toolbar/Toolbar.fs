@@ -28,6 +28,7 @@ type Toolbar() =
     let mutable userCollapse = false
 
     let container = StaticContainer(NodeType.None)
+    let volume = Volume(Position = Position.Margin(0.0f, HEIGHT))
 
     do
         container
@@ -166,9 +167,10 @@ type Toolbar() =
             (fun () -> AutoUpdate.update_available),
             Updater(Position = Position.Box(0.5f, 1.0f, -250.0f, -HEIGHT, 500.0f, HEIGHT))
         )
-        |* Volume(Position = Position.Margin(0.0f, HEIGHT))
+        |* volume
 
     override this.Draw() =
+        if hidden then volume.Draw() else
         let {
                 Rect.Left = l
                 Top = t

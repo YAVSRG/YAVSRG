@@ -159,7 +159,8 @@ module Screen =
                 this.ShouldExit <- true
 
         override this.Draw() =
-            Background.drawWithDim (this.Bounds, Color.White, 1.0f)
+            if currentType <> Type.Play || Options.options.BackgroundDim.Value < 1.0f then
+                Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
             screenContainer.Draw()
             logo.Draw()
             toolbar.Draw()

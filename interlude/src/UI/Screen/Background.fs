@@ -13,9 +13,9 @@ module Background =
     let private parallaxX = Animation.Fade 0.0f
     let private parallaxY = Animation.Fade 0.0f
     let private parallaxZ = Animation.Fade 40.0f
-    let private dimPercent = Animation.Fade 1.0f
+    let private dim_percent = Animation.Fade 1.0f
 
-    let dim (amount: float32) = dimPercent.Target <- amount
+    let dim (amount: float32) = dim_percent.Target <- amount
 
     let setParallaxPos (x: float32, y: float32) =
         parallaxX.Target <- x
@@ -98,7 +98,7 @@ module Background =
         parallaxX.Update elapsed_ms
         parallaxY.Update elapsed_ms
         parallaxZ.Update elapsed_ms
-        dimPercent.Update elapsed_ms
+        dim_percent.Update elapsed_ms
 
         background <-
             List.filter
@@ -146,6 +146,6 @@ module Background =
     let draw (bounds: Rect, color, depth) =
         drawq (Quad.ofRect bounds, color, depth)
 
-    let drawWithDim (bounds: Rect, color, depth) =
+    let draw_with_dim (bounds: Rect, color, depth) =
         draw (bounds, color, depth)
-        Draw.rect bounds (Color.FromArgb(dimPercent.Alpha, 0, 0, 0))
+        Draw.rect bounds (Color.Black.O4a dim_percent.Alpha)
