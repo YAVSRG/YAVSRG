@@ -75,9 +75,9 @@ module Printerlude =
             | Some c ->
                 // todo: move into prelude
                 let beatmap = Conversions.Interlude.toOsu c
-                let exportName = ``osu!``.getBeatmapFilename beatmap
+                let file_name = ``osu!``.getBeatmapFilename beatmap
                 let path = get_game_folder "Exports"
-                let beatmap_file = Path.Combine(path, exportName)
+                let beatmap_file = Path.Combine(path, file_name)
                 ``osu!``.saveBeatmapFile beatmap_file beatmap
 
                 let target_audio_file =
@@ -105,12 +105,13 @@ module Printerlude =
                 with err ->
                     printfn "%O" err
 
-                use fs = File.Create(Path.Combine(path, Path.ChangeExtension(exportName, ".osz")))
+                use fs = File.Create(Path.Combine(path, Path.ChangeExtension(file_name, ".osz")))
                 use archive = new ZipArchive(fs, ZipArchiveMode.Create, true)
 
                 archive.CreateEntryFromFile(beatmap_file, Path.GetFileName beatmap_file)
                 |> ignore
 
+                // todo: write to entry by opening entry as stream instead of file copy
                 match target_audio_file with
                 | Some p -> archive.CreateEntryFromFile(p, Path.GetFileName p) |> ignore
                 | _ -> ()
