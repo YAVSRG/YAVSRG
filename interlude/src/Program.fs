@@ -27,7 +27,8 @@ let launch (instance: int) =
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
     let crashSplash =
-        Utils.splash_message_picker ("CrashSplashes.txt") >> (fun s -> Logging.Critical s)
+        Utils.splash_message_picker ("CrashSplashes.txt")
+        >> (fun s -> Logging.Critical s)
 
     try
         Options.load (instance)
@@ -113,8 +114,16 @@ let main argv =
                 let executable = Assembly.GetEntryAssembly().Location.Replace(".dll", ".exe")
                 let launch_dir = Path.GetDirectoryName executable
 
-                Process.Start(ProcessStartInfo(executable, WorkingDirectory = launch_dir, UseShellExecute = true))
-                |> ignore
+                try
+                    let _ =
+                        Process.Start(
+                            ProcessStartInfo(executable, WorkingDirectory = launch_dir, UseShellExecute = true)
+                        )
+
+                    printfn "Restarting"
+                with err ->
+                    printfn "Automatic restart failed :("
+                    printfn "%O" err
 
     elif Prelude.Common.DEV_MODE then
         let instances = Process.GetProcessesByName "Interlude" |> Array.length

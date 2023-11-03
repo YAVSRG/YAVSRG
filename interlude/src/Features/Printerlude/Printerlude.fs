@@ -107,7 +107,9 @@ module Printerlude =
 
                 use fs = File.Create(Path.Combine(path, Path.ChangeExtension(exportName, ".osz")))
                 use archive = new ZipArchive(fs, ZipArchiveMode.Create, true)
-                archive.CreateEntryFromFile(beatmap_file, Path.GetFileName beatmap_file) |> ignore
+
+                archive.CreateEntryFromFile(beatmap_file, Path.GetFileName beatmap_file)
+                |> ignore
 
                 match target_audio_file with
                 | Some p -> archive.CreateEntryFromFile(p, Path.GetFileName p) |> ignore
@@ -228,14 +230,10 @@ module Printerlude =
                     fun (io: IOContext) (b: bool) ->
                         Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
                         Online.Network.credentials.Api <- (if b then "localhost" else "api.yavsrg.net")
-                        io.WriteLine("Restart your game to apply server change.")
+                        Utils.AutoUpdate.restart_on_exit <- true
+                        UI.Screen.exit <- true
                 )
-                .WithIOCommand(
-                    "timescale",
-                    "Sets the timescale of all UI animations, for testing",
-                    "speed",
-                    timescale
-                )
+                .WithIOCommand("timescale", "Sets the timescale of all UI animations, for testing", "speed", timescale)
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
                 .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
 
