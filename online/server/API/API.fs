@@ -13,8 +13,7 @@ module API =
     type Handler = string * Map<string, string array> * Map<string, string> * HttpResponse -> Async<unit>
     let handlers = Dictionary<(HttpMethod * string), Handler>()
 
-    let inline add_endpoint route handle =
-        handlers.Add( route, handle )
+    let inline add_endpoint route handle = handlers.Add(route, handle)
 
     do
         add_endpoint Auth.Discord.ROUTE Auth.Discord.handle
@@ -39,18 +38,27 @@ module API =
 
         add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
 
-    let handle_request(method: HttpMethod, route: string, body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) =
+    let handle_request
+        (
+            method: HttpMethod,
+            route: string,
+            body: string,
+            query_params: Map<string, string array>,
+            headers: Map<string, string>,
+            response: HttpResponse
+        ) =
         async {
             if handlers.ContainsKey((method, route)) then
                 try
                     let handler = handlers.[(method, route)]
-                    do! handler(body, query_params, headers, response)
+                    do! handler (body, query_params, headers, response)
                 with
                 | :? NotAuthorizedException -> response.MakeErrorResponse(401, "Needs authorization token") |> ignore
                 | :? NotFoundException -> response.MakeErrorResponse(404, "Not found") |> ignore
                 | :? AuthorizeFailedException -> response.MakeErrorResponse(403, "Bad authorization token") |> ignore
-                | err -> 
+                | err ->
                     Logging.Error(sprintf "Error in %O %s: %O" method route err)
                     response.MakeErrorResponse(500, "Internal error") |> ignore
-            else response.MakeErrorResponse(404, "Route not found") |> ignore
+            else
+                response.MakeErrorResponse(404, "Route not found") |> ignore
         }

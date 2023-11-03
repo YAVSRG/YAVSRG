@@ -8,14 +8,32 @@ open Interlude.Web.Server.Domain
 
 module Online =
 
-    let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
+    let handle
+        (
+            body: string,
+            query_params: Map<string, string array>,
+            headers: Map<string, string>,
+            response: HttpResponse
+        ) =
         async {
             let _, _ = authorize headers
 
-            let! online = LoggedInUsers.who_is_online()
+            let! online = LoggedInUsers.who_is_online ()
             let users = User.by_ids (online |> Array.map fst)
+
             response.ReplyJson(
                 {
-                    Players = users |> Array.choose (Option.map (fun x -> { Username = x.Username; Color = x.Color |> Option.defaultValue Badge.DEFAULT_COLOR } )) 
-                } : Players.Online.Response)
+                    Players =
+                        users
+                        |> Array.choose (
+                            Option.map (fun x ->
+                                {
+                                    Username = x.Username
+                                    Color = x.Color |> Option.defaultValue Badge.DEFAULT_COLOR
+                                }
+                            )
+                        )
+                }
+                : Players.Online.Response
+            )
         }

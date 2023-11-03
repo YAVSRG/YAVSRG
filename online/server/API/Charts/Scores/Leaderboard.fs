@@ -7,13 +7,17 @@ open Interlude.Web.Server.Domain
 
 module Leaderboard =
 
-    let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
+    let handle
+        (
+            body: string,
+            query_params: Map<string, string array>,
+            headers: Map<string, string>,
+            response: HttpResponse
+        ) =
         async {
             if not (query_params.ContainsKey "chart") then
                 response.MakeErrorResponse(400, "'chart' is required") |> ignore
-            else
-            
-            if not (query_params.ContainsKey "ruleset") then
+            else if not (query_params.ContainsKey "ruleset") then
                 response.MakeErrorResponse(400, "'ruleset' is required") |> ignore
             else
 
@@ -22,33 +26,42 @@ module Leaderboard =
             let hash = query_params.["chart"].[0].ToUpper()
             let ruleset = query_params.["ruleset"].[0]
 
-            let ruleset = 
-                if ruleset <> Score.SHORT_TERM_RULESET_LIST.[0] && not (Leaderboard.exists hash ruleset) then
+            let ruleset =
+                if
+                    ruleset <> Score.SHORT_TERM_RULESET_LIST.[0]
+                    && not (Leaderboard.exists hash ruleset)
+                then
                     Score.SHORT_TERM_RULESET_LIST.[0]
-                else ruleset
+                else
+                    ruleset
 
             if Leaderboard.exists hash ruleset then
-            
+
                 let info = Leaderboard.get_top_20_info hash ruleset
 
-                let scores : Charts.Scores.Leaderboard.Score array =
-                    info 
-                    |> Array.indexed 
+                let scores: Charts.Scores.Leaderboard.Score array =
+                    info
+                    |> Array.indexed
                     |> Array.choose (
                         function
-                        | i, (Some username, Some found_score) -> 
-                            Some { 
-                                Username = username
-                                Rank = i + 1
-                                Replay = found_score.Replay
-                                Rate = found_score.Rate
-                                Mods = found_score.Mods
-                                Timestamp = System.DateTimeOffset.FromUnixTimeMilliseconds(found_score.Timestamp).UtcDateTime
-                            }
+                        | i, (Some username, Some found_score) ->
+                            Some
+                                {
+                                    Username = username
+                                    Rank = i + 1
+                                    Replay = found_score.Replay
+                                    Rate = found_score.Rate
+                                    Mods = found_score.Mods
+                                    Timestamp =
+                                        System.DateTimeOffset
+                                            .FromUnixTimeMilliseconds(found_score.Timestamp)
+                                            .UtcDateTime
+                                }
                         | _ -> None
-                        )
+                    )
 
-                response.ReplyJson({ Scores = scores; RulesetId = ruleset } : Charts.Scores.Leaderboard.Response)
+                response.ReplyJson({ Scores = scores; RulesetId = ruleset }: Charts.Scores.Leaderboard.Response)
 
-            else response.MakeErrorResponse(404) |> ignore
+            else
+                response.MakeErrorResponse(404) |> ignore
         }

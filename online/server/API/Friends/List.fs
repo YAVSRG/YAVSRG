@@ -8,21 +8,31 @@ open Interlude.Web.Server.Online
 
 module List =
 
-    let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
+    let handle
+        (
+            body: string,
+            query_params: Map<string, string array>,
+            headers: Map<string, string>,
+            response: HttpResponse
+        ) =
         async {
             let userId, _ = authorize headers
 
             let friends = Friends.friends_list userId |> Array.choose id
-            let! online = LoggedInUsers.find_sessions(friends |> Array.map (fun u -> u.Username))
+            let! online = LoggedInUsers.find_sessions (friends |> Array.map (fun u -> u.Username))
+
             response.ReplyJson(
                 {
-                    Friends = 
+                    Friends =
                         Array.zip friends online
-                        |> Array.map (fun (friend, session) -> 
-                            { 
+                        |> Array.map (fun (friend, session) ->
+                            {
                                 Username = friend.Username
                                 Color = friend.Color |> Option.defaultValue Badge.DEFAULT_COLOR
                                 Online = session.IsSome
-                            } ) 
-                } : Friends.List.Response)
+                            }
+                        )
+                }
+                : Friends.List.Response
+            )
         }

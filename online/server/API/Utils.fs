@@ -6,14 +6,13 @@ open Interlude.Web.Server.Domain
 
 [<AutoOpen>]
 module Utils =
-    
+
     type HttpResponse with
         member this.ReplyJson<'T>(data: 'T) =
-            this.MakeGetResponse(JSON.ToString data, "application/json")
-            |> ignore
+            this.MakeGetResponse(JSON.ToString data, "application/json") |> ignore
+
         member this.ReplyRedirect(url: string) =
-            this.Clear().SetBegin(303).SetHeader("Location", url).SetBody()
-            |> ignore
+            this.Clear().SetBegin(303).SetHeader("Location", url).SetBody() |> ignore
 
     exception NotAuthorizedException
     exception NotFoundException
@@ -22,6 +21,7 @@ module Utils =
     let authorize (header: Map<string, string>) =
         if header.ContainsKey("Authorization") then
             match User.by_auth_token (header.["Authorization"].Substring("Bearer ".Length)) with
-            | Some (id, user) -> id, user
+            | Some(id, user) -> id, user
             | None -> raise AuthorizeFailedException
-        else raise NotAuthorizedException
+        else
+            raise NotAuthorizedException

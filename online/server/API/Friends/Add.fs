@@ -9,16 +9,22 @@ open Interlude.Web.Server.Domain
 
 module Add =
 
-    let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
+    let handle
+        (
+            body: string,
+            query_params: Map<string, string array>,
+            headers: Map<string, string>,
+            response: HttpResponse
+        ) =
         async {
             let userId, _ = authorize headers
-            
+
             match JSON.FromString body with
             | Error e -> Logging.Error(sprintf "Error parsing body for api/friends: %s" e.Message)
-            | Ok (request : Friends.Add.Request) ->
+            | Ok(request: Friends.Add.Request) ->
 
             match User.by_username request.User with
-            | Some (id, user) -> 
+            | Some(id, user) ->
                 Friends.add_friend (userId, id)
                 response.ReplyJson(true)
             | None -> response.ReplyJson(false)

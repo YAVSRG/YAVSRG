@@ -9,8 +9,23 @@ module HealthCheck =
 
     let mutable private request_counter = 0
 
-    let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) =
+    let handle
+        (
+            body: string,
+            query_params: Map<string, string array>,
+            headers: Map<string, string>,
+            response: HttpResponse
+        ) =
         async {
             request_counter <- request_counter + 1
-            response.ReplyJson ({ Status = sprintf "Everything will be ok. This endpoint has been called %i times since last restart." request_counter } : Health.HealthCheck.Response)
+
+            response.ReplyJson(
+                {
+                    Status =
+                        sprintf
+                            "Everything will be ok. This endpoint has been called %i times since last restart."
+                            request_counter
+                }
+                : Health.HealthCheck.Response
+            )
         }

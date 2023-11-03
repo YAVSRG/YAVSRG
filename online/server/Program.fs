@@ -22,7 +22,7 @@ try
     let socket_cert = new X509Certificate2(Path.Combine("./secrets", SECRETS.SocketCert), SECRETS.SocketCertPassword)
 
     Domain.Migrations.run()
-    Domain.Charts.init()
+    Domain.Backbeat.init()
 
     Server.init { 
         Address = "0.0.0.0"

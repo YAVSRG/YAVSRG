@@ -24,7 +24,7 @@ module Save =
                         return Some cache.[hash]
                     else
 
-                        match Charts.by_hash hash with
+                        match Backbeat.by_hash hash with
                         | None -> return None
                         | Some(chart, song) ->
 
@@ -60,7 +60,7 @@ module Save =
 
             let hash = request.ChartId.ToUpper()
 
-            match Charts.by_hash hash with
+            match Backbeat.by_hash hash with
             | None -> response.ReplyJson(None)
             | Some(chart_info, song) ->
 
@@ -98,7 +98,7 @@ module Save =
                 let mutable table_change: Charts.Scores.Save.TableChange option = None
 
                 for ruleset_id in Score.SHORT_TERM_RULESET_LIST do
-                    let ruleset = Charts.rulesets.[ruleset_id]
+                    let ruleset = Backbeat.rulesets.[ruleset_id]
 
                     let scoring =
                         Metrics.create ruleset chart.Keys (StoredReplayProvider replay) modChart.Notes rate
@@ -148,7 +148,7 @@ module Save =
                                 }
 
                         // if ruleset and chart match a table, aggregate your new table rating and save to leaderboard
-                        match Charts.crescent with
+                        match Backbeat.crescent with
                         | None -> ()
                         | Some table ->
                             if table.RulesetId <> ruleset_id || not (table.Contains request.ChartId) then

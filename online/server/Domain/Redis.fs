@@ -9,25 +9,27 @@ open Interlude.Web.Server
 
 module Redis =
 
-    let redis: ConnectionMultiplexer = 
+    let redis: ConnectionMultiplexer =
         let options = new ConfigurationOptions()
-        #if DEBUG
+#if DEBUG
         options.EndPoints.Add("localhost", 6379)
-        #else
+#else
         options.EndPoints.Add("redis", 6379)
-        #endif
+#endif
         options.User <- "default"
         options.Password <- "redispw"
         options.Ssl <- false
         options.SslProtocols <- SslProtocols.Tls12
-        options.add_CertificateSelection(LocalCertificateSelectionCallback(fun _ _ _ _ _ -> new X509Certificate2(SECRETS.ApiCert, SECRETS.ApiCertPassword)))
-        options.add_CertificateValidation(RemoteCertificateValidationCallback(fun _ _ _ _ -> true))
+
+        options.add_CertificateSelection (
+            LocalCertificateSelectionCallback(fun _ _ _ _ _ ->
+                new X509Certificate2(SECRETS.ApiCert, SECRETS.ApiCertPassword)
+            )
+        )
+
+        options.add_CertificateValidation (RemoteCertificateValidationCallback(fun _ _ _ _ -> true))
         ConnectionMultiplexer.Connect(options)
 
     let db = redis.GetDatabase()
     let ft = db.FT()
     let json = db.JSON()
-            
-
-            
-        

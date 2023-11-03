@@ -6,7 +6,13 @@ open Interlude.Web.Server.Domain
 
 module Remove =
 
-    let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
+    let handle
+        (
+            body: string,
+            query_params: Map<string, string array>,
+            headers: Map<string, string>,
+            response: HttpResponse
+        ) =
         async {
             let userId, _ = authorize headers
 
@@ -15,7 +21,7 @@ module Remove =
             else
 
             match User.by_username query_params.["user"].[0] with
-            | Some (id, user) -> 
+            | Some(id, user) ->
                 Friends.remove_friend (userId, id)
                 response.ReplyJson(true)
             | None -> response.ReplyJson(false)

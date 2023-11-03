@@ -7,57 +7,86 @@ open Interlude.Web.Server.Domain
 
 module Profile =
 
-    let handle (body: string, query_params: Map<string, string array>, headers: Map<string, string>, response: HttpResponse) = 
+    let handle
+        (
+            body: string,
+            query_params: Map<string, string array>,
+            headers: Map<string, string>,
+            response: HttpResponse
+        ) =
         async {
             let userId, user = authorize headers
 
             let target_userId, target_user =
                 if query_params.ContainsKey("user") then
                     match User.by_username query_params.["user"].[0] with
-                    | Some (userId, user) -> userId, user
+                    | Some(userId, user) -> userId, user
                     | None -> raise NotFoundException
-                else userId, user
+                else
+                    userId, user
 
             let recent_scores = Score.get_recent target_userId
 
-            let scores : Players.Profile.RecentScore array =
-                recent_scores 
+            let scores: Players.Profile.RecentScore array =
+                recent_scores
                 |> Array.map (fun s ->
-                    let rs = Charts.rulesets.[s.RulesetId]
-                    match Charts.by_hash s.ChartId with
-                    | Some (chart, song) ->
+                    let rs = Backbeat.rulesets.[s.RulesetId]
+
+                    match Backbeat.by_hash s.ChartId with
+                    | Some(chart, song) ->
                         {
                             Artist = song.FormattedArtists
                             Title = song.Title
                             Difficulty = chart.DifficultyName
                             Score = s.Score
                             Lamp = rs.LampName s.Lamp
-                            Mods = if s.Mods.IsEmpty then sprintf "%.2fx" s.Rate else sprintf "%.2fx*" s.Rate
+                            Mods =
+                                if s.Mods.IsEmpty then
+                                    sprintf "%.2fx" s.Rate
+                                else
+                                    sprintf "%.2fx*" s.Rate
                             Timestamp = s.Timestamp
                         }
-                    | None -> 
+                    | None ->
                         {
                             Artist = "???"
                             Title = "???"
                             Difficulty = "???"
                             Score = s.Score
                             Lamp = rs.LampName s.Lamp
-                            Mods = if s.Mods.IsEmpty then sprintf "%.2fx" s.Rate else sprintf "%.2fx*" s.Rate
+                            Mods =
+                                if s.Mods.IsEmpty then
+                                    sprintf "%.2fx" s.Rate
+                                else
+                                    sprintf "%.2fx*" s.Rate
                             Timestamp = s.Timestamp
                         }
                 )
 
-            let isFriend = target_user.Username <> user.Username && Friends.has_friend(userId, target_userId)
-            let isMutualFriend = isFriend && Friends.has_friend(target_userId, userId)
-                    
+            let is_friend =
+                target_user.Username <> user.Username
+                && Friends.has_friend (userId, target_userId)
+
+            let is_mutual_friend = is_friend && Friends.has_friend (target_userId, userId)
+
             response.ReplyJson(
                 {
                     Username = target_user.Username
                     Color = target_user.Color |> Option.defaultValue Badge.DEFAULT_COLOR
-                    Badges = target_user.Badges |> Seq.map (fun b -> { Players.Profile.Badge.Name = b; Players.Profile.Badge.Colors = Badge.badge_color b }) |> Array.ofSeq
+                    Badges =
+                        target_user.Badges
+                        |> Seq.map (fun b ->
+                            {
+                                Players.Profile.Badge.Name = b
+                                Players.Profile.Badge.Colors = Badge.badge_color b
+                            }
+                        )
+                        |> Array.ofSeq
                     RecentScores = scores
                     DateSignedUp = target_user.DateSignedUp
-                    IsFriend = isFriend
-                    IsMutualFriend = isMutualFriend
-                } : Players.Profile.Response)
+                    IsFriend = is_friend
+                    IsMutualFriend = is_mutual_friend
+                }
+                : Players.Profile.Response
+            )
         }
