@@ -32,5 +32,6 @@ You don't have to care about them in PRs I can just squash with an emoji commit 
 
 ### Code formatting/style
 
-Try to follow the existing format style, but there will soon be a script to run Fantomas formatting on all code so don't worry and just submit the PR :)
+Try to follow the existing format style, but there will soon be a script to run Fantomas formatting on all code so don't worry and just submit the PR :)  
+
 Prefer `snake_case` variable names over `camelCase`
