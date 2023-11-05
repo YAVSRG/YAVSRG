@@ -59,7 +59,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 |* PageButton.Once(
                     "chart.suggest_for_table",
                     (fun () ->
-                        Tables.Suggest.post (
+                        Tables.Suggestions.Add.post (
                             {
                                 ChartId = cc.Hash
                                 OsuBeatmapId =

@@ -22,7 +22,7 @@ module private Players =
 
     let update_friends_list () = friends_changed ()
 
-type private RecentScores(scores: Players.Profile.RecentScore array) =
+type private RecentScores(scores: Players.Profile.View.RecentScore array) =
     inherit StaticWidget(NodeType.None)
 
     let scores =
@@ -265,12 +265,12 @@ type private PlayerList() =
 
 type Profile() as this =
     inherit
-        WebRequestContainer<Players.Profile.Response>(
+        WebRequestContainer<Players.Profile.View.Response>(
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
                     match Players.current_player with
                     | Some p ->
-                        Players.Profile.get (
+                        Players.Profile.View.get (
                             p,
                             fun response ->
                                 sync
@@ -280,7 +280,7 @@ type Profile() as this =
                                     | None -> this.ServerError()
                         )
                     | None ->
-                        Players.Profile.get_me (fun response ->
+                        Players.Profile.View.get_me (fun response ->
                             sync
                             <| fun () ->
                                 match response with
@@ -399,7 +399,7 @@ type Profile() as this =
                                 }
 
                             let save_color color =
-                                Players.ProfileOptions.post (
+                                Players.Profile.Options.post (
                                     { Color = color },
                                     function
                                     | Some true -> this.SetData({ data with Color = color })
