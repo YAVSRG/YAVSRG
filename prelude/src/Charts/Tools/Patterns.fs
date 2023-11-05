@@ -436,8 +436,7 @@ module Patterns =
                     | Some c -> c.MsPerBeat
                     | None -> mspb
                 let bpm = (60000.0f<ms/minute> / clustered_mspb |> float32 |> round |> int)
-                
-                if bpm < 85 then printfn "%A %A %A" current_start current_mspb current_n
+
                 patterns.Add((pattern_id, { BPM = bpm; Time = current_start; Duration = current_end - current_start; AverageDensity = density }))
                 current_n <- 0
 

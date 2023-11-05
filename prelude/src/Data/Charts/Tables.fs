@@ -49,7 +49,6 @@ type Table =
         if id = "" then
             false
         else if
-
             Seq.forall (fun (l: Level) -> l.Name <> id && l.Rank <> rank) this.Levels |> not
         then
             false
