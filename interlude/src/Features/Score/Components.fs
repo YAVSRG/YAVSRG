@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.Gameplay
 open Prelude.Data.Scores
@@ -218,6 +219,7 @@ type Accuracy
 
     let LOWER_SIZE = 40.0f
     let new_record = sprintf "%s %s" Icons.sparkle (%"score.new_record")
+    let mutable hover = false
 
     override this.Init(parent) =
         this
@@ -228,6 +230,10 @@ type Accuracy
         )
 
         base.Init parent
+
+    override this.Update(elapsed_ms, moved) =
+        hover <- Mouse.hover this.Bounds
+        base.Update(elapsed_ms, moved)
 
     override this.Draw() =
         Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
@@ -274,6 +280,11 @@ type Accuracy
 
         Text.fill_b (Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceBottom(LOWER_SIZE), color, Alignment.CENTER)
         base.Draw()
+
+        if hover then
+            let acc_tooltip = this.Bounds.Expand(-80.0f, 75.0f).SliceBottom(60.0f)
+            Draw.rect acc_tooltip Colors.shadow_2.O2
+            Text.fill_b (Style.font, sprintf "%.6f%%" (data.Scoring.Value * 100.0), acc_tooltip.Shrink(10.0f, 5.0f), Colors.text, Alignment.CENTER)
 
 type Lamp
     (
