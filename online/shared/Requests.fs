@@ -70,10 +70,8 @@ module Charts =
             [<Json.AutoCodec>]
             type ScoreEffect =
                 {
-                    // todo: in future, one chart could be in multiple leaderboards
-                    LeaderboardChange: LeaderboardChange option
-                    // todo: in future, one chart could be in multiple tables
-                    TableChange: TableChange option
+                    LeaderboardChanges: LeaderboardChange list
+                    TableChanges: TableChange list
                 }
 
             type Response = ScoreEffect option

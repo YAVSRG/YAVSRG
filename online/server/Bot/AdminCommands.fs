@@ -146,12 +146,7 @@ module AdminCommands =
                 | name :: badge :: _ ->
                     match user_by_name name with
                     | Some(id, user) ->
-                        User.save (
-                            id,
-                            { user with
-                                Badges = Set.add badge user.Badges
-                            }
-                        )
+                        User.update_badges (id, Set.add badge user.Badges)
 
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
@@ -163,12 +158,7 @@ module AdminCommands =
                 | name :: badge :: _ ->
                     match user_by_name name with
                     | Some(id, user) ->
-                        User.save (
-                            id,
-                            { user with
-                                Badges = Set.remove badge user.Badges
-                            }
-                        )
+                        User.update_badges (id, Set.remove badge user.Badges)
 
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
@@ -227,7 +217,7 @@ module AdminCommands =
                         reply
                             "Enter a hash and ruleset, for example: $addleaderboard 1467CD6DEB4A3B87FA58FAB4F2398BE9AD7B0017031C511C549D3EF28FFB58D3"
                 | hash :: _ ->
-                    match Backbeat.by_hash hash with
+                    match Backbeat.Charts.by_hash hash with
                     | None -> do! reply "Chart not found."
                     | Some(chart, song) ->
 
@@ -245,12 +235,10 @@ module AdminCommands =
             | "addleaderboards" ->
                 let missing = ResizeArray<string>()
 
-                match Backbeat.crescent with
-                | None -> do! reply "Table is not loaded."
-                | Some table ->
+                for table in Backbeat.tables.Values do
                     for level in table.Levels do
                         for chart in level.Charts do
-                            match Backbeat.by_hash chart.Hash with
+                            match Backbeat.Charts.by_hash chart.Hash with
                             | None -> missing.Add chart.Id
                             | Some(_, _) ->
                                 if not (Leaderboard.exists chart.Hash table.RulesetId) then

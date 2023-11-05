@@ -11,7 +11,7 @@ open Prelude.Data.Charts.Tables
 
 module Backbeat =
 
-    let mutable crescent: Table option = None
+    let mutable tables: Map<string, Table> = Map.empty
 
     let rulesets = Dictionary<string, Ruleset>()
 
@@ -25,6 +25,7 @@ module Backbeat =
             Community = new Dictionary<CommunityPackId, CommunityPack>()
         }
 
+    // load seed data from Backbeat repo
     let init () =
         WebServices.download_json (
             "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/songs.json",
@@ -67,113 +68,114 @@ module Backbeat =
         WebServices.download_json (
             "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/tables/crescent.table",
             function
-            | Some(t: Table) -> crescent <- Some t
+            | Some(t: Table) -> tables <- Map.ofList [ "crescent", t ]
             | None -> Logging.Error("Failed to get Crescent from Backbeat repo")
         )
 
     // chart search by text
+    module Charts =
 
-    type QueryFragment =
-        | Artist of string
-        | Title of string
-        | Charter of string
-        | Any of string
+        type private QueryFragment =
+            | Artist of string
+            | Title of string
+            | Charter of string
+            | Any of string
 
-    let parse_query =
-        let artist = (pstring "artist:" <|> pstring "a:")
-        let title = (pstring "title:" <|> pstring "t:")
+        let private parse_query =
+            let artist = (pstring "artist:" <|> pstring "a:")
+            let title = (pstring "title:" <|> pstring "t:")
 
-        let charter =
-            (pstring "charter:"
-             <|> pstring "creator:"
-             <|> pstring "mapper:"
-             <|> pstring "m:"
-             <|> pstring "c:")
+            let charter =
+                (pstring "charter:"
+                 <|> pstring "creator:"
+                 <|> pstring "mapper:"
+                 <|> pstring "m:"
+                 <|> pstring "c:")
 
-        let words =
-            manyCharsTill anyChar (followedBy (artist <|> title <|> charter) <|> eof)
-            |>> fun s -> s.Trim()
+            let words =
+                manyCharsTill anyChar (followedBy (artist <|> title <|> charter) <|> eof)
+                |>> fun s -> s.Trim()
 
-        let parser =
-            words
-            .>>. many (
-                (artist >>. words |>> Artist)
-                <|> (title >>. words |>> Title)
-                <|> (charter >>. words |>> Charter)
-            )
-            |>> fun (a: string, xs: QueryFragment list) -> if a <> "" then Any a :: xs else xs
+            let parser =
+                words
+                .>>. many (
+                    (artist >>. words |>> Artist)
+                    <|> (title >>. words |>> Title)
+                    <|> (charter >>. words |>> Charter)
+                )
+                |>> fun (a: string, xs: QueryFragment list) -> if a <> "" then Any a :: xs else xs
 
-        fun query ->
-            match run parser query with
-            | Success(res, _, _) -> res
-            | Failure(reason, _, _) ->
-                failwithf "It should be impossible for this parser to fail, but it did: %s" reason
+            fun query ->
+                match run parser query with
+                | Success(res, _, _) -> res
+                | Failure(reason, _, _) ->
+                    failwithf "It should be impossible for this parser to fail, but it did: %s" reason
 
-    let search (query: string) =
-        let query = query.ToLower() |> parse_query
+        let search (query: string) =
+            let query = query.ToLower() |> parse_query
 
-        seq {
-            for chart_hash in charts.Keys do
-                let chart = charts.[chart_hash]
-                let song = songs.[chart.SongId]
+            seq {
+                for chart_hash in charts.Keys do
+                    let chart = charts.[chart_hash]
+                    let song = songs.[chart.SongId]
 
-                let mutable meets_search = true
+                    let mutable meets_search = true
 
-                for criteria in query do
-                    meets_search <-
-                        meets_search
-                        && match criteria with
-                           | Any s ->
-                               song.Title.ToLower().Contains(s)
-                               || song.AlternativeTitles.Any(fun x -> x.ToLower().Contains(s))
-                               || song.Artists.Any(fun x -> x.ToLower().Contains(s))
-                               || song.OtherArtists.Any(fun x -> x.ToLower().Contains(s))
-                               || song.Remixers.Any(fun x -> x.ToLower().Contains(s))
-                               || chart.Creators.Any(fun x -> x.ToLower().Contains(s))
-                           | Title s ->
-                               song.Title.ToLower().Contains(s)
-                               || song.AlternativeTitles.Any(fun x -> x.ToLower().Contains(s))
-                           | Artist s ->
-                               song.Artists.Any(fun x -> x.ToLower().Contains(s))
-                               || song.OtherArtists.Any(fun x -> x.ToLower().Contains(s))
-                               || song.Remixers.Any(fun x -> x.ToLower().Contains(s))
-                           | Charter s -> chart.Creators.Any(fun x -> x.ToLower().Contains(s))
+                    for criteria in query do
+                        meets_search <-
+                            meets_search
+                            && match criteria with
+                               | Any s ->
+                                   song.Title.ToLower().Contains(s)
+                                   || song.AlternativeTitles.Any(fun x -> x.ToLower().Contains(s))
+                                   || song.Artists.Any(fun x -> x.ToLower().Contains(s))
+                                   || song.OtherArtists.Any(fun x -> x.ToLower().Contains(s))
+                                   || song.Remixers.Any(fun x -> x.ToLower().Contains(s))
+                                   || chart.Creators.Any(fun x -> x.ToLower().Contains(s))
+                               | Title s ->
+                                   song.Title.ToLower().Contains(s)
+                                   || song.AlternativeTitles.Any(fun x -> x.ToLower().Contains(s))
+                               | Artist s ->
+                                   song.Artists.Any(fun x -> x.ToLower().Contains(s))
+                                   || song.OtherArtists.Any(fun x -> x.ToLower().Contains(s))
+                                   || song.Remixers.Any(fun x -> x.ToLower().Contains(s))
+                               | Charter s -> chart.Creators.Any(fun x -> x.ToLower().Contains(s))
 
-                if meets_search then
-                    yield (chart, song)
-        }
-        |> Seq.groupBy snd
-        |> Seq.truncate 30
-        |> Seq.map (fun (song, stuff) -> song, Seq.map fst stuff |> List.ofSeq)
+                    if meets_search then
+                        yield (chart, song)
+            }
+            |> Seq.groupBy snd
+            |> Seq.truncate 30
+            |> Seq.map (fun (song, stuff) -> song, Seq.map fst stuff |> List.ofSeq)
 
-    // sources (for human page visiting and automatic downloading)
+        // sources (for human page visiting and automatic downloading)
 
-    let format_source (source: ChartSource) =
-        match source with
-        | Osu data ->
-            sprintf "[osu! Beatmap](https://osu.ppy.sh/beatmapsets/%i#mania/%i)" data.BeatmapSetId data.BeatmapId
-        | Stepmania id -> sprintf "[%s](https://etternaonline.com/pack/%i)" packs.Stepmania.[id].Title id
-        | CommunityPack data ->
-            sprintf
-                "[%s](%s)"
-                packs.Community.[data.PackId].Title
-                (Archive.DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors.Head)
+        let format_source (source: ChartSource) =
+            match source with
+            | Osu data ->
+                sprintf "[osu! Beatmap](https://osu.ppy.sh/beatmapsets/%i#mania/%i)" data.BeatmapSetId data.BeatmapId
+            | Stepmania id -> sprintf "[%s](https://etternaonline.com/pack/%i)" packs.Stepmania.[id].Title id
+            | CommunityPack data ->
+                sprintf
+                    "[%s](%s)"
+                    packs.Community.[data.PackId].Title
+                    (Archive.DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors.Head)
 
-    let mirrors (sources: ChartSource list) =
-        seq {
-            for source in sources do
-                match source with
-                | Osu data -> yield sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.BeatmapSetId
-                | Stepmania id -> yield Archive.DownloadUrl.unpickle packs.Stepmania.[id].Mirrors.Head
-                | CommunityPack data ->
-                    yield! Seq.map Archive.DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors
-        }
+        let mirrors (sources: ChartSource list) =
+            seq {
+                for source in sources do
+                    match source with
+                    | Osu data -> yield sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.BeatmapSetId
+                    | Stepmania id -> yield Archive.DownloadUrl.unpickle packs.Stepmania.[id].Mirrors.Head
+                    | CommunityPack data ->
+                        yield! Seq.map Archive.DownloadUrl.unpickle packs.Community.[data.PackId].Mirrors
+            }
 
-    // find a chart by hash
+        // find a chart by hash
 
-    let by_hash (hash: string) =
-        if charts.ContainsKey hash then
-            let c = charts.[hash]
-            Some(c, songs.[c.SongId])
-        else
-            None
+        let by_hash (hash: string) =
+            if charts.ContainsKey hash then
+                let c = charts.[hash]
+                Some(c, songs.[c.SongId])
+            else
+                None

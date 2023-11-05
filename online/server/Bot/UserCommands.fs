@@ -50,7 +50,7 @@ module UserCommands =
                     do! reply "Enter a search term, for example: $search PLANET//SHAPER artist:Camellia creator:Evening"
 
                 | query :: _ ->
-                    let matches = Backbeat.search query |> List.ofSeq
+                    let matches = Backbeat.Charts.search query |> List.ofSeq
 
                     match matches with
                     | [] -> do! reply "No matches found."
@@ -81,7 +81,7 @@ module UserCommands =
                         for chart in charts do
                             embed.AddField(
                                 chart.DifficultyName + " by " + String.concat ", " chart.Creators,
-                                String.concat "  |  " (chart.Sources |> List.map Backbeat.format_source)
+                                String.concat "  |  " (chart.Sources |> List.map Backbeat.Charts.format_source)
                             )
                             |> ignore
 
@@ -116,9 +116,7 @@ module UserCommands =
                             if friends.Length = 0 then
                                 "nobody :("
                             else
-                                friends
-                                |> Array.map (fun user -> user.Username)
-                                |> String.concat "\n"
+                                friends |> Array.map (fun user -> user.Username) |> String.concat "\n"
                         )
 
                 do! reply_embed (embed.Build())
@@ -149,7 +147,7 @@ module UserCommands =
                 | badge :: [] ->
                     if userInfo.Badges.Contains badge then
                         let color = (Badge.badge_color badge).[0]
-                        User.save (userId, { userInfo with Color = Some color })
+                        User.update_color (userId, color)
                         do! reply_emoji ":white_check_mark:"
                     else
                         do! reply "You don't have this badge."
@@ -159,12 +157,7 @@ module UserCommands =
 
                         match System.Int32.TryParse(choice) with
                         | true, c when c > 0 && c <= colors.Length ->
-                            User.save (
-                                userId,
-                                { userInfo with
-                                    Color = Some colors.[c - 1]
-                                }
-                            )
+                            User.update_color (userId, colors.[c - 1])
 
                             do! reply_emoji ":white_check_mark:"
                         | _ -> do! reply (sprintf "The options for this badge are 1-%i" colors.Length)
@@ -225,7 +218,7 @@ module UserCommands =
                                         .WithValue(
                                             recent_scores
                                             |> Array.map (fun s ->
-                                                match Backbeat.by_hash s.ChartId with
+                                                match Backbeat.Charts.by_hash s.ChartId with
                                                 | Some(_, song) -> song.Title
                                                 | None -> "???" |> sprintf "`%-20s`"
                                             )

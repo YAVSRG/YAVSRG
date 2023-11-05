@@ -83,7 +83,7 @@ module Users =
                         match User.by_discord_id discord_id with
                         | Some(id, user) ->
                             let new_token = Guid.NewGuid().ToString("N")
-                            User.save (id, { user with AuthToken = new_token })
+                            User.set_auth_token (id, new_token)
                             Ok new_token
                         | None -> Error "No user is registered to this Discord account"
                         |> callback

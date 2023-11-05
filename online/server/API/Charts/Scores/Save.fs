@@ -24,7 +24,7 @@ module Save =
                         return Some cache.[hash]
                     else
 
-                        match Backbeat.by_hash hash with
+                        match Backbeat.Charts.by_hash hash with
                         | None -> return None
                         | Some(chart, song) ->
 
@@ -60,7 +60,7 @@ module Save =
 
             let hash = request.ChartId.ToUpper()
 
-            match Backbeat.by_hash hash with
+            match Backbeat.Charts.by_hash hash with
             | None -> response.ReplyJson(None)
             | Some(chart_info, song) ->
 
@@ -94,10 +94,10 @@ module Save =
                 let replay = Replay.decompress request.Replay // todo: zip bomb prevention?
                 let modChart = Mods.apply_mods request.Mods chart
 
-                let mutable leaderboard_change: Charts.Scores.Save.LeaderboardChange option = None
-                let mutable table_change: Charts.Scores.Save.TableChange option = None
+                let mutable leaderboard_changes: Charts.Scores.Save.LeaderboardChange list = []
+                let mutable table_changes: Charts.Scores.Save.TableChange list = []
 
-                for ruleset_id in Score.SHORT_TERM_RULESET_LIST do
+                for ruleset_id in Score.RULESETS do
                     let ruleset = Backbeat.rulesets.[ruleset_id]
 
                     let scoring =
@@ -139,21 +139,17 @@ module Save =
                         Leaderboard.Replay.save hash ruleset_id userId replay
                         let new_rank = Leaderboard.add_score hash ruleset_id userId score.Score
 
-                        leaderboard_change <-
-                            Some
-                                {
-                                    RulesetId = ruleset_id
-                                    OldRank = old_rank
-                                    NewRank = new_rank
-                                }
+                        leaderboard_changes <-
+                            {
+                                RulesetId = ruleset_id
+                                OldRank = old_rank
+                                NewRank = new_rank
+                            }
+                            :: leaderboard_changes
 
                         // if ruleset and chart match a table, aggregate your new table rating and save to leaderboard
-                        match Backbeat.crescent with
-                        | None -> ()
-                        | Some table ->
-                            if table.RulesetId <> ruleset_id || not (table.Contains request.ChartId) then
-                                ()
-                            else
+                        for table_id, table in Backbeat.tables |> Map.toSeq do
+                            if table.RulesetId = ruleset_id && table.Contains request.ChartId then
 
                                 let grades = Score.aggregate_table_grades userId ruleset_id 1.0f
 
@@ -173,25 +169,25 @@ module Save =
                                     |> fun total -> total / 50.0
 
                                 let old_position =
-                                    match TableRanking.rank "crescent" userId with
-                                    | Some pos -> Some(pos, (TableRanking.rating "crescent" userId).Value)
+                                    match TableRanking.rank table_id userId with
+                                    | Some pos -> Some(pos, (TableRanking.rating table_id userId).Value)
                                     | None -> None
 
-                                let new_rank = TableRanking.update "crescent" userId rating
+                                let new_rank = TableRanking.update table_id userId rating
 
-                                table_change <-
-                                    Some
-                                        {
-                                            Table = "crescent"
-                                            OldPosition = old_position
-                                            NewPosition = new_rank, rating
-                                        }
+                                table_changes <-
+                                    {
+                                        Table = table_id
+                                        OldPosition = old_position
+                                        NewPosition = new_rank, rating
+                                    }
+                                    :: table_changes
 
                 response.ReplyJson(
                     Some
                         {
-                            LeaderboardChange = leaderboard_change
-                            TableChange = table_change
+                            LeaderboardChanges = leaderboard_changes
+                            TableChanges = table_changes
                         }
                     : Charts.Scores.Save.Response
                 )

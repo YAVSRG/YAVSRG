@@ -30,43 +30,38 @@ module Records =
             | None -> raise NotFoundException
             | Some(targetUserId, _) ->
 
-            if query_params.["table"].[0] <> "crescent" then
-                response.MakeErrorResponse(404) |> ignore
-            else
+            match Backbeat.tables.TryFind(query_params.["table"].[0]) with
+            | None -> response.MakeErrorResponse(404) |> ignore
+            | Some table ->
+                let scores = Score.aggregate_table_scores targetUserId Score.RULESETS.[0] 1.0f
 
-                match Backbeat.crescent with
-                | None -> response.ReplyJson({ Scores = [||] }: Tables.Records.Response)
-                | Some table ->
-                    let scores =
-                        Score.aggregate_table_scores targetUserId Score.SHORT_TERM_RULESET_LIST.[0] 1.0f
+                let charts = table.Levels |> Seq.map (fun level -> level.Charts) |> Seq.concat
+                let ruleset = Backbeat.rulesets.[Score.RULESETS.[0]]
 
-                    let charts = table.Levels |> Seq.map (fun level -> level.Charts) |> Seq.concat
-                    let ruleset = Backbeat.rulesets.[Score.SHORT_TERM_RULESET_LIST.[0]]
-
-                    response.ReplyJson(
-                        {
-                            Scores =
-                                charts
-                                |> Seq.choose (fun chart ->
-                                    if scores.ContainsKey(chart.Hash) then
-                                        Some(
-                                            {
-                                                Hash = chart.Hash
-                                                Id = chart.Id
-                                                Score = scores.[chart.Hash]
-                                                Grade =
-                                                    (Prelude.Gameplay.Grade.calculate_with_target
-                                                        ruleset.Grading.Grades
-                                                        scores.[chart.Hash])
-                                                        .Grade
-                                            }
-                                            : Tables.Records.Score
-                                        )
-                                    else
-                                        None
-                                )
-                                |> Array.ofSeq
-                        }
-                        : Tables.Records.Response
-                    )
+                response.ReplyJson(
+                    {
+                        Scores =
+                            charts
+                            |> Seq.choose (fun chart ->
+                                if scores.ContainsKey(chart.Hash) then
+                                    Some(
+                                        {
+                                            Hash = chart.Hash
+                                            Id = chart.Id
+                                            Score = scores.[chart.Hash]
+                                            Grade =
+                                                (Prelude.Gameplay.Grade.calculate_with_target
+                                                    ruleset.Grading.Grades
+                                                    scores.[chart.Hash])
+                                                    .Grade
+                                        }
+                                        : Tables.Records.Score
+                                    )
+                                else
+                                    None
+                            )
+                            |> Array.ofSeq
+                    }
+                    : Tables.Records.Response
+                )
         }

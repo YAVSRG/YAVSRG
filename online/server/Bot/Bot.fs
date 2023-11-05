@@ -65,12 +65,7 @@ module Bot =
             then
                 match User.by_discord_id (PERCYQAZ_ID) with
                 | Some(id, user) ->
-                    User.save (
-                        id,
-                        { user with
-                            Badges = Set.add Badge.DEVELOPER user.Badges
-                        }
-                    )
+                    User.update_badges (id, Set.add Badge.DEVELOPER user.Badges)
 
                     do! message.AddReactionAsync(Emoji.Parse(":heart_eyes:"))
                 | None -> do! message.AddReactionAsync(Emoji.Parse(":face_with_spiral_eyes:"))

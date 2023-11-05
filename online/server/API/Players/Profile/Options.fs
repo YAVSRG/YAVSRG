@@ -29,7 +29,7 @@ module Options =
                 |> Seq.concat
                 |> Seq.contains request.Color
             then
-                User.save (userId, { user with Color = Some request.Color })
+                User.update_color (userId, request.Color)
                 response.ReplyJson(true)
             else
                 response.ReplyJson(false)

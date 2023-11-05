@@ -21,7 +21,7 @@ module Identify =
 
             let hash = query_params.["chart"].[0].ToUpper()
 
-            match Backbeat.by_hash hash with
+            match Backbeat.Charts.by_hash hash with
             | Some(chart, song) ->
                 response.ReplyJson(
                     {
@@ -30,7 +30,7 @@ module Identify =
                                 {
                                     Song = song
                                     Chart = chart
-                                    Mirrors = chart.Sources |> Backbeat.mirrors |> List.ofSeq
+                                    Mirrors = chart.Sources |> Backbeat.Charts.mirrors |> List.ofSeq
                                 }
                     }
                     : Charts.Identify.Response

@@ -32,7 +32,7 @@ module View =
                 |> Array.map (fun s ->
                     let rs = Backbeat.rulesets.[s.RulesetId]
 
-                    match Backbeat.by_hash s.ChartId with
+                    match Backbeat.Charts.by_hash s.ChartId with
                     | Some(chart, song) ->
                         {
                             Artist = song.FormattedArtists

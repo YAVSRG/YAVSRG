@@ -28,10 +28,10 @@ module Leaderboard =
 
             let ruleset =
                 if
-                    ruleset <> Score.SHORT_TERM_RULESET_LIST.[0]
+                    ruleset <> Score.RULESETS.[0]
                     && not (Leaderboard.exists hash ruleset)
                 then
-                    Score.SHORT_TERM_RULESET_LIST.[0]
+                    Score.RULESETS.[0]
                 else
                     ruleset
 

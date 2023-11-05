@@ -23,7 +23,7 @@ type Score =
 
 module Score =
 
-    let SHORT_TERM_RULESET_LIST = [| "SC(J4)548E5A" |]
+    let RULESETS = [| "SC(J4)548E5A" |]
 
     let private key (id: int64) = RedisKey("score:" + id.ToString())
 

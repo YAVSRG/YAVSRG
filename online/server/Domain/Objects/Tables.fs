@@ -41,8 +41,7 @@ module TableRanking =
 
         Array.zip users (userIds |> Array.map snd)
 
-// todo: table move suggestion
-type TableAddSuggestion =
+type TableSuggestion =
     {
         UserId: int64
         ChartId: string
@@ -56,21 +55,21 @@ type TableAddSuggestion =
         Timestamp: int64
     }
 
-module TableAddSuggestion =
+module TableSuggestion =
 
     let id (key: string) = key.Substring(18) |> int64
     let key (id: int64) =
         RedisKey(sprintf "table_suggest_add:%i" id)
 
-    let private save (id, suggestion: TableAddSuggestion) =
+    let save (id, suggestion: TableSuggestion) =
         json.Set(key id, "$", suggestion) |> ignore
 
-    let save_new (suggestion: TableAddSuggestion) : int64 =
+    let save_new (suggestion: TableSuggestion) : int64 =
         let new_id = db.StringIncrement("count:table_suggest_add", 1L)
         save (new_id, suggestion)
         new_id
 
-    let exists (chart_id: string, table_for: string) =
+    let try_get_existing (chart_id: string, table_for: string) =
         ft
             .Search(
                 "idx:table_suggest_add",
@@ -78,8 +77,8 @@ module TableAddSuggestion =
                     .SetSortBy("timestamp", true)
             )
             .Documents
-        |> Seq.isEmpty
-        |> not
+        |> Seq.tryExactlyOne
+        |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<TableSuggestion>(d.Item "json"))
 
     let list (table_for: string) =
         ft
@@ -90,5 +89,5 @@ module TableAddSuggestion =
                     .Limit(0, 100)
             )
             .Documents
-        |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<TableAddSuggestion>(d.Item "json"))
+        |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<TableSuggestion>(d.Item "json"))
         |> Array.ofSeq

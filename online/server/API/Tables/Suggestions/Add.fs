@@ -32,17 +32,19 @@ module Add =
 
             if request.TableFor <> "crescent" then
                 response.ReplyJson(false)
-            else if
-
-                TableAddSuggestion.exists (request.ChartId, request.TableFor)
-            then
-                response.ReplyJson(true)
             else
+
+            match TableSuggestion.try_get_existing (request.ChartId, request.TableFor) with
+            | Some existing ->
+                // todo: append suggested level to this suggestion
+                // todo: other metadata merges
+                response.ReplyJson(true)
+            | None ->
 
             let timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
 
             let id =
-                TableAddSuggestion.save_new
+                TableSuggestion.save_new
                     {
                         UserId = userId
                         ChartId = request.ChartId
@@ -56,6 +58,6 @@ module Add =
                         Timestamp = timestamp
                     }
 
-            Logging.Info(sprintf "Saved table suggestion #%i" id)
+            Logging.Info(sprintf "Saved new table suggestion #%i" id)
             response.ReplyJson(true)
         }

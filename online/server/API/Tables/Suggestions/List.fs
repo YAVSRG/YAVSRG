@@ -25,7 +25,7 @@ module List =
                 raise NotFoundException
             else
 
-                let suggestions = TableAddSuggestion.list table
+                let suggestions = TableSuggestion.list table
 
                 response.ReplyJson(
                     {
