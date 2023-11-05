@@ -282,9 +282,9 @@ type Accuracy
         base.Draw()
 
         if hover then
-            let acc_tooltip = this.Bounds.Expand(-80.0f, 75.0f).SliceBottom(60.0f)
+            let acc_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceBottom(60.0f)
             Draw.rect acc_tooltip Colors.shadow_2.O2
-            Text.fill_b (Style.font, sprintf "%.6f%%" (data.Scoring.Value * 100.0), acc_tooltip.Shrink(10.0f, 5.0f), Colors.text, Alignment.CENTER)
+            Text.fill_b (Style.font, sprintf "%.4f%%" (data.Scoring.Value * 100.0), acc_tooltip.Shrink(10.0f, 5.0f), Colors.text, Alignment.CENTER)
 
 type Lamp
     (
