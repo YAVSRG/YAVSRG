@@ -1,11 +1,11 @@
-﻿namespace Interlude.Web.Server.API.Players
+﻿namespace Interlude.Web.Server.API.Players.Profile
 
 open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
 
-module Profile =
+module View =
 
     let handle
         (
@@ -27,7 +27,7 @@ module Profile =
 
             let recent_scores = Score.get_recent target_userId
 
-            let scores: Players.Profile.RecentScore array =
+            let scores: Players.Profile.View.RecentScore array =
                 recent_scores
                 |> Array.map (fun s ->
                     let rs = Backbeat.rulesets.[s.RulesetId]
@@ -77,8 +77,8 @@ module Profile =
                         target_user.Badges
                         |> Seq.map (fun b ->
                             {
-                                Players.Profile.Badge.Name = b
-                                Players.Profile.Badge.Colors = Badge.badge_color b
+                                Players.Profile.View.Badge.Name = b
+                                Players.Profile.View.Badge.Colors = Badge.badge_color b
                             }
                         )
                         |> Array.ofSeq
@@ -87,6 +87,6 @@ module Profile =
                     IsFriend = is_friend
                     IsMutualFriend = is_mutual_friend
                 }
-                : Players.Profile.Response
+                : Players.Profile.View.Response
             )
         }

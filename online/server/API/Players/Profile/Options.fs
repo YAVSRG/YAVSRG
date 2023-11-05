@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Players
+﻿namespace Interlude.Web.Server.API.Players.Profile
 
 open NetCoreServer
 open Prelude
@@ -7,7 +7,7 @@ open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
 
-module ProfileOptions =
+module Options =
 
     let handle
         (
@@ -21,7 +21,7 @@ module ProfileOptions =
 
             match JSON.FromString body with
             | Error e -> Logging.Error(sprintf "Error parsing body for api/players/profile: %s" e.Message)
-            | Ok(request: Players.ProfileOptions.Request) ->
+            | Ok(request: Players.Profile.Options.Request) ->
 
             if
                 user.Badges

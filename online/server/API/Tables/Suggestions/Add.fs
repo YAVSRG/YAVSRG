@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.API.Tables
+﻿namespace Interlude.Web.Server.API.Tables.Suggestions
 
 open NetCoreServer
 open Prelude
@@ -7,7 +7,7 @@ open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
 
-module Suggest =
+module Add =
 
     let handle
         (
@@ -28,7 +28,7 @@ module Suggest =
             | Error e ->
                 Logging.Error(sprintf "Error parsing body for api/tables/suggest: %s" e.Message)
                 response.ReplyJson(false)
-            | Ok(request: Tables.Suggest.Request) ->
+            | Ok(request: Tables.Suggestions.Add.Request) ->
 
             if request.TableFor <> "crescent" then
                 response.ReplyJson(false)

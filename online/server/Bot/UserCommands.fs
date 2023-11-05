@@ -117,11 +117,7 @@ module UserCommands =
                                 "nobody :("
                             else
                                 friends
-                                |> Array.map (
-                                    function
-                                    | Some user -> user.Username
-                                    | None -> "<deleted user>"
-                                )
+                                |> Array.map (fun user -> user.Username)
                                 |> String.concat "\n"
                         )
 

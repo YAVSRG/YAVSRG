@@ -30,7 +30,6 @@ type User =
         DiscordId: uint64
         DateSignedUp: int64
         LastLogin: int64
-        // todo: last seen
         AuthToken: string
         Badges: Set<Badge>
         Color: int32 option
@@ -55,9 +54,12 @@ module User =
             Color = None
         }
 
-    // todo: operations on single parts of a user to avoid conflicts
+    // todo: more operations on single parts of a user to avoid conflicts
     let save(id, user: User) =
         json.Set(key id, "$", user) |> ignore
+
+    let update_last_seen(id) =
+        json.Set(key id, "$.LastLogin", Some (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())) |> ignore
 
     let save_new(user: User) : int64 =
         let new_id = db.StringIncrement("count:users", 1L)
@@ -107,7 +109,7 @@ module User =
         let query = escape query
         if query = "" then [||] else
 
-        ft.Search("idx:users", Query(sprintf "@username:{*%s*}" query)).Documents
+        ft.Search("idx:users", Query(sprintf "@username:{*%s*}" query).SetSortBy("last_login", false)).Documents
         |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
         |> Array.ofSeq
 

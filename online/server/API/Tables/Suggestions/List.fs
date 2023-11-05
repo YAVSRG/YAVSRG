@@ -1,11 +1,11 @@
-﻿namespace Interlude.Web.Server.API.Tables
+﻿namespace Interlude.Web.Server.API.Tables.Suggestions
 
 open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
 
-module Suggestions =
+module List =
 
     let handle
         (
@@ -31,8 +31,9 @@ module Suggestions =
                     {
                         Suggestions =
                             suggestions
-                            |> Array.map (fun x ->
+                            |> Array.map (fun (id, x) ->
                                 {
+                                    Id = id
                                     ChartId = x.ChartId
                                     OsuBeatmapId = x.OsuBeatmapId
                                     EtternaPackId = x.EtternaPackId
@@ -43,6 +44,6 @@ module Suggestions =
                                 }
                             )
                     }
-                    : Tables.Suggestions.Response
+                    : Tables.Suggestions.List.Response
                 )
         }

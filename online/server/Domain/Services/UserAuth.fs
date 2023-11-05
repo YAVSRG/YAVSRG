@@ -74,13 +74,7 @@ module Users =
                     | Action.Login(token, callback) ->
                         match User.by_auth_token token with
                         | Some(id, user) ->
-                            User.save (
-                                id,
-                                { user with
-                                    LastLogin = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                                }
-                            )
-
+                            User.update_last_seen id
                             Ok(id, user.Username)
                         | None -> Error "Token invalid or expired"
                         |> callback

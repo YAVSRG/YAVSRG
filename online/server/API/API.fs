@@ -24,19 +24,19 @@ module API =
 
         add_endpoint Tables.Records.ROUTE Tables.Records.handle
         add_endpoint Tables.Leaderboard.ROUTE Tables.Leaderboard.handle
-        add_endpoint Tables.Suggest.ROUTE Tables.Suggest.handle
-        add_endpoint Tables.Suggestions.ROUTE Tables.Suggestions.handle
+        add_endpoint Tables.Suggestions.Add.ROUTE Tables.Suggestions.Add.handle
+        add_endpoint Tables.Suggestions.List.ROUTE Tables.Suggestions.List.handle
 
         add_endpoint Players.Online.ROUTE Players.Online.handle
         add_endpoint Players.Search.ROUTE Players.Search.handle
-        add_endpoint Players.Profile.ROUTE Players.Profile.handle
-        add_endpoint Players.ProfileOptions.ROUTE Players.ProfileOptions.handle
+        add_endpoint Players.Profile.View.ROUTE Players.Profile.View.handle
+        add_endpoint Players.Profile.Options.ROUTE Players.Profile.Options.handle
 
         add_endpoint Friends.List.ROUTE Friends.List.handle
         add_endpoint Friends.Add.ROUTE Friends.Add.handle
         add_endpoint Friends.Remove.ROUTE Friends.Remove.handle
 
-        add_endpoint Health.HealthCheck.ROUTE Health.HealthCheck.handle
+        add_endpoint Health.Status.ROUTE Health.Status.handle
 
     let handle_request
         (

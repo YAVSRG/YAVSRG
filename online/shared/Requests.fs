@@ -158,49 +158,65 @@ module Tables =
             Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
 
     /// requires login token as Authorization header
-    module Suggest =
+    module List =
 
-        let ROUTE = (POST, "/tables/suggestions")
+        let ROUTE = (GET, "/tables")
+
+        open Prelude.Data.Charts.Tables
 
         [<Json.AutoCodec>]
-        type Request =
-            {
-                ChartId: string
-                OsuBeatmapId: int
-                EtternaPackId: int
-                Artist: string
-                Title: string
-                Difficulty: string
-                TableFor: string
-                SuggestedLevel: int
-            }
+        type Response = { Tables: Map<string, Table> }
 
-        let post (request: Request, callback: bool option -> unit) =
-            Client.post<Request> (snd ROUTE, request, callback)
+        let get (callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE, callback)
 
-    /// url parameters:
-    ///  table - id of table to get ranking for e.g 'crescent' or 'mizu'
     module Suggestions =
 
-        let ROUTE = (GET, "/tables/suggestions")
+        /// requires login token as Authorization header
+        module Add =
 
-        [<Json.AutoCodec>]
-        type Suggestion =
-            {
-                ChartId: string
-                OsuBeatmapId: int
-                EtternaPackId: int
-                Artist: string
-                Title: string
-                Difficulty: string
-                SuggestedLevel: int
-            }
+            let ROUTE = (POST, "/tables/suggestions")
 
-        [<Json.AutoCodec>]
-        type Response = { Suggestions: Suggestion array }
+            [<Json.AutoCodec>]
+            type Request =
+                {
+                    ChartId: string
+                    OsuBeatmapId: int
+                    EtternaPackId: int
+                    Artist: string
+                    Title: string
+                    Difficulty: string
+                    TableFor: string
+                    SuggestedLevel: int
+                }
 
-        let get (table: string, callback: Response option -> unit) =
-            Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
+            let post (request: Request, callback: bool option -> unit) =
+                Client.post<Request> (snd ROUTE, request, callback)
+
+        /// url parameters:
+        ///  table - id of table to get ranking for e.g 'crescent' or 'mizu'
+        module List =
+
+            let ROUTE = (GET, "/tables/suggestions")
+
+            [<Json.AutoCodec>]
+            type Suggestion =
+                {
+                    Id: int64
+                    ChartId: string
+                    OsuBeatmapId: int
+                    EtternaPackId: int
+                    Artist: string
+                    Title: string
+                    Difficulty: string
+                    SuggestedLevel: int
+                }
+
+            [<Json.AutoCodec>]
+            type Response = { Suggestions: Suggestion array }
+
+            let get (table: string, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
 
 module Players =
 
@@ -235,56 +251,57 @@ module Players =
         let get (query: string, callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE + "?query=" + escape query, callback)
 
-    /// requires login token as Authorization header
-    /// url parameters:
-    ///  user - OPTIONAL: name of user to view profile of (not case sensitive)
     module Profile =
 
-        let ROUTE = (GET, "/players/profile")
+        /// requires login token as Authorization header
+        /// url parameters:
+        ///  user - OPTIONAL: name of user to view profile of (not case sensitive)
+        module View =
+            let ROUTE = (GET, "/players/profile")
 
-        [<Json.AutoCodec>]
-        type Badge = { Name: string; Colors: int32 list }
+            [<Json.AutoCodec>]
+            type Badge = { Name: string; Colors: int32 list }
 
-        [<Json.AutoCodec>]
-        type RecentScore =
-            {
-                Artist: string
-                Title: string
-                Difficulty: string
-                Score: float
-                Lamp: string
-                Mods: string
-                Timestamp: int64
-            }
+            [<Json.AutoCodec>]
+            type RecentScore =
+                {
+                    Artist: string
+                    Title: string
+                    Difficulty: string
+                    Score: float
+                    Lamp: string
+                    Mods: string
+                    Timestamp: int64
+                }
 
-        [<Json.AutoCodec>]
-        type Response =
-            {
-                Username: string
-                Color: int
-                Badges: Badge array
-                RecentScores: RecentScore array
-                DateSignedUp: int64
-                IsFriend: bool
-                IsMutualFriend: bool
-            }
+            [<Json.AutoCodec>]
+            type Response =
+                {
+                    Username: string
+                    Color: int
+                    Badges: Badge array
+                    RecentScores: RecentScore array
+                    DateSignedUp: int64
+                    IsFriend: bool
+                    IsMutualFriend: bool
+                }
 
-        let get_me (callback: Response option -> unit) =
-            Client.get<Response> (snd ROUTE, callback)
+            let get_me (callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE, callback)
 
-        let get (user: string, callback: Response option -> unit) =
-            Client.get<Response> (snd ROUTE + "?user=" + escape user, callback)
+            let get (user: string, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + "?user=" + escape user, callback)
 
-    /// requires login token as Authorization header
-    module ProfileOptions =
+        /// requires login token as Authorization header
+        module Options =
 
-        let ROUTE = (POST, "/players/profile/options")
+            let ROUTE = (POST, "/players/profile/options")
 
-        [<Json.AutoCodec>]
-        type Request = { Color: int }
+            [<Json.AutoCodec>]
+            type Request = { Color: int }
 
-        let post (request: Request, callback: bool option -> unit) =
-            Client.post<Request> (snd ROUTE, request, callback)
+            let post (request: Request, callback: bool option -> unit) =
+                Client.post<Request> (snd ROUTE, request, callback)
 
 module Friends =
 
@@ -330,7 +347,7 @@ module Friends =
 
 module Health =
 
-    module HealthCheck =
+    module Status =
 
         let ROUTE = (GET, "/health")
 

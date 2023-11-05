@@ -58,6 +58,7 @@ type TableAddSuggestion =
 
 module TableAddSuggestion =
 
+    let id (key: string) = key.Substring(18) |> int64
     let key (id: int64) =
         RedisKey(sprintf "table_suggest_add:%i" id)
 
@@ -89,5 +90,5 @@ module TableAddSuggestion =
                     .Limit(0, 100)
             )
             .Documents
-        |> Seq.map (fun d -> Text.Json.JsonSerializer.Deserialize<TableAddSuggestion>(d.Item "json"))
+        |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<TableAddSuggestion>(d.Item "json"))
         |> Array.ofSeq

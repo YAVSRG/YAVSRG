@@ -5,7 +5,7 @@ open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 
 
-module HealthCheck =
+module Status =
 
     let mutable private request_counter = 0
 
@@ -26,6 +26,6 @@ module HealthCheck =
                             "Everything will be ok. This endpoint has been called %i times since last restart."
                             request_counter
                 }
-                : Health.HealthCheck.Response
+                : Health.Status.Response
             )
         }

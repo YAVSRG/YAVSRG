@@ -18,7 +18,7 @@ module List =
         async {
             let userId, _ = authorize headers
 
-            let friends = Friends.friends_list userId |> Array.choose id
+            let friends = Friends.friends_list userId
             let! online = LoggedInUsers.find_sessions (friends |> Array.map (fun u -> u.Username))
 
             response.ReplyJson(

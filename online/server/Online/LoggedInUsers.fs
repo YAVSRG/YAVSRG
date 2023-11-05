@@ -22,15 +22,17 @@ module LoggedInUsers =
         | Login of Guid * string
         | Logout of Guid
 
-    let private lock_obj = Object()
+    let private LOCK_OBJ = Object()
     let private user_states = Dictionary<Guid, UserState>()
     let private usernames = Dictionary<string, Guid>()
+
+    // todo: this code CAN be written as locks since it doesn't communicate with any other services just internal state
 
     let private state_change = 
         { new Async.Service<Action, unit>() with 
             override this.Handle(req) = 
                 async {
-                    lock lock_obj <| fun () ->
+                    lock LOCK_OBJ <| fun () ->
                     match req with
 
                     | Action.Connect id ->
@@ -102,7 +104,7 @@ module LoggedInUsers =
             { new Async.Service<unit, (int64 * string) array>() with 
                 override this.Handle(req) = 
                     async {
-                        let states = lock lock_obj <| fun () -> Array.ofSeq user_states.Values
+                        let states = lock LOCK_OBJ <| fun () -> Array.ofSeq user_states.Values
                         return states |> Array.choose (function UserState.LoggedIn (id, username) -> Some (id, username) | _ -> None)
                     }
             }
@@ -113,7 +115,7 @@ module LoggedInUsers =
             { new Async.Service<Guid, string option>() with 
                 override this.Handle(req) = 
                     async {
-                        let ok, state = lock lock_obj <| fun () -> user_states.TryGetValue req
+                        let ok, state = lock LOCK_OBJ <| fun () -> user_states.TryGetValue req
                         if ok then
                             match state with
                             | UserState.LoggedIn (_, username) -> return Some username
@@ -129,7 +131,7 @@ module LoggedInUsers =
                 override this.Handle(req) =
                     async {
                         return
-                            lock lock_obj <| fun () ->
+                            lock LOCK_OBJ <| fun () ->
                             Array.map (fun username -> match usernames.TryGetValue username with true, id -> Some id | false, _ -> None) req
                     }
             }
