@@ -22,7 +22,7 @@ let main argv =
     Logging.Info "Welcome to the Prelude test track"
 
     //Imports.main()
-    OsuScoreMigration.main()
+    Wife3.main()
 
     Logging.Info "Test track complete!"
 
