@@ -342,14 +342,16 @@ type Profile() as this =
                                 data.Username,
                                 function
                                 | Some true ->
-                                    this.SetData(
-                                        { data with
-                                            IsFriend = false
-                                            IsMutualFriend = false
-                                        }
-                                    )
+                                    sync
+                                    <| fun () ->
+                                        this.SetData(
+                                            { data with
+                                                IsFriend = false
+                                                IsMutualFriend = false
+                                            }
+                                        )
 
-                                    Players.update_friends_list ()
+                                        Players.update_friends_list ()
                                 | _ -> Notifications.error ("Error removing friend", "")
                             )
                         ),
@@ -376,8 +378,10 @@ type Profile() as this =
                                 { User = data.Username },
                                 function
                                 | Some true ->
-                                    this.SetData({ data with IsFriend = true })
-                                    Players.update_friends_list ()
+                                    sync 
+                                    <| fun () -> 
+                                        this.SetData({ data with IsFriend = true })
+                                        Players.update_friends_list ()
                                 | _ -> Notifications.error ("Error adding friend", "")
                             )
                         ),
@@ -402,7 +406,7 @@ type Profile() as this =
                                 Players.Profile.Options.post (
                                     { Color = color },
                                     function
-                                    | Some true -> this.SetData({ data with Color = color })
+                                    | Some true -> sync <| fun () -> this.SetData({ data with Color = color })
                                     | _ -> Notifications.error ("Error updating profile", "")
                                 )
 

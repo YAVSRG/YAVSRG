@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Utils
 open Interlude.UI
 open Interlude.Utils
 
@@ -25,16 +26,20 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render: 'T -
     let data = Setting.simple Unchecked.defaultof<'T> |> Setting.trigger rerender
 
     member this.Offline() =
+        require_ui_thread()
         status <- WebRequestState.Offline
 
     member this.ServerError() =
+        require_ui_thread()
         status <- WebRequestState.ServerError
 
     member this.SetData result =
+        require_ui_thread()
         status <- WebRequestState.Loaded
         data.Value <- result
 
     member this.Reload() =
+        require_ui_thread()
         status <- WebRequestState.Loading
         load this
 
