@@ -91,34 +91,37 @@ type Table =
 
     member this.Contains(cc: CachedChart) : bool = this.Contains cc.Hash
 
-    member this.AddChart(level: string, cid: string, chart: CachedChart) : bool =
+    member this.AddChart(level: int, cid: string, keymode: int, hash: string) : bool =
         if
             this.Levels
-            |> Seq.forall (fun l -> l.Charts |> Seq.forall (fun c -> c.Id <> cid && c.Hash <> chart.Hash))
+            |> Seq.forall (fun l -> l.Charts |> Seq.forall (fun c -> c.Id <> cid && c.Hash <> hash))
             |> not
         then
             false
-        else if chart.Keys <> this.Keymode then
+        else if keymode <> this.Keymode then
             false
         else
 
             let l = this.Level level
 
-            if l.Charts.TrueForAll(fun c -> c.Hash <> chart.Hash) then
-                l.Charts.Add { Id = cid; Hash = chart.Hash }
+            if l.Charts.TrueForAll(fun c -> c.Hash <> hash) then
+                l.Charts.Add { Id = cid; Hash = hash }
                 true
             else
                 false
 
-    member this.RemoveChart(chart: CachedChart) : bool =
+
+    member this.RemoveChart(hash: string) : bool =
         let mutable removed = false
 
         for l in this.Levels do
-            match Seq.tryFind (fun c -> c.Hash = chart.Hash) l.Charts with
+            match Seq.tryFind (fun c -> c.Hash = hash) l.Charts with
             | Some c -> removed <- l.Charts.Remove c
             | None -> ()
 
         removed
+
+    member this.RemoveChart(chart: CachedChart) : bool = this.RemoveChart(chart.Hash)
 
     member this.Rating (grade: int) (level: Level, chart: TableChart) =
         match grade with
@@ -152,12 +155,12 @@ module Table =
 
     let private loaded = ResizeArray<Loaded>()
 
-    let generate_cid (chart: CachedChart) =
+    let generate_cid (creator: string, title: string) =
         let strip =
             let regex = System.Text.RegularExpressions.Regex("[^\sa-zA-Z0-9_-]")
             fun (s: string) -> regex.Replace(s.ToLowerInvariant(), "").Trim().Replace(" ", "-")
 
-        sprintf "%s/%s" (strip chart.Creator) (strip chart.Title)
+        sprintf "%s/%s" (strip creator) (strip title)
 
     let generate_table_name (name: string) =
         let strip =

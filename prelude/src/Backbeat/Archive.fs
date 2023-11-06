@@ -135,6 +135,7 @@ type Chart =
         Sources: ChartSource list
         LastUpdated: DateTime
     }
+    member this.FormattedCreators = String.concat ", " this.Creators
 
 type Charts = Dictionary<ChartHash, Chart>
 
