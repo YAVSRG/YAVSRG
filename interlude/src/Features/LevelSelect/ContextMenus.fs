@@ -56,31 +56,34 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 let chart = Chart.CHART.Value
 
                 content
-                |* PageButton.Once(
+                |* PageButton(
                     "chart.suggest_for_table",
                     (fun () ->
-                        Tables.Suggestions.Add.post (
-                            {
-                                ChartId = cc.Hash
-                                OsuBeatmapId =
-                                    match chart.Header.ChartSource with
-                                    | Osu(_, id) -> id
-                                    | _ -> -1
-                                EtternaPackId =
-                                    match chart.Header.ChartSource with
-                                    | Stepmania(pack) -> pack
-                                    | _ -> -1
-                                Artist = cc.Artist
-                                Title = cc.Title
-                                Difficulty = cc.DifficultyName
-                                TableFor = table.Name.ToLower()
-                                SuggestedLevel = 0
-                            },
-                            function
-                            | Some true ->
-                                Notifications.action_feedback (Icons.add_to_collection, "Suggestion sent!", "")
-                            | _ -> Notifications.error ("Error sending suggestion", "")
-                        )
+                        SelectTableLevelPage(fun level ->
+                            Tables.Suggestions.Add.post (
+                                {
+                                    ChartId = cc.Hash
+                                    OsuBeatmapId =
+                                        match chart.Header.ChartSource with
+                                        | Osu(_, id) -> id
+                                        | _ -> -1
+                                    EtternaPackId =
+                                        match chart.Header.ChartSource with
+                                        | Stepmania(pack) -> pack
+                                        | _ -> -1
+                                    Artist = cc.Artist
+                                    Title = cc.Title
+                                    Difficulty = cc.DifficultyName
+                                    TableFor = table.Name.ToLower()
+                                    SuggestedLevel = level.Rank
+                                },
+                                function
+                                | Some true ->
+                                    Notifications.action_feedback (Icons.add_to_collection, "Suggestion sent!", "")
+                                | _ -> Notifications.error ("Error sending suggestion", "")
+                            )
+                            Menu.Back()
+                        ).Show()
                     )
                 )
         | None -> ()
@@ -141,7 +144,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         | LibraryGroupContext.None -> GroupContextMenu(name, charts, context).Show()
         | LibraryGroupContext.Folder id -> EditFolderPage(id, Library.collections.GetFolder(id).Value).Show()
         | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value).Show()
-        | LibraryGroupContext.Table lvl -> EditLevelPage(Table.current().Value.TryLevel(lvl).Value).Show()
+        | LibraryGroupContext.Table lvl -> ()
 
 type ScoreContextMenu(score: ScoreInfoProvider) as this =
     inherit Page()
