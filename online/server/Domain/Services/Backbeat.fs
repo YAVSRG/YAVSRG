@@ -68,7 +68,9 @@ module Backbeat =
         WebServices.download_json (
             "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/tables/crescent.table",
             function
-            | Some(t: Table) -> tables <- Map.ofList [ "crescent", t ]
+            | Some(t: Table) ->
+                tables <- Map.ofList [ "crescent", t ]
+                TableWithSuggestions.update_if_newer ("crescent", t)
             | None -> Logging.Error("Failed to get Crescent from Backbeat repo")
         )
 

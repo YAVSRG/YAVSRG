@@ -69,6 +69,17 @@ module TableSuggestion =
         save (new_id, suggestion)
         new_id
 
+    let delete (id: int64) = json.Del(key id, "$") |> ignore
+
+    let by_id (id: int64) =
+        let result = json.Get(key id, [| "$" |])
+
+        if result.IsNull then
+            None
+        else
+            let s: string = RedisResult.op_Explicit result
+            Some <| Text.Json.JsonSerializer.Deserialize<TableSuggestion>(s)
+
     let try_get_existing (chart_id: string, table_for: string) =
         ft
             .Search(
@@ -91,3 +102,30 @@ module TableSuggestion =
             .Documents
         |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<TableSuggestion>(d.Item "json"))
         |> Array.ofSeq
+
+open Prelude.Common
+open Prelude.Data.Charts.Tables
+
+module TableWithSuggestions =
+
+    let key (id: string) = RedisKey(sprintf "table_preview:%s" id)
+
+    let get (id) =
+        let result = db.StringGet(key id)
+
+        if result.IsNullOrEmpty then
+            None
+        else
+            let s: string = result.ToString()
+            Result.toOption <| JSON.FromString<Table>(s)
+
+    let update (id: string, table: Table) =
+        db.StringSet(key id, JSON.ToString table) |> ignore
+
+    let update_if_newer (id: string, table: Table) =
+        if
+            match get id with
+            | None -> true
+            | Some existing -> existing.Version < table.Version
+        then
+            update (id, table)

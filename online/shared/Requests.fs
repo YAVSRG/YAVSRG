@@ -191,8 +191,9 @@ module Tables =
             let post (request: Request, callback: bool option -> unit) =
                 Client.post<Request> (snd ROUTE, request, callback)
 
+        /// requires login token as Authorization header
         /// url parameters:
-        ///  table - id of table to get ranking for e.g 'crescent' or 'mizu'
+        ///  table - id of table to get suggestions for e.g 'crescent' or 'mizu'
         module List =
 
             let ROUTE = (GET, "/tables/suggestions")
@@ -207,11 +208,39 @@ module Tables =
                     Artist: string
                     Title: string
                     Difficulty: string
-                    SuggestedLevels: Map<int64, int>
+                    LevelsSuggestedBy: Map<int, string array>
                 }
 
             [<Json.AutoCodec>]
             type Response = { Suggestions: Suggestion array }
+
+            let get (table: string, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
+
+        // todo: another endpoint to tell CLI tools what needs adding to backbeat
+
+        /// requires login token as Authorization header
+        /// requires 'table-editor' badge for permission
+        module Apply =
+
+            let ROUTE = (POST, "/tables/suggestions/apply")
+
+            [<Json.AutoCodec>]
+            type Request = { Id: int64; Level: int }
+
+            let post (request: Request, callback: bool option -> unit) =
+                Client.post<Request> (snd ROUTE, request, callback)
+
+        /// url parameters:
+        ///  table - id of table to get preview of e.g 'crescent' or 'mizu'
+        module Preview =
+
+            open Prelude.Data.Charts.Tables
+
+            let ROUTE = (GET, "/tables/suggestions/preview")
+
+            [<Json.AutoCodec>]
+            type Response = { Table: Table }
 
             let get (table: string, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)

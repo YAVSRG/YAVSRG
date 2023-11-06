@@ -19,15 +19,8 @@ module Add =
         async {
             let userId, user = authorize headers
 
-            // if not (user.Badges.Contains Badge.TABLE_EDITOR) then
-            //     Logging.Error(sprintf "User '%s' doesn't have permission to suggest for tables" user.Username)
-            //     raise PermissionDeniedException
-            // else
-
             match JSON.FromString body with
-            | Error e ->
-                Logging.Error(sprintf "Error parsing body for api/tables/suggestions/add: %s" e.Message)
-                raise (BadRequestException None)
+            | Error e -> raise (BadRequestException None)
             | Ok(request: Tables.Suggestions.Add.Request) ->
 
             match Backbeat.tables.TryFind(request.TableFor) with
