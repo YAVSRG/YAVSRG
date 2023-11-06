@@ -17,6 +17,8 @@ module Utils =
     exception NotAuthorizedException
     exception NotFoundException
     exception AuthorizeFailedException
+    exception PermissionDeniedException
+    exception BadRequestException of Message: string option
 
     let authorize (header: Map<string, string>) =
         if header.ContainsKey("Authorization") then
@@ -25,3 +27,7 @@ module Utils =
             | None -> raise AuthorizeFailedException
         else
             raise NotAuthorizedException
+
+    let require_query_parameter (query_params: Map<string, string array>) (name: string) =
+        if not (query_params.ContainsKey name) then
+            raise (BadRequestException(Some(sprintf "'%s' is required" name)))

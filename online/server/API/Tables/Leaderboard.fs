@@ -15,10 +15,7 @@ module Leaderboard =
             response: HttpResponse
         ) =
         async {
-            if not (query_params.ContainsKey "table") then
-                response.MakeErrorResponse(400, "'table' is required") |> ignore
-            else
-
+            require_query_parameter query_params "table"
             let _, _ = authorize headers
 
             let table_id = query_params.["table"].[0]

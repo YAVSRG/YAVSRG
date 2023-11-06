@@ -20,7 +20,7 @@ module Add =
             let userId, _ = authorize headers
 
             match JSON.FromString body with
-            | Error e -> Logging.Error(sprintf "Error parsing body for api/friends: %s" e.Message)
+            | Error e -> raise (BadRequestException None)
             | Ok(request: Friends.Add.Request) ->
 
             match User.by_username request.User with

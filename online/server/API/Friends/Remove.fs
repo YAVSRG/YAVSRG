@@ -14,11 +14,8 @@ module Remove =
             response: HttpResponse
         ) =
         async {
+            require_query_parameter query_params "user"
             let userId, _ = authorize headers
-
-            if not (query_params.ContainsKey "user") then
-                response.MakeErrorResponse(400, "'user' is required") |> ignore
-            else
 
             match User.by_username query_params.["user"].[0] with
             | Some(id, user) ->

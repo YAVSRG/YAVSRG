@@ -15,22 +15,15 @@ module Leaderboard =
             response: HttpResponse
         ) =
         async {
-            if not (query_params.ContainsKey "chart") then
-                response.MakeErrorResponse(400, "'chart' is required") |> ignore
-            else if not (query_params.ContainsKey "ruleset") then
-                response.MakeErrorResponse(400, "'ruleset' is required") |> ignore
-            else
-
+            require_query_parameter query_params "chart"
+            require_query_parameter query_params "ruleset"
             let _, _ = authorize headers
 
             let hash = query_params.["chart"].[0].ToUpper()
             let ruleset = query_params.["ruleset"].[0]
 
             let ruleset =
-                if
-                    ruleset <> Score.RULESETS.[0]
-                    && not (Leaderboard.exists hash ruleset)
-                then
+                if ruleset <> Score.RULESETS.[0] && not (Leaderboard.exists hash ruleset) then
                     Score.RULESETS.[0]
                 else
                     ruleset

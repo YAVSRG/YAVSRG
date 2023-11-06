@@ -15,35 +15,33 @@ module List =
             response: HttpResponse
         ) =
         async {
-            if not (query_params.ContainsKey "table") then
-                response.MakeErrorResponse(400, "'table' is required") |> ignore
-            else
+            require_query_parameter query_params "table"
 
             let table = query_params.["table"].[0]
 
-            if table <> "crescent" then
-                raise NotFoundException
-            else
+            match Backbeat.tables.TryFind table with
+            | None -> raise NotFoundException
+            | _ ->
 
-                let suggestions = TableSuggestion.list table
+            let suggestions = TableSuggestion.list table
 
-                response.ReplyJson(
-                    {
-                        Suggestions =
-                            suggestions
-                            |> Array.map (fun (id, x) ->
-                                {
-                                    Id = id
-                                    ChartId = x.ChartId
-                                    OsuBeatmapId = x.OsuBeatmapId
-                                    EtternaPackId = x.EtternaPackId
-                                    Artist = x.Artist
-                                    Title = x.Title
-                                    Difficulty = x.Difficulty
-                                    SuggestedLevel = x.SuggestedLevel
-                                }
-                            )
-                    }
-                    : Tables.Suggestions.List.Response
-                )
+            response.ReplyJson(
+                {
+                    Suggestions =
+                        suggestions
+                        |> Array.map (fun (id, x) ->
+                            {
+                                Id = id
+                                ChartId = x.ChartId
+                                OsuBeatmapId = x.OsuBeatmapId
+                                EtternaPackId = x.EtternaPackId
+                                Artist = x.Artist
+                                Title = x.Title
+                                Difficulty = x.Difficulty
+                                SuggestedLevels = x.SuggestedLevels
+                            }
+                        )
+                }
+                : Tables.Suggestions.List.Response
+            )
         }

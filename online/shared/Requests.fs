@@ -207,7 +207,7 @@ module Tables =
                     Artist: string
                     Title: string
                     Difficulty: string
-                    SuggestedLevel: int
+                    SuggestedLevels: Map<int64, int>
                 }
 
             [<Json.AutoCodec>]

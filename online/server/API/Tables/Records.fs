@@ -15,16 +15,9 @@ module Records =
             response: HttpResponse
         ) =
         async {
+            require_query_parameter query_params "user"
+            require_query_parameter query_params "table"
             let userId, _ = authorize headers
-
-            if not (query_params.ContainsKey "user") then
-                response.MakeErrorResponse(400, "'user' is required") |> ignore
-            else if
-
-                not (query_params.ContainsKey "table")
-            then
-                response.MakeErrorResponse(400, "'table' is required") |> ignore
-            else
 
             match User.by_username query_params.["user"].[0] with
             | None -> raise NotFoundException

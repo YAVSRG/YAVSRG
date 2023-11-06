@@ -49,13 +49,10 @@ module Save =
             response: HttpResponse
         ) =
         async {
-            // authorisation, validation, etc
             let userId, user = authorize headers
 
             match JSON.FromString body with
-            | Error e ->
-                Logging.Error(sprintf "Error parsing body for api/charts/scores: %s" e.Message)
-                response.MakeErrorResponse(400) |> ignore
+            | Error e -> raise (BadRequestException None)
             | Ok(request: Charts.Scores.Save.Request) -> // todo: basic clamp on how much data can be sent in one request (about 10kb?)
 
             let hash = request.ChartId.ToUpper()

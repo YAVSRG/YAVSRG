@@ -15,11 +15,8 @@ module Search =
             response: HttpResponse
         ) =
         async {
+            require_query_parameter query_params "query"
             let _, _ = authorize headers
-
-            if not (query_params.ContainsKey "query") then
-                response.MakeErrorResponse(400, "'query' is required") |> ignore
-            else
 
             let matches = User.search_by_username query_params.["query"].[0]
             let users = User.by_ids (matches |> Array.map fst)

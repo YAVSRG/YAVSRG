@@ -43,21 +43,21 @@ module TableRanking =
 
 type TableSuggestion =
     {
-        UserId: int64
         ChartId: string
+        TableFor: string
         OsuBeatmapId: int
         EtternaPackId: int
         Artist: string
         Title: string
         Difficulty: string
-        TableFor: string
-        SuggestedLevel: int
+        SuggestedLevels: Map<int64, int>
         Timestamp: int64
     }
 
 module TableSuggestion =
 
     let id (key: string) = key.Substring(18) |> int64
+
     let key (id: int64) =
         RedisKey(sprintf "table_suggest_add:%i" id)
 

@@ -56,6 +56,10 @@ module API =
                 | :? NotAuthorizedException -> response.MakeErrorResponse(401, "Needs authorization token") |> ignore
                 | :? NotFoundException -> response.MakeErrorResponse(404, "Not found") |> ignore
                 | :? AuthorizeFailedException -> response.MakeErrorResponse(403, "Bad authorization token") |> ignore
+                | :? PermissionDeniedException -> response.MakeErrorResponse(403, "Permission denied") |> ignore
+                | :? BadRequestException as err ->
+                    response.MakeErrorResponse(400, Option.defaultValue "Bad request" err.Message)
+                    |> ignore
                 | err ->
                     Logging.Error(sprintf "Error in %O %s: %O" method route err)
                     response.MakeErrorResponse(500, "Internal error") |> ignore

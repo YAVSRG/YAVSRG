@@ -33,9 +33,8 @@ module Discord =
             response: HttpResponse
         ) =
         async {
-            if not (query_params.ContainsKey "code" && query_params.ContainsKey "state") then
-                response.MakeErrorResponse(400) |> ignore
-            else
+            require_query_parameter query_params "code"
+            require_query_parameter query_params "state"
 
             let code = query_params.["code"].[0]
             let state = query_params.["state"].[0]

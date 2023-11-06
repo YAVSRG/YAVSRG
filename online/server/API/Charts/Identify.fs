@@ -15,9 +15,7 @@ module Identify =
             response: HttpResponse
         ) =
         async {
-            if not (query_params.ContainsKey "chart") then
-                response.MakeErrorResponse(400, "'chart' is required") |> ignore
-            else
+            require_query_parameter query_params "chart"
 
             let hash = query_params.["chart"].[0].ToUpper()
 

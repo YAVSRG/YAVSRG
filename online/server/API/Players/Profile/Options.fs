@@ -20,7 +20,7 @@ module Options =
             let userId, user = authorize headers
 
             match JSON.FromString body with
-            | Error e -> Logging.Error(sprintf "Error parsing body for api/players/profile: %s" e.Message)
+            | Error e -> raise (BadRequestException None)
             | Ok(request: Players.Profile.Options.Request) ->
 
             if
