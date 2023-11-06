@@ -41,10 +41,6 @@ module User =
     let id (key: string) = key.Substring(5) |> int64
     let key (id: int64) = RedisKey("user:" + id.ToString())
 
-    let escape (query: string) =
-        let regex = Text.RegularExpressions.Regex("[^a-zA-Z0-9'\\-_\\s]")
-        regex.Replace(query, "").Replace("'", "\\'").Replace("-", "\\-").Trim()
-
     let create (username, discord_id) =
         {
             Username = username

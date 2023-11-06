@@ -169,7 +169,7 @@ module UserCommands =
                     task {
                         let now = DateTimeOffset.UtcNow
 
-                        let formatTimeOffset (ts: int64) =
+                        let format_time_ago (ts: int64) =
                             let ts: TimeSpan = now - DateTimeOffset.FromUnixTimeMilliseconds(ts)
 
                             if ts.TotalDays > 365.0 then
@@ -187,7 +187,7 @@ module UserCommands =
                             else
                                 "Just now"
 
-                        let formatMods (score: Score) =
+                        let format_mods (score: Score) =
                             if score.Mods.IsEmpty then
                                 sprintf "%.2fx" score.Rate
                             else
@@ -232,8 +232,8 @@ module UserCommands =
                                                     "`%6.2f%%` `%6s` `%6s` `%8s`"
                                                     (s.Score * 100.0)
                                                     (Backbeat.rulesets.[s.RulesetId].LampName s.Lamp)
-                                                    (formatMods s)
-                                                    (formatTimeOffset s.Timestamp)
+                                                    (format_mods s)
+                                                    (format_time_ago s.Timestamp)
                                             )
                                             |> String.concat "\n"
                                         )

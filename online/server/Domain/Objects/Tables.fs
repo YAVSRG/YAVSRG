@@ -51,7 +51,7 @@ type TableSuggestion =
         Title: string
         Difficulty: string
         SuggestedLevels: Map<int64, int>
-        Timestamp: int64
+        LastUpdated: int64
     }
 
 module TableSuggestion =
@@ -59,22 +59,22 @@ module TableSuggestion =
     let id (key: string) = key.Substring(18) |> int64
 
     let key (id: int64) =
-        RedisKey(sprintf "table_suggest_add:%i" id)
+        RedisKey(sprintf "table_suggestion:%i" id)
 
     let save (id, suggestion: TableSuggestion) =
         json.Set(key id, "$", suggestion) |> ignore
 
     let save_new (suggestion: TableSuggestion) : int64 =
-        let new_id = db.StringIncrement("count:table_suggest_add", 1L)
+        let new_id = db.StringIncrement("count:table_suggestions", 1L)
         save (new_id, suggestion)
         new_id
 
     let try_get_existing (chart_id: string, table_for: string) =
         ft
             .Search(
-                "idx:table_suggest_add",
-                Query(sprintf "@chart_id:{%s} @table_for:{%s}" chart_id table_for)
-                    .SetSortBy("timestamp", true)
+                "idx:table_suggestions",
+                Query(sprintf "@chart_id:{%s} @table_for:{%s}" (escape chart_id) (escape table_for))
+                    .SetSortBy("last_updated", true)
             )
             .Documents
         |> Seq.tryExactlyOne
@@ -83,9 +83,9 @@ module TableSuggestion =
     let list (table_for: string) =
         ft
             .Search(
-                "idx:table_suggest_add",
+                "idx:table_suggestions",
                 Query(sprintf "@table_for:{%s}" table_for)
-                    .SetSortBy("timestamp", true)
+                    .SetSortBy("last_updated", true)
                     .Limit(0, 100)
             )
             .Documents

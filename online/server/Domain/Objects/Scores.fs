@@ -70,8 +70,8 @@ module Score =
                             userId
                             userId
                             rate
-                            hash
-                            (ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
+                            (escape hash)
+                            (escape <| ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
                     )
                         .SetSortBy("score", false)
                         .Limit(0, 1)
@@ -97,7 +97,7 @@ module Score =
                         userId
                         userId
                         rate
-                        (ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
+                        (escape <| ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
                 )
                     .Verbatim()
                     .GroupBy("@hash", Reducers.Max("grade").As("best_grade"))
@@ -123,7 +123,7 @@ module Score =
                         userId
                         userId
                         rate
-                        (ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
+                        (escape <| ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
                 )
                     .Verbatim()
                     .GroupBy("@hash", Reducers.Max("score").As("best_score"))

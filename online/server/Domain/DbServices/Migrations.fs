@@ -79,3 +79,22 @@ module Migrations =
 
             db.StringIncrement("migration", 1L) |> ignore
             Logging.Debug("Migration 4 OK")
+
+        if migration < 6L then
+            Logging.Debug("Performing migration 5")
+
+            ft.DropIndex("idx:table_suggest_add", true) |> ignore
+            db.KeyDelete("count:table_suggest_add") |> ignore
+
+            ft.Create(
+                "idx:table_suggestions",
+                FTCreateParams().On(IndexDataType.JSON).Prefix("table_suggestion:"),
+                Schema()
+                    .AddTagField(FieldName("$.TableFor", "table_for"), false)
+                    .AddTagField(FieldName("$.ChartFor", "chart_for"), false)
+                    .AddNumericField(FieldName("$.LastUpdated", "last_updated"), true)
+            )
+            |> ignore
+
+            db.StringIncrement("migration", 1L) |> ignore
+            Logging.Debug("Migration 5 OK")

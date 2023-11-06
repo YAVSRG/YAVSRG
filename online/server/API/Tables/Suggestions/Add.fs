@@ -52,7 +52,7 @@ module Add =
                         OsuBeatmapId = max existing_value.OsuBeatmapId request.OsuBeatmapId
                         EtternaPackId = max existing_value.EtternaPackId request.EtternaPackId
                         SuggestedLevels = Map.add userId request.SuggestedLevel existing_value.SuggestedLevels
-                        Timestamp = timestamp
+                        LastUpdated = timestamp
                     }
                 )
 
@@ -71,7 +71,7 @@ module Add =
                         Title = request.Title
                         Difficulty = request.Difficulty
                         SuggestedLevels = Map.ofList [ userId, request.SuggestedLevel ]
-                        Timestamp = timestamp
+                        LastUpdated = timestamp
                     }
 
             Logging.Info(sprintf "Saved new table suggestion #%i" id)

@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Web.Server.Domain
 
+open System.Text.RegularExpressions
 open System.Net.Security
 open System.Security.Authentication
 open System.Security.Cryptography.X509Certificates
@@ -33,3 +34,7 @@ module Redis =
     let db = redis.GetDatabase()
     let ft = db.FT()
     let json = db.JSON()
+
+    let escape (query: string) =
+        let regex = Regex("[^a-zA-Z0-9'\\-_\\s]")
+        regex.Replace(query, "").Replace("'", "\\'").Replace("-", "\\-").Trim()
