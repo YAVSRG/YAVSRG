@@ -42,15 +42,19 @@ type Table =
 
     member private this.Level(id: string) : Level = this.Levels.Find(fun l -> l.Name = id)
 
+    member private this.Level(rank: int) : Level =
+        this.Levels.Find(fun l -> l.Rank = rank)
+
     member this.TryLevel(id: string) : Level option =
         Seq.tryFind (fun (l: Level) -> l.Name = id) this.Levels
+
+    member this.TryLevel(rank: int) : Level option =
+        Seq.tryFind (fun (l: Level) -> l.Rank = rank) this.Levels
 
     member this.AddLevel(id: string, rank: int) : bool =
         if id = "" then
             false
-        else if
-            Seq.forall (fun (l: Level) -> l.Name <> id && l.Rank <> rank) this.Levels |> not
-        then
+        else if Seq.forall (fun (l: Level) -> l.Name <> id && l.Rank <> rank) this.Levels |> not then
             false
         else
 
@@ -69,10 +73,7 @@ type Table =
     member this.RenameLevel(old_name: string, new_name: string) =
         if new_name = "" then
             false
-        else if
-
-            this.TryLevel(new_name).IsSome
-        then
+        else if this.TryLevel(new_name).IsSome then
             false
         else
             this.Level(old_name).Name <- new_name
@@ -80,10 +81,10 @@ type Table =
 
     // Charts
 
-    member this.LevelOf(hash: string) : Level =
-        this.Levels.Find(fun l -> l.Charts.Any(fun c -> c.Hash = hash))
+    member this.LevelOf(hash: string) : Level option =
+        this.Levels |> Seq.tryFind (fun l -> l.Charts.Any(fun c -> c.Hash = hash))
 
-    member this.LevelOf(cc: CachedChart) : Level = this.LevelOf cc.Hash
+    member this.LevelOf(cc: CachedChart) : Level option = this.LevelOf cc.Hash
 
     member this.Contains(hash: string) : bool =
         this.Levels.Any(fun l -> l.Charts.Any(fun c -> c.Hash = hash))
