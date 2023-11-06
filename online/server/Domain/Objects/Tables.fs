@@ -56,7 +56,7 @@ type TableSuggestion =
 
 module TableSuggestion =
 
-    let id (key: string) = key.Substring(18) |> int64
+    let id (key: string) = key.Substring(17) |> int64
 
     let key (id: int64) =
         RedisKey(sprintf "table_suggestion:%i" id)
@@ -84,7 +84,7 @@ module TableSuggestion =
         ft
             .Search(
                 "idx:table_suggestions",
-                Query(sprintf "@table_for:{%s}" table_for)
+                Query(sprintf "@table_for:{%s}" (escape table_for))
                     .SetSortBy("last_updated", true)
                     .Limit(0, 100)
             )

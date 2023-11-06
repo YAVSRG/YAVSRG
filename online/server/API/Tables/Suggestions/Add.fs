@@ -19,10 +19,10 @@ module Add =
         async {
             let userId, user = authorize headers
 
-            if not (user.Badges.Contains Badge.TABLE_EDITOR) then
-                Logging.Error(sprintf "User '%s' doesn't have permission to suggest for tables" user.Username)
-                raise PermissionDeniedException
-            else
+            // if not (user.Badges.Contains Badge.TABLE_EDITOR) then
+            //     Logging.Error(sprintf "User '%s' doesn't have permission to suggest for tables" user.Username)
+            //     raise PermissionDeniedException
+            // else
 
             match JSON.FromString body with
             | Error e ->

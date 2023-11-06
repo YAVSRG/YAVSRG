@@ -91,7 +91,7 @@ module Migrations =
                 FTCreateParams().On(IndexDataType.JSON).Prefix("table_suggestion:"),
                 Schema()
                     .AddTagField(FieldName("$.TableFor", "table_for"), false)
-                    .AddTagField(FieldName("$.ChartFor", "chart_for"), false)
+                    .AddTagField(FieldName("$.ChartId", "chart_id"), false)
                     .AddNumericField(FieldName("$.LastUpdated", "last_updated"), true)
             )
             |> ignore
