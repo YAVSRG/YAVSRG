@@ -5,7 +5,7 @@ open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
 
-module List =
+module Missing =
 
     let handle
         (
@@ -16,7 +16,6 @@ module List =
         ) =
         async {
             require_query_parameter query_params "table"
-            let _, user = authorize headers
 
             let table = query_params.["table"].[0]
 
@@ -26,38 +25,11 @@ module List =
 
             let suggestions = TableSuggestion.list table
 
-            let user_ids =
-                suggestions
-                |> Seq.map (fun (id, x) -> x.SuggestedLevels.Keys)
-                |> Seq.concat
-                |> Seq.distinct
-                |> Array.ofSeq
-
-            let user_map = Array.zip user_ids (User.by_ids user_ids) |> Map.ofSeq
-
-            let map_suggested_by (user_suggestions: Map<int64, int>) =
-                user_suggestions
-                |> Map.toSeq
-                |> Seq.groupBy snd
-                |> Seq.map (fun (level, users) ->
-                    level,
-                    users
-                    |> Seq.map fst
-                    |> Seq.map (fun id ->
-                        match user_map.TryFind(id) with
-                        | Some(Some user) -> user.Username
-                        | _ -> "???"
-                    )
-                    |> Array.ofSeq
-                )
-                |> Map.ofSeq
-
-            let has_permission_to_apply = user.Badges.Contains(Badge.TABLE_EDITOR)
-
             response.ReplyJson(
                 {
                     Suggestions =
                         suggestions
+                        |> Array.filter (fun (_, x) -> (Backbeat.Charts.by_hash x.ChartId).IsNone)
                         |> Array.map (fun (id, x) ->
                             {
                                 Id = id
@@ -68,11 +40,9 @@ module List =
                                 Title = x.Title
                                 Creator = x.Creator
                                 Difficulty = x.Difficulty
-                                LevelsSuggestedBy = map_suggested_by x.SuggestedLevels
-                                CanApply = has_permission_to_apply && (Backbeat.Charts.by_hash x.ChartId).IsSome
                             }
                         )
                 }
-                : Tables.Suggestions.List.Response
+                : Tables.Suggestions.Missing.Response
             )
         }

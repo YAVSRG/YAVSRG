@@ -49,6 +49,7 @@ type TableSuggestion =
         EtternaPackId: int
         Artist: string
         Title: string
+        Creator: string
         Difficulty: string
         SuggestedLevels: Map<int64, int>
         LastUpdated: int64
@@ -78,7 +79,7 @@ module TableSuggestion =
             None
         else
             let s: string = RedisResult.op_Explicit result
-            Some <| Text.Json.JsonSerializer.Deserialize<TableSuggestion>(s)
+            Some <| Text.Json.JsonSerializer.Deserialize<TableSuggestion array>(s).[0]
 
     let try_get_existing (chart_id: string, table_for: string) =
         ft

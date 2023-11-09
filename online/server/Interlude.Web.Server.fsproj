@@ -28,6 +28,7 @@
     <Compile Include="API\Tables\Suggestions\List.fs" />
     <Compile Include="API\Tables\Suggestions\Apply.fs" />
     <Compile Include="API\Tables\Suggestions\Preview.fs" />
+    <Compile Include="API\Tables\Suggestions\Missing.fs" />
     <Compile Include="API\Tables\Leaderboard.fs" />
     <Compile Include="API\Tables\Records.fs" />
     <Compile Include="API\Friends\List.fs" />

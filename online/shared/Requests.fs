@@ -183,6 +183,7 @@ module Tables =
                     EtternaPackId: int
                     Artist: string
                     Title: string
+                    Creator: string
                     Difficulty: string
                     TableFor: string
                     SuggestedLevel: int
@@ -207,8 +208,10 @@ module Tables =
                     EtternaPackId: int
                     Artist: string
                     Title: string
+                    Creator: string
                     Difficulty: string
                     LevelsSuggestedBy: Map<int, string array>
+                    CanApply: bool
                 }
 
             [<Json.AutoCodec>]
@@ -217,7 +220,30 @@ module Tables =
             let get (table: string, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
 
-        // todo: another endpoint to tell CLI tools what needs adding to backbeat
+        /// url parameters:
+        ///  table - id of table to get suggestions for e.g 'crescent' or 'mizu'
+        module Missing =
+
+            let ROUTE = (GET, "/tables/suggestions/missing")
+
+            [<Json.AutoCodec>]
+            type Suggestion =
+                {
+                    Id: int64
+                    ChartId: string
+                    OsuBeatmapId: int
+                    EtternaPackId: int
+                    Artist: string
+                    Title: string
+                    Creator: string
+                    Difficulty: string
+                }
+
+            [<Json.AutoCodec>]
+            type Response = { Suggestions: Suggestion array }
+
+            let get (table: string, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
 
         /// requires login token as Authorization header
         /// requires 'table-editor' badge for permission

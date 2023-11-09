@@ -62,6 +62,7 @@ module Add =
                         EtternaPackId = request.EtternaPackId
                         Artist = request.Artist
                         Title = request.Title
+                        Creator = request.Creator
                         Difficulty = request.Difficulty
                         SuggestedLevels = Map.ofList [ userId, request.SuggestedLevel ]
                         LastUpdated = timestamp
