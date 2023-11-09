@@ -11,6 +11,7 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
+open Interlude.Features.LevelSelect.Tables
 
 type private ModeDropdown
     (options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =

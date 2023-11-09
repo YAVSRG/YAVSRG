@@ -13,6 +13,7 @@ open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Score
+open Interlude.Features.LevelSelect.Tables
 open Interlude.Web.Shared.Requests
 
 type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
@@ -73,6 +74,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                                         | _ -> -1
                                     Artist = cc.Artist
                                     Title = cc.Title
+                                    Creator = cc.Creator
                                     Difficulty = cc.DifficultyName
                                     TableFor = table.Name.ToLower()
                                     SuggestedLevel = level.Rank

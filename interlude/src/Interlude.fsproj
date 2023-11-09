@@ -83,7 +83,9 @@
     <Compile Include="Features\Play\Practice.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
     <Compile Include="Features\LevelSelect\Collections.fs" />
-    <Compile Include="Features\LevelSelect\Tables.fs" />
+    <Compile Include="Features\LevelSelect\Tables\ChooseLevel.fs" />
+    <Compile Include="Features\LevelSelect\Tables\Suggestions.fs" />
+    <Compile Include="Features\LevelSelect\Tables\Manage.fs" />
     <Compile Include="Features\LevelSelect\LibraryView.fs" />
     <Compile Include="Features\LevelSelect\ActionBar.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus.fs" />

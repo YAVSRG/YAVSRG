@@ -1,9 +1,9 @@
 ﻿namespace Interlude.UI
 
-module Icons = 
-    
+module Icons =
+
     open Percyqaz.Flux.Resources
-    
+
     let check = Feather.check
     let x = Feather.x
     let screenshot = Feather.image
