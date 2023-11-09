@@ -138,9 +138,9 @@ module Tables =
             for entry in folder.Charts |> List.ofSeq do
                 match Cache.by_key entry.Path interlude_cache with
                 | Some cc ->
-                    let id = Table.generate_cid cc
+                    let id = Table.generate_cid (cc.Creator, cc.Title)
 
-                    if table.AddChart("XXX", id, cc) then
+                    if table.AddChart(-1, id, cc.Keys, cc.Hash) then
                         printfn "+ %s" id
                         folder.Remove cc |> ignore
                 | None -> printfn "Chart key '%s' from collection not in cache" entry.Path
