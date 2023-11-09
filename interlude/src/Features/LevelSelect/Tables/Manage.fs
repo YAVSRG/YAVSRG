@@ -91,7 +91,7 @@ type ManageTablesPage() as this =
         if Table.current().IsSome then
             container
             |+ Dummy()
-            |* PageButton("tables.suggestions", fun () -> SuggestionsPage().Show())
+            |* PageButton("table.suggestions", fun () -> SuggestionsPage().Show())
 
         if container.Focused then
             container.Focus()

@@ -26,7 +26,7 @@ let launch (instance: int) =
     if OperatingSystem.IsWindows() then
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
-    let crashSplash =
+    let crash_splash =
         Utils.splash_message_picker ("CrashSplashes.txt")
         >> (fun s -> Logging.Critical s)
 
@@ -34,7 +34,7 @@ let launch (instance: int) =
         Options.load (instance)
     with err ->
         Logging.Critical("Fatal error loading game config", err)
-        crashSplash ()
+        crash_splash ()
         Console.ReadLine() |> ignore
 
     let mutable has_shutdown = false
@@ -51,7 +51,7 @@ let launch (instance: int) =
             Printerlude.shutdown ()
 
             if unexpected then
-                crashSplash ()
+                crash_splash ()
                 Logging.Critical("The game crashed or quit abnormally, but was able to shut down correctly")
             else
                 Logging.Info("Thank you for playing")

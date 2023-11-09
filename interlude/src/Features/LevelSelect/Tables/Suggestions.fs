@@ -149,6 +149,6 @@ type SuggestionsPage() as this =
             |+ sl
         )
 
-    override this.Title = %"levelselect.tables.suggestions"
+    override this.Title = %"table.suggestions.name"
     override this.OnClose() = ()
     override this.OnReturnTo() = sl.Reload()
