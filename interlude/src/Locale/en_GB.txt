@@ -466,7 +466,7 @@ noteskins.edit.colors.tooltip=Edit the colors of notes here.
 noteskins.edit.colorstyle.name=Color style
 noteskins.edit.colorstyle.tooltip=This is the rule for when each note should be a certain color.\n'DDR' simulates Dance Dance Revolution's system where notes are colored by their musical rhythm placement.\n'Column' just sets a fixed color per column.\n'Chord' colors notes by the number simultaneous notes pressed, as chords.
 noteskins.edit.columnlighttime.name=Column light time
-noteskins.edit.columnlighttime.tooltip=Controls how slowly column lights fade away.
+noteskins.edit.columnlighttime.tooltip=Controls how slowly column lights fade away.\nHigher value = longer fading animation.\nLow value = column lights vanish nearly instantly.
 noteskins.edit.columnspacing.name=Column spacing
 noteskins.edit.columnspacing.tooltip=This is the visual spacing between columns, in pixels.
 noteskins.edit.columnwidth.name=Column width
