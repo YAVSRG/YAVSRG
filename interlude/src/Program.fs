@@ -78,12 +78,15 @@ let launch (instance: int) =
 
 [<EntryPoint>]
 let main argv =
+    let executable_location = Assembly.GetExecutingAssembly().Location
+    Directory.SetCurrentDirectory(Path.GetDirectoryName(executable_location))
+
     if
         not (File.Exists("bass.dll"))
         && not (File.Exists("libbass.iso"))
         && not (File.Exists("libbass.dylib"))
     then
-        printfn "Looks like Interlude was launched from the wrong starting directory!"
+        printfn "Interlude is missing the appropriate audio library dll/iso/dylib for your platform.\n If you are a developer, info on how to fix this is at https://github.com/YAVSRG/YAVSRG#readme\n If you are not a developer, looks like you deleted a file you shouldn't have!\n Redownloading the game and extracting the zip over this folder to replace what is missing should fix it."
         -1
     else
 
@@ -111,7 +114,7 @@ let main argv =
             m.Dispose()
 
             if OperatingSystem.IsWindows() then
-                let executable = Assembly.GetEntryAssembly().Location.Replace(".dll", ".exe")
+                let executable = executable_location.Replace(".dll", ".exe")
                 let launch_dir = Path.GetDirectoryName executable
 
                 try
