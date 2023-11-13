@@ -30,11 +30,11 @@ module Batch =
     let VERTEX_SIZE = sizeof<Vertex>
 
     let vertices: Vertex array = Array.zeroCreate VERTEX_COUNT
-    let elements: int array = Array.init (CAPACITY * VERTICES_PER_ELEMENT) id
+    let elements: int array = Array.init VERTEX_COUNT id
 
     let ebo = Buffer.create BufferTarget.ElementArrayBuffer elements
     let vbo = Buffer.create BufferTarget.ArrayBuffer vertices
-    let vao = VertexArrayObject.create<Vertex, int> (vbo, ebo)
+    let vao = VertexArrayObject.create (vbo, ebo)
 
     // 2 floats in slot 0, for pos
     VertexArrayObject.vertex_attrib_pointer (0, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, 0)
@@ -56,8 +56,7 @@ module Batch =
         VERTEX_SIZE,
         sizeof<float32> * 4
     )
-    // 1 int in slot 3, for tex unit
-    // 4 bytes for padding sake
+    // 1 int in slot 3, for tex unit - using an int instead of a byte to make 20 bytes total instead of 17
     VertexArrayObject.vertex_attrib_pointer (
         3,
         1,

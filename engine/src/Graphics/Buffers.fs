@@ -24,7 +24,7 @@ type VertexArrayObject = int
 
 module VertexArrayObject =
 
-    let create<'Vertex, 'Index> (vbo: Buffer, ebo: Buffer) : VertexArrayObject =
+    let create<'Vertex> (vbo: Buffer, ebo: Buffer) : VertexArrayObject =
         let handle = GL.GenVertexArray()
         GL.BindVertexArray handle
         Buffer.bind vbo

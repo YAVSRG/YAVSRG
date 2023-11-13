@@ -13,10 +13,15 @@ module Shader =
         let handle = GL.CreateShader stype
         GL.ShaderSource(handle, src)
         GL.CompileShader handle
-        let output = GL.GetShaderInfoLog handle
 
-        if output <> null && output <> "" then
-            Logging.Critical(sprintf "Error compiling shader type %O: %s" stype output)
+        let mutable success = 0
+        GL.GetShader(handle, ShaderParameter.CompileStatus, &success)
+
+        if success = 0 then
+            let output = GL.GetShaderInfoLog handle
+
+            if output <> null && output <> "" then
+                Logging.Critical(sprintf "Error compiling shader type %O: %s" stype output)
 
         handle
 

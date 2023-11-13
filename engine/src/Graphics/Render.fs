@@ -16,7 +16,7 @@ module Viewport =
     let mutable (vwidth, vheight) = (1.0f, 1.0f)
     let mutable bounds = Rect.ZERO
 
-    let createProjection (flip: bool) =
+    let create_projection (flip: bool) =
         Matrix4.Identity
         * Matrix4.CreateOrthographic(vwidth, vheight, 0.0f, 1.0f)
         * Matrix4.CreateTranslation(-1.0f, -1.0f, 0.0f)
@@ -47,7 +47,7 @@ module FBO =
             Batch.draw ()
 
             if List.isEmpty stack then
-                Shader.set_uniform_mat4 ("uProjection", createProjection false) Shader.main
+                Shader.set_uniform_mat4 ("uProjection", create_projection false) Shader.main
                 GL.Viewport(0, 0, int vwidth, int vheight)
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.fbo_id)
@@ -63,7 +63,7 @@ module FBO =
 
             if List.isEmpty stack then
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
-                Shader.set_uniform_mat4 ("uProjection", createProjection true) Shader.main
+                Shader.set_uniform_mat4 ("uProjection", create_projection true) Shader.main
                 GL.Viewport(0, 0, rwidth, rheight)
             else
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head stack)
@@ -179,7 +179,7 @@ module Render =
         vwidth <- (width / height) * 1080.0f
         vheight <- 1080.0f
 
-        Shader.set_uniform_mat4 ("uProjection", createProjection true) Shader.main
+        Shader.set_uniform_mat4 ("uProjection", create_projection true) Shader.main
 
         bounds <- Rect.Box(0.0f, 0.0f, vwidth, vheight)
 

@@ -8,7 +8,6 @@ type WindowType =
     | Fullscreen = 2
     | ``Borderless Fullscreen`` = 3
 
-// todo: possibly separately to the window resolutions, would be nice to detect available FullscreenResolutions for the current monitor
 module WindowResolution =
     let presets: (int * int) array =
         [|
