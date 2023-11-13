@@ -70,7 +70,7 @@ module FBO =
 
         member this.Dispose() = in_use.[this.fbo_index] <- false
 
-    let init () =
+    let internal init () =
         for i in 0 .. (pool_size - 1) do
             if (texture_ids.[i] <> 0) then
                 GL.DeleteTexture(texture_ids.[i])
@@ -126,7 +126,7 @@ module FBO =
         { 0 .. (pool_size - 1) }
         |> Seq.tryFind (fun i -> not in_use.[i])
         |> function
-            | None -> failwith "All FBOs in pool are in use. Change pool size or (more likely) dispose of FBOs"
+            | None -> failwith "Ran out of FBOs! (6 max) - Some are likely not being disposed after use"
             | Some i ->
                 let sprite: Sprite =
                     {
@@ -163,15 +163,15 @@ module Render =
 
         let mutable frame_compensation: unit -> Time = K 0.0f<ms>
 
-    let start () =
+    let internal start () =
         GL.Clear(ClearBufferMask.ColorBufferBit)
         Batch.start ()
 
-    let finish () =
+    let internal finish () =
         Batch.finish ()
         GL.Flush()
 
-    let resize (width, height) =
+    let internal resize (width, height) =
         rwidth <- width
         rheight <- height
         GL.Viewport(new Rectangle(0, 0, width, height))
@@ -185,7 +185,7 @@ module Render =
 
         FBO.init ()
 
-    let init () =
+    let internal init () =
         let mutable major = 0
         let mutable minor = 0
         let mutable rev = 0

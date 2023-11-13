@@ -30,8 +30,8 @@ module Sprite =
     let MAX_TEXTURE_SIZE = GL.GetInteger GetPName.MaxTextureSize
 
     // texture unit 0 is reserved for binding uncached sprites
-    let texture_unit_handles: int array = Array.zeroCreate MAX_TEXTURE_UNITS
-    let texture_unit_in_use: bool array = Array.zeroCreate MAX_TEXTURE_UNITS
+    let private texture_unit_handles: int array = Array.zeroCreate MAX_TEXTURE_UNITS
+    let private texture_unit_in_use: bool array = Array.zeroCreate MAX_TEXTURE_UNITS
 
     let upload (image: Image<PixelFormats.Rgba32>, rows, columns, smooth) : Sprite =
         let id = GL.GenTexture()

@@ -2,9 +2,9 @@
 
 open OpenTK.Graphics.OpenGL
 
-type Buffer = BufferTarget * int
+type private Buffer = BufferTarget * int
 
-module Buffer =
+module private Buffer =
 
     let create (btype: BufferTarget) (data: 'Vertex array) : Buffer =
         let handle = GL.GenBuffer()
@@ -20,9 +20,9 @@ module Buffer =
     let data (data: 'Vertex array) (count: int) ((btype, handle): Buffer) =
         GL.BufferSubData(btype, 0, nativeint (count * sizeof<'Vertex>), data)
 
-type VertexArrayObject = int
+type private VertexArrayObject = int
 
-module VertexArrayObject =
+module private VertexArrayObject =
 
     let create<'Vertex> (vbo: Buffer, ebo: Buffer) : VertexArrayObject =
         let handle = GL.GenVertexArray()

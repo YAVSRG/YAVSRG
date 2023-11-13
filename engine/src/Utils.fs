@@ -23,8 +23,6 @@ module Utils =
     module Bitmap =
         let load (stream: Stream) : Bitmap = Bitmap.Load<PixelFormats.Rgba32> stream
 
-    type Color = Drawing.Color
-
     let lerp x a b : float32 = (b - a) * x + a
 
     let mutable internal UI_THREAD = -1

@@ -218,7 +218,7 @@ module Text =
 
         width
 
-    let draw_b (font: SpriteFont, text: string, scale, x, y, (fg, bg)) =
+    let draw_b (font: SpriteFont, text: string, scale, x, y, (fg: Drawing.Color, bg: Drawing.Color)) =
         let scale2 = scale / SCALE
         let shadow_spacing = font.ShadowDepth * scale
         let mutable x = x
@@ -244,7 +244,7 @@ module Text =
                 let h = float32 s.Height * scale2
                 let r = Rect.Box(x, y, w, h)
 
-                if (bg: Color).A <> 0uy then
+                if (bg: Drawing.Color).A <> 0uy then
                     Draw.quad (Quad.ofRect (r.Translate(shadow_spacing, shadow_spacing))) (Quad.color bg) struct (s, q)
 
                 Draw.quad (Quad.ofRect r) (Quad.color fg) struct (s, q)
@@ -253,7 +253,7 @@ module Text =
             i <- i + 1
 
     let draw (font, text, scale, x, y, color) =
-        draw_b (font, text, scale, x, y, (color, Color.Transparent))
+        draw_b (font, text, scale, x, y, (color, Drawing.Color.Transparent))
 
     let draw_aligned (font: SpriteFont, text, scale, x, y, color, just: float32) =
         draw (font, text, scale, x - measure (font, text) * scale * just, y, color)
@@ -261,7 +261,7 @@ module Text =
     let draw_aligned_b (font: SpriteFont, text, scale, x, y, color, just: float32) =
         draw_b (font, text, scale, x - measure (font, text) * scale * just, y, color)
 
-    let fill_b (font: SpriteFont, text: string, bounds: Rect, color: Color * Color, just: float32) =
+    let fill_b (font: SpriteFont, text: string, bounds: Rect, colors: Drawing.Color * Drawing.Color, just: float32) =
         let w = measure (font, text)
         let scale = Math.Min(bounds.Height * 0.6f, (bounds.Width / w))
 
@@ -270,7 +270,7 @@ module Text =
             + just * (bounds.Right - scale * w * 0.5f)
             - w * scale * 0.5f
 
-        draw_b (font, text, scale, x, bounds.CenterY - scale * 0.75f, color)
+        draw_b (font, text, scale, x, bounds.CenterY - scale * 0.75f, colors)
 
     let fill (font, text, bounds, color, just) =
-        fill_b (font, text, bounds, (color, Color.Transparent), just)
+        fill_b (font, text, bounds, (color, Drawing.Color.Transparent), just)

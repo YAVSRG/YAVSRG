@@ -15,7 +15,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Common
 
-module FrameTimeStrategies =
+module private FrameTimeStrategies =
 
     type MonitorEnumProc = delegate of IntPtr * IntPtr * IntPtr * IntPtr -> bool
 
@@ -235,7 +235,7 @@ type Strategy =
     | CpuTimingScanlineCorrection
     | CpuTiming
 
-type RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_init: unit -> unit) =
+type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_init: unit -> unit) =
 
     let mutable resized = false
     let mutable fps_count = 0

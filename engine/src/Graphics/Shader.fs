@@ -5,9 +5,9 @@ open OpenTK.Mathematics
 open Percyqaz.Common
 open Percyqaz.Flux.Utils
 
-type Shader = int
+type private Shader = int
 
-module Shader =
+module private Shader =
 
     let compile (stype: ShaderType) (src: string) : Shader =
         let handle = GL.CreateShader stype

@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System
+open System.Drawing
 open System.Collections.Generic
 open Percyqaz.Flux.Utils
 

@@ -9,7 +9,7 @@ module Batch =
 
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential)>]
-    type Vertex =
+    type private Vertex =
         {
             X: float32
             Y: float32
@@ -22,19 +22,19 @@ module Batch =
             T: int32
         }
 
-    let mutable active = false
+    let mutable private active = false
 
-    let CAPACITY = 512
-    let VERTICES_PER_ELEMENT = 6
-    let VERTEX_COUNT = CAPACITY * VERTICES_PER_ELEMENT // 2 triangles per quad
-    let VERTEX_SIZE = sizeof<Vertex>
+    let private CAPACITY = 512
+    let private VERTICES_PER_ELEMENT = 6
+    let private VERTEX_COUNT = CAPACITY * VERTICES_PER_ELEMENT // 2 triangles per quad
+    let private VERTEX_SIZE = sizeof<Vertex>
 
-    let vertices: Vertex array = Array.zeroCreate VERTEX_COUNT
-    let elements: int array = Array.init VERTEX_COUNT id
+    let private vertices: Vertex array = Array.zeroCreate VERTEX_COUNT
+    let private elements: int array = Array.init VERTEX_COUNT id
 
-    let ebo = Buffer.create BufferTarget.ElementArrayBuffer elements
-    let vbo = Buffer.create BufferTarget.ArrayBuffer vertices
-    let vao = VertexArrayObject.create (vbo, ebo)
+    let private ebo = Buffer.create BufferTarget.ElementArrayBuffer elements
+    let private vbo = Buffer.create BufferTarget.ArrayBuffer vertices
+    let private vao = VertexArrayObject.create (vbo, ebo)
 
     // 2 floats in slot 0, for pos
     VertexArrayObject.vertex_attrib_pointer (0, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, 0)
@@ -69,7 +69,7 @@ module Batch =
     let mutable vcount = 0
     let mutable bcount = 0
 
-    let draw () =
+    let internal draw () =
         if vcount > 0 then
             Buffer.data vertices vcount vbo
             GL.DrawArrays(PrimitiveType.Triangles, 0, vcount)
@@ -77,7 +77,7 @@ module Batch =
         vcount <- 0
         bcount <- bcount + 1
 
-    let vertex (pos: Vector2) (uv: Vector2) (color: Color) (texture_unit: int) =
+    let internal vertex (pos: Vector2) (uv: Vector2) (color: Color) (texture_unit: int) =
         if vcount = VERTEX_COUNT then
             draw ()
 
@@ -96,18 +96,18 @@ module Batch =
 
         vcount <- vcount + 1
 
-    let start () =
+    let internal start () =
         bcount <- 0
         VertexArrayObject.bind vao
         active <- true
 
-    let finish () =
+    let internal finish () =
         draw ()
         //printfn "%i" bcount
         active <- false
 
 module Stencil =
-    let mutable depth = 0
+    let mutable private depth = 0
 
     let start_stencilling (alpha_masking) =
         Batch.draw ()

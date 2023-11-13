@@ -36,9 +36,8 @@ module Window =
     let on_file_drop = WindowEvents.on_file_drop.Publish
     let on_resize = WindowEvents.on_resize.Publish
 
-    let LOCK_OBJ = obj ()
-    let mutable action_queue = []
-    let mutable is_focused = true
+    let internal LOCK_OBJ = obj ()
+    let mutable internal action_queue = []
 
     type WindowAction =
         | ApplyConfig of Config
