@@ -72,7 +72,7 @@ let launch (instance: int) =
     use icon_stream = Utils.get_resource_stream ("icon.png")
     use icon = Utils.Bitmap.load icon_stream
 
-    Launch.entryPoint (Options.config, "Interlude", Startup.ui_entry_point (), Some icon)
+    Launch.entry_point (Options.config, "Interlude", Startup.ui_entry_point (), Some icon)
 
     shutdown (false)
 
