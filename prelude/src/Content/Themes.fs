@@ -75,7 +75,9 @@ type Theme(storage) as this =
             else
                 name
 
-        match this.LoadTexture(name, "Textures") with
+        let require_square = name <> "background"
+
+        match this.LoadTexture(name, require_square, "Textures") with
         | Ok res -> res
         | Error err ->
             Logging.Error(sprintf "Error loading theme texture '%s': %s" name err.Message)

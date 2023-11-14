@@ -13,6 +13,12 @@ type ExplosionColors =
     | Column
     | Judgements
 
+[<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
+type ReceptorStyle =
+    | Rotate
+    | Flip
+
 [<Json.AutoCodec(false)>]
 type Explosions =
     {
@@ -80,6 +86,7 @@ type NoteskinConfig =
         /// Stores rotation infomation for notes. Only applied when UseRotation is true
         Rotations: float array array
 
+        ReceptorStyle: ReceptorStyle
     }
     static member Default =
         {
@@ -112,6 +119,7 @@ type NoteskinConfig =
                     [| 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0 |]
                     [| 45.0; 135.0; 0.0; 225.0; 315.0; 45.0; 135.0; 0.0; 225.0; 315.0 |]
                 |]
+            ReceptorStyle = ReceptorStyle.Rotate
         }
 
     member this.Validate =
@@ -149,8 +157,16 @@ type Noteskin(storage) as this =
         and get () = config
 
     member this.GetTexture(name: string) : (Bitmap * TextureConfig) option =
-        match this.LoadTexture name with
-        | Ok res -> res
+        let require_square = name <> "receptor" && name <> "receptorlighting"
+        // todo: user warning if receptor is not square but mode is set to Rotate
+        match this.LoadTexture(name, require_square) with
+        | Ok res -> 
+            if config.ReceptorStyle = ReceptorStyle.Rotate && name = "receptor" then
+                Option.iter (fun (img: Bitmap, config: TextureConfig) -> 
+                    if img.Width / config.Columns <> img.Height / config.Rows then
+                        Logging.Warn("This skin should have ReceptorStyle set to Flip as it uses non-square receptors")) 
+                    res
+            res
         | Error err ->
             Logging.Error(sprintf "Error loading noteskin texture '%s': %s" name err.Message)
             None

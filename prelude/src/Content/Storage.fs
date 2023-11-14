@@ -243,7 +243,7 @@ type Storage(storage: StorageType) =
             Some img
         | None -> None
 
-    member private this.LoadLooseTextures(config: TextureConfig, name: string, path: string array) : Bitmap option =
+    member private this.LoadLooseTextures(config: TextureConfig, name: string, path: string array, require_square: bool) : Bitmap option =
         if config.Columns < 1 then
             failwith "Columns must be a positive number"
         elif config.Rows < 1 then
@@ -259,7 +259,7 @@ type Storage(storage: StorageType) =
 
         let base_img = load_img 0 0
 
-        if base_img.Height <> base_img.Width then
+        if require_square && base_img.Height <> base_img.Width then
             failwith "Textures must be square"
 
         let atlas =
@@ -282,6 +282,7 @@ type Storage(storage: StorageType) =
     member internal this.LoadTexture
         (
             name: string,
+            require_square: bool,
             [<ParamArray>] path: string array
         ) : Result<(Bitmap * TextureConfig) option, exn> =
         let info: TextureConfig = this.GetTextureConfig(name, path)
@@ -296,7 +297,7 @@ type Storage(storage: StorageType) =
                 Error err
         | Loose ->
             try
-                match this.LoadLooseTextures(info, name, path) with
+                match this.LoadLooseTextures(info, name, path, require_square) with
                 | Some img -> Ok(Some(img, info))
                 | None -> Ok None
             with err ->
@@ -336,7 +337,7 @@ type Storage(storage: StorageType) =
 
             match info.Mode with
             | Loose ->
-                let img = Option.get (this.LoadLooseTextures(info, name, path))
+                let img = Option.get (this.LoadLooseTextures(info, name, path, false))
                 img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s.png" name))
 
                 for row in 0 .. info.Rows - 1 do
