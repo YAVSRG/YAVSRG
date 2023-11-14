@@ -1,20 +1,19 @@
-0.7.12.1
+0.7.13
 ====
 
-Bug fix update  
-Remember that if something doesn't look right or isn't working, I will only know if you tell me in the Discord!
+Some new stuff for you!
 
-# Fixes in this release
-- Fixed a crash when hitting the 'random chart' key with no charts visible
-- Fixed background dim only being 254 opacity instead of 255
-- Fixed some performance issues during gameplay, resulting in over 60% more FPS on my machine
-- Fixed BPM and chart duration not updating when changing rates
-- Fixed typo in context menu key name
-- Fixed alphabetical ordering of level select groups putting all lowercase names last
-- Improved an issue in Smart frame limit on fullscreen where some frames were rendered twice
-- Probably more that I've forgotten about
+# Features
+- Hover over your accuracy in score screen to see it to 4 decimal places, instead of the usual 2
+- You can now suggest charts for Crescent by right clicking on them in level select (there is a menu option)
+- You can view suggested charts for Crescent under "Manage table" on table view (this UI is still a work in progress)
+- Non-square receptors are now supported in noteskins for players who prefer to use them more like a key overlay
 
-# Other changes
-- Watching a replay now takes you to the score screen afterwards
-- Added a `timescale` console command for testing animations
+# Changes and improvements
+- Users are sorted by time last seen in online menus
+- Some fixes to localisation
+- Fixed a bug preventing the game from launching via shortcuts and windows search
+- Game should crash more gracefully if auto-restart fails
+
+More things coming soon
 
