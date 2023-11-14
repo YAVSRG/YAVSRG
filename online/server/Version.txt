@@ -1,1 +1,1 @@
-﻿Patch to score save endpoint
+﻿Table suggestions update
