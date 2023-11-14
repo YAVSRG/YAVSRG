@@ -117,17 +117,17 @@ module Logo =
                     Draw.quad
                     <| q
                     <| Quad.color (Colors.blue.O2)
-                    <| rain.WithUV(Sprite.tiling_uv (0.625f, v * 0.06f, v * 0.07f) rain q)
+                    <| Sprite.tiling_uv (0.625f, v * 0.06f, v * 0.07f) rain q
 
                     Draw.quad
                     <| q
                     <| Quad.color (Colors.blue.O3)
-                    <| rain.WithUV(Sprite.tiling_uv (1.0f, v * 0.1f, v * 0.11f) rain q)
+                    <| Sprite.tiling_uv (1.0f, v * 0.1f, v * 0.11f) rain q
 
                     Draw.quad
                     <| q
                     <| Quad.color (Colors.blue)
-                    <| rain.WithUV(Sprite.tiling_uv (1.5625f, v * 0.15f, v * 0.16f) rain q)
+                    <| Sprite.tiling_uv (1.5625f, v * 0.15f, v * 0.16f) rain q
 
                     let mutable prev = 0.0f
                     let m = b - w * 0.5f

@@ -111,7 +111,7 @@ module Import =
     // todo: error toast
 
     let handle_file_drop (path: string) =
-        match Mounts.dropFunc with
+        match Mounts.drop_func with
         | Some f -> f path
         | None ->
 
@@ -149,14 +149,14 @@ module Import =
             )
 
 // todo: only etterna packs use this old one so just move it to there
-type SearchContainerLoader(taskWithCallback: (unit -> unit) -> unit) =
+type SearchContainerLoader(task_with_callback: (unit -> unit) -> unit) =
     inherit StaticWidget(NodeType.None)
     let mutable loading = false
 
     // loader is only drawn if it is visible on screen
     override this.Draw() =
         if not loading then
-            taskWithCallback (fun () -> sync (fun () -> (this.Parent :?> FlowContainer.Vertical<Widget>).Remove this))
+            task_with_callback (fun () -> sync (fun () -> (this.Parent :?> FlowContainer.Vertical<Widget>).Remove this))
             loading <- true
 
     override this.Update(elapsed_ms, moved) = base.Update(elapsed_ms, moved)
@@ -164,7 +164,7 @@ type SearchContainerLoader(taskWithCallback: (unit -> unit) -> unit) =
 type PopulateFunc = SearchContainer -> (unit -> unit) -> unit
 and FilterFunc = SearchContainer -> Filter -> unit
 
-and SearchContainer(populate: PopulateFunc, handleFilter: FilterFunc, itemheight) as this =
+and SearchContainer(populate: PopulateFunc, handle_filter: FilterFunc, item_height) as this =
     inherit
         StaticContainer(
             NodeType.Switch(fun _ ->
@@ -175,19 +175,19 @@ and SearchContainer(populate: PopulateFunc, handleFilter: FilterFunc, itemheight
             )
         )
 
-    let flow = FlowContainer.Vertical<Widget>(itemheight, Spacing = 15.0f)
+    let flow = FlowContainer.Vertical<Widget>(item_height, Spacing = 15.0f)
 
     let scroll =
         ScrollContainer.Flow(flow, Margin = Style.PADDING, Position = Position.TrimTop 70.0f)
 
     let search_box =
-        SearchBox(Setting.simple "", (fun (f: Filter) -> handleFilter this f), Position = Position.SliceTop 60.0f)
+        SearchBox(Setting.simple "", (fun (f: Filter) -> handle_filter this f), Position = Position.SliceTop 60.0f)
 
     do
         flow |* SearchContainerLoader(populate this)
         this |+ search_box |* scroll
 
-    new(populate, handleFilter) = SearchContainer(populate, handleFilter, 80.0f)
+    new(populate, handle_filter) = SearchContainer(populate, handle_filter, 80.0f)
 
     member this.Items = flow
     member private this.SearchBox = search_box

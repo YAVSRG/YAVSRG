@@ -17,7 +17,7 @@ module Comments =
 
     let fade = Animation.Fade(0.0f)
 
-    let private textEntry =
+    let private text_entry =
         { new TextEntry(Setting.make
                             (fun s ->
                                 match Chart.SAVE_DATA with
@@ -50,7 +50,7 @@ module Comments =
                 Border = K Colors.grey_2,
                 Position = Position.Default.Margin(200.0f, 0.0f).TrimBottom(15.0f).TrimTop(60.0f)
             )
-            |+ textEntry)
+            |+ text_entry)
         |+ Text(
             (fun () ->
                 match Chart.CACHE_DATA with
@@ -62,20 +62,20 @@ module Comments =
             Position = Position.SliceTop 55.0f
         )
 
-    let beginEdit () = editor.Select()
+    let begin_edit () = editor.Select()
 
     let init (parent: Widget) = editor.Init parent
 
     let update (elapsed_ms, moved) =
         fade.Update elapsed_ms
 
-        if textEntry.Selected && ((%%"exit").Tapped() || (%%"select").Tapped()) then
+        if text_entry.Selected && ((%%"exit").Tapped() || (%%"select").Tapped()) then
             Selection.clear ()
 
         editor.Update(elapsed_ms, moved)
 
     let draw () =
-        if textEntry.Selected then
+        if text_entry.Selected then
             Draw.rect editor.Bounds (Colors.shadow_2.O3)
             editor.Draw()
 
@@ -108,14 +108,14 @@ type private ActionButton(icon, action, active) =
 
     override this.Draw() =
         let area = this.Bounds.SliceTop(this.Bounds.Height + 5.0f)
-        let isActive = active ()
+        let is_active = active ()
         Draw.rect area !*Palette.MAIN_100
 
         Text.fill_b (
             Style.font,
             icon,
             area.Shrink(10.0f, 5.0f),
-            ((if isActive then Colors.pink_accent
+            ((if is_active then Colors.pink_accent
               elif this.Focused then Colors.yellow_accent
               else Colors.grey_1),
              Colors.shadow_2),

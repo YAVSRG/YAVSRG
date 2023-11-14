@@ -67,7 +67,7 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
 
         base.Draw()
 
-type private ModSelectPage(onClose) as this =
+type private ModSelectPage(on_close) as this =
     inherit Page()
 
     let grid =
@@ -120,12 +120,12 @@ type private ModSelectPage(onClose) as this =
         )
 
     override this.Title = %"mods.name"
-    override this.OnClose() = onClose ()
+    override this.OnClose() = on_close ()
 
-type ModSelect(onClose) =
+type ModSelect(on_close) =
     inherit
         StylishButton(
-            (fun () -> ModSelectPage(onClose).Show()),
+            (fun () -> ModSelectPage(on_close).Show()),
             K(sprintf "%s %s" Icons.mods (%"levelselect.mods.name")),
             (fun () -> Palette.color (100, 0.5f, 0.0f)),
             Hotkey = "mods"

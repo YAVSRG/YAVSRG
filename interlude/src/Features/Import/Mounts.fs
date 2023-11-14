@@ -14,7 +14,7 @@ open Interlude.UI.Menu
 
 module Mounts =
 
-    let mutable dropFunc: (string -> unit) option = None
+    let mutable drop_func: (string -> unit) option = None
 
     type Game =
         | Osu = 0
@@ -167,7 +167,7 @@ module Mounts =
                     | Game.Stepmania -> stepmaniaPackFolder
                     | Game.Etterna -> etternaPackFolder
                     | _ -> failwith "impossible"
-                    |> dropFunc.Value
+                    |> drop_func.Value
                 ),
                 Position =
                     {
@@ -179,7 +179,7 @@ module Mounts =
             )
 
         do
-            dropFunc <-
+            drop_func <-
                 fun path ->
                     match game, path with
                     | Game.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack("osu!", path) |> Some
@@ -209,7 +209,7 @@ module Mounts =
             button.Draw()
 
         override this.Close() =
-            dropFunc <- None
+            drop_func <- None
             base.Close()
 
         override this.Init(parent: Widget) =

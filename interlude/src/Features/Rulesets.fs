@@ -70,11 +70,11 @@ module Rulesets =
 type PacemakerPage() as this =
     inherit Page()
 
-    let rulesetId = Rulesets.current_hash
+    let ruleset_id = Rulesets.current_hash
 
     let existing =
-        if options.Pacemakers.ContainsKey rulesetId then
-            options.Pacemakers.[rulesetId]
+        if options.Pacemakers.ContainsKey ruleset_id then
+            options.Pacemakers.[ruleset_id]
         else
             Pacemaker.Default
 
@@ -133,6 +133,6 @@ type PacemakerPage() as this =
 
     override this.OnClose() =
         match utype.Value with
-        | 0 -> options.Pacemakers.[rulesetId] <- Pacemaker.Accuracy accuracy.Value
-        | 1 -> options.Pacemakers.[rulesetId] <- Pacemaker.Lamp lamp.Value
+        | 0 -> options.Pacemakers.[ruleset_id] <- Pacemaker.Accuracy accuracy.Value
+        | 1 -> options.Pacemakers.[ruleset_id] <- Pacemaker.Lamp lamp.Value
         | _ -> failwith "impossible"

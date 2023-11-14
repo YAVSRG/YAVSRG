@@ -23,7 +23,7 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
         |> Seq.map (sprintf "%O")
         |> String.concat ",  "
 
-    let refreshText () : unit =
+    let refresh_text () : unit =
         let binds = options.GameplayBinds.[int keymode.Value - 3]
 
         if not this.Selected then
@@ -36,7 +36,7 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
 
             text <- text + "..."
 
-    let rec inputCallback (b) =
+    let rec input_callback (b) =
         let binds = options.GameplayBinds.[int keymode.Value - 3]
 
         match b with
@@ -47,11 +47,11 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             if progress = int keymode.Value then
                 this.Focus()
             else
-                Input.grab_next_event inputCallback
+                Input.grab_next_event input_callback
 
-            refreshText ()
+            refresh_text ()
             Style.key.Play()
-        | _ -> Input.grab_next_event inputCallback
+        | _ -> Input.grab_next_event input_callback
 
     do
         this
@@ -78,9 +78,9 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
     override this.OnSelected() =
         base.OnSelected()
         progress <- 0
-        refreshText ()
+        refresh_text ()
         Style.click.Play()
-        Input.grab_next_event inputCallback
+        Input.grab_next_event input_callback
 
     override this.OnDeselected() =
         base.OnDeselected()
@@ -91,7 +91,7 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             |> Seq.map (sprintf "%O")
             |> String.concat ",  "
 
-    member this.OnKeymodeChanged() = refreshText ()
+    member this.OnKeymodeChanged() = refresh_text ()
 
 type LanecoverPage() as this =
     inherit Page()
@@ -126,7 +126,7 @@ type EditPresetPage(setting: Setting<Preset option>) as this =
 
     let mutable delete = false
 
-    let deleteButton =
+    let delete_button =
         PageButton(
             "gameplay.preset.delete",
             fun () ->
@@ -139,7 +139,7 @@ type EditPresetPage(setting: Setting<Preset option>) as this =
 
     let locked =
         Setting.simple preset.Locked
-        |> Setting.trigger (fun b -> deleteButton.Enabled <- not b)
+        |> Setting.trigger (fun b -> delete_button.Enabled <- not b)
 
     do
         this.Content(
@@ -148,7 +148,7 @@ type EditPresetPage(setting: Setting<Preset option>) as this =
             |+ PageSetting("gameplay.preset.locked", Selector<_>.FromBool(locked))
                 .Pos(270.0f)
                 .Tooltip(Tooltip.Info("gameplay.preset.locked"))
-            |+ deleteButton.Pos(340.0f)
+            |+ delete_button.Pos(340.0f)
         )
 
     override this.Title = preset.Name
@@ -173,7 +173,7 @@ type GameplayPage() as this =
     let binds = GameplayKeybinder(keycount)
     let preview = NoteskinPreview 0.35f
 
-    let presetButtons (i: int) (setting: Setting<Preset option>) =
+    let preset_buttons (i: int) (setting: Setting<Preset option>) =
         StaticContainer(
             NodeType.None,
             Position = Position.Box(1.0f, 1.0f, -1200.0f + float32 i * 300.0f, -90.0f, 290.0f, 80.0f)
@@ -300,9 +300,9 @@ type GameplayPage() as this =
                 .Pos(790.0f)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
             |+ preview
-            |+ presetButtons 1 options.Preset1
-            |+ presetButtons 2 options.Preset2
-            |+ presetButtons 3 options.Preset3
+            |+ preset_buttons 1 options.Preset1
+            |+ preset_buttons 2 options.Preset2
+            |+ preset_buttons 3 options.Preset3
         )
 
     override this.Title = %"gameplay.name"

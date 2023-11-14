@@ -22,9 +22,9 @@ open Interlude.Features.Online
 type LevelSelectScreen() =
     inherit Screen()
 
-    let searchText = Setting.simple ""
+    let search_text = Setting.simple ""
 
-    let infoPanel =
+    let info_panel =
         ChartInfo(
             Position =
                 {
@@ -36,7 +36,7 @@ type LevelSelectScreen() =
         )
 
     let refresh () =
-        infoPanel.Refresh()
+        info_panel.Refresh()
         Tree.refresh ()
 
     let random_chart () =
@@ -98,7 +98,7 @@ type LevelSelectScreen() =
         )
 
         |+ SearchBox(
-            searchText,
+            search_text,
             (fun f ->
                 Tree.filter <- f
                 refresh ()
@@ -152,9 +152,9 @@ type LevelSelectScreen() =
 
         |+ LibraryModeSettings()
 
-        |* infoPanel
+        |* info_panel
 
-        Chart.on_chart_change.Add infoPanel.Refresh
+        Chart.on_chart_change.Add info_panel.Refresh
         Comments.init this
 
         LevelSelect.on_refresh_all.Add refresh

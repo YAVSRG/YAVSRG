@@ -12,7 +12,7 @@ open Interlude.Utils
 type Page() as this =
     inherit DynamicContainer(NodeType.Switch(fun _ -> this._content))
 
-    let mutable isCurrent = false
+    let mutable is_current = false
     let mutable content = None
 
     member private this._content = content.Value
@@ -29,7 +29,7 @@ type Page() as this =
         content <- Some w
 
     override this.Update(elapsed_ms, moved) =
-        if isCurrent && not content.Value.Focused then
+        if is_current && not content.Value.Focused then
             Menu.Back()
 
         base.Update(elapsed_ms, moved)
@@ -42,7 +42,7 @@ type Page() as this =
             this.OnReturnTo()
 
         content.Value.Focus()
-        isCurrent <- true
+        is_current <- true
 
     member this.MoveDown() =
         this.Position <-
@@ -51,7 +51,7 @@ type Page() as this =
                 Bottom = 2.0f %+ 0.0f
             }
 
-        isCurrent <- false
+        is_current <- false
 
     member this.MoveUp() =
         this.Position <-
@@ -60,7 +60,7 @@ type Page() as this =
                 Bottom = 0.0f %+ 0.0f
             }
 
-        isCurrent <- false
+        is_current <- false
 
     override this.Init(parent: Widget) =
         if content.IsNone then
@@ -70,7 +70,7 @@ type Page() as this =
         base.Init parent
         this.View(false)
 
-and Menu(topLevel: Page) as this =
+and Menu(top_level: Page) as this =
     inherit Dialog()
 
     let MAX_PAGE_DEPTH = 12
@@ -151,7 +151,7 @@ and Menu(topLevel: Page) as this =
         base.Init parent
         back_button.Init this
         volume.Init this
-        this.ShowPage topLevel
+        this.ShowPage top_level
 
     override this.Draw() =
         back_button.Draw()

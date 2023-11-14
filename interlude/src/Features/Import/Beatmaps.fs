@@ -244,7 +244,7 @@ type private SortingDropdown
     (options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
     inherit StaticContainer(NodeType.None)
 
-    let mutable displayValue =
+    let mutable display_value =
         Seq.find (fun (id, _) -> id = setting.Value) options |> snd
 
     override this.Init(parent: Widget) =
@@ -261,7 +261,7 @@ type private SortingDropdown
             (fun () ->
                 sprintf
                     "%s %s"
-                    displayValue
+                    display_value
                     (if reverse.Value then
                          Icons.order_descending
                      else
@@ -283,7 +283,7 @@ type private SortingDropdown
                     options
                     snd
                     (fun g ->
-                        displayValue <- snd g
+                        display_value <- snd g
                         setting.Set(fst g)
                     )
                     (fun () -> this.Dropdown <- None)
@@ -441,10 +441,10 @@ module Beatmaps =
             //|+
             //    (
             //        GridFlowContainer(50.0f, 4, Spacing = (20.0f, 0.0f), Position = Position.Row(460.0f, 50.0f))
-            //        |+ Button("osu! (official)", fun () -> openUrl "https://osu.ppy.sh/beatmapsets?m=3")
-            //        |+ Button("NeriNyan", fun () -> openUrl "https://nerinyan.moe/main?m=3")
-            //        |+ Button("osu.direct", fun () -> openUrl "https://osu.direct/browse?mode=3")
-            //        |+ Button("chimu.moe", fun () -> openUrl "https://chimu.moe/en/beatmaps?mode=3&offset=0&size=40&status=1")
+            //        |+ Button("osu! (official)", fun () -> open_url "https://osu.ppy.sh/beatmapsets?m=3")
+            //        |+ Button("NeriNyan", fun () -> open_url "https://nerinyan.moe/main?m=3")
+            //        |+ Button("osu.direct", fun () -> open_url "https://osu.direct/browse?mode=3")
+            //        |+ Button("chimu.moe", fun () -> open_url "https://chimu.moe/en/beatmaps?mode=3&offset=0&size=40&status=1")
             //    )
             //|* Text(%"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
             begin_search filter

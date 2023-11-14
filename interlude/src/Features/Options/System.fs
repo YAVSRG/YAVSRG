@@ -20,13 +20,13 @@ module System =
 
         let set = fun v -> Hotkeys.set hotkey v
 
-        let rec inputCallback (b) =
+        let rec input_callback (b) =
             match b with
             | Key(k, (ctrl, _, shift)) ->
                 set <| Key(k, (ctrl, false, shift))
                 this.Focus()
                 Style.key.Play()
-            | _ -> Input.grab_next_event inputCallback
+            | _ -> Input.grab_next_event input_callback
 
         do
             this
@@ -60,7 +60,7 @@ module System =
         override this.OnSelected() =
             base.OnSelected()
             Style.click.Play()
-            Input.grab_next_event inputCallback
+            Input.grab_next_event input_callback
 
         override this.OnDeselected() =
             base.OnDeselected()
@@ -70,14 +70,14 @@ module System =
         inherit Page()
 
         do
-            let hotkeyEditor hk =
+            let hotkey_editor hk =
                 NavigationContainer.Row<Widget>()
                 |+ Keybinder(hk, Position = Position.TrimRight PRETTYHEIGHT)
                 |+ Button(Icons.reset, (fun () -> Hotkeys.reset hk), Position = Position.SliceRight PRETTYHEIGHT)
 
             let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
-            let scrollContainer =
+            let scroll_container =
                 ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f))
 
             container.Add(
@@ -91,11 +91,11 @@ module System =
             for hk in Hotkeys.hotkeys.Keys do
                 if hk <> "none" then
                     container.Add(
-                        PageSetting(sprintf "hotkeys.%s" hk, hotkeyEditor hk)
+                        PageSetting(sprintf "hotkeys.%s" hk, hotkey_editor hk)
                             .Tooltip(Tooltip.Info(sprintf "hotkeys.%s" hk))
                     )
 
-            this.Content scrollContainer
+            this.Content scroll_container
 
         override this.Title = %"system.hotkeys.name"
         override this.OnClose() = ()

@@ -100,7 +100,7 @@ type RotationSettingsPage() as this =
     let NOTE_WIDTH = 120.0f
 
     let _rotations, refresh_rotations =
-        refreshRow
+        refreshable_row
             (fun () -> int keycount.Value)
             (fun i k ->
                 let x = -60.0f * float32 k

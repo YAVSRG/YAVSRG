@@ -17,7 +17,7 @@ type private ModeDropdown
     (options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
     inherit StaticContainer(NodeType.None)
 
-    let mutable displayValue =
+    let mutable display_value =
         Seq.find (fun (id, _) -> id = setting.Value) options |> snd
 
     override this.Init(parent: Widget) =
@@ -34,7 +34,7 @@ type private ModeDropdown
             (fun () ->
                 sprintf
                     "%s %s"
-                    displayValue
+                    display_value
                     (if reverse.Value then
                          Icons.order_descending
                      else
@@ -55,7 +55,7 @@ type private ModeDropdown
                     options
                     snd
                     (fun g ->
-                        displayValue <- snd g
+                        display_value <- snd g
                         setting.Set(fst g)
                     )
                     (fun () -> this.Dropdown <- None)

@@ -95,7 +95,7 @@ module SpectateScreen =
             Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
             screen.State.ChangeScoring scoring
 
-        let firstNote = chart.Notes.[0].Time
+        let first_note = chart.Notes.[0].Time
         let ruleset = Rulesets.current
 
         let mutable wait_for_load = 1000.0
@@ -150,15 +150,15 @@ module SpectateScreen =
                 else
 
                 let now = Song.time_with_offset ()
-                let chartTime = now - firstNote
+                let chart_time = now - first_note
 
-                if replay_data.Time() - chartTime < MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms> then
+                if replay_data.Time() - chart_time < MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms> then
                     if Song.playing () then
                         Song.pause ()
                 elif not (Song.playing ()) then
                     Song.resume ()
 
-                scoring.Update chartTime
+                scoring.Update chart_time
 
                 if this.State.Scoring.Finished && not exiting then
                     exiting <- true

@@ -27,21 +27,21 @@ type PacemakerMode =
 
 module PlayScreen =
 
-    let rec play_screen (pacemakerMode: PacemakerMode) =
+    let rec play_screen (pacemaker_mode: PacemakerMode) =
 
         let chart = Gameplay.Chart.WITH_MODS.Value
         let ruleset = Rulesets.current
-        let firstNote = chart.Notes.[0].Time
-        let liveplay = LiveReplayProvider firstNote
+        let first_note = chart.Notes.[0].Time
+        let liveplay = LiveReplayProvider first_note
 
         let scoring = create ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
 
-        let pacemakerInfo =
-            match pacemakerMode with
+        let pacemaker_info =
+            match pacemaker_mode with
             | PacemakerMode.None -> PacemakerInfo.None
             | PacemakerMode.Score(rate, replay) ->
-                let replayData = StoredReplayProvider(replay) :> IReplayProvider
-                let scoring = create ruleset chart.Keys replayData chart.Notes rate
+                let replay_data = StoredReplayProvider(replay) :> IReplayProvider
+                let scoring = create ruleset chart.Keys replay_data chart.Notes rate
                 PacemakerInfo.Replay scoring
             | PacemakerMode.Setting ->
                 let setting =
@@ -56,7 +56,7 @@ module PlayScreen =
                     let l = Rulesets.current.Grading.Lamps.[lamp]
                     PacemakerInfo.Judgement(l.Judgement, l.JudgementThreshold)
 
-        let pacemakerMet (state: PlayState) =
+        let pacemaker_met (state: PlayState) =
             match state.Pacemaker with
             | PacemakerInfo.None -> true
             | PacemakerInfo.Accuracy x -> scoring.Value >= x
@@ -79,7 +79,7 @@ module PlayScreen =
                 actual <= count
 
         let binds = options.GameplayBinds.[chart.Keys - 3]
-        let mutable inputKeyState = 0us
+        let mutable key_state = 0us
 
         scoring.OnHit.Add(fun h ->
             match h.Guts with
@@ -87,7 +87,7 @@ module PlayScreen =
             | _ -> ()
         )
 
-        { new IPlayScreen(chart, pacemakerInfo, ruleset, scoring) with
+        { new IPlayScreen(chart, pacemaker_info, ruleset, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x
@@ -133,29 +133,29 @@ module PlayScreen =
                 Stats.session.PlayTime <- Stats.session.PlayTime + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
-                let chartTime = now - firstNote
+                let chart_time = now - first_note
 
                 if not (liveplay :> IReplayProvider).Finished then
                     // feed keyboard input into the replay provider
                     Input.pop_gameplay (
                         binds,
-                        fun column time isRelease ->
+                        fun column time is_release ->
                             if time > now then
                                 Logging.Debug("Received input event from the future")
                             else
-                                if isRelease then
-                                    inputKeyState <- Bitmask.unset_key column inputKeyState
+                                if is_release then
+                                    key_state <- Bitmask.unset_key column key_state
                                 else
-                                    inputKeyState <- Bitmask.set_key column inputKeyState
+                                    key_state <- Bitmask.set_key column key_state
 
-                                liveplay.Add(time, inputKeyState)
+                                liveplay.Add(time, key_state)
                     )
 
-                    this.State.Scoring.Update chartTime
+                    this.State.Scoring.Update chart_time
 
                 if (%%"retry").Tapped() then
                     Screen.change_new
-                        (fun () -> play_screen (pacemakerMode) :> Screen.T)
+                        (fun () -> play_screen (pacemaker_mode) :> Screen.T)
                         Screen.Type.Play
                         Transitions.Flags.Default
                     |> ignore
@@ -177,7 +177,7 @@ module PlayScreen =
                                     Difficulty = Gameplay.Chart.RATING.Value
                                 )
 
-                            (sd, Gameplay.set_score (pacemakerMet this.State) sd) |> ScoreScreen
+                            (sd, Gameplay.set_score (pacemaker_met this.State) sd) |> ScoreScreen
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default
@@ -201,13 +201,13 @@ module PlayScreen =
 
         let chart = Gameplay.Chart.WITH_MODS.Value
         let ruleset = Rulesets.current
-        let firstNote = chart.Notes.[0].Time
-        let liveplay = LiveReplayProvider firstNote
+        let first_note = chart.Notes.[0].Time
+        let liveplay = LiveReplayProvider first_note
 
         let scoring = create ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
 
         let binds = options.GameplayBinds.[chart.Keys - 3]
-        let mutable inputKeyState = 0us
+        let mutable key_state = 0us
         let mutable packet_count = 0
 
         Lobby.start_playing ()
@@ -221,7 +221,7 @@ module PlayScreen =
 
         let send_replay_packet (now: Time) =
             if not (liveplay :> IReplayProvider).Finished then
-                liveplay.Add(now, inputKeyState)
+                liveplay.Add(now, key_state)
 
             use ms = new System.IO.MemoryStream()
             use bw = new System.IO.BinaryWriter(ms)
@@ -274,28 +274,28 @@ module PlayScreen =
                 Stats.session.PlayTime <- Stats.session.PlayTime + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
-                let chartTime = now - firstNote
+                let chart_time = now - first_note
 
                 if not (liveplay :> IReplayProvider).Finished then
 
-                    if chartTime / MULTIPLAYER_REPLAY_DELAY_MS / 1.0f<ms> |> floor |> int > packet_count then
+                    if chart_time / MULTIPLAYER_REPLAY_DELAY_MS / 1.0f<ms> |> floor |> int > packet_count then
                         send_replay_packet (now)
 
                     Input.pop_gameplay (
                         binds,
-                        fun column time isRelease ->
+                        fun column time is_release ->
                             if time > now then
                                 Logging.Debug("Received input event from the future")
                             else
-                                if isRelease then
-                                    inputKeyState <- Bitmask.unset_key column inputKeyState
+                                if is_release then
+                                    key_state <- Bitmask.unset_key column key_state
                                 else
-                                    inputKeyState <- Bitmask.set_key column inputKeyState
+                                    key_state <- Bitmask.set_key column key_state
 
-                                liveplay.Add(time, inputKeyState)
+                                liveplay.Add(time, key_state)
                     )
 
-                    this.State.Scoring.Update chartTime
+                    this.State.Scoring.Update chart_time
 
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
                     liveplay.Finish()

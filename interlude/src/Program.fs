@@ -79,7 +79,8 @@ let launch (instance: int) =
 [<EntryPoint>]
 let main argv =
     let executable_location = Assembly.GetExecutingAssembly().Location
-    Directory.SetCurrentDirectory(Path.GetDirectoryName(executable_location))
+    if not (isNull executable_location) then
+        Directory.SetCurrentDirectory(Path.GetDirectoryName(executable_location))
 
     if
         not (File.Exists("bass.dll"))

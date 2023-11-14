@@ -268,7 +268,7 @@ type Leaderboard(display: Setting<Display>) as this =
     let filter = Setting.simple Filter.None
     let sort = Setting.map enum int options.ScoreSortMode
 
-    let scrollContainer =
+    let scroll_container =
         ScrollContainer.Flow(
             Loader.container,
             Margin = Style.PADDING,
@@ -333,7 +333,7 @@ type Leaderboard(display: Setting<Display>) as this =
                     }
             )
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
-        |+ scrollContainer
+        |+ scroll_container
         |+ HotkeyAction(
             "scoreboard",
             fun () ->

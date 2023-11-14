@@ -36,7 +36,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
         )
 
     let mutable preview: Sprite option = None
-    let imgFade = Animation.Fade 0.0f
+    let preview_fade = Animation.Fade 0.0f
 
     member this.IsCurrent = Noteskins.Current.id = id
 
@@ -49,7 +49,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
                     preview <- Some(Sprite.upload (bmp, config.Rows, config.Columns, true))
                     PreviewCleanup.add preview.Value
                     bmp.Dispose()
-                    imgFade.Target <- 1.0f
+                    preview_fade.Target <- 1.0f
                 )
             | None -> ()
         )
@@ -78,7 +78,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        imgFade.Update elapsed_ms
+        preview_fade.Update elapsed_ms
 
     override this.OnFocus() =
         Style.hover.Play()
@@ -91,7 +91,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
             Draw.rect this.Bounds Colors.yellow_accent.O1
 
         match preview with
-        | Some p -> Draw.sprite (this.Bounds.SliceLeft 100.0f) (Colors.white.O4a imgFade.Alpha) p
+        | Some p -> Draw.sprite (this.Bounds.SliceLeft 100.0f) (Colors.white.O4a preview_fade.Alpha) p
         | None -> ()
 
         base.Draw()

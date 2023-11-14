@@ -12,20 +12,20 @@ open Interlude.Features.Online
 
 #nowarn "3370"
 
-type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
+type ScoreScreen(score_info: ScoreInfoProvider, pbs: ImprovementFlags) as this =
     inherit Screen()
 
     let personal_bests = ref pbs
 
     let grade =
         ref
-        <| Grade.calculate_with_target scoreData.Ruleset.Grading.Grades scoreData.Accuracy
+        <| Grade.calculate_with_target score_info.Ruleset.Grading.Grades score_info.Accuracy
 
     let lamp =
         ref
-        <| Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
+        <| Lamp.calculateWithTarget score_info.Ruleset.Grading.Lamps score_info.Scoring.State
 
-    let stats = ref <| ScoreScreenStats.Generate scoreData.Scoring.HitEvents
+    let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.HitEvents
 
     let previous_personal_bests =
         if Gameplay.Chart.SAVE_DATA.Value.PersonalBests.ContainsKey Rulesets.current_hash then
@@ -34,20 +34,20 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
             None
         |> ref
 
-    let originalRuleset = options.SelectedRuleset.Value
+    let original_ruleset = options.SelectedRuleset.Value
 
-    let graph = new ScoreGraph(scoreData)
+    let graph = new ScoreGraph(score_info)
 
     let refresh () =
         personal_bests := ImprovementFlags.Default
 
         grade
-        := Grade.calculate_with_target scoreData.Ruleset.Grading.Grades scoreData.Accuracy
+        := Grade.calculate_with_target score_info.Ruleset.Grading.Grades score_info.Accuracy
 
         lamp
-        := Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
+        := Lamp.calculateWithTarget score_info.Ruleset.Grading.Lamps score_info.Scoring.State
 
-        stats := ScoreScreenStats.Generate scoreData.Scoring.HitEvents
+        stats := ScoreScreenStats.Generate score_info.Scoring.HitEvents
         previous_personal_bests := None
         graph.Refresh()
 
@@ -58,17 +58,17 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
             lamp,
             personal_bests,
             previous_personal_bests,
-            scoreData,
+            score_info,
             Position =
                 { Position.Default with
                     Top = 0.0f %+ 175.0f
                     Bottom = 0.75f %+ 0.0f
                 }
         )
-        |+ TopBanner(scoreData, Position = Position.SliceTop(180.0f))
+        |+ TopBanner(score_info, Position = Position.SliceTop(180.0f))
         |+ BottomBanner(
             stats,
-            scoreData,
+            score_info,
             graph,
             refresh,
             Position =
@@ -78,7 +78,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
         )
         |* Sidebar(
             stats,
-            scoreData,
+            score_info,
             Position =
                 {
                     Left = 0.0f %+ 20.0f
@@ -95,8 +95,8 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: ImprovementFlags) as this =
         DiscordRPC.in_menus ("Admiring a score")
 
     override this.OnExit next =
-        options.SelectedRuleset.Set originalRuleset
-        scoreData.Ruleset <- Rulesets.current
+        options.SelectedRuleset.Set original_ruleset
+        score_info.Ruleset <- Rulesets.current
         graph.Dispose()
         Toolbar.show ()
 

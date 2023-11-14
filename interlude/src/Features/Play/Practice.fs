@@ -115,15 +115,15 @@ module PracticeScreen =
         type UI() =
             inherit StaticContainer(NodeType.None)
 
-            let firstNote = Gameplay.Chart.CHART.Value.FirstNote
+            let first_note = Gameplay.Chart.CHART.Value.FirstNote
 
             let local_audio_offset =
                 Setting.make
                     (fun v ->
-                        Gameplay.Chart.SAVE_DATA.Value.Offset <- v + firstNote
+                        Gameplay.Chart.SAVE_DATA.Value.Offset <- v + first_note
                         Song.set_local_offset (v)
                     )
-                    (fun () -> (Gameplay.Chart.SAVE_DATA.Value.Offset - firstNote))
+                    (fun () -> (Gameplay.Chart.SAVE_DATA.Value.Offset - first_note))
                 |> Setting.bound -200.0f<ms> 200.0f<ms>
 
             let mutable local_audio_offset_suggestion = local_audio_offset.Value
@@ -271,12 +271,12 @@ module PracticeScreen =
 
         let chart = Gameplay.Chart.WITH_MODS.Value
 
-        let lastNote =
+        let last_note =
             chart.Notes.[chart.Notes.Length - 1].Time
             - 5.0f<ms>
             - Song.LEADIN_TIME * Gameplay.rate.Value
 
-        let mutable practice_point = min lastNote practice_point
+        let mutable practice_point = min last_note practice_point
 
         let ignore_notes_before (time: Time, scoring: ScoreMetric) =
             let mutable i = 0
@@ -291,8 +291,8 @@ module PracticeScreen =
 
                 i <- i + 1
 
-        let firstNote = chart.Notes.[0].Time
-        let mutable liveplay = LiveReplayProvider firstNote
+        let first_note = chart.Notes.[0].Time
+        let mutable liveplay = LiveReplayProvider first_note
 
         let mutable scoring =
             create Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
@@ -312,7 +312,7 @@ module PracticeScreen =
         let mutable options_mode = true
 
         let restart (screen: IPlayScreen) =
-            liveplay <- LiveReplayProvider firstNote
+            liveplay <- LiveReplayProvider first_note
             scoring <- create Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
             ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
             screen.State.ChangeScoring scoring
@@ -342,13 +342,13 @@ module PracticeScreen =
             |+ Timeline(
                 Gameplay.Chart.WITH_MODS.Value,
                 fun t ->
-                    practice_point <- min lastNote t
+                    practice_point <- min last_note t
                     Song.seek t
             )
             |+ Callout.frame (info_callout) (fun (w, h) -> Position.Box(0.0f, 0.0f, 20.0f, 20.0f, w, h + 40.0f))
             |+ sync_ui
 
-        { new IPlayScreen(chart, PacemakerInfo.None, Rulesets.current, scoring, FirstNote = firstNote) with
+        { new IPlayScreen(chart, PacemakerInfo.None, Rulesets.current, scoring, FirstNote = first_note) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x
@@ -382,7 +382,7 @@ module PracticeScreen =
 
             override this.Update(elapsed_ms, moved) =
                 let now = Song.time_with_offset ()
-                let chartTime = now - firstNote
+                let chart_time = now - first_note
 
                 if not options_mode then
                     Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsed_ms
@@ -404,8 +404,8 @@ module PracticeScreen =
                 elif not (liveplay :> IReplayProvider).Finished then
                     Input.pop_gameplay (
                         binds,
-                        fun column time isRelease ->
-                            if isRelease then
+                        fun column time is_release ->
+                            if is_release then
                                 inputKeyState <- Bitmask.unset_key column inputKeyState
                             else
                                 inputKeyState <- Bitmask.set_key column inputKeyState
@@ -413,7 +413,7 @@ module PracticeScreen =
                             liveplay.Add(time, inputKeyState)
                     )
 
-                    this.State.Scoring.Update chartTime
+                    this.State.Scoring.Update chart_time
 
                 base.Update(elapsed_ms, moved)
 

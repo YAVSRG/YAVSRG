@@ -424,14 +424,14 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
             for control in case do
                 control.Init this
 
-type ColorPicker(s: Setting<Color>, allowAlpha: bool) as this =
+type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
     inherit StaticContainer(NodeType.Switch(fun _ -> this.HexEditor))
 
     let (H, S, V) = s.Value.ToHsv()
     let mutable H = H
     let mutable S = S
     let mutable V = V
-    let mutable A = if allowAlpha then float32 s.Value.A / 255.0f else 1.0f
+    let mutable A = if allow_alpha then float32 s.Value.A / 255.0f else 1.0f
 
     let hex =
         Setting.simple (s.Value.ToHex())
@@ -446,7 +446,7 @@ type ColorPicker(s: Setting<Color>, allowAlpha: bool) as this =
                 ()
         )
 
-    let hexEditor =
+    let hex_editor =
         { new TextEntry(hex, "none", Position = Position.TrimLeft(50.0f).SliceTop PRETTYHEIGHT) with
             override this.OnDeselected() =
                 base.OnDeselected()
@@ -455,9 +455,9 @@ type ColorPicker(s: Setting<Color>, allowAlpha: bool) as this =
 
     let s = Setting.trigger (fun (c: Color) -> hex.Value <- c.ToHex()) s
 
-    do this.Add hexEditor
+    do this.Add hex_editor
 
-    member private this.HexEditor = hexEditor
+    member private this.HexEditor = hex_editor
 
     override this.OnFocus() =
         Style.hover.Play()
@@ -511,7 +511,7 @@ type ColorPicker(s: Setting<Color>, allowAlpha: bool) as this =
             (Rect.Box(hue_picker.Left, hue_picker.Top + H * (hue_picker.Height - 5.0f), hue_picker.Width, 5.0f))
             Color.White
 
-        if allowAlpha then
+        if allow_alpha then
             Draw.quad
                 (Quad.ofRect alpha_picker)
                 (struct (Color.FromArgb(0, s.Value), Color.FromArgb(0, s.Value), s.Value, s.Value))

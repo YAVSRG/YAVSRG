@@ -67,12 +67,12 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
         base.Update(elapsed_ms, moved)
         ticker.Update(elapsed_ms)
 
-type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
+type StylishButton(on_click, label_func: unit -> string, color_func) as this =
     inherit
         StaticContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                onClick ()
+                on_click ()
             )
         )
 
@@ -92,10 +92,10 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
              <| Vector2(this.Bounds.Right + (if this.TiltRight then h * 0.5f else 0.0f), this.Bounds.Top)
              <| Vector2(this.Bounds.Right, this.Bounds.Bottom)
              <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom))
-            (colorFunc () |> Quad.color)
+            (color_func () |> Quad.color)
             Sprite.DefaultQuad
 
-        Text.fill_b (Style.font, labelFunc (), this.Bounds, this.TextColor(), 0.5f)
+        Text.fill_b (Style.font, label_func (), this.Bounds, this.TextColor(), 0.5f)
         base.Draw()
 
     override this.Init(parent: Widget) =
@@ -104,7 +104,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
             this.Hotkey,
             fun () ->
                 Style.click.Play()
-                onClick ()
+                on_click ()
         )
 
         base.Init parent
@@ -113,7 +113,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
         Style.hover.Play()
         base.OnFocus()
 
-    static member Selector<'T>(label: string, values: ('T * string) array, setting: Setting<'T>, colorFunc) =
+    static member Selector<'T>(label: string, values: ('T * string) array, setting: Setting<'T>, color_func) =
         let mutable current = array.IndexOf(values |> Array.map fst, setting.Value)
         current <- max 0 current
 
@@ -123,7 +123,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) as this =
                 setting.Value <- fst values.[current]
             ),
             (fun () -> sprintf "%s %s" label (snd values.[current])),
-            colorFunc
+            color_func
         )
 
 type InlaidButton(label, action, icon) =
@@ -181,9 +181,9 @@ type InlaidButton(label, action, icon) =
 
 type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit Frame(NodeType.Switch(fun _ -> this.TextEntry))
-    let searchTimer = new Diagnostics.Stopwatch()
+    let search_timer = new Diagnostics.Stopwatch()
 
-    let textEntry =
+    let text_entry =
         TextEntry(
             s |> Setting.trigger (fun _ -> this.StartSearch()),
             "search",
@@ -201,9 +201,9 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
 
     new(s: Setting<string>, callback: Filter -> unit) = SearchBox(s, (fun () -> callback (Filter.parse s.Value)))
 
-    member private this.StartSearch() = searchTimer.Restart()
+    member private this.StartSearch() = search_timer.Restart()
 
-    member private this.TextEntry: TextEntry = textEntry
+    member private this.TextEntry: TextEntry = text_entry
 
     override this.Init(parent) =
         this.Fill <-
@@ -220,13 +220,13 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
                 else
                     !*Palette.LIGHT
 
-        this |+ textEntry
+        this |+ text_entry
         |* Text(
             fun () ->
                 match s.Value with
                 | "" -> Icons.search + " " + [ (%%"search").ToString() ] %> "misc.search"
                 | _ -> ""
-            , Color = textEntry.ColorFunc
+            , Color = text_entry.ColorFunc
             , Align = Alignment.LEFT
             , Position = Position.Margin(10.0f, 0.0f)
         )
@@ -236,8 +236,8 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if searchTimer.ElapsedMilliseconds > this.DebounceTime then
-            searchTimer.Reset()
+        if search_timer.ElapsedMilliseconds > this.DebounceTime then
+            search_timer.Reset()
             callback ()
 
 type WIP() as this =

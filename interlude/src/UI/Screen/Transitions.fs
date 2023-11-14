@@ -117,7 +117,7 @@ module Transitions =
         bubble (1600.0f, 600.0f) 80.0f 120.0f Color.White 1.0f 1.3f amount
         bubble (1400.0f, 700.0f) 50.0f 75.0f Color.White 1.4f 1.7f amount
 
-    let private diamondWipe inbound amount bounds =
+    let private diamonds_wipe inbound amount bounds =
         let s = 150.0f
 
         let size x =
@@ -204,7 +204,7 @@ module Transitions =
         Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
         Stencil.finish ()
 
-    let private draw_internal flags inbound amount bounds = diamondWipe inbound amount bounds
+    let private draw_internal flags inbound amount bounds = diamonds_wipe inbound amount bounds
 
     // setup
 

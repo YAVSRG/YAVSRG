@@ -90,7 +90,7 @@ module private Helpers =
         abstract member Left: unit -> unit
         abstract member Right: unit -> unit
 
-    let positionEditor (setting: Setting<WidgetPosition>) (default_pos: WidgetPosition) =
+    let position_editor (setting: Setting<WidgetPosition>) (default_pos: WidgetPosition) =
         column ()
         |+ PageSetting(
             "hud.generic.enable",
@@ -242,7 +242,7 @@ type EditAccuracyMeterPage() as this =
 
     do
         this.Content(
-            positionEditor pos default_pos
+            position_editor pos default_pos
             |+ PageSetting("hud.accuracymeter.gradecolors", Selector<_>.FromBool grade_colors)
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("hud.accuracymeter.gradecolors"))
@@ -298,7 +298,7 @@ type EditHitMeterPage() as this =
 
     do
         this.Content(
-            positionEditor pos default_pos
+            position_editor pos default_pos
             |+ PageSetting("hud.hitmeter.showguide", Selector<_>.FromBool show_guide)
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("hud.hitmeter.showguide"))
@@ -354,7 +354,7 @@ type EditComboMeterPage() as this =
 
     do
         this.Content(
-            positionEditor pos default_pos
+            position_editor pos default_pos
             |+ PageSetting("hud.combo.lampcolors", Selector<_>.FromBool lamp_colors)
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
@@ -395,7 +395,7 @@ type EditSkipButtonPage() as this =
                 Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
         }
 
-    do this.Content(positionEditor pos default_pos |+ preview)
+    do this.Content(position_editor pos default_pos |+ preview)
 
     override this.Title = %"hud.skipbutton.name"
     override this.OnDestroy() = preview.Destroy()
@@ -466,7 +466,7 @@ type EditProgressMeterPage() as this =
 
     do
         this.Content(
-            positionEditor pos default_pos
+            position_editor pos default_pos
             |+ PageSetting("hud.progressmeter.label", Selector<HUD.ProgressMeterLabel>.FromEnum(label))
                 .Pos(550.0f)
             |+ PageSetting("hud.progressmeter.color", ColorPicker(color, true))
@@ -502,7 +502,7 @@ type EditPacemakerPage() as this =
                 Text.fill_b (Style.font, Icons.goal, bounds, Colors.text, Alignment.CENTER)
         }
 
-    do this.Content(positionEditor pos default_pos |+ preview)
+    do this.Content(position_editor pos default_pos |+ preview)
 
     override this.Title = %"hud.pacemaker.name"
     override this.OnDestroy() = preview.Destroy()
@@ -528,7 +528,7 @@ type EditJudgementCountsPage() as this =
 
     do
         this.Content(
-            positionEditor pos default_pos
+            position_editor pos default_pos
             |+ PageSetting("hud.judgementcounts.animationtime", Slider(animation_time |> Setting.f32, Step = 5f))
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("hud.judgementcounts.animationtime"))
@@ -569,7 +569,7 @@ type EditJudgementMeterPage() as this =
 
     do
         this.Content(
-            positionEditor pos default_pos
+            position_editor pos default_pos
             |+ PageSetting("hud.judgementmeter.animationtime", Slider(animation_time, Step = 5f))
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.animationtime"))
@@ -624,7 +624,7 @@ type EditEarlyLateMeterPage() as this =
 
     do
         this.Content(
-            positionEditor pos default_pos
+            position_editor pos default_pos
             |+ PageSetting("hud.earlylatemeter.animationtime", Slider(animation_time, Step = 5f))
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("hud.earlylatemeter.animationtime"))
@@ -681,7 +681,7 @@ type RateModMeterPage() as this =
 
     do
         this.Content(
-            positionEditor pos default_pos
+            position_editor pos default_pos
             |+ PageSetting("hud.ratemodmeter.showmods", Selector<_>.FromBool(show_mods))
                 .Pos(550.0f)
                 .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
@@ -712,7 +712,7 @@ type BPMMeterPage() as this =
                 Text.fill_b (Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER)
         }
 
-    do this.Content(positionEditor pos default_pos |+ preview)
+    do this.Content(position_editor pos default_pos |+ preview)
 
     override this.Title = %"hud.bpmmeter.name"
     override this.OnDestroy() = preview.Destroy()

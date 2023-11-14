@@ -365,11 +365,11 @@ module Notifications =
 
                 let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
                 Draw.rect callout_bounds (Colors.cyan.O3a t.Fade.Alpha)
-                let frameBounds = callout_bounds.Expand(5.0f)
-                Draw.rect (frameBounds.SliceTop 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Draw.rect (frameBounds.SliceBottom 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Draw.rect (frameBounds.SliceLeft 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Draw.rect (frameBounds.SliceRight 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                let frame_bounds = callout_bounds.Expand(5.0f)
+                Draw.rect (frame_bounds.SliceTop 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceBottom 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceLeft 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceRight 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
 
                 Callout.draw (
                     callout_bounds.Left,

@@ -203,8 +203,8 @@ module Printerlude =
                                     let info = ScoreInfoProvider(score, chart, ruleset)
 
                                     if data.PersonalBests.ContainsKey ruleset_id then
-                                        let newBests, _ = Bests.update info data.PersonalBests.[ruleset_id]
-                                        data.PersonalBests.[ruleset_id] <- newBests
+                                        let new_bests, _ = Bests.update info data.PersonalBests.[ruleset_id]
+                                        data.PersonalBests.[ruleset_id] <- new_bests
                                     else
                                         data.PersonalBests.[ruleset_id] <- Bests.create info
 
@@ -254,10 +254,10 @@ module Printerlude =
         |> Themes.register_commands
 
     let exec (s: string) =
-        let msPos = ms.Position
+        let current_stream_position = ms.Position
         ctx.Evaluate io s
         context_writer.Flush()
-        ms.Position <- msPos
+        ms.Position <- current_stream_position
         Terminal.add_message (context_output.ReadToEnd())
 
     let mutable ipc_shutdown_token: System.Threading.CancellationTokenSource option =

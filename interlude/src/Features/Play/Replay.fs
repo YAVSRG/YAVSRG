@@ -23,7 +23,7 @@ type ReplayMode =
     | Auto
     | Replay of score: Score * chart: ModChart * rate: float32 * ReplayData
 
-type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Playfield, enable: Setting<bool>) =
+type InputOverlay(keys, replay_data: ReplayData, state: PlayState, playfield: Playfield, enable: Setting<bool>) =
     inherit StaticWidget(NodeType.None)
 
     let mutable seek = 0
@@ -73,16 +73,16 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
 
             let now = state.CurrentChartTime()
 
-            while replayData.Length - 1 > seek
-                  && let struct (t, _) = replayData.[seek + 1] in
+            while replay_data.Length - 1 > seek
+                  && let struct (t, _) = replay_data.[seek + 1] in
                      t < now - 100.0f<ms> do
                 seek <- seek + 1
 
-            let timeTarget =
+            let until_time =
                 now + 1080.0f<ms> / (options.ScrollSpeed.Value / Gameplay.rate.Value)
 
             let mutable peek = seek
-            let struct (t, b) = replayData.[peek]
+            let struct (t, b) = replay_data.[peek]
 
             for k = 0 to keys - 1 do
                 if Bitmask.has_key k b then
@@ -91,10 +91,10 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
                 else
                     keys_down.[k] <- false
 
-            while replayData.Length - 1 > peek
-                  && let struct (t, _) = replayData.[peek] in
-                     t < timeTarget do
-                let struct (t, b) = replayData.[peek]
+            while replay_data.Length - 1 > peek
+                  && let struct (t, _) = replay_data.[peek] in
+                     t < until_time do
+                let struct (t, b) = replay_data.[peek]
 
                 for k = 0 to keys - 1 do
                     if Bitmask.has_key k b then
@@ -109,7 +109,7 @@ type InputOverlay(keys, replayData: ReplayData, state: PlayState, playfield: Pla
 
             for k = 0 to keys - 1 do
                 if keys_down.[k] then
-                    draw_press (k, now, keys_times.[k], timeTarget)
+                    draw_press (k, now, keys_times.[k], until_time)
 
 module ReplayScreen =
 
@@ -186,7 +186,7 @@ module ReplayScreen =
             | ReplayMode.Replay(score, modchart, rate, data) ->
                 StoredReplayProvider(data) :> IReplayProvider, false, rate, modchart
 
-        let firstNote = chart.Notes.[0].Time
+        let first_note = chart.Notes.[0].Time
         let ruleset = Rulesets.current
 
         let mutable replay_data = replay_data
@@ -235,10 +235,10 @@ module ReplayScreen =
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
-                let chartTime = now - firstNote
+                let chart_time = now - first_note
 
                 if not replay_data.Finished then
-                    scoring.Update chartTime
+                    scoring.Update chart_time
 
                 if replay_data.Finished then
                     match mode with

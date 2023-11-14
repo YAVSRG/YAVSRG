@@ -102,11 +102,11 @@ module Background =
 
         background <-
             List.filter
-                (fun (sprite, fade, isDefault) ->
+                (fun (sprite, fade, is_default) ->
                     fade.Update elapsed_ms |> ignore
 
                     if fade.Target = 0.0f && fade.Value < 0.01f then
-                        if not isDefault then
+                        if not is_default then
                             Sprite.destroy sprite
 
                         false
@@ -128,19 +128,19 @@ module Background =
                 Draw.quad
                     q
                     (Quad.color color)
-                    (bg.WithUV(
+                    (
                         Sprite.tiling_uv
                             (if bgaspect > screenaspect then
-                                 let scale = pheight / float32 bg.TotalHeight
-                                 let left = (float32 bg.TotalWidth * scale - pwidth) * -0.5f
-                                 (scale, left + x, 0.0f + y)
-                             else
-                                 let scale = pwidth / float32 bg.TotalWidth
-                                 let top = (float32 bg.TotalHeight * scale - pheight) * -0.5f
-                                 (scale, 0.0f + x, top + y))
+                                    let scale = pheight / float32 bg.TotalHeight
+                                    let left = (float32 bg.TotalWidth * scale - pwidth) * -0.5f
+                                    (scale, left + x, 0.0f + y)
+                                else
+                                    let scale = pwidth / float32 bg.TotalWidth
+                                    let top = (float32 bg.TotalHeight * scale - pheight) * -0.5f
+                                    (scale, 0.0f + x, top + y))
                             bg
                             q
-                    )))
+                    ))
             background
 
     let draw (bounds: Rect, color, depth) =

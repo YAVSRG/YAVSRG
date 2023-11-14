@@ -67,18 +67,18 @@ type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Servi
     override this.Draw() =
         let icon = animation_frames.[animation.Loops % animation_frames.Length]
 
-        let iconColor =
+        let icon_color =
             match service.Status with
             | Async.ServiceStatus.Busy -> Color.FromArgb(fade.Alpha, Color.Yellow)
             | Async.ServiceStatus.Working -> Color.FromArgb(fade.Alpha, Color.Lime)
             | _ -> Color.FromArgb(fade.Alpha, Color.Gray)
 
-        let textColor =
+        let text_color =
             let x = 127 + fade.Alpha / 2
             Color.FromArgb(x, x, x)
 
-        Text.fill (Style.font, icon, this.Bounds.SliceLeft this.Bounds.Height, iconColor, Alignment.CENTER)
-        Text.fill (Style.font, name, this.Bounds.TrimLeft this.Bounds.Height, textColor, Alignment.LEFT)
+        Text.fill (Style.font, icon, this.Bounds.SliceLeft this.Bounds.Height, icon_color, Alignment.CENTER)
+        Text.fill (Style.font, name, this.Bounds.TrimLeft this.Bounds.Height, text_color, Alignment.LEFT)
 
 module ImportScreen =
 

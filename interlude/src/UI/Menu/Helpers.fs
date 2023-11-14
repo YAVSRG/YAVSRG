@@ -12,7 +12,7 @@ module Helpers =
     let column () = NavigationContainer.Column<Widget>()
     let row () = NavigationContainer.Row<Widget>()
 
-    let refreshRow number cons =
+    let refreshable_row number cons =
         let r = NavigationContainer.Row()
 
         let refresh () =

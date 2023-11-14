@@ -97,19 +97,19 @@ module private Span =
         let mutable text =
             text.Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&")
 
-        let mutable remainingText = ""
+        let mutable remaining_text = ""
         let mutable width = (Text.measure (Style.font, text)) * settings.Size
         let height = settings.Size / 0.6f
 
         while width > max_width && text.Contains(' ') do
             let i = text.LastIndexOf(' ')
-            remainingText <- text.Substring(i) + remainingText
+            remaining_text <- text.Substring(i) + remaining_text
             text <- text.Substring(0, i)
             width <- (Text.measure (Style.font, text)) * settings.Size
 
         match settings.Link with
-        | None -> (fragment (text, (fg, bg), highlight), (width, height), remainingText)
-        | Some link -> (link_fragment (text, link), (width, height), remainingText)
+        | None -> (fragment (text, (fg, bg), highlight), (width, height), remaining_text)
+        | Some link -> (link_fragment (text, link), (width, height), remaining_text)
 
     [<RequireQualifiedAccess>]
     type FragmentInfo =
@@ -186,19 +186,19 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
     do
         let mutable x = MARGIN
         let mutable y = 0.0f
-        let mutable lineHeight = 0.0f
+        let mutable line_height = 0.0f
 
         let new_line () =
             x <- MARGIN
-            y <- y + lineHeight
-            lineHeight <- 0.0f
+            y <- y + line_height
+            line_height <- 0.0f
 
         for (text, settings, info) in Span.get_fragments settings spans do
             match info with
             | Span.FragmentInfo.Linebreak -> new_line ()
             | Span.FragmentInfo.Image url ->
                 let img = Image(max_width - x, text, url)
-                lineHeight <- max lineHeight img.Height
+                line_height <- max line_height img.Height
                 img.Position <- Position.Box(0.0f, 0.0f, x, y, img.Width, img.Height)
                 this |* img
                 new_line ()
@@ -207,7 +207,7 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
             let fragment, (width, height), remaining =
                 Span.create_fragment (max_width - x) text settings
 
-            lineHeight <- max lineHeight height
+            line_height <- max line_height height
 
             if width + x > max_width then
                 new_line ()
@@ -224,7 +224,7 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
                 let fragment, (width, height), remaining =
                     Span.create_fragment (max_width - x) _remaining settings
 
-                lineHeight <- max lineHeight height
+                line_height <- max line_height height
 
                 if width + x > max_width then
                     new_line ()
@@ -415,7 +415,7 @@ module private Paragraph =
         | Paragraph(body, _) -> Spans(max_width, body, Span.Settings.Default)
         | Span(body, _) -> Spans(max_width, body, Span.Settings.Default)
         | ListBlock(kind, items, _) ->
-            ListBlock(max_width, List.map (createMultiple true (max_width - ListBlock.INDENT)) items)
+            ListBlock(max_width, List.map (create_many true (max_width - ListBlock.INDENT)) items)
         | HorizontalRule(char, _) -> HorizontalRule(max_width)
         | CodeBlock(code, _, language, _, _, _) -> CodeBlock(max_width, code, language)
         | YamlFrontmatter _
@@ -427,10 +427,10 @@ module private Paragraph =
         | EmbedParagraphs _
         | InlineHtmlBlock _ -> empty ()
 
-    and createMultiple (nested: bool) (max_width: float32) (ps: MarkdownParagraphs) : IParagraph =
+    and create_many (nested: bool) (max_width: float32) (ps: MarkdownParagraphs) : IParagraph =
         Paragraphs(nested, max_width, List.map (create max_width) ps)
 
 module MarkdownUI =
 
     let build (max_width: float32) (doc: MarkdownDocument) =
-        Paragraph.createMultiple false max_width doc.Paragraphs
+        Paragraph.create_many false max_width doc.Paragraphs

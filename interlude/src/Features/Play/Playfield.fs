@@ -86,13 +86,13 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
 
     do
         let width = Array.mapi (fun i n -> n + column_width) column_positions |> Array.max
-        let (screenAlign, columnAlign) = Content.noteskin_config().PlayfieldAlignment
+        let (screen_align_percentage, playfield_align_percentage) = Content.noteskin_config().PlayfieldAlignment
 
         this.Position <-
             {
-                Left = screenAlign %- (width * columnAlign)
+                Left = screen_align_percentage %- (width * playfield_align_percentage)
                 Top = Position.min
-                Right = screenAlign %+ (width * (1.0f - columnAlign))
+                Right = screen_align_percentage %+ (width * (1.0f - playfield_align_percentage))
                 Bottom = Position.max
             }
 

@@ -79,24 +79,24 @@ type ColorSettingsPage() as this =
 
     let data = Noteskins.Current.config
     let keycount = Setting.simple options.KeymodePreference.Value
-    let mutable noteColors = data.NoteColors
+    let mutable note_colors = data.NoteColors
 
     let g keycount i =
-        let k = if noteColors.UseGlobalColors then 0 else int keycount - 2
-        Setting.make (fun v -> noteColors.Colors.[k].[i] <- v) (fun () -> noteColors.Colors.[k].[i])
+        let k = if note_colors.UseGlobalColors then 0 else int keycount - 2
+        Setting.make (fun v -> note_colors.Colors.[k].[i] <- v) (fun () -> note_colors.Colors.[k].[i])
 
     let NOTE_WIDTH = 120.0f
 
-    let colors, refreshColors =
-        refreshRow
-            (fun () -> ColorScheme.count (int keycount.Value) noteColors.Style)
+    let colors, refresh_colors =
+        refreshable_row
+            (fun () -> ColorScheme.count (int keycount.Value) note_colors.Style)
             (fun i k ->
                 let x = -60.0f * float32 k
                 let n = float32 i
 
                 NoteColorPicker(
                     g keycount.Value i,
-                    noteColors.Style,
+                    note_colors.Style,
                     i,
                     Position =
                         { Position.Default with
@@ -114,9 +114,9 @@ type ColorSettingsPage() as this =
                 Selector<_>
                     .FromBool(
                         Setting.make
-                            (fun v -> noteColors <- { noteColors with UseGlobalColors = v })
-                            (fun () -> noteColors.UseGlobalColors)
-                        |> Setting.trigger (ignore >> refreshColors)
+                            (fun v -> note_colors <- { note_colors with UseGlobalColors = v })
+                            (fun () -> note_colors.UseGlobalColors)
+                        |> Setting.trigger (ignore >> refresh_colors)
                     )
             )
                 .Pos(200.0f)
@@ -124,14 +124,14 @@ type ColorSettingsPage() as this =
             |+ PageSetting(
                 "generic.keymode",
                 Selector<Keymode>
-                    .FromEnum(keycount |> Setting.trigger (ignore >> refreshColors))
+                    .FromEnum(keycount |> Setting.trigger (ignore >> refresh_colors))
             )
                 .Pos(270.0f)
             |+ PageSetting(
                 "noteskins.edit.colorstyle",
                 Selector.FromEnum(
-                    Setting.make (fun v -> noteColors <- { noteColors with Style = v }) (fun () -> noteColors.Style)
-                    |> Setting.trigger (ignore >> refreshColors)
+                    Setting.make (fun v -> note_colors <- { note_colors with Style = v }) (fun () -> note_colors.Style)
+                    |> Setting.trigger (ignore >> refresh_colors)
                 )
             )
                 .Pos(370.0f)
@@ -145,5 +145,5 @@ type ColorSettingsPage() as this =
     override this.OnClose() =
         Noteskins.Current.save_config
             { Noteskins.Current.config with
-                NoteColors = noteColors
+                NoteColors = note_colors
             }

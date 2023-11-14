@@ -96,10 +96,10 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     override this.OnClose() = ()
 
     static member ConfirmDelete(cc, is_submenu) =
-        let chartName = sprintf "%s [%s]" cc.Title cc.DifficultyName
+        let chart_name = sprintf "%s [%s]" cc.Title cc.DifficultyName
 
         ConfirmPage(
-            [ chartName ] %> "misc.confirmdelete",
+            [ chart_name ] %> "misc.confirmdelete",
             fun () ->
                 Cache.delete cc Library.cache
                 LevelSelect.refresh_all ()
@@ -128,10 +128,10 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
     override this.OnClose() = ()
 
     static member ConfirmDelete(name, charts, is_submenu) =
-        let groupName = sprintf "%s (%i charts)" name (Seq.length charts)
+        let group_name = sprintf "%s (%i charts)" name (Seq.length charts)
 
         ConfirmPage(
-            [ groupName ] %> "misc.confirmdelete",
+            [ group_name ] %> "misc.confirmdelete",
             fun () ->
                 Cache.delete_many charts Library.cache
                 LevelSelect.refresh_all ()
@@ -172,7 +172,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
             |+ PageButton(
                 "score.challenge",
                 (fun () ->
-                    LevelSelect.challengeScore (score.ScoreInfo.rate, score.ScoreInfo.selectedMods, score.ReplayData)
+                    LevelSelect.challenge_score (score.ScoreInfo.rate, score.ScoreInfo.selectedMods, score.ReplayData)
                     Menu.Back()
                 ),
                 Icon = Icons.goal,
@@ -183,20 +183,20 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
         )
 
     override this.Title =
-        sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
+        sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Ruleset.LampName score.Lamp)
 
     override this.OnClose() = ()
 
     static member ConfirmDeleteScore(score, is_submenu) =
-        let scoreName =
-            sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
+        let score_name =
+            sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Ruleset.LampName score.Lamp)
 
         ConfirmPage(
-            [ scoreName ] %> "misc.confirmdelete",
+            [ score_name ] %> "misc.confirmdelete",
             fun () ->
                 Chart.SAVE_DATA.Value.Scores.Remove score.ScoreInfo |> ignore
                 LevelSelect.refresh_all ()
-                Notifications.action_feedback (Icons.delete, [ scoreName ] %> "notification.deleted", "")
+                Notifications.action_feedback (Icons.delete, [ score_name ] %> "notification.deleted", "")
 
                 if is_submenu then
                     Menu.Back()

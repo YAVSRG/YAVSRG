@@ -164,7 +164,7 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
         let counters =
             Rect.Box(this.Bounds.Left + 10.0f, this.Bounds.Top + 160.0f + 10.0f, this.Bounds.Width - 20.0f, 350.0f)
 
-        let judgeCounts = data.Scoring.State.Judgements
+        let judgement_counts = data.Scoring.State.Judgements
         let judgements = data.Ruleset.Judgements |> Array.indexed
         let h = counters.Height / float32 judgements.Length
         let mutable y = counters.Top
@@ -174,12 +174,12 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
             Draw.rect b (Color.FromArgb(40, j.Color))
 
             Draw.rect
-                (b.SliceLeft(counters.Width * (float32 judgeCounts.[i] / float32 (!stats).JudgementCount)))
+                (b.SliceLeft(counters.Width * (float32 judgement_counts.[i] / float32 (!stats).JudgementCount)))
                 (Color.FromArgb(127, j.Color))
 
             Text.fill_b (
                 Style.font,
-                sprintf "%s: %i" j.Name judgeCounts.[i],
+                sprintf "%s: %i" j.Name judgement_counts.[i],
                 b.Shrink(5.0f, 2.0f),
                 Colors.text,
                 Alignment.LEFT

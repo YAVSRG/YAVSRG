@@ -238,7 +238,7 @@ type EarlyLateMeter(conf: HUD.EarlyLateMeter, state: PlayState) =
 
 type ComboMeter(conf: HUD.Combo, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let popAnimation = Animation.Fade(0.0f)
+    let pop_animation = Animation.Fade(0.0f)
     let color = Animation.Color(Color.White)
     let mutable hits = 0
 
@@ -251,19 +251,19 @@ type ComboMeter(conf: HUD.Combo, state: PlayState) =
                     Lamp.calculate state.Ruleset.Grading.Lamps state.Scoring.State
                     |> state.Ruleset.LampColor
 
-            popAnimation.Value <- conf.Pop
+            pop_animation.Value <- conf.Pop
         )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         color.Update elapsed_ms
-        popAnimation.Update elapsed_ms
+        pop_animation.Update elapsed_ms
 
     override this.Draw() =
         let combo = state.Scoring.State.CurrentCombo
 
         let amt =
-            popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
+            pop_animation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
 
         Text.fill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
 
@@ -457,7 +457,7 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
 type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
-    let judgementAnimations =
+    let judgement_animations =
         Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(conf.AnimationTime))
 
     do
@@ -465,31 +465,31 @@ type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
             match h.Guts with
             | Hit x ->
                 if x.Judgement.IsSome then
-                    judgementAnimations[x.Judgement.Value].Reset()
+                    judgement_animations[x.Judgement.Value].Reset()
             | Release x ->
                 if x.Judgement.IsSome then
-                    judgementAnimations[x.Judgement.Value].Reset()
+                    judgement_animations[x.Judgement.Value].Reset()
         )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        for j in judgementAnimations do
+        for j in judgement_animations do
             j.Update elapsed_ms
 
     override this.Draw() =
-        let h = this.Bounds.Height / float32 judgementAnimations.Length
+        let h = this.Bounds.Height / float32 judgement_animations.Length
         let mutable r = this.Bounds.SliceTop(h).Shrink(5.0f)
 
         for i = 0 to state.Ruleset.Judgements.Length - 1 do
             let j = state.Ruleset.Judgements.[i]
             Draw.rect (r.Expand(10.0f, 5.0f).SliceLeft(5.0f)) j.Color
 
-            if not judgementAnimations.[i].Complete && state.Scoring.State.Judgements.[i] > 0 then
+            if not judgement_animations.[i].Complete && state.Scoring.State.Judgements.[i] > 0 then
                 Draw.rect
                     (r.Expand 5.0f)
                     (Color.FromArgb(
-                        127 - max 0 (int (127.0 * judgementAnimations.[i].Elapsed / conf.AnimationTime)),
+                        127 - max 0 (int (127.0 * judgement_animations.[i].Elapsed / conf.AnimationTime)),
                         j.Color
                     ))
 
@@ -552,7 +552,7 @@ type RateModMeter(conf: HUD.RateModMeter, state) as this =
 type BPMMeter(conf: HUD.BPMMeter, state) as this =
     inherit StaticContainer(NodeType.None)
 
-    let firstNote = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
+    let first_note = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
     let mutable i = 0
     let bpms = Gameplay.Chart.WITH_MODS.Value.BPM
     let mutable last_seen_time = -Time.infinity
@@ -561,8 +561,8 @@ type BPMMeter(conf: HUD.BPMMeter, state) as this =
         this
         |* Text(
             (fun () ->
-                let msPerBeat = bpms.[i].Data.MsPerBeat / Gameplay.rate.Value in
-                sprintf "%.0f BPM" (60000.0f<ms / minute> / msPerBeat)
+                let ms_per_beat = bpms.[i].Data.MsPerBeat / Gameplay.rate.Value in
+                sprintf "%.0f BPM" (60000.0f<ms / minute> / ms_per_beat)
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER
@@ -577,5 +577,5 @@ type BPMMeter(conf: HUD.BPMMeter, state) as this =
 
         last_seen_time <- now
 
-        while i + 1 < bpms.Length && (bpms[i + 1].Time - firstNote) < now do
+        while i + 1 < bpms.Length && (bpms[i + 1].Time - first_note) < now do
             i <- i + 1

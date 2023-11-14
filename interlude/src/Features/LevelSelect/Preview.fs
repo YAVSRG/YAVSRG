@@ -10,7 +10,7 @@ open Prelude.Charts.Tools.Patterns
 open Interlude.UI.Menu
 open Interlude.Features.Play
 
-type Preview(chart: ModChart, changeRate: float32 -> unit) =
+type Preview(chart: ModChart, change_rate: float32 -> unit) =
     inherit Dialog()
 
     let density_graph_1, density_graph_2 = Analysis.nps_cps 100 chart
@@ -65,8 +65,8 @@ type Preview(chart: ModChart, changeRate: float32 -> unit) =
                 (Mouse.x () - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
 
             let start = chart.FirstNote - Song.LEADIN_TIME
-            let newTime = start + (chart.LastNote - start) * percent
-            Song.seek newTime
+            let new_time = start + (chart.LastNote - start) * percent
+            Song.seek new_time
 
         if not (Mouse.held Mouse.LEFT) then
             dragging <- false
@@ -78,17 +78,17 @@ type Preview(chart: ModChart, changeRate: float32 -> unit) =
             this.Close()
             LevelSelect.play ()
         elif (%%"uprate_small").Tapped() then
-            changeRate (0.01f)
+            change_rate (0.01f)
         elif (%%"uprate_half").Tapped() then
-            changeRate (0.05f)
+            change_rate (0.05f)
         elif (%%"uprate").Tapped() then
-            changeRate (0.1f)
+            change_rate (0.1f)
         elif (%%"downrate_small").Tapped() then
-            changeRate (-0.01f)
+            change_rate (-0.01f)
         elif (%%"downrate_half").Tapped() then
-            changeRate (-0.05f)
+            change_rate (-0.05f)
         elif (%%"downrate").Tapped() then
-            changeRate (-0.1f)
+            change_rate (-0.1f)
 
     override this.Close() =
         if dragging then

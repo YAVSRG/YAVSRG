@@ -248,7 +248,7 @@ type Scoreboard(display: Setting<Display>) as this =
         | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selected_mods.Value)
         | _ -> K true
 
-    let scrollContainer =
+    let scroll_container =
         ScrollContainer.Flow(
             Loader.container,
             Margin = Style.PADDING,
@@ -315,7 +315,7 @@ type Scoreboard(display: Setting<Display>) as this =
                     }
             )
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
-        |+ scrollContainer
+        |+ scroll_container
         |+ HotkeyAction(
             "scoreboard",
             fun () ->

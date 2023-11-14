@@ -47,7 +47,7 @@ module LevelSelect =
             then
                 Chart.SAVE_DATA.Value.LastPlayed <- DateTime.UtcNow
 
-    let challengeScore (_rate, _mods, replay) =
+    let challenge_score (_rate, _mods, replay) =
         match Chart.SAVE_DATA with
         | Some data ->
             if

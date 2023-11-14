@@ -29,7 +29,7 @@ module Tree =
 
     /// Group's name = this string => Selected chart is in this group
     let mutable private selected_group = ""
-    /// Chart's filepath = this string && contextIndex match => It's the selected chart
+    /// Chart's filepath = this string && context_index match => It's the selected chart
     let mutable private selected_chart = ""
     /// Group's name = this string => That group is expanded in level select
     /// Only one group can be expanded at a time, and it is independent of the "selected" group
@@ -200,7 +200,7 @@ module Tree =
             // draw pbs
             let disp (data: 'T * float32 * Color * string) (pos: float32) =
                 let _, rate, color, formatted = data
-                let rateLabel = sprintf "(%.2fx)" rate
+                let rate_label = sprintf "(%.2fx)" rate
 
                 if color.A > 0uy then
                     Draw.rect (Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom)) accent
@@ -217,7 +217,7 @@ module Tree =
 
                     Text.draw_aligned_b (
                         Style.font,
-                        rateLabel,
+                        rate_label,
                         14.0f,
                         right - pos,
                         top + 35.0f,

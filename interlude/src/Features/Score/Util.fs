@@ -26,40 +26,40 @@ type ScoreScreenStats =
         let (++) (x: Time ref) (t: Time) = x.Value <- x.Value + t
 
         let taps = ref 1
-        let earlyTaps = ref 0
+        let early_taps = ref 0
         let tap_sum = ref 0.0f<ms>
         let tap_sumOfSq = ref 0.0f<ms>
         let releases = ref 1
-        let earlyReleases = ref 0
+        let early_releases = ref 0
         let release_sum = ref 0.0f<ms>
         let release_sumOfSq = ref 0.0f<ms>
 
-        let notesHit = ref 0
-        let notesCount = ref 0
-        let holdsHeld = ref 0
-        let holdsCount = ref 0
-        let releasesReleased = ref 0
-        let releasesCount = ref 0
+        let notes_hit = ref 0
+        let notes_count = ref 0
+        let holds_held = ref 0
+        let holds_count = ref 0
+        let releases_released = ref 0
+        let releases_count = ref 0
 
         for ev in events do
             match ev.Guts with
             | Hit e ->
                 if e.IsHold then
                     if not e.Missed then
-                        inc holdsHeld
+                        inc holds_held
 
-                    inc holdsCount
+                    inc holds_count
                 else
                     if not e.Missed then
-                        inc notesHit
+                        inc notes_hit
 
-                    inc notesCount
+                    inc notes_count
 
                 if e.Judgement.IsSome then
                     inc taps
 
                     if e.Delta < 0.0f<ms> then
-                        inc earlyTaps
+                        inc early_taps
 
                     if not e.Missed then
                         tap_sum ++ e.Delta
@@ -67,12 +67,12 @@ type ScoreScreenStats =
 
             | Release e ->
                 if not e.Missed then
-                    inc releasesReleased
+                    inc releases_released
 
-                inc releasesCount
+                inc releases_count
 
                 if e.Delta < 0.0f<ms> then
-                    inc earlyReleases
+                    inc early_releases
 
                 if e.Judgement.IsSome then
                     inc releases
@@ -85,9 +85,9 @@ type ScoreScreenStats =
         let release_mean = release_sum.Value / float32 releases.Value
 
         {
-            Notes = notesHit.Value, notesCount.Value
-            Holds = holdsHeld.Value, holdsCount.Value
-            Releases = releasesReleased.Value, releasesCount.Value
+            Notes = notes_hit.Value, notes_count.Value
+            Holds = holds_held.Value, holds_count.Value
+            Releases = releases_released.Value, releases_count.Value
 
             TapMean = tap_mean
             TapStandardDeviation =
@@ -96,7 +96,7 @@ type ScoreScreenStats =
                     |> float32
                 )
                 * 1.0f<ms>
-            TapEarlyPercent = float earlyTaps.Value / float taps.Value
+            TapEarlyPercent = float early_taps.Value / float taps.Value
 
             ReleaseMean = release_mean
             ReleaseStandardDeviation =
@@ -106,7 +106,7 @@ type ScoreScreenStats =
                     |> float32
                 )
                 * 1.0f<ms>
-            ReleaseEarlyPercent = float earlyReleases.Value / float releases.Value
+            ReleaseEarlyPercent = float early_releases.Value / float releases.Value
 
             JudgementCount = taps.Value + releases.Value - 2
         }

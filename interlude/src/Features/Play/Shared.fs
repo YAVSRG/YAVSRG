@@ -44,15 +44,15 @@ module AutomaticSync =
 
         let mean = sum / count * Gameplay.rate.Value
 
-        let firstNote = Gameplay.Chart.CHART.Value.FirstNote
+        let first_note = Gameplay.Chart.CHART.Value.FirstNote
 
-        let recommendedOffset =
+        let reccommended_offset =
             if count < 10.0f then
                 offset.Value
             else
-                Gameplay.Chart.SAVE_DATA.Value.Offset - firstNote - mean * 1.25f
+                Gameplay.Chart.SAVE_DATA.Value.Offset - first_note - mean * 1.25f
 
-        offset.Set recommendedOffset
+        offset.Set reccommended_offset
 
 type Timeline(chart: ModChart, on_seek: Time -> unit) =
     inherit StaticWidget(NodeType.None)
@@ -89,14 +89,14 @@ type Timeline(chart: ModChart, on_seek: Time -> unit) =
                 (Mouse.x () - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
 
             let start = chart.FirstNote - Song.LEADIN_TIME
-            let newTime = start + (chart.LastNote - start) * percent
-            on_seek newTime
+            let new_time = start + (chart.LastNote - start) * percent
+            on_seek new_time
 
 type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
     inherit StaticWidget(NodeType.None)
     let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
     let sprite = get_texture "receptorlighting"
-    let lightTime = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
+    let light_time = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
 
     do
         let hitpos = float32 options.HitPosition.Value
@@ -119,11 +119,11 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
             sliders
 
     override this.Draw() =
-        let threshold = 1.0f - lightTime
+        let threshold = 1.0f - light_time
 
         let f k (s: Animation.Fade) =
             if s.Value > threshold then
-                let p = (s.Value - threshold) / lightTime
+                let p = (s.Value - threshold) / light_time
                 let a = 255.0f * p |> int
 
                 Draw.sprite
@@ -149,11 +149,11 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     let timers = Array.zeroCreate keys
     let mem = Array.zeroCreate keys
     let holding = Array.create keys false
-    let explodeTime = Math.Clamp(ns.Explosions.FadeTime, 0f, 0.99f)
+    let explode_time = Math.Clamp(ns.Explosions.FadeTime, 0f, 0.99f)
     let animation = Animation.Counter ns.Explosions.AnimationFrameTime
     let rotation = Noteskins.note_rotation keys
 
-    let handleEvent (ev: HitEvent<HitEventGuts>) =
+    let handle_event (ev: HitEvent<HitEventGuts>) =
         match ev.Guts with
         | Hit e when (ns.Explosions.ExplodeOnMiss || not e.Missed) ->
             sliders.[ev.Column].Target <- 1.0f
@@ -176,7 +176,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                 Bottom = 1.0f %- hitpos
             }
 
-        state.SubscribeToHits handleEvent
+        state.SubscribeToHits handle_event
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -190,11 +190,11 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
     override this.Draw() =
         let columnwidth = ns.ColumnWidth
-        let threshold = 1.0f - explodeTime
+        let threshold = 1.0f - explode_time
 
         let f k (s: Animation.Fade) =
             if s.Value > threshold then
-                let p = (s.Value - threshold) / explodeTime
+                let p = (s.Value - threshold) / explode_time
                 let a = 255.0f * p |> int
 
                 let box =
@@ -248,13 +248,13 @@ type LaneCover() =
         if options.LaneCover.Enabled.Value then
 
             let bounds = this.Bounds.Expand(0.0f, 2.0f)
-            let fadeLength = options.LaneCover.FadeLength.Value
+            let fade_length = options.LaneCover.FadeLength.Value
 
             let upper (amount: float32) =
-                Draw.rect (bounds.SliceTop(amount - fadeLength)) options.LaneCover.Color.Value
+                Draw.rect (bounds.SliceTop(amount - fade_length)) options.LaneCover.Color.Value
 
                 Draw.quad
-                    (bounds.SliceTop(amount).SliceBottom(fadeLength) |> Quad.ofRect)
+                    (bounds.SliceTop(amount).SliceBottom(fade_length) |> Quad.ofRect)
                     struct (options.LaneCover.Color.Value,
                             options.LaneCover.Color.Value,
                             Color.FromArgb(0, options.LaneCover.Color.Value),
@@ -262,10 +262,10 @@ type LaneCover() =
                     Sprite.DefaultQuad
 
             let lower (amount: float32) =
-                Draw.rect (bounds.SliceBottom(amount - fadeLength)) options.LaneCover.Color.Value
+                Draw.rect (bounds.SliceBottom(amount - fade_length)) options.LaneCover.Color.Value
 
                 Draw.quad
-                    (bounds.SliceBottom(amount).SliceTop(fadeLength) |> Quad.ofRect)
+                    (bounds.SliceBottom(amount).SliceTop(fade_length) |> Quad.ofRect)
                     struct (Color.FromArgb(0, options.LaneCover.Color.Value),
                             Color.FromArgb(0, options.LaneCover.Color.Value),
                             options.LaneCover.Color.Value,
@@ -308,18 +308,18 @@ module Utils =
             if pos.Float then screen.Add w else playfield.Add w
 
 [<AbstractClass>]
-type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
+type IPlayScreen(chart: ModChart, pacemaker_info: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
     inherit Screen()
 
-    let mutable firstNote = chart.Notes.[0].Time
+    let mutable first_note = chart.Notes.[0].Time
 
     let state: PlayState =
         {
             Ruleset = ruleset
             Scoring = scoring
             ScoringChanged = Event<unit>()
-            CurrentChartTime = fun () -> Song.time_with_offset () - firstNote
-            Pacemaker = pacemakerInfo
+            CurrentChartTime = fun () -> Song.time_with_offset () - first_note
+            Pacemaker = pacemaker_info
         }
 
     let playfield = Playfield(state, options.VanishingNotes.Value)
@@ -340,7 +340,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
     abstract member AddWidgets: unit -> unit
 
     member this.FirstNote
-        with set (value) = firstNote <- value
+        with set (value) = first_note <- value
 
     member this.Playfield = playfield
     member this.State = state
