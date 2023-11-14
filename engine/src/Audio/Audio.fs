@@ -132,7 +132,7 @@ module Song =
         let rate_changed = rate <> new_rate
         let time = time ()
         rate <- new_rate
-        //if (true) then Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0) |> bassError
+        //if (true) then Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0) |> display_bass_error
         Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency * rate)
         |> display_bass_error
 
@@ -251,7 +251,7 @@ module Devices =
     let private fft: float32 array = Array.zeroCreate 1024
     let waveform: float32 array = Array.zeroCreate 256
 
-    let private updateWaveform (elapsed_ms) =
+    let private update_waveform (elapsed_ms) =
         let lerp_amount = MathF.Pow(0.988f, float32 elapsed_ms)
 
         if Song.playing () then
@@ -280,7 +280,7 @@ module Devices =
                 waveform.[i] <- waveform.[i] * lerp_amount
 
     let update (elapsed_ms: float) =
-        updateWaveform elapsed_ms
+        update_waveform elapsed_ms
         Song.update ()
 
     let mutable private default_device = -1

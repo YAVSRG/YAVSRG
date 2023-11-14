@@ -28,7 +28,7 @@ module Fonts =
 
     [<AllowNullLiteral>]
     type SpriteFont(font: Font, fallbacks: FontFamily list) =
-        let char_lookup = new Dictionary<int32, SpriteQuad>()
+        let char_lookup = new Dictionary<int32, Sprite>()
 
         let render_options =
             new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
@@ -59,7 +59,7 @@ module Fonts =
             with err ->
                 Logging.Error(sprintf "Exception occurred rendering glyph with code point %i" (int c), err)
 
-            char_lookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.with_uv (0, 0))
+            char_lookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.precompute_1x1)
 
         // render a font texture atlas, containing common characters + icons
         // characters outside this set are dynamically generated on use
@@ -128,23 +128,27 @@ module Fonts =
                         |> ignore
                     )
 
-            let sprite = Sprite.upload (img, 1, 1, true) |> Sprite.cache "FONT" false
+            let atlas_sprite = Sprite.upload (img, 1, 1, true) |> Sprite.cache "FONT" false
 
             for i, row in List.indexed glyphs do
                 for glyph in row do
                     char_lookup.Add(
                         glyph.Code,
-                        struct ({ sprite with
-                                    TotalHeight = int glyph.Height
-                                    TotalWidth = int glyph.Width
-                                },
-                                (Rect.Box(
-                                    glyph.Offset / w,
-                                    (row_spacing * float32 i) / h,
-                                    glyph.Width / w,
-                                    glyph.Height / h
-                                 )
-                                 |> Quad.ofRect))
+                        { atlas_sprite with
+                            GridHeight = int glyph.Height
+                            GridWidth = int glyph.Width
+                            Left = glyph.Offset |> int
+                            Top = row_spacing * float32 i |> int
+                            PrecomputedQuad = 
+                                ValueSome (
+                                    Rect.Box(
+                                        glyph.Offset / w,
+                                        (row_spacing * float32 i) / h,
+                                        glyph.Width / w,
+                                        glyph.Height / h)
+                                    |> Quad.ofRect
+                                )
+                        }
                     )
 
         do render_atlas ()
@@ -156,7 +160,7 @@ module Fonts =
             char_lookup.[c]
 
         member this.Dispose() =
-            char_lookup.Values |> Seq.iter (fun struct (s, _) -> Sprite.destroy s)
+            char_lookup.Values |> Seq.iter Sprite.destroy
 
         member val CharSpacing = -0.04f with get, set
         member val SpaceWidth = 0.25f with get, set
@@ -194,7 +198,7 @@ module Text =
 
     let measure (font: SpriteFont, text: string) : float32 =
         let mutable width = -font.CharSpacing
-        let mutable highSurrogate = ' '
+        let mutable high_surrogate = ' '
         let mutable i = 0
 
         while i < text.Length do
@@ -203,16 +207,16 @@ module Text =
             if thisChar = ' ' then
                 width <- width + font.SpaceWidth
             elif Char.IsHighSurrogate thisChar then
-                highSurrogate <- thisChar
+                high_surrogate <- thisChar
             else
                 let code =
                     if Char.IsLowSurrogate thisChar then
-                        Char.ConvertToUtf32(highSurrogate, thisChar)
+                        Char.ConvertToUtf32(high_surrogate, thisChar)
                     else
                         int32 thisChar
 
-                let struct (s, _) = font.Char code
-                width <- width + (float32 s.TotalWidth) / SCALE + font.CharSpacing
+                let s = font.Char code
+                width <- width + (float32 s.GridWidth) / SCALE + font.CharSpacing
 
             i <- i + 1
 
@@ -239,15 +243,15 @@ module Text =
                     else
                         int32 this_char
 
-                let struct (s, q) = font.Char code
-                let w = float32 s.TotalWidth * scale2
-                let h = float32 s.TotalHeight * scale2
+                let s = font.Char code
+                let w = float32 s.Width * scale2
+                let h = float32 s.Height * scale2
                 let r = Rect.Box(x, y, w, h)
 
                 if (bg: Drawing.Color).A <> 0uy then
-                    Draw.quad (Quad.ofRect (r.Translate(shadow_spacing, shadow_spacing))) (Quad.color bg) struct (s, q)
+                    Draw.quad (Quad.ofRect (r.Translate(shadow_spacing, shadow_spacing))) (Quad.color bg) struct (s, s.PrecomputedQuad.Value)
 
-                Draw.quad (Quad.ofRect r) (Quad.color fg) struct (s, q)
+                Draw.quad (Quad.ofRect r) (Quad.color fg) struct (s, s.PrecomputedQuad.Value)
                 x <- x + w + font.CharSpacing * scale
 
             i <- i + 1

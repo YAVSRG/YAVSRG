@@ -132,10 +132,18 @@ module FBO =
                     {
                         ID = texture_ids.[i]
                         TextureUnit = 0
-                        TotalWidth = int vwidth
-                        TotalHeight = int vheight
+
+                        Left = 0
+                        Top = 0
+                        AtlasWidth = int vwidth
+                        AtlasHeight = int vheight
+                        GridWidth = int vwidth
+                        GridHeight = int vheight
+
                         Rows = 1
                         Columns = 1
+
+                        PrecomputedQuad = ValueNone
                     }
 
                 in_use.[i] <- true
@@ -247,7 +255,7 @@ module Draw =
     let quad
         (struct (p1, p2, p3, p4): Quad)
         (struct (c1, c2, c3, c4): QuadColors)
-        (struct (s, struct (u1, u2, u3, u4)): SpriteQuad)
+        (struct (s, struct (u1, u2, u3, u4)): TexturedQuad)
         =
         if last_texture_handle <> s.ID then
             Batch.draw ()
@@ -266,6 +274,6 @@ module Draw =
         Batch.vertex p4 u4 c4 s.TextureUnit
 
     let sprite (r: Rect) (c: Color) (s: Sprite) =
-        quad <| Quad.ofRect r <| Quad.color c <| Sprite.with_uv (0, 0) s
+        quad <| Quad.ofRect r <| Quad.color c <| Sprite.pick_texture (0, 0) s
 
-    let rect (r: Rect) (c: Color) = sprite r c Sprite.Default
+    let rect (r: Rect) (c: Color) = sprite r c Sprite.DEFAULT
