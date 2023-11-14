@@ -78,9 +78,9 @@ let launch (instance: int) =
 
 [<EntryPoint>]
 let main argv =
-    let executable_location = Assembly.GetExecutingAssembly().Location
-    if not (isNull executable_location) then
-        Directory.SetCurrentDirectory(Path.GetDirectoryName(executable_location))
+    let executable_location = AppDomain.CurrentDomain.BaseDirectory
+    try Directory.SetCurrentDirectory(executable_location)
+    with err -> Logging.Error(executable_location, err)
 
     if
         not (File.Exists("bass.dll"))
@@ -115,7 +115,7 @@ let main argv =
             m.Dispose()
 
             if OperatingSystem.IsWindows() then
-                let executable = executable_location.Replace(".dll", ".exe")
+                let executable = Path.Combine(executable_location, "Interlude.exe")
                 let launch_dir = Path.GetDirectoryName executable
 
                 try
