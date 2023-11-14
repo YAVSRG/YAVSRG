@@ -18,6 +18,7 @@ type private HoldRenderState =
     | HeadOnscreen of pos: float32 * index: int
     | NoHold
 
+// todo: pass in noteskin information to reduce many calls to retrieve it
 type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this =
     inherit StaticContainer(NodeType.None)
 
@@ -59,7 +60,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
         for k = 0 to hold_states.Length - 1 do
             hold_states.[k] <- NoHold
 
-    let scrollDirectionPos bottom : Rect -> Rect =
+    let scroll_direction_transform bottom : Rect -> Rect =
         if options.Upscroll.Value then
             id
         else
@@ -71,12 +72,17 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                     Bottom = bottom - r.Top
                 }
 
-    let scrollDirectionFlip =
+    let hold_tail_flip =
         fun q ->
             if not (Content.noteskin_config().FlipHoldTail) || options.Upscroll.Value then
                 q
             else
                 Quad.flip q
+
+    let receptor_transform k =
+        if Content.noteskin_config().ReceptorStyle = ReceptorStyle.Flip then
+            if options.Upscroll.Value then Quad.flip else id
+        else rotation k
 
     do
         let width = Array.mapi (fun i n -> n + column_width) column_positions |> Array.max
@@ -111,7 +117,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
         let scale = options.ScrollSpeed.Value / Gameplay.rate.Value * 1.0f< / ms>
         let hitposition = float32 options.HitPosition.Value
 
-        let playfieldHeight = bottom - top + (max 0.0f holdnote_trim)
+        let playfield_height = bottom - top + (max 0.0f holdnote_trim)
 
         let now =
             Song.time_with_offset ()
@@ -122,7 +128,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
             if vanishing_notes then
                 let space_needed = hitposition + note_height
                 let time_needed = space_needed / scale
-                now - time_needed // todo: this is true at 1.0x SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im a laze
+                now - time_needed // todo: this is true at 1.0x SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im lazy
             else
                 now
 
@@ -171,6 +177,8 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
         if fill_column_gaps then
             Draw.rect this.Bounds playfield_color
 
+        let receptor_aspect_ratio = receptor.AspectRatio
+
         for k in 0 .. (keys - 1) do
             if not fill_column_gaps then
                 Draw.rect
@@ -184,10 +192,10 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                     HeadOffscreen holds_offscreen.[k]
 
             Draw.quad // receptor
-                (Rect.Box(left + column_positions.[k], hitposition, column_width, note_height)
-                 |> scrollDirectionPos bottom
+                (Rect.Box(left + column_positions.[k], hitposition + note_height - note_height / receptor_aspect_ratio, column_width, note_height / receptor_aspect_ratio)
+                 |> scroll_direction_transform bottom
                  |> Quad.ofRect
-                 |> rotation k)
+                 |> receptor_transform k)
                 (Quad.color Color.White)
                 (Sprite.with_uv
                     (animation.Loops,
@@ -201,7 +209,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
             Draw.quad
                 (Quad.ofRect (
                     Rect.Box(left + column_positions.[k], pos, column_width, note_height)
-                    |> scrollDirectionPos bottom
+                    |> scroll_direction_transform bottom
                  )
                  |> rotation k)
                 (Quad.color Color.White)
@@ -211,7 +219,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
             Draw.quad
                 (Quad.ofRect (
                     Rect.Box(left + column_positions.[k], pos, column_width, note_height)
-                    |> scrollDirectionPos bottom
+                    |> scroll_direction_transform bottom
                  )
                  |> rotation k)
                 (Quad.color tint)
@@ -226,7 +234,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                         left + column_positions.[k] + column_width,
                         pos_b + note_height * 0.5f + 2.0f
                     )
-                    |> scrollDirectionPos bottom
+                    |> scroll_direction_transform bottom
                 ))
                 (Quad.color tint)
                 (Sprite.with_uv (animation.Loops, color) holdbody)
@@ -240,16 +248,16 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                         left + column_positions.[k] + column_width,
                         pos + note_height
                     )
-                    |> scrollDirectionPos bottom
+                    |> scroll_direction_transform bottom
                  )
                  |> if useholdtail then id else rotation k)
                 (Quad.color tint)
                 (Sprite.with_uv (animation.Loops, color) (if useholdtail then holdtail else holdhead)
-                 |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
+                 |> fun struct (s, q) -> struct (s, hold_tail_flip q))
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
-        // todo: also put a cap at -playfieldHeight when *negative sv comes into play
-        while column_pos < playfieldHeight && note_peek < chart.Notes.Length do
+        // todo: also put a cap at -playfield_height when *negative sv comes into play
+        while column_pos < playfield_height && note_peek < chart.Notes.Length do
 
             let { Time = t; Data = struct (nd, color) } = chart.Notes.[note_peek]
             // update vertical position + scroll speed based on sv

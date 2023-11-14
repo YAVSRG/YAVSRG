@@ -123,7 +123,7 @@ module Background =
                 let x = -parallaxX.Value * parallaxZ.Value * depth
                 let y = -parallaxY.Value * parallaxZ.Value * depth
                 let screenaspect = pwidth / pheight
-                let bgaspect = float32 bg.Width / float32 bg.Height
+                let bgaspect = float32 bg.TotalWidth / float32 bg.TotalHeight
 
                 Draw.quad
                     q
@@ -131,12 +131,12 @@ module Background =
                     (bg.WithUV(
                         Sprite.tiling_uv
                             (if bgaspect > screenaspect then
-                                 let scale = pheight / float32 bg.Height
-                                 let left = (float32 bg.Width * scale - pwidth) * -0.5f
+                                 let scale = pheight / float32 bg.TotalHeight
+                                 let left = (float32 bg.TotalWidth * scale - pwidth) * -0.5f
                                  (scale, left + x, 0.0f + y)
                              else
-                                 let scale = pwidth / float32 bg.Width
-                                 let top = (float32 bg.Height * scale - pheight) * -0.5f
+                                 let scale = pwidth / float32 bg.TotalWidth
+                                 let top = (float32 bg.TotalHeight * scale - pheight) * -0.5f
                                  (scale, 0.0f + x, top + y))
                             bg
                             q

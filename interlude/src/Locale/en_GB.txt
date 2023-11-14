@@ -538,6 +538,10 @@ noteskins.edit.playfield.name=Playfield
 noteskins.edit.playfield.tooltip=Edit settings for the playfield here.
 noteskins.edit.playfieldcolor.name=Playfield color
 noteskins.edit.playfieldcolor.tooltip=The color of the playfield behind notes and receptors.
+noteskins.edit.receptorstyle.flip=Flip
+noteskins.edit.receptorstyle.name=Receptor style
+noteskins.edit.receptorstyle.rotate=Rotate
+noteskins.edit.receptorstyle.tooltip=Rotate = Receptors should rotate to match note rotations.\nFlip = Receptors should not rotate to match note rotations, but should flip upside down when using upscroll.
 noteskins.edit.rotations.name=Rotations
 noteskins.edit.rotations.tooltip=Edit the rotation of your notes here.\nOnly useful if you use arrow notes.
 noteskins.edit.tooltip=Edit your noteskin settings here.

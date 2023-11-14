@@ -88,6 +88,7 @@ type RotationSettingsPage() as this =
     let data = Noteskins.Current.config
     let use_rotation = Setting.simple data.UseRotation
     let keycount = Setting.simple options.KeymodePreference.Value
+    let receptor_style = Setting.simple data.ReceptorStyle
     let mutable rotations = data.Rotations
 
     let g keycount i =
@@ -98,7 +99,7 @@ type RotationSettingsPage() as this =
 
     let NOTE_WIDTH = 120.0f
 
-    let _rotations, refreshRotations =
+    let _rotations, refresh_rotations =
         refreshRow
             (fun () -> int keycount.Value)
             (fun i k ->
@@ -124,11 +125,19 @@ type RotationSettingsPage() as this =
             |+ PageSetting(
                 "generic.keymode",
                 Selector<Keymode>
-                    .FromEnum(keycount |> Setting.trigger (ignore >> refreshRotations))
+                    .FromEnum(keycount |> Setting.trigger (ignore >> refresh_rotations))
             )
                 .Pos(270.0f)
             |+ PageSetting("noteskins.edit.rotations", _rotations)
                 .Pos(370.0f, Viewport.vwidth - 200.0f, NOTE_WIDTH)
+            |+ PageSetting("noteskins.edit.receptorstyle", 
+                Selector(
+                    [|
+                        ReceptorStyle.Rotate, %"noteskins.edit.receptorstyle.rotate";
+                        ReceptorStyle.Flip, %"noteskins.edit.receptorstyle.flip"
+                    |], receptor_style))
+                .Pos(470.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.receptorstyle"))
         )
 
     override this.Title = %"noteskins.edit.rotations.name"
@@ -138,4 +147,5 @@ type RotationSettingsPage() as this =
             { Noteskins.Current.config with
                 Rotations = rotations
                 UseRotation = use_rotation.Value
+                ReceptorStyle = receptor_style.Value
             }
