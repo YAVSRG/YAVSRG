@@ -140,7 +140,7 @@ type AnimationSettingsPage() as this =
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
             (Quad.color Color.White)
-            (Sprite.with_uv (note_frames.Loops, 0) receptor)
+            (Sprite.pick_texture (note_frames.Loops, 0) receptor)
 
         if enable_explosions.Value then
             let threshold = max 0.0f (1.0f - explosion_fade_time.Value)
@@ -159,7 +159,7 @@ type AnimationSettingsPage() as this =
                     .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
                  |> Quad.ofRect)
                 (Quad.color (Color.White.O4a a))
-                (Sprite.with_uv (explosion_frames.Loops, 0) noteexplosion)
+                (Sprite.pick_texture (explosion_frames.Loops, 0) noteexplosion)
 
         // draw hold explosion example
         bottom <- bottom - COLUMN_WIDTH * 2.0f
@@ -167,7 +167,7 @@ type AnimationSettingsPage() as this =
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
             (Quad.color Color.White)
-            (Sprite.with_uv (note_frames.Loops, 0) receptor)
+            (Sprite.pick_texture (note_frames.Loops, 0) receptor)
 
         if enable_explosions.Value then
             let threshold = max 0.0f (1.0f - explosion_fade_time.Value)
@@ -186,7 +186,7 @@ type AnimationSettingsPage() as this =
                     .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
                  |> Quad.ofRect)
                 (Quad.color (Color.White.O4a a))
-                (Sprite.with_uv (explosion_frames.Loops, 0) holdexplosion)
+                (Sprite.pick_texture (explosion_frames.Loops, 0) holdexplosion)
 
         // draw note animation example
         bottom <- bottom - COLUMN_WIDTH * 2.0f
@@ -194,7 +194,7 @@ type AnimationSettingsPage() as this =
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
             (Quad.color Color.White)
-            (Sprite.with_uv (note_frames.Loops, 0) note)
+            (Sprite.pick_texture (note_frames.Loops, 0) note)
 
         // draw column light example
         bottom <- bottom + COLUMN_WIDTH * 4.0f
@@ -203,7 +203,7 @@ type AnimationSettingsPage() as this =
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
             (Quad.color Color.White)
-            (Sprite.with_uv (note_frames.Loops, int hold_explosion_fade.Target) receptor)
+            (Sprite.pick_texture (note_frames.Loops, int hold_explosion_fade.Target) receptor)
 
         if enable_column_light.Value then
             let threshold = max 0.0f (1.0f - column_light_time.Value)

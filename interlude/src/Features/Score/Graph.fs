@@ -89,7 +89,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 Draw.quad
                     (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
                     (Quad.color color.O3)
-                    Sprite.DefaultQuad
+                    Sprite.DEFAULT_QUAD
 
         // draw dots
         let hscale = (width - 10.0f) / events.[events.Count - 1].Time

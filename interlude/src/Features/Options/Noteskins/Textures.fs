@@ -54,7 +54,7 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
 
     override this.Draw() =
         base.Draw()
-        Draw.quad (this.Bounds |> Quad.ofRect) (Quad.color Color.White) (Sprite.with_uv (x, y) sprite)
+        Draw.quad (this.Bounds |> Quad.ofRect) (Quad.color Color.White) (Sprite.pick_texture (x, y) sprite)
 
 type DeleteButton(onClick) =
     inherit Button(K Icons.delete, onClick, Floating = true)
@@ -70,7 +70,7 @@ type DeleteButton(onClick) =
 type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as this =
     inherit StaticContainer(NodeType.Switch(fun () -> this.Items))
 
-    let mutable sprite = Sprite.Default
+    let mutable sprite = Sprite.DEFAULT
     let mutable selected: bool array array = [||]
     let mutable items: NavigationContainer.Grid<Widget> = Unchecked.defaultof<_>
 

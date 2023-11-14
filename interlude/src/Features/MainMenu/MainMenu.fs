@@ -50,9 +50,9 @@ type private MenuButton(on_click, label: string, pos) as this =
         Draw.quad
             (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f))
             (Quad.color !*Palette.HIGHLIGHT_100)
-            Sprite.DefaultQuad
+            Sprite.DEFAULT_QUAD
 
-        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.color !*Palette.MAIN_100) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.color !*Palette.MAIN_100) Sprite.DEFAULT_QUAD
         base.Draw()
 
     member this.Pop() =

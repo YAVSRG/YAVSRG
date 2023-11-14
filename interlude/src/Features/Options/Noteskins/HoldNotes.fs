@@ -71,12 +71,12 @@ type HoldNoteSettingsPage() as this =
                  )
                  |> Quad.ofRect)
                 (Quad.color color)
-                (Sprite.with_uv (animation.Loops, 0) body)
+                (Sprite.pick_texture (animation.Loops, 0) body)
 
             Draw.quad
                 (Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
                 (Quad.color color)
-                (Sprite.with_uv (animation.Loops, 0) head)
+                (Sprite.pick_texture (animation.Loops, 0) head)
 
             Draw.quad
                 (Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
@@ -86,7 +86,7 @@ type HoldNoteSettingsPage() as this =
                         id
                  |> Quad.ofRect)
                 (Quad.color color)
-                (Sprite.with_uv (animation.Loops, 0) (if use_tail_texture.Value then tail else head))
+                (Sprite.pick_texture (animation.Loops, 0) (if use_tail_texture.Value then tail else head))
 
             Text.fill_b (Style.font, label, Rect.Box(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
 

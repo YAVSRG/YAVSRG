@@ -40,7 +40,7 @@ module Transitions =
                 (o + d * endpoint - perp)
                 (o + d * startpoint - perp))
             (Quad.color col)
-            Sprite.DefaultQuad
+            Sprite.DEFAULT_QUAD
 
     let private glint (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) =
         let t = 4.0f * (time - time * time)
@@ -64,10 +64,10 @@ module Transitions =
 
         let c = Color.FromArgb(Math.Clamp(t * 255.0f |> int, 0, 255), col)
 
-        Draw.quad q (Quad.color c) Sprite.DefaultQuad
-        Draw.quad q2 (Quad.color c) Sprite.DefaultQuad
-        Draw.quad (Quad.rotate_about o 180.0 q) (Quad.color c) Sprite.DefaultQuad
-        Draw.quad (Quad.rotate_about o 180.0 q2) (Quad.color c) Sprite.DefaultQuad
+        Draw.quad q (Quad.color c) Sprite.DEFAULT_QUAD
+        Draw.quad q2 (Quad.color c) Sprite.DEFAULT_QUAD
+        Draw.quad (Quad.rotate_about o 180.0 q) (Quad.color c) Sprite.DEFAULT_QUAD
+        Draw.quad (Quad.rotate_about o 180.0 q2) (Quad.color c) Sprite.DEFAULT_QUAD
 
     let private wedge (centre: Vector2) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
         let segments = int ((a2 - a1) / 0.10)
@@ -82,7 +82,7 @@ module Transitions =
             Draw.quad
                 (Quad.create (centre + ang1 * r2) (centre + ang2 * r2) (centre + ang2 * r1) (centre + ang1 * r1))
                 (Quad.color col)
-                Sprite.DefaultQuad
+                Sprite.DEFAULT_QUAD
 
     let private cwedge =
         wedge <| new Vector2(Viewport.vwidth * 0.5f, Viewport.vheight * 0.5f)
@@ -141,7 +141,7 @@ module Transitions =
                  <| new Vector2(x + r, y)
                  <| new Vector2(x, y + r))
                 (Quad.color Color.Transparent)
-                Sprite.DefaultQuad
+                Sprite.DEFAULT_QUAD
 
         Stencil.start_stencilling false
 
@@ -184,7 +184,7 @@ module Transitions =
                      <| new Vector2(x + s, h)
                      <| new Vector2(x, h))
                     (Quad.color Color.Transparent)
-                    Sprite.DefaultQuad
+                    Sprite.DEFAULT_QUAD
             else
                 Draw.quad
                     (Quad.create
@@ -193,7 +193,7 @@ module Transitions =
                      <| new Vector2(x + h + s, 0.0f) - v
                      <| new Vector2(x + h, 0.0f) - v)
                     (Quad.color Color.Transparent)
-                    Sprite.DefaultQuad
+                    Sprite.DEFAULT_QUAD
 
         Stencil.start_stencilling false
 

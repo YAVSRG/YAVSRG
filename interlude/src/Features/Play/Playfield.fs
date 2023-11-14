@@ -197,7 +197,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                  |> Quad.ofRect
                  |> receptor_transform k)
                 (Quad.color Color.White)
-                (Sprite.with_uv
+                (Sprite.pick_texture
                     (animation.Loops,
                      if (state.Scoring.KeyState |> Bitmask.has_key k) then
                          1
@@ -213,7 +213,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                  )
                  |> rotation k)
                 (Quad.color Color.White)
-                (Sprite.with_uv (animation.Loops, color) note)
+                (Sprite.pick_texture (animation.Loops, color) note)
 
         let inline draw_head (k, pos, color, tint) =
             Draw.quad
@@ -223,7 +223,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                  )
                  |> rotation k)
                 (Quad.color tint)
-                (Sprite.with_uv (animation.Loops, color) holdhead)
+                (Sprite.pick_texture (animation.Loops, color) holdhead)
 
         let inline draw_body (k, pos_a, pos_b, color, tint) =
             Draw.quad
@@ -237,7 +237,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                     |> scroll_direction_transform bottom
                 ))
                 (Quad.color tint)
-                (Sprite.with_uv (animation.Loops, color) holdbody)
+                (Sprite.pick_texture (animation.Loops, color) holdbody)
 
         let inline draw_tail (k, pos, clip, color, tint) =
             Draw.quad
@@ -252,7 +252,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                  )
                  |> if useholdtail then id else rotation k)
                 (Quad.color tint)
-                (Sprite.with_uv (animation.Loops, color) (if useholdtail then holdtail else holdhead)
+                (Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
                  |> fun struct (s, q) -> struct (s, hold_tail_flip q))
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn

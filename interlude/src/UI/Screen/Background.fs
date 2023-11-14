@@ -116,27 +116,27 @@ module Background =
 
     let drawq (q: Quad, color: Color, depth: float32) =
         List.iter
-            (fun (bg, (fade: Animation.Fade), isDefault) ->
+            (fun (bg: Sprite, (fade: Animation.Fade), is_default) ->
                 let color = Color.FromArgb(fade.Alpha, color)
                 let pwidth = Viewport.vwidth + parallaxZ.Value * depth
                 let pheight = Viewport.vheight + parallaxZ.Value * depth
                 let x = -parallaxX.Value * parallaxZ.Value * depth
                 let y = -parallaxY.Value * parallaxZ.Value * depth
                 let screenaspect = pwidth / pheight
-                let bgaspect = float32 bg.TotalWidth / float32 bg.TotalHeight
+                let bgaspect = float32 bg.Width / float32 bg.Height
 
                 Draw.quad
                     q
                     (Quad.color color)
                     (
-                        Sprite.tiling_uv
+                        Sprite.tiling
                             (if bgaspect > screenaspect then
-                                    let scale = pheight / float32 bg.TotalHeight
-                                    let left = (float32 bg.TotalWidth * scale - pwidth) * -0.5f
+                                    let scale = pheight / float32 bg.Height
+                                    let left = (float32 bg.Width * scale - pwidth) * -0.5f
                                     (scale, left + x, 0.0f + y)
                                 else
-                                    let scale = pwidth / float32 bg.TotalWidth
-                                    let top = (float32 bg.TotalHeight * scale - pheight) * -0.5f
+                                    let scale = pwidth / float32 bg.Width
+                                    let top = (float32 bg.Height * scale - pheight) * -0.5f
                                     (scale, 0.0f + x, top + y))
                             bg
                             q

@@ -189,7 +189,7 @@ module Tree =
                  <| new Vector2(left + stripe_length, bottom - 25.0f)
                  <| new Vector2(left, bottom - 25.0f))
                 (struct (accent, Color.Transparent, Color.Transparent, accent))
-                Sprite.DefaultQuad
+                Sprite.DEFAULT_QUAD
 
             let border = bounds.Expand(5.0f, 0.0f)
             let border_color = if this.Selected then !*Palette.LIGHT else color

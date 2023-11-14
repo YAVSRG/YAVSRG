@@ -233,7 +233,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                     Draw.quad
                         (box |> Quad.ofRect |> rotation k)
                         (Quad.color (Color.FromArgb(a, Color.White)))
-                        (Sprite.with_uv
+                        (Sprite.pick_texture
                             (frame, color)
                             (Content.get_texture (if e.IsHold then "holdexplosion" else "noteexplosion")))
                 | _ -> ()
@@ -259,7 +259,7 @@ type LaneCover() =
                             options.LaneCover.Color.Value,
                             Color.FromArgb(0, options.LaneCover.Color.Value),
                             Color.FromArgb(0, options.LaneCover.Color.Value))
-                    Sprite.DefaultQuad
+                    Sprite.DEFAULT_QUAD
 
             let lower (amount: float32) =
                 Draw.rect (bounds.SliceBottom(amount - fade_length)) options.LaneCover.Color.Value
@@ -270,7 +270,7 @@ type LaneCover() =
                             Color.FromArgb(0, options.LaneCover.Color.Value),
                             options.LaneCover.Color.Value,
                             options.LaneCover.Color.Value)
-                    Sprite.DefaultQuad
+                    Sprite.DEFAULT_QUAD
 
             let height = bounds.Height
 

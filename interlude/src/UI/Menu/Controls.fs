@@ -188,7 +188,7 @@ type Divider() =
         Draw.quad
             (Quad.ofRect this.Bounds)
             (struct (Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White))
-            Sprite.DefaultQuad
+            Sprite.DEFAULT_QUAD
 
 type PageSetting(name, widget: Widget) as this =
     inherit StaticContainer(NodeType.Switch(fun _ -> this.Child))
@@ -490,7 +490,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
         Draw.quad
             (Quad.ofRect saturation_value_picker)
             (struct (Color.White, Color.FromHsv(H, 1.0f, 1.0f), Color.Black, Color.Black))
-            Sprite.DefaultQuad
+            Sprite.DEFAULT_QUAD
 
         let x = saturation_value_picker.Left + S * saturation_value_picker.Width
         let y = saturation_value_picker.Bottom - V * saturation_value_picker.Height
@@ -505,7 +505,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             Draw.quad
                 (Quad.ofRect (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h)))
                 (struct (a, a, b, b))
-                Sprite.DefaultQuad
+                Sprite.DEFAULT_QUAD
 
         Draw.rect
             (Rect.Box(hue_picker.Left, hue_picker.Top + H * (hue_picker.Height - 5.0f), hue_picker.Width, 5.0f))
@@ -515,7 +515,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             Draw.quad
                 (Quad.ofRect alpha_picker)
                 (struct (Color.FromArgb(0, s.Value), Color.FromArgb(0, s.Value), s.Value, s.Value))
-                Sprite.DefaultQuad
+                Sprite.DEFAULT_QUAD
 
             Draw.rect
                 (Rect.Box(

@@ -65,7 +65,7 @@ type RotationPicker(rotation: Setting<float>) as this =
         Draw.quad
             (Quad.ofRect this.Bounds |> Quad.rotate rotation.Value)
             (Quad.color Color.White)
-            (Sprite.with_uv (3, 0) sprite)
+            (Sprite.pick_texture (3, 0) sprite)
 
         base.Draw()
 

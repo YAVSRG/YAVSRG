@@ -274,7 +274,7 @@ module Content =
                                 id
                         )
 
-                        Sprite.Default |> Sprites.add id
+                        Sprite.DEFAULT |> Sprites.add id
 
             let switch (new_id: string) =
                 let new_id =
@@ -304,7 +304,7 @@ module Content =
                             id
                     )
 
-                    Sprite.Default |> Sprites.add id
+                    Sprite.DEFAULT |> Sprites.add id
 
         // Loading into memory
 

@@ -52,7 +52,7 @@ module Logo =
                             (l + 0.5f * w, t + 0.76875f * w)
                             (r - 0.08f * w, t + 0.09f * w))
                         (Quad.color Colors.blue)
-                        Sprite.DefaultQuad
+                        Sprite.DEFAULT_QUAD
 
                     Draw.quad
                         (Quad.createv
@@ -62,7 +62,7 @@ module Logo =
                             (l + 0.5f * w, t + 0.96875f * w)
                          |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.blue)
-                        Sprite.DefaultQuad
+                        Sprite.DEFAULT_QUAD
 
                     Draw.quad
                         (Quad.createv
@@ -72,7 +72,7 @@ module Logo =
                             (l + 0.5f * w, t + 0.96875f * w)
                          |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.blue)
-                        Sprite.DefaultQuad
+                        Sprite.DEFAULT_QUAD
 
                     Stencil.start_stencilling (true)
 
@@ -83,7 +83,7 @@ module Logo =
                             (l + 0.5f * w, t + 0.75f * w)
                             (r - 0.1f * w, t + 0.1f * w))
                         (Quad.color Colors.cyan_accent)
-                        Sprite.DefaultQuad
+                        Sprite.DEFAULT_QUAD
 
                     Draw.quad
                         (Quad.createv
@@ -93,7 +93,7 @@ module Logo =
                             (l + 0.5f * w, t + 0.95f * w)
                          |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.cyan_accent)
-                        Sprite.DefaultQuad
+                        Sprite.DEFAULT_QUAD
 
                     Draw.quad
                         (Quad.createv
@@ -103,7 +103,7 @@ module Logo =
                             (l + 0.5f * w, t + 0.95f * w)
                          |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.cyan_accent)
-                        Sprite.DefaultQuad
+                        Sprite.DEFAULT_QUAD
 
                     Draw.sprite breathe_bounds Colors.white (Content.get_texture "logo")
 
@@ -117,17 +117,17 @@ module Logo =
                     Draw.quad
                     <| q
                     <| Quad.color (Colors.blue.O2)
-                    <| Sprite.tiling_uv (0.625f, v * 0.06f, v * 0.07f) rain q
+                    <| Sprite.tiling (0.625f, v * 0.06f, v * 0.07f) rain q
 
                     Draw.quad
                     <| q
                     <| Quad.color (Colors.blue.O3)
-                    <| Sprite.tiling_uv (1.0f, v * 0.1f, v * 0.11f) rain q
+                    <| Sprite.tiling (1.0f, v * 0.1f, v * 0.11f) rain q
 
                     Draw.quad
                     <| q
                     <| Quad.color (Colors.blue)
-                    <| Sprite.tiling_uv (1.5625f, v * 0.15f, v * 0.16f) rain q
+                    <| Sprite.tiling (1.5625f, v * 0.15f, v * 0.16f) rain q
 
                     let mutable prev = 0.0f
                     let m = b - w * 0.5f
@@ -148,7 +148,7 @@ module Logo =
                                 (new Vector2(l + (i + 1.0f) * w / 32.0f, b))
                                 (new Vector2(l + i * w / 32.0f, b)))
                             (Quad.color (Colors.blue_accent.O3))
-                            Sprite.DefaultQuad
+                            Sprite.DEFAULT_QUAD
 
                         prev <- level
 
