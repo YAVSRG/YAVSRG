@@ -13,12 +13,14 @@ type Sprite =
     {
         ID: int
         TextureUnit: int
-        Width: int
-        Height: int
+        TotalWidth: int
+        TotalHeight: int
         Rows: int
         Columns: int
     }
-
+    member this.Width = this.TotalWidth / this.Columns
+    member this.Height = this.TotalHeight / this.Rows
+    member this.AspectRatio = float32 this.Width / float32 this.Height
     member this.WithUV(q: Quad) : SpriteQuad = struct (this, q)
 
 and SpriteQuad = (struct (Sprite * Quad))
@@ -81,8 +83,8 @@ module Sprite =
         {
             ID = id
             TextureUnit = 0
-            Width = width
-            Height = height
+            TotalWidth = width
+            TotalHeight = height
             Rows = rows
             Columns = columns
         }
@@ -132,13 +134,13 @@ module Sprite =
         |> sprite.WithUV
 
     let tiling_uv (scale, left, top) (sprite: Sprite) (quad: Quad) =
-        let width = float32 sprite.Width * scale
-        let height = float32 sprite.Height * scale
+        let width = float32 sprite.TotalWidth * scale
+        let height = float32 sprite.TotalHeight * scale
         Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height)) quad
 
     let aligned_box_x (x_origin, y_origin, x_offset, y_offset, x_scale, y_mult) (sprite: Sprite) : Rect =
         let width = x_scale
-        let height = float32 sprite.Height / float32 sprite.Width * width * y_mult
+        let height = float32 sprite.TotalHeight / float32 sprite.TotalWidth * width * y_mult
         let left = x_origin - x_offset * width
         let top = y_origin - y_offset * height
         Rect.Box(left, top, width, height)

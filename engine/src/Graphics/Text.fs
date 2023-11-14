@@ -135,8 +135,8 @@ module Fonts =
                     char_lookup.Add(
                         glyph.Code,
                         struct ({ sprite with
-                                    Height = int glyph.Height
-                                    Width = int glyph.Width
+                                    TotalHeight = int glyph.Height
+                                    TotalWidth = int glyph.Width
                                 },
                                 (Rect.Box(
                                     glyph.Offset / w,
@@ -212,7 +212,7 @@ module Text =
                         int32 thisChar
 
                 let struct (s, _) = font.Char code
-                width <- width + (float32 s.Width) / SCALE + font.CharSpacing
+                width <- width + (float32 s.TotalWidth) / SCALE + font.CharSpacing
 
             i <- i + 1
 
@@ -240,8 +240,8 @@ module Text =
                         int32 this_char
 
                 let struct (s, q) = font.Char code
-                let w = float32 s.Width * scale2
-                let h = float32 s.Height * scale2
+                let w = float32 s.TotalWidth * scale2
+                let h = float32 s.TotalHeight * scale2
                 let r = Rect.Box(x, y, w, h)
 
                 if (bg: Drawing.Color).A <> 0uy then

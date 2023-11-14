@@ -132,8 +132,8 @@ module FBO =
                     {
                         ID = texture_ids.[i]
                         TextureUnit = 0
-                        Width = int vwidth
-                        Height = int vheight
+                        TotalWidth = int vwidth
+                        TotalHeight = int vheight
                         Rows = 1
                         Columns = 1
                     }
