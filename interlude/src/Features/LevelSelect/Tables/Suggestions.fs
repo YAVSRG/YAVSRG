@@ -147,6 +147,7 @@ type SuggestionsPage() as this =
         this.Content(
             StaticContainer(NodeType.Leaf)
             |+ sl
+            |+ WIP()
         )
 
     override this.Title = %"table.suggestions.name"
