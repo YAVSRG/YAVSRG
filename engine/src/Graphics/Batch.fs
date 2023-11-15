@@ -24,7 +24,7 @@ module Batch =
 
     let mutable private active = false
 
-    let private CAPACITY = 512
+    let private CAPACITY = 1024
     let private VERTICES_PER_ELEMENT = 6
     let private VERTEX_COUNT = CAPACITY * VERTICES_PER_ELEMENT // 2 triangles per quad
     let private VERTEX_SIZE = sizeof<Vertex>

@@ -26,6 +26,7 @@ type Sprite =
         Columns: int
 
         mutable PrecomputedQuad: Quad voption
+        mutable DefaultQuad: Quad option
     }
     member this.Width = this.GridWidth / this.Columns
     member this.Height = this.GridHeight / this.Rows
@@ -115,6 +116,7 @@ module Sprite =
             Columns = columns
 
             PrecomputedQuad = ValueNone
+            DefaultQuad = None
         }
 
     let cache (source: string) (low_priority: bool) (sprite: Sprite) : Sprite =
@@ -140,8 +142,8 @@ module Sprite =
                     { sprite with TextureUnit = i }
 
     let DEFAULT =
-        use img = new Image<PixelFormats.Rgba32>(1, 1)
-        img.[0, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
+        use img = new Image<Rgba32>(1, 1)
+        img.[0, 0] <- new Rgba32(255uy, 255uy, 255uy, 255uy)
         upload (img, 1, 1, false) |> cache "BLANK" false
 
     let DEFAULT_QUAD: TexturedQuad = struct (DEFAULT, Quad.ofRect Rect.ONE)
@@ -162,6 +164,8 @@ module Sprite =
         sprite.PrecomputedQuad <- ValueSome quad
 
         sprite
+
+    let with_default_quad_alt (quad: Quad) (sprite: Sprite) = { sprite with DefaultQuad = Some quad }
 
     let pick_texture (x: int, y: int) (sprite: Sprite) : TexturedQuad =
         if sprite.PrecomputedQuad.IsSome then struct (sprite, sprite.PrecomputedQuad.Value) else

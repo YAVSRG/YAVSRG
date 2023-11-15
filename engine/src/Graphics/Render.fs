@@ -144,6 +144,7 @@ module FBO =
                         Columns = 1
 
                         PrecomputedQuad = ValueNone
+                        DefaultQuad = None
                     }
 
                 in_use.[i] <- true
@@ -251,27 +252,50 @@ module Render =
 module Draw =
 
     let mutable private last_texture_handle = -1
+    let mutable private last_texture_default_quad = None
 
     let quad
         (struct (p1, p2, p3, p4): Quad)
         (struct (c1, c2, c3, c4): QuadColors)
         (struct (s, struct (u1, u2, u3, u4)): TexturedQuad)
         =
-        if last_texture_handle <> s.ID then
+        if last_texture_handle <> s.ID && s.ID = Sprite.DEFAULT.ID && last_texture_default_quad.IsSome then
+
+            let struct (u1, u2, u3, u4) = last_texture_default_quad.Value
+            
+            Batch.vertex p1 u1 c1 s.TextureUnit
+            Batch.vertex p2 u2 c2 s.TextureUnit
+            Batch.vertex p3 u3 c3 s.TextureUnit
+            Batch.vertex p1 u1 c1 s.TextureUnit
+            Batch.vertex p3 u3 c3 s.TextureUnit
+            Batch.vertex p4 u4 c4 s.TextureUnit
+
+        elif last_texture_handle <> s.ID then
+
             Batch.draw ()
 
             if s.TextureUnit = 0 then
                 GL.BindTexture(TextureTarget.Texture2D, s.ID)
 
             Shader.set_uniform_i32 ("sampler", s.TextureUnit) Shader.main
+            last_texture_default_quad <- s.DefaultQuad
             last_texture_handle <- s.ID
 
-        Batch.vertex p1 u1 c1 s.TextureUnit
-        Batch.vertex p2 u2 c2 s.TextureUnit
-        Batch.vertex p3 u3 c3 s.TextureUnit
-        Batch.vertex p1 u1 c1 s.TextureUnit
-        Batch.vertex p3 u3 c3 s.TextureUnit
-        Batch.vertex p4 u4 c4 s.TextureUnit
+            Batch.vertex p1 u1 c1 s.TextureUnit
+            Batch.vertex p2 u2 c2 s.TextureUnit
+            Batch.vertex p3 u3 c3 s.TextureUnit
+            Batch.vertex p1 u1 c1 s.TextureUnit
+            Batch.vertex p3 u3 c3 s.TextureUnit
+            Batch.vertex p4 u4 c4 s.TextureUnit
+
+        else
+
+            Batch.vertex p1 u1 c1 s.TextureUnit
+            Batch.vertex p2 u2 c2 s.TextureUnit
+            Batch.vertex p3 u3 c3 s.TextureUnit
+            Batch.vertex p1 u1 c1 s.TextureUnit
+            Batch.vertex p3 u3 c3 s.TextureUnit
+            Batch.vertex p4 u4 c4 s.TextureUnit
 
     let sprite (r: Rect) (c: Color) (s: Sprite) =
         quad <| Quad.ofRect r <| Quad.color c <| Sprite.pick_texture (0, 0) s

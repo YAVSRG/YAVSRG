@@ -101,19 +101,20 @@ module Fonts =
 
             let glyphs = Seq.map row_glyph_info rows |> List.ofSeq
 
-            let h = float32 glyphs.Length * row_spacing
+            let h = float32 glyphs.Length * row_spacing |> int
 
             let w =
                 glyphs
                 |> List.map (fun x -> let l = List.last x in l.Offset + l.Size.Width + 2.0f)
                 |> List.max
+                |> int
 
             if int w > Sprite.MAX_TEXTURE_SIZE then
                 Logging.Critical(
-                    sprintf "Font atlas width of %f exceeds max texture size of %i!" w Sprite.MAX_TEXTURE_SIZE
+                    sprintf "Font atlas width of %i exceeds max texture size of %i!" w Sprite.MAX_TEXTURE_SIZE
                 )
 
-            use img = new Bitmap(int w, int h)
+            use img = new Bitmap(w, h)
 
             for i, row in List.indexed glyphs do
                 for glyph in row do
@@ -122,13 +123,19 @@ module Fonts =
                             draw_options,
                             code_to_string glyph.Code,
                             font,
-                            SixLabors.ImageSharp.Color.White,
+                            Color.White,
                             new PointF(glyph.Offset, row_spacing * float32 i)
                         )
                         |> ignore
                     )
 
-            let atlas_sprite = Sprite.upload (img, 1, 1, true) |> Sprite.cache "FONT" false
+            img.[w - 1, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
+
+            let atlas_sprite = 
+                Sprite.upload (img, 1, 1, true)
+                |> Sprite.cache "FONT" false
+                |> Sprite.with_default_quad_alt
+                    (Rect.Box((float32 w - 0.5f) / float32 w, 0.5f / float32 h, 0.0f, 0.0f) |> Quad.ofRect)
 
             for i, row in List.indexed glyphs do
                 for glyph in row do
@@ -142,10 +149,10 @@ module Fonts =
                             PrecomputedQuad = 
                                 ValueSome (
                                     Rect.Box(
-                                        glyph.Offset / w,
-                                        (row_spacing * float32 i) / h,
-                                        glyph.Width / w,
-                                        glyph.Height / h)
+                                        glyph.Offset / float32 w,
+                                        (row_spacing * float32 i) / float32 h,
+                                        glyph.Width / float32 w,
+                                        glyph.Height / float32 h)
                                     |> Quad.ofRect
                                 )
                         }
