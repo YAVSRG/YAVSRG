@@ -121,7 +121,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
 
         let now =
             Song.time_with_offset ()
-            + Render.Performance.frame_compensation ()
+            + Performance.frame_compensation ()
             + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
 
         let begin_time =
