@@ -303,8 +303,8 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
         | Unlimited ->
             present_of_last_frame <- now ()
-            Render.Performance.visual_latency_lo <- 0.0
-            Render.Performance.visual_latency_hi <- 1.0
+            Performance.visual_latency_lo <- 0.0
+            Performance.visual_latency_hi <- 1.0
 
         | DwmSync ->
             if not (FrameTimeStrategies.wait_for_vblank ()) then
@@ -312,14 +312,14 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
                 strategy <- CpuTiming
 
             present_of_last_frame <- now ()
-            Render.Performance.visual_latency_lo <- present_of_last_frame - frame_is_ready
-            Render.Performance.visual_latency_hi <- present_of_last_frame - start_of_frame
+            Performance.visual_latency_lo <- present_of_last_frame - frame_is_ready
+            Performance.visual_latency_hi <- present_of_last_frame - start_of_frame
             est_present_of_next_frame <- present_of_last_frame + est_refresh_period
 
         | CpuTimingScanlineCorrection ->
             present_of_last_frame <- swap_of_last_frame
-            Render.Performance.visual_latency_lo <- 0.0
-            Render.Performance.visual_latency_hi <- est_refresh_period
+            Performance.visual_latency_lo <- 0.0
+            Performance.visual_latency_hi <- est_refresh_period
 
             let scanline_correction =
                 match FrameTimeStrategies.get_scanline () with
@@ -345,8 +345,8 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
         | CpuTiming ->
             present_of_last_frame <- swap_of_last_frame
-            Render.Performance.visual_latency_lo <- 0.0
-            Render.Performance.visual_latency_hi <- est_refresh_period
+            Performance.visual_latency_lo <- 0.0
+            Performance.visual_latency_hi <- est_refresh_period
 
             while est_present_of_next_frame < present_of_last_frame do
                 est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
@@ -367,7 +367,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         resized <- false
         Input.finish_frame_events ()
         Devices.update elapsed_ms
-        Render.Performance.update_time <- now () - start_of_frame
+        Performance.update_time <- now () - start_of_frame
 
         if ui_root.ShouldExit then
             window.Close()
@@ -381,7 +381,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
         Render.finish ()
         frame_is_ready <- now ()
-        Render.Performance.draw_time <- frame_is_ready - before_draw
+        Performance.draw_time <- frame_is_ready - before_draw
 
         if not ui_root.ShouldExit then
             window.Context.SwapBuffers()
@@ -392,18 +392,18 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         let time = fps_timer.ElapsedTicks
 
         if time > Stopwatch.Frequency then
-            Render.Performance.framecount_tickcount <- (fps_count, time)
+            Performance.framecount_tickcount <- (fps_count, time)
             fps_timer.Restart()
             fps_count <- 0
 
-        Render.Performance.elapsed_ms <- elapsed_ms
+        Performance.elapsed_ms <- elapsed_ms
 
     member this.Init() =
         Devices.init audio_device
         Render.init ()
         Render.resize (window.ClientSize.X, window.ClientSize.Y)
 
-        Render.Performance.frame_compensation <-
+        Performance.frame_compensation <-
             fun () ->
                 if strategy <> Unlimited then
                     float32 (est_present_of_next_frame - now ()) * 1.0f<ms>

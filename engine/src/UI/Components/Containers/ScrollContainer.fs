@@ -95,11 +95,12 @@ type ScrollContainer(child: Widget, content_height: float32) =
             child.Update(elapsed_ms, moved)
 
     override this.Draw() =
-        Stencil.start_stencilling (false)
-        Draw.rect this.Bounds Color.Transparent
-        Stencil.start_drawing ()
-        child.Draw()
-        Stencil.finish ()
+        if content_height > 0.0f then
+            Stencil.start_stencilling (false)
+            Draw.rect this.Bounds Color.Transparent
+            Stencil.start_drawing ()
+            child.Draw()
+            Stencil.finish ()
 
     override this.Init(parent: Widget) =
         base.Init parent

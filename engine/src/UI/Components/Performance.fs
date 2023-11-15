@@ -35,13 +35,14 @@ type PerformanceMonitor() =
                 enable <- true
 
         if enable then
-            i <- (i + 599) % 600
-            frame_times.[i] <- Render.Performance.elapsed_ms
-            draw_times.[i] <- Render.Performance.draw_time * 2.0
-            update_times.[i] <- Render.Performance.update_time * 10.0
-            latencies.[i] <- Render.Performance.visual_latency_hi
 
-            let (frames, ticks) = Render.Performance.framecount_tickcount
+            i <- (i + 599) % 600
+            frame_times.[i] <- Performance.elapsed_ms
+            draw_times.[i] <- Performance.draw_time * 2.0
+            update_times.[i] <- Performance.update_time * 10.0
+            latencies.[i] <- Performance.visual_latency_hi
+
+            let (frames, ticks) = Performance.framecount_tickcount
             fps <- float frames / (float ticks / float Stopwatch.Frequency)
 
     override this.Draw() =
@@ -59,8 +60,8 @@ type PerformanceMonitor() =
                 Style.font,
                 sprintf
                     "%.1f - %.1fms playfield latency"
-                    Render.Performance.visual_latency_lo
-                    Render.Performance.visual_latency_hi,
+                    Performance.visual_latency_lo
+                    Performance.visual_latency_hi,
                 30.0f,
                 this.Bounds.Left + 20.0f,
                 this.Bounds.Top + 60.0f,
@@ -69,7 +70,7 @@ type PerformanceMonitor() =
 
             Text.draw_b (
                 Style.font,
-                sprintf "%.1fms frame compensation" (Render.Performance.frame_compensation ()),
+                sprintf "%.1fms frame compensation" (Performance.frame_compensation ()),
                 30.0f,
                 this.Bounds.Left + 20.0f,
                 this.Bounds.Top + 100.0f,

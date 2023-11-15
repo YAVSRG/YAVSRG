@@ -11,6 +11,7 @@
 	  <Compile Include="Resources\Feather.fs" />
 	  <EmbeddedResource Include="Resources\shader.frag" />
 	  <EmbeddedResource Include="Resources\shader.vert" />
+	  <Compile Include="Graphics\Performance.fs" />
 	  <Compile Include="Graphics\Buffers.fs" />
 	  <Compile Include="Graphics\Shader.fs" />
 	  <Compile Include="Graphics\Math.fs" />
