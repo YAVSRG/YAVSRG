@@ -103,7 +103,6 @@ module Batch =
 
     let internal finish () =
         draw ()
-        //printfn "%i" bcount
         active <- false
 
 module Stencil =
