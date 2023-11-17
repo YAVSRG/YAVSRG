@@ -33,7 +33,7 @@ module Save =
                         use stream = message.Content.ReadAsStream()
                         use br = new System.IO.BinaryReader(stream)
 
-                        match Chart.readHeadless chart.Keys header "" br with
+                        match Chart.read_headless chart.Keys header "" br with
                         | Some chart ->
                             cache.[hash] <- chart
                             return Some chart
