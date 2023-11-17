@@ -92,7 +92,7 @@ module Scores =
 
             match
                 try
-                    loadBeatmapFile osu_file
+                    beatmap_from_file osu_file
                     |> fun b ->
                         ``osu!``.toInterlude
                             b

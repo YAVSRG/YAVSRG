@@ -82,11 +82,14 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
     let receptor_transform k =
         if Content.noteskin_config().ReceptorStyle = ReceptorStyle.Flip then
             if options.Upscroll.Value then Quad.flip else id
-        else rotation k
+        else
+            rotation k
 
     do
         let width = Array.mapi (fun i n -> n + column_width) column_positions |> Array.max
-        let (screen_align_percentage, playfield_align_percentage) = Content.noteskin_config().PlayfieldAlignment
+
+        let (screen_align_percentage, playfield_align_percentage) =
+            Content.noteskin_config().PlayfieldAlignment
 
         this.Position <-
             {
@@ -192,7 +195,12 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                     HeadOffscreen holds_offscreen.[k]
 
             Draw.quad // receptor
-                (Rect.Box(left + column_positions.[k], hitposition + note_height - note_height / receptor_aspect_ratio, column_width, note_height / receptor_aspect_ratio)
+                (Rect.Box(
+                    left + column_positions.[k],
+                    hitposition + note_height - note_height / receptor_aspect_ratio,
+                    column_width,
+                    note_height / receptor_aspect_ratio
+                 )
                  |> scroll_direction_transform bottom
                  |> Quad.ofRect
                  |> receptor_transform k)

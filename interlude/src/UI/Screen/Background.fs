@@ -85,7 +85,8 @@ module Background =
                         (Content.get_texture "background", Animation.Fade(0.0f, Target = 1.0f), true)
                         :: background
 
-                    Content.accent_color <- Content.theme_config().DefaultAccentColor }
+                    Content.accent_color <- Content.theme_config().DefaultAccentColor
+        }
 
     let load (path: string option) =
         List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background
@@ -111,7 +112,8 @@ module Background =
 
                         false
                     else
-                        true)
+                        true
+                )
                 background
 
     let drawq (q: Quad, color: Color, depth: float32) =
@@ -128,19 +130,18 @@ module Background =
                 Draw.quad
                     q
                     (Quad.color color)
-                    (
-                        Sprite.tiling
-                            (if bgaspect > screenaspect then
-                                    let scale = pheight / float32 bg.Height
-                                    let left = (float32 bg.Width * scale - pwidth) * -0.5f
-                                    (scale, left + x, 0.0f + y)
-                                else
-                                    let scale = pwidth / float32 bg.Width
-                                    let top = (float32 bg.Height * scale - pheight) * -0.5f
-                                    (scale, 0.0f + x, top + y))
-                            bg
-                            q
-                    ))
+                    (Sprite.tiling
+                        (if bgaspect > screenaspect then
+                             let scale = pheight / float32 bg.Height
+                             let left = (float32 bg.Width * scale - pwidth) * -0.5f
+                             (scale, left + x, 0.0f + y)
+                         else
+                             let scale = pwidth / float32 bg.Width
+                             let top = (float32 bg.Height * scale - pheight) * -0.5f
+                             (scale, 0.0f + x, top + y))
+                        bg
+                        q)
+            )
             background
 
     let draw (bounds: Rect, color, depth) =

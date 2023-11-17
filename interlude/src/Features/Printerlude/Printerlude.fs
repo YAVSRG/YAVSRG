@@ -75,10 +75,10 @@ module Printerlude =
             | Some c ->
                 // todo: move into prelude
                 let beatmap = Conversions.Interlude.toOsu c
-                let file_name = ``osu!``.getBeatmapFilename beatmap
+                let file_name = ``osu!``.get_osu_filename beatmap
                 let path = get_game_folder "Exports"
                 let beatmap_file = Path.Combine(path, file_name)
-                ``osu!``.saveBeatmapFile beatmap_file beatmap
+                ``osu!``.beatmap_to_file beatmap_file beatmap
 
                 let target_audio_file =
                     match c.Header.AudioFile with

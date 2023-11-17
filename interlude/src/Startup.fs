@@ -36,7 +36,7 @@ module private Migrations =
             for file in Directory.EnumerateFiles folder do
                 match Path.GetExtension(file).ToLower() with
                 | ".yav" ->
-                    match Chart.fromFile file with
+                    match Chart.from_file file with
                     | Some c ->
                         match Chart.check c with
                         | Error _ ->

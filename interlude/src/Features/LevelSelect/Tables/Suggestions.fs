@@ -12,7 +12,7 @@ open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
 type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) as this =
-    inherit Frame(NodeType.Switch (fun () -> this.Actions))
+    inherit Frame(NodeType.Switch(fun () -> this.Actions))
 
     // todo: tooltip on hover
     let button (icon: string, action) =
@@ -23,31 +23,39 @@ type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) as this =
         }
 
     let actions =
-        let fc = FlowContainer.RightToLeft(60.0f, Spacing = 20.0f, Position = Position.SliceTop(40.0f).TrimRight(20.0f))
+        let fc =
+            FlowContainer.RightToLeft(60.0f, Spacing = 20.0f, Position = Position.SliceTop(40.0f).TrimRight(20.0f))
+
         if suggestion.CanApply then
-            fc.Add(button(Icons.CHECK, 
-                fun () ->
-                    SelectTableLevelPage(
-                        fun level ->
-                            Tables.Suggestions.Apply.post(
+            fc.Add(
+                button (
+                    Icons.CHECK,
+                    fun () ->
+                        SelectTableLevelPage(fun level ->
+                            Tables.Suggestions.Apply.post (
                                 ({
                                     Id = suggestion.Id
                                     Level = level.Rank
-                                } : Tables.Suggestions.Apply.Request),
+                                }
+                                : Tables.Suggestions.Apply.Request),
                                 function
                                 | Some true ->
                                     Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion applied!", "")
                                 | _ -> Notifications.error ("Error applying suggestion", "")
                             )
-                            Menu.Back()
-                    ).Show()
-                ))
 
-        fc.Add(button(Icons.EDIT_2, 
-            fun () ->
-                SelectTableLevelPage(
-                    fun level ->
-                        Tables.Suggestions.Add.post(
+                            Menu.Back()
+                        )
+                            .Show()
+                )
+            )
+
+        fc.Add(
+            button (
+                Icons.EDIT_2,
+                fun () ->
+                    SelectTableLevelPage(fun level ->
+                        Tables.Suggestions.Add.post (
                             ({
                                 ChartId = suggestion.ChartId
                                 OsuBeatmapId = suggestion.OsuBeatmapId
@@ -58,15 +66,18 @@ type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) as this =
                                 Difficulty = suggestion.Difficulty
                                 TableFor = Table.current().Value.Name.ToLower()
                                 SuggestedLevel = level.Rank
-                            } : Tables.Suggestions.Add.Request),
+                            }
+                            : Tables.Suggestions.Add.Request),
                             function
-                            | Some true ->
-                                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                            | Some true -> Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
                             | _ -> Notifications.error ("Error sending suggestion", "")
                         )
+
                         Menu.Back()
-                ).Show()
-            ))
+                    )
+                        .Show()
+            )
+        )
 
         fc
 
@@ -74,11 +85,7 @@ type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) as this =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text(
-            suggestion.Title, 
-            Position = Position.Row(0.0f, 40.0f).Margin(10.0f, 0.0f),
-            Align = Alignment.LEFT
-        )
+        |+ Text(suggestion.Title, Position = Position.Row(0.0f, 40.0f).Margin(10.0f, 0.0f), Align = Alignment.LEFT)
         |+ Text(
             sprintf "%s  •  %s" suggestion.Artist suggestion.Creator,
             Position = Position.Row(40.0f, 30.0f).Margin(10.0f, 0.0f),
@@ -143,12 +150,7 @@ type SuggestionsPage() as this =
 
     let sl = SuggestionsList()
 
-    do 
-        this.Content(
-            StaticContainer(NodeType.Leaf)
-            |+ sl
-            |+ WIP()
-        )
+    do this.Content(StaticContainer(NodeType.Leaf) |+ sl |+ WIP())
 
     override this.Title = %"table.suggestions.name"
     override this.OnClose() = ()

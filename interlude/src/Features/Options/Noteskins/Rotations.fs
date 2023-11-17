@@ -130,12 +130,16 @@ type RotationSettingsPage() as this =
                 .Pos(270.0f)
             |+ PageSetting("noteskins.edit.rotations", _rotations)
                 .Pos(370.0f, Viewport.vwidth - 200.0f, NOTE_WIDTH)
-            |+ PageSetting("noteskins.edit.receptorstyle", 
+            |+ PageSetting(
+                "noteskins.edit.receptorstyle",
                 Selector(
                     [|
-                        ReceptorStyle.Rotate, %"noteskins.edit.receptorstyle.rotate";
+                        ReceptorStyle.Rotate, %"noteskins.edit.receptorstyle.rotate"
                         ReceptorStyle.Flip, %"noteskins.edit.receptorstyle.flip"
-                    |], receptor_style))
+                    |],
+                    receptor_style
+                )
+            )
                 .Pos(470.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.receptorstyle"))
         )

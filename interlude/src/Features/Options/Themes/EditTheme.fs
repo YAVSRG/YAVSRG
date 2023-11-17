@@ -11,18 +11,12 @@ type EditThemePage() as this =
     inherit Page()
 
     let data = Themes.Current.config
-        
+
     let name = Setting.simple data.Name
 
-    do
-        this.Content(
-            column()
-            |+ PageTextEntry("themes.edittheme.themename", name).Pos(200.0f)
-        )
+    do this.Content(column () |+ PageTextEntry("themes.edittheme.themename", name).Pos(200.0f))
 
     override this.Title = data.Name
+
     override this.OnClose() =
-        Themes.Current.save_config
-            { data with
-                Name = name.Value
-            }
+        Themes.Current.save_config { data with Name = name.Value }

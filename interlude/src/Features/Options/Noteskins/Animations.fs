@@ -231,10 +231,13 @@ type AnimationSettingsPage() as this =
                 ColumnLightTime = column_light_time.Value
                 AnimationFrameTime = note_animation_time.Value
                 Explosions =
-                    { Enable = enable_explosions.Value
-                      Scale = explosion_scale.Value
-                      FadeTime = explosion_fade_time.Value
-                      ExpandAmount = explosion_expand.Value
-                      ExplodeOnMiss = explosion_on_miss.Value
-                      AnimationFrameTime = explosion_animation_time.Value
-                      Colors = explosion_colors.Value } }
+                    {
+                        Enable = enable_explosions.Value
+                        Scale = explosion_scale.Value
+                        FadeTime = explosion_fade_time.Value
+                        ExpandAmount = explosion_expand.Value
+                        ExplodeOnMiss = explosion_on_miss.Value
+                        AnimationFrameTime = explosion_animation_time.Value
+                        Colors = explosion_colors.Value
+                    }
+            }

@@ -209,11 +209,7 @@ module Network =
                         status <- LoggedIn
 
                         if Screen.current_type <> Screen.Type.SplashScreen then
-                            Notifications.system_feedback (
-                                Icons.GLOBE,
-                                [ name ] %> "notification.network.login",
-                                ""
-                            )
+                            Notifications.system_feedback (Icons.GLOBE, [ name ] %> "notification.network.login", "")
 
                         Events.successful_login_ev.Trigger name
                 | Downstream.LOGIN_FAILED reason ->
