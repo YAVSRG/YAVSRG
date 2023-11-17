@@ -8,7 +8,7 @@ open SixLabors.ImageSharp.Drawing.Processing
 open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Utils
-open Percyqaz.Flux.Resources
+open Percyqaz.Flux.Icons
 
 module Fonts =
 
