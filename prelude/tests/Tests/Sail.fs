@@ -3,10 +3,12 @@
 open Prelude
 open Prelude.Charts.Formats.``osu!``
 
-let source = @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637823398692216004-AWOLNATION - Sail (Official Music Video)\AWOLNATION - Sail (Percyqaz) [SAIL WITH ME INTO THE DARK].osu"
-let sail = loadBeatmapFile source
+let source =
+    @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637823398692216004-AWOLNATION - Sail (Official Music Video)\AWOLNATION - Sail (Percyqaz) [SAIL WITH ME INTO THE DARK].osu"
 
-let note_gradient(start_nps, end_nps, start_time, end_time) =
+let sail = beatmap_from_file source
+
+let note_gradient (start_nps, end_nps, start_time, end_time) =
 
     // this is the "average speed formula" - i discovered it myself from this problem and then looked it up
     let average_nps = (start_nps * end_nps) * 2.0f / (start_nps + end_nps)
@@ -21,36 +23,52 @@ let note_gradient(start_nps, end_nps, start_time, end_time) =
 
     // sample the curve at N evenly spaced intervals
     // this will give the correct note timings
-    let duration : Time = end_time - start_time
+    let duration: Time = end_time - start_time
     let samplesf = average_nps * float32 duration / 1000.0f
     // for a clean transition, N should come out to be an integer (so that the next note would land exactly at `end_time`)
     let samples = int samplesf
 
-    [0..samples]
+    [ 0..samples ]
     |> List.map (fun s -> float32 s / float32 samples) // normalise to range [0,1]
     |> List.map (fun s -> func s) // [0,1] still, but now gradiented according to desired transition
     |> List.map (fun l -> l * duration + start_time) // output as time in original range
 
 let start = 17335f<ms> // change this to change offset
-let bpm = 119f<beat/minute>
-let measure (n: float32) : Time = start + n * 4.0f<beat> * 60000f<ms/minute> / bpm
-let snap (per_beat: float32) = per_beat * bpm / 60f<beat/minute>
+let bpm = 119f<beat / minute>
 
-let bass m = note_gradient(snap 16f, snap 14f, measure m, measure (m + 0.5f))
-let bass_ez m = note_gradient(snap 16f, snap 12f, measure m, measure (m + 0.5f))
+let measure (n: float32) : Time =
+    start + n * 4.0f<beat> * 60000f<ms / minute> / bpm
 
-let SAIL m = note_gradient(snap 20f, snap 18f, measure m, measure (m + 0.25f))
+let snap (per_beat: float32) = per_beat * bpm / 60f<beat / minute>
+
+let bass m =
+    note_gradient (snap 16f, snap 14f, measure m, measure (m + 0.5f))
+
+let bass_ez m =
+    note_gradient (snap 16f, snap 12f, measure m, measure (m + 0.5f))
+
+let SAIL m =
+    note_gradient (snap 20f, snap 18f, measure m, measure (m + 0.25f))
+
 let gentle_oo m =
-    note_gradient(snap 12f, snap 9f, measure m, measure (m + 0.5f))
+    note_gradient (snap 12f, snap 9f, measure m, measure (m + 0.5f))
+
 let oo1 m =
-    note_gradient(snap 9f, snap 10f, measure m, measure (m + 0.5f))
-    @ note_gradient(snap 10f, snap 12f, measure (m + 0.5f), measure (m + 1.25f))
+    note_gradient (snap 9f, snap 10f, measure m, measure (m + 0.5f))
+    @ note_gradient (snap 10f, snap 12f, measure (m + 0.5f), measure (m + 1.25f))
+
 let oo2 m =
-    note_gradient(snap 9f, snap 14f, measure m, measure (m + 0.5f))
-    @ note_gradient(snap 14f, snap 9f, measure (m + 0.5f), measure (m + 1.25f))
-let ``SAIL!!`` m = note_gradient(snap 25f, snap 20f, measure m, measure (m + 0.25f))
-let into_the_dark m = note_gradient(snap 12f, snap 14f, measure m, measure (m + 1.75f))
-let sail_with_me m = note_gradient(snap 12f, snap 10f, measure m, measure (m + 1.75f))
+    note_gradient (snap 9f, snap 14f, measure m, measure (m + 0.5f))
+    @ note_gradient (snap 14f, snap 9f, measure (m + 0.5f), measure (m + 1.25f))
+
+let ``SAIL!!`` m =
+    note_gradient (snap 25f, snap 20f, measure m, measure (m + 0.25f))
+
+let into_the_dark m =
+    note_gradient (snap 12f, snap 14f, measure m, measure (m + 1.75f))
+
+let sail_with_me m =
+    note_gradient (snap 12f, snap 10f, measure m, measure (m + 1.75f))
 
 let lines =
     [
@@ -131,13 +149,13 @@ let lines =
         bass 104f
     ]
 
-let line (t: Time) = BPM (t, 60000f<ms/minute> / bpm, 4<beat>, (SampleSet.Default, 0, 0), TimingEffect.OmitFirstBarline)
+let line (t: Time) =
+    BPM(t, 60000f<ms / minute> / bpm, 4<beat>, (SampleSet.Default, 0, 0), TimingEffect.OmitFirstBarline)
 
-let renderedLines =
-    lines
-    |> List.concat
-    |> List.map line
-    
-let main() = 
-    { sail with Timing = (line start) :: renderedLines }
-    |> saveBeatmapFile source
+let renderedLines = lines |> List.concat |> List.map line
+
+let main () =
+    { sail with
+        Timing = (line start) :: renderedLines
+    }
+    |> beatmap_to_file source

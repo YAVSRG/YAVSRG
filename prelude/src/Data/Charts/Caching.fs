@@ -160,7 +160,7 @@ module Cache =
                             for file in Directory.EnumerateFiles song do
                                 match Path.GetExtension(file).ToLower() with
                                 | ".yav" ->
-                                    match Chart.fromFile file with
+                                    match Chart.from_file file with
                                     | Some c ->
                                         try
                                             let c =
@@ -209,7 +209,7 @@ module Cache =
                                                 create_entry (Path.GetFileName folder) (File.GetCreationTimeUtc file) c
 
                                             let new_file = get_path entry cache
-                                            Chart.toFile c new_file
+                                            Chart.to_file c new_file
                                             File.SetCreationTimeUtc(new_file, entry.DateAdded)
                                             File.Delete file
 
@@ -231,7 +231,7 @@ module Cache =
                         for file in Directory.EnumerateFiles folder do
                             match Path.GetExtension(file).ToLower() with
                             | ".yav" ->
-                                match Chart.fromFile file with
+                                match Chart.from_file file with
                                 | Some c ->
                                     let entry = create_entry (Path.GetFileName folder) (File.GetCreationTimeUtc file) c
 
@@ -328,7 +328,7 @@ module Cache =
             let entry = create_entry folder now c
             let new_file = get_path entry cache
             Directory.CreateDirectory(Path.GetDirectoryName new_file) |> ignore
-            Chart.toFile c new_file
+            Chart.to_file c new_file
 
             cache.Entries.[entry.Key] <- entry
 
@@ -350,7 +350,7 @@ module Cache =
         if target.Entries.ContainsKey({ entry with Folder = folder }.Key) then
             ()
         else
-            let chart = (Chart.fromFile (get_path entry source)).Value
+            let chart = (Chart.from_file (get_path entry source)).Value
 
             let chart =
                 { chart with
@@ -409,11 +409,11 @@ module Cache =
             let entry = create_entry folder DateTime.UtcNow chart
             let target_path = get_path entry target
             Directory.CreateDirectory(Path.GetDirectoryName target_path) |> ignore
-            Chart.toFile chart target_path
+            Chart.to_file chart target_path
 
             target.Entries.[entry.Key] <- entry
 
-    let load (entry: CachedChart) (cache: Cache) = get_path entry cache |> Chart.fromFile
+    let load (entry: CachedChart) (cache: Cache) = get_path entry cache |> Chart.from_file
 
     let by_key (key: string) (cache: Cache) : CachedChart option =
         let success, c = cache.Entries.TryGetValue key
@@ -454,7 +454,7 @@ module Cache =
                     use! stream = response.Content.ReadAsStreamAsync() |> Async.AwaitTask
                     use br = new BinaryReader(stream)
 
-                    match Chart.readHeadless chart.Keys header "" br with
+                    match Chart.read_headless chart.Keys header "" br with
                     | None -> return false
                     | Some chart_data ->
 

@@ -160,12 +160,17 @@ type Noteskin(storage) as this =
         let require_square = name <> "receptor" && name <> "receptorlighting"
         // todo: user warning if receptor is not square but mode is set to Rotate
         match this.LoadTexture(name, require_square) with
-        | Ok res -> 
+        | Ok res ->
             if config.ReceptorStyle = ReceptorStyle.Rotate && name = "receptor" then
-                Option.iter (fun (img: Bitmap, config: TextureConfig) -> 
-                    if img.Width / config.Columns <> img.Height / config.Rows then
-                        Logging.Warn("This skin should have ReceptorStyle set to Flip as it uses non-square receptors")) 
+                Option.iter
+                    (fun (img: Bitmap, config: TextureConfig) ->
+                        if img.Width / config.Columns <> img.Height / config.Rows then
+                            Logging.Warn(
+                                "This skin should have ReceptorStyle set to Flip as it uses non-square receptors"
+                            )
+                    )
                     res
+
             res
         | Error err ->
             Logging.Error(sprintf "Error loading noteskin texture '%s': %s" name err.Message)

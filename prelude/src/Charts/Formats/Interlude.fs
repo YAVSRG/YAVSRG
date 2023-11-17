@@ -22,25 +22,25 @@ module Interlude =
 
         let clone = Array.copy
 
-        let createEmpty keycount : NoteRow = Array.create keycount NoteType.NOTHING
+        let create_empty keycount : NoteRow = Array.create keycount NoteType.NOTHING
 
-        let createNotes keycount (notes: Bitmask) =
-            let nr = createEmpty keycount
+        let create_notes keycount (notes: Bitmask) =
+            let nr = create_empty keycount
 
             for k in Bitmask.toSeq notes do
                 nr.[k] <- NoteType.NORMAL
 
             nr
 
-        let createLnBodies keycount (notes: Bitmask) =
-            let nr = createEmpty keycount
+        let create_ln_bodies keycount (notes: Bitmask) =
+            let nr = create_empty keycount
 
             for k in Bitmask.toSeq notes do
                 nr.[k] <- NoteType.HOLDBODY
 
             nr
 
-        let isEmpty: NoteRow -> bool =
+        let is_empty: NoteRow -> bool =
             Array.forall (
                 function
                 | NoteType.NOTHING
@@ -49,7 +49,7 @@ module Interlude =
             )
 
         let read (keycount: int) (br: BinaryReader) : NoteRow =
-            let row = createEmpty keycount
+            let row = create_empty keycount
             let columns = br.ReadUInt16()
 
             for k in Bitmask.toSeq columns do
@@ -76,7 +76,7 @@ module Interlude =
             for k in columns do
                 bw.Write(byte row.[k])
 
-        let prettyPrint (row: NoteRow) =
+        let pretty_print (row: NoteRow) =
             let p =
                 function
                 | NoteType.NORMAL -> '#'
@@ -167,7 +167,7 @@ module Interlude =
 
     module Chart =
 
-        let readHeadless (keys: int) (header: ChartHeader) (source_path: string) (br: BinaryReader) =
+        let read_headless (keys: int) (header: ChartHeader) (source_path: string) (br: BinaryReader) =
 
             let notes = TimeArray.read br (NoteRow.read keys)
 
@@ -194,7 +194,7 @@ module Interlude =
                     LoadedFromPath = source_path
                 }
 
-        let fromFile filepath =
+        let from_file filepath =
             try
                 use fs = new FileStream(filepath, FileMode.Open)
                 use br = new BinaryReader(fs)
@@ -207,13 +207,13 @@ module Interlude =
                         Logging.Error(sprintf "%O" err)
                         raise err
 
-                readHeadless keys header filepath br
+                read_headless keys header filepath br
 
             with err ->
                 Logging.Error(sprintf "Couldn't load chart from %s: %O" filepath err, err)
                 None
 
-        let writeHeadless (chart: Chart) (bw: BinaryWriter) =
+        let write_headless (chart: Chart) (bw: BinaryWriter) =
             TimeArray.write chart.Notes bw (fun bw nr -> NoteRow.write bw nr)
 
             TimeArray.write
@@ -226,12 +226,12 @@ module Interlude =
 
             TimeArray.write chart.SV bw (fun bw f -> bw.Write f)
 
-        let toFile (chart: Chart) filepath =
+        let to_file (chart: Chart) filepath =
             use fs = new FileStream(filepath, FileMode.Create)
             use bw = new BinaryWriter(fs)
             bw.Write(chart.Keys |> byte)
             bw.Write(JSON.ToString chart.Header)
-            writeHeadless chart bw
+            write_headless chart bw
 
         module LegacyHash =
 
@@ -266,7 +266,7 @@ module Interlude =
                 let offset = chart.FirstNote
 
                 for { Time = o; Data = nr } in chart.Notes do
-                    if NoteRow.isEmpty nr |> not then
+                    if NoteRow.is_empty nr |> not then
                         bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
 
                         for nt in nr do
@@ -313,8 +313,11 @@ module Interlude =
 
         let check (chart: Chart) : Result<unit, string> =
             try
-                if chart.Notes.Length = 0 then failwith "Chart must have notes"
-                if chart.BPM.Length = 0 then failwith "Chart must have at least one BPM marker"
+                if chart.Notes.Length = 0 then
+                    failwith "Chart must have notes"
+
+                if chart.BPM.Length = 0 then
+                    failwith "Chart must have at least one BPM marker"
 
                 let mutable lastTime = -Time.infinity
                 let mutable ln = 0us
@@ -343,7 +346,7 @@ module Interlude =
 
                             ln <- Bitmask.unset_key k ln
 
-                    if NoteRow.isEmpty nr then
+                    if NoteRow.is_empty nr then
                         failwithf "Note row is useless/empty at %f" time
 
                 if ln <> 0us then
@@ -359,13 +362,13 @@ module Interlude =
 
             let xs =
                 left.Notes
-                |> Array.map (fun { Time = o; Data = nr } -> f (o - left_offset), NoteRow.prettyPrint nr)
+                |> Array.map (fun { Time = o; Data = nr } -> f (o - left_offset), NoteRow.pretty_print nr)
 
             let right_offset = right.FirstNote
 
             let ys =
                 right.Notes
-                |> Array.map (fun { Time = o; Data = nr } -> f (o - right_offset), NoteRow.prettyPrint nr)
+                |> Array.map (fun { Time = o; Data = nr } -> f (o - right_offset), NoteRow.pretty_print nr)
 
             for i = 0 to (min xs.Length ys.Length) - 1 do
                 if xs.[i] <> ys.[i] then

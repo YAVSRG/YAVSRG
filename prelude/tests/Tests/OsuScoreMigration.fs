@@ -129,7 +129,7 @@ module OsuScoreMigration =
 
             let chart =
                 try
-                    loadBeatmapFile osu_file
+                    beatmap_from_file osu_file
                     |> fun b ->
                         ``osu!``.toInterlude
                             b

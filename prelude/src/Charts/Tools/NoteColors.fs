@@ -11,11 +11,13 @@ open Prelude.Charts.Formats.Interlude
 // Some players may find certain coloring systems useful, for example having color coding depending on the musical beat a note is snapped to
 // It is also common just to have simple column color variation to make columns appear distinct
 
-module NoteColors = 
+module NoteColors =
 
-    let DDRValues = [|1.0f; 2.0f; 3.0f; 4.0f; 6.0f; 8.0f; 12.0f; 16.0f|] |> Array.map (fun i -> i * 1.0f</beat>)
+    let DDR_VALUES =
+        [| 1.0f; 2.0f; 3.0f; 4.0f; 6.0f; 8.0f; 12.0f; 16.0f |]
+        |> Array.map (fun i -> i * 1.0f< / beat>)
 
-    type ColorScheme = 
+    type ColorScheme =
         | Column = 0
         | Chord = 1
         | DDR = 2
@@ -25,7 +27,7 @@ module NoteColors =
             match scheme with
             | ColorScheme.Column -> keycount
             | ColorScheme.Chord -> keycount
-            | ColorScheme.DDR -> Array.length DDRValues + 1
+            | ColorScheme.DDR -> Array.length DDR_VALUES + 1
             | _ -> keycount
 
     type ColorData = byte array
@@ -33,6 +35,7 @@ module NoteColors =
     type Colorizer<'state> = 'state -> TimeItem<NoteRow> -> ('state * ColorData)
 
     type private ColorNoteRow = (struct (NoteRow * ColorData))
+
     type ColorizedChart =
         {
             Keys: int
@@ -42,45 +45,59 @@ module NoteColors =
             ModsUsed: string list
         }
 
-    let private roughly_divisible (a: Time) (b: Time) = Time.abs(a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
+    let private roughly_divisible (a: Time) (b: Time) =
+        Time.abs (a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
 
-    let private ddr_func (delta: Time) (msPerBeat: float32<ms/beat>) : int =
-        List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughly_divisible delta (msPerBeat / n)) [0..7]
-        |> Option.defaultValue DDRValues.Length
+    let private ddr_func (delta: Time) (msPerBeat: float32<ms / beat>) : int =
+        List.tryFind ((fun i -> DDR_VALUES.[i]) >> fun n -> roughly_divisible delta (msPerBeat / n)) [ 0..7 ]
+        |> Option.defaultValue DDR_VALUES.Length
 
-    let column_colors (colorData: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
+    let private column_colors (colorData: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
 
         let c = [| for i in 0 .. (mc.Keys - 1) -> colorData.[i] |]
         mc.Notes |> TimeArray.map (fun nr -> struct (nr, c))
 
-    let chord_colors (color_data: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
-        
-        let mutable previous_colors : ColorData = Array.zeroCreate mc.Keys
+    let private chord_colors (color_data: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
 
-        mc.Notes |> TimeArray.map (fun nr ->
+        let mutable previous_colors: ColorData = Array.zeroCreate mc.Keys
+
+        mc.Notes
+        |> TimeArray.map (fun nr ->
 
             let mutable index = -1
+
             for k = 0 to mc.Keys - 1 do
-                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then index <- index + 1
+                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+                    index <- index + 1
+
             index <- max 0 index
-            
+
             let colors = Array.create mc.Keys color_data.[index]
+
             for k = 0 to mc.Keys - 1 do
-                if nr.[k] = NoteType.HOLDBODY || nr.[k] = NoteType.HOLDTAIL then colors.[k] <- previous_colors.[k]
-                else previous_colors.[k] <- color_data.[index]
+                if nr.[k] = NoteType.HOLDBODY || nr.[k] = NoteType.HOLDTAIL then
+                    colors.[k] <- previous_colors.[k]
+                else
+                    previous_colors.[k] <- color_data.[index]
 
             struct (nr, colors)
         )
 
-    let ddr_colors (color_data: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
+    let private ddr_colors (color_data: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
 
-        let mutable previous_colors : ColorData = Array.zeroCreate mc.Keys
+        let mutable previous_colors: ColorData = Array.zeroCreate mc.Keys
 
         let mutable bpm_index = 0
         let mutable bpm_time = if mc.BPM.Length = 0 then 0.0f<ms> else mc.BPM.[0].Time
-        let mutable bpm_mspb = if mc.BPM.Length = 0 then 500.0f<ms/beat> else mc.BPM.[0].Data.MsPerBeat
 
-        mc.Notes |> Array.map (fun { Time = time; Data = nr } ->
+        let mutable bpm_mspb =
+            if mc.BPM.Length = 0 then
+                500.0f<ms / beat>
+            else
+                mc.BPM.[0].Data.MsPerBeat
+
+        mc.Notes
+        |> Array.map (fun { Time = time; Data = nr } ->
 
             while bpm_index < mc.BPM.Length - 1 && mc.BPM.[bpm_index + 1].Time < time do
                 bpm_index <- bpm_index + 1
@@ -90,24 +107,37 @@ module NoteColors =
             let ddr_color = ddr_func (time - bpm_time) bpm_mspb
 
             let colors = Array.create mc.Keys color_data.[ddr_color]
-            for k = 0 to mc.Keys - 1 do
-                if nr.[k] = NoteType.HOLDBODY || nr.[k] = NoteType.HOLDTAIL then colors.[k] <- previous_colors.[k]
-                else previous_colors.[k] <- color_data.[ddr_color]
 
-            { Time = time; Data = struct (nr, colors) }
+            for k = 0 to mc.Keys - 1 do
+                if nr.[k] = NoteType.HOLDBODY || nr.[k] = NoteType.HOLDTAIL then
+                    colors.[k] <- previous_colors.[k]
+                else
+                    previous_colors.[k] <- color_data.[ddr_color]
+
+            {
+                Time = time
+                Data = struct (nr, colors)
+            }
         )
 
-    let apply_scheme (scheme: ColorScheme) (color_data: ColorData) (mc: ModChart) =
-        let colored_notes = 
+    let private apply_scheme (scheme: ColorScheme) (color_data: ColorData) (mc: ModChart) =
+        let colored_notes =
             match scheme with
             | ColorScheme.Column -> column_colors color_data mc
             | ColorScheme.Chord -> chord_colors color_data mc
             | ColorScheme.DDR -> ddr_colors color_data mc
             | _ -> column_colors (Array.zeroCreate mc.Keys) mc
-        { Keys = mc.Keys; Notes = colored_notes; BPM = mc.BPM; SV = mc.SV; ModsUsed = mc.ModsUsed }
+
+        {
+            Keys = mc.Keys
+            Notes = colored_notes
+            BPM = mc.BPM
+            SV = mc.SV
+            ModsUsed = mc.ModsUsed
+        }
 
     [<Json.AutoCodec(false)>]
-    type ColorConfig = 
+    type ColorConfig =
         {
             Style: ColorScheme
             Colors: ColorDataSets
@@ -119,12 +149,20 @@ module NoteColors =
                 Colors = Array.init 9 (fun i -> Array.init 10 byte)
                 UseGlobalColors = true
             }
+
         member this.Validate =
             { this with
                 Colors =
-                    if Array.forall (fun (x: ColorData) -> x.Length = 10) this.Colors && this.Colors.Length = 9 then this.Colors
+                    if
+                        Array.forall (fun (x: ColorData) -> x.Length = 10) this.Colors
+                        && this.Colors.Length = 9
+                    then
+                        this.Colors
                     else
-                        Logging.Error("Problem with noteskin: Colors should be an 9x10 array - Please use the ingame editor")
+                        Logging.Error(
+                            "Problem with noteskin: Colors should be an 9x10 array - Please use the ingame editor"
+                        )
+
                         ColorConfig.Default.Colors
             }
 

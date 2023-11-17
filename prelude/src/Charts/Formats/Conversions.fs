@@ -351,7 +351,7 @@ module Stepmania =
                     stops <- List.tail stops
                     point_at_end_of_measure <- true
 
-                let nr = NoteRow.createLnBodies keys ln
+                let nr = NoteRow.create_ln_bodies keys ln
 
                 Seq.iteri
                     (fun k c ->
@@ -372,7 +372,7 @@ module Stepmania =
                     )
                     m.[i]
 
-                if NoteRow.isEmpty nr |> not then
+                if NoteRow.is_empty nr |> not then
                     states.Add(
                         {
                             Time = now + offset + float32 (i - start) * sep
@@ -856,10 +856,11 @@ module Utilities =
                 else
                     id
 
-            Stepmania.toInterlude (loadStepmaniaFile action.Source) action |> List.map f
+            Stepmania.toInterlude (stepmania_chart_from_file action.Source) action
+            |> List.map f
         | ".osu" ->
             try
-                let map = loadBeatmapFile action.Source
+                let map = beatmap_from_file action.Source
 
                 if
                     map.General.Mode = GameMode.Mania
@@ -867,7 +868,7 @@ module Utilities =
                     && not (``osu!``.detect_rate_mod(map.Metadata.Version).IsSome)
                     && map.Objects.Length >= 20
                 then
-                    [ ``osu!``.toInterlude (loadBeatmapFile action.Source) action ]
+                    [ ``osu!``.toInterlude (beatmap_from_file action.Source) action ]
                 else
                     []
             with err ->

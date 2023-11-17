@@ -243,7 +243,13 @@ type Storage(storage: StorageType) =
             Some img
         | None -> None
 
-    member private this.LoadLooseTextures(config: TextureConfig, name: string, path: string array, require_square: bool) : Bitmap option =
+    member private this.LoadLooseTextures
+        (
+            config: TextureConfig,
+            name: string,
+            path: string array,
+            require_square: bool
+        ) : Bitmap option =
         if config.Columns < 1 then
             failwith "Columns must be a positive number"
         elif config.Rows < 1 then

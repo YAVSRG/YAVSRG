@@ -534,11 +534,11 @@ module OsuSkin =
 
     let private skin_ini_parser =
         tuple5
-            (parseHeader "General" .>> spaces)
-            (opt (parseHeader "Colours" .>> spaces))
-            (opt (parseHeader "Fonts" .>> spaces))
-            (opt (parseHeader "CatchTheBeat" .>> spaces))
-            (many (parseHeader "Mania" .>> spaces))
+            (parse_header "General" .>> spaces)
+            (opt (parse_header "Colours" .>> spaces))
+            (opt (parse_header "Fonts" .>> spaces))
+            (opt (parse_header "CatchTheBeat" .>> spaces))
+            (many (parse_header "Mania" .>> spaces))
         |>> fun (g, c, f, ctb, ms) ->
             {
                 General = parse_general g
