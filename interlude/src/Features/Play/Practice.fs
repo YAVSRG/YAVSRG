@@ -140,7 +140,7 @@ module PracticeScreen =
             let accept_suggestion_hint =
                 [ (%%"accept_suggestion").ToString() ] %> "practice.suggestions.accepthint"
 
-            let about_right_hint = Icons.check + " " + %"practice.suggestions.aboutright"
+            let about_right_hint = Icons.CHECK + " " + %"practice.suggestions.aboutright"
 
             let suggestion_text () =
                 Text(fun () ->
@@ -190,19 +190,19 @@ module PracticeScreen =
                 |+ Conditional(
                     (fun () -> mode.Audio = 0 && options.AudioVolume.Value > 0.0),
                     Callout.frame
-                        (Callout.Small.Icon(Icons.audio_mute).Body(%"practice.mute_mandatory_hint"))
+                        (Callout.Small.Icon(Icons.VOLUME_X).Body(%"practice.mute_mandatory_hint"))
                         (fun (w, h) -> Position.Box(0.0f, 0.0f, 340.0f, 450.0f, w, h + 40.0f))
                 )
                 |+ Conditional(
                     (fun () -> mode.Audio = 1 && options.AudioVolume.Value > 0.0),
                     Callout.frame
-                        (Callout.Small.Icon(Icons.audio_mute).Body(%"practice.mute_hint"))
+                        (Callout.Small.Icon(Icons.VOLUME_X).Body(%"practice.mute_hint"))
                         (fun (w, h) -> Position.Box(0.0f, 0.0f, 340.0f, 450.0f, w, h + 40.0f))
                 )
                 |+ Conditional(
                     (fun () -> mode.Audio = 2 && options.AudioVolume.Value = 0.0),
                     Callout.frame
-                        (Callout.Small.Icon(Icons.audio_on).Body(%"practice.unmute_hint"))
+                        (Callout.Small.Icon(Icons.VOLUME_2).Body(%"practice.unmute_hint"))
                         (fun (w, h) -> Position.Box(0.0f, 0.0f, 340.0f, 450.0f, w, h + 40.0f))
                 )
                 |+ Conditional(
@@ -246,7 +246,7 @@ module PracticeScreen =
                     )
                 )
                 |* Button(
-                    Icons.reset + " Reset offsets",
+                    Icons.REFRESH_CCW + " Reset offsets",
                     (fun () ->
                         local_audio_offset.Set 0.0f<ms>
                         visual_offset.Set 0.0f
@@ -258,7 +258,7 @@ module PracticeScreen =
 
     let info_callout =
         Callout.Small
-            .Icon(Icons.practice)
+            .Icon(Icons.TARGET)
             .Title(%"practice.info.title")
             .Body(%"practice.info.desc")
             .Hotkey(%"practice.info.play", "skip")

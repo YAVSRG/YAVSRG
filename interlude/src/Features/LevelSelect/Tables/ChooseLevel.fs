@@ -20,7 +20,7 @@ type private LevelButton(name, action) =
     override this.Init(parent: Widget) =
         this
         |+ Text(
-            K(sprintf "%s %s  >" Icons.folder name),
+            K(sprintf "%s %s  >" Icons.FOLDER name),
             Color =
                 (fun () ->
                     ((if this.Focused then

@@ -39,7 +39,7 @@ module Mounts =
                         "mount.import",
                         fun () ->
                             import <- true
-                            Notifications.action_feedback (Icons.add_to_collection, %"notification.import_queued", "")
+                            Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
                     )
                     .Pos(300.0f)
                     .Tooltip(Tooltip.Info("mount.import"))
@@ -49,7 +49,7 @@ module Mounts =
                         fun () ->
                             import <- true
                             mount.LastImported <- System.DateTime.UnixEpoch
-                            Notifications.action_feedback (Icons.add_to_collection, %"notification.import_queued", "")
+                            Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
                     )
                     .Pos(370.0f)
                     .Tooltip(Tooltip.Info("mount.importall"))
@@ -67,14 +67,14 @@ module Mounts =
                                         (),
                                         fun () ->
                                             Notifications.task_feedback (
-                                                Icons.add_to_collection,
+                                                Icons.FOLDER_PLUS,
                                                 %"notification.score_import_success",
                                                 ""
                                             )
                                     )
 
                                     Notifications.action_feedback (
-                                        Icons.add_to_collection,
+                                        Icons.FOLDER_PLUS,
                                         %"notification.score_import_queued",
                                         ""
                                     )
@@ -97,7 +97,7 @@ module Mounts =
             if import then
                 import_mounted_source.Request(
                     setting.Value.Value,
-                    fun () -> Notifications.task_feedback (Icons.add_to_collection, %"notification.import_success", "")
+                    fun () -> Notifications.task_feedback (Icons.FOLDER_PLUS, %"notification.import_success", "")
                 )
 
     let import_mounts_on_startup () =
@@ -192,7 +192,7 @@ module Mounts =
 
                     if setting.Value.IsSome then
                         import_mounted_source.Request(setting.Value.Value, ignore)
-                        Notifications.action_feedback (Icons.add_to_collection, %"notification.import_queued", "")
+                        Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
                         this.Close()
                 |> Some
 
@@ -222,7 +222,7 @@ module Mounts =
 
         let create_button =
             Button(
-                sprintf "%s %s" Icons.import_local (%"imports.mount.create"),
+                sprintf "%s %s" Icons.LINK (%"imports.mount.create"),
                 (fun () -> CreateDialog(game, setting).Show()),
                 Position = Position.SliceBottom(60.0f).Margin 5.0f
             )
@@ -230,7 +230,7 @@ module Mounts =
         let edit_buttons =
             NavigationContainer.Row<Button>(Position = Position.SliceBottom(60.0f).Margin 5.0f)
             |+ Button(
-                sprintf "%s %s" Icons.edit (%"imports.mount.edit"),
+                sprintf "%s %s" Icons.EDIT_2 (%"imports.mount.edit"),
                 (fun () -> EditorPage(setting).Show()),
                 Position =
                     { Position.Default with
@@ -238,7 +238,7 @@ module Mounts =
                     }
             )
             |+ Button(
-                sprintf "%s %s" Icons.delete (%"imports.mount.delete"),
+                sprintf "%s %s" Icons.TRASH (%"imports.mount.delete"),
                 (fun () -> setting.Value <- None),
                 Position =
                     { Position.Default with

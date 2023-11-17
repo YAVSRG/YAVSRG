@@ -416,7 +416,7 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
         | PacemakerInfo.Replay _ ->
             Text.fill_b (
                 Style.font,
-                Icons.goal,
+                Icons.FLAG,
                 this.Bounds
                     .SliceLeft(0.0f)
                     .Expand(this.Bounds.Height, 0.0f)
@@ -446,11 +446,11 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
 
             let display =
                 if hearts > 5 then
-                    sprintf "%s x%i" (String.replicate 5 Icons.heart2) hearts
+                    sprintf "%s x%i" (String.replicate 5 Icons.HEART_ON) hearts
                 elif hearts > 0 then
-                    (String.replicate hearts Icons.heart2)
+                    (String.replicate hearts Icons.HEART_ON)
                 else
-                    Icons.failure
+                    Icons.X
 
             Text.fill_b (Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
 
@@ -489,7 +489,8 @@ type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
                 Draw.rect
                     (r.Expand 5.0f)
                     (Color.FromArgb(
-                        127 - max 0 (int (127.0 * judgement_animations.[i].Elapsed / conf.AnimationTime)),
+                        127
+                        - max 0 (int (127.0 * judgement_animations.[i].Elapsed / conf.AnimationTime)),
                         j.Color
                     ))
 

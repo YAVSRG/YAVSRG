@@ -146,10 +146,10 @@ type NoteskinsPage() as this =
         this.Content(
             NavigationContainer.Column<Widget>()
             |+ (FlowContainer.LeftToRight<Widget>(250.0f, Position = Position.Row(230.0f, 50.0f).Margin(100.0f, 0.0f))
-                |+ Button(Icons.edit + " " + %"noteskins.edit.name", tryEditNoteskin)
+                |+ Button(Icons.EDIT_2 + " " + %"noteskins.edit.name", tryEditNoteskin)
                     .Tooltip(Tooltip.Info("noteskins.edit"))
                 |+ Button(
-                    Icons.edit + " " + %"noteskins.edit.export.name",
+                    Icons.EDIT_2 + " " + %"noteskins.edit.export.name",
                     fun () ->
                         if not (Noteskins.export_current ()) then
                             Notifications.error (

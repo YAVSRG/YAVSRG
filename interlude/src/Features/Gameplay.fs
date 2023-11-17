@@ -43,7 +43,7 @@ module Gameplay =
             | None -> 0.0f<ms>
             |> fun x -> x / _rate.Value
             |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
-            |> fun (x, y) -> sprintf "%s %i:%02i" Icons.time x y
+            |> fun (x, y) -> sprintf "%s %i:%02i" Icons.CLOCK x y
 
         let private format_bpm (cc: CachedChart option) =
             match cc with
@@ -52,11 +52,11 @@ module Gameplay =
             |> fun (b, a) -> (60000.0f<ms> / a * _rate.Value |> int, 60000.0f<ms> / b * _rate.Value |> int)
             |> fun (a, b) ->
                 if a > 9000 || b < 0 then
-                    sprintf "%s ∞" Icons.bpm
+                    sprintf "%s ∞" Icons.MUSIC
                 elif Math.Abs(a - b) < 5 || b > 9000 then
-                    sprintf "%s %i" Icons.bpm a
+                    sprintf "%s %i" Icons.MUSIC a
                 else
-                    sprintf "%s %i-%i" Icons.bpm a b
+                    sprintf "%s %i-%i" Icons.MUSIC a b
 
         let private format_notecounts (chart: ModChart) =
             let mutable notes = 0

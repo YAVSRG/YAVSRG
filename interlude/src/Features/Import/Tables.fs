@@ -166,11 +166,11 @@ type TableCard(id: string, desc: string, table: Table) as this =
         Text.fill_b (
             Style.font
             , match status with
-              | NotInstalled -> Icons.download + " Install"
-              | UpdateAvailable -> Icons.download + " Update available"
-              | MissingCharts -> sprintf "%s Download missing charts (%i)" Icons.download missing
-              | InstallingCharts -> sprintf "%s Installing missing charts (%i)" Icons.download missing
-              | UpToDate -> Icons.check + " Up to date!"
+              | NotInstalled -> Icons.DOWNLOAD + " Install"
+              | UpdateAvailable -> Icons.DOWNLOAD + " Update available"
+              | MissingCharts -> sprintf "%s Download missing charts (%i)" Icons.DOWNLOAD missing
+              | InstallingCharts -> sprintf "%s Installing missing charts (%i)" Icons.DOWNLOAD missing
+              | UpToDate -> Icons.CHECK + " Up to date!"
             , button_bounds.Shrink Style.PADDING
             , match status with
               | InstallingCharts -> Colors.text_cyan_2

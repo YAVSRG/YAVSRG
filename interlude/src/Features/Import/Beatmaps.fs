@@ -81,7 +81,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
                                 if b then
                                     charts_updated_ev.Trigger()
 
-                                Notifications.task_feedback (Icons.download, %"notification.install_song", data.title)
+                                Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_song", data.title)
                                 File.Delete target
                                 status <- if b then Installed else DownloadFailed
                         )
@@ -125,7 +125,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
             Border = fun () -> if this.Focused then Colors.white else border.O2
         )
         |* Clickable.Focus this
-    //|+ Button(Icons.open_in_browser,
+    //|+ Button(Icons.OPEN_IN_BROWSER,
     //    fun () -> openUrl(sprintf "https://osu.ppy.sh/beatmapsets/%i" data.beatmapset_id)
     //    ,
     //    Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
@@ -178,10 +178,10 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
         Text.fill_b (
             Style.font,
             (match status with
-             | NotDownloaded -> Icons.download + " Download"
-             | Downloading -> Icons.download + " Downloading .."
-             | DownloadFailed -> Icons.x + " Error"
-             | Installed -> Icons.check + " Downloaded"),
+             | NotDownloaded -> Icons.DOWNLOAD + " Download"
+             | Downloading -> Icons.DOWNLOAD + " Downloading .."
+             | DownloadFailed -> Icons.X + " Error"
+             | Installed -> Icons.CHECK + " Downloaded"),
             download_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f),
             (match status with
              | NotDownloaded -> if this.Focused then Colors.text_yellow_2 else Colors.text
@@ -203,8 +203,8 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
                 Alignment.CENTER
             )
 
-        stat 150.0f (sprintf "%s %i" Icons.heart data.favourite_count)
-        stat 300.0f (sprintf "%s %i" Icons.play data.play_count)
+        stat 150.0f (sprintf "%s %i" Icons.HEART data.favourite_count)
+        stat 300.0f (sprintf "%s %i" Icons.PLAY data.play_count)
         stat 450.0f keymodes_string
 
         if this.Focused && Mouse.x () > this.Bounds.Right - 600.0f then
@@ -263,9 +263,9 @@ type private SortingDropdown
                     "%s %s"
                     display_value
                     (if reverse.Value then
-                         Icons.order_descending
+                         Icons.CHEVRONS_DOWN
                      else
-                         Icons.order_ascending)
+                         Icons.CHEVRONS_UP)
             ),
             !%Palette.DARK_100,
             TiltRight = false,
@@ -424,9 +424,9 @@ module Beatmaps =
                 ),
                 (fun () ->
                     if statuses.Contains status then
-                        Icons.check + " " + status
+                        Icons.CHECK + " " + status
                     else
-                        Icons.x + " " + status
+                        Icons.X + " " + status
                 ),
                 (fun () -> if statuses.Contains status then color.O3 else color.O1),
                 Position = position
@@ -436,7 +436,7 @@ module Beatmaps =
 
         override this.Init(parent) =
             //this
-            //|+ EmptyState(Icons.connection_failed, "osu!search is down :(")
+            //|+ EmptyState(Icons.CONNECTION_FAILED, "osu!search is down :(")
             //|+ Text("You'll have to download charts manually for the time being", Position = Position.Row(400.0f, 50.0f))
             //|+
             //    (
@@ -494,7 +494,7 @@ module Beatmaps =
                 Colors.grey_2
             |+ Conditional(
                 (fun () -> not loading && items.Count = 0),
-                EmptyState(Icons.search, %"imports.beatmaps.no_results", Position = Position.TrimTop(120.0f))
+                EmptyState(Icons.SEARCH, %"imports.beatmaps.no_results", Position = Position.TrimTop(120.0f))
             )
             |* SortingDropdown(
                 [

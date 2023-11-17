@@ -111,7 +111,7 @@ module Scoreboard =
                 K(
                     format_timespan (DateTime.UtcNow - data.ScoreInfo.time.ToUniversalTime())
                     + if data.ScoreInfo.layout = Layout.Layout.LeftTwo then
-                          " " + Icons.download
+                          " " + Icons.DOWNLOAD
                       else
                           ""
                 ),
@@ -276,7 +276,7 @@ type Scoreboard(display: Setting<Display>) as this =
             .Tooltip(Tooltip.Info("levelselect.info.mode", "scoreboard_storage"))
         |+ StylishButton
             .Selector(
-                Icons.sort,
+                Icons.CHEVRONS_UP,
                 [|
                     Sort.Accuracy, %"levelselect.info.scoreboard.sort.accuracy"
                     Sort.Performance, %"levelselect.info.scoreboard.sort.performance"
@@ -296,7 +296,7 @@ type Scoreboard(display: Setting<Display>) as this =
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
         |+ StylishButton
             .Selector(
-                Icons.filter,
+                Icons.FILTER,
                 [|
                     Filter.None, %"levelselect.info.scoreboard.filter.none"
                     Filter.CurrentRate, %"levelselect.info.scoreboard.filter.currentrate"
@@ -324,7 +324,7 @@ type Scoreboard(display: Setting<Display>) as this =
                 else
                     Loader.container.Focus()
         )
-        |* Conditional((fun () -> count = 0), EmptyState(Icons.empty_scoreboard, %"levelselect.info.scoreboard.empty"))
+        |* Conditional((fun () -> count = 0), EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty"))
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

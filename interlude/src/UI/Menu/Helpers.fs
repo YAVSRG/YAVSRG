@@ -32,7 +32,7 @@ module Helpers =
 type Tooltip(content: Callout) =
     inherit StaticWidget(NodeType.None)
 
-    let content = content.Icon(Icons.info)
+    let content = content.Icon(Icons.INFO)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

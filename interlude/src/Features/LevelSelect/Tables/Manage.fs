@@ -68,7 +68,7 @@ type ManageTablesPage() as this =
                 Interlude.Features.Import.ImportScreen.switch_to_tables ()
                 Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
             ),
-            Icon = Icons.download
+            Icon = Icons.DOWNLOAD
         )
         |* Dummy()
 
@@ -89,9 +89,8 @@ type ManageTablesPage() as this =
             )
 
         if Table.current().IsSome then
-            container
-            |+ Dummy()
-            |* PageButton("table.suggestions", fun () -> SuggestionsPage().Show())
+            container |+ Dummy()
+            |* PageButton("table.suggestions", (fun () -> SuggestionsPage().Show()))
 
         if container.Focused then
             container.Focus()

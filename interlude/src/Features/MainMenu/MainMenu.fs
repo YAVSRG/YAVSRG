@@ -109,14 +109,14 @@ type MainMenuScreen() as this =
         |+ quit
         |+ (StylishButton(
             Wiki.show_changelog,
-            K(Icons.star + " " + %"menu.changelog"),
+            K(Icons.STAR + " " + %"menu.changelog"),
             !%Palette.MAIN_100,
             TiltRight = false,
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-300.0f, -50.0f)
         ))
         |* StylishButton(
             (fun () -> open_url ("https://discord.gg/tA22tWR")),
-            K(Icons.comment + " " + %"menu.discord"),
+            K(Icons.MESSAGE_SQUARE + " " + %"menu.discord"),
             !%Palette.DARK_100,
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-625.0f, -50.0f)
         )
@@ -124,7 +124,7 @@ type MainMenuScreen() as this =
     override this.OnEnter prev =
         if AutoUpdate.update_available then
             Notifications.system_feedback (
-                Icons.system_notification,
+                Icons.ALERT_OCTAGON,
                 %"notification.update_available.title",
                 %"notification.update_available.body"
             )

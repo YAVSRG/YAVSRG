@@ -74,7 +74,7 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
                                 if b then
                                     charts_updated_ev.Trigger()
 
-                                Notifications.task_feedback (Icons.download, %"notification.install_pack", data.name)
+                                Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_pack", data.name)
                                 File.Delete target
                                 status <- if b then Installed else DownloadFailed
                         )
@@ -135,11 +135,11 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
                 }
         )
         |+ Button(
-            Icons.open_in_browser
+            Icons.EXTERNAL_LINK
             , fun () -> open_url (sprintf "https://etternaonline.com/pack/%i" id)
             , Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f)
         )
-        |* Button(Icons.download, download, Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
+        |* Button(Icons.DOWNLOAD, download, Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
 
     override this.OnFocus() =
         Style.hover.Play()

@@ -25,7 +25,7 @@ type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) as this =
     let actions =
         let fc = FlowContainer.RightToLeft(60.0f, Spacing = 20.0f, Position = Position.SliceTop(40.0f).TrimRight(20.0f))
         if suggestion.CanApply then
-            fc.Add(button(Icons.check, 
+            fc.Add(button(Icons.CHECK, 
                 fun () ->
                     SelectTableLevelPage(
                         fun level ->
@@ -36,14 +36,14 @@ type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) as this =
                                 } : Tables.Suggestions.Apply.Request),
                                 function
                                 | Some true ->
-                                    Notifications.action_feedback (Icons.add_to_collection, "Suggestion applied!", "")
+                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion applied!", "")
                                 | _ -> Notifications.error ("Error applying suggestion", "")
                             )
                             Menu.Back()
                     ).Show()
                 ))
 
-        fc.Add(button(Icons.edit, 
+        fc.Add(button(Icons.EDIT_2, 
             fun () ->
                 SelectTableLevelPage(
                     fun level ->
@@ -61,7 +61,7 @@ type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) as this =
                             } : Tables.Suggestions.Add.Request),
                             function
                             | Some true ->
-                                Notifications.action_feedback (Icons.add_to_collection, "Suggestion sent!", "")
+                                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
                             | _ -> Notifications.error ("Error sending suggestion", "")
                         )
                         Menu.Back()

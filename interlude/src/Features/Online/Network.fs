@@ -210,7 +210,7 @@ module Network =
 
                         if Screen.current_type <> Screen.Type.SplashScreen then
                             Notifications.system_feedback (
-                                Icons.connected,
+                                Icons.GLOBE,
                                 [ name ] %> "notification.network.login",
                                 ""
                             )

@@ -489,7 +489,7 @@ module Notifications =
 
     let error (title, description) =
         add (
-            Callout.Small.Icon(Icons.alert).Title(title).Body(description),
+            Callout.Small.Icon(Icons.ALERT_CIRCLE).Title(title).Body(description),
             (Colors.red_accent, Colors.red),
             Colors.text
         )

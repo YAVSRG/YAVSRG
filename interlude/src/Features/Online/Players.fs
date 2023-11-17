@@ -207,7 +207,7 @@ type private SearchList() =
                         ScrollContainer.Flow(contents) :> Widget
                     else
                         EmptyState(
-                            Icons.search,
+                            Icons.SEARCH,
                             if query.Value.Trim().Length > 0 then
                                 "Nobody found :("
                             else
@@ -356,11 +356,11 @@ type Profile() as this =
                             )
                         ),
                         (if data.IsMutualFriend then
-                             Icons.heart
+                             Icons.HEART
                          else
-                             Icons.remove_friend),
+                             Icons.USER_MINUS),
                         HoverText = "Remove friend",
-                        HoverIcon = Icons.remove_friend,
+                        HoverIcon = Icons.USER_MINUS,
                         UnfocusedColor =
                             (if data.IsMutualFriend then
                                  Colors.text_pink_2
@@ -378,14 +378,14 @@ type Profile() as this =
                                 { User = data.Username },
                                 function
                                 | Some true ->
-                                    sync 
-                                    <| fun () -> 
+                                    sync
+                                    <| fun () ->
                                         this.SetData({ data with IsFriend = true })
                                         Players.update_friends_list ()
                                 | _ -> Notifications.error ("Error adding friend", "")
                             )
                         ),
-                        Icons.add_friend,
+                        Icons.USER_PLUS,
                         UnfocusedColor = Colors.text_green_2,
                         Position = Position.TrimRight(40.0f).SliceTop(70.0f).SliceRight(300.0f)
                     )
@@ -421,7 +421,7 @@ type Profile() as this =
                             color_picker.Current <- dropdown
                             dropdown.Focus()
                         ),
-                        Icons.reset,
+                        Icons.REFRESH_CCW,
                         Position = Position.TrimRight(40.0f).SliceTop(70.0f).SliceRight(300.0f)
                     )
                 )

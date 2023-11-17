@@ -31,9 +31,9 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                     )
                         .Show()
                 ),
-                Icon = Icons.add_to_collection
+                Icon = Icons.FOLDER_PLUS
             )
-            |+ PageButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.delete)
+            |+ PageButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.TRASH)
 
         match context with
         | LibraryContext.None
@@ -47,7 +47,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                     if CollectionManager.remove_from (name, Library.collections.Get(name).Value, cc, context) then
                         Menu.Back()
                 ),
-                Icon = Icons.remove_from_collection,
+                Icon = Icons.FOLDER_MINUS,
                 Text = [ name ] %> "chart.remove_from_collection.name"
             )
 
@@ -81,11 +81,13 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                                 },
                                 function
                                 | Some true ->
-                                    Notifications.action_feedback (Icons.add_to_collection, "Suggestion sent!", "")
+                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
                                 | _ -> Notifications.error ("Error sending suggestion", "")
                             )
+
                             Menu.Back()
-                        ).Show()
+                        )
+                            .Show()
                     )
                 )
         | None -> ()
@@ -118,7 +120,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
             |+ PageButton(
                 "group.delete",
                 (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)),
-                Icon = Icons.delete
+                Icon = Icons.TRASH
             )
                 .Tooltip(Tooltip.Info("group.delete"))
 
@@ -157,7 +159,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
             |+ PageButton(
                 "score.delete",
                 (fun () -> ScoreContextMenu.ConfirmDeleteScore(score, true)),
-                Icon = Icons.delete
+                Icon = Icons.TRASH
             )
                 .Pos(200.0f)
             |+ PageButton(
@@ -166,7 +168,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
                     ScoreScreenHelpers.watch_replay (score.ScoreInfo, score.ModChart, score.ReplayData)
                     Menu.Back()
                 ),
-                Icon = Icons.watch
+                Icon = Icons.FILM
             )
                 .Pos(270.0f)
             |+ PageButton(
@@ -175,7 +177,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
                     LevelSelect.challenge_score (score.ScoreInfo.rate, score.ScoreInfo.selectedMods, score.ReplayData)
                     Menu.Back()
                 ),
-                Icon = Icons.goal,
+                Icon = Icons.FLAG,
                 Enabled = Network.lobby.IsNone
             )
                 .Pos(340.0f)
@@ -196,7 +198,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
             fun () ->
                 Chart.SAVE_DATA.Value.Scores.Remove score.ScoreInfo |> ignore
                 LevelSelect.refresh_all ()
-                Notifications.action_feedback (Icons.delete, [ score_name ] %> "notification.deleted", "")
+                Notifications.action_feedback (Icons.TRASH, [ score_name ] %> "notification.deleted", "")
 
                 if is_submenu then
                     Menu.Back()

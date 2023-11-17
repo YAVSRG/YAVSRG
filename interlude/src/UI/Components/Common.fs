@@ -224,7 +224,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
         |* Text(
             fun () ->
                 match s.Value with
-                | "" -> Icons.search + " " + [ (%%"search").ToString() ] %> "misc.search"
+                | "" -> Icons.SEARCH + " " + [ (%%"search").ToString() ] %> "misc.search"
                 | _ -> ""
             , Color = text_entry.ColorFunc
             , Align = Alignment.LEFT
@@ -294,10 +294,10 @@ type LoadingState() =
 
     let animation_frames =
         [|
-            Percyqaz.Flux.Resources.Feather.cloud_snow
-            Percyqaz.Flux.Resources.Feather.cloud_drizzle
-            Percyqaz.Flux.Resources.Feather.cloud_rain
-            Percyqaz.Flux.Resources.Feather.cloud_drizzle
+            Icons.CLOUD_SNOW
+            Icons.CLOUD_DRIZZLE
+            Icons.CLOUD_RAIN
+            Icons.CLOUD_DRIZZLE
         |]
 
     member val Text = %"misc.loading" with get, set
@@ -349,7 +349,7 @@ type LoadingIndicator() =
 type NewAndShiny() =
     inherit StaticWidget(NodeType.None)
 
-    member val Icon = Icons.alert with get, set
+    member val Icon = Icons.ALERT_CIRCLE with get, set
 
     override this.Draw() =
         let x, y = this.Bounds.Right, this.Bounds.Bottom // todo: alignment options

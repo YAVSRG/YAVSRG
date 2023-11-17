@@ -44,7 +44,7 @@ type Toolbar() =
         )
         |+ IconButton(
             %"menu.back",
-            Icons.back,
+            Icons.ARROW_LEFT_CIRCLE,
             HEIGHT,
             (fun () -> Screen.back Transitions.Flags.UnderLogo |> ignore),
             Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 160.0f, HEIGHT - 10.0f)
@@ -65,7 +65,7 @@ type Toolbar() =
                     then
                         OptionsMenuRoot.show ()
                 ),
-                Icons.options,
+                Icons.SETTINGS,
                 Hotkey = "options"
             )
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
@@ -75,7 +75,7 @@ type Toolbar() =
                     if not Toolbar.hidden then
                         Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
                 ),
-                Icons.import,
+                Icons.DOWNLOAD,
                 Hotkey = "import"
             )
                 .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
@@ -85,8 +85,8 @@ type Toolbar() =
                     if not Toolbar.hidden then
                         Wiki.show ()
                 ),
-                Icons.wiki,
-                HoverIcon = Icons.wiki2,
+                Icons.BOOK,
+                HoverIcon = Icons.BOOK_OPEN,
                 Hotkey = "wiki"
             )
                 .Tooltip(Tooltip.Info("menu.wiki").Hotkey("wiki"))
@@ -94,9 +94,10 @@ type Toolbar() =
                 %"menu.stats.name",
                 (fun () ->
                     if not Toolbar.hidden then
-                        Screen.change_new StatsScreen Screen.Type.Stats Transitions.Flags.Default |> ignore
+                        Screen.change_new StatsScreen Screen.Type.Stats Transitions.Flags.Default
+                        |> ignore
                 ),
-                Icons.stats_2
+                Icons.TRENDING_UP
             )
                 .Tooltip(Tooltip.Info("menu.stats")))
         |+ NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
@@ -120,7 +121,7 @@ type Toolbar() =
                 ImageServices.save_image_jpg.Request((img, path), img.Dispose)
 
                 Notifications.action_feedback_button (
-                    Icons.screenshot,
+                    Icons.IMAGE,
                     %"notification.screenshot",
                     id,
                     %"notification.screenshot.open_folder",
@@ -134,7 +135,7 @@ type Toolbar() =
                 Noteskins.load ()
                 Themes.load ()
                 first_init <- false
-                Notifications.action_feedback (Icons.system_notification, %"notification.reload_themes", "")
+                Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_themes", "")
         )
         |+ HotkeyAction(
             "preset1",
@@ -142,7 +143,7 @@ type Toolbar() =
                 match options.Preset1.Value with
                 | Some s when Screen.current_type <> Screen.Type.Play ->
                     Presets.load s
-                    Notifications.action_feedback (Icons.system_notification, %"notification.preset_loaded", s.Name)
+                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
                 | _ -> ()
         )
         |+ HotkeyAction(
@@ -151,7 +152,7 @@ type Toolbar() =
                 match options.Preset2.Value with
                 | Some s when Screen.current_type <> Screen.Type.Play ->
                     Presets.load s
-                    Notifications.action_feedback (Icons.system_notification, %"notification.preset_loaded", s.Name)
+                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
                 | _ -> ()
         )
         |+ HotkeyAction(
@@ -160,7 +161,7 @@ type Toolbar() =
                 match options.Preset3.Value with
                 | Some s when Screen.current_type <> Screen.Type.Play ->
                     Presets.load s
-                    Notifications.action_feedback (Icons.system_notification, %"notification.preset_loaded", s.Name)
+                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
                 | _ -> ()
         )
         |+ Conditional(
@@ -170,35 +171,37 @@ type Toolbar() =
         |* volume
 
     override this.Draw() =
-        if Toolbar.hidden then volume.Draw() else
-        let {
-                Rect.Left = l
-                Top = t
-                Right = r
-                Bottom = b
-            } =
-            this.Bounds
+        if Toolbar.hidden then
+            volume.Draw()
+        else
+            let {
+                    Rect.Left = l
+                    Top = t
+                    Right = r
+                    Bottom = b
+                } =
+                this.Bounds
 
-        Draw.rect (Rect.Create(l, t, r, t + HEIGHT)) !*Palette.MAIN_100
-        Draw.rect (Rect.Create(l, b - HEIGHT, r, b)) !*Palette.MAIN_100
+            Draw.rect (Rect.Create(l, t, r, t + HEIGHT)) !*Palette.MAIN_100
+            Draw.rect (Rect.Create(l, b - HEIGHT, r, b)) !*Palette.MAIN_100
 
-        if Toolbar.slideout_amount.Value > 0.01f then
-            let s = this.Bounds.Width / 48.0f
+            if Toolbar.slideout_amount.Value > 0.01f then
+                let s = this.Bounds.Width / 48.0f
 
-            for i in 0..47 do
-                let level =
-                    System.Math.Min((Devices.waveform.[i] + 0.01f) * Toolbar.slideout_amount.Value * 0.4f, HEIGHT)
+                for i in 0..47 do
+                    let level =
+                        System.Math.Min((Devices.waveform.[i] + 0.01f) * Toolbar.slideout_amount.Value * 0.4f, HEIGHT)
 
-                Draw.rect
-                    (Rect.Create(l + float32 i * s + 2.0f, t, l + (float32 i + 1.0f) * s - 2.0f, t + level))
-                    (Palette.color (int level, 1.0f, 0.5f))
+                    Draw.rect
+                        (Rect.Create(l + float32 i * s + 2.0f, t, l + (float32 i + 1.0f) * s - 2.0f, t + level))
+                        (Palette.color (int level, 1.0f, 0.5f))
 
-                Draw.rect
-                    (Rect.Create(r - (float32 i + 1.0f) * s + 2.0f, b - level, r - float32 i * s - 2.0f, b))
-                    (Palette.color (int level, 1.0f, 0.5f))
+                    Draw.rect
+                        (Rect.Create(r - (float32 i + 1.0f) * s + 2.0f, b - level, r - float32 i * s - 2.0f, b))
+                        (Palette.color (int level, 1.0f, 0.5f))
 
-        container.Draw()
-        Terminal.draw ()
+            container.Draw()
+            Terminal.draw ()
 
     override this.Update(elapsed_ms, moved) =
         Stats.session.GameTime <- Stats.session.GameTime + elapsed_ms

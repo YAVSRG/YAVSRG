@@ -36,9 +36,9 @@ type private ModeDropdown
                     "%s %s"
                     display_value
                     (if reverse.Value then
-                         Icons.order_descending
+                         Icons.CHEVRONS_DOWN
                      else
-                         Icons.order_ascending)
+                         Icons.CHEVRONS_UP)
             ),
             !%Palette.DARK_100,
             Position = Position.TrimLeft 145.0f
@@ -101,7 +101,7 @@ type LibraryModeSettings() =
     let manage_collections =
         StylishButton(
             (fun () -> Menu.ShowPage SelectCollectionPage.Editor),
-            K(sprintf "%s %s" Icons.collections (%"levelselect.collections.name")),
+            K(sprintf "%s %s" Icons.FOLDER (%"levelselect.collections.name")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         )
@@ -110,7 +110,7 @@ type LibraryModeSettings() =
     let manage_tables =
         StylishButton(
             (fun () -> Menu.ShowPage ManageTablesPage),
-            K(sprintf "%s %s" Icons.edit (%"levelselect.table.name")),
+            K(sprintf "%s %s" Icons.EDIT_2 (%"levelselect.table.name")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         )
@@ -138,7 +138,7 @@ type LibraryModeSettings() =
         this
         |+ StylishButton
             .Selector(
-                sprintf "%s %s:" Icons.collections (%"levelselect.librarymode"),
+                sprintf "%s %s:" Icons.FOLDER (%"levelselect.librarymode"),
                 [|
                     LibraryMode.All, %"levelselect.librarymode.all"
                     LibraryMode.Collections, %"levelselect.librarymode.collections"

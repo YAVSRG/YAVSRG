@@ -79,9 +79,9 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
         Text.fill_b (
             Style.font
             , match status with
-              | NotInstalled -> Icons.download + " Install"
-              | UpdateAvailable -> Icons.download + " Update available"
-              | UpToDate -> Icons.check + " Installed"
+              | NotInstalled -> Icons.DOWNLOAD + " Install"
+              | UpdateAvailable -> Icons.DOWNLOAD + " Update available"
+              | UpToDate -> Icons.CHECK + " Installed"
             , this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.PADDING)
             , match status with
               | NotInstalled -> if this.Focused then Colors.text_yellow_2 else Colors.text

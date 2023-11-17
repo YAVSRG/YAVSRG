@@ -42,7 +42,7 @@ type ChartInfo() as this =
         |+ Conditional((fun () -> display.Value = Display.Details), details)
 
         |+ Text(
-            (fun () -> sprintf "%s %.2f" Icons.star rating),
+            (fun () -> sprintf "%s %.2f" Icons.STAR rating),
             Color = (fun () -> Color.White, physical_color rating),
             Align = Alignment.LEFT,
             Position =
@@ -115,7 +115,7 @@ type ChartInfo() as this =
                 Chart.wait_for_load
                 <| fun () -> Preview(Chart.WITH_MODS.Value, change_rate).Show()
             ),
-            K(Icons.preview + " " + %"levelselect.preview.name"),
+            K(Icons.EYE + " " + %"levelselect.preview.name"),
             !%Palette.MAIN_100,
             Hotkey = "preview",
             TiltLeft = false,

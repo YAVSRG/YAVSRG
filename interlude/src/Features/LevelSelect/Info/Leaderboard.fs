@@ -294,7 +294,7 @@ type Leaderboard(display: Setting<Display>) as this =
             .Tooltip(Tooltip.Info("levelselect.info.mode", "scoreboard_storage"))
         |+ StylishButton
             .Selector(
-                Icons.sort,
+                Icons.CHEVRONS_UP,
                 [|
                     Sort.Accuracy, %"levelselect.info.scoreboard.sort.accuracy"
                     Sort.Performance, %"levelselect.info.scoreboard.sort.performance"
@@ -314,7 +314,7 @@ type Leaderboard(display: Setting<Display>) as this =
             .Tooltip(Tooltip.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
         |+ StylishButton
             .Selector(
-                Icons.filter,
+                Icons.FILTER,
                 [|
                     Filter.None, %"levelselect.info.scoreboard.filter.none"
                     Filter.CurrentRate, %"levelselect.info.scoreboard.filter.currentrate"
@@ -345,16 +345,16 @@ type Leaderboard(display: Setting<Display>) as this =
         |+ Conditional(
             (fun () -> state.Value = State.EmptyLeaderboard),
             EmptyState(
-                Icons.leaderboard,
+                Icons.FLAG,
                 %"levelselect.info.leaderboard.empty",
                 Subtitle = %"levelselect.info.leaderboard.empty.subtitle"
             )
         )
         |+ Conditional(
             (fun () -> state.Value = State.NoLeaderboard),
-            EmptyState(Icons.no_leaderboard, %"levelselect.info.leaderboard.unavailable")
+            EmptyState(Icons.CLOUD_OFF, %"levelselect.info.leaderboard.unavailable")
         )
-        |* Conditional((fun () -> state.Value = State.Offline), EmptyState(Icons.connected, %"misc.offline"))
+        |* Conditional((fun () -> state.Value = State.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

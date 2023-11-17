@@ -73,7 +73,7 @@ module System =
             let hotkey_editor hk =
                 NavigationContainer.Row<Widget>()
                 |+ Keybinder(hk, Position = Position.TrimRight PRETTYHEIGHT)
-                |+ Button(Icons.reset, (fun () -> Hotkeys.reset hk), Position = Position.SliceRight PRETTYHEIGHT)
+                |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hk), Position = Position.SliceRight PRETTYHEIGHT)
 
             let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
@@ -84,7 +84,7 @@ module System =
                 PageButton(
                     "system.hotkeys.reset",
                     (fun () -> ConfirmPage(%"system.hotkeys.reset.confirm", Hotkeys.reset_all).Show()),
-                    Icon = Icons.reset
+                    Icon = Icons.REFRESH_CCW
                 )
             )
 
@@ -331,7 +331,7 @@ module System =
                 Conditional(
                     (fun () -> has_changed),
                     Callout.frame
-                        (Callout.Small.Icon(Icons.system).Title(%"system.window_changes_hint"))
+                        (Callout.Small.Icon(Icons.AIRPLAY).Title(%"system.window_changes_hint"))
                         (fun (w, h) -> Position.SliceTop(h + 40.0f + 40.0f).SliceRight(w + 40.0f).Margin(20.0f, 20.0f))
                 )
             )

@@ -69,7 +69,7 @@ type NoteskinCard(data: RepoEntry) as this =
                 fun success ->
                     if success then
                         sync Noteskins.load
-                        Notifications.task_feedback (Icons.download, %"notification.install_noteskin", data.Name)
+                        Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_noteskin", data.Name)
                         status <- Installed
                     else
                         status <- DownloadFailed
@@ -94,10 +94,10 @@ type NoteskinCard(data: RepoEntry) as this =
         Text.fill_b (
             Style.font,
             (match status with
-             | NotDownloaded -> Icons.download + " Download"
-             | Downloading -> Icons.download + " Downloading .."
-             | DownloadFailed -> Icons.x + " Error"
-             | Installed -> Icons.check + " Downloaded"),
+             | NotDownloaded -> Icons.DOWNLOAD + " Download"
+             | Downloading -> Icons.DOWNLOAD + " Downloading .."
+             | DownloadFailed -> Icons.X + " Error"
+             | Installed -> Icons.CHECK + " Downloaded"),
             this.Bounds.SliceBottom(60.0f).Shrink(Style.PADDING),
             (match status with
              | NotDownloaded -> if this.Focused then Colors.text_yellow_2 else Colors.text

@@ -17,7 +17,8 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
         StaticContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                selected.[x].[y] <- not selected.[x].[y])
+                selected.[x].[y] <- not selected.[x].[y]
+            )
         )
 
     override this.Init(parent) =
@@ -28,12 +29,14 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
                 (fun () ->
                     if selected.[x].[y] then Colors.pink_accent.O2
                     elif this.Focused then Colors.yellow_accent.O2
-                    else Color.Transparent),
+                    else Color.Transparent
+                ),
             Border =
                 (fun () ->
                     if this.Focused then Colors.white.O3
                     elif selected.[x].[y] then Colors.pink_accent
-                    else Color.Transparent)
+                    else Color.Transparent
+                )
         )
         |* Clickable(
             this.Select,
@@ -57,7 +60,7 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
         Draw.quad (this.Bounds |> Quad.ofRect) (Quad.color Color.White) (Sprite.pick_texture (x, y) sprite)
 
 type DeleteButton(onClick) =
-    inherit Button(K Icons.delete, onClick, Floating = true)
+    inherit Button(K Icons.TRASH, onClick, Floating = true)
 
     member val VerticalPad = 0.0f with get, set
 
@@ -136,7 +139,8 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                         Noteskins.Current.reload_texture (texture_id)
                                         this.Refresh()
                                 )
-                                    .Show()),
+                                    .Show()
+                            ),
                             Position = Position.Box(0.0f, 0.0f, float32 c * (size + 10.0f), -50.0f, size, 40.0f)
                         ),
                         c + 2,
@@ -167,7 +171,8 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                 Noteskins.Current.reload_texture (texture_id)
                                 this.Refresh()
                         )
-                            .Show()),
+                            .Show()
+                    ),
                     VerticalPad = size * 0.5f - 20.0f,
                     Position =
                         Position
@@ -182,7 +187,7 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
 
         if sprite.Rows < max_colors then
             items.Add(
-                { new Button(K(sprintf "%s %s" Icons.add "Add color"),
+                { new Button(K(sprintf "%s %s" Icons.PLUS_CIRCLE "Add color"),
                              (fun () ->
                                  let src_row =
                                      match Seq.tryHead this.SelectedTextures with
@@ -198,21 +203,23 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                          Noteskins.Current.reload_texture (texture_id)
                                          this.Refresh()
                                  )
-                                     .Show()),
+                                     .Show()
+                             ),
                              Floating = true,
                              Position = Position.Margin(0.0f, -50.0f).SliceBottom(40.0f)) with
                     override this.Draw() =
                         if this.Focused then
                             Draw.rect this.Bounds Colors.yellow_accent.O2
 
-                        base.Draw() },
+                        base.Draw()
+                },
                 0,
                 1
             )
 
         if sprite.Columns < max_frames then
             items.Add(
-                { new Button(K Icons.add,
+                { new Button(K Icons.PLUS_CIRCLE,
                              (fun () ->
                                  let src_col =
                                      match Seq.tryHead this.SelectedTextures with
@@ -228,14 +235,16 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                          Noteskins.Current.reload_texture (texture_id)
                                          this.Refresh()
                                  )
-                                     .Show()),
+                                     .Show()
+                             ),
                              Floating = true,
                              Position = Position.Margin(-50.0f, 0.0f).SliceRight(40.0f)) with
                     override this.Draw() =
                         if this.Focused then
                             Draw.rect this.Bounds Colors.yellow_accent.O2
 
-                        base.Draw() },
+                        base.Draw()
+                },
                 1,
                 0
             )
@@ -288,7 +297,7 @@ type TextureEditPage(texture_id: string) as this =
             |+ texture_editor
             |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f, Position = Position.SliceRight(400.0f).Margin(50.0f))
                 |+ Button(
-                    Icons.rotate_cw + " Rotate clockwise"
+                    Icons.ROTATE_CW + " Rotate clockwise"
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
                             Noteskins.Current.instance.RotateClockwise((col, row), texture_id)
@@ -298,7 +307,7 @@ type TextureEditPage(texture_id: string) as this =
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
                 )
                 |+ Button(
-                    Icons.rotate_ccw + " Rotate anticlockwise"
+                    Icons.ROTATE_CCW + " Rotate anticlockwise"
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
                             Noteskins.Current.instance.RotateAnticlockwise((col, row), texture_id)
@@ -308,7 +317,7 @@ type TextureEditPage(texture_id: string) as this =
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
                 )
                 |+ Button(
-                    Icons.vertical_flip + " Vertical flip"
+                    Icons.CORNER_LEFT_UP + " Vertical flip"
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
                             Noteskins.Current.instance.VerticalFlipTexture((col, row), texture_id)
@@ -318,7 +327,7 @@ type TextureEditPage(texture_id: string) as this =
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
                 )
                 |+ Button(
-                    Icons.horizontal_flip + " Horizontal flip"
+                    Icons.CORNER_DOWN_LEFT + " Horizontal flip"
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
                             Noteskins.Current.instance.HorizontalFlipTexture((col, row), texture_id)
@@ -337,19 +346,22 @@ type TextureCard(id: string, on_click: unit -> unit) as this =
         Frame(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                on_click ()),
+                on_click ()
+            ),
             Fill =
                 (fun () ->
                     if this.Focused then
                         Colors.yellow_accent.O1
                     else
-                        Colors.shadow_2.O2),
+                        Colors.shadow_2.O2
+                ),
             Border =
                 (fun () ->
                     if this.Focused then
                         Colors.yellow_accent
                     else
-                        Colors.grey_2.O3)
+                        Colors.grey_2.O3
+                )
         )
 
     // todo: refresh on return from editor

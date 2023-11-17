@@ -54,10 +54,10 @@ module Debug =
                             Caching.Cache.recache_service.Request(
                                 Library.cache,
                                 fun () ->
-                                    Notifications.task_feedback (Icons.folder, %"notification.recache_complete", "")
+                                    Notifications.task_feedback (Icons.FOLDER, %"notification.recache_complete", "")
                             )
 
-                            Notifications.action_feedback (Icons.folder, %"notification.recache", "")
+                            Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
                     )
                     .Pos(200.0f)
                     .Tooltip(Tooltip.Info("debug.rebuildcache"))
@@ -68,14 +68,14 @@ module Debug =
                             if AutoUpdate.update_available then
                                 AutoUpdate.apply_update (fun () ->
                                     Notifications.system_feedback (
-                                        Icons.system_notification,
+                                        Icons.ALERT_OCTAGON,
                                         %"notification.update_installed.title",
                                         %"notification.update_installed.body"
                                     )
                                 )
 
                                 Notifications.system_feedback (
-                                    Icons.system_notification,
+                                    Icons.ALERT_OCTAGON,
                                     %"notification.update_installing.title",
                                     %"notification.update_installing.body"
                                 )

@@ -182,7 +182,7 @@ type GameplayPage() as this =
             (fun () ->
                 match setting.Value with
                 | None -> sprintf "Preset %i (Empty)" i
-                | Some s -> Icons.edit + " " + s.Name
+                | Some s -> Icons.EDIT_2 + " " + s.Name
             ),
             (fun () ->
                 if setting.Value.IsSome then
@@ -202,11 +202,7 @@ type GameplayPage() as this =
                             Presets.load s
                             preview.Refresh()
 
-                            Notifications.action_feedback (
-                                Icons.system_notification,
-                                %"notification.preset_loaded",
-                                s.Name
-                            )
+                            Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
                     )
                         .Show()
                 | None -> ()
@@ -224,7 +220,7 @@ type GameplayPage() as this =
                 if setting.Value.IsNone then
                     let name = sprintf "Preset %i" i
                     setting.Value <- Presets.create (name) |> Some
-                    Notifications.action_feedback (Icons.system_notification, %"notification.preset_saved", name)
+                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
                 else
                     let name = setting.Value.Value.Name
 
@@ -233,11 +229,7 @@ type GameplayPage() as this =
                         fun () ->
                             setting.Value <- Presets.create (name) |> Some
 
-                            Notifications.action_feedback (
-                                Icons.system_notification,
-                                %"notification.preset_saved",
-                                name
-                            )
+                            Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
                     )
                         .Show()
             ),

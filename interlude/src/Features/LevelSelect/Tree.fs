@@ -146,7 +146,7 @@ module Tree =
                 else
                     ""
                 + match chart_save_data with
-                  | Some c when c.Comment <> "" -> Icons.comment
+                  | Some c when c.Comment <> "" -> Icons.MESSAGE_SQUARE
                   | _ -> ""
 
         override this.Bounds(top) =
@@ -253,7 +253,11 @@ module Tree =
 
             Text.draw_aligned_b (Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
-            if Comments.fade.Value > 0.01f && chart_save_data.IsSome && chart_save_data.Value.Comment <> "" then
+            if
+                Comments.fade.Value > 0.01f
+                && chart_save_data.IsSome
+                && chart_save_data.Value.Comment <> ""
+            then
                 Draw.rect bounds (Palette.color (Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
 
                 Text.fill_b (
@@ -442,7 +446,7 @@ module Tree =
 
         groups <-
             library_groups.Keys
-            |> Seq.sortBy(fun (index, group_name) -> (index, group_name.ToLower()))
+            |> Seq.sortBy (fun (index, group_name) -> (index, group_name.ToLower()))
             |> if options.ChartGroupReverse.Value then Seq.rev else id
             |> Seq.map (fun (index, group_name) ->
                 library_groups.[(index, group_name)].Charts

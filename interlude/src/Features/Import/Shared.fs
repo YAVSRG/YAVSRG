@@ -58,7 +58,7 @@ module Import =
 
         let info =
             Callout.Normal
-                .Icon(Icons.alert)
+                .Icon(Icons.ALERT_CIRCLE)
                 .Title(%"unlinkedsongsimport.info.title")
                 .Body(%"unlinkedsongsimport.info.body")
 
@@ -81,7 +81,7 @@ module Import =
                                 (path, false),
                                 fun success ->
                                     if success then
-                                        Notifications.action_feedback (Icons.check, %"notification.import_success", "")
+                                        Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")
                                         charts_updated_ev.Trigger()
                                     else
                                         Notifications.error (%"notification.import_failure", "")
@@ -142,7 +142,7 @@ module Import =
                 (path, false),
                 fun success ->
                     if success then
-                        Notifications.action_feedback (Icons.check, %"notification.import_success", "")
+                        Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")
                         charts_updated_ev.Trigger()
                     else
                         Notifications.error (%"notification.import_failure", "")

@@ -174,7 +174,7 @@ module Wiki =
             )
             |+ IconButton(
                 %"menu.back"
-                , Icons.back
+                , Icons.ARROW_LEFT_CIRCLE
                 , 50.0f
                 , fun () ->
                     match page_history with
@@ -188,16 +188,16 @@ module Wiki =
             |+ Text(
                 (fun () ->
                     match current_page with
-                    | Changelog -> Icons.edit + " Changelog"
-                    | WikiPage p -> sprintf "%s %s  >  %s" Icons.wiki2 p.Folder p.Title
-                    | WikiIndex -> sprintf "%s Home" Icons.wiki
+                    | Changelog -> Icons.EDIT_2 + " Changelog"
+                    | WikiPage p -> sprintf "%s %s  >  %s" Icons.BOOK_OPEN p.Folder p.Title
+                    | WikiIndex -> sprintf "%s Home" Icons.BOOK
                 ),
                 Align = Alignment.LEFT,
                 Position = Position.Column(200.0f, 900.0f)
             )
             |+ IconButton(
                 %"wiki.openinbrowser"
-                , Icons.open_in_browser
+                , Icons.EXTERNAL_LINK
                 , 50.0f
                 , fun () ->
                     match current_page with
@@ -257,7 +257,7 @@ module Wiki =
                             Position = Position.Box(0.0f, 0.0f, 0.0f, y, max_width, 400.0f)
                         )
                         |+ Text(
-                            Icons.wiki2 + " Table of contents",
+                            Icons.BOOK_OPEN + " Table of contents",
                             Position = Position.SliceTop(70.0f).Margin(20.0f, 0.0f),
                             Align = Alignment.LEFT
                         )

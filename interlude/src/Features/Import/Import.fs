@@ -47,10 +47,10 @@ type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Servi
 
     let animation_frames =
         [|
-            Percyqaz.Flux.Resources.Feather.cloud_snow
-            Percyqaz.Flux.Resources.Feather.cloud_drizzle
-            Percyqaz.Flux.Resources.Feather.cloud_rain
-            Percyqaz.Flux.Resources.Feather.cloud_drizzle
+            Icons.CLOUD_SNOW
+            Icons.CLOUD_DRIZZLE
+            Icons.CLOUD_RAIN
+            Icons.CLOUD_DRIZZLE
         |]
 
     override this.Update(elapsed_ms, moved) =
@@ -94,12 +94,12 @@ type ImportScreen() as this =
 
     let tabs =
         FlowContainer.Vertical<Widget>(65.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
-        |+ TabButton(Icons.import_local, %"imports.local.name", ImportScreen.container, Mounts.tab)
-        |+ TabButton(Icons.import_etterna, %"imports.etterna_packs.name", ImportScreen.container, EtternaPacks.tab)
-        |+ TabButton(Icons.import_osu, %"imports.beatmaps.name", ImportScreen.container, Beatmaps.tab)
-        |+ TabButton(Icons.import_noteskin, %"imports.noteskins.name", ImportScreen.container, Noteskins.tab)
-        |+ TabButton(Icons.gameplay, %"imports.rulesets.name", ImportScreen.container, Rulesets.tab)
-        |+ TabButton(Icons.table, %"imports.tables.name", ImportScreen.container, Tables.tab)
+        |+ TabButton(Icons.LINK, %"imports.local.name", ImportScreen.container, Mounts.tab)
+        |+ TabButton(Icons.ARCHIVE, %"imports.etterna_packs.name", ImportScreen.container, EtternaPacks.tab)
+        |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.beatmaps.name", ImportScreen.container, Beatmaps.tab)
+        |+ TabButton(Icons.IMAGE, %"imports.noteskins.name", ImportScreen.container, Noteskins.tab)
+        |+ TabButton(Icons.SLIDERS, %"imports.rulesets.name", ImportScreen.container, Rulesets.tab)
+        |+ TabButton(Icons.SIDEBAR, %"imports.tables.name", ImportScreen.container, Tables.tab)
         |+ ServiceStatus("Loading", WebServices.download_string)
         |+ ServiceStatus("Downloading", WebServices.download_file)
         |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)

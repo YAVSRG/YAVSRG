@@ -100,17 +100,17 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
     override this.Init(parent) =
         this
         |+ Text(
-            sprintf "%s  %iK Results" Icons.stats data.Chart.Keys,
+            sprintf "%s  %iK Results" Icons.BAR_CHART data.Chart.Keys,
             Position = Position.SliceTop(90.0f).Margin(10.0f, 0.0f),
             Align = Alignment.CENTER
         )
         |+ Text(
-            (fun () -> sprintf "%s %s  •  %s" Icons.mods data.Mods data.Ruleset.Name),
+            (fun () -> sprintf "%s %s  •  %s" Icons.ZAP data.Mods data.Ruleset.Name),
             Position = Position.TrimTop(90.0f).SliceTop(70.0f),
             Align = Alignment.CENTER
         )
         |+ Text(
-            sprintf "%s %.2f" Icons.star data.Difficulty.Physical,
+            sprintf "%s %.2f" Icons.STAR data.Difficulty.Physical,
             Position = Position.TrimTop(530.0f).SliceTop(70.0f).Margin(10.0f, 0.0f),
             Align = Alignment.LEFT
         )
@@ -127,7 +127,7 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
         // todo: update this on ruleset change
         |+ Tooltip(
             Callout.Normal
-                .Icon(Icons.stats_2)
+                .Icon(Icons.TRENDING_UP)
                 .Title("Taps")
                 .Body(
                     sprintf
@@ -174,7 +174,10 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
             Draw.rect b (Color.FromArgb(40, j.Color))
 
             Draw.rect
-                (b.SliceLeft(counters.Width * (float32 judgement_counts.[i] / float32 (!stats).JudgementCount)))
+                (b.SliceLeft(
+                    counters.Width
+                    * (float32 judgement_counts.[i] / float32 (!stats).JudgementCount)
+                ))
                 (Color.FromArgb(127, j.Color))
 
             Text.fill_b (
@@ -218,7 +221,7 @@ type Accuracy
     inherit StaticContainer(NodeType.None)
 
     let LOWER_SIZE = 40.0f
-    let new_record = sprintf "%s %s" Icons.sparkle (%"score.new_record")
+    let new_record = sprintf "%s %s" Icons.AWARD (%"score.new_record")
     let mutable hover = false
 
     override this.Init(parent) =
@@ -284,7 +287,14 @@ type Accuracy
         if hover then
             let acc_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceBottom(60.0f)
             Draw.rect acc_tooltip Colors.shadow_2.O2
-            Text.fill_b (Style.font, sprintf "%.4f%%" (data.Scoring.Value * 100.0), acc_tooltip.Shrink(10.0f, 5.0f), Colors.text, Alignment.CENTER)
+
+            Text.fill_b (
+                Style.font,
+                sprintf "%.4f%%" (data.Scoring.Value * 100.0),
+                acc_tooltip.Shrink(10.0f, 5.0f),
+                Colors.text,
+                Alignment.CENTER
+            )
 
 type Lamp
     (
@@ -296,7 +306,7 @@ type Lamp
     inherit StaticContainer(NodeType.None)
 
     let LOWER_SIZE = 40.0f
-    let new_record = sprintf "%s %s" Icons.sparkle (%"score.new_record")
+    let new_record = sprintf "%s %s" Icons.AWARD (%"score.new_record")
 
     override this.Init(parent) =
         this
@@ -423,7 +433,7 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
                 }
                     .Show()
             ),
-            sprintf "%s %s" Icons.edit (%"score.graph.settings") |> K,
+            sprintf "%s %s" Icons.EDIT_2 (%"score.graph.settings") |> K,
             !%Palette.MAIN_100,
             Position =
                 {
@@ -435,7 +445,7 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
         )
         |+ StylishButton(
             (fun () -> ScoreScreenHelpers.watch_replay (data.ScoreInfo, data.ModChart, data.ReplayData)),
-            sprintf "%s %s" Icons.watch (%"score.watch_replay.name") |> K,
+            sprintf "%s %s" Icons.FILM (%"score.watch_replay.name") |> K,
             !%Palette.DARK_100,
             Position =
                 {

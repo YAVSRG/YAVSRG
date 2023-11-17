@@ -128,7 +128,7 @@ type ActionBar(random_chart) =
     override this.Init parent =
         this
         |+ ActionButton(
-            Icons.practice,
+            Icons.TARGET,
             (fun () ->
                 // todo: wait until load if not
                 if Chart.WITH_MODS.IsSome then
@@ -144,7 +144,7 @@ type ActionBar(random_chart) =
         )
             .Tooltip(Tooltip.Info("levelselect.practice_mode").Hotkey("practice_mode"))
         |+ ActionButton(
-            Icons.reset,
+            Icons.REFRESH_CCW,
             random_chart,
             (K false),
             Hotkey = "random_chart",
@@ -152,7 +152,7 @@ type ActionBar(random_chart) =
         )
             .Tooltip(Tooltip.Info("levelselect.random_chart").Hotkey("random_chart"))
         |* ActionButton(
-            Icons.comment,
+            Icons.MESSAGE_SQUARE,
             (fun () -> Comments.fade.Target <- 1.0f - Comments.fade.Target),
             (fun () -> Comments.fade.Target = 1.0f),
             Hotkey = "show_comments",

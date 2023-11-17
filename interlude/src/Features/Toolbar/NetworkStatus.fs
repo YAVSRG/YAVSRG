@@ -16,11 +16,11 @@ type NetworkStatus() =
 
         let text, color =
             match Network.status with
-            | Network.NotConnected -> Icons.not_connected + "  Offline", Colors.grey_2
-            | Network.Connecting -> Icons.connecting + "  Connecting..", Colors.grey_1
-            | Network.ConnectionFailed -> Icons.connection_failed + "  Offline", Colors.red_accent
-            | Network.Connected -> Icons.connected + "  Not logged in", Colors.green_accent
-            | Network.LoggedIn -> Icons.connected + "  " + Network.credentials.Username, Colors.green_accent
+            | Network.NotConnected -> Icons.USER_X + "  Offline", Colors.grey_2
+            | Network.Connecting -> Icons.GLOBE + "  Connecting..", Colors.grey_1
+            | Network.ConnectionFailed -> Icons.SLASH + "  Offline", Colors.red_accent
+            | Network.Connected -> Icons.GLOBE + "  Not logged in", Colors.green_accent
+            | Network.LoggedIn -> Icons.GLOBE + "  " + Network.credentials.Username, Colors.green_accent
 
         Draw.rect area (Colors.shadow_1.O2)
         Text.fill_b (Style.font, text, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)
@@ -34,7 +34,7 @@ type NetworkStatus() =
 
             Text.fill_b (
                 Style.font,
-                Icons.multiplayer + "  In a lobby",
+                Icons.USERS + "  In a lobby",
                 area.Shrink(10.0f, 5.0f),
                 Colors.text_subheading,
                 Alignment.CENTER
@@ -63,12 +63,12 @@ type NetworkStatus() =
 
     member this.MenuItems: (string * (unit -> unit)) seq =
         match Network.status with
-        | Network.NotConnected -> [ Icons.connecting + " Connect", (fun () -> Network.connect ()) ]
-        | Network.Connecting -> [ Icons.connection_failed + " Cancel", ignore ]
-        | Network.ConnectionFailed -> [ Icons.connecting + " Reconnect", (fun () -> Network.connect ()) ]
+        | Network.NotConnected -> [ Icons.GLOBE + " Connect", (fun () -> Network.connect ()) ]
+        | Network.Connecting -> [ Icons.SLASH + " Cancel", ignore ]
+        | Network.ConnectionFailed -> [ Icons.GLOBE + " Reconnect", (fun () -> Network.connect ()) ]
         | Network.Connected ->
             [
-                Icons.login + " Log in",
+                Icons.LOG_IN + " Log in",
                 fun () ->
                     if Network.credentials.Token <> "" then
                         Network.login_with_token ()
@@ -77,10 +77,10 @@ type NetworkStatus() =
             ]
         | Network.LoggedIn ->
             [
-                Icons.multiplayer + " Multiplayer",
+                Icons.USERS + " Multiplayer",
                 fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore
-                Icons.search + " Players", (fun () -> PlayersPage().Show())
-                Icons.logout + " Log out", Network.logout
+                Icons.SEARCH + " Players", (fun () -> PlayersPage().Show())
+                Icons.LOG_OUT + " Log out", Network.logout
             ]
 
     member this.ToggleDropdown() =

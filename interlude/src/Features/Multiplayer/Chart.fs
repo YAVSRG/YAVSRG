@@ -35,7 +35,7 @@ type ContextMenu(cc: CachedChart) as this =
                     )
                         .Show()
                 ),
-                Icon = Icons.add_to_collection
+                Icon = Icons.FOLDER_PLUS
             )
 
         this.Content content
@@ -126,7 +126,7 @@ type SelectedChart() =
         |+ Text(
             (fun () ->
                 if SelectedChart.loaded () then
-                    sprintf "%s %.2f" Icons.star Chart.RATING.Value.Physical
+                    sprintf "%s %.2f" Icons.STAR Chart.RATING.Value.Physical
                 else
                     ""
             ),
@@ -193,9 +193,9 @@ type SelectedChart() =
                 (fun () -> Network.lobby.Value.Spectate <- not Network.lobby.Value.Spectate),
                 (fun () ->
                     if Network.lobby.Value.Spectate then
-                        sprintf "%s %s" Icons.preview (%"lobby.spectator")
+                        sprintf "%s %s" Icons.EYE (%"lobby.spectator")
                     else
-                        sprintf "%s %s" Icons.play (%"lobby.player")
+                        sprintf "%s %s" Icons.PLAY (%"lobby.player")
                 ),
                 !%Palette.MAIN_100,
                 Position =
@@ -224,7 +224,7 @@ type SelectedChart() =
                         Transitions.Flags.Default
                     |> ignore
                 ),
-                K(sprintf "%s %s" Icons.preview (%"lobby.spectate")),
+                K(sprintf "%s %s" Icons.EYE (%"lobby.spectate")),
                 !%Palette.DARK_100,
                 TiltRight = false,
                 Position =
@@ -261,10 +261,10 @@ type SelectedChart() =
                         match l.ReadyStatus with
                         | ReadyFlag.NotReady ->
                             if Network.lobby.Value.Spectate then
-                                sprintf "%s %s" Icons.preview (%"lobby.ready")
+                                sprintf "%s %s" Icons.EYE (%"lobby.ready")
                             else
-                                sprintf "%s %s" Icons.ready (%"lobby.ready")
-                        | _ -> sprintf "%s %s" Icons.not_ready (%"lobby.not_ready")
+                                sprintf "%s %s" Icons.CHECK (%"lobby.ready")
+                        | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
                     | None -> "!"
                 ),
                 !%Palette.DARK_100,
@@ -293,9 +293,9 @@ type SelectedChart() =
                 ),
                 (fun () ->
                     if Network.lobby.Value.Countdown then
-                        sprintf "%s %s" Icons.connection_failed (%"lobby.cancel_game")
+                        sprintf "%s %s" Icons.SLASH (%"lobby.cancel_game")
                     else
-                        sprintf "%s %s" Icons.play (%"lobby.start_game")
+                        sprintf "%s %s" Icons.PLAY (%"lobby.start_game")
                 ),
                 !%Palette.MAIN_100,
                 Position =

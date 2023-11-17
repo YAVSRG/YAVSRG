@@ -57,7 +57,7 @@ type Lobby() =
                 && Network.lobby.Value.Settings.IsSome
                 && Network.lobby.Value.YouAreHost
             ),
-            Button(Icons.options, (fun () -> LobbySettingsPage(Network.lobby.Value.Settings.Value).Show())),
+            Button(Icons.SETTINGS, (fun () -> LobbySettingsPage(Network.lobby.Value.Settings.Value).Show())),
             Position = Position.SliceTop(90.0f).Margin(10.0f).SliceRight(70.0f)
         )
         |+ Text(
@@ -82,7 +82,7 @@ type Lobby() =
                 if Network.lobby.IsSome && SelectedChart.loaded () then
                     Preview(Gameplay.Chart.WITH_MODS.Value, ignore).Show()
             ),
-            K(sprintf "%s %s" Icons.preview (%"levelselect.preview.name")),
+            K(sprintf "%s %s" Icons.EYE (%"levelselect.preview.name")),
             !%Palette.MAIN_100,
             TiltLeft = false,
             Hotkey = "preview",
@@ -94,7 +94,7 @@ type Lobby() =
             .Tooltip(Tooltip.Info("levelselect.preview"))
         |+ StylishButton(
             ignore,
-            K(sprintf "%s %s" Icons.mods (%"levelselect.mods.name")),
+            K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods.name")),
             !%Palette.DARK_100,
             Hotkey = "mods",
             Position =

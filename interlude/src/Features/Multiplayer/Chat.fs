@@ -154,7 +154,7 @@ type Chat() =
 
         StaticContainer(NodeType.None)
         |+ Text(
-            (fun () -> sprintf "%s %s: %i" Icons.countdown reason (seconds_left ())),
+            (fun () -> sprintf "%s %s: %i" Icons.CLOCK reason (seconds_left ())),
             Color =
                 (fun () ->
                     if seconds_left () > 0 then
@@ -188,14 +188,14 @@ type Chat() =
         Network.Events.lobby_event.Add(fun (kind, data) ->
             let text, color =
                 match (kind, data) with
-                | LobbyEvent.Join, who -> sprintf "%s %s joined" Icons.login who, Colors.green_accent
-                | LobbyEvent.Leave, who -> sprintf "%s %s left" Icons.logout who, Colors.red_accent
-                | LobbyEvent.Host, who -> sprintf "%s %s is now host" Icons.star who, Colors.yellow_accent
-                | LobbyEvent.Ready, who -> sprintf "%s %s is ready" Icons.ready who, Colors.green
-                | LobbyEvent.Ready_Spectate, who -> sprintf "%s %s is ready" Icons.preview who, Colors.green
-                | LobbyEvent.NotReady, who -> sprintf "%s %s is not ready" Icons.not_ready who, Colors.pink
-                | LobbyEvent.Invite, who -> sprintf "%s %s invited" Icons.invite who, Colors.cyan_accent
-                | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.info msg, Colors.grey_1
+                | LobbyEvent.Join, who -> sprintf "%s %s joined" Icons.LOG_IN who, Colors.green_accent
+                | LobbyEvent.Leave, who -> sprintf "%s %s left" Icons.LOG_OUT who, Colors.red_accent
+                | LobbyEvent.Host, who -> sprintf "%s %s is now host" Icons.STAR who, Colors.yellow_accent
+                | LobbyEvent.Ready, who -> sprintf "%s %s is ready" Icons.CHECK who, Colors.green
+                | LobbyEvent.Ready_Spectate, who -> sprintf "%s %s is ready" Icons.EYE who, Colors.green
+                | LobbyEvent.NotReady, who -> sprintf "%s %s is not ready" Icons.X who, Colors.pink
+                | LobbyEvent.Invite, who -> sprintf "%s %s invited" Icons.MAIL who, Colors.cyan_accent
+                | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.INFO msg, Colors.grey_1
                 | _, msg -> msg, Colors.white
 
             add_msg (Text(text, Color = (fun () -> color, Colors.shadow_1), Align = Alignment.CENTER))

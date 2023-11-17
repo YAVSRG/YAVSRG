@@ -29,7 +29,7 @@ module CollectionManager =
             else
                 LevelSelect.refresh_details ()
 
-            Notifications.action_feedback (Icons.add_to_collection, [ cc.Title; name ] %> "collections.added", "")
+            Notifications.action_feedback (Icons.FOLDER_PLUS, [ cc.Title; name ] %> "collections.added", "")
             true
         else
             false
@@ -48,11 +48,7 @@ module CollectionManager =
             else
                 LevelSelect.refresh_details ()
 
-            Notifications.action_feedback (
-                Icons.remove_from_collection,
-                [ cc.Title; name ] %> "collections.removed",
-                ""
-            )
+            Notifications.action_feedback (Icons.FOLDER_MINUS, [ cc.Title; name ] %> "collections.removed", "")
 
             if Some cc = Chart.CACHE_DATA then
                 Chart.LIBRARY_CTX <- LibraryContext.None
@@ -93,7 +89,7 @@ type private CreateFolderPage() as this =
     inherit Page()
 
     let new_name = Setting.simple "Folder" |> Setting.alphanumeric
-    let icon = Setting.simple Icons.heart
+    let icon = Setting.simple Icons.HEART
 
     do
         this.Content(
@@ -117,17 +113,17 @@ type private CreateFolderPage() as this =
 
     static member Icons =
         [|
-            Icons.heart, Icons.heart
-            Icons.star, Icons.star
-            Icons.bookmark, Icons.bookmark
-            Icons.folder, Icons.folder
+            Icons.HEART, Icons.HEART
+            Icons.STAR, Icons.STAR
+            Icons.BOOKMARK, Icons.BOOKMARK
+            Icons.FOLDER, Icons.FOLDER
         |]
 
 type private CreatePlaylistPage() as this =
     inherit Page()
 
     let new_name = Setting.simple "Playlist" |> Setting.alphanumeric
-    let icon = Setting.simple Icons.heart
+    let icon = Setting.simple Icons.HEART
 
     do
         this.Content(
@@ -151,10 +147,10 @@ type private CreatePlaylistPage() as this =
 
     static member Icons =
         [|
-            Icons.star, Icons.star
-            Icons.goal, Icons.goal
-            Icons.play, Icons.play
-            Icons.playlist, Icons.playlist
+            Icons.STAR, Icons.STAR
+            Icons.FLAG, Icons.FLAG
+            Icons.PLAY, Icons.PLAY
+            Icons.LIST, Icons.LIST
         |]
 
 type private EditFolderPage(name: string, folder: Folder) as this =
@@ -185,7 +181,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                     )
                         .Show()
                 ),
-                Icon = Icons.delete
+                Icon = Icons.TRASH
             )
                 .Pos(370.0f)
             |+ PageButton(
@@ -261,7 +257,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                     )
                         .Show()
                 ),
-                Icon = Icons.delete
+                Icon = Icons.TRASH
             )
                 .Pos(370.0f)
             |+ PageButton(

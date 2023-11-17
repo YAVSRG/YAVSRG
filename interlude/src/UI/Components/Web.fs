@@ -17,29 +17,31 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render: 'T -
 
     let mutable status = WebRequestState.Loading
 
-    let mutable content : Widget = Dummy()
+    let mutable content: Widget = Dummy()
 
-    let rerender(v) =
+    let rerender (v) =
         content <- render v
-        if this.Initialised && not content.Initialised then content.Init this
+
+        if this.Initialised && not content.Initialised then
+            content.Init this
 
     let data = Setting.simple Unchecked.defaultof<'T> |> Setting.trigger rerender
 
     member this.Offline() =
-        require_ui_thread()
+        require_ui_thread ()
         status <- WebRequestState.Offline
 
     member this.ServerError() =
-        require_ui_thread()
+        require_ui_thread ()
         status <- WebRequestState.ServerError
 
     member this.SetData result =
-        require_ui_thread()
+        require_ui_thread ()
         status <- WebRequestState.Loaded
         data.Value <- result
 
     member this.Reload() =
-        require_ui_thread()
+        require_ui_thread ()
         status <- WebRequestState.Loading
         load this
 
@@ -49,16 +51,23 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render: 'T -
 
         this
         |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
-        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.connected, %"misc.offline"))
-        |* Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.connected, %"misc.server_error"))
+        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
+        |* Conditional(
+            (fun () -> status = WebRequestState.ServerError),
+            EmptyState(Icons.GLOBE, %"misc.server_error")
+        )
 
         base.Init parent
         content.Init this
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        if status = WebRequestState.Loaded then content.Update(elapsed_ms, moved)
+
+        if status = WebRequestState.Loaded then
+            content.Update(elapsed_ms, moved)
 
     override this.Draw() =
         base.Draw()
-        if status = WebRequestState.Loaded then content.Draw()
+
+        if status = WebRequestState.Loaded then
+            content.Draw()

@@ -84,7 +84,7 @@ and Menu(top_level: Page) as this =
     let back_button =
         IconButton(
             %"menu.back",
-            Icons.back,
+            Icons.ARROW_LEFT_CIRCLE,
             60.0f,
             Menu.Back,
             Position = Position.Box(0.0f, 1.0f, 5.0f, -70.0f, 160.0f, 60.0f)

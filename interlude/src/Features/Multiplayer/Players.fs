@@ -48,12 +48,12 @@ type Player(name: string, player: Network.LobbyPlayer) =
     override this.Draw() =
         let icon, fill, border =
             match player.Status with
-            | LobbyPlayerStatus.Ready -> Icons.ready, Colors.green, Colors.green_accent
-            | LobbyPlayerStatus.ReadyToSpectate -> Icons.preview, Colors.green, Colors.green_accent
-            | LobbyPlayerStatus.Playing -> Icons.play, Colors.green, Colors.green_accent
-            | LobbyPlayerStatus.Spectating -> Icons.preview, Colors.green, Colors.green_accent
-            | LobbyPlayerStatus.AbandonedPlay -> Icons.not_ready, Colors.grey_2.O1, Colors.white
-            | LobbyPlayerStatus.MissingChart -> Icons.connection_failed, Colors.grey_2.O1, Colors.white
+            | LobbyPlayerStatus.Ready -> Icons.CHECK, Colors.green, Colors.green_accent
+            | LobbyPlayerStatus.ReadyToSpectate -> Icons.EYE, Colors.green, Colors.green_accent
+            | LobbyPlayerStatus.Playing -> Icons.PLAY, Colors.green, Colors.green_accent
+            | LobbyPlayerStatus.Spectating -> Icons.EYE, Colors.green, Colors.green_accent
+            | LobbyPlayerStatus.AbandonedPlay -> Icons.X, Colors.grey_2.O1, Colors.white
+            | LobbyPlayerStatus.MissingChart -> Icons.SLASH, Colors.grey_2.O1, Colors.white
             | LobbyPlayerStatus.NotReady
             | _ -> "", Colors.cyan, Colors.cyan_accent
 
@@ -101,7 +101,7 @@ type PlayerList() =
                 other_players.Add(Player(username, l.Players.[username]))
 
         other_players.Add(
-            Button(sprintf "%s %s" Icons.invite (%"lobby.send_invite"), (fun () -> Menu.ShowPage InvitePlayerPage))
+            Button(sprintf "%s %s" Icons.MAIL (%"lobby.send_invite"), (fun () -> Menu.ShowPage InvitePlayerPage))
         )
 
     override this.Init(parent) =
@@ -143,7 +143,7 @@ type PlayerList() =
                   | Some l -> l.YouAreHost
                   | None -> false)
              then
-                 Icons.star + " Host"
+                 Icons.STAR + " Host"
              else
                  ""),
             user_bounds.Shrink(10.0f, 0.0f),

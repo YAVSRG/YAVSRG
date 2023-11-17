@@ -114,7 +114,7 @@ module private Helpers =
 
         |+ PageSetting(
             "hud.generic.move",
-            { new PositionEditor(Icons.move) with
+            { new PositionEditor(Icons.MOVE) with
                 override this.Up() =
                     { setting.Value with
                         Top = setting.Value.Top - 5.0f
@@ -149,7 +149,7 @@ module private Helpers =
 
         |+ PageSetting(
             "hud.generic.grow",
-            { new PositionEditor(Icons.grow) with
+            { new PositionEditor(Icons.MAXIMIZE_2) with
                 override this.Up() =
                     { setting.Value with
                         Top = setting.Value.Top - 5.0f
@@ -180,7 +180,7 @@ module private Helpers =
 
         |+ PageSetting(
             "hud.generic.shrink",
-            { new PositionEditor(Icons.shrink) with
+            { new PositionEditor(Icons.MINIMIZE_2) with
                 override this.Up() =
                     { setting.Value with
                         Bottom = setting.Value.Bottom - 5.0f
@@ -499,7 +499,7 @@ type EditPacemakerPage() as this =
     let preview =
         { new ConfigPreview(0.5f, pos) with
             override this.DrawComponent(bounds) =
-                Text.fill_b (Style.font, Icons.goal, bounds, Colors.text, Alignment.CENTER)
+                Text.fill_b (Style.font, Icons.FLAG, bounds, Colors.text, Alignment.CENTER)
         }
 
     do this.Content(position_editor pos default_pos |+ preview)

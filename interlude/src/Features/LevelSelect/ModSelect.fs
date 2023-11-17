@@ -83,7 +83,7 @@ type private ModSelectPage(on_close) as this =
         grid
         |* ModSelector(
             "auto",
-            [| Icons.check |],
+            [| Icons.CHECK |],
             (fun _ -> if autoplay then 0 else -1),
             (fun _ -> autoplay <- not autoplay)
         )
@@ -92,7 +92,7 @@ type private ModSelectPage(on_close) as this =
             grid
             |* ModSelector(
                 id,
-                [| Icons.check |],
+                [| Icons.CHECK |],
                 (fun _ ->
                     if selected_mods.Value.ContainsKey id then
                         selected_mods.Value.[id]
@@ -105,7 +105,7 @@ type private ModSelectPage(on_close) as this =
         grid
         |* ModSelector(
             "pacemaker",
-            [| Icons.check |],
+            [| Icons.CHECK |],
             (fun _ -> if enable_pacemaker then 0 else -1),
             (fun _ -> enable_pacemaker <- not enable_pacemaker)
         )
@@ -126,7 +126,7 @@ type ModSelect(on_close) =
     inherit
         StylishButton(
             (fun () -> ModSelectPage(on_close).Show()),
-            K(sprintf "%s %s" Icons.mods (%"levelselect.mods.name")),
+            K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods.name")),
             (fun () -> Palette.color (100, 0.5f, 0.0f)),
             Hotkey = "mods"
         )

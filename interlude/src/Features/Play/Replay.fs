@@ -122,7 +122,7 @@ module ReplayScreen =
             this
             |* IconButton(
                 "Toggle input overlay",
-                Icons.preview,
+                Icons.EYE,
                 50.0f,
                 (fun () -> show_input_overlay.Set(not show_input_overlay.Value)),
                 Position = Position.SliceTop(50.0f).Margin(20.0f, 0.0f)
@@ -143,7 +143,7 @@ module ReplayScreen =
         override this.Init(parent) =
             this
             |+ Text(
-                (Icons.watch + if is_auto then " Watching AUTOPLAY" else " Watching replay"),
+                (Icons.FILM + if is_auto then " Watching AUTOPLAY" else " Watching replay"),
                 Color = K Colors.text,
                 Align = Alignment.CENTER,
                 Position = Position.SliceTop(70.0f).Margin(30.0f, 10.0f).SliceLeft(440.0f)
