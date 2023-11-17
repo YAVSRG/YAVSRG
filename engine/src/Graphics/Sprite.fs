@@ -36,13 +36,14 @@ type Sprite =
         match yobj with
         | :? Sprite as y -> x.ID = y.ID
         | _ -> false
- 
+
     override x.GetHashCode() = hash x.ID
+
     interface System.IComparable with
-      member x.CompareTo yobj =
-          match yobj with
-          | :? Sprite as y -> compare x.ID y.ID
-          | _ -> invalidArg "yobj" "cannot compare values of different types"
+        member x.CompareTo yobj =
+            match yobj with
+            | :? Sprite as y -> compare x.ID y.ID
+            | _ -> invalidArg "yobj" "cannot compare values of different types"
 
 and TexturedQuad = (struct (Sprite * Quad))
 
@@ -168,26 +169,35 @@ module Sprite =
     let with_default_quad_alt (quad: Quad) (sprite: Sprite) = { sprite with DefaultQuad = Some quad }
 
     let pick_texture (x: int, y: int) (sprite: Sprite) : TexturedQuad =
-        if sprite.PrecomputedQuad.IsSome then struct (sprite, sprite.PrecomputedQuad.Value) else
+        if sprite.PrecomputedQuad.IsSome then
+            struct (sprite, sprite.PrecomputedQuad.Value)
+        else
 
-        let stride_x = float32 sprite.GridWidth / float32 sprite.AtlasWidth / float32 sprite.Columns
-        let stride_y = float32 sprite.GridHeight / float32 sprite.AtlasHeight / float32 sprite.Rows
+            let stride_x =
+                float32 sprite.GridWidth / float32 sprite.AtlasWidth / float32 sprite.Columns
 
-        let origin_x = float32 sprite.Left / float32 sprite.AtlasWidth + float32 x * stride_x
-        let origin_y = float32 sprite.Top / float32 sprite.AtlasHeight + float32 y * stride_y
+            let stride_y =
+                float32 sprite.GridHeight / float32 sprite.AtlasHeight / float32 sprite.Rows
 
-        let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y) |> Quad.ofRect
+            let origin_x =
+                float32 sprite.Left / float32 sprite.AtlasWidth + float32 x * stride_x
 
-        if sprite.Rows = 1 && sprite.Columns = 1 then sprite.PrecomputedQuad <- ValueSome quad
+            let origin_y =
+                float32 sprite.Top / float32 sprite.AtlasHeight + float32 y * stride_y
 
-        struct (sprite, quad)
+            let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y) |> Quad.ofRect
+
+            if sprite.Rows = 1 && sprite.Columns = 1 then
+                sprite.PrecomputedQuad <- ValueSome quad
+
+            struct (sprite, quad)
 
     let tiling (scale, left, top) (sprite: Sprite) (quad: Quad) : TexturedQuad =
-        assert(sprite.GridHeight = sprite.AtlasHeight && sprite.GridWidth = sprite.AtlasWidth)
+        assert (sprite.GridHeight = sprite.AtlasHeight && sprite.GridWidth = sprite.AtlasWidth)
 
         let width = float32 sprite.GridWidth * scale
         let height = float32 sprite.GridHeight * scale
-        struct(sprite, Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height)) quad)
+        struct (sprite, Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height)) quad)
 
     let aligned_box_x (x_origin, y_origin, x_offset, y_offset, x_scale, y_mult) (sprite: Sprite) : Rect =
         let width = x_scale

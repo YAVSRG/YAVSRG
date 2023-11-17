@@ -30,4 +30,4 @@ module Utils =
     let is_ui_thread () =
         UI_THREAD < 0 || Thread.CurrentThread.ManagedThreadId = UI_THREAD
 
-    let inline require_ui_thread () = assert(is_ui_thread())
+    let inline require_ui_thread () = assert (is_ui_thread ())

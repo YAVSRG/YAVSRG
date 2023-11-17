@@ -131,11 +131,13 @@ module Fonts =
 
             img.[w - 1, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
 
-            let atlas_sprite = 
+            let atlas_sprite =
                 Sprite.upload (img, 1, 1, true)
                 |> Sprite.cache "FONT" false
-                |> Sprite.with_default_quad_alt
-                    (Rect.Box((float32 w - 0.5f) / float32 w, 0.5f / float32 h, 0.0f, 0.0f) |> Quad.ofRect)
+                |> Sprite.with_default_quad_alt (
+                    Rect.Box((float32 w - 0.5f) / float32 w, 0.5f / float32 h, 0.0f, 0.0f)
+                    |> Quad.ofRect
+                )
 
             for i, row in List.indexed glyphs do
                 for glyph in row do
@@ -146,13 +148,14 @@ module Fonts =
                             GridWidth = int glyph.Width
                             Left = glyph.Offset |> int
                             Top = row_spacing * float32 i |> int
-                            PrecomputedQuad = 
-                                ValueSome (
+                            PrecomputedQuad =
+                                ValueSome(
                                     Rect.Box(
                                         glyph.Offset / float32 w,
                                         (row_spacing * float32 i) / float32 h,
                                         glyph.Width / float32 w,
-                                        glyph.Height / float32 h)
+                                        glyph.Height / float32 h
+                                    )
                                     |> Quad.ofRect
                                 )
                         }
@@ -206,26 +209,22 @@ module Text =
     let measure (font: SpriteFont, text: string) : float32 =
         let mutable width = -font.CharSpacing
         let mutable high_surrogate = ' '
-        let mutable i = 0
 
-        while i < text.Length do
-            let thisChar = text.[i]
+        for char in text.AsSpan() do
 
-            if thisChar = ' ' then
+            if char = ' ' then
                 width <- width + font.SpaceWidth
-            elif Char.IsHighSurrogate thisChar then
-                high_surrogate <- thisChar
+            elif Char.IsHighSurrogate char then
+                high_surrogate <- char
             else
                 let code =
-                    if Char.IsLowSurrogate thisChar then
-                        Char.ConvertToUtf32(high_surrogate, thisChar)
+                    if Char.IsLowSurrogate char then
+                        Char.ConvertToUtf32(high_surrogate, char)
                     else
-                        int32 thisChar
+                        int32 char
 
                 let s = font.Char code
                 width <- width + (float32 s.GridWidth) / SCALE + font.CharSpacing
-
-            i <- i + 1
 
         width
 
@@ -234,21 +233,19 @@ module Text =
         let shadow_spacing = font.ShadowDepth * scale
         let mutable x = x
         let mutable high_surrogate = ' '
-        let mutable i = 0
 
-        while i < text.Length do
-            let this_char = text.[i]
+        for char in text.AsSpan() do
 
-            if this_char = ' ' then
+            if char = ' ' then
                 x <- x + font.SpaceWidth * scale
-            elif Char.IsHighSurrogate this_char then
-                high_surrogate <- this_char
+            elif Char.IsHighSurrogate char then
+                high_surrogate <- char
             else
                 let code =
-                    if Char.IsLowSurrogate this_char then
-                        Char.ConvertToUtf32(high_surrogate, this_char)
+                    if Char.IsLowSurrogate char then
+                        Char.ConvertToUtf32(high_surrogate, char)
                     else
-                        int32 this_char
+                        int32 char
 
                 let s = font.Char code
                 let w = float32 s.Width * scale2
@@ -256,12 +253,13 @@ module Text =
                 let r = Rect.Box(x, y, w, h)
 
                 if (bg: Drawing.Color).A <> 0uy then
-                    Draw.quad (Quad.ofRect (r.Translate(shadow_spacing, shadow_spacing))) (Quad.color bg) struct (s, s.PrecomputedQuad.Value)
+                    Draw.quad
+                        (Quad.ofRect (r.Translate(shadow_spacing, shadow_spacing)))
+                        (Quad.color bg)
+                        struct (s, s.PrecomputedQuad.Value)
 
                 Draw.quad (Quad.ofRect r) (Quad.color fg) struct (s, s.PrecomputedQuad.Value)
                 x <- x + w + font.CharSpacing * scale
-
-            i <- i + 1
 
     let draw (font, text, scale, x, y, color) =
         draw_b (font, text, scale, x, y, (color, Drawing.Color.Transparent))

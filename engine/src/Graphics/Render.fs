@@ -248,10 +248,14 @@ module Draw =
         (struct (c1, c2, c3, c4): QuadColors)
         (struct (s, struct (u1, u2, u3, u4)): TexturedQuad)
         =
-        if last_texture_handle <> s.ID && s.ID = Sprite.DEFAULT.ID && last_texture_default_quad.IsSome then
+        if
+            last_texture_handle <> s.ID
+            && s.ID = Sprite.DEFAULT.ID
+            && last_texture_default_quad.IsSome
+        then
 
             let struct (u1, u2, u3, u4) = last_texture_default_quad.Value
-            
+
             Batch.vertex p1 u1 c1 s.TextureUnit
             Batch.vertex p2 u2 c2 s.TextureUnit
             Batch.vertex p3 u3 c3 s.TextureUnit

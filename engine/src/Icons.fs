@@ -1,7 +1,9 @@
 ﻿namespace Percyqaz.Flux.Icons
 
 type Feather =
-    class end
+    class
+    end
+
     static member ALERT_OCTAGON = "\uE81B"
     static member ALERT_CIRCLE = "\uE81C"
     static member ACTIVITY = "\uE81D"
