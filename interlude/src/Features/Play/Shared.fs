@@ -98,6 +98,14 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
     let sprite = get_texture "receptorlighting"
     let light_time = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
 
+    let column_spacing = ns.KeymodeColumnSpacing keys
+    let column_positions =
+        let mutable x = 0.0f
+        Array.init keys (fun i -> 
+            let v = x
+            if i + 1 < keys then x <- x + ns.ColumnWidth + column_spacing.[i]
+            v)
+
     do
         let hitpos = float32 options.HitPosition.Value
 
@@ -127,7 +135,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
                 let a = 255.0f * p |> int
 
                 Draw.sprite
-                    (let x = ns.ColumnWidth * 0.5f + (ns.ColumnWidth + ns.ColumnSpacing) * float32 k
+                    (let x = ns.ColumnWidth * 0.5f + column_positions.[k]
 
                      if options.Upscroll.Value then
                          Sprite.aligned_box_x
@@ -152,6 +160,14 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     let explode_time = Math.Clamp(ns.Explosions.FadeTime, 0f, 0.99f)
     let animation = Animation.Counter ns.Explosions.AnimationFrameTime
     let rotation = Noteskins.note_rotation keys
+    
+    let column_spacing = ns.KeymodeColumnSpacing keys
+    let column_positions =
+        let mutable x = 0.0f
+        Array.init keys (fun i -> 
+            let v = x
+            if i + 1 < keys then x <- x + ns.ColumnWidth + column_spacing.[i]
+            v)
 
     let handle_event (ev: HitEvent<HitEventGuts>) =
         match ev.Guts with
@@ -200,14 +216,14 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                 let box =
                     (if options.Upscroll.Value then
                          Rect.Box(
-                             this.Bounds.Left + (columnwidth + ns.ColumnSpacing) * float32 k,
+                             this.Bounds.Left + column_positions.[k],
                              this.Bounds.Top,
                              columnwidth,
                              columnwidth
                          )
                      else
                          Rect.Box(
-                             this.Bounds.Left + (columnwidth + ns.ColumnSpacing) * float32 k,
+                             this.Bounds.Left + column_positions.[k],
                              this.Bounds.Bottom - columnwidth,
                              columnwidth,
                              columnwidth

@@ -89,7 +89,7 @@ type RotationSettingsPage() as this =
     let use_rotation = Setting.simple data.UseRotation
     let keycount = Setting.simple options.KeymodePreference.Value
     let receptor_style = Setting.simple data.ReceptorStyle
-    let mutable rotations = data.Rotations
+    let rotations = data.Rotations
 
     let g keycount i =
         let k = int keycount - 3

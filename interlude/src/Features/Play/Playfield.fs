@@ -25,10 +25,14 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
     let keys = chart.Keys
 
     let column_width = Content.noteskin_config().ColumnWidth
-    let column_spacing = Content.noteskin_config().ColumnSpacing
+    let column_spacing = Content.noteskin_config().KeymodeColumnSpacing keys
 
     let column_positions =
-        Array.init keys (fun i -> float32 i * (column_width + column_spacing))
+        let mutable x = 0.0f
+        Array.init keys (fun i -> 
+            let v = x
+            if i + 1 < keys then x <- x + column_width + column_spacing.[i]
+            v)
 
     let note_height = column_width
     let holdnote_trim = column_width * Content.noteskin_config().HoldNoteTrim
