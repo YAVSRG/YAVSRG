@@ -7,6 +7,8 @@ open Percyqaz.Json
 open Percyqaz.Common
 open Prelude
 
+// todo: move interlude format + tooling to its own namespace instead of sharing one with convert formats
+
 module Interlude =
 
     type NoteType =

@@ -67,6 +67,10 @@ type NoteskinConfig =
         ColumnWidth: float32
         /// Sets the spacing of columns, in pixels
         ColumnSpacing: float32
+        /// If true, game uses AdvancedColumnSpacing instead of ColumnSpacing for column spacing
+        UseAdvancedColumnSpacing: bool
+        /// Stores column spacing information for keymodes. Only applied when UseAdvancedColumnSpacing is true
+        AdvancedColumnSpacing: float32 array array
         /// If true, spacing between columns is filled instead of having a gap
         FillColumnGaps: bool
 
@@ -100,6 +104,18 @@ type NoteskinConfig =
             DroppedHoldColor = Color.FromArgb(255, 150, 150, 150)
             ColumnWidth = 150.0f
             ColumnSpacing = 0.0f
+            UseAdvancedColumnSpacing = false
+            AdvancedColumnSpacing =
+                [|
+                    Array.zeroCreate 2
+                    Array.zeroCreate 3
+                    Array.zeroCreate 4
+                    Array.zeroCreate 5
+                    Array.zeroCreate 6
+                    Array.zeroCreate 7
+                    Array.zeroCreate 8
+                    Array.zeroCreate 9
+                |]
             FillColumnGaps = false
             ColumnLightTime = 0.4f
             EnableColumnLight = true
@@ -137,7 +153,23 @@ type NoteskinConfig =
                     )
 
                     NoteskinConfig.Default.Rotations
+            AdvancedColumnSpacing =
+                if
+                    this.AdvancedColumnSpacing.Length = 8
+                    && Array.indexed this.AdvancedColumnSpacing |> Array.forall (fun (i, a) -> a.Length = 2 + i)
+                then
+                    this.AdvancedColumnSpacing
+                else
+                    Logging.Error(
+                        "Problem with noteskin: AdvancedColumnSpacing is not in the right format - Please use the ingame editor"
+                    )
+
+                    NoteskinConfig.Default.AdvancedColumnSpacing
         }
+    member this.KeymodeColumnSpacing(keymode: int) : float32 array =
+        if this.UseAdvancedColumnSpacing then 
+            this.AdvancedColumnSpacing.[keymode - 3]
+        else Array.create (keymode - 1) this.ColumnSpacing
 
 type Noteskin(storage) as this =
     inherit Storage(storage)
