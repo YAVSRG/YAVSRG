@@ -18,14 +18,20 @@ type TextureFileMode =
     | Grid
     | Loose
 
+[<Json.AutoCodec>]
+type TextureSampleMode =
+    | Linear
+    | Nearest
+
 [<Json.AutoCodec(false)>]
 type TextureConfig =
     {
         Columns: int
         Rows: int
         Mode: TextureFileMode
+        Sampling: TextureSampleMode
     }
-    static member Default = { Columns = 1; Rows = 1; Mode = Grid }
+    static member Default = { Columns = 1; Rows = 1; Mode = Grid; Sampling = Linear }
 
 type StorageType =
     | Embedded of ZipArchive
