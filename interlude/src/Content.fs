@@ -139,13 +139,13 @@ module Content =
                 for id in Storage.THEME_TEXTURES do
                     match instance.GetTexture id with
                     | Some(img, config) ->
-                        Sprite.upload (img, config.Rows, config.Columns, false)
+                        Sprite.upload (img, config.Rows, config.Columns, config.Sampling = Linear)
                         |> Sprite.cache id (id = "rain" || id = "logo" || id = "background")
                         |> Sprites.add id
                     | None ->
                         match loaded.["*default"].GetTexture id with
                         | Some(img, config) ->
-                            Sprite.upload (img, config.Rows, config.Columns, false)
+                            Sprite.upload (img, config.Rows, config.Columns, config.Sampling = Linear)
                             |> Sprite.cache id (id = "rain" || id = "logo" || id = "background")
                             |> Sprites.add id
                         | None -> failwithf "Failed to load texture '%s' from *default" id
@@ -264,7 +264,7 @@ module Content =
                 for id in Storage.NOTESKIN_TEXTURES do
                     match instance.GetTexture id with
                     | Some(img, config) ->
-                        Sprite.upload (img, config.Rows, config.Columns, false)
+                        Sprite.upload (img, config.Rows, config.Columns, config.Sampling = Linear)
                         |> Sprite.cache id false
                         |> Sprites.add id
                     | None ->
@@ -294,7 +294,7 @@ module Content =
             let reload_texture (id: string) =
                 match instance.GetTexture id with
                 | Some(img, config) ->
-                    Sprite.upload (img, config.Rows, config.Columns, false)
+                    Sprite.upload (img, config.Rows, config.Columns, config.Sampling = Linear)
                     |> Sprite.cache id false
                     |> Sprites.add id
                 | None ->
