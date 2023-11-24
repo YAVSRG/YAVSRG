@@ -9,16 +9,20 @@ Click [here to read more info about this project](https://www.yavsrg.net/)
 
 ## 🎮 Play it:
 
-Go [here](https://github.com/YAVSRG/Interlude/releases) for pre-built versions (download and extract the zip, run the exe)
+Go [here](https://github.com/YAVSRG/Interlude/releases) for pre-built versions for Windows (download and extract the zip, run the exe)
 
 ## 🤝 Contributing
 
-Come join [the discord](https://discord.gg/tA22tWR) -- I need YOUR help particularly with playtesting upcoming tables features
+Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, you name it
+
+Pull requests are very welcome; If you want to work on a feature please check with me first via Discord
 
 ## 🤖 Building it yourself
 
-You shouldn't need to do this. Download the latest release [here](https://github.com/YAVSRG/Interlude/releases) instead
+If you just want to play, you don't need to do this. Download the latest release [here](https://github.com/YAVSRG/Interlude/releases) instead
 
-Want to run it on Linux or MacOS just for a laugh? Use [Mono](https://www.mono-project.com/download/stable) for the time being
+If you are a developer and DO want to build and make changes, clone [this repo](https://github.com/YAVSRG/YAVSRG) and follow the README instructions there to set up the development polyrepo.
 
-I have proven cross platform builds as a concept, but will only bother to add them to the releases system if I have the time and reason to do it
+Want to play on macOS/Linux? Use [Mono](https://www.mono-project.com/download/stable) for the time being.  
+The game builds for macOS and Linux (some glitches on macOS), but they will only be added to the official release system if I have the resources and enough players requesting it (most people use Windows)
+
