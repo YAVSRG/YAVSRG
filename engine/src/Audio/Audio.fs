@@ -80,7 +80,7 @@ module Song =
     let play_from (time) =
         timer_start <- time
 
-        if (time >= 0.0f<ms> && time < duration ()) then
+        if time >= 0.0f<ms> && time < duration () then
             channel_playing <- true
 
             Bass.ChannelSetPosition(
@@ -102,12 +102,15 @@ module Song =
         if playing () then
             play_from time
         else
-            if (time >= 0.0f<ms> && time < duration ()) then
+            if time >= 0.0f<ms> && time < duration () then
                 Bass.ChannelSetPosition(
                     now_playing.ID,
                     Bass.ChannelSeconds2Bytes(now_playing.ID, float <| time / 1000.0f<ms>)
                 )
                 |> display_bass_error
+            else if channel_playing then
+                Bass.ChannelStop now_playing.ID |> display_bass_error
+                channel_playing <- false
 
             timer.Reset()
             timer_start <- time
@@ -115,7 +118,7 @@ module Song =
     let pause () =
         let time = time ()
 
-        if (time >= 0.0f<ms> && time < duration ()) then
+        if time >= 0.0f<ms> && time < duration () then
             Bass.ChannelPause now_playing.ID |> display_bass_error
 
         timer.Stop()
@@ -123,7 +126,7 @@ module Song =
     let resume () =
         let time = time ()
 
-        if (time >= 0.0f<ms> && time < duration ()) then
+        if time >= 0.0f<ms> && time < duration () then
             Bass.ChannelPlay now_playing.ID |> display_bass_error
 
         timer.Start()
@@ -186,7 +189,7 @@ module Song =
 
         let t = time ()
 
-        if (t >= 0.0f<ms> && t < now_playing.Duration && not channel_playing) then
+        if t >= 0.0f<ms> && t < now_playing.Duration && not channel_playing then
             channel_playing <- true
 
             Bass.ChannelSetPosition(now_playing.ID, Bass.ChannelSeconds2Bytes(now_playing.ID, float <| t / 1000.0f<ms>))
