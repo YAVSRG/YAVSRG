@@ -5,8 +5,8 @@ open System.IO
 open System.IO.Compression
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Formats.Interlude
-open Prelude.Charts.Formats.Conversions
+open Prelude.Charts
+open Prelude.Charts.Conversions
 open Prelude.Data.Charts.Caching
 open Prelude.Backbeat.Archive
 open Backbeat.Utils
@@ -42,7 +42,7 @@ module Collect =
             id
         | Some id -> id
 
-    let slurp_chart (extraSources: ChartSource list) (chart: Charts.Formats.Interlude.Chart) =
+    let slurp_chart (extraSources: ChartSource list) (chart: Charts.Chart) =
         if chart.Header.AudioFile = Missing then
             Logging.Info(sprintf "Rejecting %s because it doesn't have audio" chart.Header.Title)
         elif chart.Header.BackgroundFile = Missing then
@@ -60,7 +60,7 @@ module Collect =
             | _ -> (Cache.background_path chart backbeat_cache).Value |> Cache.compute_hash
 
         let create_entry (song_id) =
-            let lastNote = chart.LastNote
+            let last_note = chart.LastNote
 
             {
                 SongId = song_id
@@ -69,7 +69,7 @@ module Collect =
                 DifficultyName = chart.Header.DiffName
                 Subtitle = chart.Header.Subtitle
                 Tags = chart.Header.Tags
-                Duration = lastNote - chart.FirstNote
+                Duration = last_note - chart.FirstNote
                 Notecount =
                     let mutable count = 0
 
@@ -79,7 +79,7 @@ module Collect =
                                 count <- count + 1
 
                     count
-                BPM = Interlude.minMaxBPM (List.ofSeq chart.BPM) lastNote
+                BPM = Chart.find_min_max_bpm chart
                 Sources =
                     match chart.Header.ChartSource with
                     | Origin.Osu(-1, 0) -> []
@@ -168,7 +168,7 @@ module Collect =
             | ChartFile _ as file ->
                 try
                     let action = { Config = config; Source = file }
-                    loadAndConvertFile action
+                    convert_chart_file action
                 with err ->
                     Logging.Error("Failed to convert/cache file: " + file, err)
                     []
@@ -180,14 +180,14 @@ module Collect =
     let cache_pack_folder (sm_pack_id: int) (target: string) =
         let pack_name = sm_pack_id.ToString()
 
-        for songFolder in Directory.EnumerateDirectories target do
+        for song_folder in Directory.EnumerateDirectories target do
             cache_song_folder
                 { ConversionOptions.Default with
                     StepmaniaPackId = Some sm_pack_id
                     MoveAssets = false
                     PackName = pack_name
                 }
-                songFolder
+                song_folder
 
         Cache.save backbeat_cache
         slurp_folder [] pack_name

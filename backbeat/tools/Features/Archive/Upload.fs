@@ -2,13 +2,16 @@
 
 open System.IO
 open Percyqaz.Common
-open Prelude.Charts.Formats
-open Prelude.Data.Charts.Caching
 open Prelude.Backbeat.Archive
+open Prelude.Charts
+open Prelude.Data.Charts.Caching
 open Backbeat.Utils
 open System.Collections.Concurrent
 open Bytewizer.Backblaze.Client
 open Bytewizer.Backblaze.Models
+
+type BackbeatChart = Prelude.Backbeat.Archive.Chart
+type Chart = Prelude.Charts.Chart
 
 [<AutoOpen>]
 module Upload =
@@ -48,15 +51,15 @@ module Upload =
         existing_files.[s] <- true
         Queue.append "uploaded" s
 
-    let private upload_chart_internal (chart: Interlude.Chart) (chart_info: Chart) =
-        match Interlude.Chart.check chart with
+    let private upload_chart_internal (chart: Chart) (chart_info: BackbeatChart) =
+        match Chart.check chart with
         | Error msg -> failwithf "Invalid chart to upload: %s" msg
         | Ok() ->
 
         Async.Parallel
             [
                 task {
-                    let hash = Interlude.Chart.hash chart
+                    let hash = Chart.hash chart
 
                     let exists = existing_files.ContainsKey hash
 
@@ -64,7 +67,7 @@ module Upload =
                         use ms = new MemoryStream()
                         use bw = new BinaryWriter(ms)
 
-                        Interlude.Chart.write_headless chart bw
+                        Chart.write_headless chart bw
                         bw.Flush()
 
                         let! response = client.UploadAsync("c44023fe407a500583900717", hash, ms)
@@ -131,7 +134,7 @@ module Upload =
             Array.init
                 24
                 (fun i ->
-                    { new Async.Service<(Interlude.Chart * Chart), unit>() with
+                    { new Async.Service<(Chart * BackbeatChart), unit>() with
                         override this.Handle((chart, chart_info)) =
                             async {
                                 do! upload_chart_internal chart chart_info
@@ -144,7 +147,7 @@ module Upload =
 
         let mutable i = 0
 
-        { new Async.Service<(Interlude.Chart * Chart), unit>() with
+        { new Async.Service<(Chart * BackbeatChart), unit>() with
             override this.Handle(r) =
                 async {
                     sub_services.[i].Request(r, ignore)
@@ -153,5 +156,5 @@ module Upload =
                 }
         }
 
-    let upload_chart (chart: Interlude.Chart) (chart_info: Chart) =
+    let upload_chart (chart: Chart) (chart_info: BackbeatChart) =
         mass_upload_service.Request((chart, chart_info), ignore)
