@@ -582,7 +582,7 @@ module ``osu!`` =
         {
             AudioFilename: string
             AudioLeadIn: int
-            PreviewTime: Time
+            PreviewTime: int
             Countdown: int
             SampleSet: SampleSet
             StackLeniency: float
@@ -601,7 +601,7 @@ module ``osu!`` =
             {
                 AudioFilename = ""
                 AudioLeadIn = 0
-                PreviewTime = -1.0f<ms>
+                PreviewTime = -1
                 Countdown = 0
                 SampleSet = SampleSet.Normal
                 StackLeniency = 0.7
@@ -627,7 +627,7 @@ module ``osu!`` =
             | "AudioLeadIn" -> { s with AudioLeadIn = value |> int }
             | "PreviewTime" ->
                 { s with
-                    PreviewTime = value |> float |> Time.ofFloat
+                    PreviewTime = value |> int
                 }
             | "Countdown" -> { s with Countdown = value |> int }
             | "SampleSet" ->

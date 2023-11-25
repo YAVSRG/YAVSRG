@@ -117,7 +117,7 @@ module Interlude_To_Osu =
                     | Absolute s -> Path.GetFileName s
                     | Asset _
                     | Missing -> "audio.mp3"
-                PreviewTime = chart.Header.PreviewTime
+                PreviewTime = int chart.Header.PreviewTime
                 SampleSet = SampleSet.Soft
                 Mode = GameMode.Mania
             }

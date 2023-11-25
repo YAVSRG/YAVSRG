@@ -213,7 +213,7 @@ module Osu_To_Interlude =
                 Source = let t = b.Metadata.Source.Trim() in if t.Length > 0 then Some t else None
                 Tags = b.Metadata.Tags
 
-                PreviewTime = b.General.PreviewTime
+                PreviewTime = float32 b.General.PreviewTime * 1.0f<ms>
                 BackgroundFile =
                     let r = find_background_file b.Events
 
