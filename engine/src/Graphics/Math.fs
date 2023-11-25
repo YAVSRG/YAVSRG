@@ -33,6 +33,12 @@ type Rect =
             Right = l + w
             Bottom = t + h
         }
+    
+    member inline this.AsQuad =
+        struct (new Vector2(this.Left, this.Top),
+                new Vector2(this.Right, this.Top),
+                new Vector2(this.Right, this.Bottom),
+                new Vector2(this.Left, this.Bottom))
 
     member inline this.Width = this.Right - this.Left
     member inline this.Height = this.Bottom - this.Top
@@ -152,12 +158,6 @@ type Quad = (struct (Vector2 * Vector2 * Vector2 * Vector2))
 type QuadColors = (struct (Color * Color * Color * Color))
 
 module Quad =
-
-    let ofRect (r: Rect) : Quad =
-        struct (new Vector2(r.Left, r.Top),
-                new Vector2(r.Right, r.Top),
-                new Vector2(r.Right, r.Bottom),
-                new Vector2(r.Left, r.Bottom))
 
     let parallelogram (amount: float32) (r: Rect) : Quad =
         let a = r.Height * 0.5f * amount

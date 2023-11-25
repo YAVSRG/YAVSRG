@@ -291,6 +291,6 @@ module Draw =
             Batch.vertex p4 u4 c4 s.TextureUnit
 
     let sprite (r: Rect) (c: Color) (s: Sprite) =
-        quad <| Quad.ofRect r <| Quad.color c <| Sprite.pick_texture (0, 0) s
+        quad <| r.AsQuad <| Quad.color c <| Sprite.pick_texture (0, 0) s
 
     let rect (r: Rect) (c: Color) = sprite r c Sprite.DEFAULT

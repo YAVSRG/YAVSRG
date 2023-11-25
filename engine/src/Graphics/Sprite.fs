@@ -147,7 +147,7 @@ module Sprite =
         img.[0, 0] <- new Rgba32(255uy, 255uy, 255uy, 255uy)
         upload (img, 1, 1, false) |> cache "BLANK" false
 
-    let DEFAULT_QUAD: TexturedQuad = struct (DEFAULT, Quad.ofRect Rect.ONE)
+    let DEFAULT_QUAD: TexturedQuad = struct (DEFAULT, Rect.ONE.AsQuad)
 
     let destroy (sprite: Sprite) =
         if sprite.ID <> DEFAULT.ID then
@@ -161,7 +161,7 @@ module Sprite =
         let origin_x = float32 sprite.Left / float32 sprite.AtlasWidth
         let origin_y = float32 sprite.Top / float32 sprite.AtlasHeight
 
-        let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y) |> Quad.ofRect
+        let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y).AsQuad
         sprite.PrecomputedQuad <- ValueSome quad
 
         sprite
@@ -185,7 +185,7 @@ module Sprite =
             let origin_y =
                 float32 sprite.Top / float32 sprite.AtlasHeight + float32 y * stride_y
 
-            let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y) |> Quad.ofRect
+            let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y).AsQuad
 
             if sprite.Rows = 1 && sprite.Columns = 1 then
                 sprite.PrecomputedQuad <- ValueSome quad

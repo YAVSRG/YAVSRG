@@ -135,8 +135,7 @@ module Fonts =
                 Sprite.upload (img, 1, 1, true)
                 |> Sprite.cache "FONT" false
                 |> Sprite.with_default_quad_alt (
-                    Rect.Box((float32 w - 0.5f) / float32 w, 0.5f / float32 h, 0.0f, 0.0f)
-                    |> Quad.ofRect
+                    Rect.Box((float32 w - 0.5f) / float32 w, 0.5f / float32 h, 0.0f, 0.0f).AsQuad
                 )
 
             for i, row in List.indexed glyphs do
@@ -155,8 +154,7 @@ module Fonts =
                                         (row_spacing * float32 i) / float32 h,
                                         glyph.Width / float32 w,
                                         glyph.Height / float32 h
-                                    )
-                                    |> Quad.ofRect
+                                    ).AsQuad
                                 )
                         }
                     )
@@ -254,11 +252,11 @@ module Text =
 
                 if (bg: Drawing.Color).A <> 0uy then
                     Draw.quad
-                        (Quad.ofRect (r.Translate(shadow_spacing, shadow_spacing)))
+                        ((r.Translate(shadow_spacing, shadow_spacing)).AsQuad)
                         (Quad.color bg)
                         struct (s, s.PrecomputedQuad.Value)
 
-                Draw.quad (Quad.ofRect r) (Quad.color fg) struct (s, s.PrecomputedQuad.Value)
+                Draw.quad r.AsQuad (Quad.color fg) struct (s, s.PrecomputedQuad.Value)
                 x <- x + w + font.CharSpacing * scale
 
     let draw (font, text, scale, x, y, color) =
