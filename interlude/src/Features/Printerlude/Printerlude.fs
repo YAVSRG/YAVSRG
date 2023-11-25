@@ -10,6 +10,7 @@ open Prelude.Charts.Conversions
 open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
+open Prelude.Data.``osu!``
 open Interlude
 open Interlude.Features
 open Interlude.Web.Shared.Requests
@@ -75,68 +76,11 @@ module Printerlude =
             match Gameplay.Chart.CHART with
             | None -> failwith "No chart loaded to export"
             | Some c ->
-                // todo: move into prelude
-                let beatmap = Interlude_To_Osu.convert c
-                let file_name = ``osu!``.get_osu_filename beatmap
-                let path = get_game_folder "Exports"
-                let beatmap_file = Path.Combine(path, file_name)
-                ``osu!``.beatmap_to_file beatmap_file beatmap
-
-                let target_audio_file =
-                    match c.Header.AudioFile with
-                    | Relative s -> Some <| Path.Combine(path, s)
-                    | Absolute s -> Some <| Path.Combine(path, Path.GetFileName s)
-                    | Asset s -> Some <| Path.Combine(path, "audio.mp3")
-                    | Missing -> None
-
-                let target_bg_file =
-                    match c.Header.BackgroundFile with
-                    | Relative s -> Some <| Path.Combine(path, s)
-                    | Absolute s -> Some <| Path.Combine(path, Path.GetFileName s)
-                    | Asset s -> Some <| Path.Combine(path, "bg.png")
-                    | Missing -> None
-
                 try
-                    match target_audio_file with
-                    | Some p -> File.Copy((Cache.audio_path c Library.cache).Value, p, true)
-                    | _ -> ()
-
-                    match target_bg_file with
-                    | Some p -> File.Copy((Cache.background_path c Library.cache).Value, p, true)
-                    | _ -> ()
+                    create_osz c Library.cache (get_game_folder "Exports")
+                    Logging.Info "Exported."
                 with err ->
-                    printfn "%O" err
-
-                use fs = File.Create(Path.Combine(path, Path.ChangeExtension(file_name, ".osz")))
-                use archive = new ZipArchive(fs, ZipArchiveMode.Create, true)
-
-                archive.CreateEntryFromFile(beatmap_file, Path.GetFileName beatmap_file)
-                |> ignore
-
-                // todo: write to entry by opening entry as stream instead of file copy
-                match target_audio_file with
-                | Some p -> archive.CreateEntryFromFile(p, Path.GetFileName p) |> ignore
-                | _ -> ()
-
-                match target_bg_file with
-                | Some p -> archive.CreateEntryFromFile(p, Path.GetFileName p) |> ignore
-                | _ -> ()
-
-                Logging.Info "Exported."
-
-                try
-                    match target_audio_file with
-                    | Some p -> File.Delete p
-                    | _ -> ()
-
-                    match target_bg_file with
-                    | Some p -> File.Delete p
-                    | _ -> ()
-
-                    File.Delete beatmap_file
-                    Logging.Info "Cleaned up."
-                with err ->
-                    Logging.Error("Error while cleaning up after export", err)
+                    Logging.Error("Error while exporting as osz", err)
 
         let private import_osu_scores () =
             Import.Scores.import_osu_scores_service.Request((), ignore)
