@@ -206,7 +206,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                     note_height / receptor_aspect_ratio
                  )
                  |> scroll_direction_transform bottom
-                 |> Quad.ofRect
+                 |> _.AsQuad
                  |> receptor_transform k)
                 (Quad.color Color.White)
                 (Sprite.pick_texture
@@ -219,27 +219,27 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
 
         let inline draw_note (k, pos, color) =
             Draw.quad
-                (Quad.ofRect (
+                ((
                     Rect.Box(left + column_positions.[k], pos, column_width, note_height)
                     |> scroll_direction_transform bottom
-                 )
+                 ).AsQuad
                  |> rotation k)
                 (Quad.color Color.White)
                 (Sprite.pick_texture (animation.Loops, color) note)
 
         let inline draw_head (k, pos, color, tint) =
             Draw.quad
-                (Quad.ofRect (
+                ((
                     Rect.Box(left + column_positions.[k], pos, column_width, note_height)
                     |> scroll_direction_transform bottom
-                 )
+                 ).AsQuad
                  |> rotation k)
                 (Quad.color tint)
                 (Sprite.pick_texture (animation.Loops, color) holdhead)
 
         let inline draw_body (k, pos_a, pos_b, color, tint) =
             Draw.quad
-                (Quad.ofRect (
+                ((
                     Rect.Create(
                         left + column_positions.[k],
                         pos_a + note_height * 0.5f,
@@ -247,13 +247,13 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                         pos_b + note_height * 0.5f + 2.0f
                     )
                     |> scroll_direction_transform bottom
-                ))
+                ).AsQuad)
                 (Quad.color tint)
                 (Sprite.pick_texture (animation.Loops, color) holdbody)
 
         let inline draw_tail (k, pos, clip, color, tint) =
             Draw.quad
-                (Quad.ofRect (
+                ((
                     Rect.Create(
                         left + column_positions.[k],
                         max clip pos,
@@ -261,7 +261,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                         pos + note_height
                     )
                     |> scroll_direction_transform bottom
-                 )
+                 ).AsQuad
                  |> if useholdtail then id else rotation k)
                 (Quad.color tint)
                 (Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)

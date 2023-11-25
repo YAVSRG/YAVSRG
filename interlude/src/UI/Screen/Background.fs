@@ -145,7 +145,7 @@ module Background =
             background
 
     let draw (bounds: Rect, color, depth) =
-        drawq (Quad.ofRect bounds, color, depth)
+        drawq (bounds.AsQuad, color, depth)
 
     let draw_with_dim (bounds: Rect, color, depth) =
         draw (bounds, color, depth)

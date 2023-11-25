@@ -68,13 +68,12 @@ type HoldNoteSettingsPage() as this =
                     min headpos tailpos + COLUMN_WIDTH * 0.5f,
                     left + COLUMN_WIDTH,
                     max headpos tailpos + COLUMN_WIDTH * 0.5f
-                 )
-                 |> Quad.ofRect)
+                 ).AsQuad)
                 (Quad.color color)
                 (Sprite.pick_texture (animation.Loops, 0) body)
 
             Draw.quad
-                (Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+                (Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
                 (Quad.color color)
                 (Sprite.pick_texture (animation.Loops, 0) head)
 
@@ -83,8 +82,7 @@ type HoldNoteSettingsPage() as this =
                  |> if flip_hold_tail.Value && downscroll then
                         fun (r: Rect) -> r.Shrink(0.0f, r.Height)
                     else
-                        id
-                 |> Quad.ofRect)
+                        id).AsQuad
                 (Quad.color color)
                 (Sprite.pick_texture (animation.Loops, 0) (if use_tail_texture.Value then tail else head))
 

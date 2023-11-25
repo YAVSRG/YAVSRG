@@ -138,7 +138,7 @@ type AnimationSettingsPage() as this =
 
         // draw note explosion example
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
             (Quad.color Color.White)
             (Sprite.pick_texture (note_frames.Loops, 0) receptor)
 
@@ -157,7 +157,7 @@ type AnimationSettingsPage() as this =
                     .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                     .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                     .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
-                 |> Quad.ofRect)
+                    .AsQuad)
                 (Quad.color (Color.White.O4a a))
                 (Sprite.pick_texture (explosion_frames.Loops, 0) noteexplosion)
 
@@ -165,7 +165,7 @@ type AnimationSettingsPage() as this =
         bottom <- bottom - COLUMN_WIDTH * 2.0f
 
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
             (Quad.color Color.White)
             (Sprite.pick_texture (note_frames.Loops, 0) receptor)
 
@@ -184,7 +184,7 @@ type AnimationSettingsPage() as this =
                     .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                     .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                     .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
-                 |> Quad.ofRect)
+                    .AsQuad)
                 (Quad.color (Color.White.O4a a))
                 (Sprite.pick_texture (explosion_frames.Loops, 0) holdexplosion)
 
@@ -192,7 +192,7 @@ type AnimationSettingsPage() as this =
         bottom <- bottom - COLUMN_WIDTH * 2.0f
 
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
             (Quad.color Color.White)
             (Sprite.pick_texture (note_frames.Loops, 0) note)
 
@@ -201,7 +201,7 @@ type AnimationSettingsPage() as this =
         left <- left - COLUMN_WIDTH * 1.5f
 
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH) |> Quad.ofRect)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
             (Quad.color Color.White)
             (Sprite.pick_texture (note_frames.Loops, int hold_explosion_fade.Target) receptor)
 

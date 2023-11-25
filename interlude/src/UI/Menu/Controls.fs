@@ -186,7 +186,7 @@ type Divider() =
 
     override this.Draw() =
         Draw.quad
-            (Quad.ofRect this.Bounds)
+            this.Bounds.AsQuad
             (struct (Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White))
             Sprite.DEFAULT_QUAD
 
@@ -488,7 +488,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
         Draw.rect preview s.Value
 
         Draw.quad
-            (Quad.ofRect saturation_value_picker)
+            (saturation_value_picker.AsQuad)
             (struct (Color.White, Color.FromHsv(H, 1.0f, 1.0f), Color.Black, Color.Black))
             Sprite.DEFAULT_QUAD
 
@@ -503,7 +503,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             let b = Color.FromHsv((float32 i + 1.0f) / 6.0f, 1.0f, 1.0f)
 
             Draw.quad
-                (Quad.ofRect (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h)))
+                (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h)).AsQuad
                 (struct (a, a, b, b))
                 Sprite.DEFAULT_QUAD
 
@@ -513,7 +513,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
 
         if allow_alpha then
             Draw.quad
-                (Quad.ofRect alpha_picker)
+                alpha_picker.AsQuad
                 (struct (Color.FromArgb(0, s.Value), Color.FromArgb(0, s.Value), s.Value, s.Value))
                 Sprite.DEFAULT_QUAD
 

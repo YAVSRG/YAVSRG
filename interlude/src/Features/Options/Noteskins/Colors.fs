@@ -59,7 +59,7 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as th
         elif this.Focused then
             Draw.rect this.Bounds Colors.yellow_accent.O2
 
-        Draw.quad (Quad.ofRect this.Bounds) (Quad.color Color.White) (Sprite.pick_texture (3, int color.Value) sprite)
+        Draw.quad this.Bounds.AsQuad (Quad.color Color.White) (Sprite.pick_texture (3, int color.Value) sprite)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

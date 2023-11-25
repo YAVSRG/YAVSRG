@@ -5,12 +5,9 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude.Common
-open Prelude.Data.Content
 open Interlude.Content
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features.OptionsMenu.Gameplay
 
 type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array array) =
     inherit
@@ -57,7 +54,7 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
 
     override this.Draw() =
         base.Draw()
-        Draw.quad (this.Bounds |> Quad.ofRect) (Quad.color Color.White) (Sprite.pick_texture (x, y) sprite)
+        Draw.quad this.Bounds.AsQuad (Quad.color Color.White) (Sprite.pick_texture (x, y) sprite)
 
 type DeleteButton(onClick) =
     inherit Button(K Icons.TRASH, onClick, Floating = true)

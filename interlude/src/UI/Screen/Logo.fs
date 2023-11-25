@@ -112,7 +112,7 @@ module Logo =
                     Draw.rect breathe_bounds Colors.cyan_accent
                     let rain = Content.get_texture "rain"
                     let v = float32 counter.Time
-                    let q = Quad.ofRect breathe_bounds
+                    let q = breathe_bounds.AsQuad
 
                     Draw.quad
                     <| q

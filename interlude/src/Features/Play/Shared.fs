@@ -304,7 +304,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                         |> int
 
                     Draw.quad
-                        (box |> Quad.ofRect |> rotation k)
+                        (box.AsQuad |> rotation k)
                         (Quad.color (Color.FromArgb(a, Color.White)))
                         (Sprite.pick_texture
                             (frame, color)
@@ -327,7 +327,7 @@ type LaneCover() =
                 Draw.rect (bounds.SliceTop(amount - fade_length)) options.LaneCover.Color.Value
 
                 Draw.quad
-                    (bounds.SliceTop(amount).SliceBottom(fade_length) |> Quad.ofRect)
+                    (bounds.SliceTop(amount).SliceBottom(fade_length).AsQuad)
                     struct (options.LaneCover.Color.Value,
                             options.LaneCover.Color.Value,
                             Color.FromArgb(0, options.LaneCover.Color.Value),
@@ -338,7 +338,7 @@ type LaneCover() =
                 Draw.rect (bounds.SliceBottom(amount - fade_length)) options.LaneCover.Color.Value
 
                 Draw.quad
-                    (bounds.SliceBottom(amount).SliceTop(fade_length) |> Quad.ofRect)
+                    (bounds.SliceBottom(amount).SliceTop(fade_length).AsQuad)
                     struct (Color.FromArgb(0, options.LaneCover.Color.Value),
                             Color.FromArgb(0, options.LaneCover.Color.Value),
                             options.LaneCover.Color.Value,
