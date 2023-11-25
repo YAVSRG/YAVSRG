@@ -13,12 +13,16 @@ open Interlude.Features.Play
 type Preview(chart: ModChart, change_rate: float32 -> unit) =
     inherit Dialog()
 
-    let density_graph_1, density_graph_2 = Analysis.nps_cps 100 chart
+    let HEIGHT = 60.0f
 
-    let density_graph_1, density_graph_2 =
-        Array.map float32 density_graph_1, Array.map float32 density_graph_2
+    // chord density is notes per second but n simultaneous notes count for 1 instead of n
+    let samples = int ((chart.LastNote - chart.FirstNote) / 1000.0f) |> max 10 |> min 400
+    let note_density, chord_density = Analysis.nps_cps samples chart
 
-    let max_note_density = Array.max density_graph_1
+    let note_density, chord_density =
+        Array.map float32 note_density, Array.map float32 chord_density
+
+    let max_note_density = Array.max note_density
 
     let playfield = Playfield(PlayState.Dummy chart, false) |+ LaneCover()
 
@@ -37,17 +41,69 @@ type Preview(chart: ModChart, change_rate: float32 -> unit) =
         let start = chart.FirstNote - Song.LEADIN_TIME
         let offset = b.Width * Song.LEADIN_TIME / chart.LastNote
 
-        let w = (b.Width - offset) / float32 density_graph_1.Length
+        let w = (b.Width - offset) / float32 note_density.Length
 
-        for i = 0 to density_graph_1.Length - 1 do
-            let h = 80.0f * density_graph_1.[i] / max_note_density
-            let h2 = 80.0f * density_graph_2.[i] / max_note_density
-            Draw.rect (Rect.Box(b.Left + offset + float32 i * w, b.Bottom - h, w, h - 5.0f)) (Color.FromArgb(120, Color.White))
-            Draw.rect (Rect.Box(b.Left + offset + float32 i * w, b.Bottom - h2, w, h2 - 5.0f)) (Palette.color (80, 1.0f, 0.0f))
+        let mutable x = b.Left + offset - w
+        let mutable note_prev = 0.0f
+        let mutable chord_prev = 0.0f
 
-        let percent = (Song.time () - start) / (chart.LastNote - start)
-        Draw.rect (b.SliceBottom(5.0f)) (Color.FromArgb(160, Color.White))
+        let chord_density_color = !*Palette.HIGHLIGHT_100
+
+        for i = 0 to note_density.Length - 1 do
+            let note_next = HEIGHT * note_density.[i] / max_note_density
+            let chord_next = HEIGHT * chord_density.[i] / max_note_density
+
+            Draw.quad 
+                (
+                    Quad.createv 
+                        (x, b.Bottom)
+                        (x, b.Bottom - note_prev)
+                        (x + w, b.Bottom - note_next)
+                        (x + w, b.Bottom)
+                )
+                (Quad.color Colors.white.O2)
+                Sprite.DEFAULT_QUAD
+
+            Draw.quad 
+                (
+                    Quad.createv 
+                        (x, b.Bottom)
+                        (x, b.Bottom - chord_prev)
+                        (x + w, b.Bottom - chord_next)
+                        (x + w, b.Bottom)
+                )
+                (Quad.color chord_density_color)
+                Sprite.DEFAULT_QUAD
+
+            x <- x + w
+            note_prev <- note_next
+            chord_prev <- chord_next
+            
+        Draw.quad 
+            (
+                Quad.createv 
+                    (x, b.Bottom)
+                    (x, b.Bottom - note_prev)
+                    (b.Right, b.Bottom - note_prev)
+                    (b.Right, b.Bottom)
+            )
+            (Quad.color Colors.white.O2)
+            Sprite.DEFAULT_QUAD
+            
+        Draw.quad 
+            (
+                Quad.createv 
+                    (x, b.Bottom)
+                    (x, b.Bottom - chord_prev)
+                    (b.Right, b.Bottom - chord_prev)
+                    (b.Right, b.Bottom)
+            )
+            (Quad.color chord_density_color)
+            Sprite.DEFAULT_QUAD
+
+        let percent = (Song.time () - start) / (chart.LastNote - start) |> min 1.0f
         let x = b.Width * percent
+        Draw.rect (b.SliceBottom(5.0f)) (Color.FromArgb(160, Color.White))
         Draw.rect (b.SliceBottom(5.0f).SliceLeft x) (Palette.color (255, 1.0f, 0.0f))
 
         volume.Draw()
