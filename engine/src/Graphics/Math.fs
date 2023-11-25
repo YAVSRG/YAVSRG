@@ -169,7 +169,7 @@ module Quad =
 
     let create c1 c2 c3 c4 : Quad = struct (c1, c2, c3, c4)
 
-    let createv (c1x, c1y) (c2x, c2y) (c3x, c3y) (c4x, c4y) : Quad =
+    let inline createv (c1x, c1y) (c2x, c2y) (c3x, c3y) (c4x, c4y) : Quad =
         struct (new Vector2(c1x, c1y), new Vector2(c2x, c2y), new Vector2(c3x, c3y), new Vector2(c4x, c4y))
 
     let color c : QuadColors = struct (c, c, c, c)
