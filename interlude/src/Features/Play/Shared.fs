@@ -395,16 +395,17 @@ type IPlayScreen(chart: ModChart, pacemaker_info: PacemakerInfo, ruleset: Rulese
             Pacemaker = pacemaker_info
         }
 
-    let playfield = Playfield(state, options.VanishingNotes.Value)
+    let noteskin_config = noteskin_config()
+    let playfield = Playfield(Gameplay.Chart.WITH_COLORS.Value, state, noteskin_config, options.VanishingNotes.Value)
 
     do
         this.Add playfield
 
-        if noteskin_config().EnableColumnLight then
-            playfield.Add(new ColumnLighting(chart.Keys, noteskin_config (), state))
+        if noteskin_config.EnableColumnLight then
+            playfield.Add(new ColumnLighting(chart.Keys, noteskin_config, state))
 
-        if noteskin_config().Explosions.Enable then
-            playfield.Add(new Explosions(chart.Keys, noteskin_config (), state))
+        if noteskin_config.Explosions.Enable then
+            playfield.Add(new Explosions(chart.Keys, noteskin_config, state))
 
         playfield.Add(LaneCover())
 

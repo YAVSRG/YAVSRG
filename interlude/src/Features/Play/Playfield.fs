@@ -19,13 +19,13 @@ type private HoldRenderState =
     | NoHold
 
 // todo: pass in noteskin information to reduce many calls to retrieve it
-type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this =
+type Playfield(chart: ColorizedChart, state: PlayState, noteskin_config: NoteskinConfig, vanishing_notes: bool) as this =
     inherit StaticContainer(NodeType.None)
 
     let keys = chart.Keys
 
-    let column_width = Content.noteskin_config().ColumnWidth
-    let column_spacing = Content.noteskin_config().KeymodeColumnSpacing keys
+    let column_width = noteskin_config.ColumnWidth
+    let column_spacing = noteskin_config.KeymodeColumnSpacing keys
 
     let column_positions =
         let mutable x = 0.0f
@@ -35,17 +35,17 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
             v)
 
     let note_height = column_width
-    let holdnote_trim = column_width * Content.noteskin_config().HoldNoteTrim
-    let playfield_color = Content.noteskin_config().PlayfieldColor
-    let fill_column_gaps = Content.noteskin_config().FillColumnGaps
+    let holdnote_trim = column_width * noteskin_config.HoldNoteTrim
+    let playfield_color = noteskin_config.PlayfieldColor
+    let fill_column_gaps = noteskin_config.FillColumnGaps
 
     let receptor = Content.get_texture "receptor"
     let holdtail = Content.get_texture "holdtail"
     let holdhead = Content.get_texture "holdhead"
     let holdbody = Content.get_texture "holdbody"
     let note = Content.get_texture "note"
-    let useholdtail = Content.noteskin_config().UseHoldTailTexture
-    let animation = Animation.Counter(Content.noteskin_config().AnimationFrameTime)
+    let useholdtail = noteskin_config.UseHoldTailTexture
+    let animation = Animation.Counter(noteskin_config.AnimationFrameTime)
 
     let sv = chart.SV
     let mutable note_seek = 0
@@ -78,13 +78,13 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
 
     let hold_tail_flip =
         fun q ->
-            if not (Content.noteskin_config().FlipHoldTail) || options.Upscroll.Value then
+            if not (noteskin_config.FlipHoldTail) || options.Upscroll.Value then
                 q
             else
                 Quad.flip q
 
     let receptor_transform k =
-        if Content.noteskin_config().ReceptorStyle = ReceptorStyle.Flip then
+        if noteskin_config.ReceptorStyle = ReceptorStyle.Flip then
             if options.Upscroll.Value then Quad.flip else id
         else
             rotation k
@@ -93,7 +93,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
         let width = Array.mapi (fun i n -> n + column_width) column_positions |> Array.max
 
         let (screen_align_percentage, playfield_align_percentage) =
-            Content.noteskin_config().PlayfieldAlignment
+            noteskin_config.PlayfieldAlignment
 
         this.Position <-
             {
@@ -102,8 +102,6 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
                 Right = screen_align_percentage %+ (width * (1.0f - playfield_align_percentage))
                 Bottom = Position.max
             }
-
-    new(state: PlayState, vanishing_notes) = Playfield(Gameplay.Chart.WITH_COLORS.Value, state, vanishing_notes)
 
     member this.ColumnWidth = column_width
     member this.ColumnPositions = column_positions
@@ -306,7 +304,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
 
                             let tint =
                                 if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then
-                                    Content.noteskin_config().DroppedHoldColor
+                                    noteskin_config.DroppedHoldColor
                                 else
                                     Color.White
 
@@ -336,7 +334,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
 
                             let tint =
                                 if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then
-                                    Content.noteskin_config().DroppedHoldColor
+                                    noteskin_config.DroppedHoldColor
                                 else
                                     Color.White
 
@@ -375,7 +373,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
 
                     let tint =
                         if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then
-                            Content.noteskin_config().DroppedHoldColor
+                            noteskin_config.DroppedHoldColor
                         else
                             Color.White
 
@@ -402,7 +400,7 @@ type Playfield(chart: ColorizedChart, state: PlayState, vanishing_notes) as this
 
                     let tint =
                         if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then
-                            Content.noteskin_config().DroppedHoldColor
+                            noteskin_config.DroppedHoldColor
                         else
                             Color.White
 

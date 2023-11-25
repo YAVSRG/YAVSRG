@@ -14,10 +14,10 @@ type NoteskinPreview(scale: float32) as this =
 
     let fbo = FBO.create ()
 
-    let createRenderer () =
-        match Gameplay.Chart.WITH_MODS with
+    let create_renderer () =
+        match Gameplay.Chart.WITH_COLORS with
         | Some chart ->
-            let playfield = Playfield(PlayState.Dummy chart, false)
+            let playfield = Playfield(chart, PlayState.Dummy Gameplay.Chart.WITH_MODS.Value, noteskin_config(), false)
             playfield.Add(LaneCover())
 
             if this.Initialised then
@@ -26,7 +26,7 @@ type NoteskinPreview(scale: float32) as this =
             playfield :> Widget
         | None -> new Dummy()
 
-    let mutable renderer = createRenderer ()
+    let mutable renderer = create_renderer ()
 
     let w = Viewport.vwidth * scale
     let h = Viewport.vheight * scale
@@ -62,7 +62,7 @@ type NoteskinPreview(scale: float32) as this =
     member this.Refresh() =
         if Gameplay.Chart.CHART.IsSome then
             Gameplay.Chart.recolor ()
-            Gameplay.Chart.wait_for_load <| fun () -> renderer <- createRenderer ()
+            Gameplay.Chart.wait_for_load <| fun () -> renderer <- create_renderer ()
 
     override this.Update(elapsed_ms, moved) =
         this.Bounds <- Viewport.bounds

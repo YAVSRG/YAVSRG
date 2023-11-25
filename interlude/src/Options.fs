@@ -455,9 +455,9 @@ module Options =
         File.WriteAllText(
             Path.Combine(get_game_folder "Songs", "HOW_TO_ADD_SONGS.txt"),
             "Dragging and dropping things into this folder won't work.\n"
-            + "Instead, drag and drop things onto the *game window* while it's open and it will import.\n"
-            + "Does this folder have stuff in, but they don't show up in game?\n"
-            + "Check they are .yav files, and then go to Options > Debug > Rebuild cache and let that run."
+            + "Instead, drag and drop things onto the *game window* while it's open and it will import, OR use the ingame downloaders.\n"
+            + "> Help! I have files in here, but they don't show up ingame?\n"
+            + "Make sure they are .yav files, if so go to Options > Debug > Rebuild cache and let that run, it will re-add anything that's missing."
         )
 
         HUDOptions.load ()

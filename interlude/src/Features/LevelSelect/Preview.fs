@@ -6,11 +6,13 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Charts.Tools
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Charts.Tools.Patterns
 open Interlude.UI.Menu
 open Interlude.Features.Play
+open Interlude.Features.Gameplay
 
-type Preview(chart: ModChart, change_rate: float32 -> unit) =
+type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 -> unit) =
     inherit Dialog()
 
     let HEIGHT = 60.0f
@@ -24,7 +26,7 @@ type Preview(chart: ModChart, change_rate: float32 -> unit) =
 
     let max_note_density = Array.max note_density
 
-    let playfield = Playfield(PlayState.Dummy chart, false) |+ LaneCover()
+    let playfield = Playfield(with_colors, PlayState.Dummy chart, Interlude.Content.noteskin_config(), false) |+ LaneCover()
 
     let volume = Volume()
     let mutable dragging = false

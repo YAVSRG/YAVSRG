@@ -19,7 +19,7 @@ type PlayState =
         CurrentChartTime: unit -> ChartTime
         Pacemaker: PacemakerInfo
     }
-    static member Dummy(chart) =
+    static member Dummy chart =
         let s = Metrics.create_dummy chart
 
         {
