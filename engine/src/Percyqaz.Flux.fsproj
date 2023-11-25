@@ -29,6 +29,7 @@
 	  <Compile Include="UI\Widget.fs" />
 	  <Compile Include="UI\Style.fs" />
 	  <Compile Include="UI\Components\Primitives.fs" />
+	  <Compile Include="UI\Components\Containers\FlowContainerV2.fs" />
 	  <Compile Include="UI\Components\Containers\FlowContainer.fs" />
 	  <Compile Include="UI\Components\Containers\NavigationContainer.fs" />
 	  <Compile Include="UI\Components\Containers\GridContainer.fs" />
