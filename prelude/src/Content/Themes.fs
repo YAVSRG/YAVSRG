@@ -5,7 +5,6 @@ open System.IO.Compression
 open Percyqaz.Common
 open Percyqaz.Json
 open Prelude.Common
-open Prelude.Gameplay
 
 (*
     Default config values for themes, textures, noteskins, widget layouts

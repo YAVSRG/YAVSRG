@@ -8,8 +8,8 @@ open System.Security.Cryptography
 open Percyqaz.Common
 open Percyqaz.Json
 open Prelude
-open Prelude.Charts.Formats.Interlude
-open Prelude.Charts.Formats.Conversions
+open Prelude.Charts
+open Prelude.Charts.Conversions
 open Prelude.Gameplay.Layout
 open Prelude.Gameplay.Difficulty
 
@@ -80,7 +80,7 @@ module Cache =
             Keys = chart.Keys
             Length = last_note - chart.FirstNote
             DateAdded = file_time
-            BPM = Interlude.minMaxBPM (List.ofSeq chart.BPM) last_note
+            BPM = Chart.find_min_max_bpm chart
             DifficultyName = chart.Header.DiffName
             Physical = rating.Physical
             BackgroundFile =

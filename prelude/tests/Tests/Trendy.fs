@@ -6,6 +6,8 @@ open Prelude.Charts.Formats.``osu!``
 let trendy =
     beatmap_from_file
         @"C:\Users\percy\AppData\Local\osu!\Songs\1010949 greyl - Trendy\greyl - Trendy (Percyqaz) [Uncut Ver.].osu"
+    |> Result.toOption
+    |> Option.get
 
 let times =
     [|

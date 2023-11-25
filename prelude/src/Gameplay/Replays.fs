@@ -5,7 +5,7 @@ open System.IO
 open System.IO.Compression
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 
 // internally, a score is made up of flags on what a player has to do here
 

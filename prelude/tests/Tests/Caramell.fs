@@ -17,7 +17,7 @@ let osu_file =
         "Caramell - Caramelldansen (Speedycake Remix) (Pope Gadget) [THE POPE GADGET VS. PERCYQAZ SHUFFLEGANZA 1.05x].osu"
     )
 
-let dansen = beatmap_from_file osu_file
+let dansen = beatmap_from_file osu_file |> Result.toOption |> Option.get
 
 let mutable _msPerBeat = Unchecked.defaultof<_>
 

@@ -2,8 +2,8 @@
 
 open System.IO
 open Percyqaz.Common
-open Prelude.Charts.Formats.Interlude
-open Prelude.Charts.Formats.Conversions
+open Prelude.Charts
+open Prelude.Charts.Conversions
 open Prelude.Data.Charts
 
 module Imports =
@@ -14,6 +14,6 @@ module Imports =
         for song in Directory.EnumerateDirectories Library.Imports.osuSongFolder do
             for file in Directory.EnumerateFiles song do
                 if file.ToLower().EndsWith(".osu") then
-                    for chart in loadAndConvertFile { Source = file; Config = ConversionOptions.Default } do
+                    for chart in convert_chart_file { Source = file; Config = ConversionOptions.Default } do
                         match Chart.check chart with Error msg -> Logging.Error msg | Ok() -> ()
         Logging.Info "Complete!"

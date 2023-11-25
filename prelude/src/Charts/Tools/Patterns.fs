@@ -3,7 +3,7 @@
 open System.Collections.Generic
 open Percyqaz.Json
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 
 [<RequireQualifiedAccess>]
 type Direction =

@@ -2,7 +2,7 @@
 
 open System
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 
 type HitEventGutsInternal =
     | Hit_ of delta: Time * is_hold_head: bool * missed: bool

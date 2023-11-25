@@ -23,13 +23,17 @@
   <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="Types.fs" />
-    <Compile Include="Charts\Formats\Interlude.fs" />
-    <Compile Include="Charts\Formats\StepMania.fs" />
-    <Compile Include="Charts\Formats\osu!.fs" />
-    <Compile Include="Charts\Formats\Conversions.fs" />
+    <Compile Include="Charts\Interlude.fs" />
     <Compile Include="Charts\Tools\Mods.fs" />
     <Compile Include="Charts\Tools\Patterns.fs" />
     <Compile Include="Charts\Tools\NoteColors.fs" />
+    <Compile Include="Charts\Formats\osu!.fs" />
+    <Compile Include="Charts\Formats\StepMania.fs" />
+    <Compile Include="Charts\Conversions\Shared.fs" />
+    <Compile Include="Charts\Conversions\osu!.fs" />
+    <Compile Include="Charts\Conversions\StepMania.fs" />
+    <Compile Include="Charts\Conversions\Interlude.fs" />
+    <Compile Include="Charts\Conversions\Helpers.fs" />
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\Replays.fs" />
     <Compile Include="Gameplay\Rulesets.fs" />

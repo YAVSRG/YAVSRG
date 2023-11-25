@@ -939,20 +939,39 @@ module ``osu!`` =
                 Timing = timingpoints
             }
 
-    // todo: return result type instead of throwing
-    let beatmap_from_file path : Beatmap =
-        match runParserOnFile parse_beatmap () path System.Text.Encoding.UTF8 with
-        | Success(result, _, _) -> result
-        | Failure(errorMsg, _, _) -> failwith errorMsg
+    open System.Text
+    open System.Text.RegularExpressions
+    open System.IO
+
+    let beatmap_from_file path : Result<Beatmap, string> =
+        match runParserOnFile parse_beatmap () path Encoding.UTF8 with
+        | Success(result, _, _) -> Result.Ok result
+        | Failure(error_message, _, _) -> Result.Error error_message
 
     let beatmap_to_file path beatmap =
-        System.IO.File.WriteAllText(path, beatmap_to_string beatmap)
+        File.WriteAllText(path, beatmap_to_string beatmap)
 
-    // todo: return result type instead of throwing
-    let storyboard_from_file path : Storyboard =
-        match runParserOnFile parse_events () path System.Text.Encoding.UTF8 with
-        | Success(result, _, _) -> result
-        | Failure(errorMsg, _, _) -> failwith errorMsg
+    let storyboard_from_file path : Result<Storyboard, string> =
+        match runParserOnFile parse_events () path Encoding.UTF8 with
+        | Success(result, _, _) -> Result.Ok result
+        | Failure(error_msg, _, _) -> Result.Error error_msg
 
     let storyboard_to_file path events =
-        System.IO.File.WriteAllText(path, storyboard_to_string events + "\n\n")
+        File.WriteAllText(path, storyboard_to_string events + "\n\n")
+
+    let private RATE_REGEX =
+        Regex(
+            """((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)x)"""
+        )
+    // Interlude supports rates, so rate mods are detected to be skipped when batch converting
+    let detect_rate_mod (difficulty_name: string) : float32 option =
+        let m = RATE_REGEX.Match difficulty_name
+
+        if m.Success then
+            let r = m.Value.Trim([| ' '; 'x' |]).Replace(',', '.')
+
+            match System.Single.TryParse r with
+            | true, r -> Some r
+            | false, _ -> None
+        else
+            None

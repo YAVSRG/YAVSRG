@@ -4,9 +4,9 @@ open System
 open System.IO
 open Percyqaz.Common
 open Prelude
+open Prelude.Charts
+open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.``osu!``
-open Prelude.Charts.Formats.Interlude
-open Prelude.Charts.Formats.Conversions
 open Prelude.Data.``osu!``
 open Prelude.Gameplay
 open SevenZip.Compression
@@ -130,8 +130,10 @@ module OsuScoreMigration =
             let chart =
                 try
                     beatmap_from_file osu_file
+                    |> Result.toOption
+                    |> Option.get
                     |> fun b ->
-                        ``osu!``.toInterlude
+                        Osu_To_Interlude.convert
                             b
                             {
                                 Config = ConversionOptions.Default

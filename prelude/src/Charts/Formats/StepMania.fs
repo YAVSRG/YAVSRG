@@ -96,7 +96,7 @@ module StepMania =
         Some common tags have been omitted due to having no relevance to this project or poor documentation
     *)
 
-    type StepmaniaData =
+    type StepManiaData =
         {
             TITLE: string
             SUBTITLE: string
@@ -246,15 +246,14 @@ module StepMania =
                             }
                             :: s.Charts
                     }
-                | Failure(errorMsg, _, _) -> failwith errorMsg
+                | Failure(error_message, _, _) -> failwith error_message
             | _ -> s
 
-        List.fold f StepmaniaData.Default header
+        List.fold f StepManiaData.Default header
 
     let private parse_stepmania_file = parse_header |>> read_stepmania_data
 
-    // todo: return result type instead of throwing
-    let stepmania_chart_from_file path : StepmaniaData =
+    let stepmania_data_from_file path : Result<StepManiaData, string> =
         match runParserOnFile parse_stepmania_file () path System.Text.Encoding.UTF8 with
-        | Success(result, _, _) -> result
-        | Failure(errorMsg, _, _) -> failwith errorMsg
+        | Success(result, _, _) -> Result.Ok result
+        | Failure(error_message, _, _) -> Result.Error error_message

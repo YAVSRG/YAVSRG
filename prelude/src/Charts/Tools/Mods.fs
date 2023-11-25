@@ -2,7 +2,7 @@
 
 open System
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 
 type ModChart =
     {

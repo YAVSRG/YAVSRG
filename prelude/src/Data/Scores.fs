@@ -7,7 +7,7 @@ open System.Collections.Concurrent
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty

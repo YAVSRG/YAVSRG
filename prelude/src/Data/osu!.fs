@@ -370,7 +370,7 @@ module ``osu!`` =
     open Prelude
     open System.Text
     open SevenZip.Compression
-    open Prelude.Charts.Formats.Interlude
+    open Prelude.Charts
     open Prelude.Gameplay
 
     let decode_replay (replay: ScoreDatabase_Score, chart: Chart, rate: float32) : ReplayData =

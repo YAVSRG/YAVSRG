@@ -4,7 +4,7 @@ open System
 open System.Collections.Generic
 open Percyqaz.Json
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 
 type ArtistName = string
 

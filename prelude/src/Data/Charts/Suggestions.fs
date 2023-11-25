@@ -2,7 +2,7 @@
 
 open System
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 open Prelude.Charts.Tools.Patterns
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching

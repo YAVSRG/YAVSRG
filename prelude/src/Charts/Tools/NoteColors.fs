@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Json
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 
 // This is the final stage of preprocessing chart data before it is played by the user.
 // Colorings are an assignment of a color id for each note. These ids are then used by skins to display differences in textures

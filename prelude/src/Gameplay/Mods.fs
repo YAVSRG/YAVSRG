@@ -4,7 +4,7 @@ open System
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 open Prelude.Charts.Tools
 
 module Mods =

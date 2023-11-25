@@ -7,7 +7,7 @@ open System.Collections.Concurrent
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude.Common
-open Prelude.Charts.Formats.Conversions
+open Prelude.Charts.Conversions
 open Prelude.Data.Charts.Caching
 
 open Collections
@@ -95,9 +95,9 @@ module Library =
                             | ChartFile _ as file ->
                                 try
                                     let action = { Config = config; Source = file }
-                                    loadAndConvertFile action
+                                    convert_chart_file action
                                 with err ->
-                                    Logging.Error("Failed to convert/cache file: " + file, err)
+                                    Logging.Error("Exception while converting file: " + file, err)
                                     []
                             | _ -> []
                         )
@@ -186,7 +186,7 @@ module Library =
                             | _ ->
                                 Logging.Warn(
                                     sprintf
-                                        "%s: Extracted zip does not match the usual structure for a Stepmania pack"
+                                        "%s: Extracted zip does not match the usual structure for a StepMania pack"
                                         dir
                                 )
 
