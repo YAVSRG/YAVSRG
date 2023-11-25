@@ -26,7 +26,7 @@ module System =
                 set <| Key(k, (ctrl, false, shift))
                 this.Focus()
                 Style.key.Play()
-            | _ -> Input.grab_next_event input_callback
+            | _ -> Input.listen_to_next_key input_callback
 
         do
             this
@@ -60,11 +60,11 @@ module System =
         override this.OnSelected() =
             base.OnSelected()
             Style.click.Play()
-            Input.grab_next_event input_callback
+            Input.listen_to_next_key input_callback
 
         override this.OnDeselected() =
             base.OnDeselected()
-            Input.remove_input_method ()
+            Input.remove_listener ()
 
     type HotkeysPage() as this =
         inherit Page()

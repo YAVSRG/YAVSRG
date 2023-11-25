@@ -102,13 +102,13 @@ module Terminal =
 
     let private hide () =
         shown <- false
-        Input.remove_input_method ()
+        Input.remove_listener ()
 
     let private show () =
         shown <- true
 
         let rec add_input () =
-            Input.set_text_input (
+            Input.listen_to_text (
                 current_line,
                 fun () ->
                     if shown then

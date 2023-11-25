@@ -51,7 +51,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
         base.OnSelected()
         Style.text_open.Play()
 
-        Input.set_text_input (
+        Input.listen_to_text (
             setting |> Setting.trigger (fun v -> Style.key.Play()),
             fun () ->
                 if this.Selected then
@@ -61,7 +61,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
     override this.OnDeselected() =
         base.OnDeselected()
         Style.text_close.Play()
-        Input.remove_input_method ()
+        Input.remove_listener ()
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

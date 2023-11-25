@@ -233,7 +233,7 @@ type LevelSelectScreen() =
         refresh ()
         DiscordRPC.in_menus ("Choosing a song")
 
-    override this.OnExit next = Input.remove_input_method ()
+    override this.OnExit next = Input.remove_listener ()
 
     override this.OnBack() =
         if Network.lobby.IsSome then

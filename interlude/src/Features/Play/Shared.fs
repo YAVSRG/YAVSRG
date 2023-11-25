@@ -427,7 +427,7 @@ type IPlayScreen(chart: ModChart, pacemaker_info: PacemakerInfo, ruleset: Rulese
         Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
         Song.on_finish <- SongFinishAction.Wait
         Song.play_leadin ()
-        Input.remove_input_method ()
+        Input.remove_listener ()
         Input.finish_frame_events ()
 
     override this.OnExit next =

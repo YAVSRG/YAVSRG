@@ -47,11 +47,11 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             if progress = int keymode.Value then
                 this.Focus()
             else
-                Input.grab_next_event input_callback
+                Input.listen_to_next_key input_callback
 
             refresh_text ()
             Style.key.Play()
-        | _ -> Input.grab_next_event input_callback
+        | _ -> Input.listen_to_next_key input_callback
 
     do
         this
@@ -80,11 +80,11 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
         progress <- 0
         refresh_text ()
         Style.click.Play()
-        Input.grab_next_event input_callback
+        Input.listen_to_next_key input_callback
 
     override this.OnDeselected() =
         base.OnDeselected()
-        Input.remove_input_method ()
+        Input.remove_listener ()
 
         text <-
             options.GameplayBinds.[int keymode.Value - 3]
