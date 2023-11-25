@@ -44,6 +44,8 @@ module NoteColors =
             SV: TimeArray<float32>
             ModsUsed: string list
         }
+        member this.FirstNote = this.Notes.[0].Time
+        member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
 
     let private roughly_divisible (a: Time) (b: Time) =
         Time.abs (a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
