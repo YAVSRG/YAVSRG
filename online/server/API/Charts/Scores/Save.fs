@@ -6,7 +6,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
 open Prelude.Backbeat.Archive
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
