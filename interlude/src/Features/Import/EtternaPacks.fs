@@ -13,9 +13,10 @@ open Prelude.Data.Charts.Sorting
 open Prelude.Data
 open Interlude.Utils
 open Interlude.UI
+open Interlude.UI.Components
 
 [<Json.AutoCodec>]
-type EOPackAttrs =
+type EtternaOnlinePackAttributes =
     {
         name: string
         average: float
@@ -25,14 +26,14 @@ type EOPackAttrs =
     }
 
 [<Json.AutoCodec>]
-type EOPack =
+type EtternaOnlinePack =
     {
         ``type``: string
         id: int
-        attributes: EOPackAttrs
+        attributes: EtternaOnlinePackAttributes
     }
 
-type private SMImportCard(id: int, data: EOPackAttrs) as this =
+type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
     inherit
         Frame(
             NodeType.Button(fun () ->
@@ -160,22 +161,18 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
     member private this.Download() = download ()
 
     static member Filter(filter: Filter) =
-        fun (c: Widget) ->
-            match c with
-            | :? SMImportCard as c ->
-                List.forall
-                    (function
-                    | Impossible -> false
-                    | String str -> c.Data.name.ToLower().Contains(str)
-                    | _ -> true)
-                    filter
-            | _ -> true
+        fun (c: EtternaPackCard) ->
+            List.forall
+                (function
+                | Impossible -> false
+                | String str -> c.Data.name.ToLower().Contains(str)
+                | _ -> true)
+                filter
 
 module EtternaPacks =
 
-    do
-        // EtternaOnline's certificate keeps expiring!! Rop get on it
-        // todo: set up automated test that pings eo for certificate expiry
+    // todo: automated test to ping EO and see if the cert is expired
+    let allow_expired_etternaonline_cert() =
         ServicePointManager.ServerCertificateValidationCallback <-
             RemoteCertificateValidationCallback(fun _ cert _ sslPolicyErrors ->
                 if sslPolicyErrors = SslPolicyErrors.None then
@@ -190,28 +187,44 @@ module EtternaPacks =
                     cert_string = "56726C10C603AFE9C338966ABC303D161072FEE5"
             )
 
-    let tab =
-        let search_container =
-            SearchContainer(
-                (fun search_container callback ->
-                    WebServices.download_json (
-                        "https://api.etternaonline.com/v2/packs/",
-                        fun data ->
-                            match data with
-                            | Some(d: {| data: ResizeArray<EOPack> |}) ->
-                                sync (fun () ->
-                                    for p in d.data do
-                                        search_container.Items.Add(SMImportCard(p.id, p.attributes))
-                                )
-                            | None -> ()
+    type EtternaPackSearch() as this =
+        inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
 
-                            callback ()
-                    )
-                ),
-                (fun search_container filter -> search_container.Items.Filter <- SMImportCard.Filter filter),
-                Position = Position.TrimBottom(60.0f)
+        let flow =
+            FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
+
+        let scroll =
+            ScrollContainer.Flow(flow, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
+
+        let mutable failed = false
+
+        override this.Init(parent) =
+            allow_expired_etternaonline_cert()
+            WebServices.download_json (
+                "https://api.etternaonline.com/v2/packs/",
+                fun data ->
+                    match data with
+                    | Some(d: {| data: ResizeArray<EtternaOnlinePack> |}) ->
+                        sync (fun () ->
+                            for p in d.data do
+                                flow.Add(EtternaPackCard(p.id, p.attributes))
+                        )
+                    | None -> failed <- true
             )
 
-        StaticContainer(NodeType.Switch(K search_container))
-        |+ search_container
-        |+ Text(%"imports.disclaimer.etterna", Position = Position.SliceBottom(55.0f))
+            this
+            |+ (SearchBox(
+                Setting.simple "",
+                (fun (f: Filter) -> flow.Filter <- EtternaPackCard.Filter f),
+                Position = Position.SliceTop 60.0f
+            ))
+            |+ Text(%"imports.disclaimer.etterna", Position = Position.SliceBottom 55.0f)
+            |* scroll
+
+            base.Init parent
+
+        override this.Focusable = flow.Focusable
+
+        member this.Items = flow
+
+    let tab = EtternaPackSearch()

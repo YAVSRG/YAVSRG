@@ -3,11 +3,9 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data.Charts
-open Prelude.Data.Charts.Sorting
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.UI.Components
 
 [<AutoOpen>]
 module Import =
@@ -16,7 +14,6 @@ module Import =
     open System.IO.Compression
     open System.Text.RegularExpressions
     open Prelude
-    open Prelude.Charts.Conversions
     open Prelude.Data.Content
     open Prelude.Data.Content.Noteskin
     open Interlude.Options
@@ -108,7 +105,7 @@ module Import =
             )
                 .Show()
         | Error err -> Logging.Error("Error while parsing osu! skin.ini\n" + err)
-    // todo: error toast
+        // todo: error toast
 
     let handle_file_drop (path: string) =
         match Mounts.drop_func with
@@ -147,50 +144,6 @@ module Import =
                     else
                         Notifications.error (%"notification.import_failure", "")
             )
-
-// todo: only etterna packs use this old one so just move it to there
-type SearchContainerLoader(task_with_callback: (unit -> unit) -> unit) =
-    inherit StaticWidget(NodeType.None)
-    let mutable loading = false
-
-    // loader is only drawn if it is visible on screen
-    override this.Draw() =
-        if not loading then
-            task_with_callback (fun () -> sync (fun () -> (this.Parent :?> FlowContainer.Vertical<Widget>).Remove this))
-            loading <- true
-
-    override this.Update(elapsed_ms, moved) = base.Update(elapsed_ms, moved)
-
-type PopulateFunc = SearchContainer -> (unit -> unit) -> unit
-and FilterFunc = SearchContainer -> Filter -> unit
-
-and SearchContainer(populate: PopulateFunc, handle_filter: FilterFunc, item_height) as this =
-    inherit
-        StaticContainer(
-            NodeType.Switch(fun _ ->
-                if (this.Items: FlowContainer.Vertical<Widget>).Count > 0 then
-                    this.Items
-                else
-                    this.SearchBox
-            )
-        )
-
-    let flow = FlowContainer.Vertical<Widget>(item_height, Spacing = 15.0f)
-
-    let scroll =
-        ScrollContainer.Flow(flow, Margin = Style.PADDING, Position = Position.TrimTop 70.0f)
-
-    let search_box =
-        SearchBox(Setting.simple "", (fun (f: Filter) -> handle_filter this f), Position = Position.SliceTop 60.0f)
-
-    do
-        flow |* SearchContainerLoader(populate this)
-        this |+ search_box |* scroll
-
-    new(populate, handle_filter) = SearchContainer(populate, handle_filter, 80.0f)
-
-    member this.Items = flow
-    member private this.SearchBox = search_box
 
 type DownloadStatus =
     | NotDownloaded
