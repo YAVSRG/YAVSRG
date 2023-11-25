@@ -1,3 +1,4 @@
+set -e
 cd Percyqaz.Common
 (git status | grep "ahead of" -c) && git push
 cd ..
