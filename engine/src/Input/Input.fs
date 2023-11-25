@@ -63,10 +63,9 @@ type InputEvType =
 
 type InputEv = (struct (Bind * InputEvType * float32<ms>))
 
-// todo: rename to InputListener
 [<RequireQualifiedAccess>]
-type InputMethod =
-    | Text of setting: Setting<string> * callback: (unit -> unit)
+type InputListener =
+    | Text of setting: Setting<string> * on_remove: (unit -> unit)
     | Bind of callback: (Bind -> unit)
     | None
 
@@ -184,32 +183,39 @@ module Input =
 
     let mutable internal events_this_frame: InputEv list = []
 
-    let mutable internal input_method: InputMethod = InputMethod.None
-    let mutable internal input_method_mouse_cancel = 0f
+    let mutable internal input_listener: InputListener = InputListener.None
+    let mutable internal input_listener_mouse_cancel = 0f
 
     let mutable internal scrolled_this_frame = 0f
 
     let mutable internal gw: NativeWindow = null
 
-    let remove_input_method () =
-        match input_method with
-        | InputMethod.Text(s, callback) ->
+    /// Stops listening to text input OR to the next button pressed, if system previously was
+    let remove_listener () =
+        match input_listener with
+        | InputListener.Text(_, on_remove) ->
             InputThread.typing <- false
-            callback ()
-        | InputMethod.Bind _
-        | InputMethod.None -> ()
+            on_remove ()
+        | InputListener.Bind _
+        | InputListener.None -> ()
 
-        input_method <- InputMethod.None
+        input_listener <- InputListener.None
 
-    let set_text_input (s: Setting<string>, callback: unit -> unit) =
-        remove_input_method ()
-        input_method <- InputMethod.Text(s, callback)
+    /// Used for UIs that let the user type some text into the provided text buffer
+    /// In this mode keybindings do not activate (so something bound to A will not fire, it will type 'a' into the buffer instead)
+    /// `on_remove` is called when the text listening mode is exited
+    let listen_to_text (s: Setting<string>, on_remove: unit -> unit) =
+        remove_listener ()
+        input_listener <- InputListener.Text(s, on_remove)
         InputThread.typing <- true
-        input_method_mouse_cancel <- 0f
+        input_listener_mouse_cancel <- 0f
 
-    let grab_next_event (callback: Bind -> unit) =
-        remove_input_method ()
-        input_method <- InputMethod.Bind callback
+    /// Used for UIs that let the user bind a key to a hotkey
+    /// The very next button (or modifier + button combo) they press will be passed to `callback`
+    /// Then the listener is removed
+    let listen_to_next_key (callback: Bind -> unit) =
+        remove_listener ()
+        input_listener <- InputListener.Bind callback
 
     let pop_matching (b: Bind, t: InputEvType) =
         let mutable out = ValueNone
@@ -265,8 +271,8 @@ module Input =
         out
 
     let finish_frame_events () =
-        input_method_mouse_cancel <-
-            input_method_mouse_cancel
+        input_listener_mouse_cancel <-
+            input_listener_mouse_cancel
             + abs (this_frame.MouseX - last_frame.MouseX)
             + abs (this_frame.MouseY - last_frame.MouseY)
 
@@ -295,29 +301,28 @@ module Input =
     let init (win: NativeWindow) =
         gw <- win
         InputThread.init gw
+    
+    let private DELETE_CHARACTER = Bind.mk Keys.Backspace
+    let private DELETE_WORD = Bind.ctrl Keys.Backspace
+    let private COPY = Bind.ctrl Keys.C
+    let private PASTE = Bind.ctrl Keys.V
+    let update_input_listener () =
 
-    let update_input_listeners () =
-
-        let deleteChar = Bind.mk Keys.Backspace
-        let deleteWord = Bind.ctrl Keys.Backspace
-        let copy = Bind.ctrl Keys.C
-        let paste = Bind.ctrl Keys.V
-
-        match input_method with
-        | InputMethod.Text(s, _) ->
+        match input_listener with
+        | InputListener.Text(s, _) ->
 
             if this_frame.TypedText <> "" then
                 s.Value <- s.Value + this_frame.TypedText
 
-            if pop_matching(deleteChar, InputEvType.Press).IsSome && s.Value.Length > 0 then
+            if pop_matching(DELETE_CHARACTER, InputEvType.Press).IsSome && s.Value.Length > 0 then
                 Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) s
-            elif pop_matching(deleteWord, InputEvType.Press).IsSome then
+            elif pop_matching(DELETE_WORD, InputEvType.Press).IsSome then
                 s.Value <-
                     let parts = s.Value.Split(" ")
                     Array.take (parts.Length - 1) parts |> String.concat " "
-            elif pop_matching(copy, InputEvType.Press).IsSome then
+            elif pop_matching(COPY, InputEvType.Press).IsSome then
                 gw.ClipboardString <- s.Value
-            elif pop_matching(paste, InputEvType.Press).IsSome then
+            elif pop_matching(PASTE, InputEvType.Press).IsSome then
                 s.Value <-
                     s.Value
                     + try
@@ -325,10 +330,10 @@ module Input =
                       with _ ->
                           ""
 
-            if input_method_mouse_cancel > 200f then
-                remove_input_method ()
+            if input_listener_mouse_cancel > 200f then
+                remove_listener ()
 
-        | InputMethod.Bind callback ->
+        | InputListener.Bind callback ->
             match pop_any InputEvType.Press with
             | ValueSome(x, _) ->
                 match x with
@@ -336,10 +341,10 @@ module Input =
                     if Bind.IsModifier k then
                         ()
                     else
-                        remove_input_method ()
+                        remove_listener ()
                         callback x
                 | _ ->
-                    remove_input_method ()
+                    remove_listener ()
                     callback x
             | ValueNone ->
                 match pop_any InputEvType.Release with
@@ -347,12 +352,12 @@ module Input =
                     match x with
                     | Key(k, m) ->
                         if Bind.IsModifier k then
-                            remove_input_method ()
+                            remove_listener ()
                             callback x
                     | _ -> ()
                 | ValueNone -> ()
 
-        | InputMethod.None -> ()
+        | InputListener.None -> ()
 
     let begin_frame_events () =
         last_frame <- this_frame
@@ -369,7 +374,7 @@ module Input =
 
         scrolled_this_frame <- this_frame.MouseZ - last_frame.MouseZ
         this_frame_finished <- false
-        update_input_listeners ()
+        update_input_listener ()
 
 module Mouse =
 
@@ -387,21 +392,21 @@ module Mouse =
         Input.scrolled_this_frame <- 0.0f
         v
 
-    let private click b =
+    let private click b : bool =
         Input.pop_matching(Mouse b, InputEvType.Press).IsSome
 
-    let left_click () = click LEFT
-    let right_click () = click RIGHT
+    let left_click () : bool = click LEFT
+    let right_click () : bool = click RIGHT
 
-    let held b = Input.held (Mouse b)
+    let held b : bool = Input.held (Mouse b)
 
-    let released b =
+    let released b : bool =
         Input.pop_matching(Mouse b, InputEvType.Release).IsSome
 
-    let moved_recently () =
+    let moved_recently () : bool =
         (DateTime.UtcNow.Ticks - Input.last_time_mouse_moved) < 5_000_000L
 
-    let hover (r: Rect) =
+    let hover (r: Rect) : bool =
         not Input.this_frame_finished && r.Contains(pos ())
 
 type Bind with
