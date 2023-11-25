@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Flux.UI
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Tables

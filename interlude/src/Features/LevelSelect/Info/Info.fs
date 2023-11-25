@@ -6,7 +6,7 @@ open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 open Interlude.Features
 open Interlude.Options
 open Interlude.Utils

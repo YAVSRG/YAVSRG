@@ -5,6 +5,8 @@ open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Prelude.Common
+open Prelude.Charts
+open Prelude.Charts.Conversions
 open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
@@ -59,7 +61,7 @@ module Printerlude =
 
             match Gameplay.Chart.CHART with
             | None -> failwith "Select a chart"
-            | Some c -> Interlude.Chart.diff cmp c
+            | Some c -> Chart.diff cmp c
 
         let show_version (io: IOContext) =
             io.WriteLine(sprintf "You are running %s" Utils.version)
@@ -74,7 +76,7 @@ module Printerlude =
             | None -> failwith "No chart loaded to export"
             | Some c ->
                 // todo: move into prelude
-                let beatmap = Conversions.Interlude.toOsu c
+                let beatmap = Interlude_To_Osu.convert c
                 let file_name = ``osu!``.get_osu_filename beatmap
                 let path = get_game_folder "Exports"
                 let beatmap_file = Path.Combine(path, file_name)
@@ -82,17 +84,17 @@ module Printerlude =
 
                 let target_audio_file =
                     match c.Header.AudioFile with
-                    | Interlude.Relative s -> Some <| Path.Combine(path, s)
-                    | Interlude.Absolute s -> Some <| Path.Combine(path, Path.GetFileName s)
-                    | Interlude.Asset s -> Some <| Path.Combine(path, "audio.mp3")
-                    | Interlude.Missing -> None
+                    | Relative s -> Some <| Path.Combine(path, s)
+                    | Absolute s -> Some <| Path.Combine(path, Path.GetFileName s)
+                    | Asset s -> Some <| Path.Combine(path, "audio.mp3")
+                    | Missing -> None
 
                 let target_bg_file =
                     match c.Header.BackgroundFile with
-                    | Interlude.Relative s -> Some <| Path.Combine(path, s)
-                    | Interlude.Absolute s -> Some <| Path.Combine(path, Path.GetFileName s)
-                    | Interlude.Asset s -> Some <| Path.Combine(path, "bg.png")
-                    | Interlude.Missing -> None
+                    | Relative s -> Some <| Path.Combine(path, s)
+                    | Absolute s -> Some <| Path.Combine(path, Path.GetFileName s)
+                    | Asset s -> Some <| Path.Combine(path, "bg.png")
+                    | Missing -> None
 
                 try
                     match target_audio_file with

@@ -16,7 +16,7 @@ module Import =
     open System.IO.Compression
     open System.Text.RegularExpressions
     open Prelude
-    open Prelude.Charts.Formats.Conversions
+    open Prelude.Charts.Conversions
     open Prelude.Data.Content
     open Prelude.Data.Content.Noteskin
     open Interlude.Options

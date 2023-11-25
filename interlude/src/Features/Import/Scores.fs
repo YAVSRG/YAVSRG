@@ -5,9 +5,9 @@ open System.Text
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude.Charts
+open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.``osu!``
-open Prelude.Charts.Formats.Interlude
-open Prelude.Charts.Formats.Conversions
 open Prelude.Gameplay
 open Prelude.Data.``osu!``
 open Prelude.Data.Scores
@@ -58,7 +58,7 @@ module Scores =
 
             match Cache.by_hash chart_hash Library.cache with
             | None ->
-                match ``osu!``.detect_rate_mod beatmap_data.Difficulty with
+                match detect_rate_mod beatmap_data.Difficulty with
                 | Some rate ->
                     let chart = Chart.scale rate chart
                     let chart_hash = Chart.hash chart
@@ -92,15 +92,16 @@ module Scores =
 
             match
                 try
-                    beatmap_from_file osu_file
-                    |> fun b ->
-                        ``osu!``.toInterlude
-                            b
+                    match beatmap_from_file osu_file with
+                    | Ok beatmap ->
+                        Osu_To_Interlude.convert
+                            beatmap
                             {
                                 Config = ConversionOptions.Default
                                 Source = osu_file
                             }
-                    |> Some
+                        |> Some
+                    | Error _ -> None
                 with _ ->
                     None
             with

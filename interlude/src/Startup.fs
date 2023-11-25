@@ -4,7 +4,7 @@ open System.Collections.Generic
 open System.IO
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 open Prelude.Data.Charts
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching

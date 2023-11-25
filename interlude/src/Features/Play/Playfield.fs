@@ -5,7 +5,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
-open Prelude.Charts.Formats.Interlude
+open Prelude.Charts
 open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Content
 open Interlude
