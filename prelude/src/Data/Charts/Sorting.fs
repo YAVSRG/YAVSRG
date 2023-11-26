@@ -216,6 +216,8 @@ module Sorting =
                  + " "
                  + c.DifficultyName
                  + " "
+                 + (c.Subtitle |> Option.defaultValue "")
+                 + " "
                  + c.Folder)
                     .ToLower()
 
