@@ -18,11 +18,15 @@ module Suggestion =
 
     let mutable recommended_recently = Set.empty
 
-    let get_suggestions (chart: Chart) (cache_info: CachedChart) (filter: Filter) =
+
+
+    let get_similar_suggestions (cache_info: CachedChart) (filter: Filter) : CachedChart seq option =
 
         recommended_recently <- Set.add cache_info.Hash recommended_recently
-        // todo: use pattern cache here
-        let patterns = Patterns.generate_pattern_report (1.0f, chart)
+
+        if not (Library.patterns.ContainsKey cache_info.Hash) then None else
+
+        let patterns = Library.patterns.[cache_info.Hash]
 
         let min_difficulty = cache_info.Physical - 0.5
         let max_difficulty = cache_info.Physical + 0.5
@@ -39,7 +43,7 @@ module Suggestion =
             |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
             |> Seq.filter (fun x ->
                 match Scores.get x.Hash with
-                | Some d -> (now - d.LastPlayed).TotalDays < 2
+                | Some d -> (now - d.LastPlayed).TotalDays > 2.0
                 | _ -> true
             )
             |> Seq.filter (fun x -> Library.patterns.ContainsKey x.Hash)
@@ -62,7 +66,7 @@ module Suggestion =
                                 | Jack _ -> abs (p.BPM - p2.BPM) |> min 25 |> (fun i -> 1.0f - float32 i / 25.0f)
 
                             let duration_similarity =
-                                abs (p.Score - p.Score)
+                                abs (p.Score - p2.Score)
                                 |> float32
                                 |> min 1000.0f
                                 |> fun i -> 1.0f - i / 1000.0f
@@ -73,23 +77,28 @@ module Suggestion =
         }
         |> Seq.sortByDescending snd
         |> Seq.map fst
+        |> Some
 
-    let get_suggestion (chart: Chart) (cache_info: CachedChart) (filter: Filter) =
+    let get_suggestion (cache_info: CachedChart) (filter: Filter) =
         let rand = Random()
 
-        let options =
-            get_suggestions chart cache_info filter |> Seq.truncate 100 |> Array.ofSeq
-
-        if options.Length = 0 then
-            None
-        else
+        match get_similar_suggestions cache_info filter with
+        | Some matches ->
+            let best_matches = matches |> Seq.truncate 100 |> Array.ofSeq
+            if best_matches.Length = 0 then None else
 
             let res =
-                options.[rand.NextDouble()
-                         |> fun x -> x * x |> fun x -> x * float options.Length |> floor |> int]
+                let index =
+                    rand.NextDouble()
+                    |> fun x -> x * x
+                    |> fun x -> x * float best_matches.Length
+                    |> floor
+                    |> int
+                best_matches.[index]
 
             recommended_recently <- Set.add res.Hash recommended_recently
             Some res
+        | None -> None
 
     let get_random (filter: Filter) : CachedChart option =
         let rand = Random()
