@@ -589,6 +589,7 @@ notification.score_import_queued=Score import queued!
 notification.score_import_success=Score import successful!
 notification.screenshot.open_folder=Open folder
 notification.screenshot=Screenshot saved!
+notification.suggestion_failed=No suggestions found :(
 notification.update_available.body=Click on 'What's New' to see and install it.
 notification.update_available.title=Update available!
 notification.update_installed.body=Relaunch the game to apply it.

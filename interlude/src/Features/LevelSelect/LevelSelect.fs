@@ -40,23 +40,18 @@ type LevelSelectScreen() =
         Tree.refresh ()
 
     let random_chart () =
-
-        Chart.wait_for_load
-        <| fun () ->
-
-            // todo: remove need for chart load
-            if options.AdvancedRecommendations.Value && Chart.CACHE_DATA.IsSome then
-                match Suggestion.get_suggestion Chart.CHART.Value Chart.CACHE_DATA.Value Tree.filter with
-                | Some c ->
-                    Tree.switch_chart (c, LibraryContext.None, "")
-                    refresh ()
-                | None -> () // todo: notification when no chart found
-            else
-                match Suggestion.get_random Tree.filter with
-                | Some c ->
-                    Tree.switch_chart (c, LibraryContext.None, "")
-                    refresh ()
-                | None -> () // todo: notification when no chart found
+        if options.AdvancedRecommendations.Value && Chart.CACHE_DATA.IsSome then
+            match Suggestion.get_suggestion Chart.CACHE_DATA.Value Tree.filter with
+            | Some c ->
+                Tree.switch_chart (c, LibraryContext.None, "")
+                refresh ()
+            | None -> Notifications.action_feedback(Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
+        else
+            match Suggestion.get_random Tree.filter with
+            | Some c ->
+                Tree.switch_chart (c, LibraryContext.None, "")
+                refresh ()
+            | None -> ()
 
     override this.Init(parent: Widget) =
         base.Init parent
