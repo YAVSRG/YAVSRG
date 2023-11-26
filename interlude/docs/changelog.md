@@ -1,3 +1,15 @@
+0.7.14
+====
+
+# New features
+- Proof-of-concept endless mode! For all your INFINITE GAMING needs
+
+# Improvements
+- Selected mods (and if the pacemaker is on) are saved when you close and open the game
+- Suggestions engine is drastically improved
+- Level select search box works on chart subtitles again
+- Some more codebase improvements
+
 0.7.13.2
 ====
 
@@ -22,6 +34,7 @@
 This update fixes a crash on startup
 
 If you are one of the lucky users to experience these crashes on startup, you will not be able to automatically update ingame, so instead you must:  
+
 - Download this update manually
 - Replace Interlude.exe with the new version
 - Now launch it and you should be good
@@ -287,7 +300,6 @@ osu! and Etterna rulesets have been modified to hopefully make them more accurat
 Go to Imports > Rulesets to install the updates and see what you think
 
 Your personal bests data will be wiped by the update, use the `fix_personal_bests` console command to recalculate them from your scores (takes about 30 seconds)
-
 
 0.7.5.1
 ====
