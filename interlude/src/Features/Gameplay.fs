@@ -30,6 +30,7 @@ open Interlude.Web.Shared.Requests
 module Gameplay =
 
     let mutable autoplay = false
+    let endless_mode = Setting.simple false
 
     module Chart =
 

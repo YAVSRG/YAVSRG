@@ -694,3 +694,5 @@ unlinkedsongsimport.info.title=Import 'Songs' folder
 unlinkedsongsimport.link_intended.name=No, I want to link my Songs folder
 unlinkedsongsimport.name=Unlinked Songs import
 wiki.openinbrowser=Open in browser
+gameplay.endless_mode.name=Endless mode
+gameplay.endless_mode.tooltip=A window into my future plans for Interlude features.\nWhen this is enabled, after playing a song you are immediately suggested something else to play.\nPress the back button (ESC) while ingame to leave this mode.

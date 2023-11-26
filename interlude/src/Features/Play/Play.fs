@@ -177,7 +177,7 @@ module PlayScreen =
                                     Difficulty = Gameplay.Chart.RATING.Value
                                 )
 
-                            (sd, Gameplay.set_score (pacemaker_met this.State) sd) |> ScoreScreen
+                            (sd, Gameplay.set_score (pacemaker_met this.State) sd, true) |> ScoreScreen
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default
@@ -316,7 +316,7 @@ module PlayScreen =
                                     Difficulty = Gameplay.Chart.RATING.Value
                                 )
 
-                            (sd, Gameplay.set_score true sd) |> ScoreScreen
+                            (sd, Gameplay.set_score true sd, true) |> ScoreScreen
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default

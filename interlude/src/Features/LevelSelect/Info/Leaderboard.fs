@@ -50,7 +50,7 @@ module Leaderboard =
                 NodeType.Button(
                     (fun () ->
                         Screen.change_new
-                            (fun () -> new ScoreScreen(data, ImprovementFlags.Default) :> Screen)
+                            (fun () -> new ScoreScreen(data, ImprovementFlags.Default, false) :> Screen)
                             Screen.Type.Score
                             Transitions.Flags.Default
                         |> ignore

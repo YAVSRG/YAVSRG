@@ -255,7 +255,7 @@ module ReplayScreen =
                                         Difficulty = Gameplay.Chart.RATING.Value
                                     )
 
-                                new ScoreScreen(sd, ImprovementFlags.Default) :> Screen
+                                new ScoreScreen(sd, ImprovementFlags.Default, false) :> Screen
                             )
                             Screen.Type.Score
                             Transitions.Flags.Default

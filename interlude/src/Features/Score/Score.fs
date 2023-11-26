@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Gameplay
 open Prelude.Data.Scores
+open Interlude.Utils
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -12,7 +13,7 @@ open Interlude.Features.Online
 
 #nowarn "3370"
 
-type ScoreScreen(score_info: ScoreInfoProvider, pbs: ImprovementFlags) as this =
+type ScoreScreen(score_info: ScoreInfoProvider, pbs: ImprovementFlags, played_just_now: bool) as this =
     inherit Screen()
 
     let personal_bests = ref pbs
@@ -103,5 +104,7 @@ type ScoreScreen(score_info: ScoreInfoProvider, pbs: ImprovementFlags) as this =
     override this.OnBack() =
         if Network.lobby.IsSome then
             Some Screen.Type.Lobby
+        elif played_just_now && Gameplay.endless_mode.Value && options.AdvancedRecommendations.Value && ScoreScreenHelpers.continue_endless_mode() then
+            None
         else
             Some Screen.Type.LevelSelect

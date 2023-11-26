@@ -118,6 +118,11 @@ type private ModSelectPage(on_close) as this =
             |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerPage().Show()))
                 .Pos(500.0f)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker"))
+            |+ Conditional(options.AdvancedRecommendations.Get, 
+                PageSetting("gameplay.endless_mode", Selector<_>.FromBool(endless_mode))
+                    .Pos(570.0f)
+                    .Tooltip(Tooltip.Info("gameplay.endless_mode"))
+              )
         )
 
     override this.Title = %"mods.name"

@@ -104,7 +104,7 @@ type Chat() =
                     |+ Clickable(
                         (fun () ->
                             Screen.change_new
-                                (fun () -> ScoreScreen(data, ImprovementFlags.Default) :> Screen)
+                                (fun () -> ScoreScreen(data, ImprovementFlags.Default, false) :> Screen)
                                 Screen.Type.Score
                                 Transitions.Flags.Default
                             |> ignore

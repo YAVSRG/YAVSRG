@@ -3,12 +3,14 @@
 open System.Collections.Generic
 open System.IO
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Data.Charts
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
-open Interlude
+open Interlude.Utils
+open Interlude.Options
 open Interlude.Features
 open Interlude.Features.Stats
 open Interlude.Features.MainMenu
@@ -213,7 +215,34 @@ module Startup =
                     Transitions.Flags.Default
                 |> ignore
 
-        Utils.AutoUpdate.check_for_updates ()
+        ScoreScreenHelpers.continue_endless_mode <- fun () ->
+            match Suggestions.Suggestion.get_suggestion Gameplay.Chart.CACHE_DATA.Value [] with
+            | Some c ->
+                Gameplay.Chart.change(c, Collections.LibraryContext.None)
+
+                let rec play_when_song_loads() =
+                    let success = 
+                        Screen.change_new
+                            (fun () ->
+                                PlayScreen.play_screen (
+                                    if options.EnablePacemaker.Value then
+                                        PacemakerMode.Setting
+                                    else
+                                        PacemakerMode.None
+                                )
+                            )
+                            Screen.Type.Play
+                            Transitions.Flags.Default
+                    if not success then 
+                        sync play_when_song_loads
+
+                Gameplay.Chart.wait_for_load play_when_song_loads
+                true
+            | None -> 
+                Notifications.action_feedback(Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
+                false
+
+        AutoUpdate.check_for_updates ()
         Mounts.import_mounts_on_startup ()
 
         Logging.Subscribe(fun (level, main, details) -> sprintf "[%A] %s" level main |> Terminal.add_message)
