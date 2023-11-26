@@ -216,7 +216,7 @@ module Startup =
                 |> ignore
 
         ScoreScreenHelpers.continue_endless_mode <- fun () ->
-            match Suggestions.Suggestion.get_suggestion Gameplay.Chart.CACHE_DATA.Value [] with
+            match Suggestions.Suggestion.get_suggestion Gameplay.Chart.CACHE_DATA.Value Tree.filter with
             | Some c ->
                 Gameplay.Chart.change(c, Collections.LibraryContext.None)
 
@@ -235,6 +235,7 @@ module Startup =
                             Transitions.Flags.Default
                     if not success then 
                         sync play_when_song_loads
+                    else Gameplay.Chart.SAVE_DATA.Value.LastPlayed <- System.DateTime.UtcNow
 
                 Gameplay.Chart.wait_for_load play_when_song_loads
                 true
