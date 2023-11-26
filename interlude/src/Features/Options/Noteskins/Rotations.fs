@@ -7,6 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Content
 open Interlude.Content
+open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI.Menu
@@ -87,7 +88,7 @@ type RotationSettingsPage() as this =
 
     let data = Noteskins.Current.config
     let use_rotation = Setting.simple data.UseRotation
-    let keycount = Setting.simple options.KeymodePreference.Value
+    let keycount : Setting<Keymode> = Setting.simple (match Chart.CACHE_DATA with Some c -> enum c.Keys | None -> Keymode.``4K``)
     let receptor_style = Setting.simple data.ReceptorStyle
     let rotations = data.Rotations
 

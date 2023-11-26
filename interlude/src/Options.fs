@@ -8,6 +8,7 @@ open Percyqaz.Json
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Prelude.Common
+open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Layout
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Library.Imports
@@ -91,15 +92,15 @@ module Options =
             Upscroll: Setting<bool>
             BackgroundDim: Setting.Bounded<float32>
             LaneCover: LaneCoverOptions
-            KeymodePreference: Setting<Keymode>
-            UseKeymodePreference: Setting<bool>
             Noteskin: Setting<string>
 
             Playstyles: Layout array
             SelectedRuleset: Setting<string>
             FailCondition: Setting<FailType>
             Pacemakers: Dictionary<string, Pacemaker>
+            EnablePacemaker: Setting<bool>
             SaveScoreIfUnderPace: Setting<bool>
+            SelectedMods: Setting<ModState>
 
             OsuMount: Setting<MountedChartSource option>
             StepmaniaMount: Setting<MountedChartSource option>
@@ -150,8 +151,6 @@ module Options =
                         Color = Setting.simple Color.Black
                     }
                 Noteskin = Setting.simple "*defaultBar.isk"
-                KeymodePreference = Setting.simple Keymode.``4K``
-                UseKeymodePreference = Setting.simple false
 
                 // playstyles are hints to the difficulty calc on how the hands are positioned
                 // will be removed when difficulty calc gets scrapped
@@ -177,7 +176,9 @@ module Options =
                     )
                 FailCondition = Setting.simple FailType.EndOfSong
                 Pacemakers = Dictionary<string, Pacemaker>()
+                EnablePacemaker = Setting.simple false
                 SaveScoreIfUnderPace = Setting.simple true
+                SelectedMods = Setting.simple Map.empty
 
                 OsuMount = Setting.simple None
                 StepmaniaMount = Setting.simple None

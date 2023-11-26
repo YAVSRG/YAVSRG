@@ -11,6 +11,7 @@ open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.UI
 open Interlude.Utils
+open Interlude.Features.Gameplay
 open Interlude.Features
 
 type GameplayKeybinder(keymode: Setting<Keymode>) as this =
@@ -169,7 +170,7 @@ type EditPresetPage(setting: Setting<Preset option>) as this =
 type GameplayPage() as this =
     inherit Page()
 
-    let keycount = Setting.simple options.KeymodePreference.Value
+    let keycount : Setting<Keymode> = Setting.simple (match Chart.CACHE_DATA with Some c -> enum c.Keys | None -> Keymode.``4K``)
     let binds = GameplayKeybinder(keycount)
     let preview = NoteskinPreview 0.35f
 

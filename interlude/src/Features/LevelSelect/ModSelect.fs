@@ -6,6 +6,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Gameplay.Mods
 open Interlude.Features
+open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
@@ -106,8 +107,8 @@ type private ModSelectPage(on_close) as this =
         |* ModSelector(
             "pacemaker",
             [| Icons.CHECK |],
-            (fun _ -> if enable_pacemaker then 0 else -1),
-            (fun _ -> enable_pacemaker <- not enable_pacemaker)
+            (fun _ -> if options.EnablePacemaker.Value then 0 else -1),
+            (fun _ -> Setting.app not options.EnablePacemaker)
         )
 
     do

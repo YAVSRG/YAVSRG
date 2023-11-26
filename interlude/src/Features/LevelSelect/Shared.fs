@@ -4,6 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Interlude.UI
+open Interlude.Options
 open Interlude.Features.Play
 open Interlude.Features.Online
 open Interlude.Features.Gameplay
@@ -36,7 +37,7 @@ module LevelSelect =
                             ReplayScreen.replay_screen (ReplayMode.Auto) :> Screen.T
                         else
                             PlayScreen.play_screen (
-                                if enable_pacemaker then
+                                if options.EnablePacemaker.Value then
                                     PacemakerMode.Setting
                                 else
                                     PacemakerMode.None

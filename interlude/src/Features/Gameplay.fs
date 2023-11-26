@@ -30,12 +30,11 @@ open Interlude.Web.Shared.Requests
 module Gameplay =
 
     let mutable autoplay = false
-    let mutable enable_pacemaker = false
 
     module Chart =
 
         let _rate = Setting.rate 1.0f
-        let _selected_mods = Setting.simple Map.empty
+        let _selected_mods = options.SelectedMods
 
         let private format_duration (cc: CachedChart option) =
             match cc with

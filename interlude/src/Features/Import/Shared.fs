@@ -24,8 +24,8 @@ module Import =
 
     type ImportOsuNoteskinPage(ini: OsuSkin.OsuSkinIni, source_path: string, target_path: string) as this =
         inherit Page()
-
-        let keymode = Setting.simple options.KeymodePreference.Value
+        
+        let keymode = Setting.simple Keymode.``4K``
 
         do
             this.Content(

@@ -8,6 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Content
 open Interlude.Content
+open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
@@ -78,7 +79,7 @@ type ColorSettingsPage() as this =
     inherit Page()
 
     let data = Noteskins.Current.config
-    let keycount = Setting.simple options.KeymodePreference.Value
+    let keycount : Setting<Keymode> = Setting.simple (match Chart.CACHE_DATA with Some c -> enum c.Keys | None -> Keymode.``4K``)
     let mutable note_colors = data.NoteColors
 
     let g keycount i =
