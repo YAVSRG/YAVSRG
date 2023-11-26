@@ -132,9 +132,16 @@ module Animation =
     type Group() =
         inherit Animation()
         let mutable animations = []
+        let mutable looping = false
+        let mutable add_after_loop = []
 
         member this.Add(a: Animation) =
-            lock (this) (fun () -> animations <- a :: animations)
+            lock this 
+                (fun () -> 
+                    if looping then
+                        add_after_loop <- a :: add_after_loop
+                    else animations <- a :: animations
+                )
 
         override this.Complete = animations.IsEmpty
 
@@ -148,7 +155,15 @@ module Animation =
                     if x.Complete then f else x :: f
 
             if not this.Complete then
-                lock (this) (fun () -> animations <- loop animations)
+                looping <- true
+                lock this 
+                    (fun () -> 
+                        animations <- loop animations
+                        if not (List.isEmpty add_after_loop) then 
+                            animations <- add_after_loop @ animations
+                            add_after_loop <- []
+                    )
+                looping <- false
 
     type Sequence() =
         inherit Animation()
