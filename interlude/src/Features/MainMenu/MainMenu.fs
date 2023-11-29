@@ -16,7 +16,7 @@ open Interlude.Features.Online
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 
-type private MenuButton(on_click, label: string, pos) as this =
+type private MenuButton(on_click, label: string, pos) =
     inherit
         DynamicContainer(
             NodeType.Button(fun () ->
@@ -25,7 +25,7 @@ type private MenuButton(on_click, label: string, pos) as this =
             )
         )
 
-    do
+    override this.Init(parent) =
         this |+ Clickable.Focus this
         |* Text(
             label,
@@ -41,6 +41,8 @@ type private MenuButton(on_click, label: string, pos) as this =
         )
 
         this.Position <- pos
+        base.Init parent
+        this.Hide()
 
     override this.OnFocus() =
         Style.hover.Play()
@@ -54,8 +56,15 @@ type private MenuButton(on_click, label: string, pos) as this =
 
         Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.color !*Palette.MAIN_100) Sprite.DEFAULT_QUAD
         base.Draw()
+        
+    member this.Hide() =
+        this.Position <-
+            { pos with
+                Right = 0.0f %- Viewport.vwidth
+            }
+        this.SnapPosition()
 
-    member this.Pop() =
+    member this.Show() =
         this.Position <-
             { pos with
                 Right = 0.0f %- Viewport.vwidth
@@ -74,13 +83,13 @@ type MainMenuScreen() as this =
         Screen.change Screen.Type.LevelSelect Transitions.Flags.Default |> ignore
 
     let play =
-        MenuButton(play_action, %"menu.play.name", Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f))
+        MenuButton(play_action, %"menu.play.name", Position.Box(0.0f, 0.5f, -300.0f, -200.0f, 1500.0f, 100.0f))
 
     let options =
         MenuButton(
             OptionsMenuRoot.show,
             %"menu.options.name",
-            Position.Box(0.0f, 0.5f, -100.0f, -50.0f, 1230.0f, 100.0f)
+            Position.Box(0.0f, 0.5f, -300.0f, -50.0f, 1430.0f, 100.0f)
         )
 
     let quit =
@@ -90,7 +99,7 @@ type MainMenuScreen() as this =
                     Logo.move_center ()
             ),
             %"menu.quit.name",
-            Position.Box(0.0f, 0.5f, -100.0f, 100.0f, 1160.0f, 100.0f)
+            Position.Box(0.0f, 0.5f, -300.0f, 100.0f, 1360.0f, 100.0f)
         )
 
     let choose_splash =
@@ -101,6 +110,7 @@ type MainMenuScreen() as this =
     let mutable splash_text = "", ""
     let splash_fade = Animation.Fade 0.0f
     let splash_subtitle_fade = Animation.Fade 0.0f
+    let button_sequence = Animation.Group()
 
     do
         this
@@ -138,9 +148,15 @@ type MainMenuScreen() as this =
         Toolbar.show ()
         Song.on_finish <- SongFinishAction.LoopFromBeginning
         splash_fade.Target <- 1.0f
-        play.Pop()
-        options.Pop()
-        quit.Pop()
+        button_sequence.Add
+            <|
+            Animation.seq [
+                Animation.Action play.Show
+                Animation.Delay 50.0
+                Animation.Action options.Show
+                Animation.Delay 50.0
+                Animation.Action quit.Show
+            ]
         DiscordRPC.in_menus ("Main menu")
 
     override this.OnExit next =
@@ -149,6 +165,9 @@ type MainMenuScreen() as this =
 
         splash_fade.Target <- 0.0f
         splash_fade.Snap()
+        play.Hide()
+        options.Hide()
+        quit.Hide()
         Background.dim 0.7f
 
     override this.OnBack() = Some Screen.Type.SplashScreen
@@ -185,6 +204,7 @@ type MainMenuScreen() as this =
         base.Update(elapsed_ms, moved)
         splash_fade.Update elapsed_ms
         splash_subtitle_fade.Update elapsed_ms
+        button_sequence.Update elapsed_ms
 
         splash_subtitle_fade.Target <-
             if Mouse.hover (this.Bounds.Expand(-400.0f, 0.0f).SliceTop(100.0f)) then
