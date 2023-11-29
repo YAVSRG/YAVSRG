@@ -484,9 +484,43 @@ module Patterns =
 
         coverage
 
+    let ln_percent (chart: Chart) : float32 =
+        let mutable notes = 0
+        let mutable lnotes = 0
+
+        for { Data = nr } in chart.Notes do
+            for n in nr do
+                if n = NoteType.NORMAL then
+                    notes <- notes + 1
+                elif n = NoteType.HOLDHEAD then
+                    notes <- notes + 1
+                    lnotes <- lnotes + 1
+
+        float32 lnotes / float32 notes
+
+    let sv_time (chart: Chart) : Time =
+        if chart.SV.Length = 0 then 0.0f<ms> else
+
+        let mutable total = 0.0f<ms>
+
+        let mutable time = chart.FirstNote
+        let mutable vel = 1.0f
+        for sv in chart.SV do
+            if not (System.Single.IsFinite vel) || abs(vel - 1.0f) > 0.01f then
+                total <- total + (sv.Time - time)
+            vel <- sv.Data
+            time <- sv.Time
+            
+        if not (System.Single.IsFinite vel) || abs(vel - 1.0f) > 0.01f then
+            total <- total + (chart.LastNote - time)
+
+        total
+
     [<Json.AutoCodec>]
     type PatternReportEntry = { Pattern: PatternId; BPM: int; Score: float32<ms/rate> }
-    let generate_pattern_report (rate: float32, chart: Chart) =
+    [<Json.AutoCodec>]
+    type PatternReport = { Patterns: PatternReportEntry list; LNPercent: float32; SVAmount: Time }
+    let generate_pattern_report (rate: float32, chart: Chart) : PatternReport =
         let data = 
             analyse rate chart
             |> pattern_locations
@@ -494,22 +528,27 @@ module Patterns =
 
         let importance (p, bpm) =
             match p with
-            | Stream s -> float32 (bpm * bpm) * 0.5f
+            | Stream s -> float32 (bpm * bpm) * 0.25f
             | Jack s -> float32 (bpm * bpm)
 
-        data.Keys 
-        |> Seq.map ( fun (p, bpm) -> { Pattern = p; BPM = bpm; Score = data.[(p, bpm)].TotalTime * importance (p, bpm) / 1_000_000.0f } )
-        |> Seq.sortByDescending (fun x -> x.Score )
-        |> List.ofSeq
-        |> List.truncate 10
+        {
+            Patterns = 
+                data.Keys 
+                |> Seq.map ( fun (p, bpm) -> { Pattern = p; BPM = bpm; Score = data.[(p, bpm)].TotalTime * importance (p, bpm) / 1_000_000.0f } )
+                |> Seq.sortByDescending (fun x -> x.Score )
+                |> List.ofSeq
+                |> List.truncate 10
+            LNPercent = ln_percent chart
+            SVAmount = sv_time chart
+        }
 
-    let categorise_chart (report: PatternReportEntry list) =
+    let categorise_chart (report: PatternReport) =
         let isJack = fun e -> match e.Pattern with Jack _ -> true | _ -> false
         let isStream = fun e -> match e.Pattern with Stream _ -> true | _ -> false
-        let jacks = report |> List.filter isJack
-        let streams = report |> List.filter isStream
+        let jacks = report.Patterns |> List.filter isJack
+        let streams = report.Patterns |> List.filter isStream
 
-        let total = report |> List.sumBy (fun e -> e.Score)
+        let total = report.Patterns |> List.sumBy (fun e -> e.Score)
         let stream_total = streams |> List.sumBy (fun e -> e.Score)
         let jack_total = jacks |> List.sumBy (fun e -> e.Score)
 

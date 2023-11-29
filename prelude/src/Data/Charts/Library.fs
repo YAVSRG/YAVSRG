@@ -8,13 +8,14 @@ open Percyqaz.Json
 open Percyqaz.Common
 open Prelude.Common
 open Prelude.Charts.Conversions
+open Prelude.Charts.Tools.Patterns
 open Prelude.Data.Charts.Caching
 
 open Collections
 
 module Library =
 
-    type Patterns = ConcurrentDictionary<string, Prelude.Charts.Tools.Patterns.Patterns.PatternReportEntry list>
+    type Patterns = ConcurrentDictionary<string, Patterns.PatternReport>
 
     // todo: function to load these as it's unpredictable having it load static like this
     let cache: Cache = Cache.from_path (get_game_folder "Songs")

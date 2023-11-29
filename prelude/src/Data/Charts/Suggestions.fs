@@ -26,13 +26,17 @@ module Suggestion =
 
         if not (Library.patterns.ContainsKey cache_info.Hash) then None else
 
-        let patterns = Library.patterns.[cache_info.Hash]
+        let report = Library.patterns.[cache_info.Hash]
+        let patterns = report.Patterns
 
         let min_difficulty = cache_info.Physical - 0.5
         let max_difficulty = cache_info.Physical + 0.5
 
         let min_length = cache_info.Length - 60000.0f<ms>
         let max_length = min_length + 120000.0f<ms>
+
+        let max_ln_pc = report.LNPercent + 0.1f
+        let min_ln_pc = report.LNPercent - 0.1f
 
         let now = DateTime.UtcNow
 
@@ -41,13 +45,14 @@ module Suggestion =
             |> Seq.filter (fun x -> x.Keys = cache_info.Keys)
             |> Seq.filter (fun x -> x.Physical >= min_difficulty && x.Physical <= max_difficulty)
             |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
+            |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
+            |> Seq.filter (fun x -> Library.patterns.ContainsKey x.Hash)
+            |> Seq.filter (fun x -> let ln_pc = Library.patterns.[x.Hash].LNPercent in ln_pc >= min_ln_pc && ln_pc <= max_ln_pc)
             |> Seq.filter (fun x ->
                 match Scores.get x.Hash with
                 | Some d -> (now - d.LastPlayed).TotalDays > 2.0
                 | _ -> true
             )
-            |> Seq.filter (fun x -> Library.patterns.ContainsKey x.Hash)
-            |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
 
             |> Filter.apply filter
 
@@ -57,8 +62,11 @@ module Suggestion =
 
                 let mutable similarity_score = 0.0f
 
+                if report.SVAmount > 30000.0f<ms> && candidate_patterns.SVAmount < 30000.0f<ms> then similarity_score <- similarity_score - 1000.0f
+                if report.SVAmount < 30000.0f<ms> && candidate_patterns.SVAmount > report.SVAmount then similarity_score <- similarity_score - 1000.0f
+
                 for p in patterns do
-                    for p2 in candidate_patterns do
+                    for p2 in candidate_patterns.Patterns do
                         if p.Pattern = p2.Pattern then
                             let bpm_similarity =
                                 match p.Pattern with

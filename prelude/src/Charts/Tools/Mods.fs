@@ -61,6 +61,7 @@ module NoLN =
                 | NoteType.HOLDTAIL -> nr.[k] <- NoteType.NOTHING
                 | _ -> ()
 
+        // todo: remove empty note rows
         { chart with Notes = notes_copy }, has_ln
 
 module Inverse =

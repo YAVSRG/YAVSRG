@@ -67,7 +67,7 @@ module Sorting =
 
     let has_pattern (c: CachedChart, pattern: string) =
         if Library.patterns.ContainsKey c.Hash then
-            let p = Library.patterns.[c.Hash]
+            let p = Library.patterns.[c.Hash].Patterns
 
             let pattern_to_find =
                 match pattern.ToLower() with
