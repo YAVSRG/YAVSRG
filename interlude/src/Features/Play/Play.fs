@@ -5,6 +5,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.Metrics
@@ -12,6 +13,7 @@ open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
+open Interlude.UI.Menu
 open Interlude.Web.Shared
 open Interlude.Features
 open Interlude.Features.Stats
@@ -87,6 +89,46 @@ module PlayScreen =
             | _ -> ()
         )
 
+        let mutable recommended_offset = 0.0f
+        let offset_slideout = 
+
+            let offset_slider = 
+                Slider(
+                    LocalAudioSync.offset
+                    |> Setting.map float32 (fun x -> x * 1.0f<ms>)
+                    |> Setting.bound -200.0f 200.0f,
+                    Step = 1f,
+                    Format = (fun v -> sprintf "%.0fms" v),
+                    Position = Position.Box(0.0f, 0.0f, 600.0f, 60.0f))
+
+            let close() = 
+                Screen.change_new
+                    (fun () -> play_screen (pacemaker_mode) :> Screen.T)
+                    Screen.Type.Play
+                    Transitions.Flags.Default
+                |> ignore
+
+            Slideout(
+                "Offset",
+                StaticContainer(NodeType.None)
+                |+ offset_slider
+                |+ Text(
+                    (fun () -> sprintf "Press %O to use recommended offset (%.0fms)" (%%"accept_suggestion") recommended_offset),
+                    Position = Position.Box(0.0f, 0.0f, 0.0f, 60.0f, 600.0f, 40.0f))
+                |+ HotkeyAction("accept_suggestion", fun () -> LocalAudioSync.offset.Set (recommended_offset * 1.0f<ms>); close())
+                |+ Callout.frame
+                    (Callout
+                        .Small
+                        .Icon(Icons.INFO)
+                        .Body("Use a negative offset if you are hitting LATE and want to hit EARLIER.\nUse a positive offset if you are hitting EARLY and want to hit LATER."))
+                    (fun (w, h) -> Position.SliceRight(w)),
+                130.0f,
+                10.0f,
+                Hotkey = "options",
+                ShowButton = false,
+                OnOpen = (fun () -> Song.pause(); recommended_offset <- LocalAudioSync.get_automatic scoring |> float32; offset_slider.Select()),
+                OnClose = close)
+
         { new IPlayScreen(chart, pacemaker_info, ruleset, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
@@ -103,6 +145,8 @@ module PlayScreen =
                 add_widget EarlyLateMeter
                 add_widget RateModMeter
                 add_widget BPMMeter
+
+                this.Add offset_slideout
 
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then
@@ -124,8 +168,8 @@ module PlayScreen =
                 else
                     Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
 
-                if options.AutoCalibrateOffset.Value then
-                    AutomaticSync.apply (scoring)
+                if options.AutoCalibrateOffset.Value && recommended_offset = 0.0f then
+                    LocalAudioSync.apply_automatic (scoring)
 
                 base.OnExit(next)
 
@@ -186,10 +230,10 @@ module PlayScreen =
             override this.Draw() =
                 base.Draw()
 
-                if options.AutoCalibrateOffset.Value && this.State.CurrentChartTime() < 0.0f<ms> then
+                if options.AutoCalibrateOffset.Value && this.State.CurrentChartTime() < 0.0f<ms> && Song.playing() then
                     Text.draw_b (
                         Style.font,
-                        sprintf "Local offset: %.0fms" AutomaticSync.offset.Value,
+                        sprintf "Local offset: %.0fms" LocalAudioSync.offset.Value,
                         20.0f,
                         this.Bounds.Left + 20.0f,
                         this.Bounds.Top + 20.0f,
@@ -257,7 +301,7 @@ module PlayScreen =
                     Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
 
                 if options.AutoCalibrateOffset.Value then
-                    AutomaticSync.apply (scoring)
+                    LocalAudioSync.apply_automatic (scoring)
 
                 if next <> Screen.Type.Score then
                     Lobby.abandon_play ()

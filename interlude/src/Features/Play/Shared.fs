@@ -20,7 +20,7 @@ open Interlude.Features
 open Interlude.Features.Online
 open Interlude.Features.Play
 
-module AutomaticSync =
+module LocalAudioSync =
 
     let offset =
         Setting.make
@@ -31,7 +31,7 @@ module AutomaticSync =
             (fun () -> Gameplay.Chart.SAVE_DATA.Value.Offset - Gameplay.Chart.CHART.Value.FirstNote)
         |> Setting.roundt 0
 
-    let apply (scoring: IScoreMetric) =
+    let get_automatic (scoring: IScoreMetric) =
         let mutable sum = 0.0f<ms>
         let mutable count = 1.0f
 
@@ -46,21 +46,23 @@ module AutomaticSync =
 
         let first_note = Gameplay.Chart.CHART.Value.FirstNote
 
-        let reccommended_offset =
-            if count < 10.0f then
-                offset.Value
-            else
-                Gameplay.Chart.SAVE_DATA.Value.Offset - first_note - mean * 1.25f
+        if count < 10.0f then
+            offset.Value
+        else
+            Gameplay.Chart.SAVE_DATA.Value.Offset - first_note - mean * 1.25f
 
-        offset.Set reccommended_offset
+    let apply_automatic (scoring: IScoreMetric) =
+        offset.Set (get_automatic scoring)
 
 type Timeline(chart: ModChart, on_seek: Time -> unit) =
     inherit StaticWidget(NodeType.None)
-    
+
     let HEIGHT = 60.0f
 
     // chord density is notes per second but n simultaneous notes count for 1 instead of n
-    let samples = int ((chart.LastNote - chart.FirstNote) / 1000.0f) |> max 10 |> min 400
+    let samples =
+        int ((chart.LastNote - chart.FirstNote) / 1000.0f) |> max 10 |> min 400
+
     let note_density, chord_density = Analysis.nps_cps samples chart
 
     let note_density, chord_density =
@@ -85,51 +87,27 @@ type Timeline(chart: ModChart, on_seek: Time -> unit) =
             let note_next = HEIGHT * note_density.[i] / max_note_density
             let chord_next = HEIGHT * chord_density.[i] / max_note_density
 
-            Draw.quad 
-                (
-                    Quad.createv 
-                        (x, b.Bottom)
-                        (x, b.Bottom - note_prev)
-                        (x + w, b.Bottom - note_next)
-                        (x + w, b.Bottom)
-                )
+            Draw.quad
+                (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (x + w, b.Bottom - note_next) (x + w, b.Bottom))
                 (Quad.color Colors.white.O2)
                 Sprite.DEFAULT_QUAD
 
-            Draw.quad 
-                (
-                    Quad.createv 
-                        (x, b.Bottom)
-                        (x, b.Bottom - chord_prev)
-                        (x + w, b.Bottom - chord_next)
-                        (x + w, b.Bottom)
-                )
+            Draw.quad
+                (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (x + w, b.Bottom - chord_next) (x + w, b.Bottom))
                 (Quad.color chord_density_color)
                 Sprite.DEFAULT_QUAD
 
             x <- x + w
             note_prev <- note_next
             chord_prev <- chord_next
-            
-        Draw.quad 
-            (
-                Quad.createv 
-                    (x, b.Bottom)
-                    (x, b.Bottom - note_prev)
-                    (b.Right, b.Bottom - note_prev)
-                    (b.Right, b.Bottom)
-            )
+
+        Draw.quad
+            (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (b.Right, b.Bottom - note_prev) (b.Right, b.Bottom))
             (Quad.color Colors.white.O2)
             Sprite.DEFAULT_QUAD
-            
-        Draw.quad 
-            (
-                Quad.createv 
-                    (x, b.Bottom)
-                    (x, b.Bottom - chord_prev)
-                    (b.Right, b.Bottom - chord_prev)
-                    (b.Right, b.Bottom)
-            )
+
+        Draw.quad
+            (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
             (Quad.color chord_density_color)
             Sprite.DEFAULT_QUAD
 
@@ -156,12 +134,20 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
     let light_time = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
 
     let column_spacing = ns.KeymodeColumnSpacing keys
+
     let column_positions =
         let mutable x = 0.0f
-        Array.init keys (fun i -> 
-            let v = x
-            if i + 1 < keys then x <- x + ns.ColumnWidth + column_spacing.[i]
-            v)
+
+        Array.init
+            keys
+            (fun i ->
+                let v = x
+
+                if i + 1 < keys then
+                    x <- x + ns.ColumnWidth + column_spacing.[i]
+
+                v
+            )
 
     do
         let hitpos = float32 options.HitPosition.Value
@@ -217,14 +203,22 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     let explode_time = Math.Clamp(ns.Explosions.FadeTime, 0f, 0.99f)
     let animation = Animation.Counter ns.Explosions.AnimationFrameTime
     let rotation = Noteskins.note_rotation keys
-    
+
     let column_spacing = ns.KeymodeColumnSpacing keys
+
     let column_positions =
         let mutable x = 0.0f
-        Array.init keys (fun i -> 
-            let v = x
-            if i + 1 < keys then x <- x + ns.ColumnWidth + column_spacing.[i]
-            v)
+
+        Array.init
+            keys
+            (fun i ->
+                let v = x
+
+                if i + 1 < keys then
+                    x <- x + ns.ColumnWidth + column_spacing.[i]
+
+                v
+            )
 
     let handle_event (ev: HitEvent<HitEventGuts>) =
         match ev.Guts with
@@ -272,12 +266,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
                 let box =
                     (if options.Upscroll.Value then
-                         Rect.Box(
-                             this.Bounds.Left + column_positions.[k],
-                             this.Bounds.Top,
-                             columnwidth,
-                             columnwidth
-                         )
+                         Rect.Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top, columnwidth, columnwidth)
                      else
                          Rect.Box(
                              this.Bounds.Left + column_positions.[k],
@@ -395,8 +384,10 @@ type IPlayScreen(chart: ModChart, pacemaker_info: PacemakerInfo, ruleset: Rulese
             Pacemaker = pacemaker_info
         }
 
-    let noteskin_config = noteskin_config()
-    let playfield = Playfield(Gameplay.Chart.WITH_COLORS.Value, state, noteskin_config, options.VanishingNotes.Value)
+    let noteskin_config = noteskin_config ()
+
+    let playfield =
+        Playfield(Gameplay.Chart.WITH_COLORS.Value, state, noteskin_config, options.VanishingNotes.Value)
 
     do
         this.Add playfield
@@ -442,3 +433,61 @@ type IPlayScreen(chart: ModChart, pacemaker_info: PacemakerInfo, ruleset: Rulese
             Some Screen.Type.Lobby
         else
             Some Screen.Type.LevelSelect
+
+type Slideout(label: string, content: Widget, height: float32, x: float32) as this =
+    inherit DynamicContainer(NodeType.None)
+
+    let mutable is_open = false
+
+    let button =
+        { new Button((fun () -> label + " " + (if is_open then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)),
+                     (fun () -> if is_open then this.Close() else this.Open()),
+                     Floating = true) with
+            override this.Draw() =
+                Draw.rect this.Bounds Colors.cyan_shadow
+                base.Draw()
+        }
+
+    member val Hotkey = "none" with get, set
+    member val OnOpen = ignore with get, set
+    member val OnClose = ignore with get, set
+    member val ShowButton = true with get, set
+
+    override this.Init(parent: Widget) =
+        button.Position <- Position.SliceBottom(40.0f).SliceLeft(200.0f).Translate(x, 45.0f)
+        button.Init this
+        content.Position <- Position.Margin(15.0f)
+        content.Init this
+        this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
+        this |* HotkeyAction(this.Hotkey, fun () -> if is_open then this.Close() else this.Open())
+        base.Init parent
+
+    member this.Close() = 
+        is_open <- false
+        this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
+        this.OnClose()
+
+    member this.Open() = 
+        is_open <- true
+        this.Position <- Position.SliceTop(height)
+        this.OnOpen()
+
+    override this.Draw() =
+        if this.Bounds.Bottom > this.Parent.Bounds.Top - 4.0f then
+            Draw.rect this.Bounds Colors.shadow_2.O2
+            Draw.rect (this.Bounds.Expand(5.0f).SliceBottom(5.0f)) Colors.cyan_shadow
+            content.Draw()
+            button.Draw()
+        elif this.ShowButton then
+            button.Draw()
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        let moved = moved || this.Moving
+        if this.Bounds.Bottom > this.Parent.Bounds.Top - 4.0f then
+            content.Update(elapsed_ms, moved)
+            button.Update(elapsed_ms, moved)
+        elif this.ShowButton then
+            button.Update(elapsed_ms, moved)
+        if is_open && (%%"exit").Tapped() then
+            this.Close()
