@@ -203,6 +203,8 @@ type DynamicContainer(node_type) =
             if not this.Initialised then
                 pos.Snap()
 
+    member this.Moving = pos.Moving
+
     member this.SnapPosition() =
         pos.Snap()
 
