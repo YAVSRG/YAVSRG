@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Interlude.Utils
 open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Features
@@ -48,7 +47,7 @@ type Details(display: Setting<Display>) =
         match Gameplay.Chart.PATTERNS with
         | None -> ()
         | Some p ->
-            for entry in p do
+            for entry in p.Patterns do
                 Text.fill_b (
                     Style.font,
                     sprintf "%i BPM %O" entry.BPM entry.Pattern,

@@ -83,7 +83,7 @@ module Gameplay =
         let mutable WITH_MODS: ModChart option = None
         let mutable FMT_NOTECOUNTS: string option = None
         let mutable RATING: RatingReport option = None
-        let mutable PATTERNS: Patterns.PatternReportEntry list option = None
+        let mutable PATTERNS: Patterns.PatternReport option = None
 
         let mutable WITH_COLORS: ColorizedChart option = None
 
