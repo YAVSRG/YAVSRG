@@ -146,23 +146,24 @@ module Song =
     let set_global_offset (offset) = _global_offset <- offset
 
     let private song_loader =
-        { new Async.SwitchService<string option, Song>() with
-            override this.Process(path) =
+        { new Async.SwitchService<string option * bool, Song * bool>() with
+            override this.Process((path, play_automatically)) =
                 async {
                     return
                         match path with
-                        | Some p -> Song.FromFile p
-                        | None -> Song.Default
+                        | Some p -> Song.FromFile p, play_automatically
+                        | None -> Song.Default, play_automatically
                 }
 
-            override this.Handle(song) =
+            override this.Handle((song, play_automatically)) =
                 loading <- false
                 now_playing <- song
                 change_rate rate
-                play_from preview_point
+                if play_automatically then
+                    play_from preview_point
         }
 
-    let change (path: string option, offset: Time, new_rate: float32, (preview, chart_last_note)) =
+    let change (path: string option, offset: Time, new_rate: float32, (preview, chart_last_note), play_automatically) =
         let path_changed = path <> load_path
         load_path <- path
         preview_point <- preview
@@ -181,7 +182,7 @@ module Song =
 
             channel_playing <- false
             loading <- true
-            song_loader.Request(path)
+            song_loader.Request(path, play_automatically)
 
     let update () =
 
