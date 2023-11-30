@@ -163,9 +163,9 @@ module Mounts =
                 %"imports.mount.create.auto",
                 (fun () ->
                     match game with
-                    | Game.Osu -> osuSongFolder
-                    | Game.Stepmania -> stepmaniaPackFolder
-                    | Game.Etterna -> etternaPackFolder
+                    | Game.Osu -> OSU_SONG_FOLDER
+                    | Game.Stepmania -> STEPMANIA_PACK_FOLDER
+                    | Game.Etterna -> ETTERNA_PACK_FOLDER
                     | _ -> failwith "impossible"
                     |> drop_func.Value
                 ),
