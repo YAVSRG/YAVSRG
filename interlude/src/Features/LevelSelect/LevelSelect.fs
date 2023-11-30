@@ -18,6 +18,8 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Online
+open Interlude.Features.Play
+open Interlude.Features.Score
 
 type LevelSelectScreen() =
     inherit Screen()
@@ -52,9 +54,39 @@ type LevelSelectScreen() =
                 Tree.switch_chart (c, LibraryContext.None, "")
                 refresh ()
             | None -> ()
+    
+    let continue_endless_mode () =
+        match Suggestion.get_suggestion Chart.CACHE_DATA.Value Tree.filter with
+        | Some c ->
+            Chart.change(c, LibraryContext.None, false)
+    
+            let rec play_when_song_loads() =
+                let success = 
+                    Screen.change_new
+                        (fun () ->
+                            PlayScreen.play_screen (
+                                if options.EnablePacemaker.Value then
+                                    PacemakerMode.Setting
+                                else
+                                    PacemakerMode.None
+                            )
+                        )
+                        Screen.Type.Play
+                        Transitions.Flags.Default
+                if not success then 
+                    sync play_when_song_loads
+                else Chart.SAVE_DATA.Value.LastPlayed <- System.DateTime.UtcNow
+    
+            Chart.wait_for_load play_when_song_loads
+            true
+        | None -> 
+            Notifications.action_feedback(Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
+            false
 
     override this.Init(parent: Widget) =
         base.Init parent
+
+        ScoreScreenHelpers.continue_endless_mode <- continue_endless_mode
 
         Setting.app (fun s -> if sorting_modes.ContainsKey s then s else "title") options.ChartSortMode
         Setting.app (fun s -> if grouping_modes.ContainsKey s then s else "pack") options.ChartGroupMode

@@ -57,8 +57,6 @@ module Logo =
                     breathe_bounds
 
                 if r > 2.0f then
-                    // gradient for the edges of the triangle is 13/8 for some reason
-
                     /// DARK BLUE BACKDROP
 
                     let UPPER_TRIANGLE_1 = Vector2(l + 0.1f * w, t + 0.1f * w)

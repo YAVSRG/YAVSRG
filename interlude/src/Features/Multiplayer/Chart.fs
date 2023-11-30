@@ -72,7 +72,7 @@ module SelectedChart =
                     Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash)
                     Lobby.missing_chart ()
                 | Some cc ->
-                    Chart.change (cc, Collections.LibraryContext.None)
+                    Chart.change (cc, Collections.LibraryContext.None, true)
                     rate.Set chart.Rate
 
                     selected_mods.Set(

@@ -97,7 +97,7 @@ module Gameplay =
         let mutable on_load_finished = []
 
         type private LoadRequest =
-            | Load of CachedChart
+            | Load of CachedChart * play_audio: bool
             | Update of bool
             | Recolor
 
@@ -105,7 +105,7 @@ module Gameplay =
             { new Async.SwitchServiceSeq<LoadRequest, unit -> unit>() with
                 override this.Process(req) =
                     match req with
-                    | Load cc ->
+                    | Load (cc, play_audio) ->
                         seq {
                             match Cache.load cc Library.cache with
                             | None ->
@@ -132,7 +132,8 @@ module Gameplay =
                                         Cache.audio_path chart Library.cache,
                                         save_data.Offset - chart.FirstNote,
                                         _rate.Value,
-                                        (chart.Header.PreviewTime, chart.LastNote)
+                                        (chart.Header.PreviewTime, chart.LastNote),
+                                        play_audio
                                     )
 
                                     SAVE_DATA <- Some save_data
@@ -226,7 +227,7 @@ module Gameplay =
                 override this.Handle(action) = action ()
             }
 
-        let change (cc: CachedChart, ctx: LibraryContext) =
+        let change (cc: CachedChart, ctx: LibraryContext, auto_play_audio: bool) =
             CACHE_DATA <- Some cc
             FMT_DURATION <- format_duration CACHE_DATA
             FMT_BPM <- format_bpm CACHE_DATA
@@ -243,7 +244,7 @@ module Gameplay =
 
             WITH_COLORS <- None
 
-            chart_loader.Request(Load cc)
+            chart_loader.Request(Load (cc, auto_play_audio))
 
         let update () =
             if CACHE_DATA.IsSome then
@@ -439,12 +440,12 @@ module Gameplay =
 
     let init () =
         match Cache.by_key options.CurrentChart.Value Library.cache with
-        | Some cc -> Chart.change (cc, LibraryContext.None)
+        | Some cc -> Chart.change (cc, LibraryContext.None, true)
         | None ->
             Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
 
             match Suggestions.Suggestion.get_random [] with
-            | Some cc -> Chart.change (cc, LibraryContext.None)
+            | Some cc -> Chart.change (cc, LibraryContext.None, true)
             | None ->
                 Logging.Debug "No charts installed"
                 Background.load None

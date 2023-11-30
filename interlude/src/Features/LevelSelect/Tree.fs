@@ -74,7 +74,7 @@ module Tree =
         if Transitions.active then
             ()
         else
-            Chart.change (cc, context)
+            Chart.change (cc, context, true)
             Selection.clear ()
             selected_chart <- cc.Key
             expanded_group <- group_name
