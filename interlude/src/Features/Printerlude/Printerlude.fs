@@ -6,12 +6,12 @@ open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Prelude.Common
 open Prelude.Charts
-open Prelude.Charts.Conversions
 open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.``osu!``
 open Interlude
+open Interlude.Utils
 open Interlude.Features
 open Interlude.Web.Shared.Requests
 
@@ -44,9 +44,6 @@ module Printerlude =
                 )
 
     module private Utils =
-
-        open Prelude.Charts.Formats
-        open System.IO.Compression
 
         let mutable cmp = None
 
@@ -84,6 +81,12 @@ module Printerlude =
 
         let private import_osu_scores () =
             Import.Scores.import_osu_scores_service.Request((), ignore)
+
+        open SixLabors.ImageSharp
+
+        let private banner (hex: string) (emoji: string) =
+            use banner = Prelude.Data.ImageServices.generate_banner { BaseColor = Color.FromHex hex; Emoji = emoji.ToLower() }
+            banner.SaveAsPng("banner.png")
 
         let private sync_table_scores () =
             match Tables.Table.current () with
@@ -177,10 +180,11 @@ module Printerlude =
                     fun (io: IOContext) (b: bool) ->
                         Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
                         Online.Network.credentials.Api <- (if b then "localhost" else "api.yavsrg.net")
-                        Utils.AutoUpdate.restart_on_exit <- true
+                        AutoUpdate.restart_on_exit <- true
                         UI.Screen.exit <- true
                 )
                 .WithIOCommand("timescale", "Sets the timescale of all UI animations, for testing", "speed", timescale)
+                .WithCommand("banner", "Generates a banner image (for testing)", "color", "emoji", banner)
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
                 .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
 
