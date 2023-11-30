@@ -465,7 +465,7 @@ module Options =
 
     let save () =
         try
-            JSON.ToFile (config_path, true) config
-            JSON.ToFile (Path.Combine(get_game_folder "Data", "options.json"), true) options
+            save_important_json_file config_path config
+            save_important_json_file (Path.Combine(get_game_folder "Data", "options.json")) options
         with err ->
             Logging.Critical("Failed to write options/config to file.", err)
