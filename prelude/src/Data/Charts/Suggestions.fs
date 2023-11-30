@@ -18,8 +18,6 @@ module Suggestion =
 
     let mutable recommended_recently = Set.empty
 
-
-
     let get_similar_suggestions (cache_info: CachedChart) (filter: Filter) : CachedChart seq option =
 
         recommended_recently <- Set.add cache_info.Hash recommended_recently
@@ -81,7 +79,7 @@ module Suggestion =
 
                             similarity_score <- similarity_score + duration_similarity * bpm_similarity
 
-                yield entry, similarity_score
+                if similarity_score > 0.0f then yield entry, similarity_score
         }
         |> Seq.sortByDescending snd
         |> Seq.map fst
