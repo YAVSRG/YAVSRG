@@ -16,6 +16,19 @@ module Logo =
 
     let mutable private state = Centre
 
+    let GRADIENT = 1.61803f
+    let PADDING = 10f
+    let Y_PADDING_FOR_GRADIENT = PADDING * MathF.Sqrt(GRADIENT * GRADIENT + 1.0f)
+    let X_PADDING_FOR_GRADIENT = (Y_PADDING_FOR_GRADIENT + PADDING) / GRADIENT
+    let X_PADDING_FOR_GRADIENT_INNER = (Y_PADDING_FOR_GRADIENT - PADDING) / GRADIENT
+
+    let BOBBING_INTENSITY = 0.01f
+    let BREATHING_INTENSITY = 0.01f
+    
+    let TRIANGLE_HEIGHT = 0.4f * GRADIENT
+    let LOWER_Y_THICKNESS = 0.85f - TRIANGLE_HEIGHT - BREATHING_INTENSITY - (3.0f * PADDING / 800.0f)
+    let LOWER_X_THICKNESS = LOWER_Y_THICKNESS / GRADIENT
+
     type Display() =
         inherit DynamicContainer(NodeType.None)
 
@@ -28,10 +41,10 @@ module Logo =
                 base.Draw()
                 let w = this.Bounds.Width
 
-                let breathe_1 = float32 (Math.Sin(counter.Time / 3500.0 * Math.PI) * 0.01) * w
+                let breathe_1 = float32 (Math.Sin(counter.Time / 3500.0 * Math.PI)) * BOBBING_INTENSITY * w
 
                 let breathe_2 =
-                    float32 (Math.Cos(counter.Time / 8000.0 * Math.PI) * 0.018 + 0.018) * w
+                    (float32 (Math.Cos(counter.Time / 8000.0 * Math.PI)) * BREATHING_INTENSITY + 2.0f * BREATHING_INTENSITY) * w
 
                 let breathe_bounds = this.Bounds.Translate(0.0f, breathe_1)
 
@@ -44,39 +57,51 @@ module Logo =
                     breathe_bounds
 
                 if r > 2.0f then
-                    // gradient for the edges of the triangle is 1.5
+                    // gradient for the edges of the triangle is 13/8 for some reason
 
                     /// DARK BLUE BACKDROP
 
-                    // center triangle backdrop
+                    let UPPER_TRIANGLE_1 = Vector2(l + 0.1f * w, t + 0.1f * w)
+                    let UPPER_TRIANGLE_2 = Vector2(r - 0.1f * w, t + 0.1f * w)
+                    let UPPER_TRIANGLE_3 = Vector2(l + 0.5f * w, t + (0.1f + TRIANGLE_HEIGHT) * w)
+
                     Draw.quad
-                        (Quad.createv
-                            (l + 0.08f * w, t + 0.09f * w)
-                            (l + 0.5f * w, t + 0.76875f * w)
-                            (l + 0.5f * w, t + 0.76875f * w)
-                            (r - 0.08f * w, t + 0.09f * w))
+                        (Quad.create
+                            (UPPER_TRIANGLE_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING))
+                            (UPPER_TRIANGLE_2 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING))
+                            (UPPER_TRIANGLE_3 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT))
+                            (UPPER_TRIANGLE_3 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT))
+                        )
                         (Quad.color Colors.blue)
                         Sprite.DEFAULT_QUAD
 
-                    // left lower triangle backdrop
+                    let LOWER_LEFT_1 = Vector2(l + 0.1f * w, t + (0.95f - TRIANGLE_HEIGHT) * w)
+                    let LOWER_LEFT_2 = Vector2(l + (0.1f + LOWER_X_THICKNESS) * w, t + (0.95f - TRIANGLE_HEIGHT) * w)
+                    let LOWER_LEFT_3 = Vector2(l + 0.5f * w, t + (0.95f - LOWER_Y_THICKNESS) * w)
+                    let LOWER_LEFT_4 = Vector2(l + 0.5f * w, t + 0.95f * w)
+
                     Draw.quad
-                        (Quad.createv
-                            (l + 0.08f * w, t + 0.29f * w)
-                            (l + 0.21536f * w, t + 0.29f * w)
-                            (l + 0.5f * w, t + 0.75f * w)
-                            (l + 0.5f * w, t + 0.96875f * w)
-                         |> Quad.translate (0.0f, breathe_2))
+                        (Quad.create
+                            (LOWER_LEFT_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING))
+                            (LOWER_LEFT_2 + Vector2(X_PADDING_FOR_GRADIENT_INNER, -PADDING))
+                            (LOWER_LEFT_3 + Vector2(0.0f, -Y_PADDING_FOR_GRADIENT))
+                            (LOWER_LEFT_4 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT))
+                        |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.blue)
                         Sprite.DEFAULT_QUAD
 
-                    // right lower triangle backdrop
+                    let LOWER_RIGHT_1 = Vector2(r - 0.1f * w, t + (0.95f - TRIANGLE_HEIGHT) * w)
+                    let LOWER_RIGHT_2 = Vector2(r - (0.1f + LOWER_X_THICKNESS) * w, t + (0.95f - TRIANGLE_HEIGHT) * w)
+                    let LOWER_RIGHT_3 = Vector2(r - 0.5f * w, t + (0.95f - LOWER_Y_THICKNESS) * w)
+                    let LOWER_RIGHT_4 = Vector2(r - 0.5f * w, t + 0.95f * w)
+                    
                     Draw.quad
-                        (Quad.createv
-                            (r - 0.08f * w, t + 0.29f * w)
-                            (r - 0.21536f * w, t + 0.29f * w)
-                            (l + 0.5f * w, t + 0.75f * w)
-                            (l + 0.5f * w, t + 0.96875f * w)
-                         |> Quad.translate (0.0f, breathe_2))
+                        (Quad.create
+                            (LOWER_RIGHT_1 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING))
+                            (LOWER_RIGHT_2 + Vector2(-X_PADDING_FOR_GRADIENT_INNER, -PADDING))
+                            (LOWER_RIGHT_3 + Vector2(0.0f, -Y_PADDING_FOR_GRADIENT))
+                            (LOWER_RIGHT_4 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT))
+                        |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.blue)
                         Sprite.DEFAULT_QUAD
 
@@ -86,33 +111,32 @@ module Logo =
                     
                     // center triangle
                     Draw.quad
-                        (Quad.createv
-                            (l + 0.1f * w, t + 0.1f * w)
-                            (l + 0.5f * w, t + 0.75f * w)
-                            (l + 0.5f * w, t + 0.75f * w)
-                            (r - 0.1f * w, t + 0.1f * w))
+                        (Quad.create
+                            UPPER_TRIANGLE_1
+                            UPPER_TRIANGLE_2
+                            UPPER_TRIANGLE_3
+                            UPPER_TRIANGLE_3
+                        )
                         (Quad.color Colors.cyan_accent)
                         Sprite.DEFAULT_QUAD
                         
-                    // left lower triangle
                     Draw.quad
-                        (Quad.createv
-                            (l + 0.1f * w, t + 0.3f * w)
-                            (l + 0.2075f * w, t + 0.3f * w)
-                            (l + 0.5f * w, t + 0.77f * w)
-                            (l + 0.5f * w, t + 0.95f * w)
-                         |> Quad.translate (0.0f, breathe_2))
+                        (Quad.create
+                            LOWER_LEFT_1
+                            LOWER_LEFT_2
+                            LOWER_LEFT_3
+                            LOWER_LEFT_4
+                        |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.cyan_accent)
                         Sprite.DEFAULT_QUAD
                         
-                    // right lower triangle
                     Draw.quad
-                        (Quad.createv
-                            (r - 0.1f * w, t + 0.3f * w)
-                            (r - 0.2075f * w, t + 0.3f * w)
-                            (l + 0.5f * w, t + 0.77f * w)
-                            (l + 0.5f * w, t + 0.95f * w)
-                         |> Quad.translate (0.0f, breathe_2))
+                        (Quad.create
+                            LOWER_RIGHT_1
+                            LOWER_RIGHT_2
+                            LOWER_RIGHT_3
+                            LOWER_RIGHT_4
+                        |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.cyan_accent)
                         Sprite.DEFAULT_QUAD
 
