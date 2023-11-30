@@ -194,38 +194,3 @@ module WebServices =
 //                return true
 //            } |> Async.AwaitTask
 //    }
-
-// todo: place in IO services file + have zip extractor/creator service
-module ImageServices =
-
-    open SixLabors.ImageSharp.Formats.Jpeg
-
-    let save_image_jpg =
-        { new Async.Service<Bitmap * string, unit>() with
-            override this.Handle((image, path)) =
-                image.SaveAsJpegAsync(path, JpegEncoder(Quality = 90)) |> Async.AwaitTask
-        }
-
-    let save_image_png =
-        { new Async.Service<Bitmap * string, unit>() with
-            override this.Handle((image, path)) =
-                image.SaveAsPngAsync(path) |> Async.AwaitTask
-        }
-
-    let get_cached_image =
-        { new Async.Service<string, Bitmap>() with
-            override this.Handle(url: string) =
-                async {
-                    let cached_file_name =
-                        let uri = new Uri(url)
-                        let name = Uri.UnescapeDataString(uri.Segments[uri.Segments.Length - 1])
-                        Path.Combine(get_game_folder ("Downloads"), name)
-
-                    if File.Exists(cached_file_name) then
-                        return! Image.LoadAsync<PixelFormats.Rgba32>(cached_file_name) |> Async.AwaitTask
-                    else
-                        let! image = WebServices.download_image.RequestAsync(url)
-                        save_image_png.Request((image, cached_file_name), ignore)
-                        return image
-                }
-        }

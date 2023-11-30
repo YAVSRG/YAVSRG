@@ -48,6 +48,7 @@
     <Compile Include="Backbeat\Archive.fs" />
     <Compile Include="Data\Web.fs" />
     <Compile Include="Data\Scores.fs" />
+    <Compile Include="Data\Images.fs" />
     <Compile Include="Data\Charts\Caching.fs" />
     <Compile Include="Data\Charts\Tables.fs" />
     <Compile Include="Data\Charts\Collections.fs" />
