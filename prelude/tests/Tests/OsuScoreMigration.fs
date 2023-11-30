@@ -108,14 +108,14 @@ module OsuScoreMigration =
         Logging.Info "Reading osu database ..."
 
         use file =
-            Path.Combine(Data.Charts.Library.Imports.osuSongFolder, "..", "scores.db")
+            Path.Combine(Data.Charts.Library.Imports.OSU_SONG_FOLDER, "..", "scores.db")
             |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)
         let scores = ScoreDatabase.Read(reader)
 
         use file =
-            Path.Combine(Data.Charts.Library.Imports.osuSongFolder, "..", "osu!.db")
+            Path.Combine(Data.Charts.Library.Imports.OSU_SONG_FOLDER, "..", "osu!.db")
             |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)
@@ -125,7 +125,7 @@ module OsuScoreMigration =
             main_db.Beatmaps
             |> Seq.filter (fun b -> b.Mode = 3uy && round b.OverallDifficulty = 8.0f) do
             let osu_file =
-                Path.Combine(Data.Charts.Library.Imports.osuSongFolder, beatmap_data.FolderName, beatmap_data.Filename)
+                Path.Combine(Data.Charts.Library.Imports.OSU_SONG_FOLDER, beatmap_data.FolderName, beatmap_data.Filename)
 
             let chart =
                 try
@@ -152,7 +152,7 @@ module OsuScoreMigration =
                     for score in scores.Scores do
                         let replay_file =
                             Path.Combine(
-                                Data.Charts.Library.Imports.osuSongFolder,
+                                Data.Charts.Library.Imports.OSU_SONG_FOLDER,
                                 "..",
                                 "Data",
                                 "r",
@@ -217,7 +217,7 @@ module OsuScoreMigration =
         Logging.Info "Reading osu database ..."
 
         use file =
-            Path.Combine(Data.Charts.Library.Imports.osuSongFolder, "..", "osu!.db")
+            Path.Combine(Data.Charts.Library.Imports.OSU_SONG_FOLDER, "..", "osu!.db")
             |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)

@@ -48,13 +48,13 @@ module Library =
 
     module Imports =
 
-        let osuSongFolder =
+        let OSU_SONG_FOLDER =
             Path.Combine(Environment.GetFolderPath Environment.SpecialFolder.LocalApplicationData, "osu!", "Songs")
 
-        let stepmaniaPackFolder =
+        let STEPMANIA_PACK_FOLDER =
             Path.Combine(Path.GetPathRoot Environment.CurrentDirectory, "Games", "Stepmania 5", "Songs")
 
-        let etternaPackFolder =
+        let ETTERNA_PACK_FOLDER =
             Path.Combine(Path.GetPathRoot Environment.CurrentDirectory, "Games", "Etterna", "Songs")
 
         [<Json.AutoCodec>]
