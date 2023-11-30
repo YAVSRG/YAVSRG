@@ -44,7 +44,11 @@ module Logo =
                     breathe_bounds
 
                 if r > 2.0f then
+                    // gradient for the edges of the triangle is 1.5
 
+                    /// DARK BLUE BACKDROP
+
+                    // center triangle backdrop
                     Draw.quad
                         (Quad.createv
                             (l + 0.08f * w, t + 0.09f * w)
@@ -54,28 +58,33 @@ module Logo =
                         (Quad.color Colors.blue)
                         Sprite.DEFAULT_QUAD
 
+                    // left lower triangle backdrop
                     Draw.quad
                         (Quad.createv
                             (l + 0.08f * w, t + 0.29f * w)
-                            (l + 0.22f * w, t + 0.29f * w) // todo: 0.22 is too far. go and work out the right number
+                            (l + 0.21536f * w, t + 0.29f * w)
                             (l + 0.5f * w, t + 0.75f * w)
                             (l + 0.5f * w, t + 0.96875f * w)
                          |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.blue)
                         Sprite.DEFAULT_QUAD
 
+                    // right lower triangle backdrop
                     Draw.quad
                         (Quad.createv
                             (r - 0.08f * w, t + 0.29f * w)
-                            (r - 0.22f * w, t + 0.29f * w)
+                            (r - 0.21536f * w, t + 0.29f * w)
                             (l + 0.5f * w, t + 0.75f * w)
                             (l + 0.5f * w, t + 0.96875f * w)
                          |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.blue)
                         Sprite.DEFAULT_QUAD
 
-                    Stencil.start_stencilling (true)
+                    /// STENCIL FOR LIGHT BLUE PARTS WITH RAIN AND VISUALISER IN THEM
 
+                    Stencil.start_stencilling (true)
+                    
+                    // center triangle
                     Draw.quad
                         (Quad.createv
                             (l + 0.1f * w, t + 0.1f * w)
@@ -84,7 +93,8 @@ module Logo =
                             (r - 0.1f * w, t + 0.1f * w))
                         (Quad.color Colors.cyan_accent)
                         Sprite.DEFAULT_QUAD
-
+                        
+                    // left lower triangle
                     Draw.quad
                         (Quad.createv
                             (l + 0.1f * w, t + 0.3f * w)
@@ -94,7 +104,8 @@ module Logo =
                          |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.cyan_accent)
                         Sprite.DEFAULT_QUAD
-
+                        
+                    // right lower triangle
                     Draw.quad
                         (Quad.createv
                             (r - 0.1f * w, t + 0.3f * w)
@@ -107,8 +118,9 @@ module Logo =
 
                     Draw.sprite breathe_bounds Colors.white (Content.get_texture "logo")
 
+                    /// RENDER VISUALISER AND RAIN INSIDE STENCIL
+
                     Stencil.start_drawing ()
-                    //chart background
                     Draw.rect breathe_bounds Colors.cyan_accent
                     let rain = Content.get_texture "rain"
                     let v = float32 counter.Time
