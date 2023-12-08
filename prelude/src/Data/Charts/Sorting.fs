@@ -183,7 +183,7 @@ module Sorting =
 
     module Filter =
 
-        let private string = " =:<>\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLower()
+        let private string = " =<>\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLower()
 
         let private quoted_string =
             between (pchar '"') (pchar '"') ("\"" |> isNoneOf |> many1Satisfy)
