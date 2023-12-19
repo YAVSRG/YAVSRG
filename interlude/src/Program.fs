@@ -87,11 +87,11 @@ let main argv =
 
     if
         not (File.Exists("bass.dll"))
-        && not (File.Exists("libbass.iso"))
+        && not (File.Exists("libbass.so"))
         && not (File.Exists("libbass.dylib"))
     then
         printfn
-            "Interlude is missing the appropriate audio library dll/iso/dylib for your platform.\n If you are a developer, info on how to fix this is at https://github.com/YAVSRG/YAVSRG#readme\n If you are not a developer, looks like you deleted a file you shouldn't have!\n Redownloading the game and extracting the zip over this folder to replace what is missing should fix it."
+            "Interlude is missing the appropriate audio library dll/so/dylib for your platform.\n If you are a developer, info on how to fix this is at https://github.com/YAVSRG/YAVSRG#readme\n If you are not a developer, looks like you deleted a file you shouldn't have!\n Redownloading the game and extracting the zip over this folder to replace what is missing should fix it."
 
         -1
     else
