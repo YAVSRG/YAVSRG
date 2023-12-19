@@ -9,6 +9,8 @@ open Percyqaz.Common
 module private Helpers =
     let display_bass_error b = () //if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString(), Environment.StackTrace)
 
+    let mutable internal current_device = -1
+
 type Song =
     {
         ID: int
@@ -33,6 +35,7 @@ type Song =
             let d = Bass.ChannelGetInfo ID
             let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength ID) * 1000.0
             let Frequency = d.Frequency
+            Bass.ChannelSetDevice(ID, current_device) |> display_bass_error
             //let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
             {
                 ID = ID
@@ -327,6 +330,7 @@ module Devices =
 
             if Song.now_playing.ID <> 0 then
                 Bass.ChannelSetDevice(Song.now_playing.ID, id) |> display_bass_error
+            current_device <- id
         with err ->
             Logging.Error(sprintf "Error switching to audio output %i" index, err)
 
