@@ -139,14 +139,12 @@ module Content =
                 for id in Storage.THEME_TEXTURES do
                     match instance.GetTexture id with
                     | Some(img, config) ->
-                        Sprite.upload (img, config.Rows, config.Columns, config.Sampling = Linear)
-                        |> Sprite.cache id (id = "rain" || id = "logo" || id = "background")
+                        Sprite.upload_one false (config.Sampling = Linear) { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
                         |> Sprites.add id
                     | None ->
                         match loaded.["*default"].GetTexture id with
                         | Some(img, config) ->
-                            Sprite.upload (img, config.Rows, config.Columns, config.Sampling = Linear)
-                            |> Sprite.cache id (id = "rain" || id = "logo" || id = "background")
+                            Sprite.upload_one false (config.Sampling = Linear) { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
                             |> Sprites.add id
                         | None -> failwithf "Failed to load texture '%s' from *default" id
 
@@ -264,8 +262,7 @@ module Content =
                 for id in Storage.NOTESKIN_TEXTURES do
                     match instance.GetTexture id with
                     | Some(img, config) ->
-                        Sprite.upload (img, config.Rows, config.Columns, config.Sampling = Linear)
-                        |> Sprite.cache id false
+                        Sprite.upload_one false (config.Sampling = Linear) { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
                         |> Sprites.add id
                     | None ->
                         Logging.Warn(
@@ -273,8 +270,9 @@ module Content =
                                 "Noteskin texture '%s' didn't load properly, so it will appear as a white square ingame."
                                 id
                         )
-
-                        Sprite.DEFAULT |> Sprites.add id
+                        
+                        failwith "TODO"
+                        //Sprite.DEFAULT |> Sprites.add id
 
             let switch (new_id: string) =
                 let new_id =
@@ -294,8 +292,7 @@ module Content =
             let reload_texture (id: string) =
                 match instance.GetTexture id with
                 | Some(img, config) ->
-                    Sprite.upload (img, config.Rows, config.Columns, config.Sampling = Linear)
-                    |> Sprite.cache id false
+                    Sprite.upload_one false (config.Sampling = Linear) { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
                     |> Sprites.add id
                 | None ->
                     Logging.Warn(
@@ -304,7 +301,8 @@ module Content =
                             id
                     )
 
-                    Sprite.DEFAULT |> Sprites.add id
+                    failwith "TODO"
+                    //Sprite.DEFAULT |> Sprites.add id
 
         // Loading into memory
 

@@ -49,12 +49,11 @@ type private MenuButton(on_click, label: string, pos) =
         base.OnFocus()
 
     override this.Draw() =
-        Draw.quad
+        Draw.untextured_quad
             (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f))
             (Quad.color !*Palette.HIGHLIGHT_100)
-            Sprite.DEFAULT_QUAD
 
-        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.color !*Palette.MAIN_100) Sprite.DEFAULT_QUAD
+        Draw.untextured_quad (Quad.parallelogram 0.5f this.Bounds) (Quad.color !*Palette.MAIN_100)
         base.Draw()
         
     member this.Hide() =

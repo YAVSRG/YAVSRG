@@ -33,14 +33,13 @@ module Transitions =
         let startpoint = r1 + (r2 - r1) * (time * time)
         let endpoint = r1 + (r2 - r1) * (time * (2.0f - time))
 
-        Draw.quad
+        Draw.untextured_quad
             (Quad.create
                 (o + d * startpoint + perp)
                 (o + d * endpoint + perp)
                 (o + d * endpoint - perp)
                 (o + d * startpoint - perp))
             (Quad.color col)
-            Sprite.DEFAULT_QUAD
 
     let private glint (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) =
         let t = 4.0f * (time - time * time)
@@ -64,10 +63,10 @@ module Transitions =
 
         let c = Color.FromArgb(Math.Clamp(t * 255.0f |> int, 0, 255), col)
 
-        Draw.quad q (Quad.color c) Sprite.DEFAULT_QUAD
-        Draw.quad q2 (Quad.color c) Sprite.DEFAULT_QUAD
-        Draw.quad (Quad.rotate_about o 180.0 q) (Quad.color c) Sprite.DEFAULT_QUAD
-        Draw.quad (Quad.rotate_about o 180.0 q2) (Quad.color c) Sprite.DEFAULT_QUAD
+        Draw.untextured_quad q (Quad.color c)
+        Draw.untextured_quad q2 (Quad.color c)
+        Draw.untextured_quad (Quad.rotate_about o 180.0 q) (Quad.color c)
+        Draw.untextured_quad (Quad.rotate_about o 180.0 q2) (Quad.color c)
 
     let private wedge (centre: Vector2) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
         let segments = int ((a2 - a1) / 0.10)
@@ -79,10 +78,9 @@ module Transitions =
             let ang1 = Vector2(Math.Sin a1 |> float32, -Math.Cos a1 |> float32)
             let ang2 = Vector2(Math.Sin a2 |> float32, -Math.Cos a2 |> float32)
 
-            Draw.quad
+            Draw.untextured_quad
                 (Quad.create (centre + ang1 * r2) (centre + ang2 * r2) (centre + ang2 * r1) (centre + ang1 * r1))
                 (Quad.color col)
-                Sprite.DEFAULT_QUAD
 
     let private cwedge =
         wedge <| new Vector2(Viewport.vwidth * 0.5f, Viewport.vheight * 0.5f)
@@ -134,14 +132,13 @@ module Transitions =
         let diamond x y =
             let r = size x
 
-            Draw.quad
+            Draw.untextured_quad
                 (Quad.create
                  <| new Vector2(x - r, y)
                  <| new Vector2(x, y - r)
                  <| new Vector2(x + r, y)
                  <| new Vector2(x, y + r))
                 (Quad.color Color.Transparent)
-                Sprite.DEFAULT_QUAD
 
         Stencil.start_stencilling false
 
@@ -177,23 +174,21 @@ module Transitions =
             let v = new Vector2(h, -h) * f
 
             if n % 2 = 0 then
-                Draw.quad
+                Draw.untextured_quad
                     (Quad.create
                      <| new Vector2(x, h) + v
                      <| new Vector2(x + s, h) + v
                      <| new Vector2(x + s, h)
                      <| new Vector2(x, h))
                     (Quad.color Color.Transparent)
-                    Sprite.DEFAULT_QUAD
             else
-                Draw.quad
+                Draw.untextured_quad
                     (Quad.create
                      <| new Vector2(x + h, 0.0f)
                      <| new Vector2(x + h + s, 0.0f)
                      <| new Vector2(x + h + s, 0.0f) - v
                      <| new Vector2(x + h, 0.0f) - v)
                     (Quad.color Color.Transparent)
-                    Sprite.DEFAULT_QUAD
 
         Stencil.start_stencilling false
 

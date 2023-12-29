@@ -13,15 +13,16 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Gameplay
 
+// todo: eliminate the need for this entirely because all noteskins are loaded in memory already
 module private PreviewCleanup =
 
-    let mutable private list = Set.empty
+    let mutable private list = List.empty
 
-    let add (s: Sprite) = list <- list.Add s
+    let add (s: Sprite) = list <- s :: list
 
     let clear () =
-        Set.iter Sprite.destroy list
-        list <- Set.empty
+        List.iter Sprite.destroy list
+        list <- List.empty
 
 type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
     inherit
@@ -46,7 +47,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
             function
             | Some(bmp, config) ->
                 sync (fun () ->
-                    preview <- Some(Sprite.upload (bmp, config.Rows, config.Columns, true))
+                    preview <- Some(Sprite.upload_one false (config.Sampling = TextureSampleMode.Linear) { Label = "NOTESKIN_PREVIEW"; Image = bmp; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true })
                     PreviewCleanup.add preview.Value
                     bmp.Dispose()
                     preview_fade.Target <- 1.0f

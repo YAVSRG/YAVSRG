@@ -75,7 +75,7 @@ module Background =
                 match res with
                 | Some(bmp, col) ->
                     let sprite =
-                        Sprite.upload (bmp, 1, 1, true) |> Sprite.cache "loaded background" false
+                        Sprite.upload_one false true (SpriteUpload.OfImage("BACKGROUND", bmp))
 
                     bmp.Dispose()
                     Content.accent_color <- col

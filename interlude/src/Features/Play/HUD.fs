@@ -293,18 +293,16 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
             (x + (r - 4f) * a, y - (r - 4f) * b)
 
         for i = 0 to 29 do
-            Draw.quad
+            Draw.untextured_quad
                 (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
                 (Quad.color conf.BackgroundColor)
-                Sprite.DEFAULT_QUAD
 
-            Draw.quad
+            Draw.untextured_quad
                 (Quad.createv (inner i) (outer i) (outer (i + 1)) (inner (i + 1)))
                 (Quad.color Colors.white.O2)
-                Sprite.DEFAULT_QUAD
 
         for i = 0 to pc * 29.9f |> floor |> int do
-            Draw.quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) (Quad.color conf.Color) Sprite.DEFAULT_QUAD
+            Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) (Quad.color conf.Color)
 
         let text =
             match conf.Label with

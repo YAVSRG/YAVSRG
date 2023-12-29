@@ -70,7 +70,7 @@ type DeleteButton(onClick) =
 type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as this =
     inherit StaticContainer(NodeType.Switch(fun () -> this.Items))
 
-    let mutable sprite = Sprite.DEFAULT
+    let mutable sprite = Unchecked.defaultof<Sprite>
     let mutable selected: bool array array = [||]
     let mutable items: NavigationContainer.Grid<Widget> = Unchecked.defaultof<_>
 

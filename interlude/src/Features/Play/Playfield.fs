@@ -262,8 +262,10 @@ type Playfield(chart: ColorizedChart, state: PlayState, noteskin_config: Noteski
                  ).AsQuad
                  |> if useholdtail then id else rotation k)
                 (Quad.color tint)
-                (Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
-                 |> fun struct (s, q) -> struct (s, hold_tail_flip q))
+                (
+                    Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
+                    |> fun x -> x.Transform hold_tail_flip
+                )
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
         // todo: also put a cap at -playfield_height when *negative sv comes into play

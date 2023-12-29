@@ -55,7 +55,7 @@ type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 
             let note_next = HEIGHT * note_density.[i] / max_note_density
             let chord_next = HEIGHT * chord_density.[i] / max_note_density
 
-            Draw.quad 
+            Draw.untextured_quad 
                 (
                     Quad.createv 
                         (x, b.Bottom)
@@ -64,9 +64,8 @@ type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 
                         (x + w, b.Bottom)
                 )
                 (Quad.color Colors.white.O2)
-                Sprite.DEFAULT_QUAD
 
-            Draw.quad 
+            Draw.untextured_quad 
                 (
                     Quad.createv 
                         (x, b.Bottom)
@@ -75,13 +74,12 @@ type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 
                         (x + w, b.Bottom)
                 )
                 (Quad.color chord_density_color)
-                Sprite.DEFAULT_QUAD
 
             x <- x + w
             note_prev <- note_next
             chord_prev <- chord_next
             
-        Draw.quad 
+        Draw.untextured_quad 
             (
                 Quad.createv 
                     (x, b.Bottom)
@@ -90,9 +88,8 @@ type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 
                     (b.Right, b.Bottom)
             )
             (Quad.color Colors.white.O2)
-            Sprite.DEFAULT_QUAD
             
-        Draw.quad 
+        Draw.untextured_quad 
             (
                 Quad.createv 
                     (x, b.Bottom)
@@ -101,7 +98,6 @@ type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 
                     (b.Right, b.Bottom)
             )
             (Quad.color chord_density_color)
-            Sprite.DEFAULT_QUAD
 
         let percent = (Song.time () - start) / (chart.LastNote - start) |> min 1.0f
         let x = b.Width * percent

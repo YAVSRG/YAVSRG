@@ -85,10 +85,9 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 let dy = -HTHICKNESS * System.MathF.Cos theta
                 let dx = HTHICKNESS * System.MathF.Sin theta
 
-                Draw.quad
+                Draw.untextured_quad
                     (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
                     (Quad.color color.O3)
-                    Sprite.DEFAULT_QUAD
 
         // draw dots
         let hscale = (width - 10.0f) / events.[events.Count - 1].Time

@@ -87,29 +87,25 @@ type Timeline(chart: ModChart, on_seek: Time -> unit) =
             let note_next = HEIGHT * note_density.[i] / max_note_density
             let chord_next = HEIGHT * chord_density.[i] / max_note_density
 
-            Draw.quad
+            Draw.untextured_quad
                 (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (x + w, b.Bottom - note_next) (x + w, b.Bottom))
                 (Quad.color Colors.white.O2)
-                Sprite.DEFAULT_QUAD
 
-            Draw.quad
+            Draw.untextured_quad
                 (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (x + w, b.Bottom - chord_next) (x + w, b.Bottom))
                 (Quad.color chord_density_color)
-                Sprite.DEFAULT_QUAD
 
             x <- x + w
             note_prev <- note_next
             chord_prev <- chord_next
 
-        Draw.quad
+        Draw.untextured_quad
             (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (b.Right, b.Bottom - note_prev) (b.Right, b.Bottom))
             (Quad.color Colors.white.O2)
-            Sprite.DEFAULT_QUAD
 
-        Draw.quad
+        Draw.untextured_quad
             (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
             (Quad.color chord_density_color)
-            Sprite.DEFAULT_QUAD
 
         let percent = (Song.time () - start) / (chart.LastNote - start) |> min 1.0f
         let x = b.Width * percent
@@ -315,24 +311,22 @@ type LaneCover() =
             let upper (amount: float32) =
                 Draw.rect (bounds.SliceTop(amount - fade_length)) options.LaneCover.Color.Value
 
-                Draw.quad
+                Draw.untextured_quad
                     (bounds.SliceTop(amount).SliceBottom(fade_length).AsQuad)
                     struct (options.LaneCover.Color.Value,
                             options.LaneCover.Color.Value,
                             Color.FromArgb(0, options.LaneCover.Color.Value),
                             Color.FromArgb(0, options.LaneCover.Color.Value))
-                    Sprite.DEFAULT_QUAD
 
             let lower (amount: float32) =
                 Draw.rect (bounds.SliceBottom(amount - fade_length)) options.LaneCover.Color.Value
 
-                Draw.quad
+                Draw.untextured_quad
                     (bounds.SliceBottom(amount).SliceTop(fade_length).AsQuad)
                     struct (Color.FromArgb(0, options.LaneCover.Color.Value),
                             Color.FromArgb(0, options.LaneCover.Color.Value),
                             options.LaneCover.Color.Value,
                             options.LaneCover.Color.Value)
-                    Sprite.DEFAULT_QUAD
 
             let height = bounds.Height
 

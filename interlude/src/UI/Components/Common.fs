@@ -86,14 +86,13 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
     override this.Draw() =
         let h = this.Bounds.Height
 
-        Draw.quad
+        Draw.untextured_quad
             (Quad.create
              <| Vector2(this.Bounds.Left, this.Bounds.Top)
              <| Vector2(this.Bounds.Right + (if this.TiltRight then h * 0.5f else 0.0f), this.Bounds.Top)
              <| Vector2(this.Bounds.Right, this.Bounds.Bottom)
              <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom))
             (color_func () |> Quad.color)
-            Sprite.DEFAULT_QUAD
 
         Text.fill_b (Style.font, label_func (), this.Bounds, this.TextColor(), 0.5f)
         base.Draw()
@@ -362,9 +361,8 @@ type NewAndShiny() =
             (x + r * a, y - r * b)
 
         for i = 0 to 29 do
-            Draw.quad
+            Draw.untextured_quad
                 (Quad.createv (x, y) (x, y) (vec i) (vec (i + 1)))
                 (Quad.color Colors.red_accent)
-                Sprite.DEFAULT_QUAD
 
         Text.fill_b (Style.font, this.Icon, Rect.Box(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)

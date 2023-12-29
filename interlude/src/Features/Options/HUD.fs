@@ -433,21 +433,18 @@ type EditProgressMeterPage() as this =
                     (x + (r - 2f) * a, y - (r - 2f) * b)
 
                 for i = 0 to 29 do
-                    Draw.quad
+                    Draw.untextured_quad
                         (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
                         (Quad.color background_color.Value)
-                        Sprite.DEFAULT_QUAD
 
-                    Draw.quad
+                    Draw.untextured_quad
                         (Quad.createv (inner i) (outer i) (outer (i + 1)) (inner (i + 1)))
                         (Quad.color Colors.white.O2)
-                        Sprite.DEFAULT_QUAD
 
                 for i = 0 to 17 do
-                    Draw.quad
+                    Draw.untextured_quad
                         (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
                         (Quad.color color.Value)
-                        Sprite.DEFAULT_QUAD
 
                 let text =
                     match label.Value with

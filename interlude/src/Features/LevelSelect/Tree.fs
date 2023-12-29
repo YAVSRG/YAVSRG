@@ -182,14 +182,13 @@ module Tree =
 
             let stripe_length = (right - left) * (0.4f + 0.6f * hover.Value)
 
-            Draw.quad
+            Draw.untextured_quad
                 (Quad.create
                  <| new Vector2(left, top)
                  <| new Vector2(left + stripe_length, top)
                  <| new Vector2(left + stripe_length, bottom - 25.0f)
                  <| new Vector2(left, bottom - 25.0f))
                 (struct (accent, Color.Transparent, Color.Transparent, accent))
-                Sprite.DEFAULT_QUAD
 
             let border = bounds.Expand(5.0f, 0.0f)
             let border_color = if this.Selected then !*Palette.LIGHT else color
