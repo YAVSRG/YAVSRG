@@ -142,20 +142,19 @@ module Logo =
                     let v = float32 counter.Time
                     let q = breathe_bounds.AsQuad
 
-                    Draw.quad
-                    <| q
-                    <| Quad.color (Colors.blue.O2)
-                    <| Sprite.tiling (0.625f, v * 0.06f, v * 0.07f) rain q
+                    let draw_tiling_rain (scale, x, y) color =
+                        let stride = float32 rain.Width * scale
+                        let mutable y = breathe_bounds.Top - stride + y % stride
+                        while y < breathe_bounds.Bottom do
+                            let mutable x = breathe_bounds.Left - stride + x % stride
+                            while x < breathe_bounds.Right do
+                                Draw.sprite (Rect.Box(x, y, stride, stride)) color rain
+                                x <- x + stride
+                            y <- y + stride
 
-                    Draw.quad
-                    <| q
-                    <| Quad.color (Colors.blue.O3)
-                    <| Sprite.tiling (1.0f, v * 0.1f, v * 0.11f) rain q
-
-                    Draw.quad
-                    <| q
-                    <| Quad.color (Colors.blue)
-                    <| Sprite.tiling (1.5625f, v * 0.15f, v * 0.16f) rain q
+                    draw_tiling_rain (0.625f, v * 0.06f, v * 0.07f) Colors.blue.O2
+                    draw_tiling_rain (1.0f, v * 0.1f, v * 0.11f) Colors.blue.O3
+                    draw_tiling_rain (1.5625f, v * 0.15f, v * 0.16f) Colors.blue
 
                     let mutable prev = 0.0f
                     let m = b - w * 0.5f

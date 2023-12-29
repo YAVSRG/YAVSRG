@@ -31,11 +31,13 @@ module Content =
             else
                 failwithf "No such loaded sprite: %s" id
 
-        let add (id: string) (s: Sprite) =
+        let remove (id: string) =
             if cache.ContainsKey id then
                 Sprite.destroy cache.[id]
                 cache.Remove id |> ignore
 
+        let add (id: string) (s: Sprite) =
+            remove id
             cache.Add(id, s)
 
     module Sounds =
@@ -136,17 +138,26 @@ module Content =
                 config <- instance.Config
 
             let reload () =
+                let missing_textures = ResizeArray()
+                let available_textures = ResizeArray()
                 for id in Storage.THEME_TEXTURES do
+                    Sprites.remove id
                     match instance.GetTexture id with
-                    | Some(img, config) ->
-                        Sprite.upload_one false (config.Sampling = Linear) { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
-                        |> Sprites.add id
-                    | None ->
-                        match loaded.["*default"].GetTexture id with
-                        | Some(img, config) ->
-                            Sprite.upload_one false (config.Sampling = Linear) { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
-                            |> Sprites.add id
-                        | None -> failwithf "Failed to load texture '%s' from *default" id
+                    | Some(img, config) -> available_textures.Add { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
+                    | None -> 
+                        Logging.Warn(
+                            sprintf
+                                "Theme texture '%s' didn't load properly, so it will appear as a white square ingame."
+                                id
+                        )
+                        // todo: fall back to default theme textures like it used to
+                        missing_textures.Add id
+
+                let atlas, sprites = Sprite.upload_many "THEME" false (available_textures.ToArray())
+                for id, sprite in sprites do
+                    Sprites.add id sprite
+                for id in missing_textures do
+                    Sprites.add id (Texture.create_default_sprite atlas)
 
                 for id in Storage.THEME_SOUNDS do
                     match instance.GetSound id with
@@ -259,20 +270,25 @@ module Content =
                 config <- instance.Config
 
             let reload () =
+                let missing_textures = ResizeArray()
+                let available_textures = ResizeArray()
                 for id in Storage.NOTESKIN_TEXTURES do
+                    Sprites.remove id
                     match instance.GetTexture id with
-                    | Some(img, config) ->
-                        Sprite.upload_one false (config.Sampling = Linear) { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
-                        |> Sprites.add id
-                    | None ->
+                    | Some(img, config) -> available_textures.Add { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
+                    | None -> 
                         Logging.Warn(
                             sprintf
                                 "Noteskin texture '%s' didn't load properly, so it will appear as a white square ingame."
                                 id
                         )
-                        
-                        failwith "TODO"
-                        //Sprite.DEFAULT |> Sprites.add id
+                        missing_textures.Add id
+
+                let atlas, sprites = Sprite.upload_many "NOTESKIN" config.LinearSampling (available_textures.ToArray())
+                for id, sprite in sprites do
+                    Sprites.add id sprite
+                for id in missing_textures do
+                    Sprites.add id (Texture.create_default_sprite atlas)
 
             let switch (new_id: string) =
                 let new_id =
@@ -288,21 +304,6 @@ module Content =
                     config <- instance.Config
 
                 reload ()
-
-            let reload_texture (id: string) =
-                match instance.GetTexture id with
-                | Some(img, config) ->
-                    Sprite.upload_one false (config.Sampling = Linear) { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
-                    |> Sprites.add id
-                | None ->
-                    Logging.Warn(
-                        sprintf
-                            "Noteskin texture '%s' didn't load properly, so it will appear as a white square ingame."
-                            id
-                    )
-
-                    failwith "TODO"
-                    //Sprite.DEFAULT |> Sprites.add id
 
         // Loading into memory
 

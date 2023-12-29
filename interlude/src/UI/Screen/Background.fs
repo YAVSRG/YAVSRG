@@ -74,8 +74,7 @@ module Background =
             member this.Handle(res) =
                 match res with
                 | Some(bmp, col) ->
-                    let sprite =
-                        Sprite.upload_one false true (SpriteUpload.OfImage("BACKGROUND", bmp))
+                    let sprite = Sprite.upload_one true (SpriteUpload.OfImage("BACKGROUND", bmp))
 
                     bmp.Dispose()
                     Content.accent_color <- col
@@ -144,8 +143,7 @@ module Background =
             )
             background
 
-    let draw (bounds: Rect, color, depth) =
-        drawq (bounds.AsQuad, color, depth)
+    let draw (bounds: Rect, color, depth) = drawq (bounds.AsQuad, color, depth)
 
     let draw_with_dim (bounds: Rect, color, depth) =
         draw (bounds, color, depth)
