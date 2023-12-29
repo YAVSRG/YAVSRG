@@ -658,7 +658,6 @@ module SkinConversions =
                         Rows = colors
                         Columns = animation_frames
                         Mode = Loose
-                        Sampling = Linear
                     }
 
             let mutable flipholdtail = false
@@ -713,7 +712,7 @@ module SkinConversions =
                 // todo: square these images
                 (grayscale 0.5f receptor_base).Save(Path.Combine(target, "receptor-0-0.png"))
                 (grayscale 1.0f receptor_base).Save(Path.Combine(target, "receptor-1-0.png"))
-                JSON.ToFile (Path.Combine(target, "receptor.json"), false) { Rows = 2; Columns = 1; Mode = Loose; Sampling = Linear }
+                JSON.ToFile (Path.Combine(target, "receptor.json"), false) { Rows = 2; Columns = 1; Mode = Loose }
             with err ->
                 Logging.Warn("Error generating receptors", err)
 

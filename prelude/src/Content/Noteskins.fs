@@ -91,6 +91,8 @@ type NoteskinConfig =
         Rotations: float array array
 
         ReceptorStyle: ReceptorStyle
+
+        LinearSampling: bool
     }
     static member Default =
         {
@@ -136,6 +138,7 @@ type NoteskinConfig =
                     [| 45.0; 135.0; 0.0; 225.0; 315.0; 45.0; 135.0; 0.0; 225.0; 315.0 |]
                 |]
             ReceptorStyle = ReceptorStyle.Rotate
+            LinearSampling = true
         }
 
     member this.Validate =
