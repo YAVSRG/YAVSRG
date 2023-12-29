@@ -19,7 +19,7 @@ module Batch =
             G: uint8
             B: uint8
             A: uint8
-            T: int32
+            L: int32
         }
 
     let mutable private active = false
@@ -56,7 +56,7 @@ module Batch =
         VERTEX_SIZE,
         sizeof<float32> * 4
     )
-    // 1 int in slot 3, for tex unit - using an int instead of a byte to make 20 bytes total instead of 17
+    // 1 int in slot 3, for tex unit - using an int makes 20 bytes total
     VertexArrayObject.vertex_attrib_pointer (
         3,
         1,
@@ -77,7 +77,7 @@ module Batch =
         vcount <- 0
         bcount <- bcount + 1
 
-    let internal vertex (pos: Vector2) (uv: Vector2) (color: Color) (texture_unit: int) =
+    let internal vertex (pos: Vector2) (uv: Vector2) (color: Color) (texture_layer: int) =
         if vcount = VERTEX_COUNT then
             draw ()
 
@@ -91,7 +91,7 @@ module Batch =
                 G = color.G
                 B = color.B
                 A = color.A
-                T = texture_unit
+                L = texture_layer
             }
 
         vcount <- vcount + 1

@@ -112,15 +112,6 @@ module FBO =
                 int vwidth,
                 int vheight
             )
-
-            //GL.FramebufferTexture3D(
-            //    FramebufferTarget.Framebuffer,
-            //    FramebufferAttachment.ColorAttachment0,
-            //    TextureTarget.Texture2DArray,
-            //    texture_ids.[i],
-            //    0,
-            //    0
-            //)
             
             GL.FramebufferTextureLayer(
                 FramebufferTarget.Framebuffer,
@@ -138,15 +129,26 @@ module FBO =
         |> function
             | None -> failwith "Ran out of FBOs! (6 max) - Some are likely not being disposed after use"
             | Some i ->
+                let texture: Texture =
+                    {
+                        Handle = texture_ids.[i]
+                        TextureUnit = 0
+                        
+                        Width = int vwidth
+                        Height = int vheight
+                        Layers = 1
+
+                        References = -1
+                    }
+
                 let sprite: Sprite =
                     {
-                        ID = texture_ids.[i]
-                        TextureUnit = 0
+                        Texture = texture
 
-                        Left = 0
-                        Top = 0
-                        AtlasWidth = int vwidth
-                        AtlasHeight = int vheight
+                        X = 0
+                        Y = 0
+                        Z = 0
+
                         GridWidth = int vwidth
                         GridHeight = int vheight
 
@@ -154,7 +156,6 @@ module FBO =
                         Columns = 1
 
                         PrecomputedQuad = ValueNone
-                        DefaultQuad = None
                     }
 
                 in_use.[i] <- true
@@ -205,11 +206,12 @@ module Render =
 
         Logging.Debug(
             sprintf
-                "GL %s | %s | U:%i T:%i | GLFW %i.%i.%i%s | C:%i"
+                "GL %s | %s | U:%i T:%i L:%i | GLFW %i.%i.%i%s | C:%i"
                 (GL.GetString StringName.Version)
                 (GL.GetString StringName.Renderer)
-                Sprite.MAX_TEXTURE_UNITS
-                Sprite.MAX_TEXTURE_SIZE
+                Texture.MAX_TEXTURE_UNITS
+                Texture.MAX_TEXTURE_SIZE
+                Texture.MAX_ARRAY_TEXTURE_LAYERS
                 major
                 minor
                 rev
@@ -251,56 +253,41 @@ module Render =
 module Draw =
 
     let mutable private last_texture_handle = -1
-    let mutable private last_texture_default_quad = None
 
-    let quad
-        (struct (p1, p2, p3, p4): Quad)
-        (struct (c1, c2, c3, c4): QuadColors)
-        (struct (s, struct (u1, u2, u3, u4)): TexturedQuad)
-        =
-        if
-            last_texture_handle <> s.ID
-            && s.ID = Sprite.DEFAULT.ID
-            && last_texture_default_quad.IsSome
-        then
+    let untextured_quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) =
+        
+        Batch.vertex p1 Vector2.Zero c1 0
+        Batch.vertex p2 Vector2.Zero c2 0
+        Batch.vertex p3 Vector2.Zero c3 0
+        Batch.vertex p1 Vector2.Zero c1 0
+        Batch.vertex p3 Vector2.Zero c3 0
+        Batch.vertex p4 Vector2.Zero c4 0
 
-            let struct (u1, u2, u3, u4) = last_texture_default_quad.Value
+    let textured_quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (t: Texture) (layer: int) (struct (u1, u2, u3, u4): Quad) =
 
-            Batch.vertex p1 u1 c1 s.TextureUnit
-            Batch.vertex p2 u2 c2 s.TextureUnit
-            Batch.vertex p3 u3 c3 s.TextureUnit
-            Batch.vertex p1 u1 c1 s.TextureUnit
-            Batch.vertex p3 u3 c3 s.TextureUnit
-            Batch.vertex p4 u4 c4 s.TextureUnit
-
-        elif last_texture_handle <> s.ID then
-
+        if last_texture_handle <> t.Handle then
             Batch.draw ()
+        
+            if t.TextureUnit = 0 then
+                GL.BindTexture(TextureTarget.Texture2DArray, t.Handle)
+        
+            Shader.set_uniform_i32 ("sampler", t.TextureUnit) Shader.main
+            last_texture_handle <- t.Handle
 
-            if s.TextureUnit = 0 then
-                GL.BindTexture(TextureTarget.Texture2DArray, s.ID)
+        Batch.vertex p1 u1 c1 layer
+        Batch.vertex p2 u2 c2 layer
+        Batch.vertex p3 u3 c3 layer
+        Batch.vertex p1 u1 c1 layer
+        Batch.vertex p3 u3 c3 layer
+        Batch.vertex p4 u4 c4 layer
 
-            Shader.set_uniform_i32 ("sampler", s.TextureUnit) Shader.main
-            last_texture_default_quad <- s.DefaultQuad
-            last_texture_handle <- s.ID
-
-            Batch.vertex p1 u1 c1 s.TextureUnit
-            Batch.vertex p2 u2 c2 s.TextureUnit
-            Batch.vertex p3 u3 c3 s.TextureUnit
-            Batch.vertex p1 u1 c1 s.TextureUnit
-            Batch.vertex p3 u3 c3 s.TextureUnit
-            Batch.vertex p4 u4 c4 s.TextureUnit
-
-        else
-
-            Batch.vertex p1 u1 c1 s.TextureUnit
-            Batch.vertex p2 u2 c2 s.TextureUnit
-            Batch.vertex p3 u3 c3 s.TextureUnit
-            Batch.vertex p1 u1 c1 s.TextureUnit
-            Batch.vertex p3 u3 c3 s.TextureUnit
-            Batch.vertex p4 u4 c4 s.TextureUnit
+    let inline quad (q: Quad) (c: QuadColors) (t: QuadTexture) =
+        match t with
+        | NoTexture -> untextured_quad q c
+        | Texture (tex, layer, uv) -> textured_quad q c tex layer uv
 
     let sprite (r: Rect) (c: Color) (s: Sprite) =
         quad <| r.AsQuad <| Quad.color c <| Sprite.pick_texture (0, 0) s
 
-    let rect (r: Rect) (c: Color) = sprite r c Sprite.DEFAULT
+    let rect (r: Rect) (c: Color) = 
+        quad <| r.AsQuad <| Quad.color c <| NoTexture

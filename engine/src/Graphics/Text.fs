@@ -59,7 +59,7 @@ module Fonts =
             with err ->
                 Logging.Error(sprintf "Exception occurred rendering glyph with code point %i" (int c), err)
 
-            char_lookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.precompute_1x1)
+            char_lookup.Add(c, Sprite.upload_one false true { Label = "LOOSE_CHAR"; Rows = 1; Columns = 1; Image = img; DisposeImageAfter = true })
 
         // render a font texture atlas, containing common characters + icons
         // characters outside this set are dynamically generated on use
@@ -68,16 +68,16 @@ module Fonts =
 
             let row_glyph_info chars =
                 let mutable w = 0.0f
-                let mutable highSurrogate: char = ' '
+                let mutable high_surrogate: char = ' '
 
                 seq {
                     for c in chars do
                         if Char.IsHighSurrogate c then
-                            highSurrogate <- c
+                            high_surrogate <- c
                         else
                             let code =
                                 if Char.IsLowSurrogate c then
-                                    Char.ConvertToUtf32(highSurrogate, c)
+                                    Char.ConvertToUtf32(high_surrogate, c)
                                 else
                                     int32 c
 
@@ -109,9 +109,9 @@ module Fonts =
                 |> List.max
                 |> int
 
-            if int w > Sprite.MAX_TEXTURE_SIZE then
+            if int w > Texture.MAX_TEXTURE_SIZE then
                 Logging.Critical(
-                    sprintf "Font atlas width of %i exceeds max texture size of %i!" w Sprite.MAX_TEXTURE_SIZE
+                    sprintf "Font atlas width of %i exceeds max texture size of %i!" w Texture.MAX_TEXTURE_SIZE
                 )
 
             use img = new Bitmap(w, h)
@@ -132,21 +132,21 @@ module Fonts =
             img.[w - 1, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
 
             let atlas_sprite =
-                Sprite.upload (img, 1, 1, true)
-                |> Sprite.cache "FONT" false
-                |> Sprite.with_default_quad_alt (
-                    Rect.Box((float32 w - 0.5f) / float32 w, 0.5f / float32 h, 0.0f, 0.0f).AsQuad
-                )
+                Sprite.upload_one false true { Label = "FONT_ATLAS"; Rows = 1; Columns = 1; Image = img; DisposeImageAfter = true }
 
             for i, row in List.indexed glyphs do
                 for glyph in row do
+                    let sprite = 
+                        Texture.create_sprite 
+                            (glyph.Offset |> int, row_spacing * float32 i |> int)
+                            1
+                            (int glyph.Width, int glyph.Height)
+                            (1, 1)
+                            atlas_sprite.Texture
+
                     char_lookup.Add(
                         glyph.Code,
-                        { atlas_sprite with
-                            GridHeight = int glyph.Height
-                            GridWidth = int glyph.Width
-                            Left = glyph.Offset |> int
-                            Top = row_spacing * float32 i |> int
+                        { sprite with
                             PrecomputedQuad =
                                 ValueSome(
                                     Rect.Box(
@@ -254,9 +254,9 @@ module Text =
                     Draw.quad
                         ((r.Translate(shadow_spacing, shadow_spacing)).AsQuad)
                         (Quad.color bg)
-                        struct (s, s.PrecomputedQuad.Value)
+                        (Texture (s.Texture, s.Z, s.PrecomputedQuad.Value))
 
-                Draw.quad r.AsQuad (Quad.color fg) struct (s, s.PrecomputedQuad.Value)
+                Draw.quad r.AsQuad (Quad.color fg) (Texture (s.Texture, s.Z, s.PrecomputedQuad.Value))
                 x <- x + w + font.CharSpacing * scale
 
     let draw (font, text, scale, x, y, color) =

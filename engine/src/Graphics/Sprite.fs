@@ -1,5 +1,6 @@
 ﻿namespace Percyqaz.Flux.Graphics
 
+open System
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 open OpenTK.Mathematics
@@ -9,85 +10,238 @@ open Percyqaz.Common
 (*
     Sprites and content uploading
 *)
-[<CustomEquality; CustomComparison>]
-type Sprite =
+
+// Represents a GL array texture and its properties
+type Texture =
     {
-        ID: int
+        Handle: int
         TextureUnit: int
 
-        Left: int
-        Top: int
-        AtlasWidth: int
-        AtlasHeight: int
+        Width: int
+        Height: int
+        Layers: int
+
+        mutable References: int
+        // todo: sprite with precomputed quad for drawing defaults
+    }
+
+// Represents a specific area of a Texture, treated as a grid of equal-sized related sprites
+// For example the sprite sheet of notes might be on layer 3, offset 0, 0, 8 rows and 8 columns
+// The sprite of note color 1, animation frame 1, could then be layer 3, offset 128, 128, 1 row and 1 column
+type Sprite =
+    {
+        Texture: Texture
+        X: int
+        Y: int
+        Z: int
+
         GridWidth: int
         GridHeight: int
 
         Rows: int
         Columns: int
-
+        
         mutable PrecomputedQuad: Quad voption
-        mutable DefaultQuad: Quad option
     }
     member this.Width = this.GridWidth / this.Columns
     member this.Height = this.GridHeight / this.Rows
     member this.AspectRatio = float32 this.Width / float32 this.Height
 
-    override x.Equals(yobj) =
-        match yobj with
-        | :? Sprite as y -> x.ID = y.ID
-        | _ -> false
+[<Struct>]
+type QuadTexture =
+    | NoTexture
+    | Texture of Texture * layer: int * uv: Quad
+    member this.Transform(func: Quad -> Quad) =
+        match this with
+        | NoTexture -> NoTexture
+        | Texture (tex, layer, uv) -> Texture (tex, layer, func uv)
 
-    override x.GetHashCode() = hash x.ID
+type SpriteUpload =
+    {
+        Label: string
+        Rows: int
+        Columns: int
+        Image: Image<Rgba32>
+        DisposeImageAfter: bool
+    }
+    static member OfImage(label: string, img: Image<Rgba32>) =
+        {
+            Label = label
+            Rows = 1
+            Columns = 1
+            Image = img
+            DisposeImageAfter = true
+        }
 
-    interface System.IComparable with
-        member x.CompareTo yobj =
-            match yobj with
-            | :? Sprite as y -> compare x.ID y.ID
-            | _ -> invalidArg "yobj" "cannot compare values of different types"
-
-and TexturedQuad = (struct (Sprite * Quad))
-
-module Sprite =
+module Texture =
 
     let MAX_TEXTURE_UNITS = GL.GetInteger GetPName.MaxTextureImageUnits
     let TOTAL_TEXTURE_UNITS = GL.GetInteger GetPName.MaxCombinedTextureImageUnits
     let MAX_TEXTURE_SIZE = GL.GetInteger GetPName.MaxTextureSize
+    let MAX_ARRAY_TEXTURE_LAYERS = GL.GetInteger GetPName.MaxArrayTextureLayers
 
     // texture unit 0 is reserved for binding uncached sprites
     let private texture_unit_handles: int array = Array.zeroCreate MAX_TEXTURE_UNITS
     let private texture_unit_in_use: bool array = Array.zeroCreate MAX_TEXTURE_UNITS
+    
+    let destroy (texture: Texture) =
+        assert(texture.References = 0)
+        texture_unit_in_use.[texture.TextureUnit] <- false
+        GL.DeleteTexture texture.Handle
 
-    let upload (image: Image<Rgba32>, rows, columns, smooth) : Sprite =
+    let create (label: string) (width: int, height: int, layers: int) : Texture =
         let id = GL.GenTexture()
-
-        let width = image.Width
-        let height = image.Height
-
-        let mutable data = System.Span<Rgba32>.Empty
-        let success = image.TryGetSinglePixelSpan(&data)
-
-        if not success then
-            Logging.Critical "Couldn't get pixel span for image!"
-
         GL.BindTexture(TextureTarget.Texture2DArray, id)
 
-        GL.TexImage3D<Rgba32>(
+        let texture_unit =
+            seq { 1 .. (MAX_TEXTURE_UNITS - 1) }
+            |> Seq.tryFind (fun i -> not texture_unit_in_use.[i])
+            |> function
+                | None ->
+                    Logging.Debug(sprintf "Texture '%s' will perform slightly worse, as all texture units are full" label)
+                    0
+                | Some i ->
+                    texture_unit_handles.[i] <- id
+                    texture_unit_in_use.[i] <- true
+    
+                    GL.ActiveTexture(int TextureUnit.Texture0 + i |> enum)
+                    GL.BindTexture(TextureTarget.Texture2DArray, id)
+                    GL.ActiveTexture(TextureUnit.Texture0)
+    
+                    Logging.Debug(sprintf "Texture '%s' has handle %i, index %i" label id i)
+                    i
+
+        {
+            Handle = id
+            TextureUnit = texture_unit
+
+            Width = width
+            Height = height
+            Layers = layers
+
+            References = 0
+        }
+
+    let create_sprite (x: int, y: int) (layer: int) (w: int, h: int) (rows: int, columns: int) (texture: Texture) =
+        texture.References <- texture.References + 1
+        {
+            Texture = texture
+
+            X = x
+            Y = y
+            Z = layer
+
+            GridWidth = w
+            GridHeight = h
+
+            Rows = rows
+            Columns = columns
+
+            PrecomputedQuad = ValueNone
+        }
+
+    let create_default_sprite (texture: Texture) =
+        {
+            Texture = texture
+
+            X = 0
+            Y = 0
+            Z = 0
+
+            GridWidth = 1
+            GridHeight = 1
+
+            Rows = 1
+            Columns = 1
+
+            PrecomputedQuad = ValueSome Rect.ZERO.AsQuad
+        }
+        
+
+module Sprite =
+    
+    let precompute_1x1 (sprite: Sprite) =
+        let stride_x = float32 sprite.GridWidth / float32 sprite.Texture.Width
+        let stride_y = float32 sprite.GridHeight / float32 sprite.Texture.Height
+    
+        let origin_x = float32 sprite.X / float32 sprite.Texture.Width
+        let origin_y = float32 sprite.X / float32 sprite.Texture.Height
+    
+        let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y).AsQuad
+        sprite.PrecomputedQuad <- ValueSome quad
+    
+        sprite
+
+    let upload_many (label: string) (use_repeat: bool) (use_smoothing: bool) (images: SpriteUpload array) : (string * Sprite) array =
+
+        let width = images |> Array.map _.Image.Width |> Array.max
+        let height = images |> Array.map _.Image.Height |> Array.max
+        let layers = images.Length + 1
+
+        let texture = Texture.create label (width, height, layers)
+        // texture is currently bound since it was just created
+        
+        // Init array texture with transparency on all layers, plus white pixel in top left of layer 0 using any array texture as a "blank"
+        GL.TexImage3D(
             TextureTarget.Texture2DArray,
             0,
             PixelInternalFormat.Rgba,
             width,
             height,
-            1,
+            layers,
             0,
             PixelFormat.Rgba,
             PixelType.UnsignedByte,
-            data.ToArray()
+            IntPtr.Zero
         )
 
-        GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, int TextureWrapMode.Repeat)
-        GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, int TextureWrapMode.Repeat)
+        GL.TexSubImage3D<Rgba32>(
+            TextureTarget.Texture2DArray,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            PixelFormat.Rgba,
+            PixelType.UnsignedByte,
+            [|new Rgba32(255uy, 255uy, 255uy, 255uy)|]
+        )
 
-        if smooth then
+        let mutable layer = 1
+        let mutable pixel_data = System.Span<Rgba32>.Empty
+        for image in images do
+            
+            let success = image.Image.TryGetSinglePixelSpan(&pixel_data)
+            if not success then Logging.Critical "Couldn't get pixel span for image!"
+
+            GL.TexSubImage3D<Rgba32>(
+                TextureTarget.Texture2DArray,
+                0,
+                0,
+                0,
+                layer,
+                image.Image.Width,
+                image.Image.Height,
+                1,
+                PixelFormat.Rgba,
+                PixelType.UnsignedByte,
+                pixel_data.ToArray()
+            )
+
+            layer <- layer + 1
+
+        // Finish the texture by setting wrap and interpolation behaviours
+
+        if use_repeat then
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, int TextureWrapMode.Repeat)
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, int TextureWrapMode.Repeat)
+        else
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, int TextureWrapMode.ClampToEdge)
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, int TextureWrapMode.ClampToEdge)
+
+        if use_smoothing then
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear)
         else
@@ -103,102 +257,68 @@ module Sprite =
                 int TextureMagFilter.Nearest
             )
 
-        {
-            ID = id
-            TextureUnit = 0
+        let mutable layer = 1
 
-            Left = 0
-            Top = 0
-            AtlasWidth = width
-            AtlasHeight = height
-            GridWidth = width
-            GridHeight = height
+        let gen_sprite (info: SpriteUpload) =
+            
+            let sprite = 
+                Texture.create_sprite 
+                    (0, 0)
+                    layer
+                    (info.Image.Width, info.Image.Height)
+                    (info.Rows, info.Columns)
+                    texture
 
-            Rows = rows
-            Columns = columns
+            let sprite = if info.Rows = 1 && info.Columns = 1 then precompute_1x1 sprite else sprite
 
-            PrecomputedQuad = ValueNone
-            DefaultQuad = None
-        }
+            if info.DisposeImageAfter then info.Image.Dispose()
 
-    let cache (source: string) (low_priority: bool) (sprite: Sprite) : Sprite =
-        if low_priority && MAX_TEXTURE_UNITS = 16 then
-            sprite
-        else
+            layer <- layer + 1
 
-            seq { 1 .. (MAX_TEXTURE_UNITS - 1) }
-            |> Seq.tryFind (fun i -> not texture_unit_in_use.[i])
-            |> function
-                | None ->
-                    Logging.Debug(sprintf "Can't cache '%s', all texture units are full" source)
-                    sprite
-                | Some i ->
-                    texture_unit_handles.[i] <- sprite.ID
-                    texture_unit_in_use.[i] <- true
+            info.Label, sprite
 
-                    GL.ActiveTexture(int TextureUnit.Texture0 + i |> enum)
-                    GL.BindTexture(TextureTarget.Texture2DArray, sprite.ID)
-                    GL.ActiveTexture(TextureUnit.Texture0)
+        images |> Array.map gen_sprite
 
-                    //Logging.Debug(sprintf "Cached sprite (%s) with ID %i to index %i" source sprite.ID i)
-                    { sprite with TextureUnit = i }
-
-    let DEFAULT =
-        use img = new Image<Rgba32>(1, 1)
-        img.[0, 0] <- new Rgba32(255uy, 255uy, 255uy, 255uy)
-        upload (img, 1, 1, false) |> cache "BLANK" false
-
-    let DEFAULT_QUAD: TexturedQuad = struct (DEFAULT, Rect.ONE.AsQuad)
+    let upload_one (use_repeat: bool) (use_smoothing: bool) (info: SpriteUpload) : Sprite =
+        let results = upload_many info.Label use_repeat use_smoothing [| info |]
+        snd results.[0]
 
     let destroy (sprite: Sprite) =
-        if sprite.ID <> DEFAULT.ID then
-            texture_unit_in_use.[sprite.TextureUnit] <- false
-            GL.DeleteTexture sprite.ID
+        if sprite.Z > 0 then
+            sprite.Texture.References <- sprite.Texture.References - 1
+            if sprite.Texture.References = 0 then Texture.destroy sprite.Texture
 
-    let precompute_1x1 (sprite: Sprite) =
-        let stride_x = float32 sprite.GridWidth / float32 sprite.AtlasWidth
-        let stride_y = float32 sprite.GridHeight / float32 sprite.AtlasHeight
-
-        let origin_x = float32 sprite.Left / float32 sprite.AtlasWidth
-        let origin_y = float32 sprite.Top / float32 sprite.AtlasHeight
-
-        let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y).AsQuad
-        sprite.PrecomputedQuad <- ValueSome quad
-
-        sprite
-
-    let with_default_quad_alt (quad: Quad) (sprite: Sprite) = { sprite with DefaultQuad = Some quad }
-
-    let pick_texture (x: int, y: int) (sprite: Sprite) : TexturedQuad =
+    let pick_texture (x: int, y: int) (sprite: Sprite) : QuadTexture =
         if sprite.PrecomputedQuad.IsSome then
-            struct (sprite, sprite.PrecomputedQuad.Value)
+            Texture (sprite.Texture, sprite.Z, sprite.PrecomputedQuad.Value)
         else
 
             let stride_x =
-                float32 sprite.GridWidth / float32 sprite.AtlasWidth / float32 sprite.Columns
+                float32 sprite.GridWidth / float32 sprite.Texture.Width / float32 sprite.Columns
 
             let stride_y =
-                float32 sprite.GridHeight / float32 sprite.AtlasHeight / float32 sprite.Rows
+                float32 sprite.GridHeight / float32 sprite.Texture.Height / float32 sprite.Rows
 
             let origin_x =
-                float32 sprite.Left / float32 sprite.AtlasWidth + float32 x * stride_x
+                float32 sprite.X / float32 sprite.Texture.Width + float32 (x % sprite.Columns) * stride_x
 
             let origin_y =
-                float32 sprite.Top / float32 sprite.AtlasHeight + float32 y * stride_y
+                float32 sprite.Y / float32 sprite.Texture.Height + float32 (y % sprite.Rows) * stride_y
 
             let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y).AsQuad
 
             if sprite.Rows = 1 && sprite.Columns = 1 then
                 sprite.PrecomputedQuad <- ValueSome quad
+                
+            Texture (sprite.Texture, sprite.Z, quad)
 
-            struct (sprite, quad)
-
-    let tiling (scale, left, top) (sprite: Sprite) (quad: Quad) : TexturedQuad =
-        assert (sprite.GridHeight = sprite.AtlasHeight && sprite.GridWidth = sprite.AtlasWidth)
+    let tiling (scale, left, top) (sprite: Sprite) (quad: Quad) : QuadTexture =
+        assert (sprite.GridHeight = sprite.Texture.Height && sprite.GridWidth = sprite.Texture.Width)
 
         let width = float32 sprite.GridWidth * scale
         let height = float32 sprite.GridHeight * scale
-        struct (sprite, Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height)) quad)
+
+        Texture (sprite.Texture, sprite.Z, Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height)) quad)
 
     let aligned_box_x (x_origin, y_origin, x_offset, y_offset, x_scale, y_mult) (sprite: Sprite) : Rect =
         let width = x_scale
