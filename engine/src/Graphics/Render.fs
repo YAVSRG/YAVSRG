@@ -81,26 +81,27 @@ module FBO =
                 fbo_ids.[i] <- 0
 
             texture_ids.[i] <- GL.GenTexture()
-            GL.BindTexture(TextureTarget.Texture2D, texture_ids.[i])
+            GL.BindTexture(TextureTarget.Texture2DArray, texture_ids.[i])
 
-            GL.TexImage2D(
-                TextureTarget.Texture2D,
+            GL.TexImage3D(
+                TextureTarget.Texture2DArray,
                 0,
                 PixelInternalFormat.Rgba,
                 int vwidth,
                 int vheight,
+                1,
                 0,
                 PixelFormat.Rgba,
                 PixelType.UnsignedByte,
                 IntPtr.Zero
             )
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear)
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear)
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, int TextureWrapMode.ClampToEdge)
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, int TextureWrapMode.ClampToEdge)
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, int TextureWrapMode.ClampToEdge)
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, int TextureWrapMode.ClampToEdge)
 
             GL.GenFramebuffers(1, &fbo_ids.[i])
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo_ids.[i])
@@ -112,11 +113,20 @@ module FBO =
                 int vheight
             )
 
-            GL.FramebufferTexture2D(
+            //GL.FramebufferTexture3D(
+            //    FramebufferTarget.Framebuffer,
+            //    FramebufferAttachment.ColorAttachment0,
+            //    TextureTarget.Texture2DArray,
+            //    texture_ids.[i],
+            //    0,
+            //    0
+            //)
+            
+            GL.FramebufferTextureLayer(
                 FramebufferTarget.Framebuffer,
                 FramebufferAttachment.ColorAttachment0,
-                TextureTarget.Texture2D,
                 texture_ids.[i],
+                0,
                 0
             )
 
@@ -268,7 +278,7 @@ module Draw =
             Batch.draw ()
 
             if s.TextureUnit = 0 then
-                GL.BindTexture(TextureTarget.Texture2D, s.ID)
+                GL.BindTexture(TextureTarget.Texture2DArray, s.ID)
 
             Shader.set_uniform_i32 ("sampler", s.TextureUnit) Shader.main
             last_texture_default_quad <- s.DefaultQuad

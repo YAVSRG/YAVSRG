@@ -69,35 +69,36 @@ module Sprite =
         if not success then
             Logging.Critical "Couldn't get pixel span for image!"
 
-        GL.BindTexture(TextureTarget.Texture2D, id)
+        GL.BindTexture(TextureTarget.Texture2DArray, id)
 
-        GL.TexImage2D<Rgba32>(
-            TextureTarget.Texture2D,
+        GL.TexImage3D<Rgba32>(
+            TextureTarget.Texture2DArray,
             0,
             PixelInternalFormat.Rgba,
             width,
             height,
+            1,
             0,
             PixelFormat.Rgba,
             PixelType.UnsignedByte,
             data.ToArray()
         )
 
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, int TextureWrapMode.Repeat)
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, int TextureWrapMode.Repeat)
+        GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, int TextureWrapMode.Repeat)
+        GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, int TextureWrapMode.Repeat)
 
         if smooth then
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear)
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear)
         else
             GL.TexParameter(
-                TextureTarget.Texture2D,
+                TextureTarget.Texture2DArray,
                 TextureParameterName.TextureMinFilter,
                 int TextureMinFilter.Nearest
             )
 
             GL.TexParameter(
-                TextureTarget.Texture2D,
+                TextureTarget.Texture2DArray,
                 TextureParameterName.TextureMagFilter,
                 int TextureMagFilter.Nearest
             )
@@ -136,7 +137,7 @@ module Sprite =
                     texture_unit_in_use.[i] <- true
 
                     GL.ActiveTexture(int TextureUnit.Texture0 + i |> enum)
-                    GL.BindTexture(TextureTarget.Texture2D, sprite.ID)
+                    GL.BindTexture(TextureTarget.Texture2DArray, sprite.ID)
                     GL.ActiveTexture(TextureUnit.Texture0)
 
                     //Logging.Debug(sprintf "Cached sprite (%s) with ID %i to index %i" source sprite.ID i)
