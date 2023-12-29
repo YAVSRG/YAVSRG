@@ -1,7 +1,7 @@
 ﻿#version 330 core
 in vec2 fUv;
 in vec4 fColor;
-flat in int fTexLayer;
+in float fTexLayer;
 
 uniform bool alphaMasking;
 uniform sampler2DArray sampler;

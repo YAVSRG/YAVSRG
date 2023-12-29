@@ -22,7 +22,6 @@ type Texture =
         Layers: int
 
         mutable References: int
-        // todo: sprite with precomputed quad for drawing defaults
     }
 
 // Represents a specific area of a Texture, treated as a grid of equal-sized related sprites
@@ -88,6 +87,7 @@ module Texture =
         assert(texture.References = 0)
         texture_unit_in_use.[texture.TextureUnit] <- false
         GL.DeleteTexture texture.Handle
+        //Logging.Debug(sprintf "Destroyed texture with handle %i" texture.Handle)
 
     let create (label: string) (width: int, height: int, layers: int) : Texture =
         let id = GL.GenTexture()
@@ -108,7 +108,7 @@ module Texture =
                     GL.BindTexture(TextureTarget.Texture2DArray, id)
                     GL.ActiveTexture(TextureUnit.Texture0)
     
-                    Logging.Debug(sprintf "Texture '%s' has handle %i, index %i" label id i)
+                    //Logging.Debug(sprintf "Texture '%s' has handle %i, index %i" label id i)
                     i
 
         {
@@ -172,7 +172,7 @@ module Sprite =
     
         sprite
 
-    let upload_many (label: string) (use_repeat: bool) (use_smoothing: bool) (images: SpriteUpload array) : (string * Sprite) array =
+    let upload_many (label: string) (use_smoothing: bool) (images: SpriteUpload array) : Texture * (string * Sprite) array =
 
         let width = images |> Array.map _.Image.Width |> Array.max
         let height = images |> Array.map _.Image.Height |> Array.max
@@ -234,12 +234,8 @@ module Sprite =
 
         // Finish the texture by setting wrap and interpolation behaviours
 
-        if use_repeat then
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, int TextureWrapMode.Repeat)
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, int TextureWrapMode.Repeat)
-        else
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, int TextureWrapMode.ClampToEdge)
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, int TextureWrapMode.ClampToEdge)
+        GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, int TextureWrapMode.ClampToEdge)
+        GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, int TextureWrapMode.ClampToEdge)
 
         if use_smoothing then
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
@@ -277,10 +273,10 @@ module Sprite =
 
             info.Label, sprite
 
-        images |> Array.map gen_sprite
+        texture, images |> Array.map gen_sprite
 
-    let upload_one (use_repeat: bool) (use_smoothing: bool) (info: SpriteUpload) : Sprite =
-        let results = upload_many info.Label use_repeat use_smoothing [| info |]
+    let upload_one (use_smoothing: bool) (info: SpriteUpload) : Sprite =
+        let texture, results = upload_many info.Label use_smoothing [| info |]
         snd results.[0]
 
     let destroy (sprite: Sprite) =
@@ -312,8 +308,8 @@ module Sprite =
                 
             Texture (sprite.Texture, sprite.Z, quad)
 
+    // todo: remove or rename this, only used for Interlude's song background image
     let tiling (scale, left, top) (sprite: Sprite) (quad: Quad) : QuadTexture =
-        assert (sprite.GridHeight = sprite.Texture.Height && sprite.GridWidth = sprite.Texture.Width)
 
         let width = float32 sprite.GridWidth * scale
         let height = float32 sprite.GridHeight * scale

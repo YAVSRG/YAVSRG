@@ -19,7 +19,7 @@ module Batch =
             G: uint8
             B: uint8
             A: uint8
-            L: int32
+            L: float32
         }
 
     let mutable private active = false
@@ -56,11 +56,11 @@ module Batch =
         VERTEX_SIZE,
         sizeof<float32> * 4
     )
-    // 1 int in slot 3, for tex unit - using an int makes 20 bytes total
+    // 1 int in slot 3, for texture layer - using an int makes 20 bytes total
     VertexArrayObject.vertex_attrib_pointer (
         3,
         1,
-        VertexAttribPointerType.Int,
+        VertexAttribPointerType.Float,
         false,
         VERTEX_SIZE,
         sizeof<float32> * 4 + 4
@@ -91,7 +91,7 @@ module Batch =
                 G = color.G
                 B = color.B
                 A = color.A
-                L = texture_layer
+                L = float32 texture_layer
             }
 
         vcount <- vcount + 1
