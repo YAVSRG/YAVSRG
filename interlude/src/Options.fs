@@ -428,12 +428,13 @@ module Options =
             options.Upscroll.Set preset.Upscroll
             options.LaneCover.LoadPreset preset.LaneCover
 
-            if Content.Noteskins.loaded.ContainsKey preset.Noteskin then
+            match Seq.tryFind (fun (id, _) -> id = preset.Noteskin) (Content.Noteskins.list()) with
+            | Some _ ->
                 options.Noteskin.Set preset.Noteskin
                 Content.Noteskins.Current.switch preset.Noteskin
-            else
+            | None ->
                 Logging.Error(
-                    sprintf "Noteskin '%s' use in this preset has been moved or isn't available" preset.Noteskin
+                    sprintf "Noteskin '%s' used in this preset has been moved or isn't available" preset.Noteskin
                 )
 
     let load (instance: int) =

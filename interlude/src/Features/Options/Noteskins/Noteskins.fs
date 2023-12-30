@@ -47,7 +47,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
             function
             | Some(bmp, config) ->
                 sync (fun () ->
-                    preview <- Some (Sprite.upload_one true { Label = "NOTESKIN_PREVIEW"; Image = bmp; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true })
+                    preview <- Some (Sprite.upload_one false true { Label = "NOTESKIN_PREVIEW"; Image = bmp; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true })
                     PreviewCleanup.add preview.Value
                     bmp.Dispose()
                     preview_fade.Target <- 1.0f

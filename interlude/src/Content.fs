@@ -153,7 +153,7 @@ module Content =
                         // todo: fall back to default theme textures like it used to
                         missing_textures.Add id
 
-                let atlas, sprites = Sprite.upload_many "THEME" false (available_textures.ToArray())
+                let atlas, sprites = Sprite.upload_many "THEME" true false (available_textures.ToArray())
                 for id, sprite in sprites do
                     Sprites.add id sprite
                 for id in missing_textures do
@@ -249,7 +249,14 @@ module Content =
 
     module Noteskins =
 
-        let loaded: Dictionary<string, Noteskin> = new Dictionary<string, Noteskin>()
+        type private LoadedNoteskin =
+            {
+                Noteskin: Noteskin
+                mutable TextureAtlas: Texture option
+                mutable Sprites: (string * Sprite) array option
+            }
+
+        let private loaded = new Dictionary<string, LoadedNoteskin>()
 
         let private DEFAULTS =
             let skins = [ "defaultBar.isk"; "defaultArrow.isk"; "defaultOrb.isk" ]
@@ -269,26 +276,36 @@ module Content =
                 instance.Config <- new_config
                 config <- instance.Config
 
-            let reload () =
+            let private reload_noteskin_atlas (target: string) =
+                let ns = loaded.[target]
+
                 let missing_textures = ResizeArray()
                 let available_textures = ResizeArray()
-                for id in Storage.NOTESKIN_TEXTURES do
-                    Sprites.remove id
-                    match instance.GetTexture id with
-                    | Some(img, config) -> available_textures.Add { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
+
+                for texture_id in Storage.NOTESKIN_TEXTURES do
+                    match ns.Noteskin.GetTexture texture_id with
+                    | Some(img, config) -> available_textures.Add { Label = texture_id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
                     | None -> 
                         Logging.Warn(
                             sprintf
-                                "Noteskin texture '%s' didn't load properly, so it will appear as a white square ingame."
-                                id
+                                "Noteskin texture '%s' in '%s' didn't load properly, so it will appear as a white square ingame."
+                                texture_id
+                                ns.Noteskin.Config.Name
                         )
-                        missing_textures.Add id
+                        missing_textures.Add texture_id
 
-                let atlas, sprites = Sprite.upload_many "NOTESKIN" config.LinearSampling (available_textures.ToArray())
-                for id, sprite in sprites do
-                    Sprites.add id sprite
-                for id in missing_textures do
-                    Sprites.add id (Texture.create_default_sprite atlas)
+                let atlas, sprites = Sprite.upload_many ("NOTESKIN[" + ns.Noteskin.Config.Name + "]") false config.LinearSampling (available_textures.ToArray())
+                let sprites = Array.concat [ sprites; missing_textures |> Seq.map (fun id -> (id, Texture.create_default_sprite atlas)) |> Array.ofSeq ]
+                match ns.Sprites with
+                | Some existing -> for _, s in existing do Sprite.destroy s
+                | None -> ()
+                ns.TextureAtlas <- Some atlas
+                ns.Sprites <- Some sprites
+
+            let reload () = 
+                reload_noteskin_atlas id
+                for (texture_id, sprite) in loaded.[id].Sprites.Value do
+                    Sprites.add texture_id sprite.Copy
 
             let switch (new_id: string) =
                 let new_id =
@@ -298,12 +315,27 @@ module Content =
                         Logging.Warn("Noteskin '" + new_id + "' not found, switching to default")
                         "*defaultBar.isk"
 
+                match loaded.[id].TextureAtlas with
+                | Some atlas -> Texture.unclaim_texture_unit atlas
+                | None -> ()
+
+                if loaded.[new_id].Sprites.IsNone then
+                    reload_noteskin_atlas new_id
+
+                match loaded.[new_id].TextureAtlas with
+                | Some atlas ->
+                    Texture.claim_texture_unit atlas |> ignore
+                | None ->
+                    reload_noteskin_atlas new_id
+                    Texture.claim_texture_unit loaded.[new_id].TextureAtlas.Value |> ignore
+
                 if new_id <> id || first_init then
                     id <- new_id
-                    instance <- loaded.[id]
+                    instance <- loaded.[id].Noteskin
                     config <- instance.Config
-
-                reload ()
+                    
+                    for (texture_id, sprite) in loaded.[new_id].Sprites.Value do
+                        Sprites.add texture_id sprite.Copy
 
         // Loading into memory
 
@@ -312,7 +344,7 @@ module Content =
             loaded.Clear()
 
             for (id, ns) in DEFAULTS do
-                loaded.Add(id, ns)
+                loaded.Add(id, { Noteskin = ns; TextureAtlas = None; Sprites = None })
 
             for zip in
                 Directory.EnumerateFiles(get_game_folder "Noteskins")
@@ -332,7 +364,7 @@ module Content =
 
                 try
                     let ns = Noteskin.FromPath source
-                    loaded.Add(id, ns)
+                    loaded.Add(id, { Noteskin = ns; TextureAtlas = None; Sprites = None } )
                     Logging.Debug(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
                 with err ->
                     Logging.Error("  Failed to load noteskin '" + id + "'", err)
@@ -343,7 +375,7 @@ module Content =
 
         /// Returns id * Noteskin pairs
         let list () =
-            loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value)) |> Array.ofSeq
+            loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Noteskin)) |> Array.ofSeq
 
         let create_from_embedded (username: string option) : bool =
             if not Current.instance.IsEmbedded then
