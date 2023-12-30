@@ -2,8 +2,7 @@
 
 ### Branch naming
 
-I don't know a best practice for what to name your branches  
-Would recommend matching the primary branch on the original repo unless I see a better naming scheme idea
+I would just name them 'main' to match the central repo
 
 ### Commit messages
 
