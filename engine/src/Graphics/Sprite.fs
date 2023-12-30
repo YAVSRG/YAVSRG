@@ -15,7 +15,7 @@ open Percyqaz.Common
 type Texture =
     {
         Handle: int
-        TextureUnit: int
+        mutable TextureUnit: int
 
         Width: int
         Height: int
@@ -45,6 +45,9 @@ type Sprite =
     member this.Width = this.GridWidth / this.Columns
     member this.Height = this.GridHeight / this.Rows
     member this.AspectRatio = float32 this.Width / float32 this.Height
+    member this.Copy =
+        this.Texture.References <- this.Texture.References + 1
+        this
 
 [<Struct>]
 type QuadTexture =
@@ -82,38 +85,48 @@ module Texture =
     // texture unit 0 is reserved for binding uncached sprites
     let private texture_unit_handles: int array = Array.zeroCreate MAX_TEXTURE_UNITS
     let private texture_unit_in_use: bool array = Array.zeroCreate MAX_TEXTURE_UNITS
-    
-    let destroy (texture: Texture) =
-        assert(texture.References = 0)
-        texture_unit_in_use.[texture.TextureUnit] <- false
-        GL.DeleteTexture texture.Handle
-        //Logging.Debug(sprintf "Destroyed texture with handle %i" texture.Handle)
 
-    let create (label: string) (width: int, height: int, layers: int) : Texture =
-        let id = GL.GenTexture()
-        GL.BindTexture(TextureTarget.Texture2DArray, id)
+    let claim_texture_unit (texture: Texture) : bool =
+        if texture.TextureUnit <> 0 then true else
 
         let texture_unit =
             seq { 1 .. (MAX_TEXTURE_UNITS - 1) }
             |> Seq.tryFind (fun i -> not texture_unit_in_use.[i])
             |> function
                 | None ->
-                    Logging.Debug(sprintf "Texture '%s' will perform slightly worse, as all texture units are full" label)
+                    Logging.Debug(sprintf "Texture unit claim failed, all texture units are full")
                     0
                 | Some i ->
-                    texture_unit_handles.[i] <- id
+                    texture_unit_handles.[i] <- texture.Handle
                     texture_unit_in_use.[i] <- true
     
                     GL.ActiveTexture(int TextureUnit.Texture0 + i |> enum)
-                    GL.BindTexture(TextureTarget.Texture2DArray, id)
+                    GL.BindTexture(TextureTarget.Texture2DArray, texture.Handle)
                     GL.ActiveTexture(TextureUnit.Texture0)
     
-                    //Logging.Debug(sprintf "Texture '%s' has handle %i, index %i" label id i)
+                    Logging.Debug(sprintf "Texture has handle %i, index %i" texture.Handle i)
                     i
 
+        texture.TextureUnit <- texture_unit
+        texture.TextureUnit <> 0
+
+    let unclaim_texture_unit (texture: Texture) =
+        if texture.TextureUnit <> 0 then
+            texture_unit_in_use.[texture.TextureUnit] <- false
+            texture.TextureUnit <- 0
+
+    let destroy (texture: Texture) =
+        assert(texture.References = 0)
+        unclaim_texture_unit texture
+        GL.DeleteTexture texture.Handle
+        //Logging.Debug(sprintf "Destroyed texture with handle %i" texture.Handle)
+
+    let create (width: int, height: int, layers: int) : Texture =
+        let id = GL.GenTexture()
+        GL.BindTexture(TextureTarget.Texture2DArray, id)
         {
             Handle = id
-            TextureUnit = texture_unit
+            TextureUnit = 0
 
             Width = width
             Height = height
@@ -172,13 +185,14 @@ module Sprite =
     
         sprite
 
-    let upload_many (label: string) (use_smoothing: bool) (images: SpriteUpload array) : Texture * (string * Sprite) array =
+    let upload_many (label: string) (use_texture_unit: bool) (use_smoothing: bool) (images: SpriteUpload array) : Texture * (string * Sprite) array =
 
         let width = images |> Array.map _.Image.Width |> Array.max
         let height = images |> Array.map _.Image.Height |> Array.max
         let layers = images.Length + 1
 
-        let texture = Texture.create label (width, height, layers)
+        let texture = Texture.create (width, height, layers)
+        if use_texture_unit then Texture.claim_texture_unit texture |> ignore
         // texture is currently bound since it was just created
         
         // Init array texture with transparency on all layers, plus white pixel in top left of layer 0 using any array texture as a "blank"
@@ -275,8 +289,8 @@ module Sprite =
 
         texture, images |> Array.map gen_sprite
 
-    let upload_one (use_smoothing: bool) (info: SpriteUpload) : Sprite =
-        let texture, results = upload_many info.Label use_smoothing [| info |]
+    let upload_one (use_texture_unit: bool) (use_smoothing: bool) (info: SpriteUpload) : Sprite =
+        let texture, results = upload_many info.Label use_texture_unit use_smoothing [| info |]
         snd results.[0]
 
     let destroy (sprite: Sprite) =
@@ -308,7 +322,7 @@ module Sprite =
                 
             Texture (sprite.Texture, sprite.Z, quad)
 
-    // todo: remove or rename this, only used for Interlude's song background image
+    // todo: relocate, remove or rename this, only used for Interlude's song background image
     let tiling (scale, left, top) (sprite: Sprite) (quad: Quad) : QuadTexture =
 
         let width = float32 sprite.GridWidth * scale

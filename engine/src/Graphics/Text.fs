@@ -59,7 +59,7 @@ module Fonts =
             with err ->
                 Logging.Error(sprintf "Exception occurred rendering glyph with code point %i" (int c), err)
 
-            char_lookup.Add(c, Sprite.upload_one true { Label = "LOOSE_CHAR"; Rows = 1; Columns = 1; Image = img; DisposeImageAfter = true })
+            char_lookup.Add(c, Sprite.upload_one false true { Label = "LOOSE_CHAR"; Rows = 1; Columns = 1; Image = img; DisposeImageAfter = true })
 
         // render a font texture atlas, containing common characters + icons
         // characters outside this set are dynamically generated on use
@@ -132,7 +132,7 @@ module Fonts =
             img.[w - 1, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
 
             let atlas_sprite =
-                Sprite.upload_one true { Label = "FONT_ATLAS"; Rows = 1; Columns = 1; Image = img; DisposeImageAfter = true }
+                Sprite.upload_one true true { Label = "FONT_ATLAS"; Rows = 1; Columns = 1; Image = img; DisposeImageAfter = true }
 
             for i, row in List.indexed glyphs do
                 for glyph in row do
