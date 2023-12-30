@@ -294,7 +294,7 @@ module Content =
                         )
                         missing_textures.Add texture_id
 
-                let atlas, sprites = Sprite.upload_many ("NOTESKIN[" + ns.Noteskin.Config.Name + "]") false config.LinearSampling (available_textures.ToArray())
+                let atlas, sprites = Sprite.upload_many ("NOTESKIN[" + ns.Noteskin.Config.Name + "]") false ns.Noteskin.Config.LinearSampling (available_textures.ToArray())
                 let sprites = Array.concat [ sprites; missing_textures |> Seq.map (fun id -> (id, Texture.create_default_sprite atlas)) |> Array.ofSeq ]
                 match ns.Sprites with
                 | Some existing -> for _, s in existing do Sprite.destroy s
@@ -376,6 +376,8 @@ module Content =
         /// Returns id * Noteskin pairs
         let list () =
             loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Noteskin)) |> Array.ofSeq
+
+        let exists (noteskin_id: string) = loaded.ContainsKey noteskin_id
 
         let create_from_embedded (username: string option) : bool =
             if not Current.instance.IsEmbedded then

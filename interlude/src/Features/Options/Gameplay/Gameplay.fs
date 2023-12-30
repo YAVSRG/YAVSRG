@@ -138,17 +138,17 @@ type EditPresetPage(setting: Setting<Preset option>) as this =
     let preset = setting.Value.Value
     let name = Setting.simple preset.Name
 
-    let locked =
-        Setting.simple preset.Locked
-        |> Setting.trigger (fun b -> delete_button.Enabled <- not b)
+    let mode =
+        Setting.simple preset.Mode
+        |> Setting.trigger (fun mode -> delete_button.Enabled <- mode <> PresetMode.Locked)
 
     do
         this.Content(
             column ()
             |+ PageTextEntry("gameplay.preset.name", name).Pos(200.0f)
-            |+ PageSetting("gameplay.preset.locked", Selector<_>.FromBool(locked))
+            |+ PageSetting("gameplay.preset.mode", Selector<PresetMode>([|PresetMode.Unlocked, %"gameplay.preset.mode.unlocked"; PresetMode.Locked, %"gameplay.preset.mode.locked"; PresetMode.Autosave, %"gameplay.preset.mode.autosave" |], mode))
                 .Pos(270.0f)
-                .Tooltip(Tooltip.Info("gameplay.preset.locked"))
+                .Tooltip(Tooltip.Info("gameplay.preset.mode"))
             |+ delete_button.Pos(340.0f)
         )
 
@@ -162,7 +162,7 @@ type EditPresetPage(setting: Setting<Preset option>) as this =
                 Some
                     { preset with
                         Name = name.Value
-                        Locked = locked.Value
+                        Mode = mode.Value
                     }
             )
 
@@ -179,6 +179,10 @@ type GameplayPage() as this =
             NodeType.None,
             Position = Position.Box(1.0f, 1.0f, -1200.0f + float32 i * 300.0f, -90.0f, 290.0f, 80.0f)
         )
+        |+ Conditional(
+            (fun () -> options.SelectedPreset.Value = Some i && match setting.Value with Some p -> p.Mode = PresetMode.Autosave | None -> false),
+            Text(sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"), Color = K Colors.text_green, Position = Position.SliceBottom(40.0f).Margin(10.0f, 0.0f))
+        )
         |+ Button(
             (fun () ->
                 match setting.Value with
@@ -187,64 +191,71 @@ type GameplayPage() as this =
             ),
             (fun () ->
                 if setting.Value.IsSome then
+                    Presets.load i |> ignore
                     EditPresetPage(setting).Show()
             ),
             Disabled = (fun () -> setting.Value.IsNone),
             Position = Position.SliceTop(40.0f)
         )
-        |+ Button(
-            %"gameplay.preset.load",
-            (fun () ->
-                match setting.Value with
-                | Some s ->
-                    ConfirmPage(
-                        [ s.Name ] %> "gameplay.preset.load.prompt",
-                        fun () ->
-                            Presets.load s
-                            preview.Refresh()
-
-                            Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
-                    )
-                        .Show()
-                | None -> ()
-            ),
-            Disabled = (fun () -> setting.Value.IsNone),
-            Position =
-                { Position.SliceBottom(40.0f) with
-                    Right = 0.5f %+ 0.0f
-                }
-                    .Margin(40.0f, 0.0f)
-        )
-        |+ Button(
-            %"gameplay.preset.save",
-            (fun () ->
-                if setting.Value.IsNone then
-                    let name = sprintf "Preset %i" i
-                    setting.Value <- Presets.create (name) |> Some
-                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
-                else
-                    let name = setting.Value.Value.Name
-
-                    ConfirmPage(
-                        [ name ] %> "gameplay.preset.save.prompt",
-                        fun () ->
-                            setting.Value <- Presets.create (name) |> Some
-
-                            Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
-                    )
-                        .Show()
-            ),
-            Disabled =
+        
+        |+ Conditional(
+            (fun () -> options.SelectedPreset.Value <> Some i || match setting.Value with Some p -> p.Mode <> PresetMode.Autosave | None -> true),
+            Button(
+                %"gameplay.preset.load",
                 (fun () ->
                     match setting.Value with
-                    | Some s -> s.Locked
-                    | None -> false
+                    | Some s ->
+                        ConfirmPage(
+                            [ s.Name ] %> "gameplay.preset.load.prompt",
+                            fun () ->
+                                Presets.load i |> ignore
+                                preview.Refresh()
+
+                                Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
+                        )
+                            .Show()
+                    | None -> ()
                 ),
-            Position =
-                { Position.SliceBottom(40.0f) with
-                    Left = 0.5f %+ 0.0f
-                }
-                    .Margin(40.0f, 0.0f)
+                Disabled = (fun () -> setting.Value.IsNone),
+                Position =
+                    { Position.SliceBottom(40.0f) with
+                        Right = 0.5f %+ 0.0f
+                    }
+                        .Margin(40.0f, 0.0f)
+            )
+        )
+        |+ Conditional(
+            (fun () -> options.SelectedPreset.Value <> Some i || match setting.Value with Some p -> p.Mode <> PresetMode.Autosave | None -> true),
+            Button(
+                %"gameplay.preset.save",
+                (fun () ->
+                    match setting.Value with
+                    | None ->
+                        let name = sprintf "Preset %i" i
+                        setting.Value <- Presets.create (name) |> Some
+                        Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
+                    | Some existing ->
+                        ConfirmPage(
+                            [ existing.Name ] %> "gameplay.preset.save.prompt",
+                            fun () ->
+                                setting.Value <- Presets.save existing |> Some
+
+                                Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_saved", existing.Name)
+                        )
+                            .Show()
+                ),
+                Disabled =
+                    (fun () ->
+                        match setting.Value with
+                        | Some s -> s.Mode <> PresetMode.Unlocked
+                        | None -> false
+                    ),
+                Position =
+                    { Position.SliceBottom(40.0f) with
+                        Left = 0.5f %+ 0.0f
+                    }
+                        .Margin(40.0f, 0.0f)
+            )
         )
 
     do

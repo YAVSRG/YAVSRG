@@ -64,10 +64,17 @@ module Options =
             this.Color.Value <- p.Color.Value
 
     [<Json.AutoCodec>]
+    [<RequireQualifiedAccess>]
+    type PresetMode =
+        | Unlocked
+        | Locked
+        | Autosave
+
+    [<Json.AutoCodec(false)>]
     type Preset =
         {
             Name: string
-            Locked: bool
+            Mode: PresetMode
 
             VisualOffset: float32
             ScrollSpeed: float32
@@ -123,6 +130,7 @@ module Options =
             Preset1: Setting<Preset option>
             Preset2: Setting<Preset option>
             Preset3: Setting<Preset option>
+            SelectedPreset: Setting<int option>
 
             VanishingNotes: Setting<bool>
             AutoCalibrateOffset: Setting<bool>
@@ -256,6 +264,7 @@ module Options =
                 Preset1 = Setting.simple None
                 Preset2 = Setting.simple None
                 Preset3 = Setting.simple None
+                SelectedPreset = Setting.simple None
 
                 VanishingNotes = Setting.simple true
                 AutoCalibrateOffset = Setting.simple false
@@ -408,10 +417,12 @@ module Options =
 
     module Presets =
 
+        let get (id: int) = [| options.Preset1; options.Preset2; options.Preset3 |].[id - 1]
+
         let create (name: string) : Preset =
             {
                 Name = name
-                Locked = false
+                Mode = PresetMode.Unlocked
 
                 VisualOffset = options.VisualOffset.Value
                 ScrollSpeed = options.ScrollSpeed.Value
@@ -421,21 +432,43 @@ module Options =
                 Noteskin = options.Noteskin.Value
             }
 
-        let load (preset: Preset) =
-            options.VisualOffset.Set preset.VisualOffset
-            options.ScrollSpeed.Set preset.ScrollSpeed
-            options.HitPosition.Set preset.HitPosition
-            options.Upscroll.Set preset.Upscroll
-            options.LaneCover.LoadPreset preset.LaneCover
+        let save (preset: Preset) : Preset =
+            { preset with
+                VisualOffset = options.VisualOffset.Value
+                ScrollSpeed = options.ScrollSpeed.Value
+                HitPosition = options.HitPosition.Value
+                Upscroll = options.Upscroll.Value
+                LaneCover = options.LaneCover
+                Noteskin = options.Noteskin.Value
+            }
 
-            match Seq.tryFind (fun (id, _) -> id = preset.Noteskin) (Content.Noteskins.list()) with
-            | Some _ ->
-                options.Noteskin.Set preset.Noteskin
-                Content.Noteskins.Current.switch preset.Noteskin
-            | None ->
-                Logging.Error(
-                    sprintf "Noteskin '%s' used in this preset has been moved or isn't available" preset.Noteskin
-                )
+        let load (id: int) =
+            match options.SelectedPreset.Value with
+            | None -> ()
+            | Some i ->
+                let setting = get i
+                match setting.Value with
+                | Some preset when preset.Mode = PresetMode.Autosave ->
+                    setting.Set (Some (save preset))
+                | _ -> ()
+
+            match (get id).Value with
+            | Some loaded_preset ->
+                options.SelectedPreset.Value <- Some id
+
+                options.VisualOffset.Set loaded_preset.VisualOffset
+                options.ScrollSpeed.Set loaded_preset.ScrollSpeed
+                options.HitPosition.Set loaded_preset.HitPosition
+                options.Upscroll.Set loaded_preset.Upscroll
+                options.LaneCover.LoadPreset loaded_preset.LaneCover
+
+                if Content.Noteskins.exists loaded_preset.Noteskin then
+                    options.Noteskin.Set loaded_preset.Noteskin
+                    Content.Noteskins.Current.switch loaded_preset.Noteskin
+                else
+                    Logging.Error(sprintf "Noteskin '%s' used in this preset has been renamed or isn't available" loaded_preset.Noteskin)
+                Some loaded_preset.Name
+            | None -> None
 
     let load (instance: int) =
         config <- load_important_json_file "Config" config_path true

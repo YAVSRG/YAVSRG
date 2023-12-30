@@ -131,38 +131,39 @@ type Toolbar() =
         |+ HotkeyAction(
             "reload_themes",
             fun () ->
-                first_init <- true
-                Noteskins.load ()
-                Themes.load ()
-                first_init <- false
-                Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_themes", "")
+                if not Toolbar.hidden then
+                    first_init <- true
+                    Noteskins.load ()
+                    Themes.load ()
+                    first_init <- false
+                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_themes", "")
         )
         |+ HotkeyAction(
             "preset1",
             fun () ->
-                match options.Preset1.Value with
-                | Some s when Screen.current_type <> Screen.Type.Play ->
-                    Presets.load s
-                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
-                | _ -> ()
+                if not Toolbar.hidden then
+                    match Presets.load 1 with
+                    | Some success_name ->
+                        Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
+                    | None -> ()
         )
         |+ HotkeyAction(
             "preset2",
             fun () ->
-                match options.Preset2.Value with
-                | Some s when Screen.current_type <> Screen.Type.Play ->
-                    Presets.load s
-                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
-                | _ -> ()
+                if not Toolbar.hidden then
+                    match Presets.load 2 with
+                    | Some success_name ->
+                        Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
+                    | None -> ()
         )
         |+ HotkeyAction(
             "preset3",
             fun () ->
-                match options.Preset3.Value with
-                | Some s when Screen.current_type <> Screen.Type.Play ->
-                    Presets.load s
-                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
-                | _ -> ()
+                if not Toolbar.hidden then
+                    match Presets.load 3 with
+                    | Some success_name ->
+                        Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
+                    | None -> ()
         )
         |+ Conditional(
             (fun () -> AutoUpdate.update_available),
