@@ -136,6 +136,7 @@ type Toolbar() =
                     Noteskins.load ()
                     Themes.load ()
                     first_init <- false
+                    Gameplay.Chart.recolor()
                     Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_themes", "")
         )
         |+ HotkeyAction(
@@ -144,6 +145,7 @@ type Toolbar() =
                 if not Toolbar.hidden then
                     match Presets.load 1 with
                     | Some success_name ->
+                        Gameplay.Chart.recolor()
                         Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
                     | None -> ()
         )
@@ -153,6 +155,7 @@ type Toolbar() =
                 if not Toolbar.hidden then
                     match Presets.load 2 with
                     | Some success_name ->
+                        Gameplay.Chart.recolor()
                         Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
                     | None -> ()
         )
@@ -162,6 +165,7 @@ type Toolbar() =
                 if not Toolbar.hidden then
                     match Presets.load 3 with
                     | Some success_name ->
+                        Gameplay.Chart.recolor()
                         Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
                     | None -> ()
         )

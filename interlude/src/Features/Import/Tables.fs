@@ -151,6 +151,7 @@ type TableCard(id: string, desc: string, table: Table) as this =
         | NotInstalled
         | UpdateAvailable ->
             Table.install (id, table)
+            Interlude.Options.options.Table.Value <- Some table.Name
             existing <- table
             status <- UpToDate
             this.RefreshInfo()

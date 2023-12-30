@@ -70,7 +70,11 @@ module Gameplay =
                         notes <- notes + 1
                         lnotes <- lnotes + 1
 
-            sprintf "%iK | %i Notes | %.0f%% Holds" chart.Keys notes (100.0f * float32 lnotes / float32 notes)
+            let hold_count =
+                let pc = (100.0f * float32 lnotes / float32 notes)
+                if pc < 0.5f then sprintf "%i Holds" lnotes
+                else sprintf "%.0f%% Holds" pc
+            sprintf "%iK | %i Notes | %s" chart.Keys notes hold_count
 
         let mutable CACHE_DATA: CachedChart option = None
         let mutable FMT_DURATION: string = format_duration None
@@ -86,6 +90,8 @@ module Gameplay =
         let mutable PATTERNS: Patterns.PatternReport option = None
 
         let mutable WITH_COLORS: ColorizedChart option = None
+
+        let mutable previous_keymode = None
 
         let not_selected () = CACHE_DATA.IsNone
         let is_loading () = CACHE_DATA.IsSome && CHART.IsNone
@@ -243,6 +249,12 @@ module Gameplay =
             PATTERNS <- None
 
             WITH_COLORS <- None
+
+            match previous_keymode with
+            | Some k when k <> cc.Keys ->
+                Options.Presets.keymode_changed cc.Keys
+            | _ -> ()
+            previous_keymode <- Some cc.Keys
 
             chart_loader.Request(Load (cc, auto_play_audio))
 

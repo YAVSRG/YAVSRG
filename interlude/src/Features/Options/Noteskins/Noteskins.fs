@@ -13,7 +13,6 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Gameplay
 
-// todo: eliminate the need for this entirely because all noteskins are loaded in memory already
 module private PreviewCleanup =
 
     let mutable private list = List.empty

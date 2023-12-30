@@ -131,6 +131,7 @@ module Options =
             Preset2: Setting<Preset option>
             Preset3: Setting<Preset option>
             SelectedPreset: Setting<int option>
+            KeymodePreferredPresets: int option array
 
             VanishingNotes: Setting<bool>
             AutoCalibrateOffset: Setting<bool>
@@ -265,6 +266,7 @@ module Options =
                 Preset2 = Setting.simple None
                 Preset3 = Setting.simple None
                 SelectedPreset = Setting.simple None
+                KeymodePreferredPresets = [| None; None; None; None; None; None; None; None |]
 
                 VanishingNotes = Setting.simple true
                 AutoCalibrateOffset = Setting.simple false
@@ -469,6 +471,11 @@ module Options =
                     Logging.Error(sprintf "Noteskin '%s' used in this preset has been renamed or isn't available" loaded_preset.Noteskin)
                 Some loaded_preset.Name
             | None -> None
+
+        let keymode_changed (keys: int) =
+            match options.KeymodePreferredPresets.[keys - 3] with
+            | Some preference -> load preference |> ignore
+            | None -> ()
 
     let load (instance: int) =
         config <- load_important_json_file "Config" config_path true
