@@ -104,7 +104,7 @@ module Texture =
                     GL.BindTexture(TextureTarget.Texture2DArray, texture.Handle)
                     GL.ActiveTexture(TextureUnit.Texture0)
     
-                    Logging.Debug(sprintf "Texture has handle %i, index %i" texture.Handle i)
+                    //Logging.Debug(sprintf "Texture has handle %i, index %i" texture.Handle i)
                     i
 
         texture.TextureUnit <- texture_unit
@@ -290,7 +290,7 @@ module Sprite =
         texture, images |> Array.map gen_sprite
 
     let upload_one (use_texture_unit: bool) (use_smoothing: bool) (info: SpriteUpload) : Sprite =
-        let texture, results = upload_many info.Label use_texture_unit use_smoothing [| info |]
+        let _, results = upload_many info.Label use_texture_unit use_smoothing [| info |]
         snd results.[0]
 
     let destroy (sprite: Sprite) =
