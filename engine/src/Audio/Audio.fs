@@ -193,7 +193,7 @@ module Song =
 
         let t = time ()
 
-        if t >= 0.0f<ms> && t < now_playing.Duration && not channel_playing then
+        if playing() && t >= 0.0f<ms> && t < now_playing.Duration && not channel_playing then
             channel_playing <- true
 
             Bass.ChannelSetPosition(now_playing.ID, Bass.ChannelSeconds2Bytes(now_playing.ID, float <| t / 1000.0f<ms>))
