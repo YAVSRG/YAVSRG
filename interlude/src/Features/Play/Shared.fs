@@ -433,9 +433,12 @@ type Slideout(label: string, content: Widget, height: float32, x: float32) as th
 
     let mutable is_open = false
 
+    let MARGIN = 15.0f
+    let height = height + MARGIN * 2.0f
+
     let button =
         { new Button((fun () -> label + " " + (if is_open then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)),
-                     (fun () -> if is_open then this.Close() else this.Open()),
+                     (fun () -> if this.ControlledByUser then (if is_open then this.Close() else this.Open())),
                      Floating = true) with
             override this.Draw() =
                 Draw.rect this.Bounds Colors.cyan_shadow
@@ -446,14 +449,16 @@ type Slideout(label: string, content: Widget, height: float32, x: float32) as th
     member val OnOpen = ignore with get, set
     member val OnClose = ignore with get, set
     member val ShowButton = true with get, set
+    member val ControlledByUser = true with get, set
 
     override this.Init(parent: Widget) =
         button.Position <- Position.SliceBottom(40.0f).SliceLeft(200.0f).Translate(x, 45.0f)
         button.Init this
-        content.Position <- Position.Margin(15.0f)
+        content.Position <- Position.Margin(MARGIN)
         content.Init this
         this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
-        this |* HotkeyAction(this.Hotkey, fun () -> if is_open then this.Close() else this.Open())
+        if this.ControlledByUser then
+            this |* HotkeyAction(this.Hotkey, fun () -> if is_open then this.Close() else this.Open())
         base.Init parent
 
     member this.Close() = 
@@ -483,5 +488,5 @@ type Slideout(label: string, content: Widget, height: float32, x: float32) as th
             button.Update(elapsed_ms, moved)
         elif this.ShowButton then
             button.Update(elapsed_ms, moved)
-        if is_open && (%%"exit").Tapped() then
+        if this.ControlledByUser && is_open && (%%"exit").Tapped() then
             this.Close()

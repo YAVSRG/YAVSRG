@@ -306,7 +306,7 @@ module PracticeScreen =
         do ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
 
         let binds = options.GameplayBinds.[chart.Keys - 3]
-        let mutable inputKeyState = 0us
+        let mutable input_key_state = 0us
 
         // options state
         let mutable options_mode = true
@@ -374,7 +374,7 @@ module PracticeScreen =
             override this.OnBack() =
                 if not options_mode then
                     pause (this)
-                    inputKeyState <- 0us
+                    input_key_state <- 0us
                     None
                 else
                     Song.resume ()
@@ -406,11 +406,11 @@ module PracticeScreen =
                         binds,
                         fun column time is_release ->
                             if is_release then
-                                inputKeyState <- Bitmask.unset_key column inputKeyState
+                                input_key_state <- Bitmask.unset_key column input_key_state
                             else
-                                inputKeyState <- Bitmask.set_key column inputKeyState
+                                input_key_state <- Bitmask.set_key column input_key_state
 
-                            liveplay.Add(time, inputKeyState)
+                            liveplay.Add(time, input_key_state)
                     )
 
                     this.State.Scoring.Update chart_time

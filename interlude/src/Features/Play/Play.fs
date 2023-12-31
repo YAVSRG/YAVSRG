@@ -122,7 +122,7 @@ module PlayScreen =
                         .Icon(Icons.INFO)
                         .Body("Use a negative offset if you are hitting LATE and want to hit EARLIER.\nUse a positive offset if you are hitting EARLY and want to hit LATER."))
                     (fun (w, h) -> Position.SliceRight(w)),
-                130.0f,
+                100.0f,
                 10.0f,
                 Hotkey = "options",
                 ShowButton = false,
