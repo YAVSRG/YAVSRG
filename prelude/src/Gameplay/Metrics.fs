@@ -85,7 +85,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
     let snapshots = ResizeArray<ScoreMetricSnapshot>()
     let hit_data = InternalScore.create_gameplay ruleset.Accuracy.MissWindow keys notes
-    let hitEvents = ResizeArray<HitEvent<HitEventGuts>>()
+    let hit_events = ResizeArray<HitEvent<HitEventGuts>>()
 
     let on_hit_ev = Event<HitEvent<HitEventGuts>>()
     let on_hit = on_hit_ev.Publish
@@ -142,7 +142,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
     member this.Finished = note_seek_passive = hit_data.Length
 
-    member this.HitEvents = hitEvents.AsReadOnly()
+    member this.HitEvents = hit_events.AsReadOnly()
     member this.Snapshots = snapshots.AsReadOnly()
 
     // correctness guaranteed up to the time you update, no matter how you update
@@ -351,7 +351,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
     member private this._HandleEvent ev =
         let ev = this.HandleEvent ev
-        hitEvents.Add ev
+        hit_events.Add ev
         on_hit_ev.Trigger ev
 
 module Helpers =
