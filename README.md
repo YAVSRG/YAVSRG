@@ -34,6 +34,8 @@ Using an IDE that lets you commit to multiple repositories at once is recommende
 >
 > If you just want to play the game, **you do *not* need to do this**, instead get the game by downloading the latest release from the site
 
+Building requires the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed on your system - Follow Microsoft's install instructions for your platform
+
 Build for development:
 ```
 cd Interlude
