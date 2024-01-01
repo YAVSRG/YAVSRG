@@ -424,44 +424,40 @@ module Notifications =
         current_tooltip <- Some t
 
     let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) =
-        let n: Notification =
-            {
-                Data = body
-                Size = Callout.measure body
-                FillColor = colors
-                ContentColor = content_colors
-                Fade = Animation.Fade(0.0f, Target = 1.0f)
-                Duration = 2000.0
-            }
-
-        if Percyqaz.Flux.Utils.is_ui_thread () then
+        ensure_ui_thread <|
+        fun () ->
+            let n: Notification =
+                {
+                    Data = body
+                    Size = Callout.measure body
+                    FillColor = colors
+                    ContentColor = content_colors
+                    Fade = Animation.Fade(0.0f, Target = 1.0f)
+                    Duration = 2000.0
+                }
             items.Add n
-        else
-            sync (fun () -> items.Add n)
 
     let private add_long (body: Callout, colors: Color * Color, content_colors: Color * Color) =
-        let n: Notification =
-            {
-                Data = body
-                Size = Callout.measure body
-                FillColor = colors
-                ContentColor = content_colors
-                Fade = Animation.Fade(0.0f, Target = 1.0f)
-                Duration = 5000.0
-            }
-
-        if Percyqaz.Flux.Utils.is_ui_thread () then
+        ensure_ui_thread <|
+        fun () ->
+            let n: Notification =
+                {
+                    Data = body
+                    Size = Callout.measure body
+                    FillColor = colors
+                    ContentColor = content_colors
+                    Fade = Animation.Fade(0.0f, Target = 1.0f)
+                    Duration = 5000.0
+                }
             items.Add n
-        else
-            sync (fun () -> items.Add n)
 
     let task_feedback (icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.pink_accent, Colors.pink), Colors.text)
-        sync Style.notify_task.Play
+        ensure_ui_thread Style.notify_task.Play
 
     let action_feedback (icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.cyan_accent, Colors.cyan), Colors.text)
-        sync Style.notify_info.Play
+        ensure_ui_thread Style.notify_info.Play
 
     let action_feedback_button
         (
@@ -481,11 +477,11 @@ module Notifications =
             Colors.text
         )
 
-        sync Style.notify_info.Play
+        ensure_ui_thread Style.notify_info.Play
 
     let system_feedback (icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.green_accent, Colors.green), Colors.text)
-        sync Style.notify_system.Play
+        ensure_ui_thread Style.notify_system.Play
 
     let error (title, description) =
         add (
@@ -494,4 +490,4 @@ module Notifications =
             Colors.text
         )
 
-        sync Style.notify_error.Play
+        ensure_ui_thread Style.notify_error.Play

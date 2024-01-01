@@ -91,16 +91,16 @@ module Gameplay =
 
         let mutable WITH_COLORS: ColorizedChart option = None
 
-        let mutable previous_keymode = None
-
         let not_selected () = CACHE_DATA.IsNone
         let is_loading () = CACHE_DATA.IsSome && CHART.IsNone
         let is_loaded () = CACHE_DATA.IsSome && CHART.IsSome
 
-        let private chart_change_ev = Event<unit>()
-        let on_chart_change = chart_change_ev.Publish
+        let private chart_change_finished = Event<unit>()
+        let on_chart_change_finished = chart_change_finished.Publish
+        let private chart_change_started = Event<unit>()
+        let on_chart_change_started = chart_change_started.Publish
 
-        let mutable on_load_finished = []
+        let mutable on_load_succeeded = []
 
         type private LoadRequest =
             | Load of CachedChart * play_audio: bool
@@ -115,7 +115,7 @@ module Gameplay =
                         seq {
                             match Cache.load cc Library.cache with
                             | None ->
-                                // set error state
+                                // todo: set a proper error state to indicate this failed
                                 Background.load None
 
                                 Notifications.error (
@@ -123,7 +123,9 @@ module Gameplay =
                                     %"notification.chart_load_failed.body"
                                 )
 
-                                yield fun () -> on_load_finished <- []
+                                yield fun () ->
+                                    chart_change_finished.Trigger() 
+                                    on_load_succeeded <- []
                             | Some chart ->
 
                             Background.load (Cache.background_path chart Library.cache)
@@ -166,19 +168,19 @@ module Gameplay =
                                     RATING <- Some rating
                                     PATTERNS <- Some patterns
                                     FMT_NOTECOUNTS <- Some note_counts
-                                    chart_change_ev.Trigger()
+                                    chart_change_finished.Trigger()
 
                             yield
                                 fun () ->
-                                    for action in on_load_finished do
+                                    for action in on_load_succeeded do
                                         action ()
 
-                                    on_load_finished <- []
+                                    on_load_succeeded <- []
                         }
                     | Update is_interrupted_load ->
                         seq {
                             match CHART with
-                            | None -> failwith "impossible"
+                            | None -> ()
                             | Some chart ->
 
                             let with_mods = apply_mods _selected_mods.Value chart
@@ -204,19 +206,19 @@ module Gameplay =
                                     FMT_NOTECOUNTS <- Some note_counts
 
                                     if is_interrupted_load then
-                                        chart_change_ev.Trigger()
+                                        chart_change_finished.Trigger()
 
                             yield
                                 fun () ->
-                                    for action in on_load_finished do
+                                    for action in on_load_succeeded do
                                         action ()
 
-                                    on_load_finished <- []
+                                    on_load_succeeded <- []
                         }
                     | Recolor ->
                         seq {
                             match WITH_MODS with
-                            | None -> failwith "impossible"
+                            | None -> ()
                             | Some with_mods ->
 
                             let with_colors = apply_coloring (Content.noteskin_config().NoteColors) with_mods
@@ -224,10 +226,10 @@ module Gameplay =
 
                             yield
                                 fun () ->
-                                    for action in on_load_finished do
+                                    for action in on_load_succeeded do
                                         action ()
 
-                                    on_load_finished <- []
+                                    on_load_succeeded <- []
                         }
 
                 override this.Handle(action) = action ()
@@ -250,12 +252,7 @@ module Gameplay =
 
             WITH_COLORS <- None
 
-            match previous_keymode with
-            | Some k when k <> cc.Keys ->
-                Options.Presets.keymode_changed cc.Keys
-            | _ -> ()
-            previous_keymode <- Some cc.Keys
-
+            chart_change_started.Trigger()
             chart_loader.Request(Load (cc, auto_play_audio))
 
         let update () =
@@ -287,7 +284,7 @@ module Gameplay =
         let wait_for_load (action) =
             if CACHE_DATA.IsNone then ()
             elif WITH_COLORS.IsSome then action ()
-            else on_load_finished <- action :: on_load_finished
+            else on_load_succeeded <- action :: on_load_succeeded
 
         do sync_forever chart_loader.Join
 
@@ -342,7 +339,20 @@ module Gameplay =
             Chart.update ()
         )
 
-    do Chart.on_chart_change.Add(fun () -> Collections.on_chart_changed rate selected_mods)
+    do 
+        Chart.on_chart_change_finished.Add(fun () -> Collections.on_chart_changed rate selected_mods)
+        
+        let mutable previous_keymode = None
+        Chart.on_chart_change_started.Add(fun () ->
+            match Chart.CACHE_DATA with
+            | None -> failwith "impossible"
+            | Some cc ->
+                match previous_keymode with
+                | Some k when k <> cc.Keys ->
+                    Presets.keymode_changed cc.Keys
+                | _ -> ()
+                previous_keymode <- Some cc.Keys
+        )
 
     let make_score (replay_data, keys) : Score =
         {

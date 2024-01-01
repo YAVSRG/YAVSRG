@@ -151,6 +151,8 @@ module Leaderboard =
             base.Init parent
 
         member this.Data = data
+        
+        member this.FadeOut() = fade.Target <- 0.0f
 
         override this.OnFocus() =
             Style.hover.Play()
@@ -276,6 +278,8 @@ type Leaderboard(display: Setting<Display>) as this =
         )
 
     do
+        Chart.on_chart_change_started.Add (fun () -> Loader.container.Iter (fun s -> s.FadeOut()))
+
         this
         |+ StylishButton(
             (fun () -> display.Set Display.Details),
