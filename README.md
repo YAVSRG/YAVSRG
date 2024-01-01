@@ -1,55 +1,68 @@
-# Yet Another Vertically Scrolling Rhythm Game
+<img src="https://user-images.githubusercontent.com/21290233/165412641-5f857e96-901b-48dc-867e-e509ca123a3b.png" align="left">
+  
+# **Yet Another Vertically Scrolling Rhythm Game**
+The YET ANOTHER VERTICALLY SCROLLING RHYTHM GAME project is a collection of all my ideas on what could be done with VSRGs, brought to life.
 
-The YAVSRG project encompasses my custom rhythm game client, [Interlude](https://github.com/YAVSRG/Interlude), and the tooling around it
+Hello, I am Percyqaz, an enjoyer of VSRGs (specifically played on keyboard), and this is my custom rhythm game client, **Interlude**, and the tooling around it.
 
-See [yavsrg.net](https://www.yavsrg.net) for more information on this project.
+Visit [yavsrg.net](https://www.yavsrg.net) to read more about this project and its features.
 
-This repo is my latest go at managing a solution of several parts that I can easily work on and test together on my machine, but could otherwise be checked out as separate repos
-
-The struggle of submodules:
-- **Interlude.Web** and **Interlude** projects both depend on **Prelude** as a submodule. This would mean I need to have two copies of the repo checked out (unless I do something wacky with symlinks?) and constantly keep them synchronised as I want to test changes to all 3 projects together.  
-  This is one instance of a few dependency tree scenarios solved by just cloning all repos side-by-side
-
-The struggle of monorepo:
-- Size of cloning everything for CI pipelines
-- Cannot release versions of both game client and chart editor via GitHub releases in future if they share a repo
-- Reusable libraries that belong on my personal GitHub outside the YAVSRG org would Have to stay as submodules
-- Some private assets/scripts still need to be submodules
-- Submodules make me go mental and I want them gone from or abstracted out of my workflow
+As of 1st Jan 2024, every element of this project can be found in this monorepository.
 
 ----
 
-### ⚙️ Set up guide ***(For developers)***
-```bash
-git clone https://github.com/YAVSRG/YAVSRG.git
-./clone-repos.sh
-# Cloning Interlude.Assets will fail because it's private, that's OK you won't need it
-```
-After setting up, you can open `YAVSRG.sln` in your IDE of choice to open the whole multi-repo project at once.
+### 🎮 Playing the game
 
-Using an IDE that lets you commit to multiple repositories at once is recommended
+Lots of setup guidance, including a wiki, is built into the game to help you get started. You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in your browser!
 
-### 🤖 Building Interlude ***(For developers)***
+**On Windows** - Download the latest release [from the website](https://www.yavsrg.net), extract it and play!  
+**On macOS** - Build instructions for developers below. If you aren't a developer, ask Percyqaz to help you [in the Discord](https://discord.gg/tA22tWR) instead.
+**On linux** - Build instructions for developers below. If you aren't a developer, ask Percyqaz to help you [in the Discord](https://discord.gg/tA22tWR) instead.
+
+On non-Windows platforms you could also try running the Windows build in WINE or Proton.
+
+### 🤖 Building Interlude ***(for developers)***
 > [!Note]
 >
-> If you just want to play the game, **you do *not* need to do this**, instead get the game by downloading the latest release from the site
+> If you just want to play the game on Windows, **you do *not* need to do this**, instead get the game by downloading the latest release from the site
 
+Cloning the codebase to your machine requires [Git](https://git-scm.com/downloads)  
 Building requires the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed on your system - Follow Microsoft's install instructions for your platform
 
-Build for development:
+To check out the codebase on your machine:
+```bash
+# navigate to somewhere you like to store code
+git clone https://github.com/YAVSRG/YAVSRG.git --recurse-submodules
 ```
-cd Interlude
+Don't forget to recurse submodules or you will be missing some dependencies.
+
+To build and run the game, run the build script
+```bash
+cd interlude
+chmod +x interlude.sh
 ./interlude.sh
-# The game will crash upon first startup, because
-# you need the correct bass.dll/dynlib/so for your platform placed in ./src/bin/Debug/net7.0
-# Get it here https://github.com/percyqaz/Percyqaz.Flux/tree/master/lib
-# If your platform isn't there contact me in the discord or search online for it
+# On first startup, the game will tell you that you need the correct bass.dll/dynlib/so for your platform placed in ./src/bin/Debug/net8.0
+# Look for it here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib
+# If your platform isn't there contact me in the Discord or search online for it
 ```
 
-Run the same toolchain that CI does to make a distributable build:
+To create a distributable zip file of the game, run the toolchain project
 ```bash
-cd Interlude/tools
+cd interlude/tools
 dotnet run -- release_win64
 cd ../releases
-# interlude_win64.zip is now in here
+# interlude_win64.zip is now in the current directory
+# these are the same build artifacts used in the release pipeline
 ```
+
+## 🤝 Contributing
+
+Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, you name it
+
+Pull requests are very welcome; If you want to work on a feature please check with me first via Discord
+
+> [!Warning]
+>
+> IMPOSTOR SYNDROME DISCLAIMER
+> Don't know F#? Don't know how to code but want to learn? This is a hobby project largely dedicated to expanding my skills as a programmer and I would be pleased if it could do the same for you.
+> Ask away in the Discord, I'm often free to chat about how I or the codebase work and will happily give YOU the tools to make meaningful contributions.
