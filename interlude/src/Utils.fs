@@ -160,7 +160,7 @@ module Utils =
         let check_for_updates () =
             if OperatingSystem.IsWindows() then
                 WebServices.download_json (
-                    "https://api.github.com/repos/YAVSRG/Interlude/releases/latest",
+                    "https://api.github.com/repos/YAVSRG/YAVSRG/releases/latest",
                     fun (d: GithubRelease option) ->
                         if d.IsSome then
                             handle_update d.Value
@@ -172,7 +172,7 @@ module Utils =
                 if Directory.Exists folder_path then
                     Directory.Delete(folder_path, true)
             else
-                Logging.Info "Auto-updater not availble for macOS / Linux"
+                Logging.Info "Auto-updater not availble for macOS / Linux (yet)"
 
         let apply_update (callback) =
             if not update_available then

@@ -3,7 +3,7 @@
 # **Yet Another Vertically Scrolling Rhythm Game**
 The YET ANOTHER VERTICALLY SCROLLING RHYTHM GAME project is a collection of all my ideas on what could be done with VSRGs, brought to life.
 
-Hello, I am Percyqaz, an enjoyer of VSRGs (specifically played on keyboard), and this is my custom rhythm game client, **Interlude**, and the tooling around it.
+This is my custom rhythm game client, **Interlude**, and the tooling around it.
 
 Visit [yavsrg.net](https://www.yavsrg.net) to read more about this project and its features.
 
@@ -16,8 +16,8 @@ As of 1st Jan 2024, every element of this project can be found in this monorepos
 Lots of setup guidance, including a wiki, is built into the game to help you get started. You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in your browser!
 
 **On Windows** - Download the latest release [from the website](https://www.yavsrg.net), extract it and play!  
-**On macOS** - Build instructions for developers below. If you aren't a developer, ask Percyqaz to help you [in the Discord](https://discord.gg/tA22tWR) instead.
-**On linux** - Build instructions for developers below. If you aren't a developer, ask Percyqaz to help you [in the Discord](https://discord.gg/tA22tWR) instead.
+**On macOS** - Build instructions for developers below! If you aren't a developer, ask Percyqaz to help you [in the Discord](https://discord.gg/tA22tWR) instead  
+**On linux** - Build instructions for developers below! If you aren't a developer, ask Percyqaz to help you [in the Discord](https://discord.gg/tA22tWR) instead  
 
 On non-Windows platforms you could also try running the Windows build in WINE or Proton.
 
@@ -36,17 +36,17 @@ git clone https://github.com/YAVSRG/YAVSRG.git --recurse-submodules
 ```
 Don't forget to recurse submodules or you will be missing some dependencies.
 
-To build and run the game, run the build script
+To build and run the game, run the build script:
 ```bash
-cd interlude
-chmod +x interlude.sh
-./interlude.sh
+cd scripts
+chmod +x interlude_run.sh
+./interlude_run.sh
 # On first startup, the game will tell you that you need the correct bass.dll/dynlib/so for your platform placed in ./src/bin/Debug/net8.0
 # Look for it here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib
 # If your platform isn't there contact me in the Discord or search online for it
 ```
 
-To create a distributable zip file of the game, run the toolchain project
+To create a distributable zip file of the game, run the toolchain project:
 ```bash
 cd interlude/tools
 dotnet run -- release_win64
@@ -64,5 +64,7 @@ Pull requests are very welcome; If you want to work on a feature please check wi
 > [!Warning]
 >
 > IMPOSTOR SYNDROME DISCLAIMER
+>
 > Don't know F#? Don't know how to code but want to learn? This is a hobby project largely dedicated to expanding my skills as a programmer and I would be pleased if it could do the same for you.
+>
 > Ask away in the Discord, I'm often free to chat about how I or the codebase work and will happily give YOU the tools to make meaningful contributions.

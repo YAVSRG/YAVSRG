@@ -1,1 +1,0 @@
-dotnet dev-certs https --trust -ep ./secrets/localhost.pfx -p DEVELOPMENT
