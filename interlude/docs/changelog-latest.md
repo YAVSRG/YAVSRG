@@ -1,24 +1,19 @@
-0.7.15
+0.7.15.1
 ====
 
-Feature update 1 of a few in a short span of time
+Feature update 2 of a few in a short span of time!
 
 # Bug fixes
-- You can no longer switch presets or reload noteskins while playing
-- Note colors now update correctly when swapping presets outside the options menu
-- Newly installed tables stay "selected" instead of requiring a manual re-select upon game restart
+- Fixed a bug when seeking to before the start of audio files in replay and practice mode
+- Fixed a minor graphical glitch in score screen graph (hangover from 0.7.15's changes)
+- Fixed some errors in chart loading under rare conditions
+- Fixed scoreboard and leaderboard not updating until a chart fully and successfully loads
+- Fixed visual offset not being factored into input overlay on replay mode
 
-# Improvements
-- LN percentage indicator on level select switches to a plain count of LNs if they make up <0.5% of the chart, requested by Jup
-
-# New features
-- You can set a mode on your presets so when it is selected, all changes are automatically saved to it and you don't need to manually save before switching to another preset
-- You can set your presets to automatically switch depending on the keymode of the chart you are looking at in level select
-  Example use: To use a different scroll speed, hit position and noteskin for 4k and 7k
-  
-How the render engine loads textures has been improved to make this possible, swapping noteskins should be seamless due to preloading the noteskins used by your presets
-
-This also lifts the technical limitations on a couple of other features coming soon :)
-
-Because some parts of the engine have changed, please report any unusual bugs in the Discord - Everything should look and perform exactly the same as before (or marginally better) but keep an eye out
+# New replay mode features
+- You can pause replays (with space)
+- You can speed up and slow down replays to get a better look (with the normal rate changing keybinds)
+- New hit overlay in replay mode that highlights what judgements and ms deviations every input was awarded
+  Particularly useful for reading off release timings even on weird skins
+- Playfield dimming effect is now an adjustable slider so you can get the right contrast for the overlay over your notes
 
