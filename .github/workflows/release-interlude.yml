@@ -3,7 +3,7 @@ name: Release Interlude
 on:
   push:
     branches: [ "main" ]
-    paths: "docs/changelog-latest.md"
+    paths: "interlude/docs/changelog-latest.md"
   workflow_dispatch:
   # for debug purposes
 
@@ -14,33 +14,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        repository: percyqaz/Percyqaz.Common
-        path: Percyqaz.Common
-        
-    - uses: actions/checkout@v3
-      with:
-        repository: percyqaz/Percyqaz.Shell
-        path: Percyqaz.Shell
-        
-    - uses: actions/checkout@v3
-      with:
-        repository: percyqaz/Percyqaz.Flux
-        path: Percyqaz.Flux
-        
-    - uses: actions/checkout@v3
-      with:
-        repository: YAVSRG/Prelude
-        path: Prelude
-        
-    - uses: actions/checkout@v3
-      with:
-        repository: YAVSRG/Interlude.Web
-        path: Interlude.Web
-        
-    - uses: actions/checkout@v3
-      with:
-        path: Interlude
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -50,15 +23,15 @@ jobs:
     - name: Package Interlude
       id: package
       run: |
-        cd Interlude/tools
+        cd interlude/tools
         dotnet run -- release_win64
         echo "VERSION=v$(dotnet run -- version)" >> $GITHUB_OUTPUT
         
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "Interlude/releases/*.zip"
-        bodyFile: "Interlude/docs/changelog-latest.md"
+        artifacts: "interlude/releases/*.zip"
+        bodyFile: "interlude/docs/changelog-latest.md"
         token: ${{ secrets.GITHUB_TOKEN }}
         owner: YAVSRG
         repo: Interlude
@@ -69,7 +42,7 @@ jobs:
       id: read_file
       uses: andstor/file-reader-action@v1
       with:
-        path: "Interlude/docs/changelog-latest.md"
+        path: "interlude/docs/changelog-latest.md"
 
     - name: Post Changelog via Webhook
       uses: tsickert/discord-webhook@v5.3.0
@@ -80,4 +53,4 @@ jobs:
           ```
           ${{ steps.read_file.outputs.contents }}
           ```
-          Update ingame or [download Interlude from GitHub](https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip)
+          Update ingame or [download Interlude from GitHub](https://github.com/YAVSRG/YAVSRG/releases/latest/download/Interlude-win64.zip)

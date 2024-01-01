@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Percyqaz.Common\src\Percyqaz.Common.fsproj" />
-    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
+    <ProjectReference Include="..\..\libraries\Percyqaz.Common\src\Percyqaz.Common.fsproj" />
+    <ProjectReference Include="..\..\prelude\src\Prelude.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,23 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-      with:
-        repository: percyqaz/Percyqaz.Common
-        path: Percyqaz.Common
-        
-    - uses: actions/checkout@v3
-      with:
-        repository: percyqaz/Percyqaz.Shell
-        path: Percyqaz.Shell
-        
-    - uses: actions/checkout@v3
-      with:
-        repository: YAVSRG/Prelude
-        path: Prelude
-        
-    - uses: actions/checkout@v3
-      with:
-        path: Backbeat
       
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -32,13 +15,13 @@ jobs:
         dotnet-version: 7.0.x
         
     - name: Commit table changes via tool
-      run: cd Backbeat/tools && dotnet run -- commit crescent
+      run: cd backbeat/tools && dotnet run -- commit crescent
       
     - name: Read changelog contents
       id: read_file
       uses: andstor/file-reader-action@v1
       with:
-        path: "Backbeat/tables/crescent.diff"
+        path: "backbeat/tables/crescent.diff"
         
     - name: Post changes to webhook
       uses: tsickert/discord-webhook@v5.3.0
@@ -53,4 +36,3 @@ jobs:
         commit_message: <🌙> Apply pending table changes
         skip_checkout: true
         skip_fetch: true
-        repository: ./Backbeat

@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
+    <ProjectReference Include="..\..\..\prelude\src\Prelude.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -24,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
-    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
+	  <ProjectReference Include="..\..\libraries\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
+    <ProjectReference Include="..\..\prelude\src\Prelude.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

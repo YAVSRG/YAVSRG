@@ -67,7 +67,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Percyqaz.Common\src\Percyqaz.Common.fsproj" />
+    <ProjectReference Include="..\..\libraries\Percyqaz.Common\src\Percyqaz.Common.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

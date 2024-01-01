@@ -3,32 +3,32 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Percyqaz.Common", "Percyqaz.Common\src\Percyqaz.Common.fsproj", "{D9FF0A2D-98D3-4249-BFC6-3EDA475DCEDD}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Percyqaz.Common", "libraries\Percyqaz.Common\src\Percyqaz.Common.fsproj", "{D9FF0A2D-98D3-4249-BFC6-3EDA475DCEDD}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Prelude", "Prelude\src\Prelude.fsproj", "{399CFBE8-C1AA-49CD-8A99-DC0BCF57091D}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Prelude", "prelude\src\Prelude.fsproj", "{399CFBE8-C1AA-49CD-8A99-DC0BCF57091D}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Percyqaz.Flux", "Percyqaz.Flux\src\Percyqaz.Flux.fsproj", "{C8BE8EAC-53C0-4225-9160-17D344C6C786}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Percyqaz.Flux", "engine\src\Percyqaz.Flux.fsproj", "{C8BE8EAC-53C0-4225-9160-17D344C6C786}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude", "Interlude\src\Interlude.fsproj", "{D5EFAE0B-7E9F-4856-98B5-80D3D3F37231}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude", "interlude\src\Interlude.fsproj", "{D5EFAE0B-7E9F-4856-98B5-80D3D3F37231}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Tools", "Interlude\tools\Interlude.Tools.fsproj", "{811E948A-7F59-4BCE-A655-5CF4ED43E669}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Tools", "interlude\tools\Interlude.Tools.fsproj", "{811E948A-7F59-4BCE-A655-5CF4ED43E669}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Noteskins", "Interlude.Noteskins\tools\Interlude.Noteskins.fsproj", "{A61A0594-BA70-4740-ADB4-6FC20EA0B40F}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Noteskins", "backbeat\noteskins\tools\Interlude.Noteskins.fsproj", "{A61A0594-BA70-4740-ADB4-6FC20EA0B40F}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Backbeat", "Backbeat\tools\Backbeat.fsproj", "{755DDB37-C1FF-4833-9679-B503CFAA5E9B}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Backbeat", "backbeat\tools\Backbeat.fsproj", "{755DDB37-C1FF-4833-9679-B503CFAA5E9B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7395E751-8352-4084-9D6E-C59D3130C8A4} = {7395E751-8352-4084-9D6E-C59D3130C8A4}
 	EndProjectSection
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Shared", "Interlude.Web\shared\Interlude.Web.Shared.fsproj", "{7EEF2A2C-DA63-41E7-9CC9-7D46155BFCD5}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Shared", "online\shared\Interlude.Web.Shared.fsproj", "{7EEF2A2C-DA63-41E7-9CC9-7D46155BFCD5}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Server", "Interlude.Web\server\Interlude.Web.Server.fsproj", "{17BA6969-20CE-4D19-AF7C-F9ED355786CE}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Server", "online\server\Interlude.Web.Server.fsproj", "{17BA6969-20CE-4D19-AF7C-F9ED355786CE}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Tests", "Interlude.Web\tests\Interlude.Web.Tests.fsproj", "{81CCE970-9179-4A40-81CA-2D86F28732B8}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Web.Tests", "online\tests\Interlude.Web.Tests.fsproj", "{81CCE970-9179-4A40-81CA-2D86F28732B8}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Prelude.Tests", "Prelude\tests\Prelude.Tests.fsproj", "{5C58AF88-4C8F-4DBE-A5B6-182612BB7DE3}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Prelude.Tests", "prelude\tests\Prelude.Tests.fsproj", "{5C58AF88-4C8F-4DBE-A5B6-182612BB7DE3}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Percyqaz.Shell", "Percyqaz.Shell\src\Percyqaz.Shell.fsproj", "{7395E751-8352-4084-9D6E-C59D3130C8A4}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Percyqaz.Shell", "libraries\Percyqaz.Shell\src\Percyqaz.Shell.fsproj", "{7395E751-8352-4084-9D6E-C59D3130C8A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

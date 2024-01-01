@@ -28,4 +28,4 @@ jobs:
           B2_APP_KEY_ID: ${{ secrets.B2_APP_KEY_ID }}
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_WORKER_API: ${{ secrets.CF_WORKER_API }}
-        run: python b2AuthorizeCfWorker.py
+        run: python online/b2AuthorizeCfWorker.py

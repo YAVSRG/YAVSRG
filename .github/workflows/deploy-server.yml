@@ -1,4 +1,4 @@
-name: Deploy Multiplayer Server
+name: Deploy online.yavsrg.net
 on:
   push:
     branches: [ "main" ]
@@ -10,21 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          repository: percyqaz/Percyqaz.Common
-          path: Percyqaz.Common
-        
-      - uses: actions/checkout@v3
-        with:
-          repository: YAVSRG/Prelude
-          path: Prelude
-        
-      - uses: actions/checkout@v3
-        with:
-          path: Interlude.Web
         
       - name: Build image 
-        run: docker build -t interlude-web-server -f Interlude.Web/server/dockerfile .
+        run: docker build -t interlude-web-server -f online/server/dockerfile .
         
       - name: Install doctl 
         uses: digitalocean/action-doctl@v2

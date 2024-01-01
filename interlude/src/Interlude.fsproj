@@ -139,10 +139,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Interlude.Web\shared\Interlude.Web.Shared.fsproj" />
-    <ProjectReference Include="..\..\Percyqaz.Flux\src\Percyqaz.Flux.fsproj" />
-    <ProjectReference Include="..\..\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
-    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
+    <ProjectReference Include="..\..\engine\src\Percyqaz.Flux.fsproj" />
+    <ProjectReference Include="..\..\libraries\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
+    <ProjectReference Include="..\..\online\shared\Interlude.Web.Shared.fsproj" />
+    <ProjectReference Include="..\..\prelude\src\Prelude.fsproj" />
   </ItemGroup>
 	
 </Project>
