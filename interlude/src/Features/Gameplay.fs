@@ -91,6 +91,7 @@ module Gameplay =
 
         let mutable WITH_COLORS: ColorizedChart option = None
 
+        // todo: remove these unused functions OR use them
         let not_selected () = CACHE_DATA.IsNone
         let is_loading () = CACHE_DATA.IsSome && CHART.IsNone
         let is_loaded () = CACHE_DATA.IsSome && CHART.IsSome
@@ -100,7 +101,7 @@ module Gameplay =
         let private chart_change_started = Event<unit>()
         let on_chart_change_started = chart_change_started.Publish
 
-        let mutable on_load_succeeded = []
+        let mutable private on_load_succeeded = []
 
         type private LoadRequest =
             | Load of CachedChart * play_audio: bool
@@ -236,6 +237,7 @@ module Gameplay =
             }
 
         let change (cc: CachedChart, ctx: LibraryContext, auto_play_audio: bool) =
+            // todo: show a one-time warning if chart loading takes over 1 second
             CACHE_DATA <- Some cc
             FMT_DURATION <- format_duration CACHE_DATA
             FMT_BPM <- format_bpm CACHE_DATA
