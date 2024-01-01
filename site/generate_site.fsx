@@ -53,8 +53,8 @@ module MarkdownToHtml =
 
     let render_document (md: MarkdownDocument) = paragraphs md.Paragraphs
 
-let template = File.ReadAllText("./site_data/page.html")
-let changelog_template = File.ReadAllText("./site_data/changelog.html")
+let template = File.ReadAllText("./templates/page.html")
+let changelog_template = File.ReadAllText("./templates/changelog.html")
 
 let build_page (file: string) (title: string) (content: string) =
     template.Replace("{{title}}", title).Replace("{{content}}", content)
@@ -69,23 +69,23 @@ let build_mpage (file: string) (title: string) (contents: string array) =
     changelog_template.Replace("{{title}}", title).Replace("{{content}}", content)
     |> fun t -> File.WriteAllText(file, t)
 
-Markdown.Parse(File.ReadAllText("./site_data/terms_of_service.md"))
+Markdown.Parse(File.ReadAllText("./templates/terms_of_service.md"))
 |> MarkdownToHtml.render_document
-|> build_page "./site/terms_of_service.html" "Terms of Service"
+|> build_page "./files/terms_of_service.html" "Terms of Service"
 
-Markdown.Parse(File.ReadAllText("./site_data/privacy_policy.md"))
+Markdown.Parse(File.ReadAllText("./templates/privacy_policy.md"))
 |> MarkdownToHtml.render_document
-|> build_page "./site/privacy_policy.html" "Privacy Policy"
+|> build_page "./files/privacy_policy.html" "Privacy Policy"
 
 let re = Regex("(?=\s[0-9]\.[0-9]+\.[0-9]+.*\s*\=\=\=\=)")
 
-File.ReadAllText("./Interlude/docs/changelog.md")
+File.ReadAllText("../interlude/docs/changelog.md")
 |> re.Split
 |> Array.map (fun s -> s.Trim())
 |> Array.except [ "" ]
 |> Array.map Markdown.Parse
 |> Array.map MarkdownToHtml.render_document
-|> build_mpage "./site/interlude/changelog.html" "Changelog"
+|> build_mpage "./files/interlude/changelog.html" "Changelog"
 
 //// WIKI GENERATOR
 
@@ -132,7 +132,7 @@ let parse_wiki_file (path: string) =
       Filename = Path.GetFileNameWithoutExtension(path) }
 
 let wiki_pages =
-    Directory.EnumerateFiles("./Interlude/docs/wiki/")
+    Directory.EnumerateFiles("../interlude/docs/wiki/")
     |> Seq.filter (fun f -> f.EndsWith ".md" && not (f.EndsWith "index.md"))
     |> Seq.map parse_wiki_file
     |> Array.ofSeq
@@ -154,17 +154,17 @@ let wiki_sidebar_content =
     |> sprintf
         "<div class=\"frame text-20 container flex flex-col mx-auto p-4\"><h1 class=\"text-30\">Table of contents</h1>%s</div>"
 
-let wiki_template = File.ReadAllText("./site_data/wiki.html")
+let wiki_template = File.ReadAllText("./templates/wiki.html")
 
 for page in wiki_pages do
     wiki_template
         .Replace("{{title}}", sprintf "%s - Interlude Wiki" page.Title)
         .Replace("{{content}}", page.Html)
-    |> fun t -> File.WriteAllText("./site/interlude/wiki/" + page.Filename + ".html", t)
+    |> fun t -> File.WriteAllText("./files/interlude/wiki/" + page.Filename + ".html", t)
 
 let content =
     File
-        .ReadAllText("./Interlude/docs/wiki/index.md")
+        .ReadAllText("../interlude/docs/wiki/index.md")
         .Split([| "::::" |], System.StringSplitOptions.TrimEntries)
     |> Array.map (Markdown.Parse >> MarkdownToHtml.render_document)
     |> Array.map (sprintf "<div class=\"frame text-20 container flex flex-col mx-auto p-4\">%s</div>")
@@ -173,4 +173,4 @@ let content =
 wiki_template
     .Replace("{{title}}", "Interlude Wiki")
     .Replace("{{content}}", content + wiki_sidebar_content)
-|> fun t -> File.WriteAllText("./site/interlude/wiki/index.html", t)
+|> fun t -> File.WriteAllText("./files/interlude/wiki/index.html", t)
