@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+    db:
+        container_name: redis
+        image: redis/redis-stack
+        restart: unless-stopped
+        ports:
+            - 6379:6379
+            - 8001:8001
+        volumes:
+            - ./data:/data
+    server:
+        container_name: server
+        build:
+            context: ..
+            dockerfile: ./Interlude.Web/server/dockerfile
+        restart: unless-stopped
+        ports:
+            - 32767:32767
+            - 443:443
+        depends_on:
+            - db
+        volumes:
+            - ./secrets:/docker_root/secrets

@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Version.txt" />
+    <Compile Include="Secrets.fs" />
+    <Compile Include="Domain\Redis.fs" />
+    <Compile Include="Domain\Objects\Users.fs" />
+    <Compile Include="Domain\Objects\Friends.fs" />
+    <Compile Include="Domain\Objects\Scores.fs" />
+    <Compile Include="Domain\Objects\Leaderboards.fs" />
+    <Compile Include="Domain\Objects\Tables.fs" />
+    <Compile Include="Domain\DbServices\DeleteUser.fs" />
+    <Compile Include="Domain\DbServices\Migrations.fs" />
+    <Compile Include="Domain\Services\UserAuth.fs" />
+    <Compile Include="Domain\Services\Backbeat.fs" />
+    <Compile Include="Online\LoggedInUsers.fs" />
+    <Compile Include="Online\Lobbies.fs" />
+    <Compile Include="Online\Online.fs" />
+    <Compile Include="API\Utils.fs" />
+    <Compile Include="API\Auth\Discord.fs" />
+    <Compile Include="API\Charts\Identify.fs" />
+    <Compile Include="API\Charts\Scores\Leaderboard.fs" />
+    <Compile Include="API\Charts\Scores\Save.fs" />
+    <Compile Include="API\Tables\Suggestions\Add.fs" />
+    <Compile Include="API\Tables\Suggestions\List.fs" />
+    <Compile Include="API\Tables\Suggestions\Apply.fs" />
+    <Compile Include="API\Tables\Suggestions\Preview.fs" />
+    <Compile Include="API\Tables\Suggestions\Missing.fs" />
+    <Compile Include="API\Tables\Leaderboard.fs" />
+    <Compile Include="API\Tables\Records.fs" />
+    <Compile Include="API\Friends\List.fs" />
+    <Compile Include="API\Friends\Add.fs" />
+    <Compile Include="API\Friends\Remove.fs" />
+    <Compile Include="API\Players\Profile\View.fs" />
+    <Compile Include="API\Players\Profile\Options.fs" />
+    <Compile Include="API\Players\Search.fs" />
+    <Compile Include="API\Players\Online.fs" />
+    <Compile Include="API\Health\Status.fs" />
+    <Compile Include="API\API.fs" />
+    <Compile Include="Bot\Constants.fs" />
+    <Compile Include="Bot\UserCommands.fs" />
+    <Compile Include="Bot\AdminCommands.fs" />
+    <Compile Include="Bot\Bot.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="3.10.0" />
+    <PackageReference Include="NetCoreServer" Version="7.0.0" />
+    <PackageReference Include="NRedisStack" Version="0.6.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\shared\Interlude.Web.Shared.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="7.0.400" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+**/bin/
+**/obj/
+secrets
+/data
+/b2AuthorizeCfWorker_local.py

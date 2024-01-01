@@ -1,0 +1,53 @@
+name: Deploy Multiplayer Server
+on:
+  push:
+    branches: [ "main" ]
+    paths: "server/Version.txt"
+  workflow_dispatch:
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: percyqaz/Percyqaz.Common
+          path: Percyqaz.Common
+        
+      - uses: actions/checkout@v3
+        with:
+          repository: YAVSRG/Prelude
+          path: Prelude
+        
+      - uses: actions/checkout@v3
+        with:
+          path: Interlude.Web
+        
+      - name: Build image 
+        run: docker build -t interlude-web-server -f Interlude.Web/server/dockerfile .
+        
+      - name: Install doctl 
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          
+      - name: Log in to DigitalOcean registry 
+        run: doctl registry login --expiry-seconds 600
+        
+      - name: Tag image 
+        run:
+          docker tag interlude-web-server registry.digitalocean.com/yavsrg/interlude-web-server:latest
+          
+      - name: Push image
+        run: docker push registry.digitalocean.com/yavsrg/interlude-web-server:latest
+        
+      - name: Run update script on server
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+            host: ${{ secrets.WEBSERVER_IP }}
+            username: root
+            password: ${{ secrets.WEBSERVER_PASSWORD }}
+            script: ./update.sh
+            
+      - name: Run garbage collection on DigitalOcean registry
+        run: doctl registry garbage-collection start --force

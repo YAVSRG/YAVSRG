@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Buffer.fs" />
+    <Compile Include="Packets.fs" />
+    <Compile Include="Client.fs" />
+    <Compile Include="Server.fs" />
+    <Compile Include="API.fs" />
+    <Compile Include="Requests.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NetCoreServer" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Percyqaz.Common\src\Percyqaz.Common.fsproj" />
+    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="7.0.400" />
+  </ItemGroup>
+
+</Project>
