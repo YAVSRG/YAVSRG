@@ -1,0 +1,3884 @@
+{
+    "Rulesets": {
+        "osu-od-0": {
+            "Accuracy": {
+                "CbrushWindow": 151.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 0
+                }, 
+                "MissWindow": 188, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-151.5, 5], [-127.5, 4], [-97.5, 3], [-64.5, 2], [-16.5, 1], [16.5, 0], [64.5, 1], [97.5, 2], [127.5, 3], [151.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD0.0)"
+        }, 
+        "osu-od-1": {
+            "Accuracy": {
+                "CbrushWindow": 148.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 1
+                }, 
+                "MissWindow": 185, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-148.5, 5], [-124.5, 4], [-94.5, 3], [-61.5, 2], [-16.5, 1], [16.5, 0], [61.5, 1], [94.5, 2], [124.5, 3], [148.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD1.0)"
+        }, 
+        "osu-od-10": {
+            "Accuracy": {
+                "CbrushWindow": 121.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 10
+                }, 
+                "MissWindow": 158, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-121.5, 5], [-97.5, 4], [-67.5, 3], [-34.5, 2], [-16.5, 1], [16.5, 0], [34.5, 1], [67.5, 2], [97.5, 3], [121.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD10.0)"
+        }, 
+        "osu-od-2": {
+            "Accuracy": {
+                "CbrushWindow": 145.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 2
+                }, 
+                "MissWindow": 182, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-145.5, 5], [-121.5, 4], [-91.5, 3], [-58.5, 2], [-16.5, 1], [16.5, 0], [58.5, 1], [91.5, 2], [121.5, 3], [145.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD2.0)"
+        }, 
+        "osu-od-3": {
+            "Accuracy": {
+                "CbrushWindow": 142.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 3
+                }, 
+                "MissWindow": 179, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-142.5, 5], [-118.5, 4], [-88.5, 3], [-55.5, 2], [-16.5, 1], [16.5, 0], [55.5, 1], [88.5, 2], [118.5, 3], [142.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD3.0)"
+        }, 
+        "osu-od-4": {
+            "Accuracy": {
+                "CbrushWindow": 139.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 4
+                }, 
+                "MissWindow": 176, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-139.5, 5], [-115.5, 4], [-85.5, 3], [-52.5, 2], [-16.5, 1], [16.5, 0], [52.5, 1], [85.5, 2], [115.5, 3], [139.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD4.0)"
+        }, 
+        "osu-od-5": {
+            "Accuracy": {
+                "CbrushWindow": 136.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 5
+                }, 
+                "MissWindow": 173, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-136.5, 5], [-112.5, 4], [-82.5, 3], [-49.5, 2], [-16.5, 1], [16.5, 0], [49.5, 1], [82.5, 2], [112.5, 3], [136.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD5.0)"
+        }, 
+        "osu-od-6": {
+            "Accuracy": {
+                "CbrushWindow": 133.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 6
+                }, 
+                "MissWindow": 170, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-133.5, 5], [-109.5, 4], [-79.5, 3], [-46.5, 2], [-16.5, 1], [16.5, 0], [46.5, 1], [79.5, 2], [109.5, 3], [133.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD6.0)"
+        }, 
+        "osu-od-7": {
+            "Accuracy": {
+                "CbrushWindow": 130.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 7
+                }, 
+                "MissWindow": 167, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-130.5, 5], [-106.5, 4], [-76.5, 3], [-43.5, 2], [-16.5, 1], [16.5, 0], [43.5, 1], [76.5, 2], [106.5, 3], [130.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD7.0)"
+        }, 
+        "osu-od-8": {
+            "Accuracy": {
+                "CbrushWindow": 127.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 8
+                }, 
+                "MissWindow": 164, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-127.5, 5], [-103.5, 4], [-73.5, 3], [-40.5, 2], [-16.5, 1], [16.5, 0], [40.5, 1], [73.5, 2], [103.5, 3], [127.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD8.0)"
+        }, 
+        "osu-od-9": {
+            "Accuracy": {
+                "CbrushWindow": 124.5, 
+                "HoldNoteBehaviour": {
+                    "Osu": 9
+                }, 
+                "MissWindow": 161, 
+                "Points": {
+                    "Weights": [300, [300, 300, 200, 100, 50, 0]]
+                }, 
+                "Timegates": [[-124.5, 5], [-100.5, 4], [-70.5, 3], [-37.5, 2], [-16.5, 1], [16.5, 0], [37.5, 1], [70.5, 2], [100.5, 3], [124.5, 4]]
+            }, 
+            "Description": "Simulates osu!'s scoring system", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 80, 80], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 255, 80, 255], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 80, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 100], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 1, 
+                    "Color": [255, 255, 255, 160], 
+                    "Name": "SS"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 0, 255, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 3, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PERF"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "SS"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "1KK"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "300g"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "300"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "200"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 160, 255], 
+                "Name": "100"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 160, 160, 160], 
+                "Name": "50"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 80, 80], 
+                "Name": "MISS"
+            }], 
+            "Name": "osu! (OD9.0)"
+        }, 
+        "sc-j1": {
+            "Accuracy": {
+                "CbrushWindow": 90, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 3, 
+                        "JudgementIfOverheld": 3
+                    }
+                }, 
+                "MissWindow": 180, 
+                "Points": {
+                    "Weights": [10, [10, 9, 5, -5, -10, -10]]
+                }, 
+                "Timegates": [[-180, 5], [-135, 4], [-135, 3], [-67.5, 2], [-33.75, 1], [33.75, 0], [67.5, 1], [135, 2], [135, 3], [180, 4]]
+            }, 
+            "Description": "The 'official' scoring system of Interlude, fine tuned for maximum fun", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 200, 163, 155], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.89995, 
+                    "Color": [255, 194, 162, 182], 
+                    "Name": "C-"
+                }, {
+                    "Accuracy": 0.90995, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.91995, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B-"
+                }, {
+                    "Accuracy": 0.92995, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.93995, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A-"
+                }, {
+                    "Accuracy": 0.94995, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95995, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.96995, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "S-"
+                }, {
+                    "Accuracy": 0.97995, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.98995, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1P"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "SC (J1)"
+        }, 
+        "sc-j2": {
+            "Accuracy": {
+                "CbrushWindow": 90, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 3, 
+                        "JudgementIfOverheld": 3
+                    }
+                }, 
+                "MissWindow": 180, 
+                "Points": {
+                    "Weights": [10, [10, 9, 5, -5, -10, -10]]
+                }, 
+                "Timegates": [[-180, 5], [-135, 4], [-120, 3], [-60, 2], [-30, 1], [30, 0], [60, 1], [120, 2], [135, 3], [180, 4]]
+            }, 
+            "Description": "The 'official' scoring system of Interlude, fine tuned for maximum fun", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 200, 163, 155], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.89995, 
+                    "Color": [255, 194, 162, 182], 
+                    "Name": "C-"
+                }, {
+                    "Accuracy": 0.90995, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.91995, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B-"
+                }, {
+                    "Accuracy": 0.92995, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.93995, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A-"
+                }, {
+                    "Accuracy": 0.94995, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95995, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.96995, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "S-"
+                }, {
+                    "Accuracy": 0.97995, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.98995, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1P"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "SC (J2)"
+        }, 
+        "sc-j3": {
+            "Accuracy": {
+                "CbrushWindow": 90, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 3, 
+                        "JudgementIfOverheld": 3
+                    }
+                }, 
+                "MissWindow": 180, 
+                "Points": {
+                    "Weights": [10, [10, 9, 5, -5, -10, -10]]
+                }, 
+                "Timegates": [[-180, 5], [-135, 4], [-105, 3], [-52.5, 2], [-26.25, 1], [26.25, 0], [52.5, 1], [105, 2], [135, 3], [180, 4]]
+            }, 
+            "Description": "The 'official' scoring system of Interlude, fine tuned for maximum fun", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 200, 163, 155], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.89995, 
+                    "Color": [255, 194, 162, 182], 
+                    "Name": "C-"
+                }, {
+                    "Accuracy": 0.90995, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.91995, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B-"
+                }, {
+                    "Accuracy": 0.92995, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.93995, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A-"
+                }, {
+                    "Accuracy": 0.94995, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95995, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.96995, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "S-"
+                }, {
+                    "Accuracy": 0.97995, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.98995, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1P"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "SC (J3)"
+        }, 
+        "sc-j4": {
+            "Accuracy": {
+                "CbrushWindow": 90, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 3, 
+                        "JudgementIfOverheld": 3
+                    }
+                }, 
+                "MissWindow": 180, 
+                "Points": {
+                    "Weights": [10, [10, 9, 5, -5, -10, -10]]
+                }, 
+                "Timegates": [[-180, 5], [-135, 4], [-90, 3], [-45, 2], [-22.5, 1], [22.5, 0], [45, 1], [90, 2], [135, 3], [180, 4]]
+            }, 
+            "Description": "The 'official' scoring system of Interlude, fine tuned for maximum fun", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 200, 163, 155], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.89995, 
+                    "Color": [255, 194, 162, 182], 
+                    "Name": "C-"
+                }, {
+                    "Accuracy": 0.90995, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.91995, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B-"
+                }, {
+                    "Accuracy": 0.92995, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.93995, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A-"
+                }, {
+                    "Accuracy": 0.94995, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95995, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.96995, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "S-"
+                }, {
+                    "Accuracy": 0.97995, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.98995, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1P"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "SC (J4)"
+        }, 
+        "sc-j5": {
+            "Accuracy": {
+                "CbrushWindow": 90, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 3, 
+                        "JudgementIfOverheld": 3
+                    }
+                }, 
+                "MissWindow": 180, 
+                "Points": {
+                    "Weights": [10, [10, 9, 5, -5, -10, -10]]
+                }, 
+                "Timegates": [[-150, 5], [-112.5, 4], [-75, 3], [-37.5, 2], [-18.75, 1], [18.75, 0], [37.5, 1], [75, 2], [112.5, 3], [150, 4]]
+            }, 
+            "Description": "The 'official' scoring system of Interlude, fine tuned for maximum fun", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 200, 163, 155], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.89995, 
+                    "Color": [255, 194, 162, 182], 
+                    "Name": "C-"
+                }, {
+                    "Accuracy": 0.90995, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.91995, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B-"
+                }, {
+                    "Accuracy": 0.92995, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.93995, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A-"
+                }, {
+                    "Accuracy": 0.94995, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95995, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.96995, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "S-"
+                }, {
+                    "Accuracy": 0.97995, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.98995, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1P"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "SC (J5)"
+        }, 
+        "sc-j6": {
+            "Accuracy": {
+                "CbrushWindow": 90, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 3, 
+                        "JudgementIfOverheld": 3
+                    }
+                }, 
+                "MissWindow": 180, 
+                "Points": {
+                    "Weights": [10, [10, 9, 5, -5, -10, -10]]
+                }, 
+                "Timegates": [[-120, 5], [-90, 4], [-60, 3], [-30, 2], [-15, 1], [15, 0], [30, 1], [60, 2], [90, 3], [120, 4]]
+            }, 
+            "Description": "The 'official' scoring system of Interlude, fine tuned for maximum fun", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 200, 163, 155], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.89995, 
+                    "Color": [255, 194, 162, 182], 
+                    "Name": "C-"
+                }, {
+                    "Accuracy": 0.90995, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.91995, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B-"
+                }, {
+                    "Accuracy": 0.92995, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.93995, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A-"
+                }, {
+                    "Accuracy": 0.94995, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95995, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.96995, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "S-"
+                }, {
+                    "Accuracy": 0.97995, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.98995, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1P"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "SC (J6)"
+        }, 
+        "sc-j7": {
+            "Accuracy": {
+                "CbrushWindow": 90, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 3, 
+                        "JudgementIfOverheld": 3
+                    }
+                }, 
+                "MissWindow": 180, 
+                "Points": {
+                    "Weights": [10, [10, 9, 5, -5, -10, -10]]
+                }, 
+                "Timegates": [[-90, 5], [-67.5, 4], [-45, 3], [-22.5, 2], [-11.25, 1], [11.25, 0], [22.5, 1], [45, 2], [67.5, 3], [90, 4]]
+            }, 
+            "Description": "The 'official' scoring system of Interlude, fine tuned for maximum fun", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 200, 163, 155], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.89995, 
+                    "Color": [255, 194, 162, 182], 
+                    "Name": "C-"
+                }, {
+                    "Accuracy": 0.90995, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.91995, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B-"
+                }, {
+                    "Accuracy": 0.92995, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.93995, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A-"
+                }, {
+                    "Accuracy": 0.94995, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95995, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.96995, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "S-"
+                }, {
+                    "Accuracy": 0.97995, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.98995, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1P"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "SC (J7)"
+        }, 
+        "sc-j8": {
+            "Accuracy": {
+                "CbrushWindow": 90, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 3, 
+                        "JudgementIfOverheld": 3
+                    }
+                }, 
+                "MissWindow": 180, 
+                "Points": {
+                    "Weights": [10, [10, 9, 5, -5, -10, -10]]
+                }, 
+                "Timegates": [[-60, 5], [-45, 4], [-30, 3], [-15, 2], [-7.5, 1], [7.5, 0], [15, 1], [30, 2], [45, 3], [60, 4]]
+            }, 
+            "Description": "The 'official' scoring system of Interlude, fine tuned for maximum fun", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 200, 163, 155], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.89995, 
+                    "Color": [255, 194, 162, 182], 
+                    "Name": "C-"
+                }, {
+                    "Accuracy": 0.90995, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.91995, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B-"
+                }, {
+                    "Accuracy": 0.92995, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.93995, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A-"
+                }, {
+                    "Accuracy": 0.94995, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95995, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.96995, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "S-"
+                }, {
+                    "Accuracy": 0.97995, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.98995, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1P"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "SC (J8)"
+        }, 
+        "sc-j9": {
+            "Accuracy": {
+                "CbrushWindow": 90, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 3, 
+                        "JudgementIfOverheld": 3
+                    }
+                }, 
+                "MissWindow": 180, 
+                "Points": {
+                    "Weights": [10, [10, 9, 5, -5, -10, -10]]
+                }, 
+                "Timegates": [[-30, 5], [-22.5, 4], [-15, 3], [-7.5, 2], [-3.75, 1], [3.75, 0], [7.5, 1], [15, 2], [22.5, 3], [30, 4]]
+            }, 
+            "Description": "The 'official' scoring system of Interlude, fine tuned for maximum fun", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 200, 163, 155], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.89995, 
+                    "Color": [255, 194, 162, 182], 
+                    "Name": "C-"
+                }, {
+                    "Accuracy": 0.90995, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.91995, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B-"
+                }, {
+                    "Accuracy": 0.92995, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.93995, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A-"
+                }, {
+                    "Accuracy": 0.94995, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.95995, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.96995, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "S-"
+                }, {
+                    "Accuracy": 0.97995, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.98995, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1CB"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1G"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1P"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "SC (J9)"
+        }, 
+        "wife-j1": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": "JustBreakCombo", 
+                "MissWindow": 180, 
+                "Points": {
+                    "WifeCurve": 1
+                }, 
+                "Timegates": [[-180, 5], [-135, 4], [-135, 3], [-67.5, 2], [-33.75, 1], [33.75, 0], [67.5, 1], [135, 2], [135, 3], [180, 4]]
+            }, 
+            "Description": "Simulates Etterna's scoring system, Wife3", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 0, 0], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.6, 
+                    "Color": [255, 128, 0, 128], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 0, 0, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.85, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A."
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A:"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.965, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA."
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA:"
+                }, {
+                    "Accuracy": 0.997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA."
+                }, {
+                    "Accuracy": 0.999, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA:"
+                }, {
+                    "Accuracy": 0.99955, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA"
+                }, {
+                    "Accuracy": 0.9997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA."
+                }, {
+                    "Accuracy": 0.9998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA:"
+                }, {
+                    "Accuracy": 0.999935, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAAA"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "MF"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "BF"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "WF"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "Wife3 (J1)"
+        }, 
+        "wife-j2": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": "JustBreakCombo", 
+                "MissWindow": 180, 
+                "Points": {
+                    "WifeCurve": 2
+                }, 
+                "Timegates": [[-180, 5], [-135, 4], [-120, 3], [-60, 2], [-30, 1], [30, 0], [60, 1], [120, 2], [135, 3], [180, 4]]
+            }, 
+            "Description": "Simulates Etterna's scoring system, Wife3", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 0, 0], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.6, 
+                    "Color": [255, 128, 0, 128], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 0, 0, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.85, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A."
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A:"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.965, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA."
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA:"
+                }, {
+                    "Accuracy": 0.997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA."
+                }, {
+                    "Accuracy": 0.999, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA:"
+                }, {
+                    "Accuracy": 0.99955, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA"
+                }, {
+                    "Accuracy": 0.9997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA."
+                }, {
+                    "Accuracy": 0.9998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA:"
+                }, {
+                    "Accuracy": 0.999935, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAAA"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "MF"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "BF"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "WF"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "Wife3 (J2)"
+        }, 
+        "wife-j3": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": "JustBreakCombo", 
+                "MissWindow": 180, 
+                "Points": {
+                    "WifeCurve": 3
+                }, 
+                "Timegates": [[-180, 5], [-135, 4], [-105, 3], [-52.5, 2], [-26.25, 1], [26.25, 0], [52.5, 1], [105, 2], [135, 3], [180, 4]]
+            }, 
+            "Description": "Simulates Etterna's scoring system, Wife3", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 0, 0], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.6, 
+                    "Color": [255, 128, 0, 128], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 0, 0, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.85, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A."
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A:"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.965, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA."
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA:"
+                }, {
+                    "Accuracy": 0.997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA."
+                }, {
+                    "Accuracy": 0.999, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA:"
+                }, {
+                    "Accuracy": 0.99955, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA"
+                }, {
+                    "Accuracy": 0.9997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA."
+                }, {
+                    "Accuracy": 0.9998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA:"
+                }, {
+                    "Accuracy": 0.999935, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAAA"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "MF"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "BF"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "WF"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "Wife3 (J3)"
+        }, 
+        "wife-j4": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": "JustBreakCombo", 
+                "MissWindow": 180, 
+                "Points": {
+                    "WifeCurve": 4
+                }, 
+                "Timegates": [[-180, 5], [-135, 4], [-90, 3], [-45, 2], [-22.5, 1], [22.5, 0], [45, 1], [90, 2], [135, 3], [180, 4]]
+            }, 
+            "Description": "Simulates Etterna's scoring system, Wife3", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 0, 0], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.6, 
+                    "Color": [255, 128, 0, 128], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 0, 0, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.85, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A."
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A:"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.965, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA."
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA:"
+                }, {
+                    "Accuracy": 0.997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA."
+                }, {
+                    "Accuracy": 0.999, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA:"
+                }, {
+                    "Accuracy": 0.99955, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA"
+                }, {
+                    "Accuracy": 0.9997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA."
+                }, {
+                    "Accuracy": 0.9998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA:"
+                }, {
+                    "Accuracy": 0.999935, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAAA"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "MF"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "BF"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "WF"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "Wife3 (J4)"
+        }, 
+        "wife-j5": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": "JustBreakCombo", 
+                "MissWindow": 180, 
+                "Points": {
+                    "WifeCurve": 5
+                }, 
+                "Timegates": [[-150, 5], [-112.5, 4], [-75, 3], [-37.5, 2], [-18.75, 1], [18.75, 0], [37.5, 1], [75, 2], [112.5, 3], [150, 4]]
+            }, 
+            "Description": "Simulates Etterna's scoring system, Wife3", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 0, 0], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.6, 
+                    "Color": [255, 128, 0, 128], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 0, 0, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.85, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A."
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A:"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.965, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA."
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA:"
+                }, {
+                    "Accuracy": 0.997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA."
+                }, {
+                    "Accuracy": 0.999, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA:"
+                }, {
+                    "Accuracy": 0.99955, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA"
+                }, {
+                    "Accuracy": 0.9997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA."
+                }, {
+                    "Accuracy": 0.9998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA:"
+                }, {
+                    "Accuracy": 0.999935, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAAA"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "MF"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "BF"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "WF"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "Wife3 (J5)"
+        }, 
+        "wife-j6": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": "JustBreakCombo", 
+                "MissWindow": 180, 
+                "Points": {
+                    "WifeCurve": 6
+                }, 
+                "Timegates": [[-120, 5], [-90, 4], [-60, 3], [-30, 2], [-15, 1], [15, 0], [30, 1], [60, 2], [90, 3], [120, 4]]
+            }, 
+            "Description": "Simulates Etterna's scoring system, Wife3", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 0, 0], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.6, 
+                    "Color": [255, 128, 0, 128], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 0, 0, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.85, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A."
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A:"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.965, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA."
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA:"
+                }, {
+                    "Accuracy": 0.997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA."
+                }, {
+                    "Accuracy": 0.999, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA:"
+                }, {
+                    "Accuracy": 0.99955, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA"
+                }, {
+                    "Accuracy": 0.9997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA."
+                }, {
+                    "Accuracy": 0.9998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA:"
+                }, {
+                    "Accuracy": 0.999935, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAAA"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "MF"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "BF"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "WF"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "Wife3 (J6)"
+        }, 
+        "wife-j7": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": "JustBreakCombo", 
+                "MissWindow": 180, 
+                "Points": {
+                    "WifeCurve": 7
+                }, 
+                "Timegates": [[-90, 5], [-67.5, 4], [-45, 3], [-22.5, 2], [-11.25, 1], [11.25, 0], [22.5, 1], [45, 2], [67.5, 3], [90, 4]]
+            }, 
+            "Description": "Simulates Etterna's scoring system, Wife3", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 0, 0], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.6, 
+                    "Color": [255, 128, 0, 128], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 0, 0, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.85, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A."
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A:"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.965, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA."
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA:"
+                }, {
+                    "Accuracy": 0.997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA."
+                }, {
+                    "Accuracy": 0.999, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA:"
+                }, {
+                    "Accuracy": 0.99955, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA"
+                }, {
+                    "Accuracy": 0.9997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA."
+                }, {
+                    "Accuracy": 0.9998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA:"
+                }, {
+                    "Accuracy": 0.999935, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAAA"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "MF"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "BF"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "WF"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "Wife3 (J7)"
+        }, 
+        "wife-j8": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": "JustBreakCombo", 
+                "MissWindow": 180, 
+                "Points": {
+                    "WifeCurve": 8
+                }, 
+                "Timegates": [[-60, 5], [-45, 4], [-30, 3], [-15, 2], [-7.5, 1], [7.5, 0], [15, 1], [30, 2], [45, 3], [60, 4]]
+            }, 
+            "Description": "Simulates Etterna's scoring system, Wife3", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 0, 0], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.6, 
+                    "Color": [255, 128, 0, 128], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 0, 0, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.85, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A."
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A:"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.965, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA."
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA:"
+                }, {
+                    "Accuracy": 0.997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA."
+                }, {
+                    "Accuracy": 0.999, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA:"
+                }, {
+                    "Accuracy": 0.99955, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA"
+                }, {
+                    "Accuracy": 0.9997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA."
+                }, {
+                    "Accuracy": 0.9998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA:"
+                }, {
+                    "Accuracy": 0.999935, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAAA"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "MF"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "BF"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "WF"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "Wife3 (J8)"
+        }, 
+        "wife-j9": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": "JustBreakCombo", 
+                "MissWindow": 180, 
+                "Points": {
+                    "WifeCurve": 9
+                }, 
+                "Timegates": [[-30, 5], [-22.5, 4], [-15, 3], [-7.5, 2], [-3.75, 1], [3.75, 0], [7.5, 1], [15, 2], [22.5, 3], [30, 4]]
+            }, 
+            "Description": "Simulates Etterna's scoring system, Wife3", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0, 
+                    "Color": [255, 255, 0, 0], 
+                    "Name": "D"
+                }, {
+                    "Accuracy": 0.6, 
+                    "Color": [255, 128, 0, 128], 
+                    "Name": "C"
+                }, {
+                    "Accuracy": 0.7, 
+                    "Color": [255, 0, 0, 255], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.8, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.85, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A."
+                }, {
+                    "Accuracy": 0.9, 
+                    "Color": [255, 0, 255, 0], 
+                    "Name": "A:"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.965, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA."
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AA:"
+                }, {
+                    "Accuracy": 0.997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA."
+                }, {
+                    "Accuracy": 0.999, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAA:"
+                }, {
+                    "Accuracy": 0.99955, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA"
+                }, {
+                    "Accuracy": 0.9997, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA."
+                }, {
+                    "Accuracy": 0.9998, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAA:"
+                }, {
+                    "Accuracy": 0.999935, 
+                    "Color": [255, 255, 215, 0], 
+                    "Name": "AAAAA"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 160, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "MF"
+                }, {
+                    "Color": [255, 80, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 160, 255, 160], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDG"
+                }, {
+                    "Color": [255, 200, 160, 255], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 1, 
+                    "Name": "BF"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": 2, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDP"
+                }, {
+                    "Color": [255, 255, 160, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "WF"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "MFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "Marvellous"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "Perfect"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "Great"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 0, 255], 
+                "Name": "Good"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 255], 
+                "Name": "Bad"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 0, 0], 
+                "Name": "Miss"
+            }], 
+            "Name": "Wife3 JUSTICE"
+        }, 
+        "xs-mizu": {
+            "Accuracy": {
+                "CbrushWindow": 150, 
+                "HoldNoteBehaviour": {
+                    "Normal": {
+                        "JudgementIfDropped": 2, 
+                        "JudgementIfOverheld": 1
+                    }
+                }, 
+                "MissWindow": 150, 
+                "Points": {
+                    "Weights": [1, [1, 0.5, 0, 0]]
+                }, 
+                "Timegates": [[-45, 1], [45, 0], [150, 1]]
+            }, 
+            "Description": "EXSCORE-based score system designed by qqp", 
+            "Grading": {
+                "Grades": [{
+                    "Accuracy": 0.9, 
+                    "Color": [255, 202, 153, 183], 
+                    "Name": "B"
+                }, {
+                    "Accuracy": 0.92, 
+                    "Color": [255, 163, 190, 207], 
+                    "Name": "B+"
+                }, {
+                    "Accuracy": 0.93, 
+                    "Color": [255, 149, 193, 220], 
+                    "Name": "A"
+                }, {
+                    "Accuracy": 0.94, 
+                    "Color": [255, 148, 210, 180], 
+                    "Name": "A+"
+                }, {
+                    "Accuracy": 0.95, 
+                    "Color": [255, 134, 227, 183], 
+                    "Name": "AA"
+                }, {
+                    "Accuracy": 0.96, 
+                    "Color": [255, 127, 231, 139], 
+                    "Name": "AA+"
+                }, {
+                    "Accuracy": 0.97, 
+                    "Color": [255, 237, 205, 140], 
+                    "Name": "AAA"
+                }, {
+                    "Accuracy": 0.98, 
+                    "Color": [255, 246, 234, 128], 
+                    "Name": "AAA+"
+                }, {
+                    "Accuracy": 0.99, 
+                    "Color": [255, 235, 200, 220], 
+                    "Name": "S"
+                }, {
+                    "Accuracy": 0.995, 
+                    "Color": [255, 209, 156, 255], 
+                    "Name": "S+"
+                }], 
+                "Lamps": [{
+                    "Color": [255, 255, 160, 160], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDCB"
+                }, {
+                    "Color": [255, 180, 180, 180], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1BREAK"
+                }, {
+                    "Color": [255, 255, 255, 80], 
+                    "Judgement": -1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "FC"
+                }, {
+                    "Color": [255, 255, 255, 160], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 9, 
+                    "Name": "SDN"
+                }, {
+                    "Color": [255, 255, 255, 200], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 1, 
+                    "Name": "1N"
+                }, {
+                    "Color": [255, 160, 255, 255], 
+                    "Judgement": 1, 
+                    "JudgementThreshold": 0, 
+                    "Name": "PFC"
+                }]
+            }, 
+            "Judgements": [{
+                "BreaksCombo": false, 
+                "Color": [255, 0, 255, 255], 
+                "Name": "CRITICAL"
+            }, {
+                "BreaksCombo": false, 
+                "Color": [255, 255, 255, 0], 
+                "Name": "NEAR"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 0, 255, 100], 
+                "Name": "BREAK"
+            }, {
+                "BreaksCombo": true, 
+                "Color": [255, 255, 100, 100], 
+                "Name": "MISS"
+            }], 
+            "Name": "EXSCORE (Mizu)"
+        }
+    }
+}

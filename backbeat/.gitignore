@@ -1,0 +1,13 @@
+**/*.txt
+**/.vs
+**/bin
+**/obj
+settings.json
+**/*.zip
+**/*.mp3
+**/*.png
+Charts
+archive/yav
+archive/tmp
+archive/input
+**/*.old
