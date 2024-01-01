@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <Compile Include="Utils.fs" />
+	  <Compile Include="Icons.fs" />
+	  <EmbeddedResource Include="Resources\Inconsolata.ttf" />
+	  <EmbeddedResource Include="Resources\feather.ttf" />
+	  <EmbeddedResource Include="Resources\shader.frag" />
+	  <EmbeddedResource Include="Resources\shader.vert" />
+	  <Compile Include="Graphics\Performance.fs" />
+	  <Compile Include="Graphics\Buffers.fs" />
+	  <Compile Include="Graphics\Shader.fs" />
+	  <Compile Include="Graphics\Math.fs" />
+	  <Compile Include="Graphics\Sprite.fs" />
+	  <Compile Include="Graphics\Batch.fs" />
+	  <Compile Include="Graphics\Render.fs" />
+	  <Compile Include="Graphics\Text.fs" />
+	  <Compile Include="Audio\Audio.fs" />
+	  <Compile Include="Audio\Waveform.fs" />
+	  <Compile Include="Input\Input.fs" />
+	  <Compile Include="Input\Hotkeys.fs" />
+	  <Compile Include="UI\Animation.fs" />
+	  <Compile Include="UI\Position.fs" />
+	  <Compile Include="UI\Selection.fs" />
+	  <Compile Include="UI\Widget.fs" />
+	  <Compile Include="UI\Style.fs" />
+	  <Compile Include="UI\Components\Primitives.fs" />
+	  <Compile Include="UI\Components\Containers\FlowContainerV2.fs" />
+	  <Compile Include="UI\Components\Containers\FlowContainer.fs" />
+	  <Compile Include="UI\Components\Containers\NavigationContainer.fs" />
+	  <Compile Include="UI\Components\Containers\GridContainer.fs" />
+	  <Compile Include="UI\Components\Containers\SwapContainer.fs" />
+    <Compile Include="UI\Components\Containers\ScrollContainer.fs" />
+    <Compile Include="UI\Components\Buttons.fs" />
+    <Compile Include="UI\Components\Dialogs.fs" />
+    <Compile Include="UI\Components\Performance.fs" />
+    <Compile Include="UI\Root.fs" />
+    <Compile Include="Windowing\Config.fs" />
+    <Compile Include="Windowing\RenderThread.fs" />
+    <Compile Include="Windowing\Window.fs" />
+    <Compile Include="Launch.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ManagedBass" Version="3.1.1" />
+    <PackageReference Include="OpenTK" Version="4.7.2" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+	<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Percyqaz.Common\src\Percyqaz.Common.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="7.0.400" />
+  </ItemGroup>
+
+</Project>
