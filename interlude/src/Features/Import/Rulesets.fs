@@ -116,7 +116,7 @@ module Rulesets =
 
         override this.Init(parent) =
             WebServices.download_json (
-                "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/rulesets/rulesets.json",
+                "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json",
                 fun data ->
                     match data with
                     | Some(d: PrefabRulesets.Repo) ->

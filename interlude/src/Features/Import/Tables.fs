@@ -198,13 +198,13 @@ module Tables =
 
         override this.Init(parent) =
             WebServices.download_json (
-                "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/tables/index.json",
+                "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/tables/index.json",
                 fun data ->
                     match data with
                     | Some(d: TableIndex) ->
                         for (entry: TableIndexEntry) in d.Tables do
                             WebServices.download_json (
-                                "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/tables/" + entry.File,
+                                "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/tables/" + entry.File,
                                 fun table ->
                                     match table with
                                     | Some(t: Table) ->
