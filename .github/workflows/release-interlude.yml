@@ -6,6 +6,10 @@ on:
     paths: "interlude/docs/changelog-latest.md"
   workflow_dispatch:
   # for debug purposes
+  
+concurrency:
+  group: "interlude_release"
+  cancel-in-progress: false
 
 jobs:
   build:

@@ -5,6 +5,10 @@ on:
     paths: "server/Version.txt"
   workflow_dispatch:
 
+concurrency:
+  group: "server_deploy"
+  cancel-in-progress: false
+
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
