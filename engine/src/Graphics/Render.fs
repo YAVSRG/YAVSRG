@@ -2,6 +2,7 @@
 
 open System
 open System.Drawing
+open SixLabors.ImageSharp.PixelFormats
 open OpenTK.Graphics.OpenGL
 open OpenTK.Mathematics
 open OpenTK.Windowing.GraphicsLibraryFramework
@@ -89,11 +90,25 @@ module FBO =
                 PixelInternalFormat.Rgba,
                 int vwidth,
                 int vheight,
-                1,
+                2,
                 0,
                 PixelFormat.Rgba,
                 PixelType.UnsignedByte,
                 IntPtr.Zero
+            )
+            
+            GL.TexSubImage3D<Rgba32>(
+                TextureTarget.Texture2DArray,
+                0,
+                0,
+                0,
+                0,
+                1,
+                1,
+                1,
+                PixelFormat.Rgba,
+                PixelType.UnsignedByte,
+                [|new Rgba32(255uy, 255uy, 255uy, 255uy)|]
             )
 
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
@@ -118,7 +133,7 @@ module FBO =
                 FramebufferAttachment.ColorAttachment0,
                 texture_ids.[i],
                 0,
-                0
+                1
             )
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
@@ -147,7 +162,7 @@ module FBO =
 
                         X = 0
                         Y = 0
-                        Z = 0
+                        Z = 1
 
                         GridWidth = int vwidth
                         GridHeight = int vheight
