@@ -1,0 +1,83 @@
+name: Release Interlude
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: "docs/changelog-latest.md"
+  workflow_dispatch:
+  # for debug purposes
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: percyqaz/Percyqaz.Common
+        path: Percyqaz.Common
+        
+    - uses: actions/checkout@v3
+      with:
+        repository: percyqaz/Percyqaz.Shell
+        path: Percyqaz.Shell
+        
+    - uses: actions/checkout@v3
+      with:
+        repository: percyqaz/Percyqaz.Flux
+        path: Percyqaz.Flux
+        
+    - uses: actions/checkout@v3
+      with:
+        repository: YAVSRG/Prelude
+        path: Prelude
+        
+    - uses: actions/checkout@v3
+      with:
+        repository: YAVSRG/Interlude.Web
+        path: Interlude.Web
+        
+    - uses: actions/checkout@v3
+      with:
+        path: Interlude
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+        
+    - name: Package Interlude
+      id: package
+      run: |
+        cd Interlude/tools
+        dotnet run -- release_win64
+        echo "VERSION=v$(dotnet run -- version)" >> $GITHUB_OUTPUT
+        
+    - name: Create Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "Interlude/releases/*.zip"
+        bodyFile: "Interlude/docs/changelog-latest.md"
+        token: ${{ secrets.GITHUB_TOKEN }}
+        owner: YAVSRG
+        repo: Interlude
+        tag: ${{ steps.package.outputs.VERSION }}
+        commit: main
+
+    - name: Read changelog contents
+      id: read_file
+      uses: andstor/file-reader-action@v1
+      with:
+        path: "Interlude/docs/changelog-latest.md"
+
+    - name: Post Changelog via Webhook
+      uses: tsickert/discord-webhook@v5.3.0
+      with:
+        webhook-url: ${{ secrets.WEBHOOK_URL }}
+        content: |
+          **New update released!** <@&1147134372504408095>
+          ```
+          ${{ steps.read_file.outputs.contents }}
+          ```
+          Update ingame or [download Interlude from GitHub](https://github.com/YAVSRG/Interlude/releases/latest/download/Interlude-win64.zip)

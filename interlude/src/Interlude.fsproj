@@ -1,0 +1,148 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <RepositoryUrl>https://github.com/YAVSRG/Interlude</RepositoryUrl>
+    <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
+    <AssemblyVersion>0.7.15.1</AssemblyVersion>
+    <FileVersion>0.7.15.1</FileVersion>
+    <Authors>Percyqaz</Authors>
+    <RunPostBuildEvent>1</RunPostBuildEvent>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Optimize>True</Optimize>
+    <Tailcalls>True</Tailcalls>
+  </PropertyGroup>
+	
+  <PropertyGroup>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Locale\en_GB.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="Resources\icon.png" />
+    <EmbeddedResource Include="Resources\defaultArrow.isk" />
+    <EmbeddedResource Include="Resources\defaultBar.isk" />
+    <EmbeddedResource Include="Resources\defaultOrb.isk" />
+    <EmbeddedResource Include="Resources\CrashSplashes.txt" />
+    <EmbeddedResource Include="Resources\MenuSplashes.txt" />
+    <EmbeddedResource Include="Resources\default.zip" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="Content.fs" />
+    <Compile Include="Options.fs" />
+    <Compile Include="UI\Icons.fs" />
+    <Compile Include="UI\Callouts.fs" />
+    <Compile Include="UI\Components\Common.fs" />
+    <Compile Include="UI\Components\Dropdown.fs" />
+    <Compile Include="UI\Components\Web.fs" />
+    <Compile Include="UI\Menu\Volume.fs" />
+    <Compile Include="UI\Menu\Helpers.fs" />
+    <Compile Include="UI\Menu\Controls.fs" />
+    <Compile Include="UI\Menu\Menu.fs" />
+    <Compile Include="UI\Screen\Logo.fs" />
+    <Compile Include="UI\Screen\Background.fs" />
+    <Compile Include="UI\Screen\Transitions.fs" />
+    <Compile Include="UI\Screen\Screen.fs" />
+    <Compile Include="Features\Wiki\MarkdownUI.fs" />
+    <Compile Include="Features\Wiki\Wiki.fs" />
+    <Compile Include="Features\Online\DiscordRPC.fs" />
+    <Compile Include="Features\Online\Network.fs" />
+    <Compile Include="Features\Online\Login.fs" />
+    <Compile Include="Features\Online\Players.fs" />
+    <Compile Include="Features\Stats\Stats.fs" />
+    <Compile Include="Features\Stats\Tables.fs" />
+    <Compile Include="Features\Stats\Screen.fs" />
+    <Compile Include="Features\Import\Scores.fs" />
+    <Compile Include="Features\Import\Mounts.fs" />
+    <Compile Include="Features\Import\Shared.fs" />
+    <Compile Include="Features\Import\EtternaPacks.fs" />
+    <Compile Include="Features\Import\Beatmaps.fs" />
+    <Compile Include="Features\Import\Noteskins.fs" />
+    <Compile Include="Features\Import\Rulesets.fs" />
+    <Compile Include="Features\Import\Tables.fs" />
+    <Compile Include="Features\Import\Import.fs" />
+    <Compile Include="Features\Rulesets.fs" />
+    <Compile Include="Features\Gameplay.fs" />
+    <Compile Include="Features\Score\Util.fs" />
+    <Compile Include="Features\Score\Graph.fs" />
+    <Compile Include="Features\Score\Components.fs" />
+    <Compile Include="Features\Score\Score.fs" />
+    <Compile Include="Features\Play\State.fs" />
+    <Compile Include="Features\Play\Playfield.fs" />
+    <Compile Include="Features\Play\HUD.fs" />
+    <Compile Include="Features\Play\Shared.fs" />
+    <Compile Include="Features\Play\Play.fs" />
+    <Compile Include="Features\Play\Replay.fs" />
+    <Compile Include="Features\Play\Spectate.fs" />
+    <Compile Include="Features\Play\Practice.fs" />
+    <Compile Include="Features\LevelSelect\Shared.fs" />
+    <Compile Include="Features\LevelSelect\Collections.fs" />
+    <Compile Include="Features\LevelSelect\Tables\ChooseLevel.fs" />
+    <Compile Include="Features\LevelSelect\Tables\Suggestions.fs" />
+    <Compile Include="Features\LevelSelect\Tables\Manage.fs" />
+    <Compile Include="Features\LevelSelect\LibraryView.fs" />
+    <Compile Include="Features\LevelSelect\ActionBar.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus.fs" />
+    <Compile Include="Features\LevelSelect\Tree.fs" />
+    <Compile Include="Features\LevelSelect\Preview.fs" />
+    <Compile Include="Features\LevelSelect\ModSelect.fs" />
+    <Compile Include="Features\LevelSelect\Info\Details.fs" />
+    <Compile Include="Features\LevelSelect\Info\Leaderboard.fs" />
+    <Compile Include="Features\LevelSelect\Info\Scoreboard.fs" />
+    <Compile Include="Features\LevelSelect\Info\Info.fs" />
+    <Compile Include="Features\LevelSelect\LevelSelect.fs" />
+    <Compile Include="Features\Multiplayer\LobbySelect.fs" />
+    <Compile Include="Features\Multiplayer\Chart.fs" />
+    <Compile Include="Features\Multiplayer\Players.fs" />
+    <Compile Include="Features\Multiplayer\Chat.fs" />
+    <Compile Include="Features\Multiplayer\LobbyScreen.fs" />
+    <Compile Include="Features\Options\System.fs" />
+    <Compile Include="Features\Options\Themes\EditTheme.fs" />
+    <Compile Include="Features\Options\Gameplay\Preview.fs" />
+    <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
+    <Compile Include="Features\Options\Noteskins\Playfield.fs" />
+    <Compile Include="Features\Options\Noteskins\HoldNotes.fs" />
+    <Compile Include="Features\Options\Noteskins\Colors.fs" />
+    <Compile Include="Features\Options\Noteskins\Rotations.fs" />
+    <Compile Include="Features\Options\Noteskins\Animations.fs" />
+    <Compile Include="Features\Options\Noteskins\Textures.fs" />
+    <Compile Include="Features\Options\Noteskins\Editor.fs" />
+    <Compile Include="Features\Options\Noteskins\Noteskins.fs" />
+    <Compile Include="Features\Options\HUD.fs" />
+    <Compile Include="Features\Options\Advanced.fs" />
+    <Compile Include="Features\Options\Debug.fs" />
+    <Compile Include="Features\Options\OptionsMenu.fs" />
+    <Compile Include="Features\MainMenu\LoadingScreen.fs" />
+    <Compile Include="Features\MainMenu\MainMenu.fs" />
+    <Compile Include="Features\Printerlude\Terminal.fs" />
+    <Compile Include="Features\Printerlude\Printerlude.fs" />
+    <Compile Include="Features\Toolbar\NetworkStatus.fs" />
+    <Compile Include="Features\Toolbar\Update.fs" />
+    <Compile Include="Features\Toolbar\Toolbar.fs" />
+    <Compile Include="Startup.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
+    <PackageReference Include="FSharp.Formatting" Version="19.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="7.0.400" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Interlude.Web\shared\Interlude.Web.Shared.fsproj" />
+    <ProjectReference Include="..\..\Percyqaz.Flux\src\Percyqaz.Flux.fsproj" />
+    <ProjectReference Include="..\..\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
+    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
+  </ItemGroup>
+	
+</Project>

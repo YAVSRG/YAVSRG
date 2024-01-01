@@ -1,0 +1,17 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/publish
+/packages
+*/nupkg
+*/bin
+*/obj
+.ionide/symbolCache.db
+
+/releases
+.vs
+.fake
+.ionide
+.editorconfig
+/nuget
