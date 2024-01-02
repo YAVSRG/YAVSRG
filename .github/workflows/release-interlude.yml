@@ -36,17 +36,6 @@ jobs:
         dotnet run -- release_win64
         echo "VERSION=v$(dotnet run -- version)" >> $GITHUB_OUTPUT
         
-    - name: Create Release (Fallback for updater to work)
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "interlude/releases/*.zip"
-        bodyFile: "interlude/docs/changelog-latest.md"
-        token: ${{ secrets.GITHUB_TOKEN }}
-        owner: YAVSRG
-        repo: Interlude
-        tag: ${{ steps.package.outputs.VERSION }}
-        commit: main
-        
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
