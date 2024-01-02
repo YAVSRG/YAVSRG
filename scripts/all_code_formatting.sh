@@ -1,0 +1,2 @@
+cd ..
+fantomas --check . || bash
