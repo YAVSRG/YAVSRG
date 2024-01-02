@@ -52,13 +52,13 @@ module Wiki =
                         if Cache.index_content.IsNone then
                             match!
                                 WebServices.download_string.RequestAsync(
-                                    "https://raw.githubusercontent.com/YAVSRG/Interlude/main/docs/wiki/index.md"
+                                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.md"
                                 )
                             with
                             | Some md ->
                                 match!
                                     WebServices.download_json_async (
-                                        "https://raw.githubusercontent.com/YAVSRG/Interlude/main/docs/wiki/index.json"
+                                        "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.json"
                                     )
                                 with
                                 | Some toc ->
@@ -90,7 +90,7 @@ module Wiki =
                         if Cache.page_cache_by_filename.[p.Filename].IsNone then
                             match!
                                 WebServices.download_string.RequestAsync(
-                                    "https://raw.githubusercontent.com/YAVSRG/Interlude/main/docs/wiki/"
+                                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/"
                                     + p.Filename
                                     + ".md"
                                 )
@@ -114,7 +114,7 @@ module Wiki =
                         if Cache.changelog_content.IsNone then
                             match!
                                 WebServices.download_string.RequestAsync(
-                                    "https://raw.githubusercontent.com/YAVSRG/Interlude/main/docs/changelog.md"
+                                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/interlude/docs/changelog.md"
                                 )
                             with
                             | Some md -> Cache.changelog_content <- Some [| Markdown.Parse md |]
