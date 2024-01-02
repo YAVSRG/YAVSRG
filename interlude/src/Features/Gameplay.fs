@@ -239,8 +239,6 @@ module Gameplay =
         let change (cc: CachedChart, ctx: LibraryContext, auto_play_audio: bool) =
             // todo: show a one-time warning if chart loading takes over 1 second
             CACHE_DATA <- Some cc
-            FMT_DURATION <- format_duration CACHE_DATA
-            FMT_BPM <- format_bpm CACHE_DATA
             LIBRARY_CTX <- ctx
             options.CurrentChart.Value <- cc.Key
 
@@ -255,6 +253,10 @@ module Gameplay =
             WITH_COLORS <- None
 
             chart_change_started.Trigger()
+
+            FMT_DURATION <- format_duration CACHE_DATA
+            FMT_BPM <- format_bpm CACHE_DATA
+            
             chart_loader.Request(Load (cc, auto_play_audio))
 
         let update () =
@@ -342,7 +344,7 @@ module Gameplay =
         )
 
     do 
-        Chart.on_chart_change_finished.Add(fun () -> Collections.on_chart_changed rate selected_mods)
+        Chart.on_chart_change_started.Add(fun () -> Collections.on_chart_changed Chart._rate Chart._selected_mods)
         
         let mutable previous_keymode = None
         Chart.on_chart_change_started.Add(fun () ->

@@ -258,7 +258,7 @@ type Scoreboard(display: Setting<Display>) as this =
         )
 
     do
-        Chart.on_chart_change_started.Add (fun () -> Loader.container.Iter (fun s -> s.FadeOut()))
+        Chart.on_chart_change_started.Add (fun () -> if Chart.CACHE_DATA.Value.Hash <> chart then Loader.container.Iter (fun s -> s.FadeOut()))
         Loader.container.Sort <- sorter ()
 
         this

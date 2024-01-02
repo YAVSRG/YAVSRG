@@ -53,7 +53,6 @@ module Dialog =
     let show (d: Dialog) =
         match current with
         | Some existing ->
-            Logging.Warn(sprintf "Nested dialogs not supported, Already showing %O." existing)
             d.Init display
             d.Close()
         | None ->

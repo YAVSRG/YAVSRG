@@ -116,13 +116,13 @@ module Library =
             { new Async.Service<string * ConversionOptions, unit>() with
                 override this.Handle((path, config)) =
                     async {
-                        for songFolder in
+                        for song_folder in
                             (Directory.EnumerateDirectories path
                              |> match config.ChangedAfter with
                                 | None -> id
                                 | Some timestamp ->
                                     Seq.filter (fun path -> Directory.GetLastWriteTime path >= timestamp)) do
-                            do! convert_song_folder.RequestAsync(songFolder, config)
+                            do! convert_song_folder.RequestAsync(song_folder, config)
                     }
             }
 
@@ -297,7 +297,7 @@ module Library =
                             match Cache.load entry cache with
                             | Some c ->
                                 patterns.[entry.Hash] <-
-                                    Prelude.Charts.Tools.Patterns.Patterns.generate_pattern_report (1.0f, c)
+                                    Patterns.generate_pattern_report (1.0f, c)
                             | None -> ()
                 }
         }

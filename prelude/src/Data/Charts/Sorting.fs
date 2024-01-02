@@ -313,7 +313,7 @@ module Sorting =
                     entry.Path <- cc.Key
                     Some(cc, LibraryContext.Folder name)
                 | None ->
-                    Logging.Warn(sprintf "Could not find chart: %s [%s] for collection %s" entry.Path entry.Hash name)
+                    //Logging.Warn(sprintf "Could not find chart: %s [%s] for collection %s" entry.Path entry.Hash name)
                     None
             )
             |> Filter.applyf filter
@@ -346,7 +346,7 @@ module Sorting =
                     entry.Path <- cc.Key
                     Some(cc, LibraryContext.Playlist(i, name, info))
                 | None ->
-                    Logging.Warn(sprintf "Could not find chart: %s [%s] for playlist %s" entry.Path entry.Hash name)
+                    //Logging.Warn(sprintf "Could not find chart: %s [%s] for playlist %s" entry.Path entry.Hash name)
                     None
             )
             |> Filter.applyf filter
