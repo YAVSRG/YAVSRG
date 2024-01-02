@@ -59,7 +59,9 @@ cd ../releases
 
 Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, you name it
 
-Pull requests are very welcome; If you want to work on a feature please check with me first via Discord
+Pull requests are very welcome!
+If you spot a bug, typo or other minor change and have a quick fix, just go right ahead and PR it.
+If you want to work on a feature please check with me first via [Discord](https://discord.gg/tA22tWR)
 
 > [!Warning]
 >
