@@ -1,2 +1,3 @@
-cd ../interlude/docs && ./update_wiki_toc.sh && cd ../../site
-dotnet fsi generate_site.fsx || bash
+./interlude_wiki_generate_toc.sh
+cd ../site
+dotnet fsi site_generator.fsx || bash
