@@ -7,7 +7,9 @@ This is my custom rhythm game client, **Interlude**, and the tooling around it.
 
 Visit [yavsrg.net](https://www.yavsrg.net) to read more about this project and its features.
 
-## 🎮 Playing the game
+----
+
+<h2 align="center">🎮 Playing the game</h2>
 
 Lots of setup guidance, including a wiki, is built into the game to help you get started. You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in your browser!
 
@@ -17,7 +19,8 @@ Lots of setup guidance, including a wiki, is built into the game to help you get
 
 On non-Windows platforms you could also try running the Windows build in WINE or Proton.
 
-## 🤖 Building Interlude ***(For developers)***
+<h2 align="center">🤖 Building Interlude ***(For developers)***</h2>
+
 > [!Note]
 >
 > If you just want to play the game on Windows, **you do *not* need to do this**, instead get the game by downloading the latest release from the site
@@ -52,7 +55,7 @@ cd ../releases
 # these are the same build artifacts used in the release pipeline
 ```
 
-## 🤝 Contributing
+<h2 align="center">🤝 Contributing</h2>
 
 Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, you name it
 
