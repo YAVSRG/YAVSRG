@@ -36,8 +36,9 @@ module ImageServices =
                         return! Image.LoadAsync<PixelFormats.Rgba32>(cached_file_name) |> Async.AwaitTask
                     else
                         let! image = WebServices.download_image.RequestAsync(url)
-                        save_image_png.Request((image, cached_file_name), ignore)
-                        return image
+                        let clone = image.Clone()
+                        save_image_png.Request((image, cached_file_name), image.Dispose)
+                        return clone
                 }
         }
 
