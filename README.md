@@ -1,6 +1,6 @@
 <img src="https://user-images.githubusercontent.com/21290233/165412641-5f857e96-901b-48dc-867e-e509ca123a3b.png" align="left">
   
-## **Yet Another Vertically Scrolling Rhythm Game**
+## YAVSRG :: Interlude
 The YET ANOTHER VERTICALLY SCROLLING RHYTHM GAME project is a collection of all my ideas on what could be done with VSRGs, brought to life.
 
 This is my custom rhythm game client, **Interlude**, and the tooling around it.

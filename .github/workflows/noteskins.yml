@@ -3,7 +3,7 @@ name: Noteskins
 on:
   push:
     branches: [ "main" ]
-    paths: "Noteskins/**"
+    paths: "backbeat/noteskins/Noteskins/**"
   workflow_dispatch:
   # for debug purposes
 
@@ -15,31 +15,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        repository: percyqaz/Percyqaz.Common
-        path: Percyqaz.Common
-        
-    - uses: actions/checkout@v3
-      with:
-        repository: YAVSRG/Prelude
-        path: Prelude
-        
-    - uses: actions/checkout@v3
-      with:
-        path: Interlude.Noteskins
+        submodules: 'true'
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 8.0.x
       
     - name: Run Noteskin Tool
-      run: cd Interlude.Noteskins/Tools && dotnet run
+      run: cd backbeat/noteskins/Tools && dotnet run
       
     - name: Read changelog contents
       id: read_file
       uses: andstor/file-reader-action@v1
       with:
-        path: "Interlude.Noteskins/new.txt"
+        path: "backbeat/noteskins/new.txt"
         
     - name: Post changes to webhook
       uses: tsickert/discord-webhook@v5.3.0
@@ -51,7 +41,6 @@ jobs:
     - name: Commit changed files
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        repository: Interlude.Noteskins
         commit_message: <💚> Update Noteskin Index
         skip_checkout: true
         skip_fetch: true
