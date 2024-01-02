@@ -13,7 +13,7 @@ services:
         container_name: server
         build:
             context: ..
-            dockerfile: ./Interlude.Web/server/dockerfile
+            dockerfile: ./online/server/dockerfile
         restart: unless-stopped
         ports:
             - 32767:32767

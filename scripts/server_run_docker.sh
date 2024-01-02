@@ -1,2 +1,2 @@
 cd ../online
-docker compose up --build --detach || $SHELL
+docker compose -p interludeweb up --build --detach || $SHELL

@@ -1,12 +1,12 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /src
 
 # Copy source code
-COPY Interlude.Web/ ./Interlude.Web
-COPY Prelude/ ./Prelude
-COPY Percyqaz.Common/ ./Percyqaz.Common
+COPY online ./online
+COPY prelude/ ./prelude
+COPY libraries/Percyqaz.Common/ ./libraries/Percyqaz.Common
 
-WORKDIR ./Interlude.Web/server
+WORKDIR ./online/server
 
 RUN dotnet restore
 RUN dotnet publish -c Release -o out
@@ -14,6 +14,6 @@ RUN dotnet publish -c Release -o out
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/runtime:7.0
 WORKDIR /docker_root
-COPY --from=build-env /src/Interlude.Web/server/out .
+COPY --from=build-env /src/online/server/out .
 RUN mkdir -p /docker_root/secrets
 ENTRYPOINT ["dotnet", "Interlude.Web.Server.dll"]
