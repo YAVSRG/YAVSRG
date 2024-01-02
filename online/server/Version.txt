@@ -1,1 +1,1 @@
-﻿Table suggestions update
+﻿Test of redeploying with new monorepo
