@@ -143,7 +143,7 @@ module Utils =
                     (int s.[0], int s.[1], int s.[2], 0)
 
             let current = short_version
-            let incoming = release.tag_name.Substring(1)
+            let incoming = release.tag_name.Replace("interlude-", "").Substring(1)
             latest_version_name <- incoming
 
             let pcurrent = parse_version current
