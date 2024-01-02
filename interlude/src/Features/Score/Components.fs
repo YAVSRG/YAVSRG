@@ -421,7 +421,7 @@ type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: S
         this
         |+ graph
         |+ Text(
-            version,
+            version + "  : :  www.yavsrg.net",
             Position = Position.SliceBottom(50.0f).Margin(20.0f, 5.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT
