@@ -135,10 +135,10 @@ for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) |
         skins.Add
             {
                 Name = ns.Config.Name
-                Download = sprintf "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/%s" filename
+                Download = sprintf "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/%s" filename
                 Preview =
                     sprintf
-                        "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/%s"
+                        "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/%s"
                         (Path.ChangeExtension(filename, ".png"))
             }
 
