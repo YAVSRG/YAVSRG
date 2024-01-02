@@ -2,7 +2,7 @@ name: Deploy online.yavsrg.net
 on:
   push:
     branches: [ "main" ]
-    paths: "server/Version.txt"
+    paths: "online/server/Version.txt"
   workflow_dispatch:
 
 concurrency:
