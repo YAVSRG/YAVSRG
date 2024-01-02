@@ -19,7 +19,7 @@ module Releases =
 
     let publish () =
 
-        let changelog = Path.Combine(YAVSRG_PATH, "Interlude", "docs", "changelog.md")
+        let changelog = Path.Combine(YAVSRG_PATH, "interlude", "docs", "changelog.md")
         let logtxt = File.ReadAllText(changelog)
         let latest = logtxt.Split(current_version + "\r\n" + "====", 2).[0]
 
@@ -27,7 +27,7 @@ module Releases =
             failwithf "No changelog for new version. Create this first"
 
         let v = latest.Split("====", 2).[0].Trim()
-        File.WriteAllText(Path.Combine(YAVSRG_PATH, "Interlude", "docs", "changelog-latest.md"), latest)
+        File.WriteAllText(Path.Combine(YAVSRG_PATH, "interlude", "docs", "changelog-latest.md"), latest)
 
         printfn "Version: %s -> %s" current_version v
         printfn "%s" latest
@@ -71,7 +71,7 @@ module Releases =
             Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net7.0", info.RuntimeId)
 
         let clean_dir =
-            Path.Combine(YAVSRG_PATH, "Interlude", "releases", $"Interlude-{info.Name}")
+            Path.Combine(YAVSRG_PATH, "interlude", "releases", $"Interlude-{info.Name}")
 
         try
             Directory.Delete(build_dir, true)
@@ -101,7 +101,7 @@ module Releases =
                 | _ -> ()
 
         File.Copy(
-            Path.Combine(YAVSRG_PATH, "Percyqaz.Flux", "lib", info.RuntimeId, info.BassLibraryFile),
+            Path.Combine(YAVSRG_PATH, "engine", "lib", info.RuntimeId, info.BassLibraryFile),
             Path.Combine(clean_dir, info.BassLibraryFile)
         )
 
