@@ -577,7 +577,17 @@ module Tree =
 
         if Dialog.exists () then
             ()
+        elif (%%"context_menu").Tapped() && Chart.CACHE_DATA.IsSome then
+            ChartContextMenu(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX).Show()
         else
+
+            if (%%"up").Tapped() && expanded_group <> "" then
+                scroll_to <- ScrollTo.Pack expanded_group
+                expanded_group <- ""
+
+            if (%%"down").Tapped() && expanded_group = "" && selected_group <> "" then
+                expanded_group <- selected_group
+                scroll_to <- ScrollTo.Pack expanded_group
 
             let bottom_edge =
                 List.fold (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsed_ms)) scroll_pos.Value groups
@@ -594,16 +604,6 @@ module Tree =
 
             if click_cooldown > 0.0 then
                 click_cooldown <- click_cooldown - elapsed_ms
-
-            if (%%"up").Tapped() && expanded_group <> "" then
-                scroll_to <- ScrollTo.Pack expanded_group
-                expanded_group <- ""
-
-            if (%%"down").Tapped() && expanded_group = "" && selected_group <> "" then
-                expanded_group <- selected_group
-                scroll_to <- ScrollTo.Pack expanded_group
-            elif (%%"context_menu").Tapped() && Chart.CACHE_DATA.IsSome then
-                ChartContextMenu(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX).Show()
 
             let lo = total_height - tree_height - origin
             let hi = 20.0f + origin
