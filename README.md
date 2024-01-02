@@ -19,7 +19,7 @@ Lots of setup guidance, including a wiki, is built into the game to help you get
 
 On non-Windows platforms you could also try running the Windows build in WINE or Proton.
 
-<h2 align="center">🤖 Building Interlude <em>(For developers)</em></h2>
+<h2 align="center">🧱 Building Interlude <code style="color: red; font-size: 20px">&lt;for developers only&gt;</code></h2>
 
 > [!Note]
 >
