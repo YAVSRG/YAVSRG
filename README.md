@@ -7,7 +7,7 @@ This is my custom rhythm game client, **Interlude**, and the tooling around it.
 
 Visit [yavsrg.net](https://www.yavsrg.net) to read more about this project and its features.
 
-----
+<br/>
 
 <h2 align="center">🎮 Playing the game</h2>
 
@@ -19,7 +19,7 @@ Lots of setup guidance, including a wiki, is built into the game to help you get
 
 On non-Windows platforms you could also try running the Windows build in WINE or Proton.
 
-<h2 align="center">🤖 Building Interlude ***(For developers)***</h2>
+<h2 align="center">🤖 Building Interlude <em>(For developers)</em></h2>
 
 > [!Note]
 >
