@@ -34,7 +34,8 @@ module Osu_To_Interlude =
             while earliest_upcoming_release < time do
                 for k = 0 to keys - 1 do
                     if holding_until.[k] = Some earliest_upcoming_release then
-                        assert(earliest_upcoming_release >= last_row.Time)
+                        assert (earliest_upcoming_release >= last_row.Time)
+
                         if earliest_upcoming_release > last_row.Time then
                             last_row <-
                                 {
@@ -59,7 +60,8 @@ module Osu_To_Interlude =
 
         let add_note column time =
             finish_holds time
-            assert(time >= last_row.Time)
+            assert (time >= last_row.Time)
+
             if time > last_row.Time then
                 last_row <-
                     {
@@ -79,7 +81,8 @@ module Osu_To_Interlude =
 
         let start_hold column time end_time =
             finish_holds time
-            assert(time >= last_row.Time)
+            assert (time >= last_row.Time)
+
             if time > last_row.Time then
                 last_row <-
                     {
@@ -109,7 +112,10 @@ module Osu_To_Interlude =
         finish_holds Time.infinity
         output.ToArray()
 
-    let rec private find_bpm_durations (points: TimingPoint list) (end_time: Time) : Dictionary<float32<ms/beat>, Time> =
+    let rec private find_bpm_durations
+        (points: TimingPoint list)
+        (end_time: Time)
+        : Dictionary<float32<ms / beat>, Time> =
         if List.isEmpty points then
             failwith "no bpm point"
 
@@ -137,7 +143,10 @@ module Osu_To_Interlude =
             data
         | _ -> find_bpm_durations (List.tail points) end_time
 
-    let private convert_timing_points (points: TimingPoint list) (end_time: Time) : TimeArray<BPM> * TimeArray<float32> =
+    let private convert_timing_points
+        (points: TimingPoint list)
+        (end_time: Time)
+        : TimeArray<BPM> * TimeArray<float32> =
         let most_common_bpm =
             (find_bpm_durations points end_time)
                 .OrderByDescending(fun p -> p.Value)
@@ -176,10 +185,17 @@ module Osu_To_Interlude =
     let convert (b: Beatmap) (action: ConversionAction) : Chart =
         let keys = b.Difficulty.CircleSize |> int
 
-        if b.General.Mode <> GameMode.Mania then skip_conversion "Beatmap is not osu!mania gamemode"
-        if keys < 3 || keys > 10 then skip_conversion "Keymode not supported"
-        if detect_rate_mod(b.Metadata.Version).IsSome then skip_conversion "Skipping rate modded beatmap"
-        if b.Objects.Length < 20 then skip_conversion "Beatmap has very few or no notes"
+        if b.General.Mode <> GameMode.Mania then
+            skip_conversion "Beatmap is not osu!mania gamemode"
+
+        if keys < 3 || keys > 10 then
+            skip_conversion "Keymode not supported"
+
+        if detect_rate_mod(b.Metadata.Version).IsSome then
+            skip_conversion "Skipping rate modded beatmap"
+
+        if b.Objects.Length < 20 then
+            skip_conversion "Beatmap has very few or no notes"
 
         let path = Path.GetDirectoryName action.Source
 

@@ -24,7 +24,7 @@ module Import =
 
     type ImportOsuNoteskinPage(ini: OsuSkin.OsuSkinIni, source_path: string, target_path: string) as this =
         inherit Page()
-        
+
         let keymode = Setting.simple Keymode.``4K``
 
         do
@@ -105,7 +105,7 @@ module Import =
             )
                 .Show()
         | Error err -> Logging.Error("Error while parsing osu! skin.ini\n" + err)
-        // todo: error toast
+    // todo: error toast
 
     let handle_file_drop (path: string) =
         match Mounts.drop_func with

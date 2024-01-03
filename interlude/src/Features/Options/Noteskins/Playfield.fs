@@ -21,11 +21,7 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) as this =
 
     do
         this
-        |+ Text(
-            (fun () -> sprintf "%.0f" spacing.Value),
-            Align = Alignment.CENTER,
-            Color = K Colors.text_subheading
-        )
+        |+ Text((fun () -> sprintf "%.0f" spacing.Value), Align = Alignment.CENTER, Color = K Colors.text_subheading)
         |* Clickable(
             (fun () ->
                 (if not this.Selected then
@@ -76,13 +72,14 @@ type PlayfieldSettingsPage() as this =
 
     let data = Noteskins.Current.config
 
-    
+
     let keycount =
         match Gameplay.Chart.CACHE_DATA with
         | Some c -> c.Keys
         | None -> 4
         |> enum
-        |> Setting.simple 
+        |> Setting.simple
+
     let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
     let align_offset = Setting.percentf (snd data.PlayfieldAlignment)
     let playfield_color = Setting.simple data.PlayfieldColor
@@ -91,6 +88,7 @@ type PlayfieldSettingsPage() as this =
 
     let column_spacing =
         Setting.bounded data.ColumnSpacing 0.0f 100.0f |> Setting.roundf 0
+
     let use_advanced_column_spacing = Setting.simple data.UseAdvancedColumnSpacing
     let fill_gaps = Setting.simple data.FillColumnGaps
     let spacing = data.AdvancedColumnSpacing
@@ -103,6 +101,7 @@ type PlayfieldSettingsPage() as this =
         |> Setting.bound 0.0f 300.0f
 
     let NOTE_WIDTH = 120.0f
+
     let _spacings, refresh_spacings =
         refreshable_row
             (fun () -> int keycount.Value - 1)
@@ -146,20 +145,30 @@ type PlayfieldSettingsPage() as this =
                 .Pos(650.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.useadvancedcolumnspacing"))
 
-            |+ Conditional((fun () -> not use_advanced_column_spacing.Value), PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
-                .Pos(720.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.columnspacing")))
-            
-            |+ Conditional((fun () -> use_advanced_column_spacing.Value), PageSetting(
-                "generic.keymode",
-                Selector<Keymode>
-                    .FromEnum(keycount |> Setting.trigger (ignore >> refresh_spacings))
-            ).Pos(720.0f))
+            |+ Conditional(
+                (fun () -> not use_advanced_column_spacing.Value),
+                PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
+                    .Pos(720.0f)
+                    .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
+            )
 
-            |+ Conditional((fun () -> use_advanced_column_spacing.Value), PageSetting("noteskins.edit.advancedcolumnspacing", _spacings)
-                .Pos(790.0f, Viewport.vwidth - 200.0f, PRETTYHEIGHT)  
-                .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing")))
-                
+            |+ Conditional(
+                (fun () -> use_advanced_column_spacing.Value),
+                PageSetting(
+                    "generic.keymode",
+                    Selector<Keymode>
+                        .FromEnum(keycount |> Setting.trigger (ignore >> refresh_spacings))
+                )
+                    .Pos(720.0f)
+            )
+
+            |+ Conditional(
+                (fun () -> use_advanced_column_spacing.Value),
+                PageSetting("noteskins.edit.advancedcolumnspacing", _spacings)
+                    .Pos(790.0f, Viewport.vwidth - 200.0f, PRETTYHEIGHT)
+                    .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
+            )
+
         )
 
     override this.Draw() =
@@ -184,7 +193,11 @@ type PlayfieldSettingsPage() as this =
         Draw.rect (frame.SliceBottom Style.PADDING) Colors.white
 
         let pw =
-            (float32 keys * column_width.Value + if use_advanced_column_spacing.Value then Array.sum spacing.[keys - 3] else float32 (keys - 1) * column_spacing.Value)
+            (float32 keys * column_width.Value
+             + if use_advanced_column_spacing.Value then
+                   Array.sum spacing.[keys - 3]
+               else
+                   float32 (keys - 1) * column_spacing.Value)
             * PREVIEW_SCALE
 
         let start = preview_bounds.Width * align_anchor.Value - pw * align_offset.Value
@@ -199,9 +212,12 @@ type PlayfieldSettingsPage() as this =
                     playfield_color.Value
 
                 if i < keys then
-                    let s = 
-                        if use_advanced_column_spacing.Value then spacing.[keys - 3].[i - 1]
-                        else column_spacing.Value
+                    let s =
+                        if use_advanced_column_spacing.Value then
+                            spacing.[keys - 3].[i - 1]
+                        else
+                            column_spacing.Value
+
                     left <- left + (column_width.Value + s) * PREVIEW_SCALE
 
         Draw.rect

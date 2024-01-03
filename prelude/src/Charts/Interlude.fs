@@ -388,7 +388,10 @@ module Chart =
             SV = TimeArray.scale scale chart.SV
         }
 
-    let rec private find_bpm_durations (points: TimeArray<BPM>) (end_time: Time) : Dictionary<float32<ms/beat>, Time> =
+    let rec private find_bpm_durations
+        (points: TimeArray<BPM>)
+        (end_time: Time)
+        : Dictionary<float32<ms / beat>, Time> =
         if Array.isEmpty points then
             failwith "chart has no bpm points"
 
@@ -420,9 +423,12 @@ module Chart =
         data
 
     /// Actually returns millisecond per beat (mspb) values similar to osu's format
-    let find_most_common_bpm (chart: Chart) : float32<ms/beat> =
-        (find_bpm_durations chart.BPM chart.LastNote).OrderByDescending(fun p -> p.Value).First().Key
+    let find_most_common_bpm (chart: Chart) : float32<ms / beat> =
+        (find_bpm_durations chart.BPM chart.LastNote)
+            .OrderByDescending(fun p -> p.Value)
+            .First()
+            .Key
 
-    let find_min_max_bpm (chart: Chart) : float32<ms/beat> * float32<ms/beat> =
+    let find_min_max_bpm (chart: Chart) : float32<ms / beat> * float32<ms / beat> =
         let d = (find_bpm_durations chart.BPM chart.LastNote).OrderBy(fun p -> p.Key)
         (d.First().Key, d.Last().Key)

@@ -417,7 +417,8 @@ module Options =
 
     module Presets =
 
-        let get (id: int) = [| options.Preset1; options.Preset2; options.Preset3 |].[id - 1]
+        let get (id: int) =
+            [| options.Preset1; options.Preset2; options.Preset3 |].[id - 1]
 
         let create (name: string) : Preset =
             {
@@ -447,9 +448,9 @@ module Options =
             | None -> ()
             | Some i ->
                 let setting = get i
+
                 match setting.Value with
-                | Some preset when preset.Mode = PresetMode.Autosave ->
-                    setting.Set (Some (save preset))
+                | Some preset when preset.Mode = PresetMode.Autosave -> setting.Set(Some(save preset))
                 | _ -> ()
 
             match (get id).Value with
@@ -466,7 +467,12 @@ module Options =
                     options.Noteskin.Set loaded_preset.Noteskin
                     Content.Noteskins.Current.switch loaded_preset.Noteskin
                 else
-                    Logging.Error(sprintf "Noteskin '%s' used in this preset has been renamed or isn't available" loaded_preset.Noteskin)
+                    Logging.Error(
+                        sprintf
+                            "Noteskin '%s' used in this preset has been renamed or isn't available"
+                            loaded_preset.Noteskin
+                    )
+
                 Some loaded_preset.Name
             | None -> None
 

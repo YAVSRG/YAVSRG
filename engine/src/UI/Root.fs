@@ -12,9 +12,9 @@ module Root =
 
     let sync_forever (action: unit -> unit) =
         ROOT_ANIMATION.Add(Animation.ActionLoop action)
-        
+
     let inline ensure_ui_thread action =
-        if is_ui_thread () then action () else sync action 
+        if is_ui_thread () then action () else sync action
 
 [<AbstractClass>]
 type Root() =

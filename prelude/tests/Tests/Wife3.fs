@@ -15,10 +15,11 @@ module Wife3 =
         let base_value = wife_curve 4 delta
 
         let note_rounding_error_value =
-            { 1 .. 1000 }
-            |> Seq.map (fun _ -> wife_curve 4 (delta + (-0.5 + ran.NextDouble() |> float32 |> fun x -> x * 1.0f<ms>)))
+            { 1..1000 }
+            |> Seq.map (fun _ -> wife_curve 4 (delta + (-0.5 + ran.NextDouble() |> float32 |> (fun x -> x * 1.0f<ms>))))
             |> Seq.average
 
-        printfn "Centered value: %.16f%%\nWith variation: %.16f%%" (base_value * 100.0) (note_rounding_error_value * 100.0)
-
-
+        printfn
+            "Centered value: %.16f%%\nWith variation: %.16f%%"
+            (base_value * 100.0)
+            (note_rounding_error_value * 100.0)

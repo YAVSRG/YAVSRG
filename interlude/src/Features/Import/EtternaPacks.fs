@@ -172,7 +172,7 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
 module EtternaPacks =
 
     // todo: automated test to ping EO and see if the cert is expired
-    let allow_expired_etternaonline_cert() =
+    let allow_expired_etternaonline_cert () =
         ServicePointManager.ServerCertificateValidationCallback <-
             RemoteCertificateValidationCallback(fun _ cert _ sslPolicyErrors ->
                 if sslPolicyErrors = SslPolicyErrors.None then
@@ -190,8 +190,7 @@ module EtternaPacks =
     type EtternaPackSearch() as this =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
 
-        let flow =
-            FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
+        let flow = FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
 
         let scroll =
             ScrollContainer.Flow(flow, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
@@ -199,12 +198,16 @@ module EtternaPacks =
         let mutable failed = false
 
         override this.Init(parent) =
-            allow_expired_etternaonline_cert()
+            allow_expired_etternaonline_cert ()
+
             WebServices.download_json (
                 "https://api.etternaonline.com/v2/packs/",
                 fun data ->
                     match data with
-                    | Some(d: {| data: ResizeArray<EtternaOnlinePack> |}) ->
+                    | Some(d:
+                        {|
+                            data: ResizeArray<EtternaOnlinePack>
+                        |}) ->
                         sync (fun () ->
                             for p in d.data do
                                 flow.Add(EtternaPackCard(p.id, p.attributes))

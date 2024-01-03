@@ -23,17 +23,21 @@ type ReplayMode =
     | Auto
     | Replay of score: Score * chart: ModChart * rate: float32 * ReplayData
 
-type private HitOverlay(rate: float32, chart: ModChart, replay_data: ReplayData, state: PlayState, playfield: Playfield, enable: Setting<bool>) =
+type private HitOverlay
+    (
+        rate: float32,
+        chart: ModChart,
+        replay_data: ReplayData,
+        state: PlayState,
+        playfield: Playfield,
+        enable: Setting<bool>
+    ) =
     inherit StaticWidget(NodeType.None)
 
     let hit_events =
         let full_score =
-            Metrics.create
-                state.Ruleset
-                chart.Keys
-                (StoredReplayProvider replay_data)
-                chart.Notes
-                rate
+            Metrics.create state.Ruleset chart.Keys (StoredReplayProvider replay_data) chart.Notes rate
+
         full_score.Update Time.infinity
         full_score.HitEvents |> Array.ofSeq
 
@@ -72,51 +76,63 @@ type private HitOverlay(rate: float32, chart: ModChart, replay_data: ReplayData,
                     | Hit x -> x.Delta
                     | Release x -> x.Delta
 
-                let is_miss = 
+                let is_miss =
                     match ev.Guts with
                     | Hit x -> x.Missed
                     | Release x -> x.Missed
 
                 let color =
                     match ev.Guts with
-                    | Hit x -> 
+                    | Hit x ->
                         match x.Judgement with
                         | None -> Colors.grey_1.O2
                         | Some i -> state.Ruleset.JudgementColor i
-                    | Release x -> 
+                    | Release x ->
                         match x.Judgement with
                         | None -> Colors.grey_1.O2
                         | Some i -> state.Ruleset.JudgementColor i
 
                 if is_miss then
-                    Rect.Create(
-                        playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
-                        y (ev.Time - state.Ruleset.Accuracy.MissWindow),
-                        playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column] + playfield.ColumnWidth,
-                        y (ev.Time - state.Ruleset.Accuracy.MissWindow)
-                    ).Shrink(0.0f, -playfield.ColumnWidth * 0.5f)
+                    Rect
+                        .Create(
+                            playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
+                            y (ev.Time - state.Ruleset.Accuracy.MissWindow),
+                            playfield.Bounds.Left
+                            + playfield.ColumnPositions.[ev.Column]
+                            + playfield.ColumnWidth,
+                            y (ev.Time - state.Ruleset.Accuracy.MissWindow)
+                        )
+                        .Shrink(0.0f, -playfield.ColumnWidth * 0.5f)
                     |> scroll_direction_pos playfield.Bounds.Bottom
-                    |> fun a -> Text.fill_b(Style.font, Icons.X, a, (color, Colors.black), 0.5f)
+                    |> fun a -> Text.fill_b (Style.font, Icons.X, a, (color, Colors.black), 0.5f)
                 else
-                    Rect.Create(
-                        playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
-                        y ev.Time,
-                        playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column] + playfield.ColumnWidth,
-                        y (ev.Time - delta)
-                    ).Shrink((playfield.ColumnWidth - 5.0f) * 0.5f, 0.0f)
+                    Rect
+                        .Create(
+                            playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
+                            y ev.Time,
+                            playfield.Bounds.Left
+                            + playfield.ColumnPositions.[ev.Column]
+                            + playfield.ColumnWidth,
+                            y (ev.Time - delta)
+                        )
+                        .Shrink((playfield.ColumnWidth - 5.0f) * 0.5f, 0.0f)
                     |> scroll_direction_pos playfield.Bounds.Bottom
                     |> fun a -> Draw.rect a color
 
-                    Rect.Create(
-                        playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
-                        y ev.Time,
-                        playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column] + playfield.ColumnWidth,
-                        y ev.Time
-                    ).Shrink(20.0f, -2.5f)
+                    Rect
+                        .Create(
+                            playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
+                            y ev.Time,
+                            playfield.Bounds.Left
+                            + playfield.ColumnPositions.[ev.Column]
+                            + playfield.ColumnWidth,
+                            y ev.Time
+                        )
+                        .Shrink(20.0f, -2.5f)
                     |> scroll_direction_pos playfield.Bounds.Bottom
                     |> fun a -> Draw.rect a color
 
-            let now = 
+            let now =
                 state.CurrentChartTime()
                 + Performance.frame_compensation ()
                 + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
@@ -124,14 +140,19 @@ type private HitOverlay(rate: float32, chart: ModChart, replay_data: ReplayData,
             while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
                 seek <- seek + 1
 
-            let until_time = now + (1080.0f<ms> + state.Ruleset.Accuracy.MissWindow) / (options.ScrollSpeed.Value / Gameplay.rate.Value)
+            let until_time =
+                now
+                + (1080.0f<ms> + state.Ruleset.Accuracy.MissWindow)
+                  / (options.ScrollSpeed.Value / Gameplay.rate.Value)
 
             let mutable peek = seek
+
             while hit_events.Length - 1 > peek && hit_events.[peek].Time < until_time do
                 draw_event now hit_events.[peek]
                 peek <- peek + 1
 
-type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playfield: Playfield, enable: Setting<bool>) =
+type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playfield: Playfield, enable: Setting<bool>)
+    =
     inherit StaticWidget(NodeType.None)
 
     let mutable seek = 0
@@ -167,16 +188,18 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
                     + float32 (t - now) * (options.ScrollSpeed.Value / Gameplay.rate.Value)
                     + playfield.ColumnWidth * 0.5f
 
-                Rect.Create(
-                    playfield.Bounds.Left + playfield.ColumnPositions.[k],
-                    y start,
-                    playfield.Bounds.Left + playfield.ColumnPositions.[k] + playfield.ColumnWidth,
-                    y finish
-                ).Shrink(20.0f, 0.0f)
+                Rect
+                    .Create(
+                        playfield.Bounds.Left + playfield.ColumnPositions.[k],
+                        y start,
+                        playfield.Bounds.Left + playfield.ColumnPositions.[k] + playfield.ColumnWidth,
+                        y finish
+                    )
+                    .Shrink(20.0f, 0.0f)
                 |> scroll_direction_pos playfield.Bounds.Bottom
                 |> fun a -> Draw.rect a Colors.grey_2.O2
 
-            let now = 
+            let now =
                 state.CurrentChartTime()
                 + Performance.frame_compensation ()
                 + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
@@ -238,7 +261,13 @@ module ReplayScreen =
             )
             |+ Text(
                 "Playfield dim",
-                Color = (fun () -> if show_input_overlay.Value || show_hit_overlay.Value then Colors.text else Colors.text_greyout),
+                Color =
+                    (fun () ->
+                        if show_input_overlay.Value || show_hit_overlay.Value then
+                            Colors.text
+                        else
+                            Colors.text_greyout
+                    ),
                 Align = Alignment.CENTER,
                 Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceTop(50.0f)
             )
@@ -247,12 +276,24 @@ module ReplayScreen =
                 Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceBottom(50.0f).Margin(5.0f)
             )
             |+ Button(
-                (fun () -> (if show_input_overlay.Value then Icons.CHECK_CIRCLE else Icons.CIRCLE) + " Input overlay"),
+                (fun () ->
+                    (if show_input_overlay.Value then
+                         Icons.CHECK_CIRCLE
+                     else
+                         Icons.CIRCLE)
+                    + " Input overlay"
+                ),
                 (fun () -> show_input_overlay.Set(not show_input_overlay.Value)),
                 Position = Position.SliceTop(50.0f).SliceLeft(400.0f)
             )
             |* Button(
-                (fun () -> (if show_hit_overlay.Value then Icons.CHECK_CIRCLE else Icons.CIRCLE) + " Hit overlay"),
+                (fun () ->
+                    (if show_hit_overlay.Value then
+                         Icons.CHECK_CIRCLE
+                     else
+                         Icons.CIRCLE)
+                    + " Hit overlay"
+                ),
                 (fun () -> show_hit_overlay.Set(not show_hit_overlay.Value)),
                 Position = Position.SliceBottom(50.0f).SliceLeft(400.0f)
             )
@@ -265,12 +306,11 @@ module ReplayScreen =
         let mutable show = true
         let mutable show_timeout = 3000.0
 
-        let slideout = Slideout("Options", Controls(is_auto), 100.0f, 10.0f, ShowButton = false, ControlledByUser = false)
+        let slideout =
+            Slideout("Options", Controls(is_auto), 100.0f, 10.0f, ShowButton = false, ControlledByUser = false)
 
         override this.Init(parent) =
-            this
-            |+ Timeline(Gameplay.Chart.WITH_MODS.Value, on_seek)
-            |* slideout
+            this |+ Timeline(Gameplay.Chart.WITH_MODS.Value, on_seek) |* slideout
 
             base.Init parent
 
@@ -290,6 +330,7 @@ module ReplayScreen =
                     show <- false
 
                     slideout.Close()
+
                     this.Position <-
                         { Position.Default with
                             Bottom = 1.0f %+ 100.0f
@@ -311,9 +352,9 @@ module ReplayScreen =
 
         let first_note = chart.Notes.[0].Time
         let ruleset = Rulesets.current
-        let playback_speed = 
-            Setting.bounded rate 0.5f 2.0f
-            |> Setting.trigger (fun r -> Song.change_rate r)
+
+        let playback_speed =
+            Setting.bounded rate 0.5f 2.0f |> Setting.trigger (fun r -> Song.change_rate r)
 
         let mutable replay_data = replay_data
 
@@ -343,11 +384,11 @@ module ReplayScreen =
                     add_widget BPMMeter
 
                 this
-                |+ { new StaticWidget(NodeType.None) with 
-                    override _.Draw() =
-                        if show_input_overlay.Value || show_hit_overlay.Value then 
-                            Draw.rect this.Playfield.Bounds (Colors.black.O4a (255.0f * playfield_dim.Value |> int))
-                }
+                |+ { new StaticWidget(NodeType.None) with
+                       override _.Draw() =
+                           if show_input_overlay.Value || show_hit_overlay.Value then
+                               Draw.rect this.Playfield.Bounds (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
+                   }
                 |+ InputOverlay(chart.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, show_input_overlay)
                 |+ HitOverlay(rate, chart, replay_data.GetFullReplay(), this.State, this.Playfield, show_hit_overlay)
                 |* ControlOverlay(
@@ -397,8 +438,8 @@ module ReplayScreen =
                             Transitions.Flags.Default
                         |> ignore
 
-                if (%%"skip").Tapped() && Song.time() > 0.0f<ms> then
-                    if Song.playing() then Song.pause() else Song.resume()
+                if (%%"skip").Tapped() && Song.time () > 0.0f<ms> then
+                    if Song.playing () then Song.pause () else Song.resume ()
                 elif (%%"uprate_small").Tapped() then
                     playback_speed.Value <- playback_speed.Value + 0.01f
                 elif (%%"uprate_half").Tapped() then

@@ -51,8 +51,7 @@ module LocalAudioSync =
         else
             Gameplay.Chart.SAVE_DATA.Value.Offset - first_note - mean * 1.25f
 
-    let apply_automatic (scoring: IScoreMetric) =
-        offset.Set (get_automatic scoring)
+    let apply_automatic (scoring: IScoreMetric) = offset.Set(get_automatic scoring)
 
 type Timeline(chart: ModChart, on_seek: Time -> unit) =
     inherit StaticWidget(NodeType.None)
@@ -438,7 +437,10 @@ type Slideout(label: string, content: Widget, height: float32, x: float32) as th
 
     let button =
         { new Button((fun () -> label + " " + (if is_open then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)),
-                     (fun () -> if this.ControlledByUser then (if is_open then this.Close() else this.Open())),
+                     (fun () ->
+                         if this.ControlledByUser then
+                             (if is_open then this.Close() else this.Open())
+                     ),
                      Floating = true) with
             override this.Draw() =
                 Draw.rect this.Bounds Colors.cyan_shadow
@@ -457,16 +459,19 @@ type Slideout(label: string, content: Widget, height: float32, x: float32) as th
         content.Position <- Position.Margin(MARGIN)
         content.Init this
         this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
+
         if this.ControlledByUser then
-            this |* HotkeyAction(this.Hotkey, fun () -> if is_open then this.Close() else this.Open())
+            this
+            |* HotkeyAction(this.Hotkey, (fun () -> if is_open then this.Close() else this.Open()))
+
         base.Init parent
 
-    member this.Close() = 
+    member this.Close() =
         is_open <- false
         this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
         this.OnClose()
 
-    member this.Open() = 
+    member this.Open() =
         is_open <- true
         this.Position <- Position.SliceTop(height)
         this.OnOpen()
@@ -483,10 +488,12 @@ type Slideout(label: string, content: Widget, height: float32, x: float32) as th
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         let moved = moved || this.Moving
+
         if this.Bounds.Bottom > this.Parent.Bounds.Top - 4.0f then
             content.Update(elapsed_ms, moved)
             button.Update(elapsed_ms, moved)
         elif this.ShowButton then
             button.Update(elapsed_ms, moved)
+
         if this.ControlledByUser && is_open && (%%"exit").Tapped() then
             this.Close()

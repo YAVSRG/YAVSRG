@@ -5,7 +5,7 @@ open System.IO
 open System.Reflection
 
 [<Json.AutoCodec(false)>]
-type Secrets = 
+type Secrets =
     {
         SocketCert: string
         SocketCertPassword: string
@@ -17,7 +17,8 @@ type Secrets =
         DiscordClientSecret: string
         IsProduction: bool
     }
-    static member Default = {
+    static member Default =
+        {
             SocketCert = "localhost.pfx"
             SocketCertPassword = "DEVELOPMENT"
             ApiCert = "localhost.pfx"
@@ -34,16 +35,21 @@ module Secrets =
 
     let SECRETS =
         if not (File.Exists "./secrets/secrets.json") then
-            #if DEBUG
-                failwith "Secrets folder not found! You are running the server as a non-docker instance, make sure you ran it with the script"
-            #else
-                failwith "Secrets folder not found! Did you mount it properly?"
-            #endif
+#if DEBUG
+            failwith
+                "Secrets folder not found! You are running the server as a non-docker instance, make sure you ran it with the script"
+#else
+            failwith "Secrets folder not found! Did you mount it properly?"
+#endif
         match Prelude.Common.JSON.FromFile<Secrets>("./secrets/secrets.json") with
         | Ok o -> o
-        | Error e ->
-            failwithf "Error while reading secrets.json: %O" e
-    let TAGLINE = 
-        let stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Web.Server.Version.txt")
+        | Error e -> failwithf "Error while reading secrets.json: %O" e
+
+    let TAGLINE =
+        let stream =
+            Assembly
+                .GetExecutingAssembly()
+                .GetManifestResourceStream("Interlude.Web.Server.Version.txt")
+
         use tr = new StreamReader(stream)
         tr.ReadToEnd()

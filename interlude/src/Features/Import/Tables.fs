@@ -204,7 +204,8 @@ module Tables =
                     | Some(d: TableIndex) ->
                         for (entry: TableIndexEntry) in d.Tables do
                             WebServices.download_json (
-                                "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/tables/" + entry.File,
+                                "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/tables/"
+                                + entry.File,
                                 fun table ->
                                     match table with
                                     | Some(t: Table) ->

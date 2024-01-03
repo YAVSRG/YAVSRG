@@ -88,7 +88,14 @@ type RotationSettingsPage() as this =
 
     let data = Noteskins.Current.config
     let use_rotation = Setting.simple data.UseRotation
-    let keycount : Setting<Keymode> = Setting.simple (match Chart.CACHE_DATA with Some c -> enum c.Keys | None -> Keymode.``4K``)
+
+    let keycount: Setting<Keymode> =
+        Setting.simple (
+            match Chart.CACHE_DATA with
+            | Some c -> enum c.Keys
+            | None -> Keymode.``4K``
+        )
+
     let receptor_style = Setting.simple data.ReceptorStyle
     let rotations = data.Rotations
 

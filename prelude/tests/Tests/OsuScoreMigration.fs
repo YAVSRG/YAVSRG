@@ -125,7 +125,11 @@ module OsuScoreMigration =
             main_db.Beatmaps
             |> Seq.filter (fun b -> b.Mode = 3uy && round b.OverallDifficulty = 8.0f) do
             let osu_file =
-                Path.Combine(Data.Charts.Library.Imports.OSU_SONG_FOLDER, beatmap_data.FolderName, beatmap_data.Filename)
+                Path.Combine(
+                    Data.Charts.Library.Imports.OSU_SONG_FOLDER,
+                    beatmap_data.FolderName,
+                    beatmap_data.Filename
+                )
 
             let chart =
                 try

@@ -25,4 +25,7 @@ module Friends =
 
     let has_friend (userId: int64, friendId: int64) = db.SetContains(key userId, friendId)
 
-    let friends_list (userId: int64) : User array = User.by_ids (get_id_list userId) |> Array.choose id |> Array.sortByDescending (fun u -> u.LastLogin)
+    let friends_list (userId: int64) : User array =
+        User.by_ids (get_id_list userId)
+        |> Array.choose id
+        |> Array.sortByDescending (fun u -> u.LastLogin)

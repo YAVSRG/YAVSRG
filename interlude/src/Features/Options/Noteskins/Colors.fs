@@ -79,7 +79,14 @@ type ColorSettingsPage() as this =
     inherit Page()
 
     let data = Noteskins.Current.config
-    let keycount : Setting<Keymode> = Setting.simple (match Chart.CACHE_DATA with Some c -> enum c.Keys | None -> Keymode.``4K``)
+
+    let keycount: Setting<Keymode> =
+        Setting.simple (
+            match Chart.CACHE_DATA with
+            | Some c -> enum c.Keys
+            | None -> Keymode.``4K``
+        )
+
     let mutable note_colors = data.NoteColors
 
     let g keycount i =

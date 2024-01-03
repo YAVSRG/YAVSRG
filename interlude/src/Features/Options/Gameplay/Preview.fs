@@ -17,7 +17,9 @@ type NoteskinPreview(scale: float32) as this =
     let create_renderer () =
         match Gameplay.Chart.WITH_COLORS with
         | Some chart ->
-            let playfield = Playfield(chart, PlayState.Dummy Gameplay.Chart.WITH_MODS.Value, noteskin_config(), false)
+            let playfield =
+                Playfield(chart, PlayState.Dummy Gameplay.Chart.WITH_MODS.Value, noteskin_config (), false)
+
             playfield.Add(LaneCover())
 
             if this.Initialised then

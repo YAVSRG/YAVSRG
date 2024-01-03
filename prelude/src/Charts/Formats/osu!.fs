@@ -625,10 +625,7 @@ module ``osu!`` =
             match key with
             | "AudioFilename" -> { s with AudioFilename = value }
             | "AudioLeadIn" -> { s with AudioLeadIn = value |> int }
-            | "PreviewTime" ->
-                { s with
-                    PreviewTime = value |> int
-                }
+            | "PreviewTime" -> { s with PreviewTime = value |> int }
             | "Countdown" -> { s with Countdown = value |> int }
             | "SampleSet" ->
                 { s with

@@ -96,7 +96,7 @@ module FBO =
                 PixelType.UnsignedByte,
                 IntPtr.Zero
             )
-            
+
             GL.TexSubImage3D<Rgba32>(
                 TextureTarget.Texture2DArray,
                 0,
@@ -108,15 +108,32 @@ module FBO =
                 1,
                 PixelFormat.Rgba,
                 PixelType.UnsignedByte,
-                [|new Rgba32(255uy, 255uy, 255uy, 255uy)|]
+                [| new Rgba32(255uy, 255uy, 255uy, 255uy) |]
             )
 
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
+            GL.TexParameter(
+                TextureTarget.Texture2DArray,
+                TextureParameterName.TextureMinFilter,
+                int TextureMinFilter.Linear
+            )
 
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear)
+            GL.TexParameter(
+                TextureTarget.Texture2DArray,
+                TextureParameterName.TextureMagFilter,
+                int TextureMagFilter.Linear
+            )
 
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, int TextureWrapMode.ClampToEdge)
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, int TextureWrapMode.ClampToEdge)
+            GL.TexParameter(
+                TextureTarget.Texture2DArray,
+                TextureParameterName.TextureWrapS,
+                int TextureWrapMode.ClampToEdge
+            )
+
+            GL.TexParameter(
+                TextureTarget.Texture2DArray,
+                TextureParameterName.TextureWrapT,
+                int TextureWrapMode.ClampToEdge
+            )
 
             GL.GenFramebuffers(1, &fbo_ids.[i])
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo_ids.[i])
@@ -127,7 +144,7 @@ module FBO =
                 int vwidth,
                 int vheight
             )
-            
+
             GL.FramebufferTextureLayer(
                 FramebufferTarget.Framebuffer,
                 FramebufferAttachment.ColorAttachment0,
@@ -148,7 +165,7 @@ module FBO =
                     {
                         Handle = texture_ids.[i]
                         TextureUnit = 0
-                        
+
                         Width = int vwidth
                         Height = int vheight
                         Layers = 1
@@ -270,7 +287,7 @@ module Draw =
     let mutable private last_texture_handle = -1
 
     let untextured_quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) =
-        
+
         Batch.vertex p1 Vector2.Zero c1 0
         Batch.vertex p2 Vector2.Zero c2 0
         Batch.vertex p3 Vector2.Zero c3 0
@@ -278,14 +295,20 @@ module Draw =
         Batch.vertex p3 Vector2.Zero c3 0
         Batch.vertex p4 Vector2.Zero c4 0
 
-    let textured_quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (t: Texture) (layer: int) (struct (u1, u2, u3, u4): Quad) =
+    let textured_quad
+        (struct (p1, p2, p3, p4): Quad)
+        (struct (c1, c2, c3, c4): QuadColors)
+        (t: Texture)
+        (layer: int)
+        (struct (u1, u2, u3, u4): Quad)
+        =
 
         if last_texture_handle <> t.Handle then
             Batch.draw ()
-        
+
             if t.TextureUnit = 0 then
                 GL.BindTexture(TextureTarget.Texture2DArray, t.Handle)
-        
+
             Shader.set_uniform_i32 ("sampler", t.TextureUnit) Shader.main
             last_texture_handle <- t.Handle
 
@@ -299,10 +322,10 @@ module Draw =
     let inline quad (q: Quad) (c: QuadColors) (t: QuadTexture) =
         match t with
         | NoTexture -> untextured_quad q c
-        | Texture (tex, layer, uv) -> textured_quad q c tex layer uv
+        | Texture(tex, layer, uv) -> textured_quad q c tex layer uv
 
     let sprite (r: Rect) (c: Color) (s: Sprite) =
         quad <| r.AsQuad <| Quad.color c <| Sprite.pick_texture (0, 0) s
 
-    let rect (r: Rect) (c: Color) = 
+    let rect (r: Rect) (c: Color) =
         quad <| r.AsQuad <| Quad.color c <| NoTexture

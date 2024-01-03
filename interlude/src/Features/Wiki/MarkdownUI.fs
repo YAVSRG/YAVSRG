@@ -157,7 +157,8 @@ type private Image(width, title, url) as this =
     do
         ImageServices.get_cached_image.Request(
             url,
-            fun bmp -> sync (fun () -> sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp))))
+            fun bmp ->
+                sync (fun () -> sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp))))
         )
 
         this

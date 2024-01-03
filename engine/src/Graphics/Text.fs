@@ -59,7 +59,19 @@ module Fonts =
             with err ->
                 Logging.Error(sprintf "Exception occurred rendering glyph with code point %i" (int c), err)
 
-            char_lookup.Add(c, Sprite.upload_one false true { Label = "LOOSE_CHAR"; Rows = 1; Columns = 1; Image = img; DisposeImageAfter = true })
+            char_lookup.Add(
+                c,
+                Sprite.upload_one
+                    false
+                    true
+                    {
+                        Label = "LOOSE_CHAR"
+                        Rows = 1
+                        Columns = 1
+                        Image = img
+                        DisposeImageAfter = true
+                    }
+            )
 
         // render a font texture atlas, containing common characters + icons
         // characters outside this set are dynamically generated on use
@@ -132,12 +144,21 @@ module Fonts =
             img.[w - 1, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
 
             let atlas_sprite =
-                Sprite.upload_one true true { Label = "FONT_ATLAS"; Rows = 1; Columns = 1; Image = img; DisposeImageAfter = true }
+                Sprite.upload_one
+                    true
+                    true
+                    {
+                        Label = "FONT_ATLAS"
+                        Rows = 1
+                        Columns = 1
+                        Image = img
+                        DisposeImageAfter = true
+                    }
 
             for i, row in List.indexed glyphs do
                 for glyph in row do
-                    let sprite = 
-                        Texture.create_sprite 
+                    let sprite =
+                        Texture.create_sprite
                             (glyph.Offset |> int, row_spacing * float32 i |> int)
                             1
                             (int glyph.Width, int glyph.Height)
@@ -149,12 +170,14 @@ module Fonts =
                         { sprite with
                             PrecomputedQuad =
                                 ValueSome(
-                                    Rect.Box(
-                                        glyph.Offset / float32 w,
-                                        (row_spacing * float32 i) / float32 h,
-                                        glyph.Width / float32 w,
-                                        glyph.Height / float32 h
-                                    ).AsQuad
+                                    Rect
+                                        .Box(
+                                            glyph.Offset / float32 w,
+                                            (row_spacing * float32 i) / float32 h,
+                                            glyph.Width / float32 w,
+                                            glyph.Height / float32 h
+                                        )
+                                        .AsQuad
                                 )
                         }
                     )
@@ -254,9 +277,9 @@ module Text =
                     Draw.quad
                         ((r.Translate(shadow_spacing, shadow_spacing)).AsQuad)
                         (Quad.color bg)
-                        (Texture (s.Texture, s.Z, s.PrecomputedQuad.Value))
+                        (Texture(s.Texture, s.Z, s.PrecomputedQuad.Value))
 
-                Draw.quad r.AsQuad (Quad.color fg) (Texture (s.Texture, s.Z, s.PrecomputedQuad.Value))
+                Draw.quad r.AsQuad (Quad.color fg) (Texture(s.Texture, s.Z, s.PrecomputedQuad.Value))
                 x <- x + w + font.CharSpacing * scale
 
     let draw (font, text, scale, x, y, color) =

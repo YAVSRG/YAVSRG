@@ -13,11 +13,7 @@ module FlowContainerV2 =
         abstract member Size: float32
         abstract member OnSizeChanged: (unit -> unit) -> unit
 
-    type FlowItem<'T when 'T :> Widget and 'T :> FlowContainerItem> = 
-        { 
-            Widget: 'T
-            mutable Visible: bool
-        }
+    type FlowItem<'T when 'T :> Widget and 'T :> FlowContainerItem> = { Widget: 'T; mutable Visible: bool }
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget and 'T :> FlowContainerItem>() as this =
@@ -282,6 +278,7 @@ module FlowContainerV2 =
             for { Widget = c; Visible = visible } in children do
                 if visible then
                     let size = c.Size
+
                     c.Position <-
                         {
                             Left = 1.0f %- (r + size)

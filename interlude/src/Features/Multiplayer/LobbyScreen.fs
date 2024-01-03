@@ -80,7 +80,8 @@ type Lobby() =
         |+ StylishButton(
             (fun () ->
                 if Network.lobby.IsSome && SelectedChart.loaded () then
-                    Preview(Gameplay.Chart.WITH_MODS.Value, Gameplay.Chart.WITH_COLORS.Value, ignore).Show()
+                    Preview(Gameplay.Chart.WITH_MODS.Value, Gameplay.Chart.WITH_COLORS.Value, ignore)
+                        .Show()
             ),
             K(sprintf "%s %s" Icons.EYE (%"levelselect.preview.name")),
             !%Palette.MAIN_100,

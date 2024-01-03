@@ -338,10 +338,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
             while est_present_of_next_frame < present_of_last_frame do
                 est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
 
-            FrameTimeStrategies.sleep_accurate (
-                total_frame_timer,
-                est_present_of_next_frame
-            )
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, est_present_of_next_frame)
 
         | CpuTiming ->
             present_of_last_frame <- swap_of_last_frame
@@ -351,10 +348,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
             while est_present_of_next_frame < present_of_last_frame do
                 est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
 
-            FrameTimeStrategies.sleep_accurate (
-                total_frame_timer,
-                est_present_of_next_frame
-            )
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, est_present_of_next_frame)
 
         let elapsed_ms = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()

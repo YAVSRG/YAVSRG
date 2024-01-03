@@ -442,9 +442,7 @@ type EditProgressMeterPage() as this =
                         (Quad.color Colors.white.O2)
 
                 for i = 0 to 17 do
-                    Draw.untextured_quad
-                        (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
-                        (Quad.color color.Value)
+                    Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) (Quad.color color.Value)
 
                 let text =
                     match label.Value with

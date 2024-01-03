@@ -58,22 +58,28 @@ module CollectionManager =
 
     let reorder_up (context: LibraryContext) : bool =
         match context with
-        | LibraryContext.Playlist(index, id, data) -> 
+        | LibraryContext.Playlist(index, id, data) ->
             if collections.GetPlaylist(id).Value.MoveChartUp index then
-                if Chart.LIBRARY_CTX = context then Chart.LIBRARY_CTX <- LibraryContext.Playlist(index - 1, id, data)
+                if Chart.LIBRARY_CTX = context then
+                    Chart.LIBRARY_CTX <- LibraryContext.Playlist(index - 1, id, data)
+
                 LevelSelect.refresh_all ()
                 true
-            else false
+            else
+                false
         | _ -> false
 
     let reorder_down (context: LibraryContext) : bool =
         match context with
-        | LibraryContext.Playlist(index, id, data) -> 
+        | LibraryContext.Playlist(index, id, data) ->
             if collections.GetPlaylist(id).Value.MoveChartDown index then
-                if Chart.LIBRARY_CTX = context then Chart.LIBRARY_CTX <- LibraryContext.Playlist(index + 1, id, data)
+                if Chart.LIBRARY_CTX = context then
+                    Chart.LIBRARY_CTX <- LibraryContext.Playlist(index + 1, id, data)
+
                 LevelSelect.refresh_all ()
                 true
-            else false
+            else
+                false
         | _ -> false
 
 type private CreateFolderPage() as this =
@@ -126,7 +132,12 @@ type private CreatePlaylistPage() as this =
                 (fun () ->
                     if collections.CreatePlaylist(new_name.Value, icon.Value).IsSome then
                         Menu.Back()
-                    else Notifications.action_feedback(Icons.X, "Name is taken", "A collection already exists with that name")
+                    else
+                        Notifications.action_feedback (
+                            Icons.X,
+                            "Name is taken",
+                            "A collection already exists with that name"
+                        )
                 )
             )
                 .Pos(400.0f)
@@ -183,7 +194,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
             if collections.RenameCollection(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed collection '%s' to '%s'" name new_name.Value)
             else
-                Notifications.action_feedback(Icons.X, "Rename failed", "A collection already exists with that name")
+                Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"
 
 type private EditPlaylistPage(name: string, playlist: Playlist) as this =
@@ -206,7 +217,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                             if collections.Delete name then
                                 if options.LibraryMode.Value = LibraryMode.Collections then
                                     LevelSelect.refresh_all ()
-                                    
+
                                 // todo: unselect collection when deleted
 
                                 Menu.Back()
@@ -226,7 +237,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
             if collections.RenamePlaylist(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
             else
-                Notifications.action_feedback(Icons.X, "Rename failed", "A collection already exists with that name")
+                Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"
 
 type private CollectionButton(icon, name, action) =
@@ -242,11 +253,7 @@ type private CollectionButton(icon, name, action) =
         this
         |+ Text(
             K(sprintf "%s %s  >" icon name),
-            Color =
-                (fun () ->
-                    ((if this.Focused then Colors.yellow_accent else Colors.white),
-                     Colors.shadow_2)
-                ),
+            Color = (fun () -> ((if this.Focused then Colors.yellow_accent else Colors.white), Colors.shadow_2)),
             Align = Alignment.LEFT,
             Position = Position.Margin Style.PADDING
         )

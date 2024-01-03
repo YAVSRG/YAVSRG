@@ -49,18 +49,17 @@ type private MenuButton(on_click, label: string, pos) =
         base.OnFocus()
 
     override this.Draw() =
-        Draw.untextured_quad
-            (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f))
-            (Quad.color !*Palette.HIGHLIGHT_100)
+        Draw.untextured_quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.color !*Palette.HIGHLIGHT_100)
 
         Draw.untextured_quad (Quad.parallelogram 0.5f this.Bounds) (Quad.color !*Palette.MAIN_100)
         base.Draw()
-        
+
     member this.Hide() =
         this.Position <-
             { pos with
                 Right = 0.0f %- Viewport.vwidth
             }
+
         this.SnapPosition()
 
     member this.Show() =
@@ -147,15 +146,17 @@ type MainMenuScreen() as this =
         Toolbar.show ()
         Song.on_finish <- SongFinishAction.LoopFromBeginning
         splash_fade.Target <- 1.0f
+
         button_sequence.Add
-            <|
-            Animation.seq [
+        <| Animation.seq
+            [
                 Animation.Action play.Show
                 Animation.Delay 50.0
                 Animation.Action options.Show
                 Animation.Delay 50.0
                 Animation.Action quit.Show
             ]
+
         DiscordRPC.in_menus ("Main menu")
 
     override this.OnExit next =

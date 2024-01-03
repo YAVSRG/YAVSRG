@@ -501,7 +501,8 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             let b = Color.FromHsv((float32 i + 1.0f) / 6.0f, 1.0f, 1.0f)
 
             Draw.untextured_quad
-                (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h)).AsQuad
+                (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h))
+                    .AsQuad
                 (struct (a, a, b, b))
 
         Draw.rect

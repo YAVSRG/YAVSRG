@@ -28,8 +28,7 @@ module Helpers =
             | Ok data ->
 
                 try
-                    StepMania_To_Interlude.convert data action
-                    |> List.map set_pack_source
+                    StepMania_To_Interlude.convert data action |> List.map set_pack_source
                 with
                 | :? ConversionSkipException -> []
                 | other_error ->

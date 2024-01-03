@@ -162,6 +162,7 @@ module Song =
                 loading <- false
                 now_playing <- song
                 change_rate rate
+
                 if play_automatically then
                     play_from preview_point
         }
@@ -193,7 +194,7 @@ module Song =
 
         let t = time ()
 
-        if playing() && t >= 0.0f<ms> && t < now_playing.Duration && not channel_playing then
+        if playing () && t >= 0.0f<ms> && t < now_playing.Duration && not channel_playing then
             channel_playing <- true
 
             Bass.ChannelSetPosition(now_playing.ID, Bass.ChannelSeconds2Bytes(now_playing.ID, float <| t / 1000.0f<ms>))
@@ -330,6 +331,7 @@ module Devices =
 
             if Song.now_playing.ID <> 0 then
                 Bass.ChannelSetDevice(Song.now_playing.ID, id) |> display_bass_error
+
             current_device <- id
         with err ->
             Logging.Error(sprintf "Error switching to audio output %i" index, err)

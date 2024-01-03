@@ -85,7 +85,13 @@ module Printerlude =
         open SixLabors.ImageSharp
 
         let private banner (hex: string) (emoji: string) =
-            use banner = Prelude.Data.ImageServices.generate_banner { BaseColor = Color.FromHex hex; Emoji = emoji.ToLower() }
+            use banner =
+                Prelude.Data.ImageServices.generate_banner
+                    {
+                        BaseColor = Color.FromHex hex
+                        Emoji = emoji.ToLower()
+                    }
+
             banner.SaveAsPng("banner.png")
 
         let private sync_table_scores () =
