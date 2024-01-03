@@ -38,9 +38,37 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
         match context with
         | LibraryContext.None
         | LibraryContext.Table _ -> ()
-        | LibraryContext.Folder name
-        | LibraryContext.Playlist(_, name, _) ->
+        | LibraryContext.Folder name ->
             content
+            |* PageButton(
+                "chart.remove_from_collection",
+                (fun () ->
+                    if CollectionManager.remove_from (name, Library.collections.Get(name).Value, cc, context) then
+                        Menu.Back()
+                ),
+                Icon = Icons.FOLDER_MINUS,
+                Text = [ name ] %> "chart.remove_from_collection.name"
+            )
+        | LibraryContext.Playlist(index, name, _) ->
+            content
+            |+ PageButton(
+                "chart.move_up_in_playlist",
+                (fun () ->
+                    if CollectionManager.reorder_up context then
+                        Menu.Back()
+                ),
+                Icon = Icons.ARROW_UP_CIRCLE,
+                Enabled = (index > 0)
+            )
+            |+ PageButton(
+                "chart.move_down_in_playlist",
+                (fun () ->
+                    if CollectionManager.reorder_down context then
+                        Menu.Back()
+                ),
+                Icon = Icons.ARROW_DOWN_CIRCLE,
+                Enabled = (index + 1 < Library.collections.GetPlaylist(name).Value.Charts.Count)
+            )
             |* PageButton(
                 "chart.remove_from_collection",
                 (fun () ->

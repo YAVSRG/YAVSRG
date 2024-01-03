@@ -120,7 +120,6 @@ module Options =
             ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
 
-            SelectedCollection: Setting<string option>
             Table: Setting<string option>
             GameplayBinds: (Bind array) array
 
@@ -200,7 +199,6 @@ module Options =
                 ChartGroupReverse = Setting.simple false
                 ScoreSortMode = Setting.simple 0
 
-                SelectedCollection = Setting.simple None
                 Table = Setting.simple None
 
                 EnableConsole = Setting.simple false
@@ -312,8 +310,8 @@ module Options =
             Hotkeys.register "library_mode" (mk Keys.D1)
             Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
             Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
-            Hotkeys.register "move_down_in_collection" (ctrl Keys.RightBracket)
-            Hotkeys.register "move_up_in_collection" (ctrl Keys.LeftBracket)
+            Hotkeys.register "move_down_in_playlist" (ctrl Keys.Down)
+            Hotkeys.register "move_up_in_playlist" (ctrl Keys.Up)
             Hotkeys.register "sort_mode" (mk Keys.D2)
             Hotkeys.register "reverse_sort_mode" (shift Keys.D2)
             Hotkeys.register "group_mode" (mk Keys.D3)

@@ -13,7 +13,6 @@ open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.UI.Components
 open Interlude.Features.Gameplay
 
 module CollectionManager =
@@ -57,33 +56,25 @@ module CollectionManager =
         else
             false
 
-    module Current =
+    let reorder_up (context: LibraryContext) : bool =
+        match context with
+        | LibraryContext.Playlist(index, id, data) -> 
+            if collections.GetPlaylist(id).Value.MoveChartUp index then
+                if Chart.LIBRARY_CTX = context then Chart.LIBRARY_CTX <- LibraryContext.Playlist(index - 1, id, data)
+                LevelSelect.refresh_all ()
+                true
+            else false
+        | _ -> false
 
-        let quick_add (cc: CachedChart) =
-            match options.SelectedCollection.Value with
-            | Some coll -> add_to (coll, Collections.current.Value, cc)
-            | None -> false
-
-        let quick_remove (cc: CachedChart, context: LibraryContext) =
-            match options.SelectedCollection.Value with
-            | Some coll -> remove_from (coll, Collections.current.Value, cc, context)
-            | None -> false
-
-    let reorder_up (context: LibraryContext) =
-        if
-            match context with
-            | LibraryContext.Playlist(index, id, _) -> collections.GetPlaylist(id).Value.MoveChartUp index
-            | _ -> false
-        then
-            LevelSelect.refresh_all ()
-
-    let reorder_down (context: LibraryContext) =
-        if
-            match context with
-            | LibraryContext.Playlist(index, id, _) -> collections.GetPlaylist(id).Value.MoveChartDown index
-            | _ -> false
-        then
-            LevelSelect.refresh_all ()
+    let reorder_down (context: LibraryContext) : bool =
+        match context with
+        | LibraryContext.Playlist(index, id, data) -> 
+            if collections.GetPlaylist(id).Value.MoveChartDown index then
+                if Chart.LIBRARY_CTX = context then Chart.LIBRARY_CTX <- LibraryContext.Playlist(index + 1, id, data)
+                LevelSelect.refresh_all ()
+                true
+            else false
+        | _ -> false
 
 type private CreateFolderPage() as this =
     inherit Page()
@@ -101,7 +92,6 @@ type private CreateFolderPage() as this =
                 "confirm.yes",
                 (fun () ->
                     if collections.CreateFolder(new_name.Value, icon.Value).IsSome then
-                        Collections.select new_name.Value
                         Menu.Back()
                 )
             )
@@ -135,8 +125,8 @@ type private CreatePlaylistPage() as this =
                 "confirm.yes",
                 (fun () ->
                     if collections.CreatePlaylist(new_name.Value, icon.Value).IsSome then
-                        Collections.select new_name.Value
                         Menu.Back()
+                    else Notifications.action_feedback(Icons.X, "Name is taken", "A collection already exists with that name")
                 )
             )
                 .Pos(400.0f)
@@ -174,8 +164,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                                 if options.LibraryMode.Value = LibraryMode.Collections then
                                     LevelSelect.refresh_all ()
 
-                                if options.SelectedCollection.Value = Some name then
-                                    Collections.unselect ()
+                                // todo: unselect collection when deleted
 
                                 Menu.Back()
                     )
@@ -184,49 +173,17 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                 Icon = Icons.TRASH
             )
                 .Pos(370.0f)
-            |+ PageButton(
-                "collections.edit.select",
-                (fun () ->
-                    Collections.select name
-                    Menu.Back()
-                )
-            )
-                .Pos(470.0f)
-                .Tooltip(Tooltip.Info("collections.edit.select"))
-
-            |+ if options.SelectedCollection.Value = Some name then
-                   Text(%"collections.selected.this", Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
-               else
-                   Text(
-                       [
-                           match options.SelectedCollection.Value with
-                           | Some s -> s
-                           | None -> "--"
-                       ]
-                       %> "collections.selected.other",
-                       Position = Position.SliceBottom(260.0f).SliceTop(70.0f)
-                   )
-            |+ Text(
-                [ (%%"add_to_collection").ToString() ] %> "collections.addhint",
-                Position = Position.SliceBottom(190.0f).SliceTop(70.0f)
-            )
-            |+ Text(
-                [ (%%"remove_from_collection").ToString() ] %> "collections.removehint",
-                Position = Position.SliceBottom(120.0f).SliceTop(70.0f)
-            )
 
         this.Content content
 
     override this.Title = name
 
     override this.OnClose() =
-        if new_name.Value <> name then
+        if new_name.Value <> name && new_name.Value.Length > 1 then
             if collections.RenameCollection(name, new_name.Value) then
-                if options.SelectedCollection.Value = Some name then
-                    Collections.select new_name.Value
-
                 Logging.Debug(sprintf "Renamed collection '%s' to '%s'" name new_name.Value)
             else
+                Notifications.action_feedback(Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"
 
 type private EditPlaylistPage(name: string, playlist: Playlist) as this =
@@ -249,9 +206,8 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                             if collections.Delete name then
                                 if options.LibraryMode.Value = LibraryMode.Collections then
                                     LevelSelect.refresh_all ()
-
-                                if options.SelectedCollection.Value = Some name then
-                                    Collections.unselect ()
+                                    
+                                // todo: unselect collection when deleted
 
                                 Menu.Back()
                     )
@@ -260,49 +216,17 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                 Icon = Icons.TRASH
             )
                 .Pos(370.0f)
-            |+ PageButton(
-                "collections.edit.select",
-                (fun () ->
-                    Collections.select name
-                    Menu.Back()
-                )
-            )
-                .Pos(470.0f)
-                .Tooltip(Tooltip.Info("collections.edit.select"))
-
-            |+ if options.SelectedCollection.Value = Some name then
-                   Text(%"collections.selected.this", Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
-               else
-                   Text(
-                       [
-                           match options.SelectedCollection.Value with
-                           | Some s -> s
-                           | None -> "[None]"
-                       ]
-                       %> "collections.selected.other",
-                       Position = Position.SliceBottom(260.0f).SliceTop(70.0f)
-                   )
-            |+ Text(
-                [ (%%"add_to_collection").ToString() ] %> "collections.addhint",
-                Position = Position.SliceBottom(190.0f).SliceTop(70.0f)
-            )
-            |+ Text(
-                [ (%%"remove_from_collection").ToString() ] %> "collections.removehint",
-                Position = Position.SliceBottom(120.0f).SliceTop(70.0f)
-            )
 
         this.Content content
 
     override this.Title = name
 
     override this.OnClose() =
-        if new_name.Value <> name then
+        if new_name.Value <> name && new_name.Value.Length > 0 then
             if collections.RenamePlaylist(name, new_name.Value) then
-                if options.SelectedCollection.Value = Some name then
-                    Collections.select new_name.Value
-
                 Logging.Debug(sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
             else
+                Notifications.action_feedback(Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"
 
 type private CollectionButton(icon, name, action) =
@@ -321,10 +245,7 @@ type private CollectionButton(icon, name, action) =
             Color =
                 (fun () ->
                     ((if this.Focused then Colors.yellow_accent else Colors.white),
-                     (if options.SelectedCollection.Value = Some name then
-                          Colors.blue_shadow
-                      else
-                          Colors.shadow_2))
+                     Colors.shadow_2)
                 ),
             Align = Alignment.LEFT,
             Position = Position.Margin Style.PADDING

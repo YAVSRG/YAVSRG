@@ -296,8 +296,6 @@ module Gameplay =
 
         open Prelude.Data.Charts.Library
 
-        let mutable current: Collection option = None
-
         let on_rate_changed v =
             match Chart.LIBRARY_CTX with
             | LibraryContext.Playlist(_, _, d) -> d.Rate.Value <- v
@@ -314,19 +312,6 @@ module Gameplay =
                 rate.Value <- d.Rate.Value
                 mods.Value <- d.Mods.Value
             | _ -> ()
-
-        let unselect () =
-            options.SelectedCollection.Set None
-            current <- None
-
-        let select (name: string) =
-            match collections.Get name with
-            | Some c ->
-                options.SelectedCollection.Set(Some name)
-                current <- Some c
-            | None ->
-                Logging.Error(sprintf "No such collection with name '%s'" name)
-                options.SelectedCollection.Set None
 
     let rate =
         Chart._rate
@@ -477,10 +462,6 @@ module Gameplay =
                 Background.load None
 
         Table.init options.Table.Value
-
-        match options.SelectedCollection.Value with
-        | Some c -> Collections.select c
-        | None -> ()
 
         Online.Multiplayer.init ()
         Stats.init ()
