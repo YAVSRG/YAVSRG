@@ -140,11 +140,21 @@ module Content =
             let reload () =
                 let missing_textures = ResizeArray()
                 let available_textures = ResizeArray()
+
                 for id in Storage.THEME_TEXTURES do
                     Sprites.remove id
+
                     match instance.GetTexture id with
-                    | Some(img, config) -> available_textures.Add { Label = id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
-                    | None -> 
+                    | Some(img, config) ->
+                        available_textures.Add
+                            {
+                                Label = id
+                                Image = img
+                                Rows = config.Rows
+                                Columns = config.Columns
+                                DisposeImageAfter = true
+                            }
+                    | None ->
                         Logging.Warn(
                             sprintf
                                 "Theme texture '%s' didn't load properly, so it will appear as a white square ingame."
@@ -153,9 +163,12 @@ module Content =
                         // todo: fall back to default theme textures like it used to
                         missing_textures.Add id
 
-                let atlas, sprites = Sprite.upload_many "THEME" true false (available_textures.ToArray())
+                let atlas, sprites =
+                    Sprite.upload_many "THEME" true false (available_textures.ToArray())
+
                 for id, sprite in sprites do
                     Sprites.add id sprite
+
                 for id in missing_textures do
                     Sprites.add id (Texture.create_default_sprite atlas)
 
@@ -284,26 +297,53 @@ module Content =
 
                 for texture_id in Storage.NOTESKIN_TEXTURES do
                     match ns.Noteskin.GetTexture texture_id with
-                    | Some(img, config) -> available_textures.Add { Label = texture_id; Image = img; Rows = config.Rows; Columns = config.Columns; DisposeImageAfter = true }
-                    | None -> 
+                    | Some(img, config) ->
+                        available_textures.Add
+                            {
+                                Label = texture_id
+                                Image = img
+                                Rows = config.Rows
+                                Columns = config.Columns
+                                DisposeImageAfter = true
+                            }
+                    | None ->
                         Logging.Warn(
                             sprintf
                                 "Noteskin texture '%s' in '%s' didn't load properly, so it will appear as a white square ingame."
                                 texture_id
                                 ns.Noteskin.Config.Name
                         )
+
                         missing_textures.Add texture_id
 
-                let atlas, sprites = Sprite.upload_many ("NOTESKIN[" + ns.Noteskin.Config.Name + "]") false ns.Noteskin.Config.LinearSampling (available_textures.ToArray())
-                let sprites = Array.concat [ sprites; missing_textures |> Seq.map (fun id -> (id, Texture.create_default_sprite atlas)) |> Array.ofSeq ]
+                let atlas, sprites =
+                    Sprite.upload_many
+                        ("NOTESKIN[" + ns.Noteskin.Config.Name + "]")
+                        false
+                        ns.Noteskin.Config.LinearSampling
+                        (available_textures.ToArray())
+
+                let sprites =
+                    Array.concat
+                        [
+                            sprites
+                            missing_textures
+                            |> Seq.map (fun id -> (id, Texture.create_default_sprite atlas))
+                            |> Array.ofSeq
+                        ]
+
                 match ns.Sprites with
-                | Some existing -> for _, s in existing do Sprite.destroy s
+                | Some existing ->
+                    for _, s in existing do
+                        Sprite.destroy s
                 | None -> ()
+
                 ns.TextureAtlas <- Some atlas
                 ns.Sprites <- Some sprites
 
-            let reload () = 
+            let reload () =
                 reload_noteskin_atlas id
+
                 for (texture_id, sprite) in loaded.[id].Sprites.Value do
                     Sprites.add texture_id sprite.Copy
 
@@ -323,8 +363,7 @@ module Content =
                     reload_noteskin_atlas new_id
 
                 match loaded.[new_id].TextureAtlas with
-                | Some atlas ->
-                    Texture.claim_texture_unit atlas |> ignore
+                | Some atlas -> Texture.claim_texture_unit atlas |> ignore
                 | None ->
                     reload_noteskin_atlas new_id
                     Texture.claim_texture_unit loaded.[new_id].TextureAtlas.Value |> ignore
@@ -333,7 +372,7 @@ module Content =
                     id <- new_id
                     instance <- loaded.[id].Noteskin
                     config <- instance.Config
-                    
+
                     for (texture_id, sprite) in loaded.[new_id].Sprites.Value do
                         Sprites.add texture_id sprite.Copy
 
@@ -344,7 +383,14 @@ module Content =
             loaded.Clear()
 
             for (id, ns) in DEFAULTS do
-                loaded.Add(id, { Noteskin = ns; TextureAtlas = None; Sprites = None })
+                loaded.Add(
+                    id,
+                    {
+                        Noteskin = ns
+                        TextureAtlas = None
+                        Sprites = None
+                    }
+                )
 
             for zip in
                 Directory.EnumerateFiles(get_game_folder "Noteskins")
@@ -364,7 +410,16 @@ module Content =
 
                 try
                     let ns = Noteskin.FromPath source
-                    loaded.Add(id, { Noteskin = ns; TextureAtlas = None; Sprites = None } )
+
+                    loaded.Add(
+                        id,
+                        {
+                            Noteskin = ns
+                            TextureAtlas = None
+                            Sprites = None
+                        }
+                    )
+
                     Logging.Debug(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
                 with err ->
                     Logging.Error("  Failed to load noteskin '" + id + "'", err)

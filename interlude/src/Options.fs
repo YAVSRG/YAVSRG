@@ -120,7 +120,6 @@ module Options =
             ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
 
-            SelectedCollection: Setting<string option>
             Table: Setting<string option>
             GameplayBinds: (Bind array) array
 
@@ -200,7 +199,6 @@ module Options =
                 ChartGroupReverse = Setting.simple false
                 ScoreSortMode = Setting.simple 0
 
-                SelectedCollection = Setting.simple None
                 Table = Setting.simple None
 
                 EnableConsole = Setting.simple false
@@ -312,8 +310,8 @@ module Options =
             Hotkeys.register "library_mode" (mk Keys.D1)
             Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
             Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
-            Hotkeys.register "move_down_in_collection" (ctrl Keys.RightBracket)
-            Hotkeys.register "move_up_in_collection" (ctrl Keys.LeftBracket)
+            Hotkeys.register "move_down_in_playlist" (ctrl Keys.Down)
+            Hotkeys.register "move_up_in_playlist" (ctrl Keys.Up)
             Hotkeys.register "sort_mode" (mk Keys.D2)
             Hotkeys.register "reverse_sort_mode" (shift Keys.D2)
             Hotkeys.register "group_mode" (mk Keys.D3)
@@ -419,7 +417,8 @@ module Options =
 
     module Presets =
 
-        let get (id: int) = [| options.Preset1; options.Preset2; options.Preset3 |].[id - 1]
+        let get (id: int) =
+            [| options.Preset1; options.Preset2; options.Preset3 |].[id - 1]
 
         let create (name: string) : Preset =
             {
@@ -449,9 +448,9 @@ module Options =
             | None -> ()
             | Some i ->
                 let setting = get i
+
                 match setting.Value with
-                | Some preset when preset.Mode = PresetMode.Autosave ->
-                    setting.Set (Some (save preset))
+                | Some preset when preset.Mode = PresetMode.Autosave -> setting.Set(Some(save preset))
                 | _ -> ()
 
             match (get id).Value with
@@ -468,7 +467,12 @@ module Options =
                     options.Noteskin.Set loaded_preset.Noteskin
                     Content.Noteskins.Current.switch loaded_preset.Noteskin
                 else
-                    Logging.Error(sprintf "Noteskin '%s' used in this preset has been renamed or isn't available" loaded_preset.Noteskin)
+                    Logging.Error(
+                        sprintf
+                            "Noteskin '%s' used in this preset has been renamed or isn't available"
+                            loaded_preset.Noteskin
+                    )
+
                 Some loaded_preset.Name
             | None -> None
 

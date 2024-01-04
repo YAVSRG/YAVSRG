@@ -19,7 +19,8 @@ type private HoldRenderState =
     | NoHold
 
 // todo: pass in noteskin information to reduce many calls to retrieve it
-type Playfield(chart: ColorizedChart, state: PlayState, noteskin_config: NoteskinConfig, vanishing_notes: bool) as this =
+type Playfield(chart: ColorizedChart, state: PlayState, noteskin_config: NoteskinConfig, vanishing_notes: bool) as this
+    =
     inherit StaticContainer(NodeType.None)
 
     let keys = chart.Keys
@@ -29,10 +30,17 @@ type Playfield(chart: ColorizedChart, state: PlayState, noteskin_config: Noteski
 
     let column_positions =
         let mutable x = 0.0f
-        Array.init keys (fun i -> 
-            let v = x
-            if i + 1 < keys then x <- x + column_width + column_spacing.[i]
-            v)
+
+        Array.init
+            keys
+            (fun i ->
+                let v = x
+
+                if i + 1 < keys then
+                    x <- x + column_width + column_spacing.[i]
+
+                v
+            )
 
     let note_height = column_width
     let holdnote_trim = column_width * noteskin_config.HoldNoteTrim
@@ -217,55 +225,49 @@ type Playfield(chart: ColorizedChart, state: PlayState, noteskin_config: Noteski
 
         let inline draw_note (k, pos, color) =
             Draw.quad
-                ((
-                    Rect.Box(left + column_positions.[k], pos, column_width, note_height)
-                    |> scroll_direction_transform bottom
-                 ).AsQuad
+                ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
+                  |> scroll_direction_transform bottom)
+                    .AsQuad
                  |> rotation k)
                 (Quad.color Color.White)
                 (Sprite.pick_texture (animation.Loops, color) note)
 
         let inline draw_head (k, pos, color, tint) =
             Draw.quad
-                ((
-                    Rect.Box(left + column_positions.[k], pos, column_width, note_height)
-                    |> scroll_direction_transform bottom
-                 ).AsQuad
+                ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
+                  |> scroll_direction_transform bottom)
+                    .AsQuad
                  |> rotation k)
                 (Quad.color tint)
                 (Sprite.pick_texture (animation.Loops, color) holdhead)
 
         let inline draw_body (k, pos_a, pos_b, color, tint) =
             Draw.quad
-                ((
-                    Rect.Create(
-                        left + column_positions.[k],
-                        pos_a + note_height * 0.5f,
-                        left + column_positions.[k] + column_width,
-                        pos_b + note_height * 0.5f + 2.0f
-                    )
-                    |> scroll_direction_transform bottom
-                ).AsQuad)
+                ((Rect.Create(
+                    left + column_positions.[k],
+                    pos_a + note_height * 0.5f,
+                    left + column_positions.[k] + column_width,
+                    pos_b + note_height * 0.5f + 2.0f
+                  )
+                  |> scroll_direction_transform bottom)
+                    .AsQuad)
                 (Quad.color tint)
                 (Sprite.pick_texture (animation.Loops, color) holdbody)
 
         let inline draw_tail (k, pos, clip, color, tint) =
             Draw.quad
-                ((
-                    Rect.Create(
-                        left + column_positions.[k],
-                        max clip pos,
-                        left + column_positions.[k] + column_width,
-                        pos + note_height
-                    )
-                    |> scroll_direction_transform bottom
-                 ).AsQuad
+                ((Rect.Create(
+                    left + column_positions.[k],
+                    max clip pos,
+                    left + column_positions.[k] + column_width,
+                    pos + note_height
+                  )
+                  |> scroll_direction_transform bottom)
+                    .AsQuad
                  |> if useholdtail then id else rotation k)
                 (Quad.color tint)
-                (
-                    Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
-                    |> fun x -> x.Transform hold_tail_flip
-                )
+                (Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
+                 |> fun x -> x.Transform hold_tail_flip)
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
         // todo: also put a cap at -playfield_height when *negative sv comes into play

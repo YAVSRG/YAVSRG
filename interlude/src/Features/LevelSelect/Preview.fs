@@ -18,7 +18,9 @@ type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 
     let HEIGHT = 60.0f
 
     // chord density is notes per second but n simultaneous notes count for 1 instead of n
-    let samples = int ((chart.LastNote - chart.FirstNote) / 1000.0f) |> max 10 |> min 400
+    let samples =
+        int ((chart.LastNote - chart.FirstNote) / 1000.0f) |> max 10 |> min 400
+
     let note_density, chord_density = Analysis.nps_cps samples chart
 
     let note_density, chord_density =
@@ -26,7 +28,9 @@ type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 
 
     let max_note_density = Array.max note_density
 
-    let playfield = Playfield(with_colors, PlayState.Dummy chart, Interlude.Content.noteskin_config(), false) |+ LaneCover()
+    let playfield =
+        Playfield(with_colors, PlayState.Dummy chart, Interlude.Content.noteskin_config (), false)
+        |+ LaneCover()
 
     let volume = Volume()
     let mutable dragging = false
@@ -55,48 +59,24 @@ type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 
             let note_next = HEIGHT * note_density.[i] / max_note_density
             let chord_next = HEIGHT * chord_density.[i] / max_note_density
 
-            Draw.untextured_quad 
-                (
-                    Quad.createv 
-                        (x, b.Bottom)
-                        (x, b.Bottom - note_prev)
-                        (x + w, b.Bottom - note_next)
-                        (x + w, b.Bottom)
-                )
+            Draw.untextured_quad
+                (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (x + w, b.Bottom - note_next) (x + w, b.Bottom))
                 (Quad.color Colors.white.O2)
 
-            Draw.untextured_quad 
-                (
-                    Quad.createv 
-                        (x, b.Bottom)
-                        (x, b.Bottom - chord_prev)
-                        (x + w, b.Bottom - chord_next)
-                        (x + w, b.Bottom)
-                )
+            Draw.untextured_quad
+                (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (x + w, b.Bottom - chord_next) (x + w, b.Bottom))
                 (Quad.color chord_density_color)
 
             x <- x + w
             note_prev <- note_next
             chord_prev <- chord_next
-            
-        Draw.untextured_quad 
-            (
-                Quad.createv 
-                    (x, b.Bottom)
-                    (x, b.Bottom - note_prev)
-                    (b.Right, b.Bottom - note_prev)
-                    (b.Right, b.Bottom)
-            )
+
+        Draw.untextured_quad
+            (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (b.Right, b.Bottom - note_prev) (b.Right, b.Bottom))
             (Quad.color Colors.white.O2)
-            
-        Draw.untextured_quad 
-            (
-                Quad.createv 
-                    (x, b.Bottom)
-                    (x, b.Bottom - chord_prev)
-                    (b.Right, b.Bottom - chord_prev)
-                    (b.Right, b.Bottom)
-            )
+
+        Draw.untextured_quad
+            (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
             (Quad.color chord_density_color)
 
         let percent = (Song.time () - start) / (chart.LastNote - start) |> min 1.0f

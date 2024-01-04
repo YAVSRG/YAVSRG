@@ -219,7 +219,8 @@ module StepMania_To_Interlude =
             elif square_paren > 1 then
                 let guess = folder_name.Substring(square_paren + 1)
                 if guess.EndsWith(']') then guess.TrimEnd ']' else ""
-            else ""
+            else
+                ""
 
         let convert_difficulty (i: int) (diff: ChartData) : Chart =
             let keys = diff.STEPSTYPE.Keycount

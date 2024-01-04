@@ -33,7 +33,7 @@ type Rect =
             Right = l + w
             Bottom = t + h
         }
-    
+
     member inline this.AsQuad =
         struct (new Vector2(this.Left, this.Top),
                 new Vector2(this.Right, this.Top),

@@ -25,32 +25,33 @@ type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) =
         }
 
     let suggested_row (level: int) =
-        let container = 
+        let container =
             StaticContainer(NodeType.None, Position = Position.Row(size, 40.0f))
             |+ Text(
                 sprintf "Level %i; Suggested by %s" level (suggestion.LevelsSuggestedBy.[level] |> String.concat ", "),
                 Position = Position.Margin(10.0f, 0.0f),
                 Align = Alignment.LEFT
             )
+
         if suggestion.CanApply then
             container
             |* button (
                 Icons.CHECK,
                 fun () ->
-                    ConfirmPage(sprintf "Add %s to level %i?" suggestion.Title level, fun () ->
-                        Tables.Suggestions.Apply.post (
-                            ({
-                                Id = suggestion.Id
-                                Level = level
-                            }
-                            : Tables.Suggestions.Apply.Request),
-                            function
-                            | Some true ->
-                                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion applied!", "")
-                            | _ -> Notifications.error ("Error applying suggestion", "")
-                        )
-                    ).Show()
+                    ConfirmPage(
+                        sprintf "Add %s to level %i?" suggestion.Title level,
+                        fun () ->
+                            Tables.Suggestions.Apply.post (
+                                ({ Id = suggestion.Id; Level = level }: Tables.Suggestions.Apply.Request),
+                                function
+                                | Some true ->
+                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion applied!", "")
+                                | _ -> Notifications.error ("Error applying suggestion", "")
+                            )
+                    )
+                        .Show()
             )
+
         container
 
     let actions =
@@ -84,7 +85,8 @@ type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) =
                         )
 
                         Menu.Back()
-                    ).Show()
+                    )
+                        .Show()
             )
         )
 
@@ -107,8 +109,7 @@ type Suggestion(suggestion: Tables.Suggestions.List.Suggestion) =
         |* actions
 
         for level in suggestion.LevelsSuggestedBy.Keys do
-            this
-            |* suggested_row level
+            this |* suggested_row level
             size <- size + 40.0f
 
         base.Init parent

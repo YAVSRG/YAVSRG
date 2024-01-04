@@ -108,7 +108,10 @@ type NoteskinCard(data: RepoEntry) as this =
         )
 
     member this.LoadPreview(img: Bitmap) =
-        preview <- Some <| Sprite.upload_one false true (SpriteUpload.OfImage("NOTESKIN_PREVIEW", img))
+        preview <-
+            Some
+            <| Sprite.upload_one false true (SpriteUpload.OfImage("NOTESKIN_PREVIEW", img))
+
         preview_fade.Target <- 1.0f
 
     member this.Name = data.Name

@@ -82,10 +82,11 @@
     <Compile Include="Features\Play\Spectate.fs" />
     <Compile Include="Features\Play\Practice.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
-    <Compile Include="Features\LevelSelect\Collections.fs" />
     <Compile Include="Features\LevelSelect\Tables\ChooseLevel.fs" />
     <Compile Include="Features\LevelSelect\Tables\Suggestions.fs" />
     <Compile Include="Features\LevelSelect\Tables\Manage.fs" />
+    <Compile Include="Features\LevelSelect\Collections\Actions.fs" />
+    <Compile Include="Features\LevelSelect\Collections\Menus.fs" />
     <Compile Include="Features\LevelSelect\LibraryView.fs" />
     <Compile Include="Features\LevelSelect\ActionBar.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus.fs" />

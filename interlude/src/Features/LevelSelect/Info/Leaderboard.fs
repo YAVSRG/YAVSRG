@@ -151,7 +151,7 @@ module Leaderboard =
             base.Init parent
 
         member this.Data = data
-        
+
         member this.FadeOut() = fade.Target <- 0.0f
 
         override this.OnFocus() =
@@ -278,7 +278,10 @@ type Leaderboard(display: Setting<Display>) as this =
         )
 
     do
-        Chart.on_chart_change_started.Add (fun () -> if Chart.CACHE_DATA.Value.Hash <> chart then Loader.container.Iter (fun s -> s.FadeOut()))
+        Chart.on_chart_change_started.Add(fun () ->
+            if Chart.CACHE_DATA.Value.Hash <> chart then
+                Loader.container.Iter(fun s -> s.FadeOut())
+        )
 
         this
         |+ StylishButton(

@@ -159,7 +159,8 @@ type NoteskinConfig =
             AdvancedColumnSpacing =
                 if
                     this.AdvancedColumnSpacing.Length = 8
-                    && Array.indexed this.AdvancedColumnSpacing |> Array.forall (fun (i, a) -> a.Length = 2 + i)
+                    && Array.indexed this.AdvancedColumnSpacing
+                       |> Array.forall (fun (i, a) -> a.Length = 2 + i)
                 then
                     this.AdvancedColumnSpacing
                 else
@@ -169,10 +170,12 @@ type NoteskinConfig =
 
                     NoteskinConfig.Default.AdvancedColumnSpacing
         }
+
     member this.KeymodeColumnSpacing(keymode: int) : float32 array =
-        if this.UseAdvancedColumnSpacing then 
+        if this.UseAdvancedColumnSpacing then
             this.AdvancedColumnSpacing.[keymode - 3]
-        else Array.create (keymode - 1) this.ColumnSpacing
+        else
+            Array.create (keymode - 1) this.ColumnSpacing
 
 type Noteskin(storage) as this =
     inherit Storage(storage)

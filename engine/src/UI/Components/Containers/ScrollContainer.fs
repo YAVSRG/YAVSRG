@@ -23,7 +23,7 @@ type ScrollContainer(child: Widget, content_height: float32) =
         let sc = ScrollContainer(child, 0.0f)
         child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.PADDING * 2.0f))
         sc
-        
+
     static member Flow(child: FlowContainerV2.Vertical<'T>) =
         let sc = ScrollContainer(child, 0.0f)
         child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.PADDING * 2.0f))

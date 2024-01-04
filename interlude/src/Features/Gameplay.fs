@@ -72,8 +72,12 @@ module Gameplay =
 
             let hold_count =
                 let pc = (100.0f * float32 lnotes / float32 notes)
-                if pc < 0.5f then sprintf "%i Holds" lnotes
-                else sprintf "%.0f%% Holds" pc
+
+                if pc < 0.5f then
+                    sprintf "%i Holds" lnotes
+                else
+                    sprintf "%.0f%% Holds" pc
+
             sprintf "%iK | %i Notes | %s" chart.Keys notes hold_count
 
         let mutable CACHE_DATA: CachedChart option = None
@@ -112,7 +116,7 @@ module Gameplay =
             { new Async.SwitchServiceSeq<LoadRequest, unit -> unit>() with
                 override this.Process(req) =
                     match req with
-                    | Load (cc, play_audio) ->
+                    | Load(cc, play_audio) ->
                         seq {
                             match Cache.load cc Library.cache with
                             | None ->
@@ -124,9 +128,10 @@ module Gameplay =
                                     %"notification.chart_load_failed.body"
                                 )
 
-                                yield fun () ->
-                                    chart_change_finished.Trigger() 
-                                    on_load_succeeded <- []
+                                yield
+                                    fun () ->
+                                        chart_change_finished.Trigger()
+                                        on_load_succeeded <- []
                             | Some chart ->
 
                             Background.load (Cache.background_path chart Library.cache)
@@ -256,8 +261,8 @@ module Gameplay =
 
             FMT_DURATION <- format_duration CACHE_DATA
             FMT_BPM <- format_bpm CACHE_DATA
-            
-            chart_loader.Request(Load (cc, auto_play_audio))
+
+            chart_loader.Request(Load(cc, auto_play_audio))
 
         let update () =
             if CACHE_DATA.IsSome then
@@ -296,8 +301,6 @@ module Gameplay =
 
         open Prelude.Data.Charts.Library
 
-        let mutable current: Collection option = None
-
         let on_rate_changed v =
             match Chart.LIBRARY_CTX with
             | LibraryContext.Playlist(_, _, d) -> d.Rate.Value <- v
@@ -315,19 +318,6 @@ module Gameplay =
                 mods.Value <- d.Mods.Value
             | _ -> ()
 
-        let unselect () =
-            options.SelectedCollection.Set None
-            current <- None
-
-        let select (name: string) =
-            match collections.Get name with
-            | Some c ->
-                options.SelectedCollection.Set(Some name)
-                current <- Some c
-            | None ->
-                Logging.Error(sprintf "No such collection with name '%s'" name)
-                options.SelectedCollection.Set None
-
     let rate =
         Chart._rate
         |> Setting.trigger (fun v ->
@@ -343,18 +333,19 @@ module Gameplay =
             Chart.update ()
         )
 
-    do 
+    do
         Chart.on_chart_change_started.Add(fun () -> Collections.on_chart_changed Chart._rate Chart._selected_mods)
-        
+
         let mutable previous_keymode = None
+
         Chart.on_chart_change_started.Add(fun () ->
             match Chart.CACHE_DATA with
             | None -> failwith "impossible"
             | Some cc ->
                 match previous_keymode with
-                | Some k when k <> cc.Keys ->
-                    Presets.keymode_changed cc.Keys
+                | Some k when k <> cc.Keys -> Presets.keymode_changed cc.Keys
                 | _ -> ()
+
                 previous_keymode <- Some cc.Keys
         )
 
@@ -477,10 +468,6 @@ module Gameplay =
                 Background.load None
 
         Table.init options.Table.Value
-
-        match options.SelectedCollection.Value with
-        | Some c -> Collections.select c
-        | None -> ()
 
         Online.Multiplayer.init ()
         Stats.init ()

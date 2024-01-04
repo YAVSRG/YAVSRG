@@ -424,8 +424,8 @@ module Notifications =
         current_tooltip <- Some t
 
     let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) =
-        ensure_ui_thread <|
-        fun () ->
+        ensure_ui_thread
+        <| fun () ->
             let n: Notification =
                 {
                     Data = body
@@ -435,11 +435,12 @@ module Notifications =
                     Fade = Animation.Fade(0.0f, Target = 1.0f)
                     Duration = 2000.0
                 }
+
             items.Add n
 
     let private add_long (body: Callout, colors: Color * Color, content_colors: Color * Color) =
-        ensure_ui_thread <|
-        fun () ->
+        ensure_ui_thread
+        <| fun () ->
             let n: Notification =
                 {
                     Data = body
@@ -449,6 +450,7 @@ module Notifications =
                     Fade = Animation.Fade(0.0f, Target = 1.0f)
                     Duration = 5000.0
                 }
+
             items.Add n
 
     let task_feedback (icon: string, title: string, description: string) =

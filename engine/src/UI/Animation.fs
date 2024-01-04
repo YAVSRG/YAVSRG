@@ -136,11 +136,13 @@ module Animation =
         let mutable add_after_loop = []
 
         member this.Add(a: Animation) =
-            lock this 
-                (fun () -> 
+            lock
+                this
+                (fun () ->
                     if looping then
                         add_after_loop <- a :: add_after_loop
-                    else animations <- a :: animations
+                    else
+                        animations <- a :: animations
                 )
 
         override this.Complete = animations.IsEmpty
@@ -156,13 +158,17 @@ module Animation =
 
             if not this.Complete then
                 looping <- true
-                lock this 
-                    (fun () -> 
+
+                lock
+                    this
+                    (fun () ->
                         animations <- loop animations
-                        if not (List.isEmpty add_after_loop) then 
+
+                        if not (List.isEmpty add_after_loop) then
                             animations <- add_after_loop @ animations
                             add_after_loop <- []
                     )
+
                 looping <- false
 
     type Sequence() =

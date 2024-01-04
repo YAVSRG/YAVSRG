@@ -58,10 +58,7 @@ type PerformanceMonitor() =
 
             Text.draw_b (
                 Style.font,
-                sprintf
-                    "%.1f - %.1fms playfield latency"
-                    Performance.visual_latency_lo
-                    Performance.visual_latency_hi,
+                sprintf "%.1f - %.1fms playfield latency" Performance.visual_latency_lo Performance.visual_latency_hi,
                 30.0f,
                 this.Bounds.Left + 20.0f,
                 this.Bounds.Top + 60.0f,
@@ -85,7 +82,7 @@ type PerformanceMonitor() =
                 this.Bounds.Top + 150.0f,
                 Colors.text_subheading
             )
-            
+
             Text.draw_b (
                 Style.font,
                 sprintf "%O to toggle graph" graph_bind,

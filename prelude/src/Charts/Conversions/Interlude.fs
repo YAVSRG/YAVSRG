@@ -44,7 +44,11 @@ module Interlude_To_Osu =
 
         convert (notes |> Array.toList) |> List.ofSeq
 
-    let private convert_timing_points (bpm: TimeArray<BPM>) (sv: TimeArray<float32>) (most_common_mspb: float32<ms/beat>) =
+    let private convert_timing_points
+        (bpm: TimeArray<BPM>)
+        (sv: TimeArray<float32>)
+        (most_common_mspb: float32<ms / beat>)
+        =
 
         let corrective_sv offset mult =
             if sv.Length = 0 then
@@ -76,7 +80,8 @@ module Interlude_To_Osu =
             seq {
                 let mutable bs = bpm |> List.ofArray
 
-                if List.isEmpty bs then ()
+                if List.isEmpty bs then
+                    ()
                 else
 
                     yield! svs (-Time.infinity) (List.head bs).Time 1.0f
@@ -85,10 +90,7 @@ module Interlude_To_Osu =
                         match bs with
                         | {
                               Time = offset
-                              Data = {
-                                         Meter = meter
-                                         MsPerBeat = mspb
-                                     }
+                              Data = { Meter = meter; MsPerBeat = mspb }
                           } :: { Time = offset2 } :: rs ->
                             yield TimingPoint.BPM(offset, mspb, meter, (SampleSet.Soft, 0, 10), enum 0)
                             yield! svs offset offset2 (most_common_mspb / mspb)

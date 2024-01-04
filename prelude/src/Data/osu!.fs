@@ -406,20 +406,20 @@ module ``osu!`` =
                         last_state <- state
         }
         |> Array.ofSeq
-    
+
     open System.IO.Compression
     open Prelude.Charts.Conversions
     open Prelude.Charts.Formats.``osu!``
     open Prelude.Data.Charts.Caching
-    
+
     let create_osz (chart: Chart) (cache: Cache) (export_folder: string) =
         let beatmap = Interlude_To_Osu.convert chart
         let file_name = get_osu_filename beatmap
         let archive_path = Path.Combine(export_folder, file_name.Replace(".osu", ".osz"))
-    
+
         use fs = File.Open(archive_path, FileMode.Create)
         use archive = new ZipArchive(fs, ZipArchiveMode.Create, false)
-    
+
         do
             let osu_file_entry = archive.CreateEntry(file_name)
             use osu_file_stream = osu_file_entry.Open()
@@ -434,11 +434,13 @@ module ``osu!`` =
                 use bg_file_stream = bg_file_entry.Open()
                 fs.CopyTo(bg_file_stream)
             | None -> ()
-    
+
         do
             match Cache.audio_path chart cache with
             | Some audio_path ->
-                use fs = File.Open(audio_path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)
+                use fs =
+                    File.Open(audio_path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)
+
                 let audio_file_entry = archive.CreateEntry("audio.mp3")
                 use audio_file_stream = audio_file_entry.Open()
                 fs.CopyTo(audio_file_stream)

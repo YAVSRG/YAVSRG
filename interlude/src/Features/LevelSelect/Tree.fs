@@ -138,13 +138,13 @@ module Tree =
             color <- color_func personal_bests
 
             markers <-
-                if options.LibraryMode.Value <> LibraryMode.Collections then
-                    match Collections.current with
-                    | Some(Folder c) -> if c.Contains cc then c.Icon.Value + " " else ""
-                    | Some(Playlist p) -> if p.Contains cc then p.Icon.Value + " " else ""
-                    | None -> ""
-                else
-                    ""
+                //if options.LibraryMode.Value <> LibraryMode.Collections then
+                //    match Collections.current with
+                //    | Some(Folder c) -> if c.Contains cc then c.Icon.Value + " " else ""
+                //    | Some(Playlist p) -> if p.Contains cc then p.Icon.Value + " " else ""
+                //    | None -> ""
+                //else
+                ""
                 + match chart_save_data with
                   | Some c when c.Comment <> "" -> Icons.MESSAGE_SQUARE
                   | _ -> ""

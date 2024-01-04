@@ -301,11 +301,12 @@ module Input =
     let init (win: NativeWindow) =
         gw <- win
         InputThread.init gw
-    
+
     let private DELETE_CHARACTER = Bind.mk Keys.Backspace
     let private DELETE_WORD = Bind.ctrl Keys.Backspace
     let private COPY = Bind.ctrl Keys.C
     let private PASTE = Bind.ctrl Keys.V
+
     let update_input_listener () =
 
         match input_listener with

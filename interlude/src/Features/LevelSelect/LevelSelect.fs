@@ -47,21 +47,21 @@ type LevelSelectScreen() =
             | Some c ->
                 Tree.switch_chart (c, LibraryContext.None, "")
                 refresh ()
-            | None -> Notifications.action_feedback(Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
+            | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
         else
             match Suggestion.get_random Tree.filter with
             | Some c ->
                 Tree.switch_chart (c, LibraryContext.None, "")
                 refresh ()
             | None -> ()
-    
+
     let continue_endless_mode () =
         match Suggestion.get_suggestion Chart.CACHE_DATA.Value Tree.filter with
         | Some c ->
-            Chart.change(c, LibraryContext.None, false)
-    
-            let rec play_when_song_loads() =
-                let success = 
+            Chart.change (c, LibraryContext.None, false)
+
+            let rec play_when_song_loads () =
+                let success =
                     Screen.change_new
                         (fun () ->
                             PlayScreen.play_screen (
@@ -73,14 +73,16 @@ type LevelSelectScreen() =
                         )
                         Screen.Type.Play
                         Transitions.Flags.Default
-                if not success then 
+
+                if not success then
                     sync play_when_song_loads
-                else Chart.SAVE_DATA.Value.LastPlayed <- System.DateTime.UtcNow
-    
+                else
+                    Chart.SAVE_DATA.Value.LastPlayed <- System.DateTime.UtcNow
+
             Chart.wait_for_load play_when_song_loads
             true
-        | None -> 
-            Notifications.action_feedback(Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
+        | None ->
+            Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
             false
 
     override this.Init(parent: Widget) =

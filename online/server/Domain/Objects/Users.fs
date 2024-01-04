@@ -85,7 +85,7 @@ module User =
         if result.IsNull then
             None
         else
-            let s: string = RedisResult.op_Explicit(result)
+            let s: string = RedisResult.op_Explicit (result)
             Some <| Text.Json.JsonSerializer.Deserialize<User array>(s).[0]
 
     let by_ids (ids: int64 array) =

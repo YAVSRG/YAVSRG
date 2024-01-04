@@ -90,18 +90,20 @@ module PlayScreen =
         )
 
         let mutable recommended_offset = 0.0f
-        let offset_slideout = 
 
-            let offset_slider = 
+        let offset_slideout =
+
+            let offset_slider =
                 Slider(
                     LocalAudioSync.offset
                     |> Setting.map float32 (fun x -> x * 1.0f<ms>)
                     |> Setting.bound -200.0f 200.0f,
                     Step = 1f,
                     Format = (fun v -> sprintf "%.0fms" v),
-                    Position = Position.Box(0.0f, 0.0f, 600.0f, 60.0f))
+                    Position = Position.Box(0.0f, 0.0f, 600.0f, 60.0f)
+                )
 
-            let close() = 
+            let close () =
                 Screen.change_new
                     (fun () -> play_screen (pacemaker_mode) :> Screen.T)
                     Screen.Type.Play
@@ -113,21 +115,39 @@ module PlayScreen =
                 StaticContainer(NodeType.None)
                 |+ offset_slider
                 |+ Text(
-                    (fun () -> sprintf "Press %O to use recommended offset (%.0fms)" (%%"accept_suggestion") recommended_offset),
-                    Position = Position.Box(0.0f, 0.0f, 0.0f, 60.0f, 600.0f, 40.0f))
-                |+ HotkeyAction("accept_suggestion", fun () -> LocalAudioSync.offset.Set (recommended_offset * 1.0f<ms>); close())
+                    (fun () ->
+                        sprintf
+                            "Press %O to use recommended offset (%.0fms)"
+                            (%%"accept_suggestion")
+                            recommended_offset
+                    ),
+                    Position = Position.Box(0.0f, 0.0f, 0.0f, 60.0f, 600.0f, 40.0f)
+                )
+                |+ HotkeyAction(
+                    "accept_suggestion",
+                    fun () ->
+                        LocalAudioSync.offset.Set(recommended_offset * 1.0f<ms>)
+                        close ()
+                )
                 |+ Callout.frame
-                    (Callout
-                        .Small
+                    (Callout.Small
                         .Icon(Icons.INFO)
-                        .Body("Use a negative offset if you are hitting LATE and want to hit EARLIER.\nUse a positive offset if you are hitting EARLY and want to hit LATER."))
+                        .Body(
+                            "Use a negative offset if you are hitting LATE and want to hit EARLIER.\nUse a positive offset if you are hitting EARLY and want to hit LATER."
+                        ))
                     (fun (w, h) -> Position.SliceRight(w)),
                 100.0f,
                 10.0f,
                 Hotkey = "options",
                 ShowButton = false,
-                OnOpen = (fun () -> Song.pause(); recommended_offset <- LocalAudioSync.get_automatic scoring |> float32; offset_slider.Select()),
-                OnClose = close)
+                OnOpen =
+                    (fun () ->
+                        Song.pause ()
+                        recommended_offset <- LocalAudioSync.get_automatic scoring |> float32
+                        offset_slider.Select()
+                    ),
+                OnClose = close
+            )
 
         { new IPlayScreen(chart, pacemaker_info, ruleset, scoring) with
             override this.AddWidgets() =
@@ -230,7 +250,11 @@ module PlayScreen =
             override this.Draw() =
                 base.Draw()
 
-                if options.AutoCalibrateOffset.Value && this.State.CurrentChartTime() < 0.0f<ms> && Song.playing() then
+                if
+                    options.AutoCalibrateOffset.Value
+                    && this.State.CurrentChartTime() < 0.0f<ms>
+                    && Song.playing ()
+                then
                     Text.draw_b (
                         Style.font,
                         sprintf "Local offset: %.0fms" LocalAudioSync.offset.Value,

@@ -68,10 +68,7 @@ type private Leaderboard() =
         this
         |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
         |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
-        |+ Conditional(
-            (fun () -> status = WebRequestState.ServerError),
-            EmptyState(Icons.GLOBE, %"misc.server_error")
-        )
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.GLOBE, %"misc.server_error"))
         |* ScrollContainer.Flow(contents)
 
         base.Init parent
@@ -193,10 +190,7 @@ type private CompareFriend
         this
         |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
         |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
-        |+ Conditional(
-            (fun () -> status = WebRequestState.ServerError),
-            EmptyState(Icons.GLOBE, %"misc.server_error")
-        )
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.GLOBE, %"misc.server_error"))
         |+ Text(
             "Comparing to " + name,
             Align = Alignment.RIGHT,
@@ -278,10 +272,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (Level * TableChart * 
         this
         |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
         |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
-        |+ Conditional(
-            (fun () -> status = WebRequestState.ServerError),
-            EmptyState(Icons.GLOBE, %"misc.server_error")
-        )
+        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.GLOBE, %"misc.server_error"))
         |+ Conditional(
             (fun () -> status = WebRequestState.Loaded && friends.Value.Length = 0),
             EmptyState(Icons.USERS, %"stats.table.friends.empty", Subtitle = %"stats.table.friends.empty.subtitle")

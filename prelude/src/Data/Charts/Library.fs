@@ -36,6 +36,7 @@ module Library =
 
     let patterns: Patterns =
         let path = Path.Combine(get_game_folder "Data", "patterns.json")
+
         if File.GetLastWriteTimeUtc(path) > DateTime.Parse("12/12/2023") then
             load_important_json_file "Patterns" (Path.Combine(get_game_folder "Data", "patterns.json")) false
         else
@@ -295,9 +296,7 @@ module Library =
                     for entry in cache.Entries.Values do
                         if not (patterns.ContainsKey entry.Hash) then
                             match Cache.load entry cache with
-                            | Some c ->
-                                patterns.[entry.Hash] <-
-                                    Patterns.generate_pattern_report (1.0f, c)
+                            | Some c -> patterns.[entry.Hash] <- Patterns.generate_pattern_report (1.0f, c)
                             | None -> ()
                 }
         }
