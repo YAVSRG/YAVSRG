@@ -8,6 +8,7 @@ open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
+open Prelude.Data.Charts.Collections
 open Prelude.Gameplay.Mods
 open Interlude.Web.Shared
 open Interlude.Utils
@@ -19,7 +20,7 @@ open Interlude.Features.LevelSelect
 open Interlude.Features.Online
 open Interlude.Features.Play
 
-type ContextMenu(cc: CachedChart) as this =
+type MultiplayerChartContextMenu(cc: CachedChart) as this =
     inherit Page()
 
     do
@@ -29,9 +30,16 @@ type ContextMenu(cc: CachedChart) as this =
             |+ PageButton(
                 "chart.add_to_collection",
                 (fun () ->
-                    SelectCollectionPage(fun (name, collection) ->
-                        if CollectionManager.add_to (name, collection, cc) then
-                            Menu.Back()
+                    SelectCollectionPage(
+                        fun (name, collection) ->
+                            if CollectionActions.add_to (name, collection, cc) then
+                                Menu.Back()
+                        ,
+                        fun (_, collection) ->
+                            match collection with
+                            | Folder f -> f.Contains cc
+                            | Playlist p -> false
+                        , true
                     )
                         .Show()
                 ),
@@ -72,7 +80,7 @@ module SelectedChart =
                     Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash)
                     Lobby.missing_chart ()
                 | Some cc ->
-                    Chart.change (cc, Collections.LibraryContext.None, true)
+                    Chart.change (cc, LibraryContext.None, true)
                     rate.Set chart.Rate
 
                     selected_mods.Set(

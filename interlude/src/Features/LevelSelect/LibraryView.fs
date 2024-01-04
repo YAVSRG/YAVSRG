@@ -195,9 +195,9 @@ type LibraryModeSettings() =
 
         if Chart.CACHE_DATA.IsSome then
             if (%%"move_up_in_playlist").Tapped() then
-                CollectionManager.reorder_up Chart.LIBRARY_CTX |> ignore // todo: play sound effect
+                CollectionActions.reorder_up Chart.LIBRARY_CTX |> ignore // todo: play sound effect
             elif (%%"move_down_in_playlist").Tapped() then
-                CollectionManager.reorder_down Chart.LIBRARY_CTX |> ignore
+                CollectionActions.reorder_down Chart.LIBRARY_CTX |> ignore
 
             elif (%%"collections").Tapped() then
                 Menu.ShowPage SelectCollectionPage.Editor
