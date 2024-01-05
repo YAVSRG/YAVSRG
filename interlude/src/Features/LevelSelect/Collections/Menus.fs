@@ -125,6 +125,8 @@ type private EditFolderPage(name: string, folder: Folder) as this =
         if new_name.Value <> name && new_name.Value.Length > 1 then
             if collections.RenameCollection(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed collection '%s' to '%s'" name new_name.Value)
+                if options.LibraryMode.Value = LibraryMode.Collections then
+                    LevelSelect.refresh_all ()
             else
                 Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"
@@ -168,6 +170,8 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
         if new_name.Value <> name && new_name.Value.Length > 0 then
             if collections.RenamePlaylist(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
+                if options.LibraryMode.Value = LibraryMode.Collections then
+                    LevelSelect.refresh_all ()
             else
                 Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"
