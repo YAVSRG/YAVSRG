@@ -14,11 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        
-      - name: Checkout submodules
-        run: |
-          git submodule update --init libraries/Percyqaz.Shell
-          git submodule update --init libraries/Percyqaz.Common
+        with:
+          submodules: true
         
       - name: Build image 
         run: docker build -t interlude-web-server -f online/server/dockerfile .

@@ -14,11 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-        
-    - name: Checkout submodules
-      run: |
-        git submodule update --init libraries/Percyqaz.Shell
-        git submodule update --init libraries/Percyqaz.Common
+      with:
+        submodules: true
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
