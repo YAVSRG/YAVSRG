@@ -6,7 +6,3 @@
 	path = libraries/Percyqaz.Common
 	url = https://github.com/percyqaz/Percyqaz.Common.git
 	branch = main
-[submodule "interlude/assets"]
-	path = interlude/assets
-	url = https://github.com/YAVSRG/Interlude.Assets.git
-	branch = main
