@@ -6,7 +6,7 @@ open System.Collections.Generic
 open System.Collections.Concurrent
 open System.Security.Cryptography
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Conversions

@@ -2,7 +2,7 @@
 
 open System
 open System.Collections.Generic
-open Percyqaz.Json
+open Percyqaz.Data
 open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay

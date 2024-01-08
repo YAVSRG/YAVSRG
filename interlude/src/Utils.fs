@@ -82,7 +82,7 @@ module Utils =
 
     module AutoUpdate =
         open System.IO.Compression
-        open Percyqaz.Json
+        open Percyqaz.Data
         open Prelude.Data
 
         // this doesn't just copy a folder to a destination, but renames any existing/duplicates of the same name to .old

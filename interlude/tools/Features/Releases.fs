@@ -68,7 +68,7 @@ module Releases =
         Directory.SetCurrentDirectory(INTERLUDE_SOURCE_PATH)
 
         let build_dir =
-            Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net7.0", info.RuntimeId)
+            Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net8.0", info.RuntimeId)
 
         let clean_dir =
             Path.Combine(YAVSRG_PATH, "interlude", "releases", $"Interlude-{info.Name}")

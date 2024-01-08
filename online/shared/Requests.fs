@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Web.Shared.Requests
 
-open Percyqaz.Json
+open Percyqaz.Data
 open Interlude.Web.Shared.API
 
 module Auth =

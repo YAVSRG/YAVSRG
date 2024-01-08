@@ -4,7 +4,7 @@ open System.IO
 open System.Collections.Generic
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Prelude.Common

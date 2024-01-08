@@ -31,9 +31,13 @@ Follow the install instructions for your platform
 To check out the codebase on your machine:
 ```bash
 # navigate to somewhere you like to store code
-git clone https://github.com/YAVSRG/YAVSRG.git # don't use --recurse-submodules flag or Interlude.Assets will cause an error
-git submodule update --init libraries/Percyqaz.Shell
+git clone https://github.com/YAVSRG/YAVSRG.git --recurse-submodules
+```
+If you forgot to use `--recurse-submodules` when you cloned, you can manually initialise the submodules:
+```
 git submodule update --init libraries/Percyqaz.Common
+git submodule update --init libraries/Percyqaz.Data
+git submodule update --init libraries/Percyqaz.Shell
 ```
 
 To build and run the game, run the build script:

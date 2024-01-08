@@ -5,7 +5,7 @@ open System.Net
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Mods

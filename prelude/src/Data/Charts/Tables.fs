@@ -2,7 +2,7 @@
 
 open System.Linq
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Prelude.Data.Charts.Caching
 open Prelude.Gameplay
 

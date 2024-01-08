@@ -1,6 +1,6 @@
 ﻿namespace Prelude.Data.Content
 
-open Percyqaz.Json
+open Percyqaz.Data
 open Prelude.Common
 
 [<Json.AutoCodec(false)>]

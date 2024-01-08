@@ -5,7 +5,7 @@ open System.IO
 open SixLabors.ImageSharp
 open System.Drawing
 open System.Collections.Generic
-open Percyqaz.Json
+open Percyqaz.Data
 open Percyqaz.Common
 
 [<AutoOpen>]

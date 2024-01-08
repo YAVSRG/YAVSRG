@@ -1,7 +1,7 @@
 ﻿namespace Backbeat
 
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Prelude.Common
 
 module Utils =

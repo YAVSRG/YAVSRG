@@ -2,7 +2,7 @@
 
 open System
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Prelude
 
 type JudgementId = int

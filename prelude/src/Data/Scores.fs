@@ -4,7 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open System.Collections.Concurrent
-open Percyqaz.Json
+open Percyqaz.Data
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts

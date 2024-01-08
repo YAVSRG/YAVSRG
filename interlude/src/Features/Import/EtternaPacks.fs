@@ -4,7 +4,7 @@ open System.Net
 open System.Net.Security
 open System.IO
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common

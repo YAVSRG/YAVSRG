@@ -1,8 +1,8 @@
 ﻿namespace Interlude.Web.Server
 
-open Percyqaz.Json
 open System.IO
 open System.Reflection
+open Percyqaz.Data
 
 [<Json.AutoCodec(false)>]
 type Secrets =

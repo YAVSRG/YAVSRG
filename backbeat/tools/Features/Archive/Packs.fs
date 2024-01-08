@@ -1,8 +1,8 @@
 ﻿namespace Backbeat.Features.Archive
 
 open System
-open Percyqaz.Json
 open Percyqaz.Common
+open Percyqaz.Data
 open Prelude
 open Prelude.Backbeat.Archive
 

@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.Wiki
 
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics

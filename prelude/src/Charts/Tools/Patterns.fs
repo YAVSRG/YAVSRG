@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Charts.Tools.Patterns
 
 open System.Collections.Generic
-open Percyqaz.Json
+open Percyqaz.Data
 open Prelude
 open Prelude.Charts
 

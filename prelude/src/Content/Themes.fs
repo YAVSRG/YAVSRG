@@ -3,7 +3,7 @@ namespace Prelude.Data.Content
 open System.IO
 open System.IO.Compression
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Prelude.Common
 
 (*

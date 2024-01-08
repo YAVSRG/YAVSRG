@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.Stats
 
 open System.IO
-open Percyqaz.Json
+open Percyqaz.Data
 open Prelude
 
 [<Json.AutoCodec(false)>]

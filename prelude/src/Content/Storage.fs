@@ -6,7 +6,7 @@ open System.IO.Compression
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
-open Percyqaz.Json
+open Percyqaz.Data
 open Prelude.Common
 
 (*
