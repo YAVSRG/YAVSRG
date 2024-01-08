@@ -230,26 +230,24 @@ module Tree =
 
             // draw text
             Draw.rect (bounds.SliceBottom 25.0f) Colors.shadow_1.O1
-            Text.draw_b (Style.font, cc.Title, 23.0f, left + 5f, top, Colors.text)
+            Text.draw_b (Style.font, cc.Title, 23.0f, left + 7f, top, Colors.text)
 
             Text.draw_b (
                 Style.font,
                 sprintf "%s  •  %s" cc.Artist cc.Creator,
                 18.0f,
-                left + 5f,
+                left + 7f,
                 top + 34.0f,
                 Colors.text_subheading
             )
-            // todo: option between subtitle preference, source preference and just always showing difficulty name
             Text.draw_b (
                 Style.font,
                 cc.Subtitle |> Option.defaultValue cc.DifficultyName,
                 15.0f,
-                left + 5f,
+                left + 7f,
                 top + 65.0f,
                 Colors.text_subheading
             )
-
             Text.draw_aligned_b (Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
             if
@@ -405,12 +403,10 @@ module Tree =
             else
                 b
 
-
     let mutable filter: Filter = []
     let mutable private groups: GroupItem list = []
     let mutable private last_item: ChartItem option = None
     let mutable is_empty = false
-
 
     let refresh () =
         // fetch groups
