@@ -1,12 +1,12 @@
 ﻿namespace Interlude.Features.Wiki
 
 open Percyqaz.Common
+open Percyqaz.Data.Markdown
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data
 open Interlude.Utils
-open FSharp.Formatting.Markdown
 
 type LinkHandler =
     {

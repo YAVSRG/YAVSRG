@@ -132,7 +132,6 @@
 
   <ItemGroup>
     <PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
-    <PackageReference Include="FSharp.Formatting" Version="19.1.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Data
+open Percyqaz.Data.Markdown
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -9,7 +10,6 @@ open Prelude.Data
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open FSharp.Formatting.Markdown
 
 module Wiki =
 
