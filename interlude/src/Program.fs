@@ -2,7 +2,6 @@
 open System.IO
 open System.Threading
 open System.Diagnostics
-open System.Reflection
 open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Flux
@@ -10,7 +9,6 @@ open Percyqaz.Flux.Windowing
 open Interlude
 open Interlude.UI
 open Interlude.Features
-open Interlude.Features.Import
 open Interlude.Features.Printerlude
 open Interlude.Features.Online
 
@@ -27,11 +25,11 @@ let launch (instance: int) =
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
     let crash_splash =
-        Utils.splash_message_picker ("CrashSplashes.txt")
+        Utils.splash_message_picker "CrashSplashes.txt"
         >> (fun s -> Logging.Critical s)
 
     try
-        Options.load (instance)
+        Options.load instance
     with err ->
         Logging.Critical("Fatal error loading game config", err)
         crash_splash ()
@@ -60,14 +58,15 @@ let launch (instance: int) =
 
     Window.after_init.Add(fun () ->
         Content.init Options.options.Theme.Value Options.options.Noteskin.Value
+        Gameplay.Chart.recolor() // todo: revisit all init logic
         Options.Hotkeys.init Options.options.Hotkeys
         Printerlude.init (instance)
         //DiscordRPC.init()
 
-        AppDomain.CurrentDomain.ProcessExit.Add(fun args -> shutdown (true))
+        AppDomain.CurrentDomain.ProcessExit.Add(fun args -> shutdown true)
     )
 
-    Window.on_file_drop.Add(Import.handle_file_drop)
+    Window.on_file_drop.Add(Import.Import.handle_file_drop)
 
     use icon_stream = Utils.get_resource_stream ("icon.png")
     use icon = Utils.Bitmap.load icon_stream
@@ -86,9 +85,9 @@ let main argv =
         Logging.Error(executable_location, err)
 
     if
-        not (File.Exists("bass.dll"))
-        && not (File.Exists("libbass.so"))
-        && not (File.Exists("libbass.dylib"))
+        not (File.Exists "bass.dll")
+        && not (File.Exists "libbass.so")
+        && not (File.Exists "libbass.dylib")
     then
         printfn
             "Interlude is missing the appropriate audio library dll/so/dylib for your platform.\n If you are a developer, info on how to fix this is at https://github.com/YAVSRG/YAVSRG#readme\n If you are not a developer, looks like you deleted a file you shouldn't have!\n Redownloading the game and extracting the zip over this folder to replace what is missing should fix it."
@@ -109,9 +108,7 @@ let main argv =
             | Some success -> printfn "%s" success
             | None -> printfn "Error: Connection timed out!"
 
-    else if
-
-        m.WaitOne(TimeSpan.Zero, true)
+    else if m.WaitOne(TimeSpan.Zero, true)
     then
         launch (0)
         m.ReleaseMutex()
