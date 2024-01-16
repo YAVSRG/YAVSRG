@@ -1,9 +1,13 @@
-0.7.15.3
+0.7.15.4
 ====
 
-Minor patch amidst the code organisation changes (it's keeping me on my toes)
+Another minor patch amidst more infrastructure changes
+
+Interlude now runs on .NET 8 :)
 
 # Improvements in this update
-- Fixed a bug when selecting charts in a playlist while viewing said playlist in Collections view
-- Added a little www.yavsrg.net watermark to the bottom left of score screens! Maybe I can reel some new people in that get curious when they see your score posts
+- Reduced the file size of Interlude.exe a little
+- Fixed a note colors bug when loading the first chart
+- Fixed level select screen not updating when you rename a collection
+- Fixed level select groups taking 2 frames to collapse thanks to @9382
 
