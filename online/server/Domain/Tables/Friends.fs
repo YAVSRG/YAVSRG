@@ -34,7 +34,7 @@ module Friends =
             Read = fun r -> r.Json JSON
         }
     let get_following_ids (user_id: int64) : Set<int64> = 
-        GET_FOLLOWING_IDS.Execute user_id db |> expect |> Percyqaz.Common.Combinators.debug |> Array.tryExactlyOne |> Option.defaultValue Set.empty
+        GET_FOLLOWING_IDS.Execute user_id db |> expect |> Array.tryExactlyOne |> Option.defaultValue Set.empty
         
     let private GET_FOLLOWERS_IDS : Query<int64, Set<int64>> =
         {
@@ -44,29 +44,19 @@ module Friends =
             Read = fun r -> r.Json JSON
         }
     let get_followers_ids (user_id: int64) : Set<int64> = 
-        GET_FOLLOWERS_IDS.Execute user_id db |> expect |> Percyqaz.Common.Combinators.debug |> Array.tryExactlyOne |> Option.defaultValue Set.empty
+        GET_FOLLOWERS_IDS.Execute user_id db |> expect |> Array.tryExactlyOne |> Option.defaultValue Set.empty
 
     type private UpdateFollowingFollowersModel = { UserId: int64; UserNewFollowing: Set<int64>; FriendId: int64; FriendNewFollowers: Set<int64> }
     let private UPDATE_FOLLOWING_FOLLOWERS : NonQuery<UpdateFollowingFollowersModel> =
         {
             SQL = """
-            BEGIN TRANSACTION;
-
-            UPDATE friends
-            SET "Following" = @UserNewFollowing
-            WHERE UserId = @UserId;
+            INSERT INTO friends (UserId, "Following", Followers)
+            VALUES (@UserId, @UserNewFollowing, '[]')
+            ON CONFLICT DO UPDATE SET "Following" = @UserNewFollowing;
             
-            UPDATE friends
-            SET "Followers" = @FriendNewFollowers
-            WHERE UserId = @FriendId;
-            
-            INSERT OR IGNORE INTO friends ("UserId", "Following", "Followers")
-            VALUES (@UserId, @UserNewFollowing, '[]');
-            
-            INSERT OR IGNORE INTO friends ("UserId", "Following", "Followers")
-            VALUES (@FriendId, '[]', @FriendNewFollowers);
-
-            COMMIT;
+            INSERT INTO friends (UserId, "Following", Followers)
+            VALUES (@FriendId, '[]', @FriendNewFollowers)
+            ON CONFLICT DO UPDATE SET Followers = @FriendNewFollowers;
             """
             Parameters = 
                 [
@@ -76,10 +66,9 @@ module Friends =
                     "@FriendNewFollowers", SqliteType.Text, -1
                 ]
             FillParameters = (fun p m ->
-                printfn "%A" m
                 p.Int64 m.UserId
                 p.Json JSON m.UserNewFollowing
-                p.Int64 m.UserId
+                p.Int64 m.FriendId
                 p.Json JSON m.FriendNewFollowers
             )
         }
