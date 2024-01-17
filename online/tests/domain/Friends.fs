@@ -87,3 +87,31 @@ module Friends =
         Assert.AreEqual(FriendRelation.Friend, Friends.relation(id1, id2))
         Assert.AreEqual(Friends.get_following_ids id1, Set.ofList [id2])
         Assert.AreEqual(Friends.get_followers_ids id2, Set.ofList [id1])
+    
+    [<Test>]
+    let List () =
+        let id1 = User.create ("FriendListA", 0uL) |> User.save_new
+        let id2 = User.create ("FriendListB", 0uL) |> User.save_new
+        let id3 = User.create ("FriendListC", 0uL) |> User.save_new
+    
+        Friends.add (id1, id2)
+        Friends.add (id1, id3)
+
+        let result = Friends.friends_list id1
+        Assert.AreEqual(2, result.Length)
+
+    [<Test>]
+    let Add_NonExistentUser() =
+        let user_id = User.create ("AddNonExistentFriend", 0uL) |> User.save_new
+
+        Assert.Throws(fun () -> Friends.add (user_id, 32767)) |> printfn "%O"
+        Assert.Throws(fun () -> Friends.add (32767, user_id)) |> printfn "%O"
+        Assert.Throws(fun () -> Friends.add (32767, 32768)) |> printfn "%O"
+    
+    [<Test>]
+    let Remove_NonExistentUser() =
+        let user_id = User.create ("RemoveNonExistentFriend", 0uL) |> User.save_new
+    
+        Assert.Throws(fun () -> Friends.remove (user_id, 32767)) |> printfn "%O"
+        Assert.Throws(fun () -> Friends.remove (32767, user_id)) |> printfn "%O"
+        Assert.Throws(fun () -> Friends.remove (32767, 32768)) |> printfn "%O"
