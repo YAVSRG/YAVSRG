@@ -201,7 +201,7 @@ module Users =
         
         let results = User.list 0
 
-        Assert.GreaterOrEqual(3, results.Length)
+        Assert.LessOrEqual(3, results.Length)
     
     [<Test>]
     let List_BigPageNumber () =
@@ -218,3 +218,33 @@ module Users =
         let results = User.list -1
 
         Assert.AreEqual(0, results.Length)
+
+    [<Test>]
+    let ByIds_Empty () =
+        Assert.AreEqual(0, (User.by_ids [||]).Length)
+
+    [<Test>]
+    let ByIds_NotFound () =
+        let results = User.by_ids [|32767; 32768; 32769|]
+
+        Assert.AreEqual(0, results.Length)
+    
+    [<Test>]
+    let ByIds () =
+        let id1 = User.create ("ByIds1", 0uL) |> User.save_new
+        let id2 = User.create ("ByIds2", 0uL) |> User.save_new
+        let id3 = User.create ("ByIds3", 0uL) |> User.save_new
+
+        let results = User.by_ids [|id1; id2; id3|]
+    
+        Assert.AreEqual(3, results.Length)
+    
+    [<Test>]
+    let ByIds_Duplicates () =
+        let id1 = User.create ("ByIdsDuplicates1", 0uL) |> User.save_new
+        let id2 = User.create ("ByIdsDuplicates2", 0uL) |> User.save_new
+        User.create ("ByIdsDuplicates3", 0uL) |> User.save_new |> ignore
+
+        let results = User.by_ids [|id1; id2; id1; 32767|]
+    
+        Assert.AreEqual(2, results.Length)

@@ -10,9 +10,10 @@ module Migrations_New =
 
     let run (db: Database) =
         Database.migrate 
-            "Initial" 
+            "InitialUsersAndFriends" 
             (fun db ->
                 Database.create_table User.TABLE db |> expect |> ignore
+                Friends.CREATE_TABLE.Execute () db |> expect |> ignore
                 Logging.Info("Migration #1 complete")
             )
             db
@@ -26,6 +27,7 @@ module Database =
 
     let startup_unit_tests() : IDisposable =
         let _db, keep_alive = Database.in_memory("unit_tests")
+        //let _db, keep_alive = Database.from_file("unit_tests.db"), { new IDisposable with override this.Dispose() = () }
         Migrations_New.run _db
         db <- _db
         keep_alive
