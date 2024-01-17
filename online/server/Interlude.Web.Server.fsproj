@@ -20,6 +20,7 @@
     <Compile Include="Online\Lobbies.fs" />
     <Compile Include="Online\Online.fs" />
     <Compile Include="API\Utils.fs" />
+    <Compile Include="API\Health\Status.fs" />
     <Compile Include="API\Auth\Dummy.fs" />
     <Compile Include="API\Auth\Discord.fs" />
     <Compile Include="API\Charts\Identify.fs" />
@@ -39,7 +40,6 @@
     <Compile Include="API\Players\Profile\Options.fs" />
     <Compile Include="API\Players\Search.fs" />
     <Compile Include="API\Players\Online.fs" />
-    <Compile Include="API\Health\Status.fs" />
     <Compile Include="API\API.fs" />
     <Compile Include="Bot\Constants.fs" />
     <Compile Include="Bot\UserCommands.fs" />

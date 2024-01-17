@@ -3,6 +3,18 @@
 open Percyqaz.Data
 open Interlude.Web.Shared.API
 
+module Health =
+
+    module Status =
+
+        let ROUTE = (GET, "/health")
+
+        [<Json.AutoCodec>]
+        type Response = { Status: string }
+
+        let get (callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE, callback)
+
 module Auth =
 
     /// url parameters:
@@ -397,15 +409,3 @@ module Friends =
 
         let delete (user: string, callback: bool option -> unit) =
             Client.delete (snd ROUTE + "?user=" + escape user, callback)
-
-module Health =
-
-    module Status =
-
-        let ROUTE = (GET, "/health")
-
-        [<Json.AutoCodec>]
-        type Response = { Status: string }
-
-        let get (callback: Response option -> unit) =
-            Client.get<Response> (snd ROUTE, callback)
