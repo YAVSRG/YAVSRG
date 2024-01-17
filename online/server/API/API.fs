@@ -4,6 +4,7 @@ open System.Collections.Generic
 open NetCoreServer
 open Percyqaz.Common
 open Prelude
+open Interlude.Web.Server
 open Interlude.Web.Shared.API
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
@@ -17,6 +18,7 @@ module API =
 
 
     do
+        if not SECRETS.IsProduction then add_endpoint (GET, "/auth/dummy") Auth.Dummy.handle
         add_endpoint Auth.Discord.ROUTE Auth.Discord.handle
 
         add_endpoint Charts.Identify.ROUTE Charts.Identify.handle

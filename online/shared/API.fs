@@ -100,8 +100,8 @@ module API =
 
         let private client = new Http.HttpClient()
 
-        let init (baseAddress: string) =
-            client.BaseAddress <- new Uri(baseAddress)
+        let init (base_address: string) =
+            client.BaseAddress <- new Uri(base_address)
 
         let authenticate (token: string) =
             client.DefaultRequestHeaders.Authorization <- new Http.Headers.AuthenticationHeaderValue("Bearer", token)

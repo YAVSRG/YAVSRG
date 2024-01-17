@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\shared\Interlude.Web.Shared.fsproj" />
+    <ProjectReference Include="..\..\shared\Interlude.Web.Shared.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

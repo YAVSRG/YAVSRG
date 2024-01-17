@@ -20,6 +20,7 @@
     <Compile Include="Online\Lobbies.fs" />
     <Compile Include="Online\Online.fs" />
     <Compile Include="API\Utils.fs" />
+    <Compile Include="API\Auth\Dummy.fs" />
     <Compile Include="API\Auth\Discord.fs" />
     <Compile Include="API\Charts\Identify.fs" />
     <Compile Include="API\Charts\Scores\Leaderboard.fs" />
