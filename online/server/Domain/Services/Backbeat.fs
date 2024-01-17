@@ -26,17 +26,18 @@ module Backbeat =
         }
 
     // load seed data from Backbeat repo
+    // todo: stop storing seed data. this server should be the source of truth
     let init () =
         WebServices.download_json (
-            "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/songs.json",
+            "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/songs.json",
             function
             | Some _songs ->
                 WebServices.download_json (
-                    "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/charts.json",
+                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/charts.json",
                     function
                     | Some _charts ->
                         WebServices.download_json (
-                            "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/archive/packs.json",
+                            "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/packs.json",
                             function
                             | Some _packs ->
                                 packs <- _packs
@@ -49,29 +50,29 @@ module Backbeat =
                                         charts.Count
                                         songs.Count
                                 )
-                            | None -> Logging.Error("Failed to get pack data from Backbeat repo")
+                            | None -> Logging.Error("Failed to get pack data from Backbeat")
                         )
-                    | None -> Logging.Error("Failed to get chart data from Backbeat repo")
+                    | None -> Logging.Error("Failed to get chart data from Backbeat")
                 )
-            | None -> Logging.Error("Failed to get song data from Backbeat repo")
+            | None -> Logging.Error("Failed to get song data from Backbeat")
         )
 
         WebServices.download_json (
-            "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/rulesets/rulesets.json",
+            "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json",
             function
             | Some(archive: PrefabRulesets.Repo) ->
                 for rs in archive.Rulesets.Values do
                     rulesets.[Ruleset.hash rs] <- rs
-            | None -> Logging.Error("Failed to get ruleset data from Backbeat repo")
+            | None -> Logging.Error("Failed to get ruleset data from Backbeat")
         )
 
         WebServices.download_json (
-            "https://raw.githubusercontent.com/YAVSRG/Backbeat/main/tables/crescent.table",
+            "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/tables/crescent.table",
             function
             | Some(t: Table) ->
                 tables <- Map.ofList [ "crescent", t ]
                 TableWithSuggestions.update_if_newer ("crescent", t)
-            | None -> Logging.Error("Failed to get Crescent from Backbeat repo")
+            | None -> Logging.Error("Failed to get Crescent from Backbeat")
         )
 
     // chart search by text
