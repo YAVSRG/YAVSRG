@@ -2,6 +2,7 @@
 
 open System.IO
 open System.Reflection
+open Percyqaz.Common
 open Percyqaz.Data
 
 [<Json.AutoCodec(false)>]
@@ -36,8 +37,9 @@ module Secrets =
     let SECRETS =
         if not (File.Exists "./secrets/secrets.json") then
 #if DEBUG
-            failwith
-                "Secrets folder not found! You are running the server as a non-docker instance, make sure you ran it with the script"
+            Logging.Info "!!! Server assembly is being run outside of docker, or examined in unit tests. Using default values for secrets"
+            Secrets.Default
+        else
 #else
             failwith "Secrets folder not found! Did you mount it properly?"
 #endif
@@ -53,3 +55,10 @@ module Secrets =
 
         use tr = new StreamReader(stream)
         tr.ReadToEnd()
+
+open Percyqaz.Data.Sqlite
+
+[<AutoOpen>]
+module internal DatabaseRef =
+
+    let mutable db = Unchecked.defaultof<Database>

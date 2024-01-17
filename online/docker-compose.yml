@@ -22,3 +22,4 @@ services:
             - db
         volumes:
             - ./secrets:/docker_root/secrets
+            - ./data:/docker_root/data
