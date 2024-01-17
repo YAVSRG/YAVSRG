@@ -1,1 +1,1 @@
-﻿Test of redeploying with new monorepo
+﻿.NET 8.0 deploy
