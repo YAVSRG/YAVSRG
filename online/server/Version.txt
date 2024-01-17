@@ -1,1 +1,1 @@
-﻿.NET 8.0 deploy
+﻿.NET 8.0 deploy try 2
