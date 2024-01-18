@@ -16,6 +16,9 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
+          
+      - name: Unit tests
+        run: dotnet test -v q online/tests/domain/Interlude.Web.Tests.Domain.fsproj
         
       - name: Build image 
         run: docker build -t interlude-web-server -f online/server/dockerfile .
