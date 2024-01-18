@@ -75,9 +75,7 @@ type ReplayData = ReplayRow array
 
 module Replay =
 
-    let decompress (data: string) : ReplayData =
-        let compressed = Convert.FromBase64String data
-        use input_stream = new MemoryStream(compressed)
+    let decompress_from (input_stream: Stream) : ReplayData =
         use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
         use br = new BinaryReader(gzip_stream)
 
@@ -88,9 +86,16 @@ module Replay =
             output.[i] <- struct (br.ReadSingle() * 1.0f<ms>, br.ReadUInt16())
 
         output
+        
+    let decompress_bytes (data: byte array) =
+        use stream = new MemoryStream(data)
+        decompress_from stream
+        
+    let decompress_string (data: string) : ReplayData =
+        let bytes = Convert.FromBase64String data
+        decompress_bytes bytes
 
-    let compress (data: ReplayData) : string =
-        use output_stream = new MemoryStream()
+    let compress_to (output_stream: Stream) (data: ReplayData) =
         use gzip_stream = new GZipStream(output_stream, CompressionLevel.Optimal)
         use bw = new BinaryWriter(gzip_stream)
 
@@ -101,7 +106,14 @@ module Replay =
             bw.Write buttons
 
         bw.Flush()
-        Convert.ToBase64String(output_stream.ToArray())
+
+    let compress_bytes (data: ReplayData) : byte array =
+        use stream = new MemoryStream()
+        compress_to stream data
+        stream.ToArray()
+
+    let compress_string (data: ReplayData) : string =
+        Convert.ToBase64String(compress_bytes data)
 
     // the replay generated when Auto-play is enabled
     let perfect_replay (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
@@ -170,7 +182,7 @@ type StoredReplayProvider(data: ReplayData) =
 
         member this.GetFullReplay() = data
 
-    new(data: string) = StoredReplayProvider(Replay.decompress data)
+    new(data: string) = StoredReplayProvider(Replay.decompress_string data)
 
     static member AutoPlay(keys, noteData) =
         Replay.perfect_replay keys noteData |> StoredReplayProvider

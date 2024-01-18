@@ -157,7 +157,7 @@ module Scores =
                 let score: Score =
                     {
                         time = DateTime.FromFileTimeUtc(replay_info.Timestamp).ToLocalTime()
-                        replay = Replay.compress replay_data
+                        replay = Replay.compress_string replay_data
                         rate = MathF.Round(combined_rate, 2)
                         selectedMods = mods
                         layout = Layout.Layout.LeftTwo

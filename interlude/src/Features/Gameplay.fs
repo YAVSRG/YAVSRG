@@ -352,7 +352,7 @@ module Gameplay =
     let make_score (replay_data, keys) : Score =
         {
             time = DateTime.UtcNow
-            replay = Replay.compress replay_data
+            replay = Replay.compress_string replay_data
             rate = rate.Value
             selectedMods = selected_mods.Value |> ModState.filter Chart.WITH_MODS.Value
             layout = options.Playstyles.[keys - 3]

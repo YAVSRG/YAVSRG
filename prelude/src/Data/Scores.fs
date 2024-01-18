@@ -79,7 +79,7 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
 
     member this.ReplayData =
         replayData <-
-            ValueOption.defaultWith (fun () -> Replay.decompress score.replay) replayData
+            ValueOption.defaultWith (fun () -> Replay.decompress_string score.replay) replayData
             |> ValueSome
 
         replayData.Value
