@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="Users.fs" />
     <Compile Include="Friends.fs" />
+    <Compile Include="Replays.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

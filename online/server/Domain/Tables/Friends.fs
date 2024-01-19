@@ -133,3 +133,5 @@ module Friends =
         get_following_ids user_id
         |> Array.ofSeq
         |> User.by_ids
+
+    // todo: on user deleted, remove them from all follower lists

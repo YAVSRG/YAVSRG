@@ -24,7 +24,7 @@ module Replay =
         { NonQuery.without_parameters() with
             SQL = """
             CREATE TABLE replays (
-                Id INTEGER PRIMARY KEY NOT NULL
+                Id INTEGER PRIMARY KEY NOT NULL,
                 UserId INTEGER NOT NULL,
                 ChartId TEXT NOT NULL,
                 Purposes TEXT NOT NULL,
@@ -33,50 +33,88 @@ module Replay =
                 Rate REAL NOT NULL,
                 Mods TEXT NOT NULL,
                 Data BLOB NOT NULL,
-                FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
+                FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
                 UNIQUE (UserId, ChartId, TimePlayed)
             );
             """
         }
 
-    let create (user_id: int64, chart_id: string, timestamp: DateTime, replay: ReplayData, rate: float32, mods: Mods.ModState) =
+    let create (user_id: int64, chart_id: string, timestamp: int64, replay: ReplayData, rate: float32, mods: Mods.ModState) =
         {
             UserId = user_id
             ChartId = chart_id
-            TimePlayed = (DateTimeOffset.op_Implicit timestamp).ToUnixTimeMilliseconds()
+            TimePlayed = timestamp
             TimeUploaded = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             Rate = MathF.Round(rate, 2)
             Mods = mods
             Data = Replay.compress_bytes replay
         }
 
+    let private GET_LEADERBOARD : Query<{| UserId: int64; ChartId: string; RulesetId: string |}, {| Id: int64; Purposes: Set<string>; TimePlayed: int64 |}> =
+        {
+            SQL = """
+                SELECT Id, Purposes, TimePlayed FROM replays
+                WHERE UserId = @UserId
+                AND ChartId = @ChartId
+                AND Purposes LIKE @Pattern ESCAPE '\';
+            """
+            Parameters = 
+                [
+                    "@UserId", SqliteType.Integer, 8
+                    "@ChartId", SqliteType.Text, -1
+                    "@Pattern", SqliteType.Text, -1
+                ]
+            FillParameters = (fun p req ->
+                p.Int64 req.UserId
+                p.String req.ChartId
+                p.String (req.RulesetId.Replace("_", "\\_").Replace("%", "\\%"))
+            )
+            Read = (fun r ->
+                {|
+                    Id = r.Int64
+                    Purposes = r.Json JSON
+                    TimePlayed = r.Int64
+                |}
+            )
+        }
+    let private UPDATE_PURPOSES : NonQuery<int64 * Set<string>> =
+        {
+            SQL = """
+                UPDATE replays
+                SET Purposes = @Purposes
+                WHERE Id = @Id;
+            """
+            Parameters = 
+                [
+                    "@Id", SqliteType.Integer, 8
+                    "@Purposes", SqliteType.Text, -1
+                ]
+            FillParameters = (fun p (id, purposes) ->
+                p.Int64 id
+                p.Json JSON purposes
+            )
+        }
+    let private DELETE_BY_ID : NonQuery<int64> =
+        {
+            SQL = "DELETE FROM replays WHERE Id = @Id;"
+            Parameters = [ "@Id", SqliteType.Integer, 8 ]
+            FillParameters = fun p id -> p.Int64 id
+        }
     let private SAVE_LEADERBOARD : NonQuery<string * Replay> =
         {
             SQL = """
-            BEGIN TRANSACTION;
-
-            UPDATE replays
-            SET Purposes = JSON_GROUP_ARRAY(json_each.value)
-            FROM (
-                SELECT replays.UserId, replays.ChartId, replays.Purposes, json_each.value
-                FROM replays, json_each(replays.Purposes)
-                WHERE UserId = @UserId
-                AND ChartId = @ChartId
-                AND json_each.value IS NOT @Purpose
-            )
-
-            DELETE FROM replays
-            WHERE UserId = @UserId
-            AND ChartId = @ChartId
-            AND Purpose = '[]';
-
             INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Rate, Mods, Data)
             VALUES (@UserId, @ChartId, @PurposeSingleton, @TimePlayed, @TimeUploaded, @Rate, @Mods, @Data)
             ON CONFLICT DO UPDATE SET 
-                TimeUploaded = excluded.TimeUploaded
-                Purposes = JSON_GROUP_ARRAY(DISTINCT JSON_EXTRACT(excluded.Purposes, '$') || @PurposeSingleton);
-
-            COMMIT;
+                TimeUploaded = excluded.TimeUploaded,
+                Purposes = (
+                    SELECT json_group_array(value) FROM (
+                        SELECT json_each.value
+                        FROM replays, json_each(replays.Purposes)
+                        WHERE replays.Id = excluded.Id
+                        UNION ALL SELECT @Purpose
+                    ) GROUP BY ''
+                );
             """
             Parameters =
                 [
@@ -103,7 +141,23 @@ module Replay =
             )
         }
     // Only the most best replay per-chart is stored, overwriting any previous replay for that chart
-    let save_leaderboard (ruleset_id: string) (replay: Replay) = SAVE_LEADERBOARD.ExecuteGetId (ruleset_id, replay) db |> expect |> ignore
+    let save_leaderboard (ruleset_id: string) (replay: Replay) =
+        match GET_LEADERBOARD.Execute {| ChartId = replay.ChartId; RulesetId = ruleset_id; UserId = replay.UserId |} db |> expect |> Array.tryExactlyOne with
+        | Some existing ->
+            // If exact replay already exists in DB
+            if existing.TimePlayed = replay.TimePlayed then existing.Id else 
+            
+            // If a score for this chart, this ruleset, already exists, with only this purpose, delete it
+            if existing.Purposes.Count = 1 then
+                DELETE_BY_ID.Execute existing.Id db |> expect |> ignore
+            // Otherwise remove that purpose and keep it
+            else
+                UPDATE_PURPOSES.Execute (existing.Id, Set.remove ruleset_id existing.Purposes) db |> expect |> ignore
+            
+            SAVE_LEADERBOARD.ExecuteGetId (ruleset_id, replay) db |> expect
+
+        | None -> 
+            SAVE_LEADERBOARD.ExecuteGetId (ruleset_id, replay) db |> expect
 
     let private SAVE_CHALLENGE : NonQuery<Replay> =
         {
@@ -111,8 +165,15 @@ module Replay =
             INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Rate, Mods, Data)
             VALUES (@UserId, @ChartId, @PurposeSingleton, @TimePlayed, @TimeUploaded, @Rate, @Mods, @Data)
             ON CONFLICT DO UPDATE SET 
-                TimeUploaded = excluded.TimeUploaded
-                Purposes = JSON_GROUP_ARRAY(DISTINCT JSON_EXTRACT(excluded.Purposes, '$') || @PurposeSingleton);
+                TimeUploaded = excluded.TimeUploaded,
+                Purposes = (
+                    SELECT json_group_array(value) FROM (
+                        SELECT json_each.value
+                        FROM replays, json_each(replays.Purposes)
+                        WHERE replays.Id = excluded.Id
+                        UNION ALL SELECT @Purpose
+                    ) GROUP BY ''
+                );
             """
             Parameters =
                 [
@@ -124,6 +185,7 @@ module Replay =
                     "@Mods", SqliteType.Text, -1
                     "@Data", SqliteType.Blob, -1
                     "@PurposeSingleton", SqliteType.Text, -1
+                    "@Purpose", SqliteType.Text, -1
                 ]
             FillParameters = (fun p replay ->
                 p.Int64 replay.UserId
@@ -134,6 +196,7 @@ module Replay =
                 p.Json JSON replay.Mods
                 p.Blob replay.Data
                 p.Json JSON ["challenge"]
+                p.String "challenge"
             )
         }
     // Replay is stored long term for sharing with friends
@@ -142,7 +205,7 @@ module Replay =
     let private BY_ID : Query<int64, Replay> =
         {
             SQL = """
-            SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Rate, Mods FROM replays
+            SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Rate, Mods, Data FROM replays
             WHERE Id = @Id;
             """
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
@@ -156,7 +219,12 @@ module Replay =
                     TimeUploaded = r.Int64
                     Rate = r.Float32
                     Mods = r.Json JSON
-                    Data = [||]
+                    Data =
+                        // todo: push into Percyqaz.Data
+                        use stream = r.Stream
+                        use ms = new System.IO.MemoryStream()
+                        stream.CopyTo ms
+                        ms.ToArray()
                 }
             )
         }
