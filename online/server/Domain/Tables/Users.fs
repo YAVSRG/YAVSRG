@@ -39,7 +39,7 @@ type User =
 
 module User =
 
-    let TABLE : TableCommandHelper =
+    let internal TABLE : TableCommandHelper =
         {
             Name = "users"
             PrimaryKey = Column.Integer("Id").Unique
@@ -67,7 +67,7 @@ module User =
             Color = Badge.DEFAULT_COLOR
         }
 
-    let SAVE_NEW : NonQuery<User> =
+    let private SAVE_NEW : NonQuery<User> =
         {
             SQL = TABLE.INSERT
             Parameters =
@@ -92,7 +92,7 @@ module User =
         }
     let save_new (user: User) : int64 = SAVE_NEW.ExecuteGetId user db |> expect
 
-    let BY_DISCORD_ID : Query<uint64, int64 * User> =
+    let private BY_DISCORD_ID : Query<uint64, int64 * User> =
         {
             SQL = """SELECT * FROM users WHERE DiscordId = @DiscordId;"""
             Parameters = [ "@DiscordId", SqliteType.Text, -1 ]
@@ -112,7 +112,7 @@ module User =
         }
     let by_discord_id (discord_id: uint64) = BY_DISCORD_ID.Execute discord_id db |> expect |> Array.tryExactlyOne
 
-    let BY_ID : Query<int64, User> =
+    let private BY_ID : Query<int64, User> =
         {
             SQL = """SELECT * FROM users WHERE Id = @Id;"""
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
@@ -156,7 +156,7 @@ module User =
             }
         query.Execute () db |> expect
 
-    let BY_AUTH_TOKEN : Query<string, int64 * User> =
+    let private BY_AUTH_TOKEN : Query<string, int64 * User> =
         {
             SQL = """SELECT * FROM users WHERE AuthToken = @AuthToken;"""
             Parameters = [ "@AuthToken", SqliteType.Text, -1 ]
@@ -176,7 +176,7 @@ module User =
         }
     let by_auth_token (token: string) = BY_AUTH_TOKEN.Execute token db |> expect |> Array.tryExactlyOne
 
-    let BY_USERNAME : Query<string, int64 * User> =
+    let private BY_USERNAME : Query<string, int64 * User> =
         {
             SQL = """SELECT * FROM users WHERE Username LIKE @Username ESCAPE '\';"""
             Parameters = [ "@Username", SqliteType.Text, -1 ]
@@ -196,7 +196,7 @@ module User =
         }
     let by_username (username: string) = BY_USERNAME.Execute username db |> expect |> Array.tryExactlyOne
 
-    let SEARCH_BY_USERNAME : Query<string, int64 * User> =
+    let private SEARCH_BY_USERNAME : Query<string, int64 * User> =
         {
             SQL = """SELECT * FROM users WHERE Username LIKE @Pattern ESCAPE '\' ORDER BY LastLogin DESC;"""
             Parameters = [ "@Pattern", SqliteType.Text, -1 ]
@@ -216,7 +216,7 @@ module User =
         }
     let search_by_username (query: string) = SEARCH_BY_USERNAME.Execute query db |> expect
     
-    let LIST : Query<int, int64 * User> =
+    let private LIST : Query<int, int64 * User> =
         {
             SQL = """SELECT * FROM users ORDER BY DateSignedUp ASC LIMIT @Limit OFFSET @Offset;"""
             Parameters = [ "@Limit", SqliteType.Integer, 8; "@Offset", SqliteType.Integer, 8 ]
@@ -236,7 +236,7 @@ module User =
         }
     let list (page: int) = if page < 0 then [||] else LIST.Execute page db |> expect
 
-    let SET_AUTH_TOKEN : NonQuery<int64 * string> =
+    let private SET_AUTH_TOKEN : NonQuery<int64 * string> =
         {
             SQL = """UPDATE users SET AuthToken = @AuthToken WHERE Id = @Id;"""
             Parameters = [ "@AuthToken", SqliteType.Text, -1; "@Id", SqliteType.Integer, 8 ]
@@ -244,7 +244,7 @@ module User =
         }
     let set_auth_token (id, token: string) = SET_AUTH_TOKEN.Execute (id, token) db |> expect |> ignore
     
-    let UPDATE_COLOR : NonQuery<int64 * int32> =
+    let private UPDATE_COLOR : NonQuery<int64 * int32> =
         {
             SQL = """UPDATE users SET Color = @Color WHERE Id = @Id;"""
             Parameters = [ "@Color", SqliteType.Integer, 4; "@Id", SqliteType.Integer, 8 ]
@@ -252,7 +252,7 @@ module User =
         }
     let update_color (id, color: int32) = UPDATE_COLOR.Execute (id, color) db |> expect |> ignore
     
-    let UPDATE_BADGES : NonQuery<int64 * Set<Badge>> =
+    let private UPDATE_BADGES : NonQuery<int64 * Set<Badge>> =
         {
             SQL = """UPDATE users SET Badges = @Badges WHERE Id = @Id;"""
             Parameters = [ "@Badges", SqliteType.Text, -1; "@Id", SqliteType.Integer, 8 ]
@@ -260,7 +260,7 @@ module User =
         }
     let update_badges (id, badges: Set<Badge>) = UPDATE_BADGES.Execute (id, badges) db |> expect |> ignore
 
-    let UPDATE_LAST_SEEN : NonQuery<int64> =
+    let private UPDATE_LAST_SEEN : NonQuery<int64> =
         {
             SQL = """UPDATE users SET LastLogin = @Now WHERE Id = @Id;"""
             Parameters = [ "@Now", SqliteType.Integer, 8; "@Id", SqliteType.Integer, 8 ]

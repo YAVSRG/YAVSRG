@@ -88,7 +88,7 @@ module Save =
 
                 // actually calculate what score was obtained
 
-                let replay = Replay.decompress request.Replay // todo: zip bomb prevention?
+                let replay = Replay.decompress_string request.Replay // todo: zip bomb prevention?
                 let modChart = Mods.apply_mods request.Mods chart
 
                 let mutable leaderboard_changes: Charts.Scores.Save.LeaderboardChange list = []

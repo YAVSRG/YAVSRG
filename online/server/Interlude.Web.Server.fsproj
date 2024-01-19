@@ -8,6 +8,7 @@
     <Compile Include="Config.fs" />
     <Compile Include="Domain\Tables\Users.fs" />
     <Compile Include="Domain\Tables\Friends.fs" />
+    <Compile Include="Domain\Tables\Scores.fs" />
     <Compile Include="Domain\Database.fs" />
     <Compile Include="Domain\Redis.fs" />
     <Compile Include="Domain\Objects\Users.fs" />

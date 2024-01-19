@@ -27,7 +27,6 @@ module Database =
 
     let startup_unit_tests() : IDisposable =
         let _db, keep_alive = Database.in_memory("unit_tests")
-        //let _db, keep_alive = Database.from_file("unit_tests.db"), { new IDisposable with override this.Dispose() = () }
         Migrations_New.run _db
         db <- _db
         keep_alive

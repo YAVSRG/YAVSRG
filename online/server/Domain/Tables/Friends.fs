@@ -14,14 +14,14 @@ type FriendRelation =
 
 module Friends =
 
-    let CREATE_TABLE : NonQuery<unit> =
+    let internal CREATE_TABLE : NonQuery<unit> =
         { NonQuery.without_parameters() with
             SQL = """
             CREATE TABLE friends (
                 UserId INTEGER PRIMARY KEY NOT NULL,
                 Following TEXT NOT NULL,
                 Followers TEXT NOT NULL,
-                FOREIGN KEY (UserId) REFERENCES users(Id)
+                FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE
             );
             """
         }
@@ -50,13 +50,17 @@ module Friends =
     let private UPDATE_FOLLOWING_FOLLOWERS : NonQuery<UpdateFollowingFollowersModel> =
         {
             SQL = """
+            BEGIN TRANSACTION;
+
             INSERT INTO friends (UserId, "Following", Followers)
             VALUES (@UserId, @UserNewFollowing, '[]')
-            ON CONFLICT DO UPDATE SET "Following" = @UserNewFollowing;
+            ON CONFLICT DO UPDATE SET "Following" = excluded.Following;
             
             INSERT INTO friends (UserId, "Following", Followers)
             VALUES (@FriendId, '[]', @FriendNewFollowers)
-            ON CONFLICT DO UPDATE SET Followers = @FriendNewFollowers;
+            ON CONFLICT DO UPDATE SET Followers = excluded.Followers;
+
+            COMMIT;
             """
             Parameters = 
                 [
