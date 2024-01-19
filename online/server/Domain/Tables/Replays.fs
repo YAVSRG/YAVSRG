@@ -100,7 +100,7 @@ module Replay =
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p id -> p.Int64 id
         }
-    let private SAVE_LEADERBOARD : NonQuery<string * Replay> =
+    let private SAVE_LEADERBOARD : Query<string * Replay, int64> =
         {
             SQL = """
             INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Rate, Mods, Data)
@@ -114,7 +114,8 @@ module Replay =
                         WHERE replays.Id = excluded.Id
                         UNION ALL SELECT @Purpose
                     ) GROUP BY ''
-                );
+                )
+            RETURNING Id;
             """
             Parameters =
                 [
@@ -139,6 +140,7 @@ module Replay =
                 p.Json JSON [ ruleset ]
                 p.String ruleset
             )
+            Read = fun r -> r.Int64
         }
     // Only the most best replay per-chart is stored, overwriting any previous replay for that chart
     let save_leaderboard (ruleset_id: string) (replay: Replay) =
@@ -154,12 +156,12 @@ module Replay =
             else
                 UPDATE_PURPOSES.Execute (existing.Id, Set.remove ruleset_id existing.Purposes) db |> expect |> ignore
             
-            SAVE_LEADERBOARD.ExecuteGetId (ruleset_id, replay) db |> expect
+            SAVE_LEADERBOARD.Execute (ruleset_id, replay) db |> expect |> Array.exactlyOne
 
         | None -> 
-            SAVE_LEADERBOARD.ExecuteGetId (ruleset_id, replay) db |> expect
+            SAVE_LEADERBOARD.Execute (ruleset_id, replay) db |> expect |> Array.exactlyOne
 
-    let private SAVE_CHALLENGE : NonQuery<Replay> =
+    let private SAVE_CHALLENGE : Query<Replay, int64> =
         {
             SQL = """
             INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Rate, Mods, Data)
@@ -173,7 +175,8 @@ module Replay =
                         WHERE replays.Id = excluded.Id
                         UNION ALL SELECT @Purpose
                     ) GROUP BY ''
-                );
+                )
+            RETURNING Id;
             """
             Parameters =
                 [
@@ -198,9 +201,10 @@ module Replay =
                 p.Json JSON ["challenge"]
                 p.String "challenge"
             )
+            Read = fun r -> r.Int64
         }
     // Replay is stored long term for sharing with friends
-    let save_challenge (replay: Replay) = SAVE_CHALLENGE.ExecuteGetId replay db |> expect
+    let save_challenge (replay: Replay) = SAVE_CHALLENGE.Execute replay db |> expect |> Array.exactlyOne
 
     let private BY_ID : Query<int64, Replay> =
         {

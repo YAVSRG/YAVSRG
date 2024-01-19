@@ -34,3 +34,27 @@ module Replays =
         match Replay.by_id replay_id with
         | Some fetched_replay -> Assert.AreEqual(replay, fetched_replay)
         | None -> Assert.Fail()
+
+    [<Test>]
+    let Leaderboard_Idempotent () =
+        let user_id = User.create ("LeaderboardIdempotent", 0uL) |> User.save_new
+        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+    
+        let replay_id = Replay.save_leaderboard SCJ4 replay
+        let replay_id2 = Replay.save_leaderboard SCJ4 replay
+        let replay_id3 = Replay.save_leaderboard SCJ4 replay
+
+        Assert.AreEqual(replay_id, replay_id2)
+        Assert.AreEqual(replay_id, replay_id3)
+
+    [<Test>]
+    let Challenge_Idempotent () =
+        let user_id = User.create ("ChallengeIdempotent", 0uL) |> User.save_new
+        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        
+        let replay_id = Replay.save_challenge replay
+        let replay_id2 = Replay.save_challenge replay
+        let replay_id3 = Replay.save_challenge replay
+    
+        Assert.AreEqual(replay_id, replay_id2)
+        Assert.AreEqual(replay_id, replay_id3)
