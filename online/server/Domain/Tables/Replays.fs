@@ -67,7 +67,7 @@ module Replay =
             FillParameters = (fun p req ->
                 p.Int64 req.UserId
                 p.String req.ChartId
-                p.String (req.RulesetId.Replace("_", "\\_").Replace("%", "\\%"))
+                p.String ("%" + req.RulesetId.Replace("_", "\\_").Replace("%", "\\%") + "%")
             )
             Read = (fun r ->
                 {|
@@ -165,7 +165,7 @@ module Replay =
         {
             SQL = """
             INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Rate, Mods, Data)
-            VALUES (@UserId, @ChartId, @PurposeSingleton, @TimePlayed, @TimeUploaded, @Rate, @Mods, @Data)
+            VALUES (@UserId, @ChartId, '["challenge"]', @TimePlayed, @TimeUploaded, @Rate, @Mods, @Data)
             ON CONFLICT DO UPDATE SET 
                 TimeUploaded = excluded.TimeUploaded,
                 Purposes = (
@@ -173,7 +173,7 @@ module Replay =
                         SELECT json_each.value
                         FROM replays, json_each(replays.Purposes)
                         WHERE replays.Id = excluded.Id
-                        UNION ALL SELECT @Purpose
+                        UNION ALL SELECT 'challenge'
                     ) GROUP BY ''
                 )
             RETURNING Id;
@@ -187,8 +187,6 @@ module Replay =
                     "@Rate", SqliteType.Real, 4
                     "@Mods", SqliteType.Text, -1
                     "@Data", SqliteType.Blob, -1
-                    "@PurposeSingleton", SqliteType.Text, -1
-                    "@Purpose", SqliteType.Text, -1
                 ]
             FillParameters = (fun p replay ->
                 p.Int64 replay.UserId
@@ -198,8 +196,6 @@ module Replay =
                 p.Float32 replay.Rate
                 p.Json JSON replay.Mods
                 p.Blob replay.Data
-                p.Json JSON ["challenge"]
-                p.String "challenge"
             )
             Read = fun r -> r.Int64
         }
@@ -226,7 +222,7 @@ module Replay =
                     Data =
                         // todo: push into Percyqaz.Data
                         use stream = r.Stream
-                        use ms = new System.IO.MemoryStream()
+                        use ms = new IO.MemoryStream()
                         stream.CopyTo ms
                         ms.ToArray()
                 }

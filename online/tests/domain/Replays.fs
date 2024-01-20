@@ -36,6 +36,18 @@ module Replays =
         | None -> Assert.Fail()
 
     [<Test>]
+    let Challenge_Idempotent () =
+        let user_id = User.create ("ChallengeIdempotent", 0uL) |> User.save_new
+        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        
+        let replay_id = Replay.save_challenge replay
+        let replay_id2 = Replay.save_challenge replay
+        let replay_id3 = Replay.save_challenge replay
+    
+        Assert.AreEqual(replay_id, replay_id2)
+        Assert.AreEqual(replay_id, replay_id3)
+
+    [<Test>]
     let Leaderboard_Idempotent () =
         let user_id = User.create ("LeaderboardIdempotent", 0uL) |> User.save_new
         let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
@@ -48,13 +60,83 @@ module Replays =
         Assert.AreEqual(replay_id, replay_id3)
 
     [<Test>]
-    let Challenge_Idempotent () =
-        let user_id = User.create ("ChallengeIdempotent", 0uL) |> User.save_new
+    let Leaderboard_AutomaticDelete () =
+        let user_id = User.create ("LeaderboardAutomaticDelete", 0uL) |> User.save_new
         let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replay2 = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
         
-        let replay_id = Replay.save_challenge replay
-        let replay_id2 = Replay.save_challenge replay
-        let replay_id3 = Replay.save_challenge replay
+        let replay_id = Replay.save_leaderboard SCJ4 replay
+        let replay_id2 = Replay.save_leaderboard SCJ4 replay2
     
+        Assert.AreNotEqual(Some replay, Replay.by_id replay_id)
+        // todo: ensure scores get unlinked from replays because this is causing a delete
+        match Replay.by_id replay_id2 with
+        | Some fetched_replay -> Assert.AreEqual(replay2, fetched_replay)
+        | None -> Assert.Fail()
+    
+    [<Test>]
+    let Leaderboard_IdempotentAutomaticDelete () =
+        let user_id = User.create ("LeaderboardIdempotentAutomaticDelete", 0uL) |> User.save_new
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+            
+        let replay_id = Replay.save_leaderboard SCJ4 replayA
+        let replay_id2 = Replay.save_leaderboard SCJ4 replayA
+        let replay_id3 = Replay.save_leaderboard SCJ4 replayB
+        
+        Assert.AreEqual(replay_id, replay_id2)
+        // todo: ensure scores get unlinked from replays because this is causing a delete
+        Assert.AreNotEqual(Some replayA, Replay.by_id replay_id)
+        match Replay.by_id replay_id3 with
+        | Some fetched_replay -> Assert.AreEqual(replayB, fetched_replay)
+        | None -> Assert.Fail()
+    
+    [<Test>]
+    let Leaderboard_ChallengeNoAutomaticDelete () =
+        let user_id = User.create ("LeaderboardChallengeNoAutomaticDelete", 0uL) |> User.save_new
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+            
+        let replay_id = Replay.save_leaderboard SCJ4 replayA
+        let replay_id2 = Replay.save_leaderboard SCJ4 replayA
+        let replay_id3 = Replay.save_challenge replayA
+        let replay_id4 = Replay.save_leaderboard SCJ4 replayB
+        
         Assert.AreEqual(replay_id, replay_id2)
         Assert.AreEqual(replay_id, replay_id3)
+        Assert.AreNotEqual(replay_id, replay_id4)
+        Assert.AreEqual(Some replayA, Replay.by_id replay_id)
+        match Replay.by_id replay_id4 with
+        | Some fetched_replay -> Assert.AreEqual(replayB, fetched_replay)
+        | None -> Assert.Fail()
+    
+    [<Test>]
+    let Leaderboard_OtherRulesetNoAutomaticDelete () =
+        let user_id = User.create ("LeaderboardOtherRulesetNoAutomaticDelete", 0uL) |> User.save_new
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+            
+        let replay_id = Replay.save_leaderboard SCJ4 replayA
+        let replay_id2 = Replay.save_leaderboard "OtherRuleset" replayA
+        let replay_id3 = Replay.save_leaderboard SCJ4 replayB
+        
+        Assert.AreEqual(replay_id, replay_id2)
+        Assert.AreNotEqual(replay_id, replay_id3)
+        Assert.AreEqual(Some replayA, Replay.by_id replay_id)
+        Assert.AreEqual(Some replayB, Replay.by_id replay_id3)
+    
+    [<Test>]
+    let Leaderboard_OtherRulesetAutomaticDelete () =
+        let user_id = User.create ("LeaderboardOtherRulesetAutomaticDelete", 0uL) |> User.save_new
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+            
+        let replay_id = Replay.save_leaderboard SCJ4 replayA
+        let replay_id2 = Replay.save_leaderboard "OtherRuleset" replayA
+        let replay_id3 = Replay.save_leaderboard SCJ4 replayB
+        let replay_id4 = Replay.save_leaderboard "OtherRuleset" replayB
+        
+        Assert.AreEqual(replay_id, replay_id2)
+        Assert.AreEqual(replay_id3, replay_id4)
+        Assert.AreEqual(Some replayB, Replay.by_id replay_id3)
+        Assert.AreEqual(None, Replay.by_id replay_id)
