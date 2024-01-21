@@ -15,6 +15,7 @@ module Migrations_New =
                 Database.create_table User.TABLE db |> expect |> ignore
                 Friends.CREATE_TABLE.Execute () db |> expect |> ignore
                 Replay.CREATE_TABLE.Execute () db |> expect |> ignore
+                Score.CREATE_TABLE.Execute () db |> expect |> ignore
                 Logging.Info("Migration #1 complete")
             )
             db

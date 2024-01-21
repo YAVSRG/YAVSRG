@@ -16,7 +16,7 @@ type Score =
         TimeUploaded: int64
         Rate: float32
         Mods: Mods.ModState
-        Ranked: bool
+        Ranked: bool // precomputed; true only if mod state is valid and rate >= 1
         Accuracy: float
         Grade: int
         Lamp: int
@@ -47,6 +47,32 @@ module Score =
                 UNIQUE (UserId, ChartId, RulesetId, TimePlayed)
             );
             """
+        }
+
+    let create (
+        user_id: int64,
+        chart_id: string,
+        ruleset_id: string,
+        time_played: int64,
+        rate: float32,
+        mods: Mods.ModState,
+        accuracy: float,
+        grade: int,
+        lamp: int,
+        replay_id: int64 option) =
+        {
+            UserId = user_id
+            ChartId = chart_id
+            RulesetId = ruleset_id
+            TimePlayed = time_played
+            TimeUploaded = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            Rate = MathF.Round(rate, 2)
+            Mods = mods
+            Ranked = rate >= 1.0f && (match Mods.check mods with Ok Mods.ModStatus.Ranked -> true | _ -> false)
+            Accuracy = accuracy
+            Grade = grade
+            Lamp = lamp
+            ReplayId = replay_id
         }
 
     let private SAVE : Query<Score, int64> =
@@ -165,81 +191,97 @@ module Score =
             )
         }
     let get_leaderboard (chart_id: string) (ruleset_id: string) = GET_LEADERBOARD.Execute (chart_id, ruleset_id) db |> expect
+    
+    type UserLeaderboardScore =
+        {
+            TimePlayed: int64
+            Rate: float32
+            Mods: Mods.ModState
+            Accuracy: float
+            Grade: int
+            Lamp: int
+            ReplayId: int64 option
+        }
+    let private GET_USER_LEADERBOARD_SCORE : Query<int64 * string * string, UserLeaderboardScore> =
+        {
+            SQL = """
+            SELECT TimePlayed, Rate, Mods, Accuracy, Grade, Lamp, ReplayId FROM scores
+            WHERE UserId = @UserId AND RulesetId = @RulesetId AND Ranked = 1 AND ChartId = @ChartId
+            ORDER BY Accuracy DESC
+            LIMIT 1;
+            """
+            Parameters = 
+                [
+                    "@UserId", SqliteType.Integer, 8
+                    "@ChartId", SqliteType.Text, -1
+                    "@RulesetId", SqliteType.Text, -1
+                ]
+            FillParameters = (fun p (user_id, chart_id, ruleset_id) -> 
+                p.Int64 user_id
+                p.String chart_id
+                p.String ruleset_id
+            )
+            Read = (fun r ->
+                {
+                    TimePlayed = r.Int64
+                    Rate = r.Float32
+                    Mods = r.Json JSON
+                    Accuracy = r.Float64
+                    Grade = r.Int32
+                    Lamp = r.Int32
+                    ReplayId = r.Int64Option
+                }
+            )
+        }
+    let get_user_leaderboard_score (user_id: int64) (chart_id: string) (ruleset_id: string) : UserLeaderboardScore option =
+        GET_USER_LEADERBOARD_SCORE.Execute (user_id, chart_id, ruleset_id) db |> expect |> Array.tryExactlyOne
 
-    //let get_best_score (userId: int64) (ruleset_id: string) (rate: float32) (hash: string) : Score option =
-    //    let results =
-    //        ft
-    //            .Search(
-    //                "idx:scores",
-    //                Query(
-    //                    sprintf
-    //                        "@user_id:[%i %i] @rate:[%f 2.0] @hash:{%s} @ruleset_id:{%s}"
-    //                        userId
-    //                        userId
-    //                        rate
-    //                        (escape hash)
-    //                        (escape <| ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
-    //                )
-    //                    .SetSortBy("score", false)
-    //                    .Limit(0, 1)
-    //            )
-    //            .Documents
+    let private AGGREGATE_USER_RANKED_GRADES : Query<int64 * string, string * int> =
+        {
+            SQL = """
+            SELECT ChartId, Grade FROM scores
+            WHERE UserId = @UserId AND RulesetId = @RulesetId AND Ranked = 1
+            GROUP BY ChartId
+            ORDER BY Accuracy DESC
+            LIMIT 1
+            """
+            Parameters = 
+                [
+                    "@UserId", SqliteType.Integer, 8
+                    "@RulesetId", SqliteType.Text, -1
+                ]
+            FillParameters = (fun p (user_id, ruleset_id) ->
+                p.Int64 user_id
+                p.String ruleset_id
+            )
+            Read = fun r -> r.String, r.Int32
+        }
+    let aggregate_user_ranked_grades (user_id: int64) (ruleset_id: string) =
+        AGGREGATE_USER_RANKED_GRADES.Execute (user_id, ruleset_id) db |> expect
 
-    //    results
-    //    |> Seq.tryHead
-    //    |> Option.map (fun d -> Text.Json.JsonSerializer.Deserialize<Score>(d.Item "json"))
+    let aggregate_table_scores (userId: int64) (ruleset_id: string) (rate: float32) =
+        ()
+        //let results = Collections.Generic.Dictionary<string, float>()
 
-    //// ft.aggregate idx:scores "@user_id:[4 4]" verbatim groupby 1 @hash reduce max 1 grade as best_grade
-    //// todo: filter to table hashes when there are more scores for non-table than table (soon)
+        //ft
+        //    .Aggregate(
+        //        "idx:scores",
+        //        AggregationRequest(
+        //            sprintf
+        //                "@user_id:[%i %i] @rate:[%f 2.0] @ruleset_id:{%s}"
+        //                userId
+        //                userId
+        //                rate
+        //                (escape <| ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
+        //        )
+        //            .Verbatim()
+        //            .GroupBy("@hash", Reducers.Max("score").As("best_score"))
+        //    )
+        //    .GetResults()
+        //|> Seq.iter (fun result ->
+        //    let mutable a = 0.0
+        //    result.["best_score"].TryParse(&a) |> ignore
+        //    results.[result.["hash"].ToString()] <- a
+        //)
 
-    //let aggregate_table_grades (userId: int64) (ruleset_id: string) (rate: float32) =
-    //    let results = Collections.Generic.Dictionary<string, int>()
-
-    //    ft
-    //        .Aggregate(
-    //            "idx:scores",
-    //            AggregationRequest(
-    //                sprintf
-    //                    "@user_id:[%i %i] @rate:[%f 2.0] @ruleset_id:{%s}"
-    //                    userId
-    //                    userId
-    //                    rate
-    //                    (escape <| ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
-    //            )
-    //                .Verbatim()
-    //                .GroupBy("@hash", Reducers.Max("grade").As("best_grade"))
-    //        )
-    //        .GetResults()
-    //    |> Seq.iter (fun result ->
-    //        let mutable g = 0
-    //        result.["best_grade"].TryParse(&g) |> ignore
-    //        results.[result.["hash"].ToString()] <- g
-    //    )
-
-    //    results
-
-    //let aggregate_table_scores (userId: int64) (ruleset_id: string) (rate: float32) =
-    //    let results = Collections.Generic.Dictionary<string, float>()
-
-    //    ft
-    //        .Aggregate(
-    //            "idx:scores",
-    //            AggregationRequest(
-    //                sprintf
-    //                    "@user_id:[%i %i] @rate:[%f 2.0] @ruleset_id:{%s}"
-    //                    userId
-    //                    userId
-    //                    rate
-    //                    (escape <| ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
-    //            )
-    //                .Verbatim()
-    //                .GroupBy("@hash", Reducers.Max("score").As("best_score"))
-    //        )
-    //        .GetResults()
-    //    |> Seq.iter (fun result ->
-    //        let mutable a = 0.0
-    //        result.["best_score"].TryParse(&a) |> ignore
-    //        results.[result.["hash"].ToString()] <- a
-    //    )
-
-    //    results
+        //results
