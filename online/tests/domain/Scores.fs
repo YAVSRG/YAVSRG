@@ -38,13 +38,13 @@ module Scores =
 
         let ruleset = "LeaderboardRoundTripWithReplays"
 
-        let replayA = Replay.create (user1_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replayA = Replay.create (user1_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
         let replayA_id = Replay.save_leaderboard ruleset replayA
         
         let scoreA = Score.create (user1_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, 0.98, 1, 3, Some replayA_id)
         let _ = Score.save scoreA
 
-        let replayB = Replay.create (user2_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.1f, Map.empty)
+        let replayB = Replay.create (user2_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
         let replayB_id = Replay.save_leaderboard ruleset replayB
         
         let scoreB = Score.create (user2_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f, Map.empty, 0.99, 1, 3, Some replayB_id)

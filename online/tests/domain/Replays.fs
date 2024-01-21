@@ -16,7 +16,7 @@ module Replays =
     [<Test>]
     let Challenge_RoundTrip () =
         let user_id = User.create ("ChallengeRoundTrip", 0uL) |> User.save_new
-        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
         let replay_id = Replay.save_challenge replay
 
@@ -27,7 +27,7 @@ module Replays =
     [<Test>]
     let Leaderboard_RoundTrip () =
         let user_id = User.create ("LeaderboardRoundTrip", 0uL) |> User.save_new
-        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
     
         let replay_id = Replay.save_leaderboard SCJ4 replay
 
@@ -38,7 +38,7 @@ module Replays =
     [<Test>]
     let Challenge_Idempotent () =
         let user_id = User.create ("ChallengeIdempotent", 0uL) |> User.save_new
-        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
         
         let replay_id = Replay.save_challenge replay
         let replay_id2 = Replay.save_challenge replay
@@ -50,7 +50,7 @@ module Replays =
     [<Test>]
     let Leaderboard_Idempotent () =
         let user_id = User.create ("LeaderboardIdempotent", 0uL) |> User.save_new
-        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
     
         let replay_id = Replay.save_leaderboard SCJ4 replay
         let replay_id2 = Replay.save_leaderboard SCJ4 replay
@@ -62,8 +62,8 @@ module Replays =
     [<Test>]
     let Leaderboard_AutomaticDelete () =
         let user_id = User.create ("LeaderboardAutomaticDelete", 0uL) |> User.save_new
-        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
-        let replay2 = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+        let replay2 = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
         
         let replay_id = Replay.save_leaderboard SCJ4 replay
         let replay_id2 = Replay.save_leaderboard SCJ4 replay2
@@ -77,8 +77,8 @@ module Replays =
     [<Test>]
     let Leaderboard_IdempotentAutomaticDelete () =
         let user_id = User.create ("LeaderboardIdempotentAutomaticDelete", 0uL) |> User.save_new
-        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
-        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
             
         let replay_id = Replay.save_leaderboard SCJ4 replayA
         let replay_id2 = Replay.save_leaderboard SCJ4 replayA
@@ -94,8 +94,8 @@ module Replays =
     [<Test>]
     let Leaderboard_ChallengeNoAutomaticDelete () =
         let user_id = User.create ("LeaderboardChallengeNoAutomaticDelete", 0uL) |> User.save_new
-        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
-        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
             
         let replay_id = Replay.save_leaderboard SCJ4 replayA
         let replay_id2 = Replay.save_leaderboard SCJ4 replayA
@@ -113,8 +113,8 @@ module Replays =
     [<Test>]
     let Leaderboard_OtherRulesetNoAutomaticDelete () =
         let user_id = User.create ("LeaderboardOtherRulesetNoAutomaticDelete", 0uL) |> User.save_new
-        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
-        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
             
         let replay_id = Replay.save_leaderboard SCJ4 replayA
         let replay_id2 = Replay.save_leaderboard "OtherRuleset" replayA
@@ -128,8 +128,8 @@ module Replays =
     [<Test>]
     let Leaderboard_OtherRulesetAutomaticDelete () =
         let user_id = User.create ("LeaderboardOtherRulesetAutomaticDelete", 0uL) |> User.save_new
-        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
-        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA, 1.0f, Map.empty)
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
             
         let replay_id = Replay.save_leaderboard SCJ4 replayA
         let replay_id2 = Replay.save_leaderboard "OtherRuleset" replayA

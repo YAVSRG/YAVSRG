@@ -7,15 +7,12 @@ open Prelude.Common
 open Prelude.Gameplay
 open Interlude.Web.Server
 
-// todo: consider removing duplicated rate and mods, as replays are only accessed through scores + challenges
 type Replay =
     {
         UserId: int64
         ChartId: string
         TimePlayed: int64
         TimeUploaded: int64
-        Rate: float32
-        Mods: Mods.ModState
         Data: byte array
     }
 
@@ -31,8 +28,6 @@ module Replay =
                 Purposes TEXT NOT NULL,
                 TimePlayed INTEGER NOT NULL,
                 TimeUploaded INTEGER NOT NULL,
-                Rate REAL NOT NULL,
-                Mods TEXT NOT NULL,
                 Data BLOB NOT NULL,
                 FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
                 UNIQUE (UserId, ChartId, TimePlayed)
@@ -40,14 +35,12 @@ module Replay =
             """
         }
 
-    let create (user_id: int64, chart_id: string, timestamp: int64, replay: ReplayData, rate: float32, mods: Mods.ModState) =
+    let create (user_id: int64, chart_id: string, timestamp: int64, replay: ReplayData) =
         {
             UserId = user_id
             ChartId = chart_id
             TimePlayed = timestamp
             TimeUploaded = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-            Rate = MathF.Round(rate, 2)
-            Mods = mods
             Data = Replay.compress_bytes replay
         }
 
@@ -104,8 +97,8 @@ module Replay =
     let private SAVE_LEADERBOARD : Query<string * Replay, int64> =
         {
             SQL = """
-            INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Rate, Mods, Data)
-            VALUES (@UserId, @ChartId, @PurposeSingleton, @TimePlayed, @TimeUploaded, @Rate, @Mods, @Data)
+            INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Data)
+            VALUES (@UserId, @ChartId, @PurposeSingleton, @TimePlayed, @TimeUploaded, @Data)
             ON CONFLICT DO UPDATE SET 
                 TimeUploaded = excluded.TimeUploaded,
                 Purposes = (
@@ -124,8 +117,6 @@ module Replay =
                     "@ChartId", SqliteType.Text, -1
                     "@TimePlayed", SqliteType.Integer, 8
                     "@TimeUploaded", SqliteType.Integer, 8
-                    "@Rate", SqliteType.Real, 4
-                    "@Mods", SqliteType.Text, -1
                     "@Data", SqliteType.Blob, -1
                     "@PurposeSingleton", SqliteType.Text, -1
                     "@Purpose", SqliteType.Text, -1
@@ -135,8 +126,6 @@ module Replay =
                 p.String replay.ChartId
                 p.Int64 replay.TimePlayed
                 p.Int64 replay.TimeUploaded
-                p.Float32 replay.Rate
-                p.Json JSON replay.Mods
                 p.Blob replay.Data
                 p.Json JSON [ ruleset ]
                 p.String ruleset
@@ -165,8 +154,8 @@ module Replay =
     let private SAVE_CHALLENGE : Query<Replay, int64> =
         {
             SQL = """
-            INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Rate, Mods, Data)
-            VALUES (@UserId, @ChartId, '["challenge"]', @TimePlayed, @TimeUploaded, @Rate, @Mods, @Data)
+            INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Data)
+            VALUES (@UserId, @ChartId, '["challenge"]', @TimePlayed, @TimeUploaded, @Data)
             ON CONFLICT DO UPDATE SET 
                 TimeUploaded = excluded.TimeUploaded,
                 Purposes = (
@@ -185,8 +174,6 @@ module Replay =
                     "@ChartId", SqliteType.Text, -1
                     "@TimePlayed", SqliteType.Integer, 8
                     "@TimeUploaded", SqliteType.Integer, 8
-                    "@Rate", SqliteType.Real, 4
-                    "@Mods", SqliteType.Text, -1
                     "@Data", SqliteType.Blob, -1
                 ]
             FillParameters = (fun p replay ->
@@ -194,8 +181,6 @@ module Replay =
                 p.String replay.ChartId
                 p.Int64 replay.TimePlayed
                 p.Int64 replay.TimeUploaded
-                p.Float32 replay.Rate
-                p.Json JSON replay.Mods
                 p.Blob replay.Data
             )
             Read = fun r -> r.Int64
@@ -206,7 +191,7 @@ module Replay =
     let private BY_ID : Query<int64, Replay> =
         {
             SQL = """
-            SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Rate, Mods, Data FROM replays
+            SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Data FROM replays
             WHERE Id = @Id;
             """
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
@@ -218,8 +203,6 @@ module Replay =
                     ChartId = r.String
                     TimePlayed = r.Int64
                     TimeUploaded = r.Int64
-                    Rate = r.Float32
-                    Mods = r.Json JSON
                     Data =
                         // todo: push into Percyqaz.Data
                         use stream = r.Stream
