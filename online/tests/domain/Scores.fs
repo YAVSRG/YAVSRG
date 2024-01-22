@@ -32,7 +32,7 @@ module Scores =
         Assert.AreEqual(score.Lamp, results.[0].Lamp)
     
     [<Test>]
-    let Leaderboard_RoundTrip_WithReplays () =
+    let Leaderboard_RoundTripWithReplays () =
         let user1_id = User.create ("LeaderboardRoundTripWithReplayA", 0uL) |> User.save_new
         let user2_id = User.create ("LeaderboardRoundTripWithReplayB", 0uL) |> User.save_new
 
@@ -47,7 +47,7 @@ module Scores =
         let replayB = Replay.create (user2_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
         let replayB_id = Replay.save_leaderboard ruleset replayB
         
-        let scoreB = Score.create (user2_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f, Map.empty, 0.99, 1, 3, Some replayB_id)
+        let scoreB = Score.create (user2_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
         let _ = Score.save scoreB
 
         let results = Score.get_leaderboard CRESCENT_MOON ruleset
@@ -71,3 +71,159 @@ module Scores =
         Assert.AreEqual(scoreA.Rate, results.[1].Rate)
         Assert.AreEqual(scoreA.Mods, results.[1].Mods)
         Assert.AreEqual(scoreA.TimePlayed, results.[1].TimePlayed)
+
+    [<Test>]
+    let Leaderboard_RoundTripMultipleScoresWorstFirst () =
+        let user_id = User.create ("LeaderboardRoundTripMultipleScoresWorstFirst", 0uL) |> User.save_new
+
+        let ruleset = "LeaderboardRoundTripMultipleScoresWorstFirst"
+
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+        let replayA_id = Replay.save_leaderboard ruleset replayA
+        let scoreA = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, 0.98, 1, 3, Some replayA_id)
+        let _ = Score.save scoreA
+
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let scoreB = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
+        let _ = Score.save scoreB
+
+        let results = Score.get_leaderboard CRESCENT_MOON ruleset
+
+        printfn "%A" results
+
+        Assert.AreEqual(1, results.Length)
+
+        Assert.AreEqual(user_id, results.[0].UserId)
+        Assert.AreEqual(scoreB.Accuracy, results.[0].Accuracy)
+        Assert.AreEqual(scoreB.Grade, results.[0].Grade)
+        Assert.AreEqual(scoreB.Lamp, results.[0].Lamp)
+        Assert.AreEqual(scoreB.Rate, results.[0].Rate)
+        Assert.AreEqual(scoreB.Mods, results.[0].Mods)
+        Assert.AreEqual(scoreB.TimePlayed, results.[0].TimePlayed)
+        Assert.AreEqual(Some replayB_id, results.[0].ReplayId)
+    
+    [<Test>]
+    let Leaderboard_RoundTripMultipleScoresBestFirst () =
+        let user_id = User.create ("LeaderboardRoundTripMultipleScoresBestFirst", 0uL) |> User.save_new
+    
+        let ruleset = "LeaderboardRoundTripMultipleScoresBestFirst"
+    
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let scoreB = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
+        let _ = Score.save scoreB
+    
+        let scoreA = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, 0.98, 1, 3, None)
+        let _ = Score.save scoreA
+    
+        let results = Score.get_leaderboard CRESCENT_MOON ruleset
+    
+        printfn "%A" results
+    
+        Assert.AreEqual(1, results.Length)
+    
+        Assert.AreEqual(user_id, results.[0].UserId)
+        Assert.AreEqual(scoreB.Accuracy, results.[0].Accuracy)
+        Assert.AreEqual(scoreB.Grade, results.[0].Grade)
+        Assert.AreEqual(scoreB.Lamp, results.[0].Lamp)
+        Assert.AreEqual(scoreB.Rate, results.[0].Rate)
+        Assert.AreEqual(scoreB.Mods, results.[0].Mods)
+        Assert.AreEqual(scoreB.TimePlayed, results.[0].TimePlayed)
+        Assert.AreEqual(Some replayB_id, results.[0].ReplayId)
+    
+    [<Test>]
+    let LeaderboardScore_RoundTripMultipleScoresWorstFirst () =
+        let user_id = User.create ("LeaderboardScoreRoundTripMultipleScoresWorstFirst", 0uL) |> User.save_new
+    
+        let ruleset = "LeaderboardScoreRoundTripMultipleScoresWorstFirst"
+    
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+        let replayA_id = Replay.save_leaderboard ruleset replayA
+        let scoreA = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, 0.98, 1, 3, Some replayA_id)
+        let _ = Score.save scoreA
+    
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let scoreB = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
+        let _ = Score.save scoreB
+    
+        match Score.get_user_leaderboard_score user_id CRESCENT_MOON ruleset with
+        | None -> Assert.Fail()
+        | Some result ->
+            Assert.AreEqual(scoreB.Accuracy, result.Accuracy)
+            Assert.AreEqual(scoreB.Grade, result.Grade)
+            Assert.AreEqual(scoreB.Lamp, result.Lamp)
+            Assert.AreEqual(scoreB.Rate, result.Rate)
+            Assert.AreEqual(scoreB.Mods, result.Mods)
+            Assert.AreEqual(scoreB.TimePlayed, result.TimePlayed)
+            Assert.AreEqual(Some replayB_id, result.ReplayId)
+        
+    [<Test>]
+    let LeaderboardScore_RoundTripMultipleScoresBestFirst () =
+        let user_id = User.create ("LeaderboardScoreRoundTripMultipleScoresBestFirst", 0uL) |> User.save_new
+        
+        let ruleset = "LeaderboardScoreRoundTripMultipleScoresBestFirst"
+        
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let scoreB = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
+        let _ = Score.save scoreB
+        
+        let scoreA = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, 0.98, 1, 3, None)
+        let _ = Score.save scoreA
+        
+        match Score.get_user_leaderboard_score user_id CRESCENT_MOON ruleset with
+        | None -> Assert.Fail()
+        | Some result ->
+            Assert.AreEqual(scoreB.Accuracy, result.Accuracy)
+            Assert.AreEqual(scoreB.Grade, result.Grade)
+            Assert.AreEqual(scoreB.Lamp, result.Lamp)
+            Assert.AreEqual(scoreB.Rate, result.Rate)
+            Assert.AreEqual(scoreB.Mods, result.Mods)
+            Assert.AreEqual(scoreB.TimePlayed, result.TimePlayed)
+            Assert.AreEqual(Some replayB_id, result.ReplayId)
+
+    [<Test>]
+    let RoundTrips_ById () =
+        let user_id = User.create ("RoundTripsById", 0uL) |> User.save_new
+
+        let ruleset = "RoundTripsById"
+
+        let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+        let replayA_id = Replay.save_leaderboard ruleset replayA
+        let scoreA = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, 0.98, 1, 3, Some replayA_id)
+        let scoreA_id = Score.save scoreA
+
+        let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let scoreB = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
+        let scoreB_id = Score.save scoreB
+
+        match Score.by_id scoreA_id with
+        | Some (retrieved_score, None) -> 
+            Assert.AreEqual(retrieved_score.UserId, scoreA.UserId)
+            Assert.AreEqual(retrieved_score.ChartId, scoreA.ChartId)
+            Assert.AreEqual(retrieved_score.RulesetId, scoreA.RulesetId)
+            Assert.AreEqual(retrieved_score.TimePlayed, scoreA.TimePlayed)
+            Assert.AreEqual(retrieved_score.Rate, scoreA.Rate)
+            Assert.AreEqual(retrieved_score.Mods, scoreA.Mods)
+            Assert.AreEqual(retrieved_score.Accuracy, scoreA.Accuracy)
+            Assert.AreEqual(retrieved_score.Grade, scoreA.Grade)
+            Assert.AreEqual(retrieved_score.Lamp, scoreA.Lamp)
+        | _ -> Assert.Fail()
+
+        match Score.by_id scoreB_id with
+        | Some (retrieved_score, Some retrieved_replay) -> 
+            Assert.AreEqual(retrieved_score.UserId, scoreB.UserId)
+            Assert.AreEqual(retrieved_score.ChartId, scoreB.ChartId)
+            Assert.AreEqual(retrieved_score.RulesetId, scoreB.RulesetId)
+            Assert.AreEqual(retrieved_score.TimePlayed, scoreB.TimePlayed)
+            Assert.AreEqual(retrieved_score.Rate, scoreB.Rate)
+            Assert.AreEqual(retrieved_score.Mods, scoreB.Mods)
+            Assert.AreEqual(retrieved_score.Accuracy, scoreB.Accuracy)
+            Assert.AreEqual(retrieved_score.Grade, scoreB.Grade)
+            Assert.AreEqual(retrieved_score.Lamp, scoreB.Lamp)
+
+            Assert.AreEqual(retrieved_replay.Data, replayB.Data)
+        | _ -> Assert.Fail()

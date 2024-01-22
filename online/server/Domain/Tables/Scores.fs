@@ -166,9 +166,17 @@ module Score =
     let private GET_LEADERBOARD : Query<string * string, LeaderboardScore> = 
         {
             SQL = """
-            SELECT UserId, TimePlayed, Rate, Mods, Accuracy, Grade, Lamp, ReplayId FROM scores
-            WHERE ChartId = @ChartId AND RulesetId = @RulesetId AND Ranked = 1
-            ORDER BY Accuracy DESC
+            WITH UserBestScores AS (
+                SELECT 
+                    UserId, TimePlayed, Rate, Mods, Accuracy, Grade, Lamp, ReplayId,
+                    ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY Accuracy DESC) AS UserScoreRank
+                FROM scores
+                WHERE ChartId = @ChartId AND RulesetId = @RulesetId AND Ranked = 1
+            )
+
+            SELECT UserId, TimePlayed, Rate, Mods, Accuracy, Grade, Lamp, ReplayId FROM UserBestScores
+            WHERE UserScoreRank = 1
+            ORDER BY Accuracy DESC, TimePlayed ASC
             LIMIT 20;
             """
             Parameters = 
@@ -239,11 +247,17 @@ module Score =
     let private AGGREGATE_USER_RANKED_GRADES : Query<int64 * string, string * int> =
         {
             SQL = """
-            SELECT ChartId, Grade FROM scores
-            WHERE UserId = @UserId AND RulesetId = @RulesetId AND Ranked = 1
-            GROUP BY ChartId
-            ORDER BY Accuracy DESC
-            LIMIT 1
+            WITH ChartBestGrades AS (
+                SELECT 
+                    ChartId,
+                    Grade,
+                    Accuracy,
+                    ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY Accuracy DESC) AS ChartScoreRank
+                FROM scores
+                WHERE UserId = @UserId AND RulesetId = @RulesetId AND Ranked = 1
+            )
+            SELECT ChartId, Grade FROM ChartBestGrades
+            WHERE ChartScoreRank = 1;
             """
             Parameters = 
                 [
@@ -258,30 +272,75 @@ module Score =
         }
     let aggregate_user_ranked_grades (user_id: int64) (ruleset_id: string) =
         AGGREGATE_USER_RANKED_GRADES.Execute (user_id, ruleset_id) db |> expect
+        
+    let private AGGREGATE_USER_RANKED_SCORES : Query<int64 * string, string * float> =
+        {
+            SQL = """
+            WITH ChartBestScores AS (
+                SELECT 
+                    ChartId,
+                    Accuracy,
+                    ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY Accuracy DESC) AS ChartScoreRank
+                FROM scores
+                WHERE UserId = @UserId AND RulesetId = @RulesetId AND Ranked = 1
+            )
+            SELECT ChartId, Accuracy FROM ChartBestScores
+            WHERE ChartScoreRank = 1;
+            """
+            Parameters = 
+                [
+                    "@UserId", SqliteType.Integer, 8
+                    "@RulesetId", SqliteType.Text, -1
+                ]
+            FillParameters = (fun p (user_id, ruleset_id) ->
+                p.Int64 user_id
+                p.String ruleset_id
+            )
+            Read = fun r -> r.String, r.Int32
+        }
+    let aggregate_user_ranked_scores (user_id: int64) (ruleset_id: string) =
+        AGGREGATE_USER_RANKED_SCORES.Execute (user_id, ruleset_id) db |> expect
 
-    let aggregate_table_scores (userId: int64) (ruleset_id: string) (rate: float32) =
-        ()
-        //let results = Collections.Generic.Dictionary<string, float>()
-
-        //ft
-        //    .Aggregate(
-        //        "idx:scores",
-        //        AggregationRequest(
-        //            sprintf
-        //                "@user_id:[%i %i] @rate:[%f 2.0] @ruleset_id:{%s}"
-        //                userId
-        //                userId
-        //                rate
-        //                (escape <| ruleset_id.Replace(")", "\\)").Replace("(", "\\("))
-        //        )
-        //            .Verbatim()
-        //            .GroupBy("@hash", Reducers.Max("score").As("best_score"))
-        //    )
-        //    .GetResults()
-        //|> Seq.iter (fun result ->
-        //    let mutable a = 0.0
-        //    result.["best_score"].TryParse(&a) |> ignore
-        //    results.[result.["hash"].ToString()] <- a
-        //)
-
-        //results
+    type ScoreByIdModel =
+        {
+            UserId: int64
+            ChartId: string
+            RulesetId: string
+            TimePlayed: int64
+            Rate: float32
+            Mods: Mods.ModState
+            Accuracy: float
+            Grade: int
+            Lamp: int
+        }
+    let BY_ID : Query<int64, ScoreByIdModel * int64 option> =
+        {
+            SQL = """
+            SELECT UserId, ChartId, RulesetId, TimePlayed, Rate, Mods, Accuracy, Grade, Lamp, ReplayId FROM scores
+            WHERE Id = @Id
+            """
+            Parameters = [ "@Id", SqliteType.Integer, 8 ]
+            FillParameters = fun p id -> p.Int64 id
+            Read = (fun r ->
+                {
+                    UserId = r.Int64
+                    ChartId = r.String
+                    RulesetId = r.String
+                    TimePlayed = r.Int64
+                    Rate = r.Float32
+                    Mods = r.Json JSON
+                    Accuracy = r.Float64
+                    Grade = r.Int32
+                    Lamp = r.Int32
+                },
+                r.Int64Option
+            )
+        }
+    let by_id (score_id: int64) =
+        match BY_ID.Execute score_id db |> expect |> Array.tryExactlyOne with
+        | Some (score, Some replay_id) ->
+            match Replay.by_id replay_id with
+            | Some replay -> Some (score, Some replay)
+            | None -> failwithf "Score %A had replay id %A, but couldn't retrieve it by id" score replay_id
+        | Some (score, None) -> Some (score, None)
+        | None -> None
