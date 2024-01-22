@@ -81,12 +81,12 @@ module Scores =
         let replayA = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
         let replayA_id = Replay.save_leaderboard ruleset replayA
         let scoreA = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, 0.98, 1, 3, Some replayA_id)
-        let _ = Score.save scoreA
+        let _ = Score.save scoreA |> Score.by_id |> printfn "%A"
 
         let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
         let replayB_id = Replay.save_leaderboard ruleset replayB
-        let scoreB = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
-        let _ = Score.save scoreB
+        let scoreB = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
+        let _ = Score.save scoreB |> Score.by_id |> printfn "%A"
 
         let results = Score.get_leaderboard CRESCENT_MOON ruleset
 
@@ -145,7 +145,7 @@ module Scores =
     
         let replayB = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
         let replayB_id = Replay.save_leaderboard ruleset replayB
-        let scoreB = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
+        let scoreB = Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, 0.99, 0, 2, Some replayB_id)
         let _ = Score.save scoreB
     
         match Score.get_user_leaderboard_score user_id CRESCENT_MOON ruleset with
