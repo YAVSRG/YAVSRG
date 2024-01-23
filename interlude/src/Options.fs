@@ -293,6 +293,8 @@ module Options =
             Hotkeys.register "delete" (mk Keys.Delete)
             Hotkeys.register "screenshot" (mk Keys.F12)
             Hotkeys.register "volume" (mk Keys.LeftAlt)
+            Hotkeys.register "volume_up" (alt Keys.Up)
+            Hotkeys.register "volume_down" (alt Keys.Down)
             Hotkeys.register "previous" (mk Keys.Left)
             Hotkeys.register "next" (mk Keys.Right)
             Hotkeys.register "previous_group" (mk Keys.PageUp)
