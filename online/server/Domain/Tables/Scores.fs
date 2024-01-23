@@ -251,8 +251,7 @@ module Score =
                 SELECT 
                     ChartId,
                     Grade,
-                    Accuracy,
-                    ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY Accuracy DESC) AS ChartScoreRank
+                    ROW_NUMBER() OVER (PARTITION BY ChartId ORDER BY Accuracy DESC) AS ChartScoreRank
                 FROM scores
                 WHERE UserId = @UserId AND RulesetId = @RulesetId AND Ranked = 1
             )
@@ -280,7 +279,7 @@ module Score =
                 SELECT 
                     ChartId,
                     Accuracy,
-                    ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY Accuracy DESC) AS ChartScoreRank
+                    ROW_NUMBER() OVER (PARTITION BY ChartId ORDER BY Accuracy DESC) AS ChartScoreRank
                 FROM scores
                 WHERE UserId = @UserId AND RulesetId = @RulesetId AND Ranked = 1
             )
@@ -296,7 +295,7 @@ module Score =
                 p.Int64 user_id
                 p.String ruleset_id
             )
-            Read = fun r -> r.String, r.Int32
+            Read = fun r -> r.String, r.Float64
         }
     let aggregate_user_ranked_scores (user_id: int64) (ruleset_id: string) =
         AGGREGATE_USER_RANKED_SCORES.Execute (user_id, ruleset_id) db |> expect

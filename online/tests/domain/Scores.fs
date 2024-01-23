@@ -227,3 +227,67 @@ module Scores =
 
             Assert.AreEqual(retrieved_replay.Data, replayB.Data)
         | _ -> Assert.Fail()
+    
+    [<Test>]
+    let AggregateGrades () =
+        let user_id = User.create ("AggregateGrades", 0uL) |> User.save_new
+
+        let mutable time = TIMEPLAYED
+        let save_score_and_replay (chart_id: string) (grade: int) =
+            let replay = Replay.create (user_id, chart_id, time, CRESCENT_MOON_REPLAY_DATA)
+            let replay_id = Replay.save_leaderboard "AggregateGrades" replay
+            let score = Score.create (user_id, chart_id, "AggregateGrades", time, 1.05f, Map.empty, 0.99 - 0.01 * float grade, grade, 3, Some replay_id)
+            Score.save score |> ignore
+            time <- time + 1000L
+
+        save_score_and_replay "chart1" 1
+        save_score_and_replay "chart1" 3
+        save_score_and_replay "chart1" 2
+        save_score_and_replay "chart2" 4
+        save_score_and_replay "chart2" 2
+        save_score_and_replay "chart2" 2
+        save_score_and_replay "chart3" 5
+        save_score_and_replay "chart3" 5
+        save_score_and_replay "chart3" 5
+        save_score_and_replay "chart4" 0
+
+        let results = Score.aggregate_user_ranked_grades user_id "AggregateGrades"
+        let result_map = Map.ofArray results
+        printfn "%A" result_map
+
+        Assert.AreEqual(1, result_map.["chart1"])
+        Assert.AreEqual(2, result_map.["chart2"])
+        Assert.AreEqual(5, result_map.["chart3"])
+        Assert.AreEqual(0, result_map.["chart4"])
+    
+    [<Test>]
+    let AggregateScores () =
+        let user_id = User.create ("AggregateScores", 0uL) |> User.save_new
+
+        let mutable time = TIMEPLAYED
+        let save_score_and_replay (chart_id: string) (grade: int) =
+            let replay = Replay.create (user_id, chart_id, time, CRESCENT_MOON_REPLAY_DATA)
+            let replay_id = Replay.save_leaderboard "AggregateScores" replay
+            let score = Score.create (user_id, chart_id, "AggregateScores", time, 1.05f, Map.empty, 0.99 - 0.01 * float grade, grade, 3, Some replay_id)
+            Score.save score |> ignore
+            time <- time + 1000L
+
+        save_score_and_replay "chart1" 1
+        save_score_and_replay "chart1" 3
+        save_score_and_replay "chart1" 2
+        save_score_and_replay "chart2" 4
+        save_score_and_replay "chart2" 2
+        save_score_and_replay "chart2" 2
+        save_score_and_replay "chart3" 5
+        save_score_and_replay "chart3" 5
+        save_score_and_replay "chart3" 5
+        save_score_and_replay "chart4" 0
+
+        let results = Score.aggregate_user_ranked_scores user_id "AggregateScores"
+        let result_map = Map.ofArray results
+        printfn "%A" result_map
+
+        Assert.AreEqual(0.98, result_map.["chart1"])
+        Assert.AreEqual(0.97, result_map.["chart2"])
+        Assert.AreEqual(0.94, result_map.["chart3"])
+        Assert.AreEqual(0.99, result_map.["chart4"])
