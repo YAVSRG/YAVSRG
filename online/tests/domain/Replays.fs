@@ -69,7 +69,6 @@ module Replays =
         let replay_id2 = Replay.save_leaderboard SCJ4 replay2
     
         Assert.AreNotEqual(Some replay, Replay.by_id replay_id)
-        // todo: ensure scores get unlinked from replays because this is causing a delete
         match Replay.by_id replay_id2 with
         | Some fetched_replay -> Assert.AreEqual(replay2, fetched_replay)
         | None -> Assert.Fail()
@@ -85,7 +84,6 @@ module Replays =
         let replay_id3 = Replay.save_leaderboard SCJ4 replayB
         
         Assert.AreEqual(replay_id, replay_id2)
-        // todo: ensure scores get unlinked from replays because this is causing a delete
         Assert.AreNotEqual(Some replayA, Replay.by_id replay_id)
         match Replay.by_id replay_id3 with
         | Some fetched_replay -> Assert.AreEqual(replayB, fetched_replay)
