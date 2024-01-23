@@ -192,11 +192,13 @@ module Network =
                         open_url url
                 | Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag ->
                     Logging.Debug("Linking an account with: " + discord_tag)
-                    Events.waiting_registration_ev.Trigger discord_tag
+                    sync
+                    <| fun () -> Events.waiting_registration_ev.Trigger discord_tag
                 | Downstream.REGISTRATION_FAILED reason ->
                     Logging.Info(sprintf "Registration failed: %s" reason)
                     Notifications.error (%"notification.network.registrationfailed", reason)
-                    Events.registration_failed_ev.Trigger reason
+                    sync
+                    <| fun () -> Events.registration_failed_ev.Trigger reason
                 | Downstream.AUTH_TOKEN token ->
                     credentials.Token <- token
                     this.Send(Upstream.LOGIN credentials.Token)
@@ -216,6 +218,8 @@ module Network =
                     credentials.Token <- ""
                     Logging.Info(sprintf "Login failed: %s" reason)
 
+                    sync
+                    <| fun () -> 
                     if Screen.current_type <> Screen.Type.SplashScreen then
                         Notifications.error (%"notification.network.loginfailed", reason)
 
