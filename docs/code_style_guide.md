@@ -12,6 +12,7 @@ You don't have to care about them in PRs I can just squash with an emoji commit 
 👽️ = Bug fix
 🌸 = UI improvement
 ✨ = New user-facing feature
+✨ = New developer-facing feature
 🧱 = New codebase feature that doesn't (yet) affect users
 🚴 = Code refactoring/cleanup/formatting
 ⚡️ = Automation (CI pipelines, automated tests, developer tooling)

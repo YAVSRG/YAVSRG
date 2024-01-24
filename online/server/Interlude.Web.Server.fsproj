@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Version.txt" />
-    <Compile Include="Config.fs" />
+    <Compile Include="Globals.fs" />
     <Compile Include="Domain_Old\Redis.fs" />
     <Compile Include="Domain_Old\Objects\Users.fs" />
     <Compile Include="Domain_Old\Objects\Friends.fs" />
@@ -24,9 +24,13 @@
     <Compile Include="Domain\Services\Scores.fs" />
     <Compile Include="Domain\Services\Users.fs" />
     <Compile Include="Domain\Database.fs" />
-    <Compile Include="Online\LoggedInUsers.fs" />
+    <Compile Include="Online\Sessions.fs" />
     <Compile Include="Online\Lobbies.fs" />
     <Compile Include="Online\Online.fs" />
+    <Compile Include="Bot\Constants.fs" />
+    <Compile Include="Bot\UserCommands.fs" />
+    <Compile Include="Bot\AdminCommands.fs" />
+    <Compile Include="Bot\Bot.fs" />
     <Compile Include="API\Utils.fs" />
     <Compile Include="API\Health\Status.fs" />
     <Compile Include="API\Auth\Dummy.fs" />
@@ -49,10 +53,6 @@
     <Compile Include="API\Players\Search.fs" />
     <Compile Include="API\Players\Online.fs" />
     <Compile Include="API\API.fs" />
-    <Compile Include="Bot\Constants.fs" />
-    <Compile Include="Bot\UserCommands.fs" />
-    <Compile Include="Bot\AdminCommands.fs" />
-    <Compile Include="Bot\Bot.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

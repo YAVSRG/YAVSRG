@@ -148,10 +148,22 @@ module Bot =
 
             client.add_Ready (fun () ->
                 task {
-                    if not startup_message_shown then
-                        let! _ =
+                    Discord.debug_log <- fun s ->
+                        let s = if s.Length > 2000 then s.Substring(0, 1995) + "\n..." else s
+                        try
                             (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel)
-                                .SendMessageAsync(sprintf "I've just restarted! Running \"%s\"" TAGLINE)
+                                .SendMessageAsync(s)
+                            |> Async.AwaitTask
+                            |> Async.Ignore
+                            |> Async.RunSynchronously
+                        with err -> Logging.Critical(sprintf "Exception while trying to debug log message: %s" s, err)
+
+                    if not startup_message_shown then
+
+                        if Secrets.SECRETS.IsProduction then
+                            sprintf "I've just been deployed! Running \"%s\"" TAGLINE
+                        else "Yippee! I'm a newly restarted local test instance"
+                        |> Discord.debug_log
 
                         startup_message_shown <- true
 

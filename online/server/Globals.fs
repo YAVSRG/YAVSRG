@@ -62,3 +62,7 @@ open Percyqaz.Data.Sqlite
 module internal DatabaseRef =
 
     let mutable db = Unchecked.defaultof<Database>
+
+module Discord =
+
+    let mutable debug_log = fun (s: string) -> ()

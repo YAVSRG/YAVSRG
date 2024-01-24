@@ -30,14 +30,14 @@ module Save =
             let hash = request.ChartId.ToUpper()
 
             match Backbeat.Charts.by_hash hash with
-            | None -> response.ReplyJson(None)
+            | None -> response.ReplyJson((None : Charts.Scores.Save.Response option))
             | Some(chart_info, song) ->
 
             let timestamp =
                 (System.DateTimeOffset.op_Implicit request.Timestamp).ToUnixTimeMilliseconds()
 
             if Score.exists userId timestamp then
-                return response.ReplyJson(None)
+                return response.ReplyJson((None : Charts.Scores.Save.Response option))
             else
 
             match! Backbeat.Charts.fetch.RequestAsync(hash) with
@@ -48,7 +48,7 @@ module Save =
             | Error _ ->
                 Logging.Debug("Rejecting score with invalid mods")
                 response.MakeErrorResponse(400) |> ignore
-            | Ok status when status >= Mods.ModStatus.Unstored -> response.ReplyJson(None)
+            | Ok status when status >= Mods.ModStatus.Unstored -> response.ReplyJson((None : Charts.Scores.Save.Response option))
             | Ok mod_status ->
 
             let rate = System.MathF.Round(request.Rate, 2)
