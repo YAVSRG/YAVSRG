@@ -7,155 +7,95 @@ open Interlude.Web.Shared
 open Interlude.Web.Server.Domain
 
 [<RequireQualifiedAccess>]
-type UserState =
+type SessionState =
     | Nothing
     | Handshake
     | LoggedIn of id: int64 * username: string
 
-module LoggedInUsers =
-
-    [<RequireQualifiedAccess>]
-    type Action =
-        | Connect of Guid
-        | Disconnect of Guid
-        | Handshake of Guid
-        | Login of Guid * string
-        | Logout of Guid
+module Session =
 
     let private LOCK_OBJ = Object()
-    let private user_states = Dictionary<Guid, UserState>()
-    let private usernames = Dictionary<string, Guid>()
+    let private session_id_to_state_map = Dictionary<Guid, SessionState>()
+    let private username_to_session_id_map = Dictionary<string, Guid>()
 
-    // todo: this code CAN be written as locks since it doesn't communicate with any other services just internal state
+    let connect (session_id: Guid) = lock LOCK_OBJ <| fun () ->
+        session_id_to_state_map.Add(session_id, SessionState.Nothing)
 
-    let private state_change =
-        { new Async.Service<Action, unit>() with
-            override this.Handle(req) =
-                async {
-                    lock LOCK_OBJ
-                    <| fun () ->
-                        match req with
+    let disconnect (session_id: Guid) = lock LOCK_OBJ <| fun () ->
+        if session_id_to_state_map.ContainsKey session_id then
+            match session_id_to_state_map.[session_id] with
+            | SessionState.LoggedIn(_, username) ->
+                username_to_session_id_map.Remove username |> ignore
+                Logging.Info(sprintf "[<- %s" username)
+            | _ -> ()
+            session_id_to_state_map.Remove session_id |> ignore
 
-                        | Action.Connect id -> user_states.Add(id, UserState.Nothing)
+    let handshake (session_id: Guid) = lock LOCK_OBJ <| fun () ->
+        match session_id_to_state_map.[session_id] with
+        | SessionState.Nothing ->
+            session_id_to_state_map.[session_id] <- SessionState.Handshake
+            Server.send (session_id, Downstream.HANDSHAKE_SUCCESS)
+        | _ -> Server.kick (session_id, "Handshake sent twice")
 
-                        | Action.Disconnect id ->
-                            if user_states.ContainsKey id then
-                                match user_states.[id] with
-                                | UserState.LoggedIn(_, username) ->
-                                    usernames.Remove username |> ignore
-                                    Logging.Info(sprintf "[<- %s" username)
-                                | _ -> ()
+    let login (session_id: Guid, auth_token) = lock LOCK_OBJ <| fun () ->
+        match session_id_to_state_map.[session_id] with
+        | SessionState.Handshake ->
+            Users.login (
+                auth_token,
+                function
+                | Ok(user_id, username) ->
+                    if username_to_session_id_map.ContainsKey(username) then
+                        session_id_to_state_map[username_to_session_id_map.[username]] <- SessionState.Handshake
+                        Server.kick (username_to_session_id_map.[username], "Logged in from another location")
 
-                                user_states.Remove id |> ignore
+                    username_to_session_id_map.[username] <- session_id
+                    session_id_to_state_map.[session_id] <- SessionState.LoggedIn(user_id, username)
+                    Server.send (session_id, Downstream.LOGIN_SUCCESS username)
+                    Logging.Info(sprintf "[-> %s" username)
+                | Error reason ->
+                    Logging.Info(sprintf "%O failed to authenticate: %s" session_id reason)
+                    Server.send (session_id, Downstream.LOGIN_FAILED reason)
+            )
+            |> Async.RunSynchronously
+        | SessionState.Nothing -> Server.kick (session_id, "Login sent before handshake")
+        | _ -> ()
 
-                        | Action.Handshake id ->
-                            match user_states.[id] with
-                            | UserState.Nothing ->
-                                user_states.[id] <- UserState.Handshake
-                                Server.send (id, Downstream.HANDSHAKE_SUCCESS)
-                            | _ -> Server.kick (id, "Handshake sent twice")
+    let logout (session_id: Guid) = lock LOCK_OBJ <| fun () ->
+        match session_id_to_state_map.[session_id] with
+        | SessionState.LoggedIn(_, username) ->
+            username_to_session_id_map.Remove username |> ignore
+            session_id_to_state_map.[session_id] <- SessionState.Handshake
+            Logging.Info(sprintf "[<- %s" username)
+        | _ -> Server.kick (session_id, "Not logged in")
 
-                        | Action.Login(session_id, token) ->
-                            match user_states.[session_id] with
-                            | UserState.Handshake ->
-                                Users.login (
-                                    token,
-                                    function
-                                    | Ok(user_id, username) ->
-                                        if usernames.ContainsKey(username) then
-                                            user_states[usernames.[username]] <- UserState.Handshake
-                                            Server.kick (usernames.[username], "Logged in from another location")
+    let list_online_users () = 
+        let states = lock LOCK_OBJ <| fun () -> Array.ofSeq session_id_to_state_map.Values
 
-                                        usernames.[username] <- session_id
-                                        user_states.[session_id] <- UserState.LoggedIn(user_id, username)
-                                        Server.send (session_id, Downstream.LOGIN_SUCCESS username)
-                                        Logging.Info(sprintf "[-> %s" username)
-                                    | Error reason ->
-                                        Logging.Info(sprintf "%O failed to authenticate: %s" session_id reason)
-                                        Server.send (session_id, Downstream.LOGIN_FAILED reason)
-                                )
-                                |> Async.RunSynchronously
-                            | UserState.Nothing -> Server.kick (session_id, "Login sent before handshake")
-                            | _ -> Server.kick (session_id, "Login sent twice")
+        states
+        |> Array.choose (
+            function
+            | SessionState.LoggedIn(id, username) -> Some(id, username)
+            | _ -> None
+        )
 
-                        | Action.Logout id ->
-                            match user_states.[id] with
-                            | UserState.LoggedIn(_, username) ->
-                                usernames.Remove username |> ignore
-                                user_states.[id] <- UserState.Handshake
-                                Logging.Info(sprintf "[<- %s" username)
-                            | _ -> Server.kick (id, "Not logged in")
-                }
-        }
+    let find_username_by_session_id (session_id: Guid) =
+        let ok, state = lock LOCK_OBJ <| fun () -> session_id_to_state_map.TryGetValue session_id
+        if ok then
+            match state with
+            | SessionState.LoggedIn(_, username) -> Some username
+            | _ -> None
+        else
+            None
 
-    let connect (id) =
-        state_change.Request(Action.Connect(id), ignore)
+    let find_session_id_by_username (username: string) = 
+        let ok, session_id = lock LOCK_OBJ <| fun () -> username_to_session_id_map.TryGetValue username
+        if ok then Some session_id else None
 
-    let disconnect (id) =
-        state_change.Request(Action.Disconnect(id), ignore)
-
-    let handshake (id) =
-        state_change.Request(Action.Handshake(id), ignore)
-
-    let login (id, username) =
-        state_change.Request(Action.Login(id, username), ignore)
-
-    let logout (id) =
-        state_change.Request(Action.Logout(id), ignore)
-
-    let who_is_online =
-        let service =
-            { new Async.Service<unit, (int64 * string) array>() with
-                override this.Handle(req) =
-                    async {
-                        let states = lock LOCK_OBJ <| fun () -> Array.ofSeq user_states.Values
-
-                        return
-                            states
-                            |> Array.choose (
-                                function
-                                | UserState.LoggedIn(id, username) -> Some(id, username)
-                                | _ -> None
-                            )
-                    }
-            }
-
-        service.RequestAsync
-
-    let find_username =
-        let service =
-            { new Async.Service<Guid, string option>() with
-                override this.Handle(req) =
-                    async {
-                        let ok, state = lock LOCK_OBJ <| fun () -> user_states.TryGetValue req
-
-                        if ok then
-                            match state with
-                            | UserState.LoggedIn(_, username) -> return Some username
-                            | _ -> return None
-                        else
-                            return None
-                    }
-            }
-
-        service.RequestAsync
-
-    let find_sessions =
-        let service =
-            { new Async.Service<string array, Guid option array>() with
-                override this.Handle(req) =
-                    async {
-                        return
-                            lock LOCK_OBJ
-                            <| fun () ->
-                                Array.map
-                                    (fun username ->
-                                        match usernames.TryGetValue username with
-                                        | true, id -> Some id
-                                        | false, _ -> None
-                                    )
-                                    req
-                    }
-            }
-
-        service.RequestAsync
+    let find_session_ids_by_usernames (usernames: string array) = lock LOCK_OBJ <| fun () ->
+        Array.map
+            (fun username ->
+                match username_to_session_id_map.TryGetValue username with
+                | true, id -> Some id
+                | false, _ -> None
+            )
+            usernames

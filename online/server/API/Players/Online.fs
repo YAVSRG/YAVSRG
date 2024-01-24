@@ -18,7 +18,7 @@ module Online =
         async {
             let _, _ = authorize headers
 
-            let! online = LoggedInUsers.who_is_online ()
+            let online = Session.list_online_users ()
             let users = User.by_ids (online |> Array.map fst)
 
             response.ReplyJson(

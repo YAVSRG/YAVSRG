@@ -16,10 +16,10 @@ module List =
             response: HttpResponse
         ) =
         async {
-            let userId, _ = authorize headers
+            let user_id, _ = authorize headers
 
-            let friends = Friends.friends_list userId
-            let! online = LoggedInUsers.find_sessions (friends |> Array.map (fun u -> u.Username))
+            let friends = Friends.friends_list user_id
+            let online = Session.find_session_ids_by_usernames (friends |> Array.map (fun u -> u.Username))
 
             response.ReplyJson(
                 {

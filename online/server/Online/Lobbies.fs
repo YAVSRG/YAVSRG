@@ -180,19 +180,17 @@ module Lobby =
         for p in lobby.Players.Values do
             p.Status <- LobbyPlayerStatus.NotReady
 
-    let private ensure_logged_in (player) : Async<string> =
-        async {
-            match! LoggedInUsers.find_username player with
-            | None -> return malice player "You are not logged in"
-            | Some username -> return username
-        }
+    let private ensure_logged_in (player: PlayerId) : string =
+        match Session.find_username_by_session_id player with
+        | None -> malice player "You are not logged in"
+        | Some username -> username
 
-    let private ensure_in_lobby (player) =
+    let private ensure_in_lobby (player: PlayerId) =
         match get_player_lobby_id player with
         | Some id -> id, lobbies.[id]
         | None -> user_error player "You are not in a lobby"
 
-    let private ensure_not_in_lobby (player) =
+    let private ensure_not_in_lobby (player: PlayerId) =
         if (get_player_lobby_id player).IsSome then
             user_error player "You are already in a lobby"
 
@@ -204,7 +202,7 @@ module Lobby =
                         match req with
 
                         | List(player) ->
-                            let! _ = ensure_logged_in player
+                            let _ = ensure_logged_in player
 
                             let lobbies =
                                 seq {
@@ -227,7 +225,7 @@ module Lobby =
                             Server.send (player, Downstream.LOBBY_LIST lobbies)
 
                         | Create(player, lobby_name) ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             ensure_not_in_lobby player
 
 
@@ -251,7 +249,7 @@ module Lobby =
 
 
                         | Join(player, lobby_id) ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             ensure_not_in_lobby player
 
                             if not (lobbies.ContainsKey lobby_id) then
@@ -286,7 +284,7 @@ module Lobby =
 
 
                         | Leave player ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
 
@@ -322,12 +320,10 @@ module Lobby =
 
 
                         | Invite(sender, recipient) ->
-                            let! username = ensure_logged_in sender
+                            let username = ensure_logged_in sender
                             let lobby_id, lobby = ensure_in_lobby sender
 
-                            let! session_ids = LoggedInUsers.find_sessions [| recipient |]
-
-                            match session_ids.[0] with
+                            match Session.find_session_id_by_username recipient with
                             | None -> user_error sender "User not found"
                             | Some recipient_id ->
 
@@ -341,7 +337,7 @@ module Lobby =
 
 
                         | Chat(player, message) ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             Logging.Info(sprintf "%s: %s" username message)
@@ -350,7 +346,7 @@ module Lobby =
 
 
                         | ReadyUp(player, flag) ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
                             let old_status = lobby.Players.[player].Status
@@ -406,7 +402,7 @@ module Lobby =
 
 
                         | SelectChart(player, chart) ->
-                            let! _ = ensure_logged_in player
+                            let _ = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             if lobby.Host <> player then
@@ -428,7 +424,7 @@ module Lobby =
 
 
                         | StartGame player ->
-                            let! _ = ensure_logged_in player
+                            let _ = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
                             if lobby.Host <> player then
@@ -459,7 +455,7 @@ module Lobby =
 
 
                         | CancelStartGame player ->
-                            let! _ = ensure_logged_in player
+                            let _ = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             if lobby.Host <> player then
@@ -479,7 +475,7 @@ module Lobby =
 
 
                         | BeginPlaying player ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             if not lobby.GameRunning then
@@ -499,7 +495,7 @@ module Lobby =
 
 
                         | FinishPlaying(player, abandoned) ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
                             if not lobby.GameRunning then
@@ -546,7 +542,7 @@ module Lobby =
 
 
                         | BeginSpectating player ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             if not lobby.GameRunning then
@@ -591,7 +587,7 @@ module Lobby =
 
 
                         | PlayData(player, data) ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             if not lobby.GameRunning then
@@ -612,7 +608,7 @@ module Lobby =
 
 
                         | Settings(player, settings) ->
-                            let! _ = ensure_logged_in player
+                            let _ = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             if lobby.Host <> player then
@@ -625,15 +621,13 @@ module Lobby =
 
 
                         | ChangeHost(player, newhost) ->
-                            let! _ = ensure_logged_in player
+                            let _ = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
                             if lobby.Host <> player then
                                 user_error player "You are not host"
 
-                            let! session_ids = LoggedInUsers.find_sessions [| newhost |]
-
-                            match session_ids.[0] with
+                            match Session.find_session_id_by_username newhost with
                             | None -> user_error player "User is not in this lobby"
                             | Some newhost_id ->
 
@@ -649,7 +643,7 @@ module Lobby =
 
 
                         | MissingChart(player) ->
-                            let! username = ensure_logged_in player
+                            let username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             if lobby.Players.[player].Status = LobbyPlayerStatus.MissingChart then

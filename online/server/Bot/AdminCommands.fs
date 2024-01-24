@@ -58,7 +58,7 @@ module AdminCommands =
     // Requires user to exist, with the developer role
     let dispatch
         (client: DiscordSocketClient)
-        (userId: int64, userInfo: User)
+        (user_id: int64, user_info: User)
         (context: SocketMessage)
         (command: string)
         (args: string list)
@@ -125,7 +125,7 @@ module AdminCommands =
                 ()
 
             | "online" ->
-                let! user_list = LoggedInUsers.who_is_online ()
+                let user_list = Session.list_online_users ()
 
                 do!
                     EmbedBuilder(Title = sprintf "All online users (%i)" user_list.Length)
@@ -254,7 +254,7 @@ module AdminCommands =
 
     let interaction
         (client: DiscordSocketClient)
-        (userId: int64, userInfo: User)
+        (user_id: int64, user_info: User)
         (context: SocketMessageComponent)
         (command: string)
         (args: string list)
