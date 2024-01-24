@@ -22,6 +22,7 @@
     <Compile Include="Domain\Objects\Scores.fs" />
     <Compile Include="Domain\Objects\Leaderboards.fs" />
     <Compile Include="Domain\Services\Scores.fs" />
+    <Compile Include="Domain\Services\Users.fs" />
     <Compile Include="Domain\Database.fs" />
     <Compile Include="Online\LoggedInUsers.fs" />
     <Compile Include="Online\Lobbies.fs" />

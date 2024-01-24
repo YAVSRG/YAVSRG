@@ -2,7 +2,7 @@
 
 open NUnit.Framework
 
-open Interlude.Web.Server.Domain.New
+open Interlude.Web.Server.Domain.Objects
 
 module Leaderboards =
 

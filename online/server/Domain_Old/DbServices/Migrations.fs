@@ -5,7 +5,7 @@ open NRedisStack.Search.Literals.Enums
 open Percyqaz.Common
 open Interlude.Web.Server.Domain.Redis
 
-module Migrations =
+module RedisMigrations =
 
     let run () =
         Logging.Debug("Performing any necessary migrations...")

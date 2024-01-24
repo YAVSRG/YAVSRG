@@ -3,7 +3,7 @@
 open NUnit.Framework
 
 open Prelude.Gameplay
-open Interlude.Web.Server.Domain.New
+open Interlude.Web.Server.Domain.Objects
 
 module Replays =
     

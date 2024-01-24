@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.New
+﻿namespace Interlude.Web.Server.Domain.Objects
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite

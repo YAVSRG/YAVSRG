@@ -1,9 +1,11 @@
-﻿namespace Interlude.Web.Server.Domain.New
+﻿namespace Interlude.Web.Server.Domain
 
 open System
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Interlude.Web.Server
+
+open Interlude.Web.Server.Domain.Objects
 
 module Migrations =
 
