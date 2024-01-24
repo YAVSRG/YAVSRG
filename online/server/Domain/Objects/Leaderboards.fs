@@ -26,9 +26,8 @@ module Leaderboard =
     let private CREATE : NonQuery<string * string> =
         {
             SQL = """
-            INSERT INTO leaderboards (ChartId, RulesetId)
-            VALUES (@ChartId, @RulesetId)
-            ON CONFLICT IGNORE;
+            INSERT OR IGNORE INTO leaderboards (ChartId, RulesetId)
+            VALUES (@ChartId, @RulesetId);
             """
             Parameters =
                 [
@@ -40,12 +39,12 @@ module Leaderboard =
                 p.String ruleset_id
             )
         }
-    let create (chart_id: string) (ruleset_id: string) = CREATE.Execute (chart_id, ruleset_id) db |> expect
+    let create (chart_id: string) (ruleset_id: string) = CREATE.Execute (chart_id, ruleset_id) db |> expect |> ignore
 
     let private EXISTS : Query<string * string, int32> = 
         {
             SQL = """
-            SELECT 1 FROM scores
+            SELECT 1 FROM leaderboards
             WHERE ChartId = @ChartId AND RulesetId = @RulesetId;
             """
             Parameters =

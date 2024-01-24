@@ -69,12 +69,12 @@ module Scores =
                         Lamp.calculate ruleset.Grading.Lamps scoring.State
                     )
 
-                let has_leaderboard, is_new_leaderboard_score =
+                let is_new_leaderboard_score =
                     if is_ranked && Leaderboard.exists chart_id ruleset_id then
                         match Score.get_user_leaderboard_score user_id chart_id ruleset_id with
-                        | Some score_model -> true, score_model.Accuracy < accuracy
-                        | None -> true, true
-                    else false, false
+                        | Some score_model -> score_model.Accuracy < accuracy
+                        | None -> true
+                    else false
 
                 let score =
                     if is_new_leaderboard_score then
