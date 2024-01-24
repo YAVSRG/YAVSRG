@@ -9,24 +9,16 @@ I would just name them 'main' to match the central repo
 I like to put emoji in commit messages  
 You don't have to care about them in PRs I can just squash with an emoji commit message
 
-🎓 = Localisation changes
-
-🌸 = UI improvement
-
 👽️ = Bug fix
-
+🌸 = UI improvement
 ✨ = New user-facing feature
-
-🧱 = New codebase feature/feature otherwise not reaching all users
-
-⚙️ = Developer tooling
-
-⚡️ = CI pipelines
-
-📘 = Documentation, wikis
-
+🧱 = New codebase feature that doesn't (yet) affect users
+📑 = Code rearrangement/cleanup/formatting
+⚡️ = Automation (CI pipelines, automated tests, developer tooling)
+📘 = Documentation for users
+📕 = Documentation for developer workflows
+🎓 = Localisation changes
 🏷️ = Releases
-
 💚 = Community content & Automated commits
 
 ### Code formatting/style
