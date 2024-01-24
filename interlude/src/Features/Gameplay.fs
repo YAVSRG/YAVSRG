@@ -419,8 +419,18 @@ module Gameplay =
                                 if not (replay :> IReplayProvider).Finished then
                                     replay.Finish()
 
+                                let score =
+                                    {
+                                        time = DateTime.UtcNow
+                                        replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
+                                        rate = rate.Value
+                                        selectedMods = selected_mods.Value |> ModState.filter with_mods
+                                        layout = options.Playstyles.[with_mods.Keys - 3]
+                                        keycount = with_mods.Keys
+                                    }
+
                                 ScoreInfoProvider(
-                                    make_score ((replay :> IReplayProvider).GetFullReplay(), with_mods.Keys),
+                                    score,
                                     chart,
                                     Content.Rulesets.current,
                                     Player = Some username
@@ -433,16 +443,26 @@ module Gameplay =
 
                 replays.Add(
                     Network.credentials.Username,
-                    (s,
-                     fun () ->
-                         if not (replay :> IReplayProvider).Finished then
-                             replay.Finish()
+                    (s, fun () ->
+                        if not (replay :> IReplayProvider).Finished then
+                            replay.Finish()
 
-                         ScoreInfoProvider(
-                             make_score ((replay :> IReplayProvider).GetFullReplay(), with_mods.Keys),
-                             chart,
-                             Content.Rulesets.current
-                         ))
+                        let score =
+                            {
+                                time = DateTime.UtcNow
+                                replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
+                                rate = rate.Value
+                                selectedMods = selected_mods.Value |> ModState.filter with_mods
+                                layout = options.Playstyles.[with_mods.Keys - 3]
+                                keycount = with_mods.Keys
+                            }
+
+                        ScoreInfoProvider(
+                            score,
+                            chart,
+                            Content.Rulesets.current
+                         )
+                    )
                 )
 
             let init () =
