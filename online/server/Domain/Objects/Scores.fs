@@ -22,6 +22,7 @@ type Score =
         Lamp: int
         ReplayId: int64 option
     }
+    member this.WithReplay (replay_id) = { this with ReplayId = Some replay_id }
 
 module Score =
 
@@ -56,10 +57,10 @@ module Score =
         time_played: int64,
         rate: float32,
         mods: Mods.ModState,
+        is_ranked: bool,
         accuracy: float,
         grade: int,
-        lamp: int,
-        replay_id: int64 option) =
+        lamp: int) =
         {
             UserId = user_id
             ChartId = chart_id
@@ -68,11 +69,11 @@ module Score =
             TimeUploaded = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             Rate = MathF.Round(rate, 2)
             Mods = mods
-            Ranked = rate >= 1.0f && (match Mods.check mods with Ok Mods.ModStatus.Ranked -> true | _ -> false)
+            Ranked = is_ranked
             Accuracy = accuracy
             Grade = grade
             Lamp = lamp
-            ReplayId = replay_id
+            ReplayId = None
         }
 
     let private SAVE : Query<Score, int64> =

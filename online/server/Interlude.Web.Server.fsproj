@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -6,21 +6,23 @@
   <ItemGroup>
     <EmbeddedResource Include="Version.txt" />
     <Compile Include="Config.fs" />
+    <Compile Include="Domain_Old\Redis.fs" />
+    <Compile Include="Domain_Old\Objects\Users.fs" />
+    <Compile Include="Domain_Old\Objects\Friends.fs" />
+    <Compile Include="Domain_Old\Objects\Scores.fs" />
+    <Compile Include="Domain_Old\Objects\Leaderboards.fs" />
+    <Compile Include="Domain_Old\Objects\Tables.fs" />
+    <Compile Include="Domain_Old\DbServices\DeleteUser.fs" />
+    <Compile Include="Domain_Old\DbServices\Migrations.fs" />
+    <Compile Include="Domain_Old\Services\UserAuth.fs" />
+    <Compile Include="Domain_Old\Services\Backbeat.fs" />
     <Compile Include="Domain\Objects\Users.fs" />
     <Compile Include="Domain\Objects\Friends.fs" />
     <Compile Include="Domain\Objects\Replays.fs" />
     <Compile Include="Domain\Objects\Scores.fs" />
+    <Compile Include="Domain\Objects\Leaderboards.fs" />
+    <Compile Include="Domain\Services\Scores.fs" />
     <Compile Include="Domain\Database.fs" />
-    <Compile Include="Domain\Old\Redis.fs" />
-    <Compile Include="Domain\Old\Objects\Users.fs" />
-    <Compile Include="Domain\Old\Objects\Friends.fs" />
-    <Compile Include="Domain\Old\Objects\Scores.fs" />
-    <Compile Include="Domain\Old\Objects\Leaderboards.fs" />
-    <Compile Include="Domain\Old\Objects\Tables.fs" />
-    <Compile Include="Domain\Old\DbServices\DeleteUser.fs" />
-    <Compile Include="Domain\Old\DbServices\Migrations.fs" />
-    <Compile Include="Domain\Services\UserAuth.fs" />
-    <Compile Include="Domain\Services\Backbeat.fs" />
     <Compile Include="Online\LoggedInUsers.fs" />
     <Compile Include="Online\Lobbies.fs" />
     <Compile Include="Online\Online.fs" />
