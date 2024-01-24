@@ -9,7 +9,7 @@ module Migrations =
 
     let run (db: Database) =
         Database.migrate 
-            "InitialUsersAndFriends" 
+            "InitialTables" 
             (fun db ->
                 Database.create_table User.TABLE db |> expect |> ignore
                 Friends.CREATE_TABLE.Execute () db |> expect |> ignore

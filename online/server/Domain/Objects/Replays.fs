@@ -44,6 +44,7 @@ module Replay =
             Data = Replay.compress_bytes replay
         }
 
+    let private REPLAY_LOCK_OBJ = obj()
     let private GET_LEADERBOARD : Query<{| UserId: int64; ChartId: string; RulesetId: string |}, {| Id: int64; Purposes: Set<string>; TimePlayed: int64 |}> =
         {
             SQL = """
@@ -134,6 +135,7 @@ module Replay =
         }
     // Only the most best replay per-chart is stored, overwriting any previous replay for that chart
     let save_leaderboard (ruleset_id: string) (replay: Replay) =
+        lock (REPLAY_LOCK_OBJ) <| fun () ->
         match GET_LEADERBOARD.Execute {| ChartId = replay.ChartId; RulesetId = ruleset_id; UserId = replay.UserId |} db |> expect |> Array.tryExactlyOne with
         | Some existing ->
             // If exact replay already exists in DB
@@ -186,7 +188,9 @@ module Replay =
             Read = fun r -> r.Int64
         }
     // Replay is stored long term for sharing with friends
-    let save_challenge (replay: Replay) = SAVE_CHALLENGE.Execute replay db |> expect |> Array.exactlyOne
+    let save_challenge (replay: Replay) = 
+        lock (REPLAY_LOCK_OBJ) <| fun () ->
+        SAVE_CHALLENGE.Execute replay db |> expect |> Array.exactlyOne
 
     let private BY_ID : Query<int64, Replay> =
         {

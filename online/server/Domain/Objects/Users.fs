@@ -1,9 +1,10 @@
-namespace Interlude.Web.Server.Domain
+﻿namespace Interlude.Web.Server.Domain.New
 
 open System
-open StackExchange.Redis
-open NRedisStack.Search
-open Interlude.Web.Server.Domain.Redis
+open Percyqaz.Common
+open Prelude.Common
+open Percyqaz.Data.Sqlite
+open Interlude.Web.Server
 
 type Badge = string
 
@@ -33,117 +34,236 @@ type User =
         LastLogin: int64
         AuthToken: string
         Badges: Set<Badge>
-        Color: int32 option
+        Color: int32
     }
 
 module User =
 
-    let id (key: string) = key.Substring(5) |> int64
-    let key (id: int64) = RedisKey("user:" + id.ToString())
-
+    let internal TABLE : TableCommandHelper =
+        {
+            Name = "users"
+            PrimaryKey = Column.Integer("Id").Unique
+            Columns = 
+                [
+                    Column.Text("Username").Unique
+                    Column.Text("DiscordId")
+                    Column.Integer("DateSignedUp")
+                    Column.Integer("LastLogin")
+                    Column.Text("AuthToken")
+                    Column.Text("Badges")
+                    Column.Integer("Color")
+                ]
+        }
+        
+    let generate_auth_token() = Guid.NewGuid().ToString("N")
     let create (username, discord_id) =
         {
             Username = username
             DiscordId = discord_id
             DateSignedUp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             LastLogin = 0L
-            AuthToken = Guid.NewGuid().ToString("N")
+            AuthToken = generate_auth_token()
             Badges = Set.empty
-            Color = None
+            Color = Badge.DEFAULT_COLOR
         }
 
-    let set_auth_token (id, token: string) =
-        json.Set(key id, "$.AuthToken", sprintf "\"%s\"" token) |> ignore
+    let private SAVE_NEW : NonQuery<User> =
+        {
+            SQL = TABLE.INSERT
+            Parameters =
+                [
+                    "@Username", SqliteType.Text, -1
+                    "@DiscordId", SqliteType.Text, -1
+                    "@DateSignedUp", SqliteType.Integer, 8
+                    "@LastLogin", SqliteType.Integer, 8
+                    "@AuthToken", SqliteType.Text, -1
+                    "@Badges", SqliteType.Text, -1
+                    "@Color", SqliteType.Integer, 8
+                ]
+            FillParameters = (fun p user ->
+                p.String user.Username
+                p.String (string user.DiscordId)
+                p.Int64 user.DateSignedUp
+                p.Int64 user.LastLogin
+                p.String user.AuthToken
+                p.Json JSON user.Badges
+                p.Int32 user.Color
+            )
+        }
+    let save_new (user: User) : int64 = SAVE_NEW.ExecuteGetId user db |> expect
 
-    let update_color (id, color: int32) =
-        json.Set(key id, "$.Color", Some color) |> ignore
+    let private BY_DISCORD_ID : Query<uint64, int64 * User> =
+        {
+            SQL = """SELECT * FROM users WHERE DiscordId = @DiscordId;"""
+            Parameters = [ "@DiscordId", SqliteType.Text, -1 ]
+            FillParameters = (fun p id -> p.String (string id) )
+            Read = (fun r -> 
+                r.Int64,
+                {
+                    Username = r.String
+                    DiscordId = uint64 r.String
+                    DateSignedUp = r.Int64
+                    LastLogin = r.Int64
+                    AuthToken = r.String
+                    Badges = r.Json JSON
+                    Color = r.Int32
+                }
+            )
+        }
+    let by_discord_id (discord_id: uint64) = BY_DISCORD_ID.Execute discord_id db |> expect |> Array.tryExactlyOne
 
-    let update_badges (id, badges: Set<Badge>) =
-        json.Set(key id, "$.Badges", badges) |> ignore
-
-    let update_last_seen (id) =
-        json.Set(key id, "$.LastLogin", Some(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()))
-        |> ignore
-
-    let save_new (user: User) : int64 =
-        let new_id = db.StringIncrement("count:users", 1L)
-        json.Set(key new_id, "$", user) |> ignore
-        new_id
-
-    let by_discord_id (discord_id: uint64) =
-        let results =
-            ft
-                .Search("idx:users", Query(sprintf "@discord_id:[%i %i]" discord_id discord_id))
-                .Documents
-
-        Seq.tryExactlyOne results
-        |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
-
-    let by_id (id: int64) =
-        let result = json.Get(key id, [| "$" |])
-
-        if result.IsNull then
-            None
-        else
-            let s: string = RedisResult.op_Explicit (result)
-            Some <| Text.Json.JsonSerializer.Deserialize<User array>(s).[0]
+    let private BY_ID : Query<int64, User> =
+        {
+            SQL = """SELECT * FROM users WHERE Id = @Id;"""
+            Parameters = [ "@Id", SqliteType.Integer, 8 ]
+            FillParameters = (fun p id -> p.Int64 id )
+            Read = (fun r -> 
+                r.Int64 |> ignore;
+                {
+                    Username = r.String
+                    DiscordId = uint64 r.String
+                    DateSignedUp = r.Int64
+                    LastLogin = r.Int64
+                    AuthToken = r.String
+                    Badges = r.Json JSON
+                    Color = r.Int32
+                }
+            )
+        }
+    let by_id (id: int64) = BY_ID.Execute id db |> expect |> Array.tryExactlyOne
 
     let by_ids (ids: int64 array) =
         if ids.Length = 0 then
             [||]
         else
 
-            json.MGet(ids |> Array.map key, "$")
-            |> Array.map (fun result ->
-                if result.IsNull then
-                    None
-                else
-                    let s: string = RedisResult.op_Explicit result
-                    Some <| Text.Json.JsonSerializer.Deserialize<User array>(s).[0]
+        let ids_string = String.concat "," (Array.map string ids)
+        let query : Query<unit, int64 * User> =
+            { Query.without_parameters() with
+                SQL = sprintf "SELECT * FROM users WHERE Id IN (%s)" ids_string
+                Read = (fun r -> 
+                    r.Int64,
+                    {
+                        Username = r.String
+                        DiscordId = uint64 r.String
+                        DateSignedUp = r.Int64
+                        LastLogin = r.Int64
+                        AuthToken = r.String
+                        Badges = r.Json JSON
+                        Color = r.Int32
+                    }
+                )
+            }
+        query.Execute () db |> expect
+
+    let private BY_AUTH_TOKEN : Query<string, int64 * User> =
+        {
+            SQL = """SELECT * FROM users WHERE AuthToken = @AuthToken;"""
+            Parameters = [ "@AuthToken", SqliteType.Text, -1 ]
+            FillParameters = (fun p token -> p.String token )
+            Read = (fun r -> 
+                r.Int64,
+                {
+                    Username = r.String
+                    DiscordId = uint64 r.String
+                    DateSignedUp = r.Int64
+                    LastLogin = r.Int64
+                    AuthToken = r.String
+                    Badges = r.Json JSON
+                    Color = r.Int32
+                }
             )
+        }
+    let by_auth_token (token: string) = BY_AUTH_TOKEN.Execute token db |> expect |> Array.tryExactlyOne
 
-    let by_auth_token (token: string) =
-        let token = escape token
+    let private BY_USERNAME : Query<string, int64 * User> =
+        {
+            SQL = """SELECT * FROM users WHERE Username LIKE @Username ESCAPE '\';"""
+            Parameters = [ "@Username", SqliteType.Text, -1 ]
+            FillParameters = (fun p username -> p.String (username.Replace("_", "\\_")) )
+            Read = (fun r -> 
+                r.Int64,
+                {
+                    Username = r.String
+                    DiscordId = uint64 r.String
+                    DateSignedUp = r.Int64
+                    LastLogin = r.Int64
+                    AuthToken = r.String
+                    Badges = r.Json JSON
+                    Color = r.Int32
+                }
+            )
+        }
+    let by_username (username: string) = BY_USERNAME.Execute username db |> expect |> Array.tryExactlyOne
 
-        if token = "" then
-            None
-        else
+    let private SEARCH_BY_USERNAME : Query<string, int64 * User> =
+        {
+            SQL = """SELECT * FROM users WHERE Username LIKE @Pattern ESCAPE '\' ORDER BY LastLogin DESC;"""
+            Parameters = [ "@Pattern", SqliteType.Text, -1 ]
+            FillParameters = (fun p query -> p.String ("%" + query.Replace("_", "\\_") + "%") )
+            Read = (fun r -> 
+                r.Int64,
+                {
+                    Username = r.String
+                    DiscordId = uint64 r.String
+                    DateSignedUp = r.Int64
+                    LastLogin = r.Int64
+                    AuthToken = r.String
+                    Badges = r.Json JSON
+                    Color = r.Int32
+                }
+            )
+        }
+    let search_by_username (query: string) = SEARCH_BY_USERNAME.Execute query db |> expect
+    
+    let private LIST : Query<int, int64 * User> =
+        {
+            SQL = """SELECT * FROM users ORDER BY DateSignedUp ASC LIMIT @Limit OFFSET @Offset;"""
+            Parameters = [ "@Limit", SqliteType.Integer, 8; "@Offset", SqliteType.Integer, 8 ]
+            FillParameters = (fun p page -> p.Int64 15L; p.Int64 (int64 page * 15L) )
+            Read = (fun r -> 
+                r.Int64,
+                {
+                    Username = r.String
+                    DiscordId = uint64 r.String
+                    DateSignedUp = r.Int64
+                    LastLogin = r.Int64
+                    AuthToken = r.String
+                    Badges = r.Json JSON
+                    Color = r.Int32
+                }
+            )
+        }
+    let list (page: int) = if page < 0 then [||] else LIST.Execute page db |> expect
 
-            let results =
-                ft.Search("idx:users", Query(sprintf "@auth_token:{%s}" token)).Documents
+    let private SET_AUTH_TOKEN : NonQuery<int64 * string> =
+        {
+            SQL = """UPDATE users SET AuthToken = @AuthToken WHERE Id = @Id;"""
+            Parameters = [ "@AuthToken", SqliteType.Text, -1; "@Id", SqliteType.Integer, 8 ]
+            FillParameters = fun p (id, token) -> p.String token; p.Int64 id
+        }
+    let set_auth_token (id, token: string) = SET_AUTH_TOKEN.Execute (id, token) db |> expect |> ignore
+    
+    let private UPDATE_COLOR : NonQuery<int64 * int32> =
+        {
+            SQL = """UPDATE users SET Color = @Color WHERE Id = @Id;"""
+            Parameters = [ "@Color", SqliteType.Integer, 4; "@Id", SqliteType.Integer, 8 ]
+            FillParameters = fun p (id, color) -> p.Int32 color; p.Int64 id
+        }
+    let update_color (id, color: int32) = UPDATE_COLOR.Execute (id, color) db |> expect |> ignore
+    
+    let private UPDATE_BADGES : NonQuery<int64 * Set<Badge>> =
+        {
+            SQL = """UPDATE users SET Badges = @Badges WHERE Id = @Id;"""
+            Parameters = [ "@Badges", SqliteType.Text, -1; "@Id", SqliteType.Integer, 8 ]
+            FillParameters = fun p (id, badges) -> p.Json JSON badges; p.Int64 id
+        }
+    let update_badges (id, badges: Set<Badge>) = UPDATE_BADGES.Execute (id, badges) db |> expect |> ignore
 
-            Seq.tryExactlyOne results
-            |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
-
-    let by_username (username: string) =
-        let username = escape username
-
-        if username = "" then
-            None
-        else
-
-            let results =
-                ft.Search("idx:users", Query(sprintf "@username:{%s}" username)).Documents
-
-            Seq.tryExactlyOne results
-            |> Option.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
-
-    let search_by_username (query: string) =
-        let query = escape query
-
-        if query = "" then
-            [||]
-        else
-
-            ft
-                .Search("idx:users", Query(sprintf "@username:{*%s*}" query).SetSortBy("last_login", false))
-                .Documents
-            |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
-            |> Array.ofSeq
-
-    let list (page: int) =
-        ft
-            .Search("idx:users", Query("*").SetSortBy("date_signed_up", true).Limit(page * 15, 15))
-            .Documents
-        |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
-        |> Array.ofSeq
+    let private UPDATE_LAST_SEEN : NonQuery<int64> =
+        {
+            SQL = """UPDATE users SET LastLogin = @Now WHERE Id = @Id;"""
+            Parameters = [ "@Now", SqliteType.Integer, 8; "@Id", SqliteType.Integer, 8 ]
+            FillParameters = fun p id -> p.Int64 (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()); p.Int64 id
+        }
+    let update_last_seen (id) = UPDATE_LAST_SEEN.Execute (id) db |> expect |> ignore
