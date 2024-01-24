@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Tests.Domain
+﻿namespace Interlude.Web.Tests.Domain.Objects
 
 open NUnit.Framework
 

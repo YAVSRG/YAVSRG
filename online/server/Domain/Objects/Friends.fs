@@ -138,4 +138,11 @@ module Friends =
         |> Array.ofSeq
         |> User.by_ids
 
-    // todo: on user deleted, remove them from all follower lists
+    let on_user_deleted (user_id: int64) =
+        lock (UPDATE_LOCK_OBJ) <| fun () ->
+        for following_id in get_following_ids user_id do
+            remove (user_id, following_id)
+        Logging.Info("Removed all friends of deleted user")
+        for follower_id in get_followers_ids user_id do
+            remove (follower_id, user_id)
+        Logging.Info("Unfriending deleted user from everyone else")

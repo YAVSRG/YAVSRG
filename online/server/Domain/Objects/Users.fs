@@ -242,7 +242,7 @@ module User =
             Parameters = [ "@AuthToken", SqliteType.Text, -1; "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p (id, token) -> p.String token; p.Int64 id
         }
-    let set_auth_token (id, token: string) = SET_AUTH_TOKEN.Execute (id, token) db |> expect |> ignore
+    let set_auth_token (id: int64, token: string) = SET_AUTH_TOKEN.Execute (id, token) db |> expect |> ignore
     
     let private UPDATE_COLOR : NonQuery<int64 * int32> =
         {
@@ -250,7 +250,7 @@ module User =
             Parameters = [ "@Color", SqliteType.Integer, 4; "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p (id, color) -> p.Int32 color; p.Int64 id
         }
-    let update_color (id, color: int32) = UPDATE_COLOR.Execute (id, color) db |> expect |> ignore
+    let update_color (id: int64, color: int32) = UPDATE_COLOR.Execute (id, color) db |> expect |> ignore
     
     let private UPDATE_BADGES : NonQuery<int64 * Set<Badge>> =
         {
@@ -258,7 +258,7 @@ module User =
             Parameters = [ "@Badges", SqliteType.Text, -1; "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p (id, badges) -> p.Json JSON badges; p.Int64 id
         }
-    let update_badges (id, badges: Set<Badge>) = UPDATE_BADGES.Execute (id, badges) db |> expect |> ignore
+    let update_badges (id: int64, badges: Set<Badge>) = UPDATE_BADGES.Execute (id, badges) db |> expect |> ignore
 
     let private UPDATE_LAST_SEEN : NonQuery<int64> =
         {
@@ -266,4 +266,12 @@ module User =
             Parameters = [ "@Now", SqliteType.Integer, 8; "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p id -> p.Int64 (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()); p.Int64 id
         }
-    let update_last_seen (id) = UPDATE_LAST_SEEN.Execute (id) db |> expect |> ignore
+    let update_last_seen (id: int64) = UPDATE_LAST_SEEN.Execute id db |> expect |> ignore
+
+    let private DELETE : NonQuery<int64> =
+        {
+            SQL = """DELETE FROM users WHERE Id = @Id;"""
+            Parameters = [ "@Id", SqliteType.Integer, 8 ]
+            FillParameters = fun p id -> p.Int64 id
+        }
+    let delete (id: int64) = DELETE.Execute id db |> expect |> ignore

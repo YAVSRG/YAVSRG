@@ -27,7 +27,7 @@ module Scores =
         | Unrated
         | Rated of TableRatingChange list * LeaderboardRankChange list
 
-    let ACCEPTED_RULESETS = [| "SC(J4)548E5A" |]
+    let private ACCEPTED_RULESETS = [| "SC(J4)548E5A" |]
     
     let submit (user_id: int64, chart_id: string, replay: ReplayData, rate: float32, mods: Mods.ModState, timestamp: int64) =
         async {

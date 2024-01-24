@@ -195,13 +195,12 @@ module Replay =
     let private BY_ID : Query<int64, Replay> =
         {
             SQL = """
-            SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Data FROM replays
+            SELECT UserId, ChartId, TimePlayed, TimeUploaded, Data FROM replays
             WHERE Id = @Id;
             """
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p id -> p.Int64 id
             Read = (fun r ->
-                r.Int64 |> ignore;
                 {
                     UserId = r.Int64
                     ChartId = r.String
@@ -217,3 +216,30 @@ module Replay =
             )
         }
     let by_id (replay_id: int64) = BY_ID.Execute replay_id db |> expect |> Array.tryExactlyOne
+    
+    let by_ids (replay_ids: int64 array) =
+        if replay_ids.Length = 0 then
+            [||]
+        else
+    
+        let ids_string = String.concat "," (Array.map string replay_ids)
+        let query : Query<unit, int64 * Replay> =
+            { Query.without_parameters() with
+                SQL = sprintf "SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Data FROM replays WHERE Id IN (%s)" ids_string
+                Read = (fun r -> 
+                    r.Int64,
+                    {
+                        UserId = r.Int64
+                        ChartId = r.String
+                        TimePlayed = r.Int64
+                        TimeUploaded = r.Int64
+                        Data =
+                            // todo: push into Percyqaz.Data
+                            use stream = r.Stream
+                            use ms = new IO.MemoryStream()
+                            stream.CopyTo ms
+                            ms.ToArray()
+                    }
+                )
+            }
+        query.Execute () db |> expect
