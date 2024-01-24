@@ -59,4 +59,4 @@ To respect your privacy, measures are taken to minimise or entirely prevent inte
 You are entitled to view, modify or erase any personal information stored about you on Interlude's services.
 This is currently a manual process and may take a few days - contact [support@yavsrg.net](mailto:support@yavsrg.net) to file a request.
 
-For any other concerns about your data or how it is used, [contact Percyqaz via discord](https://discord.gg/tA22tWR).
+For any other concerns about your data or how it is used, [contact Percyqaz via discord](https://yavsrg.net/discord).
