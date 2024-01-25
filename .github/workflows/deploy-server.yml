@@ -47,4 +47,4 @@ jobs:
             script: ./update.sh
             
       - name: Run garbage collection on DigitalOcean registry
-        run: doctl registry garbage-collection start --force
+        run: doctl registry garbage-collection start --force --include-untagged-manifests
