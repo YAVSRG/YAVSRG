@@ -6,7 +6,7 @@ open Discord
 open Discord.WebSocket
 open Percyqaz.Common
 open Interlude.Web.Server
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 module Bot =
 

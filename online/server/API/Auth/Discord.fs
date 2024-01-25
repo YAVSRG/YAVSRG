@@ -6,7 +6,7 @@ open System.Net.Http.Json
 open Percyqaz.Common
 open Interlude.Web.Server
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Services
 
 module Discord =
 
@@ -104,7 +104,7 @@ module Discord =
                 else
                     identity.username
 
-            match! AuthFlow.receive_discord_callback (state, uint64 identity.id, discord_tag) with
+            match Users.DiscordAuthFlow.receive_discord_callback (state, uint64 identity.id, discord_tag) with
             | true -> response.ReplyRedirect("https://yavsrg.net/login_success")
             | false -> response.ReplyRedirect("https://yavsrg.net/login_failed")
         }

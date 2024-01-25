@@ -5,6 +5,7 @@ open Discord
 open Discord.WebSocket
 open Prelude.Backbeat.Archive
 open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 module UserCommands =
 
@@ -17,7 +18,7 @@ module UserCommands =
     // Requires user to exist but no particular permissions
     let dispatch
         (client: DiscordSocketClient)
-        (userId: int64, userInfo: User)
+        (user_id: int64, user_info: User)
         (context: SocketMessage)
         (command: string)
         (args: string list)
@@ -107,16 +108,16 @@ module UserCommands =
             | "fl"
             | "friends"
             | "friendlist" ->
-                let friends = Friends.friends_list (userId)
+                let friends = Friends.friends_list (user_id)
 
                 let embed =
-                    EmbedBuilder(Title = sprintf "%s's friends list" userInfo.Username)
+                    EmbedBuilder(Title = sprintf "%s's friends list" user_info.Username)
                         .WithColor(Color.Blue)
                         .WithDescription(
                             if friends.Length = 0 then
                                 "nobody :("
                             else
-                                friends |> Array.map (fun user -> user.Username) |> String.concat "\n"
+                                friends |> Array.map (fun (id, user) -> user.Username) |> String.concat "\n"
                         )
 
                 do! reply_embed (embed.Build())
@@ -127,7 +128,7 @@ module UserCommands =
                 | username :: _ ->
                     match user_by_name username with
                     | Some(id, _) ->
-                        Friends.add_friend (userId, id)
+                        Friends.add_friend (user_id, id)
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
             | "uf"
@@ -137,7 +138,7 @@ module UserCommands =
                 | username :: _ ->
                     match user_by_name username with
                     | Some(id, _) ->
-                        Friends.remove_friend (userId, id)
+                        Friends.remove_friend (user_id, id)
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
             | "pc"
@@ -145,19 +146,19 @@ module UserCommands =
                 match args with
                 | [] -> do! reply "Enter a badge name, for example $profilecolor early-tester"
                 | badge :: [] ->
-                    if userInfo.Badges.Contains badge then
+                    if user_info.Badges.Contains badge then
                         let color = (Badge.badge_color badge).[0]
-                        User.update_color (userId, color)
+                        User.update_color (user_id, color)
                         do! reply_emoji ":white_check_mark:"
                     else
                         do! reply "You don't have this badge."
                 | badge :: choice :: _ ->
-                    if userInfo.Badges.Contains badge then
+                    if user_info.Badges.Contains badge then
                         let colors = Badge.badge_color badge
 
                         match System.Int32.TryParse(choice) with
                         | true, c when c > 0 && c <= colors.Length ->
-                            User.update_color (userId, colors.[c - 1])
+                            User.update_color (user_id, colors.[c - 1])
 
                             do! reply_emoji ":white_check_mark:"
                         | _ -> do! reply (sprintf "The options for this badge are 1-%i" colors.Length)
@@ -165,12 +166,12 @@ module UserCommands =
                         do! reply "You don't have this badge."
             | "p"
             | "profile" ->
-                let profile (userId, userInfo) =
+                let profile (user_id, user_info) =
                     task {
                         let now = DateTimeOffset.UtcNow
 
-                        let format_time_ago (ts: int64) =
-                            let ts: TimeSpan = now - DateTimeOffset.FromUnixTimeMilliseconds(ts)
+                        let format_time_ago (timestamp: int64) =
+                            let ts: TimeSpan = now - DateTimeOffset.FromUnixTimeMilliseconds(timestamp)
 
                             if ts.TotalDays > 365.0 then
                                 sprintf "%.0fy ago" (ts.TotalDays / 365.0)
@@ -187,27 +188,26 @@ module UserCommands =
                             else
                                 "Just now"
 
-                        let format_mods (score: Score) =
+                        let format_mods (score: Score.RecentScore) =
                             if score.Mods.IsEmpty then
                                 sprintf "%.2fx" score.Rate
                             else
                                 sprintf "%.2fx*" score.Rate
 
-                        let recent_scores = Score.get_recent userId
+                        let recent_scores = Score.get_user_recent user_id
 
                         let embed =
                             let color =
-                                userInfo.Color
-                                |> Option.defaultValue Badge.DEFAULT_COLOR
+                                user_info.Color
                                 |> Drawing.Color.FromArgb
                                 |> Color.op_Explicit
 
                             let embed =
                                 EmbedBuilder(
-                                    Title = userInfo.Username,
+                                    Title = user_info.Username,
                                     Footer =
                                         EmbedFooterBuilder(
-                                            Text = (String.concat ", " userInfo.Badges).Replace("-", " ").ToUpper()
+                                            Text = (String.concat ", " user_info.Badges).Replace("-", " ").ToUpper()
                                         )
                                 )
                                     .WithColor(color)
@@ -227,13 +227,13 @@ module UserCommands =
                                     EmbedFieldBuilder(Name = "..", IsInline = true)
                                         .WithValue(
                                             recent_scores
-                                            |> Array.map (fun s ->
+                                            |> Array.map (fun (s: Score.RecentScore) ->
                                                 sprintf
                                                     "`%6.2f%%` `%6s` `%6s` `%8s`"
-                                                    (s.Score * 100.0)
-                                                    (Backbeat.rulesets.[s.RulesetId].LampName s.Lamp)
+                                                    (s.Accuracy * 100.0)
+                                                    (Backbeat.rulesets.[Score.PRIMARY_RULESET].LampName s.Lamp)
                                                     (format_mods s)
-                                                    (format_time_ago s.Timestamp)
+                                                    (format_time_ago s.TimePlayed)
                                             )
                                             |> String.concat "\n"
                                         )
@@ -245,7 +245,7 @@ module UserCommands =
                     }
 
                 match args with
-                | [] -> do! profile (userId, userInfo)
+                | [] -> do! profile (user_id, user_info)
                 | name :: _ ->
                     match user_by_name name with
                     | Some(id, user) -> do! profile (id, user)

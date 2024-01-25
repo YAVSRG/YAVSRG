@@ -1,11 +1,9 @@
 ﻿namespace Interlude.Web.Server.API.Auth
 
 open NetCoreServer
-open System.Net.Http
-open Percyqaz.Common
 open Interlude.Web.Server
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 module Dummy =
 

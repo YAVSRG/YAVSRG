@@ -6,6 +6,8 @@ open Discord.WebSocket
 open Prelude.Backbeat.Archive
 open Interlude.Web.Server
 open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Services
 open Interlude.Web.Server.Online
 
 module AdminCommands =
@@ -163,9 +165,9 @@ module AdminCommands =
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
 
-            | "contact" ->
+            | "whois" ->
                 match args with
-                | [] -> do! reply "Enter a username, for example: $contact Percyqaz"
+                | [] -> do! reply "Enter a username, for example: $whois Percyqaz"
                 | name :: _ ->
                     match user_by_name name with
                     | Some(id, user) -> do! reply (sprintf "<@%i>" user.DiscordId)
@@ -177,60 +179,13 @@ module AdminCommands =
                 | name :: _ ->
                     match user_by_name name with
                     | Some(id, user) ->
-                        Aggregate.delete_user (id)
+                        Users.permanently_delete_user (id)
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
-
-            | "addtestuser" when not SECRETS.IsProduction ->
-                match args with
-                | [] -> do! reply "Enter a username, for example: $addtestuser TESTUSER1"
-                | name :: _ ->
-
-                    match Users.valid_username name with
-                    | Error reason -> do! reply (sprintf "Invalid username (%s)" reason)
-                    | Ok() ->
-
-                    match User.by_username (name) with
-                    | Some u -> do! reply "That username is already taken"
-                    | None ->
-
-                    let user = User.create (name, 0uL)
-                    let id = User.save_new (user)
-
-                    do!
-                        reply (
-                            sprintf
-                                "Created user '%s' with id '%i'\n\nAuth token:\n`%s`"
-                                user.Username
-                                id
-                                user.AuthToken
-                        )
 
             | "reloadbackbeat" ->
                 Backbeat.init ()
                 do! reply_emoji ":white_check_mark:"
-
-            | "addleaderboard" ->
-                match args with
-                | [] ->
-                    do!
-                        reply
-                            "Enter a hash and ruleset, for example: $addleaderboard 1467CD6DEB4A3B87FA58FAB4F2398BE9AD7B0017031C511C549D3EF28FFB58D3"
-                | hash :: _ ->
-                    match Backbeat.Charts.by_hash hash with
-                    | None -> do! reply "Chart not found."
-                    | Some(chart, song) ->
-
-                    Leaderboard.create hash "SC(J4)548E5A"
-
-                    let msg =
-                        sprintf
-                            "## :checkered_flag: Leaderboard created:\n%s [%s]"
-                            song.FormattedTitle
-                            chart.DifficultyName
-
-                    let! _ = (client.GetChannel(FEED_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(msg)
-                    do! reply_emoji ":white_check_mark:"
 
             | "addleaderboards" ->
                 let missing = ResizeArray<string>()

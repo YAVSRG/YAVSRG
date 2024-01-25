@@ -3,7 +3,7 @@
 open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 module Leaderboard =
 
@@ -19,18 +19,18 @@ module Leaderboard =
             require_query_parameter query_params "ruleset"
             let _, _ = authorize headers
 
-            let hash = query_params.["chart"].[0].ToUpper()
-            let ruleset = query_params.["ruleset"].[0]
+            let chart_id = query_params.["chart"].[0].ToUpper()
+            let ruleset_id = query_params.["ruleset"].[0]
 
-            let ruleset =
-                if ruleset <> Score.RULESETS.[0] && not (Leaderboard.exists hash ruleset) then
-                    Score.RULESETS.[0]
+            let ruleset_id =
+                if ruleset_id <> Score.PRIMARY_RULESET && not (Leaderboard.exists chart_id ruleset_id) then
+                    Score.PRIMARY_RULESET
                 else
-                    ruleset
+                    ruleset_id
 
-            if Leaderboard.exists hash ruleset then
+            if Leaderboard.exists chart_id ruleset_id then
 
-                let info = Leaderboard.get_top_20_info hash ruleset
+                let info = Score.get_leaderboard chart_id ruleset_id
 
                 let scores: Charts.Scores.Leaderboard.Score array =
                     info
@@ -53,7 +53,7 @@ module Leaderboard =
                         | _ -> None
                     )
 
-                response.ReplyJson({ Scores = scores; RulesetId = ruleset }: Charts.Scores.Leaderboard.Response)
+                response.ReplyJson({ Scores = scores; RulesetId = ruleset_id }: Charts.Scores.Leaderboard.Response)
 
             else
                 response.MakeErrorResponse(404) |> ignore

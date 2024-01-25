@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain
+﻿namespace Interlude.Web.Server.Domain.Old
 
 open NRedisStack.Search
 open NRedisStack.Search.Literals.Enums

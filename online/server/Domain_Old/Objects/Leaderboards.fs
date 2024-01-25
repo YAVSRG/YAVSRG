@@ -1,4 +1,4 @@
-namespace Interlude.Web.Server.Domain
+namespace Interlude.Web.Server.Domain.Old
 
 open System
 open StackExchange.Redis
