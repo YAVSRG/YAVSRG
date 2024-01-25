@@ -24,7 +24,7 @@ try
     let socket_cert =
         new X509Certificate2(Path.Combine("./secrets", SECRETS.SocketCert), SECRETS.SocketCertPassword)
 
-    //Domain.Database.startup ()
+    Domain.Database.startup ()
     Domain.RedisMigrations.run ()
     Domain.Backbeat.init ()
 

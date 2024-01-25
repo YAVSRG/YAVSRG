@@ -51,7 +51,7 @@ Enter DO API key for both username and password
 ### ./update.sh
 ```
 docker pull registry.digitalocean.com/yavsrg/interlude-web-server
-wget https://raw.githubusercontent.com/YAVSRG/Interlude.Web/main/docker-compose-production.yml -O ./docker-compose.yml
+wget https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/online/docker-compose-production.yml -O ./docker-compose.yml
 docker compose up --detach
 ```
 
