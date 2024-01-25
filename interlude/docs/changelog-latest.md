@@ -1,13 +1,11 @@
-0.7.15.4
+0.7.15.5
 ====
 
-Another minor patch amidst more infrastructure changes
-
-Interlude now runs on .NET 8 :)
+Minor patch
 
 # Improvements in this update
-- Reduced the file size of Interlude.exe a little
-- Fixed a note colors bug when loading the first chart
-- Fixed level select screen not updating when you rename a collection
-- Fixed level select groups taking 2 frames to collapse thanks to @9382
+- Fixed a crash in multiplayer lobbies
+- Fixed a crash related to previewing your noteskin right after making changes
+- Fixed a crash on debug mode/linux in the user registration UI
+- Added hotkeys to adjust audio volume (hold Alt + Up, Alt + Down), improving the keyboard-only experience :)
 
