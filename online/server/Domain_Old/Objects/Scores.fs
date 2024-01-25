@@ -136,3 +136,16 @@ module Score =
         )
 
         results
+    
+    let _dump () =
+        let results =
+            ft
+                .Search(
+                    "idx:scores",
+                    Query("*").SetSortBy("timestamp", false)
+                )
+                .Documents
+    
+        results
+        |> Seq.map (fun d -> Text.Json.JsonSerializer.Deserialize<Score>(d.Item "json"))
+        |> Array.ofSeq
