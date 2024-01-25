@@ -128,6 +128,7 @@ module API =
                                 callback None
                         with
                         | :? Http.HttpRequestException
+                        | :? OperationCanceledException
                         | :? AggregateException -> callback None
                     }
                 , ignore
@@ -159,6 +160,7 @@ module API =
                                 callback None
                         with
                         | :? Http.HttpRequestException
+                        | :? OperationCanceledException
                         | :? AggregateException -> callback None
                     }
                 , ignore
@@ -184,6 +186,7 @@ module API =
                                 callback None
                         with
                         | :? Http.HttpRequestException
+                        | :? OperationCanceledException
                         | :? AggregateException -> callback None
                     }
                 , ignore
