@@ -142,7 +142,7 @@ module Score =
             ft
                 .Search(
                     "idx:scores",
-                    Query("*").SetSortBy("timestamp", false)
+                    Query("*").Limit(0, 10000)
                 )
                 .Documents
     

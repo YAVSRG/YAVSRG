@@ -150,7 +150,7 @@ module User =
 
     let _dump () =
         ft
-            .Search("idx:users", Query("*").SetSortBy("date_signed_up", true))
+            .Search("idx:users", Query("*").SetSortBy("date_signed_up", true).Limit(0, 1000))
             .Documents
         |> Seq.map (fun d -> id d.Id, Text.Json.JsonSerializer.Deserialize<User>(d.Item "json"))
         |> Array.ofSeq

@@ -1,1 +1,1 @@
-﻿Migration test run with unit test fix!
+﻿Fix bug in redis data dumping
