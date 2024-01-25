@@ -317,7 +317,9 @@ type Storage(storage: StorageType) =
 
             match info.Mode with
             | Grid ->
-                let img = Option.get (this.LoadGridTexture(info, name, path))
+                match this.LoadGridTexture(info, name, path) with
+                | None -> Logging.Error(sprintf "Couldn't split texture '%s' because it couldn't be loaded" name)
+                | Some img ->
                 let w = img.Width / info.Columns
                 let h = img.Height / info.Rows
 
@@ -343,7 +345,9 @@ type Storage(storage: StorageType) =
 
             match info.Mode with
             | Loose ->
-                let img = Option.get (this.LoadLooseTextures(info, name, path, false))
+                match this.LoadLooseTextures(info, name, path, false) with
+                | None -> Logging.Error(sprintf "Couldn't stitch texture '%s' because it couldn't be loaded" name)
+                | Some img ->
                 img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s.png" name))
 
                 for row in 0 .. info.Rows - 1 do
