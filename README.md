@@ -15,7 +15,7 @@ Lots of setup guidance, including a wiki, is built into the game to help you get
 
 **On Windows** - Download the latest release [from the website](https://www.yavsrg.net), extract it and play!  
 **On macOS** - Build instructions for developers below! If you aren't a developer, ask for help [in the Discord](https://discord.gg/tA22tWR) instead  
-**On linux** - Build instructions for developers below! If you aren't a developer, ask for help [in the Discord](https://discord.gg/tA22tWR) instead  
+**On Linux** - Build instructions for developers below! If you aren't a developer, ask for help [in the Discord](https://discord.gg/tA22tWR) instead  
 
 On non-Windows platforms you could also try running the Windows build in WINE or Proton.
 
