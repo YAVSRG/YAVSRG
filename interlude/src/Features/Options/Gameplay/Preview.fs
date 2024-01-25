@@ -15,18 +15,21 @@ type NoteskinPreview(scale: float32) as this =
     let fbo = FBO.create ()
 
     let create_renderer () =
-        match Gameplay.Chart.WITH_COLORS with
-        | Some chart ->
-            let playfield =
-                Playfield(chart, PlayState.Dummy Gameplay.Chart.WITH_MODS.Value, noteskin_config (), false)
+        let cmp = 
+            match Gameplay.Chart.WITH_COLORS with
+            | Some chart ->
+                let playfield =
+                    Playfield(chart, PlayState.Dummy Gameplay.Chart.WITH_MODS.Value, noteskin_config (), false)
 
-            playfield.Add(LaneCover())
+                playfield.Add(LaneCover())
 
-            if this.Initialised then
-                playfield.Init this
+                playfield :> Widget
+            | None -> new Dummy()
+            
+        if this.Initialised then
+            cmp.Init this
 
-            playfield :> Widget
-        | None -> new Dummy()
+        cmp
 
     let mutable renderer = create_renderer ()
 
