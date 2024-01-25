@@ -4,6 +4,8 @@ open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Old
+open Interlude.Web.Server.Domain.Objects
 
 module List =
 
@@ -33,7 +35,7 @@ module List =
                 |> Seq.distinct
                 |> Array.ofSeq
 
-            let user_map = Array.zip user_ids (User.by_ids user_ids) |> Map.ofSeq
+            let user_map = User.by_ids user_ids |> Map.ofSeq
 
             let map_suggested_by (user_suggestions: Map<int64, int>) =
                 user_suggestions
@@ -45,7 +47,7 @@ module List =
                     |> Seq.map fst
                     |> Seq.map (fun id ->
                         match user_map.TryFind(id) with
-                        | Some(Some user) -> user.Username
+                        | Some user -> user.Username
                         | _ -> "???"
                     )
                     |> Array.ofSeq

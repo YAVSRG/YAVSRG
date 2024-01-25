@@ -3,8 +3,6 @@
 open System
 open Discord
 open Discord.WebSocket
-open Prelude.Backbeat.Archive
-open Interlude.Web.Server
 open Interlude.Web.Server.Domain
 open Interlude.Web.Server.Domain.Objects
 open Interlude.Web.Server.Domain.Services
@@ -13,7 +11,7 @@ open Interlude.Web.Server.Online
 module AdminCommands =
 
     let user_by_name (name: string) =
-        if Seq.forall (fun (c: char) -> Seq.contains c Users.VALID_USERNAME_CHARACTERS) name then
+        if Seq.forall (fun (c: char) -> Seq.contains c Users.Username.VALID_CHARACTERS) name then
             User.by_username name
         else
             None

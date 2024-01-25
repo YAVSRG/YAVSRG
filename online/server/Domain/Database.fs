@@ -7,7 +7,7 @@ open Prelude
 open Prelude.Gameplay
 open Interlude.Web.Server
 
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Old
 
 module Migrations =
 

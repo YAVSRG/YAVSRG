@@ -6,11 +6,12 @@ open Discord.WebSocket
 open Prelude.Backbeat.Archive
 open Interlude.Web.Server.Domain
 open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Services
 
 module UserCommands =
 
     let user_by_name (name: string) =
-        if Seq.forall (fun (c: char) -> Seq.contains c Users.VALID_USERNAME_CHARACTERS) name then
+        if Seq.forall (fun (c: char) -> Seq.contains c Users.Username.VALID_CHARACTERS) name then
             User.by_username name
         else
             None
@@ -128,7 +129,7 @@ module UserCommands =
                 | username :: _ ->
                     match user_by_name username with
                     | Some(id, _) ->
-                        Friends.add_friend (user_id, id)
+                        Friends.add (user_id, id)
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
             | "uf"
@@ -138,7 +139,7 @@ module UserCommands =
                 | username :: _ ->
                     match user_by_name username with
                     | Some(id, _) ->
-                        Friends.remove_friend (user_id, id)
+                        Friends.remove (user_id, id)
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
             | "pc"

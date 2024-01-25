@@ -2,10 +2,9 @@
 
 open NetCoreServer
 open Prelude
-open Percyqaz.Common
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 module Options =
 
@@ -17,7 +16,7 @@ module Options =
             response: HttpResponse
         ) =
         async {
-            let userId, user = authorize headers
+            let user_id, user = authorize headers
 
             match JSON.FromString body with
             | Error e -> raise (BadRequestException None)
@@ -29,7 +28,7 @@ module Options =
                 |> Seq.concat
                 |> Seq.contains request.Color
             then
-                User.update_color (userId, request.Color)
+                User.update_color (user_id, request.Color)
                 response.ReplyJson(true)
             else
                 response.ReplyJson(false)

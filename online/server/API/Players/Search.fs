@@ -3,7 +3,7 @@
 open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 module Search =
 
@@ -25,13 +25,11 @@ module Search =
                 {
                     Matches =
                         users
-                        |> Array.choose (
-                            Option.map (fun x ->
-                                {
-                                    Username = x.Username
-                                    Color = x.Color |> Option.defaultValue Badge.DEFAULT_COLOR
-                                }
-                            )
+                        |> Array.map (fun (_, x) ->
+                            {
+                                Username = x.Username
+                                Color = x.Color
+                            }
                         )
                 }
                 : Players.Search.Response

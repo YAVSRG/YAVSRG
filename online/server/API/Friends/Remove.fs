@@ -2,7 +2,7 @@
 
 open NetCoreServer
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 module Remove =
 
@@ -15,11 +15,11 @@ module Remove =
         ) =
         async {
             require_query_parameter query_params "user"
-            let userId, _ = authorize headers
+            let user_id, _ = authorize headers
 
             match User.by_username query_params.["user"].[0] with
             | Some(id, user) ->
-                Friends.remove_friend (userId, id)
+                Friends.remove (user_id, id)
                 response.ReplyJson(true)
             | None -> response.ReplyJson(false)
         }

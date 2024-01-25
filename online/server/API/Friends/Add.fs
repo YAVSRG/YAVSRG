@@ -5,7 +5,7 @@ open Prelude
 open Percyqaz.Common
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 module Add =
 
@@ -17,7 +17,7 @@ module Add =
             response: HttpResponse
         ) =
         async {
-            let userId, _ = authorize headers
+            let user_id, _ = authorize headers
 
             match JSON.FromString body with
             | Error e -> raise (BadRequestException None)
@@ -25,7 +25,7 @@ module Add =
 
             match User.by_username request.User with
             | Some(id, user) ->
-                Friends.add_friend (userId, id)
+                Friends.add (user_id, id)
                 response.ReplyJson(true)
             | None -> response.ReplyJson(false)
         }

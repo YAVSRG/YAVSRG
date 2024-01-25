@@ -2,7 +2,7 @@
 
 open NetCoreServer
 open Prelude
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 [<AutoOpen>]
 module Utils =

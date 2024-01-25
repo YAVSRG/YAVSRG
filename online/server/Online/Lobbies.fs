@@ -6,7 +6,8 @@ open System.Linq
 open System.IO
 open Percyqaz.Common
 open Interlude.Web.Shared
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Services
+open Interlude.Web.Server.Domain.Objects
 
 type LobbyId = Guid
 type PlayerId = Guid
@@ -139,7 +140,7 @@ module Lobby =
             false
         else
 
-            (Seq.forall (fun (c: char) -> Seq.contains c Users.VALID_USERNAME_CHARACTERS) proposed)
+            (Seq.forall (fun (c: char) -> Seq.contains c Users.Username.VALID_CHARACTERS) proposed)
 
     let private multicast (lobby: Lobby, packet: Downstream) =
         for p in lobby.Players.Keys do

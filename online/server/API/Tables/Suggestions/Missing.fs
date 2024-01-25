@@ -4,6 +4,7 @@ open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Old
 
 module Missing =
 

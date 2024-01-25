@@ -71,7 +71,7 @@ module Backbeat =
             function
             | Some(t: Table) ->
                 tables <- Map.ofList [ "crescent", t ]
-                TableWithSuggestions.update_if_newer ("crescent", t)
+                //TableWithSuggestions.update_if_newer ("crescent", t)
             | None -> Logging.Error("Failed to get Crescent from Backbeat")
         )
 

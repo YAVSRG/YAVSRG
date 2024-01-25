@@ -1,15 +1,14 @@
 ﻿namespace Interlude.Web.Server.API.Charts.Scores
 
 open NetCoreServer
-open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
-open Prelude.Backbeat.Archive
 open Prelude.Charts
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Old
 
 module Save =
 
@@ -21,7 +20,7 @@ module Save =
             response: HttpResponse
         ) =
         async {
-            let userId, user = authorize headers
+            let user_id, _ = authorize headers
 
             match JSON.FromString body with
             | Error e -> raise (BadRequestException None)
@@ -36,7 +35,7 @@ module Save =
             let timestamp =
                 (System.DateTimeOffset.op_Implicit request.Timestamp).ToUnixTimeMilliseconds()
 
-            if Score.exists userId timestamp then
+            if Score.exists user_id timestamp then
                 return response.ReplyJson((None : Charts.Scores.Save.Response option))
             else
 
@@ -76,7 +75,7 @@ module Save =
 
                     let score: Score =
                         {
-                            UserId = userId
+                            UserId = user_id
                             ChartId = hash
                             RulesetId = ruleset_id
                             Score = scoring.Value
@@ -89,7 +88,7 @@ module Save =
 
                     Score.save_new score |> ignore
 
-                    let old_score = Leaderboard.score hash ruleset_id userId
+                    let old_score = Leaderboard.score hash ruleset_id user_id
 
                     if
                         mod_status = Mods.ModStatus.Ranked
@@ -100,13 +99,13 @@ module Save =
                             | None -> true
                         )
                     then
-                        let old_rank = Leaderboard.rank hash ruleset_id userId
+                        let old_rank = Leaderboard.rank hash ruleset_id user_id
 
                         let replay =
                             Leaderboard.Replay.create (request.Replay, rate, request.Mods, request.Timestamp)
 
-                        Leaderboard.Replay.save hash ruleset_id userId replay
-                        let new_rank = Leaderboard.add_score hash ruleset_id userId score.Score
+                        Leaderboard.Replay.save hash ruleset_id user_id replay
+                        let new_rank = Leaderboard.add_score hash ruleset_id user_id score.Score
 
                         leaderboard_changes <-
                             {
@@ -120,7 +119,7 @@ module Save =
                         for table_id, table in Backbeat.tables |> Map.toSeq do
                             if table.RulesetId = ruleset_id && table.Contains request.ChartId then
 
-                                let grades = Score.aggregate_table_grades userId ruleset_id 1.0f
+                                let grades = Score.aggregate_table_grades user_id ruleset_id 1.0f
 
                                 let rating =
                                     table.Levels
@@ -138,11 +137,11 @@ module Save =
                                     |> fun total -> total / 50.0
 
                                 let old_position =
-                                    match TableRanking.rank table_id userId with
-                                    | Some pos -> Some(pos, (TableRanking.rating table_id userId).Value)
+                                    match TableRanking.rank table_id user_id with
+                                    | Some pos -> Some(pos, (TableRanking.rating table_id user_id).Value)
                                     | None -> None
 
-                                let new_rank = TableRanking.update table_id userId rating
+                                let new_rank = TableRanking.update table_id user_id rating
 
                                 table_changes <-
                                     {

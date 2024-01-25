@@ -4,6 +4,7 @@ open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 
 module View =
 
@@ -15,22 +16,22 @@ module View =
             response: HttpResponse
         ) =
         async {
-            let userId, user = authorize headers
+            let user_id, user = authorize headers
 
-            let target_userId, target_user =
+            let target_user_id, target_user =
                 if query_params.ContainsKey("user") then
                     match User.by_username query_params.["user"].[0] with
                     | Some(userId, user) -> userId, user
                     | None -> raise NotFoundException
                 else
-                    userId, user
+                    user_id, user
 
-            let recent_scores = Score.get_recent target_userId
+            let recent_scores = Score.get_user_recent target_user_id
 
             let scores: Players.Profile.View.RecentScore array =
                 recent_scores
                 |> Array.map (fun s ->
-                    let rs = Backbeat.rulesets.[s.RulesetId]
+                    let rs = Backbeat.rulesets.[Score.PRIMARY_RULESET]
 
                     match Backbeat.Charts.by_hash s.ChartId with
                     | Some(chart, song) ->
@@ -38,41 +39,37 @@ module View =
                             Artist = song.FormattedArtists
                             Title = song.Title
                             Difficulty = chart.DifficultyName
-                            Score = s.Score
+                            Score = s.Accuracy
                             Lamp = rs.LampName s.Lamp
                             Mods =
                                 if s.Mods.IsEmpty then
                                     sprintf "%.2fx" s.Rate
                                 else
                                     sprintf "%.2fx*" s.Rate
-                            Timestamp = s.Timestamp
+                            Timestamp = s.TimePlayed
                         }
                     | None ->
                         {
                             Artist = "???"
                             Title = "???"
                             Difficulty = "???"
-                            Score = s.Score
+                            Score = s.Accuracy
                             Lamp = rs.LampName s.Lamp
                             Mods =
                                 if s.Mods.IsEmpty then
                                     sprintf "%.2fx" s.Rate
                                 else
                                     sprintf "%.2fx*" s.Rate
-                            Timestamp = s.Timestamp
+                            Timestamp = s.TimePlayed
                         }
                 )
 
-            let is_friend =
-                target_user.Username <> user.Username
-                && Friends.has_friend (userId, target_userId)
-
-            let is_mutual_friend = is_friend && Friends.has_friend (target_userId, userId)
+            let relation = Friends.relation (user_id, target_user_id)
 
             response.ReplyJson(
                 {
                     Username = target_user.Username
-                    Color = target_user.Color |> Option.defaultValue Badge.DEFAULT_COLOR
+                    Color = target_user.Color
                     Badges =
                         target_user.Badges
                         |> Seq.map (fun b ->
@@ -84,8 +81,8 @@ module View =
                         |> Array.ofSeq
                     RecentScores = scores
                     DateSignedUp = target_user.DateSignedUp
-                    IsFriend = is_friend
-                    IsMutualFriend = is_mutual_friend
+                    IsFriend = relation = FriendRelation.Friend || relation = FriendRelation.MutualFriend
+                    IsMutualFriend = relation = FriendRelation.MutualFriend
                 }
                 : Players.Profile.View.Response
             )

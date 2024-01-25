@@ -7,7 +7,7 @@ open Interlude.Web.Server.Domain.Redis
 
 type Badge = string
 
-module Badge =
+module Badge_Old =
 
     let DEVELOPER = "developer"
     let DONATOR = "donator"

@@ -32,28 +32,32 @@ module Leaderboard =
 
                 let info = Score.get_leaderboard chart_id ruleset_id
 
-                let scores: Charts.Scores.Leaderboard.Score array =
-                    info
-                    |> Array.indexed
-                    |> Array.choose (
-                        function
-                        | i, (Some username, Some found_score) ->
-                            Some
-                                {
-                                    Username = username
-                                    Rank = i + 1
-                                    Replay = found_score.Replay
-                                    Rate = found_score.Rate
-                                    Mods = found_score.Mods
-                                    Timestamp =
-                                        System.DateTimeOffset
-                                            .FromUnixTimeMilliseconds(found_score.Timestamp)
-                                            .UtcDateTime
-                                }
-                        | _ -> None
-                    )
+                printfn "%A" info
 
-                response.ReplyJson({ Scores = scores; RulesetId = ruleset_id }: Charts.Scores.Leaderboard.Response)
+                // todo: score service to pull leaderboard, username info, replay info
+
+                //let scores: Charts.Scores.Leaderboard.Score array =
+                //    info
+                //    |> Array.indexed
+                //    |> Array.choose (
+                //        function
+                //        | i, (Some username, Some found_score) ->
+                //            Some
+                //                {
+                //                    Username = username
+                //                    Rank = i + 1
+                //                    Replay = found_score.Replay
+                //                    Rate = found_score.Rate
+                //                    Mods = found_score.Mods
+                //                    Timestamp =
+                //                        System.DateTimeOffset
+                //                            .FromUnixTimeMilliseconds(found_score.Timestamp)
+                //                            .UtcDateTime
+                //                }
+                //        | _ -> None
+                //    )
+
+                response.ReplyJson({ Scores = [||]; RulesetId = ruleset_id }: Charts.Scores.Leaderboard.Response)
 
             else
                 response.MakeErrorResponse(404) |> ignore

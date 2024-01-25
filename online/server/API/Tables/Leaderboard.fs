@@ -3,7 +3,7 @@
 open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Old
 
 module Leaderboard =
 
@@ -35,7 +35,7 @@ module Leaderboard =
                             Some
                                 {
                                     Username = username
-                                    Color = color |> Option.defaultValue Badge.DEFAULT_COLOR
+                                    Color = color |> Option.defaultValue Badge_Old.DEFAULT_COLOR
                                     Rank = i + 1
                                     Rating = rating
                                 }

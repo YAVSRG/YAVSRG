@@ -3,7 +3,7 @@
 open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Objects
 open Interlude.Web.Server.Online
 
 module List =
@@ -19,16 +19,16 @@ module List =
             let user_id, _ = authorize headers
 
             let friends = Friends.friends_list user_id
-            let online = Session.find_session_ids_by_usernames (friends |> Array.map (fun u -> u.Username))
+            let online = Session.find_session_ids_by_usernames (friends |> Array.map (fun (id, u) -> u.Username))
 
             response.ReplyJson(
                 {
                     Friends =
                         Array.zip friends online
-                        |> Array.map (fun (friend, session) ->
+                        |> Array.map (fun ((_, friend), session) ->
                             {
                                 Username = friend.Username
-                                Color = friend.Color |> Option.defaultValue Badge.DEFAULT_COLOR
+                                Color = friend.Color
                                 Online = session.IsSome
                             }
                         )
