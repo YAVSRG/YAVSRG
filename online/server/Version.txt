@@ -1,1 +1,1 @@
-﻿Restructured session management + other QOL things
+﻿Bring server back up while I investigate why it didn't work
