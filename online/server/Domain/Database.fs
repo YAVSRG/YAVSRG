@@ -15,7 +15,7 @@ module Migrations =
 
         DatabaseRef.db <- db
 
-        let users = User._dump()
+        let users = try User._dump() with _ -> [||]
 
         let migrate_user : NonQuery<int64 * User> =
             {
@@ -59,7 +59,7 @@ module Migrations =
 
         Logging.Info("Migrated friends successfully")
 
-        let scores = Score._dump()
+        let scores = try Score._dump() with _ -> [||]
 
         let now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
 
