@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Version.txt" />
+    <Compile Include="Utils.fs" />
     <Compile Include="Globals.fs" />
     <Compile Include="Domain_Old\Redis.fs" />
     <Compile Include="Domain_Old\Objects\Tables.fs" />
@@ -15,6 +16,7 @@
     <Compile Include="Domain\Objects\Leaderboards.fs" />
     <Compile Include="Domain\Objects\Tables.fs" />
     <Compile Include="Domain\Services\Backbeat.fs" />
+    <Compile Include="Domain\Services\Tables.fs" />
     <Compile Include="Domain\Services\Scores.fs" />
     <Compile Include="Domain\Services\Users.fs" />
     <Compile Include="Domain\Database.fs" />

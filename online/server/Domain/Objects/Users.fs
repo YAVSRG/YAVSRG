@@ -60,7 +60,7 @@ module User =
         {
             Username = username
             DiscordId = discord_id
-            DateSignedUp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            DateSignedUp = Timestamp.now()
             LastLogin = 0L
             AuthToken = generate_auth_token()
             Badges = Set.empty
@@ -264,7 +264,7 @@ module User =
         {
             SQL = """UPDATE users SET LastLogin = @Now WHERE Id = @Id;"""
             Parameters = [ "@Now", SqliteType.Integer, 8; "@Id", SqliteType.Integer, 8 ]
-            FillParameters = fun p id -> p.Int64 (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()); p.Int64 id
+            FillParameters = fun p id -> p.Int64 (Timestamp.now()); p.Int64 id
         }
     let update_last_seen (id: int64) = UPDATE_LAST_SEEN.Execute id db |> expect |> ignore
 

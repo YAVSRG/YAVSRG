@@ -4,6 +4,7 @@ open NetCoreServer
 open Prelude
 open Percyqaz.Common
 open Interlude.Web.Shared.Requests
+open Interlude.Web.Server
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Services
 open Interlude.Web.Server.Domain.Old
@@ -36,7 +37,7 @@ module Add =
             | Some level when level.Rank = request.SuggestedLevel -> response.ReplyJson(true) // Chart is already in this table, at this level. Discard suggestion
             | _ ->
 
-            let timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            let timestamp = Timestamp.now()
 
             match TableSuggestion.try_get_existing (request.ChartId, request.TableFor) with
             | Some(existing_id, existing_value) ->

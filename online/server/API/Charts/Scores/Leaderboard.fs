@@ -45,7 +45,7 @@ module Leaderboard =
                                 Rate = score.Rate
                                 Mods = score.Mods
                                 Timestamp =
-                                    System.DateTimeOffset
+                                    DateTimeOffset
                                         .FromUnixTimeMilliseconds(score.TimePlayed)
                                         .UtcDateTime
                             }

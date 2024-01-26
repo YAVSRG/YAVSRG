@@ -44,42 +44,4 @@ module Save =
                         }
                     : Charts.Scores.Save.Response
                 )
-
-                // todo: move this into a service too
-
-                //// if ruleset and chart match a table, aggregate your new table rating and save to leaderboard
-                //for table_id, table in Backbeat.tables |> Map.toSeq do
-                //    if table.RulesetId = ruleset_id && table.Contains request.ChartId then
-
-                //        let grades = Score.aggregate_table_grades user_id ruleset_id 1.0f
-
-                //        let rating =
-                //            table.Levels
-                //            |> Seq.map (fun l -> l.Charts |> Seq.map (fun c -> l, c))
-                //            |> Seq.concat
-                //            |> Seq.choose (fun (level, chart) ->
-                //                if grades.ContainsKey(chart.Hash) then
-                //                    Some(table.Rating grades.[chart.Hash] (level, chart))
-                //                else
-                //                    None
-                //            )
-                //            |> Seq.sortDescending
-                //            |> Seq.truncate 50
-                //            |> Seq.sum
-                //            |> fun total -> total / 50.0
-
-                //        let old_position =
-                //            match TableRanking.rank table_id user_id with
-                //            | Some pos -> Some(pos, (TableRanking.rating table_id user_id).Value)
-                //            | None -> None
-
-                //        let new_rank = TableRanking.update table_id user_id rating
-
-                //        table_changes <-
-                //            {
-                //                Table = table_id
-                //                OldPosition = old_position
-                //                NewPosition = new_rank, rating
-                //            }
-                //            :: table_changes
         }

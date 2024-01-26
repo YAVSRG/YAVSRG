@@ -40,7 +40,7 @@ module Replay =
             UserId = user_id
             ChartId = chart_id
             TimePlayed = timestamp
-            TimeUploaded = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            TimeUploaded = Timestamp.now()
             Data = Replay.compress_bytes replay
         }
 

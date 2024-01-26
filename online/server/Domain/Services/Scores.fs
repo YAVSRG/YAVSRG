@@ -109,7 +109,7 @@ module Scores =
 
                 Score.save score |> ignore
 
-                // todo: table and leaderboard changes
+            Tables.recalculate_affected_table_ratings(user_id, chart_id) // todo: return what ratings changed
 
             return ScoreUploadOutcome.Rated (table_changes, leaderboard_changes)
         }

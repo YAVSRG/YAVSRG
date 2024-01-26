@@ -3,7 +3,7 @@
 open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain.Old
+open Interlude.Web.Server.Domain.Services
 
 module Leaderboard =
 
@@ -24,22 +24,17 @@ module Leaderboard =
                 raise NotFoundException
             else
 
-                let info = [||] //TableRanking.get_top_50_info "crescent"
+                let info = Tables.get_leaderboard_details table_id
 
                 let players: Tables.Leaderboard.Player array =
                     info
-                    |> Array.indexed
-                    |> Array.choose (
-                        function
-                        | i, (Some(username, color), rating) ->
-                            Some
-                                {
-                                    Username = username
-                                    Color = color
-                                    Rank = i + 1
-                                    Rating = rating
-                                }
-                        | _ -> None
+                    |> Array.map (fun (i, user, rating) ->
+                        {
+                            Username = user.Username
+                            Color = user.Color
+                            Rank = i + 1
+                            Rating = rating
+                        }
                     )
 
                 response.ReplyJson({ Players = players }: Tables.Leaderboard.Response)

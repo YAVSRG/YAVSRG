@@ -50,7 +50,7 @@ module TableRating =
                 p.Int64 user_id
                 p.String table_id
                 p.Float64 rating
-                p.Int64 (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
+                p.Int64 (Timestamp.now())
             )
         }
     let set (user_id: int64) (table_id: string) (rating: float) = SET.Execute(user_id, table_id, rating) db |> expect |> ignore
