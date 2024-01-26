@@ -1,9 +1,11 @@
 ﻿namespace Interlude.Web.Server.Domain.Services
 
+open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
 open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Services
 
 module Scores =
 
@@ -23,22 +25,40 @@ module Scores =
 
     [<RequireQualifiedAccess>]
     type ScoreUploadOutcome =
+        | UploadFailed
         | SongNotRecognised
         | Unrated
         | Rated of TableRatingChange list * LeaderboardRankChange list
 
     let private ACCEPTED_RULESETS = [| Score.PRIMARY_RULESET |]
     
-    let submit (user_id: int64, chart_id: string, replay: ReplayData, rate: float32, mods: Mods.ModState, timestamp: int64) =
+    let submit (user_id: int64, chart_id: string, replay_untrusted_string: string, rate: float32, mods: Mods.ModState, timestamp: int64) =
         async {
 
-            match! Interlude.Web.Server.Domain.Backbeat.Charts.fetch.RequestAsync(chart_id) with
+            if rate < 0.5f || rate > 2.0f then
+                return ScoreUploadOutcome.UploadFailed
+            else
+
+            match Mods.check mods with
+            | Error message -> 
+                Logging.Error(sprintf "Mod validation failed from user #%i: %s" user_id message)
+                return ScoreUploadOutcome.UploadFailed
+            | Ok Mods.ModStatus.Unstored -> return ScoreUploadOutcome.UploadFailed
+            | Ok mod_ranked_status ->
+
+            match! Backbeat.Charts.fetch.RequestAsync(chart_id) with
             | None -> return ScoreUploadOutcome.SongNotRecognised
             | Some chart ->
 
-            let mod_chart = Mods.apply_mods mods chart
+            match Replay.decompress_string_untrusted (chart.LastNote - chart.FirstNote) replay_untrusted_string with
+            | Error message -> 
+                Logging.Error(sprintf "Replay decompression failed from user #%i: %s" user_id message)
+                return ScoreUploadOutcome.UploadFailed
+            | Ok replay ->
 
-            let is_ranked = rate >= 1.0f && (match Mods.check mods with Ok Mods.ModStatus.Ranked -> true | _ -> false)
+            let is_ranked = rate >= 1.0f && mod_ranked_status = Mods.ModStatus.Ranked
+
+            let mod_chart = Mods.apply_mods mods chart
 
             if not is_ranked then
                 return ScoreUploadOutcome.Unrated
@@ -47,13 +67,16 @@ module Scores =
             let mutable leaderboard_changes: LeaderboardRankChange list = []
             let mutable table_changes: TableRatingChange list = []
 
+            // todo: get relevant rulesets for this chart (i.e. tables ft this chart with different rulesets + SCJ4)
             for ruleset_id in ACCEPTED_RULESETS do
-                let ruleset = Interlude.Web.Server.Domain.Backbeat.rulesets.[ruleset_id]
+                let ruleset = Backbeat.rulesets.[ruleset_id]
                 let scoring = Metrics.create ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes rate
 
                 scoring.Update Time.infinity
 
                 let accuracy = scoring.Value
+
+                if accuracy < 0.7 then () else
 
                 let score : Score =
                     Score.create (

@@ -25,7 +25,7 @@ try
         new X509Certificate2(Path.Combine("./secrets", SECRETS.SocketCert), SECRETS.SocketCertPassword)
 
     Domain.Database.startup ()
-    Domain.Backbeat.init ()
+    Domain.Services.Backbeat.init ()
 
     Server.init
         {

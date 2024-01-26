@@ -12,15 +12,12 @@
     <Compile Include="Domain_Old\Objects\Scores.fs" />
     <Compile Include="Domain_Old\Objects\Leaderboards.fs" />
     <Compile Include="Domain_Old\Objects\Tables.fs" />
-    <Compile Include="Domain_Old\DbServices\DeleteUser.fs" />
-    <Compile Include="Domain_Old\DbServices\Migrations.fs" />
-    <Compile Include="Domain_Old\Services\UserAuth.fs" />
-    <Compile Include="Domain_Old\Services\Backbeat.fs" />
     <Compile Include="Domain\Objects\Users.fs" />
     <Compile Include="Domain\Objects\Friends.fs" />
     <Compile Include="Domain\Objects\Replays.fs" />
     <Compile Include="Domain\Objects\Scores.fs" />
     <Compile Include="Domain\Objects\Leaderboards.fs" />
+    <Compile Include="Domain\Services\Backbeat.fs" />
     <Compile Include="Domain\Services\Scores.fs" />
     <Compile Include="Domain\Services\Users.fs" />
     <Compile Include="Domain\Database.fs" />
@@ -65,5 +62,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="8.0.100" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Domain_Old\DbServices\" />
   </ItemGroup>
 </Project>

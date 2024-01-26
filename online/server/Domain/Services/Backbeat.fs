@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain
+﻿namespace Interlude.Web.Server.Domain.Services
 
 open System.Linq
 open System.Collections.Generic

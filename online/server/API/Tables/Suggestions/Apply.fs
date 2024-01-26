@@ -6,8 +6,9 @@ open Prelude
 open Prelude.Data.Charts.Tables
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
+open Interlude.Web.Server.Domain.Objects
 open Interlude.Web.Server.Domain.Old
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Services
 
 module Apply =
 
@@ -21,7 +22,7 @@ module Apply =
         async {
             let user_id, user = authorize headers
 
-            if not (user.Badges.Contains Objects.Badge.TABLE_EDITOR) then
+            if not (user.Badges.Contains Badge.TABLE_EDITOR) then
                 Logging.Error(sprintf "User '%s' doesn't have permission to apply table suggestions" user.Username)
                 raise PermissionDeniedException
             else

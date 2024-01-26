@@ -119,32 +119,35 @@ module Replay =
     let MAX_ROWS_PER_SECOND = 200
     let MAX_BYTES_PER_SECOND = MAX_ROWS_PER_SECOND * BYTES_PER_ROW
 
-    let decompress_string_untrusted (chart_duration: Time) (input: string) : ReplayData =
+    let decompress_string_untrusted (chart_duration: Time) (input: string) : Result<ReplayData, string> =
         let max_rows = (10 + int (chart_duration / 1000.0f<ms>)) * MAX_ROWS_PER_SECOND
         let max_bytes = max_rows * BYTES_PER_ROW
 
-        let bytes = Convert.FromBase64String input
-        if bytes.Length % BYTES_PER_ROW <> 0 then failwith "replay string has wrong number of bytes to be valid"
+        try
+            let bytes = Convert.FromBase64String input
+            if bytes.Length % BYTES_PER_ROW <> 0 then failwith "replay string has wrong number of bytes to be valid"
 
-        use input_stream = new MemoryStream()
-        use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
-        use br = new BinaryReader(gzip_stream)
+            use input_stream = new MemoryStream()
+            use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
+            use br = new BinaryReader(gzip_stream)
     
-        let count : int = br.ReadInt32()
-        if count > max_rows then failwith "replay header indicates it is unreasonably big"
+            let count : int = br.ReadInt32()
+            if count > max_rows then failwith "replay header indicates it is unreasonably big"
 
-        let output = Array.zeroCreate count
-        let mutable last_time = -Single.NegativeInfinity
+            let output = Array.zeroCreate count
+            let mutable last_time = -Single.NegativeInfinity
     
-        for i = 0 to (count - 1) do
-            if gzip_stream.Position > max_bytes then failwith "replay is unreasonably big"
-            let time = br.ReadSingle()
-            if Single.IsNaN time || Single.IsInfinity time then failwith "replay contains invalid float value"
-            if time <= last_time then failwith "replay goes backwards in time"
-            last_time <- time
-            output.[i] <- struct (time * 1.0f<ms>, br.ReadUInt16())
+            for i = 0 to (count - 1) do
+                if gzip_stream.Position > max_bytes then failwith "replay is unreasonably big"
+                let time = br.ReadSingle()
+                if Single.IsNaN time || Single.IsInfinity time then failwith "replay contains invalid float value"
+                if time <= last_time then failwith "replay goes backwards in time"
+                last_time <- time
+                output.[i] <- struct (time * 1.0f<ms>, br.ReadUInt16())
     
-        output
+            Ok output
+        with err ->
+            Error err.Message
 
     // the replay generated when Auto-play is enabled
     let perfect_replay (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
