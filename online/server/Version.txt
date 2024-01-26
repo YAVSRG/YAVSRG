@@ -1,1 +1,1 @@
-﻿Fix bug in redis data dumping
+﻿DEPLOY THE MIGRATION
