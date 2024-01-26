@@ -472,7 +472,6 @@ module Gameplay =
 
     let deinit () =
         Scores.save ()
-        Library.save ()
         Stats.save ()
 
     let init_window () =

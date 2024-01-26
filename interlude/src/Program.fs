@@ -6,6 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Flux
 open Percyqaz.Flux.Windowing
+open Prelude.Data.Charts
 open Interlude
 open Interlude.UI
 open Interlude.Features
@@ -35,6 +36,8 @@ let launch (instance: int) =
         crash_splash ()
         Console.ReadLine() |> ignore
 
+    Library.init_startup()
+
     let mutable has_shutdown = false
 
     let shutdown (unexpected) =
@@ -43,10 +46,11 @@ let launch (instance: int) =
         else
             has_shutdown <- true
             Gameplay.deinit ()
+            Library.deinit ()
             Options.deinit ()
             Network.deinit ()
-            //DiscordRPC.shutdown()
             Printerlude.deinit ()
+            //DiscordRPC.shutdown()
 
             if unexpected then
                 crash_splash ()
@@ -57,7 +61,6 @@ let launch (instance: int) =
             Logging.Shutdown()
 
     Window.after_init.Add(fun () -> AppDomain.CurrentDomain.ProcessExit.Add(fun args -> shutdown true))
-
     Window.on_file_drop.Add(Import.Import.handle_file_drop)
 
     use icon_stream = Utils.get_resource_stream ("icon.png")

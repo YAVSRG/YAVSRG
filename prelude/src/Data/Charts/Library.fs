@@ -15,37 +15,38 @@ open Collections
 
 module Library =
 
+    // ---- Loading and saving ----
+
     type Patterns = ConcurrentDictionary<string, Patterns.PatternReport>
 
-    // todo: function to load these as it's unpredictable having it load static like this
-    let cache: Cache = Cache.from_path (get_game_folder "Songs")
+    // todo: redesign this init and save logic. at least it's more controlled than it was before
+    let mutable cache : Cache = Unchecked.defaultof<_>
 
-    let collections =
-        let cs: Collections =
-            load_important_json_file "Collections" (Path.Combine(get_game_folder "Data", "collections.json")) false
+    let mutable collections : Collections = Unchecked.defaultof<_>
 
+    let mutable patterns: Patterns = Unchecked.defaultof<_>
+
+    let init_startup() =
+        cache <- Cache.from_path (get_game_folder "Songs")
+        collections <- load_important_json_file "Collections" (Path.Combine(get_game_folder "Data", "collections.json")) false
+        patterns <-
+            let path = Path.Combine(get_game_folder "Data", "patterns.json")
+            
+            if File.GetLastWriteTimeUtc(path) > DateTime.Parse("12/12/2023") then
+                load_important_json_file "Patterns" (Path.Combine(get_game_folder "Data", "patterns.json")) false
+            else
+                Logging.Info("Pattern analysis has updated, you will need to cache patterns again")
+                Patterns()
+        
         Logging.Info(
             sprintf
                 "Loaded chart library of %i charts, %i folders, %i playlists"
                 cache.Entries.Count
-                cs.Folders.Count
-                cs.Playlists.Count
+                collections.Folders.Count
+                collections.Playlists.Count
         )
 
-        cs
-
-    let patterns: Patterns =
-        let path = Path.Combine(get_game_folder "Data", "patterns.json")
-
-        if File.GetLastWriteTimeUtc(path) > DateTime.Parse("12/12/2023") then
-            load_important_json_file "Patterns" (Path.Combine(get_game_folder "Data", "patterns.json")) false
-        else
-            Logging.Info("Pattern analysis has updated, you will need to cache patterns again")
-            Patterns()
-
-    // ---- Basic data layer stuff ----
-
-    let save () =
+    let deinit () =
         Cache.save cache
         save_important_json_file (Path.Combine(get_game_folder "Data", "collections.json")) collections
         save_important_json_file (Path.Combine(get_game_folder "Data", "patterns.json")) patterns
