@@ -56,6 +56,17 @@ module Leaderboard =
                         let s: string = RedisResult.op_Explicit result
                         Some <| Text.Json.JsonSerializer.Deserialize<Replay array>(s).[0]
                 )
+                
+        let _dump() =
+            let keys = redis.GetServers().[0].Keys(0, "leaderboard.score:*") |> Array.ofSeq
+            json.MGet(keys, "$")
+            |> Array.choose (fun result ->
+                if result.IsNull then
+                    None
+                else
+                    let s: string = RedisResult.op_Explicit result
+                    Some <| Text.Json.JsonSerializer.Deserialize<Replay array>(s).[0]
+            )
 
     let private key (hash: string) (ruleset: string) =
         RedisKey(sprintf "leaderboard:%s:%s" hash ruleset)

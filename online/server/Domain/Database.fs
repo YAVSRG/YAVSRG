@@ -11,7 +11,13 @@ open Interlude.Web.Server.Domain.Old
 
 module Migrations =
 
-    let migrate_users_friends(db: Database) =
+    type ScoreMigrationModel =
+        {
+            Score: Score
+            mutable ReplayId: int64 option
+        }
+
+    let migrate_redis(db: Database) =
 
         DatabaseRef.db <- db
 
@@ -59,11 +65,46 @@ module Migrations =
 
         Logging.Info("Migrated friends successfully")
 
-        let scores = try Score._dump() with _ -> [||]
-
         let now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        let replays = Leaderboard.Replay._dump()
+        let scores = (try Score._dump() with _ -> [||]) |> Array.map (fun s -> { Score = s; ReplayId = None })
+        let scores_by_timestamp = scores |> Seq.map (fun s -> s.Score.Timestamp, s) |> Map.ofSeq
 
-        let migrate_score : NonQuery<Score> =
+        let migrate_replay : NonQuery<int * Leaderboard.Replay> =
+            {
+                SQL = """
+                INSERT INTO replays (Id, UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Data)
+                VALUES (@Id, @UserId, @ChartId, @Purposes, @TimePlayed, @TimeUploaded, @Data);
+                """
+                Parameters =
+                    [
+                        "@Id", SqliteType.Integer, 8
+                        "@UserId", SqliteType.Integer, 8
+                        "@ChartId", SqliteType.Text, -1
+                        "@TimePlayed", SqliteType.Integer, 8
+                        "@TimeUploaded", SqliteType.Integer, 8
+                        "@Data", SqliteType.Blob, -1
+                        "@Purposes", SqliteType.Text, -1
+                    ]
+                FillParameters = (fun p (id, replay) ->
+                    let matching_score = scores_by_timestamp.[replay.Timestamp]
+                    matching_score.ReplayId <- Some id
+                    p.Int64 id
+                    p.Int64 matching_score.Score.UserId
+                    p.String matching_score.Score.ChartId
+                    p.Int64 replay.Timestamp
+                    p.Int64 now
+                    p.Blob (replay.Replay |> Convert.FromBase64String)
+                    p.Json JSON [ Objects.Score.PRIMARY_RULESET ]
+                )
+            }
+
+        migrate_replay.Batch (Array.indexed replays) db
+        |> expect
+        |> sprintf "Migrated %i replays successfully"
+        |> Logging.Info
+
+        let migrate_score : NonQuery<ScoreMigrationModel> =
             {
                 SQL = """
                 INSERT INTO scores (UserId, ChartId, RulesetId, TimePlayed, TimeUploaded, Rate, Mods, Ranked, Accuracy, Grade, Lamp, ReplayId)
@@ -85,22 +126,22 @@ module Migrations =
                         "@ReplayId", SqliteType.Integer, 8
                     ]
                 FillParameters = (fun p score ->
-                    p.Int64 score.UserId
-                    p.String score.ChartId
-                    p.String score.RulesetId
-                    p.Int64 score.Timestamp
+                    p.Int64 score.Score.UserId
+                    p.String score.Score.ChartId
+                    p.String score.Score.RulesetId
+                    p.Int64 score.Score.Timestamp
                     p.Int64 now
-                    p.Float32 score.Rate
-                    p.Json JSON score.Mods
-                    p.Boolean (score.Rate >= 1.0f && Mods.check score.Mods = Ok Mods.ModStatus.Ranked)
-                    p.Float64 score.Score
-                    p.Int32 score.Grade
-                    p.Int32 score.Lamp
-                    p.Int64Option None
+                    p.Float32 score.Score.Rate
+                    p.Json JSON score.Score.Mods
+                    p.Boolean (score.Score.Rate >= 1.0f && Mods.check score.Score.Mods = Ok Mods.ModStatus.Ranked)
+                    p.Float64 score.Score.Score
+                    p.Int32 score.Score.Grade
+                    p.Int32 score.Score.Lamp
+                    p.Int64Option score.ReplayId
                 )
             }
 
-        migrate_score.Batch (scores |> Seq.where(fun score -> users_that_exist.Contains score.UserId)) db
+        migrate_score.Batch (scores |> Seq.where(fun score -> users_that_exist.Contains score.Score.UserId)) db
         |> expect
         |> sprintf "Migrated %i scores successfully"
         |> Logging.Info
@@ -120,14 +161,14 @@ module Migrations =
             )
             db
         Database.migrate
-            "MigrateUsersAndFriendsFromRedis"
-            migrate_users_friends
+            "MigrateEverythingFromRedis"
+            migrate_redis
             db
 
 module Database =
 
     let startup() =
-        //if IO.File.Exists("./data/core.db") then IO.File.Delete("./data/core.db") // for debug purposes
+        if IO.File.Exists("./data/core.db") then IO.File.Delete("./data/core.db") // for debug purposes
         db <- Database.from_file("./data/core.db")
         Migrations.run db
 
