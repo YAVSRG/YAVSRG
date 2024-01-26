@@ -470,10 +470,6 @@ module Gameplay =
                 Network.Events.leave_lobby.Add on_leave_lobby
                 Network.Events.player_status.Add player_status
 
-    let deinit () =
-        Scores.save ()
-        Stats.save ()
-
     let init_window () =
         match Cache.by_key options.CurrentChart.Value Library.cache with
         | Some cc -> Chart.change (cc, LibraryContext.None, true)
@@ -487,5 +483,4 @@ module Gameplay =
                 Background.load None
 
         Table.init_window options.Table.Value
-        Stats.init_window ()
         Online.Multiplayer.init_window ()

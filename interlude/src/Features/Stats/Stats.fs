@@ -41,10 +41,10 @@ module Stats =
     let mutable total: Stats = Stats.Default
     let mutable session: Stats = Stats.Default
 
-    let init_window () =
+    let init_startup () =
         total <- load_important_json_file "Stats" (Path.Combine(get_game_folder "Data", "stats.json")) false
 
-    let save () =
+    let deinit () =
         total.PlayTime <- total.PlayTime + session.PlayTime
         total.PracticeTime <- total.PracticeTime + session.PracticeTime
         total.GameTime <- total.GameTime + session.GameTime

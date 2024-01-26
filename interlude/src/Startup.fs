@@ -191,7 +191,13 @@ module Startup =
                 Migrations.run_2 ()
                 Stats.total.MigrationVersion <- Some 2
 
-    let ui_entry_point (instance) =
+    let init_startup (instance) =
+        Options.init_startup instance
+        Stats.init_startup ()
+        Library.init_startup()
+        Scores.init_startup()
+
+    let init_window (instance) =
         Screen.init_window
             [|
                 LoadingScreen()
@@ -223,8 +229,30 @@ module Startup =
                 Content.init_window Options.options.Theme.Value Options.options.Noteskin.Value
                 Options.Hotkeys.init_window Options.options.Hotkeys
                 //DiscordRPC.init()
-                Gameplay.init_window ()
                 migrate ()
+                Gameplay.init_window ()
                 Network.init_window()
                 base.Init()
         }
+
+    let mutable private has_shutdown = false
+    let deinit unexpected_shutdown crash_splash =
+        if has_shutdown then
+            ()
+        else
+            has_shutdown <- true
+            Stats.deinit ()
+            Scores.deinit ()
+            Library.deinit ()
+            Options.deinit ()
+            Network.deinit ()
+            Printerlude.deinit ()
+            //DiscordRPC.shutdown()
+
+            if unexpected_shutdown then
+                crash_splash ()
+                Logging.Critical("The game crashed or quit abnormally, but was able to shut down correctly")
+            else
+                Logging.Info("Thank you for playing")
+
+            Logging.Shutdown()

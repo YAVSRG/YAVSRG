@@ -6,12 +6,9 @@ open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Flux
 open Percyqaz.Flux.Windowing
-open Prelude.Data.Charts
 open Interlude
 open Interlude.UI
 open Interlude.Features
-open Interlude.Features.Printerlude
-open Interlude.Features.Online
 
 let launch (instance: int) =
     Logging.Verbosity <-
@@ -30,45 +27,20 @@ let launch (instance: int) =
         >> (fun s -> Logging.Critical s)
 
     try
-        Options.init_startup instance
+        Startup.init_startup instance
     with err ->
-        Logging.Critical("Fatal error loading game config", err)
+        Logging.Critical("Something went wrong when loading some of the game config/data, preventing the game from opening", err)
         crash_splash ()
         Console.ReadLine() |> ignore
 
-    Library.init_startup()
-
-    let mutable has_shutdown = false
-
-    let shutdown (unexpected) =
-        if has_shutdown then
-            ()
-        else
-            has_shutdown <- true
-            Gameplay.deinit ()
-            Library.deinit ()
-            Options.deinit ()
-            Network.deinit ()
-            Printerlude.deinit ()
-            //DiscordRPC.shutdown()
-
-            if unexpected then
-                crash_splash ()
-                Logging.Critical("The game crashed or quit abnormally, but was able to shut down correctly")
-            else
-                Logging.Info("Thank you for playing")
-
-            Logging.Shutdown()
-
-    Window.after_init.Add(fun () -> AppDomain.CurrentDomain.ProcessExit.Add(fun args -> shutdown true))
+    Window.after_init.Add(fun () -> AppDomain.CurrentDomain.ProcessExit.Add(fun args -> Startup.deinit true crash_splash))
     Window.on_file_drop.Add(Import.Import.handle_file_drop)
 
     use icon_stream = Utils.get_resource_stream ("icon.png")
     use icon = Utils.Bitmap.load icon_stream
+    Launch.entry_point (Options.config, "Interlude", Startup.init_window instance, Some icon)
 
-    Launch.entry_point (Options.config, "Interlude", Startup.ui_entry_point (instance), Some icon)
-
-    shutdown (false)
+    Startup.deinit false crash_splash
 
 [<EntryPoint>]
 let main argv =

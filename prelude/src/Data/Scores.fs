@@ -59,6 +59,7 @@ type ChartSaveData =
                             -> Difficulty rating data
 *)
 
+// todo: rename LazyScoreCalculator - do we even need this or could this be a module that calculates stuff
 type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
     let mutable ruleset: Ruleset = ruleset
 
@@ -231,15 +232,19 @@ module Scores =
                 Entries = new ConcurrentDictionary<string, ChartSaveData>()
             }
 
-    // todo: function to load this as it's unpredictable having it load static like this
-    let data: Data =
-        load_important_json_file "Scores" (Path.Combine(get_game_folder "Data", "scores.json")) true
-        |> fun d ->
-            Logging.Info(sprintf "Loaded scores for %i charts." d.Entries.Keys.Count)
-            d
+    // todo: move this to an SQLite database
+    let mutable data : Data = Unchecked.defaultof<_>
 
-    let save () =
-        save_important_json_file (Path.Combine(get_game_folder "Data", "scores.json")) data
+    let save () = save_important_json_file (Path.Combine(get_game_folder "Data", "scores.json")) data
+
+    let init_startup() =
+        data <-
+            load_important_json_file "Scores" (Path.Combine(get_game_folder "Data", "scores.json")) true
+            |> fun d ->
+                Logging.Info(sprintf "Loaded scores for %i charts." d.Entries.Keys.Count)
+                d
+
+    let deinit () = save()
 
     let get_or_create (chart: Chart) =
         let hash = Chart.hash chart
