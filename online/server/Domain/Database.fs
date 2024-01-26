@@ -127,13 +127,12 @@ module Migrations =
 module Database =
 
     let startup() =
-        if IO.File.Exists("./data/core.db") then IO.File.Delete("./data/core.db") // for debug purposes
-        let _db = Database.from_file("./data/core.db")
-        Migrations.run _db
-        db <- db
+        //if IO.File.Exists("./data/core.db") then IO.File.Delete("./data/core.db") // for debug purposes
+        db <- Database.from_file("./data/core.db")
+        Migrations.run db
 
     let startup_unit_tests() : IDisposable =
         let _db, keep_alive = Database.in_memory("unit_tests")
-        Migrations.run _db
         db <- _db
+        Migrations.run _db
         keep_alive
