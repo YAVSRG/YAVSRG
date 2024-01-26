@@ -25,6 +25,13 @@ module Migrations =
             "MigrateEverythingFromRedis"
             (fun db -> Logging.Info("Redis no longer exists to migrate data from"))
             db
+        Database.migrate
+            "AddTableRatings"
+            (fun db ->
+                TableRating.CREATE_TABLE.Execute () db |> expect |> ignore
+                Logging.Info("Migration created table ratings")
+            )
+            db
 
 module Database =
 

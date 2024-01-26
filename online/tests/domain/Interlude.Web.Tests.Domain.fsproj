@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Objects\Tables.fs" />
     <Compile Include="Objects\Users.fs" />
     <Compile Include="Objects\Friends.fs" />
     <Compile Include="Objects\Replays.fs" />
