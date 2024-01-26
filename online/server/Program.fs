@@ -44,10 +44,10 @@ try
             Handle_Request = API.handle_request
         }
 
-    //Logging.Info(sprintf "Launching game server on port %i ..." SOCKET_PORT)
-    //Server.start ()
-    //Logging.Info(sprintf "Launching api on port %i ..." HTTPS_PORT)
-    //API.Server.start ()
+    Logging.Info(sprintf "Launching game server on port %i ..." SOCKET_PORT)
+    Server.start ()
+    Logging.Info(sprintf "Launching api on port %i ..." HTTPS_PORT)
+    API.Server.start ()
     Logging.Info(sprintf "Launching discord bot ...")
     Bot.start ()
 

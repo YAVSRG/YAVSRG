@@ -168,7 +168,6 @@ module Migrations =
 module Database =
 
     let startup() =
-        if IO.File.Exists("./data/core.db") then IO.File.Delete("./data/core.db") // for debug purposes
         db <- Database.from_file("./data/core.db")
         Migrations.run db
 

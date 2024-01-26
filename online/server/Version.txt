@@ -1,1 +1,1 @@
-﻿DEPLOY THE MIGRATION
+﻿Post-migration checkup
