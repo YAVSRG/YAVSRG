@@ -24,7 +24,7 @@ module Leaderboard =
                 raise NotFoundException
             else
 
-                let info = TableRanking.get_top_50_info "crescent"
+                let info = [||] //TableRanking.get_top_50_info "crescent"
 
                 let players: Tables.Leaderboard.Player array =
                     info
@@ -35,7 +35,7 @@ module Leaderboard =
                             Some
                                 {
                                     Username = username
-                                    Color = color |> Option.defaultValue Badge_Old.DEFAULT_COLOR
+                                    Color = color
                                     Rank = i + 1
                                     Rating = rating
                                 }

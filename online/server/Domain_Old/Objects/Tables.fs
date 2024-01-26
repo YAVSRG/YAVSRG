@@ -30,16 +30,16 @@ module TableRanking =
             r, v.Score
         )
 
-    let get_top_50_info (id: string) =
-        let userIds = get_top_50_ids id
+    //let get_top_50_info (id: string) =
+    //    let userIds = get_top_50_ids id
 
-        let users =
-            userIds
-            |> Array.map fst
-            |> User.by_ids
-            |> Array.map (Option.map (fun x -> x.Username, x.Color))
+    //    let users =
+    //        userIds
+    //        |> Array.map fst
+    //        |> User.by_ids
+    //        |> Array.map (Option.map (fun x -> x.Username, x.Color))
 
-        Array.zip users (userIds |> Array.map snd)
+    //    Array.zip users (userIds |> Array.map snd)
 
 type TableSuggestion =
     {
