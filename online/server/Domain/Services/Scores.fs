@@ -90,3 +90,26 @@ module Scores =
 
             return ScoreUploadOutcome.Rated (table_changes, leaderboard_changes)
         }
+
+    let get_leaderboard_details (chart_id: string) (ruleset_id: string) =
+        let leaderboard_scores = Score.get_leaderboard chart_id ruleset_id
+        let users = leaderboard_scores |> Array.map (fun x -> x.UserId) |> User.by_ids |> Map.ofArray
+        let replays = leaderboard_scores |> Array.choose (fun x -> x.ReplayId) |> Replay.by_ids |> Map.ofArray
+
+        leaderboard_scores
+        |> Array.indexed 
+        |> Array.choose (fun (i, score) -> 
+            match users.TryFind score.UserId with
+            | None -> None
+            | Some user ->
+
+            match score.ReplayId with
+            | None -> None
+            | Some replay_id ->
+
+            match replays.TryFind replay_id with
+            | None -> None
+            | Some replay ->
+
+            Some (i, user, score, replay)
+        )

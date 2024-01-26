@@ -1,9 +1,11 @@
 ﻿namespace Interlude.Web.Server.API.Charts.Scores
 
+open System
 open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Services
 
 module Leaderboard =
 
@@ -30,34 +32,26 @@ module Leaderboard =
 
             if Leaderboard.exists chart_id ruleset_id then
 
-                let info = Score.get_leaderboard chart_id ruleset_id
+                let info = Scores.get_leaderboard_details chart_id ruleset_id
 
-                printfn "%A" info
+                let scores: Charts.Scores.Leaderboard.Score array =
+                    info
+                    |> Array.map (
+                        fun (i, user, score, replay) ->
+                            {
+                                Username = user.Username
+                                Rank = i + 1
+                                Replay = replay.Data |> Convert.ToBase64String
+                                Rate = score.Rate
+                                Mods = score.Mods
+                                Timestamp =
+                                    System.DateTimeOffset
+                                        .FromUnixTimeMilliseconds(score.TimePlayed)
+                                        .UtcDateTime
+                            }
+                    )
 
-                // todo: score service to pull leaderboard, username info, replay info
-
-                //let scores: Charts.Scores.Leaderboard.Score array =
-                //    info
-                //    |> Array.indexed
-                //    |> Array.choose (
-                //        function
-                //        | i, (Some username, Some found_score) ->
-                //            Some
-                //                {
-                //                    Username = username
-                //                    Rank = i + 1
-                //                    Replay = found_score.Replay
-                //                    Rate = found_score.Rate
-                //                    Mods = found_score.Mods
-                //                    Timestamp =
-                //                        System.DateTimeOffset
-                //                            .FromUnixTimeMilliseconds(found_score.Timestamp)
-                //                            .UtcDateTime
-                //                }
-                //        | _ -> None
-                //    )
-
-                response.ReplyJson({ Scores = [||]; RulesetId = ruleset_id }: Charts.Scores.Leaderboard.Response)
+                response.ReplyJson({ Scores = scores; RulesetId = ruleset_id }: Charts.Scores.Leaderboard.Response)
 
             else
                 response.MakeErrorResponse(404) |> ignore
