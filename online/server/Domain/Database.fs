@@ -66,7 +66,7 @@ module Migrations =
         Logging.Info("Migrated friends successfully")
 
         let now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-        let replays = Leaderboard.Replay._dump()
+        let replays = try Leaderboard.Replay._dump() with _ -> [||]
         let scores = (try Score._dump() with _ -> [||]) |> Array.map (fun s -> { Score = s; ReplayId = None })
         let scores_by_timestamp = scores |> Seq.map (fun s -> s.Score.Timestamp, s) |> Map.ofSeq
 

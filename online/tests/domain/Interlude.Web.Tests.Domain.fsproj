@@ -15,6 +15,7 @@
     <Compile Include="Objects\Scores.fs" />
     <Compile Include="Objects\Leaderboards.fs" />
     <Compile Include="Services\Users.fs" />
+    <Compile Include="Services\Scores.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
