@@ -36,14 +36,15 @@ module NoteColors =
 
     type private ColorNoteRow = (struct (NoteRow * ColorData))
 
-    type ColorizedChart =
+    type ColoredChart =
         {
-            Keys: int
+            Source: ModdedChart
             Notes: TimeArray<ColorNoteRow>
-            BPM: TimeArray<BPM>
-            SV: TimeArray<float32>
-            ModsUsed: string list
         }
+        member this.Keys = this.Source.Keys
+        member this.BPM = this.Source.BPM
+        member this.SV = this.Source.SV
+        member this.ModsUsed = this.Source.ModsUsed
         member this.FirstNote = this.Notes.[0].Time
         member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
 
@@ -54,12 +55,12 @@ module NoteColors =
         List.tryFind ((fun i -> DDR_VALUES.[i]) >> fun n -> roughly_divisible delta (msPerBeat / n)) [ 0..7 ]
         |> Option.defaultValue DDR_VALUES.Length
 
-    let private column_colors (colorData: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
+    let private column_colors (colorData: ColorData) (mc: ModdedChart) : TimeArray<ColorNoteRow> =
 
         let c = [| for i in 0 .. (mc.Keys - 1) -> colorData.[i] |]
         mc.Notes |> TimeArray.map (fun nr -> struct (nr, c))
 
-    let private chord_colors (color_data: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
+    let private chord_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorNoteRow> =
 
         let mutable previous_colors: ColorData = Array.zeroCreate mc.Keys
 
@@ -85,7 +86,7 @@ module NoteColors =
             struct (nr, colors)
         )
 
-    let private ddr_colors (color_data: ColorData) (mc: ModChart) : TimeArray<ColorNoteRow> =
+    let private ddr_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorNoteRow> =
 
         let mutable previous_colors: ColorData = Array.zeroCreate mc.Keys
 
@@ -122,7 +123,7 @@ module NoteColors =
             }
         )
 
-    let private apply_scheme (scheme: ColorScheme) (color_data: ColorData) (mc: ModChart) =
+    let private apply_scheme (scheme: ColorScheme) (color_data: ColorData) (mc: ModdedChart) : ColoredChart =
         let colored_notes =
             match scheme with
             | ColorScheme.Column -> column_colors color_data mc
@@ -131,11 +132,8 @@ module NoteColors =
             | _ -> column_colors (Array.zeroCreate mc.Keys) mc
 
         {
-            Keys = mc.Keys
+            Source = mc
             Notes = colored_notes
-            BPM = mc.BPM
-            SV = mc.SV
-            ModsUsed = mc.ModsUsed
         }
 
     [<Json.AutoCodec(false)>]
@@ -168,6 +166,6 @@ module NoteColors =
                         ColorConfig.Default.Colors
             }
 
-    let apply_coloring (config: ColorConfig) (chart: ModChart) : ColorizedChart =
+    let apply_coloring (config: ColorConfig) (chart: ModdedChart) : ColoredChart =
         let index = if config.UseGlobalColors then 0 else chart.Keys - 2
         apply_scheme config.Style config.Colors.[index] chart

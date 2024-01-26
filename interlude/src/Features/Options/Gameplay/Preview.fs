@@ -16,7 +16,7 @@ type NoteskinPreview(scale: float32) as this =
 
     let fbo = FBO.create ()
 
-    let create_renderer (with_mods: ModChart, with_colors: ColorizedChart) =
+    let create_renderer (with_mods: ModdedChart, with_colors: ColoredChart) =
         let playfield =
             Playfield(with_colors, PlayState.Dummy with_mods, noteskin_config (), false)
 

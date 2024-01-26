@@ -30,7 +30,7 @@ type PacemakerMode =
 
 module PlayScreen =
 
-    let rec play_screen (chart: Chart, with_mods: ModChart, pacemaker_mode: PacemakerMode) =
+    let rec play_screen (chart: Chart, with_mods: ModdedChart, pacemaker_mode: PacemakerMode) =
 
         let ruleset = Rulesets.current
         let first_note = with_mods.Notes.[0].Time
@@ -265,7 +265,7 @@ module PlayScreen =
                     )
         }
 
-    let multiplayer_screen (chart: Chart, with_mods: ModChart) =
+    let multiplayer_screen (chart: Chart, with_mods: ModdedChart) =
 
         let ruleset = Rulesets.current
         let first_note = with_mods.Notes.[0].Time

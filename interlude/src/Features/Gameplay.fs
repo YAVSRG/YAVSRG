@@ -22,7 +22,6 @@ open Interlude
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
-open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests
@@ -58,7 +57,7 @@ module Gameplay =
                 else
                     sprintf "%s %i-%i" Icons.MUSIC a b
 
-        let private format_notecounts (chart: ModChart) =
+        let private format_notecounts (chart: ModdedChart) =
             let mutable notes = 0
             let mutable lnotes = 0
 
@@ -88,17 +87,12 @@ module Gameplay =
         let mutable CHART: Chart option = None
         let mutable SAVE_DATA: ChartSaveData option = None
 
-        let mutable WITH_MODS: ModChart option = None
+        let mutable WITH_MODS: ModdedChart option = None
         let mutable FMT_NOTECOUNTS: string option = None
         let mutable RATING: RatingReport option = None
         let mutable PATTERNS: Patterns.PatternReport option = None
 
-        let mutable WITH_COLORS: ColorizedChart option = None
-
-        // todo: remove these unused functions OR use them
-        let not_selected () = CACHE_DATA.IsNone
-        let is_loading () = CACHE_DATA.IsSome && CHART.IsNone
-        let is_loaded () = CACHE_DATA.IsSome && CHART.IsSome
+        let mutable WITH_COLORS: ColoredChart option = None
 
         let private chart_change_finished = Event<unit>()
         let on_chart_change_finished = chart_change_finished.Publish
@@ -290,11 +284,16 @@ module Gameplay =
 
                 chart_loader.Request Recolor
 
-        let if_loaded (action: Chart * ModChart * ColorizedChart -> unit) =
+        let if_loading (action: CachedChart -> unit) =
+            match CACHE_DATA with
+            | Some data -> action data
+            | None -> ()
+
+        let if_loaded (action: Chart * ModdedChart * ColoredChart -> unit) =
             if CACHE_DATA.IsNone then ()
             elif WITH_COLORS.IsSome then action (CHART.Value, WITH_MODS.Value, WITH_COLORS.Value)
 
-        let when_loaded (action: Chart * ModChart * ColorizedChart -> unit) =
+        let when_loaded (action: Chart * ModdedChart * ColoredChart -> unit) =
             if CACHE_DATA.IsNone then ()
             elif WITH_COLORS.IsSome then action (CHART.Value, WITH_MODS.Value, WITH_COLORS.Value)
             else on_load_succeeded <- (fun () -> action (CHART.Value, WITH_MODS.Value, WITH_COLORS.Value)) :: on_load_succeeded

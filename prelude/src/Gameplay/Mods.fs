@@ -42,7 +42,7 @@ module Mods =
             // Returns resulting chart + flag
             // flag is true if the mod made meaningful changes to the chart
             // The resulting chart can still be modified in ways that don't affect gameplay such as changing BPMs
-            Apply: int -> ModChart -> ModChart * bool
+            Apply: int -> ModdedChart -> ModdedChart * bool
             Priority: int
         }
 
@@ -51,7 +51,7 @@ module Mods =
 
     module ModState =
 
-        let filter (chart: ModChart) (mods: ModState) =
+        let filter (chart: ModdedChart) (mods: ModState) =
             List.fold (fun m i -> Map.add i mods.[i] m) Map.empty chart.ModsUsed
 
         let r = new Random()
@@ -138,8 +138,8 @@ module Mods =
         Mod application pipeline
     *)
 
-    let apply_mods (mods: ModState) (chart: Chart) : ModChart =
-        let mutable modchart = ModChart.from_chart chart
+    let apply_mods (mods: ModState) (chart: Chart) : ModdedChart =
+        let mutable modchart = ModdedChart.from_chart chart
 
         for id, m, state in ModState.enumerate mods do
             let mc, mod_was_applied = m.Apply state modchart

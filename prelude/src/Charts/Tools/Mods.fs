@@ -4,7 +4,7 @@ open System
 open Prelude
 open Prelude.Charts
 
-type ModChart =
+type ModdedChart =
     {
         Keys: int
         Notes: TimeArray<NoteRow>
@@ -15,7 +15,7 @@ type ModChart =
     member this.FirstNote = this.Notes.[0].Time
     member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
 
-module ModChart =
+module ModdedChart =
 
     let from_chart (chart: Chart) =
         {
@@ -28,7 +28,7 @@ module ModChart =
 
 module Mirror =
 
-    let apply (chart: ModChart) : ModChart * bool =
+    let apply (chart: ModdedChart) : ModdedChart * bool =
         { chart with
             Notes = TimeArray.map Array.rev chart.Notes
         },
@@ -36,7 +36,7 @@ module Mirror =
 
 module NoSV =
 
-    let apply (chart: ModChart) : ModChart * bool =
+    let apply (chart: ModdedChart) : ModdedChart * bool =
         let mutable has_sv = false
 
         for { Data = s } in chart.SV do
@@ -47,7 +47,7 @@ module NoSV =
 
 module NoLN =
 
-    let apply (chart: ModChart) : ModChart * bool =
+    let apply (chart: ModdedChart) : ModdedChart * bool =
         let mutable has_ln = false
         let notes_copy = TimeArray.map Array.copy chart.Notes
 
@@ -92,7 +92,7 @@ module Inverse =
         for { Data = d2 } in b do
             printfn "     ~ %s" (NoteRow.pretty_print d2)
 
-    let apply (halved: bool) (chart: ModChart) : ModChart * bool =
+    let apply (halved: bool) (chart: ModdedChart) : ModdedChart * bool =
 
         let output = chart.Notes |> TimeArray.map Array.copy |> ResizeArray
 

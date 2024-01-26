@@ -21,12 +21,12 @@ open Interlude.Features.Score
 [<RequireQualifiedAccess>]
 type ReplayMode =
     | Auto
-    | Replay of score: Score * chart: ModChart * rate: float32 * ReplayData
+    | Replay of score: Score * chart: ModdedChart * rate: float32 * ReplayData
 
 type private HitOverlay
     (
         rate: float32,
-        chart: ModChart,
+        chart: ModdedChart,
         replay_data: ReplayData,
         state: PlayState,
         playfield: Playfield,

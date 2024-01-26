@@ -12,7 +12,7 @@ open Interlude.UI.Menu
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type Preview(chart: ModChart, with_colors: ColorizedChart, change_rate: float32 -> unit) =
+type Preview(chart: ModdedChart, with_colors: ColoredChart, change_rate: float32 -> unit) =
     inherit Dialog()
 
     let HEIGHT = 60.0f

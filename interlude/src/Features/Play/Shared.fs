@@ -53,7 +53,7 @@ module LocalAudioSync =
 
     let apply_automatic (scoring: IScoreMetric) = offset.Set(get_automatic scoring)
 
-type Timeline(chart: ModChart, on_seek: Time -> unit) =
+type Timeline(chart: ModdedChart, on_seek: Time -> unit) =
     inherit StaticWidget(NodeType.None)
 
     let HEIGHT = 60.0f
@@ -363,7 +363,7 @@ module Utils =
             if pos.Float then screen.Add w else playfield.Add w
 
 [<AbstractClass>]
-type IPlayScreen(chart: ModChart, pacemaker_info: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
+type IPlayScreen(chart: ModdedChart, pacemaker_info: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
     inherit Screen()
 
     let mutable first_note = chart.Notes.[0].Time
