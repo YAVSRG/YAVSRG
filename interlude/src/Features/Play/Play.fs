@@ -5,10 +5,11 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.Metrics
+open Prelude.Charts
+open Prelude.Charts.Tools
 open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content
@@ -29,21 +30,20 @@ type PacemakerMode =
 
 module PlayScreen =
 
-    let rec play_screen (pacemaker_mode: PacemakerMode) =
+    let rec play_screen (chart: Chart, with_mods: ModChart, pacemaker_mode: PacemakerMode) =
 
-        let chart = Gameplay.Chart.WITH_MODS.Value
         let ruleset = Rulesets.current
-        let first_note = chart.Notes.[0].Time
+        let first_note = with_mods.Notes.[0].Time
         let liveplay = LiveReplayProvider first_note
 
-        let scoring = create ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
+        let scoring = create ruleset with_mods.Keys liveplay with_mods.Notes Gameplay.rate.Value
 
         let pacemaker_info =
             match pacemaker_mode with
             | PacemakerMode.None -> PacemakerInfo.None
             | PacemakerMode.Score(rate, replay) ->
                 let replay_data = StoredReplayProvider(replay) :> IReplayProvider
-                let scoring = create ruleset chart.Keys replay_data chart.Notes rate
+                let scoring = create ruleset with_mods.Keys replay_data with_mods.Notes rate
                 PacemakerInfo.Replay scoring
             | PacemakerMode.Setting ->
                 let setting =
@@ -80,7 +80,7 @@ module PlayScreen =
 
                 actual <= count
 
-        let binds = options.GameplayBinds.[chart.Keys - 3]
+        let binds = options.GameplayBinds.[with_mods.Keys - 3]
         let mutable key_state = 0us
 
         scoring.OnHit.Add(fun h ->
@@ -105,7 +105,7 @@ module PlayScreen =
 
             let close () =
                 Screen.change_new
-                    (fun () -> play_screen (pacemaker_mode) :> Screen.T)
+                    (fun () -> play_screen (chart, with_mods, pacemaker_mode) :> Screen.T)
                     Screen.Type.Play
                     Transitions.Flags.Default
                 |> ignore
@@ -149,7 +149,7 @@ module PlayScreen =
                 OnClose = close
             )
 
-        { new IPlayScreen(chart, pacemaker_info, ruleset, scoring) with
+        { new IPlayScreen(with_mods, pacemaker_info, ruleset, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x
@@ -219,7 +219,7 @@ module PlayScreen =
 
                 if (%%"retry").Tapped() then
                     Screen.change_new
-                        (fun () -> play_screen (pacemaker_mode) :> Screen.T)
+                        (fun () -> play_screen (chart, with_mods, pacemaker_mode) :> Screen.T)
                         Screen.Type.Play
                         Transitions.Flags.Default
                     |> ignore
@@ -235,9 +235,9 @@ module PlayScreen =
                                         (liveplay :> IReplayProvider).GetFullReplay(),
                                         this.Chart.Keys
                                     ),
-                                    Gameplay.Chart.CHART.Value,
+                                    chart,
                                     this.State.Ruleset,
-                                    ModChart = Gameplay.Chart.WITH_MODS.Value,
+                                    ModChart = with_mods,
                                     Difficulty = Gameplay.Chart.RATING.Value
                                 )
 
@@ -265,16 +265,15 @@ module PlayScreen =
                     )
         }
 
-    let multiplayer_screen () =
+    let multiplayer_screen (chart: Chart, with_mods: ModChart) =
 
-        let chart = Gameplay.Chart.WITH_MODS.Value
         let ruleset = Rulesets.current
-        let first_note = chart.Notes.[0].Time
+        let first_note = with_mods.Notes.[0].Time
         let liveplay = LiveReplayProvider first_note
 
-        let scoring = create ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
+        let scoring = create ruleset with_mods.Keys liveplay with_mods.Notes Gameplay.rate.Value
 
-        let binds = options.GameplayBinds.[chart.Keys - 3]
+        let binds = options.GameplayBinds.[with_mods.Keys - 3]
         let mutable key_state = 0us
         let mutable packet_count = 0
 
@@ -297,7 +296,7 @@ module PlayScreen =
             Lobby.play_data (ms.ToArray())
             packet_count <- packet_count + 1
 
-        { new IPlayScreen(chart, PacemakerInfo.None, ruleset, scoring) with
+        { new IPlayScreen(with_mods, PacemakerInfo.None, ruleset, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x
@@ -378,9 +377,9 @@ module PlayScreen =
                                         (liveplay :> IReplayProvider).GetFullReplay(),
                                         this.Chart.Keys
                                     ),
-                                    Gameplay.Chart.CHART.Value,
+                                    chart,
                                     this.State.Ruleset,
-                                    ModChart = Gameplay.Chart.WITH_MODS.Value,
+                                    ModChart = with_mods,
                                     Difficulty = Gameplay.Chart.RATING.Value
                                 )
 

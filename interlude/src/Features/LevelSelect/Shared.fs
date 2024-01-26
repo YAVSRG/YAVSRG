@@ -24,36 +24,37 @@ module LevelSelect =
 
     let play () =
 
-        Chart.wait_for_load
-        <| fun () ->
+        Chart.when_loaded <| fun (chart, with_mods, _) ->
 
-            if Network.lobby.IsSome then
-                if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
-                    Lobby.select_chart (Chart.CACHE_DATA.Value, rate.Value, selected_mods.Value)
-            else if
-                Screen.change_new
-                    (fun () ->
-                        if autoplay then
-                            ReplayScreen.replay_screen (ReplayMode.Auto) :> Screen.T
-                        else
-                            PlayScreen.play_screen (
-                                if options.EnablePacemaker.Value then
-                                    PacemakerMode.Setting
-                                else
-                                    PacemakerMode.None
-                            )
-                    )
-                    (if autoplay then Screen.Type.Replay else Screen.Type.Play)
-                    Transitions.Flags.Default
-            then
-                Chart.SAVE_DATA.Value.LastPlayed <- DateTime.UtcNow
+        if Network.lobby.IsSome then
+            if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
+                Lobby.select_chart (Chart.CACHE_DATA.Value, rate.Value, selected_mods.Value)
+        else if
+            Screen.change_new
+                (fun () ->
+                    if autoplay then
+                        ReplayScreen.replay_screen (ReplayMode.Auto) :> Screen.T
+                    else
+                        PlayScreen.play_screen (chart, with_mods,
+                            if options.EnablePacemaker.Value then
+                                PacemakerMode.Setting
+                            else
+                                PacemakerMode.None
+                        )
+                )
+                (if autoplay then Screen.Type.Replay else Screen.Type.Play)
+                Transitions.Flags.Default
+        then
+            Chart.SAVE_DATA.Value.LastPlayed <- DateTime.UtcNow
 
     let challenge_score (_rate, _mods, replay) =
+        Chart.if_loaded <| fun (chart, with_mods, _) ->
+
         match Chart.SAVE_DATA with
         | Some data ->
             if
                 Screen.change_new
-                    (fun () -> PlayScreen.play_screen (PacemakerMode.Score(rate.Value, replay)))
+                    (fun () -> PlayScreen.play_screen (chart, with_mods, PacemakerMode.Score(rate.Value, replay)))
                     (Screen.Type.Play)
                     Transitions.Flags.Default
             then

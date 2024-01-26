@@ -231,7 +231,7 @@ type Scoreboard(display: Setting<Display>) as this =
 
     let mutable count = -1
 
-    let mutable chart = ""
+    let mutable last_chart_id = ""
     let mutable scoring = ""
 
     let filter = Setting.simple Filter.None
@@ -259,7 +259,7 @@ type Scoreboard(display: Setting<Display>) as this =
 
     do
         Chart.on_chart_change_started.Add(fun () ->
-            if Chart.CACHE_DATA.Value.Hash <> chart then
+            if Chart.CACHE_DATA.Value.Hash <> last_chart_id then
                 Loader.container.Iter(fun s -> s.FadeOut())
         )
 
@@ -343,8 +343,8 @@ type Scoreboard(display: Setting<Display>) as this =
             | Some c -> c.Hash
             | None -> ""
 
-        Chart.wait_for_load
-        <| fun () ->
+        Chart.when_loaded
+        <| fun (chart, _, _) ->
 
             if
                 (match Chart.SAVE_DATA with
@@ -353,9 +353,9 @@ type Scoreboard(display: Setting<Display>) as this =
                      let v = d.Scores.Count <> count in
                      count <- d.Scores.Count
                      v)
-                || h <> chart
+                || h <> last_chart_id
             then
-                chart <- h
+                last_chart_id <- h
                 Loader.load ()
             elif scoring <> Content.Rulesets.current_hash then
                 Loader.container.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)

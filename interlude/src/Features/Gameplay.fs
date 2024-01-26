@@ -290,16 +290,18 @@ module Gameplay =
 
                 chart_loader.Request Recolor
 
-        let wait_for_load (action) =
+        let if_loaded (action: Chart * ModChart * ColorizedChart -> unit) =
             if CACHE_DATA.IsNone then ()
-            elif WITH_COLORS.IsSome then action ()
-            else on_load_succeeded <- action :: on_load_succeeded
+            elif WITH_COLORS.IsSome then action (CHART.Value, WITH_MODS.Value, WITH_COLORS.Value)
+
+        let when_loaded (action: Chart * ModChart * ColorizedChart -> unit) =
+            if CACHE_DATA.IsNone then ()
+            elif WITH_COLORS.IsSome then action (CHART.Value, WITH_MODS.Value, WITH_COLORS.Value)
+            else on_load_succeeded <- (fun () -> action (CHART.Value, WITH_MODS.Value, WITH_COLORS.Value)) :: on_load_succeeded
 
         do sync_forever chart_loader.Join
 
     module Collections =
-
-        open Prelude.Data.Charts.Library
 
         let on_rate_changed v =
             match Chart.LIBRARY_CTX with
@@ -397,11 +399,9 @@ module Gameplay =
             let private player_status (username, status) =
                 if status = LobbyPlayerStatus.Playing then
 
-                    Chart.wait_for_load
-                    <| fun () ->
+                    Chart.when_loaded
+                    <| fun (chart, with_mods, _) ->
 
-                        let chart = Chart.CHART.Value
-                        let with_mods = Chart.WITH_MODS.Value
                         let replay = Network.lobby.Value.Players.[username].Replay
 
                         replays.Add(

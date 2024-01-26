@@ -4,6 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
+open Prelude.Charts.Tools
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Features
@@ -14,24 +16,18 @@ type NoteskinPreview(scale: float32) as this =
 
     let fbo = FBO.create ()
 
-    let create_renderer () =
-        let cmp = 
-            match Gameplay.Chart.WITH_COLORS with
-            | Some chart ->
-                let playfield =
-                    Playfield(chart, PlayState.Dummy Gameplay.Chart.WITH_MODS.Value, noteskin_config (), false)
+    let create_renderer (with_mods: ModChart, with_colors: ColorizedChart) =
+        let playfield =
+            Playfield(with_colors, PlayState.Dummy with_mods, noteskin_config (), false)
 
-                playfield.Add(LaneCover())
-
-                playfield :> Widget
-            | None -> new Dummy()
+        playfield.Add(LaneCover())
             
         if this.Initialised then
-            cmp.Init this
+            playfield.Init this
 
-        cmp
+        playfield :> Widget
 
-    let mutable renderer = create_renderer ()
+    let mutable renderer : Widget = Dummy()
 
     let w = Viewport.vwidth * scale
     let h = Viewport.vheight * scale
@@ -51,6 +47,9 @@ type NoteskinPreview(scale: float32) as this =
     do
         fbo.Unbind()
 
+        Gameplay.Chart.if_loaded <| fun (_, with_mods, with_colors) -> 
+            renderer <- create_renderer (with_mods, with_colors)
+
         this
         |* (bounds_placeholder
             |+ Text(
@@ -67,7 +66,7 @@ type NoteskinPreview(scale: float32) as this =
     member this.Refresh() =
         if Gameplay.Chart.CHART.IsSome then
             Gameplay.Chart.recolor ()
-            Gameplay.Chart.wait_for_load <| fun () -> renderer <- create_renderer ()
+            Gameplay.Chart.when_loaded <| fun (_, with_mods, with_colors) -> renderer <- create_renderer (with_mods, with_colors)
 
     override this.Update(elapsed_ms, moved) =
         this.Bounds <- Viewport.bounds

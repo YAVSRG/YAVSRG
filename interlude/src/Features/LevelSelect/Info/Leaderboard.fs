@@ -264,7 +264,7 @@ type Leaderboard(display: Setting<Display>) as this =
 
     let state = Setting.simple State.NoLeaderboard
 
-    let mutable chart = ""
+    let mutable last_chart_id = ""
     let mutable scoring = ""
 
     let filter = Setting.simple Filter.None
@@ -279,7 +279,7 @@ type Leaderboard(display: Setting<Display>) as this =
 
     do
         Chart.on_chart_change_started.Add(fun () ->
-            if Chart.CACHE_DATA.Value.Hash <> chart then
+            if Chart.CACHE_DATA.Value.Hash <> last_chart_id then
                 Loader.container.Iter(fun s -> s.FadeOut())
         )
 
@@ -373,10 +373,10 @@ type Leaderboard(display: Setting<Display>) as this =
             | Some c -> c.Hash
             | None -> ""
 
-        Chart.wait_for_load
-        <| fun () ->
+        Chart.when_loaded
+        <| fun (chart, _, _) ->
 
-            if h <> chart || scoring <> Content.Rulesets.current_hash then
-                chart <- h
+            if h <> last_chart_id || scoring <> Content.Rulesets.current_hash then
+                last_chart_id <- h
                 scoring <- Content.Rulesets.current_hash
-                Loader.load state Chart.CHART.Value
+                Loader.load state chart

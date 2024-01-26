@@ -112,8 +112,8 @@ type ChartInfo() as this =
 
         |+ StylishButton(
             (fun () ->
-                Chart.wait_for_load
-                <| fun () -> Preview(Chart.WITH_MODS.Value, Chart.WITH_COLORS.Value, change_rate).Show()
+                Chart.when_loaded
+                <| fun (_, with_mods, with_colors) -> Preview(with_mods, with_colors, change_rate).Show()
             ),
             K(Icons.EYE + " " + %"levelselect.preview.name"),
             !%Palette.MAIN_100,
@@ -167,8 +167,8 @@ type ChartInfo() as this =
         | Display.Online -> online.Refresh()
         | _ -> ()
 
-        Chart.wait_for_load
-        <| fun () ->
+        Chart.when_loaded
+        <| fun (_, _, _) ->
             rating <- Chart.RATING.Value.Physical
             notecounts <- Chart.FMT_NOTECOUNTS.Value
 

@@ -145,9 +145,10 @@ type Lobby() =
                 Screen.current_type = Screen.Type.Lobby
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.Play
             then
+                Gameplay.Chart.if_loaded <| fun (chart, with_mods, _) ->
                 if
                     Screen.change_new
-                        (fun () -> PlayScreen.multiplayer_screen ())
+                        (fun () -> PlayScreen.multiplayer_screen (chart, with_mods))
                         Screen.Type.Play
                         Transitions.Flags.Default
                     |> not
