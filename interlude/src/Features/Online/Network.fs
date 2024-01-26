@@ -376,7 +376,12 @@ module Network =
         lobby <- None
         client.Disconnect()
 
-    let shutdown () =
+    let init_window() =
+        if target_ip.ToString() <> "0.0.0.0" then
+            connect ()
+        // todo: reconnect automatically on amicable disconnect (not connection failure or kick)
+
+    let deinit () =
         if status <> NotConnected then
             client.Disconnect()
 

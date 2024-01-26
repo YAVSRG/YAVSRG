@@ -3,14 +3,13 @@
 open System.Collections.Generic
 open System.IO
 open Percyqaz.Common
-open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Data.Charts
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Interlude.Utils
-open Interlude.Options
+open Interlude
 open Interlude.Features
 open Interlude.Features.Stats
 open Interlude.Features.MainMenu
@@ -21,12 +20,13 @@ open Interlude.Features.LevelSelect
 open Interlude.Features.Multiplayer
 open Interlude.Features.Printerlude
 open Interlude.Features.Toolbar
+open Interlude.Features.Online
 
 module private Migrations =
 
     let run_1 () =
         Logging.Info "---- ---- ----"
-        Logging.Info "Hold it! Update 0.7.2 changes how chart hashing work - Please wait while your data gets migrated"
+        Logging.Info "Hold it! Update 0.7.2 changes how chart hashing works - Please wait while your data gets migrated"
         Logging.Info "This may take a couple of minutes, do not close your game ..."
 
         // build mapping from cache
@@ -169,7 +169,6 @@ module private Migrations =
         Logging.Info "Please wait while Interlude caches what patterns you have in your charts - it shouldn't take long"
         Library.cache_patterns.RequestAsync() |> Async.RunSynchronously
 
-
 module Startup =
     let MIGRATION_VERSION = 2
 
@@ -192,8 +191,8 @@ module Startup =
                 Migrations.run_2 ()
                 Stats.total.MigrationVersion <- Some 2
 
-    let ui_entry_point () =
-        Screen.init
+    let ui_entry_point (instance) =
+        Screen.init_window
             [|
                 LoadingScreen()
                 MainMenuScreen()
@@ -218,12 +217,14 @@ module Startup =
         AutoUpdate.check_for_updates ()
         Mounts.import_mounts_on_startup ()
 
-        Logging.Subscribe(fun (level, main, details) -> sprintf "[%A] %s" level main |> Terminal.add_message)
-        |> ignore
-
         { new Screen.ScreenRoot(Toolbar()) with
             override this.Init() =
-                Gameplay.init ()
+                Printerlude.init_window (instance)
+                Content.init_window Options.options.Theme.Value Options.options.Noteskin.Value
+                Options.Hotkeys.init_window Options.options.Hotkeys
+                //DiscordRPC.init()
+                Gameplay.init_window ()
                 migrate ()
+                Network.init_window()
                 base.Init()
         }

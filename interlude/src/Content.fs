@@ -488,7 +488,7 @@ module Content =
                 override this.Handle(ns) = async { return ns.GetTexture "note" }
             }
 
-    let init (theme_id: string) (noteskin_id: string) =
+    let init_window (theme_id: string) (noteskin_id: string) =
         Themes.Current.id <- theme_id
         Noteskins.Current.id <- noteskin_id
         Logging.Info "===== Loading game content ====="

@@ -286,7 +286,7 @@ module Options =
 
     module Hotkeys =
 
-        let init (d: Dictionary<Hotkey, Bind>) =
+        let init_window (d: Dictionary<Hotkey, Bind>) =
             Hotkeys.register "search" (mk Keys.Tab)
             Hotkeys.register "toolbar" (ctrl Keys.T)
             Hotkeys.register "tooltip" (mk Keys.Slash)
@@ -389,7 +389,7 @@ module Options =
                 JSON.ToFile (path, true) default_value
                 cache.Add(id, default_value)
 
-        let load () =
+        let init_startup () =
             Directory.CreateDirectory(Path.Combine(get_game_folder "Data", "HUD")) |> ignore
 
             load_id<AccuracyMeter> ()
@@ -483,7 +483,7 @@ module Options =
             | Some preference -> load preference |> ignore
             | None -> ()
 
-    let load (instance: int) =
+    let init_startup (instance: int) =
         config <- load_important_json_file "Config" config_path true
         Localisation.load_file config.Locale
 
@@ -507,10 +507,9 @@ module Options =
             + "> Help! I have files in here, but they don't show up ingame?\n"
             + "Make sure they are .yav files, if so go to Options > Debug > Rebuild cache and let that run, it will re-add anything that's missing."
         )
+        HUDOptions.init_startup ()
 
-        HUDOptions.load ()
-
-    let save () =
+    let deinit () =
         try
             save_important_json_file config_path config
             save_important_json_file (Path.Combine(get_game_folder "Data", "options.json")) options

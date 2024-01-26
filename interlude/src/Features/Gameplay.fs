@@ -465,17 +465,17 @@ module Gameplay =
                     )
                 )
 
-            let init () =
+            let init_window () =
                 Network.Events.game_start.Add on_game_start
                 Network.Events.leave_lobby.Add on_leave_lobby
                 Network.Events.player_status.Add player_status
 
-    let save () =
+    let deinit () =
         Scores.save ()
         Library.save ()
         Stats.save ()
 
-    let init () =
+    let init_window () =
         match Cache.by_key options.CurrentChart.Value Library.cache with
         | Some cc -> Chart.change (cc, LibraryContext.None, true)
         | None ->
@@ -487,7 +487,6 @@ module Gameplay =
                 Logging.Debug "No charts installed"
                 Background.load None
 
-        Table.init options.Table.Value
-
-        Online.Multiplayer.init ()
-        Stats.init ()
+        Table.init_window options.Table.Value
+        Stats.init_window ()
+        Online.Multiplayer.init_window ()

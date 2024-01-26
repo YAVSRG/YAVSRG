@@ -29,7 +29,7 @@ let launch (instance: int) =
         >> (fun s -> Logging.Critical s)
 
     try
-        Options.load instance
+        Options.init_startup instance
     with err ->
         Logging.Critical("Fatal error loading game config", err)
         crash_splash ()
@@ -42,11 +42,11 @@ let launch (instance: int) =
             ()
         else
             has_shutdown <- true
-            Gameplay.save ()
-            Options.save ()
-            Network.shutdown ()
+            Gameplay.deinit ()
+            Options.deinit ()
+            Network.deinit ()
             //DiscordRPC.shutdown()
-            Printerlude.shutdown ()
+            Printerlude.deinit ()
 
             if unexpected then
                 crash_splash ()
@@ -56,22 +56,14 @@ let launch (instance: int) =
 
             Logging.Shutdown()
 
-    Window.after_init.Add(fun () ->
-        Content.init Options.options.Theme.Value Options.options.Noteskin.Value
-        Gameplay.Chart.recolor() // todo: revisit all init logic
-        Options.Hotkeys.init Options.options.Hotkeys
-        Printerlude.init (instance)
-        //DiscordRPC.init()
-
-        AppDomain.CurrentDomain.ProcessExit.Add(fun args -> shutdown true)
-    )
+    Window.after_init.Add(fun () -> AppDomain.CurrentDomain.ProcessExit.Add(fun args -> shutdown true))
 
     Window.on_file_drop.Add(Import.Import.handle_file_drop)
 
     use icon_stream = Utils.get_resource_stream ("icon.png")
     use icon = Utils.Bitmap.load icon_stream
 
-    Launch.entry_point (Options.config, "Interlude", Startup.ui_entry_point (), Some icon)
+    Launch.entry_point (Options.config, "Interlude", Startup.ui_entry_point (instance), Some icon)
 
     shutdown (false)
 

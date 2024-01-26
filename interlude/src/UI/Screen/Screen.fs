@@ -52,7 +52,7 @@ module Screen =
     let mutable private current = Unchecked.defaultof<T>
     let private screens: T array = Array.zeroCreate 5
 
-    let init (_screens: T array) =
+    let init_window (_screens: T array) =
         assert (_screens.Length = 5)
 
         for i = 0 to 4 do

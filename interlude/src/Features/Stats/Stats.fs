@@ -41,7 +41,7 @@ module Stats =
     let mutable total: Stats = Stats.Default
     let mutable session: Stats = Stats.Default
 
-    let init () =
+    let init_window () =
         total <- load_important_json_file "Stats" (Path.Combine(get_game_folder "Data", "stats.json")) false
 
     let save () =

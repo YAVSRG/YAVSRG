@@ -183,7 +183,7 @@ module Table =
         | Some l -> _current <- Some l
         | None -> Logging.Warn(sprintf "Table not found: '%s'" name)
 
-    let init (selected: string option) =
+    let init_window (selected: string option) =
         loaded.Clear()
         let table_path = Path.Combine(get_game_folder "Data", "Tables")
         Directory.CreateDirectory table_path |> ignore
@@ -208,7 +208,7 @@ module Table =
 
     let install (id: string, table: Table) =
         JSON.ToFile (table_pathf id, true) table
-        init (Some table.Name)
+        init_window (Some table.Name)
 
     let list () = loaded :> Loaded seq
 

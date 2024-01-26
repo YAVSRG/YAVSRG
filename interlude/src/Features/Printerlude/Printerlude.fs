@@ -1,5 +1,7 @@
 ﻿namespace Interlude.Features.Printerlude
 
+open System
+open System.Threading
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Shell
@@ -216,16 +218,21 @@ module Printerlude =
         ms.Position <- current_stream_position
         Terminal.add_message (context_output.ReadToEnd())
 
-    let mutable ipc_shutdown_token: System.Threading.CancellationTokenSource option =
-        None
+    let mutable logging_disposable: IDisposable option = None
+    let mutable ipc_shutdown_token: CancellationTokenSource option = None
 
     let ipc_commands = ShellContext.Empty |> Utils.register_ipc_commands
 
-    let init (instance: int) =
+    let init_window (instance: int) =
         Terminal.exec_command <- exec
+        
+        logging_disposable <- 
+            Some 
+            <| Logging.Subscribe(fun (level, main, details) -> sprintf "[%A] %s" level main |> Terminal.add_message)
 
         if instance = 0 then
             ipc_shutdown_token <- Some(IPC.start_server_thread "Interlude" ipc_commands)
 
-    let shutdown () =
+    let deinit () =
+        logging_disposable |> Option.iter (fun d -> d.Dispose())
         ipc_shutdown_token |> Option.iter (fun token -> token.Cancel())
