@@ -9,12 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Objects\Tables.fs" />
-    <Compile Include="Objects\Users.fs" />
-    <Compile Include="Objects\Friends.fs" />
-    <Compile Include="Objects\Replays.fs" />
-    <Compile Include="Objects\Scores.fs" />
-    <Compile Include="Objects\Leaderboards.fs" />
+    <Compile Include="Core\Tables.fs" />
+    <Compile Include="Core\Users.fs" />
+    <Compile Include="Core\Friends.fs" />
+    <Compile Include="Core\Replays.fs" />
+    <Compile Include="Core\Scores.fs" />
+    <Compile Include="Core\Leaderboards.fs" />
     <Compile Include="Services\Users.fs" />
     <Compile Include="Services\Scores.fs" />
     <Compile Include="Program.fs" />

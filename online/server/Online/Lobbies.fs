@@ -7,7 +7,7 @@ open System.IO
 open Percyqaz.Common
 open Interlude.Web.Shared
 open Interlude.Web.Server.Domain.Services
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 
 type LobbyId = Guid
 type PlayerId = Guid

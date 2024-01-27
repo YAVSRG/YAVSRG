@@ -5,7 +5,7 @@ open Discord
 open Discord.WebSocket
 open Prelude.Backbeat.Archive
 open Interlude.Web.Server.Domain
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
 module UserCommands =

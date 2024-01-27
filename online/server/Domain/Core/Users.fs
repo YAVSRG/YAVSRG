@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Objects
+﻿namespace Interlude.Web.Server.Domain.Core
 
 open System
 open Percyqaz.Common
@@ -90,7 +90,7 @@ module User =
                 p.Int32 user.Color
             )
         }
-    let save_new (user: User) : int64 = SAVE_NEW.ExecuteGetId user db |> expect
+    let save_new (user: User) : int64 = SAVE_NEW.ExecuteGetId user core_db |> expect
 
     let private BY_DISCORD_ID : Query<uint64, int64 * User> =
         {
@@ -110,7 +110,7 @@ module User =
                 }
             )
         }
-    let by_discord_id (discord_id: uint64) = BY_DISCORD_ID.Execute discord_id db |> expect |> Array.tryExactlyOne
+    let by_discord_id (discord_id: uint64) = BY_DISCORD_ID.Execute discord_id core_db |> expect |> Array.tryExactlyOne
 
     let private BY_ID : Query<int64, User> =
         {
@@ -130,7 +130,7 @@ module User =
                 }
             )
         }
-    let by_id (id: int64) = BY_ID.Execute id db |> expect |> Array.tryExactlyOne
+    let by_id (id: int64) = BY_ID.Execute id core_db |> expect |> Array.tryExactlyOne
 
     let by_ids (ids: int64 array) =
         if ids.Length = 0 then
@@ -154,7 +154,7 @@ module User =
                     }
                 )
             }
-        query.Execute () db |> expect
+        query.Execute () core_db |> expect
 
     let private BY_AUTH_TOKEN : Query<string, int64 * User> =
         {
@@ -174,7 +174,7 @@ module User =
                 }
             )
         }
-    let by_auth_token (token: string) = BY_AUTH_TOKEN.Execute token db |> expect |> Array.tryExactlyOne
+    let by_auth_token (token: string) = BY_AUTH_TOKEN.Execute token core_db |> expect |> Array.tryExactlyOne
 
     let private BY_USERNAME : Query<string, int64 * User> =
         {
@@ -194,7 +194,7 @@ module User =
                 }
             )
         }
-    let by_username (username: string) = BY_USERNAME.Execute username db |> expect |> Array.tryExactlyOne
+    let by_username (username: string) = BY_USERNAME.Execute username core_db |> expect |> Array.tryExactlyOne
 
     let private SEARCH_BY_USERNAME : Query<string, int64 * User> =
         {
@@ -214,7 +214,7 @@ module User =
                 }
             )
         }
-    let search_by_username (query: string) = SEARCH_BY_USERNAME.Execute query db |> expect
+    let search_by_username (query: string) = SEARCH_BY_USERNAME.Execute query core_db |> expect
     
     let private LIST : Query<int, int64 * User> =
         {
@@ -234,7 +234,7 @@ module User =
                 }
             )
         }
-    let list (page: int) = if page < 0 then [||] else LIST.Execute page db |> expect
+    let list (page: int) = if page < 0 then [||] else LIST.Execute page core_db |> expect
 
     let private SET_AUTH_TOKEN : NonQuery<int64 * string> =
         {
@@ -242,7 +242,7 @@ module User =
             Parameters = [ "@AuthToken", SqliteType.Text, -1; "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p (id, token) -> p.String token; p.Int64 id
         }
-    let set_auth_token (id: int64, token: string) = SET_AUTH_TOKEN.Execute (id, token) db |> expect |> ignore
+    let set_auth_token (id: int64, token: string) = SET_AUTH_TOKEN.Execute (id, token) core_db |> expect |> ignore
     
     let private UPDATE_COLOR : NonQuery<int64 * int32> =
         {
@@ -250,7 +250,7 @@ module User =
             Parameters = [ "@Color", SqliteType.Integer, 4; "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p (id, color) -> p.Int32 color; p.Int64 id
         }
-    let update_color (id: int64, color: int32) = UPDATE_COLOR.Execute (id, color) db |> expect |> ignore
+    let update_color (id: int64, color: int32) = UPDATE_COLOR.Execute (id, color) core_db |> expect |> ignore
     
     let private UPDATE_BADGES : NonQuery<int64 * Set<Badge>> =
         {
@@ -258,7 +258,7 @@ module User =
             Parameters = [ "@Badges", SqliteType.Text, -1; "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p (id, badges) -> p.Json JSON badges; p.Int64 id
         }
-    let update_badges (id: int64, badges: Set<Badge>) = UPDATE_BADGES.Execute (id, badges) db |> expect |> ignore
+    let update_badges (id: int64, badges: Set<Badge>) = UPDATE_BADGES.Execute (id, badges) core_db |> expect |> ignore
 
     let private UPDATE_LAST_SEEN : NonQuery<int64> =
         {
@@ -266,7 +266,7 @@ module User =
             Parameters = [ "@Now", SqliteType.Integer, 8; "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p id -> p.Int64 (Timestamp.now()); p.Int64 id
         }
-    let update_last_seen (id: int64) = UPDATE_LAST_SEEN.Execute id db |> expect |> ignore
+    let update_last_seen (id: int64) = UPDATE_LAST_SEEN.Execute id core_db |> expect |> ignore
 
     let private DELETE : NonQuery<int64> =
         {
@@ -274,4 +274,4 @@ module User =
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p id -> p.Int64 id
         }
-    let delete (id: int64) = DELETE.Execute id db |> expect |> ignore
+    let delete (id: int64) = DELETE.Execute id core_db |> expect |> ignore

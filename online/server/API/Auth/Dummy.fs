@@ -3,7 +3,7 @@
 open NetCoreServer
 open Interlude.Web.Server
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 
 module Dummy =
 

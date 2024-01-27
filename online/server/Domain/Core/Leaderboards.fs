@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Objects
+﻿namespace Interlude.Web.Server.Domain.Core
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -39,7 +39,7 @@ module Leaderboard =
                 p.String ruleset_id
             )
         }
-    let create (chart_id: string) (ruleset_id: string) = CREATE.Execute (chart_id, ruleset_id) db |> expect |> ignore
+    let create (chart_id: string) (ruleset_id: string) = CREATE.Execute (chart_id, ruleset_id) core_db |> expect |> ignore
 
     let private EXISTS : Query<string * string, int32> = 
         {
@@ -58,4 +58,4 @@ module Leaderboard =
             )
             Read = (fun r -> r.Int32)
         }
-    let exists (chart_id: string) (ruleset_id: string) = EXISTS.Execute (chart_id, ruleset_id) db |> expect |> Array.isEmpty |> not
+    let exists (chart_id: string) (ruleset_id: string) = EXISTS.Execute (chart_id, ruleset_id) core_db |> expect |> Array.isEmpty |> not

@@ -1,9 +1,9 @@
-﻿namespace Interlude.Web.Tests.Domain.Objects
+﻿namespace Interlude.Web.Tests.Domain.Core
 
 open NUnit.Framework
 
 open Prelude.Gameplay
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 
 module Scores =
     

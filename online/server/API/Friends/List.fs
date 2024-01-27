@@ -3,7 +3,7 @@
 open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Online
 
 module List =

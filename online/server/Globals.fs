@@ -61,7 +61,8 @@ open Percyqaz.Data.Sqlite
 [<AutoOpen>]
 module internal DatabaseRef =
 
-    let mutable db = Unchecked.defaultof<Database>
+    let mutable core_db = Unchecked.defaultof<Database>
+    let mutable backbeat_db = Unchecked.defaultof<Database>
 
 module Discord =
 

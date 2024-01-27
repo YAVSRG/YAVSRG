@@ -285,3 +285,46 @@ type TableIndexEntry =
 [<Json.AutoCodec>]
 type TableIndex =
     { Tables: ResizeArray<TableIndexEntry> }
+
+module NewTables =
+
+    [<Json.AutoCodec>]
+    type TableRatingCalculation =
+        | AverageTop50
+
+    [<Json.AutoCodec>]
+    type TypeSectionInfo =
+        {
+            LevelStart: int
+            LevelEnd: int
+            Name: string
+            Description: string
+        }
+
+    [<Json.AutoCodec>]
+    type TableInfo =
+        {
+            Name: string
+            Description: string
+            Keymode: int
+            RulesetId: string
+            RatingCalculation: TableRatingCalculation
+            Sections: TypeSectionInfo list
+        }
+
+    [<Json.AutoCodec>]
+    type Chart =
+        {
+            Hash: string
+            Level: int
+        }
+
+    [<Json.AutoCodec>]
+    type Table =
+        {
+            Info: TableInfo
+            Charts: Chart list
+            LevelDisplayNames: Map<int, string>
+        }
+
+    // todo: loading and saving

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Objects
+﻿namespace Interlude.Web.Server.Domain.Core
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -34,7 +34,7 @@ module Friends =
             Read = fun r -> r.Json JSON
         }
     let get_following_ids (user_id: int64) : Set<int64> = 
-        GET_FOLLOWING_IDS.Execute user_id db |> expect |> Array.tryExactlyOne |> Option.defaultValue Set.empty
+        GET_FOLLOWING_IDS.Execute user_id core_db |> expect |> Array.tryExactlyOne |> Option.defaultValue Set.empty
         
     let private GET_FOLLOWERS_IDS : Query<int64, Set<int64>> =
         {
@@ -44,7 +44,7 @@ module Friends =
             Read = fun r -> r.Json JSON
         }
     let get_followers_ids (user_id: int64) : Set<int64> = 
-        GET_FOLLOWERS_IDS.Execute user_id db |> expect |> Array.tryExactlyOne |> Option.defaultValue Set.empty
+        GET_FOLLOWERS_IDS.Execute user_id core_db |> expect |> Array.tryExactlyOne |> Option.defaultValue Set.empty
 
     type private UpdateFollowingFollowersModel = { UserId: int64; UserNewFollowing: Set<int64>; FriendId: int64; FriendNewFollowers: Set<int64> }
     let private UPDATE_FOLLOWING_FOLLOWERS : NonQuery<UpdateFollowingFollowersModel> =
@@ -91,7 +91,7 @@ module Friends =
                 FriendId = friend_id
                 FriendNewFollowers = Set.add user_id (get_followers_ids friend_id)
             }
-            db
+            core_db
         |> expect
         |> ignore
 
@@ -106,7 +106,7 @@ module Friends =
                 FriendId = friend_id
                 FriendNewFollowers = Set.remove user_id (get_followers_ids friend_id)
             }
-            db
+            core_db
         |> expect
         |> ignore
 
@@ -120,7 +120,7 @@ module Friends =
     let relation (user_id: int64, friend_id: int64) =
         if user_id = friend_id then FriendRelation.None else
 
-        match GET_FOLLOWING_FOLLOWERS_IDS.Execute user_id db |> expect |> Array.tryExactlyOne with
+        match GET_FOLLOWING_FOLLOWERS_IDS.Execute user_id core_db |> expect |> Array.tryExactlyOne with
         | Some (following, followers) ->
 
             let friend = Set.contains friend_id following

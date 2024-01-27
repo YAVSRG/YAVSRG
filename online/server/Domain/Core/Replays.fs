@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Objects
+﻿namespace Interlude.Web.Server.Domain.Core
 
 open System
 open Percyqaz.Common
@@ -136,22 +136,22 @@ module Replay =
     // Only the most best replay per-chart is stored, overwriting any previous replay for that chart
     let save_leaderboard (ruleset_id: string) (replay: Replay) =
         lock (REPLAY_LOCK_OBJ) <| fun () ->
-        match GET_LEADERBOARD.Execute {| ChartId = replay.ChartId; RulesetId = ruleset_id; UserId = replay.UserId |} db |> expect |> Array.tryExactlyOne with
+        match GET_LEADERBOARD.Execute {| ChartId = replay.ChartId; RulesetId = ruleset_id; UserId = replay.UserId |} core_db |> expect |> Array.tryExactlyOne with
         | Some existing ->
             // If exact replay already exists in DB
             if existing.TimePlayed = replay.TimePlayed then existing.Id else 
             
             // If a score for this chart, this ruleset, already exists, with only this purpose, delete it
             if existing.Purposes.Count = 1 then
-                DELETE_BY_ID.Execute existing.Id db |> expect |> ignore
+                DELETE_BY_ID.Execute existing.Id core_db |> expect |> ignore
             // Otherwise remove that purpose and keep it
             else
-                UPDATE_PURPOSES.Execute (existing.Id, Set.remove ruleset_id existing.Purposes) db |> expect |> ignore
+                UPDATE_PURPOSES.Execute (existing.Id, Set.remove ruleset_id existing.Purposes) core_db |> expect |> ignore
             
-            SAVE_LEADERBOARD.Execute (ruleset_id, replay) db |> expect |> Array.exactlyOne
+            SAVE_LEADERBOARD.Execute (ruleset_id, replay) core_db |> expect |> Array.exactlyOne
 
         | None -> 
-            SAVE_LEADERBOARD.Execute (ruleset_id, replay) db |> expect |> Array.exactlyOne
+            SAVE_LEADERBOARD.Execute (ruleset_id, replay) core_db |> expect |> Array.exactlyOne
 
     let private SAVE_CHALLENGE : Query<Replay, int64> =
         {
@@ -190,7 +190,7 @@ module Replay =
     // Replay is stored long term for sharing with friends
     let save_challenge (replay: Replay) = 
         lock (REPLAY_LOCK_OBJ) <| fun () ->
-        SAVE_CHALLENGE.Execute replay db |> expect |> Array.exactlyOne
+        SAVE_CHALLENGE.Execute replay core_db |> expect |> Array.exactlyOne
 
     let private BY_ID : Query<int64, Replay> =
         {
@@ -215,7 +215,7 @@ module Replay =
                 }
             )
         }
-    let by_id (replay_id: int64) = BY_ID.Execute replay_id db |> expect |> Array.tryExactlyOne
+    let by_id (replay_id: int64) = BY_ID.Execute replay_id core_db |> expect |> Array.tryExactlyOne
     
     let by_ids (replay_ids: int64 array) =
         if replay_ids.Length = 0 then
@@ -242,4 +242,4 @@ module Replay =
                     }
                 )
             }
-        query.Execute () db |> expect
+        query.Execute () core_db |> expect

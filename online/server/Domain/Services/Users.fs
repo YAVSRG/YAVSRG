@@ -5,7 +5,7 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Interlude.Web.Shared
 open Interlude.Web.Server
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 
 module Users =
 

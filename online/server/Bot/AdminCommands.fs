@@ -4,7 +4,7 @@ open System
 open Discord
 open Discord.WebSocket
 open Interlude.Web.Server.Domain
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 open Interlude.Web.Server.Online
 

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Web.Server.Domain.Objects
+﻿namespace Interlude.Web.Server.Domain.Core
 
 open System
 open Percyqaz.Common
@@ -115,7 +115,7 @@ module Score =
             )
             Read = fun r -> r.Int64
         }
-    let save (score: Score) : int64 = SAVE.Execute score db |> expect |> Array.exactlyOne
+    let save (score: Score) : int64 = SAVE.Execute score core_db |> expect |> Array.exactlyOne
 
     let PRIMARY_RULESET = "SC(J4)548E5A"
     type RecentScore =
@@ -152,7 +152,7 @@ module Score =
                 }
             )
         }
-    let get_user_recent (user_id: int64) = GET_USER_RECENT.Execute user_id db |> expect
+    let get_user_recent (user_id: int64) = GET_USER_RECENT.Execute user_id core_db |> expect
 
     type LeaderboardScore =
         {
@@ -200,7 +200,7 @@ module Score =
                 }
             )
         }
-    let get_leaderboard (chart_id: string) (ruleset_id: string) = GET_LEADERBOARD.Execute (chart_id, ruleset_id) db |> expect
+    let get_leaderboard (chart_id: string) (ruleset_id: string) = GET_LEADERBOARD.Execute (chart_id, ruleset_id) core_db |> expect
     
     type UserLeaderboardScore =
         {
@@ -244,7 +244,7 @@ module Score =
             )
         }
     let get_user_leaderboard_score (user_id: int64) (chart_id: string) (ruleset_id: string) : UserLeaderboardScore option =
-        GET_USER_LEADERBOARD_SCORE.Execute (user_id, chart_id, ruleset_id) db |> expect |> Array.tryExactlyOne
+        GET_USER_LEADERBOARD_SCORE.Execute (user_id, chart_id, ruleset_id) core_db |> expect |> Array.tryExactlyOne
 
     let private AGGREGATE_USER_RANKED_GRADES : Query<int64 * string, string * int> =
         {
@@ -272,7 +272,7 @@ module Score =
             Read = fun r -> r.String, r.Int32
         }
     let aggregate_user_ranked_grades (user_id: int64) (ruleset_id: string) =
-        AGGREGATE_USER_RANKED_GRADES.Execute (user_id, ruleset_id) db |> expect
+        AGGREGATE_USER_RANKED_GRADES.Execute (user_id, ruleset_id) core_db |> expect
         
     let private AGGREGATE_USER_RANKED_SCORES : Query<int64 * string, string * float> =
         {
@@ -300,7 +300,7 @@ module Score =
             Read = fun r -> r.String, r.Float64
         }
     let aggregate_user_ranked_scores (user_id: int64) (ruleset_id: string) =
-        AGGREGATE_USER_RANKED_SCORES.Execute (user_id, ruleset_id) db |> expect
+        AGGREGATE_USER_RANKED_SCORES.Execute (user_id, ruleset_id) core_db |> expect
 
     type ScoreByIdModel =
         {
@@ -338,7 +338,7 @@ module Score =
             )
         }
     let by_id (score_id: int64) =
-        match BY_ID.Execute score_id db |> expect |> Array.tryExactlyOne with
+        match BY_ID.Execute score_id core_db |> expect |> Array.tryExactlyOne with
         | Some (score, Some replay_id) ->
             match Replay.by_id replay_id with
             | Some replay -> Some (score, Some replay)

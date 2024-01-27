@@ -1,8 +1,8 @@
-﻿namespace Interlude.Web.Tests.Domain.Objects
+﻿namespace Interlude.Web.Tests.Domain.Core
 
 open NUnit.Framework
 
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 
 module Leaderboards =
 

@@ -2,12 +2,12 @@
 
 open NUnit.Framework
 
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
 module Users = 
 
-    module Scores = Interlude.Web.Tests.Domain.Objects.Scores
+    module Scores = Interlude.Web.Tests.Domain.Core.Scores
     
     [<Test>]
     let DeleteUser_FullCleanup () =

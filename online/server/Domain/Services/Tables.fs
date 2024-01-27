@@ -2,7 +2,7 @@
 
 open Prelude.Data.Charts.Tables
 open Interlude.Web.Server
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 
 module Tables =
 

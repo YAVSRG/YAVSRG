@@ -4,7 +4,7 @@ open NetCoreServer
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Old
-open Interlude.Web.Server.Domain.Objects
+open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
 module List =

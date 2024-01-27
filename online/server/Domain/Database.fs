@@ -7,9 +7,9 @@ open Interlude.Web.Server
 
 module Migrations =
 
-    open Interlude.Web.Server.Domain.Objects
+    open Interlude.Web.Server.Domain.Core
 
-    let run (db: Database) =
+    let run_core (db: Database) =
         Database.migrate 
             "InitialTables" 
             (fun db ->
@@ -33,14 +33,22 @@ module Migrations =
             )
             db
 
+    let run_backbeat (db: Database) =
+        ()
+
 module Database =
 
     let startup() =
-        db <- Database.from_file("./data/core.db")
-        Migrations.run db
+        core_db <- Database.from_file("./data/core.db")
+        backbeat_db <- Database.from_file("./data/backbeat.db")
+        Migrations.run_core core_db
+        Migrations.run_backbeat backbeat_db
 
     let startup_unit_tests() : IDisposable =
-        let _db, keep_alive = Database.in_memory("unit_tests")
-        db <- _db
-        Migrations.run _db
-        keep_alive
+        let _core_db, keep_alive = Database.in_memory("unit_tests_core")
+        let _backbeat_db, keep_alive_2 = Database.in_memory("unit_tests_backbeat")
+        core_db <- _core_db
+        backbeat_db <- _backbeat_db
+        Migrations.run_core _core_db
+        Migrations.run_backbeat _backbeat_db
+        { new IDisposable with override this.Dispose() = keep_alive.Dispose(); keep_alive_2.Dispose() }
