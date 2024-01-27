@@ -202,7 +202,7 @@ type ScoreContextMenu(score_info: ScoreInfoProvider) as this =
             |+ PageButton(
                 "score.watch_replay",
                 (fun () ->
-                    ScoreScreenHelpers.watch_replay (score_info.Chart, score_info.ScoreInfo, score_info.ColoredChart, score_info.ReplayData)
+                    ScoreScreenHelpers.watch_replay (score_info.Chart, score_info.ScoreInfo, Chart.color_this_chart(score_info.ModdedChart), score_info.ReplayData)
                     Menu.Back()
                 ),
                 Icon = Icons.FILM

@@ -240,9 +240,7 @@ module PlayScreen =
                                     ),
                                     info.Chart,
                                     this.State.Ruleset,
-                                    noteskin_config().NoteColors,
                                     ModdedChart = info.WithMods,
-                                    ColoredChart = info.WithColors,
                                     Difficulty = info.Rating
                                 )
 
@@ -384,9 +382,7 @@ module PlayScreen =
                                     ),
                                     info.Chart,
                                     this.State.Ruleset,
-                                    noteskin_config().NoteColors,
                                     ModdedChart = info.WithMods,
-                                    ColoredChart = info.WithColors,
                                     Difficulty = info.Rating
                                 )
 

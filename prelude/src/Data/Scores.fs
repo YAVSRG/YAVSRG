@@ -61,11 +61,10 @@ type ChartSaveData =
 *)
 
 // todo: rename LazyScoreCalculator - do we even need this or could this be a module that calculates stuff
-type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset, color_scheme: ColorConfig) =
+type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
     let mutable ruleset: Ruleset = ruleset
 
     let mutable modchart = ValueNone
-    let mutable coloredchart = ValueNone
     let mutable modstring = ValueNone
     let mutable modstatus = ValueNone
     let mutable difficulty = ValueNone
@@ -95,15 +94,6 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset, color_schem
 
             modchart.Value
         and set (value) = modchart <- ValueSome value
-
-    member this.ColoredChart
-        with get () =
-            coloredchart <-
-                ValueOption.defaultWith (fun () -> apply_coloring color_scheme this.ModdedChart) coloredchart
-                |> ValueSome
-
-            coloredchart.Value
-        and set (value) = coloredchart <- ValueSome value
 
     member this.Ruleset
         with get () = ruleset

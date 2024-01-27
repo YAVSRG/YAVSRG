@@ -429,9 +429,7 @@ module ReplayScreen =
                                         score,
                                         this.State.Chart,
                                         this.State.Ruleset,
-                                        noteskin_config().NoteColors,
-                                        ModdedChart = with_colors.Source,
-                                        ColoredChart = with_colors
+                                        ModdedChart = with_colors.Source
                                     )
 
                                 new ScoreScreen(sd, ImprovementFlags.Default, false) :> Screen

@@ -170,7 +170,6 @@ module Scoreboard =
                 Ruleset: Ruleset
                 CurrentChart: Chart
                 ChartSaveData: ChartSaveData
-                NoteColors: ColorConfig
                 mutable NewBests: Bests option
             }
             override this.ToString() = "<scoreboard calculation>"
@@ -182,7 +181,7 @@ module Scoreboard =
                 member this.Process(req: Request) =
                     seq {
                         for score in req.ChartSaveData.Scores do
-                            let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset, req.NoteColors)
+                            let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
 
                             if s.ModStatus = Mods.ModStatus.Ranked then
                                 req.NewBests <-
@@ -219,7 +218,6 @@ module Scoreboard =
                     Ruleset = Content.Rulesets.current
                     CurrentChart = info.Chart
                     ChartSaveData = info.SaveData
-                    NoteColors = Content.noteskin_config().NoteColors
                     NewBests = None
                 }
 

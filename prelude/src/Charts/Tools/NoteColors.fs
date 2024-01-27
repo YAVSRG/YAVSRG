@@ -44,7 +44,8 @@ module NoteColors =
         member this.Keys = this.Source.Keys
         member this.BPM = this.Source.BPM
         member this.SV = this.Source.SV
-        member this.ModsUsed = this.Source.ModsUsed
+        member this.ModsSelected = this.Source.ModsSelected
+        member this.ModsApplied = this.Source.ModsApplied
         member this.FirstNote = this.Notes.[0].Time
         member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
 

@@ -177,7 +177,6 @@ module Leaderboard =
                 Ruleset: Ruleset
                 Hash: string
                 Chart: Chart
-                NoteColors: ColorConfig
             }
             override this.ToString() = "<leaderboard calculation>"
 
@@ -201,7 +200,6 @@ module Leaderboard =
                                     : Score),
                                     req.Chart,
                                     req.Ruleset,
-                                    req.NoteColors,
                                     Player = Some score.Username
                                 )
 
@@ -237,7 +235,6 @@ module Leaderboard =
                                     RulesetId = Content.Rulesets.current_hash
                                     Ruleset = Content.Rulesets.current
                                     Chart = chart
-                                    NoteColors = Content.noteskin_config().NoteColors
                                     Hash = cc.Hash
                                 }
 
@@ -255,7 +252,6 @@ module Leaderboard =
                                 RulesetId = Content.Rulesets.current_hash
                                 Ruleset = Content.Rulesets.current
                                 Chart = chart
-                                NoteColors = Content.noteskin_config().NoteColors
                                 Hash = cc.Hash
                             }
 

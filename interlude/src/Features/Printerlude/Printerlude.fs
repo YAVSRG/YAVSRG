@@ -137,8 +137,6 @@ module Printerlude =
             { new Async.Service<string, unit>() with
                 override this.Handle(ruleset_id) =
                     async {
-                        let color_config = Content.noteskin_config().NoteColors
-
                         match Content.Rulesets.try_get_by_hash ruleset_id with
                         | None -> ()
                         | Some ruleset ->
@@ -159,7 +157,7 @@ module Printerlude =
                                 | Some chart ->
 
                                 for score in data.Scores do
-                                    let info = ScoreInfoProvider(score, chart, ruleset, color_config)
+                                    let info = ScoreInfoProvider(score, chart, ruleset)
 
                                     if data.PersonalBests.ContainsKey ruleset_id then
                                         let new_bests, _ = Bests.update info data.PersonalBests.[ruleset_id]

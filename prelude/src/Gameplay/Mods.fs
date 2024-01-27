@@ -42,7 +42,7 @@ module Mods =
             // Returns resulting chart + flag
             // flag is true if the mod made meaningful changes to the chart
             // The resulting chart can still be modified in ways that don't affect gameplay such as changing BPMs
-            Apply: int -> ModdedChart -> ModdedChart * bool
+            Apply: int -> ModdedChartInternal -> ModdedChartInternal * bool
             Priority: int
         }
 
@@ -50,9 +50,6 @@ module Mods =
     let add_mod id obj = available_mods.Add(id, obj)
 
     module ModState =
-
-        let filter (chart: ModdedChart) (mods: ModState) =
-            List.fold (fun m i -> Map.add i mods.[i] m) Map.empty chart.ModsUsed
 
         let r = new Random()
 
@@ -139,21 +136,25 @@ module Mods =
     *)
 
     let apply_mods (mods: ModState) (chart: Chart) : ModdedChart =
-        let mutable modchart = ModdedChart.from_chart chart
+        let mutable modchart_internal = { Keys = chart.Keys; Notes = chart.Notes; SV = chart.SV; BPM = chart.BPM }
+        let mutable mods_applied = []
 
         for id, m, state in ModState.enumerate mods do
-            let mc, mod_was_applied = m.Apply state modchart
+            let new_mc, mod_was_applied = m.Apply state modchart_internal
 
-            modchart <-
-                { mc with
-                    ModsUsed =
-                        if mod_was_applied then
-                            modchart.ModsUsed @ [ id ]
-                        else
-                            modchart.ModsUsed
-                }
+            if mod_was_applied then
+                mods_applied <- mods_applied @ [ id ]
+                modchart_internal <- new_mc
 
-        modchart
+        {
+            Keys = modchart_internal.Keys
+            Notes = modchart_internal.Notes
+            SV = modchart_internal.SV
+            BPM = modchart_internal.BPM
+
+            ModsSelected = mods
+            ModsApplied = List.fold (fun m i -> Map.add i mods.[i] m) Map.empty mods_applied
+        }
 
     let format_mods (rate: float32, mods: ModState, autoplay: bool) =
         String.Join(

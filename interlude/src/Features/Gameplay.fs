@@ -381,6 +381,9 @@ module Gameplay =
                     }
                 ) :: on_load_succeeded
 
+        let color_this_chart(with_mods: ModdedChart) =
+            apply_coloring (Content.noteskin_config().NoteColors) with_mods
+
         let init_window() = sync_forever chart_loader.Join
 
     let collections_on_rate_changed (library_ctx: LibraryContext) (v: float32) =
@@ -425,12 +428,12 @@ module Gameplay =
             Chart.update ()
         )
 
-    let make_score (with_mods, replay_data, keys) : Score =
+    let make_score (with_mods: ModdedChart, replay_data, keys) : Score =
         {
             time = DateTime.UtcNow
             replay = Replay.compress_string replay_data
             rate = rate.Value
-            selectedMods = selected_mods.Value |> ModState.filter with_mods
+            selectedMods = with_mods.ModsApplied
             layout = options.Playstyles.[keys - 3]
             keycount = keys
         }
@@ -496,7 +499,7 @@ module Gameplay =
                                     time = DateTime.UtcNow
                                     replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
                                     rate = rate.Value
-                                    selectedMods = selected_mods.Value |> ModState.filter info.WithMods
+                                    selectedMods = info.WithMods.ModsApplied
                                     layout = options.Playstyles.[info.WithMods.Keys - 3]
                                     keycount = info.WithMods.Keys
                                 }
@@ -505,10 +508,8 @@ module Gameplay =
                                 score,
                                 info.Chart,
                                 Content.Rulesets.current,
-                                Content.noteskin_config().NoteColors,
                                 Player = Some username,
-                                ModdedChart = info.WithMods,
-                                ColoredChart = info.WithColors
+                                ModdedChart = info.WithMods
                             )
                     )
 
@@ -525,7 +526,7 @@ module Gameplay =
                             time = DateTime.UtcNow
                             replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
                             rate = rate.Value
-                            selectedMods = selected_mods.Value |> ModState.filter info.WithMods
+                            selectedMods = info.WithMods.ModsApplied
                             layout = options.Playstyles.[info.WithMods.Keys - 3]
                             keycount = info.WithMods.Keys
                         }
@@ -534,9 +535,7 @@ module Gameplay =
                         score,
                         info.Chart,
                         Content.Rulesets.current,
-                        Content.noteskin_config().NoteColors,
-                        ModdedChart = info.WithMods,
-                        ColoredChart = info.WithColors
+                        ModdedChart = info.WithMods
                     )
                 )
             )
