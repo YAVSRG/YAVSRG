@@ -1,8 +1,9 @@
 ﻿namespace Interlude.Features.Score
 
 open Prelude
-open Prelude.Charts.Tools
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Gameplay
+open Prelude.Charts
 open Prelude.Data.Scores
 
 type ScoreScreenStats =
@@ -113,6 +114,6 @@ type ScoreScreenStats =
 
 module ScoreScreenHelpers =
 
-    let mutable watch_replay: Score * ModdedChart * ReplayData -> unit = ignore
+    let mutable watch_replay: Chart * Score * ColoredChart * ReplayData -> unit = ignore
 
     let mutable continue_endless_mode: unit -> bool = fun () -> false

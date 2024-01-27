@@ -225,9 +225,9 @@ type SelectedChart() =
                         Network.lobby.Value.Players.Keys.First(fun p ->
                             Network.lobby.Value.Players.[p].Status = LobbyPlayerStatus.Playing
                         )
-
+                    Chart.if_loaded <| fun info -> //todo: store info in sync with selected chart in SelectedChart
                     Screen.change_new
-                        (fun () -> SpectateScreen.spectate_screen username)
+                        (fun () -> SpectateScreen.spectate_screen (info, username))
                         Screen.Type.Replay
                         Transitions.Flags.Default
                     |> ignore

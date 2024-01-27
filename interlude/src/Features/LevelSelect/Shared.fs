@@ -33,9 +33,9 @@ module LevelSelect =
             Screen.change_new
                 (fun () ->
                     if autoplay then
-                        ReplayScreen.replay_screen (ReplayMode.Auto info.WithMods) :> Screen.T
+                        ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T
                     else
-                        PlayScreen.play_screen (info.Chart, info.WithMods,
+                        PlayScreen.play_screen (info,
                             if options.EnablePacemaker.Value then
                                 PacemakerMode.Setting
                             else
@@ -52,7 +52,7 @@ module LevelSelect =
 
         if
             Screen.change_new
-                (fun () -> PlayScreen.play_screen (info.Chart, info.WithMods, PacemakerMode.Score(rate.Value, replay)))
+                (fun () -> PlayScreen.play_screen (info, PacemakerMode.Score(rate.Value, replay)))
                 (Screen.Type.Play)
                 Transitions.Flags.Default
         then

@@ -86,46 +86,48 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 Text = [ name ] %> "chart.remove_from_collection.name"
             )
 
-        match Table.current () with
-        | Some table ->
-            if Network.status = Network.Status.LoggedIn && Chart.CHART.IsSome then
-                let chart = Chart.CHART.Value
+        // match Table.current () with
+        // | Some table ->
+        //     // todo: this code is wrong. you can have a context menu open for not the current chart
+        //     // this should instead load the chart from disk for correctness, but the cache should ultimately store the source
+        //     if Network.status = Network.Status.LoggedIn && Chart.CHART.IsSome then
+        //         let chart = Chart.CHART.Value
 
-                content
-                |* PageButton(
-                    "chart.suggest_for_table",
-                    (fun () ->
-                        SelectTableLevelPage(fun level ->
-                            Tables.Suggestions.Add.post (
-                                {
-                                    ChartId = cc.Hash
-                                    OsuBeatmapId =
-                                        match chart.Header.ChartSource with
-                                        | Osu(_, id) -> id
-                                        | _ -> -1
-                                    EtternaPackId =
-                                        match chart.Header.ChartSource with
-                                        | Stepmania(pack) -> pack
-                                        | _ -> -1
-                                    Artist = cc.Artist
-                                    Title = cc.Title
-                                    Creator = cc.Creator
-                                    Difficulty = cc.DifficultyName
-                                    TableFor = table.Name.ToLower()
-                                    SuggestedLevel = level.Rank
-                                },
-                                function
-                                | Some true ->
-                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                                | _ -> Notifications.error ("Error sending suggestion", "")
-                            )
+        //         content
+        //         |* PageButton(
+        //             "chart.suggest_for_table",
+        //             (fun () ->
+        //                 SelectTableLevelPage(fun level ->
+        //                     Tables.Suggestions.Add.post (
+        //                         {
+        //                             ChartId = cc.Hash
+        //                             OsuBeatmapId =
+        //                                 match chart.Header.ChartSource with
+        //                                 | Osu(_, id) -> id
+        //                                 | _ -> -1
+        //                             EtternaPackId =
+        //                                 match chart.Header.ChartSource with
+        //                                 | Stepmania(pack) -> pack
+        //                                 | _ -> -1
+        //                             Artist = cc.Artist
+        //                             Title = cc.Title
+        //                             Creator = cc.Creator
+        //                             Difficulty = cc.DifficultyName
+        //                             TableFor = table.Name.ToLower()
+        //                             SuggestedLevel = level.Rank
+        //                         },
+        //                         function
+        //                         | Some true ->
+        //                             Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+        //                         | _ -> Notifications.error ("Error sending suggestion", "")
+        //                     )
 
-                            Menu.Back()
-                        )
-                            .Show()
-                    )
-                )
-        | None -> ()
+        //                     Menu.Back()
+        //                 )
+        //                     .Show()
+        //             )
+        //         )
+        // | None -> ()
 
         this.Content content
 
@@ -185,7 +187,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value).Show()
         | LibraryGroupContext.Table lvl -> ()
 
-type ScoreContextMenu(score: ScoreInfoProvider) as this =
+type ScoreContextMenu(score_info: ScoreInfoProvider) as this =
     inherit Page()
 
     do
@@ -193,14 +195,14 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
             column ()
             |+ PageButton(
                 "score.delete",
-                (fun () -> ScoreContextMenu.ConfirmDeleteScore(score, true)),
+                (fun () -> ScoreContextMenu.ConfirmDeleteScore(score_info, true)),
                 Icon = Icons.TRASH
             )
                 .Pos(200.0f)
             |+ PageButton(
                 "score.watch_replay",
                 (fun () ->
-                    ScoreScreenHelpers.watch_replay (score.ScoreInfo, score.ModChart, score.ReplayData)
+                    ScoreScreenHelpers.watch_replay (score_info.Chart, score_info.ScoreInfo, score_info.ColoredChart, score_info.ReplayData)
                     Menu.Back()
                 ),
                 Icon = Icons.FILM
@@ -209,7 +211,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
             |+ PageButton(
                 "score.challenge",
                 (fun () ->
-                    LevelSelect.challenge_score (score.ScoreInfo.rate, score.ScoreInfo.selectedMods, score.ReplayData)
+                    LevelSelect.challenge_score (score_info.ScoreInfo.rate, score_info.ScoreInfo.selectedMods, score_info.ReplayData)
                     Menu.Back()
                 ),
                 Icon = Icons.FLAG,
@@ -220,7 +222,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
         )
 
     override this.Title =
-        sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Ruleset.LampName score.Lamp)
+        sprintf "%s | %s" (score_info.Scoring.FormatAccuracy()) (score_info.Ruleset.LampName score_info.Lamp)
 
     override this.OnClose() = ()
 

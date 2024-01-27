@@ -80,7 +80,7 @@ type Lobby() =
         |+ StylishButton(
             (fun () ->
                 Gameplay.Chart.if_loaded <| fun info ->
-                    Preview(info.WithColors, ignore).Show()
+                    Preview(info, ignore).Show()
             ),
             K(sprintf "%s %s" Icons.EYE (%"levelselect.preview.name")),
             !%Palette.MAIN_100,
@@ -147,7 +147,7 @@ type Lobby() =
                 Gameplay.Chart.if_loaded <| fun info ->
                 if
                     Screen.change_new
-                        (fun () -> PlayScreen.multiplayer_screen (info.Chart, info.WithMods))
+                        (fun () -> PlayScreen.multiplayer_screen info)
                         Screen.Type.Play
                         Transitions.Flags.Default
                     |> not
@@ -162,9 +162,10 @@ type Lobby() =
                 && Screen.current_type = Screen.Type.Lobby
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.Spectate
             then
+                Gameplay.Chart.if_loaded <| fun info ->
                 if
                     Screen.change_new
-                        (fun () -> SpectateScreen.spectate_screen username)
+                        (fun () -> SpectateScreen.spectate_screen (info, username))
                         Screen.Type.Replay
                         Transitions.Flags.Default
                     |> not

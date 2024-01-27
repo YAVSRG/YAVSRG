@@ -425,17 +425,17 @@ module Gameplay =
             Chart.update ()
         )
 
-    let make_score (replay_data, keys) : Score =
+    let make_score (with_mods, replay_data, keys) : Score =
         {
             time = DateTime.UtcNow
             replay = Replay.compress_string replay_data
             rate = rate.Value
-            selectedMods = selected_mods.Value |> ModState.filter Chart.WITH_MODS.Value
+            selectedMods = selected_mods.Value |> ModState.filter with_mods
             layout = options.Playstyles.[keys - 3]
             keycount = keys
         }
 
-    let set_score (met_pacemaker: bool) (data: ScoreInfoProvider) : ImprovementFlags =
+    let set_score (met_pacemaker: bool) (data: ScoreInfoProvider) (save_data: ChartSaveData) : ImprovementFlags =
         if
             data.ModStatus < ModStatus.Unstored
             && (options.SaveScoreIfUnderPace.Value || met_pacemaker)
@@ -453,9 +453,9 @@ module Gameplay =
                         ignore
                     )
 
-                Scores.save_score_pbs Chart.SAVE_DATA.Value Content.Rulesets.current_hash data
+                Scores.save_score_pbs save_data Content.Rulesets.current_hash data
             else
-                Scores.save_score Chart.SAVE_DATA.Value data.ScoreInfo
+                Scores.save_score save_data data.ScoreInfo
                 ImprovementFlags.Default
         else
             ImprovementFlags.Default
@@ -505,16 +505,18 @@ module Gameplay =
                                 score,
                                 info.Chart,
                                 Content.Rulesets.current,
+                                Content.noteskin_config().NoteColors,
                                 Player = Some username,
-                                ModChart = info.WithMods
+                                ModdedChart = info.WithMods,
+                                ColoredChart = info.WithColors
                             )
                     )
 
-        let add_own_replay (chart: Chart, with_mods: ModdedChart, s: IScoreMetric, replay: LiveReplayProvider) =
+        let add_own_replay (info: Chart.LoadedChartInfo, scoring: IScoreMetric, replay: LiveReplayProvider) =
 
             replays.Add(
                 Network.credentials.Username,
-                (s, fun () ->
+                (scoring, fun () ->
                     if not (replay :> IReplayProvider).Finished then
                         replay.Finish()
 
@@ -523,16 +525,18 @@ module Gameplay =
                             time = DateTime.UtcNow
                             replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
                             rate = rate.Value
-                            selectedMods = selected_mods.Value |> ModState.filter with_mods
-                            layout = options.Playstyles.[with_mods.Keys - 3]
-                            keycount = with_mods.Keys
+                            selectedMods = selected_mods.Value |> ModState.filter info.WithMods
+                            layout = options.Playstyles.[info.WithMods.Keys - 3]
+                            keycount = info.WithMods.Keys
                         }
 
                     ScoreInfoProvider(
                         score,
-                        chart,
+                        info.Chart,
                         Content.Rulesets.current,
-                        ModChart = with_mods
+                        Content.noteskin_config().NoteColors,
+                        ModdedChart = info.WithMods,
+                        ColoredChart = info.WithColors
                     )
                 )
             )

@@ -10,6 +10,7 @@ open Prelude.Gameplay
 open Prelude.Gameplay.Metrics
 open Prelude.Charts
 open Prelude.Charts.Tools
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content
@@ -17,6 +18,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Web.Shared
 open Interlude.Features
+open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Features.Play.HUD
@@ -30,21 +32,21 @@ type PacemakerMode =
 
 module PlayScreen =
 
-    let rec play_screen (chart: Chart, with_mods: ModdedChart, pacemaker_mode: PacemakerMode) =
+    let rec play_screen (info: LoadedChartInfo, pacemaker_mode: PacemakerMode) =
 
         let ruleset = Rulesets.current
-        let first_note = with_mods.Notes.[0].Time
+        let first_note = info.WithMods.FirstNote
         let liveplay = LiveReplayProvider first_note
 
-        let scoring = create ruleset with_mods.Keys liveplay with_mods.Notes Gameplay.rate.Value
+        let scoring = create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
         let pacemaker_info =
             match pacemaker_mode with
             | PacemakerMode.None -> PacemakerInfo.None
             | PacemakerMode.Score(rate, replay) ->
                 let replay_data = StoredReplayProvider(replay) :> IReplayProvider
-                let scoring = create ruleset with_mods.Keys replay_data with_mods.Notes rate
-                PacemakerInfo.Replay scoring
+                let replay_scoring = create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
+                PacemakerInfo.Replay replay_scoring
             | PacemakerMode.Setting ->
                 let setting =
                     if options.Pacemakers.ContainsKey Rulesets.current_hash then
@@ -80,7 +82,7 @@ module PlayScreen =
 
                 actual <= count
 
-        let binds = options.GameplayBinds.[with_mods.Keys - 3]
+        let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
 
         scoring.OnHit.Add(fun h ->
@@ -91,11 +93,12 @@ module PlayScreen =
 
         let mutable recommended_offset = 0.0f
 
-        let offset_slideout =
+        let offset_setting = LocalAudioSync.offset_setting info.Chart info.SaveData
+        let offset_slideout (screen: IPlayScreen) =
 
             let offset_slider =
                 Slider(
-                    LocalAudioSync.offset
+                    offset_setting
                     |> Setting.map float32 (fun x -> x * 1.0f<ms>)
                     |> Setting.bound -200.0f 200.0f,
                     Step = 1f,
@@ -105,7 +108,7 @@ module PlayScreen =
 
             let close () =
                 Screen.change_new
-                    (fun () -> play_screen (chart, with_mods, pacemaker_mode) :> Screen.T)
+                    (fun () -> play_screen (info, pacemaker_mode) :> Screen.T)
                     Screen.Type.Play
                     Transitions.Flags.Default
                 |> ignore
@@ -126,7 +129,7 @@ module PlayScreen =
                 |+ HotkeyAction(
                     "accept_suggestion",
                     fun () ->
-                        LocalAudioSync.offset.Set(recommended_offset * 1.0f<ms>)
+                        offset_setting.Value <- recommended_offset * 1.0f<ms>
                         close ()
                 )
                 |+ Callout.frame
@@ -143,13 +146,13 @@ module PlayScreen =
                 OnOpen =
                     (fun () ->
                         Song.pause ()
-                        recommended_offset <- LocalAudioSync.get_automatic scoring |> float32
+                        recommended_offset <- LocalAudioSync.get_automatic screen.State info.SaveData |> float32
                         offset_slider.Select()
                     ),
                 OnClose = close
             )
 
-        { new IPlayScreen(with_mods, pacemaker_info, ruleset, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, pacemaker_info, ruleset, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x
@@ -166,7 +169,7 @@ module PlayScreen =
                 add_widget RateModMeter
                 add_widget BPMMeter
 
-                this.Add offset_slideout
+                this.Add (offset_slideout this)
 
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then
@@ -176,8 +179,8 @@ module PlayScreen =
 
                 DiscordRPC.playing_timed (
                     "Playing",
-                    Gameplay.Chart.CACHE_DATA.Value.Title,
-                    Gameplay.Chart.CACHE_DATA.Value.Length / Gameplay.rate.Value
+                    info.CacheInfo.Title,
+                    info.CacheInfo.Length / Gameplay.rate.Value
                 )
 
             override this.OnExit(next) =
@@ -189,7 +192,7 @@ module PlayScreen =
                     Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
 
                 if options.AutoCalibrateOffset.Value && recommended_offset = 0.0f then
-                    LocalAudioSync.apply_automatic (scoring)
+                    LocalAudioSync.apply_automatic this.State info.SaveData
 
                 base.OnExit(next)
 
@@ -219,7 +222,7 @@ module PlayScreen =
 
                 if (%%"retry").Tapped() then
                     Screen.change_new
-                        (fun () -> play_screen (chart, with_mods, pacemaker_mode) :> Screen.T)
+                        (fun () -> play_screen (info, pacemaker_mode) :> Screen.T)
                         Screen.Type.Play
                         Transitions.Flags.Default
                     |> ignore
@@ -229,19 +232,21 @@ module PlayScreen =
 
                     Screen.change_new
                         (fun () ->
-                            let sd =
+                            let score_info =
                                 ScoreInfoProvider(
-                                    Gameplay.make_score (
+                                    Gameplay.make_score (info.WithMods,
                                         (liveplay :> IReplayProvider).GetFullReplay(),
-                                        this.Chart.Keys
+                                        info.WithMods.Keys
                                     ),
-                                    chart,
+                                    info.Chart,
                                     this.State.Ruleset,
-                                    ModChart = with_mods,
-                                    Difficulty = Gameplay.Chart.RATING.Value
+                                    noteskin_config().NoteColors,
+                                    ModdedChart = info.WithMods,
+                                    ColoredChart = info.WithColors,
+                                    Difficulty = info.Rating
                                 )
 
-                            (sd, Gameplay.set_score (pacemaker_met this.State) sd, true) |> ScoreScreen
+                            (score_info, Gameplay.set_score (pacemaker_met this.State) score_info info.SaveData, true) |> ScoreScreen
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default
@@ -257,7 +262,7 @@ module PlayScreen =
                 then
                     Text.draw_b (
                         Style.font,
-                        sprintf "Local offset: %.0fms" LocalAudioSync.offset.Value,
+                        sprintf "Local offset: %.0fms" offset_setting.Value,
                         20.0f,
                         this.Bounds.Left + 20.0f,
                         this.Bounds.Top + 20.0f,
@@ -265,20 +270,20 @@ module PlayScreen =
                     )
         }
 
-    let multiplayer_screen (chart: Chart, with_mods: ModdedChart) =
+    let multiplayer_screen (info: LoadedChartInfo) =
 
         let ruleset = Rulesets.current
-        let first_note = with_mods.Notes.[0].Time
+        let first_note = info.WithMods.FirstNote
         let liveplay = LiveReplayProvider first_note
 
-        let scoring = create ruleset with_mods.Keys liveplay with_mods.Notes Gameplay.rate.Value
+        let scoring = create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
-        let binds = options.GameplayBinds.[with_mods.Keys - 3]
+        let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
         let mutable packet_count = 0
 
         Lobby.start_playing ()
-        Gameplay.Multiplayer.add_own_replay (chart, with_mods, scoring, liveplay)
+        Gameplay.Multiplayer.add_own_replay (info, scoring, liveplay)
 
         scoring.OnHit.Add(fun h ->
             match h.Guts with
@@ -296,7 +301,7 @@ module PlayScreen =
             Lobby.play_data (ms.ToArray())
             packet_count <- packet_count + 1
 
-        { new IPlayScreen(with_mods, PacemakerInfo.None, ruleset, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, ruleset, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x
@@ -324,7 +329,7 @@ module PlayScreen =
                     Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
 
                 if options.AutoCalibrateOffset.Value then
-                    LocalAudioSync.apply_automatic (scoring)
+                    LocalAudioSync.apply_automatic this.State info.SaveData
 
                 if next <> Screen.Type.Score then
                     Lobby.abandon_play ()
@@ -333,8 +338,8 @@ module PlayScreen =
 
                 DiscordRPC.playing_timed (
                     "Multiplayer",
-                    Gameplay.Chart.CACHE_DATA.Value.Title,
-                    Gameplay.Chart.CACHE_DATA.Value.Length / Gameplay.rate.Value
+                    info.CacheInfo.Title,
+                    info.CacheInfo.Length / Gameplay.rate.Value
                 )
 
             override this.Update(elapsed_ms, moved) =
@@ -371,19 +376,21 @@ module PlayScreen =
 
                     Screen.change_new
                         (fun () ->
-                            let sd =
+                            let score_info =
                                 ScoreInfoProvider(
-                                    Gameplay.make_score (
+                                    Gameplay.make_score (info.WithMods,
                                         (liveplay :> IReplayProvider).GetFullReplay(),
-                                        this.Chart.Keys
+                                        info.WithMods.Keys
                                     ),
-                                    chart,
+                                    info.Chart,
                                     this.State.Ruleset,
-                                    ModChart = with_mods,
-                                    Difficulty = Gameplay.Chart.RATING.Value
+                                    noteskin_config().NoteColors,
+                                    ModdedChart = info.WithMods,
+                                    ColoredChart = info.WithColors,
+                                    Difficulty = info.Rating
                                 )
 
-                            (sd, Gameplay.set_score true sd, true) |> ScoreScreen
+                            (score_info, Gameplay.set_score true score_info info.SaveData, true) |> ScoreScreen
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default

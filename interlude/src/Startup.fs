@@ -5,6 +5,7 @@ open System.IO
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Charts
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
@@ -208,14 +209,14 @@ module Startup =
             |]
 
         ScoreScreenHelpers.watch_replay <-
-            fun (score: Score, modchart, data) ->
+            fun (chart: Chart, score: Score, with_colors: ColoredChart, data) ->
                 let rate = score.rate
 
                 if rate <> Gameplay.rate.Value then
                     Gameplay.rate.Value <- rate
 
                 Screen.change_new
-                    (fun () -> ReplayScreen.replay_screen (ReplayMode.Replay(score, modchart, rate, data)) :> Screen.T)
+                    (fun () -> ReplayScreen.replay_screen (chart, ReplayMode.Replay(score, with_colors, rate, data)) :> Screen.T)
                     Screen.Type.Replay
                     Transitions.Flags.Default
                 |> ignore

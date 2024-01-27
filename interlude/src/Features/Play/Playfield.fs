@@ -18,7 +18,6 @@ type private HoldRenderState =
     | HeadOnscreen of pos: float32 * index: int
     | NoHold
 
-// todo: pass in noteskin information to reduce many calls to retrieve it
 type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinConfig, vanishing_notes: bool) as this
     =
     inherit StaticContainer(NodeType.None)

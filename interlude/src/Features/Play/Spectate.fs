@@ -6,12 +6,11 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Charts.Tools
 open Interlude.Web.Shared.Packets
 open Interlude.Content
-open Interlude.Utils
 open Interlude.UI
 open Interlude.Features
+open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Online
 open Interlude.Features.Play.HUD
 
@@ -37,14 +36,14 @@ module SpectateScreen =
             Draw.rect this.Bounds Colors.black.O2
             base.Draw()
 
-    type ControlOverlay(on_seek, who, cycle) =
+    type ControlOverlay(info: LoadedChartInfo, on_seek, who, cycle) =
         inherit DynamicContainer(NodeType.None)
 
         let mutable show = true
         let mutable show_timeout = 3000.0
 
         override this.Init(parent) =
-            this |+ Timeline(Gameplay.Chart.WITH_MODS.Value, on_seek)
+            this |+ Timeline(info.WithMods, on_seek)
             |* Controls(who, cycle, Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
 
             base.Init parent
@@ -68,9 +67,7 @@ module SpectateScreen =
                             Bottom = 1.0f %+ 100.0f
                         }
 
-    let spectate_screen (username: string) =
-
-        let chart = Gameplay.Chart.WITH_MODS.Value
+    let spectate_screen (info: LoadedChartInfo, username: string) =
 
         let mutable currently_spectating = username
         let mutable scoring = fst Gameplay.Multiplayer.replays.[username]
@@ -95,7 +92,7 @@ module SpectateScreen =
             Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
             screen.State.ChangeScoring scoring
 
-        let first_note = chart.Notes.[0].Time
+        let first_note = info.WithMods.FirstNote
         let ruleset = Rulesets.current
 
         let mutable wait_for_load = 1000.0
@@ -103,7 +100,7 @@ module SpectateScreen =
 
         Lobby.start_spectating ()
 
-        { new IPlayScreen(chart, PacemakerInfo.None, ruleset, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, ruleset, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x
@@ -121,7 +118,7 @@ module SpectateScreen =
                 add_widget MultiplayerScoreTracker
 
                 this
-                |* ControlOverlay(
+                |* ControlOverlay(info,
                     ignore,
                     (fun () -> currently_spectating),
                     fun () ->
@@ -131,7 +128,7 @@ module SpectateScreen =
 
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
-                DiscordRPC.playing ("Spectating", Gameplay.Chart.CACHE_DATA.Value.Title)
+                DiscordRPC.playing ("Spectating", info.CacheInfo.Title)
                 Song.pause ()
 
             override this.OnExit(next) =

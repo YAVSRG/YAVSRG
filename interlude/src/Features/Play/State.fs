@@ -2,7 +2,11 @@
 
 open System
 open Prelude
+open Prelude.Charts
+open Prelude.Charts.Tools
 open Prelude.Gameplay
+open Prelude.Data.Scores
+open Interlude.Features.Gameplay.Chart
 
 [<RequireQualifiedAccess>]
 type PacemakerInfo =
@@ -13,16 +17,20 @@ type PacemakerInfo =
 
 type PlayState =
     {
+        Chart: Chart
+        WithMods: ModdedChart
         Ruleset: Ruleset
         mutable Scoring: IScoreMetric
         ScoringChanged: Event<unit>
         CurrentChartTime: unit -> ChartTime
         Pacemaker: PacemakerInfo
     }
-    static member Dummy chart =
-        let s = Metrics.create_dummy chart
+    static member Dummy (info: LoadedChartInfo) =
+        let s = Metrics.create_dummy info.WithMods
 
         {
+            Chart = info.Chart
+            WithMods = info.WithMods
             Ruleset = s.Ruleset
             Scoring = s
             ScoringChanged = Event<unit>()

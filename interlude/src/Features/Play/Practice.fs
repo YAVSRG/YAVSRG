@@ -6,7 +6,8 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Charts.Tools
+open Prelude.Charts
+open Prelude.Data.Scores
 open Prelude.Gameplay
 open Prelude.Gameplay.Metrics
 open Interlude.Options
@@ -14,6 +15,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Features
+open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Online
 open Interlude.Features.Stats
 open Interlude.Features.Play.HUD
@@ -113,18 +115,11 @@ module PracticeScreen =
                 elif this.Selected && (%%"left").Tapped() then
                     this.Focus()
 
-        type UI() =
+        type UI(chart: Chart, save_data: ChartSaveData) =
             inherit StaticContainer(NodeType.None)
 
-            let first_note = Gameplay.Chart.CHART.Value.FirstNote
-
-            let local_audio_offset =
-                Setting.make
-                    (fun v ->
-                        Gameplay.Chart.SAVE_DATA.Value.Offset <- v + first_note
-                        Song.set_local_offset (v)
-                    )
-                    (fun () -> (Gameplay.Chart.SAVE_DATA.Value.Offset - first_note))
+            let local_audio_offset = 
+                LocalAudioSync.offset_setting chart save_data
                 |> Setting.bound -200.0f<ms> 200.0f<ms>
 
             let mutable local_audio_offset_suggestion = local_audio_offset.Value
@@ -268,10 +263,10 @@ module PracticeScreen =
             .Body(%"practice.info.sync")
             .Hotkey(%"practice.info.accept_suggestion", "accept_suggestion")
 
-    let rec practice_screen (with_mods: ModdedChart, practice_point: Time) =
+    let rec practice_screen (info: LoadedChartInfo, practice_point: Time) =
 
         let last_note =
-            with_mods.Notes.[with_mods.Notes.Length - 1].Time
+            info.WithMods.LastNote
             - 5.0f<ms>
             - Song.LEADIN_TIME * Gameplay.rate.Value
 
@@ -285,16 +280,16 @@ module PracticeScreen =
                      t < time do
                 let struct (t, deltas, flags) = scoring.HitData.[i]
 
-                for k = 0 to with_mods.Keys - 1 do
+                for k = 0 to info.WithMods.Keys - 1 do
                     flags.[k] <- HitStatus.NOTHING
 
                 i <- i + 1
 
-        let first_note = with_mods.Notes.[0].Time
+        let first_note = info.WithMods.FirstNote
         let mutable liveplay = LiveReplayProvider first_note
 
         let mutable scoring =
-            create Rulesets.current with_mods.Keys liveplay with_mods.Notes Gameplay.rate.Value
+            create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
         scoring.OnHit.Add(fun h ->
             match h.Guts with
@@ -304,7 +299,7 @@ module PracticeScreen =
 
         do ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
 
-        let binds = options.GameplayBinds.[with_mods.Keys - 3]
+        let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable input_key_state = 0us
 
         // options state
@@ -312,7 +307,7 @@ module PracticeScreen =
 
         let restart (screen: IPlayScreen) =
             liveplay <- LiveReplayProvider first_note
-            scoring <- create Rulesets.current with_mods.Keys liveplay with_mods.Notes Gameplay.rate.Value
+            scoring <- create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
             ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
             screen.State.ChangeScoring scoring
 
@@ -328,7 +323,7 @@ module PracticeScreen =
             restart (screen)
             options_mode <- false
 
-        let sync_ui = Sync.UI()
+        let sync_ui = Sync.UI (info.Chart, info.SaveData)
 
         let pause (screen: IPlayScreen) =
             Song.pause ()
@@ -339,7 +334,7 @@ module PracticeScreen =
         let options_ui =
             StaticContainer(NodeType.None)
             |+ Timeline(
-                Gameplay.Chart.WITH_MODS.Value,
+                info.WithMods,
                 fun t ->
                     practice_point <- min last_note t
                     Song.seek t
@@ -347,7 +342,7 @@ module PracticeScreen =
             |+ Callout.frame (info_callout) (fun (w, h) -> Position.Box(0.0f, 0.0f, 20.0f, 20.0f, w, h + 40.0f))
             |+ sync_ui
 
-        { new IPlayScreen(with_mods, PacemakerInfo.None, Rulesets.current, scoring, FirstNote = first_note) with
+        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, Rulesets.current, scoring, FirstNote = first_note) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x

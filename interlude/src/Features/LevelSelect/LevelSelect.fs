@@ -64,7 +64,7 @@ type LevelSelectScreen() =
                 let success =
                     Screen.change_new
                         (fun () ->
-                            PlayScreen.play_screen (info.Chart, info.WithMods,
+                            PlayScreen.play_screen (info,
                                 if options.EnablePacemaker.Value then
                                     PacemakerMode.Setting
                                 else
@@ -77,7 +77,7 @@ type LevelSelectScreen() =
                 if not success then
                     sync (fun () -> play_when_song_loads info)
                 else
-                    Chart.SAVE_DATA.Value.LastPlayed <- System.DateTime.UtcNow
+                    info.SaveData.LastPlayed <- System.DateTime.UtcNow
 
             Chart.when_loaded <| play_when_song_loads
             true

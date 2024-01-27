@@ -6,22 +6,24 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude
-open Prelude.Data.Scores
 open Prelude.Charts.Tools
+open Prelude.Charts.Tools.NoteColors
+open Prelude.Data.Scores
 open Prelude.Gameplay
 open Prelude.Gameplay.Metrics
 open Interlude.Content
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features
+open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Online
 open Interlude.Features.Play.HUD
 open Interlude.Features.Score
 
 [<RequireQualifiedAccess>]
 type ReplayMode =
-    | Auto of ModdedChart
-    | Replay of score: Score * chart: ModdedChart * rate: float32 * ReplayData
+    | Auto of ColoredChart
+    | Replay of score: Score * chart: ColoredChart * rate: float32 * ReplayData
 
 type private HitOverlay
     (
@@ -36,7 +38,7 @@ type private HitOverlay
 
     let hit_events =
         let full_score =
-            Metrics.create state.Ruleset chart.Keys (StoredReplayProvider replay_data) chart.Notes rate
+            create state.Ruleset chart.Keys (StoredReplayProvider replay_data) chart.Notes rate
 
         full_score.Update Time.infinity
         full_score.HitEvents |> Array.ofSeq
@@ -300,7 +302,7 @@ module ReplayScreen =
 
             base.Init parent
 
-    type ControlOverlay(is_auto, on_seek) =
+    type ControlOverlay(with_mods: ModdedChart, is_auto, on_seek) =
         inherit DynamicContainer(NodeType.None)
 
         let mutable show = true
@@ -310,7 +312,7 @@ module ReplayScreen =
             Slideout("Options", Controls(is_auto), 100.0f, 10.0f, ShowButton = false, ControlledByUser = false)
 
         override this.Init(parent) =
-            this |+ Timeline(Gameplay.Chart.WITH_MODS.Value, on_seek) |* slideout
+            this |+ Timeline(with_mods, on_seek) |* slideout
 
             base.Init parent
 
@@ -336,19 +338,19 @@ module ReplayScreen =
                             Bottom = 1.0f %+ 100.0f
                         }
 
-    let replay_screen (mode: ReplayMode) =
+    let replay_screen (chart, mode: ReplayMode) =
 
-        let replay_data, is_auto, rate, chart =
+        let replay_data, is_auto, rate, with_colors =
             match mode with
-            | ReplayMode.Auto chart ->
-                StoredReplayProvider.AutoPlay(chart.Keys, chart.Notes) :> IReplayProvider,
+            | ReplayMode.Auto with_colors ->
+                StoredReplayProvider.AutoPlay(with_colors.Keys, with_colors.Source.Notes) :> IReplayProvider,
                 true,
                 Gameplay.rate.Value,
-                chart
+                with_colors
             | ReplayMode.Replay(_, modchart, rate, data) ->
                 StoredReplayProvider(data) :> IReplayProvider, false, rate, modchart
 
-        let first_note = chart.Notes.[0].Time
+        let first_note = with_colors.FirstNote
         let ruleset = Rulesets.current
 
         let playback_speed =
@@ -356,14 +358,14 @@ module ReplayScreen =
 
         let mutable replay_data = replay_data
 
-        let mutable scoring = create ruleset chart.Keys replay_data chart.Notes rate
+        let mutable scoring = create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplayProvider(replay_data.GetFullReplay())
-            scoring <- create ruleset chart.Keys replay_data chart.Notes rate
+            scoring <- create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
             screen.State.ChangeScoring scoring
 
-        { new IPlayScreen(chart, PacemakerInfo.None, ruleset, scoring) with
+        { new IPlayScreen(chart, with_colors, PacemakerInfo.None, ruleset, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x
@@ -387,9 +389,10 @@ module ReplayScreen =
                            if show_input_overlay.Value || show_hit_overlay.Value then
                                Draw.rect this.Playfield.Bounds (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
                    }
-                |+ InputOverlay(chart.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, show_input_overlay)
-                |+ HitOverlay(rate, chart, replay_data.GetFullReplay(), this.State, this.Playfield, show_hit_overlay)
+                |+ InputOverlay(with_colors.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, show_input_overlay)
+                |+ HitOverlay(rate, with_colors.Source, replay_data.GetFullReplay(), this.State, this.Playfield, show_hit_overlay)
                 |* ControlOverlay(
+                    with_colors.Source,
                     is_auto,
                     fun t ->
                         let now = Song.time () in
@@ -424,10 +427,11 @@ module ReplayScreen =
                                 let sd =
                                     ScoreInfoProvider(
                                         score,
-                                        Gameplay.Chart.CHART.Value,
+                                        this.State.Chart,
                                         this.State.Ruleset,
-                                        ModChart = Gameplay.Chart.WITH_MODS.Value,
-                                        Difficulty = Gameplay.Chart.RATING.Value
+                                        noteskin_config().NoteColors,
+                                        ModdedChart = with_colors.Source,
+                                        ColoredChart = with_colors
                                     )
 
                                 new ScoreScreen(sd, ImprovementFlags.Default, false) :> Screen

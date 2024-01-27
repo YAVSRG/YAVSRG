@@ -8,10 +8,13 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
+open Prelude.Charts
 open Prelude.Charts.Tools
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Charts.Tools.Patterns
 open Prelude.Gameplay
 open Prelude.Data.Content
+open Prelude.Data.Scores
 open Interlude
 open Interlude.Options
 open Interlude.Content
@@ -22,20 +25,20 @@ open Interlude.Features.Play
 
 module LocalAudioSync =
 
-    let offset =
+    let offset_setting (chart: Chart) (save_data: ChartSaveData) =
         Setting.make
             (fun v ->
-                Gameplay.Chart.SAVE_DATA.Value.Offset <- v + Gameplay.Chart.CHART.Value.FirstNote
+                save_data.Offset <- v + chart.FirstNote
                 Song.set_local_offset v
             )
-            (fun () -> Gameplay.Chart.SAVE_DATA.Value.Offset - Gameplay.Chart.CHART.Value.FirstNote)
+            (fun () -> save_data.Offset - chart.FirstNote)
         |> Setting.roundt 0
 
-    let get_automatic (scoring: IScoreMetric) =
+    let get_automatic (state: PlayState) (save_data: ChartSaveData) =
         let mutable sum = 0.0f<ms>
         let mutable count = 1.0f
 
-        for ev in scoring.HitEvents do
+        for ev in state.Scoring.HitEvents do
             match ev.Guts with
             | Hit x when not x.Missed ->
                 sum <- sum + x.Delta
@@ -44,25 +47,27 @@ module LocalAudioSync =
 
         let mean = sum / count * Gameplay.rate.Value
 
-        let first_note = Gameplay.Chart.CHART.Value.FirstNote
+        let first_note = state.Chart.FirstNote
 
         if count < 10.0f then
-            offset.Value
+            save_data.Offset - first_note
         else
-            Gameplay.Chart.SAVE_DATA.Value.Offset - first_note - mean * 1.25f
+            save_data.Offset - first_note - mean * 1.25f
 
-    let apply_automatic (scoring: IScoreMetric) = offset.Set(get_automatic scoring)
+    let apply_automatic (state: PlayState) (save_data: ChartSaveData)=
+        let setting = offset_setting state.Chart save_data
+        setting.Value <- get_automatic state save_data
 
-type Timeline(chart: ModdedChart, on_seek: Time -> unit) =
+type Timeline(with_mods: ModdedChart, on_seek: Time -> unit) =
     inherit StaticWidget(NodeType.None)
 
     let HEIGHT = 60.0f
 
     // chord density is notes per second but n simultaneous notes count for 1 instead of n
     let samples =
-        int ((chart.LastNote - chart.FirstNote) / 1000.0f) |> max 10 |> min 400
+        int ((with_mods.LastNote - with_mods.FirstNote) / 1000.0f) |> max 10 |> min 400
 
-    let note_density, chord_density = Analysis.nps_cps samples chart
+    let note_density, chord_density = Analysis.nps_cps samples with_mods
 
     let note_density, chord_density =
         Array.map float32 note_density, Array.map float32 chord_density
@@ -71,8 +76,8 @@ type Timeline(chart: ModdedChart, on_seek: Time -> unit) =
 
     override this.Draw() =
         let b = this.Bounds.Shrink(10.0f, 20.0f)
-        let start = chart.FirstNote - Song.LEADIN_TIME
-        let offset = b.Width * Song.LEADIN_TIME / chart.LastNote
+        let start = with_mods.FirstNote - Song.LEADIN_TIME
+        let offset = b.Width * Song.LEADIN_TIME /with_mods.LastNote
 
         let w = (b.Width - offset) / float32 note_density.Length
 
@@ -106,7 +111,7 @@ type Timeline(chart: ModdedChart, on_seek: Time -> unit) =
             (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
             (Quad.color chord_density_color)
 
-        let percent = (Song.time () - start) / (chart.LastNote - start) |> min 1.0f
+        let percent = (Song.time () - start) / (with_mods.LastNote - start) |> min 1.0f
         let x = b.Width * percent
         Draw.rect (b.SliceBottom(5.0f)) (Color.FromArgb(160, Color.White))
         Draw.rect (b.SliceBottom(5.0f).SliceLeft x) (Palette.color (255, 1.0f, 0.0f))
@@ -118,8 +123,8 @@ type Timeline(chart: ModdedChart, on_seek: Time -> unit) =
             let percent =
                 (Mouse.x () - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
 
-            let start = chart.FirstNote - Song.LEADIN_TIME
-            let new_time = start + (chart.LastNote - start) * percent
+            let start = with_mods.FirstNote - Song.LEADIN_TIME
+            let new_time = start + (with_mods.LastNote - start) * percent
             on_seek new_time
 
 type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
@@ -363,13 +368,15 @@ module Utils =
             if pos.Float then screen.Add w else playfield.Add w
 
 [<AbstractClass>]
-type IPlayScreen(chart: ModdedChart, pacemaker_info: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
+type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
     inherit Screen()
 
-    let mutable first_note = chart.Notes.[0].Time
+    let mutable first_note = with_colors.FirstNote
 
     let state: PlayState =
         {
+            Chart = chart
+            WithMods = with_colors.Source
             Ruleset = ruleset
             Scoring = scoring
             ScoringChanged = Event<unit>()
@@ -380,16 +387,16 @@ type IPlayScreen(chart: ModdedChart, pacemaker_info: PacemakerInfo, ruleset: Rul
     let noteskin_config = noteskin_config ()
 
     let playfield =
-        Playfield(Gameplay.Chart.WITH_COLORS.Value, state, noteskin_config, options.VanishingNotes.Value)
+        Playfield(with_colors, state, noteskin_config, options.VanishingNotes.Value)
 
     do
         this.Add playfield
 
         if noteskin_config.EnableColumnLight then
-            playfield.Add(new ColumnLighting(chart.Keys, noteskin_config, state))
+            playfield.Add(new ColumnLighting(with_colors.Keys, noteskin_config, state))
 
         if noteskin_config.Explosions.Enable then
-            playfield.Add(new Explosions(chart.Keys, noteskin_config, state))
+            playfield.Add(new Explosions(with_colors.Keys, noteskin_config, state))
 
         playfield.Add(LaneCover())
 
@@ -402,7 +409,6 @@ type IPlayScreen(chart: ModdedChart, pacemaker_info: PacemakerInfo, ruleset: Rul
 
     member this.Playfield = playfield
     member this.State = state
-    member this.Chart = chart
 
     override this.OnEnter(prev) =
         Dialog.close ()

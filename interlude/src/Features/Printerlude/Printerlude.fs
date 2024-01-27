@@ -128,7 +128,7 @@ module Printerlude =
                                             Mods = score.selectedMods
                                             Timestamp = score.time
                                         }
-                                        : Web.Shared.Requests.Charts.Scores.Save.Request),
+                                        : Charts.Scores.Save.Request),
                                         ignore
                                     )
             )
@@ -137,6 +137,8 @@ module Printerlude =
             { new Async.Service<string, unit>() with
                 override this.Handle(ruleset_id) =
                     async {
+                        let color_config = Content.noteskin_config().NoteColors
+
                         match Content.Rulesets.try_get_by_hash ruleset_id with
                         | None -> ()
                         | Some ruleset ->
@@ -157,7 +159,7 @@ module Printerlude =
                                 | Some chart ->
 
                                 for score in data.Scores do
-                                    let info = ScoreInfoProvider(score, chart, ruleset)
+                                    let info = ScoreInfoProvider(score, chart, ruleset, color_config)
 
                                     if data.PersonalBests.ContainsKey ruleset_id then
                                         let new_bests, _ = Bests.update info data.PersonalBests.[ruleset_id]

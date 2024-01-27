@@ -6,6 +6,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Charts
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Gameplay
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
@@ -16,6 +17,7 @@ open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
+open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Score
 
 module Scoreboard =
@@ -167,7 +169,8 @@ module Scoreboard =
                 RulesetId: string
                 Ruleset: Ruleset
                 CurrentChart: Chart
-                ChartSaveData: ChartSaveData option
+                ChartSaveData: ChartSaveData
+                NoteColors: ColorConfig
                 mutable NewBests: Bests option
             }
             override this.ToString() = "<scoreboard calculation>"
@@ -177,48 +180,46 @@ module Scoreboard =
         let score_loader =
             { new Async.SwitchServiceSeq<Request, unit -> unit>() with
                 member this.Process(req: Request) =
-                    match req.ChartSaveData with
-                    | None -> Seq.empty
-                    | Some d ->
-                        seq {
-                            for score in d.Scores do
-                                let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
+                    seq {
+                        for score in req.ChartSaveData.Scores do
+                            let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset, req.NoteColors)
 
-                                if s.ModStatus = Mods.ModStatus.Ranked then
-                                    req.NewBests <-
-                                        Some(
-                                            match req.NewBests with
-                                            | None -> Bests.create s
-                                            | Some b -> fst (Bests.update s b)
-                                        )
+                            if s.ModStatus = Mods.ModStatus.Ranked then
+                                req.NewBests <-
+                                    Some(
+                                        match req.NewBests with
+                                        | None -> Bests.create s
+                                        | Some b -> fst (Bests.update s b)
+                                    )
 
-                                let sc = ScoreCard s
-                                yield fun () -> container.Add sc
+                            let sc = ScoreCard s
+                            yield fun () -> container.Add sc
 
-                            match req.NewBests with
-                            | None -> ()
-                            | Some b ->
-                                yield
-                                    fun () ->
-                                        if
-                                            not (req.ChartSaveData.Value.PersonalBests.ContainsKey req.RulesetId)
-                                            || b <> req.ChartSaveData.Value.PersonalBests.[req.RulesetId]
-                                        then
-                                            LevelSelect.refresh_details ()
-                                            req.ChartSaveData.Value.PersonalBests.[req.RulesetId] <- b
+                        match req.NewBests with
+                        | None -> ()
+                        | Some b ->
+                            yield
+                                fun () ->
+                                    if
+                                        not (req.ChartSaveData.PersonalBests.ContainsKey req.RulesetId)
+                                        || b <> req.ChartSaveData.PersonalBests.[req.RulesetId]
+                                    then
+                                        LevelSelect.refresh_details ()
+                                        req.ChartSaveData.PersonalBests.[req.RulesetId] <- b
 
-                        }
+                    }
 
                 member this.Handle(action) = action ()
             }
 
-        let load () =
+        let load (info: LoadedChartInfo) =
             score_loader.Request
                 {
                     RulesetId = Content.Rulesets.current_hash
                     Ruleset = Content.Rulesets.current
-                    CurrentChart = Chart.CHART.Value
-                    ChartSaveData = Chart.SAVE_DATA
+                    CurrentChart = info.Chart
+                    ChartSaveData = info.SaveData
+                    NoteColors = Content.noteskin_config().NoteColors
                     NewBests = None
                 }
 
@@ -350,7 +351,7 @@ type Scoreboard(display: Setting<Display>) as this =
                 ) || info.CacheInfo.Hash <> last_loaded
             then
                 last_loaded <- info.CacheInfo.Hash
-                Loader.load ()
+                Loader.load info
             elif scoring <> Content.Rulesets.current_hash then
                 Loader.container.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
                 scoring <- Content.Rulesets.current_hash

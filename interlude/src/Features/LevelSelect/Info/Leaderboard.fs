@@ -9,6 +9,7 @@ open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Prelude.Gameplay
 open Prelude.Charts
+open Prelude.Charts.Tools.NoteColors
 open Interlude
 open Interlude.UI
 open Interlude.Utils
@@ -176,6 +177,7 @@ module Leaderboard =
                 Ruleset: Ruleset
                 Hash: string
                 Chart: Chart
+                NoteColors: ColorConfig
             }
             override this.ToString() = "<leaderboard calculation>"
 
@@ -199,6 +201,7 @@ module Leaderboard =
                                     : Score),
                                     req.Chart,
                                     req.Ruleset,
+                                    req.NoteColors,
                                     Player = Some score.Username
                                 )
 
@@ -234,6 +237,7 @@ module Leaderboard =
                                     RulesetId = Content.Rulesets.current_hash
                                     Ruleset = Content.Rulesets.current
                                     Chart = chart
+                                    NoteColors = Content.noteskin_config().NoteColors
                                     Hash = cc.Hash
                                 }
 
@@ -251,6 +255,7 @@ module Leaderboard =
                                 RulesetId = Content.Rulesets.current_hash
                                 Ruleset = Content.Rulesets.current
                                 Chart = chart
+                                NoteColors = Content.noteskin_config().NoteColors
                                 Hash = cc.Hash
                             }
 

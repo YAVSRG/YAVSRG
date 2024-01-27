@@ -4,10 +4,10 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Features
+open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Play
 
 type NoteskinPreview(scale: float32) as this =
@@ -15,9 +15,9 @@ type NoteskinPreview(scale: float32) as this =
 
     let fbo = FBO.create ()
 
-    let create_renderer (with_colors: ColoredChart) =
+    let create_renderer (info: LoadedChartInfo) =
         let playfield =
-            Playfield(with_colors, PlayState.Dummy with_colors.Source, noteskin_config (), false)
+            Playfield(info.WithColors, PlayState.Dummy info, noteskin_config (), false)
 
         playfield.Add(LaneCover())
             
@@ -47,7 +47,7 @@ type NoteskinPreview(scale: float32) as this =
         fbo.Unbind()
 
         Gameplay.Chart.if_loaded <| fun info -> 
-            renderer <- create_renderer info.WithColors
+            renderer <- create_renderer info
 
         this
         |* (bounds_placeholder
@@ -63,9 +63,8 @@ type NoteskinPreview(scale: float32) as this =
     member this.PreviewBounds = bounds_placeholder.Bounds
 
     member this.Refresh() =
-        if Gameplay.Chart.CHART.IsSome then
-            Gameplay.Chart.recolor ()
-            Gameplay.Chart.when_loaded <| fun info -> renderer <- create_renderer info.WithColors
+        Gameplay.Chart.recolor ()
+        Gameplay.Chart.when_loaded <| fun info -> renderer <- create_renderer info
 
     override this.Update(elapsed_ms, moved) =
         this.Bounds <- Viewport.bounds

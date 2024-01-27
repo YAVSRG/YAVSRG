@@ -113,7 +113,7 @@ type ChartInfo() as this =
         |+ StylishButton(
             (fun () ->
                 Chart.when_loaded
-                <| fun info -> Preview(info.WithColors, change_rate).Show()
+                <| fun info -> Preview(info, change_rate).Show()
             ),
             K(Icons.EYE + " " + %"levelselect.preview.name"),
             !%Palette.MAIN_100,

@@ -132,7 +132,7 @@ type ActionBar(random_chart) =
             (fun () ->
                 Chart.when_loaded <| fun info ->
                 Screen.change_new
-                    (fun () -> PracticeScreen.practice_screen (info.WithMods, 0.0f<ms>))
+                    (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
                     Screen.Type.Practice
                     Transitions.Flags.Default
                 |> ignore

@@ -23,7 +23,7 @@ open Interlude.Utils
     They can all be toggled/repositioned/configured using themes
 *)
 
-type AccuracyMeter(conf: HUD.AccuracyMeter, state) as this =
+type AccuracyMeter(conf: HUD.AccuracyMeter, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
 
     let grades = state.Ruleset.Grading.Grades
@@ -206,7 +206,7 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
 
 type EarlyLateMeter(conf: HUD.EarlyLateMeter, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let atime = conf.AnimationTime * Gameplay.rate.Value * 1.0f<ms>
+    let atime = conf.AnimationTime * rate.Value * 1.0f<ms>
     let mutable early = false
     let mutable time = -Time.infinity
 
@@ -267,12 +267,12 @@ type ComboMeter(conf: HUD.Combo, state: PlayState) =
 
         Text.fill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
 
-type ProgressMeter(conf: HUD.ProgressMeter, state) =
+type ProgressMeter(conf: HUD.ProgressMeter, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let duration =
-        let chart = Gameplay.Chart.WITH_MODS.Value
-        chart.Notes.[chart.Notes.Length - 1].Time - chart.Notes.[0].Time
+        let chart = state.WithMods
+        chart.LastNote - chart.FirstNote
 
     override this.Draw() =
         let now = state.CurrentChartTime()
@@ -324,13 +324,13 @@ type ProgressMeter(conf: HUD.ProgressMeter, state) =
             Alignment.CENTER
         )
 
-type SkipButton(conf: HUD.SkipButton, state) =
+type SkipButton(conf: HUD.SkipButton, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"
     let mutable active = true
 
-    let first_note = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
+    let first_note = state.WithMods.FirstNote
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -536,7 +536,7 @@ type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
                 - Web.Shared.Packets.MULTIPLAYER_REPLAY_DELAY_MS * 2.0f<ms>
             )
 
-type RateModMeter(conf: HUD.RateModMeter, state) as this =
+type RateModMeter(conf: HUD.RateModMeter, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
 
     do
@@ -551,9 +551,9 @@ type RateModMeter(conf: HUD.RateModMeter, state) as this =
 type BPMMeter(conf: HUD.BPMMeter, state) as this =
     inherit StaticContainer(NodeType.None)
 
-    let first_note = Gameplay.Chart.WITH_MODS.Value.Notes.[0].Time
+    let first_note = state.WithMods.FirstNote
     let mutable i = 0
-    let bpms = Gameplay.Chart.WITH_MODS.Value.BPM
+    let bpms = state.WithMods.BPM
     let mutable last_seen_time = -Time.infinity
 
     do

@@ -8,6 +8,7 @@ open Percyqaz.Data
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
@@ -60,10 +61,11 @@ type ChartSaveData =
 *)
 
 // todo: rename LazyScoreCalculator - do we even need this or could this be a module that calculates stuff
-type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
+type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset, color_scheme: ColorConfig) =
     let mutable ruleset: Ruleset = ruleset
 
     let mutable modchart = ValueNone
+    let mutable coloredchart = ValueNone
     let mutable modstring = ValueNone
     let mutable modstatus = ValueNone
     let mutable difficulty = ValueNone
@@ -85,7 +87,7 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
 
         replayData.Value
 
-    member this.ModChart
+    member this.ModdedChart
         with get () =
             modchart <-
                 ValueOption.defaultWith (fun () -> apply_mods score.selectedMods chart) modchart
@@ -93,6 +95,15 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
 
             modchart.Value
         and set (value) = modchart <- ValueSome value
+
+    member this.ColoredChart
+        with get () =
+            coloredchart <-
+                ValueOption.defaultWith (fun () -> apply_coloring color_scheme this.ModdedChart) coloredchart
+                |> ValueSome
+
+            coloredchart.Value
+        and set (value) = coloredchart <- ValueSome value
 
     member this.Ruleset
         with get () = ruleset
@@ -110,9 +121,9 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
                     let m =
                         Metrics.create
                             ruleset
-                            this.ModChart.Keys
+                            this.ModdedChart.Keys
                             (StoredReplayProvider this.ReplayData)
-                            this.ModChart.Notes
+                            this.ModdedChart.Notes
                             score.rate
 
                     m.Update Time.infinity
@@ -127,7 +138,7 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
         with get () =
             difficulty <-
                 ValueOption.defaultWith
-                    (fun () -> RatingReport(this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys))
+                    (fun () -> RatingReport(this.ModdedChart.Notes, score.rate, score.layout, this.ModdedChart.Keys))
                     difficulty
                 |> ValueSome
 
