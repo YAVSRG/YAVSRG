@@ -9,12 +9,13 @@ open Interlude.Web.Server
 [<Json.AutoCodec>]
 [<RequireQualifiedAccess>]
 type TableChangeEventDetails =
-    | Add of string * int
-    | Move of string * int * int
-    | Remove of string * int
+    | Add of int
+    | Move of int * int
+    | Remove of int
 
 type TableChangeEvent =
     {
+        ChartId: string
         UserId: int64
         Timestamp: int64
         Details: TableChangeEventDetails
@@ -37,6 +38,7 @@ module TableLevel =
             CREATE TABLE table_changes (
                 Id INTEGER PRIMARY KEY NOT NULL,
                 TableId TEXT NOT NULL,
+                ChartId TEXT NOT NULL,
                 UserId INTEGER NOT NULL,
                 Timestamp INTEGER NOT NULL,
                 Details TEXT NOT NULL
@@ -94,7 +96,7 @@ module TableLevel =
     let private GET_CHANGES_SINCE : Query<string * int64, TableChangeEvent> =
         {
             SQL = """
-            SELECT UserId, Timestamp, Details FROM table_changes
+            SELECT ChartId, UserId, Timestamp, Details FROM table_changes
             WHERE TableId = @TableId AND Timestamp >= @Timestamp;
             """
             Parameters = 
@@ -108,6 +110,7 @@ module TableLevel =
             )
             Read = (fun r ->
                 {
+                    ChartId = r.String
                     UserId = r.Int64
                     Timestamp = r.Int64
                     Details = r.Json JSON
@@ -144,8 +147,8 @@ module TableLevel =
             INSERT INTO table_levels (TableId, ChartId, Level)
             VALUES (@TableId, @ChartId, @Level);
 
-            INSERT INTO table_changes (TableId, UserId, Timestamp, Details)
-            VALUES (@TableId, @UserId, @Timestamp, @Details);
+            INSERT INTO table_changes (TableId, ChartId, UserId, Timestamp, Details)
+            VALUES (@TableId, @ChartId, @UserId, @Timestamp, @Details);
 
             COMMIT;
             """
@@ -164,7 +167,7 @@ module TableLevel =
                 p.Int64 m.UserId
                 p.Int32 m.Level
                 p.Int64 (Timestamp.now())
-                p.Json JSON (TableChangeEventDetails.Add(m.ChartId, m.Level))
+                p.Json JSON (TableChangeEventDetails.Add m.Level)
             )
         }
     let private MOVE : NonQuery<{|TableId: string; ChartId: string; UserId: int64; OldLevel: int; NewLevel: int|}> =
@@ -175,8 +178,8 @@ module TableLevel =
             INSERT OR REPLACE INTO table_levels (TableId, ChartId, Level)
             VALUES (@TableId, @ChartId, @Level);
 
-            INSERT INTO table_changes (TableId, UserId, Timestamp, Details)
-            VALUES (@TableId, @UserId, @Timestamp, @Details);
+            INSERT INTO table_changes (TableId, ChartId, UserId, Timestamp, Details)
+            VALUES (@TableId, @ChartId, @UserId, @Timestamp, @Details);
 
             COMMIT;
             """
@@ -195,7 +198,7 @@ module TableLevel =
                 p.Int64 m.UserId
                 p.Int32 m.NewLevel
                 p.Int64 (Timestamp.now())
-                p.Json JSON (TableChangeEventDetails.Move(m.ChartId, m.OldLevel, m.NewLevel))
+                p.Json JSON (TableChangeEventDetails.Move(m.OldLevel, m.NewLevel))
             )
         }
     let add_or_move (user_id: int64) (table_id: string) (chart_id: string) (level: int) = lock CHANGE_LOCK_OBJ <| fun () ->
@@ -213,8 +216,8 @@ module TableLevel =
             DELETE FROM table_levels
             WHERE TableId = @TableId AND ChartId = @ChartId;
 
-            INSERT INTO table_changes (TableId, UserId, Timestamp, Details)
-            VALUES (@TableId, @UserId, @Timestamp, @Details);
+            INSERT INTO table_changes (TableId, ChartId, UserId, Timestamp, Details)
+            VALUES (@TableId, @ChartId, @UserId, @Timestamp, @Details);
 
             COMMIT;
             """
@@ -233,7 +236,7 @@ module TableLevel =
                 p.Int64 m.UserId
                 p.Int32 m.OldLevel
                 p.Int64 (Timestamp.now())
-                p.Json JSON (TableChangeEventDetails.Remove(m.ChartId, m.OldLevel))
+                p.Json JSON (TableChangeEventDetails.Remove m.OldLevel)
             )
         }
     let remove (user_id: int64) (table_id: string) (chart_id: string) = lock CHANGE_LOCK_OBJ <| fun () ->
@@ -241,3 +244,68 @@ module TableLevel =
         | Some current -> 
             REMOVE.Execute {| ChartId = chart_id; OldLevel = current; TableId = table_id; UserId = user_id |} backbeat_db |> expect |> ignore
         | None -> ()
+
+[<Json.AutoCodec>]
+[<RequireQualifiedAccess>]
+type TableSuggestionStatus =
+    | Pending
+    | Accepted of timestamp: int64 * user_id: int64
+    | Rejected of timestamp: int64 * user_id: int64 * reason: string
+
+type TableSuggestion =
+    {
+        TableId: string
+        ChartId: string
+        UserId: string
+        TimeSuggested: int64
+        Votes: Map<int64, int>
+        Status: TableSuggestionStatus
+    }
+
+module TableSuggestion =
+    
+    let internal CREATE_TABLE : NonQuery<unit> =
+        { NonQuery.without_parameters() with
+            SQL = """
+            CREATE TABLE table_suggestions (
+                Id INTEGER PRIMARY KEY NOT NULL,
+                TableId TEXT NOT NULL,
+                ChartId TEXT NOT NULL,
+                UserId INTEGER NOT NULL,
+                TimeSuggested INTEGER NOT NULL,
+                Votes TEXT NOT NULL,
+                Status TEXT NOT NULL
+            );
+            """
+        }
+
+    let suggest (user_id: int64) (table_id: string) (chart_id: string) (level: int) = failwith "nyi"
+
+    let suggest_allow_reopening_rejected (user_id: int64) (table_id: string) (chart_id: string) (level: int) = failwith "nyi"
+
+    let pending_by_chart (table_id: string) (chart_id: string) : Map<int64, int> * TableSuggestionStatus = failwith "nyi"
+
+    type TableChartSuggestionModel =
+        {
+            UserId: string
+            TimeSuggested: int64
+            Votes: Map<int64, int>
+            Status: TableSuggestionStatus
+        }
+    let all_by_chart (table_id: string) (chart_id: string) : TableChartSuggestionModel array = failwith "nyi"
+
+    type TableSuggestionModel =
+        {
+            ChartId: string
+            UserId: string
+            TimeSuggested: int64
+            Votes: Map<int64, int>
+            Status: TableSuggestionStatus
+        }
+    let pending_by_table (table_id: string) : TableSuggestionModel array = failwith "nyi"
+
+    // todo: pending_by_user, all_by_user
+
+    let accept (user_id: int64) (table_id: string) (chart_id: string) = failwith "nyi"
+
+    let reject (user_id: int64) (table_id: string) (chart_id: string) (reason: string) = failwith "nyi"

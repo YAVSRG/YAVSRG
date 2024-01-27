@@ -16,7 +16,8 @@ module Tables =
         Assert.AreEqual(Some 3, TableLevel.get "round_trip" "chart_id")
         Assert.AreEqual(1, changelog.Length)
         Assert.AreEqual(user_id, changelog.[0].UserId)
-        Assert.AreEqual(TableChangeEventDetails.Add("chart_id", 3), changelog.[0].Details)
+        Assert.AreEqual("chart_id", changelog.[0].ChartId)
+        Assert.AreEqual(TableChangeEventDetails.Add 3, changelog.[0].Details)
         Assert.AreNotEqual(None, TableLevel.get_time_last_changed "round_trip")
 
     [<Test>]
@@ -53,13 +54,16 @@ module Tables =
         Assert.AreEqual(3, changelog.Length)
 
         Assert.AreEqual(user_id, changelog.[0].UserId)
-        Assert.AreEqual(TableChangeEventDetails.Add("chart_id", 3), changelog.[0].Details)
+        Assert.AreEqual("chart_id", changelog.[0].ChartId)
+        Assert.AreEqual(TableChangeEventDetails.Add 3, changelog.[0].Details)
 
         Assert.AreEqual(user_id, changelog.[1].UserId)
-        Assert.AreEqual(TableChangeEventDetails.Move("chart_id", 3, 4), changelog.[1].Details)
+        Assert.AreEqual("chart_id", changelog.[1].ChartId)
+        Assert.AreEqual(TableChangeEventDetails.Move(3, 4), changelog.[1].Details)
 
         Assert.AreEqual(user_id, changelog.[2].UserId)
-        Assert.AreEqual(TableChangeEventDetails.Remove("chart_id", 4), changelog.[2].Details)
+        Assert.AreEqual("chart_id", changelog.[2].ChartId)
+        Assert.AreEqual(TableChangeEventDetails.Remove 4, changelog.[2].Details)
 
     [<Test>]
     let TableLevel_BatchGet () =
