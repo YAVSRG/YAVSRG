@@ -122,7 +122,7 @@ module Gameplay =
 
         let private chart_change_finished = Event<unit>()
         let on_chart_change_finished = chart_change_finished.Publish
-        let private chart_change_started = Event<unit>()
+        let private chart_change_started = Event<LoadingChartInfo>()
         let on_chart_change_started = chart_change_started.Publish
 
         let mutable private on_load_succeeded = []
@@ -277,10 +277,15 @@ module Gameplay =
 
             WITH_COLORS <- None
 
-            chart_change_started.Trigger()
-
             FMT_DURATION <- format_duration CACHE_DATA
             FMT_BPM <- format_bpm CACHE_DATA
+
+            chart_change_started.Trigger {
+                CacheInfo = cc
+                LibraryContext = LIBRARY_CTX
+                DurationString = FMT_DURATION
+                BpmString = FMT_BPM
+            }
 
             chart_loader.Request(Load(cc, auto_play_audio))
 
@@ -376,31 +381,38 @@ module Gameplay =
                     }
                 ) :: on_load_succeeded
 
-        do sync_forever chart_loader.Join
+        let init_window() = sync_forever chart_loader.Join
 
-    module Collections =
+    let collections_on_rate_changed (library_ctx: LibraryContext) (v: float32) =
+        match library_ctx with
+        | LibraryContext.Playlist(_, _, d) -> d.Rate.Value <- v
+        | _ -> ()
 
-        let on_rate_changed v =
-            match Chart.LIBRARY_CTX with
-            | LibraryContext.Playlist(_, _, d) -> d.Rate.Value <- v
+    let collections_on_mods_changed (library_ctx: LibraryContext) (mods: ModState) =
+        match library_ctx with
+        | LibraryContext.Playlist(_, _, d) -> d.Mods.Value <- mods
+        | _ -> ()
+
+    let collections_on_chart_changed (library_ctx: LibraryContext) (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
+        match library_ctx with
+        | LibraryContext.Playlist(_, _, d) ->
+            rate.Value <- d.Rate.Value
+            mods.Value <- d.Mods.Value
+        | _ -> ()
+
+    let presets_on_chart_changed =
+        let mutable previous_keymode = None
+        fun cc ->
+            match previous_keymode with
+            | Some k when k <> cc.Keys -> Presets.keymode_changed cc.Keys
             | _ -> ()
-
-        let on_mods_changed mods =
-            match Chart.LIBRARY_CTX with
-            | LibraryContext.Playlist(_, _, d) -> d.Mods.Value <- mods
-            | _ -> ()
-
-        let on_chart_changed (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
-            match Chart.LIBRARY_CTX with
-            | LibraryContext.Playlist(_, _, d) ->
-                rate.Value <- d.Rate.Value
-                mods.Value <- d.Mods.Value
-            | _ -> ()
+            previous_keymode <- Some cc.Keys
 
     let rate =
         Chart._rate
         |> Setting.trigger (fun v ->
-            Collections.on_rate_changed v
+            Chart.if_loading <| fun info ->
+            collections_on_rate_changed info.LibraryContext v
             Song.change_rate v
             Chart.update ()
         )
@@ -408,24 +420,9 @@ module Gameplay =
     let selected_mods =
         Chart._selected_mods
         |> Setting.trigger (fun mods ->
-            Collections.on_mods_changed mods
+            Chart.if_loading <| fun info ->
+            collections_on_mods_changed info.LibraryContext mods
             Chart.update ()
-        )
-
-    do
-        Chart.on_chart_change_started.Add(fun () -> Collections.on_chart_changed Chart._rate Chart._selected_mods)
-
-        let mutable previous_keymode = None
-
-        Chart.on_chart_change_started.Add(fun () ->
-            match Chart.CACHE_DATA with
-            | None -> failwith "impossible"
-            | Some cc ->
-                match previous_keymode with
-                | Some k when k <> cc.Keys -> Presets.keymode_changed cc.Keys
-                | _ -> ()
-
-                previous_keymode <- Some cc.Keys
         )
 
     let make_score (replay_data, keys) : Score =
@@ -447,7 +444,7 @@ module Gameplay =
                 if Network.status = Network.Status.LoggedIn then
                     Charts.Scores.Save.post (
                         ({
-                            ChartId = Chart.CACHE_DATA.Value.Hash
+                            ChartId = Chart.hash data.Chart // todo: ScoreInfoProvider should be less poo and provide things like this
                             Replay = data.ScoreInfo.replay
                             Rate = data.ScoreInfo.rate
                             Mods = data.ScoreInfo.selectedMods
@@ -463,90 +460,87 @@ module Gameplay =
         else
             ImprovementFlags.Default
 
-    module Online =
+    module Multiplayer =
 
-        module Multiplayer =
+        let replays = new Dictionary<string, IScoreMetric * (unit -> ScoreInfoProvider)>()
 
-            let replays = new Dictionary<string, IScoreMetric * (unit -> ScoreInfoProvider)>()
+        let private on_leave_lobby () = replays.Clear()
 
-            let private on_leave_lobby () = replays.Clear()
+        let private on_game_start () = replays.Clear()
 
-            let private on_game_start () = replays.Clear()
+        let private player_status (username, status) =
+            if status = LobbyPlayerStatus.Playing then
 
-            let private player_status (username, status) =
-                if status = LobbyPlayerStatus.Playing then
+                Chart.when_loaded
+                <| fun info ->
 
-                    Chart.when_loaded
-                    <| fun info ->
+                    let replay = Network.lobby.Value.Players.[username].Replay
 
-                        let replay = Network.lobby.Value.Players.[username].Replay
+                    replays.Add(
+                        username,
+                        let metric =
+                            Metrics.create
+                                Content.Rulesets.current
+                                info.WithMods.Keys
+                                replay
+                                info.WithMods.Notes
+                                Chart._rate.Value
 
-                        replays.Add(
-                            username,
-                            let metric =
-                                Metrics.create
-                                    Content.Rulesets.current
-                                    info.WithMods.Keys
-                                    replay
-                                    info.WithMods.Notes
-                                    Chart._rate.Value
+                        metric,
+                        fun () ->
+                            if not (replay :> IReplayProvider).Finished then
+                                replay.Finish()
 
-                            metric,
-                            fun () ->
-                                if not (replay :> IReplayProvider).Finished then
-                                    replay.Finish()
+                            let score =
+                                {
+                                    time = DateTime.UtcNow
+                                    replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
+                                    rate = rate.Value
+                                    selectedMods = selected_mods.Value |> ModState.filter info.WithMods
+                                    layout = options.Playstyles.[info.WithMods.Keys - 3]
+                                    keycount = info.WithMods.Keys
+                                }
 
-                                let score =
-                                    {
-                                        time = DateTime.UtcNow
-                                        replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
-                                        rate = rate.Value
-                                        selectedMods = selected_mods.Value |> ModState.filter info.WithMods
-                                        layout = options.Playstyles.[info.WithMods.Keys - 3]
-                                        keycount = info.WithMods.Keys
-                                    }
+                            ScoreInfoProvider(
+                                score,
+                                info.Chart,
+                                Content.Rulesets.current,
+                                Player = Some username,
+                                ModChart = info.WithMods
+                            )
+                    )
 
-                                ScoreInfoProvider(
-                                    score,
-                                    info.Chart,
-                                    Content.Rulesets.current,
-                                    Player = Some username,
-                                    ModChart = info.WithMods
-                                )
-                        )
+        let add_own_replay (chart: Chart, with_mods: ModdedChart, s: IScoreMetric, replay: LiveReplayProvider) =
 
-            let add_own_replay (s: IScoreMetric, replay: LiveReplayProvider) =
-                let chart = Chart.CHART.Value
-                let with_mods = Chart.WITH_MODS.Value
+            replays.Add(
+                Network.credentials.Username,
+                (s, fun () ->
+                    if not (replay :> IReplayProvider).Finished then
+                        replay.Finish()
 
-                replays.Add(
-                    Network.credentials.Username,
-                    (s, fun () ->
-                        if not (replay :> IReplayProvider).Finished then
-                            replay.Finish()
+                    let score =
+                        {
+                            time = DateTime.UtcNow
+                            replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
+                            rate = rate.Value
+                            selectedMods = selected_mods.Value |> ModState.filter with_mods
+                            layout = options.Playstyles.[with_mods.Keys - 3]
+                            keycount = with_mods.Keys
+                        }
 
-                        let score =
-                            {
-                                time = DateTime.UtcNow
-                                replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
-                                rate = rate.Value
-                                selectedMods = selected_mods.Value |> ModState.filter with_mods
-                                layout = options.Playstyles.[with_mods.Keys - 3]
-                                keycount = with_mods.Keys
-                            }
-
-                        ScoreInfoProvider(
-                            score,
-                            chart,
-                            Content.Rulesets.current
-                         )
+                    ScoreInfoProvider(
+                        score,
+                        chart,
+                        Content.Rulesets.current,
+                        ModChart = with_mods
                     )
                 )
+            )
 
-            let init_window () =
-                Network.Events.game_start.Add on_game_start
-                Network.Events.leave_lobby.Add on_leave_lobby
-                Network.Events.player_status.Add player_status
+        let init_window () =
+            Network.Events.game_start.Add on_game_start
+            Network.Events.leave_lobby.Add on_leave_lobby
+            Network.Events.player_status.Add player_status
 
     let init_window () =
         match Cache.by_key options.CurrentChart.Value Library.cache with
@@ -561,4 +555,8 @@ module Gameplay =
                 Background.load None
 
         Table.init_window options.Table.Value
-        Online.Multiplayer.init_window ()
+        Multiplayer.init_window ()
+        Chart.init_window()
+
+        Chart.on_chart_change_started.Add(fun info -> collections_on_chart_changed info.LibraryContext Chart._rate Chart._selected_mods)
+        Chart.on_chart_change_started.Add(fun info -> presets_on_chart_changed info.CacheInfo)

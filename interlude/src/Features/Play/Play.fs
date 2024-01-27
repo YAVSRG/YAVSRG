@@ -278,7 +278,7 @@ module PlayScreen =
         let mutable packet_count = 0
 
         Lobby.start_playing ()
-        Gameplay.Online.Multiplayer.add_own_replay (scoring, liveplay)
+        Gameplay.Multiplayer.add_own_replay (chart, with_mods, scoring, liveplay)
 
         scoring.OnHit.Add(fun h ->
             match h.Guts with

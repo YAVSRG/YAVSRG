@@ -15,7 +15,7 @@ open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Online
 open Interlude.Features.Play
-open Interlude.Features.Gameplay.Online
+open Interlude.Features.Gameplay
 open Interlude.Utils
 
 (*

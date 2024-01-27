@@ -73,7 +73,7 @@ module SpectateScreen =
         let chart = Gameplay.Chart.WITH_MODS.Value
 
         let mutable currently_spectating = username
-        let mutable scoring = fst Gameplay.Online.Multiplayer.replays.[username]
+        let mutable scoring = fst Gameplay.Multiplayer.replays.[username]
         let mutable replay_data = Network.lobby.Value.Players.[username].Replay
 
         let cycle_spectator (screen: IPlayScreen) =
@@ -90,7 +90,7 @@ module SpectateScreen =
                 | Some i -> users_available_to_spectate.[(i + 1) % users_available_to_spectate.Length]
 
             currently_spectating <- next_user
-            scoring <- fst Gameplay.Online.Multiplayer.replays.[next_user]
+            scoring <- fst Gameplay.Multiplayer.replays.[next_user]
             replay_data <- Network.lobby.Value.Players.[next_user].Replay
             Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
             screen.State.ChangeScoring scoring

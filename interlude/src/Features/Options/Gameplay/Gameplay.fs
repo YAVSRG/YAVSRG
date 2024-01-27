@@ -220,12 +220,9 @@ type EditPresetPage(preset_id: int, setting: Setting<Preset option>) as this =
 type GameplayPage() as this =
     inherit Page()
 
+    // todo: create these keycounts based on current chart if it exists
     let keycount: Setting<Keymode> =
-        Setting.simple (
-            match Chart.CACHE_DATA with
-            | Some c -> enum c.Keys
-            | None -> Keymode.``4K``
-        )
+        Setting.simple Keymode.``4K``
 
     let binds = GameplayKeybinder(keycount)
     let preview = NoteskinPreview 0.35f

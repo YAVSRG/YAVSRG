@@ -72,13 +72,7 @@ type PlayfieldSettingsPage() as this =
 
     let data = Noteskins.Current.config
 
-
-    let keycount =
-        match Gameplay.Chart.CACHE_DATA with
-        | Some c -> c.Keys
-        | None -> 4
-        |> enum
-        |> Setting.simple
+    let keycount = Setting.simple Keymode.``4K``
 
     let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
     let align_offset = Setting.percentf (snd data.PlayfieldAlignment)

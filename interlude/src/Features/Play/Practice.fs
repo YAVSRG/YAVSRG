@@ -6,6 +6,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
+open Prelude.Charts.Tools
 open Prelude.Gameplay
 open Prelude.Gameplay.Metrics
 open Interlude.Options
@@ -267,12 +268,10 @@ module PracticeScreen =
             .Body(%"practice.info.sync")
             .Hotkey(%"practice.info.accept_suggestion", "accept_suggestion")
 
-    let rec practice_screen (practice_point: Time) =
-
-        let chart = Gameplay.Chart.WITH_MODS.Value
+    let rec practice_screen (with_mods: ModdedChart, practice_point: Time) =
 
         let last_note =
-            chart.Notes.[chart.Notes.Length - 1].Time
+            with_mods.Notes.[with_mods.Notes.Length - 1].Time
             - 5.0f<ms>
             - Song.LEADIN_TIME * Gameplay.rate.Value
 
@@ -286,16 +285,16 @@ module PracticeScreen =
                      t < time do
                 let struct (t, deltas, flags) = scoring.HitData.[i]
 
-                for k = 0 to chart.Keys - 1 do
+                for k = 0 to with_mods.Keys - 1 do
                     flags.[k] <- HitStatus.NOTHING
 
                 i <- i + 1
 
-        let first_note = chart.Notes.[0].Time
+        let first_note = with_mods.Notes.[0].Time
         let mutable liveplay = LiveReplayProvider first_note
 
         let mutable scoring =
-            create Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
+            create Rulesets.current with_mods.Keys liveplay with_mods.Notes Gameplay.rate.Value
 
         scoring.OnHit.Add(fun h ->
             match h.Guts with
@@ -305,7 +304,7 @@ module PracticeScreen =
 
         do ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
 
-        let binds = options.GameplayBinds.[chart.Keys - 3]
+        let binds = options.GameplayBinds.[with_mods.Keys - 3]
         let mutable input_key_state = 0us
 
         // options state
@@ -313,7 +312,7 @@ module PracticeScreen =
 
         let restart (screen: IPlayScreen) =
             liveplay <- LiveReplayProvider first_note
-            scoring <- create Rulesets.current chart.Keys liveplay chart.Notes Gameplay.rate.Value
+            scoring <- create Rulesets.current with_mods.Keys liveplay with_mods.Notes Gameplay.rate.Value
             ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
             screen.State.ChangeScoring scoring
 
@@ -348,7 +347,7 @@ module PracticeScreen =
             |+ Callout.frame (info_callout) (fun (w, h) -> Position.Box(0.0f, 0.0f, 20.0f, 20.0f, w, h + 40.0f))
             |+ sync_ui
 
-        { new IPlayScreen(chart, PacemakerInfo.None, Rulesets.current, scoring, FirstNote = first_note) with
+        { new IPlayScreen(with_mods, PacemakerInfo.None, Rulesets.current, scoring, FirstNote = first_note) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x

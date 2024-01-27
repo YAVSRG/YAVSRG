@@ -28,12 +28,12 @@ module LevelSelect =
 
         if Network.lobby.IsSome then
             if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
-                Lobby.select_chart (Chart.CACHE_DATA.Value, rate.Value, selected_mods.Value)
+                Lobby.select_chart (info.CacheInfo, rate.Value, selected_mods.Value)
         else if
             Screen.change_new
                 (fun () ->
                     if autoplay then
-                        ReplayScreen.replay_screen (ReplayMode.Auto) :> Screen.T
+                        ReplayScreen.replay_screen (ReplayMode.Auto info.WithMods) :> Screen.T
                     else
                         PlayScreen.play_screen (info.Chart, info.WithMods,
                             if options.EnablePacemaker.Value then
@@ -45,21 +45,17 @@ module LevelSelect =
                 (if autoplay then Screen.Type.Replay else Screen.Type.Play)
                 Transitions.Flags.Default
         then
-            Chart.SAVE_DATA.Value.LastPlayed <- DateTime.UtcNow
+            info.SaveData.LastPlayed <- DateTime.UtcNow
 
     let challenge_score (_rate, _mods, replay) =
         Chart.if_loaded <| fun info ->
 
-        match Chart.SAVE_DATA with
-        | Some data ->
-            if
-                Screen.change_new
-                    (fun () -> PlayScreen.play_screen (info.Chart, info.WithMods, PacemakerMode.Score(rate.Value, replay)))
-                    (Screen.Type.Play)
-                    Transitions.Flags.Default
-            then
-                data.LastPlayed <- DateTime.UtcNow
-                rate.Set _rate
-                selected_mods.Set _mods
-
-        | None -> Logging.Warn "There is no chart selected"
+        if
+            Screen.change_new
+                (fun () -> PlayScreen.play_screen (info.Chart, info.WithMods, PacemakerMode.Score(rate.Value, replay)))
+                (Screen.Type.Play)
+                Transitions.Flags.Default
+        then
+            info.SaveData.LastPlayed <- DateTime.UtcNow
+            rate.Set _rate
+            selected_mods.Set _mods

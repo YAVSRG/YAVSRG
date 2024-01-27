@@ -57,7 +57,7 @@ type Chat() =
         last_msg <- Some w
 
     let game_end_report () =
-        if Online.Multiplayer.replays.Keys.Count > 0 then
+        if Multiplayer.replays.Keys.Count > 0 then
             add_msg (
                 Text(
                     sprintf "== Results for %s ==" SelectedChart.chart.Value.Title,
@@ -67,10 +67,10 @@ type Chat() =
             )
 
             let scores =
-                Online.Multiplayer.replays.Keys
+                Multiplayer.replays.Keys
                 |> Seq.map (fun username ->
-                    let s, make_score_info = Online.Multiplayer.replays.[username]
-                    s.Update(Time.infinity)
+                    let s, make_score_info = Multiplayer.replays.[username]
+                    s.Update Time.infinity
                     username, make_score_info ()
                 )
                 |> Seq.sortByDescending (fun (_, s) -> s.Scoring.Value)

@@ -130,13 +130,12 @@ type ActionBar(random_chart) =
         |+ ActionButton(
             Icons.TARGET,
             (fun () ->
-                // todo: wait until load if not
-                if Chart.WITH_MODS.IsSome then
-                    Screen.change_new
-                        (fun () -> PracticeScreen.practice_screen (0.0f<ms>))
-                        Screen.Type.Practice
-                        Transitions.Flags.Default
-                    |> ignore
+                Chart.when_loaded <| fun info ->
+                Screen.change_new
+                    (fun () -> PracticeScreen.practice_screen (info.WithMods, 0.0f<ms>))
+                    Screen.Type.Practice
+                    Transitions.Flags.Default
+                |> ignore
             ),
             (K false),
             Hotkey = "practice_mode",

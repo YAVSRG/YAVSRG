@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Prelude.Charts.Tools
 open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Content
 open Interlude.Content
@@ -91,6 +90,8 @@ type NoteskinPreview(scale: float32) as this =
 type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
     inherit NoteskinPreview(scale)
 
+    let keycount = match Gameplay.Chart.CACHE_DATA with Some cc -> cc.Keys | None -> 4
+
     override this.Draw() =
         base.Draw()
 
@@ -102,11 +103,7 @@ type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
 
                 let width =
                     cfg.ColumnWidth
-                    * float32 (
-                        match Gameplay.Chart.CACHE_DATA with
-                        | Some cc -> cc.Keys
-                        | None -> 4
-                    )
+                    * float32 keycount
                     * scale
 
                 let (screenAlign, columnAlign) = cfg.PlayfieldAlignment

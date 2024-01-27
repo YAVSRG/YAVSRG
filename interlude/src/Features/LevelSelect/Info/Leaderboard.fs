@@ -208,12 +208,12 @@ module Leaderboard =
                 member this.Handle(lc: LeaderboardCard) = container.Add lc
             }
 
-        let load (state: Setting<State>) (chart: Chart) =
+        let load (state: Setting<State>) (cc: CachedChart) (chart: Chart) =
             if Network.status <> Network.Status.LoggedIn then
                 state.Set State.Offline
             else
                 state.Set State.Loading
-                let hash, ruleset_id = Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash
+                let hash, ruleset_id = cc.Hash, Content.Rulesets.current_hash
                 container.Clear()
 
                 Charts.Scores.Leaderboard.get (
@@ -223,7 +223,7 @@ module Leaderboard =
                     | Some reply ->
                         if
                             (hash, ruleset_id)
-                            <> (Chart.CACHE_DATA.Value.Hash, Content.Rulesets.current_hash)
+                            <> (cc.Hash, Content.Rulesets.current_hash)
                         then
                             ()
                         else
@@ -234,7 +234,7 @@ module Leaderboard =
                                     RulesetId = Content.Rulesets.current_hash
                                     Ruleset = Content.Rulesets.current
                                     Chart = chart
-                                    Hash = Chart.CACHE_DATA.Value.Hash
+                                    Hash = cc.Hash
                                 }
 
                             state.Set(
@@ -251,7 +251,7 @@ module Leaderboard =
                                 RulesetId = Content.Rulesets.current_hash
                                 Ruleset = Content.Rulesets.current
                                 Chart = chart
-                                Hash = Chart.CACHE_DATA.Value.Hash
+                                Hash = cc.Hash
                             }
 
                         state.Set State.NoLeaderboard
@@ -264,7 +264,8 @@ type Leaderboard(display: Setting<Display>) as this =
 
     let state = Setting.simple State.NoLeaderboard
 
-    let mutable last_chart_id = ""
+    let mutable last_loading = ""
+    let mutable last_loaded = ""
     let mutable scoring = ""
 
     let filter = Setting.simple Filter.None
@@ -278,9 +279,10 @@ type Leaderboard(display: Setting<Display>) as this =
         )
 
     do
-        Chart.on_chart_change_started.Add(fun () ->
-            if Chart.CACHE_DATA.Value.Hash <> last_chart_id then
+        Chart.on_chart_change_started.Add(fun info ->
+            if info.CacheInfo.Hash <> last_loading then
                 Loader.container.Iter(fun s -> s.FadeOut())
+                last_loading <- info.CacheInfo.Hash
         )
 
         this
@@ -368,15 +370,10 @@ type Leaderboard(display: Setting<Display>) as this =
         Loader.score_loader.Join()
 
     member this.Refresh() =
-        let h =
-            match Chart.CACHE_DATA with
-            | Some c -> c.Hash
-            | None -> ""
-
         Chart.when_loaded
         <| fun info ->
 
-            if h <> last_chart_id || scoring <> Content.Rulesets.current_hash then
-                last_chart_id <- h
+            if info.CacheInfo.Hash <> last_loaded || scoring <> Content.Rulesets.current_hash then
+                last_loaded <- info.CacheInfo.Hash
                 scoring <- Content.Rulesets.current_hash
-                Loader.load state info.Chart
+                Loader.load state info.CacheInfo info.Chart

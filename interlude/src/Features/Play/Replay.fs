@@ -20,7 +20,7 @@ open Interlude.Features.Score
 
 [<RequireQualifiedAccess>]
 type ReplayMode =
-    | Auto
+    | Auto of ModdedChart
     | Replay of score: Score * chart: ModdedChart * rate: float32 * ReplayData
 
 type private HitOverlay
@@ -340,9 +340,7 @@ module ReplayScreen =
 
         let replay_data, is_auto, rate, chart =
             match mode with
-            | ReplayMode.Auto ->
-                let chart = Gameplay.Chart.WITH_MODS.Value
-
+            | ReplayMode.Auto chart ->
                 StoredReplayProvider.AutoPlay(chart.Keys, chart.Notes) :> IReplayProvider,
                 true,
                 Gameplay.rate.Value,
@@ -419,7 +417,7 @@ module ReplayScreen =
 
                 if replay_data.Finished then
                     match mode with
-                    | ReplayMode.Auto -> Screen.back Transitions.Flags.Default |> ignore
+                    | ReplayMode.Auto _ -> Screen.back Transitions.Flags.Default |> ignore
                     | ReplayMode.Replay(score, _, _, _) ->
                         Screen.change_new
                             (fun () ->

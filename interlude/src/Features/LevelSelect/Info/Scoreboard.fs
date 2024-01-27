@@ -231,7 +231,8 @@ type Scoreboard(display: Setting<Display>) as this =
 
     let mutable count = -1
 
-    let mutable last_chart_id = ""
+    let mutable last_loading = ""
+    let mutable last_loaded = ""
     let mutable scoring = ""
 
     let filter = Setting.simple Filter.None
@@ -258,9 +259,10 @@ type Scoreboard(display: Setting<Display>) as this =
         )
 
     do
-        Chart.on_chart_change_started.Add(fun () ->
-            if Chart.CACHE_DATA.Value.Hash <> last_chart_id then
+        Chart.on_chart_change_started.Add(fun info ->
+            if info.CacheInfo.Hash <> last_loading then
                 Loader.container.Iter(fun s -> s.FadeOut())
+                last_loading <- info.CacheInfo.Hash
         )
 
         Loader.container.Sort <- sorter ()
@@ -338,22 +340,16 @@ type Scoreboard(display: Setting<Display>) as this =
         Loader.score_loader.Join()
 
     member this.Refresh() =
-        let h =
-            match Chart.CACHE_DATA with
-            | Some c -> c.Hash
-            | None -> ""
-
         Chart.when_loaded
         <| fun info ->
-
             if
                 (
                     let v = info.SaveData.Scores.Count <> count in
                     count <- info.SaveData.Scores.Count
                     v
-                ) || h <> last_chart_id
+                ) || info.CacheInfo.Hash <> last_loaded
             then
-                last_chart_id <- h
+                last_loaded <- info.CacheInfo.Hash
                 Loader.load ()
             elif scoring <> Content.Rulesets.current_hash then
                 Loader.container.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
