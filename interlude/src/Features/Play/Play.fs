@@ -8,9 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.Metrics
-open Prelude.Charts
 open Prelude.Charts.Tools
-open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content

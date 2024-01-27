@@ -8,7 +8,6 @@ open Percyqaz.Data
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Tools.NoteColors
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
@@ -52,13 +51,6 @@ type ChartSaveData =
             LastPlayed = DateTime.UnixEpoch
             Comment = ""
         }
-
-(*
-    Gameplay pipelines that need to happen to play a chart
-    Chart -> Modified chart -> Colorized chart
-                            -> Replay data -> Mod replay data
-                            -> Difficulty rating data
-*)
 
 // todo: rename LazyScoreCalculator - do we even need this or could this be a module that calculates stuff
 type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
@@ -158,13 +150,6 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
             |> ValueSome
 
         fst perf.Value
-
-    member this.Technical =
-        perf <-
-            ValueOption.defaultWith (fun () -> calculate_score_rating this.Difficulty score.keycount this.Scoring) perf
-            |> ValueSome
-
-        snd perf.Value
 
     member this.Mods =
         modstring <-

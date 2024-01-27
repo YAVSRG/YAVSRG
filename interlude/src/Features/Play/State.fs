@@ -5,7 +5,6 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Tools
 open Prelude.Gameplay
-open Prelude.Data.Scores
 open Interlude.Features.Gameplay.Chart
 
 [<RequireQualifiedAccess>]
