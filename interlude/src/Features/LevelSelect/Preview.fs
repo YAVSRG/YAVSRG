@@ -5,23 +5,21 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Prelude.Common
-open Prelude.Charts.Tools
 open Prelude.Charts.Tools.NoteColors
 open Prelude.Charts.Tools.Patterns
 open Interlude.UI.Menu
 open Interlude.Features.Play
-open Interlude.Features.Gameplay
 
-type Preview(chart: ModdedChart, with_colors: ColoredChart, change_rate: float32 -> unit) =
+type Preview(with_colors: ColoredChart, change_rate: float32 -> unit) =
     inherit Dialog()
 
     let HEIGHT = 60.0f
 
     // chord density is notes per second but n simultaneous notes count for 1 instead of n
     let samples =
-        int ((chart.LastNote - chart.FirstNote) / 1000.0f) |> max 10 |> min 400
+        int ((with_colors.LastNote - with_colors.FirstNote) / 1000.0f) |> max 10 |> min 400
 
-    let note_density, chord_density = Analysis.nps_cps samples chart
+    let note_density, chord_density = Analysis.nps_cps samples with_colors.Source
 
     let note_density, chord_density =
         Array.map float32 note_density, Array.map float32 chord_density
@@ -29,7 +27,7 @@ type Preview(chart: ModdedChart, with_colors: ColoredChart, change_rate: float32
     let max_note_density = Array.max note_density
 
     let playfield =
-        Playfield(with_colors, PlayState.Dummy chart, Interlude.Content.noteskin_config (), false)
+        Playfield(with_colors, PlayState.Dummy with_colors.Source, Interlude.Content.noteskin_config (), false)
         |+ LaneCover()
 
     let volume = Volume()
@@ -44,8 +42,8 @@ type Preview(chart: ModdedChart, with_colors: ColoredChart, change_rate: float32
         playfield.Draw()
 
         let b = this.Bounds.Shrink(10.0f, 20.0f)
-        let start = chart.FirstNote - Song.LEADIN_TIME
-        let offset = b.Width * Song.LEADIN_TIME / chart.LastNote
+        let start = with_colors.FirstNote - Song.LEADIN_TIME
+        let offset = b.Width * Song.LEADIN_TIME / with_colors.LastNote
 
         let w = (b.Width - offset) / float32 note_density.Length
 
@@ -79,7 +77,7 @@ type Preview(chart: ModdedChart, with_colors: ColoredChart, change_rate: float32
             (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
             (Quad.color chord_density_color)
 
-        let percent = (Song.time () - start) / (chart.LastNote - start) |> min 1.0f
+        let percent = (Song.time () - start) / (with_colors.LastNote - start) |> min 1.0f
         let x = b.Width * percent
         Draw.rect (b.SliceBottom(5.0f)) (Color.FromArgb(160, Color.White))
         Draw.rect (b.SliceBottom(5.0f).SliceLeft x) (Palette.color (255, 1.0f, 0.0f))
@@ -99,8 +97,8 @@ type Preview(chart: ModdedChart, with_colors: ColoredChart, change_rate: float32
             let percent =
                 (Mouse.x () - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
 
-            let start = chart.FirstNote - Song.LEADIN_TIME
-            let new_time = start + (chart.LastNote - start) * percent
+            let start = with_colors.FirstNote - Song.LEADIN_TIME
+            let new_time = start + (with_colors.LastNote - start) * percent
             Song.seek new_time
 
         if not (Mouse.held Mouse.LEFT) then

@@ -60,11 +60,11 @@ type LevelSelectScreen() =
         | Some c ->
             Chart.change (c, LibraryContext.None, false)
 
-            let rec play_when_song_loads (chart, with_mods, with_colors) =
+            let rec play_when_song_loads (info: Chart.LoadedChartInfo) =
                 let success =
                     Screen.change_new
                         (fun () ->
-                            PlayScreen.play_screen (chart, with_mods,
+                            PlayScreen.play_screen (info.Chart, info.WithMods,
                                 if options.EnablePacemaker.Value then
                                     PacemakerMode.Setting
                                 else
@@ -75,7 +75,7 @@ type LevelSelectScreen() =
                         Transitions.Flags.Default
 
                 if not success then
-                    sync (fun () -> play_when_song_loads(chart, with_mods, with_colors))
+                    sync (fun () -> play_when_song_loads info)
                 else
                     Chart.SAVE_DATA.Value.LastPlayed <- System.DateTime.UtcNow
 

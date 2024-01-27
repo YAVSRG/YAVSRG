@@ -113,7 +113,7 @@ type ChartInfo() as this =
         |+ StylishButton(
             (fun () ->
                 Chart.when_loaded
-                <| fun (_, with_mods, with_colors) -> Preview(with_mods, with_colors, change_rate).Show()
+                <| fun info -> Preview(info.WithColors, change_rate).Show()
             ),
             K(Icons.EYE + " " + %"levelselect.preview.name"),
             !%Palette.MAIN_100,
@@ -168,9 +168,9 @@ type ChartInfo() as this =
         | _ -> ()
 
         Chart.when_loaded
-        <| fun (_, _, _) ->
-            rating <- Chart.RATING.Value.Physical
-            notecounts <- Chart.FMT_NOTECOUNTS.Value
+        <| fun info ->
+            rating <- info.Rating.Physical
+            notecounts <- info.NotecountsString
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

@@ -16,9 +16,9 @@ type NoteskinPreview(scale: float32) as this =
 
     let fbo = FBO.create ()
 
-    let create_renderer (with_mods: ModdedChart, with_colors: ColoredChart) =
+    let create_renderer (with_colors: ColoredChart) =
         let playfield =
-            Playfield(with_colors, PlayState.Dummy with_mods, noteskin_config (), false)
+            Playfield(with_colors, PlayState.Dummy with_colors.Source, noteskin_config (), false)
 
         playfield.Add(LaneCover())
             
@@ -47,8 +47,8 @@ type NoteskinPreview(scale: float32) as this =
     do
         fbo.Unbind()
 
-        Gameplay.Chart.if_loaded <| fun (_, with_mods, with_colors) -> 
-            renderer <- create_renderer (with_mods, with_colors)
+        Gameplay.Chart.if_loaded <| fun info -> 
+            renderer <- create_renderer info.WithColors
 
         this
         |* (bounds_placeholder
@@ -66,7 +66,7 @@ type NoteskinPreview(scale: float32) as this =
     member this.Refresh() =
         if Gameplay.Chart.CHART.IsSome then
             Gameplay.Chart.recolor ()
-            Gameplay.Chart.when_loaded <| fun (_, with_mods, with_colors) -> renderer <- create_renderer (with_mods, with_colors)
+            Gameplay.Chart.when_loaded <| fun info -> renderer <- create_renderer info.WithColors
 
     override this.Update(elapsed_ms, moved) =
         this.Bounds <- Viewport.bounds

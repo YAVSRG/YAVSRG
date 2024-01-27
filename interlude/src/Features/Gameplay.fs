@@ -94,6 +94,32 @@ module Gameplay =
 
         let mutable WITH_COLORS: ColoredChart option = None
 
+        type LoadingChartInfo =
+            {
+                CacheInfo: CachedChart
+                LibraryContext: LibraryContext
+                DurationString: string
+                BpmString: string
+            }
+
+        type LoadedChartInfo =
+            {
+                CacheInfo: CachedChart
+                LibraryContext: LibraryContext
+                DurationString: string
+                BpmString: string
+
+                Chart: Chart
+                SaveData: ChartSaveData
+
+                WithMods: ModdedChart
+                NotecountsString: string
+                Rating: RatingReport
+                Patterns: Patterns.PatternReport
+
+                WithColors: ColoredChart
+            }
+
         let private chart_change_finished = Event<unit>()
         let on_chart_change_finished = chart_change_finished.Publish
         let private chart_change_started = Event<unit>()
@@ -284,19 +310,71 @@ module Gameplay =
 
                 chart_loader.Request Recolor
 
-        let if_loading (action: CachedChart -> unit) =
-            match CACHE_DATA with
-            | Some data -> action data
-            | None -> ()
+        let if_loading (action: LoadingChartInfo -> unit) =
+            if CACHE_DATA.IsSome then
+                action {
+                    CacheInfo = CACHE_DATA.Value
+                    LibraryContext = LIBRARY_CTX
+                    DurationString = FMT_DURATION
+                    BpmString = FMT_BPM
+                }
 
-        let if_loaded (action: Chart * ModdedChart * ColoredChart -> unit) =
-            if CACHE_DATA.IsNone then ()
-            elif WITH_COLORS.IsSome then action (CHART.Value, WITH_MODS.Value, WITH_COLORS.Value)
+        let if_loaded (action: LoadedChartInfo -> unit) =
+            if WITH_COLORS.IsSome then 
+                action {
+                    CacheInfo = CACHE_DATA.Value
+                    LibraryContext = LIBRARY_CTX
+                    DurationString = FMT_DURATION
+                    BpmString = FMT_BPM
 
-        let when_loaded (action: Chart * ModdedChart * ColoredChart -> unit) =
-            if CACHE_DATA.IsNone then ()
-            elif WITH_COLORS.IsSome then action (CHART.Value, WITH_MODS.Value, WITH_COLORS.Value)
-            else on_load_succeeded <- (fun () -> action (CHART.Value, WITH_MODS.Value, WITH_COLORS.Value)) :: on_load_succeeded
+                    Chart = CHART.Value
+                    SaveData = SAVE_DATA.Value
+
+                    WithMods = WITH_MODS.Value
+                    NotecountsString = FMT_NOTECOUNTS.Value
+                    Rating = RATING.Value
+                    Patterns = PATTERNS.Value
+
+                    WithColors = WITH_COLORS.Value
+                }
+
+        let when_loaded (action: LoadedChartInfo -> unit) =
+            if WITH_COLORS.IsSome then
+                action {
+                    CacheInfo = CACHE_DATA.Value
+                    LibraryContext = LIBRARY_CTX
+                    DurationString = FMT_DURATION
+                    BpmString = FMT_BPM
+
+                    Chart = CHART.Value
+                    SaveData = SAVE_DATA.Value
+
+                    WithMods = WITH_MODS.Value
+                    NotecountsString = FMT_NOTECOUNTS.Value
+                    Rating = RATING.Value
+                    Patterns = PATTERNS.Value
+
+                    WithColors = WITH_COLORS.Value
+                }
+            else
+                on_load_succeeded <- (fun () -> 
+                    action {
+                        CacheInfo = CACHE_DATA.Value
+                        LibraryContext = LIBRARY_CTX
+                        DurationString = FMT_DURATION
+                        BpmString = FMT_BPM
+
+                        Chart = CHART.Value
+                        SaveData = SAVE_DATA.Value
+
+                        WithMods = WITH_MODS.Value
+                        NotecountsString = FMT_NOTECOUNTS.Value
+                        Rating = RATING.Value
+                        Patterns = PATTERNS.Value
+
+                        WithColors = WITH_COLORS.Value
+                    }
+                ) :: on_load_succeeded
 
         do sync_forever chart_loader.Join
 
@@ -399,7 +477,7 @@ module Gameplay =
                 if status = LobbyPlayerStatus.Playing then
 
                     Chart.when_loaded
-                    <| fun (chart, with_mods, _) ->
+                    <| fun info ->
 
                         let replay = Network.lobby.Value.Players.[username].Replay
 
@@ -408,9 +486,9 @@ module Gameplay =
                             let metric =
                                 Metrics.create
                                     Content.Rulesets.current
-                                    with_mods.Keys
+                                    info.WithMods.Keys
                                     replay
-                                    with_mods.Notes
+                                    info.WithMods.Notes
                                     Chart._rate.Value
 
                             metric,
@@ -423,16 +501,17 @@ module Gameplay =
                                         time = DateTime.UtcNow
                                         replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
                                         rate = rate.Value
-                                        selectedMods = selected_mods.Value |> ModState.filter with_mods
-                                        layout = options.Playstyles.[with_mods.Keys - 3]
-                                        keycount = with_mods.Keys
+                                        selectedMods = selected_mods.Value |> ModState.filter info.WithMods
+                                        layout = options.Playstyles.[info.WithMods.Keys - 3]
+                                        keycount = info.WithMods.Keys
                                     }
 
                                 ScoreInfoProvider(
                                     score,
-                                    chart,
+                                    info.Chart,
                                     Content.Rulesets.current,
-                                    Player = Some username
+                                    Player = Some username,
+                                    ModChart = info.WithMods
                                 )
                         )
 

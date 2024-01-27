@@ -344,16 +344,14 @@ type Scoreboard(display: Setting<Display>) as this =
             | None -> ""
 
         Chart.when_loaded
-        <| fun (chart, _, _) ->
+        <| fun info ->
 
             if
-                (match Chart.SAVE_DATA with
-                 | None -> false
-                 | Some d ->
-                     let v = d.Scores.Count <> count in
-                     count <- d.Scores.Count
-                     v)
-                || h <> last_chart_id
+                (
+                    let v = info.SaveData.Scores.Count <> count in
+                    count <- info.SaveData.Scores.Count
+                    v
+                ) || h <> last_chart_id
             then
                 last_chart_id <- h
                 Loader.load ()

@@ -374,9 +374,9 @@ type Leaderboard(display: Setting<Display>) as this =
             | None -> ""
 
         Chart.when_loaded
-        <| fun (chart, _, _) ->
+        <| fun info ->
 
             if h <> last_chart_id || scoring <> Content.Rulesets.current_hash then
                 last_chart_id <- h
                 scoring <- Content.Rulesets.current_hash
-                Loader.load state chart
+                Loader.load state info.Chart

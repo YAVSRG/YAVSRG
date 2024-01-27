@@ -51,13 +51,13 @@ module NoteColors =
     let private roughly_divisible (a: Time) (b: Time) =
         Time.abs (a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
 
-    let private ddr_func (delta: Time) (msPerBeat: float32<ms / beat>) : int =
-        List.tryFind ((fun i -> DDR_VALUES.[i]) >> fun n -> roughly_divisible delta (msPerBeat / n)) [ 0..7 ]
+    let private ddr_func (delta: Time) (ms_per_beat: float32<ms / beat>) : int =
+        List.tryFind ((fun i -> DDR_VALUES.[i]) >> fun n -> roughly_divisible delta (ms_per_beat / n)) [ 0..7 ]
         |> Option.defaultValue DDR_VALUES.Length
 
-    let private column_colors (colorData: ColorData) (mc: ModdedChart) : TimeArray<ColorNoteRow> =
+    let private column_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorNoteRow> =
 
-        let c = [| for i in 0 .. (mc.Keys - 1) -> colorData.[i] |]
+        let c = [| for i in 0 .. (mc.Keys - 1) -> color_data.[i] |]
         mc.Notes |> TimeArray.map (fun nr -> struct (nr, c))
 
     let private chord_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorNoteRow> =

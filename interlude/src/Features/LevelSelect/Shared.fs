@@ -24,7 +24,7 @@ module LevelSelect =
 
     let play () =
 
-        Chart.when_loaded <| fun (chart, with_mods, _) ->
+        Chart.when_loaded <| fun info ->
 
         if Network.lobby.IsSome then
             if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
@@ -35,7 +35,7 @@ module LevelSelect =
                     if autoplay then
                         ReplayScreen.replay_screen (ReplayMode.Auto) :> Screen.T
                     else
-                        PlayScreen.play_screen (chart, with_mods,
+                        PlayScreen.play_screen (info.Chart, info.WithMods,
                             if options.EnablePacemaker.Value then
                                 PacemakerMode.Setting
                             else
@@ -48,13 +48,13 @@ module LevelSelect =
             Chart.SAVE_DATA.Value.LastPlayed <- DateTime.UtcNow
 
     let challenge_score (_rate, _mods, replay) =
-        Chart.if_loaded <| fun (chart, with_mods, _) ->
+        Chart.if_loaded <| fun info ->
 
         match Chart.SAVE_DATA with
         | Some data ->
             if
                 Screen.change_new
-                    (fun () -> PlayScreen.play_screen (chart, with_mods, PacemakerMode.Score(rate.Value, replay)))
+                    (fun () -> PlayScreen.play_screen (info.Chart, info.WithMods, PacemakerMode.Score(rate.Value, replay)))
                     (Screen.Type.Play)
                     Transitions.Flags.Default
             then
