@@ -9,7 +9,7 @@ module Migrations =
 
     open Interlude.Web.Server.Domain.Core
 
-    let run_core (db: Database) =
+    let run_core (db: Database) : unit =
         Database.migrate 
             "InitialTables" 
             (fun db ->
@@ -33,8 +33,15 @@ module Migrations =
             )
             db
 
-    let run_backbeat (db: Database) =
-        ()
+    open Interlude.Web.Server.Domain.Backbeat
+
+    let run_backbeat (db: Database) : unit =
+        Database.migrate
+            "InitialTableLevels"
+            (fun db ->
+                TableLevel.CREATE_TABLES.Execute () db |> expect |> ignore
+            )
+            db
 
 module Database =
 
