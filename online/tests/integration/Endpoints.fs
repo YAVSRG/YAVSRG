@@ -116,7 +116,28 @@ module Endpoints =
                 done_signal.Set() |> ignore
             )
               
-            // This test fails because the endpoint doesn't exist!
+            Assert.IsTrue(done_signal.WaitOne(500))
+        
+        [<Test>]
+        let Charts_All () =
+            use done_signal = new AutoResetEvent(false)
+                                
+            Tables.Charts.get ("crescent", Option.get >> fun (res: Tables.Charts.Response) -> 
+                printfn "%A" res.Charts
+                done_signal.Set() |> ignore
+            )
+                      
+            Assert.IsTrue(done_signal.WaitOne(500))
+        
+        [<Test>]
+        let Charts_Section () =
+            use done_signal = new AutoResetEvent(false)
+                                
+            Tables.Charts.get_section ("crescent", "advanced", Option.get >> fun (res: Tables.Charts.Response) -> 
+                printfn "%A" res.Charts
+                done_signal.Set() |> ignore
+            )
+                      
             Assert.IsTrue(done_signal.WaitOne(500))
             
         module Suggestions =
@@ -138,17 +159,6 @@ module Endpoints =
                                                     
                 Tables.Suggestions.Missing.get ("crescent", Option.get >> fun (res: Tables.Suggestions.Missing.Response) -> 
                     printfn "%A" res.Suggestions
-                    done_signal.Set() |> ignore
-                )
-                                                    
-                Assert.IsTrue(done_signal.WaitOne(500))
-
-            [<Test>]
-            let Preview () =
-                use done_signal = new AutoResetEvent(false)
-                                                    
-                Tables.Suggestions.Preview.get ("crescent", Option.get >> fun (res: Tables.Suggestions.Preview.Response) -> 
-                    printfn "%A" res.Table
                     done_signal.Set() |> ignore
                 )
                                                     

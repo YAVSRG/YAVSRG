@@ -20,22 +20,22 @@ module Leaderboard =
 
             let table_id = query_params.["table"].[0]
 
-            if table_id <> "crescent" then
+            if not (Backbeat.Tables.exists table_id) then
                 raise NotFoundException
             else
 
-                let info = Tables.get_leaderboard_details table_id
+            let info = Tables.get_leaderboard_details table_id
 
-                let players: Tables.Leaderboard.Player array =
-                    info
-                    |> Array.map (fun (i, user, rating) ->
-                        {
-                            Username = user.Username
-                            Color = user.Color
-                            Rank = i + 1
-                            Rating = rating
-                        }
-                    )
+            let players: Tables.Leaderboard.Player array =
+                info
+                |> Array.map (fun (i, user, rating) ->
+                    {
+                        Username = user.Username
+                        Color = user.Color
+                        Rank = i + 1
+                        Rating = rating
+                    }
+                )
 
-                response.ReplyJson({ Players = players }: Tables.Leaderboard.Response)
+            response.ReplyJson({ Players = players }: Tables.Leaderboard.Response)
         }

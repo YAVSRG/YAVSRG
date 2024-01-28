@@ -33,8 +33,10 @@
     <Compile Include="API\Charts\Identify.fs" />
     <Compile Include="API\Charts\Scores\Leaderboard.fs" />
     <Compile Include="API\Charts\Scores\Save.fs" />
-    <Compile Include="API\Tables\Leaderboard.fs" />
     <Compile Include="API\Tables\Records.fs" />
+    <Compile Include="API\Tables\Leaderboard.fs" />
+    <Compile Include="API\Tables\List.fs" />
+    <Compile Include="API\Tables\Charts.fs" />
     <Compile Include="API\Friends\List.fs" />
     <Compile Include="API\Friends\Add.fs" />
     <Compile Include="API\Friends\Remove.fs" />

@@ -296,10 +296,10 @@ module NewTables =
     [<Json.AutoCodec>]
     type TypeSectionInfo =
         {
-            LevelStart: int
-            LevelEnd: int
             Name: string
             Description: string
+            LevelStart: int
+            LevelEnd: int
         }
 
     [<Json.AutoCodec>]

@@ -112,6 +112,7 @@ module Backbeat =
                     }
             }
 
+        // table ids must be lowercase
         let TABLES : Map<string, TableInfo> = Map.ofList [ "crescent", CRESCENT ]
 
         let exists (table_id: string) = TABLES.ContainsKey table_id

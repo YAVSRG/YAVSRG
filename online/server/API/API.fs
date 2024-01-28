@@ -3,7 +3,6 @@
 open System.Collections.Generic
 open NetCoreServer
 open Percyqaz.Common
-open Prelude
 open Interlude.Web.Server
 open Interlude.Web.Shared.API
 open Interlude.Web.Shared.Requests
@@ -16,7 +15,6 @@ module API =
 
     let inline add_endpoint route handle = handlers.Add(route, handle)
 
-
     do
         if not SECRETS.IsProduction then add_endpoint (GET, "/auth/dummy") Auth.Dummy.handle
         add_endpoint Auth.Discord.ROUTE Auth.Discord.handle
@@ -27,6 +25,8 @@ module API =
 
         add_endpoint Tables.Records.ROUTE Tables.Records.handle
         add_endpoint Tables.Leaderboard.ROUTE Tables.Leaderboard.handle
+        add_endpoint Tables.List.ROUTE Tables.List.handle
+        add_endpoint Tables.Charts.ROUTE Tables.Charts.handle
 
         add_endpoint Players.Online.ROUTE Players.Online.handle
         add_endpoint Players.Search.ROUTE Players.Search.handle

@@ -19,7 +19,7 @@ module Auth =
 
     /// url parameters:
     ///  code - given by discord auth to identify you
-    ///  state - given by server to identify which Interlude client is logging in
+    ///  state - state token previously provided by server to identify which Interlude client is logging in
     module Discord =
 
         let ROUTE = (GET, "/auth/discord")
@@ -32,12 +32,13 @@ module Charts =
 
         let ROUTE = (GET, "/charts/identify")
 
+        open Prelude.Backbeat.Archive
+
         [<Json.AutoCodec>]
         type Info =
             {
-                Song: Prelude.Backbeat.Archive.Song
-                Chart: Prelude.Backbeat.Archive.Chart
-                Mirrors: string list
+                Song: Song
+                Chart: Chart
             }
 
         [<Json.AutoCodec>]
@@ -166,24 +167,57 @@ module Tables =
 
         let get (table: string, callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
-
-    /// requires login token as Authorization header
+            
     module List =
 
         let ROUTE = (GET, "/tables")
 
-        open Prelude.Data.Charts.Tables
+        open Prelude.Data.Charts.Tables.NewTables
 
         [<Json.AutoCodec>]
-        type Response = { Tables: Map<string, Table> }
+        type Table =
+            {
+                Id: string
+                Info: TableInfo
+            }
+
+        [<Json.AutoCodec>]
+        type Response = { Tables: Table array }
 
         let get (callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE, callback)
 
+    /// url parameters:
+    ///  table - id of table to get charts for e.g 'crescent' or 'mizu'
+    ///  section - OPTIONAL: name of section to get charts for
+    module Charts =
+        
+        let ROUTE = (GET, "/tables/charts")
+        
+        open Prelude.Backbeat.Archive
+        
+        [<Json.AutoCodec>]
+        type ChartInfo =
+            {
+                Hash: string
+                Level: int
+                Song: Song
+                Chart: Chart
+            }
+        
+        [<Json.AutoCodec>]
+        type Response = { Charts: ChartInfo array }
+
+        let get (table: string, callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE + "?table=" + table, callback)
+        
+        let get_section (table: string, section: string, callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE + "?table=" + table + "&section=" + section, callback)
+
     module Suggestions =
 
         /// requires login token as Authorization header
-        module Add =
+        module Vote =
 
             let ROUTE = (POST, "/tables/suggestions")
 
@@ -191,16 +225,36 @@ module Tables =
             type Request =
                 {
                     ChartId: string
+                    TableId: string
+                    Level: int
+                }
+
+            type Response =
+                | Ok
+                | OkDetailsRequired
+                | Rejected
+
+            let post (request: Request, callback: Response option -> unit) =
+                Client.post_return<Request, Response> (snd ROUTE, request, callback)
+                
+        /// requires login token as Authorization header
+        module ProvideDetails =
+            
+            let ROUTE = (POST, "/tables/suggestions/details")
+
+            [<Json.AutoCodec>]
+            type Request =
+                {
+                    ChartId: string
+                    TableId: string
                     OsuBeatmapId: int
                     EtternaPackId: int
                     Artist: string
                     Title: string
                     Creator: string
                     Difficulty: string
-                    TableFor: string
-                    SuggestedLevel: int
                 }
-
+                
             let post (request: Request, callback: bool option -> unit) =
                 Client.post<Request> (snd ROUTE, request, callback)
 
@@ -211,19 +265,14 @@ module Tables =
 
             let ROUTE = (GET, "/tables/suggestions")
 
+            open Prelude.Backbeat.Archive
+
             [<Json.AutoCodec>]
             type Suggestion =
                 {
-                    Id: int64
                     ChartId: string
-                    OsuBeatmapId: int
-                    EtternaPackId: int
-                    Artist: string
-                    Title: string
-                    Creator: string
-                    Difficulty: string
-                    LevelsSuggestedBy: Map<int, string array>
-                    CanApply: bool
+                    Votes: Map<int, string array>
+                    BackbeatInfo: (Song * Chart) option
                 }
 
             [<Json.AutoCodec>]
@@ -241,7 +290,6 @@ module Tables =
             [<Json.AutoCodec>]
             type Suggestion =
                 {
-                    Id: int64
                     ChartId: string
                     OsuBeatmapId: int
                     EtternaPackId: int
@@ -259,29 +307,37 @@ module Tables =
 
         /// requires login token as Authorization header
         /// requires 'table-editor' badge for permission
-        module Apply =
+        module Accept =
 
-            let ROUTE = (POST, "/tables/suggestions/apply")
+            let ROUTE = (POST, "/tables/suggestions/accept")
 
             [<Json.AutoCodec>]
-            type Request = { Id: int64; Level: int }
+            type Request = 
+                { 
+                    TableId: string
+                    ChartId: string
+                    Level: int
+                }
 
             let post (request: Request, callback: bool option -> unit) =
                 Client.post<Request> (snd ROUTE, request, callback)
-
-        /// url parameters:
-        ///  table - id of table to get preview of e.g 'crescent' or 'mizu'
-        module Preview =
-
-            open Prelude.Data.Charts.Tables
-
-            let ROUTE = (GET, "/tables/suggestions/preview")
-
+        
+        /// requires login token as Authorization header
+        /// requires 'table-editor' badge for permission
+        module Reject =
+        
+            let ROUTE = (POST, "/tables/suggestions/reject")
+        
             [<Json.AutoCodec>]
-            type Response = { Table: Table }
-
-            let get (table: string, callback: Response option -> unit) =
-                Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
+            type Request = 
+                { 
+                    TableId: string
+                    ChartId: string
+                    Reason: string
+                }
+        
+            let post (request: Request, callback: bool option -> unit) =
+                Client.post<Request> (snd ROUTE, request, callback)
 
 module Players =
 
@@ -298,7 +354,6 @@ module Players =
 
         let get (callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE, callback)
-
 
     /// requires login token as Authorization header
     /// url parameters:
