@@ -8,72 +8,113 @@ open Prelude.Data
 open Prelude.Gameplay
 open Prelude.Backbeat.Archive
 open Prelude.Data.Charts.Tables
+open Interlude.Web.Server.Domain.Core
 
 module Backbeat =
 
     let mutable tables: Map<string, Table> = Map.empty
-
     let rulesets = Dictionary<string, Ruleset>()
-
     let mutable songs = Songs()
-
     let mutable charts = Charts()
-
     let mutable packs =
         {
             Stepmania = new Dictionary<StepmaniaPackId, StepmaniaPack>()
             Community = new Dictionary<CommunityPackId, CommunityPack>()
         }
 
-    // load seed data from Backbeat repo
-    // todo: stop storing seed data. this server should be the source of truth
     let init () =
-        WebServices.download_json (
-            "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/songs.json",
-            function
+        async {
+            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/songs.json" with
+            | None -> failwith "Failed to download backbeat songs"
             | Some _songs ->
-                WebServices.download_json (
-                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/charts.json",
-                    function
-                    | Some _charts ->
-                        WebServices.download_json (
-                            "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/packs.json",
-                            function
-                            | Some _packs ->
-                                packs <- _packs
-                                charts <- _charts
-                                songs <- _songs
 
-                                Logging.Info(
-                                    sprintf
-                                        "Backbeat downloads complete, %i Charts and %i Songs"
-                                        charts.Count
-                                        songs.Count
-                                )
-                            | None -> Logging.Error("Failed to get pack data from Backbeat")
-                        )
-                    | None -> Logging.Error("Failed to get chart data from Backbeat")
-                )
-            | None -> Logging.Error("Failed to get song data from Backbeat")
-        )
+            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/charts.json" with
+            | None -> failwith "Failed to download backbeat charts"
+            | Some _charts ->
+            
+            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/packs.json" with
+            | None -> failwith "Failed to download backbeat packs"
+            | Some _packs ->
 
-        WebServices.download_json (
-            "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json",
-            function
+            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json" with
+            | None -> failwith "Failed to download backbeat rulesets"
             | Some(archive: PrefabRulesets.Repo) ->
-                for rs in archive.Rulesets.Values do
-                    rulesets.[Ruleset.hash rs] <- rs
-            | None -> Logging.Error("Failed to get ruleset data from Backbeat")
-        )
 
-        WebServices.download_json (
-            "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/tables/crescent.table",
-            function
-            | Some(t: Table) ->
-                tables <- Map.ofList [ "crescent", t ]
-                //TableWithSuggestions.update_if_newer ("crescent", t)
-            | None -> Logging.Error("Failed to get Crescent from Backbeat")
-        )
+            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/tables/crescent.table" with
+            | None -> failwith "Failed to download crescent"
+            | Some(crescent: Table) ->
+            
+            packs <- _packs
+            charts <- _charts
+            songs <- _songs
+
+            Logging.Info(
+                sprintf
+                    "Backbeat downloads complete, %i Charts and %i Songs"
+                    charts.Count
+                    songs.Count
+            )
+
+            for rs in archive.Rulesets.Values do
+                rulesets.[Ruleset.hash rs] <- rs
+                tables <- Map.ofList [ "crescent", crescent ]
+        }
+
+    module Tables =
+
+        open NewTables
+
+        let CRESCENT : TableInfo =
+            {
+                Name = "Crescent"
+                Description = "A variety of interesting 4K charts to improve your skills with!"
+                Keymode = 4
+                RulesetId = Score.PRIMARY_RULESET
+                RatingCalculation = TableRatingCalculation.AverageTop50
+                Sections = 
+                    [
+                        { 
+                            LevelStart = 0
+                            LevelEnd = 9
+                            Name = "ROOKIE"
+                            Description = "Charts for complete beginners to get into the game"
+                        }
+                        { 
+                            LevelStart = 10
+                            LevelEnd = 19
+                            Name = "ADVANCED"
+                            Description = "Charts that should be interesting and challenging to an experienced player"
+                        }
+                        { 
+                            LevelStart = 20
+                            LevelEnd = 29
+                            Name = "EXPERT"
+                            Description = "Fast, tiring, and technical charts for people who have played a serious amount of 4K"
+                        }
+                        { 
+                            LevelStart = 30
+                            LevelEnd = 39
+                            Name = "XTREME"
+                            Description = "Extremely difficult charts to push even the most powerful keyboard smashers to their limit"
+                        }
+                    ]
+                LevelDisplayNames = 
+                    Map.ofSeq 
+                    <| seq {
+                        for i = 0 to 9 do
+                            yield i, sprintf "R-%02i" i
+                        for i = 10 to 19 do
+                            yield i, sprintf "A-%02i" i
+                        for i = 20 to 29 do
+                            yield i, sprintf "E-%02i" i
+                        for i = 30 to 39 do
+                            yield i, sprintf "X-%02i" i
+                    }
+            }
+
+        let TABLES : Map<string, TableInfo> = Map.ofList [ "crescent", CRESCENT ]
+
+        let exists (table_id: string) = TABLES.ContainsKey table_id
 
     // chart search by text
     module Charts =

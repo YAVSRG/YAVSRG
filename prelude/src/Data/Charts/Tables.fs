@@ -289,6 +289,7 @@ type TableIndex =
 module NewTables =
 
     [<Json.AutoCodec>]
+    [<RequireQualifiedAccess>]
     type TableRatingCalculation =
         | AverageTop50
 
@@ -310,6 +311,7 @@ module NewTables =
             RulesetId: string
             RatingCalculation: TableRatingCalculation
             Sections: TypeSectionInfo list
+            LevelDisplayNames: Map<int, string>
         }
 
     [<Json.AutoCodec>]
@@ -320,11 +322,10 @@ module NewTables =
         }
 
     [<Json.AutoCodec>]
-    type Table =
+    type ClientTable =
         {
             Info: TableInfo
             Charts: Chart list
-            LevelDisplayNames: Map<int, string>
         }
 
     // todo: loading and saving

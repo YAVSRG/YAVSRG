@@ -181,26 +181,26 @@ module AdminCommands =
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
 
-            | "reloadbackbeat" ->
-                Backbeat.init ()
-                do! reply_emoji ":white_check_mark:"
+            //| "reloadbackbeat" ->
+            //    Backbeat.init ()
+            //    do! reply_emoji ":white_check_mark:"
 
-            | "addleaderboards" ->
-                let missing = ResizeArray<string>()
+            //| "addleaderboards" ->
+            //    let missing = ResizeArray<string>()
 
-                for table in Backbeat.tables.Values do
-                    for level in table.Levels do
-                        for chart in level.Charts do
-                            match Backbeat.Charts.by_hash chart.Hash with
-                            | None -> missing.Add chart.Id
-                            | Some(_, _) ->
-                                if not (Leaderboard.exists chart.Hash table.RulesetId) then
-                                    Leaderboard.create chart.Hash table.RulesetId
+            //    for table in Backbeat.tables.Values do
+            //        for level in table.Levels do
+            //            for chart in level.Charts do
+            //                match Backbeat.Charts.by_hash chart.Hash with
+            //                | None -> missing.Add chart.Id
+            //                | Some(_, _) ->
+            //                    if not (Leaderboard.exists chart.Hash table.RulesetId) then
+            //                        Leaderboard.create chart.Hash table.RulesetId
 
-                    if missing.Count > 0 then
-                        do! reply ("Missing charts:\n  " + String.concat "\n  " missing)
+            //        if missing.Count > 0 then
+            //            do! reply ("Missing charts:\n  " + String.concat "\n  " missing)
 
-                    do! reply_emoji ":white_check_mark:"
+            //        do! reply_emoji ":white_check_mark:"
 
             | _ -> ()
         }

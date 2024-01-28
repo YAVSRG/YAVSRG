@@ -43,6 +43,15 @@ module Migrations =
                 TableSuggestion.CREATE_TABLE.Execute () db |> expect |> ignore
             )
             db
+        Database.migrate
+            "ImportOldCrescentLevels"
+            (fun _ ->
+                let old_crescent = Services.Backbeat.tables.["crescent"]
+                for level in old_crescent.Levels do
+                    for chart in level.Charts do
+                        TableLevel.add_or_move 1L "crescent" chart.Hash level.Rank
+            )
+            db
 
 module Database =
 
