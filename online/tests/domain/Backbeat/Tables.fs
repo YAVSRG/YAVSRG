@@ -92,3 +92,30 @@ module Tables =
         Assert.AreEqual(2, between_map.["chart_B"])
         Assert.AreEqual(3, between_map.["chart_C"])
 
+    [<Test>]
+    let TableSuggestion_VotesRoundTrip () =
+        Assert.True(TableSuggestion.suggest "votesroundtrip" "chart_id" 10L 5)
+        Assert.True(TableSuggestion.suggest "votesroundtrip" "chart_id" 20L 5)
+        Assert.True(TableSuggestion.suggest "votesroundtrip" "chart_id" 30L 7)
+
+        let expected_votes = Map.ofList [10L, 5; 20L, 5; 30L, 7]
+
+        match TableSuggestion.pending_by_chart "votesroundtrip" "chart_id" with
+        | None -> Assert.Fail()
+        | Some votes ->
+            Assert.AreEqual(3, Map.count votes)
+            Assert.AreEqual(expected_votes, votes)
+
+        let all_by_chart = TableSuggestion.all_by_chart "votesroundtrip" "chart_id"
+
+        Assert.AreEqual(1, all_by_chart.Length)
+        Assert.AreEqual(TableSuggestionStatus.Pending, all_by_chart.[0].Status)
+        Assert.AreEqual(expected_votes, all_by_chart.[0].Votes)
+        Assert.AreEqual(10L, all_by_chart.[0].UserId)
+        
+        let pending_by_table = TableSuggestion.pending_by_table "votesroundtrip"
+        
+        Assert.AreEqual(1, pending_by_table.Length)
+        Assert.AreEqual("chart_id", pending_by_table.[0].ChartId)
+        Assert.AreEqual(expected_votes, pending_by_table.[0].Votes)
+        Assert.AreEqual(10L, pending_by_table.[0].UserId)

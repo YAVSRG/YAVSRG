@@ -37,9 +37,10 @@ module Migrations =
 
     let run_backbeat (db: Database) : unit =
         Database.migrate
-            "InitialTableLevels"
+            "InitialTableLevelsAndSuggestions"
             (fun db ->
                 TableLevel.CREATE_TABLES.Execute () db |> expect |> ignore
+                TableSuggestion.CREATE_TABLE.Execute () db |> expect |> ignore
             )
             db
 
