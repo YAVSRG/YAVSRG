@@ -7,6 +7,8 @@ open Interlude.Web.Server.Domain.Core
 
 module Search =
 
+    open Players.Search
+
     let handle
         (
             body: string,
@@ -32,6 +34,6 @@ module Search =
                             }
                         )
                 }
-                : Players.Search.Response
+                : Response
             )
         }

@@ -9,6 +9,8 @@ open Interlude.Web.Server.Domain.Services
 
 module Leaderboard =
 
+    open Charts.Scores.Leaderboard
+
     let handle
         (
             body: string,
@@ -34,7 +36,7 @@ module Leaderboard =
 
                 let info = Scores.get_leaderboard_details chart_id ruleset_id
 
-                let scores: Charts.Scores.Leaderboard.Score array =
+                let scores: Score array =
                     info
                     |> Array.map (
                         fun (i, user, score, replay) ->
@@ -51,7 +53,7 @@ module Leaderboard =
                             }
                     )
 
-                response.ReplyJson({ Scores = scores; RulesetId = ruleset_id }: Charts.Scores.Leaderboard.Response)
+                response.ReplyJson({ Scores = scores; RulesetId = ruleset_id }: Response)
 
             else
                 response.MakeErrorResponse(404) |> ignore

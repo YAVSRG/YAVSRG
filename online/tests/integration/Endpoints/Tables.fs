@@ -16,6 +16,26 @@ module Tables =
         )
                         
         Assert.IsTrue(done_signal.WaitOne(500))
+        
+    [<Test>]
+    let Records_TableNotFound () =
+        use done_signal = new AutoResetEvent(false)
+                        
+        Tables.Records.get (USERNAME, "doesntexist", 
+            function Some _ -> Assert.Fail() | None -> done_signal.Set() |> ignore
+        )
+                        
+        Assert.IsTrue(done_signal.WaitOne(500))
+        
+    [<Test>]
+    let Records_UserNotFound () =
+        use done_signal = new AutoResetEvent(false)
+                        
+        Tables.Records.get ("ThisUserDoesNotExist", "crescent", 
+            function Some _ -> Assert.Fail() | None -> done_signal.Set() |> ignore
+        )
+                        
+        Assert.IsTrue(done_signal.WaitOne(500))
             
     [<Test>]
     let Leaderboard () =
@@ -26,6 +46,16 @@ module Tables =
             done_signal.Set() |> ignore
         )
                             
+        Assert.IsTrue(done_signal.WaitOne(500))
+        
+    [<Test>]
+    let Leaderboard_NotFound () =
+        use done_signal = new AutoResetEvent(false)
+                        
+        Tables.Leaderboard.get ("doesntexist", 
+            function Some _ -> Assert.Fail() | None -> done_signal.Set() |> ignore
+        )
+                        
         Assert.IsTrue(done_signal.WaitOne(500))
 
     [<Test>]
@@ -57,6 +87,26 @@ module Tables =
         Tables.Charts.get_section ("crescent", "advanced", Option.get >> fun (res: Tables.Charts.Response) -> 
             printfn "%A" res.Charts
             done_signal.Set() |> ignore
+        )
+                      
+        Assert.IsTrue(done_signal.WaitOne(500))
+    
+    [<Test>]
+    let Charts_TableNotFound () =
+        use done_signal = new AutoResetEvent(false)
+                            
+        Tables.Charts.get_section ("doesntexist", "advanced",
+            function Some _ -> Assert.Fail() | None -> done_signal.Set() |> ignore
+        )
+                  
+        Assert.IsTrue(done_signal.WaitOne(500))
+        
+    [<Test>]
+    let Charts_SectionNotFound () =
+        use done_signal = new AutoResetEvent(false)
+                                
+        Tables.Charts.get_section ("crescent", "doesntexist",
+            function Some _ -> Assert.Fail() | None -> done_signal.Set() |> ignore
         )
                       
         Assert.IsTrue(done_signal.WaitOne(500))

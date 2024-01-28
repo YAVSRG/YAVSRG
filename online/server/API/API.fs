@@ -16,6 +16,8 @@ module API =
     let inline add_endpoint route handle = handlers.Add(route, handle)
 
     do
+        add_endpoint Health.Status.ROUTE Health.Status.handle
+
         if not SECRETS.IsProduction then add_endpoint (GET, "/auth/dummy") Auth.Dummy.handle
         add_endpoint Auth.Discord.ROUTE Auth.Discord.handle
 
@@ -27,6 +29,7 @@ module API =
         add_endpoint Tables.Leaderboard.ROUTE Tables.Leaderboard.handle
         add_endpoint Tables.List.ROUTE Tables.List.handle
         add_endpoint Tables.Charts.ROUTE Tables.Charts.handle
+        add_endpoint Tables.Suggestions.Vote.ROUTE Tables.Suggestions.Vote.handle
 
         add_endpoint Players.Online.ROUTE Players.Online.handle
         add_endpoint Players.Search.ROUTE Players.Search.handle
@@ -37,8 +40,6 @@ module API =
         add_endpoint Friends.List.ROUTE Friends.List.handle
         add_endpoint Friends.Add.ROUTE Friends.Add.handle
         add_endpoint Friends.Remove.ROUTE Friends.Remove.handle
-
-        add_endpoint Health.Status.ROUTE Health.Status.handle
 
     let handle_request
         (

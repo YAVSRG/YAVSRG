@@ -228,7 +228,9 @@ module Tables =
                     TableId: string
                     Level: int
                 }
-
+                
+            [<Json.AutoCodec>]
+            [<RequireQualifiedAccess>]
             type Response =
                 | Ok
                 | OkDetailsRequired

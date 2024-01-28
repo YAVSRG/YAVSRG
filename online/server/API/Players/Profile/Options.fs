@@ -8,6 +8,8 @@ open Interlude.Web.Server.Domain.Core
 
 module Options =
 
+    open Players.Profile.Options
+
     let handle
         (
             body: string,
@@ -20,7 +22,7 @@ module Options =
 
             match JSON.FromString body with
             | Error e -> raise (BadRequestException None)
-            | Ok(request: Players.Profile.Options.Request) ->
+            | Ok(request: Request) ->
 
             if
                 user.Badges

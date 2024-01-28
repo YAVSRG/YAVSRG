@@ -7,6 +7,8 @@ open Interlude.Web.Server.Domain.Services
 
 module Identify =
 
+    open Charts.Identify
+
     let handle
         (
             body: string,
@@ -30,7 +32,7 @@ module Identify =
                                     Chart = chart
                                 }
                     }
-                    : Charts.Identify.Response
+                    : Response
                 )
-            | None -> response.ReplyJson({ Info = None }: Charts.Identify.Response)
+            | None -> response.ReplyJson({ Info = None }: Response)
         }

@@ -8,6 +8,8 @@ open Interlude.Web.Server.Domain.Services
 
 module Records =
 
+    open Tables.Records
+
     let handle
         (
             body: string,
@@ -50,13 +52,13 @@ module Records =
                                                 scores.[chart.Hash])
                                                 .Grade
                                     }
-                                    : Tables.Records.Score
+                                    : Score
                                 )
                             else
                                 None
                         )
                         |> Array.ofSeq
                 }
-                : Tables.Records.Response
+                : Response
             )
         }

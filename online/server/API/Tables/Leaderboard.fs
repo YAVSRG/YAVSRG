@@ -7,6 +7,8 @@ open Interlude.Web.Server.Domain.Services
 
 module Leaderboard =
 
+    open Tables.Leaderboard
+
     let handle
         (
             body: string,
@@ -26,7 +28,7 @@ module Leaderboard =
 
             let info = Tables.get_leaderboard_details table_id
 
-            let players: Tables.Leaderboard.Player array =
+            let players: Player array =
                 info
                 |> Array.map (fun (i, user, rating) ->
                     {
@@ -37,5 +39,5 @@ module Leaderboard =
                     }
                 )
 
-            response.ReplyJson({ Players = players }: Tables.Leaderboard.Response)
+            response.ReplyJson({ Players = players } : Response)
         }

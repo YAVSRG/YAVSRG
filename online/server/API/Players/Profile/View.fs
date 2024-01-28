@@ -8,6 +8,8 @@ open Interlude.Web.Server.Domain.Services
 
 module View =
 
+    open Players.Profile.View
+
     let handle
         (
             body: string,
@@ -28,7 +30,7 @@ module View =
 
             let recent_scores = Score.get_user_recent target_user_id
 
-            let scores: Players.Profile.View.RecentScore array =
+            let scores: RecentScore array =
                 recent_scores
                 |> Array.map (fun s ->
                     let rs = Backbeat.rulesets.[Score.PRIMARY_RULESET]
@@ -74,8 +76,8 @@ module View =
                         target_user.Badges
                         |> Seq.map (fun b ->
                             {
-                                Players.Profile.View.Badge.Name = b
-                                Players.Profile.View.Badge.Colors = Badge.badge_color b
+                                Badge.Name = b
+                                Badge.Colors = Badge.badge_color b
                             }
                         )
                         |> Array.ofSeq
@@ -84,6 +86,6 @@ module View =
                     IsFriend = relation = FriendRelation.Friend || relation = FriendRelation.MutualFriend
                     IsMutualFriend = relation = FriendRelation.MutualFriend
                 }
-                : Players.Profile.View.Response
+                : Response
             )
         }

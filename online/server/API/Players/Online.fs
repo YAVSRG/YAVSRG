@@ -8,6 +8,8 @@ open Interlude.Web.Server.Domain.Core
 
 module Online =
 
+    open Players.Online
+
     let handle
         (
             body: string,
@@ -32,6 +34,6 @@ module Online =
                             }
                         )
                 }
-                : Players.Online.Response
+                : Response
             )
         }

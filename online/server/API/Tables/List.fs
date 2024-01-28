@@ -7,6 +7,8 @@ open Interlude.Web.Server.Domain.Services
 
 module List =
 
+    open Tables.List
+
     let handle
         (
             body: string,
@@ -15,10 +17,10 @@ module List =
             response: HttpResponse
         ) =
         async {
-            let tables : Tables.List.Table array = 
+            let tables : Table array = 
                 Backbeat.Tables.TABLES
                 |> Map.toArray
                 |> Array.map (fun (id, info) -> { Id = id; Info = info })
 
-            response.ReplyJson({ Tables = tables } : Tables.List.Response)
+            response.ReplyJson({ Tables = tables } : Response)
         }

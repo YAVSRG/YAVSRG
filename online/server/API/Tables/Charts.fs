@@ -8,6 +8,8 @@ open Interlude.Web.Server.Domain.Services
 
 module Charts =
 
+    open Tables.Charts
+
     let handle
         (
             body: string,
@@ -34,7 +36,7 @@ module Charts =
                     | None -> raise NotFoundException
                 | None -> TableLevel.get_all table_id
             
-            let charts_with_info : Tables.Charts.ChartInfo array =
+            let charts_with_info : ChartInfo array =
                 charts
                 |> Array.choose (fun (chart_id, level) ->
                     match Backbeat.Charts.by_hash chart_id with
@@ -48,5 +50,5 @@ module Charts =
                     | None -> None
                 )
 
-            response.ReplyJson({ Charts = charts_with_info } : Tables.Charts.Response)
+            response.ReplyJson({ Charts = charts_with_info } : Response)
         }

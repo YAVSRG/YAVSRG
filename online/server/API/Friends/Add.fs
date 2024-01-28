@@ -9,6 +9,8 @@ open Interlude.Web.Server.Domain.Core
 
 module Add =
 
+    open Friends.Add
+
     let handle
         (
             body: string,
@@ -21,7 +23,7 @@ module Add =
 
             match JSON.FromString body with
             | Error e -> raise (BadRequestException None)
-            | Ok(request: Friends.Add.Request) ->
+            | Ok(request: Request) ->
 
             match User.by_username request.User with
             | Some(id, user) ->

@@ -8,6 +8,8 @@ open Interlude.Web.Server.Online
 
 module List =
 
+    open Friends.List
+
     let handle
         (
             body: string,
@@ -33,6 +35,6 @@ module List =
                             }
                         )
                 }
-                : Friends.List.Response
+                : Response
             )
         }

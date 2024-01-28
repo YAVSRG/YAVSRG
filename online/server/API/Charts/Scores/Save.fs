@@ -8,6 +8,8 @@ open Interlude.Web.Server.Domain.Services
 
 module Save =
 
+    open Charts.Scores.Save
+
     let handle
         (
             body: string,
@@ -20,15 +22,15 @@ module Save =
 
             match JSON.FromString body with
             | Error e -> raise (BadRequestException None)
-            | Ok(request: Charts.Scores.Save.Request) -> // todo: basic clamp on how much data can be sent in one request (about 10kb?)
+            | Ok(request: Request) -> // todo: basic clamp on how much data can be sent in one request (about 10kb?)
 
             let chart_id = request.ChartId.ToUpper()
             let timestamp = (System.DateTimeOffset.op_Implicit request.Timestamp).ToUnixTimeMilliseconds()
 
             match! Scores.submit (user_id, chart_id, request.Replay, request.Rate, request.Mods, timestamp) with
             | Scores.ScoreUploadOutcome.UploadFailed -> raise (BadRequestException None)
-            | Scores.ScoreUploadOutcome.SongNotRecognised -> response.ReplyJson(None : Charts.Scores.Save.Response)
-            | Scores.ScoreUploadOutcome.Unrated -> response.ReplyJson(None : Charts.Scores.Save.Response)
+            | Scores.ScoreUploadOutcome.SongNotRecognised -> response.ReplyJson(None : Response)
+            | Scores.ScoreUploadOutcome.Unrated -> response.ReplyJson(None : Response)
             | Scores.ScoreUploadOutcome.Rated (table_changes, leaderboard_changes) -> 
 
                 response.ReplyJson(
@@ -42,6 +44,6 @@ module Save =
                                 table_changes
                                 |> List.map (fun x -> { Table = x.Table; OldPosition = None; NewPosition = (0, 0.0) })
                         }
-                    : Charts.Scores.Save.Response
+                    : Response
                 )
         }
