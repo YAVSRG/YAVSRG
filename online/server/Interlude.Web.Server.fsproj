@@ -7,8 +7,6 @@
     <EmbeddedResource Include="Version.txt" />
     <Compile Include="Utils.fs" />
     <Compile Include="Globals.fs" />
-    <Compile Include="Domain_Old\Redis.fs" />
-    <Compile Include="Domain_Old\Objects\Tables.fs" />
     <Compile Include="Domain\Core\Users.fs" />
     <Compile Include="Domain\Core\Friends.fs" />
     <Compile Include="Domain\Core\Replays.fs" />
@@ -35,11 +33,6 @@
     <Compile Include="API\Charts\Identify.fs" />
     <Compile Include="API\Charts\Scores\Leaderboard.fs" />
     <Compile Include="API\Charts\Scores\Save.fs" />
-    <Compile Include="API\Tables\Suggestions\Add.fs" />
-    <Compile Include="API\Tables\Suggestions\List.fs" />
-    <Compile Include="API\Tables\Suggestions\Apply.fs" />
-    <Compile Include="API\Tables\Suggestions\Preview.fs" />
-    <Compile Include="API\Tables\Suggestions\Missing.fs" />
     <Compile Include="API\Tables\Leaderboard.fs" />
     <Compile Include="API\Tables\Records.fs" />
     <Compile Include="API\Friends\List.fs" />
