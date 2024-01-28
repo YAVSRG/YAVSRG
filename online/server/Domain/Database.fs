@@ -46,10 +46,13 @@ module Migrations =
         Database.migrate
             "ImportOldCrescentLevels"
             (fun _ ->
-                let old_crescent = Services.Backbeat.tables.["crescent"]
-                for level in old_crescent.Levels do
-                    for chart in level.Charts do
-                        TableLevel.add_or_move 1L "crescent" chart.Hash level.Rank
+                
+                match Services.Backbeat.tables.TryFind "crescent" with
+                | Some old_crescent ->
+                    for level in old_crescent.Levels do
+                        for chart in level.Charts do
+                            TableLevel.add_or_move 1L "crescent" chart.Hash level.Rank
+                | None -> ()
             )
             db
 
