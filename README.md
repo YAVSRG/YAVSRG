@@ -11,7 +11,8 @@ Visit [yavsrg.net](https://www.yavsrg.net) to read more about this project and i
 
 <h2 align="center">🎮 Playing the game</h2>
 
-Lots of setup guidance, including a wiki, is built into the game to help you get started. You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in your browser!
+Various player guides, including a wiki, are built into the game to help you get started, especially if you're coming from another popular rhythm game client.  
+You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in your browser!
 
 **On Windows** - Download the latest release [from the website](https://www.yavsrg.net), extract it and play!  
 **On macOS** - Build instructions for developers below! If you aren't a developer, ask for help [in the Discord](https://discord.gg/tA22tWR) instead  
