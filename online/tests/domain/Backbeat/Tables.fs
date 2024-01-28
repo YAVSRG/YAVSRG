@@ -119,3 +119,79 @@ module Tables =
         Assert.AreEqual("chart_id", pending_by_table.[0].ChartId)
         Assert.AreEqual(expected_votes, pending_by_table.[0].Votes)
         Assert.AreEqual(10L, pending_by_table.[0].UserId)
+    
+    [<Test>]
+    let TableSuggestion_SuggestIdempotent () =
+        Assert.True(TableSuggestion.suggest "suggestidempotent" "chart_id" 10L 5)
+        Assert.True(TableSuggestion.suggest "suggestidempotent" "chart_id" 10L 5)
+        Assert.True(TableSuggestion.suggest "suggestidempotent" "chart_id" 10L 5)
+    
+        let expected_votes = Map.ofList [10L, 5]
+    
+        match TableSuggestion.pending_by_chart "suggestidempotent" "chart_id" with
+        | None -> Assert.Fail()
+        | Some votes -> Assert.AreEqual(expected_votes, votes)
+    
+    [<Test>]
+    let TableSuggestion_ApprovalProcess () =
+        Assert.True(TableSuggestion.suggest "approvalprocess" "chart_id" 10L 5)
+        Assert.True(TableSuggestion.suggest "approvalprocess" "chart_id" 20L 6)
+        Assert.True(TableSuggestion.accept "approvalprocess" "chart_id" 10L 5)
+
+        match TableSuggestion.pending_by_chart "rejectionprocess" "chart_id" with
+        | None -> ()
+        | Some _ -> Assert.Fail()
+
+        Assert.True(TableSuggestion.suggest "approvalprocess" "chart_id" 20L 7)
+    
+        match TableSuggestion.pending_by_chart "approvalprocess" "chart_id" with
+        | None -> Assert.Fail()
+        | Some votes -> 
+            Assert.AreEqual(1, votes.Count)
+            Assert.AreEqual(7, votes.[20L])
+
+        Assert.AreEqual(2, (TableSuggestion.all_by_chart "approvalprocess" "chart_id").Length)
+        Assert.AreEqual(Some 5, TableLevel.get "approvalprocess" "chart_id")
+
+    [<Test>]
+    let TableSuggestion_RejectionProcess () =
+        Assert.True(TableSuggestion.suggest "rejectionprocess" "chart_id" 10L 5)
+        Assert.True(TableSuggestion.suggest "rejectionprocess" "chart_id" 20L 6)
+        Assert.True(TableSuggestion.reject "rejectionprocess" "chart_id" 10L "This chart has vibro in it or something!")
+        Assert.False(TableSuggestion.suggest "rejectionprocess" "chart_id" 20L 7)
+    
+        match TableSuggestion.pending_by_chart "rejectionprocess" "chart_id" with
+        | None -> ()
+        | Some _ -> Assert.Fail()
+
+        TableSuggestion.suggest_allow_reopening_rejected "rejectionprocess" "chart_id" 20L 7
+    
+        match TableSuggestion.pending_by_chart "rejectionprocess" "chart_id" with
+        | None -> Assert.Fail()
+        | Some votes -> 
+            Assert.AreEqual(1, votes.Count)
+            Assert.AreEqual(7, votes.[20L])
+
+        Assert.AreEqual(2, (TableSuggestion.all_by_chart "approvalprocess" "chart_id").Length)
+
+    [<Test>]
+    let TableSuggestion_DoesntExist () =
+        Assert.True(TableSuggestion.suggest "exists" "chart_id" 10L 5)
+
+        Assert.False(TableSuggestion.accept "doesntexist" "doesntexist" 10L 5)
+        Assert.False(TableSuggestion.accept "exists" "doesntexist" 10L 5) 
+        Assert.False(TableSuggestion.accept "doesntexist" "chart_id" 10L 5)
+
+        Assert.False(TableSuggestion.reject "doesntexist" "doesntexist" 10L "Vibro")
+        Assert.False(TableSuggestion.reject "exists" "doesntexist" 10L "Vibro")  
+        Assert.False(TableSuggestion.reject "doesntexist" "chart_id" 10L "Vibro")
+
+        Assert.AreEqual(0, (TableSuggestion.all_by_chart "doesntexist" "doesntexist").Length)
+        Assert.AreEqual(0, (TableSuggestion.all_by_chart "doesntexist" "chart_id").Length)
+        Assert.AreEqual(0, (TableSuggestion.all_by_chart "exists" "doesntexist").Length)
+
+        Assert.AreEqual(None, TableSuggestion.pending_by_chart "doesntexist" "doesntexist")
+        Assert.AreEqual(None, TableSuggestion.pending_by_chart "exists" "doesntexist")
+        Assert.AreEqual(None, TableSuggestion.pending_by_chart "doesntexist" "chart_id")
+
+        Assert.AreEqual(0, (TableSuggestion.pending_by_table "doesntexist").Length)
