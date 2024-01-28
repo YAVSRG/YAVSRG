@@ -330,7 +330,8 @@ module TableSuggestion =
         {
             SQL = """
             SELECT ChartId, UserId, TimeSuggested, Votes FROM table_suggestions
-            WHERE TableId = @TableId AND Status = '"Pending"';
+            WHERE TableId = @TableId AND Status = '"Pending"'
+            ORDER BY TimeSuggested ASC;
             """
             Parameters = [ "@TableId", SqliteType.Text, -1 ]
             FillParameters = fun p table_id -> p.String table_id
@@ -343,6 +344,7 @@ module TableSuggestion =
                 }
             )
         }
+    // todo: paging
     let pending_by_table (table_id: string) : TableSuggestionModel array = 
         PENDING_BY_TABLE.Execute table_id backbeat_db |> expect
 

@@ -273,8 +273,8 @@ module Tables =
             type Suggestion =
                 {
                     ChartId: string
-                    Votes: Map<int, string array>
-                    BackbeatInfo: (Song * Chart) option
+                    Votes: Map<int, int>
+                    BackbeatInfo: (Chart * Song) option
                 }
 
             [<Json.AutoCodec>]
@@ -284,13 +284,13 @@ module Tables =
                 Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
 
         /// url parameters:
-        ///  table - id of table to get suggestions for e.g 'crescent' or 'mizu'
+        ///  table - id of table to get missing charts for for e.g 'crescent' or 'mizu'
         module Missing =
 
             let ROUTE = (GET, "/tables/suggestions/missing")
 
             [<Json.AutoCodec>]
-            type Suggestion =
+            type MissingChart =
                 {
                     ChartId: string
                     OsuBeatmapId: int
@@ -302,7 +302,7 @@ module Tables =
                 }
 
             [<Json.AutoCodec>]
-            type Response = { Suggestions: Suggestion array }
+            type Response = { Charts: MissingChart array }
 
             let get (table: string, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)

@@ -129,7 +129,7 @@ module Tables =
             use done_signal = new AutoResetEvent(false)
                                                     
             Tables.Suggestions.Missing.get ("crescent", Option.get >> fun (res: Tables.Suggestions.Missing.Response) -> 
-                printfn "%A" res.Suggestions
+                printfn "%A" res.Charts
                 done_signal.Set() |> ignore
             )
                                                     
