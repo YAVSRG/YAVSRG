@@ -28,7 +28,6 @@ module Identify =
                                 {
                                     Song = song
                                     Chart = chart
-                                    Mirrors = chart.Sources |> Backbeat.Charts.mirrors |> List.ofSeq
                                 }
                     }
                     : Charts.Identify.Response

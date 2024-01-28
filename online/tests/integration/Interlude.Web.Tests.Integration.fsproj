@@ -9,7 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Endpoints.fs" />
+    <Compile Include="Constants.fs" />
+    <Compile Include="Endpoints\Health.fs" />
+    <Compile Include="Endpoints\Charts.fs" />
+    <Compile Include="Endpoints\Tables.fs" />
+    <Compile Include="Endpoints\Players.fs" />
+    <Compile Include="Endpoints\Friends.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
