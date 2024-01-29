@@ -40,6 +40,8 @@
     <Compile Include="API\Tables\Suggestions\Vote.fs" />
     <Compile Include="API\Tables\Suggestions\List.fs" />
     <Compile Include="API\Tables\Suggestions\Missing.fs" />
+    <Compile Include="API\Tables\Suggestions\Accept.fs" />
+    <Compile Include="API\Tables\Suggestions\Reject.fs" />
     <Compile Include="API\Players\Profile\View.fs" />
     <Compile Include="API\Players\Profile\Options.fs" />
     <Compile Include="API\Players\Search.fs" />

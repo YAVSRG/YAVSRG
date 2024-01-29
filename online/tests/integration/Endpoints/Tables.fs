@@ -134,3 +134,44 @@ module Tables =
             )
                                                     
             Assert.IsTrue(done_signal.WaitOne(500))
+
+        [<Test>]
+        let Vote () =
+            use done_signal = new AutoResetEvent(false)
+                                            
+            Tables.Suggestions.Vote.post ({ TableId = "crescent"; ChartId = "chart_id"; Level = 5 }, Option.get >> fun (res: Tables.Suggestions.Vote.Response) -> 
+                printfn "%A" res
+                done_signal.Set() |> ignore
+            )
+                                            
+            Assert.IsTrue(done_signal.WaitOne(500))
+        
+        [<Test>]
+        let Vote_TableNotFound () =
+            use done_signal = new AutoResetEvent(false)
+                                                    
+            Tables.Suggestions.Vote.post ({ TableId = "doesntexist"; ChartId = "chart_id"; Level = 5 }, 
+                function Some _ -> Assert.Fail() | None -> done_signal.Set() |> ignore
+            )
+                                                    
+            Assert.IsTrue(done_signal.WaitOne(500))
+            
+        [<Test>]
+        let Accept_PermissionDenied () =
+            use done_signal = new AutoResetEvent(false)
+                                                        
+            Tables.Suggestions.Accept.post ({ TableId = "crescent"; ChartId = "chart_id"; Level = 5 }, 
+                function Some _ -> Assert.Fail() | None -> done_signal.Set() |> ignore
+            )
+                                                        
+            Assert.IsTrue(done_signal.WaitOne(500))
+            
+        [<Test>]
+        let Reject_PermissionDenied () =
+            use done_signal = new AutoResetEvent(false)
+                                                        
+            Tables.Suggestions.Reject.post ({ TableId = "crescent"; ChartId = "chart_id"; Reason = "I don't like it" }, 
+                function Some _ -> Assert.Fail() | None -> done_signal.Set() |> ignore
+            )
+
+            Assert.IsTrue(done_signal.WaitOne(500))
