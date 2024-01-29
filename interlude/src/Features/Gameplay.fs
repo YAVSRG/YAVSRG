@@ -557,7 +557,6 @@ module Gameplay =
                 Logging.Debug "No charts installed"
                 Background.load None
 
-        Table.init_window options.Table.Value
         Multiplayer.init_window ()
         Chart.init_window()
 

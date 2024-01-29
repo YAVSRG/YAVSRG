@@ -134,7 +134,6 @@ module Tables =
         [<Json.AutoCodec>]
         type Score =
             {
-                Id: string
                 Hash: string
                 Score: float
                 Grade: int
@@ -142,6 +141,8 @@ module Tables =
 
         [<Json.AutoCodec>]
         type Response = { Scores: Score array }
+
+        // todo: query parameters lo and hi for just selecting levels within a range
 
         let get (user: string, table: string, callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE + "?user=" + escape user + "&table=" + escape table, callback)
@@ -172,13 +173,14 @@ module Tables =
 
         let ROUTE = (GET, "/tables")
 
-        open Prelude.Data.Charts.Tables.NewTables
+        open Prelude.Data.Charts.Tables
 
         [<Json.AutoCodec>]
         type Table =
             {
                 Id: string
                 Info: TableInfo
+                LastUpdated: int64
             }
 
         [<Json.AutoCodec>]

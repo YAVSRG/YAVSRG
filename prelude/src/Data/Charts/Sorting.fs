@@ -363,35 +363,31 @@ module Sorting =
 
         groups
 
-    let get_table_groups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+    let get_table_groups (table: Table) (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
-
-        match Table.current () with
-        | Some table ->
-            for level_no, level in Seq.indexed table.Levels do
-                level.Charts
-                |> Seq.choose (fun (c: TableChart) ->
-                    match Cache.by_key (sprintf "%s/%s" table.Name c.Hash) Library.cache with
-                    | Some cc -> Some(cc, LibraryContext.Table level.Name)
-                    | None ->
-
+        for level, charts in table.Charts |> Seq.groupBy (fun x -> x.Level) do
+            charts
+            |> Seq.choose (fun (c: TableChart) ->
+                match Cache.by_key (sprintf "%s/%s" table.Info.Name c.Hash) Library.cache with
+                | Some cc -> Some(cc, LibraryContext.Table level)
+                | None ->
                     Cache.by_hash c.Hash Library.cache
-                    |> Option.map (fun x -> x, LibraryContext.Table level.Name)
-                )
-                |> Filter.applyf filter
-                |> ResizeArray<CachedChart * LibraryContext>
-                |> fun x ->
-                    x.Sort sorting
-                    x
-                |> fun x ->
-                    if x.Count > 0 then
-                        groups.Add(
-                            (level_no, level.Name),
-                            {
-                                Charts = x
-                                Context = LibraryGroupContext.Table level.Name
-                            }
-                        )
-        | None -> ()
-
+                    |> Option.map (fun x -> x, LibraryContext.Table level)
+            )
+            |> Filter.applyf filter
+            |> ResizeArray<CachedChart * LibraryContext>
+            |> fun x ->
+                x.Sort sorting
+                x
+            |> fun x ->
+                if x.Count > 0 then
+                    groups.Add(
+                        (level, table.Info.LevelDisplayNames.TryFind level |> Option.defaultValue (level.ToString())),
+                        {
+                            Charts = x
+                            Context = LibraryGroupContext.Table level
+                        }
+                    )
         groups
+
+    let get_empty_view () = new Dictionary<int * string, Group>()

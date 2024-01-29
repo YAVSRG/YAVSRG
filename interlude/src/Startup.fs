@@ -227,7 +227,7 @@ module Startup =
         { new Screen.ScreenRoot(Toolbar()) with
             override this.Init() =
                 Printerlude.init_window (instance)
-                Content.init_window Options.options.Theme.Value Options.options.Noteskin.Value
+                Content.init_window Options.options.Theme.Value Options.options.Noteskin.Value Options.options.Table.Value
                 Options.Hotkeys.init_window Options.options.Hotkeys
                 //DiscordRPC.init()
                 migrate ()

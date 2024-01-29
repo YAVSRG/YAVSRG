@@ -174,6 +174,7 @@ module Options =
                         Layout.LeftOne
                         Layout.Spread
                     |]
+                // todo: have this inspire a rewrite of Content module
                 SelectedRuleset =
                     Setting.simple Content.Rulesets.DEFAULT_ID
                     |> Setting.trigger (fun t ->

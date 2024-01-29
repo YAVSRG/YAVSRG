@@ -4,7 +4,7 @@ open Backbeat.Features
 open Backbeat.Features.Archive
 
 let ctx =
-    ShellContext.Empty |> Tables.register |> Archive.register |> Rulesets.register
+    ShellContext.Empty |> Archive.register |> Rulesets.register
 
 [<EntryPoint>]
 let main argv =

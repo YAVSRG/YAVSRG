@@ -23,7 +23,7 @@ module Migrations =
             db
         Database.migrate
             "MigrateEverythingFromRedis"
-            (fun db -> Logging.Info("Redis no longer exists to migrate data from"))
+            (fun _ -> Logging.Info("Redis no longer exists to migrate data from"))
             db
         Database.migrate
             "AddTableRatings"
@@ -45,15 +45,7 @@ module Migrations =
             db
         Database.migrate
             "ImportOldCrescentLevels"
-            (fun _ ->
-                
-                match Services.Backbeat.tables.TryFind "crescent" with
-                | Some old_crescent ->
-                    for level in old_crescent.Levels do
-                        for chart in level.Charts do
-                            TableLevel.add_or_move 1L "crescent" chart.Hash level.Rank
-                | None -> ()
-            )
+            (fun _ -> Logging.Info("TablesV1 no longer exist to migrate data from"))
             db
 
 module Database =

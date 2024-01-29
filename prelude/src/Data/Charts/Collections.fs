@@ -244,7 +244,7 @@ module Collections =
     [<NoComparison>]
     type LibraryContext =
         | None
-        | Table of level: string
+        | Table of level: int
         | Folder of id: string
         | Playlist of index: int * id: string * data: PlaylistEntryInfo
         member this.CollectionSource: CollectionSource option =
@@ -264,6 +264,6 @@ module Collections =
     [<RequireQualifiedAccess>]
     type LibraryGroupContext =
         | None
-        | Table of level: string
+        | Table of level: int
         | Folder of id: string
         | Playlist of id: string

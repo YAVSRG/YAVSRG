@@ -72,25 +72,25 @@ type ManageTablesPage() as this =
         )
         |* Dummy()
 
-        for e in Table.list () do
-            container
-            |* TableButton(
-                e.Table.Name,
-                fun () ->
-                    options.Table.Set(Some e.Table.Name)
-                    Table.load e.Table.Name
+        //for e in Table.list () do
+        //    container
+        //    |* TableButton(
+        //        e.Table.Name,
+        //        fun () ->
+        //            options.Table.Set(Some e.Table.Name)
+        //            Table.load e.Table.Name
 
-                    if options.LibraryMode.Value = LibraryMode.Table then
-                        LevelSelect.refresh_all ()
-                    else
-                        LevelSelect.refresh_details ()
+        //            if options.LibraryMode.Value = LibraryMode.Table then
+        //                LevelSelect.refresh_all ()
+        //            else
+        //                LevelSelect.refresh_details ()
 
-                    sync refresh
-            )
+        //            sync refresh
+        //    )
 
-        if Table.current().IsSome then
-            container |+ Dummy()
-            |* PageButton("table.suggestions", (fun () -> SuggestionsPage().Show()))
+        //if Table.current().IsSome then
+        //    container |+ Dummy()
+        //    |* PageButton("table.suggestions", (fun () -> SuggestionsPage().Show()))
 
         if container.Focused then
             container.Focus()

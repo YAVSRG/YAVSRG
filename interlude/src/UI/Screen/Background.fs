@@ -77,14 +77,14 @@ module Background =
                     let sprite = Sprite.upload_one true true (SpriteUpload.OfImage("BACKGROUND", bmp))
 
                     bmp.Dispose()
-                    Content.accent_color <- col
+                    Content.Themes.accent_color <- col
                     background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
                 | None ->
                     background <-
                         (Content.get_texture "background", Animation.Fade(0.0f, Target = 1.0f), true)
                         :: background
 
-                    Content.accent_color <- Content.theme_config().DefaultAccentColor
+                    Content.Themes.accent_color <- Content.theme_config().DefaultAccentColor
         }
 
     let load (path: string option) =

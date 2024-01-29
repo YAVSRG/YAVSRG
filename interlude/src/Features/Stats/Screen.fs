@@ -223,7 +223,7 @@ type private BasicStats() =
 type private Tabs() =
     inherit StaticContainer(NodeType.None)
 
-    let table = TableStats()
+    let table = Dummy()//TableStats()
     let skillsets = EmptyState(Icons.BAR_CHART, %"misc.nyi")
     let goals = EmptyState(Icons.BAR_CHART, %"misc.nyi")
 

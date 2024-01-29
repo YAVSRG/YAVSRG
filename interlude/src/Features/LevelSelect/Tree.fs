@@ -420,7 +420,10 @@ module Tree =
 
             match options.LibraryMode.Value with
             | LibraryMode.Collections -> get_collection_groups sorting_modes.[options.ChartSortMode.Value] filter
-            | LibraryMode.Table -> get_table_groups sorting_modes.[options.ChartSortMode.Value] filter
+            | LibraryMode.Table -> 
+                match Tables.current() with
+                | Some table -> get_table_groups table sorting_modes.[options.ChartSortMode.Value] filter
+                | None -> get_empty_view ()
             | LibraryMode.All ->
                 get_groups
                     ctx

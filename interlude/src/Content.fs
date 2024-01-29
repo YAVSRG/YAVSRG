@@ -14,11 +14,7 @@ open Prelude.Data.Content
 
 module Content =
 
-    let private DEFAULT_THEME =
-        Theme.FromZipStream <| Utils.get_resource_stream "default.zip"
-
-    let mutable accent_color = ThemeConfig.Default.DefaultAccentColor
-
+    // todo: write code properly so this doesn't have to exist
     let mutable first_init = true
 
     module Sprites =
@@ -125,12 +121,16 @@ module Content =
 
     module Themes =
 
+        let private DEFAULT = Theme.FromZipStream <| Utils.get_resource_stream "default.zip"
         let private loaded = Dictionary<string, Theme>()
+
+        // todo: remove this variable, apply changes directly from Background.fs to the palette color
+        let mutable accent_color = ThemeConfig.Default.DefaultAccentColor
 
         module Current =
 
             let mutable id = "*default"
-            let mutable instance = DEFAULT_THEME
+            let mutable instance = DEFAULT
             let mutable config = instance.Config
 
             let save_config (new_config: ThemeConfig) =
@@ -183,7 +183,7 @@ module Content =
                 if config.OverrideAccentColor then
                     accent_color <- config.DefaultAccentColor
 
-                for font in DEFAULT_THEME.GetFonts() do
+                for font in DEFAULT.GetFonts() do
                     Fonts.add font
 
                 for font in instance.GetFonts() do
@@ -223,7 +223,7 @@ module Content =
 
         let load () =
             loaded.Clear()
-            loaded.Add("*default", DEFAULT_THEME)
+            loaded.Add("*default", DEFAULT)
 
             for source in Directory.EnumerateDirectories(get_game_folder "Themes") do
                 let id = Path.GetFileName source
@@ -247,7 +247,7 @@ module Content =
             let target = Path.Combine(get_game_folder "Themes", id)
 
             if id <> "" && not (Directory.Exists target) then
-                DEFAULT_THEME.ExtractToFolder(target)
+                DEFAULT.ExtractToFolder(target)
                 load ()
                 Current.switch id
 
@@ -488,13 +488,47 @@ module Content =
                 override this.Handle(ns) = async { return ns.GetTexture "note" }
             }
 
-    let init_window (theme_id: string) (noteskin_id: string) =
+    module Tables =
+
+        open Prelude.Data.Charts.Tables
+
+        let mutable private _current : Table option = None
+        let private loaded = new Dictionary<string, Table>()
+
+        let load () =
+            loaded.Clear()
+
+            for file in Directory.EnumerateFiles(Path.Combine(get_game_folder "Data", "Tables")) do
+                if Path.GetExtension(file).ToLower() = ".table" then
+                    let id = Path.GetFileNameWithoutExtension(file)
+                    match Table.load id with
+                    | Some table -> loaded.Add(id, table)
+                    | None -> Logging.Info(sprintf "Table '%s' is out of date" id)
+
+        let install_or_update (table: Table) =
+            Table.save table
+            match _current with
+            | Some t when t.Id = table.Id -> _current <- Some table
+            | _ -> ()
+
+        let init_window (id: string option) = 
+            load()
+            match id with
+            | Some id when loaded.ContainsKey id -> _current <- Some loaded.[id]
+            | _ -> ()
+
+        let by_id (id: string) = if loaded.ContainsKey id then Some loaded.[id] else None
+
+        let current() = _current
+
+    let init_window (theme_id: string) (noteskin_id: string) (table_id: string option) =
         Themes.Current.id <- theme_id
         Noteskins.Current.id <- noteskin_id
         Logging.Info "===== Loading game content ====="
         Noteskins.load ()
         Themes.load ()
         Rulesets.load ()
+        Tables.init_window table_id
         first_init <- false
 
     let inline get_texture (id: string) = Sprites.get id

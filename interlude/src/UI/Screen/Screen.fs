@@ -152,7 +152,7 @@ module Screen =
                 let x, y = Mouse.pos ()
                 Background.set_parallax_pos (x / Viewport.vwidth, y / Viewport.vheight)
 
-            Palette.accent_color.Target <- Content.accent_color
+            Palette.accent_color.Target <- Content.Themes.accent_color
             Dialog.display.Update(elapsed_ms, moved)
 
             toolbar.Update(elapsed_ms, moved)

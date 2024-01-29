@@ -5,6 +5,7 @@ open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
+open Interlude.Web.Server.Domain.Backbeat
 
 module Records =
 
@@ -26,13 +27,16 @@ module Records =
             | None -> raise NotFoundException
             | Some(target_user_id, _) ->
 
-            match Backbeat.tables.TryFind(query_params.["table"].[0]) with
-            | None -> response.MakeErrorResponse(404) |> ignore
-            | Some table ->
+            let table_id = query_params.["table"].[0].ToLower()
 
+            if not (Backbeat.Tables.exists table_id) then raise NotFoundException
+
+            let table = Backbeat.Tables.TABLES.[table_id]
+
+            // todo: aggregate grades and scores together
             let scores = Score.aggregate_user_ranked_scores target_user_id table.RulesetId |> Map.ofArray
 
-            let charts = table.Levels |> Seq.map (fun level -> level.Charts) |> Seq.concat
+            let charts = TableLevel.get_all table_id |> Array.map fst
             let ruleset = Backbeat.rulesets.[table.RulesetId]
 
             response.ReplyJson(
@@ -40,16 +44,15 @@ module Records =
                     Scores =
                         charts
                         |> Seq.choose (fun chart ->
-                            if scores.ContainsKey(chart.Hash) then
+                            if scores.ContainsKey(chart) then
                                 Some(
                                     {
-                                        Hash = chart.Hash
-                                        Id = chart.Id
-                                        Score = scores.[chart.Hash]
+                                        Hash = chart
+                                        Score = scores.[chart]
                                         Grade =
                                             (Prelude.Gameplay.Grade.calculate_with_target
                                                 ruleset.Grading.Grades
-                                                scores.[chart.Hash])
+                                                scores.[chart])
                                                 .Grade
                                     }
                                     : Score

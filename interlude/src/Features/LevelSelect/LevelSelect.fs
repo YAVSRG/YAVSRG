@@ -10,7 +10,7 @@ open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Suggestions
-open Prelude.Data.Charts.Tables
+open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Utils
@@ -150,7 +150,7 @@ type LevelSelectScreen() =
                 (fun () ->
                     Tree.filter = []
                     && options.LibraryMode.Value = LibraryMode.Table
-                    && Table.current().IsNone
+                    && Tables.current().IsNone
                 ),
                 EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
             )

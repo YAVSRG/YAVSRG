@@ -13,6 +13,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.``osu!``
 open Interlude
+open Interlude.Content
 open Interlude.Utils
 open Interlude.Features
 open Interlude.Web.Shared.Requests
@@ -97,40 +98,39 @@ module Printerlude =
             banner.SaveAsPng("banner.png")
 
         let private sync_table_scores () =
-            match Tables.Table.current () with
+            match Tables.current () with
             | None -> ()
-            | Some t ->
+            | Some table ->
 
             Tables.Records.get (
                 Interlude.Features.Online.Network.credentials.Username,
-                t.Name.ToLower(),
+                table.Id,
                 function
                 | None -> ()
                 | Some res ->
                     let lookup = res.Scores |> Seq.map (fun s -> s.Hash, s.Score) |> Map.ofSeq
 
-                    for level in t.Levels do
-                        for chart in level.Charts do
-                            if
-                                Scores.data.Entries.ContainsKey(chart.Hash)
-                                && Scores.data.Entries.[chart.Hash].PersonalBests.ContainsKey(t.RulesetId)
-                                && Scores.data.Entries.[chart.Hash].PersonalBests.[t.RulesetId].Accuracy
-                                   |> Prelude.Gameplay.PersonalBests.get_best_above 1.0f
-                                   |> Option.defaultValue 0.0
-                                   |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
-                            then
-                                for score in Scores.data.Entries.[chart.Hash].Scores do
-                                    Charts.Scores.Save.post (
-                                        ({
-                                            ChartId = chart.Hash
-                                            Replay = score.replay
-                                            Rate = score.rate
-                                            Mods = score.selectedMods
-                                            Timestamp = score.time
-                                        }
-                                        : Charts.Scores.Save.Request),
-                                        ignore
-                                    )
+                    for chart in table.Charts do
+                        if
+                            Scores.data.Entries.ContainsKey(chart.Hash)
+                            && Scores.data.Entries.[chart.Hash].PersonalBests.ContainsKey(table.Info.RulesetId)
+                            && Scores.data.Entries.[chart.Hash].PersonalBests.[table.Info.RulesetId].Accuracy
+                                |> Prelude.Gameplay.PersonalBests.get_best_above 1.0f
+                                |> Option.defaultValue 0.0
+                                |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
+                        then
+                            for score in Scores.data.Entries.[chart.Hash].Scores do
+                                Charts.Scores.Save.post (
+                                    ({
+                                        ChartId = chart.Hash
+                                        Replay = score.replay
+                                        Rate = score.rate
+                                        Mods = score.selectedMods
+                                        Timestamp = score.time
+                                    }
+                                    : Charts.Scores.Save.Request),
+                                    ignore
+                                )
             )
 
         let private personal_best_fixer =

@@ -12,7 +12,6 @@ open Interlude.Web.Server.Domain.Core
 
 module Backbeat =
 
-    let mutable tables: Map<string, Table> = Map.empty
     let rulesets = Dictionary<string, Ruleset>()
     let mutable songs = Songs()
     let mutable charts = Charts()
@@ -39,10 +38,6 @@ module Backbeat =
             match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json" with
             | None -> failwith "Failed to download backbeat rulesets"
             | Some(archive: PrefabRulesets.Repo) ->
-
-            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/tables/crescent.table" with
-            | None -> failwith "Failed to download crescent"
-            | Some(crescent: Table) ->
             
             packs <- _packs
             charts <- _charts
@@ -54,15 +49,9 @@ module Backbeat =
                     charts.Count
                     songs.Count
             )
-
-            for rs in archive.Rulesets.Values do
-                rulesets.[Ruleset.hash rs] <- rs
-                tables <- Map.ofList [ "crescent", crescent ]
         }
 
     module Tables =
-
-        open NewTables
 
         let CRESCENT : TableInfo =
             {

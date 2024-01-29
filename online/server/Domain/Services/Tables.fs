@@ -3,10 +3,11 @@
 open Prelude.Data.Charts.Tables
 open Interlude.Web.Server
 open Interlude.Web.Server.Domain.Core
+open Interlude.Web.Server.Domain.Backbeat
 
 module Tables =
 
-    let recalculate_table_rating (user_id: int64, table_id: string, table: Table) =
+    let recalculate_table_rating (user_id: int64, table_id: string, table: TableInfo, charts: (string * int) array) =
 
         match TableRating.get user_id table_id with
         | Some (existing, timestamp) when Timestamp.now() - timestamp < 300000 -> existing
@@ -14,13 +15,12 @@ module Tables =
 
         let user_grades = Score.aggregate_user_ranked_grades user_id table.RulesetId |> Map.ofSeq
 
+        // todo: this implements AverageTop50 but should be a switch to future proof other calculation types
         let new_rating =
-            table.Levels
-            |> Seq.map (fun l -> l.Charts |> Seq.map (fun c -> l, c))
-            |> Seq.concat
-            |> Seq.choose (fun (level, chart) ->
-                match user_grades.TryFind chart.Hash with
-                | Some grade -> Some (table.Rating grade (level, chart))
+            charts
+            |> Seq.choose (fun (chart, level) ->
+                match user_grades.TryFind chart with
+                | Some grade -> Some (Table.points table (level, grade))
                 | None -> None
             )
             |> Seq.sortDescending
@@ -33,9 +33,10 @@ module Tables =
         new_rating
 
     let recalculate_affected_table_ratings (user_id: int64, chart_id: string) =
-        for table_id, table in Backbeat.tables |> Map.toSeq do
-            if table.Contains chart_id then
-                recalculate_table_rating (user_id, table_id, table) |> ignore
+        for table_id in Backbeat.Tables.TABLES.Keys do
+            match TableLevel.get table_id chart_id with
+            | Some _ -> recalculate_table_rating (user_id, table_id, Backbeat.Tables.TABLES.[table_id], TableLevel.get_all table_id) |> ignore
+            | None -> ()
 
     let get_leaderboard_details (table_id: string) =
         let table_rankings = TableRating.leaderboard table_id
