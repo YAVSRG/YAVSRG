@@ -17,7 +17,7 @@ open Interlude.UI.Menu
 type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as this =
     inherit StaticContainer(NodeType.Leaf)
 
-    let sprite = get_texture "note"
+    let sprite = Content.Texture "note"
     let n = byte sprite.Rows
 
     let fd () =
@@ -78,7 +78,7 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as th
 type ColorSettingsPage() as this =
     inherit Page()
 
-    let data = Noteskins.Current.config
+    let data = Content.NoteskinConfig
 
     let keycount: Setting<Keymode> =
         Setting.simple Keymode.``4K``
@@ -147,7 +147,7 @@ type ColorSettingsPage() as this =
     override this.Title = %"noteskins.edit.colors.name"
 
     override this.OnClose() =
-        Noteskins.Current.save_config
-            { Noteskins.Current.config with
+        Noteskins.save_config
+            { data with
                 NoteColors = note_colors
             }

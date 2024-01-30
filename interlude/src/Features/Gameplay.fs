@@ -18,7 +18,7 @@ open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Scores
-open Interlude
+open Interlude.Content
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
@@ -174,7 +174,7 @@ module Gameplay =
                             // if chart is loaded we can safely restart from this point for different rates and mods
 
                             let with_mods = apply_mods _selected_mods.Value chart
-                            let with_colors = apply_coloring (Content.noteskin_config().NoteColors) with_mods
+                            let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
                             let rating =
                                 RatingReport(
@@ -210,7 +210,7 @@ module Gameplay =
                             | Some chart ->
 
                             let with_mods = apply_mods _selected_mods.Value chart
-                            let with_colors = apply_coloring (Content.noteskin_config().NoteColors) with_mods
+                            let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
                             let rating =
                                 RatingReport(
@@ -247,7 +247,7 @@ module Gameplay =
                             | None -> ()
                             | Some with_mods ->
 
-                            let with_colors = apply_coloring (Content.noteskin_config().NoteColors) with_mods
+                            let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
                             yield fun () -> WITH_COLORS <- Some with_colors
 
                             yield
@@ -382,7 +382,7 @@ module Gameplay =
                 ) :: on_load_succeeded
 
         let color_this_chart(with_mods: ModdedChart) =
-            apply_coloring (Content.noteskin_config().NoteColors) with_mods
+            apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
         let init_window() = sync_forever chart_loader.Join
 
@@ -456,7 +456,7 @@ module Gameplay =
                         ignore
                     )
 
-                Scores.save_score_pbs save_data Content.Rulesets.current_hash data
+                Scores.save_score_pbs save_data Rulesets.current_hash data
             else
                 Scores.save_score save_data data.ScoreInfo
                 ImprovementFlags.Default
@@ -483,7 +483,7 @@ module Gameplay =
                         username,
                         let metric =
                             Metrics.create
-                                Content.Rulesets.current
+                                Rulesets.current
                                 info.WithMods.Keys
                                 replay
                                 info.WithMods.Notes
@@ -507,7 +507,7 @@ module Gameplay =
                             ScoreInfoProvider(
                                 score,
                                 info.Chart,
-                                Content.Rulesets.current,
+                                Rulesets.current,
                                 Player = Some username,
                                 ModdedChart = info.WithMods
                             )
@@ -534,7 +534,7 @@ module Gameplay =
                     ScoreInfoProvider(
                         score,
                         info.Chart,
-                        Content.Rulesets.current,
+                        Rulesets.current,
                         ModdedChart = info.WithMods
                     )
                 )

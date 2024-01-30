@@ -30,20 +30,20 @@ module Printerlude =
                     "themes_reload",
                     "Reload the current theme and noteskin",
                     fun () ->
-                        Content.Themes.load ()
-                        Content.Noteskins.load ()
+                        Themes.reload_current ()
+                        Noteskins.reload_current ()
                 )
                 .WithCommand(
                     "noteskin_stitch",
                     "Stitch a noteskin texture",
                     "id",
-                    fun id -> Content.Noteskins.Current.instance.StitchTexture id
+                    fun id -> Content.Noteskin.StitchTexture id
                 )
                 .WithCommand(
                     "noteskin_split",
                     "Split a noteskin texture",
                     "id",
-                    fun id -> Content.Noteskins.Current.instance.SplitTexture id
+                    fun id -> Content.Noteskin.SplitTexture id
                 )
 
     module private Utils =
@@ -98,7 +98,7 @@ module Printerlude =
             banner.SaveAsPng("banner.png")
 
         let private sync_table_scores () =
-            match Tables.current () with
+            match Content.Table with
             | None -> ()
             | Some table ->
 
@@ -137,7 +137,7 @@ module Printerlude =
             { new Async.Service<string, unit>() with
                 override this.Handle(ruleset_id) =
                     async {
-                        match Content.Rulesets.try_get_by_hash ruleset_id with
+                        match Content.Rulesets.by_hash ruleset_id with
                         | None -> ()
                         | Some ruleset ->
 

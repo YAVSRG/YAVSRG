@@ -16,6 +16,15 @@ module Hotkeys =
         defaults.Add(id, value)
         hotkeys.Add(id, value)
 
+    do
+        register "none" Dummy
+        register "exit" (mk Keys.Escape)
+        register "select" (mk Keys.Enter)
+        register "up" (mk Keys.Up)
+        register "down" (mk Keys.Down)
+        register "left" (mk Keys.Left)
+        register "right" (mk Keys.Right)
+
     let inline get (id: string) = hotkeys.[id]
 
     let inline set (id: string) (value: Bind) = hotkeys.[id] <- value
@@ -29,15 +38,6 @@ module Hotkeys =
     let reset_all () =
         for id in defaults.Keys do
             reset id
-
-    let init () =
-        register "none" Dummy
-        register "exit" (mk Keys.Escape)
-        register "select" (mk Keys.Enter)
-        register "up" (mk Keys.Up)
-        register "down" (mk Keys.Down)
-        register "left" (mk Keys.Left)
-        register "right" (mk Keys.Right)
 
     let import (d: Dictionary<string, Bind>) =
         for k in d.Keys do

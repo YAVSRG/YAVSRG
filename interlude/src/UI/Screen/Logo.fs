@@ -5,7 +5,7 @@ open OpenTK.Mathematics
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
-open Interlude
+open Interlude.Content
 
 module Logo =
 
@@ -130,13 +130,13 @@ module Logo =
                          |> Quad.translate (0.0f, breathe_2))
                         (Quad.color Colors.cyan_accent)
 
-                    Draw.sprite breathe_bounds Colors.white (Content.get_texture "logo")
+                    Draw.sprite breathe_bounds Colors.white (Content.Texture "logo")
 
                     /// RENDER VISUALISER AND RAIN INSIDE STENCIL
 
                     Stencil.start_drawing ()
                     Draw.rect breathe_bounds Colors.cyan_accent
-                    let rain = Content.get_texture "rain"
+                    let rain = Content.Texture "rain"
                     let v = float32 counter.Time
                     let q = breathe_bounds.AsQuad
 
@@ -180,7 +180,7 @@ module Logo =
                         prev <- level
 
                     Stencil.finish ()
-                    Draw.sprite breathe_bounds Colors.white (Content.get_texture "logo")
+                    Draw.sprite breathe_bounds Colors.white (Content.Texture "logo")
 
         member this.Move(l, t, r, b) =
             this.Position <-

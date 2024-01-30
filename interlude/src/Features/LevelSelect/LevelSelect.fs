@@ -150,7 +150,7 @@ type LevelSelectScreen() =
                 (fun () ->
                     Tree.filter = []
                     && options.LibraryMode.Value = LibraryMode.Table
-                    && Tables.current().IsNone
+                    && Content.Table.IsNone
                 ),
                 EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
             )

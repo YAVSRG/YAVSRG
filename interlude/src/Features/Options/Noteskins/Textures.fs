@@ -75,7 +75,7 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
     let mutable items: NavigationContainer.Grid<Widget> = Unchecked.defaultof<_>
 
     member this.Refresh() =
-        sprite <- get_texture texture_id
+        sprite <- Content.Texture texture_id
 
         if sprite.Columns <> selected.Length || sprite.Rows <> selected.[0].Length then
             selected <- Array.init sprite.Columns (fun _ -> Array.zeroCreate sprite.Rows)
@@ -132,8 +132,8 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                 ConfirmPage(
                                     sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
                                     fun () ->
-                                        Noteskins.Current.instance.DeleteTextureColumn(c, texture_id)
-                                        Noteskins.Current.reload ()
+                                        Content.Noteskin.DeleteTextureColumn(c, texture_id)
+                                        Noteskins.reload_current()
                                         this.Refresh()
                                 )
                                     .Show()
@@ -164,8 +164,8 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                         ConfirmPage(
                             sprintf "Really PERMANENTLY delete color %i?" (r + 1),
                             fun () ->
-                                Noteskins.Current.instance.DeleteTextureRow(r, texture_id)
-                                Noteskins.Current.reload ()
+                                Content.Noteskin.DeleteTextureRow(r, texture_id)
+                                Noteskins.reload_current ()
                                 this.Refresh()
                         )
                             .Show()
@@ -196,8 +196,8 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                          "Add a new color to this texture? (will be a copy of color %i)"
                                          (src_row + 1),
                                      fun () ->
-                                         Noteskins.Current.instance.AddTextureRow(src_row, texture_id)
-                                         Noteskins.Current.reload ()
+                                         Content.Noteskin.AddTextureRow(src_row, texture_id)
+                                         Noteskins.reload_current ()
                                          this.Refresh()
                                  )
                                      .Show()
@@ -228,8 +228,8 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                          "Add a new animation frame to this texture? (will be a copy of frame %i)"
                                          (src_col + 1),
                                      fun () ->
-                                         Noteskins.Current.instance.AddTextureColumn(src_col, texture_id)
-                                         Noteskins.Current.reload ()
+                                         Content.Noteskin.AddTextureColumn(src_col, texture_id)
+                                         Noteskins.reload_current ()
                                          this.Refresh()
                                  )
                                      .Show()
@@ -287,7 +287,7 @@ type TextureEditPage(texture_id: string) as this =
         )
 
     do
-        Noteskins.Current.instance.SplitTexture(texture_id)
+        Content.Noteskin.SplitTexture(texture_id)
 
         this.Content(
             column ()
@@ -297,9 +297,9 @@ type TextureEditPage(texture_id: string) as this =
                     Icons.ROTATE_CW + " Rotate clockwise"
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
-                            Noteskins.Current.instance.RotateClockwise((col, row), texture_id)
+                            Content.Noteskin.RotateClockwise((col, row), texture_id)
 
-                        Noteskins.Current.reload ()
+                        Noteskins.reload_current ()
                         texture_editor.Refresh()
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
                 )
@@ -307,9 +307,9 @@ type TextureEditPage(texture_id: string) as this =
                     Icons.ROTATE_CCW + " Rotate anticlockwise"
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
-                            Noteskins.Current.instance.RotateAnticlockwise((col, row), texture_id)
-
-                        Noteskins.Current.reload ()
+                            Content.Noteskin.RotateAnticlockwise((col, row), texture_id)
+                            
+                        Noteskins.reload_current ()
                         texture_editor.Refresh()
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
                 )
@@ -317,9 +317,9 @@ type TextureEditPage(texture_id: string) as this =
                     Icons.CORNER_LEFT_UP + " Vertical flip"
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
-                            Noteskins.Current.instance.VerticalFlipTexture((col, row), texture_id)
-
-                        Noteskins.Current.reload ()
+                            Content.Noteskin.VerticalFlipTexture((col, row), texture_id)
+                            
+                        Noteskins.reload_current ()
                         texture_editor.Refresh()
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
                 )
@@ -327,9 +327,9 @@ type TextureEditPage(texture_id: string) as this =
                     Icons.CORNER_DOWN_LEFT + " Horizontal flip"
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
-                            Noteskins.Current.instance.HorizontalFlipTexture((col, row), texture_id)
-
-                        Noteskins.Current.reload ()
+                            Content.Noteskin.HorizontalFlipTexture((col, row), texture_id)
+                            
+                        Noteskins.reload_current ()
                         texture_editor.Refresh()
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
                 ))
@@ -362,7 +362,7 @@ type TextureCard(id: string, on_click: unit -> unit) as this =
         )
 
     // todo: refresh on return from editor
-    let sprite = get_texture id
+    let sprite = Content.Texture id
 
     do
         this

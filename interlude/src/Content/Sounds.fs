@@ -1,0 +1,21 @@
+﻿namespace Interlude.Content
+
+open System.Collections.Generic
+open Percyqaz.Flux.Audio
+
+module Sounds =
+
+    let private cache = new Dictionary<string, SoundEffect>()
+
+    let get (id: string) =
+        if cache.ContainsKey id then
+            cache.[id]
+        else
+            failwithf "No such loaded sound: %s" id
+
+    let add (id: string) (sound: SoundEffect) =
+        if cache.ContainsKey id then
+            cache.[id].Free()
+            cache.Remove id |> ignore
+
+        cache.Add(id, sound)

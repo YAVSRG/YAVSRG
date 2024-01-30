@@ -9,8 +9,9 @@ open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Charts
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
-open Interlude.Utils
 open Interlude
+open Interlude.Utils
+open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Stats
 open Interlude.Features.MainMenu
@@ -194,6 +195,7 @@ module Startup =
 
     let init_startup (instance) =
         Options.init_startup instance
+        Options.Hotkeys.init_startup Options.options.Hotkeys
         Stats.init_startup ()
         Library.init_startup()
         Scores.init_startup()
@@ -227,8 +229,7 @@ module Startup =
         { new Screen.ScreenRoot(Toolbar()) with
             override this.Init() =
                 Printerlude.init_window (instance)
-                Content.init_window Options.options.Theme.Value Options.options.Noteskin.Value Options.options.Table.Value
-                Options.Hotkeys.init_window Options.options.Hotkeys
+                Content.init_window ()
                 //DiscordRPC.init()
                 migrate ()
                 Gameplay.init_window ()

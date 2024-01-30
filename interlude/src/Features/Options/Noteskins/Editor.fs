@@ -13,7 +13,7 @@ open Interlude.Features.OptionsMenu.Gameplay
 type EditNoteskinPage(from_hotkey: bool) as this =
     inherit Page()
 
-    let data = Noteskins.Current.config
+    let data = Content.NoteskinConfig
 
     let name = Setting.simple data.Name
 
@@ -117,7 +117,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        Noteskins.Current.save_config
-            { Noteskins.Current.config with
+        Noteskins.save_config
+            { data with
                 Name = name.Value
             }

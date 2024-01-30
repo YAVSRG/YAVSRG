@@ -108,7 +108,7 @@ type Toolbar() =
                     not Toolbar.hidden
                     && Screen.current_type <> Screen.Type.Play
                     && Screen.current_type <> Screen.Type.Replay
-                    && (not Interlude.Content.Noteskins.Current.instance.IsEmbedded)
+                    && (not Interlude.Content.Content.Noteskin.IsEmbedded)
                 then
                     Noteskins.EditNoteskinPage(true).Show()
         )
@@ -132,10 +132,8 @@ type Toolbar() =
             "reload_themes",
             fun () ->
                 if not Toolbar.hidden then
-                    first_init <- true
-                    Noteskins.load ()
-                    Themes.load ()
-                    first_init <- false
+                    Themes.reload_current ()
+                    Noteskins.reload_current ()
                     Gameplay.Chart.recolor ()
                     Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_themes", "")
         )

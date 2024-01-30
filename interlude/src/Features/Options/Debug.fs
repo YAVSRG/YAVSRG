@@ -20,13 +20,11 @@ module Debug =
         let themes = PageSetting("themes.theme", Dummy())
 
         let refresh () =
-            options.Theme.Value <- Themes.Current.id
-
             themes.Child <-
-                Selector(Themes.list (), options.Theme |> Setting.trigger (fun id -> Themes.Current.switch id))
+                Selector(Themes.list (), options.Theme)
 
         let tryEditTheme () =
-            let theme = Themes.Current.instance
+            let theme = Content.Theme
 
             match theme.Source with
             | Embedded _ ->

@@ -27,8 +27,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
     inherit
         StaticContainer(
             NodeType.Button(fun _ ->
-                if Noteskins.Current.id <> id then
-                    Noteskins.Current.switch id
+                if Noteskins.selected_id.Value <> id then
                     options.Noteskin.Set id
                     Style.click.Play()
                     on_switch ()
@@ -38,7 +37,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
     let mutable preview: Sprite option = None
     let preview_fade = Animation.Fade 0.0f
 
-    member this.IsCurrent = Noteskins.Current.id = id
+    member this.IsCurrent = Noteskins.selected_id.Value = id
 
     override this.Init(parent: Widget) =
         Noteskins.preview_loader.Request(
@@ -118,7 +117,7 @@ type NoteskinsPage() as this =
         GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
     let rec tryEditNoteskin () =
-        let ns = Noteskins.Current.instance
+        let ns = Content.Noteskin
 
         if ns.IsEmbedded then
             ConfirmPage(
@@ -178,7 +177,7 @@ type NoteskinsPage() as this =
                 Align = Alignment.LEFT
             )
             |+ Text(
-                (fun () -> Noteskins.Current.config.Name),
+                (fun () -> Content.NoteskinConfig.Name),
                 Position = Position.Row(130.0f, 100.0f).Margin(100.0f, 0.0f),
                 Color = K Colors.text,
                 Align = Alignment.LEFT

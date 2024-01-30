@@ -15,7 +15,7 @@ open Interlude.UI.Menu
 type RotationPicker(rotation: Setting<float>) as this =
     inherit StaticContainer(NodeType.Leaf)
 
-    let sprite = get_texture "note"
+    let sprite = Content.Texture "note"
 
     let fd () =
         Setting.app (fun x -> (x + 22.5) % 360.0) rotation
@@ -86,7 +86,7 @@ type RotationPicker(rotation: Setting<float>) as this =
 type RotationSettingsPage() as this =
     inherit Page()
 
-    let data = Noteskins.Current.config
+    let data = Content.NoteskinConfig
     let use_rotation = Setting.simple data.UseRotation
 
     let keycount: Setting<Keymode> = Setting.simple Keymode.``4K``
@@ -150,8 +150,8 @@ type RotationSettingsPage() as this =
     override this.Title = %"noteskins.edit.rotations.name"
 
     override this.OnClose() =
-        Noteskins.Current.save_config
-            { Noteskins.Current.config with
+        Noteskins.save_config
+            { data with
                 Rotations = rotations
                 UseRotation = use_rotation.Value
                 ReceptorStyle = receptor_style.Value

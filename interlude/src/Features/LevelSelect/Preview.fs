@@ -7,6 +7,7 @@ open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Charts.Tools.Patterns
 open Interlude.UI.Menu
+open Interlude.Content
 open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Play
 
@@ -27,7 +28,7 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
     let max_note_density = Array.max note_density
 
     let playfield =
-        Playfield(info.WithColors, PlayState.Dummy info, Interlude.Content.noteskin_config (), false)
+        Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
         |+ LaneCover()
 
     let volume = Volume()

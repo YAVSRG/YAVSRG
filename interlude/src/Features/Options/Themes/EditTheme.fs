@@ -10,7 +10,7 @@ open Interlude.UI.Components
 type EditThemePage() as this =
     inherit Page()
 
-    let data = Themes.Current.config
+    let data = Content.ThemeConfig
 
     let name = Setting.simple data.Name
 
@@ -19,4 +19,4 @@ type EditThemePage() as this =
     override this.Title = data.Name
 
     override this.OnClose() =
-        Themes.Current.save_config { data with Name = name.Value }
+        Themes.save_config { data with Name = name.Value }

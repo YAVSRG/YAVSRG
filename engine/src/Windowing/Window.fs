@@ -315,7 +315,6 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         this.ApplyConfig config
         Fonts.init ()
         Input.init this
-        Hotkeys.init ()
         WindowEvents.on_load.Trigger()
         base.IsVisible <- true
 

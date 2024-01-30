@@ -8,7 +8,7 @@ open Prelude.Gameplay
 open Prelude.Charts
 open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Content
-open Interlude
+open Interlude.Content
 open Interlude.Options
 open Interlude.Features
 
@@ -46,11 +46,11 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let playfield_color = noteskin_config.PlayfieldColor
     let fill_column_gaps = noteskin_config.FillColumnGaps
 
-    let receptor = Content.get_texture "receptor"
-    let holdtail = Content.get_texture "holdtail"
-    let holdhead = Content.get_texture "holdhead"
-    let holdbody = Content.get_texture "holdbody"
-    let note = Content.get_texture "note"
+    let receptor = Content.Texture "receptor"
+    let holdtail = Content.Texture "holdtail"
+    let holdhead = Content.Texture "holdhead"
+    let holdbody = Content.Texture "holdbody"
+    let note = Content.Texture "note"
     let useholdtail = noteskin_config.UseHoldTailTexture
     let animation = Animation.Counter(noteskin_config.AnimationFrameTime)
 
@@ -60,7 +60,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let holds_offscreen = Array.create keys -1
     let hold_states = Array.create keys NoHold
 
-    let rotation = Content.Noteskins.note_rotation keys
+    let rotation = Noteskins.note_rotation keys
 
     let mutable time = -Time.infinity
 

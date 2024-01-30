@@ -34,7 +34,13 @@
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
     <EmbeddedResource Include="Resources\default.zip" />
     <Compile Include="Utils.fs" />
-    <Compile Include="Content.fs" />
+    <Compile Include="Content\Sprites.fs" />
+    <Compile Include="Content\Sounds.fs" />
+    <Compile Include="Content\Rulesets.fs" />
+    <Compile Include="Content\Themes.fs" />
+    <Compile Include="Content\Noteskins.fs" />
+    <Compile Include="Content\Tables.fs" />
+    <Compile Include="Content\Init.fs" />
     <Compile Include="Options.fs" />
     <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Callouts.fs" />

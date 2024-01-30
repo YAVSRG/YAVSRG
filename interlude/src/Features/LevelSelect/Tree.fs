@@ -421,7 +421,7 @@ module Tree =
             match options.LibraryMode.Value with
             | LibraryMode.Collections -> get_collection_groups sorting_modes.[options.ChartSortMode.Value] filter
             | LibraryMode.Table -> 
-                match Tables.current() with
+                match Content.Table with
                 | Some table -> get_table_groups table sorting_modes.[options.ChartSortMode.Value] filter
                 | None -> get_empty_view ()
             | LibraryMode.All ->

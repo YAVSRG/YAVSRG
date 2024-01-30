@@ -130,7 +130,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit) =
 type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
     inherit StaticWidget(NodeType.None)
     let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
-    let sprite = get_texture "receptorlighting"
+    let sprite = Content.Texture "receptorlighting"
     let light_time = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
 
     let column_spacing = ns.KeymodeColumnSpacing keys
@@ -297,7 +297,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                         (Quad.color (Color.FromArgb(a, Color.White)))
                         (Sprite.pick_texture
                             (frame, color)
-                            (Content.get_texture (if e.IsHold then "holdexplosion" else "noteexplosion")))
+                            (Content.Texture (if e.IsHold then "holdexplosion" else "noteexplosion")))
                 | _ -> ()
 
         Array.iteri f sliders
@@ -384,7 +384,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
             Pacemaker = pacemaker_info
         }
 
-    let noteskin_config = noteskin_config ()
+    let noteskin_config = Content.NoteskinConfig
 
     let playfield =
         Playfield(with_colors, state, noteskin_config, options.VanishingNotes.Value)

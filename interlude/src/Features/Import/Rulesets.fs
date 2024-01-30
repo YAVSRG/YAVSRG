@@ -35,7 +35,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
 
     let mutable status =
         if Rulesets.list () |> Seq.map fst |> Seq.contains id then
-            if Ruleset.hash (Rulesets.get_by_id id) <> Ruleset.hash ruleset then
+            if Ruleset.hash (Rulesets.by_id id) <> Ruleset.hash ruleset then
                 UpdateAvailable
             else
                 UpToDate
@@ -64,12 +64,12 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
                 .ConfirmPage(
                     "Update this ruleset? (If you made changes yourself, they will be lost)",
                     fun () ->
-                        Rulesets.install (id, ruleset)
+                        Rulesets.install_or_update (id, ruleset)
                         status <- UpToDate
                 )
                 .Show()
         | NotInstalled ->
-            Rulesets.install (id, ruleset)
+            Rulesets.install_or_update (id, ruleset)
             status <- UpToDate
 
     override this.Draw() =

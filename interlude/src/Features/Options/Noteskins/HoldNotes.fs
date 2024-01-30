@@ -13,16 +13,16 @@ open Interlude.UI.Menu
 type HoldNoteSettingsPage() as this =
     inherit Page()
 
-    let data = Noteskins.Current.config
+    let data = Content.NoteskinConfig
 
     let hold_note_trim = Setting.bounded data.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
     let use_tail_texture = Setting.simple data.UseHoldTailTexture
     let flip_hold_tail = Setting.simple data.FlipHoldTail
     let dropped_color = Setting.simple data.DroppedHoldColor
 
-    let head = get_texture "holdhead"
-    let body = get_texture "holdbody"
-    let tail = get_texture "holdtail"
+    let head = Content.Texture "holdhead"
+    let body = Content.Texture "holdbody"
+    let tail = Content.Texture "holdtail"
     let animation = Animation.Counter(data.AnimationFrameTime)
 
     do
@@ -104,8 +104,8 @@ type HoldNoteSettingsPage() as this =
     override this.Title = %"noteskins.edit.holdnotes.name"
 
     override this.OnClose() =
-        Noteskins.Current.save_config
-            { Noteskins.Current.config with
+        Noteskins.save_config
+            { data with
                 HoldNoteTrim = hold_note_trim.Value
                 UseHoldTailTexture = use_tail_texture.Value
                 FlipHoldTail = flip_hold_tail.Value

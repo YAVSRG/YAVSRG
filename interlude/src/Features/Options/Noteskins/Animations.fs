@@ -12,7 +12,7 @@ open Interlude.UI.Menu
 type AnimationSettingsPage() as this =
     inherit Page()
 
-    let data = Noteskins.Current.config
+    let data = Content.NoteskinConfig
 
     let enable_column_light = Setting.simple data.EnableColumnLight
 
@@ -36,11 +36,11 @@ type AnimationSettingsPage() as this =
     let explosion_on_miss = Setting.simple data.Explosions.ExplodeOnMiss
     let explosion_colors = Setting.simple data.Explosions.Colors
 
-    let note = get_texture "note"
-    let noteexplosion = get_texture "noteexplosion"
-    let holdexplosion = get_texture "holdexplosion"
-    let receptor = get_texture "receptor"
-    let columnlighting = get_texture "receptorlighting"
+    let note = Content.Texture "note"
+    let noteexplosion = Content.Texture "noteexplosion"
+    let holdexplosion = Content.Texture "holdexplosion"
+    let receptor = Content.Texture "receptor"
+    let columnlighting = Content.Texture "receptorlighting"
     let mutable test_event_i = 0
 
     let test_events = Animation.Counter 1000.0
@@ -225,8 +225,8 @@ type AnimationSettingsPage() as this =
     override this.Title = %"noteskins.edit.animations.name"
 
     override this.OnClose() =
-        Noteskins.Current.save_config
-            { Noteskins.Current.config with
+        Noteskins.save_config
+            { data with
                 EnableColumnLight = enable_column_light.Value
                 ColumnLightTime = column_light_time.Value
                 AnimationFrameTime = note_animation_time.Value

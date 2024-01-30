@@ -6,7 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
-open Interlude
+open Interlude.Content
 
 module Background =
 
@@ -37,8 +37,8 @@ module Background =
                             let! (bmp: Bitmap) = Image.LoadAsync file |> Async.AwaitTask
 
                             let col =
-                                if Content.theme_config().OverrideAccentColor then
-                                    Content.theme_config().DefaultAccentColor
+                                if Content.ThemeConfig.OverrideAccentColor then
+                                    Content.ThemeConfig.DefaultAccentColor
                                 else
                                     let vibrance (c: Color) =
                                         Math.Abs(int c.R - int c.B)
@@ -63,7 +63,7 @@ module Background =
                                         if vibrance c > 127 then
                                             Color.FromArgb(255, c)
                                         else
-                                            Content.theme_config().DefaultAccentColor
+                                            Content.ThemeConfig.DefaultAccentColor
 
                             return Some(bmp, col)
                         with err ->
@@ -77,14 +77,14 @@ module Background =
                     let sprite = Sprite.upload_one true true (SpriteUpload.OfImage("BACKGROUND", bmp))
 
                     bmp.Dispose()
-                    Content.Themes.accent_color <- col
+                    Themes.accent_color <- col
                     background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
                 | None ->
                     background <-
-                        (Content.get_texture "background", Animation.Fade(0.0f, Target = 1.0f), true)
+                        (Content.Texture "background", Animation.Fade(0.0f, Target = 1.0f), true)
                         :: background
 
-                    Content.Themes.accent_color <- Content.theme_config().DefaultAccentColor
+                    Themes.accent_color <- Content.ThemeConfig.DefaultAccentColor
         }
 
     let load (path: string option) =

@@ -143,7 +143,7 @@ module Options =
                 AudioOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
                 AudioVolume = Setting.percent 0.05
                 CurrentChart = Setting.simple ""
-                Theme = Setting.simple "*default"
+                Theme = Content.Themes.selected_id
 
                 ScrollSpeed = Setting.bounded 2.05f 1.0f 5.0f |> Setting.roundf 2
                 HitPosition = Setting.bounded 0.0f -300.0f 600.0f
@@ -158,7 +158,7 @@ module Options =
                         FadeLength = Setting.bounded 200f 0f 500f
                         Color = Setting.simple Color.Black
                     }
-                Noteskin = Setting.simple "*defaultBar.isk"
+                Noteskin = Content.Noteskins.selected_id
 
                 // playstyles are hints to the difficulty calc on how the hands are positioned
                 // will be removed when difficulty calc gets scrapped
@@ -174,15 +174,7 @@ module Options =
                         Layout.LeftOne
                         Layout.Spread
                     |]
-                // todo: have this inspire a rewrite of Content module
-                SelectedRuleset =
-                    Setting.simple Content.Rulesets.DEFAULT_ID
-                    |> Setting.trigger (fun t ->
-                        if Content.first_init then
-                            Percyqaz.Flux.UI.Root.sync (fun () -> Content.Rulesets.switch t)
-                        else
-                            Content.Rulesets.switch t
-                    )
+                SelectedRuleset = Content.Rulesets.selected_id
                 FailCondition = Setting.simple FailType.EndOfSong
                 Pacemakers = Dictionary<string, Pacemaker>()
                 EnablePacemaker = Setting.simple false
@@ -200,7 +192,7 @@ module Options =
                 ChartGroupReverse = Setting.simple false
                 ScoreSortMode = Setting.simple 0
 
-                Table = Setting.simple None
+                Table = Content.Tables.selected_id
 
                 EnableConsole = Setting.simple false
                 Hotkeys = Dictionary<Hotkey, Bind>()
@@ -287,7 +279,7 @@ module Options =
 
     module Hotkeys =
 
-        let init_window (d: Dictionary<Hotkey, Bind>) =
+        let init_startup (d: Dictionary<Hotkey, Bind>) =
             Hotkeys.register "search" (mk Keys.Tab)
             Hotkeys.register "toolbar" (ctrl Keys.T)
             Hotkeys.register "tooltip" (mk Keys.Slash)
@@ -468,7 +460,6 @@ module Options =
 
                 if Content.Noteskins.exists loaded_preset.Noteskin then
                     options.Noteskin.Set loaded_preset.Noteskin
-                    Content.Noteskins.Current.switch loaded_preset.Noteskin
                 else
                     Logging.Error(
                         sprintf

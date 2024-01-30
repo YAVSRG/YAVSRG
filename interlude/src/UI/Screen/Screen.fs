@@ -6,7 +6,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
-open Interlude
+open Interlude.Content
 open Interlude.UI
 
 module Toolbar =
@@ -152,7 +152,7 @@ module Screen =
                 let x, y = Mouse.pos ()
                 Background.set_parallax_pos (x / Viewport.vwidth, y / Viewport.vheight)
 
-            Palette.accent_color.Target <- Content.Themes.accent_color
+            Palette.accent_color.Target <- Themes.accent_color
             Dialog.display.Update(elapsed_ms, moved)
 
             toolbar.Update(elapsed_ms, moved)
@@ -167,7 +167,7 @@ module Screen =
                 this.ShouldExit <- true
 
         override this.Draw() =
-            if current_type <> Type.Play || Options.options.BackgroundDim.Value < 1.0f then
+            if current_type <> Type.Play || Interlude.Options.options.BackgroundDim.Value < 1.0f then
                 Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
 
             screen_container.Draw()
@@ -187,12 +187,12 @@ module Screen =
                 let x, y = Mouse.pos ()
 
                 Draw.sprite
-                    (Rect.Box(x, y, Content.theme_config().CursorSize, Content.theme_config().CursorSize))
+                    (Rect.Box(x, y, Content.ThemeConfig.CursorSize, Content.ThemeConfig.CursorSize))
                     (if Notifications.tooltip_available then
                          Colors.white
                      else
                          Palette.color (255, 1.0f, 0.5f))
-                    (Content.get_texture "cursor")
+                    (Content.Texture "cursor")
 
             perf.Draw()
 

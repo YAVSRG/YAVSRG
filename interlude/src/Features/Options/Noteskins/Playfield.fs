@@ -70,7 +70,7 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) as this =
 type PlayfieldSettingsPage() as this =
     inherit Page()
 
-    let data = Noteskins.Current.config
+    let data = Content.NoteskinConfig
 
     let keycount = Setting.simple Keymode.``4K``
 
@@ -239,8 +239,8 @@ type PlayfieldSettingsPage() as this =
     override this.Title = %"noteskins.edit.playfield.name"
 
     override this.OnClose() =
-        Noteskins.Current.save_config
-            { Noteskins.Current.config with
+        Noteskins.save_config
+            { data with
                 ColumnWidth = column_width.Value
                 ColumnSpacing = column_spacing.Value
                 FillColumnGaps = fill_gaps.Value

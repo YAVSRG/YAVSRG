@@ -17,7 +17,7 @@ type NoteskinPreview(scale: float32) as this =
 
     let create_renderer (info: LoadedChartInfo) =
         let playfield =
-            Playfield(info.WithColors, PlayState.Dummy info, noteskin_config (), false)
+            Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
 
         playfield.Add(LaneCover())
             
@@ -98,7 +98,7 @@ type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
             if config.Value.Float then
                 this.PreviewBounds
             else
-                let cfg = Noteskins.Current.config
+                let cfg = Content.NoteskinConfig
 
                 let width =
                     cfg.ColumnWidth
