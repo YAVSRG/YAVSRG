@@ -66,7 +66,7 @@ module Cache =
 
     let create_entry (folder_name: string) (file_time: DateTime) (chart: Chart) =
         let last_note = chart.LastNote
-        let rating = RatingReport(chart.Notes, 1.0f, Layout.Spread, chart.Keys)
+        let rating = RatingReport(chart.Notes, 1.0f, chart.Keys)
 
         {
             Artist = chart.Header.Artist

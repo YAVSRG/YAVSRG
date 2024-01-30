@@ -9,7 +9,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Prelude.Common
 open Prelude.Gameplay.Mods
-open Prelude.Gameplay.Layout
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Library.Imports
 open Interlude
@@ -101,7 +100,6 @@ module Options =
             LaneCover: LaneCoverOptions
             Noteskin: Setting<string>
 
-            Playstyles: Layout array
             SelectedRuleset: Setting<string>
             FailCondition: Setting<FailType>
             Pacemakers: Dictionary<string, Pacemaker>
@@ -159,21 +157,6 @@ module Options =
                         Color = Setting.simple Color.Black
                     }
                 Noteskin = Content.Noteskins.selected_id
-
-                // playstyles are hints to the difficulty calc on how the hands are positioned
-                // will be removed when difficulty calc gets scrapped
-                // there is no way to edit these
-                Playstyles =
-                    [|
-                        Layout.OneHand
-                        Layout.Spread
-                        Layout.LeftOne
-                        Layout.Spread
-                        Layout.LeftOne
-                        Layout.Spread
-                        Layout.LeftOne
-                        Layout.Spread
-                    |]
                 SelectedRuleset = Content.Rulesets.selected_id
                 FailCondition = Setting.simple FailType.EndOfSong
                 Pacemakers = Dictionary<string, Pacemaker>()

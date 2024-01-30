@@ -16,9 +16,6 @@ module Themes =
     let private DEFAULT_ID = "*default"
     let private DEFAULT = Theme.FromZipStream <| Utils.get_resource_stream "default.zip"
 
-    // todo: remove this variable, apply changes directly from Background.fs to the palette color
-    let mutable accent_color = ThemeConfig.Default.DefaultAccentColor
-
     let mutable private initialised = false
     let private loaded = Dictionary<string, Theme>()
     let mutable current = DEFAULT
@@ -89,7 +86,7 @@ module Themes =
                 | None -> failwithf "Failed to load sound '%s' from *default" id
 
         if current_config.OverrideAccentColor then
-            accent_color <- current_config.DefaultAccentColor
+            Palette.accent_color.Target <- current_config.DefaultAccentColor
 
         for font in DEFAULT.GetFonts() do
             Fonts.add font

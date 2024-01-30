@@ -120,7 +120,7 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
         with get () =
             difficulty <-
                 ValueOption.defaultWith
-                    (fun () -> RatingReport(this.ModdedChart.Notes, score.rate, score.layout, this.ModdedChart.Keys))
+                    (fun () -> RatingReport(this.ModdedChart.Notes, score.rate, this.ModdedChart.Keys))
                     difficulty
                 |> ValueSome
 

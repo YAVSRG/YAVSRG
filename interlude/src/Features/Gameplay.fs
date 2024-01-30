@@ -180,7 +180,6 @@ module Gameplay =
                                 RatingReport(
                                     with_mods.Notes,
                                     _rate.Value,
-                                    options.Playstyles.[with_mods.Keys - 3],
                                     with_mods.Keys
                                 )
 
@@ -216,7 +215,6 @@ module Gameplay =
                                 RatingReport(
                                     with_mods.Notes,
                                     _rate.Value,
-                                    options.Playstyles.[with_mods.Keys - 3],
                                     with_mods.Keys
                                 )
 
@@ -434,7 +432,7 @@ module Gameplay =
             replay = Replay.compress_string replay_data
             rate = rate.Value
             selectedMods = with_mods.ModsApplied
-            layout = options.Playstyles.[keys - 3]
+            layout = Layout.Layout.Spread
             keycount = keys
         }
 
@@ -500,7 +498,7 @@ module Gameplay =
                                     replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
                                     rate = rate.Value
                                     selectedMods = info.WithMods.ModsApplied
-                                    layout = options.Playstyles.[info.WithMods.Keys - 3]
+                                    layout = Layout.Layout.Spread
                                     keycount = info.WithMods.Keys
                                 }
 
@@ -527,7 +525,7 @@ module Gameplay =
                             replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
                             rate = rate.Value
                             selectedMods = info.WithMods.ModsApplied
-                            layout = options.Playstyles.[info.WithMods.Keys - 3]
+                            layout = Layout.Layout.Spread
                             keycount = info.WithMods.Keys
                         }
 

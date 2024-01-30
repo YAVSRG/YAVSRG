@@ -194,7 +194,7 @@ module Leaderboard =
                                         replay = score.Replay
                                         rate = score.Rate
                                         selectedMods = score.Mods
-                                        layout = options.Playstyles.[req.Chart.Keys - 3]
+                                        layout = Layout.Layout.Spread
                                         keycount = req.Chart.Keys
                                     }
                                     : Score),

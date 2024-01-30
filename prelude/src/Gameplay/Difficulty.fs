@@ -186,14 +186,11 @@ module Difficulty =
     let private OHTNERF = 3.0
     let private SCALING_VALUE = 0.55
 
-    type RatingReport(notes: TimeArray<NoteRow>, rate: float32, layout, keys) =
+    type RatingReport(notes: TimeArray<NoteRow>, rate: float32, keys) =
         let layoutData =
-            match getLayoutInfo (layout, keys) with
-            | Some l -> l
-            | None ->
-                getAvailableLayouts keys
-                |> List.head
-                |> fun l -> getLayoutInfo (l, keys) |> fun x -> x.Value
+            getAvailableLayouts keys
+            |> List.head
+            |> fun l -> getLayoutInfo (l, keys) |> fun x -> x.Value
 
         let fingers = Array.zeroCreate<Time> keys
 
