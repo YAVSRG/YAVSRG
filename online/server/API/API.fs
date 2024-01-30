@@ -70,7 +70,7 @@ module API =
                     |> ignore
                 | err ->
                     Logging.Error(sprintf "Unhandled exception in %O %s: %O" method route err)
-                    Discord.debug_log(sprintf "Unhandled exception in %O %s\n%s" method route (err.StackTrace))
+                    Discord.debug_log(sprintf "Unhandled exception in %O %s\n%s" method route (err.ToString()))
                     response.MakeErrorResponse(500, "Internal error") |> ignore
             else
                 response.MakeErrorResponse(404, "Route not found") |> ignore

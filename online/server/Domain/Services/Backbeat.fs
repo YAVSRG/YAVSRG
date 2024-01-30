@@ -49,6 +49,10 @@ module Backbeat =
                     charts.Count
                     songs.Count
             )
+            
+            for rs in archive.Rulesets.Values do
+                rulesets.[Ruleset.hash rs] <- rs
+                tables <- Map.ofList [ "crescent", crescent ]
         }
 
     module Tables =
