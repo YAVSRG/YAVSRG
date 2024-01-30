@@ -9,14 +9,15 @@ open Percyqaz.Flux.Utils
 /// Each item requests a size (height or width respectively depending on container direction) and can signal to the container that this size has changed
 module FlowContainerV2 =
 
-    type FlowContainerItem =
-        abstract member Size: float32
-        abstract member OnSizeChanged: (unit -> unit) -> unit
+    type Item =
 
-    type FlowItem<'T when 'T :> Widget and 'T :> FlowContainerItem> = { Widget: 'T; mutable Visible: bool }
+        abstract member Size: float32
+        abstract OnSizeChanged : (unit -> unit) with set
+
+    type FlowItem<'T when 'T :> Widget and 'T :> Item> = { Widget: 'T; mutable Visible: bool }
 
     [<AbstractClass>]
-    type Base<'T when 'T :> Widget and 'T :> FlowContainerItem>() as this =
+    type Base<'T when 'T :> Widget and 'T :> Item>() as this =
         inherit StaticWidget(NodeType.Switch(fun _ -> this.WhoShouldFocus))
 
         let mutable filter: 'T -> bool = K true
@@ -119,7 +120,7 @@ module FlowContainerV2 =
 
         member this.Clear() =
             require_ui_thread ()
-            this.Iter(fun c -> c.OnSizeChanged ignore)
+            this.Iter(fun c -> c.OnSizeChanged <- ignore)
             children.Clear()
 
         override this.Draw() =
@@ -164,7 +165,7 @@ module FlowContainerV2 =
 
             if this.Initialised then
                 child.Init this
-                child.OnSizeChanged(fun () -> refresh <- true)
+                child.OnSizeChanged <- fun () -> refresh <- true
                 refresh <- true
 
         member this.Remove(child: 'T) =
@@ -173,7 +174,7 @@ module FlowContainerV2 =
             match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
             | Some x ->
                 children.Remove x |> ignore
-                child.OnSizeChanged ignore
+                child.OnSizeChanged <- ignore
                 refresh <- true
             | None -> Logging.Error(sprintf "%O is not in flow container %O, can't remove" child this)
 
@@ -183,7 +184,7 @@ module FlowContainerV2 =
 
             for { Widget = child } in children do
                 child.Init this
-                child.OnSizeChanged(fun () -> refresh <- true)
+                child.OnSizeChanged <- fun () -> refresh <- true
 
         member this.Iter(f: 'T -> unit) =
             require_ui_thread ()
@@ -198,7 +199,7 @@ module FlowContainerV2 =
         static member (|*)(parent: #Base<'T>, child: 'T) = parent.Add child
 
     [<Sealed>]
-    type Vertical<'T when 'T :> Widget and 'T :> FlowContainerItem>() =
+    type Vertical<'T when 'T :> Widget and 'T :> Item>() =
         inherit Base<'T>()
 
         let mutable content_height = 0.0f
@@ -231,7 +232,7 @@ module FlowContainerV2 =
                 this.SelectFocusedChild()
 
     [<Sealed>]
-    type LeftToRight<'T when 'T :> Widget and 'T :> FlowContainerItem>() =
+    type LeftToRight<'T when 'T :> Widget and 'T :> Item>() =
         inherit Base<'T>()
 
         let mutable content_width = 0.0f
@@ -264,7 +265,7 @@ module FlowContainerV2 =
                 this.SelectFocusedChild()
 
     [<Sealed>]
-    type RightToLeft<'T when 'T :> Widget and 'T :> FlowContainerItem>() =
+    type RightToLeft<'T when 'T :> Widget and 'T :> Item>() =
         inherit Base<'T>()
 
         let mutable content_width = 0.0f

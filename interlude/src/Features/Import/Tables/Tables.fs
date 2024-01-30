@@ -1,0 +1,135 @@
+﻿namespace Interlude.Features.Import
+
+open Percyqaz.Common
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
+open Prelude.Data
+open Prelude.Data.Charts
+open Prelude.Data.Charts.Caching
+open Prelude.Data.Charts.Tables
+open Interlude.Web.Shared.Requests
+open Interlude.UI
+open Interlude.UI.Menu
+
+[<RequireQualifiedAccess>]
+type private TableStatus =
+    | NotInstalled
+    | OutOfDate
+    | Installing
+    | Installed
+
+type TableCard(online_table: Tables.List.Table) as this =
+    inherit
+        Frame(
+            NodeType.Button(fun () ->
+                Style.click.Play()
+                this.Install()
+            ),
+            Fill = (fun () -> if this.Focused then Colors.pink.O2 else Colors.shadow_2.O2),
+            Border =
+                (fun () ->
+                    if this.Focused then
+                        Colors.pink_accent
+                    else
+                        Colors.grey_2.O3
+                )
+        )
+
+    let mutable existing = None
+    let mutable status = TableStatus.NotInstalled
+
+    override this.Init (parent: Widget) =
+        this
+        |+ Text(online_table.Info.Name, Align = Alignment.CENTER, Position = Position.SliceTop(80.0f).Margin(20.0f, Style.PADDING))
+        |+ Text(
+            online_table.Info.Description,
+            Align = Alignment.CENTER,
+            Position = Position.TrimTop(65.0f).SliceTop(60.0f).Margin(20.0f, Style.PADDING)
+        )
+        |* Clickable.Focus this
+
+        existing <- Interlude.Content.Tables.by_id online_table.Id
+        status <-
+            match existing with
+            | Some table when table.LastUpdated < online_table.LastUpdated -> TableStatus.OutOfDate
+            | Some table -> TableStatus.Installed
+            | None -> TableStatus.NotInstalled
+
+        base.Init parent
+
+    override this.OnFocus() =
+        Style.hover.Play()
+        base.OnFocus()
+
+    member this.Install() =
+        match status with
+        | TableStatus.NotInstalled
+        | TableStatus.OutOfDate as current_status ->
+            status <- TableStatus.Installing
+            Tables.Charts.get (online_table.Id,
+                function
+                | Some charts ->
+                    sync(fun () ->
+                        let table =
+                            {
+                                Id = online_table.Id
+                                Info = online_table.Info
+                                LastUpdated = online_table.LastUpdated
+                                Charts = charts.Charts |> Array.map (fun c -> { Hash = c.Hash; Level = c.Level }) |> List.ofArray
+                            }
+                        Interlude.Content.Tables.install_or_update table
+                        status <- TableStatus.Installed
+                        Interlude.Options.options.Table.Value <- Some online_table.Id
+                        TableDownloadMenu(table, charts.Charts).Show()
+                    )
+                | None -> 
+                    Logging.Error("Error getting charts for table")
+                    sync(fun () ->
+                        status <- current_status
+                        // error toast
+                    )
+            )
+        | TableStatus.Installing -> ()
+        | TableStatus.Installed ->
+            // temp
+            Tables.Charts.get (online_table.Id,
+                function
+                | Some charts ->
+                    sync(fun () ->
+                        let table =
+                            {
+                                Id = online_table.Id
+                                Info = online_table.Info
+                                LastUpdated = online_table.LastUpdated
+                                Charts = charts.Charts |> Array.map (fun c -> { Hash = c.Hash; Level = c.Level }) |> List.ofArray
+                            }
+                        TableDownloadMenu(table, charts.Charts).Show()
+                    )
+                | None -> 
+                    Logging.Error("Error getting charts for table")
+            )
+
+module Tables =
+
+    type TableList() as this =
+        inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
+
+        let flow = FlowContainer.Vertical<TableCard>(260.0f, Spacing = 15.0f)
+        let scroll = ScrollContainer.Flow(flow, Margin = Style.PADDING)
+
+        override this.Init(parent) =
+            Tables.List.get (
+                function
+                | Some tables ->
+                    for table in tables.Tables do
+                        sync (fun () -> flow.Add(TableCard(table)))
+                | None -> Logging.Error("Error getting online tables list")
+            )
+            this |* scroll
+            base.Init parent
+
+        override this.Focusable = flow.Focusable
+
+        member this.Items = flow
+
+    let tab = TableList()

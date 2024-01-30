@@ -14,7 +14,7 @@ type TableRatingCalculation =
     | AverageTop50
 
 [<Json.AutoCodec>]
-type TypeSectionInfo =
+type TableSectionInfo =
     {
         Name: string
         Description: string
@@ -30,9 +30,10 @@ type TableInfo =
         Keymode: int
         RulesetId: string
         RatingCalculation: TableRatingCalculation
-        Sections: TypeSectionInfo list
+        Sections: TableSectionInfo list
         LevelDisplayNames: Map<int, string>
     }
+    member this.LevelName (level: int) = Map.tryFind level this.LevelDisplayNames |> Option.defaultValue (level.ToString())
 
 [<Json.AutoCodec>]
 type TableChart =
@@ -59,7 +60,7 @@ type Table =
 module Table =
     
     let load(id: string) : Table option =
-        let path = Path.Combine(get_game_folder "Tables", id + ".table")
+        let path = Path.Combine(get_game_folder "Data", "Tables", id + ".table")
         match JSON.FromFile path with
         | Ok (file: TableClientFile) ->
             Some { 
@@ -71,7 +72,7 @@ module Table =
         | Error reason -> None
     
     let save(table: Table) =
-        let path = Path.Combine(get_game_folder "Tables", table.Id + ".table")
+        let path = Path.Combine(get_game_folder "Data", "Tables", table.Id + ".table")
         JSON.ToFile (path, true) { Info = table.Info; Charts = table.Charts }
 
     let points (info: TableInfo) (level: int, grade: int) =
