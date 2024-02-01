@@ -2,6 +2,7 @@
 
 open System.Collections.Generic
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
@@ -185,10 +186,15 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) =
             state.OpenSection <- "" 
         else state.OpenSection <- info.Name
 
+    override this.Draw() =
+        Draw.rect this.Bounds Colors.shadow_1.O1
+        base.Draw()
+
     override this.Init (parent: Widget) =
         this
         |+ Text(info.Name, Align = Alignment.LEFT, Position = Position.TrimBottom(50.0f))
-        |* Text(info.Description, Align = Alignment.LEFT, Position = Position.SliceBottom(50.0f))
+        |+ Text(info.Description, Align = Alignment.LEFT, Position = Position.SliceBottom(50.0f))
+        |* Clickable.Focus this
         base.Init parent
 
 type private LevelHeader(section_name: string, level: int, level_name: string, state: DownloaderState) =
@@ -198,10 +204,15 @@ type private LevelHeader(section_name: string, level: int, level_name: string, s
     override this.OnClick() = 
         if state.OpenLevel = level then state.OpenLevel <- -1
         else state.OpenLevel <- level
+        
+    override this.Draw() =
+        Draw.rect this.Bounds Colors.shadow_2.O1
+        base.Draw()
 
     override this.Init (parent: Widget) =
         this
-        |* Text(level_name, Align = Alignment.LEFT)
+        |+ Text(level_name, Align = Alignment.LEFT)
+        |* Clickable.Focus this
         base.Init parent
 
 type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
