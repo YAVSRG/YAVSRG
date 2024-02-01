@@ -9,37 +9,17 @@ open Percyqaz.Flux.Graphics
 /// Container that wraps a child to allow vertical scrolling with the mouse wheel
 /// Also automatically scrolls to show the selected item when navigating
 [<Sealed>]
-type ScrollContainer(child: Widget, content_height: float32) =
+type ScrollContainer<'T when 'T :> Widget and 'T :> DynamicSize>(child: 'T) =
     inherit StaticWidget(NodeType.Switch(K child))
 
     static let SENSITIVITY = 100.0f
 
+    let mutable content_height = 0.0f
     let mutable scroll_pos = Animation.Fade 0.0f // amount in pixels to move content UP inside container
-    let mutable content_height = content_height
     let mutable refresh = false
     let mutable scroll_to_child_next_frame = false
 
-    static member Flow(child: FlowContainer.Vertical<'T>) =
-        let sc = ScrollContainer(child, 0.0f)
-        child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.PADDING * 2.0f))
-        sc
-
-    static member Flow(child: FlowContainerV2.Vertical<'T>) =
-        let sc = ScrollContainer(child, 0.0f)
-        child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.PADDING * 2.0f))
-        sc
-
-    static member Grid(child: GridFlowContainer<'T>) =
-        let sc = ScrollContainer(child, 0.0f)
-        child.ContentHeightChanged.Add(fun h -> sc.set_ContentHeight (h + Style.PADDING * 2.0f))
-        sc
-
     member val Margin = 0.0f with get, set
-
-    member this.ContentHeight
-        with set (value) =
-            content_height <- value
-            refresh <- true
 
     member this.PositionPercent = scroll_pos.Value / (content_height - this.Bounds.Height)
 
@@ -110,6 +90,9 @@ type ScrollContainer(child: Widget, content_height: float32) =
     override this.Init(parent: Widget) =
         base.Init parent
         child.Init this
+
+        content_height <- child.Size
+        child.OnSizeChanged <- fun () -> content_height <- child.Size + this.Margin * 2.0f
 
         child.Position <-
             Position

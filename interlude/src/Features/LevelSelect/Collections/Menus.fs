@@ -242,7 +242,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit, is_disabled:
             |+ PageButton("collections.create_playlist", (fun () -> CreatePlaylistPage(if select_on_create then on_select else ignore).Show()))
                 .Pos(220.0f)
                 .Tooltip(Tooltip.Info("collections.create_playlist"))
-            |+ ScrollContainer.Grid(grid, Position = Position.Margin(100.0f, 100.0f).TrimTop(280.0f))
+            |+ ScrollContainer(grid, Position = Position.Margin(100.0f, 100.0f).TrimTop(280.0f))
         )
 
     override this.Title = %"collections.name"

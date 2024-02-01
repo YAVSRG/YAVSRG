@@ -98,7 +98,7 @@ type ManageTablesPage() as this =
     do
         refresh ()
 
-        this.Content(ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)))
+        this.Content(ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f)))
 
     override this.Title = %"table.name"
     override this.OnClose() = ()

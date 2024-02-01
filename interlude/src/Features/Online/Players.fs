@@ -120,7 +120,7 @@ type private OnlineList() =
                 for player in data.Players do
                     contents.Add(PlayerButton(player.Username, player.Color))
 
-                ScrollContainer.Flow(contents) :> Widget
+                ScrollContainer(contents) :> Widget
         )
 
     override this.Draw() =
@@ -162,7 +162,7 @@ type private FriendList() =
                         )
                     )
 
-                ScrollContainer.Flow(contents) :> Widget
+                ScrollContainer(contents) :> Widget
         )
 
     override this.Init(parent) =
@@ -204,7 +204,7 @@ type private SearchList() =
                         for player in data.Matches do
                             contents.Add(PlayerButton(player.Username, player.Color))
 
-                        ScrollContainer.Flow(contents) :> Widget
+                        ScrollContainer(contents) :> Widget
                     else
                         EmptyState(
                             Icons.SEARCH,

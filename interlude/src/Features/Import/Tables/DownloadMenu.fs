@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
@@ -22,9 +23,9 @@ module private TableDownloader =
     
     [<RequireQualifiedAccess>]
     type GroupStatus =
-        | Downloading
-        | SomeMissing
         | AllMissing
+        | SomeMissing
+        | Downloading
         | Downloaded
 
     type DownloaderState(table: Table, charts: Tables.Charts.ChartInfo array, on_selected_changed) =
@@ -162,7 +163,7 @@ module private TableDownloader =
             and set v = open_level <- v; on_selected_changed()
         member this.OpenSection 
             with get() = open_section
-            and set v = open_section <- v; on_selected_changed()
+            and set v = open_level <- -1; open_section <- v; on_selected_changed()
 
 open TableDownloader
 
@@ -173,7 +174,7 @@ type private DownloadMenuFragment(height: float32) as this =
     abstract member Visible : bool
     abstract member OnClick : unit -> unit
 
-    interface FlowContainerV2.Item with
+    interface DynamicSize with
         member this.Size = height
         member this.OnSizeChanged with set _ = ()
 
@@ -187,7 +188,7 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) =
         else state.OpenSection <- info.Name
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_1.O1
+        Draw.rect this.Bounds (Color.FromArgb(info.Color).O2)
         base.Draw()
 
     override this.Init (parent: Widget) =
@@ -197,16 +198,16 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) =
         |* Clickable.Focus this
         base.Init parent
 
-type private LevelHeader(section_name: string, level: int, level_name: string, state: DownloaderState) =
+type private LevelHeader(section: TableSectionInfo, level: int, level_name: string, state: DownloaderState) =
     inherit DownloadMenuFragment(50.0f)
 
-    override this.Visible = state.OpenSection = section_name
+    override this.Visible = state.OpenSection = section.Name
     override this.OnClick() = 
         if state.OpenLevel = level then state.OpenLevel <- -1
         else state.OpenLevel <- level
         
     override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O1
+        Draw.rect this.Bounds (Color.FromArgb(section.Color).O1)
         base.Draw()
 
     override this.Init (parent: Widget) =
@@ -248,7 +249,7 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
 type TableDownloadMenu(table: Table, charts: Tables.Charts.ChartInfo array) =
     inherit Page()
 
-    let container = FlowContainerV2.Vertical<DownloadMenuFragment>()
+    let container = DynamicFlowContainer.Vertical<DownloadMenuFragment>()
 
     let state = DownloaderState(table, charts, fun () -> container.Filter <- _.Visible)
 
@@ -271,12 +272,12 @@ type TableDownloadMenu(table: Table, charts: Tables.Charts.ChartInfo array) =
             container.Add (SectionHeader (section_info, state))
 
             for level, level_charts in section_levels do
-                container.Add (LevelHeader (section_info.Name, level, table.Info.LevelName level, state))
+                container.Add (LevelHeader (section_info, level, table.Info.LevelName level, state))
 
                 for chart in level_charts do
                     container.Add (Chart (chart, state))
 
-        this.Content(ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 100.0f)))
+        this.Content(ScrollContainer(container, Position = Position.Margin(100.0f, 100.0f)))
         base.Init parent
 
     override this.Title = table.Info.Name

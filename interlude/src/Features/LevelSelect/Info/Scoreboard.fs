@@ -251,7 +251,7 @@ type Scoreboard(display: Setting<Display>) as this =
         | _ -> K true
 
     let scroll_container =
-        ScrollContainer.Flow(
+        ScrollContainer(
             Loader.container,
             Margin = Style.PADDING,
             Position = Position.TrimTop(55.0f).TrimBottom(50.0f)

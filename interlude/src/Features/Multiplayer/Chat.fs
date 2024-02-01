@@ -38,7 +38,7 @@ type Chat() =
     let messages = FlowContainer.Vertical<Widget>(MESSAGE_HEIGHT, Spacing = 2.0f)
 
     let message_box =
-        ScrollContainer.Flow(messages, Position = Position.TrimBottom(60.0f).Margin(5.0f))
+        ScrollContainer(messages, Position = Position.TrimBottom(60.0f).Margin(5.0f))
 
     let chatline =
         TextEntry(current_message, "none", Position = Position.SliceBottom(50.0f).Margin(5.0f))

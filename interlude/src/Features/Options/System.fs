@@ -78,7 +78,7 @@ module System =
             let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
             let scroll_container =
-                ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f))
+                ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f))
 
             container.Add(
                 PageButton(

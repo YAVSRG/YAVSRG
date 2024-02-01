@@ -46,7 +46,7 @@ type Dropdown(items: (string * (Color * Color) * (unit -> unit)) seq, on_close: 
     inherit Frame(NodeType.Switch(fun _ -> this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
-    let scroll = ScrollContainer.Flow(flow)
+    let scroll = ScrollContainer(flow)
 
     do
         for (label, color, action) in items do

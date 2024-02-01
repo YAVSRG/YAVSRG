@@ -89,7 +89,7 @@ type PlayerList() =
     let other_players = FlowContainer.Vertical<Widget>(50.0f, Spacing = 5.0f)
 
     let other_players_scroll =
-        ScrollContainer.Flow(other_players, Position = Position.TrimTop 60.0f, Margin = Style.PADDING)
+        ScrollContainer(other_players, Position = Position.TrimTop 60.0f, Margin = Style.PADDING)
 
     let refresh () =
         other_players.Clear()

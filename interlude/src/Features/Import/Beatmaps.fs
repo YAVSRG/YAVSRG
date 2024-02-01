@@ -316,7 +316,7 @@ module Beatmaps =
         let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
 
         let scroll =
-            ScrollContainer.Flow(items, Margin = Style.PADDING, Position = Position.TrimTop(120.0f).TrimBottom(65.0f))
+            ScrollContainer(items, Margin = Style.PADDING, Position = Position.TrimTop(120.0f).TrimBottom(65.0f))
 
         let mutable filter: Filter = []
         let query_order = Setting.simple "updated"

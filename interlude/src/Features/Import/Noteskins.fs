@@ -134,7 +134,7 @@ module Noteskins =
             GridFlowContainer<NoteskinCard>(380.0f, 3, Spacing = (15.0f, 15.0f), WrapNavigation = false)
 
         let scroll =
-            ScrollContainer.Grid(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
+            ScrollContainer(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
 
         let mutable failed = false
 

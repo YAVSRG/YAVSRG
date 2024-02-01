@@ -70,7 +70,7 @@ type private Leaderboard() =
         |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
         |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
         |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.GLOBE, %"misc.server_error"))
-        |* ScrollContainer.Flow(contents)
+        |* ScrollContainer(contents)
 
         base.Init parent
 
@@ -199,7 +199,7 @@ type private CompareFriend
             Position = Position.SliceTop(50.0f).Margin(20.0f, 0.0f)
         )
         |+ Button(K(Icons.ARROW_LEFT_CIRCLE + " Back"), on_back, Position = Position.Box(0.0f, 0.0f, 200.0f, 50.0f))
-        |* ScrollContainer.Flow(contents, Position = Position.Margin(10.0f, 0.0f).TrimTop(55.0f))
+        |* ScrollContainer(contents, Position = Position.Margin(10.0f, 0.0f).TrimTop(55.0f))
 
         base.Init parent
 
@@ -377,7 +377,7 @@ type private TableStats() =
             | Some ruleset ->
 
                 let table_breakdown_items = FlowContainer.Vertical<TableLevelStats>(30.0f)
-                let table_breakdown = ScrollContainer.Flow(table_breakdown_items)
+                let table_breakdown = ScrollContainer(table_breakdown_items)
 
                 let biggest_level =
                     table_level_data
@@ -396,7 +396,7 @@ type private TableStats() =
                     )
 
                 let table_bests_items = FlowContainer.Vertical<TableScore>(50.0f)
-                let table_bests = ScrollContainer.Flow(table_bests_items)
+                let table_bests = ScrollContainer(table_bests_items)
 
                 for i, (chart_id, grade, rating) in top_scores |> Array.indexed do
                     table_bests_items.Add(TableScore(i, chart_id, grade, rating, ruleset))

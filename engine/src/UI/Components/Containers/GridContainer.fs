@@ -23,9 +23,8 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     let mutable last_selected = 0
     let children = ResizeArray<GridFlowItem<'T>>()
 
+    let mutable size_change = ignore
     let mutable content_height = 0.0f
-    let content_change_ev = Event<float32>()
-    member this.ContentHeightChanged = content_change_ev.Publish
 
     override this.Focus() =
         if children.Count > 0 then
@@ -104,7 +103,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
         if height <> content_height then
             content_height <- height
-            content_change_ev.Trigger content_height
+            size_change()
 
     member private this.Up() =
         match this.WhoIsFocused with
@@ -352,3 +351,10 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         parent
 
     static member (|*)(parent: #GridFlowContainer<_>, child: #Widget) = parent.Add child
+
+    
+    
+    interface DynamicSize with
+        member this.Size = content_height
+        member this.OnSizeChanged
+            with set v = size_change <- v

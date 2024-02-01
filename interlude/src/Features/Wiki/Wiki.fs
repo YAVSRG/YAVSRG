@@ -163,10 +163,19 @@ module Wiki =
                         |> load_resource
             }
 
+    type WikiContent(nt) =
+        inherit DynamicContainer(nt)
+
+        member val _Size = 0.0f with get, set
+        
+        interface DynamicSize with
+            member this.Size = this._Size
+            member this.OnSizeChanged with set _ = ()
+
     type Browser() as this =
         inherit Dialog()
 
-        let mutable flow = Unchecked.defaultof<ScrollContainer>
+        let mutable flow = Unchecked.defaultof<ScrollContainer<WikiContent>>
 
         let buttons =
             NavigationContainer.Row<Widget>(
@@ -210,10 +219,10 @@ module Wiki =
         do Heading.scroll_handler <- fun w -> flow.Scroll(w.Bounds.Top - flow.Bounds.Top)
 
         member private this.UpdateContent() =
-            let con = StaticContainer(NodeType.None)
             let mutable y = 0.0f
-            let max_width = 1400.0f
             let spacing = 35.0f
+            let max_width = 1400.0f
+            let con = new WikiContent(NodeType.None)
 
             match content with
             | Some paragraphs ->
@@ -267,8 +276,8 @@ module Wiki =
                     y <- y + 400.0f + spacing
             | None -> con.Add(LoadingState())
 
-            flow <-
-                ScrollContainer(con, y - spacing, Position = Position.Margin((Viewport.vwidth - 1400.0f) * 0.5f, 80.0f))
+            con._Size <- y - spacing
+            flow <- ScrollContainer(con, Position = Position.Margin((Viewport.vwidth - 1400.0f) * 0.5f, 80.0f))
 
             flow.Init this
 

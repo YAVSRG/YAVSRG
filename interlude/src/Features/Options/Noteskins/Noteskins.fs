@@ -182,7 +182,7 @@ type NoteskinsPage() as this =
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )
-            |+ ScrollContainer.Grid(
+            |+ ScrollContainer(
                 grid,
                 Position =
                     {

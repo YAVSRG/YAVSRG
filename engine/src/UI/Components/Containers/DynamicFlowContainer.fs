@@ -7,23 +7,19 @@ open Percyqaz.Flux.Utils
 
 /// Container that automatically positions its contents stacked in Vertical/Horizontal arrangements
 /// Each item requests a size (height or width respectively depending on container direction) and can signal to the container that this size has changed
-module FlowContainerV2 =
+module DynamicFlowContainer =
 
-    type Item =
-
-        abstract member Size: float32
-        abstract OnSizeChanged : (unit -> unit) with set
-
-    type FlowItem<'T when 'T :> Widget and 'T :> Item> = { Widget: 'T; mutable Visible: bool }
+    type FlowItem<'T when 'T :> Widget and 'T :> DynamicSize> = { Widget: 'T; mutable Visible: bool }
 
     [<AbstractClass>]
-    type Base<'T when 'T :> Widget and 'T :> Item>() as this =
+    type Base<'T when 'T :> Widget and 'T :> DynamicSize>() as this =
         inherit StaticWidget(NodeType.Switch(fun _ -> this.WhoShouldFocus))
 
         let mutable filter: 'T -> bool = K true
         let mutable sort: ('T -> 'T -> int) option = None
         let mutable spacing = 0.0f
         let mutable refresh = true
+        let mutable refresh_visible = false
         let mutable last_selected = 0
         let children = ResizeArray<FlowItem<'T>>()
 
@@ -97,10 +93,7 @@ module FlowContainerV2 =
         member this.Filter
             with set value =
                 filter <- value
-
-                for c in children do
-                    c.Visible <- filter c.Widget
-
+                refresh_visible <- true
                 refresh <- true
 
         member this.Sort
@@ -134,6 +127,10 @@ module FlowContainerV2 =
             base.Update(elapsed_ms, moved || refresh)
 
             let moved =
+                if refresh_visible then
+                    for c in children do
+                        c.Visible <- filter c.Widget
+                    refresh_visible <- false
                 if refresh then
                     refresh <- false
                     this.FlowContent children
@@ -199,12 +196,11 @@ module FlowContainerV2 =
         static member (|*)(parent: #Base<'T>, child: 'T) = parent.Add child
 
     [<Sealed>]
-    type Vertical<'T when 'T :> Widget and 'T :> Item>() =
+    type Vertical<'T when 'T :> Widget and 'T :> DynamicSize>() =
         inherit Base<'T>()
 
+        let mutable size_change = ignore
         let mutable content_height = 0.0f
-        let content_change_ev = Event<float32>()
-        member this.ContentHeightChanged = content_change_ev.Publish
 
         override this.FlowContent children =
             let mutable t = 0.0f
@@ -217,9 +213,9 @@ module FlowContainerV2 =
                     b <- t + size
                     t <- t + size + this.Spacing
 
-            if b <> content_height then
+            if b <> content_height then 
                 content_height <- b
-                content_change_ev.Trigger content_height
+                size_change()
 
         override this.Navigate() =
             if (%%"up").Tapped() then
@@ -231,13 +227,20 @@ module FlowContainerV2 =
             if (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
-    [<Sealed>]
-    type LeftToRight<'T when 'T :> Widget and 'T :> Item>() =
-        inherit Base<'T>()
+        override this.Init(parent) =
+            base.Init parent
 
+        interface DynamicSize with
+            member this.Size = content_height
+            member this.OnSizeChanged
+                with set v = size_change <- v
+
+    [<Sealed>]
+    type LeftToRight<'T when 'T :> Widget and 'T :> DynamicSize>() =
+        inherit Base<'T>()
+        
+        let mutable size_change = ignore
         let mutable content_width = 0.0f
-        let content_change_ev = Event<float32>()
-        member this.ContentWidthChanged = content_change_ev.Publish
 
         override this.FlowContent children =
             let mutable l = 0.0f
@@ -250,9 +253,9 @@ module FlowContainerV2 =
                     r <- l + size
                     l <- l + size + this.Spacing
 
-            if r <> content_width then
+            if r <> content_width then 
                 content_width <- r
-                content_change_ev.Trigger content_width
+                size_change()
 
         override this.Navigate() =
             if (%%"left").Tapped() then
@@ -264,13 +267,17 @@ module FlowContainerV2 =
             if (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
+        interface DynamicSize with
+            member this.Size = content_width
+            member this.OnSizeChanged
+                with set v = size_change <- v
+
     [<Sealed>]
-    type RightToLeft<'T when 'T :> Widget and 'T :> Item>() =
+    type RightToLeft<'T when 'T :> Widget and 'T :> DynamicSize>() =
         inherit Base<'T>()
 
+        let mutable size_change = ignore
         let mutable content_width = 0.0f
-        let content_change_ev = Event<float32>()
-        member this.ContentWidthChanged = content_change_ev.Publish
 
         override this.FlowContent children =
             let mutable r = 0.0f
@@ -292,8 +299,8 @@ module FlowContainerV2 =
                     r <- r + size + this.Spacing
 
                 if l <> content_width then
-                    content_width <- l
-                    content_change_ev.Trigger content_width
+                    content_width <- r
+                    size_change()
 
         override this.Navigate() =
             if (%%"left").Tapped() then
@@ -304,3 +311,8 @@ module FlowContainerV2 =
 
             if (%%"select").Tapped() then
                 this.SelectFocusedChild()
+                
+        interface DynamicSize with
+            member this.Size = content_width
+            member this.OnSizeChanged
+                with set v = size_change <- v

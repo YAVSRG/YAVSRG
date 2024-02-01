@@ -193,7 +193,7 @@ module EtternaPacks =
         let flow = FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
 
         let scroll =
-            ScrollContainer.Flow(flow, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
+            ScrollContainer(flow, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
 
         let mutable failed = false
 

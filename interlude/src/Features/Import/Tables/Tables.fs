@@ -115,7 +115,7 @@ module Tables =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
 
         let flow = FlowContainer.Vertical<TableCard>(260.0f, Spacing = 15.0f)
-        let scroll = ScrollContainer.Flow(flow, Margin = Style.PADDING)
+        let scroll = ScrollContainer(flow, Margin = Style.PADDING)
 
         override this.Init(parent) =
             Tables.List.get (
