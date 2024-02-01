@@ -18,6 +18,8 @@ type TableSectionInfo =
     {
         Name: string
         Description: string
+        Color: int32
+
         LevelStart: int
         LevelEnd: int
     }

@@ -52,7 +52,6 @@ module Backbeat =
             
             for rs in archive.Rulesets.Values do
                 rulesets.[Ruleset.hash rs] <- rs
-                tables <- Map.ofList [ "crescent", crescent ]
         }
 
     module Tables =
@@ -67,28 +66,36 @@ module Backbeat =
                 Sections = 
                     [
                         { 
+                            Name = "ROOKIE"
+                            Description = "Charts for complete beginners to get into the game!"
+                            Color = 0xFF_43ef70
+
                             LevelStart = 0
                             LevelEnd = 9
-                            Name = "ROOKIE"
-                            Description = "Charts for complete beginners to get into the game"
                         }
                         { 
+                            Name = "ADVANCED"
+                            Description = "Charts that should be interesting and challenging to an experienced player."
+                            Color = 0xFF_43e0ef
+
                             LevelStart = 10
                             LevelEnd = 19
-                            Name = "ADVANCED"
-                            Description = "Charts that should be interesting and challenging to an experienced player"
                         }
                         { 
+                            Name = "EXPERT"
+                            Description = "Fast, tiring, and technical charts for those who have played a serious amount of 4K."
+                            Color = 0xFF_ef5d57
+
                             LevelStart = 20
                             LevelEnd = 29
-                            Name = "EXPERT"
-                            Description = "Fast, tiring, and technical charts for people who have played a serious amount of 4K"
                         }
                         { 
-                            LevelStart = 30
-                            LevelEnd = 39
                             Name = "XTREME"
                             Description = "Extremely difficult charts to push even the most powerful keyboard smashers to their limit"
+                            Color = 0xFF_ff85c0
+
+                            LevelStart = 30
+                            LevelEnd = 39
                         }
                     ]
                 LevelDisplayNames = 
