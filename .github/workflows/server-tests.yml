@@ -34,17 +34,16 @@ jobs:
         run: dotnet test -v q online/tests/domain/Interlude.Web.Tests.Domain.fsproj
         
       - name: Integration tests
-        run: dotnet test -v q online/tests/domain/Interlude.Web.Tests.Integration.fsproj || docker logs server
+        run: dotnet test -v q online/tests/domain/Interlude.Web.Tests.Integration.fsproj
           
       - name: Log in to DigitalOcean registry 
         run: doctl registry login --expiry-seconds 600
         
-      - name: Tag image 
-        run:
+      - name: Tag and push image
+        run: |
+          docker stop server
           docker tag docker.io/library/interludeweb-server registry.digitalocean.com/yavsrg/interlude-web-server:latest
-          
-      - name: Push image
-        run: docker push registry.digitalocean.com/yavsrg/interlude-web-server:latest
+          docker push registry.digitalocean.com/yavsrg/interlude-web-server:latest
             
       - name: Run garbage collection on DigitalOcean registry
         run: doctl registry garbage-collection start --force --include-untagged-manifests
