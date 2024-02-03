@@ -41,7 +41,7 @@ type CreateLobbyPage() as this =
     override this.OnClose() = ()
 
 type InviteCard(sender: string, lobby: System.Guid) =
-    inherit Frame(NodeType.None)
+    inherit FrameContainer(NodeType.None)
 
     override this.Init(parent) =
         this
@@ -85,7 +85,7 @@ type InviteList() =
         base.Init parent
 
 type LobbyInfoCard(info: LobbyInfo) =
-    inherit Frame(NodeType.None)
+    inherit FrameContainer(NodeType.None)
 
     override this.Init(parent) =
         this

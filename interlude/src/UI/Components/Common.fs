@@ -179,7 +179,7 @@ type InlaidButton(label, action, icon) =
         base.Draw()
 
 type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
-    inherit Frame(NodeType.Switch(fun _ -> this.TextEntry))
+    inherit FrameContainer(NodeType.Switch(fun _ -> this.TextEntry))
     let search_timer = new Diagnostics.Stopwatch()
 
     let text_entry =

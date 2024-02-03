@@ -36,7 +36,7 @@ module Scoreboard =
 
     type ScoreCard(data: ScoreInfoProvider) =
         inherit
-            Frame(
+            FrameContainer(
                 NodeType.Button(
                     (fun () ->
                         Screen.change_new

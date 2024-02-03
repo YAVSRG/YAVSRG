@@ -15,7 +15,7 @@ open Interlude.Content
 
 type NoteskinCard(data: RepoEntry) as this =
     inherit
-        Frame(
+        FrameContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 this.Download()

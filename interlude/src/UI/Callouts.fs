@@ -216,7 +216,7 @@ module Callout =
     let frame (callout: Callout) (pos: float32 * float32 -> Position) =
         let w, h = measure callout
 
-        { new Frame(NodeType.None, Fill = K Colors.cyan.O3, Border = K Colors.cyan_accent, Position = pos (w, h)) with
+        { new FrameContainer(NodeType.None, Fill = K Colors.cyan.O3, Border = K Colors.cyan_accent, Position = pos (w, h)) with
             override this.Draw() =
                 base.Draw()
                 draw (this.Bounds.Left, this.Bounds.Top + 20.0f, w, h, Colors.text, callout)

@@ -108,9 +108,34 @@ type Conditional(condition: unit -> bool, child: Widget) =
 
     override this.Focusable = child.Focusable && condition ()
 
-// todo: split into FrameContainer and frame composition component
-type Frame(node_type) =
-    inherit StaticContainer(node_type)
+[<Sealed>]
+type Frame() =
+    inherit StaticWidget(NodeType.None)
+
+    member val Fill = !%Palette.DARK with get, set
+    member val Border = !%Palette.LIGHT with get, set
+
+    override this.Draw() =
+        let border = this.Border()
+
+        if border.A > 0uy then
+
+            let r = this.Bounds.Expand Style.PADDING
+            Draw.rect (r.SliceLeft Style.PADDING) border
+            Draw.rect (r.SliceRight Style.PADDING) border
+
+            let r = this.Bounds.Expand(0.0f, Style.PADDING)
+            Draw.rect (r.SliceTop Style.PADDING) border
+            Draw.rect (r.SliceBottom Style.PADDING) border
+
+        let fill = this.Fill()
+
+        if fill.A > 0uy then
+
+            Draw.rect base.Bounds fill
+
+type FrameContainer(nt: NodeType) =
+    inherit StaticContainer(nt)
 
     member val Fill = !%Palette.DARK with get, set
     member val Border = !%Palette.LIGHT with get, set

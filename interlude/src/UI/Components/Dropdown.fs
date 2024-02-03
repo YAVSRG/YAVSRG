@@ -43,7 +43,7 @@ module private Dropdown =
             base.Draw()
 
 type Dropdown(items: (string * (Color * Color) * (unit -> unit)) seq, on_close: unit -> unit) as this =
-    inherit Frame(NodeType.Switch(fun _ -> this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
+    inherit FrameContainer(NodeType.Switch(fun _ -> this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
     let scroll = ScrollContainer(flow)

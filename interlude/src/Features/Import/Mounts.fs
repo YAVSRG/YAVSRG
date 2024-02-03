@@ -218,7 +218,7 @@ module Mounts =
             button.Init this
 
     type Control(game: Game, setting: Setting<MountedChartSource option>) as this =
-        inherit Frame(NodeType.Switch(fun _ -> this.WhoShouldFocus))
+        inherit FrameContainer(NodeType.Switch(fun _ -> this.WhoShouldFocus))
 
         let create_button =
             Button(

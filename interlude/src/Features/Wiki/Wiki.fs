@@ -251,7 +251,7 @@ module Wiki =
                             links.Add(Button(p.Title, (fun () -> load_resource (WikiPage p))))
 
                         folders.Add(
-                            Frame(
+                            FrameContainer(
                                 NodeType.Switch(fun () -> links),
                                 Fill = K Colors.cyan.O2,
                                 Border = K Colors.cyan_accent

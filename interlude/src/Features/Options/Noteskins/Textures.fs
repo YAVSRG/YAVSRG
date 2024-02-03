@@ -21,7 +21,6 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
     override this.Init(parent) =
         this
         |+ Frame(
-            NodeType.None,
             Fill =
                 (fun () ->
                     if selected.[x].[y] then Colors.pink_accent.O2
@@ -340,7 +339,7 @@ type TextureEditPage(texture_id: string) as this =
 
 type TextureCard(id: string, on_click: unit -> unit) as this =
     inherit
-        Frame(
+        FrameContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 on_click ()

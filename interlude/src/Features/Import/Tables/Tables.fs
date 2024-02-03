@@ -16,7 +16,7 @@ type private TableStatus =
 
 type TableCard(online_table: Tables.List.Table) as this =
     inherit
-        Frame(
+        FrameContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 this.Install()

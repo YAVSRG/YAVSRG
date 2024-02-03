@@ -230,7 +230,7 @@ type private Tabs() =
     let swap = SwapContainer(Current = table, Position = Position.TrimTop 50.0f)
 
     let button (label: string, cmp) =
-        Frame(
+        FrameContainer(
             NodeType.None,
             Border = K Color.Transparent,
             Fill =

@@ -47,7 +47,7 @@ module Leaderboard =
 
     type LeaderboardCard(score: LeaderboardScore, data: ScoreInfoProvider) =
         inherit
-            Frame(
+            FrameContainer(
                 NodeType.Button(
                     (fun () ->
                         Screen.change_new

@@ -120,7 +120,6 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
 
         this
         |+ Frame(
-            NodeType.None,
             Fill = (fun () -> if this.Focused then fill.O3 else fill.O2),
             Border = fun () -> if this.Focused then Colors.white else border.O2
         )

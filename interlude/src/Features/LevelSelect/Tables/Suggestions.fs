@@ -12,7 +12,7 @@ open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
 type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
-    inherit Frame(NodeType.Leaf)
+    inherit FrameContainer(NodeType.Leaf)
 
     let mutable size = 100.0f
 

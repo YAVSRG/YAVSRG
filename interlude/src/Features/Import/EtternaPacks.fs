@@ -35,7 +35,7 @@ type EtternaOnlinePack =
 
 type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
     inherit
-        Frame(
+        FrameContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 this.Download()

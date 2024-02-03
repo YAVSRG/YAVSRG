@@ -39,7 +39,7 @@ module private Span =
         match background with
         | Some b ->
             StaticContainer(NodeType.None)
-            |+ Frame(NodeType.None, Border = K b, Fill = K b, Position = Position.Margin(0.0f, 5.0f))
+            |+ Frame(Border = K b, Fill = K b, Position = Position.Margin(0.0f, 5.0f))
             |+ t
             :> Widget
         | None -> t
@@ -162,7 +162,7 @@ type private Image(width, title, url) as this =
         )
 
         this
-        |* Frame(NodeType.None, Border = K(Color.FromArgb(127, 255, 255, 255)), Fill = K Color.Transparent)
+        |* Frame(Border = K(Color.FromArgb(127, 255, 255, 255)), Fill = K Color.Transparent)
 
     override this.Width = width
     override this.Height = width / 16.0f * 9.0f
@@ -392,7 +392,7 @@ type CodeBlock(max_width, code, language) as this =
             Position.Box(0.0f, 0.0f, Heading.MARGIN_X * 2.0f, Heading.MARGIN_Y * 2.0f, contents.Width, contents.Height)
 
         this
-        |+ Frame(NodeType.None, Fill = K Colors.shadow_2.O2, Border = K Color.Transparent)
+        |+ Frame(Fill = K Colors.shadow_2.O2, Border = K Color.Transparent)
         |* contents
 
     override this.Width = max_width

@@ -240,7 +240,7 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
 
     override this.Init (parent: Widget) =
         this
-        |+ Frame(NodeType.None, Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2)
+        |+ Frame(Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2)
         |+ Text(chart.Song.FormattedTitle, Align = Alignment.LEFT, Position = Position.Margin(5.0f, 0.0f))
         |* Text(
             fun () -> 
@@ -286,7 +286,7 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
 
     override this.Init (parent: Widget) =
         this
-        |+ Frame(NodeType.None, Fill = (K <| Color.FromArgb(section.Color).O1), Border = (K <| Color.FromArgb(section.Color).O1))
+        |+ Frame(Fill = (K <| Color.FromArgb(section.Color).O1), Border = (K <| Color.FromArgb(section.Color).O1))
         |+ Text(level_name,
             Align = Alignment.LEFT,
             Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),
@@ -341,7 +341,7 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
 
     override this.Init (parent: Widget) =
         this
-        |+ Frame(NodeType.None, Fill = (K <| Color.FromArgb(info.Color).O2), Border = (K <| Color.FromArgb(info.Color).O3))
+        |+ Frame(Fill = (K <| Color.FromArgb(info.Color).O2), Border = (K <| Color.FromArgb(info.Color).O3))
         |+ Text(info.Name,
             Align = Alignment.LEFT,
             Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),

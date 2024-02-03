@@ -327,7 +327,6 @@ type PageTextEntry(name, setting) =
 
             te
             |+ Frame(
-                NodeType.None,
                 Position = Position.Default.Margin(-15.0f, -5.0f),
                 Fill = K Color.Transparent,
                 Border =

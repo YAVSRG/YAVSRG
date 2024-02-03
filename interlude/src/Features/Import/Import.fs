@@ -23,8 +23,7 @@ type private TabButton(icon: string, name: string, container: SwapContainer, tar
 
         this
         |+ Frame(
-            NodeType.None
-            , Border =
+            Border =
                 fun () ->
                     if container.Current = target then
                         Color.White

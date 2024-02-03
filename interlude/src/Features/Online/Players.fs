@@ -237,8 +237,9 @@ type private PlayerList() =
         SwapContainer(Current = online, Position = Position.TrimTop(50.0f).Margin(40.0f))
 
     let button (label: string, cmp) =
-        Frame(
-            NodeType.None,
+        let button = Button(label, (fun () -> swap.Current <- cmp))
+        FrameContainer(
+            NodeType.Switch(fun () -> button),
             Border = K Color.Transparent,
             Fill =
                 fun () ->
@@ -247,7 +248,7 @@ type private PlayerList() =
                     else
                         Colors.black.O2
         )
-        |+ Button(label, (fun () -> swap.Current <- cmp))
+        |+ button
 
     override this.Init(parent) =
         this

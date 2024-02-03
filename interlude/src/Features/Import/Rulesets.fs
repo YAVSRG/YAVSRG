@@ -18,7 +18,7 @@ type private RulesetStatus =
 
 type RulesetCard(id: string, ruleset: Ruleset) as this =
     inherit
-        Frame(
+        FrameContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 this.Install()

@@ -44,7 +44,7 @@ module Comments =
 
     let editor =
         StaticContainer(NodeType.None, Position = Position.SliceBottom(160.0f))
-        |+ (Frame(
+        |+ (FrameContainer(
                 NodeType.None,
                 Fill = K Colors.grey_2.O2,
                 Border = K Colors.grey_2,
