@@ -26,9 +26,7 @@ module Tables =
 
     let install_or_update (table: Table) =
         Table.save table
-        match current with
-        | Some t when t.Id = table.Id -> current <- Some table
-        | _ -> ()
+        if _selected_id.Value = Some table.Id then current <- Some table
 
     let init_window () = 
         load()
@@ -54,3 +52,5 @@ module Tables =
         ) (fun () -> _selected_id.Value)
 
     let by_id (id: string) = if loaded.ContainsKey id then Some loaded.[id] else None
+
+    let list () = loaded.Values |> List.ofSeq

@@ -8,6 +8,7 @@ open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Interlude.Utils
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
@@ -86,48 +87,35 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 Text = [ name ] %> "chart.remove_from_collection.name"
             )
 
-        // match Table.current () with
-        // | Some table ->
-        //     // todo: this code is wrong. you can have a context menu open for not the current chart
-        //     // this should instead load the chart from disk for correctness, but the cache should ultimately store the source
-        //     if Network.status = Network.Status.LoggedIn && Chart.CHART.IsSome then
-        //         let chart = Chart.CHART.Value
+        match Content.Table, Chart.CHART with
+        | Some table, Some chart ->
+            if Network.status = Network.Status.LoggedIn && Chart.hash chart = cc.Hash then
+                content
+                |* PageButton(
+                    "chart.suggest_for_table",
+                    (fun () ->
+                        SelectTableLevelPage(table, fun level ->
+                            Tables.Suggestions.Vote.post (
+                                {
+                                    ChartId = cc.Hash
+                                    TableId = table.Id
+                                    Level = level
+                                },
+                                function
+                                | Some Tables.Suggestions.Vote.Response.Ok -> Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                                | Some Tables.Suggestions.Vote.Response.OkDetailsRequired -> 
+                                    // todo: send backbeat addition request with suggestion
+                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                                | Some Tables.Suggestions.Vote.Response.Rejected -> Notifications.action_feedback (Icons.X_CIRCLE, "Suggestion rejected!", "This chart has already previously been rejected")
+                                | None -> Notifications.error ("Error sending suggestion", "")
+                            )
 
-        //         content
-        //         |* PageButton(
-        //             "chart.suggest_for_table",
-        //             (fun () ->
-        //                 SelectTableLevelPage(fun level ->
-        //                     Tables.Suggestions.Add.post (
-        //                         {
-        //                             ChartId = cc.Hash
-        //                             OsuBeatmapId =
-        //                                 match chart.Header.ChartSource with
-        //                                 | Osu(_, id) -> id
-        //                                 | _ -> -1
-        //                             EtternaPackId =
-        //                                 match chart.Header.ChartSource with
-        //                                 | Stepmania(pack) -> pack
-        //                                 | _ -> -1
-        //                             Artist = cc.Artist
-        //                             Title = cc.Title
-        //                             Creator = cc.Creator
-        //                             Difficulty = cc.DifficultyName
-        //                             TableFor = table.Name.ToLower()
-        //                             SuggestedLevel = level.Rank
-        //                         },
-        //                         function
-        //                         | Some true ->
-        //                             Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-        //                         | _ -> Notifications.error ("Error sending suggestion", "")
-        //                     )
-
-        //                     Menu.Back()
-        //                 )
-        //                     .Show()
-        //             )
-        //         )
-        // | None -> ()
+                            Menu.Back()
+                        )
+                            .Show()
+                    )
+                )
+        | _ -> ()
 
         this.Content content
 

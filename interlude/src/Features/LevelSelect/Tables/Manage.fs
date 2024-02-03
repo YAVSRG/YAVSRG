@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Sorting
+open Interlude.Content
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
@@ -72,25 +73,27 @@ type ManageTablesPage() as this =
         )
         |* Dummy()
 
-        //for e in Table.list () do
-        //    container
-        //    |* TableButton(
-        //        e.Table.Name,
-        //        fun () ->
-        //            options.Table.Set(Some e.Table.Name)
-        //            Table.load e.Table.Name
+        for e in Tables.list() do
+            container
+            |* TableButton(
+                e.Info.Name,
+                fun () ->
+                    options.Table.Set(Some e.Id)
 
-        //            if options.LibraryMode.Value = LibraryMode.Table then
-        //                LevelSelect.refresh_all ()
-        //            else
-        //                LevelSelect.refresh_details ()
+                    if options.LibraryMode.Value = LibraryMode.Table then
+                        LevelSelect.refresh_all ()
+                    else
+                        LevelSelect.refresh_details ()
 
-        //            sync refresh
-        //    )
+                    sync refresh
+            )
 
-        //if Table.current().IsSome then
-        //    container |+ Dummy()
-        //    |* PageButton("table.suggestions", (fun () -> SuggestionsPage().Show()))
+        match Content.Table with
+        | Some table ->
+            container 
+            |+ Dummy()
+            |* PageButton("table.suggestions", (fun () -> SuggestionsPage(table).Show()))
+        | None -> ()
 
         if container.Focused then
             container.Focus()
