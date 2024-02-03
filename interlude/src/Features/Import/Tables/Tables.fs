@@ -42,13 +42,24 @@ type TableCard(online_table: Tables.List.Table) as this =
             Align = Alignment.CENTER,
             Position = Position.TrimTop(65.0f).SliceTop(60.0f).Margin(20.0f, Style.PADDING)
         )
+        |+ Text(
+            fun () -> 
+                match status with
+                | TableStatus.NotInstalled -> "Click to install"
+                | TableStatus.OutOfDate -> "Click to update"
+                | TableStatus.Installing -> "Installing ..."
+                | TableStatus.Installed -> "Click to view"
+            ,
+            Align = Alignment.CENTER,
+            Position = Position.SliceBottom(60.0f).Margin(20.0f, Style.PADDING)
+        )
         |* Clickable.Focus this
 
-        existing <- Interlude.Content.Tables.by_id online_table.Id
+        existing <- Tables.by_id online_table.Id
         status <-
             match existing with
             | Some table when table.LastUpdated < online_table.LastUpdated -> TableStatus.OutOfDate
-            | Some table -> TableStatus.Installed
+            | Some _ -> TableStatus.Installed
             | None -> TableStatus.NotInstalled
 
         base.Init parent
@@ -74,19 +85,19 @@ type TableCard(online_table: Tables.List.Table) as this =
                                 Charts = charts.Charts |> Array.map (fun c -> { Hash = c.Hash; Level = c.Level }) |> List.ofArray
                             }
                         Tables.install_or_update table
-                        Interlude.Options.options.Table.Value <- Some online_table.Id
+                        Tables.selected_id.Value <- Some table.Id
                         status <- TableStatus.Installed
                         existing <- Some table
                         TableDownloadMenu.OpenAfterInstall(table, charts)
                     )
                 | None -> 
                     Logging.Error("Error getting charts for table")
-                        // error toast
+                    // error toast
                     sync(fun () -> status <- current_status)
             )
         | TableStatus.Installing -> ()
         | TableStatus.Installed -> 
-            Interlude.Options.options.Table.Value <- Some existing.Value.Id
+            Tables.selected_id.Value <- Some existing.Value.Id
             TableDownloadMenu.LoadOrOpen(existing.Value)
 
 module Tables =
@@ -94,7 +105,7 @@ module Tables =
     type TableList() as this =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
 
-        let flow = FlowContainer.Vertical<TableCard>(260.0f, Spacing = 15.0f)
+        let flow = FlowContainer.Vertical<TableCard>(200.0f, Spacing = 15.0f)
         let scroll = ScrollContainer(flow, Margin = Style.PADDING)
 
         override this.Init(parent) =

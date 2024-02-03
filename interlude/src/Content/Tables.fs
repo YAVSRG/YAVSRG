@@ -34,12 +34,14 @@ module Tables =
         load()
         match _selected_id.Value with
         | Some id when loaded.ContainsKey id -> current <- Some loaded.[id]
-        | Some id -> Logging.Warn("Table '" + id + "' not found")
+        | Some id -> Logging.Warn("Table '" + id + "' not found"); _selected_id.Value <- None
         | None -> ()
         initialised <- true
 
     let selected_id =
         Setting.make (fun new_id ->
+            printfn "selected id is %A" _selected_id.Value
+            printfn "new id is %A" new_id
             if initialised then
                 match new_id with
                 | Some id when loaded.ContainsKey id -> _selected_id.Value <- Some id
@@ -51,6 +53,8 @@ module Tables =
                 | _ -> current <- None
             else
                 _selected_id.Value <- new_id
+            
+            printfn "selected id is now %A" _selected_id.Value
         ) (fun () -> _selected_id.Value)
 
     let by_id (id: string) = if loaded.ContainsKey id then Some loaded.[id] else None
