@@ -32,8 +32,7 @@ module Wiki =
         let mutable index_content: MarkdownDocument array option = None
         let mutable index_table_of_contents: Map<string, WikiPage list> = Map.empty
 
-        let mutable page_cache_by_filename: Map<string, MarkdownDocument array option> =
-            Map.empty
+        let mutable page_cache_by_filename: Map<string, MarkdownDocument array option> = Map.empty
 
         let mutable pages_by_filename: Map<string, WikiPage> = Map.empty
 
@@ -181,25 +180,26 @@ module Wiki =
             NavigationContainer.Row<Widget>(
                 Position = Position.SliceTop(70.0f).Margin((Viewport.vwidth - 1400.0f) * 0.5f, 10.0f)
             )
-            |+ IconButton(
-                %"menu.back"
-                , Icons.ARROW_LEFT_CIRCLE
-                , 50.0f
+            |+ Button(
+                fun () -> 
+                    if page_history.Length < 2 then
+                        Icons.X + " " + %"wiki.close" 
+                    else 
+                        Icons.ARROW_LEFT_CIRCLE + " " + %"menu.back"
                 , fun () ->
                     match page_history with
                     | x :: y :: xs ->
                         load_resource y
                         page_history <- y :: xs
                     | _ -> this.Close()
-                , Disabled = (fun () -> page_history.Length < 2)
                 , Position = Position.SliceLeft(150.0f)
             )
             |+ Text(
                 (fun () ->
                     match current_page with
-                    | Changelog -> Icons.EDIT_2 + " Changelog"
+                    | Changelog -> sprintf "%s %s" Icons.EDIT_2 (%"wiki.changelog")
                     | WikiPage p -> sprintf "%s %s  >  %s" Icons.BOOK_OPEN p.Folder p.Title
-                    | WikiIndex -> sprintf "%s Home" Icons.BOOK
+                    | WikiIndex -> sprintf "%s %s" Icons.HOME (%"wiki.home")
                 ),
                 Align = Alignment.LEFT,
                 Position = Position.Column(200.0f, 900.0f)
@@ -266,7 +266,7 @@ module Wiki =
                             Position = Position.Box(0.0f, 0.0f, 0.0f, y, max_width, 400.0f)
                         )
                         |+ Text(
-                            Icons.BOOK_OPEN + " Table of contents",
+                            sprintf "%s %s" Icons.BOOK_OPEN (%"wiki.contents"),
                             Position = Position.SliceTop(70.0f).Margin(20.0f, 0.0f),
                             Align = Alignment.LEFT
                         )

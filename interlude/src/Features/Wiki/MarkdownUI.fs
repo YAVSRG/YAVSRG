@@ -7,6 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data
 open Interlude.Utils
+open Interlude.UI.Components
 
 type LinkHandler =
     {
@@ -153,19 +154,28 @@ type private Image(width, title, url) as this =
     inherit IParagraph()
 
     let mutable sprite: Sprite option = None
+    let fade = Animation.Fade 0.0f
 
     do
         ImageServices.get_cached_image.Request(
             url,
             fun bmp ->
-                sync (fun () -> sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp))))
+                sync (fun () -> 
+                    sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp)))
+                    fade.Target <- 1.0f
+                )
         )
 
         this
+        |+ LoadingIndicator.Border(fun () -> sprite.IsNone)
         |* Frame(Border = K(Color.FromArgb(127, 255, 255, 255)), Fill = K Color.Transparent)
 
     override this.Width = width
     override this.Height = width / 16.0f * 9.0f
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        fade.Update elapsed_ms
 
     override this.Draw() =
         if not this.VisibleBounds.Visible then
@@ -174,8 +184,8 @@ type private Image(width, title, url) as this =
             base.Draw()
 
             match sprite with
-            | None -> Text.fill_b (Style.font, title, this.Bounds.Shrink(20.0f, 20.0f), Colors.text, Alignment.CENTER)
-            | Some s -> Draw.sprite this.Bounds Color.White s
+            | Some s -> Draw.sprite this.Bounds (Color.White.O4a fade.Alpha) s
+            | None -> ()
 
 type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as this =
     inherit IParagraph()
