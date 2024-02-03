@@ -13,6 +13,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
+          
+      - name: Setup certificate and secrets for Server instance
+        run: |
+            dotnet dev-certs https --trust -ep online/secrets/localhost.pfx -p DEVELOPMENT
+            echo "{}" >> online/secrets/secrets.json
         
       - name: Build and run image 
         run: | 
@@ -36,7 +41,7 @@ jobs:
         
       - name: Tag image 
         run:
-          docker tag interlude-web-server registry.digitalocean.com/yavsrg/interlude-web-server:latest
+          docker tag docker.io/library/interludeweb-server registry.digitalocean.com/yavsrg/interlude-web-server:latest
           
       - name: Push image
         run: docker push registry.digitalocean.com/yavsrg/interlude-web-server:latest
