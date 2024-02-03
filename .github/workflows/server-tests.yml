@@ -36,7 +36,7 @@ jobs:
       - name: Integration tests
         run: |
             docker logs server
-            dotnet test -v q online/tests/integration/Interlude.Web.Tests.Integration.fsproj
+            dotnet test online/tests/integration/Interlude.Web.Tests.Integration.fsproj
           
       - name: Log in to DigitalOcean registry 
         run: doctl registry login --expiry-seconds 600
