@@ -286,7 +286,7 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
 
     override this.Init (parent: Widget) =
         this
-        |+ Frame(NodeType.None, Fill = (K <| Color.FromArgb(0x20FFFFFF &&& section.Color)), Border = (K <| Color.FromArgb(0x20FFFFFF &&& section.Color)))
+        |+ Frame(NodeType.None, Fill = (K <| Color.FromArgb(section.Color).O1), Border = (K <| Color.FromArgb(section.Color).O1))
         |+ Text(level_name,
             Align = Alignment.LEFT,
             Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),
