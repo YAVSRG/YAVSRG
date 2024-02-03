@@ -178,6 +178,111 @@ type InlaidButton(label, action, icon) =
 
         base.Draw()
 
+module LoadingIndicator =
+
+    type Strip(is_loading: unit -> bool) =
+        inherit StaticWidget(NodeType.None)
+
+        let animation = Animation.Counter(1500.0)
+        let fade = Animation.Fade 0.0f
+
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            animation.Update elapsed_ms
+            fade.Target <- if is_loading() then 1.0f else 0.0f
+            fade.Update elapsed_ms
+
+        override this.Draw() =
+            if fade.Alpha = 0 then () else
+
+            let tick_width = this.Bounds.Width * 0.2f
+
+            let pos =
+                -tick_width
+                + (this.Bounds.Width + tick_width) * float32 animation.Time / 1500.0f
+
+            Draw.rect
+                (Rect.Create(
+                    this.Bounds.Left + max 0.0f pos,
+                    this.Bounds.Top,
+                    this.Bounds.Left + min this.Bounds.Width (pos + tick_width),
+                    this.Bounds.Bottom
+                ))
+                (Colors.white.O4a fade.Alpha)
+
+    type Border(is_loading: unit -> bool) =
+        inherit StaticWidget(NodeType.None)
+        
+        let animation = Animation.Counter(1500.0)
+        let fade = Animation.Fade 0.0f
+
+        let draw (bounds: Rect) (a: float32) (b: float32) (color: Color) =
+            let perimeter = (bounds.Width + bounds.Height) * 2.0f
+            let a, b = a % 1.0f, b % 1.0f
+
+            let corner_1 = bounds.Width / perimeter
+            let a_1 = Math.Clamp(a, 0.0f, corner_1)
+            let b_1 = Math.Clamp(b % 1.0f, 0.0f, corner_1)
+            if a_1 < corner_1 || b_1 < a_1 then
+                Draw.rect
+                    (Rect.Create(
+                        (if b_1 < a_1 then bounds.Left else bounds.Left + a_1 * perimeter),
+                        bounds.Top,
+                        bounds.Left + b_1 * perimeter |> min bounds.Right,
+                        bounds.Top + Style.PADDING)
+                    ) color
+
+            let corner_2 = (bounds.Width + bounds.Height) / perimeter
+            let a_2 = Math.Clamp(a, corner_1, corner_2)
+            let b_2 = Math.Clamp(b, corner_1, corner_2)
+            if a_2 < corner_2 || b_2 > corner_1 then
+                Draw.rect
+                    (Rect.Create(
+                        bounds.Right - Style.PADDING,
+                        bounds.Top + (a_2 - corner_1) * perimeter |> max bounds.Top,
+                        bounds.Right,
+                        bounds.Top + (b_2 - corner_1) * perimeter |> min bounds.Bottom)
+                    ) color
+            
+            let corner_3 = corner_1 + corner_2
+            let a_3 = Math.Clamp(a, corner_2, corner_3)
+            let b_3 = Math.Clamp(b, corner_2, corner_3)
+            if a_3 < corner_3 || b_3 > corner_2 then
+                Draw.rect
+                    (Rect.Create(
+                        bounds.Right - (a_3 - corner_2) * perimeter |> min bounds.Right,
+                        bounds.Bottom - Style.PADDING,
+                        bounds.Right - (b_3 - corner_2) * perimeter |> max bounds.Left,
+                        bounds.Bottom)
+                    ) color
+            
+            let a_4 = Math.Clamp(a, corner_3, 1.0f)
+            let b_4 = Math.Clamp(b, corner_3, 1.0f)
+            if a_4 < 1.0f || b_4 > corner_3 || (a_4 < corner_3 && b_4 < a_4) then
+                Draw.rect
+                    (Rect.Create(
+                        bounds.Left,
+                        bounds.Bottom - (a_4 - corner_3) * perimeter |> min bounds.Bottom,
+                        bounds.Left + Style.PADDING,
+                        if b_4 < a_4 then bounds.Top else bounds.Bottom - (b_4 - corner_3) * perimeter)
+                    ) color
+        
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            animation.Update elapsed_ms
+            fade.Target <- if is_loading() then 1.0f else 0.0f
+            fade.Update elapsed_ms
+        
+        override this.Draw() =
+            if fade.Alpha = 0 then () else
+
+            let b = this.Bounds.Expand(Style.PADDING)
+            let x = float32 (animation.Time / animation.Interval)
+            let color = Colors.white.O4a fade.Alpha
+            draw b x (x + 0.1f) color
+            draw b (x + 0.333f) (x + 0.433f) color
+            draw b (x + 0.666f) (x + 0.766f) color
+
 type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit FrameContainer(NodeType.Switch(fun _ -> this.TextEntry))
     let search_timer = new Diagnostics.Stopwatch()
@@ -317,33 +422,6 @@ type LoadingState() =
             color,
             Alignment.CENTER
         )
-
-type LoadingIndicator() =
-    inherit StaticWidget(NodeType.None)
-
-    let animation = Animation.Counter(1500.0)
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-        animation.Update elapsed_ms
-
-    override this.Draw() =
-        let tick_width = this.Bounds.Width * 0.2f
-
-        let pos =
-            -tick_width
-            + (this.Bounds.Width + tick_width) * float32 animation.Time / 1500.0f
-
-        Draw.rect this.Bounds !*Palette.DARK
-
-        Draw.rect
-            (Rect.Create(
-                this.Bounds.Left + max 0.0f pos,
-                this.Bounds.Top,
-                this.Bounds.Left + min this.Bounds.Width (pos + tick_width),
-                this.Bounds.Bottom
-            ))
-            !*Palette.LIGHT
 
 type NewAndShiny() =
     inherit StaticWidget(NodeType.None)

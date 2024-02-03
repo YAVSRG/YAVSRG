@@ -265,7 +265,7 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
         base.Init parent
 
 type private LevelHeader(section: TableSectionInfo, level: int, level_name: string, state: DownloaderState) as this =
-    inherit DownloadMenuFragment(NodeType.Button (fun () -> this.OnClick()), 50.0f)
+    inherit DownloadMenuFragment(NodeType.Button (fun () -> Style.click.Play(); this.OnClick()), 50.0f)
 
     override this.Visible = state.OpenSection = section.Name
     member this.OnClick() = 
@@ -283,6 +283,10 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
             , (fun () -> state.QueueLevel level),
             Position = Position.TrimRight(160.0f).SliceRight(200.0f).Margin(20.0f, 5.0f)
         )
+    
+    override this.OnFocus() =
+        Style.hover.Play()
+        base.OnFocus()
 
     override this.Init (parent: Widget) =
         this
@@ -319,7 +323,7 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
         base.Init parent
 
 type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as this =
-    inherit DownloadMenuFragment(NodeType.Button (fun () -> this.OnClick()), 120.0f)
+    inherit DownloadMenuFragment(NodeType.Button (fun () -> Style.click.Play(); this.OnClick()), 120.0f)
 
     override this.Visible = true
     member this.OnClick() = 
@@ -338,6 +342,10 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
             , (fun () -> state.QueueSection info.Name),
             Position = Position.TrimRight(100.0f).SliceRight(200.0f).Margin(20.0f, 20.0f)
         )
+
+    override this.OnFocus() =
+        Style.hover.Play()
+        base.OnFocus()
 
     override this.Init (parent: Widget) =
         this

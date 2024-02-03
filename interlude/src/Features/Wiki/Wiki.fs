@@ -164,7 +164,7 @@ module Wiki =
             }
 
     type WikiContent(nt) =
-        inherit DynamicContainer(nt)
+        inherit StaticContainer(nt)
 
         member val _Size = 0.0f with get, set
         

@@ -457,7 +457,7 @@ module Beatmaps =
                 ),
                 Position = Position.SliceTop 60.0f
             ))
-            |+ Conditional((fun () -> loading), LoadingIndicator(Position = Position.Row(115.0f, 5.0f)))
+            |+ LoadingIndicator.Strip((fun () -> loading), Position = Position.Row(115.0f, 5.0f))
             |+ Text(%"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
             |+ scroll
             |+ (let r =

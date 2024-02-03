@@ -15,6 +15,8 @@ module NavigationContainer =
 
         let children = ResizeArray<'T>()
         let mutable last_selected = 0
+        
+        member val WrapNavigation = true with get, set
 
         override this.Focus() =
             if children.Count > 0 then
@@ -61,6 +63,22 @@ module NavigationContainer =
                 last_selected <- index
                 children.[index].Focus()
             | None -> ()
+
+        member this.CanPrevious() =
+            if this.WrapNavigation then
+                true
+            else
+                match this.WhoIsFocused with
+                | Some i -> Seq.indexed children |> Seq.exists (fun (idx, c) -> idx < i && c.Focusable)
+                | None -> false
+        
+        member this.CanNext() =
+            if this.WrapNavigation then
+                true
+            else
+                match this.WhoIsFocused with
+                | Some i -> Seq.indexed children |> Seq.exists (fun (idx, c) -> idx > i && c.Focusable)
+                | None -> false
 
         member this.SelectFocusedChild() =
             match this.WhoIsFocused with
@@ -112,10 +130,10 @@ module NavigationContainer =
         inherit Base<'T>()
 
         override this.Navigate() =
-            if (%%"up").Tapped() then
+            if this.CanPrevious() && (%%"up").Tapped() then
                 this.Previous()
 
-            if (%%"down").Tapped() then
+            if this.CanNext() && (%%"down").Tapped() then
                 this.Next()
 
             if (%%"select").Tapped() then
@@ -126,10 +144,10 @@ module NavigationContainer =
         inherit Base<'T>()
 
         override this.Navigate() =
-            if (%%"left").Tapped() then
+            if this.CanPrevious() && (%%"left").Tapped() then
                 this.Previous()
 
-            if (%%"right").Tapped() then
+            if this.CanNext() && (%%"right").Tapped() then
                 this.Next()
 
             if (%%"select").Tapped() then

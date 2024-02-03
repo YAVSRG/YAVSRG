@@ -228,7 +228,7 @@ module Mounts =
             )
 
         let edit_buttons =
-            NavigationContainer.Row<Button>(Position = Position.SliceBottom(60.0f).Margin 5.0f)
+            NavigationContainer.Row<Button>(WrapNavigation = false, Position = Position.SliceBottom(60.0f).Margin 5.0f)
             |+ Button(
                 sprintf "%s %s" Icons.EDIT_2 (%"imports.mount.edit"),
                 (fun () -> EditorPage(setting).Show()),
