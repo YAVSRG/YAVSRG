@@ -89,7 +89,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
 
         match Content.Table, Chart.CHART with
         | Some table, Some chart ->
-            if Network.status = Network.Status.LoggedIn && Chart.hash chart = cc.Hash then
+            if Network.status = Network.Status.LoggedIn && cc.Keys = table.Info.Keymode && Chart.hash chart = cc.Hash then
                 content
                 |* PageButton(
                     "chart.suggest_for_table",

@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Web.Server.API.Tables.Suggestions
 
 open NetCoreServer
+open Percyqaz.Common
 open Prelude
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
@@ -30,12 +31,24 @@ module Accept =
             if not (user.Badges.Contains Badge.TABLE_EDITOR) then raise PermissionDeniedException
 
             let chart_id = request.ChartId.ToUpper()
-            let chart_is_known = (Backbeat.Charts.by_hash chart_id).IsSome
+            match Backbeat.Charts.by_hash chart_id with
+            | Some (known_chart, _) ->
 
-            if chart_is_known && TableSuggestion.accept request.TableId chart_id user_id request.Level then
+                if known_chart.Keys <> Backbeat.Tables.TABLES.[request.TableId].Keymode then
 
-                TableLevel.add_or_move user_id request.TableId chart_id request.Level
-                response.ReplyJson(true)
+                    Logging.Debug(sprintf "Cannot accept chart %A into table %s because keymode doesn't match" known_chart request.TableId)
+                    TableSuggestion.reject request.TableId chart_id user_id "Wrong keymode" |> ignore
+                    response.ReplyJson(false)
 
-            else response.ReplyJson(false)
+                elif TableSuggestion.accept request.TableId chart_id user_id request.Level then
+
+                    TableLevel.add_or_move user_id request.TableId chart_id request.Level
+                    Leaderboard.create chart_id Backbeat.Tables.TABLES.[request.TableId].RulesetId
+                    response.ReplyJson(true)
+
+                else
+
+                    response.ReplyJson(false)
+
+            | None -> response.ReplyJson(false)
         }
