@@ -2,7 +2,7 @@ namespace Interlude.Web.Tests.Integration
 
 open System.Net
 open System.Net.Security
-open System.Net.Http
+open Percyqaz.Common
 open Interlude.Web.Shared.API
 open NUnit.Framework
 
