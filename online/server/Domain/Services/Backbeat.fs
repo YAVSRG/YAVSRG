@@ -91,7 +91,7 @@ module Backbeat =
                         }
                         { 
                             Name = "XTREME"
-                            Description = "Extremely difficult charts to push even the most powerful keyboard smashers to their limit"
+                            Description = "Extremely difficult charts to push even the most powerful keyboard smashers to their limit!"
                             Color = 0xFF_ff85c0
 
                             LevelStart = 30
