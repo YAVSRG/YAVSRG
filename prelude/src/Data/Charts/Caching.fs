@@ -507,9 +507,3 @@ module Cache =
                 Logging.Error(err.Message, err)
                 return false
         }
-
-    let cdn_download_service =
-        { new Async.Service<string * ChartHash * (Chart * Song) * Cache, bool>() with
-            override this.Handle((folder, hash, (chart, song), cache)) =
-                cdn_download folder hash (chart, song) cache
-        }

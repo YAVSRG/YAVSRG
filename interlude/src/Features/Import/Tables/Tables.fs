@@ -1,15 +1,11 @@
 ﻿namespace Interlude.Features.Import
 
 open Percyqaz.Common
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Data
 open Prelude.Data.Charts
-open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
 open Interlude.Web.Shared.Requests
-open Interlude.UI
-open Interlude.UI.Menu
+open Interlude.Content
 
 [<RequireQualifiedAccess>]
 type private TableStatus =
@@ -77,37 +73,21 @@ type TableCard(online_table: Tables.List.Table) as this =
                                 LastUpdated = online_table.LastUpdated
                                 Charts = charts.Charts |> Array.map (fun c -> { Hash = c.Hash; Level = c.Level }) |> List.ofArray
                             }
-                        Interlude.Content.Tables.install_or_update table
-                        status <- TableStatus.Installed
+                        Tables.install_or_update table
                         Interlude.Options.options.Table.Value <- Some online_table.Id
-                        TableDownloadMenu(table, charts.Charts).Show()
+                        status <- TableStatus.Installed
+                        existing <- Some table
+                        TableDownloadMenu.OpenAfterInstall(table, charts)
                     )
                 | None -> 
                     Logging.Error("Error getting charts for table")
-                    sync(fun () ->
-                        status <- current_status
                         // error toast
-                    )
+                    sync(fun () -> status <- current_status)
             )
         | TableStatus.Installing -> ()
-        | TableStatus.Installed ->
-            // temp
-            Tables.Charts.get (online_table.Id,
-                function
-                | Some charts ->
-                    sync(fun () ->
-                        let table =
-                            {
-                                Id = online_table.Id
-                                Info = online_table.Info
-                                LastUpdated = online_table.LastUpdated
-                                Charts = charts.Charts |> Array.map (fun c -> { Hash = c.Hash; Level = c.Level }) |> List.ofArray
-                            }
-                        TableDownloadMenu(table, charts.Charts).Show()
-                    )
-                | None -> 
-                    Logging.Error("Error getting charts for table")
-            )
+        | TableStatus.Installed -> 
+            Interlude.Options.options.Table.Value <- Some existing.Value.Id
+            TableDownloadMenu.LoadOrOpen(existing.Value)
 
 module Tables =
 

@@ -49,7 +49,7 @@ module Rulesets =
     let selected_id = 
         Setting.make (fun new_id ->
             if initialised then
-                if not (loaded.ContainsKey _selected_id.Value) then
+                if not (loaded.ContainsKey new_id) then
                     Logging.Warn("Ruleset '" + new_id + "' not found, switching to default")
                     _selected_id.Value <- DEFAULT_ID
                 else _selected_id.Value <- new_id

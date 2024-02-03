@@ -1,8 +1,8 @@
 ﻿namespace Interlude.Features.Import
 
 open System.Collections.Generic
+open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
@@ -28,7 +28,7 @@ module private TableDownloader =
         | Downloading
         | Downloaded
 
-    type DownloaderState(table: Table, charts: Tables.Charts.ChartInfo array, on_selected_changed) =
+    type DownloaderState(table: Table, charts: Tables.Charts.ChartInfo array) as this =
 
         let levels_by_chart = 
             charts
@@ -59,6 +59,23 @@ module private TableDownloader =
 
         let mutable open_level = -1
         let mutable open_section = ""
+
+        let download_service =
+            { new Async.Service<string * Tables.Charts.ChartInfo, unit>() with
+                override _.Handle((table_name: string, chart: Tables.Charts.ChartInfo)) =
+                    async {
+                        sync (fun () -> this.SetStatus(chart.Hash, ChartStatus.Downloading))
+                        match Cache.by_hash chart.Hash Library.cache with
+                        | Some cc -> 
+                            Cache.copy table_name cc Library.cache
+                            sync (fun () -> this.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        | None -> 
+                            match! Cache.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Library.cache with
+                            | true -> sync (fun () -> this.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                            | false -> sync (fun () -> this.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
+                        return ()
+                    }
+            }
 
         do
             for chart in charts do
@@ -113,6 +130,8 @@ module private TableDownloader =
                     else
                         GroupStatus.Downloaded
 
+        member this.Charts = charts
+
         member this.SectionStatus (section: string) = section_status.[section]
 
         member this.LevelStatus (level: int) = level_status.[level]
@@ -128,6 +147,14 @@ module private TableDownloader =
                     charts_by_level.[level]
                     |> Seq.map (fun c -> statuses.[c.Hash])
                     |> Seq.countBy id
+                    |> fun s -> seq { 
+                        yield ChartStatus.Missing, 0
+                        yield ChartStatus.Queued, 0
+                        yield ChartStatus.Downloading, 0
+                        yield ChartStatus.Downloaded, 0
+                        yield ChartStatus.DownloadFailed, 0
+                        yield! s
+                    }
                     |> Map.ofSeq
                 if chart_statuses.[ChartStatus.Downloading] > 0 || chart_statuses.[ChartStatus.Queued] > 0 then
                     GroupStatus.Downloading
@@ -146,6 +173,13 @@ module private TableDownloader =
                     |> Map.keys
                     |> Seq.map (fun level -> level_status.[level])
                     |> Seq.countBy id
+                    |> fun s -> seq { 
+                        yield GroupStatus.SomeMissing, 0
+                        yield GroupStatus.AllMissing, 0
+                        yield GroupStatus.Downloading, 0
+                        yield GroupStatus.Downloaded, 0
+                        yield! s
+                    }
                     |> Map.ofSeq
                 if level_statuses.[GroupStatus.Downloading] > 0 then
                     GroupStatus.Downloading
@@ -157,74 +191,57 @@ module private TableDownloader =
                     GroupStatus.AllMissing
                 else
                     GroupStatus.Downloaded
+
+        member val OnSelectedChanged = ignore with get, set
                     
         member this.OpenLevel 
             with get() = open_level
-            and set v = open_level <- v; on_selected_changed()
+            and set v = open_level <- v; this.OnSelectedChanged()
         member this.OpenSection 
             with get() = open_section
-            and set v = open_level <- -1; open_section <- v; on_selected_changed()
+            and set v = open_level <- -1; open_section <- v; this.OnSelectedChanged()
+            
+        member this.QueueSection(section: string) =
+            for chart in sections |> List.find (fun (info, _) -> info.Name = section) |> snd |> Map.values |> Seq.concat do
+                match this.Status chart.Hash with
+                | ChartStatus.DownloadFailed
+                | ChartStatus.Missing -> 
+                    this.SetStatus(chart.Hash, ChartStatus.Queued)
+                    download_service.Request((table.Info.Name, chart), ignore)
+                | _ -> ()
+
+        member this.QueueLevel(level: int) =
+            for chart in charts_by_level.[level] do
+                match this.Status chart.Hash with
+                | ChartStatus.DownloadFailed
+                | ChartStatus.Missing -> 
+                    this.SetStatus(chart.Hash, ChartStatus.Queued)
+                    download_service.Request((table.Info.Name, chart), ignore)
+                | _ -> ()
+
+    let mutable existing_states : Map<string, DownloaderState> = Map.empty
 
 open TableDownloader
 
 [<AbstractClass>]
-type private DownloadMenuFragment(height: float32) as this =
-    inherit StaticContainer(NodeType.Button (fun () -> this.OnClick()))
+type private DownloadMenuFragment(nt: NodeType, height: float32) =
+    inherit StaticContainer(nt)
 
     abstract member Visible : bool
-    abstract member OnClick : unit -> unit
 
     interface DynamicSize with
         member this.Size = height
         member this.OnSizeChanged with set _ = ()
 
-type private SectionHeader(info: TableSectionInfo, state: DownloaderState) =
-    inherit DownloadMenuFragment(120.0f)
-
-    override this.Visible = true
-    override this.OnClick() = 
-        if state.OpenSection = info.Name then 
-            state.OpenSection <- "" 
-        else state.OpenSection <- info.Name
-
-    override this.Draw() =
-        Draw.rect this.Bounds (Color.FromArgb(info.Color).O2)
-        base.Draw()
-
-    override this.Init (parent: Widget) =
-        this
-        |+ Text(info.Name, Align = Alignment.LEFT, Position = Position.TrimBottom(50.0f))
-        |+ Text(info.Description, Align = Alignment.LEFT, Position = Position.SliceBottom(50.0f))
-        |* Clickable.Focus this
-        base.Init parent
-
-type private LevelHeader(section: TableSectionInfo, level: int, level_name: string, state: DownloaderState) =
-    inherit DownloadMenuFragment(50.0f)
-
-    override this.Visible = state.OpenSection = section.Name
-    override this.OnClick() = 
-        if state.OpenLevel = level then state.OpenLevel <- -1
-        else state.OpenLevel <- level
-        
-    override this.Draw() =
-        Draw.rect this.Bounds (Color.FromArgb(section.Color).O1)
-        base.Draw()
-
-    override this.Init (parent: Widget) =
-        this
-        |+ Text(level_name, Align = Alignment.LEFT)
-        |* Clickable.Focus this
-        base.Init parent
-
 type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
-    inherit DownloadMenuFragment(40.0f)
+    inherit DownloadMenuFragment(NodeType.None, 40.0f)
 
     override this.Visible = state.OpenLevel = chart.Level
-    override this.OnClick() = ()
 
     override this.Init (parent: Widget) =
         this
-        |+ Text(chart.Song.FormattedTitle, Align = Alignment.LEFT)
+        |+ Frame(NodeType.None, Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2)
+        |+ Text(chart.Song.FormattedTitle, Align = Alignment.LEFT, Position = Position.Margin(5.0f, 0.0f))
         |* Text(
             fun () -> 
                 match state.Status chart.Hash with
@@ -243,17 +260,111 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
                     | ChartStatus.Downloaded -> Colors.text_green_2
                     | ChartStatus.DownloadFailed -> Colors.text_red_2
             ,
+            Position = Position.Margin(5.0f, 0.0f),
             Align = Alignment.RIGHT)
         base.Init parent
 
-type TableDownloadMenu(table: Table, charts: Tables.Charts.ChartInfo array) =
+type private LevelHeader(section: TableSectionInfo, level: int, level_name: string, state: DownloaderState) as this =
+    inherit DownloadMenuFragment(NodeType.Button (fun () -> this.OnClick()), 50.0f)
+
+    override this.Visible = state.OpenSection = section.Name
+    member this.OnClick() = 
+        if state.OpenLevel = level then state.OpenLevel <- -1
+        else state.OpenLevel <- level
+
+    member this.Button = 
+        Button(
+            fun () -> 
+                match state.LevelStatus level with
+                | GroupStatus.AllMissing -> Icons.DOWNLOAD + " Download"
+                | GroupStatus.SomeMissing -> Icons.DOWNLOAD + " Update"
+                | GroupStatus.Downloading -> ""
+                | GroupStatus.Downloaded -> ""
+            , (fun () -> state.QueueLevel level),
+            Position = Position.TrimRight(160.0f).SliceRight(200.0f).Margin(20.0f, 5.0f)
+        )
+
+    override this.Init (parent: Widget) =
+        this
+        |+ Frame(NodeType.None, Fill = (K <| Color.FromArgb(0x20FFFFFF &&& section.Color)), Border = (K <| Color.FromArgb(0x20FFFFFF &&& section.Color)))
+        |+ Text(level_name,
+            Align = Alignment.LEFT,
+            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),
+            Position = Position.Margin(5.0f, 0.0f))
+        |+ Text(
+            fun () -> 
+                match state.LevelStatus level with
+                | GroupStatus.AllMissing -> Icons.X
+                | GroupStatus.SomeMissing -> Icons.X
+                | GroupStatus.Downloading -> Icons.REFRESH_CW
+                | GroupStatus.Downloaded -> Icons.CHECK
+            ,
+            Color = 
+                fun () ->
+                    match state.LevelStatus level with
+                    | GroupStatus.AllMissing -> Colors.text_greyout
+                    | GroupStatus.SomeMissing -> Colors.text_yellow_2
+                    | GroupStatus.Downloading -> Colors.text_yellow_2
+                    | GroupStatus.Downloaded -> Colors.text_green_2
+            ,
+            Position = Position.Margin(85.0f, 0.0f),
+            Align = Alignment.RIGHT)
+        |+ Text(
+            (fun () -> if state.OpenLevel = level then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN),
+            Color = K Colors.text,
+            Position = Position.Margin(5.0f, 0.0f),
+            Align = Alignment.RIGHT)
+        |+ Clickable.Focus this
+        |* this.Button
+        base.Init parent
+
+type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as this =
+    inherit DownloadMenuFragment(NodeType.Button (fun () -> this.OnClick()), 120.0f)
+
+    override this.Visible = true
+    member this.OnClick() = 
+        if state.OpenSection = info.Name then 
+            state.OpenSection <- "" 
+        else state.OpenSection <- info.Name
+        
+    member this.Button = 
+        Button(
+            fun () -> 
+                match state.SectionStatus info.Name with
+                | GroupStatus.AllMissing -> Icons.DOWNLOAD + " Download"
+                | GroupStatus.SomeMissing -> Icons.DOWNLOAD + " Update"
+                | GroupStatus.Downloading -> ""
+                | GroupStatus.Downloaded -> ""
+            , (fun () -> state.QueueSection info.Name),
+            Position = Position.TrimRight(100.0f).SliceRight(200.0f).Margin(20.0f, 20.0f)
+        )
+
+    override this.Init (parent: Widget) =
+        this
+        |+ Frame(NodeType.None, Fill = (K <| Color.FromArgb(info.Color).O2), Border = (K <| Color.FromArgb(info.Color).O3))
+        |+ Text(info.Name,
+            Align = Alignment.LEFT,
+            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),
+            Position = Position.Margin(5.0f).TrimBottom(50.0f))
+        |+ Text(info.Description,
+            Align = Alignment.LEFT,
+            Color = K Colors.text_subheading,
+            Position = Position.Margin(5.0f).SliceBottom(50.0f))
+        |+ Text(
+            (fun () -> if state.OpenSection = info.Name then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN),
+            Color = K Colors.text,
+            Position = Position.Margin(25.0f, 20.0f),
+            Align = Alignment.RIGHT)
+        |+ Clickable.Focus this
+        |* this.Button
+        base.Init parent
+
+type private TableDownloadMenu(table: Table, state: DownloaderState) =
     inherit Page()
 
-    let container = DynamicFlowContainer.Vertical<DownloadMenuFragment>()
+    let container = DynamicFlowContainer.Vertical<DownloadMenuFragment>(Spacing = 10.0f)
 
-    let state = DownloaderState(table, charts, fun () -> container.Filter <- _.Visible)
-
-    let charts_by_level = charts |> Array.groupBy (fun x -> x.Level)
+    let charts_by_level = state.Charts |> Array.groupBy (fun x -> x.Level)
     let sections = 
         table.Info.Sections
         |> List.sortBy (fun s -> s.LevelStart)
@@ -267,6 +378,7 @@ type TableDownloadMenu(table: Table, charts: Tables.Charts.ChartInfo array) =
     override this.Init (parent: Widget) =
 
         container.Filter <- _.Visible
+        state.OnSelectedChanged <- fun () -> container.Filter <- _.Visible
 
         for section_info, section_levels in sections do
             container.Add (SectionHeader (section_info, state))
@@ -277,46 +389,33 @@ type TableDownloadMenu(table: Table, charts: Tables.Charts.ChartInfo array) =
                 for chart in level_charts do
                     container.Add (Chart (chart, state))
 
-        this.Content(ScrollContainer(container, Position = Position.Margin(100.0f, 100.0f)))
+        this.Content(ScrollContainer(container, Margin = 10.0f, Position = Position.Margin(100.0f, 100.0f)))
         base.Init parent
 
     override this.Title = table.Info.Name
     override this.OnClose() = ()
 
-    //member this.GetMissingCharts() =
-    //    status <- InstallingCharts
+    static member LoadOrOpen(table: Table) =
+        match existing_states.TryFind table.Id with
+        | Some state -> TableDownloadMenu(table, state).Show()
+        | None -> 
+            Tables.Charts.get (table.Id,
+                function
+                | Some charts ->
+                    let state = DownloaderState(table, charts.Charts)
+                    sync(fun () ->
+                        match existing_states.TryFind table.Id with
+                        | Some state -> () // do nothing if they spam clicked the table button
+                        | None -> 
+                            existing_states <- Map.add table.Id state existing_states
+                            TableDownloadMenu(table, state).Show()
+                    )
+                | None -> 
+                    Logging.Error("Error getting charts for table")
+                    // error toast
+            )
 
-    //    let on_download_chart () =
-    //        missing <- missing - 1
-
-    //        if missing = 0 then
-    //            status <- UpToDate
-    //            this.RefreshInfo()
-
-    //    let missing_charts =
-    //        seq {
-    //            for level in existing.Levels do
-    //                for chart in level.Charts do
-    //                    match Cache.by_key (sprintf "%s/%s" table.Name chart.Hash) Library.cache with
-    //                    | Some _ -> ()
-    //                    | None -> yield chart.Id, chart.Hash
-    //        }
-
-    //    for id, hash in missing_charts do
-    //        Charts.Identify.get (
-    //            hash,
-    //            function
-    //            | Some(d: Charts.Identify.Response) ->
-    //                match d.Info with
-    //                | Some info ->
-    //                    Cache.cdn_download_service.Request(
-    //                        (table.Name, hash, (info.Chart, info.Song), Library.cache),
-    //                        fun _ -> sync on_download_chart
-    //                    )
-    //                | None ->
-    //                    Logging.Info(sprintf "Chart not found: %s(%s)" id hash)
-    //                    sync on_download_chart
-    //            | _ ->
-    //                Logging.Info(sprintf "Chart not found/server error: %s(%s)" id hash)
-    //                sync on_download_chart
-    //        )
+    static member OpenAfterInstall(table: Table, charts: Tables.Charts.Response) =
+        let state = DownloaderState(table, charts.Charts)
+        existing_states <- Map.add table.Id state existing_states
+        TableDownloadMenu(table, state).Show()

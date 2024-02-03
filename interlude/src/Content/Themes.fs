@@ -125,7 +125,7 @@ module Themes =
         Setting.make (fun new_id ->
             if initialised then
                 let old_id = _selected_id.Value
-                if not (loaded.ContainsKey _selected_id.Value) then
+                if not (loaded.ContainsKey new_id) then
                     Logging.Warn("Theme '" + new_id + "' not found, switching to default")
                     _selected_id.Value <- DEFAULT_ID
                 else _selected_id.Value <- new_id

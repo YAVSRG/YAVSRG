@@ -41,7 +41,7 @@ module Tables =
     let selected_id =
         Setting.make (fun new_id ->
             if initialised then
-                match _selected_id.Value with
+                match new_id with
                 | Some id when loaded.ContainsKey id -> _selected_id.Value <- Some id
                 | Some id -> Logging.Warn("Table '" + id + "' not found"); _selected_id.Value <- None
                 | None -> _selected_id.Value <- None
