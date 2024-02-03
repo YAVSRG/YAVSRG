@@ -108,6 +108,7 @@ type Conditional(condition: unit -> bool, child: Widget) =
 
     override this.Focusable = child.Focusable && condition ()
 
+// todo: split into FrameContainer and frame composition component
 type Frame(node_type) =
     inherit StaticContainer(node_type)
 
