@@ -1,7 +1,5 @@
 ﻿namespace Interlude.Features.Import
 
-open System.Net
-open System.Net.Security
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Data
@@ -172,20 +170,20 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
 module EtternaPacks =
 
     // todo: automated test to ping EO and see if the cert is expired
-    let allow_expired_etternaonline_cert () =
-        ServicePointManager.ServerCertificateValidationCallback <-
-            RemoteCertificateValidationCallback(fun _ cert _ sslPolicyErrors ->
-                if sslPolicyErrors = SslPolicyErrors.None then
-                    true
-                else
-                    let cert_string = cert.GetCertHashString().ToUpper()
+    //let allow_expired_etternaonline_cert () =
+    //    ServicePointManager.ServerCertificateValidationCallback <-
+    //        RemoteCertificateValidationCallback(fun _ cert _ sslPolicyErrors ->
+    //            if sslPolicyErrors = SslPolicyErrors.None then
+    //                true
+    //            else
+    //                let cert_string = cert.GetCertHashString().ToUpper()
 
-                    Logging.Debug(
-                        sprintf "Expired certificate: %s (expired on %s)" cert_string (cert.GetExpirationDateString())
-                    )
+    //                Logging.Debug(
+    //                    sprintf "Expired certificate: %s (expired on %s)" cert_string (cert.GetExpirationDateString())
+    //                )
 
-                    cert_string = "56726C10C603AFE9C338966ABC303D161072FEE5"
-            )
+    //                cert_string = "56726C10C603AFE9C338966ABC303D161072FEE5"
+    //        )
 
     type EtternaPackSearch() as this =
         inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))

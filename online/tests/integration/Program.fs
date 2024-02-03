@@ -1,5 +1,8 @@
 namespace Interlude.Web.Tests.Integration
 
+open System.Net
+open System.Net.Security
+open System.Net.Http
 open Interlude.Web.Shared.API
 open NUnit.Framework
 
@@ -8,6 +11,10 @@ type Setup() =
 
     [<OneTimeSetUp>]
     member _.InitAndAuth() =
+
+        Logging.Info("DISABLING SSL SECURITY AS A WORKAROUND FOR LOCAL CERTS ON LINUX")
+        ServicePointManager.ServerCertificateValidationCallback <- RemoteCertificateValidationCallback(fun _ cert _ sslPolicyErrors -> true)
+
         Client.init "https://localhost/"
         let http_client = new System.Net.Http.HttpClient()
         task {
