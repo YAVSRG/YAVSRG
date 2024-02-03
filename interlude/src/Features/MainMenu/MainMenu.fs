@@ -145,7 +145,6 @@ type MainMenuScreen() as this =
         Background.dim 0.0f
         Toolbar.show ()
         Song.on_finish <- SongFinishAction.LoopFromBeginning
-        splash_fade.Target <- 1.0f
 
         button_sequence.Add
         <| Animation.seq
@@ -155,6 +154,8 @@ type MainMenuScreen() as this =
                 Animation.Action options.Show
                 Animation.Delay 50.0
                 Animation.Action quit.Show
+                Animation.Delay 200.0
+                Animation.Action(fun () -> splash_fade.Target <- 1.0f)
             ]
 
         DiscordRPC.in_menus ("Main menu")
@@ -174,13 +175,16 @@ type MainMenuScreen() as this =
 
     override this.Draw() =
         let c = this.Bounds.CenterX
-        let (s, ss) = splash_text
+        let (splash, subsplash) = splash_text
         let a1 = splash_subtitle_fade.Value * splash_fade.Value * 255.0f |> int
         let a2 = splash_fade.Alpha
 
+        let heading_width = Text.measure(Style.font, splash) * 40.0f
+        Draw.rect (Rect.Box(c - heading_width * 0.5f - 20.0f, this.Bounds.Top - 25.0f + 40.0f * splash_fade.Value, heading_width + 40.0f, 70.0f)) (Colors.shadow_2.O1a a2)
+
         Text.draw_aligned_b (
             Style.font,
-            ss,
+            subsplash,
             20.0f,
             c,
             this.Bounds.Top + 50.0f + 30.0f * splash_subtitle_fade.Value,
@@ -190,10 +194,10 @@ type MainMenuScreen() as this =
 
         Text.draw_aligned_b (
             Style.font,
-            s,
+            splash,
             40.0f,
             c,
-            this.Bounds.Top - 60.0f + 80.0f * splash_fade.Value,
+            this.Bounds.Top - 20.0f + 40.0f * splash_fade.Value,
             (Colors.white.O4a a2, Palette.color (a2, 0.5f, 0.0f)),
             Alignment.CENTER
         )

@@ -334,8 +334,8 @@ module Options =
                     Hotkeys = Hotkeys.import d
                 }
 
-    let private config_path = Path.GetFullPath "config.json"
-    let first_launch = not (File.Exists config_path)
+    let private CONFIG_PATH = Path.GetFullPath "config.json"
+    let first_launch = not (File.Exists CONFIG_PATH)
 
     module HUDOptions =
 
@@ -459,7 +459,7 @@ module Options =
             | None -> ()
 
     let init_startup (instance: int) =
-        config <- load_important_json_file "Config" config_path true
+        config <- load_important_json_file "Config" CONFIG_PATH true
         Localisation.load_file config.Locale
 
         if config.WorkingDirectory <> "" then
@@ -486,7 +486,7 @@ module Options =
 
     let deinit () =
         try
-            save_important_json_file config_path config
+            save_important_json_file CONFIG_PATH config
             save_important_json_file (Path.Combine(get_game_folder "Data", "options.json")) options
         with err ->
             Logging.Critical("Failed to write options/config to file.", err)
