@@ -1,0 +1,45 @@
+name: Run unit + integration tests on server
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: "server_deploy"
+  cancel-in-progress: false
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+        
+      - name: Build and run image 
+        run: | 
+            cd online
+            docker compose -p interludeweb up --build --detach
+            cd ..
+        
+      - name: Install doctl 
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          
+      - name: Unit tests
+        run: dotnet test -v q online/tests/domain/Interlude.Web.Tests.Domain.fsproj
+        
+      - name: Integration tests
+        run: dotnet test -v q online/tests/domain/Interlude.Web.Tests.Integration.fsproj || docker logs server
+          
+      - name: Log in to DigitalOcean registry 
+        run: doctl registry login --expiry-seconds 600
+        
+      - name: Tag image 
+        run:
+          docker tag interlude-web-server registry.digitalocean.com/yavsrg/interlude-web-server:latest
+          
+      - name: Push image
+        run: docker push registry.digitalocean.com/yavsrg/interlude-web-server:latest
+            
+      - name: Run garbage collection on DigitalOcean registry
+        run: doctl registry garbage-collection start --force --include-untagged-manifests
