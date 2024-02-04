@@ -130,7 +130,7 @@ module Terminal =
         lazy
             (Fonts.create "Courier Prime Sans"
              |> fun x ->
-                 x.SpaceWidth <- 0.7f
+                 x.SpaceWidth <- 0.75f
                  x)
 
     let draw () =

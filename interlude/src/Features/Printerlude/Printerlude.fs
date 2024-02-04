@@ -230,6 +230,13 @@ module Printerlude =
             Some 
             <| Logging.Subscribe(fun (level, main, details) -> sprintf "[%A] %s" level main |> Terminal.add_message)
 
+        Terminal.add_message @"================================================"
+        Terminal.add_message @"=   ___      _      __          __        __   ="
+        Terminal.add_message @"=  / _ \____(_)__  / /____ ____/ /_ _____/ /__ ="
+        Terminal.add_message @"= / ___/ __/ / _ \/ __/ -_) __/ / // / _  / -_)="
+        Terminal.add_message @"=/_/  /_/ /_/_//_/\__/\__/_/ /_/\_,_/\_,_/\__/ ="
+        Terminal.add_message @"================================================"
+
         if instance = 0 then
             ipc_shutdown_token <- Some(IPC.start_server_thread "Interlude" ipc_commands)
 

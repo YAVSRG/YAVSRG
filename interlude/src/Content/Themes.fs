@@ -31,7 +31,6 @@ module Themes =
 
             try
                 let theme = Theme.FromFolderName id
-                Logging.Debug(sprintf "  Loaded theme '%s' (%s)" theme.Config.Name id)
                 loaded.Add(id, theme)
             with err ->
                 Logging.Error("  Failed to load theme '" + id + "'", err)

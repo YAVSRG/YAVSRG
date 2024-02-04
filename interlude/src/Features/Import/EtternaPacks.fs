@@ -196,7 +196,6 @@ module EtternaPacks =
         let mutable failed = false
 
         override this.Init(parent) =
-            allow_expired_etternaonline_cert ()
 
             WebServices.download_json (
                 "https://api.etternaonline.com/v2/packs/",

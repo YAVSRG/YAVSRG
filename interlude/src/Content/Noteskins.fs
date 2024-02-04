@@ -168,8 +168,6 @@ module Noteskins =
                         Sprites = None
                     }
                 )
-
-                Logging.Debug(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
             with err ->
                 Logging.Error("  Failed to load noteskin '" + id + "'", err)
 
