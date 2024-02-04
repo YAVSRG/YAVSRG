@@ -71,8 +71,9 @@ type PlayfieldSettingsPage() as this =
     inherit Page()
 
     let data = Content.NoteskinConfig
-
-    let keycount = Setting.simple Keymode.``4K``
+    
+    let keymode: Setting<Keymode> =
+        Setting.simple <| Gameplay.Chart.keymode()
 
     let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
     let align_offset = Setting.percentf (snd data.PlayfieldAlignment)
@@ -87,8 +88,8 @@ type PlayfieldSettingsPage() as this =
     let fill_gaps = Setting.simple data.FillColumnGaps
     let spacing = data.AdvancedColumnSpacing
 
-    let g keycount i =
-        let k = int keycount - 3
+    let g keymode i =
+        let k = int keymode - 3
 
         Setting.make (fun v -> spacing.[k].[i] <- v) (fun () -> spacing.[k].[i])
         |> Setting.roundf 0
@@ -98,13 +99,13 @@ type PlayfieldSettingsPage() as this =
 
     let _spacings, refresh_spacings =
         refreshable_row
-            (fun () -> int keycount.Value - 1)
+            (fun () -> int keymode.Value - 1)
             (fun i k ->
                 let x = -60.0f * float32 k
                 let n = float32 i
 
                 SpacingPicker(
-                    g keycount.Value i,
+                    g keymode.Value i,
                     Position =
                         { Position.Default with
                             Left = 0.5f %+ (x + NOTE_WIDTH * n)
@@ -151,7 +152,7 @@ type PlayfieldSettingsPage() as this =
                 PageSetting(
                     "generic.keymode",
                     Selector<Keymode>
-                        .FromEnum(keycount |> Setting.trigger (ignore >> refresh_spacings))
+                        .FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
                 )
                     .Pos(720.0f)
             )
@@ -178,7 +179,7 @@ type PlayfieldSettingsPage() as this =
                 this.Bounds.Height * PREVIEW_SCALE
             )
 
-        let keys = int keycount.Value
+        let keys = int keymode.Value
 
         let frame = preview_bounds.Expand Style.PADDING
         Draw.rect (frame.SliceLeft Style.PADDING) Colors.white

@@ -386,6 +386,8 @@ type EmptyState(icon: string, text: string) =
             Alignment.CENTER
         )
 
+// todo: perhaps bin this in favour of the loading indicators which are much better
+// OR add the loading indicator to this and it will look good
 type LoadingState() =
     inherit StaticWidget(NodeType.None)
 

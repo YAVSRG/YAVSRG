@@ -319,7 +319,7 @@ type SelectedChart() =
         Network.Events.change_chart.Add(fun () ->
             if Screen.current_type = Screen.Type.Lobby then
                 SelectedChart.switch Network.lobby.Value.Chart
-        ) // todo: not always
+        )
 
         base.Init parent
 

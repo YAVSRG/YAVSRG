@@ -89,7 +89,7 @@ type NoteskinPreview(scale: float32) as this =
 type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
     inherit NoteskinPreview(scale)
 
-    let keycount = match Gameplay.Chart.CACHE_DATA with Some cc -> cc.Keys | None -> 4
+    let keycount = int (Gameplay.Chart.keymode())
 
     override this.Draw() =
         base.Draw()

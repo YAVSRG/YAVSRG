@@ -34,7 +34,7 @@ type private TabButton(icon: string, name: string, container: SwapContainer, tar
 
     override this.Draw() =
         if container.Current = target then
-            Draw.rect this.Bounds Colors.shadow_2.O2
+            Draw.rect this.Bounds Colors.shadow_2.O3
             Draw.rect (this.Bounds.Expand(Style.PADDING, 0.0f).SliceLeft(Style.PADDING)) !*Palette.MAIN
         base.Draw()
 
@@ -56,7 +56,7 @@ type private Sidebar() as this =
         |+ TabButton(Icons.SLIDERS, %"imports.rulesets.name", ImportScreen.container, Rulesets.tab)
 
     do
-        this 
+        this
         |+ Text(%"menu.import.name", Position = Position.SliceTop(80.0f).Margin(20.0f, 10.0f))
         |+ Text(
             (fun () -> if ImportScreen.something_in_progress() then %"imports.in_progress" else %"imports.not_in_progress"), 

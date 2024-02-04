@@ -7,7 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Content
 open Interlude.Content
-open Interlude.Features.Gameplay
+open Interlude.Features
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI.Menu
@@ -88,8 +88,9 @@ type RotationSettingsPage() as this =
 
     let data = Content.NoteskinConfig
     let use_rotation = Setting.simple data.UseRotation
-
-    let keycount: Setting<Keymode> = Setting.simple Keymode.``4K``
+    
+    let keymode: Setting<Keymode> =
+        Setting.simple <| Gameplay.Chart.keymode()
 
     let receptor_style = Setting.simple data.ReceptorStyle
     let rotations = data.Rotations
@@ -104,13 +105,13 @@ type RotationSettingsPage() as this =
 
     let _rotations, refresh_rotations =
         refreshable_row
-            (fun () -> int keycount.Value)
+            (fun () -> int keymode.Value)
             (fun i k ->
                 let x = -60.0f * float32 k
                 let n = float32 i
 
                 RotationPicker(
-                    g keycount.Value i,
+                    g keymode.Value i,
                     Position =
                         { Position.Default with
                             Left = 0.5f %+ (x + NOTE_WIDTH * n)
@@ -128,7 +129,7 @@ type RotationSettingsPage() as this =
             |+ PageSetting(
                 "generic.keymode",
                 Selector<Keymode>
-                    .FromEnum(keycount |> Setting.trigger (ignore >> refresh_rotations))
+                    .FromEnum(keymode |> Setting.trigger (ignore >> refresh_rotations))
             )
                 .Pos(270.0f)
             |+ PageSetting("noteskins.edit.rotations", _rotations)

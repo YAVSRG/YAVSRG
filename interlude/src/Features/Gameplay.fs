@@ -14,7 +14,6 @@ open Prelude.Gameplay.Mods
 open Prelude.Gameplay
 open Prelude.Gameplay.Difficulty
 open Prelude.Data.Charts
-open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Scores
@@ -22,6 +21,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
+open Interlude.Features
 open Interlude.Features.Online
 open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests
@@ -262,6 +262,11 @@ module Gameplay =
 
                 override this.Handle(action) = action ()
             }
+
+        let keymode() : Keymode =
+            match CACHE_DATA with
+            | Some cc -> cc.Keys |> enum
+            | None -> Keymode.``4K``
 
         let change (cc: CachedChart, ctx: LibraryContext, auto_play_audio: bool) =
             // todo: show a one-time warning if chart loading takes over 1 second

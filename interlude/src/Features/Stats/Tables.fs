@@ -16,6 +16,7 @@ open Interlude.UI.Components
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
+// todo: use new the web request container component
 type private WebRequestState =
     | Offline = 0
     | Loading = 1

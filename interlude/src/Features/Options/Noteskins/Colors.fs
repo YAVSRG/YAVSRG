@@ -8,7 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Content
 open Interlude.Content
-open Interlude.Features.Gameplay
+open Interlude.Features
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
@@ -79,9 +79,9 @@ type ColorSettingsPage() as this =
     inherit Page()
 
     let data = Content.NoteskinConfig
-
-    let keycount: Setting<Keymode> =
-        Setting.simple Keymode.``4K``
+    
+    let keymode: Setting<Keymode> =
+        Setting.simple <| Gameplay.Chart.keymode()
 
     let mutable note_colors = data.NoteColors
 
@@ -93,13 +93,13 @@ type ColorSettingsPage() as this =
 
     let colors, refresh_colors =
         refreshable_row
-            (fun () -> ColorScheme.count (int keycount.Value) note_colors.Style)
+            (fun () -> ColorScheme.count (int keymode.Value) note_colors.Style)
             (fun i k ->
                 let x = -60.0f * float32 k
                 let n = float32 i
 
                 NoteColorPicker(
-                    g keycount.Value i,
+                    g keymode.Value i,
                     note_colors.Style,
                     i,
                     Position =
@@ -128,7 +128,7 @@ type ColorSettingsPage() as this =
             |+ PageSetting(
                 "generic.keymode",
                 Selector<Keymode>
-                    .FromEnum(keycount |> Setting.trigger (ignore >> refresh_colors))
+                    .FromEnum(keymode |> Setting.trigger (ignore >> refresh_colors))
             )
                 .Pos(270.0f)
             |+ PageSetting(

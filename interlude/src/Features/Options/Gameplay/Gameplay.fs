@@ -220,11 +220,10 @@ type EditPresetPage(preset_id: int, setting: Setting<Preset option>) as this =
 type GameplayPage() as this =
     inherit Page()
 
-    // todo: create these keycounts based on current chart if it exists
-    let keycount: Setting<Keymode> =
-        Setting.simple Keymode.``4K``
+    let keymode: Setting<Keymode> =
+        Setting.simple <| Gameplay.Chart.keymode()
 
-    let binds = GameplayKeybinder(keycount)
+    let binds = GameplayKeybinder(keymode)
     let preview = NoteskinPreview 0.35f
 
     let preset_buttons (preset_id: int) (setting: Setting<Preset option>) =
@@ -405,7 +404,7 @@ type GameplayPage() as this =
             |+ PageSetting(
                 "generic.keymode",
                 Selector<_>
-                    .FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
+                    .FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
             )
                 .Pos(550.0f)
             |+ PageSetting("gameplay.keybinds", binds)
