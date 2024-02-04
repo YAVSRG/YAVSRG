@@ -47,7 +47,7 @@ type private Sidebar() as this =
     inherit StaticContainer(NodeType.Switch(fun _ -> this.Flow))
 
     let flow =
-        FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(150.0f).Margin(10.0f))
+        FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(130.0f).Margin(10.0f))
         |+ TabButton(Icons.LINK, %"imports.local.name", ImportScreen.container, Mounts.tab)
         |+ TabButton(Icons.ARCHIVE, %"imports.etterna_packs.name", ImportScreen.container, EtternaPacks.tab)
         |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.beatmaps.name", ImportScreen.container, Beatmaps.tab)
@@ -62,7 +62,7 @@ type private Sidebar() as this =
             (fun () -> if ImportScreen.something_in_progress() then %"imports.in_progress" else %"imports.not_in_progress"), 
             Color = (fun () -> if ImportScreen.something_in_progress() then Colors.text_green else Colors.text_subheading), 
             Position = Position.TrimTop(60.0f).SliceTop(50.0f).Margin(20.0f, 5.0f))
-        |+ LoadingIndicator.Strip(ImportScreen.something_in_progress, Position = Position.Row(100.0f, Style.PADDING).Margin(20.0f, 0.0f))
+        |+ LoadingIndicator.Strip(ImportScreen.something_in_progress, Position = Position.Row(110.0f, Style.PADDING).Margin(20.0f, 0.0f))
         |* flow
 
     member this.Flow = flow

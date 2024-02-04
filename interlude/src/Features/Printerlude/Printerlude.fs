@@ -82,9 +82,6 @@ module Printerlude =
                 with err ->
                     Logging.Error("Error while exporting as osz", err)
 
-        let private import_osu_scores () =
-            Import.Scores.import_osu_scores_service.Request((), ignore)
-
         open SixLabors.ImageSharp
 
         let private banner (hex: string) (emoji: string) =
@@ -180,7 +177,6 @@ module Printerlude =
                 .WithCommand("export_osz", "Export current chart as osz", export_osz)
                 .WithCommand("fix_personal_bests", "Fix personal best display values", fix_personal_bests)
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
-                .WithCommand("import_osu_scores", "Import your local scores from osu!mania", import_osu_scores)
                 .WithIOCommand(
                     "local_server",
                     "Switch to local development server",
