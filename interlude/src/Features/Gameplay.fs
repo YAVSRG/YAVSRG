@@ -162,6 +162,10 @@ module Gameplay =
                                 fun () ->
                                     CHART <- Some chart
 
+                                    if abs (save_data.Offset - chart.FirstNote) > 500.0f<ms> then
+                                        save_data.Offset <- chart.FirstNote
+                                        Logging.Debug("Resetting offset for chart as it looks like a new audio file for the same chart")
+
                                     Song.change (
                                         Cache.audio_path chart Library.cache,
                                         save_data.Offset - chart.FirstNote,
