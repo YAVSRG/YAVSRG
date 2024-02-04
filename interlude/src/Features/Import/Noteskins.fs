@@ -136,6 +136,7 @@ module Noteskins =
         let scroll =
             ScrollContainer(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
 
+        let mutable loading = true
         let mutable failed = false
 
         override this.Init(parent) =
@@ -154,8 +155,13 @@ module Noteskins =
                                 )
 
                                 grid.Add nc
+                            loading <- false
                         )
-                    | None -> failed <- true
+                    | None -> 
+                        sync (fun () ->
+                            failed <- true
+                            loading <- false
+                        )
             )
 
             this
@@ -163,7 +169,8 @@ module Noteskins =
                 Setting.simple "",
                 (fun (f: Filter) -> grid.Filter <- NoteskinCard.Filter f),
                 Position = Position.SliceTop 60.0f
-            ))
+            ) |+ LoadingIndicator.Border(fun () -> loading))
+            |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to noteskins repository"))
             |+ Text(%"imports.noteskins.hint", Position = Position.SliceBottom 55.0f)
             |* scroll
 

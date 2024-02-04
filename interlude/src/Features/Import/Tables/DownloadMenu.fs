@@ -11,6 +11,8 @@ open Interlude.Web.Shared.Requests
 open Interlude.UI
 open Interlude.UI.Menu
 
+#nowarn "40"
+
 module private TableDownloader =
 
     [<RequireQualifiedAccess>]
@@ -28,7 +30,7 @@ module private TableDownloader =
         | Downloading
         | Downloaded
 
-    type DownloaderState(table: Table, charts: Tables.Charts.ChartInfo array) as this =
+    type DownloaderState(table: Table, charts: Tables.Charts.ChartInfo array, download_service: Async.Service<DownloaderState * string * Tables.Charts.ChartInfo, unit>) =
 
         let levels_by_chart = 
             charts
@@ -59,23 +61,6 @@ module private TableDownloader =
 
         let mutable open_level = -1
         let mutable open_section = ""
-
-        let download_service =
-            { new Async.Service<string * Tables.Charts.ChartInfo, unit>() with
-                override _.Handle((table_name: string, chart: Tables.Charts.ChartInfo)) =
-                    async {
-                        sync (fun () -> this.SetStatus(chart.Hash, ChartStatus.Downloading))
-                        match Cache.by_hash chart.Hash Library.cache with
-                        | Some cc -> 
-                            Cache.copy table_name cc Library.cache
-                            sync (fun () -> this.SetStatus(chart.Hash, ChartStatus.Downloaded))
-                        | None -> 
-                            match! Cache.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Library.cache with
-                            | true -> sync (fun () -> this.SetStatus(chart.Hash, ChartStatus.Downloaded))
-                            | false -> sync (fun () -> this.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
-                        return ()
-                    }
-            }
 
         do
             for chart in charts do
@@ -207,7 +192,7 @@ module private TableDownloader =
                 | ChartStatus.DownloadFailed
                 | ChartStatus.Missing -> 
                     this.SetStatus(chart.Hash, ChartStatus.Queued)
-                    download_service.Request((table.Info.Name, chart), ignore)
+                    download_service.Request((this, table.Info.Name, chart), ignore)
                 | _ -> ()
 
         member this.QueueLevel(level: int) =
@@ -216,8 +201,25 @@ module private TableDownloader =
                 | ChartStatus.DownloadFailed
                 | ChartStatus.Missing -> 
                     this.SetStatus(chart.Hash, ChartStatus.Queued)
-                    download_service.Request((table.Info.Name, chart), ignore)
+                    download_service.Request((this, table.Info.Name, chart), ignore)
                 | _ -> ()
+    
+    let download_service =
+        { new Async.Service<DownloaderState * string * Tables.Charts.ChartInfo, unit>() with
+            override _.Handle((state: DownloaderState, table_name: string, chart: Tables.Charts.ChartInfo)) =
+                async {
+                    sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
+                    match Cache.by_hash chart.Hash Library.cache with
+                    | Some cc -> 
+                        Cache.copy table_name cc Library.cache
+                        sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                    | None -> 
+                        match! Cache.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Library.cache with
+                        | true -> sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        | false -> sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
+                    return ()
+                }
+        }
 
     let mutable existing_states : Map<string, DownloaderState> = Map.empty
 
@@ -410,7 +412,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
             Tables.Charts.get (table.Id,
                 function
                 | Some charts ->
-                    let state = DownloaderState(table, charts.Charts)
+                    let state = DownloaderState(table, charts.Charts, download_service)
                     sync(fun () ->
                         match existing_states.TryFind table.Id with
                         | Some state -> () // do nothing if they spam clicked the table button
@@ -424,6 +426,6 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
             )
 
     static member OpenAfterInstall(table: Table, charts: Tables.Charts.Response) =
-        let state = DownloaderState(table, charts.Charts)
+        let state = DownloaderState(table, charts.Charts, download_service)
         existing_states <- Map.add table.Id state existing_states
         TableDownloadMenu(table, state).Show()

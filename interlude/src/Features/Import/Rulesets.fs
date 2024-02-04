@@ -112,6 +112,7 @@ module Rulesets =
         let scroll =
             ScrollContainer(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f))
 
+        let mutable loading = true
         let mutable failed = false
 
         override this.Init(parent) =
@@ -123,8 +124,13 @@ module Rulesets =
                         sync (fun () ->
                             for id in d.Rulesets.Keys do
                                 grid.Add(RulesetCard(id, d.Rulesets.[id]))
+                            loading <- false
                         )
-                    | None -> failed <- true
+                    | None -> 
+                        sync (fun () ->
+                            failed <- true
+                            loading <- false
+                        )
             )
 
             this
@@ -132,7 +138,8 @@ module Rulesets =
                 Setting.simple "",
                 (fun (f: Filter) -> grid.Filter <- RulesetCard.Filter f),
                 Position = Position.SliceTop 60.0f
-            ))
+            ) |+ LoadingIndicator.Border(fun () -> loading))
+            |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to rulesets repository"))
             |* scroll
 
             base.Init parent

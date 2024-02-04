@@ -434,18 +434,6 @@ module Beatmaps =
         override this.Focusable = items.Focusable
 
         override this.Init(parent) =
-            //this
-            //|+ EmptyState(Icons.CONNECTION_FAILED, "osu!search is down :(")
-            //|+ Text("You'll have to download charts manually for the time being", Position = Position.Row(400.0f, 50.0f))
-            //|+
-            //    (
-            //        GridFlowContainer(50.0f, 4, Spacing = (20.0f, 0.0f), Position = Position.Row(460.0f, 50.0f))
-            //        |+ Button("osu! (official)", fun () -> open_url "https://osu.ppy.sh/beatmapsets?m=3")
-            //        |+ Button("NeriNyan", fun () -> open_url "https://nerinyan.moe/main?m=3")
-            //        |+ Button("osu.direct", fun () -> open_url "https://osu.direct/browse?mode=3")
-            //        |+ Button("chimu.moe", fun () -> open_url "https://chimu.moe/en/beatmaps?mode=3&offset=0&size=40&status=1")
-            //    )
-            //|* Text(%"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
             begin_search filter
 
             this
@@ -456,8 +444,7 @@ module Beatmaps =
                     sync (fun () -> begin_search filter)
                 ),
                 Position = Position.SliceTop 60.0f
-            ))
-            |+ LoadingIndicator.Strip((fun () -> loading), Position = Position.Row(115.0f, 5.0f))
+            ) |+ LoadingIndicator.Border(fun () -> loading))
             |+ Text(%"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
             |+ scroll
             |+ (let r =

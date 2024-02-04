@@ -6,6 +6,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Tables
 open Interlude.Web.Shared.Requests
 open Interlude.Content
+open Interlude.UI.Components
 
 [<RequireQualifiedAccess>]
 type private TableStatus =
@@ -53,6 +54,7 @@ type TableCard(online_table: Tables.List.Table) as this =
             Align = Alignment.CENTER,
             Position = Position.SliceBottom(60.0f).Margin(20.0f, Style.PADDING)
         )
+        |+ LoadingIndicator.Border(fun () -> status = TableStatus.Installing)
         |* Clickable.Focus this
 
         existing <- Tables.by_id online_table.Id

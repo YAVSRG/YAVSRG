@@ -216,55 +216,49 @@ module LoadingIndicator =
         let animation = Animation.Counter(1500.0)
         let fade = Animation.Fade 0.0f
 
-        let draw (bounds: Rect) (a: float32) (b: float32) (color: Color) =
+        let draw (bounds: Rect) (a: float32) (length: float32) (color: Color) =
             let perimeter = (bounds.Width + bounds.Height) * 2.0f
-            let a, b = a % 1.0f, b % 1.0f
+            let a = a % 1.0f
+            let b = a + length
 
             let corner_1 = bounds.Width / perimeter
-            let a_1 = Math.Clamp(a, 0.0f, corner_1)
-            let b_1 = Math.Clamp(b % 1.0f, 0.0f, corner_1)
-            if a_1 < corner_1 || b_1 < a_1 then
+            let corner_2 = (bounds.Width + bounds.Height) / perimeter
+            let corner_3 = corner_1 + corner_2
+
+            if b > 1.0f || a < corner_1 then
                 Draw.rect
                     (Rect.Create(
-                        (if b_1 < a_1 then bounds.Left else bounds.Left + a_1 * perimeter),
+                        (if b > 1.0f then bounds.Left else bounds.Left + a * perimeter),
                         bounds.Top,
-                        bounds.Left + b_1 * perimeter |> min bounds.Right,
+                        bounds.Left + (b % 1.0f) * perimeter |> min bounds.Right,
                         bounds.Top + Style.PADDING)
                     ) color
 
-            let corner_2 = (bounds.Width + bounds.Height) / perimeter
-            let a_2 = Math.Clamp(a, corner_1, corner_2)
-            let b_2 = Math.Clamp(b, corner_1, corner_2)
-            if a_2 < corner_2 || b_2 > corner_1 then
+            if b > corner_1 && a < corner_2 then
                 Draw.rect
                     (Rect.Create(
                         bounds.Right - Style.PADDING,
-                        bounds.Top + (a_2 - corner_1) * perimeter |> max bounds.Top,
+                        bounds.Top + (a - corner_1) * perimeter |> max bounds.Top,
                         bounds.Right,
-                        bounds.Top + (b_2 - corner_1) * perimeter |> min bounds.Bottom)
+                        bounds.Top + (b - corner_1) * perimeter |> min bounds.Bottom)
                     ) color
-            
-            let corner_3 = corner_1 + corner_2
-            let a_3 = Math.Clamp(a, corner_2, corner_3)
-            let b_3 = Math.Clamp(b, corner_2, corner_3)
-            if a_3 < corner_3 || b_3 > corner_2 then
+                    
+            if b > corner_2 && a < corner_3 then
                 Draw.rect
                     (Rect.Create(
-                        bounds.Right - (a_3 - corner_2) * perimeter |> min bounds.Right,
+                        bounds.Right - (a - corner_2) * perimeter |> min bounds.Right,
                         bounds.Bottom - Style.PADDING,
-                        bounds.Right - (b_3 - corner_2) * perimeter |> max bounds.Left,
+                        bounds.Right - (b - corner_2) * perimeter |> max bounds.Left,
                         bounds.Bottom)
                     ) color
             
-            let a_4 = Math.Clamp(a, corner_3, 1.0f)
-            let b_4 = Math.Clamp(b, corner_3, 1.0f)
-            if a_4 < 1.0f || b_4 > corner_3 || (a_4 < corner_3 && b_4 < a_4) then
+            if b > corner_3 && a < 1.0f then
                 Draw.rect
                     (Rect.Create(
                         bounds.Left,
-                        bounds.Bottom - (a_4 - corner_3) * perimeter |> min bounds.Bottom,
+                        bounds.Bottom - (a - corner_3) * perimeter |> min bounds.Bottom,
                         bounds.Left + Style.PADDING,
-                        if b_4 < a_4 then bounds.Top else bounds.Bottom - (b_4 - corner_3) * perimeter)
+                        bounds.Bottom - (b - corner_3) * perimeter |> max bounds.Top)
                     ) color
         
         override this.Update(elapsed_ms, moved) =
@@ -279,9 +273,9 @@ module LoadingIndicator =
             let b = this.Bounds.Expand(Style.PADDING)
             let x = float32 (animation.Time / animation.Interval)
             let color = Colors.white.O4a fade.Alpha
-            draw b x (x + 0.1f) color
-            draw b (x + 0.333f) (x + 0.433f) color
-            draw b (x + 0.666f) (x + 0.766f) color
+            draw b x 0.1f color
+            draw b (x + 0.333f) 0.1f color
+            draw b (x + 0.666f) 0.1f color
 
 type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit FrameContainer(NodeType.Switch(fun _ -> this.TextEntry))
@@ -366,6 +360,7 @@ type WIP() as this =
 
         Text.fill_b (Style.font, text, this.Bounds.Shrink(20.0f), Colors.text, Alignment.CENTER)
 
+// todo: give empty states an optional action
 type EmptyState(icon: string, text: string) =
     inherit StaticWidget(NodeType.None)
 

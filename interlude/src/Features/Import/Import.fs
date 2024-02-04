@@ -3,81 +3,12 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Common
 open Prelude.Data
 open Prelude.Data.Charts
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Features.Online
-
-type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
-    inherit StaticContainer(NodeType.Switch(fun _ -> this.Button))
-
-    let button =
-        Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f))
-
-    member this.Button = button
-
-    override this.Init(parent) =
-        base.Init parent
-
-        this
-        |+ Frame(
-            Border =
-                fun () ->
-                    if container.Current = target then
-                        Color.White
-                    else
-                        Color.Transparent
-            , Fill =
-                fun () ->
-                    if this.Focused then
-                        !*Palette.MAIN_100
-                    else
-                        !*Palette.DARK_100
-        )
-        |* button
-
-type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Service<'Request, 'Result>) =
-    inherit StaticWidget(NodeType.None)
-
-    let fade = Animation.Fade 0.0f
-    let animation = Animation.Counter(250.0)
-
-    let animation_frames =
-        [|
-            Icons.CLOUD_SNOW
-            Icons.CLOUD_DRIZZLE
-            Icons.CLOUD_RAIN
-            Icons.CLOUD_DRIZZLE
-        |]
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        if service.Status <> Async.ServiceStatus.Idle then
-            fade.Target <- 1.0f
-            animation.Update elapsed_ms
-        else
-            fade.Target <- 0.0f
-
-        fade.Update elapsed_ms
-
-    override this.Draw() =
-        let icon = animation_frames.[animation.Loops % animation_frames.Length]
-
-        let icon_color =
-            match service.Status with
-            | Async.ServiceStatus.Busy -> Color.FromArgb(fade.Alpha, Color.Yellow)
-            | Async.ServiceStatus.Working -> Color.FromArgb(fade.Alpha, Color.Lime)
-            | _ -> Color.FromArgb(fade.Alpha, Color.Gray)
-
-        let text_color =
-            let x = 127 + fade.Alpha / 2
-            Color.FromArgb(x, x, x)
-
-        Text.fill (Style.font, icon, this.Bounds.SliceLeft this.Bounds.Height, icon_color, Alignment.CENTER)
-        Text.fill (Style.font, name, this.Bounds.TrimLeft this.Bounds.Height, text_color, Alignment.LEFT)
 
 module ImportScreen =
 
@@ -88,26 +19,75 @@ module ImportScreen =
     let switch_to_rulesets () = container.Current <- Rulesets.tab
     let switch_to_tables () = container.Current <- Tables.tab
 
-type ImportScreen() as this =
-    inherit Screen()
+    let something_in_progress () =
+        WebServices.download_file.Status <> Async.ServiceStatus.Idle
+        || Library.Imports.convert_song_folder.Status <> Async.ServiceStatus.Idle
+        || Caching.Cache.recache_service.Status <> Async.ServiceStatus.Idle
+        || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
 
-    let tabs =
-        FlowContainer.Vertical<Widget>(65.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
+type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
+    inherit StaticContainer(NodeType.Switch(fun _ -> this.Button))
+
+    let button = Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f, 5.0f))
+
+    member this.Button = button
+
+    override this.Draw() =
+        if container.Current = target then
+            Draw.rect this.Bounds Colors.shadow_2.O2
+            Draw.rect (this.Bounds.Expand(Style.PADDING, 0.0f).SliceLeft(Style.PADDING)) !*Palette.MAIN
+        base.Draw()
+
+    override this.Init(parent) =
+        base.Init parent
+
+        this |* button
+
+type private Sidebar() as this =
+    inherit StaticContainer(NodeType.Switch(fun _ -> this.Flow))
+
+    let flow =
+        FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(150.0f).Margin(10.0f))
         |+ TabButton(Icons.LINK, %"imports.local.name", ImportScreen.container, Mounts.tab)
         |+ TabButton(Icons.ARCHIVE, %"imports.etterna_packs.name", ImportScreen.container, EtternaPacks.tab)
         |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.beatmaps.name", ImportScreen.container, Beatmaps.tab)
+        |+ TabButton(Icons.SIDEBAR, %"imports.tables.name", ImportScreen.container, Tables.tab)
         |+ TabButton(Icons.IMAGE, %"imports.noteskins.name", ImportScreen.container, Noteskins.tab)
         |+ TabButton(Icons.SLIDERS, %"imports.rulesets.name", ImportScreen.container, Rulesets.tab)
-        |+ TabButton(Icons.SIDEBAR, %"imports.tables.name", ImportScreen.container, Tables.tab)
-        |+ ServiceStatus("Loading", WebServices.download_string)
-        |+ ServiceStatus("Downloading", WebServices.download_file)
-        |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)
-        |+ ServiceStatus("Recaching", Caching.Cache.recache_service)
 
-    do this |* (NavigationContainer.Row<Widget>() |+ tabs |+ ImportScreen.container)
+    do
+        this 
+        |+ Text(%"menu.import.name", Position = Position.SliceTop(80.0f).Margin(20.0f, 10.0f))
+        |+ Text(
+            (fun () -> if ImportScreen.something_in_progress() then %"imports.in_progress" else %"imports.not_in_progress"), 
+            Color = (fun () -> if ImportScreen.something_in_progress() then Colors.text_green else Colors.text_subheading), 
+            Position = Position.TrimTop(60.0f).SliceTop(50.0f).Margin(20.0f, 5.0f))
+        |+ LoadingIndicator.Strip(ImportScreen.something_in_progress, Position = Position.Row(100.0f, Style.PADDING).Margin(20.0f, 0.0f))
+        |* flow
+
+    member this.Flow = flow
+
+    override this.Draw() =
+        Draw.rect this.Bounds Colors.shadow_2.O1
+        Draw.rect (this.Bounds.Expand(Style.PADDING, 0.0f).SliceRight(Style.PADDING)) !*Palette.MAIN_100
+        base.Draw()
+        
+
+type ImportScreen() as this =
+    inherit Screen()
+
+    let sidebar = Sidebar(Position = Position.SliceLeft(400.0f))
+
+    do 
+        this
+        |* (
+            NavigationContainer.Row<Widget>()
+            |+ sidebar
+            |+ ImportScreen.container
+        )
 
     override this.OnEnter _ =
-        tabs.Focus()
+        sidebar.Focus()
         DiscordRPC.in_menus ("Importing new content")
 
     override this.OnExit _ = ()

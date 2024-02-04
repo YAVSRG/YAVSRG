@@ -194,6 +194,7 @@ module EtternaPacks =
             ScrollContainer(flow, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
 
         let mutable failed = false
+        let mutable loading = true
 
         override this.Init(parent) =
 
@@ -208,8 +209,13 @@ module EtternaPacks =
                         sync (fun () ->
                             for p in d.data do
                                 flow.Add(EtternaPackCard(p.id, p.attributes))
+                            loading <- false
                         )
-                    | None -> failed <- true
+                    | None -> 
+                        sync (fun () ->
+                            failed <- true
+                            loading <- false
+                        )
             )
 
             this
@@ -217,7 +223,8 @@ module EtternaPacks =
                 Setting.simple "",
                 (fun (f: Filter) -> flow.Filter <- EtternaPackCard.Filter f),
                 Position = Position.SliceTop 60.0f
-            ))
+            ) |+ LoadingIndicator.Border(fun () -> loading))
+            |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to EtternaOnline"))
             |+ Text(%"imports.disclaimer.etterna", Position = Position.SliceBottom 55.0f)
             |* scroll
 
