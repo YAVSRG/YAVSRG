@@ -1,1 +1,1 @@
-﻿TablesV2 downloads but not suggestions
+﻿Patch to accepting table suggestions
