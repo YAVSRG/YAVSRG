@@ -7,15 +7,14 @@ open Prelude.Common
 open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Features
-open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Play
 
-type NoteskinPreview(scale: float32) as this =
+type NoteskinPreview(scale: float32, rhs: bool) as this =
     inherit StaticContainer(NodeType.None)
 
     let fbo = FBO.create ()
 
-    let create_renderer (info: LoadedChartInfo) =
+    let create_renderer (info: Gameplay.Chart.LoadedChartInfo) =
         let playfield =
             Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
 
@@ -35,12 +34,20 @@ type NoteskinPreview(scale: float32) as this =
         StaticContainer(
             NodeType.None,
             Position =
-                {
-                    Left = 1.0f %- (50.0f + w)
-                    Top = 0.5f %- (h * 0.5f)
-                    Right = 1.0f %- 50.0f
-                    Bottom = 0.5f %+ (h * 0.5f)
-                }
+                if rhs then
+                    {
+                        Left = 1.0f %- (50.0f + w)
+                        Top = 0.5f %- (h * 0.5f)
+                        Right = 1.0f %- 50.0f
+                        Bottom = 0.5f %+ (h * 0.5f)
+                    }
+                else
+                    {
+                        Left = 0.0f %+ 50.0f
+                        Top = 0.5f %- (h * 0.5f)
+                        Right = 0.0f %+ (50.0f + w)
+                        Bottom = 0.5f %+ (h * 0.5f)
+                    }
         )
 
     do
@@ -87,7 +94,7 @@ type NoteskinPreview(scale: float32) as this =
 
 [<AbstractClass>]
 type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
-    inherit NoteskinPreview(scale)
+    inherit NoteskinPreview(0.35f, true)
 
     let keycount = int (Gameplay.Chart.keymode())
 

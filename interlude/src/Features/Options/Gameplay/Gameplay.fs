@@ -96,7 +96,7 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
 type LanecoverPage() as this =
     inherit Page()
 
-    let preview = NoteskinPreview 0.35f
+    let preview = NoteskinPreview(0.35f, true)
 
     do
         this.Content(
@@ -224,7 +224,7 @@ type GameplayPage() as this =
         Setting.simple <| Gameplay.Chart.keymode()
 
     let binds = GameplayKeybinder(keymode)
-    let preview = NoteskinPreview 0.35f
+    let preview = NoteskinPreview(0.35f, true)
 
     let preset_buttons (preset_id: int) (setting: Setting<Preset option>) =
         StaticContainer(

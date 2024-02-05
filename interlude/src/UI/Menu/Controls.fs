@@ -294,12 +294,13 @@ type PageButton(name, action) as this =
             Draw.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
-
-    member this.Pos(y, height) =
-        this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, PRETTYWIDTH, height)
+        
+    member this.Pos(y, width, height) =
+        this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height)
         this
 
-    member this.Pos(y) = this.Pos(y, PRETTYHEIGHT)
+    member this.Pos(y, width) = this.Pos(y, width, PRETTYHEIGHT)
+    member this.Pos(y) = this.Pos(y, PRETTYWIDTH)
 
     member val Enabled = true with get, set
 

@@ -111,7 +111,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
 type NoteskinsPage() as this =
     inherit Page()
 
-    let preview = NoteskinPreview 0.35f
+    let preview = NoteskinPreview(0.35f, false)
 
     let grid =
         GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
@@ -186,14 +186,14 @@ type NoteskinsPage() as this =
                 grid,
                 Position =
                     {
-                        Left = 0.0f %+ 100.0f
-                        Right = 0.6f %- 0.0f
-                        Top = 0.0f %+ 320.0f
-                        Bottom = 1.0f %- 270.0f
+                        Left = 0.35f %+ 150.0f
+                        Right = 1.0f %- 100.0f
+                        Top = 0.0f %+ 190.0f
+                        Bottom = 1.0f %- 190.0f
                     }
             )
             |+ PageButton("noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
-                .Pos(830.0f)
+                .Pos(830.0f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT)
                 .Tooltip(Tooltip.Info("noteskins.open_folder"))
             |+ PageButton(
                 "noteskins.get_more",
@@ -204,7 +204,7 @@ type NoteskinsPage() as this =
                         Interlude.Features.Import.ImportScreen.switch_to_noteskins ()
                 )
             )
-                .Pos(900.0f)
+                .Pos(900.0f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT)
         )
 
         this |* preview

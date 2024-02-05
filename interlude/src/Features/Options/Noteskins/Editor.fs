@@ -17,7 +17,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
 
     let name = Setting.simple data.Name
 
-    let preview = NoteskinPreview 0.35f
+    let preview = NoteskinPreview(0.35f, true)
 
     do
         this.Content(
