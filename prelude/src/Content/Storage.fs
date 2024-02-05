@@ -515,6 +515,8 @@ module Storage =
             "holdtail"
             "holdexplosion"
             "receptorlighting"
+            "stageleft"
+            "stageright"
         |]
 
     let THEME_TEXTURES = [| "background"; "rain"; "logo"; "cursor" |]

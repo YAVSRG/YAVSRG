@@ -74,6 +74,9 @@ type NoteskinConfig =
         /// If true, spacing between columns is filled instead of having a gap
         FillColumnGaps: bool
 
+        /// When true, enables `stageleft` and `stageright` textures drawn next to the playfield
+        EnableStageTextures: bool
+
         /// ???
         ColumnLightTime: float32
         /// Set to false to disable column lighting when keys are pressed
@@ -119,6 +122,7 @@ type NoteskinConfig =
                     Array.zeroCreate 9
                 |]
             FillColumnGaps = false
+            EnableStageTextures = false
             ColumnLightTime = 0.4f
             EnableColumnLight = true
             AnimationFrameTime = 200.0
@@ -226,6 +230,9 @@ type Noteskin(storage) as this =
                 yield "holdexplosion"
             if this.Config.EnableColumnLight then
                 yield "receptorlighting"
+            if this.Config.EnableStageTextures then
+                yield "stageleft"
+                yield "stageright"
         }
 
     static member FromZipStream(stream: Stream) =

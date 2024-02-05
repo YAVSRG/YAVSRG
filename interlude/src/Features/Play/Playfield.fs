@@ -12,6 +12,24 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.Features
 
+type private StageLeft() =
+    inherit StaticWidget(NodeType.None)
+
+    let sprite = Content.Texture "stageleft"
+
+    override this.Draw() =
+        let width = sprite.AspectRatio * this.Bounds.Height
+        Draw.sprite (Rect.Box(this.Bounds.Left - width, this.Bounds.Top, width, this.Bounds.Height)) Color.White sprite
+        
+type private StageRight() =
+    inherit StaticWidget(NodeType.None)
+        
+    let sprite = Content.Texture "stageright"
+        
+    override this.Draw() =
+        let width = sprite.AspectRatio * this.Bounds.Height
+        Draw.sprite (Rect.Box(this.Bounds.Right, this.Bounds.Top, width, this.Bounds.Height)) Color.White sprite
+
 [<Struct>]
 type private HoldRenderState =
     | HeadOffscreen of int
@@ -102,6 +120,10 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let (screen_align_percentage, playfield_align_percentage) =
             noteskin_config.PlayfieldAlignment
 
+        if noteskin_config.EnableStageTextures then
+            this
+            |+ StageLeft()
+            |* StageRight()
         this.Position <-
             {
                 Left = screen_align_percentage %- (width * playfield_align_percentage)
