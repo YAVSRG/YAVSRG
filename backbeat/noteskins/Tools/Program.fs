@@ -7,7 +7,7 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 
 let check_noteskin_textures (ns: Noteskin) =
-    for tex in Storage.NOTESKIN_TEXTURES do
+    for tex in ns.RequiredTextures do
         match ns.GetTexture tex with
         | Some _ -> ()
         | None -> printfn "Missing texture: %s" tex

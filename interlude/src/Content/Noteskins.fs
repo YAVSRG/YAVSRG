@@ -43,6 +43,8 @@ module Noteskins =
         let missing_textures = ResizeArray()
         let available_textures = ResizeArray()
 
+        let required_textures = ResizeArray(ns.Noteskin.RequiredTextures)
+
         for texture_id in Storage.NOTESKIN_TEXTURES do
             match ns.Noteskin.GetTexture texture_id with
             | Some(img, config) ->
@@ -55,12 +57,13 @@ module Noteskins =
                         DisposeImageAfter = true
                     }
             | None ->
-                Logging.Warn(
-                    sprintf
-                        "Noteskin texture '%s' in '%s' didn't load properly, so it will appear as a white square ingame."
-                        texture_id
-                        ns.Noteskin.Config.Name
-                )
+                if required_textures.Contains(texture_id) then
+                    Logging.Warn(
+                        sprintf
+                            "Noteskin texture '%s' in '%s' didn't load properly, so it will appear as a white square ingame."
+                            texture_id
+                            ns.Noteskin.Config.Name
+                    )
 
                 missing_textures.Add texture_id
 

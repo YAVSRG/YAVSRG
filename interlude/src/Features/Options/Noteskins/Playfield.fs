@@ -241,7 +241,7 @@ type PlayfieldSettingsPage() as this =
 
     override this.OnClose() =
         Noteskins.save_config
-            { data with
+            { Content.NoteskinConfig with
                 ColumnWidth = column_width.Value
                 ColumnSpacing = column_spacing.Value
                 FillColumnGaps = fill_gaps.Value

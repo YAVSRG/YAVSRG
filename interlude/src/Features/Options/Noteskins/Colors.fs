@@ -148,6 +148,6 @@ type ColorSettingsPage() as this =
 
     override this.OnClose() =
         Noteskins.save_config
-            { data with
+            { Content.NoteskinConfig with
                 NoteColors = note_colors
             }

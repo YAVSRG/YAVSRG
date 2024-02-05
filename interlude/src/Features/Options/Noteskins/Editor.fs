@@ -84,20 +84,19 @@ type EditNoteskinPage(from_hotkey: bool) as this =
             )
                 .Pos(580.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.animations"))
-            |+ (GridFlowContainer<TextureCard>(
-                    150.0f,
-                    4,
-                    WrapNavigation = false,
-                    Spacing = (15.0f, 15.0f),
-                    Position = Position.Box(0.0f, 0.0f, 100.0f, 680.0f, 645.0f, 315.0f)
-                )
-                |+ TextureCard("note", (fun () -> TextureEditPage("note").Show()))
-                |+ TextureCard("holdhead", (fun () -> TextureEditPage("holdhead").Show()))
-                |+ TextureCard("holdbody", (fun () -> TextureEditPage("holdbody").Show()))
-                |+ TextureCard("holdtail", (fun () -> TextureEditPage("holdtail").Show()))
-                |+ TextureCard("receptor", (fun () -> TextureEditPage("receptor").Show()))
-                |+ TextureCard("noteexplosion", (fun () -> TextureEditPage("noteexplosion").Show()))
-                |+ TextureCard("holdexplosion", (fun () -> TextureEditPage("holdexplosion").Show())))
+            |+ (
+                let grid = 
+                    GridFlowContainer<TextureCard>(
+                        150.0f,
+                        4,
+                        WrapNavigation = false,
+                        Spacing = (15.0f, 15.0f),
+                        Position = Position.Box(0.0f, 0.0f, 100.0f, 680.0f, 645.0f, 315.0f)
+                    )
+                for texture in Content.Noteskin.RequiredTextures |> Seq.except ["receptorlighting"] do
+                    grid |* TextureCard(texture, (fun () -> TextureEditPage(texture).Show()))
+                grid
+            )
             |+ preview
         )
 
@@ -118,6 +117,6 @@ type EditNoteskinPage(from_hotkey: bool) as this =
 
     override this.OnClose() =
         Noteskins.save_config
-            { data with
+            { Content.NoteskinConfig with
                 Name = name.Value
             }

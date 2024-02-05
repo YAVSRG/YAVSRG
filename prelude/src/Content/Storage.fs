@@ -357,7 +357,7 @@ type Storage(storage: StorageType) =
                 this.WriteTextureConfig({ info with Mode = Loose }, name, path)
             | Grid -> ()
 
-    member private this.MutateTexture((col, row), action, name: string, [<ParamArray>] path: string array) =
+    member private this.MutateGridTexture((col, row), action, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
@@ -365,33 +365,35 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> failwith "Not supported for stitched textures"
+        | Grid -> 
+            Logging.Warn(sprintf "Cannot mutate %s (%i, %i) as it is a grid texture" name col row)
+            false
         | Loose ->
 
-        let img =
-            match this.TryReadFile(Array.append path [| sprintf "%s-%i-%i.png" name row col |]) with
-            | Some stream ->
-                let i = Bitmap.load stream in
-                stream.Dispose()
-                i
-            | None -> failwithf "Couldn't load texture file (%i,%i)" row col
-
-        img.Mutate<PixelFormats.Rgba32>(fun context -> action context |> ignore)
-        img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
+        match this.TryReadFile(Array.append path [| sprintf "%s-%i-%i.png" name row col |]) with
+        | Some stream ->
+            let img = Bitmap.load stream in
+            stream.Dispose()
+            img.Mutate<PixelFormats.Rgba32>(fun context -> action context |> ignore)
+            img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
+            true
+        | None -> 
+            Logging.Warn (sprintf "Couldn't load texture file (%i,%i)" row col)
+            false
 
     member this.VerticalFlipTexture((col, row), name: string, [<ParamArray>] path: string array) =
-        this.MutateTexture((col, row), (fun ctx -> ctx.Flip FlipMode.Vertical), name, path)
+        this.MutateGridTexture((col, row), (fun ctx -> ctx.Flip FlipMode.Vertical), name, path)
 
     member this.HorizontalFlipTexture((col, row), name: string, [<ParamArray>] path: string array) =
-        this.MutateTexture((col, row), (fun ctx -> ctx.Flip FlipMode.Horizontal), name, path)
+        this.MutateGridTexture((col, row), (fun ctx -> ctx.Flip FlipMode.Horizontal), name, path)
 
     member this.RotateClockwise((col, row), name: string, [<ParamArray>] path: string array) =
-        this.MutateTexture((col, row), (fun ctx -> ctx.Rotate(RotateMode.Rotate90)), name, path)
+        this.MutateGridTexture((col, row), (fun ctx -> ctx.Rotate(RotateMode.Rotate90)), name, path)
 
     member this.RotateAnticlockwise((col, row), name: string, [<ParamArray>] path: string array) =
-        this.MutateTexture((col, row), (fun ctx -> ctx.Rotate(RotateMode.Rotate270)), name, path)
+        this.MutateGridTexture((col, row), (fun ctx -> ctx.Rotate(RotateMode.Rotate270)), name, path)
 
-    member this.AddTextureRow(src_row: int, name: string, [<ParamArray>] path: string array) =
+    member this.AddGridTextureRow(src_row: int, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
@@ -399,7 +401,9 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> failwith "Not supported for stitched textures"
+        | Grid -> 
+            Logging.Warn(sprintf "Cannot clone %s (*, %i) as it is a grid texture" name src_row)
+            false
         | Loose ->
 
         try
@@ -410,10 +414,12 @@ type Storage(storage: StorageType) =
                 )
 
             this.WriteTextureConfig({ info with Rows = info.Rows + 1 }, name, path)
+            true
         with err ->
             Logging.Error("Error adding texture row", err)
+            false
 
-    member this.AddTextureColumn(src_col: int, name: string, [<ParamArray>] path: string array) =
+    member this.AddGridTextureColumn(src_col: int, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
@@ -421,7 +427,9 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> failwith "Not supported for stitched textures"
+        | Grid -> 
+            Logging.Warn(sprintf "Cannot clone %s (%i, *) as it is a grid texture" name src_col)
+            false
         | Loose ->
 
         try
@@ -432,10 +440,12 @@ type Storage(storage: StorageType) =
                 )
 
             this.WriteTextureConfig({ info with Columns = info.Columns + 1 }, name, path)
+            true
         with err ->
             Logging.Error("Error adding texture column", err)
+            false
 
-    member this.DeleteTextureRow(row: int, name: string, [<ParamArray>] path: string array) =
+    member this.DeleteGridTextureRow(row: int, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
@@ -443,7 +453,9 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> failwith "Not supported for stitched textures"
+        | Grid -> 
+            Logging.Warn(sprintf "Cannot delete %s (*, %i) as it is a grid texture" name row)
+            false
         | Loose ->
 
         try
@@ -457,10 +469,12 @@ type Storage(storage: StorageType) =
                     )
 
             this.WriteTextureConfig({ info with Rows = info.Rows - 1 }, name, path)
+            true
         with err ->
             Logging.Error("Error removing texture row", err)
+            false
 
-    member this.DeleteTextureColumn(col: int, name: string, [<ParamArray>] path: string array) =
+    member this.DeleteGridTextureColumn(col: int, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
@@ -468,7 +482,9 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> failwith "Not supported for stitched textures"
+        | Grid -> 
+            Logging.Warn(sprintf "Cannot delete %s (%i, *) as it is a grid texture" name col)
+            false
         | Loose ->
 
         try
@@ -482,8 +498,10 @@ type Storage(storage: StorageType) =
                     )
 
             this.WriteTextureConfig({ info with Columns = info.Columns - 1 }, name, path)
+            true
         with err ->
             Logging.Error("Error removing texture column", err)
+            false
 
 module Storage =
 

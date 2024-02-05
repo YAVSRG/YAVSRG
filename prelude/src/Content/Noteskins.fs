@@ -214,6 +214,20 @@ type Noteskin(storage) as this =
             Logging.Error(sprintf "Error loading noteskin texture '%s': %s" name err.Message)
             None
 
+    member this.RequiredTextures =
+        seq {
+            yield "note"
+            yield "holdhead"
+            yield "holdbody"
+            yield "holdtail"
+            yield "receptor"
+            if this.Config.Explosions.Enable then
+                yield "noteexplosion"
+                yield "holdexplosion"
+            if this.Config.EnableColumnLight then
+                yield "receptorlighting"
+        }
+
     static member FromZipStream(stream: Stream) =
         new Noteskin(Embedded(new ZipArchive(stream)))
 

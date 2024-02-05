@@ -152,7 +152,7 @@ type RotationSettingsPage() as this =
 
     override this.OnClose() =
         Noteskins.save_config
-            { data with
+            { Content.NoteskinConfig with
                 Rotations = rotations
                 UseRotation = use_rotation.Value
                 ReceptorStyle = receptor_style.Value

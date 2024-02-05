@@ -8,3 +8,4 @@
 .vscode/settings.json
 
 .fake
+/.vscode/launch.json
