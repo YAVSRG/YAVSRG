@@ -207,12 +207,14 @@ type PageSetting(name, widget: Widget) as this =
                 if old_widget.Focused then
                     w.Focus()
 
+    member val Width = PRETTYWIDTH with get, set
+    member val Height = PRETTYHEIGHT with get, set
+
     member this.Pos(y, width, height) =
         this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height)
         this
-
-    member this.Pos(y, width) = this.Pos(y, width, PRETTYHEIGHT)
-    member this.Pos(y) = this.Pos(y, PRETTYWIDTH)
+    member this.Pos(y, width) = this.Pos(y, width, this.Height)
+    member this.Pos(y) = this.Pos(y, this.Width, this.Height)
 
     override this.Init(parent) =
         this
@@ -295,12 +297,13 @@ type PageButton(name, action) as this =
 
         base.Draw()
         
+    member val Width = PRETTYWIDTH with get, set
+        
     member this.Pos(y, width, height) =
         this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height)
         this
-
     member this.Pos(y, width) = this.Pos(y, width, PRETTYHEIGHT)
-    member this.Pos(y) = this.Pos(y, PRETTYWIDTH)
+    member this.Pos(y) = this.Pos(y, this.Width, PRETTYHEIGHT)
 
     member val Enabled = true with get, set
 

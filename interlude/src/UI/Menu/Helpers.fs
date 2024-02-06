@@ -2,28 +2,11 @@
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
-open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
 
 [<AutoOpen>]
-module Helpers =
-
-    let column () = NavigationContainer.Column<Widget>()
-    let row () = NavigationContainer.Row<Widget>()
-
-    let refreshable_row number cons =
-        let r = NavigationContainer.Row()
-
-        let refresh () =
-            r.Clear()
-            let n = number ()
-
-            for i in 0 .. (n - 1) do
-                r.Add(cons i n)
-
-        refresh ()
-        r, refresh
+module LayoutConstants =
 
     let PRETTYTEXTWIDTH = 425.0f
     let PRETTYHEIGHT = 70.0f
@@ -55,8 +38,3 @@ type Tooltip(content: Callout) =
             .Title(%(sprintf "%s.name" feature))
             .Body(%(sprintf "%s.tooltip" feature))
             .Hotkey(hotkey)
-
-[<AutoOpen>]
-module Tooltip =
-    type StaticContainer with
-        member this.Tooltip(content: Callout) = this |+ Tooltip(content)

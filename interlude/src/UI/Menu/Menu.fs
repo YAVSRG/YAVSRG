@@ -193,19 +193,66 @@ and Menu(top_level: Page) as this =
         Selection.unclamp ()
         _instance <- None
 
-type ConfirmPage(prompt: string, yes: unit -> unit) as this =
+type Page with
+    member this.Show() = Menu.ShowPage this
+
+[<AutoOpen>]
+module Helpers =
+
+    let column () = NavigationContainer.Column<Widget>()
+    let row () = NavigationContainer.Row<Widget>()
+
+    let refreshable_row number cons =
+        let r = NavigationContainer.Row()
+
+        let refresh () =
+            r.Clear()
+            let n = number ()
+
+            for i in 0 .. (n - 1) do
+                r.Add(cons i n)
+
+        refresh ()
+        r, refresh
+    
+    type MenuBuilder =
+        {
+            Container: NavigationContainer.Column<Widget>
+            mutable Y: float32
+        }
+        
+        static member (|+) (parent: MenuBuilder, child: PageButton) = parent |+ (child.Pos parent.Y :> Widget)
+        static member (|+) (parent: MenuBuilder, child: PageSetting) = parent |+ (child.Pos parent.Y :> Widget)
+        static member (|+) (parent: MenuBuilder, child: Widget) : MenuBuilder =
+            parent.Container.Add child
+            parent.Y <- parent.Y + PRETTYHEIGHT
+            parent
+
+        static member (|.) (parent: MenuBuilder, gap: float32) = 
+            parent.Y <- parent.Y + PRETTYHEIGHT * gap
+            parent
+        
+        static member (|>>) (parent: MenuBuilder, func: Widget -> unit) = func parent.Container
+    
+    let menu (start: float32) = { Container = NavigationContainer.Column<Widget>(); Y = start * 100.0f }
+
+    type PageSetting with
+        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
+    type PageButton with
+        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
+    type StaticContainer with
+        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
+
+type ConfirmPage(prompt: string, yes: unit -> unit) =
     inherit Page()
 
-    do
-        this.Content(
-            column ()
-            |+ PageButton.Once("confirm.yes", fork Menu.Back yes).Pos(300.0f)
-            |+ PageButton.Once("confirm.no", Menu.Back).Pos(400.0f)
-            |+ Text(prompt, Position = Position.Row(100.0f, PRETTYHEIGHT))
-        )
+    override this.Init(parent) =
+        menu 3.0f
+        |+ PageButton.Once("confirm.yes", fork Menu.Back yes)
+        |+ PageButton.Once("confirm.no", Menu.Back)
+        |+ Text(prompt, Position = Position.Row(100.0f, PRETTYHEIGHT))
+        |>> this.Content
+        base.Init parent
 
     override this.Title = %"confirm"
     override this.OnClose() = ()
-
-type Page with
-    member this.Show() = Menu.ShowPage this
