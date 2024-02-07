@@ -9,11 +9,9 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Conversions
-open Prelude.Gameplay.Layout
 open Prelude.Gameplay.Difficulty
 
-[<Json.AutoCodec>]
+[<Json.AutoCodec(true)>]
 type CachedChart =
     {
         Artist: string
@@ -33,6 +31,26 @@ type CachedChart =
         BackgroundFile: string option
         AudioFile: string option
     }
+    // todo: this exists performance gain reasons. change to an sqlite database instead
+    static member Default =
+        {
+            Artist = ""
+            Title = ""
+            Subtitle = None
+            Source = None
+            Creator = ""
+            Tags = []
+            Folder = ""
+            Hash = ""
+            Keys = 4
+            Length = 0.0f<ms>
+            DateAdded = Unchecked.defaultof<_>
+            BPM = (0.0f<ms/beat>, 0.0f<ms/beat>)
+            DifficultyName = ""
+            Physical = 0.0
+            BackgroundFile = None
+            AudioFile = None
+        }
     member this.Key = sprintf "%s/%s" this.Folder this.Hash
 
 type Cache =

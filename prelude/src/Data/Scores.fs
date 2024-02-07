@@ -13,7 +13,7 @@ open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.Layout
 
-[<Json.AutoCodec>]
+[<Json.AutoCodec(true)>]
 type Score =
     {
         time: DateTime
@@ -23,14 +23,16 @@ type Score =
         layout: Layout
         keycount: int
     }
+    static member Default = { time = Unchecked.defaultof<_>; replay = ""; rate = 1.0f; selectedMods = Map.empty; layout = Layout.Spread; keycount = 4 }
 
-[<Json.AutoCodec>]
+[<Json.AutoCodec(true)>]
 type Bests =
     {
         Lamp: PersonalBests<int>
         Accuracy: PersonalBests<float>
         Grade: PersonalBests<int>
     }
+    static member Default = { Lamp = []; Accuracy = []; Grade = [] }
 
 [<Json.AutoCodec(false)>]
 type ChartSaveData =
@@ -43,6 +45,7 @@ type ChartSaveData =
         mutable LastPlayed: DateTime
         mutable Comment: string
     }
+    static member Default = { Offset = 0.0f<ms>; Scores = List<Score>(); PersonalBests = Dictionary<string, Bests>(); LastPlayed = DateTime.UnixEpoch; Comment = "" }
     static member FromChart(c: Chart) =
         {
             Offset = c.FirstNote
@@ -173,20 +176,6 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
 
         modstatus.Value
 
-[<Json.AutoCodec>]
-type ImprovementFlags =
-    {
-        Lamp: Improvement<int>
-        Accuracy: Improvement<float>
-        Grade: Improvement<int>
-    }
-    static member Default =
-        {
-            Lamp = Improvement.None
-            Accuracy = Improvement.None
-            Grade = Improvement.None
-        }
-
 module Bests =
 
     let update (score: ScoreInfoProvider) (existing: Bests) : Bests * ImprovementFlags =
@@ -250,18 +239,24 @@ module Scores =
         d.Scores.Add score
         save ()
 
-    let save_score_pbs (d: ChartSaveData) (rulesetId: string) (score: ScoreInfoProvider) : ImprovementFlags =
+    let save_score_pbs (d: ChartSaveData) (ruleset_id: string) (score: ScoreInfoProvider) : ImprovementFlags =
         save_score d score.ScoreInfo
 
-        if d.PersonalBests.ContainsKey rulesetId then
-            let newBests, flags = Bests.update score d.PersonalBests.[rulesetId]
-            d.PersonalBests.[rulesetId] <- newBests
+        if d.PersonalBests.ContainsKey ruleset_id then
+            let newBests, flags = Bests.update score d.PersonalBests.[ruleset_id]
+            d.PersonalBests.[ruleset_id] <- newBests
             flags
         else
-            d.PersonalBests.Add(rulesetId, Bests.create score)
+            d.PersonalBests.Add(ruleset_id, Bests.create score)
 
             {
                 Lamp = Improvement.New
                 Accuracy = Improvement.New
                 Grade = Improvement.New
             }
+
+    let save_comment (d: ChartSaveData) (comment: string) =
+        d.Comment <- comment
+        
+    let save_offset (d: ChartSaveData) (offset: Time) =
+        d.Offset <- offset

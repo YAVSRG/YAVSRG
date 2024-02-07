@@ -2,7 +2,6 @@
 
 open System
 open System.IO
-open Percyqaz.Common
 open Percyqaz.Data
 open Prelude.Common
 open Prelude.Gameplay
@@ -96,20 +95,20 @@ module Table =
 
     let ratings (table: Table) =
         seq {
-                for chart in table.Charts do
-                    let grade_achieved =
-                        match Scores.get chart.Hash with
-                        | Some d ->
-                            if d.PersonalBests.ContainsKey table.Info.RulesetId then
-                                PersonalBests.get_best_above 1.0f d.PersonalBests.[table.Info.RulesetId].Grade
-                            else
-                                None
-                        | None -> None
+            for chart in table.Charts do
+                let grade_achieved =
+                    match Scores.get chart.Hash with
+                    | Some d ->
+                        if d.PersonalBests.ContainsKey table.Info.RulesetId then
+                            PersonalBests.get_best_above 1.0f d.PersonalBests.[table.Info.RulesetId].Grade
+                        else
+                            None
+                    | None -> None
 
-                    let table_points =
-                        match grade_achieved with
-                        | None -> None
-                        | Some i -> Some <| points table.Info (chart.Level, i)
+                let table_points =
+                    match grade_achieved with
+                    | None -> None
+                    | Some i -> Some <| points table.Info (chart.Level, i)
 
-                    yield chart.Level, chart.Hash, grade_achieved, table_points
+                yield chart.Level, chart.Hash, grade_achieved, table_points
         }

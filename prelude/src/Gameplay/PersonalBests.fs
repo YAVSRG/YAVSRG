@@ -8,6 +8,19 @@ type Improvement<'T> =
     | New
     | None
 
+type ImprovementFlags =
+    {
+        Lamp: Improvement<int>
+        Accuracy: Improvement<float>
+        Grade: Improvement<int>
+    }
+    static member Default =
+        {
+            Lamp = Improvement.None
+            Accuracy = Improvement.None
+            Grade = Improvement.None
+        }
+
 type PersonalBests<'T> = ('T * float32) list
 
 module PersonalBests =
