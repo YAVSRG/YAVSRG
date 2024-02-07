@@ -101,11 +101,11 @@ type LanecoverPage() as this =
         |+ PageSetting("gameplay.lanecover.enabled", Selector<_>.FromBool options.LaneCover.Enabled)
         |. 0.5f
         |+ PageSetting("gameplay.lanecover.hidden", Slider.Percent(options.LaneCover.Hidden))
-            .Tooltip(Tooltip.Info("gameplay.lanecover.hidden"))
+            .Tooltip(Tooltip.Info "gameplay.lanecover.hidden")
         |+ PageSetting("gameplay.lanecover.sudden", Slider.Percent(options.LaneCover.Sudden))
-            .Tooltip(Tooltip.Info("gameplay.lanecover.sudden"))
+            .Tooltip(Tooltip.Info "gameplay.lanecover.sudden")
         |+ PageSetting("gameplay.lanecover.fadelength", Slider(options.LaneCover.FadeLength, Step = 5.0f))
-            .Tooltip(Tooltip.Info("gameplay.lanecover.fadelength"))
+            .Tooltip(Tooltip.Info "gameplay.lanecover.fadelength")
         |+ PageSetting("gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true), Height = PRETTYHEIGHT * 2.0f)
         |+ preview
         |>> this.Content

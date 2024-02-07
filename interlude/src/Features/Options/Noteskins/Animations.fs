@@ -50,63 +50,52 @@ type AnimationSettingsPage() as this =
     let hold_explosion_fade = Animation.Fade 0.0f
 
     do
-        this.Content(
-            column ()
-            |+ PageSetting("noteskins.edit.enablecolumnlight", Selector<_>.FromBool enable_column_light)
-                .Pos(200.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.enablecolumnlight"))
-            |+ PageSetting("noteskins.edit.columnlighttime", Slider.Percent(column_light_time))
-                .Pos(270.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.columnlighttime"))
-
-            |+ PageSetting(
-                "noteskins.edit.animationtime",
-                Slider(
-                    note_animation_time
-                    |> Setting.trigger (fun v -> note_frames.Interval <- max 10.0 v)
-                    |> Setting.f32,
-                    Step = 1f
-                )
+        menu 2.0f
+        |+ PageSetting("noteskins.edit.enablecolumnlight", Selector<_>.FromBool enable_column_light)
+            .Tooltip(Tooltip.Info("noteskins.edit.enablecolumnlight"))
+        |+ PageSetting("noteskins.edit.columnlighttime", Slider.Percent(column_light_time))
+            .Tooltip(Tooltip.Info("noteskins.edit.columnlighttime"))
+        |. 0.5f
+        |+ PageSetting(
+            "noteskins.edit.animationtime",
+            Slider(
+                note_animation_time
+                |> Setting.trigger (fun v -> note_frames.Interval <- max 10.0 v)
+                |> Setting.f32,
+                Step = 1f
             )
-                .Pos(370.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.animationtime"))
-
-            |+ PageSetting("noteskins.edit.enableexplosions", Selector<_>.FromBool enable_explosions)
-                .Pos(470.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.enableexplosions"))
-            |+ PageSetting(
-                "noteskins.edit.explosionanimationtime",
-                Slider(
-                    explosion_animation_time
-                    |> Setting.trigger (fun v -> explosion_frames.Interval <- max 10.0 v)
-                    |> Setting.f32,
-                    Step = 1f
-                )
-            )
-                .Pos(540.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.explosionanimationtime"))
-            |+ PageSetting("noteskins.edit.explosionfadetime", Slider.Percent(explosion_fade_time))
-                .Pos(610.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.explosionfadetime"))
-            |+ PageSetting("noteskins.edit.explosionscale", Slider.Percent(explosion_scale))
-                .Pos(680.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.explosionscale"))
-            |+ PageSetting("noteskins.edit.explosionexpand", Slider.Percent(explosion_expand))
-                .Pos(750.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.explosionexpand"))
-            |+ PageSetting("noteskins.edit.explodeonmiss", Selector<_>.FromBool(explosion_on_miss))
-                .Pos(820.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.explodeonmiss"))
-            |+ PageSetting(
-                "noteskins.edit.explosioncolors",
-                Selector(
-                    [| ExplosionColors.Column, "Column"; ExplosionColors.Judgements, "Judgements" |],
-                    explosion_colors
-                )
-            )
-                .Pos(890.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.explosioncolors"))
         )
+            .Tooltip(Tooltip.Info("noteskins.edit.animationtime"))
+        |. 0.5f
+        |+ PageSetting("noteskins.edit.enableexplosions", Selector<_>.FromBool enable_explosions)
+            .Tooltip(Tooltip.Info("noteskins.edit.enableexplosions"))
+        |+ PageSetting(
+            "noteskins.edit.explosionanimationtime",
+            Slider(
+                explosion_animation_time
+                |> Setting.trigger (fun v -> explosion_frames.Interval <- max 10.0 v)
+                |> Setting.f32,
+                Step = 1f
+            )
+        )
+            .Tooltip(Tooltip.Info("noteskins.edit.explosionanimationtime"))
+        |+ PageSetting("noteskins.edit.explosionfadetime", Slider.Percent(explosion_fade_time))
+            .Tooltip(Tooltip.Info("noteskins.edit.explosionfadetime"))
+        |+ PageSetting("noteskins.edit.explosionscale", Slider.Percent(explosion_scale))
+            .Tooltip(Tooltip.Info("noteskins.edit.explosionscale"))
+        |+ PageSetting("noteskins.edit.explosionexpand", Slider.Percent(explosion_expand))
+            .Tooltip(Tooltip.Info("noteskins.edit.explosionexpand"))
+        |+ PageSetting("noteskins.edit.explodeonmiss", Selector<_>.FromBool(explosion_on_miss))
+            .Tooltip(Tooltip.Info("noteskins.edit.explodeonmiss"))
+        |+ PageSetting(
+            "noteskins.edit.explosioncolors",
+            Selector(
+                [| ExplosionColors.Column, "Column"; ExplosionColors.Judgements, "Judgements" |],
+                explosion_colors
+            )
+        )
+            .Tooltip(Tooltip.Info("noteskins.edit.explosioncolors"))
+        |>> this.Content
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

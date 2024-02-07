@@ -115,56 +115,45 @@ type PlayfieldSettingsPage() as this =
             )
 
     do
-        this.Content(
-            column ()
-            |+ PageSetting("noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
-                .Pos(200.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
-            |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
-                .Pos(270.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
+        menu 2.0f
+        |+ PageSetting("noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
+            .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
+        |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
+            .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
+        |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true), Height = PRETTYHEIGHT * 2f)
+            .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
+        |. 0.5f
+        |+ PageSetting("noteskins.edit.columnwidth", Slider(column_width, Step = 1f))
+            .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
+        |+ PageSetting("noteskins.edit.fillcolumngaps", Selector<_>.FromBool(fill_gaps))
+            .Tooltip(Tooltip.Info("noteskins.edit.fillcolumngaps"))
+        |+ PageSetting("noteskins.edit.useadvancedcolumnspacing", Selector<_>.FromBool(use_advanced_column_spacing))
+            .Tooltip(Tooltip.Info("noteskins.edit.useadvancedcolumnspacing"))
 
-            |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true))
-                .Pos(340.0f, PRETTYWIDTH, PRETTYHEIGHT * 2f)
-                .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
-
-            |+ PageSetting("noteskins.edit.columnwidth", Slider(column_width, Step = 1f))
-                .Pos(510.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
-
-            |+ PageSetting("noteskins.edit.fillcolumngaps", Selector<_>.FromBool(fill_gaps))
-                .Pos(580.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.fillcolumngaps"))
-
-            |+ PageSetting("noteskins.edit.useadvancedcolumnspacing", Selector<_>.FromBool(use_advanced_column_spacing))
-                .Pos(650.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.useadvancedcolumnspacing"))
-
-            |+ Conditional(
-                (fun () -> not use_advanced_column_spacing.Value),
-                PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
-                    .Pos(720.0f)
-                    .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
-            )
-
-            |+ Conditional(
-                (fun () -> use_advanced_column_spacing.Value),
-                PageSetting(
-                    "generic.keymode",
-                    Selector<Keymode>
-                        .FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
-                )
-                    .Pos(720.0f)
-            )
-
-            |+ Conditional(
-                (fun () -> use_advanced_column_spacing.Value),
-                PageSetting("noteskins.edit.advancedcolumnspacing", _spacings)
-                    .Pos(790.0f, Viewport.vwidth - 200.0f, PRETTYHEIGHT)
-                    .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
-            )
-
+        |+ Conditional(
+            (fun () -> not use_advanced_column_spacing.Value),
+            PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
+                .Pos(720.0f)
+                .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
         )
+
+        |+ Conditional(
+            (fun () -> use_advanced_column_spacing.Value),
+            PageSetting(
+                "generic.keymode",
+                Selector<Keymode>
+                    .FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
+            )
+                .Pos(720.0f)
+        )
+
+        |+ Conditional(
+            (fun () -> use_advanced_column_spacing.Value),
+            PageSetting("noteskins.edit.advancedcolumnspacing", _spacings, Width = Viewport.vwidth - 200.0f)
+                .Pos(790.0f, Viewport.vwidth - 200.0f, PRETTYHEIGHT)
+                .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
+        )
+        |>> this.Content
 
     override this.Draw() =
         base.Draw()

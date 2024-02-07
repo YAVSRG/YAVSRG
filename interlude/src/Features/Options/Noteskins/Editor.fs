@@ -19,85 +19,79 @@ type EditNoteskinPage(from_hotkey: bool) as this =
     let preview = NoteskinPreview(0.35f, true)
 
     do
-        this.Content(
-            column ()
-            |+ PageTextEntry("noteskins.edit.noteskinname", name).Pos(200.0f)
-
-            |+ PageButton(
-                "noteskins.edit.playfield",
-                fun () ->
-                    { new PlayfieldSettingsPage() with
-                        override this.OnClose() =
-                            base.OnClose()
-                            preview.Refresh()
-                    }
-                        .Show()
-            )
-                .Pos(300.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.playfield"))
-            |+ PageButton(
-                "noteskins.edit.holdnotes",
-                fun () ->
-                    { new HoldNoteSettingsPage() with
-                        override this.OnClose() =
-                            base.OnClose()
-                            preview.Refresh()
-                    }
-                        .Show()
-            )
-                .Pos(370.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.holdnotes"))
-            |+ PageButton(
-                "noteskins.edit.colors",
-                fun () ->
-                    { new ColorSettingsPage() with
-                        override this.OnClose() =
-                            base.OnClose()
-                            preview.Refresh()
-                    }
-                        .Show()
-            )
-                .Pos(440.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.colors"))
-            |+ PageButton(
-                "noteskins.edit.rotations",
-                fun () ->
-                    { new RotationSettingsPage() with
-                        override this.OnClose() =
-                            base.OnClose()
-                            preview.Refresh()
-                    }
-                        .Show()
-            )
-                .Pos(510.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.rotations"))
-            |+ PageButton(
-                "noteskins.edit.animations",
-                fun () ->
-                    { new AnimationSettingsPage() with
-                        override this.OnClose() =
-                            base.OnClose()
-                            preview.Refresh()
-                    }
-                        .Show()
-            )
-                .Pos(580.0f)
-                .Tooltip(Tooltip.Info("noteskins.edit.animations"))
-            |+ (
-                let grid = 
-                    GridFlowContainer<TextureCard>(
-                        150.0f,
-                        4,
-                        WrapNavigation = false,
-                        Spacing = (15.0f, 15.0f),
-                        Position = Position.Box(0.0f, 0.0f, 100.0f, 680.0f, 645.0f, 315.0f)
-                    )
-                for texture in Content.Noteskin.RequiredTextures |> Seq.except ["receptorlighting"] do
-                    grid |* TextureCard(texture, (fun () -> TextureEditPage(texture).Show()))
-                grid
-            )
-            |+ preview
+        menu 2.0f
+        |+ PageTextEntry("noteskins.edit.noteskinname", name)
+        |. 0.5f
+        |+ PageButton(
+            "noteskins.edit.playfield",
+            fun () ->
+                { new PlayfieldSettingsPage() with
+                    override this.OnClose() =
+                        base.OnClose()
+                        preview.Refresh()
+                }
+                    .Show()
         )
+            .Tooltip(Tooltip.Info("noteskins.edit.playfield"))
+        |+ PageButton(
+            "noteskins.edit.holdnotes",
+            fun () ->
+                { new HoldNoteSettingsPage() with
+                    override this.OnClose() =
+                        base.OnClose()
+                        preview.Refresh()
+                }
+                    .Show()
+        )
+            .Tooltip(Tooltip.Info("noteskins.edit.holdnotes"))
+        |+ PageButton(
+            "noteskins.edit.colors",
+            fun () ->
+                { new ColorSettingsPage() with
+                    override this.OnClose() =
+                        base.OnClose()
+                        preview.Refresh()
+                }
+                    .Show()
+        )
+            .Tooltip(Tooltip.Info("noteskins.edit.colors"))
+        |+ PageButton(
+            "noteskins.edit.rotations",
+            fun () ->
+                { new RotationSettingsPage() with
+                    override this.OnClose() =
+                        base.OnClose()
+                        preview.Refresh()
+                }
+                    .Show()
+        )
+            .Tooltip(Tooltip.Info("noteskins.edit.rotations"))
+        |+ PageButton(
+            "noteskins.edit.animations",
+            fun () ->
+                { new AnimationSettingsPage() with
+                    override this.OnClose() =
+                        base.OnClose()
+                        preview.Refresh()
+                }
+                    .Show()
+        )
+            .Tooltip(Tooltip.Info("noteskins.edit.animations"))
+        |+ (
+            let grid = 
+                GridFlowContainer<TextureCard>(
+                    150.0f,
+                    6,
+                    WrapNavigation = false,
+                    Spacing = (15.0f, 15.0f),
+                    Position = Position.Box(0.0f, 0.0f, 100.0f, 680.0f, 975.0f, 315.0f)
+                )
+            for texture in Content.Noteskin.RequiredTextures |> Seq.except ["receptorlighting"] do
+                grid |* TextureCard(texture, (fun () -> TextureEditPage(texture).Show()))
+            grid
+        )
+        |+ preview
+        |>> this.Content
 
         this.Add(
             Conditional(

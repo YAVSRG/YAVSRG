@@ -215,24 +215,28 @@ module Helpers =
         refresh ()
         r, refresh
     
-    type MenuBuilder =
+    type PageContent =
         {
             Container: NavigationContainer.Column<Widget>
             mutable Y: float32
         }
         
-        static member (|+) (parent: MenuBuilder, child: PageButton) = parent |+ (child.Pos parent.Y :> Widget)
-        static member (|+) (parent: MenuBuilder, child: PageSetting) = parent |+ (child.Pos parent.Y :> Widget)
-        static member (|+) (parent: MenuBuilder, child: Widget) : MenuBuilder =
+        static member (|+) (parent: PageContent, child: PageButton) = parent |+ (child.Pos parent.Y :> Widget)
+        static member (|+) (parent: PageContent, child: PageSetting) = parent |+ (child.Pos parent.Y :> Widget)
+        static member (|+) (parent: PageContent, child: Widget) : PageContent =
             parent.Container.Add child
             parent.Y <- parent.Y + PRETTYHEIGHT
             parent
 
-        static member (|.) (parent: MenuBuilder, gap: float32) = 
+        static member (|.) (parent: PageContent, gap: float32) = 
             parent.Y <- parent.Y + PRETTYHEIGHT * gap
             parent
-        
-        static member (|>>) (parent: MenuBuilder, func: Widget -> unit) = func parent.Container
+
+        static member (|-) (parent: PageContent, origin: float32) = 
+            parent.Y <- origin * 100.0f
+            parent
+            
+        static member (|>>) (parent: PageContent, func: Widget -> unit) = func parent.Container
     
     let menu (start: float32) = { Container = NavigationContainer.Column<Widget>(); Y = start * 100.0f }
 
