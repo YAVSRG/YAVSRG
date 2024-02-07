@@ -17,7 +17,7 @@ module Tables =
     let private load () =
         loaded.Clear()
 
-        for file in Directory.EnumerateFiles(Path.Combine(get_game_folder "Data", "Tables")) do
+        for file in Directory.EnumerateFiles(get_game_folder <| Path.Combine("Data", "Tables")) do
             if Path.GetExtension(file).ToLower() = ".table" then
                 let id = Path.GetFileNameWithoutExtension(file)
                 match Table.load id with
