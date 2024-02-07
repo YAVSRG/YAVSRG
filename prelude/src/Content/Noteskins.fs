@@ -199,7 +199,7 @@ type Noteskin(storage) as this =
         and get () = config
 
     member this.GetTexture(name: string) : (Bitmap * TextureConfig) option =
-        let require_square = name <> "receptor" && name <> "receptorlighting"
+        let require_square = name <> "receptor" && name <> "receptorlighting" && name <> "stageright" && name <> "stageleft"
         // todo: user warning if receptor is not square but mode is set to Rotate
         match this.LoadTexture(name, require_square) with
         | Ok res ->
