@@ -24,6 +24,7 @@ module ImportScreen =
         || Library.Imports.convert_song_folder.Status <> Async.ServiceStatus.Idle
         || Caching.Cache.recache_service.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
+        || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
 type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
     inherit StaticContainer(NodeType.Switch(fun _ -> this.Button))

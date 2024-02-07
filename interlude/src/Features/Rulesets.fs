@@ -1,17 +1,15 @@
 ﻿namespace Interlude.Features
 
 open Percyqaz.Common
-open Prelude
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Interlude.Options
 open Interlude.Utils
-open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 
 module Rulesets = Interlude.Content.Rulesets
 
+// todo: move these components to UI folder and put a ruleset editor in the options menu rulesets page
 module Rulesets =
 
     type QuickSwitcher(setting: Setting<string>) =

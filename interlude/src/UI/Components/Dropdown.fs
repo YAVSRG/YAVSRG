@@ -42,6 +42,7 @@ module private Dropdown =
 
             base.Draw()
 
+// todo: way of knowing which item was selected originally and auto-selecting it
 type Dropdown(items: (string * (Color * Color) * (unit -> unit)) seq, on_close: unit -> unit) as this =
     inherit FrameContainer(NodeType.Switch(fun _ -> this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
