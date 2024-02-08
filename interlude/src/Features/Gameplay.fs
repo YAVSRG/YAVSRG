@@ -21,7 +21,6 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
-open Interlude.Features
 open Interlude.Features.Online
 open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests
@@ -435,7 +434,6 @@ module Gameplay =
             Chart.update ()
         )
     
-    
     [<RequireQualifiedAccess>]
     type ScorePlayedBy =
         | You
@@ -444,20 +442,93 @@ module Gameplay =
     // Everything you need to display a score screen or watch a replay of a score
     type ScoreInfo =
         {
+            CachedChart: CachedChart
+            Chart: Chart
+            WithMods: ModdedChart
+            Ruleset: Ruleset
+
             PlayedBy: ScorePlayedBy
             TimePlayed: int64
             Rate: float32
 
             Replay: ReplayData
-
-            CachedChart: CachedChart
-            Chart: Chart
-            WithMods: ModdedChart
-            WithColors: ColoredChart
+            Scoring: ScoreMetric
+            Lamp: int
+            Grade: int
 
             Rating: RatingReport
-            Patterns: Patterns.PatternReport
+            Physical: float
         }
+        member this.Accuracy =
+            this.Scoring.State.PointsScored / this.Scoring.State.MaxPointsScored
+        member this.Mods = this.WithMods.ModsApplied
+
+    module ScoreInfo =
+
+        let from_gameplay (info: Chart.LoadedChartInfo) (ruleset: Ruleset) (scoring: ScoreMetric) (replay_data: ReplayData) : ScoreInfo =
+            {
+                CachedChart = info.CacheInfo
+                Chart = info.Chart
+                WithMods = info.WithMods
+                Ruleset = ruleset
+
+                PlayedBy = ScorePlayedBy.You
+                TimePlayed = Timestamp.now()
+                Rate = rate.Value
+
+                Replay = replay_data
+                Scoring = scoring
+                Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
+                Grade = Grade.calculate ruleset.Grading.Grades scoring.State
+
+                Rating = info.Rating
+                Physical = calculate_score_rating info.Rating info.WithMods.Keys scoring |> fst
+            }
+
+        let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
+            let with_mods = apply_mods score.selectedMods chart
+            let replay_data = score.replay |> Replay.decompress_string
+            let scoring = Metrics.create ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.rate
+            scoring.Update Time.infinity
+            let difficulty = RatingReport(with_mods.Notes, score.rate, with_mods.Keys)
+            {
+                CachedChart = cc
+                Chart = chart
+                WithMods = with_mods
+                Ruleset = ruleset
+
+                PlayedBy = ScorePlayedBy.You
+                TimePlayed = score.time |> Timestamp.from_datetime
+                Rate = score.rate
+
+                Replay = replay_data
+                Scoring = scoring
+                Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
+                Grade = Grade.calculate ruleset.Grading.Grades scoring.State
+
+                Rating = difficulty
+                Physical = calculate_score_rating difficulty with_mods.Keys scoring |> fst
+            }
+
+        let change_ruleset (score_info: ScoreInfo) (ruleset: Ruleset) =
+            let scoring = Metrics.create ruleset score_info.WithMods.Keys (StoredReplayProvider score_info.Replay) score_info.WithMods.Notes score_info.Rate
+            scoring.Update Time.infinity
+            { score_info with
+                Ruleset = ruleset
+                Scoring = scoring
+                Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
+                Grade = Grade.calculate ruleset.Grading.Grades scoring.State
+            }
+
+        let to_score (score_info: ScoreInfo) =
+            {
+                time = score_info.TimePlayed |> Timestamp.to_datetime
+                replay = score_info.Replay |> Replay.compress_string
+                rate = score_info.Rate
+                selectedMods = score_info.Mods
+                layout = Layout.Layout.Spread
+                keycount = score_info.WithMods.Keys
+            }
 
     let make_score (with_mods: ModdedChart, replay_data, keys) : Score =
         {
