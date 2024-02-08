@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Version.txt" />
-    <Compile Include="Utils.fs" />
     <Compile Include="Globals.fs" />
     <Compile Include="Domain\Core\Users.fs" />
     <Compile Include="Domain\Core\Friends.fs" />
