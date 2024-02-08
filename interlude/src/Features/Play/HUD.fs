@@ -548,7 +548,7 @@ type RateModMeter(conf: HUD.RateModMeter, state: PlayState) as this =
 
         this |* Text(text, Color = K Colors.text_subheading, Align = Alignment.CENTER)
 
-type BPMMeter(conf: HUD.BPMMeter, state) as this =
+type BPMMeter(conf: HUD.BPMMeter, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
 
     let first_note = state.WithMods.FirstNote

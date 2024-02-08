@@ -434,6 +434,31 @@ module Gameplay =
             collections_on_mods_changed info.LibraryContext mods
             Chart.update ()
         )
+    
+    
+    [<RequireQualifiedAccess>]
+    type ScorePlayedBy =
+        | You
+        | Username of string
+    
+    // Everything you need to display a score screen or watch a replay of a score
+    type ScoreInfo =
+        {
+            PlayedBy: ScorePlayedBy
+            TimePlayed: int64
+            Rate: float32
+
+            Replay: ReplayData
+
+
+            CachedChart: CachedChart
+            Chart: Chart
+            WithMods: ModdedChart
+            WithColors: ColoredChart
+
+            Rating: RatingReport
+            Patterns: Patterns.PatternReport
+        }
 
     let make_score (with_mods: ModdedChart, replay_data, keys) : Score =
         {
