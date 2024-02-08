@@ -450,7 +450,6 @@ module Gameplay =
 
             Replay: ReplayData
 
-
             CachedChart: CachedChart
             Chart: Chart
             WithMods: ModdedChart
