@@ -114,6 +114,6 @@ type ScoreScreenStats =
 
 module ScoreScreenHelpers =
 
-    let mutable watch_replay: Chart * Score * ColoredChart * ReplayData -> unit = ignore
+    let mutable watch_replay: ScoreInfo * ColoredChart -> unit = ignore
 
     let mutable continue_endless_mode: unit -> bool = fun () -> false

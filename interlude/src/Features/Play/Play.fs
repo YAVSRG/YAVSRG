@@ -7,7 +7,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
-open Prelude.Gameplay.Metrics
 open Prelude.Charts.Tools
 open Prelude.Data.Scores
 open Interlude.Options
@@ -36,14 +35,14 @@ module PlayScreen =
         let first_note = info.WithMods.FirstNote
         let liveplay = LiveReplayProvider first_note
 
-        let scoring = create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+        let scoring = Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
         let pacemaker_info =
             match pacemaker_mode with
             | PacemakerMode.None -> PacemakerInfo.None
             | PacemakerMode.Score(rate, replay) ->
                 let replay_data = StoredReplayProvider(replay) :> IReplayProvider
-                let replay_scoring = create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
+                let replay_scoring = Metrics.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
                 PacemakerInfo.Replay replay_scoring
             | PacemakerMode.Setting ->
                 let setting =
@@ -230,18 +229,7 @@ module PlayScreen =
 
                     Screen.change_new
                         (fun () ->
-                            let score_info =
-                                ScoreInfoProvider(
-                                    Gameplay.make_score (info.WithMods,
-                                        (liveplay :> IReplayProvider).GetFullReplay(),
-                                        info.WithMods.Keys
-                                    ),
-                                    info.Chart,
-                                    this.State.Ruleset,
-                                    ModdedChart = info.WithMods,
-                                    Difficulty = info.Rating
-                                )
-
+                            let score_info = Gameplay.score_info_from_gameplay info scoring ((liveplay :> IReplayProvider).GetFullReplay())
                             (score_info, Gameplay.set_score (pacemaker_met this.State) score_info info.SaveData, true) |> ScoreScreen
                         )
                         Screen.Type.Score
@@ -266,13 +254,15 @@ module PlayScreen =
                     )
         }
 
+    open System.IO
+
     let multiplayer_screen (info: LoadedChartInfo) =
 
         let ruleset = Rulesets.current
         let first_note = info.WithMods.FirstNote
         let liveplay = LiveReplayProvider first_note
 
-        let scoring = create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+        let scoring = Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
@@ -291,8 +281,8 @@ module PlayScreen =
             if not (liveplay :> IReplayProvider).Finished then
                 liveplay.Add(now, key_state)
 
-            use ms = new System.IO.MemoryStream()
-            use bw = new System.IO.BinaryWriter(ms)
+            use ms = new MemoryStream()
+            use bw = new BinaryWriter(ms)
             liveplay.ExportLiveBlock bw
             Lobby.play_data (ms.ToArray())
             packet_count <- packet_count + 1
@@ -373,17 +363,7 @@ module PlayScreen =
                     Screen.change_new
                         (fun () ->
                             let score_info =
-                                ScoreInfoProvider(
-                                    Gameplay.make_score (info.WithMods,
-                                        (liveplay :> IReplayProvider).GetFullReplay(),
-                                        info.WithMods.Keys
-                                    ),
-                                    info.Chart,
-                                    this.State.Ruleset,
-                                    ModdedChart = info.WithMods,
-                                    Difficulty = info.Rating
-                                )
-
+                                Gameplay.score_info_from_gameplay info scoring ((liveplay :> IReplayProvider).GetFullReplay())
                             (score_info, Gameplay.set_score true score_info info.SaveData, true) |> ScoreScreen
                         )
                         Screen.Type.Score

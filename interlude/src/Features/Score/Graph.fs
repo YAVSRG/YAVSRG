@@ -30,7 +30,7 @@ type ScoreGraphSettingsPage() as this =
     override this.Title = %"score.graph.settings"
     override this.OnClose() = ()
 
-type ScoreGraph(data: ScoreInfoProvider) =
+type ScoreGraph(score_info: ScoreInfo) =
     inherit StaticWidget(NodeType.None)
 
     let fbo = FBO.create ()
@@ -60,23 +60,23 @@ type ScoreGraph(data: ScoreInfoProvider) =
             ))
             (Colors.white.O2)
 
-        let events = data.Scoring.HitEvents
+        let events = score_info.Scoring.HitEvents
         assert (events.Count > 0)
 
         // line graph
         if
             options.ScoreGraphMode.Value = ScoreGraphMode.Combo
-            && data.Scoring.Snapshots.Count > 0
+            && score_info.Scoring.Snapshots.Count > 0
         then
-            let snapshots = data.Scoring.Snapshots
+            let snapshots = score_info.Scoring.Snapshots
             let hscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
 
             for i = 1 to snapshots.Count - 1 do
                 let l, r =
-                    float32 snapshots.[i - 1].Combo / float32 data.Scoring.State.BestCombo,
-                    float32 snapshots.[i].Combo / float32 data.Scoring.State.BestCombo
+                    float32 snapshots.[i - 1].Combo / float32 score_info.Scoring.State.BestCombo,
+                    float32 snapshots.[i].Combo / float32 score_info.Scoring.State.BestCombo
 
-                let color = data.Ruleset.LampColor snapshots.[i].Lamp
+                let color = score_info.Ruleset.LampColor snapshots.[i].Lamp
                 let x1 = this.Bounds.Left + snapshots.[i - 1].Time * hscale
                 let x2 = this.Bounds.Left + snapshots.[i].Time * hscale
                 let y1 = this.Bounds.Bottom - HTHICKNESS - (this.Bounds.Height - THICKNESS) * l
@@ -98,14 +98,14 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 | Hit evData ->
                     match evData.Judgement with
                     | Some judgement when not GraphSettings.only_releases.Value ->
-                        h - evData.Delta / data.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS),
-                        data.Ruleset.JudgementColor judgement
+                        h - evData.Delta / score_info.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS),
+                        score_info.Ruleset.JudgementColor judgement
                     | _ -> 0.0f, Color.Transparent
                 | Release evData ->
                     match evData.Judgement with
                     | Some judgement ->
-                        h - 0.5f * evData.Delta / data.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS),
-                        Color.FromArgb(127, data.Ruleset.JudgementColor judgement)
+                        h - 0.5f * evData.Delta / score_info.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS),
+                        Color.FromArgb(127, score_info.Ruleset.JudgementColor judgement)
                     | None -> 0.0f, Color.Transparent
 
             if col.A > 0uy then
@@ -130,8 +130,8 @@ type ScoreGraph(data: ScoreInfoProvider) =
 
         Draw.sprite Viewport.bounds Color.White fbo.sprite
 
-        if this.Bounds.Contains(Mouse.pos ()) && data.Scoring.Snapshots.Count > 0 then
-            let sss = data.Scoring.Snapshots
+        if this.Bounds.Contains(Mouse.pos ()) && score_info.Scoring.Snapshots.Count > 0 then
+            let sss = score_info.Scoring.Snapshots
             let pc = (Mouse.x () - this.Bounds.Left) / this.Bounds.Width
             let snapshot_index = pc * float32 sss.Count |> int |> max 0 |> min (sss.Count - 1)
             let ss = sss.[snapshot_index]

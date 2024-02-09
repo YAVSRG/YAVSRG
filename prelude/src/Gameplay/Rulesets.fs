@@ -179,7 +179,7 @@ module Lamp =
                 |} option
         }
 
-    let calculateWithTarget (lamps: Lamp array) (state: AccuracySystemState) : LampResult =
+    let calculate_with_target (lamps: Lamp array) (state: AccuracySystemState) : LampResult =
 
         let worst_judgement =
             let mutable w = -1
@@ -240,7 +240,7 @@ module Lamp =
 
         loop -1
 
-    let calculate (lamps: Lamp array) (state: AccuracySystemState) : int = (calculateWithTarget lamps state).Lamp
+    let calculate (lamps: Lamp array) (state: AccuracySystemState) : int = (calculate_with_target lamps state).Lamp
 
 [<Json.AutoCodec>]
 type GradingConfig =

@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.LevelSelect
 
+open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Charts
 open Prelude.Data.Scores
@@ -175,7 +176,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value).Show()
         | LibraryGroupContext.Table lvl -> ()
 
-type ScoreContextMenu(score_info: ScoreInfoProvider) as this =
+type ScoreContextMenu(score_info: ScoreInfo) as this =
     inherit Page()
 
     do
@@ -190,7 +191,7 @@ type ScoreContextMenu(score_info: ScoreInfoProvider) as this =
             |+ PageButton(
                 "score.watch_replay",
                 (fun () ->
-                    ScoreScreenHelpers.watch_replay (score_info.Chart, score_info.ScoreInfo, Chart.color_this_chart(score_info.ModdedChart), score_info.ReplayData)
+                    ScoreScreenHelpers.watch_replay (score_info, Chart.color_this_chart(score_info.WithMods))
                     Menu.Back()
                 ),
                 Icon = Icons.FILM
@@ -199,7 +200,7 @@ type ScoreContextMenu(score_info: ScoreInfoProvider) as this =
             |+ PageButton(
                 "score.challenge",
                 (fun () ->
-                    LevelSelect.challenge_score (score_info.ScoreInfo.rate, score_info.ScoreInfo.selectedMods, score_info.ReplayData)
+                    LevelSelect.challenge_score score_info
                     Menu.Back()
                 ),
                 Icon = Icons.FLAG,
@@ -214,16 +215,19 @@ type ScoreContextMenu(score_info: ScoreInfoProvider) as this =
 
     override this.OnClose() = ()
 
-    static member ConfirmDeleteScore(score, is_submenu) =
+    static member ConfirmDeleteScore(score_info, is_submenu) =
         let score_name =
-            sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Ruleset.LampName score.Lamp)
+            sprintf "%s | %s" (score_info.Scoring.FormatAccuracy()) (score_info.Ruleset.LampName score_info.Lamp)
 
         ConfirmPage(
             [ score_name ] %> "misc.confirmdelete",
             fun () ->
-                Chart.SAVE_DATA.Value.Scores.Remove score.ScoreInfo |> ignore
-                LevelSelect.refresh_all ()
-                Notifications.action_feedback (Icons.TRASH, [ score_name ] %> "notification.deleted", "")
+                match Chart.SAVE_DATA.Value.Scores |> Seq.tryFind (fun s -> Timestamp.from_datetime s.time = score_info.TimePlayed) with
+                | Some score_to_delete ->
+                    Chart.SAVE_DATA.Value.Scores.Remove score_to_delete |> ignore
+                    LevelSelect.refresh_all ()
+                    Notifications.action_feedback (Icons.TRASH, [ score_name ] %> "notification.deleted", "")
+                | None -> Logging.Debug("Couldn't find score matching timestamp to delete")
 
                 if is_submenu then
                     Menu.Back()

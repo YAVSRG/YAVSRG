@@ -9,7 +9,6 @@ open Prelude
 open Prelude.Charts
 open Prelude.Data.Scores
 open Prelude.Gameplay
-open Prelude.Gameplay.Metrics
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -289,7 +288,7 @@ module PracticeScreen =
         let mutable liveplay = LiveReplayProvider first_note
 
         let mutable scoring =
-            create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+            Metrics.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
         scoring.OnHit.Add(fun h ->
             match h.Guts with
@@ -307,7 +306,7 @@ module PracticeScreen =
 
         let restart (screen: IPlayScreen) =
             liveplay <- LiveReplayProvider first_note
-            scoring <- create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+            scoring <- Metrics.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
             ignore_notes_before (practice_point + Song.LEADIN_TIME * Gameplay.rate.Value, scoring)
             screen.State.ChangeScoring scoring
 

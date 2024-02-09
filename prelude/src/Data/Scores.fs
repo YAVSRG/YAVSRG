@@ -8,10 +8,12 @@ open Percyqaz.Data
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
+open Prelude.Charts.Tools
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.Layout
+open Prelude.Data.Charts.Caching
 
 [<Json.AutoCodec(true)>]
 type Score =
@@ -55,144 +57,101 @@ type ChartSaveData =
             Comment = ""
         }
 
-// todo: rename LazyScoreCalculator - do we even need this or could this be a module that calculates stuff
-type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
-    let mutable ruleset: Ruleset = ruleset
 
-    let mutable modchart = ValueNone
-    let mutable modstring = ValueNone
-    let mutable modstatus = ValueNone
-    let mutable difficulty = ValueNone
-    let mutable metrics = ValueNone
-    let mutable replayData = ValueNone
-    let mutable perf = ValueNone
-    let mutable lamp = ValueNone
-    let mutable grade = ValueNone
 
-    member val Player: string option = None with get, set
+[<RequireQualifiedAccess>]
+type ScorePlayedBy =
+    | You
+    | Username of string
 
-    member this.ScoreInfo = score
-    member this.Chart = chart
+// Everything you need to display a score screen or watch a replay of a score
+type ScoreInfo =
+    {
+        CachedChart: CachedChart
+        Chart: Chart
+        WithMods: ModdedChart
 
-    member this.ReplayData =
-        replayData <-
-            ValueOption.defaultWith (fun () -> Replay.decompress_string score.replay) replayData
-            |> ValueSome
+        PlayedBy: ScorePlayedBy
+        TimePlayed: int64
+        Rate: float32
 
-        replayData.Value
+        Replay: ReplayData
+        mutable Scoring: ScoreMetric
+        mutable Lamp: int
+        mutable Grade: int
 
-    member this.ModdedChart
-        with get () =
-            modchart <-
-                ValueOption.defaultWith (fun () -> apply_mods score.selectedMods chart) modchart
-                |> ValueSome
+        Rating: RatingReport
+        Physical: float
 
-            modchart.Value
-        and set (value) = modchart <- ValueSome value
+        ImportedFromOsu: bool
+    }
+    member this.Ruleset 
+        with get () = this.Scoring.Ruleset
+        and set (ruleset) =
+            let scoring = Metrics.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
+            this.Scoring <- scoring
+            this.Lamp <- Lamp.calculate ruleset.Grading.Lamps scoring.State
+            this.Grade <- Grade.calculate ruleset.Grading.Grades scoring.State
+    member this.Accuracy = this.Scoring.Value
+    member this.Mods = this.WithMods.ModsApplied
 
-    member this.Ruleset
-        with get () = ruleset
-        and set (value) =
-            if value <> ruleset then
-                ruleset <- value
-                metrics <- ValueNone
-                lamp <- ValueNone
-                grade <- ValueNone
+    member this.ModStatus () = match Mods.check this.Mods with Ok r -> r | Error msg -> failwith msg
+    member this.ModString () = Mods.format_mods (this.Rate, this.Mods, false)
 
-    member this.Scoring =
-        metrics <-
-            ValueOption.defaultWith
-                (fun () ->
-                    let m =
-                        Metrics.create
-                            ruleset
-                            this.ModdedChart.Keys
-                            (StoredReplayProvider this.ReplayData)
-                            this.ModdedChart.Notes
-                            score.rate
+module ScoreInfo =
 
-                    m.Update Time.infinity
-                    m
-                )
-                metrics
-            |> ValueSome
+    let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
+        let with_mods = apply_mods score.selectedMods chart
+        let replay_data = score.replay |> Replay.decompress_string
+        let scoring = Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.rate
+        let difficulty = RatingReport(with_mods.Notes, score.rate, with_mods.Keys)
+        {
+            CachedChart = cc
+            Chart = chart
+            WithMods = with_mods
 
-        metrics.Value
+            PlayedBy = ScorePlayedBy.You
+            TimePlayed = score.time |> Timestamp.from_datetime
+            Rate = score.rate
 
-    member this.Difficulty
-        with get () =
-            difficulty <-
-                ValueOption.defaultWith
-                    (fun () -> RatingReport(this.ModdedChart.Notes, score.rate, this.ModdedChart.Keys))
-                    difficulty
-                |> ValueSome
+            Replay = replay_data
+            Scoring = scoring
+            Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
+            Grade = Grade.calculate ruleset.Grading.Grades scoring.State
 
-            difficulty.Value
-        and set (value) = difficulty <- ValueSome value
+            Rating = difficulty
+            Physical = calculate_score_rating difficulty with_mods.Keys scoring |> fst
 
-    member this.Lamp =
-        lamp <-
-            ValueOption.defaultWith (fun () -> Lamp.calculate ruleset.Grading.Lamps this.Scoring.State) lamp
-            |> ValueSome
+            ImportedFromOsu = score.layout = Layout.Layout.LeftTwo
+        }
 
-        lamp.Value
-
-    member this.Grade =
-        grade <-
-            ValueOption.defaultWith (fun () -> Grade.calculate ruleset.Grading.Grades this.Scoring.State) grade
-            |> ValueSome
-
-        grade.Value
-
-    member this.Accuracy =
-        this.Scoring.State.PointsScored / this.Scoring.State.MaxPointsScored
-
-    member this.Physical =
-        perf <-
-            ValueOption.defaultWith (fun () -> calculate_score_rating this.Difficulty score.keycount this.Scoring) perf
-            |> ValueSome
-
-        fst perf.Value
-
-    member this.Mods =
-        modstring <-
-            ValueOption.defaultWith (fun () -> format_mods (score.rate, score.selectedMods, false)) modstring
-            |> ValueSome
-
-        modstring.Value
-
-    member this.ModStatus =
-        modstatus <-
-            ValueOption.defaultWith
-                (fun () ->
-                    score.selectedMods
-                    |> ModState.enumerate
-                    |> Seq.map (fun (_, m, _) -> m.Status)
-                    |> List.ofSeq
-                    |> fun l -> ModStatus.Ranked :: l |> List.max
-                )
-                modstatus
-            |> ValueSome
-
-        modstatus.Value
+    let to_score (score_info: ScoreInfo) =
+        {
+            time = score_info.TimePlayed |> Timestamp.to_datetime
+            replay = score_info.Replay |> Replay.compress_string
+            rate = score_info.Rate
+            selectedMods = score_info.Mods
+            layout = Layout.Layout.Spread
+            keycount = score_info.WithMods.Keys
+        }
 
 module Bests =
 
-    let update (score: ScoreInfoProvider) (existing: Bests) : Bests * ImprovementFlags =
-        let l, lp = PersonalBests.update (score.Lamp, score.ScoreInfo.rate) existing.Lamp
+    let update (score_info: ScoreInfo) (existing: Bests) : Bests * ImprovementFlags =
+        let l, lp = PersonalBests.update (score_info.Lamp, score_info.Rate) existing.Lamp
 
         let a, ap =
-            PersonalBests.update (score.Scoring.Value, score.ScoreInfo.rate) existing.Accuracy
+            PersonalBests.update (score_info.Accuracy, score_info.Rate) existing.Accuracy
 
-        let g, gp = PersonalBests.update (score.Grade, score.ScoreInfo.rate) existing.Grade
+        let g, gp = PersonalBests.update (score_info.Grade, score_info.Rate) existing.Grade
 
         { Lamp = l; Accuracy = a; Grade = g }, { Lamp = lp; Accuracy = ap; Grade = gp }
 
-    let create (score: ScoreInfoProvider) : Bests =
+    let create (score_info: ScoreInfo) : Bests =
         {
-            Lamp = PersonalBests.create (score.Lamp, score.ScoreInfo.rate)
-            Accuracy = PersonalBests.create (score.Scoring.Value, score.ScoreInfo.rate)
-            Grade = PersonalBests.create (score.Grade, score.ScoreInfo.rate)
+            Lamp = PersonalBests.create (score_info.Lamp, score_info.Rate)
+            Accuracy = PersonalBests.create (score_info.Accuracy, score_info.Rate)
+            Grade = PersonalBests.create (score_info.Grade, score_info.Rate)
         }
 
 module Scores =
@@ -235,19 +194,19 @@ module Scores =
         else
             Some data.Entries.[hash]
 
-    let save_score (d: ChartSaveData) (score: Score) =
-        d.Scores.Add score
+    let save_score (d: ChartSaveData) (score_info: ScoreInfo) =
+        d.Scores.Add (ScoreInfo.to_score score_info)
         save ()
 
-    let save_score_pbs (d: ChartSaveData) (ruleset_id: string) (score: ScoreInfoProvider) : ImprovementFlags =
-        save_score d score.ScoreInfo
+    let save_score_pbs (d: ChartSaveData) (ruleset_id: string) (score_info: ScoreInfo) : ImprovementFlags =
+        save_score d score_info
 
         if d.PersonalBests.ContainsKey ruleset_id then
-            let newBests, flags = Bests.update score d.PersonalBests.[ruleset_id]
+            let newBests, flags = Bests.update score_info d.PersonalBests.[ruleset_id]
             d.PersonalBests.[ruleset_id] <- newBests
             flags
         else
-            d.PersonalBests.Add(ruleset_id, Bests.create score)
+            d.PersonalBests.Add(ruleset_id, Bests.create score_info)
 
             {
                 Lamp = Improvement.New

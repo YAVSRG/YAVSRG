@@ -15,9 +15,7 @@ module OsuScoreMigration =
 
     let do_stuff (chart: Chart, replay: ReplayData, rate: float32, score_data: ScoreDatabase_Score) =
         let metric =
-            Metrics.create (PrefabRulesets.Osu.create 8.0f) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
-
-        metric.Update(Time.infinity)
+            Metrics.run (PrefabRulesets.Osu.create 8.0f) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
 
         let sum =
             300.0

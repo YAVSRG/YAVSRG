@@ -12,7 +12,7 @@ open Interlude.Features.Online
 
 #nowarn "3370"
 
-type ScoreScreen(score_info: ScoreInfoProvider, pbs: ImprovementFlags, played_just_now: bool) as this =
+type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: bool) as this =
     inherit Screen()
 
     let personal_bests = ref pbs
@@ -23,7 +23,7 @@ type ScoreScreen(score_info: ScoreInfoProvider, pbs: ImprovementFlags, played_ju
 
     let lamp =
         ref
-        <| Lamp.calculateWithTarget score_info.Ruleset.Grading.Lamps score_info.Scoring.State
+        <| Lamp.calculate_with_target score_info.Ruleset.Grading.Lamps score_info.Scoring.State
 
     let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.HitEvents
 
@@ -45,7 +45,7 @@ type ScoreScreen(score_info: ScoreInfoProvider, pbs: ImprovementFlags, played_ju
         := Grade.calculate_with_target score_info.Ruleset.Grading.Grades score_info.Accuracy
 
         lamp
-        := Lamp.calculateWithTarget score_info.Ruleset.Grading.Lamps score_info.Scoring.State
+        := Lamp.calculate_with_target score_info.Ruleset.Grading.Lamps score_info.Scoring.State
 
         stats := ScoreScreenStats.Generate score_info.Scoring.HitEvents
         previous_personal_bests := None

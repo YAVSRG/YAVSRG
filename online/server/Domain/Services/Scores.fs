@@ -70,9 +70,7 @@ module Scores =
             // todo: get relevant rulesets for this chart (i.e. tables ft this chart with different rulesets + SCJ4)
             for ruleset_id in ACCEPTED_RULESETS do
                 let ruleset = Backbeat.rulesets.[ruleset_id]
-                let scoring = Metrics.create ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes rate
-
-                scoring.Update Time.infinity
+                let scoring = Metrics.run ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes rate
 
                 let accuracy = scoring.Value
 

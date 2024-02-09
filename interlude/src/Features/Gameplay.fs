@@ -433,141 +433,57 @@ module Gameplay =
             collections_on_mods_changed info.LibraryContext mods
             Chart.update ()
         )
-    
-    [<RequireQualifiedAccess>]
-    type ScorePlayedBy =
-        | You
-        | Username of string
-    
-    // Everything you need to display a score screen or watch a replay of a score
-    type ScoreInfo =
+
+    let score_info_from_gameplay (info: Chart.LoadedChartInfo) (scoring: ScoreMetric) (replay_data: ReplayData) : ScoreInfo =
         {
-            CachedChart: CachedChart
-            Chart: Chart
-            WithMods: ModdedChart
-            Ruleset: Ruleset
+            CachedChart = info.CacheInfo
+            Chart = info.Chart
+            WithMods = info.WithMods
 
-            PlayedBy: ScorePlayedBy
-            TimePlayed: int64
-            Rate: float32
+            PlayedBy = ScorePlayedBy.You
+            TimePlayed = Timestamp.now()
+            Rate = rate.Value
 
-            Replay: ReplayData
-            Scoring: ScoreMetric
-            Lamp: int
-            Grade: int
+            Replay = replay_data
+            Scoring = scoring
+            Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
+            Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
 
-            Rating: RatingReport
-            Physical: float
-        }
-        member this.Accuracy =
-            this.Scoring.State.PointsScored / this.Scoring.State.MaxPointsScored
-        member this.Mods = this.WithMods.ModsApplied
-
-    module ScoreInfo =
-
-        let from_gameplay (info: Chart.LoadedChartInfo) (ruleset: Ruleset) (scoring: ScoreMetric) (replay_data: ReplayData) : ScoreInfo =
-            {
-                CachedChart = info.CacheInfo
-                Chart = info.Chart
-                WithMods = info.WithMods
-                Ruleset = ruleset
-
-                PlayedBy = ScorePlayedBy.You
-                TimePlayed = Timestamp.now()
-                Rate = rate.Value
-
-                Replay = replay_data
-                Scoring = scoring
-                Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
-                Grade = Grade.calculate ruleset.Grading.Grades scoring.State
-
-                Rating = info.Rating
-                Physical = calculate_score_rating info.Rating info.WithMods.Keys scoring |> fst
-            }
-
-        let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
-            let with_mods = apply_mods score.selectedMods chart
-            let replay_data = score.replay |> Replay.decompress_string
-            let scoring = Metrics.create ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.rate
-            scoring.Update Time.infinity
-            let difficulty = RatingReport(with_mods.Notes, score.rate, with_mods.Keys)
-            {
-                CachedChart = cc
-                Chart = chart
-                WithMods = with_mods
-                Ruleset = ruleset
-
-                PlayedBy = ScorePlayedBy.You
-                TimePlayed = score.time |> Timestamp.from_datetime
-                Rate = score.rate
-
-                Replay = replay_data
-                Scoring = scoring
-                Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
-                Grade = Grade.calculate ruleset.Grading.Grades scoring.State
-
-                Rating = difficulty
-                Physical = calculate_score_rating difficulty with_mods.Keys scoring |> fst
-            }
-
-        let change_ruleset (score_info: ScoreInfo) (ruleset: Ruleset) =
-            let scoring = Metrics.create ruleset score_info.WithMods.Keys (StoredReplayProvider score_info.Replay) score_info.WithMods.Notes score_info.Rate
-            scoring.Update Time.infinity
-            { score_info with
-                Ruleset = ruleset
-                Scoring = scoring
-                Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
-                Grade = Grade.calculate ruleset.Grading.Grades scoring.State
-            }
-
-        let to_score (score_info: ScoreInfo) =
-            {
-                time = score_info.TimePlayed |> Timestamp.to_datetime
-                replay = score_info.Replay |> Replay.compress_string
-                rate = score_info.Rate
-                selectedMods = score_info.Mods
-                layout = Layout.Layout.Spread
-                keycount = score_info.WithMods.Keys
-            }
-
-    let make_score (with_mods: ModdedChart, replay_data, keys) : Score =
-        {
-            time = DateTime.UtcNow
-            replay = Replay.compress_string replay_data
-            rate = rate.Value
-            selectedMods = with_mods.ModsApplied
-            layout = Layout.Layout.Spread
-            keycount = keys
+            Rating = info.Rating
+            Physical = calculate_score_rating info.Rating info.WithMods.Keys scoring |> fst
+            
+            ImportedFromOsu = false
         }
 
-    let set_score (met_pacemaker: bool) (data: ScoreInfoProvider) (save_data: ChartSaveData) : ImprovementFlags =
+    let set_score (met_pacemaker: bool) (score_info: ScoreInfo) (save_data: ChartSaveData) : ImprovementFlags =
+        let mod_status = score_info.ModStatus()
         if
-            data.ModStatus < ModStatus.Unstored
+            mod_status < ModStatus.Unstored
             && (options.SaveScoreIfUnderPace.Value || met_pacemaker)
         then
-            if data.ModStatus = ModStatus.Ranked then
+            if mod_status = ModStatus.Ranked then
                 if Network.status = Network.Status.LoggedIn then
                     Charts.Scores.Save.post (
                         ({
-                            ChartId = Chart.hash data.Chart // todo: ScoreInfoProvider should be less poo and provide things like this
-                            Replay = data.ScoreInfo.replay
-                            Rate = data.ScoreInfo.rate
-                            Mods = data.ScoreInfo.selectedMods
-                            Timestamp = data.ScoreInfo.time
+                            ChartId = score_info.CachedChart.Hash
+                            Replay = score_info.Replay |> Replay.compress_string
+                            Rate = score_info.Rate
+                            Mods = score_info.Mods
+                            Timestamp = score_info.TimePlayed |> Timestamp.to_datetime
                         }),
                         ignore
                     )
 
-                Scores.save_score_pbs save_data Rulesets.current_hash data
+                Scores.save_score_pbs save_data Rulesets.current_hash score_info
             else
-                Scores.save_score save_data data.ScoreInfo
+                Scores.save_score save_data score_info
                 ImprovementFlags.Default
         else
             ImprovementFlags.Default
 
     module Multiplayer =
 
-        let replays = new Dictionary<string, IScoreMetric * (unit -> ScoreInfoProvider)>()
+        let replays = new Dictionary<string, IScoreMetric * (unit -> ScoreInfo)>()
 
         let private on_leave_lobby () = replays.Clear()
 
@@ -583,62 +499,70 @@ module Gameplay =
 
                     replays.Add(
                         username,
-                        let metric =
+                        let scoring =
                             Metrics.create
                                 Rulesets.current
                                 info.WithMods.Keys
                                 replay
                                 info.WithMods.Notes
-                                Chart._rate.Value
+                                rate.Value
 
-                        metric,
+                        scoring,
                         fun () ->
                             if not (replay :> IReplayProvider).Finished then
                                 replay.Finish()
+                            scoring.Update Time.infinity
 
-                            let score =
-                                {
-                                    time = DateTime.UtcNow
-                                    replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
-                                    rate = rate.Value
-                                    selectedMods = info.WithMods.ModsApplied
-                                    layout = Layout.Layout.Spread
-                                    keycount = info.WithMods.Keys
-                                }
+                            let replay_data = (replay :> IReplayProvider).GetFullReplay()
+                            {
+                                CachedChart = info.CacheInfo
+                                Chart = info.Chart
+                                WithMods = info.WithMods
 
-                            ScoreInfoProvider(
-                                score,
-                                info.Chart,
-                                Rulesets.current,
-                                Player = Some username,
-                                ModdedChart = info.WithMods
-                            )
+                                PlayedBy = ScorePlayedBy.Username username
+                                TimePlayed = Timestamp.now()
+                                Rate = rate.Value
+
+                                Replay = replay_data
+                                Scoring = scoring
+                                Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
+                                Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+
+                                Rating = info.Rating
+                                Physical = calculate_score_rating info.Rating info.WithMods.Keys scoring |> fst
+
+                                ImportedFromOsu = false
+                            }
                     )
 
-        let add_own_replay (info: Chart.LoadedChartInfo, scoring: IScoreMetric, replay: LiveReplayProvider) =
-
+        let add_own_replay (info: Chart.LoadedChartInfo, scoring: ScoreMetric, replay: LiveReplayProvider) =
             replays.Add(
                 Network.credentials.Username,
                 (scoring, fun () ->
                     if not (replay :> IReplayProvider).Finished then
                         replay.Finish()
+                    scoring.Update Time.infinity
 
-                    let score =
-                        {
-                            time = DateTime.UtcNow
-                            replay = Replay.compress_string ((replay :> IReplayProvider).GetFullReplay())
-                            rate = rate.Value
-                            selectedMods = info.WithMods.ModsApplied
-                            layout = Layout.Layout.Spread
-                            keycount = info.WithMods.Keys
-                        }
+                    let replay_data = (replay :> IReplayProvider).GetFullReplay()
+                    {
+                        CachedChart = info.CacheInfo
+                        Chart = info.Chart
+                        WithMods = info.WithMods
 
-                    ScoreInfoProvider(
-                        score,
-                        info.Chart,
-                        Rulesets.current,
-                        ModdedChart = info.WithMods
-                    )
+                        PlayedBy = ScorePlayedBy.You
+                        TimePlayed = Timestamp.now()
+                        Rate = rate.Value
+
+                        Replay = replay_data
+                        Scoring = scoring
+                        Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
+                        Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+
+                        Rating = info.Rating
+                        Physical = calculate_score_rating info.Rating info.WithMods.Keys scoring |> fst
+                        
+                        ImportedFromOsu = false
+                    }
                 )
             )
 

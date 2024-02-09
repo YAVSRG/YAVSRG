@@ -211,17 +211,14 @@ module Startup =
             |]
 
         ScoreScreenHelpers.watch_replay <-
-            fun (chart: Chart, score: Score, with_colors: ColoredChart, data) ->
-                let rate = score.rate
+            fun (score_info: ScoreInfo, with_colors: ColoredChart) ->
 
-                if rate <> Gameplay.rate.Value then
-                    Gameplay.rate.Value <- rate
-
-                Screen.change_new
-                    (fun () -> ReplayScreen.replay_screen (chart, ReplayMode.Replay(score, with_colors, rate, data)) :> Screen.T)
+                if Screen.change_new
+                    (fun () -> ReplayScreen.replay_screen (score_info.Chart, ReplayMode.Replay(score_info, with_colors)) :> Screen.T)
                     Screen.Type.Replay
                     Transitions.Flags.Default
-                |> ignore
+                then
+                    Gameplay.rate.Value <- score_info.Rate
 
         AutoUpdate.check_for_updates ()
         Mounts.import_mounts_on_startup ()

@@ -34,13 +34,13 @@ module Scoreboard =
         | CurrentRate = 1
         | CurrentMods = 2
 
-    type ScoreCard(data: ScoreInfoProvider) =
+    type ScoreCard(score_info: ScoreInfo) =
         inherit
             FrameContainer(
                 NodeType.Button(
                     (fun () ->
                         Screen.change_new
-                            (fun () -> new ScoreScreen(data, ImprovementFlags.Default, false) :> Screen)
+                            (fun () -> new ScoreScreen(score_info, ImprovementFlags.Default, false) :> Screen)
                             Screen.Type.Score
                             Transitions.Flags.Default
                         |> ignore
@@ -50,11 +50,6 @@ module Scoreboard =
 
         let fade = Animation.Fade(0.0f, Target = 1.0f)
         let animation = Animation.seq [ Animation.Delay 150; fade ]
-
-        do
-            // called off main thread to pre-calculate these values
-            ignore data.Physical
-            ignore data.Lamp
 
         override this.Init(parent) =
             this.Fill <-
@@ -79,7 +74,7 @@ module Scoreboard =
 
             this
             |+ Text(
-                fun () -> data.Scoring.FormatAccuracy()
+                fun () -> score_info.Scoring.FormatAccuracy()
                 , Color = text_color
                 , Align = Alignment.LEFT
                 , Position =
@@ -95,9 +90,9 @@ module Scoreboard =
                 fun () ->
                     sprintf
                         "%s  •  %ix  •  %.2f"
-                        (data.Ruleset.LampName data.Lamp)
-                        data.Scoring.State.BestCombo
-                        data.Physical
+                        (score_info.Ruleset.LampName score_info.Lamp)
+                        score_info.Scoring.State.BestCombo
+                        score_info.Physical
                 , Color = text_subcolor
                 , Align = Alignment.LEFT
                 , Position =
@@ -111,8 +106,8 @@ module Scoreboard =
 
             |+ Text(
                 K(
-                    format_timespan (DateTime.UtcNow - data.ScoreInfo.time.ToUniversalTime())
-                    + if data.ScoreInfo.layout = Layout.Layout.LeftTwo then
+                    format_timespan (DateTime.UtcNow - Timestamp.to_datetime score_info.TimePlayed)
+                    + if score_info.ImportedFromOsu then
                           " " + Icons.DOWNLOAD
                       else
                           ""
@@ -129,7 +124,7 @@ module Scoreboard =
             )
 
             |+ Text(
-                K data.Mods,
+                score_info.ModString(),
                 Color = text_color,
                 Align = Alignment.RIGHT,
                 Position =
@@ -141,11 +136,11 @@ module Scoreboard =
                     }
             )
 
-            |* Clickable(this.Select, OnRightClick = (fun () -> ScoreContextMenu(data).Show()))
+            |* Clickable(this.Select, OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
 
             base.Init parent
 
-        member this.Data = data
+        member this.Data = score_info
 
         member this.FadeOut() = fade.Target <- 0.0f
 
@@ -158,9 +153,9 @@ module Scoreboard =
             animation.Update elapsed_ms
 
             if Mouse.hover this.Bounds && (%%"delete").Tapped() then
-                ScoreContextMenu.ConfirmDeleteScore(data, false)
+                ScoreContextMenu.ConfirmDeleteScore(score_info, false)
             elif this.Focused && (%%"context_menu").Tapped() then
-                ScoreContextMenu(data).Show()
+                ScoreContextMenu(score_info).Show()
 
     module Loader =
 
@@ -168,6 +163,7 @@ module Scoreboard =
             {
                 RulesetId: string
                 Ruleset: Ruleset
+                CachedChart: CachedChart
                 CurrentChart: Chart
                 ChartSaveData: ChartSaveData
                 mutable NewBests: Bests option
@@ -181,17 +177,17 @@ module Scoreboard =
                 member this.Process(req: Request) =
                     seq {
                         for score in req.ChartSaveData.Scores do
-                            let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
+                            let score_info = ScoreInfo.from_score req.CachedChart req.CurrentChart req.Ruleset score
 
-                            if s.ModStatus = Mods.ModStatus.Ranked then
+                            if score_info.ModStatus() = Mods.ModStatus.Ranked then
                                 req.NewBests <-
                                     Some(
                                         match req.NewBests with
-                                        | None -> Bests.create s
-                                        | Some b -> fst (Bests.update s b)
+                                        | None -> Bests.create score_info
+                                        | Some b -> fst (Bests.update score_info b)
                                     )
 
-                            let sc = ScoreCard s
+                            let sc = ScoreCard score_info
                             yield fun () -> container.Add sc
 
                         match req.NewBests with
@@ -216,6 +212,7 @@ module Scoreboard =
                 {
                     RulesetId = Content.Rulesets.current_hash
                     Ruleset = Content.Rulesets.current
+                    CachedChart = info.CacheInfo
                     CurrentChart = info.Chart
                     ChartSaveData = info.SaveData
                     NewBests = None
@@ -242,12 +239,12 @@ type Scoreboard(display: Setting<Display>) as this =
         | Sort.Accuracy -> fun b a -> a.Data.Scoring.Value.CompareTo b.Data.Scoring.Value
         | Sort.Performance -> fun b a -> a.Data.Physical.CompareTo b.Data.Physical
         | Sort.Time
-        | _ -> fun b a -> a.Data.ScoreInfo.time.CompareTo b.Data.ScoreInfo.time
+        | _ -> fun b a -> a.Data.TimePlayed.CompareTo b.Data.TimePlayed
 
     let filterer () : ScoreCard -> bool =
         match filter.Value with
-        | Filter.CurrentRate -> (fun a -> a.Data.ScoreInfo.rate = rate.Value)
-        | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selected_mods.Value)
+        | Filter.CurrentRate -> (fun a -> a.Data.Rate = rate.Value)
+        | Filter.CurrentMods -> (fun a -> a.Data.Mods = selected_mods.Value)
         | _ -> K true
 
     let scroll_container =

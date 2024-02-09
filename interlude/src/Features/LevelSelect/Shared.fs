@@ -3,6 +3,7 @@
 open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude.Data.Scores
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Play
@@ -47,15 +48,15 @@ module LevelSelect =
         then
             info.SaveData.LastPlayed <- DateTime.UtcNow
 
-    let challenge_score (_rate, _mods, replay) =
+    let challenge_score (score_info: ScoreInfo) =
         Chart.if_loaded <| fun info ->
 
         if
             Screen.change_new
-                (fun () -> PlayScreen.play_screen (info, PacemakerMode.Score(rate.Value, replay)))
-                (Screen.Type.Play)
+                (fun () -> PlayScreen.play_screen (info, PacemakerMode.Score(score_info.Rate, score_info.Replay)))
+                Screen.Type.Play
                 Transitions.Flags.Default
         then
             info.SaveData.LastPlayed <- DateTime.UtcNow
-            rate.Set _rate
-            selected_mods.Set _mods
+            rate.Set score_info.Rate
+            selected_mods.Set score_info.Mods

@@ -6,16 +6,15 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude
+open Prelude.Charts
 open Prelude.Charts.Tools
 open Prelude.Charts.Tools.NoteColors
 open Prelude.Data.Scores
 open Prelude.Gameplay
-open Prelude.Gameplay.Metrics
 open Interlude.Content
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features
-open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Online
 open Interlude.Features.Play.HUD
 open Interlude.Features.Score
@@ -23,7 +22,7 @@ open Interlude.Features.Score
 [<RequireQualifiedAccess>]
 type ReplayMode =
     | Auto of ColoredChart
-    | Replay of score: Score * chart: ColoredChart * rate: float32 * ReplayData
+    | Replay of score_info: ScoreInfo * with_colors: ColoredChart
 
 type private HitOverlay
     (
@@ -38,9 +37,8 @@ type private HitOverlay
 
     let hit_events =
         let full_score =
-            create state.Ruleset chart.Keys (StoredReplayProvider replay_data) chart.Notes rate
+            Metrics.run state.Ruleset chart.Keys (StoredReplayProvider replay_data) chart.Notes rate
 
-        full_score.Update Time.infinity
         full_score.HitEvents |> Array.ofSeq
 
     let mutable seek = 0
@@ -338,7 +336,7 @@ module ReplayScreen =
                             Bottom = 1.0f %+ 100.0f
                         }
 
-    let replay_screen (chart, mode: ReplayMode) =
+    let replay_screen (chart: Chart, mode: ReplayMode) =
 
         let replay_data, is_auto, rate, with_colors =
             match mode with
@@ -347,8 +345,8 @@ module ReplayScreen =
                 true,
                 Gameplay.rate.Value,
                 with_colors
-            | ReplayMode.Replay(_, modchart, rate, data) ->
-                StoredReplayProvider(data) :> IReplayProvider, false, rate, modchart
+            | ReplayMode.Replay(score_info, with_colors) ->
+                StoredReplayProvider(score_info.Replay) :> IReplayProvider, false, score_info.Rate, with_colors
 
         let first_note = with_colors.FirstNote
         let ruleset = Rulesets.current
@@ -358,11 +356,11 @@ module ReplayScreen =
 
         let mutable replay_data = replay_data
 
-        let mutable scoring = create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+        let mutable scoring = Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplayProvider(replay_data.GetFullReplay())
-            scoring <- create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+            scoring <- Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
             screen.State.ChangeScoring scoring
 
         { new IPlayScreen(chart, with_colors, PacemakerInfo.None, ruleset, scoring) with
@@ -421,18 +419,10 @@ module ReplayScreen =
                 if replay_data.Finished then
                     match mode with
                     | ReplayMode.Auto _ -> Screen.back Transitions.Flags.Default |> ignore
-                    | ReplayMode.Replay(score, _, _, _) ->
+                    | ReplayMode.Replay(score_info, _) ->
                         Screen.change_new
                             (fun () ->
-                                let sd =
-                                    ScoreInfoProvider(
-                                        score,
-                                        this.State.Chart,
-                                        this.State.Ruleset,
-                                        ModdedChart = with_colors.Source
-                                    )
-
-                                new ScoreScreen(sd, ImprovementFlags.Default, false) :> Screen
+                                new ScoreScreen(score_info, ImprovementFlags.Default, false) :> Screen
                             )
                             Screen.Type.Score
                             Transitions.Flags.Default

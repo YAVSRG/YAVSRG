@@ -9,7 +9,7 @@ open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Prelude.Gameplay
 open Prelude.Charts
-open Prelude.Charts.Tools.NoteColors
+open Prelude.Gameplay.Difficulty
 open Interlude
 open Interlude.UI
 open Interlude.Utils
@@ -45,13 +45,13 @@ module Leaderboard =
 
     type LeaderboardScore = Charts.Scores.Leaderboard.Score
 
-    type LeaderboardCard(score: LeaderboardScore, data: ScoreInfoProvider) =
+    type LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
         inherit
             FrameContainer(
                 NodeType.Button(
                     (fun () ->
                         Screen.change_new
-                            (fun () -> new ScoreScreen(data, ImprovementFlags.Default, false) :> Screen)
+                            (fun () -> new ScoreScreen(score_info, ImprovementFlags.Default, false) :> Screen)
                             Screen.Type.Score
                             Transitions.Flags.Default
                         |> ignore
@@ -61,11 +61,6 @@ module Leaderboard =
 
         let fade = Animation.Fade(0.0f, Target = 1.0f)
         let animation = Animation.seq [ Animation.Delay 150; fade ]
-
-        do
-            // called off main thread to pre-calculate these values
-            ignore data.Physical
-            ignore data.Lamp
 
         override this.Init(parent) =
             this.Fill <-
@@ -90,7 +85,7 @@ module Leaderboard =
 
             this
             |+ Text(
-                K(sprintf "#%i %s  •  %s" score.Rank score.Username (data.Scoring.FormatAccuracy())),
+                K(sprintf "#%i %s  •  %s" score.Rank score.Username (score_info.Scoring.FormatAccuracy())),
                 Color = text_color,
                 Align = Alignment.LEFT,
                 Position =
@@ -106,9 +101,9 @@ module Leaderboard =
                 K(
                     sprintf
                         "%s  •  %ix  •  %.2f"
-                        (data.Ruleset.LampName data.Lamp)
-                        data.Scoring.State.BestCombo
-                        data.Physical
+                        (score_info.Ruleset.LampName score_info.Lamp)
+                        score_info.Scoring.State.BestCombo
+                        score_info.Physical
                 ),
                 Color = text_subcolor,
                 Align = Alignment.LEFT,
@@ -122,7 +117,7 @@ module Leaderboard =
             )
 
             |+ Text(
-                K(format_timespan (DateTime.UtcNow - data.ScoreInfo.time.ToUniversalTime())),
+                K(format_timespan (DateTime.UtcNow - Timestamp.to_datetime score_info.TimePlayed)),
                 Color = text_subcolor,
                 Align = Alignment.RIGHT,
                 Position =
@@ -135,7 +130,7 @@ module Leaderboard =
             )
 
             |+ Text(
-                K data.Mods,
+                score_info.ModString(),
                 Color = text_color,
                 Align = Alignment.RIGHT,
                 Position =
@@ -147,11 +142,11 @@ module Leaderboard =
                     }
             )
 
-            |* Clickable(this.Select, OnRightClick = (fun () -> ScoreContextMenu(data).Show()))
+            |* Clickable(this.Select, OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
 
             base.Init parent
 
-        member this.Data = data
+        member this.Data = score_info
 
         member this.FadeOut() = fade.Target <- 0.0f
 
@@ -164,18 +159,18 @@ module Leaderboard =
             animation.Update elapsed_ms
 
             if Mouse.hover this.Bounds && (%%"delete").Tapped() then
-                ScoreContextMenu.ConfirmDeleteScore(data, false)
+                ScoreContextMenu.ConfirmDeleteScore(score_info, false)
             elif this.Focused && (%%"context_menu").Tapped() then
-                ScoreContextMenu(data).Show()
+                ScoreContextMenu(score_info).Show()
 
     module Loader =
 
         type Request =
             {
                 Scores: LeaderboardScore array
-                RulesetId: string
                 Ruleset: Ruleset
                 Hash: string
+                CachedChart: CachedChart
                 Chart: Chart
             }
             override this.ToString() = "<leaderboard calculation>"
@@ -187,23 +182,32 @@ module Leaderboard =
                 member this.Process(req: Request) =
                     seq {
                         for score in req.Scores do
-                            let data =
-                                ScoreInfoProvider(
-                                    ({
-                                        time = score.Timestamp
-                                        replay = score.Replay
-                                        rate = score.Rate
-                                        selectedMods = score.Mods
-                                        layout = Layout.Layout.Spread
-                                        keycount = req.Chart.Keys
-                                    }
-                                    : Score),
-                                    req.Chart,
-                                    req.Ruleset,
-                                    Player = Some score.Username
-                                )
+                            let with_mods = Mods.apply_mods score.Mods req.Chart
+                            let replay_data = Replay.decompress_string score.Replay
+                            let scoring = Metrics.run req.Ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+                            let rating = RatingReport(with_mods.Notes, score.Rate, with_mods.Keys)
+                            let score_info =
+                                {
+                                    CachedChart = req.CachedChart
+                                    Chart = req.Chart
+                                    WithMods = with_mods
 
-                            yield LeaderboardCard(score, data)
+                                    PlayedBy = ScorePlayedBy.Username score.Username
+                                    TimePlayed = score.Timestamp |> Timestamp.from_datetime
+                                    Rate = score.Rate
+
+                                    Replay = replay_data
+                                    Scoring = scoring
+                                    Lamp = Lamp.calculate req.Ruleset.Grading.Lamps scoring.State
+                                    Grade = Grade.calculate req.Ruleset.Grading.Grades scoring.State
+
+                                    Rating = rating
+                                    Physical = calculate_score_rating rating with_mods.Keys scoring |> fst
+                                    
+                                    ImportedFromOsu = false
+                                }
+
+                            yield LeaderboardCard(score, score_info)
                     }
 
                 member this.Handle(lc: LeaderboardCard) = container.Add lc
@@ -232,8 +236,8 @@ module Leaderboard =
                             score_loader.Request
                                 {
                                     Scores = reply.Scores
-                                    RulesetId = Content.Rulesets.current_hash
                                     Ruleset = Content.Rulesets.current
+                                    CachedChart = cc
                                     Chart = chart
                                     Hash = cc.Hash
                                 }
@@ -249,8 +253,8 @@ module Leaderboard =
                         score_loader.Request
                             {
                                 Scores = [||]
-                                RulesetId = Content.Rulesets.current_hash
                                 Ruleset = Content.Rulesets.current
+                                CachedChart = cc
                                 Chart = chart
                                 Hash = cc.Hash
                             }

@@ -154,13 +154,13 @@ module Printerlude =
                                 | Some chart ->
 
                                 for score in data.Scores do
-                                    let info = ScoreInfoProvider(score, chart, ruleset)
+                                    let score_info = ScoreInfo.from_score cc chart ruleset score
 
                                     if data.PersonalBests.ContainsKey ruleset_id then
-                                        let new_bests, _ = Bests.update info data.PersonalBests.[ruleset_id]
+                                        let new_bests, _ = Bests.update score_info data.PersonalBests.[ruleset_id]
                                         data.PersonalBests.[ruleset_id] <- new_bests
                                     else
-                                        data.PersonalBests.[ruleset_id] <- Bests.create info
+                                        data.PersonalBests.[ruleset_id] <- Bests.create score_info
 
                         Logging.Info(sprintf "Finished processing personal bests for %s" ruleset.Name)
                     }
