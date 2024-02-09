@@ -15,6 +15,7 @@
     <Compile Include="Core\Replays.fs" />
     <Compile Include="Core\Scores.fs" />
     <Compile Include="Core\Leaderboards.fs" />
+    <Compile Include="Backbeat\Sources.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Services\Users.fs" />
     <Compile Include="Services\Scores.fs" />

@@ -47,6 +47,12 @@ module Migrations =
             "ImportOldCrescentLevels"
             (fun _ -> Logging.Info("TablesV1 no longer exist to migrate data from"))
             db
+        Database.migrate
+            "AddSources"
+            (fun db -> 
+                Source.CREATE_TABLE.Execute () db |> expect |> ignore
+            )
+            db
 
 module Database =
 
