@@ -19,7 +19,7 @@ You don't have to care about them - in PRs I can just squash with an emoji commi
 🚴 = Code refactoring/cleanup/formatting
 ⚡️ = Automation (CI pipelines, automated tests, developer tooling)
 📘 = Documentation for users
-📕 = Documentation for developer workflows
+📕 = Documentation for developers
 🎓 = Localisation changes
 🏷️ = Releases
 💚 = Community content & Automated commits

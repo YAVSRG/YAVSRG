@@ -248,7 +248,7 @@ type GradingConfig =
         Grades: Grade array
         Lamps: Lamp array
     }
-    member this.Validate jcount = this //nyi, could check lamps
+    member this.Validate jcount = this // todo: could validate lamps against judgements
 
 [<Json.AutoCodec>]
 type AccuracyConfig =
@@ -262,16 +262,16 @@ type AccuracyConfig =
     member this.Validate name jcount =
         { this with
             Timegates =
-                let mutable lastTime = -Time.infinity
+                let mutable last_time = -Time.infinity
 
                 for (time, j) in this.Timegates do
-                    if time <= lastTime then
+                    if time <= last_time then
                         Logging.Error(sprintf "Problem with ruleset '%s': Timegates are in the wrong order" name)
 
                     if j >= jcount || j < 0 then
                         Logging.Error(sprintf "Problem with ruleset '%s': Timegates judgement is not valid" name)
 
-                    lastTime <- time
+                    last_time <- time
 
                 this.Timegates
             Points = this.Points.Validate name jcount

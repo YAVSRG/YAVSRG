@@ -62,12 +62,19 @@ type SongId = string
 [<Json.AutoCodec>]
 type Song =
     {
-        Artists: ArtistName list // never empty
-        OtherArtists: ArtistName list // alternate performers/cover artists
+        /// Non-empty list of main artists/arrangers/composers
+        Artists: ArtistName list
+        /// List of additional features/performers
+        OtherArtists: ArtistName list
+        /// List of additional remixers/cover artists
         Remixers: ArtistName list
+        /// Song title, prefer something romanised / ASCII printable
         Title: string
+        /// Alternative song titles, no romanisation requirements
         AlternativeTitles: string list
+        /// None for unknown, for original album/place of release
         Source: string option
+        /// Various user-defined tags
         Tags: string list
     }
     member this.FormattedArtists =
@@ -121,7 +128,8 @@ type ChartHash = string
 type Chart =
     {
         SongId: SongId
-        Creators: string list // never empty
+        /// Non-empty list of charter names
+        Creators: string list
         Keys: int
         DifficultyName: string
         Subtitle: string option
@@ -130,8 +138,8 @@ type Chart =
         Notecount: int
         BPM: (float32<ms / beat> * float32<ms / beat>)
         PreviewTime: Time
-        BackgroundFile: string // sha256
-        AudioFile: string // sha256
+        BackgroundFile: string // sha256 digest of background asset
+        AudioFile: string // sha256 digest of audio asset
         Sources: ChartSource list
         LastUpdated: DateTime
     }
