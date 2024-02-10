@@ -43,16 +43,9 @@ module Migrations =
                 TableSuggestion.CREATE_TABLE.Execute () db |> expect |> ignore
             )
             db
-        Database.migrate
-            "ImportOldCrescentLevels"
-            (fun _ -> Logging.Info("TablesV1 no longer exist to migrate data from"))
-            db
-        Database.migrate
-            "AddSources"
-            (fun db -> 
-                Source.CREATE_TABLE.Execute () db |> expect |> ignore
-            )
-            db
+        Database.migrate "ImportOldCrescentLevels" (fun _ -> Logging.Info("TablesV1 no longer exist to migrate data from")) db
+        Database.migrate "AddSources" (fun db -> Source.CREATE_TABLE.Execute () db |> expect |> ignore) db
+        Database.migrate "AddSongsAndCharts" (fun db -> Songs.CREATE_TABLES.Execute () db |> expect |> ignore) db
 
 module Database =
 
