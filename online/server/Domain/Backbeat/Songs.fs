@@ -62,27 +62,27 @@ module Songs =
             );
 
             CREATE VIRTUAL TABLE songs_fts USING fts5 (
+                Id UNINDEXED,
                 Artists,
                 OtherArtists,
                 Remixers,
                 Title,
                 AlternativeTitles,
                 Source,
-                Tags,
-                LastUpdated UNINDEXED
+                Tags
             );
 
             CREATE TRIGGER songs_fts_ai AFTER INSERT ON songs BEGIN
-              INSERT INTO songs_fts(rowid, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags, LastUpdated) 
-              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source, new.Tags, new.LastUpdated);
+              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags) 
+              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source, new.Tags);
             END;
 
             CREATE TRIGGER songs_fts_ad AFTER UPDATE ON songs BEGIN
               DELETE FROM songs_fts
               WHERE rowid = old.Id;
 
-              INSERT INTO songs_fts(rowid, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags, LastUpdated) 
-              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source, new.Tags, new.LastUpdated);
+              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags) 
+              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source, new.Tags);
             END;
 
             CREATE TRIGGER songs_fts_au AFTER DELETE ON songs BEGIN
@@ -514,17 +514,16 @@ module Songs =
             UPDATE_CHART_SONG_ID.Execute (chart_id, current_song_id, new_song_id) backbeat_db |> expect > 0
         | None -> false
 
-    type SongSearchQuery =
-        {
-            Title: string option
-            Artist: string option
-        }
-    let search_songs (search_query: SongSearchQuery) : (int64 * Song) array =
+    open System.Text.RegularExpressions
+    let search_songs (search_query: string) : (int64 * Song) array =
+        let stripped_query = Regex.Replace(search_query, @"[^a-zA-Z0-9]+", "")
+        if stripped_query = "" then [||] else
         let db_query : Query<unit, int64 * Song> =
             {
-                SQL = """
-                SELECT rowid, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags FROM songs_fts
-                WHERE songs_fts MATCH 'Camellia'
+                SQL = $"""
+                SELECT Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags FROM songs_fts
+                WHERE songs_fts MATCH '{stripped_query}'
+                ORDER BY rank DESC
                 LIMIT 20;
                 """
                 Parameters = []

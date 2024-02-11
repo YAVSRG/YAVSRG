@@ -182,4 +182,11 @@ module Songs =
     [<Test>]
     let Search () =
         Songs.add_chart_song "search" TEST_CHART TEST_SONG |> printfn "%A"
-        Songs.search_songs { Title = None; Artist = None } |> printfn "%A"
+        Assert.Positive((Songs.search_songs "Camellia").Length)
+        Assert.Positive((Songs.search_songs "{{''Nanahira}}").Length)
+        Assert.Zero((Songs.search_songs "{{{{").Length)
+
+    [<Test>]
+    let Search_TrigramMatch() =
+        Songs.add_chart_song "search_trigram" TEST_CHART TEST_SONG |> printfn "%A"
+        Assert.Positive((Songs.search_songs "a").Length)
