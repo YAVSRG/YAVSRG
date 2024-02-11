@@ -56,7 +56,7 @@ module Songs =
                 Remixers TEXT NOT NULL,
                 Title TEXT NOT NULL,
                 AlternativeTitles TEXT NOT NULL,
-                Source TEXT NOT NULL,
+                Source TEXT,
                 Tags TEXT NOT NULL
             );
             
@@ -335,7 +335,7 @@ module Songs =
                 Creators = @Creators,
                 DifficultyName = @DifficultyName,
                 Subtitle = @Subtitle,
-                ChartTags = @ChartTags,
+                Tags = @ChartTags,
                 Duration = @Duration,
                 PreviewTime = @PreviewTime,
                 Notecount = @Notecount,
