@@ -57,8 +57,38 @@ module Songs =
                 Title TEXT NOT NULL,
                 AlternativeTitles TEXT NOT NULL,
                 Source TEXT,
-                Tags TEXT NOT NULL
+                Tags TEXT NOT NULL,
+                LastUpdated INTEGER NOT NULL
             );
+
+            CREATE VIRTUAL TABLE songs_fts USING fts5 (
+                Artists,
+                OtherArtists,
+                Remixers,
+                Title,
+                AlternativeTitles,
+                Source,
+                Tags,
+                LastUpdated UNINDEXED
+            );
+
+            CREATE TRIGGER songs_fts_ai AFTER INSERT ON songs BEGIN
+              INSERT INTO songs_fts(rowid, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags, LastUpdated) 
+              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source, new.Tags, new.LastUpdated);
+            END;
+
+            CREATE TRIGGER songs_fts_ad AFTER UPDATE ON songs BEGIN
+              DELETE FROM songs_fts
+              WHERE rowid = old.Id;
+
+              INSERT INTO songs_fts(rowid, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags, LastUpdated) 
+              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source, new.Tags, new.LastUpdated);
+            END;
+
+            CREATE TRIGGER songs_fts_au AFTER DELETE ON songs BEGIN
+                DELETE FROM songs_fts
+                WHERE rowid = old.Id;
+            END;
             
             CREATE TABLE charts (
                 Id TEXT PRIMARY KEY NOT NULL,
@@ -75,6 +105,7 @@ module Songs =
                 BackgroundHash TEXT NOT NULL,
                 AudioHash TEXT NOT NULL,
                 Sources TEXT NOT NULL,
+                LastUpdated INTEGER NOT NULL,
                 FOREIGN KEY (SongId) REFERENCES songs(Id) ON DELETE RESTRICT
             );
 
@@ -210,11 +241,11 @@ module Songs =
             SQL = """
             BEGIN TRANSACTION;
 
-            INSERT INTO songs (Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags)
-            VALUES (@Artists, @OtherArtists, @Remixers, @Title, @AlternativeTitles, @Source, @Tags);
+            INSERT INTO songs (Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags, LastUpdated)
+            VALUES (@Artists, @OtherArtists, @Remixers, @Title, @AlternativeTitles, @Source, @Tags, @LastUpdated);
 
-            INSERT INTO charts (Id, SongId, Creators, DifficultyName, Subtitle, Tags, Duration, PreviewTime, Notecount, Keys, BPM, BackgroundHash, AudioHash, Sources)
-            VALUES (@ChartId, last_insert_rowid(), @Creators, @DifficultyName, @Subtitle, @ChartTags, @Duration, @PreviewTime, @Notecount, @Keys, @BPM, @BackgroundHash, @AudioHash, @Sources)
+            INSERT INTO charts (Id, SongId, Creators, DifficultyName, Subtitle, Tags, Duration, PreviewTime, Notecount, Keys, BPM, BackgroundHash, AudioHash, Sources, LastUpdated)
+            VALUES (@ChartId, last_insert_rowid(), @Creators, @DifficultyName, @Subtitle, @ChartTags, @Duration, @PreviewTime, @Notecount, @Keys, @BPM, @BackgroundHash, @AudioHash, @Sources, @LastUpdated)
             RETURNING SongId;
             
             COMMIT;
@@ -240,6 +271,7 @@ module Songs =
                 "@BackgroundHash", SqliteType.Text, -1
                 "@AudioHash", SqliteType.Text, -1
                 "@Sources", SqliteType.Text, -1
+                "@LastUpdated", SqliteType.Integer, 8
             ]
             FillParameters = (fun p (chart_id, chart, song) ->
                 p.Json JSON song.Artists
@@ -262,6 +294,7 @@ module Songs =
                 p.String chart.BackgroundHash
                 p.String chart.AudioHash
                 p.Json JSON chart.Sources
+                p.Int64 (Timestamp.now())
             )
             Read = fun r -> r.Int64
         }
@@ -270,8 +303,8 @@ module Songs =
     let private ADD_CHART : NonQuery<string * Chart * int64> = 
         {
             SQL = """
-            INSERT INTO charts (Id, SongId, Creators, DifficultyName, Subtitle, Tags, Duration, PreviewTime, Notecount, Keys, BPM, BackgroundHash, AudioHash, Sources)
-            VALUES (@ChartId, @SongId, @Creators, @DifficultyName, @Subtitle, @ChartTags, @Duration, @PreviewTime, @Notecount, @Keys, @BPM, @BackgroundHash, @AudioHash, @Sources);
+            INSERT INTO charts (Id, SongId, Creators, DifficultyName, Subtitle, Tags, Duration, PreviewTime, Notecount, Keys, BPM, BackgroundHash, AudioHash, Sources, LastUpdated)
+            VALUES (@ChartId, @SongId, @Creators, @DifficultyName, @Subtitle, @ChartTags, @Duration, @PreviewTime, @Notecount, @Keys, @BPM, @BackgroundHash, @AudioHash, @Sources, @LastUpdated);
             """
             Parameters = [
                 "@ChartId", SqliteType.Text, -1
@@ -288,6 +321,7 @@ module Songs =
                 "@BackgroundHash", SqliteType.Text, -1
                 "@AudioHash", SqliteType.Text, -1
                 "@Sources", SqliteType.Text, -1
+                "@LastUpdated", SqliteType.Integer, 8
             ]
             FillParameters = (fun p (chart_id, chart, song_id) ->
                 p.String chart_id
@@ -304,6 +338,7 @@ module Songs =
                 p.String chart.BackgroundHash
                 p.String chart.AudioHash
                 p.Json JSON chart.Sources
+                p.Int64 (Timestamp.now())
             )
         }
     let add_chart (chart_id: string) (chart: Chart) (song_id: int64) = ADD_CHART.Execute (chart_id, chart, song_id) backbeat_db |> expect |> ignore
@@ -343,7 +378,8 @@ module Songs =
                 BPM = @BPM,
                 BackgroundHash = @BackgroundHash,
                 AudioHash = @AudioHash,
-                Sources = @Sources
+                Sources = @Sources,
+                LastUpdated = @LastUpdated
             WHERE Id = @ChartId;
             """
             Parameters = [
@@ -360,6 +396,7 @@ module Songs =
                 "@BackgroundHash", SqliteType.Text, -1
                 "@AudioHash", SqliteType.Text, -1
                 "@Sources", SqliteType.Text, -1
+                "@LastUpdated", SqliteType.Integer, 8
             ]
             FillParameters = (fun p (chart_id, chart) ->
                 p.String chart_id
@@ -375,6 +412,7 @@ module Songs =
                 p.String chart.BackgroundHash
                 p.String chart.AudioHash
                 p.Json JSON chart.Sources
+                p.Int64 (Timestamp.now())
             )
         }
     let update_chart (chart_id: string) (chart: Chart) : bool = UPDATE_CHART.Execute (chart_id, chart) backbeat_db |> expect = 1
@@ -390,7 +428,8 @@ module Songs =
                 Title = @Title,
                 AlternativeTitles = @AlternativeTitles,
                 Source = @Source,
-                Tags = @Tags
+                Tags = @Tags,
+                LastUpdated = @LastUpdated
             WHERE Id = @SongId;
             """
             Parameters = [
@@ -402,6 +441,7 @@ module Songs =
                 "@AlternativeTitles", SqliteType.Text, -1
                 "@Source", SqliteType.Text, -1
                 "@Tags", SqliteType.Text, -1
+                "@LastUpdated", SqliteType.Integer, 8
             ]
             FillParameters = (fun p (song_id, song) ->
                 p.Int64 song_id
@@ -412,6 +452,7 @@ module Songs =
                 p.Json JSON song.AlternativeTitles
                 p.StringOption song.Source
                 p.Json JSON song.Tags
+                p.Int64 (Timestamp.now())
             )
         }
     let update_song (song_id: int64) (song: Song) : bool = UPDATE_SONG.Execute (song_id, song) backbeat_db |> expect = 1
@@ -442,6 +483,63 @@ module Songs =
             DELETE_CHART.Execute (chart_id, song_id) backbeat_db |> expect > 0
         | None -> false
 
-    // re-point a chart to another song id (and delete the old song if unused)
+    let private UPDATE_CHART_SONG_ID : NonQuery<string * int64 * int64> =
+        {
+            SQL = """
+            BEGIN TRANSACTION;
 
-    // bunch of search methods
+            UPDATE charts
+            SET SongId = @NewSongId
+            WHERE Id = @ChartId;
+
+            DELETE FROM songs
+            WHERE Id = @OldSongId
+            AND NOT EXISTS (
+                SELECT 1 FROM charts
+                WHERE charts.SongId = @OldSongId
+            );
+
+            COMMIT;
+            """
+            Parameters = [ "@ChartId", SqliteType.Text, -1; "@OldSongId", SqliteType.Integer, 8; "@NewSongId", SqliteType.Integer, 8 ]
+            FillParameters = (fun p (chart_id, current_song_id, new_song_id) -> 
+                p.String chart_id
+                p.Int64 current_song_id
+                p.Int64 new_song_id
+            )
+        }
+    let update_chart_song_id (chart_id: string) (new_song_id: int64) =
+        match chart_by_id chart_id with
+        | Some (current_song_id, _) ->
+            UPDATE_CHART_SONG_ID.Execute (chart_id, current_song_id, new_song_id) backbeat_db |> expect > 0
+        | None -> false
+
+    type SongSearchQuery =
+        {
+            Title: string option
+            Artist: string option
+        }
+    let search_songs (search_query: SongSearchQuery) : (int64 * Song) array =
+        let db_query : Query<unit, int64 * Song> =
+            {
+                SQL = """
+                SELECT rowid, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags FROM songs_fts
+                WHERE songs_fts MATCH 'Camellia'
+                LIMIT 20;
+                """
+                Parameters = []
+                FillParameters = fun p () -> ()
+                Read = (fun r ->
+                    r.Int64,
+                    {
+                        Artists = r.Json JSON
+                        OtherArtists = r.Json JSON
+                        Remixers = r.Json JSON
+                        Title = r.String
+                        AlternativeTitles = r.Json JSON
+                        Source = r.StringOption
+                        Tags = r.Json JSON
+                    }
+                )
+            }
+        db_query.Execute () backbeat_db |> expect

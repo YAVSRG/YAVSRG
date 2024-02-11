@@ -35,35 +35,35 @@ module Songs =
             Sources = [Stepmania (random.Next 10000); CommunityPack (random_text 5)]
         }
 
+    let TEST_SONG : Song =
+        {
+            Artists = ["Camellia"]
+            OtherArtists = ["Nanahira"]
+            Remixers = []
+            Title = "EDM Jumpers"
+            AlternativeTitles = []
+            Source = Some "EDM Extreme (2015)"
+            Tags = ["DanceDanceRevolution"]
+        }
+    let TEST_CHART_HASH = "3769432CBF00E56035035D1D0FAE74DA7313E56E443F32A1C457B0E781E42B6F"
+    let TEST_CHART : Chart =
+        {
+            Creators = ["Klaius"]
+            DifficultyName = "4K Challenge 26"
+            Subtitle = Some "EDM Extreme (2015)"
+            Tags = []
+            Duration = 277862.28f<ms>
+            PreviewTime = 92100.0f<ms>
+            Notecount = 4382
+            Keys = 4
+            BPM = 413.7931f<ms/beat>, 413.7931f<ms/beat>
+            BackgroundHash = "823436D6ED4350C2ED3ED6CC8502B69207F2670E60C6B5EAF6AB1A01744BD750"
+            AudioHash = "D0AC559C92AE400A3A2C95EA0ED0E9034798634E1AF60ACAD99C6FA272631B89"
+            Sources = [Stepmania 13813]
+        }
+
     [<Test>]
     let Chart_Song_RoundTrip () =
-        let TEST_SONG : Song =
-            {
-                Artists = ["Camellia"]
-                OtherArtists = ["Nanahira"]
-                Remixers = []
-                Title = "EDM Jumpers"
-                AlternativeTitles = []
-                Source = Some "EDM Extreme (2015)"
-                Tags = ["DanceDanceRevolution"]
-            }
-        let TEST_CHART_HASH = "3769432CBF00E56035035D1D0FAE74DA7313E56E443F32A1C457B0E781E42B6F"
-        let TEST_CHART : Chart =
-            {
-                Creators = ["Klaius"]
-                DifficultyName = "4K Challenge 26"
-                Subtitle = Some "EDM Extreme (2015)"
-                Tags = []
-                Duration = 277862.28f<ms>
-                PreviewTime = 92100.0f<ms>
-                Notecount = 4382
-                Keys = 4
-                BPM = 413.7931f<ms/beat>, 413.7931f<ms/beat>
-                BackgroundHash = "823436D6ED4350C2ED3ED6CC8502B69207F2670E60C6B5EAF6AB1A01744BD750"
-                AudioHash = "D0AC559C92AE400A3A2C95EA0ED0E9034798634E1AF60ACAD99C6FA272631B89"
-                Sources = [Stepmania 13813]
-            }
-
         let song_id = Songs.add_chart_song TEST_CHART_HASH TEST_CHART TEST_SONG
 
         match Songs.chart_by_id TEST_CHART_HASH with
@@ -178,3 +178,8 @@ module Songs =
     
         let new_chart = generate_test_chart()
         Assert.False(Songs.update_chart "doesntexist" new_chart)
+
+    [<Test>]
+    let Search () =
+        Songs.add_chart_song "search" TEST_CHART TEST_SONG |> printfn "%A"
+        Songs.search_songs { Title = None; Artist = None } |> printfn "%A"
