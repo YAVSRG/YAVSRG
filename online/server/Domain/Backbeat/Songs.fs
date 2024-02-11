@@ -19,6 +19,16 @@ type Song =
         Source: string option
         Tags: string list
     }
+    static member OfPreludeSong (song: Prelude.Backbeat.Archive.Song) =
+        {
+            Artists = song.Artists
+            OtherArtists = song.OtherArtists
+            Remixers = song.Remixers
+            Title = song.Title
+            AlternativeTitles = song.AlternativeTitles
+            Source = song.Source
+            Tags = song.Tags
+        }
 
 [<Json.AutoCodec>]
 type ChartSource =
@@ -41,6 +51,28 @@ type Chart =
         AudioHash: string
         Sources: ChartSource list
     }
+    static member OfPreludeChart (chart: Prelude.Backbeat.Archive.Chart) =
+        {
+            Creators = chart.Creators
+            DifficultyName = chart.DifficultyName
+            Subtitle = chart.Subtitle
+            Tags = chart.Tags
+            Duration = chart.Duration
+            PreviewTime = chart.PreviewTime
+            Notecount = chart.Notecount
+            Keys = chart.Keys
+            BPM = chart.BPM
+            BackgroundHash = chart.BackgroundFile
+            AudioHash = chart.AudioFile
+            Sources = 
+                chart.Sources 
+                |> List.choose (
+                    function 
+                    | Backbeat.Archive.ChartSource.CommunityPack _ -> None
+                    | Backbeat.Archive.ChartSource.Osu x -> ChartSource.Osu {| BeatmapId = x.BeatmapId; BeatmapSetId = x.BeatmapSetId |} |> Some
+                    | Backbeat.Archive.ChartSource.Stepmania i -> ChartSource.Stepmania i |> Some
+                )
+        }
 
 module Songs =
     
@@ -69,7 +101,8 @@ module Songs =
                 Title,
                 AlternativeTitles,
                 Source,
-                Tags
+                Tags,
+                tokenize="trigram"
             );
 
             CREATE TRIGGER songs_fts_ai AFTER INSERT ON songs BEGIN
@@ -522,7 +555,7 @@ module Songs =
             {
                 SQL = $"""
                 SELECT Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags FROM songs_fts
-                WHERE songs_fts MATCH '{stripped_query}'
+                WHERE songs_fts MATCH '"{stripped_query}"'
                 ORDER BY rank DESC
                 LIMIT 20;
                 """
