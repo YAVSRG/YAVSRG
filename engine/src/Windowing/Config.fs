@@ -50,7 +50,7 @@ type Config =
         {
             WorkingDirectory = ""
             Locale = "en_GB.txt"
-            WindowMode = Setting.simple WindowType.Borderless
+            WindowMode = Setting.simple WindowType.Fullscreen
             WindowResolution = Setting.simple (1024, 768)
             FullscreenVideoMode =
                 Setting.simple
