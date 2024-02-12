@@ -42,28 +42,18 @@ module private Dropdown =
 
             base.Draw()
 
-// todo: way of knowing which item was selected originally and auto-selecting it
-type Dropdown(items: (string * (Color * Color) * (unit -> unit)) seq, on_close: unit -> unit) as this =
+type DropdownOptions<'T when 'T : equality> =
+    {
+        Items: ('T * string) seq
+        Setting: Setting<'T>
+        ColorFunc: 'T -> Color * Color
+        OnClose: unit -> unit
+    }
+
+type Dropdown<'T when 'T : equality>(options: DropdownOptions<'T>) as this =
     inherit FrameContainer(NodeType.Switch(fun _ -> this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
-    let scroll = ScrollContainer(flow)
-
-    do
-        for (label, color, action) in items do
-            flow
-            |* Dropdown.Item(
-                label,
-                color,
-                fun () ->
-                    action ()
-                    this.Close()
-            )
-
-        this.Add scroll
-
-    new(items: (string * (unit -> unit)) seq, on_close: unit -> unit) =
-        Dropdown(items |> Seq.map (fun (label, action) -> (label, Colors.text, action)), on_close)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -80,26 +70,69 @@ type Dropdown(items: (string * (Color * Color) * (unit -> unit)) seq, on_close: 
             Input.finish_frame_events ()
 
     override this.Init(parent: Widget) =
+        let mutable what_to_focus : Widget = this
+        flow
+        |+ seq {
+            for (value, label) in options.Items do
+                let item = Dropdown.Item(label, options.ColorFunc value, fun () -> options.Setting.Set value; this.Close())
+                if value = options.Setting.Value then what_to_focus <- item
+                yield item
+        }
+        |> ScrollContainer
+        |> this.Add
 
         base.Init parent
-        this.Focus()
+        what_to_focus.Focus()
 
-    member this.Close() = on_close ()
+    member this.Close() = options.OnClose()
     member private this.Items = flow
 
     member this.Place(x, y, width) =
         this.Position <- Position.Box(0.0f, 0.0f, x, y, width, this.Height)
 
-    member this.Height = float32 (Seq.length items) * Dropdown.ITEMSIZE
+    member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE
 
-    static member Selector (items: 'T seq) (labels: 'T -> string) (on_select: 'T -> unit) (on_close: unit -> unit) =
-        Dropdown(Seq.map (fun item -> (labels item, Colors.text, (fun () -> on_select item))) items, on_close)
+type DropdownMenuOptions =
+    {
+        Items: ((unit -> unit) * string) seq
+        OnClose: unit -> unit
+    }
 
-    static member ColorSelector
-        (items: 'T seq)
-        (labels: 'T -> string)
-        (colors: 'T -> Color * Color)
-        (on_select: 'T -> unit)
-        (on_close: unit -> unit)
-        =
-        Dropdown(Seq.map (fun item -> (labels item, colors item, (fun () -> on_select item))) items, on_close)
+type DropdownMenu(options: DropdownMenuOptions) as this =
+    inherit FrameContainer(NodeType.Switch(fun _ -> this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
+
+    let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if
+            (%%"exit").Tapped()
+            || not this.Focused
+            || Mouse.left_click ()
+            || Mouse.right_click ()
+        then
+            this.Close()
+
+        if Mouse.hover this.Bounds then
+            Input.finish_frame_events ()
+
+    override this.Init(parent: Widget) =
+        flow
+        |+ seq {
+            for (action, label) in options.Items do
+                yield Dropdown.Item(label, Colors.text, fun () -> action(); this.Close())
+        }
+        |> ScrollContainer
+        |> this.Add
+
+        base.Init parent
+        this.Focus()
+
+    member this.Close() = options.OnClose()
+    member private this.Items = flow
+
+    member this.Place(x, y, width) =
+        this.Position <- Position.Box(0.0f, 0.0f, x, y, width, this.Height)
+
+    member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE

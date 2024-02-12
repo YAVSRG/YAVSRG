@@ -61,33 +61,39 @@ type NetworkStatus() =
         then
             PlayersPage().Show()
 
-    member this.MenuItems: (string * (unit -> unit)) seq =
+    member this.MenuItems: ((unit -> unit) * string) seq =
         match Network.status with
-        | Network.NotConnected -> [ Icons.GLOBE + " Connect", (fun () -> Network.connect ()) ]
-        | Network.Connecting -> [ Icons.SLASH + " Cancel", ignore ]
-        | Network.ConnectionFailed -> [ Icons.GLOBE + " Reconnect", (fun () -> Network.connect ()) ]
+        | Network.NotConnected -> [ (fun () -> Network.connect ()), Icons.GLOBE + " Connect" ]
+        | Network.Connecting -> [ ignore, Icons.SLASH + " Cancel" ]
+        | Network.ConnectionFailed -> [  (fun () -> Network.connect ()), Icons.GLOBE + " Reconnect" ]
         | Network.Connected ->
             [
-                Icons.LOG_IN + " Log in",
                 fun () ->
                     if Network.credentials.Token <> "" then
                         Network.login_with_token ()
                     else
                         Menu.ShowPage LoginPage
+                ,
+                Icons.LOG_IN + " Log in"
             ]
         | Network.LoggedIn ->
             [
-                Icons.USERS + " Multiplayer",
                 fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore
-                Icons.SEARCH + " Players", (fun () -> PlayersPage().Show())
-                Icons.LOG_OUT + " Log out", Network.logout
+                ,
+                Icons.USERS + " Multiplayer"
+                (fun () -> PlayersPage().Show()), Icons.SEARCH + " Players"
+                Network.logout, Icons.LOG_OUT + " Log out"
             ]
 
     member this.ToggleDropdown() =
         match this.Dropdown with
         | Some _ -> this.Dropdown <- None
         | None ->
-            let d = Dropdown(this.MenuItems, (fun () -> this.Dropdown <- None))
+            let d = 
+                DropdownMenu { 
+                    Items = this.MenuItems
+                    OnClose = (fun () -> this.Dropdown <- None)
+                }
 
             d.Position <-
                 Position
@@ -98,4 +104,4 @@ type NetworkStatus() =
             d.Init this
             this.Dropdown <- Some d
 
-    member val Dropdown: Dropdown option = None with get, set
+    member val Dropdown: DropdownMenu option = None with get, set

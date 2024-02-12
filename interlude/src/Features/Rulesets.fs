@@ -34,11 +34,12 @@ module Rulesets =
                 let rulesets = Rulesets.list ()
 
                 let d =
-                    Dropdown.Selector
-                        rulesets
-                        (fun (id, rs) -> rs.Name)
-                        (fun (id, rs) -> setting.Set id)
-                        (fun () -> this.Dropdown <- None)
+                    Dropdown { 
+                        Items = rulesets |> Seq.map (fun (id, rs) -> id, rs.Name)
+                        ColorFunc = K Colors.text
+                        OnClose = fun () -> this.Dropdown <- None
+                        Setting = setting
+                    }
 
                 d.Position <-
                     Position
@@ -49,7 +50,7 @@ module Rulesets =
                 d.Init this
                 this.Dropdown <- Some d
 
-        member val Dropdown: Dropdown option = None with get, set
+        member val Dropdown: Dropdown<string> option = None with get, set
 
         override this.Draw() =
             base.Draw()

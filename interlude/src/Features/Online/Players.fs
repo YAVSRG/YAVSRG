@@ -412,12 +412,12 @@ type Profile() as this =
                                 )
 
                             let dropdown =
-                                Dropdown.ColorSelector
-                                    badges
-                                    (fun (b, _) -> b)
-                                    (fun (_, c) -> Color.FromArgb c, Colors.shadow_2)
-                                    (snd >> save_color)
-                                    (fun () -> color_picker.Current <- Dummy())
+                                Dropdown { 
+                                    Items = badges |> Seq.map (fun (label, color) -> color, label)
+                                    ColorFunc = fun c -> Color.FromArgb c, Colors.shadow_2
+                                    OnClose = fun () -> color_picker.Current <- Dummy()
+                                    Setting = Setting.make save_color (fun () -> data.Color)
+                                }
 
                             color_picker.Current <- dropdown
                             dropdown.Focus()

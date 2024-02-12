@@ -278,20 +278,18 @@ type private SortingDropdown
         | Some _ -> this.Dropdown <- None
         | _ ->
             let d =
-                Dropdown.Selector
-                    options
-                    snd
-                    (fun g ->
-                        display_value <- snd g
-                        setting.Set(fst g)
-                    )
-                    (fun () -> this.Dropdown <- None)
+                Dropdown { 
+                    Items = options
+                    ColorFunc = K Colors.text
+                    OnClose = fun () -> this.Dropdown <- None
+                    Setting = setting |> Setting.trigger (fun v -> display_value <- Seq.find (fun (id, _) -> id = v) options |> snd)
+                }
 
             d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
             d.Init this
             this.Dropdown <- Some d
 
-    member val Dropdown: Dropdown option = None with get, set
+    member val Dropdown: Dropdown<string> option = None with get, set
 
     override this.Draw() =
         base.Draw()
