@@ -108,7 +108,7 @@ module Tree =
             && Mouse.y () > origin
 
     let CHART_HEIGHT = 90.0f
-    let GROUP_HEIGHT = 65.0f
+    let GROUP_HEIGHT = 55.0f
 
     type private ChartItem(group_name: string, cc: CachedChart, context: LibraryContext) =
         inherit TreeItem()
@@ -297,8 +297,23 @@ module Tree =
     type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: LibraryGroupContext) =
         inherit TreeItem()
 
+        let select_animation = Animation.Fade(0.0f)
+        let label =
+            match context with
+            | LibraryGroupContext.Folder id -> 
+                match Library.collections.GetFolder id with
+                | Some folder -> sprintf "%s %i" folder.Icon.Value items.Count
+                | None -> sprintf "%s %i" Icons.FOLDER items.Count
+            | LibraryGroupContext.Playlist id -> 
+                match Library.collections.GetPlaylist id with
+                | Some playlist -> sprintf "%s %i" playlist.Icon.Value items.Count
+                | None -> sprintf "%s %i" Icons.FOLDER items.Count
+            | LibraryGroupContext.Table id -> // todo: calc some cool table/folder stats to go here
+                sprintf "%s %i" Icons.FOLDER items.Count
+            | LibraryGroupContext.None -> sprintf "%s %i" Icons.FOLDER items.Count
+
         override this.Bounds(top) =
-            Rect.Create(Viewport.vwidth * 0.5f, top, Viewport.vwidth - 15.0f, top + GROUP_HEIGHT)
+            Rect.Create(Viewport.vwidth * (0.5f - 0.05f * select_animation.Value), top, Viewport.vwidth - 15.0f, top + GROUP_HEIGHT)
 
         override this.Selected = selected_group = name
         override this.Spacing = 20.0f
@@ -316,11 +331,12 @@ module Tree =
             Draw.rect
                 bounds
                 (if this.Selected then
-                     Palette.color (120, 1.0f, 0.2f)
+                     Palette.color (120, 0.7f + select_animation.Value * 0.3f, select_animation.Value * 0.3f)
                  else
                      Palette.color (100, 0.7f, 0.0f))
 
-            Text.fill_b (Style.font, name, bounds.Shrink 5.0f, Colors.text, 0.5f)
+            Text.fill_b (Style.font, name, bounds.Shrink(15.0f, 5.0f).TrimRight(100.0f), Colors.text, Alignment.LEFT)
+            Text.fill_b (Style.font, label, bounds.Shrink (15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 
         member this.Draw(top, origin, originB) =
             let b = this.CheckBounds(top, origin, originB, this.OnDraw)
@@ -350,7 +366,7 @@ module Tree =
                         Viewport.vwidth - 20f,
                         origin + 10.0f,
                         Colors.text,
-                        1.0f
+                        Alignment.RIGHT
                     )
 
                 b2
@@ -371,6 +387,8 @@ module Tree =
                     GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
 
         member this.Update(top, origin, originB, elapsed_ms) =
+            select_animation.Target <- if this.Selected then 1.0f else 0.0f
+            select_animation.Update elapsed_ms
             match scroll_to with
             | ScrollTo.Pack s when s = name ->
                 if this.Expanded then
