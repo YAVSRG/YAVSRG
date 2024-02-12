@@ -11,6 +11,8 @@ open Interlude.Features.Online
 type NetworkStatus() =
     inherit StaticWidget(NodeType.None)
 
+    let retry_timer = Animation.Delay(10000.0)
+
     override this.Draw() =
         let area = this.Bounds.Shrink(30.0f, 0.0f).TrimBottom(15.0f)
 
@@ -18,7 +20,7 @@ type NetworkStatus() =
             match Network.status with
             | Network.NotConnected -> Icons.USER_X + "  Offline", Colors.grey_2
             | Network.Connecting -> Icons.GLOBE + "  Connecting..", Colors.grey_1
-            | Network.ConnectionFailed -> Icons.SLASH + "  Offline", Colors.red_accent
+            | Network.ConnectionFailed -> Icons.WIFI_OFF + "  Offline", Colors.red_accent
             | Network.Connected -> Icons.GLOBE + "  Not logged in", Colors.green_accent
             | Network.LoggedIn -> Icons.GLOBE + "  " + Network.credentials.Username, Colors.green_accent
 
@@ -46,6 +48,11 @@ type NetworkStatus() =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
+        if Network.status = Network.NotConnected then
+            retry_timer.Update elapsed_ms
+            if retry_timer.Complete then
+                retry_timer.Reset()
+                Network.connect()
 
         match this.Dropdown with
         | Some d -> d.Update(elapsed_ms, moved)
