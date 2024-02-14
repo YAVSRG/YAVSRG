@@ -4,6 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data.Scores
+open Prelude.Data.Charts.Sorting
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Play
@@ -21,7 +22,14 @@ module LevelSelect =
     let on_refresh_all = refresh_all_event.Publish
     let on_refresh_details = refresh_details_event.Publish
 
-    do Interlude.Features.Import.Import.charts_updated.Add refresh_all
+    do 
+        Interlude.Features.Import.Import.charts_updated.Add refresh_all
+        Interlude.Features.Collections.CollectionActions.collection_modified.Add (fun () ->
+            if options.LibraryMode.Value = LibraryMode.Collections then 
+                refresh_all ()
+            else
+                refresh_details ()
+        )
 
     let play () =
 

@@ -15,6 +15,7 @@ open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Score
+open Interlude.Features.Collections
 open Interlude.Features.LevelSelect.Tables
 open Interlude.Web.Shared.Requests
 

@@ -1,18 +1,15 @@
-﻿namespace Interlude.Features.LevelSelect
+﻿namespace Interlude.Features.Collections
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Common
 open Prelude.Data.Charts.Library
-open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
-open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
-type private CreateFolderPage(on_create: (string * Collection) -> unit) as this =
+type CreateFolderPage(on_create: (string * Collection) -> unit) as this =
     inherit Page()
 
     let new_name = Setting.simple "Folder" |> Setting.alphanumeric
@@ -49,7 +46,7 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) as this 
             Icons.FOLDER, Icons.FOLDER
         |]
 
-type private CreatePlaylistPage(on_create: (string * Collection) -> unit) as this =
+type CreatePlaylistPage(on_create: (string * Collection) -> unit) as this =
     inherit Page()
 
     let new_name = Setting.simple "Playlist" |> Setting.alphanumeric
@@ -86,7 +83,7 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) as thi
             Icons.LIST, Icons.LIST
         |]
 
-type private EditFolderPage(name: string, folder: Folder) as this =
+type EditFolderPage(name: string, folder: Folder) as this =
     inherit Page()
 
     let new_name = Setting.simple name |> Setting.alphanumeric
@@ -104,8 +101,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                         [ name ] %> "misc.confirmdelete",
                         fun () ->
                             if collections.Delete name then
-                                if options.LibraryMode.Value = LibraryMode.Collections then
-                                    LevelSelect.refresh_all ()
+                                CollectionActions.collection_modified_ev.Trigger ()
 
                                 // todo: unselect collection when deleted
 
@@ -125,13 +121,12 @@ type private EditFolderPage(name: string, folder: Folder) as this =
         if new_name.Value <> name && new_name.Value.Length > 1 then
             if collections.RenameCollection(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed collection '%s' to '%s'" name new_name.Value)
-                if options.LibraryMode.Value = LibraryMode.Collections then
-                    LevelSelect.refresh_all ()
+                CollectionActions.collection_modified_ev.Trigger ()
             else
                 Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"
 
-type private EditPlaylistPage(name: string, playlist: Playlist) as this =
+type EditPlaylistPage(name: string, playlist: Playlist) as this =
     inherit Page()
 
     let new_name = Setting.simple name |> Setting.alphanumeric
@@ -149,8 +144,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                         [ name ] %> "misc.confirmdelete",
                         fun () ->
                             if collections.Delete name then
-                                if options.LibraryMode.Value = LibraryMode.Collections then
-                                    LevelSelect.refresh_all ()
+                                CollectionActions.collection_modified_ev.Trigger ()
 
                                 // todo: unselect collection when deleted
 
@@ -170,8 +164,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
         if new_name.Value <> name && new_name.Value.Length > 0 then
             if collections.RenamePlaylist(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
-                if options.LibraryMode.Value = LibraryMode.Collections then
-                    LevelSelect.refresh_all ()
+                CollectionActions.collection_modified_ev.Trigger ()
             else
                 Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"

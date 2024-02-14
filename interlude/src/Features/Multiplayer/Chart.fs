@@ -16,7 +16,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Features.Gameplay
-open Interlude.Features.LevelSelect
+open Interlude.Features.Collections
 open Interlude.Features.Online
 open Interlude.Features.Play
 
