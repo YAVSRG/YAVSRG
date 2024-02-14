@@ -6,6 +6,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
+open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
@@ -55,30 +56,54 @@ type LevelSelectScreen() =
                 refresh ()
             | None -> ()
 
-    let continue_endless_mode () =
+    let continue_endless_mode () : bool =
+        let rec play_when_song_loads (info: Chart.LoadedChartInfo) =
+            let success =
+                Screen.change_new
+                    (fun () ->
+                        PlayScreen.play_screen (info,
+                            if options.EnablePacemaker.Value then
+                                PacemakerMode.Setting
+                            else
+                                PacemakerMode.None
+                        )
+                    )
+                    Screen.Type.Play
+                    Transitions.Flags.Default
+
+            if not success then
+                sync (fun () -> play_when_song_loads info)
+            else
+                info.SaveData.LastPlayed <- System.DateTime.UtcNow
+
+        match Chart.LIBRARY_CTX with
+        | LibraryContext.Playlist (pos, playlist_id, _) ->
+            match Library.collections.GetPlaylist playlist_id with
+            | Some playlist ->
+                match
+                    seq {
+                        while pos + 1 < playlist.Charts.Count do
+                            let entry, data = playlist.Charts.[pos + 1]
+                            match Cache.by_hash entry.Hash Library.cache with
+                            | Some cc -> yield cc, data
+                            | None -> 
+                                playlist.RemoveAt(pos) |> ignore
+                                Logging.Debug(sprintf "Removed chart %s from playlist '%s' because it could not be found" entry.Hash playlist_id)
+                    }
+                    |> Seq.tryHead
+                with
+                | Some (next_chart, data) ->
+                    Chart.change(next_chart, LibraryContext.Playlist(pos + 1, playlist_id, data), false)
+                    Chart.when_loaded <| play_when_song_loads
+                    true
+                | None -> false
+            | None -> false
+
+        | _ ->
+
         match Suggestion.get_suggestion Chart.CACHE_DATA.Value Tree.filter with
         | Some c ->
             Chart.change (c, LibraryContext.None, false)
-
-            let rec play_when_song_loads (info: Chart.LoadedChartInfo) =
-                let success =
-                    Screen.change_new
-                        (fun () ->
-                            PlayScreen.play_screen (info,
-                                if options.EnablePacemaker.Value then
-                                    PacemakerMode.Setting
-                                else
-                                    PacemakerMode.None
-                            )
-                        )
-                        Screen.Type.Play
-                        Transitions.Flags.Default
-
-                if not success then
-                    sync (fun () -> play_when_song_loads info)
-                else
-                    info.SaveData.LastPlayed <- System.DateTime.UtcNow
-
             Chart.when_loaded <| play_when_song_loads
             true
         | None ->
