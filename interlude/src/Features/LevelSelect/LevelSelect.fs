@@ -136,7 +136,7 @@ type LevelSelectScreen() =
                 {
                     Left = 1.0f %- 580.0f
                     Top = 0.0f %+ 30.0f
-                    Right = 1.0f %- (30.0f + Style.PADDING)
+                    Right = 1.0f %- (20.0f + Style.PADDING)
                     Bottom = 0.0f %+ 90.0f
                 }
         )
