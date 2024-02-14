@@ -362,7 +362,7 @@ module PracticeScreen =
                 base.OnEnter(p)
                 Song.seek (practice_point)
                 Song.pause ()
-                DiscordRPC.playing ("Practice mode", Gameplay.Chart.CACHE_DATA.Value.Title)
+                DiscordRPC.playing ("Practice mode", info.CacheInfo.Title)
 
             override this.OnBack() =
                 if not options_mode then
@@ -391,8 +391,21 @@ module PracticeScreen =
                         sync_ui.AcceptSuggestion()
                         play (this)
 
-                elif options_mode && (%%"skip").Tapped() then
-                    play (this)
+                elif options_mode then
+                    if (%%"skip").Tapped() then
+                        play (this)
+                    elif (%%"uprate_small").Tapped() then
+                        Gameplay.rate.Value <- Gameplay.rate.Value + 0.01f
+                    elif (%%"uprate_half").Tapped() then
+                        Gameplay.rate.Value <- Gameplay.rate.Value + 0.05f
+                    elif (%%"uprate").Tapped() then
+                        Gameplay.rate.Value <- Gameplay.rate.Value + 0.1f
+                    elif (%%"downrate_small").Tapped() then
+                        Gameplay.rate.Value <- Gameplay.rate.Value - 0.01f
+                    elif (%%"downrate_half").Tapped() then
+                        Gameplay.rate.Value <- Gameplay.rate.Value - 0.05f
+                    elif (%%"downrate").Tapped() then
+                        Gameplay.rate.Value <- Gameplay.rate.Value - 0.1f
 
                 elif not (liveplay :> IReplayProvider).Finished then
                     Input.pop_gameplay (
