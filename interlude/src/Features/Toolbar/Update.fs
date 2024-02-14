@@ -11,7 +11,7 @@ type Updater() as this =
     do this |* Clickable.Focus this
 
     override this.Draw() =
-        let area = this.Bounds.TrimBottom(15.0f)
+        let area = this.Bounds.Shrink(0.0f, 7.5f)
         Draw.rect area (Colors.shadow_1.O2)
 
         if AutoUpdate.update_complete then

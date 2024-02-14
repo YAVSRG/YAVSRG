@@ -172,7 +172,7 @@ type Toolbar() =
         )
         |+ Conditional(
             (fun () -> AutoUpdate.update_available),
-            Updater(Position = Position.Box(0.5f, 1.0f, -250.0f, -HEIGHT, 500.0f, HEIGHT))
+            Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
         )
         |* volume
 
