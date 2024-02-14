@@ -29,20 +29,7 @@ type MultiplayerChartContextMenu(cc: CachedChart) as this =
 
             |+ PageButton(
                 "chart.add_to_collection",
-                (fun () ->
-                    SelectCollectionPage(
-                        fun (name, collection) ->
-                            if CollectionActions.add_to (name, collection, cc) then
-                                Menu.Back()
-                        ,
-                        fun (_, collection) ->
-                            match collection with
-                            | Folder f -> f.Contains cc
-                            | Playlist p -> false
-                        , true
-                    )
-                        .Show()
-                ),
+                (fun () -> AddToCollectionPage(cc).Show()),
                 Icon = Icons.FOLDER_PLUS
             )
 

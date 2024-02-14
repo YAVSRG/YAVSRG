@@ -402,6 +402,39 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
         Draw.rect (this.Bounds.TrimTop(160.0f).SliceTop(5.0f)) Colors.white
         base.Draw()
 
+open Prelude.Data.Charts.Caching
+open Interlude.Features.Collections
+open Interlude.Features.Tables
+open Interlude.Features.Online
+
+type ScoreChartContextMenu(cc: CachedChart) as this =
+    inherit Page()
+
+    do
+        let content =
+            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
+
+            |+ PageButton(
+                "chart.add_to_collection",
+                (fun () -> AddToCollectionPage(cc).Show()),
+                Icon = Icons.FOLDER_PLUS
+            )
+        match Content.Table with
+        | Some table ->
+            if Network.status = Network.Status.LoggedIn && cc.Keys = table.Info.Keymode then
+                content
+                |* PageButton(
+                    "chart.suggest_for_table",
+                    (fun () -> SuggestChartPage(table, cc).Show()),
+                    Icon = Icons.SIDEBAR
+                )
+        | _ -> ()
+
+        this.Content content
+
+    override this.Title = cc.Title
+    override this.OnClose() = ()
+
 type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> unit) as this
     =
     inherit StaticContainer(NodeType.None)
@@ -422,6 +455,19 @@ type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: Sco
             Position = Position.SliceBottom(50.0f).Margin(20.0f, 5.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT
+        )
+        |+ StylishButton(
+            (fun () -> ScoreChartContextMenu(score_info.CachedChart).Show()),
+            sprintf "%s %s" Icons.SETTINGS (%"score.chart_actions") |> K,
+            !%Palette.DARK_100,
+            Hotkey = "context_menu",
+            Position =
+                {
+                    Left = 0.4f %+ 0.0f
+                    Top = 1.0f %- 50.0f
+                    Right = 0.55f %- 25.0f
+                    Bottom = 1.0f %- 0.0f
+                }
         )
         |+ StylishButton(
             (fun () ->

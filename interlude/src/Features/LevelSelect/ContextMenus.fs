@@ -16,8 +16,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Score
 open Interlude.Features.Collections
-open Interlude.Features.LevelSelect.Tables
-open Interlude.Web.Shared.Requests
+open Interlude.Features.Tables
 
 type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     inherit Page()
@@ -27,20 +26,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
             |+ PageButton(
                 "chart.add_to_collection",
-                (fun () ->
-                    SelectCollectionPage(
-                        fun (name, collection) ->
-                            if CollectionActions.add_to (name, collection, cc) then
-                                Menu.Back()
-                        ,
-                        fun (_, collection) ->
-                            match collection with
-                            | Folder f -> f.Contains cc
-                            | Playlist p -> false
-                        , true
-                    )
-                        .Show()
-                ),
+                (fun () -> AddToCollectionPage(cc).Show()),
                 Icon = Icons.FOLDER_PLUS
             )
             |+ PageButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.TRASH)
@@ -95,27 +81,8 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 content
                 |* PageButton(
                     "chart.suggest_for_table",
-                    (fun () ->
-                        SelectTableLevelPage(table, fun level ->
-                            Tables.Suggestions.Vote.post (
-                                {
-                                    ChartId = cc.Hash
-                                    TableId = table.Id
-                                    Level = level
-                                },
-                                function
-                                | Some Tables.Suggestions.Vote.Response.Ok -> Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                                | Some Tables.Suggestions.Vote.Response.OkDetailsRequired -> 
-                                    // todo: send backbeat addition request with suggestion
-                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                                | Some Tables.Suggestions.Vote.Response.Rejected -> Notifications.action_feedback (Icons.X_CIRCLE, "Suggestion rejected!", "This chart has already previously been rejected")
-                                | None -> Notifications.error ("Error sending suggestion", "")
-                            )
-
-                            Menu.Back()
-                        )
-                            .Show()
-                    )
+                    (fun () -> SuggestChartPage(table, cc).Show()),
+                    Icon = Icons.SIDEBAR
                 )
         | _ -> ()
 

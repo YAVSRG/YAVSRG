@@ -3,13 +3,14 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
-type CreateFolderPage(on_create: (string * Collection) -> unit) as this =
+type private CreateFolderPage(on_create: (string * Collection) -> unit) as this =
     inherit Page()
 
     let new_name = Setting.simple "Folder" |> Setting.alphanumeric
@@ -46,7 +47,7 @@ type CreateFolderPage(on_create: (string * Collection) -> unit) as this =
             Icons.FOLDER, Icons.FOLDER
         |]
 
-type CreatePlaylistPage(on_create: (string * Collection) -> unit) as this =
+type private CreatePlaylistPage(on_create: (string * Collection) -> unit) as this =
     inherit Page()
 
     let new_name = Setting.simple "Playlist" |> Setting.alphanumeric
@@ -242,13 +243,26 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit, is_disabled:
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh ()
 
-    static member Editor() =
-        SelectCollectionPage(
-            fun (name, collection) ->
-                match collection with
-                | Folder f -> EditFolderPage(name, f).Show()
-                | Playlist p -> EditPlaylistPage(name, p).Show()
-            ,
-            K false,
-            false
-        )
+type ManageCollectionsPage() =
+    inherit SelectCollectionPage(
+        fun (name, collection) ->
+            match collection with
+            | Folder f -> EditFolderPage(name, f).Show()
+            | Playlist p -> EditPlaylistPage(name, p).Show()
+        ,
+        K false,
+        false
+    )
+
+type AddToCollectionPage(cc: CachedChart) =
+    inherit SelectCollectionPage(
+        fun (name, collection) ->
+            if CollectionActions.add_to (name, collection, cc) then
+                Menu.Back()
+        ,
+        fun (_, collection) ->
+            match collection with
+            | Folder f -> f.Contains cc
+            | Playlist _ -> false
+        , true
+    )

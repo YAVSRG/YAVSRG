@@ -1,4 +1,4 @@
-namespace Interlude.Features.LevelSelect.Tables
+namespace Interlude.Features.Tables
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI

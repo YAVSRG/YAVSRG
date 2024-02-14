@@ -1,9 +1,10 @@
-﻿namespace Interlude.Features.LevelSelect.Tables
+﻿namespace Interlude.Features.Tables
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Data.Charts.Tables
+open Prelude.Data.Charts.Caching
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
@@ -165,3 +166,25 @@ type SuggestionsPage(table: Table) as this =
     override this.Title = %"table.suggestions.name"
     override this.OnClose() = ()
     override this.OnReturnTo() = sl.Reload()
+
+type SuggestChartPage(table: Table, cc: CachedChart) =
+    inherit SelectTableLevelPage(
+        table, 
+        fun level ->
+            Tables.Suggestions.Vote.post (
+                {
+                    ChartId = cc.Hash
+                    TableId = table.Id
+                    Level = level
+                },
+                function
+                | Some Tables.Suggestions.Vote.Response.Ok -> Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                | Some Tables.Suggestions.Vote.Response.OkDetailsRequired -> 
+                    // todo: send backbeat addition request with suggestion
+                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                | Some Tables.Suggestions.Vote.Response.Rejected -> Notifications.action_feedback (Icons.X_CIRCLE, "Suggestion rejected!", "This chart has already previously been rejected")
+                | None -> Notifications.error ("Error sending suggestion", "")
+            )
+
+            Menu.Back()
+        )

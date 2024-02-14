@@ -1,16 +1,14 @@
-﻿namespace Interlude.Features.LevelSelect.Tables
+﻿namespace Interlude.Features.Tables
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Data.Charts.Tables
-open Prelude.Data.Charts.Sorting
 open Interlude.Content
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features.LevelSelect
 
 type private TableButton(name, action) =
     inherit
@@ -53,7 +51,7 @@ type private TableButton(name, action) =
 
         base.Draw()
 
-type ManageTablesPage() as this =
+type ManageTablesPage(table_changed) as this =
     inherit Page()
 
     let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
@@ -80,10 +78,7 @@ type ManageTablesPage() as this =
                 fun () ->
                     options.Table.Set(Some e.Id)
 
-                    if options.LibraryMode.Value = LibraryMode.Table then
-                        LevelSelect.refresh_all ()
-                    else
-                        LevelSelect.refresh_details ()
+                    table_changed()
 
                     sync refresh
             )

@@ -637,6 +637,7 @@ register.terms_of_service.name=Terms of Service
 register.username.name=Username
 score.challenge.name=Challenge this score
 score.challenge.tooltip=Play the chart, using this score as a pacemaker.
+score.chart_actions=Chart actions
 score.delete.name=Delete score
 score.graph.settings.graph_mode.name=Graph mode
 score.graph.settings.only_releases.name=Only show releases

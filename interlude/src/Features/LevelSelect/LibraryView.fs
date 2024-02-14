@@ -12,7 +12,7 @@ open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections
-open Interlude.Features.LevelSelect.Tables
+open Interlude.Features.Tables
 
 type private ModeDropdown
     (options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
@@ -99,7 +99,7 @@ type LibraryModeSettings() =
 
     let manage_collections =
         StylishButton(
-            (fun () -> Menu.ShowPage SelectCollectionPage.Editor),
+            (fun () -> Menu.ShowPage ManageCollectionsPage),
             K(sprintf "%s %s" Icons.FOLDER (%"levelselect.collections.name")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
@@ -108,7 +108,7 @@ type LibraryModeSettings() =
 
     let manage_tables =
         StylishButton(
-            (fun () -> Menu.ShowPage ManageTablesPage),
+            (fun () -> ManageTablesPage(LevelSelect.refresh_all).Show()),
             K(sprintf "%s %s" Icons.EDIT_2 (%"levelselect.table.name")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
@@ -199,9 +199,8 @@ type LibraryModeSettings() =
                 CollectionActions.reorder_down Chart.LIBRARY_CTX |> ignore
 
             elif (%%"collections").Tapped() then
-                Menu.ShowPage SelectCollectionPage.Editor
-            elif (%%"table").Tapped() then
-                Menu.ShowPage ManageTablesPage
+                Menu.ShowPage ManageCollectionsPage
+            elif (%%"table").Tapped() then ManageTablesPage(LevelSelect.refresh_all).Show() // todo: only need to refresh if view is table
             elif (%%"reverse_sort_mode").Tapped() then
                 Setting.app not options.ChartSortReverse
                 LevelSelect.refresh_all ()
