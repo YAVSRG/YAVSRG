@@ -97,8 +97,6 @@ module Gameplay =
             {
                 CacheInfo: CachedChart
                 LibraryContext: LibraryContext
-                DurationString: string
-                BpmString: string
             }
 
         type LoadedChartInfo =
@@ -127,15 +125,15 @@ module Gameplay =
         let mutable private on_load_succeeded = []
 
         type private LoadRequest =
-            | Load of CachedChart * play_audio: bool
-            | Update of bool
+            | Load of CachedChart * play_audio: bool * rate: float32 * mods: ModState
+            | Update of bool * rate: float32 * mods: ModState
             | Recolor
 
         let private chart_loader =
             { new Async.SwitchServiceSeq<LoadRequest, unit -> unit>() with
                 override this.Process(req) =
                     match req with
-                    | Load(cc, play_audio) ->
+                    | Load(cc, play_audio, rate, mods) ->
                         seq {
                             match Cache.load cc Library.cache with
                             | None ->
@@ -168,7 +166,7 @@ module Gameplay =
                                     Song.change (
                                         Cache.audio_path chart Library.cache,
                                         save_data.Offset - chart.FirstNote,
-                                        _rate.Value,
+                                        rate,
                                         (chart.Header.PreviewTime, chart.LastNote),
                                         play_audio
                                     )
@@ -176,17 +174,17 @@ module Gameplay =
                                     SAVE_DATA <- Some save_data
                             // if chart is loaded we can safely restart from this point for different rates and mods
 
-                            let with_mods = apply_mods _selected_mods.Value chart
+                            let with_mods = apply_mods mods chart
                             let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
                             let rating =
                                 RatingReport(
                                     with_mods.Notes,
-                                    _rate.Value,
+                                    rate,
                                     with_mods.Keys
                                 )
 
-                            let patterns = Patterns.generate_pattern_report (_rate.Value, chart)
+                            let patterns = Patterns.generate_pattern_report (rate, chart)
                             let note_counts = format_notecounts with_mods
 
                             yield
@@ -205,23 +203,23 @@ module Gameplay =
 
                                     on_load_succeeded <- []
                         }
-                    | Update is_interrupted_load ->
+                    | Update (is_interrupted_load, rate, mods) ->
                         seq {
                             match CHART with
                             | None -> ()
                             | Some chart ->
 
-                            let with_mods = apply_mods _selected_mods.Value chart
+                            let with_mods = apply_mods mods chart
                             let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
                             let rating =
                                 RatingReport(
                                     with_mods.Notes,
-                                    _rate.Value,
+                                    rate,
                                     with_mods.Keys
                                 )
 
-                            let patterns = Patterns.generate_pattern_report (_rate.Value, chart)
+                            let patterns = Patterns.generate_pattern_report (rate, chart)
                             let note_counts = format_notecounts with_mods
 
                             yield
@@ -283,17 +281,15 @@ module Gameplay =
 
             WITH_COLORS <- None
 
-            FMT_DURATION <- format_duration CACHE_DATA
-            FMT_BPM <- format_bpm CACHE_DATA
-
             chart_change_started.Trigger {
                 CacheInfo = cc
                 LibraryContext = LIBRARY_CTX
-                DurationString = FMT_DURATION
-                BpmString = FMT_BPM
             }
 
-            chart_loader.Request(Load(cc, auto_play_audio))
+            FMT_DURATION <- format_duration CACHE_DATA
+            FMT_BPM <- format_bpm CACHE_DATA
+
+            chart_loader.Request(Load(cc, auto_play_audio, _rate.Value, _selected_mods.Value))
 
         let update () =
             if CACHE_DATA.IsSome then
@@ -312,7 +308,7 @@ module Gameplay =
 
                 WITH_COLORS <- None
 
-                chart_loader.Request(Update is_interrupted)
+                chart_loader.Request(Update (is_interrupted, _rate.Value, _selected_mods.Value))
 
         let recolor () =
             if WITH_MODS.IsSome then
@@ -326,8 +322,6 @@ module Gameplay =
                 action {
                     CacheInfo = CACHE_DATA.Value
                     LibraryContext = LIBRARY_CTX
-                    DurationString = FMT_DURATION
-                    BpmString = FMT_BPM
                 }
 
         let if_loaded (action: LoadedChartInfo -> unit) =

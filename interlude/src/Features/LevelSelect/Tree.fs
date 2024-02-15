@@ -13,6 +13,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
 open Interlude.UI
+open Interlude.Utils
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
@@ -157,6 +158,10 @@ module Tree =
 
         override this.Spacing = 5.0f
         member this.Chart = cc
+        member this.PlaylistDuration =
+            match context with
+            | LibraryContext.Playlist (_, _, data) -> cc.Length / data.Rate.Value
+            | _ -> 0.0f<ms>
 
         member this.Select() = switch_chart (cc, context, group_name)
 
@@ -295,21 +300,33 @@ module Tree =
 
     type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: LibraryGroupContext) =
         inherit TreeItem()
-
+        
+        let mutable last_cached_flag = -1
         let select_animation = Animation.Fade(0.0f)
-        let label =
-            match context with
-            | LibraryGroupContext.Folder id -> 
-                match Library.collections.GetFolder id with
-                | Some folder -> sprintf "%s %i" folder.Icon.Value items.Count
-                | None -> sprintf "%s %i" Icons.FOLDER items.Count
-            | LibraryGroupContext.Playlist id -> 
-                match Library.collections.GetPlaylist id with
-                | Some playlist -> sprintf "%s %i" playlist.Icon.Value items.Count
-                | None -> sprintf "%s %i" Icons.FOLDER items.Count
-            | LibraryGroupContext.Table id -> // todo: calc some cool table/folder stats to go here
-                sprintf "%s %i" Icons.FOLDER items.Count
-            | LibraryGroupContext.None -> sprintf "%s %i" Icons.FOLDER items.Count
+        let mutable label = ""
+        let update_cached_info() =
+            last_cached_flag <- cache_flag
+            label <-
+                match context with
+                | LibraryGroupContext.Folder id -> 
+                    match Library.collections.GetFolder id with
+                    | Some folder -> sprintf "%s %i" folder.Icon.Value items.Count
+                    | None -> sprintf "%s %i" Icons.FOLDER items.Count
+                | LibraryGroupContext.Playlist id -> 
+                    match Library.collections.GetPlaylist id with
+                    | Some playlist ->
+                        let duration = items |> Seq.map (fun i -> i.PlaylistDuration) |> Seq.sum
+                        sprintf "%s %s    %s %i"
+                            Icons.CLOCK
+                            (format_duration_ms duration)
+                            playlist.Icon.Value
+                            items.Count
+                    | None -> sprintf "%s %i" Icons.FOLDER items.Count
+                | LibraryGroupContext.Table id -> // todo: calc some cool table/folder stats to go here
+                    sprintf "%s %i" Icons.FOLDER items.Count
+                | LibraryGroupContext.None -> sprintf "%s %i" Icons.FOLDER items.Count
+
+        do update_cached_info()
 
         override this.Bounds(top) =
             Rect.Create(Viewport.vwidth * (0.5f - 0.05f * select_animation.Value), top, Viewport.vwidth - 15.0f, top + GROUP_HEIGHT)
@@ -386,6 +403,9 @@ module Tree =
                     GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
 
         member this.Update(top, origin, originB, elapsed_ms) =
+            if last_cached_flag < cache_flag then
+                update_cached_info ()
+
             select_animation.Target <- if this.Selected then 1.0f else 0.0f
             select_animation.Update elapsed_ms
             match scroll_to with
