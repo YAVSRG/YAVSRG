@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features.Play
 
 open System
-open OpenTK
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
@@ -15,7 +14,6 @@ open Prelude.Charts.Tools.Patterns
 open Prelude.Gameplay
 open Prelude.Data.Content
 open Prelude.Data.Scores
-open Interlude
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -371,7 +369,7 @@ module Utils =
 type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
     inherit Screen()
 
-    let mutable first_note = with_colors.FirstNote
+    let first_note = with_colors.FirstNote
 
     let state: PlayState =
         {
@@ -403,9 +401,6 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         this.AddWidgets()
 
     abstract member AddWidgets: unit -> unit
-
-    member this.FirstNote
-        with set (value) = first_note <- value
 
     member this.Playfield = playfield
     member this.State = state

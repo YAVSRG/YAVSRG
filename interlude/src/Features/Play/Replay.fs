@@ -244,6 +244,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
 
 module ReplayScreen =
 
+    // todo: create ReplayScreenState object for these settings
     let show_input_overlay = Setting.simple false
     let show_hit_overlay = Setting.simple false
     let playfield_dim = Setting.percentf 0.5f
