@@ -386,11 +386,11 @@ module Songs =
             WHERE SongId = @OldId;
 
             DELETE FROM songs
-            WHERE SongId = @OldId;
+            WHERE Id = @OldId;
 
             COMMIT;
             """
-            Parameters = [ "@NewId", SqliteType.Integer, 8; "@OldId", SqliteType.Integer, 8 ]
+            Parameters = [ "@OldId", SqliteType.Integer, 8; "@NewId", SqliteType.Integer, 8 ]
             FillParameters = fun p (old_id, new_id) -> p.Int64 old_id; p.Int64 new_id
         }
     let merge_songs (old_song_id: int64) (new_song_id: int64) : bool = MERGE_SONGS.Execute (old_song_id, new_song_id) backbeat_db |> expect > 0
@@ -543,9 +543,9 @@ module Songs =
         }
     let update_chart_song_id (chart_id: string) (new_song_id: int64) =
         match chart_by_id chart_id with
-        | Some (current_song_id, _) ->
+        | Some (current_song_id, _) when current_song_id <> new_song_id ->
             UPDATE_CHART_SONG_ID.Execute (chart_id, current_song_id, new_song_id) backbeat_db |> expect > 0
-        | None -> false
+        | _ -> false
 
     open System.Text.RegularExpressions
     let search_songs (search_query: string) : (int64 * Song) array =

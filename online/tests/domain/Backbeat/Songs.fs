@@ -193,3 +193,78 @@ module Songs =
     let Search_TrigramMatch() =
         Songs.add_chart_song "search_trigram" TEST_CHART TEST_SONG |> printfn "%A"
         Assert.Positive((Songs.search_songs "ana").Length)
+
+    [<Test>]
+    let UpdateChartSongId () =
+        let chart_id_1 = "updatechartsongid1"
+        let chart_1 = generate_test_chart()
+        let song_1 = generate_test_song()
+        
+        let chart_id_2 = "updatechartsongid2"
+        let chart_2 = generate_test_chart()
+        let song_2 = generate_test_song()
+
+        let song_id_1 = Songs.add_chart_song chart_id_1 chart_1 song_1
+        let song_id_2 = Songs.add_chart_song chart_id_2 chart_2 song_2
+        
+        Assert.AreNotEqual(None, Songs.song_by_id song_id_1)
+        Assert.True(Songs.update_chart_song_id chart_id_1 song_id_2)
+        Assert.AreEqual(None, Songs.song_by_id song_id_1)
+        Assert.AreEqual(Some (song_id_2, song_2), Songs.song_by_chart_id chart_id_2)
+
+    [<Test>]
+    let UpdateChartSongId_OldSongInUse () =
+        let chart_id_1 = "updatechartsongidoldsonginuse1"
+        let chart_1 = generate_test_chart()
+        let song_1 = generate_test_song()
+        
+        let chart_id_2 = "updatechartsongidoldsonginuse2"
+        let chart_2 = generate_test_chart()
+        let song_2 = generate_test_song()
+
+        let song_id_1 = Songs.add_chart_song chart_id_1 chart_1 song_1
+        
+        Songs.add_chart "updatechartsongidoldsonginuse3" (generate_test_chart()) song_id_1
+
+        let song_id_2 = Songs.add_chart_song chart_id_2 chart_2 song_2
+        
+        Assert.True(Songs.update_chart_song_id chart_id_1 song_id_2)
+        Assert.AreNotEqual(None, Songs.song_by_id song_id_1)
+        Assert.AreEqual(Some (song_id_2, song_2), Songs.song_by_chart_id chart_id_1)
+
+    [<Test>]
+    let UpdateChartSongId_DoesntExist () =
+        let chart_id = "updatechartsongiddoesntexist"
+        let chart = generate_test_chart()
+        let song = generate_test_song()
+
+        let song_id = Songs.add_chart_song chart_id chart song
+
+        Assert.False(Songs.update_chart_song_id "doesntexist" song_id)
+        Assert.False(Songs.update_chart_song_id "doesntexist" 99999L)
+
+        try 
+            let result = Songs.update_chart_song_id chart_id 99999L
+            Assert.Fail("Expected an exception", result)
+        with
+        | e -> printfn "%O" e; Assert.Pass()
+    
+    [<Test>]
+    let MergeSongs () =
+        let chart_id_1 = "mergesongs1"
+        let chart_1 = generate_test_chart()
+        let song_1 = generate_test_song()
+    
+        let chart_id_2 = "mergesongs2"
+        let chart_2 = generate_test_chart()
+        let song_2 = generate_test_song()
+
+        let song_id_1 = Songs.add_chart_song chart_id_1 chart_1 song_1
+        let song_id_2 = Songs.add_chart_song chart_id_2 chart_2 song_2
+    
+        Assert.AreNotEqual(None, Songs.song_by_id song_id_1)
+        Assert.True(Songs.merge_songs song_id_1 song_id_2)
+        Assert.AreEqual(None, Songs.song_by_id song_id_1)
+        Assert.AreEqual(Some (song_id_2, song_2), Songs.song_by_chart_id chart_id_1)
+        Assert.AreEqual(Some (song_id_2, song_2), Songs.song_by_chart_id chart_id_2)
+    
