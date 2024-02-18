@@ -89,10 +89,11 @@ module PracticeScreen =
             while i < scoring.HitData.Length
                   && let struct (t, _, _) = scoring.HitData.[i] in
                      t < ignore_notes_before_time do
-                let struct (t, _, flags) = scoring.HitData.[i]
+                let struct (_, deltas, flags) = scoring.HitData.[i]
 
                 for k = 0 to info.WithMods.Keys - 1 do
                     flags.[k] <- HitStatus.HIT_ACCEPTED
+                    deltas.[k] <- -Time.infinity
 
                 i <- i + 1
 
