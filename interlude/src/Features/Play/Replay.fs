@@ -244,76 +244,91 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
 
 module ReplayScreen =
 
-    // todo: create ReplayScreenState object for these settings
-    let show_input_overlay = Setting.simple false
-    let show_hit_overlay = Setting.simple false
-    let playfield_dim = Setting.percentf 0.5f
+    type private ReplayState =
+        {
+            ShowInputOverlay: Setting<bool>
+            ShowHitOverlay: Setting<bool>
+            PlayfieldDim: Setting.Bounded<float32>
+            IsAuto: bool
+        }
 
-    type Controls(is_auto: bool) =
-        inherit StaticContainer(NodeType.None)
+    let private controls (state: ReplayState) : SlideoutContent =
 
-        override this.Init(parent) =
-            this
-            |+ Text(
-                (Icons.PLAY + if is_auto then " Autoplay" else " Watching replay"),
-                Color = K Colors.text,
-                Align = Alignment.RIGHT,
-                Position = Position.Margin(30.0f, 20.0f)
-            )
-            |+ Text(
-                "Playfield dim",
-                Color =
-                    (fun () ->
-                        if show_input_overlay.Value || show_hit_overlay.Value then
-                            Colors.text
+        let overlay_buttons =
+            NavigationContainer.Column<Button>(Position = Position.SliceLeft(400.0f))
+            |+ Button(
+                (fun () ->
+                    (if state.ShowInputOverlay.Value then
+                            Icons.CHECK_CIRCLE
                         else
-                            Colors.text_greyout
-                    ),
-                Align = Alignment.CENTER,
-                Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceTop(50.0f)
-            )
-            |+ Menu.Slider.Percent(
-                playfield_dim,
-                Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceBottom(50.0f).Margin(5.0f)
+                            Icons.CIRCLE)
+                    + " Input overlay"
+                ),
+                (fun () -> Setting.app not state.ShowInputOverlay),
+                Position = Position.SliceTop(50.0f)
             )
             |+ Button(
                 (fun () ->
-                    (if show_input_overlay.Value then
-                         Icons.CHECK_CIRCLE
-                     else
-                         Icons.CIRCLE)
-                    + " Input overlay"
-                ),
-                (fun () -> show_input_overlay.Set(not show_input_overlay.Value)),
-                Position = Position.SliceTop(50.0f).SliceLeft(400.0f)
-            )
-            |* Button(
-                (fun () ->
-                    (if show_hit_overlay.Value then
-                         Icons.CHECK_CIRCLE
-                     else
-                         Icons.CIRCLE)
+                    (if state.ShowHitOverlay.Value then
+                            Icons.CHECK_CIRCLE
+                        else
+                            Icons.CIRCLE)
                     + " Hit overlay"
                 ),
-                (fun () -> show_hit_overlay.Set(not show_hit_overlay.Value)),
-                Position = Position.SliceBottom(50.0f).SliceLeft(400.0f)
+                (fun () -> Setting.app not state.ShowHitOverlay),
+                Position = Position.SliceBottom(50.0f)
             )
 
-            base.Init parent
+        let dim_slider =
+            Menu.Slider.Percent(
+                state.PlayfieldDim,
+                Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceBottom(50.0f).Margin(5.0f)
+            )
 
-    type ControlOverlay(with_mods: ModdedChart, is_auto, on_seek) =
+        SlideoutContent(
+            NavigationContainer.Row<Widget>()
+            |+ overlay_buttons
+            |+ dim_slider,
+            100.0f
+        )
+        |+ Text(
+            (Icons.PLAY + if state.IsAuto then " Autoplay" else " Watching replay"),
+            Color = K Colors.text,
+            Align = Alignment.RIGHT,
+            Position = Position.Margin(30.0f, 20.0f)
+        )
+        |+ Text(
+            "Playfield dim",
+            Color =
+                (fun () ->
+                    if dim_slider.Focused then
+                        Colors.text_yellow_2
+                    elif state.ShowInputOverlay.Value || state.ShowHitOverlay.Value then
+                        Colors.text
+                    else
+                        Colors.text_greyout
+                ),
+            Align = Alignment.CENTER,
+            Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceTop(50.0f)
+        )
+
+    type private ControlOverlay(with_mods: ModdedChart, state: ReplayState, on_seek: Time -> unit) =
         inherit DynamicContainer(NodeType.None)
 
         let mutable show = true
         let mutable show_timeout = 3000.0
 
         let slideout =
-            Slideout("Options", Controls(is_auto), 100.0f, 10.0f, ShowButton = false, ControlledByUser = false)
+            Slideout(controls state, AutoCloseWhen = K false)
 
         override this.Init(parent) =
-            this |+ Timeline(with_mods, on_seek) |* slideout
+            this 
+            |+ Timeline(with_mods, on_seek)
+            |* slideout
 
             base.Init parent
+
+            slideout.Open()
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
@@ -349,8 +364,16 @@ module ReplayScreen =
             | ReplayMode.Replay(score_info, with_colors) ->
                 StoredReplayProvider(score_info.Replay) :> IReplayProvider, false, score_info.Rate, with_colors
 
-        let first_note = with_colors.FirstNote
+        let FIRST_NOTE = with_colors.FirstNote
         let ruleset = Rulesets.current
+
+        let state = 
+            {
+                ShowInputOverlay = Setting.simple false
+                ShowHitOverlay = Setting.simple false
+                PlayfieldDim = Setting.percentf 0.5f
+                IsAuto = is_auto
+            }
 
         let playback_speed =
             Setting.bounded rate 0.5f 2.0f |> Setting.trigger (fun r -> Song.change_rate r)
@@ -375,7 +398,7 @@ module ReplayScreen =
 
                 if not is_auto then
                     add_widget AccuracyMeter
-                    add_widget (fun x -> Conditional((fun () -> not show_hit_overlay.Value), HitMeter x))
+                    add_widget (fun x -> Conditional((fun () -> not state.ShowHitOverlay.Value), HitMeter x))
                     add_widget JudgementCounts
                     add_widget JudgementMeter
                     add_widget EarlyLateMeter
@@ -385,14 +408,14 @@ module ReplayScreen =
                 this
                 |+ { new StaticWidget(NodeType.None) with
                        override _.Draw() =
-                           if show_input_overlay.Value || show_hit_overlay.Value then
-                               Draw.rect this.Playfield.Bounds (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
+                           if state.ShowInputOverlay.Value || state.ShowHitOverlay.Value then
+                               Draw.rect this.Playfield.Bounds (Colors.black.O4a(255.0f * state.PlayfieldDim.Value |> int))
                    }
-                |+ InputOverlay(with_colors.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, show_input_overlay)
-                |+ HitOverlay(rate, with_colors.Source, replay_data.GetFullReplay(), this.State, this.Playfield, show_hit_overlay)
+                |+ InputOverlay(with_colors.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, state.ShowInputOverlay)
+                |+ HitOverlay(rate, with_colors.Source, replay_data.GetFullReplay(), this.State, this.Playfield, state.ShowHitOverlay)
                 |* ControlOverlay(
                     with_colors.Source,
-                    is_auto,
+                    state,
                     fun t ->
                         let now = Song.time () in
                         Song.seek t
@@ -412,7 +435,7 @@ module ReplayScreen =
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
-                let chart_time = now - first_note
+                let chart_time = now - FIRST_NOTE
 
                 if not replay_data.Finished then
                     scoring.Update chart_time

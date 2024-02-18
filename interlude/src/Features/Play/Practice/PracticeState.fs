@@ -11,16 +11,16 @@ open Interlude.Features.Play
 
 [<RequireQualifiedAccess>]
 type SyncMode =
+    | AUDIO_OFFSET
     | HIT_POSITION
     | SCROLL_SPEED
     | VISUAL_OFFSET
-    | AUDIO_OFFSET
     member this.Audio =
         match this with
+        | AUDIO_OFFSET -> 2
         | VISUAL_OFFSET -> 0
         | HIT_POSITION
         | SCROLL_SPEED -> 1
-        | AUDIO_OFFSET -> 2
 
 type SyncSuggestions =
     {
@@ -73,10 +73,10 @@ module PracticeState =
         state.SyncSuggestions <-
             Some {
                 LooksAboutRight = Time.abs mean < 5.0f<ms>
+                AudioOffset = local_audio_offset_suggestion
                 VisualOffset = visual_offset_suggestion
                 HitPosition = hit_position_suggestion
                 ScrollSpeed = scroll_speed_suggestion
-                AudioOffset = local_audio_offset_suggestion
             }
 
     let accept_suggestion (state: PracticeState) =
@@ -85,9 +85,9 @@ module PracticeState =
         | Some suggestions ->
 
         match state.SyncMode.Value with
+        | SyncMode.AUDIO_OFFSET -> (LocalAudioSync.offset_setting state.Chart state.SaveData).Set suggestions.AudioOffset
         | SyncMode.HIT_POSITION -> (options.HitPosition |> Setting.roundf 0).Set suggestions.HitPosition
         | SyncMode.SCROLL_SPEED -> (options.ScrollSpeed |> Setting.roundf 2).Set suggestions.ScrollSpeed
         | SyncMode.VISUAL_OFFSET -> (options.VisualOffset |> Setting.roundf 0).Set suggestions.VisualOffset
-        | SyncMode.AUDIO_OFFSET -> (LocalAudioSync.offset_setting state.Chart state.SaveData).Set suggestions.AudioOffset
         
         state.SyncSuggestions <- None

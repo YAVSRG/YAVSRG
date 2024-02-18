@@ -93,7 +93,7 @@
     <Compile Include="Features\Play\Replay.fs" />
     <Compile Include="Features\Play\Spectate.fs" />
     <Compile Include="Features\Play\Practice\PracticeState.fs" />
-    <Compile Include="Features\Play\Practice\Controls.fs" />
+    <Compile Include="Features\Play\Practice\PracticeControls.fs" />
     <Compile Include="Features\Play\Practice\Practice.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
     <Compile Include="Features\LevelSelect\LibraryView.fs" />

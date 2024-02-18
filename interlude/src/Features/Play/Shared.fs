@@ -428,63 +428,54 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         else
             Some Screen.Type.LevelSelect
 
-type Slideout(label: string, content: Widget, height: float32, x: float32) as this =
+type SlideoutContent(content: Widget, height: float32) =
+    inherit StaticContainer(NodeType.Switch (fun () -> content))
+
+    override this.Init(parent: Widget) =
+        this.Add content
+        base.Init parent
+
+    interface DynamicSize with
+        member this.OnSizeChanged with set _ = ()
+        member this.Size = height
+
+type Slideout(content: SlideoutContent) =
     inherit DynamicContainer(NodeType.None)
 
     let mutable is_open = false
 
     let MARGIN = 15.0f
-    let height = height + MARGIN * 2.0f
+    let height = (content :> DynamicSize).Size + MARGIN * 2.0f
 
-    let button =
-        { new Button((fun () -> label + " " + (if is_open then Icons.CHEVRON_UP else Icons.CHEVRON_DOWN)),
-                     (fun () ->
-                         if this.ControlledByUser then
-                             (if is_open then this.Close() else this.Open())
-                     ),
-                     Floating = true) with
-            override this.Draw() =
-                Draw.rect this.Bounds Colors.cyan_shadow
-                base.Draw()
-        }
-
-    member val Hotkey = "none" with get, set
     member val OnOpen = ignore with get, set
     member val OnClose = ignore with get, set
-    member val ShowButton = true with get, set
-    member val ControlledByUser = true with get, set
+    member val AutoCloseWhen = fun (content: SlideoutContent) -> not content.Focused with get, set
 
     override this.Init(parent: Widget) =
-        button.Position <- Position.SliceBottom(40.0f).SliceLeft(200.0f).Translate(x, 45.0f)
-        button.Init this
         content.Position <- Position.Margin(MARGIN)
         content.Init this
         this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
 
-        if this.ControlledByUser then
-            this
-            |* HotkeyAction(this.Hotkey, (fun () -> if is_open then this.Close() else this.Open()))
-
         base.Init parent
 
     member this.Close() =
-        is_open <- false
-        this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
-        this.OnClose()
+        if is_open then
+            is_open <- false
+            this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
+            this.OnClose()
 
     member this.Open() =
-        is_open <- true
-        this.Position <- Position.SliceTop(height)
-        this.OnOpen()
+        if not is_open then
+            is_open <- true
+            content.Select()
+            this.Position <- Position.SliceTop(height)
+            this.OnOpen()
 
     override this.Draw() =
         if this.Bounds.Bottom > this.Parent.Bounds.Top - 4.0f then
             Draw.rect this.Bounds Colors.shadow_2.O2
             Draw.rect (this.Bounds.Expand(5.0f).SliceBottom(5.0f)) Colors.cyan_shadow
             content.Draw()
-            button.Draw()
-        elif this.ShowButton then
-            button.Draw()
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -492,9 +483,10 @@ type Slideout(label: string, content: Widget, height: float32, x: float32) as th
 
         if this.Bounds.Bottom > this.Parent.Bounds.Top - 4.0f then
             content.Update(elapsed_ms, moved)
-            button.Update(elapsed_ms, moved)
-        elif this.ShowButton then
-            button.Update(elapsed_ms, moved)
 
-        if this.ControlledByUser && is_open && (%%"exit").Tapped() then
-            this.Close()
+        if is_open then
+            if (%%"exit").Tapped() then
+                Selection.up ()
+
+            if this.AutoCloseWhen content then
+                this.Close()

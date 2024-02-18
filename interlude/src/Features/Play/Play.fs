@@ -111,9 +111,7 @@ module PlayScreen =
                 |> ignore
 
             Slideout(
-                "Offset",
-                StaticContainer(NodeType.None)
-                |+ offset_slider
+                SlideoutContent(offset_slider, 100.0f)
                 |+ Text(
                     (fun () ->
                         sprintf
@@ -136,17 +134,14 @@ module PlayScreen =
                             "Use a negative offset if you are hitting LATE and want to hit EARLIER.\nUse a positive offset if you are hitting EARLY and want to hit LATER."
                         ))
                     (fun (w, h) -> Position.SliceRight(w)),
-                100.0f,
-                10.0f,
-                Hotkey = "options",
-                ShowButton = false,
                 OnOpen =
                     (fun () ->
                         Song.pause ()
                         recommended_offset <- LocalAudioSync.get_automatic screen.State info.SaveData |> float32
                         offset_slider.Select()
                     ),
-                OnClose = close
+                OnClose = close,
+                AutoCloseWhen = (fun (_: SlideoutContent) -> not offset_slider.Selected)
             )
 
         { new IPlayScreen(info.Chart, info.WithColors, pacemaker_info, ruleset, scoring) with
@@ -166,7 +161,17 @@ module PlayScreen =
                 add_widget RateModMeter
                 add_widget BPMMeter
 
-                this.Add (offset_slideout this)
+                let offset_slideout = offset_slideout this
+                this
+                |+ HotkeyAction("retry", fun () ->
+                    Screen.change_new
+                        (fun () -> play_screen (info, pacemaker_mode) :> Screen.T)
+                        Screen.Type.Play
+                        Transitions.Flags.Default
+                    |> ignore
+                )
+                |+ HotkeyAction("options", offset_slideout.Open)
+                |* offset_slideout
 
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then
@@ -216,13 +221,6 @@ module PlayScreen =
                     )
 
                     this.State.Scoring.Update chart_time
-
-                if (%%"retry").Tapped() then
-                    Screen.change_new
-                        (fun () -> play_screen (info, pacemaker_mode) :> Screen.T)
-                        Screen.Type.Play
-                        Transitions.Flags.Default
-                    |> ignore
 
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
                     liveplay.Finish()

@@ -25,7 +25,7 @@ module PracticeScreen =
         let mutable show = true
 
         let slideout =
-            Slideout("Options", SyncSuggestionControls(state), 160.0f, 10.0f, ShowButton = false, ControlledByUser = false)
+            Slideout(SyncSuggestionControls state, AutoCloseWhen = K false)
 
         override this.Init(parent) =
             this 
@@ -65,16 +65,12 @@ module PracticeScreen =
         let mutable resume_from_current_place = false
 
         let state : PracticeState =
-            let _state = 
-                {
-                    Chart = info.Chart
-                    SaveData = info.SaveData
-                    Paused = Setting.simple true
-                    SyncMode = Setting.simple SyncMode.AUDIO_OFFSET
-                    SyncSuggestions = None
-                }
-            { _state with
-                Paused = _state.Paused |> Setting.trigger (function true -> PracticeState.update_suggestions scoring _state | false -> ())
+            {
+                Chart = info.Chart
+                SaveData = info.SaveData
+                Paused = Setting.simple true
+                SyncMode = Setting.simple SyncMode.AUDIO_OFFSET
+                SyncSuggestions = None
             }
 
         let FIRST_NOTE = info.WithMods.FirstNote
@@ -117,7 +113,9 @@ module PracticeScreen =
         let pause (_: IPlayScreen) = 
             Song.pause ()
             state.Paused.Set true
+            PracticeState.update_suggestions scoring state
             resume_from_current_place <- true
+
         let resume (screen: IPlayScreen) =
             if not scoring.Finished && resume_from_current_place then
                 Song.resume ()

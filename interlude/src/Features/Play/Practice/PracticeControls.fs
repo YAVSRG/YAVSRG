@@ -56,7 +56,13 @@ type private ModeButton(label: string, mode: SyncMode, state: PracticeState) =
             this.Focus()
 
 type SyncSuggestionControls(state: PracticeState) =
-    inherit StaticContainer(NodeType.None)
+    inherit SlideoutContent(
+        FlowContainer.Vertical<ModeButton>(40.0f, Position = Position.SliceLeft(250.0f))
+        |+ ModeButton(%"practice.localoffset.name", SyncMode.AUDIO_OFFSET, state)
+        |+ ModeButton(%"gameplay.hitposition.name", SyncMode.HIT_POSITION, state)
+        |+ ModeButton(%"gameplay.scrollspeed.name", SyncMode.SCROLL_SPEED, state)
+        |+ ModeButton(%"system.visualoffset.name", SyncMode.VISUAL_OFFSET, state),
+        160.0f)
 
     let local_audio_offset = LocalAudioSync.offset_setting state.Chart state.SaveData |> Setting.bound -200.0f<ms> 200.0f<ms>
     let visual_offset = options.VisualOffset |> Setting.roundf 0
@@ -68,13 +74,7 @@ type SyncSuggestionControls(state: PracticeState) =
         let suggestion_hint = %"practice.suggestions.hint"
         let about_right_hint = Icons.CHECK + " " + %"practice.suggestions.aboutright"
 
-        this |+ (
-            FlowContainer.Vertical<ModeButton>(40.0f, Position = Position.SliceLeft(250.0f))
-            |+ ModeButton(%"gameplay.hitposition.name", SyncMode.HIT_POSITION, state)
-            |+ ModeButton(%"gameplay.scrollspeed.name", SyncMode.SCROLL_SPEED, state)
-            |+ ModeButton(%"system.visualoffset.name", SyncMode.VISUAL_OFFSET, state)
-            |+ ModeButton(%"practice.localoffset.name", SyncMode.AUDIO_OFFSET, state)
-        )
+        this
 
         |+ Conditional(
             (fun () -> state.SyncMode.Value = SyncMode.HIT_POSITION),
