@@ -82,7 +82,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
     let mutable time = -Time.infinity
 
-    let reset () =
+    let handle_seek_back_in_time () =
         note_seek <- 0
         sv_seek <- 0
 
@@ -157,6 +157,10 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             Song.time_with_offset ()
             + Performance.frame_compensation ()
             + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
+
+        if now < time then
+            handle_seek_back_in_time ()
+        time <- now
 
         let begin_time =
             if vanishing_notes then
@@ -449,8 +453,3 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             | NoHold -> ()
 
         base.Draw()
-
-        if now < time then
-            reset ()
-
-        time <- now
