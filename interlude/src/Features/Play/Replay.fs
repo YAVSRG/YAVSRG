@@ -318,8 +318,8 @@ module ReplayScreen =
         let mutable show = true
         let mutable show_timeout = 3000.0
 
-        let slideout =
-            Slideout(controls state, AutoCloseWhen = K false)
+        let replay_controls = controls state
+        let slideout = Slideout(replay_controls, AutoCloseWhen = K false)
 
         override this.Init(parent) =
             this 
@@ -351,6 +351,9 @@ module ReplayScreen =
                         { Position.Default with
                             Bottom = 1.0f %+ 100.0f
                         }
+
+            if show && not replay_controls.Focused then
+                Screen.back Transitions.Flags.Default |> ignore
 
     let replay_screen (chart: Chart, mode: ReplayMode) =
 
