@@ -19,7 +19,7 @@ open Interlude.Features.Play.Practice
 
 module PracticeScreen =
 
-    let UNPAUSE_NOTE_LEADWAY = 800f<ms>
+    let UNPAUSE_NOTE_LEADWAY = 800.0f<ms>
 
     type ControlOverlay(state: PracticeState, with_mods, on_seek) =
         inherit DynamicContainer(NodeType.None)
@@ -70,16 +70,14 @@ module PracticeScreen =
 
     let practice_screen (info: LoadedChartInfo, start_at: Time) =
 
-        let practice_point = 
-            let last_allowed_practice_point =
-                info.WithMods.LastNote
-                - 5.0f<ms>
-                - Song.LEADIN_TIME * Gameplay.rate.Value
-            Setting.bounded start_at 0.0f<ms> last_allowed_practice_point
-
         let mutable liveplay = Unchecked.defaultof<_>
         let mutable scoring = Unchecked.defaultof<_>
         let mutable resume_from_current_place = false
+
+        let last_allowed_practice_point =
+            info.WithMods.LastNote
+            - 5.0f<ms>
+            - Song.LEADIN_TIME * Gameplay.rate.Value
 
         let state : PracticeState =
             {
@@ -88,6 +86,7 @@ module PracticeScreen =
                 Paused = Setting.simple true
                 SyncMode = Setting.simple SyncMode.AUDIO_OFFSET
                 SyncSuggestions = None
+                PracticePoint = Setting.bounded start_at 0.0f<ms> last_allowed_practice_point
             }
 
         let FIRST_NOTE = info.WithMods.FirstNote
@@ -96,7 +95,7 @@ module PracticeScreen =
             liveplay <- LiveReplayProvider FIRST_NOTE
             scoring <- Metrics.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
-            let ignore_notes_before_time = practice_point.Value + UNPAUSE_NOTE_LEADWAY * Gameplay.rate.Value
+            let ignore_notes_before_time = state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * Gameplay.rate.Value
             let mutable i = 0
 
             while i < scoring.HitData.Length
@@ -124,7 +123,7 @@ module PracticeScreen =
         let restart (screen: IPlayScreen) =
             reset_to_practice_point()
             screen.State.ChangeScoring scoring
-            Song.play_from practice_point.Value
+            Song.play_from state.PracticePoint.Value
             state.Paused.Set false
 
         let pause (_: IPlayScreen) = 
@@ -141,7 +140,7 @@ module PracticeScreen =
 
         let paused_overlay =
             ControlOverlay(state, info.WithMods, fun t -> 
-                practice_point.Set t
+                state.PracticePoint.Set t
                 Song.seek t
                 resume_from_current_place <- false
             )
@@ -161,11 +160,11 @@ module PracticeScreen =
                 add_widget RateModMeter
                 add_widget BPMMeter
 
-                this.Add(paused_overlay)
+                this.Add paused_overlay
 
             override this.OnEnter(p) =
                 base.OnEnter(p)
-                Song.seek practice_point.Value
+                Song.seek state.PracticePoint.Value
                 Song.pause ()
                 DiscordRPC.playing ("Practice mode", info.CacheInfo.Title)
 

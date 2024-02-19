@@ -38,6 +38,7 @@ type PracticeState =
         Paused: Setting<bool>
         SyncMode: Setting<SyncMode>
         mutable SyncSuggestions: SyncSuggestions option
+        PracticePoint: Setting.Bounded<Time>
     }
 
 module PracticeState =

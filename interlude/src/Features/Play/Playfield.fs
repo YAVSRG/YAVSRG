@@ -88,6 +88,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         for k = 0 to hold_states.Length - 1 do
             hold_states.[k] <- NoHold
+            holds_offscreen.[k] <- -1
 
     let scroll_direction_transform bottom : Rect -> Rect =
         if options.Upscroll.Value then
