@@ -227,7 +227,7 @@ module Startup =
             override this.Init() =
                 Printerlude.init_window (instance)
                 Content.init_window ()
-                //DiscordRPC.init()
+                DiscordRPC.init_window()
                 migrate ()
                 Gameplay.init_window ()
                 Network.init_window()
@@ -246,7 +246,7 @@ module Startup =
             Options.deinit ()
             Network.deinit ()
             Printerlude.deinit ()
-            //DiscordRPC.shutdown()
+            DiscordRPC.deinit()
 
             if unexpected_shutdown then
                 crash_splash ()

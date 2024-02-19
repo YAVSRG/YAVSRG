@@ -5,23 +5,31 @@ open DiscordRPC
 
 module DiscordRPC =
 
-    let private client =
-        new DiscordRpcClient("420320424199716864", Logger = Logging.NullLogger())
+    let private client = new DiscordRpcClient("420320424199716864", Logger = Logging.NullLogger())
+    
+    let deinit () =
+        if not client.IsDisposed then
+            client.ClearPresence()
+            client.Dispose()
 
-    let init () =
-
-        client.OnReady.Add(fun msg -> Logging.Info("Connected to discord rich presence"))
-        //client.OnConnectionFailed.Add (fun msg -> client.Deinitialize())
+    let init_window () =
+        client.OnConnectionFailed.Add (fun msg -> 
+            Logging.Info("Discord not detected, disabling rich presence")
+            deinit())
         //client.RegisterUriScheme(null, null) |> ignore
         client.Initialize() |> ignore
 
     let in_menus (details: string) =
+        if client.IsDisposed then () else
+
         let rp =
             new RichPresence(State = "In menus", Details = details, Assets = new Assets(SmallImageKey = "logo"))
 
         client.SetPresence(rp)
 
     let playing (mode: string, song: string) =
+        if client.IsDisposed then () else
+
         let rp =
             new RichPresence(
                 State = mode,
@@ -36,6 +44,8 @@ module DiscordRPC =
         client.SetPresence(rp)
 
     let playing_timed (mode: string, song: string, time_left: Time) =
+        if client.IsDisposed then () else
+
         let rp =
             new RichPresence(
                 State = mode,
@@ -50,7 +60,3 @@ module DiscordRPC =
         let now = System.DateTime.UtcNow
         rp.Timestamps <- Timestamps(now, now.AddMilliseconds(float time_left))
         client.SetPresence(rp)
-
-    let shutdown () =
-        client.ClearPresence()
-        client.Dispose()
