@@ -127,22 +127,5 @@ type SyncSuggestionControls(state: PracticeState) =
                 (Callout.Small.Icon(Icons.VOLUME_2).Body(%"practice.unmute_hint"))
                 (fun (w, h) -> Position.Box(1.0f, 0.0f, -w - 20.0f, 20.0f, w, h + 40.0f))
         )
-        |* Text([ (%%"accept_suggestion").ToString() ] %> "practice.suggestions.accepthint",
-            Align = Alignment.RIGHT,
-            Position = Position.SliceTop(40.0f).TrimTop(10.0f)
-        )
-        // todo: button to reset offsets
+        |* Dummy() // todo: button to reset offsets
         base.Init parent
-
-
-module Callout =
-    let info_callout =
-        Callout.Small
-            .Icon(Icons.TARGET)
-            .Title(%"practice.info.title")
-            .Body(%"practice.info.desc")
-            .Hotkey(%"practice.info.play", "skip")
-            .Hotkey(%"practice.info.restart", "retry")
-            .Hotkey(%"practice.info.options", "exit")
-            .Body(%"practice.info.sync")
-            .Hotkey(%"practice.info.accept_suggestion", "accept_suggestion")

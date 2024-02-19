@@ -7,6 +7,8 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Interlude.Options
+open Interlude.Utils
+open Interlude.UI
 open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Gameplay.Chart
@@ -24,12 +26,24 @@ module PracticeScreen =
 
         let mutable show = true
 
-        let slideout =
-            Slideout(SyncSuggestionControls state, AutoCloseWhen = K false)
+        let info_callout =
+            Callout.Small
+                .Icon(Icons.TARGET)
+                .Title(%"practice.info.title")
+                .Hotkey(%"practice.info.play", "skip")
+                .Hotkey(%"practice.info.restart", "retry")
+                .Hotkey(%"practice.info.options", "exit")
+                .Hotkey(%"practice.info.accept_suggestion", "accept_suggestion")
+
+        let sync_controls = SyncSuggestionControls state
+        let slideout = Slideout(sync_controls, AutoCloseWhen = K false)
 
         override this.Init(parent) =
             this 
-            |+ Timeline(with_mods, on_seek) 
+            |+ Timeline(with_mods, on_seek)
+            |+ Conditional((fun () -> show),
+                Callout.frame info_callout (fun (w, h) -> Position.Box(0.0f, 1.0f, 20.0f, -100.0f - h - 40.0f, w + 100.0f, h + 40.0f))
+            )
             |* slideout
 
             base.Init parent
@@ -50,6 +64,9 @@ module PracticeScreen =
                     { Position.Default with
                         Bottom = 1.0f %+ 100.0f
                     }
+
+            if show && not sync_controls.Focused then
+                Screen.back Transitions.Flags.Default |> ignore
 
     let practice_screen (info: LoadedChartInfo, start_at: Time) =
 

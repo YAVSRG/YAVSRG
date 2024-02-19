@@ -485,7 +485,7 @@ type Slideout(content: SlideoutContent) =
             content.Update(elapsed_ms, moved)
 
         if is_open then
-            if (%%"exit").Tapped() then
+            if (%%"exit").Tapped() && content.Focused then
                 Selection.up ()
 
             if this.AutoCloseWhen content then
