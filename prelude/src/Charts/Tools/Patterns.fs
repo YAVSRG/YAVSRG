@@ -178,8 +178,7 @@ module Patterns =
             function
             |      { Notes = n }
                 :: { Jacks = x }
-                :: { Jacks = y }
-                :: _ when x > 1 && y > 1 && x <= n && y <= x -> 3
+                :: _ when x > 1 -> 2
             | _ -> 0
 
         let CHORDJACKS : Pattern = 
@@ -388,6 +387,40 @@ module Patterns =
             Jack "Gluts", Common.GLUTS
         ]
 
+    
+    
+    let ln_percent (chart: Chart) : float32 =
+        let mutable notes = 0
+        let mutable lnotes = 0
+    
+        for { Data = nr } in chart.Notes do
+            for n in nr do
+                if n = NoteType.NORMAL then
+                    notes <- notes + 1
+                elif n = NoteType.HOLDHEAD then
+                    notes <- notes + 1
+                    lnotes <- lnotes + 1
+    
+        float32 lnotes / float32 notes
+    
+    let sv_time (chart: Chart) : Time =
+        if chart.SV.Length = 0 then 0.0f<ms> else
+    
+        let mutable total = 0.0f<ms>
+    
+        let mutable time = chart.FirstNote
+        let mutable vel = 1.0f
+        for sv in chart.SV do
+            if not (System.Single.IsFinite vel) || abs(vel - 1.0f) > 0.01f then
+                total <- total + (sv.Time - time)
+            vel <- sv.Data
+            time <- sv.Time
+                
+        if not (System.Single.IsFinite vel) || abs(vel - 1.0f) > 0.01f then
+            total <- total + (chart.LastNote - time)
+    
+        total
+
     let analyse (rate: float32) (chart: Chart) =
         let data = Analysis.run rate chart
         if chart.Keys = 4 then matches analysis_4k data
@@ -432,124 +465,70 @@ module Patterns =
 
         result
 
-    type PatternLocation = { Time: ScaledTime; Duration: ScaledTime; BPM: int; AverageDensity: float32 }
-
-    let private pattern_locations (pattern_tokens: (PatternId * BPMClusteredPattern) seq) : (PatternId * PatternLocation) seq =
+    let private pattern_amount (times: ScaledTime seq) : ScaledTime =
+    
         let PATTERN_DURATION = 600.0f<ms/rate>
+        let REST_FALLOFF_FLOOR = 0.5f
+        let REST_FALLOFF_RATE = 0.0f // disabled because it works like dog rn
 
-        let groups =
-            pattern_tokens
-            |> Seq.filter (fun (_, token) -> token.BPM.Value >= 85)
-            |> Seq.groupBy fst
-            |> Array.ofSeq
-            |> Array.map (fun (pattern, data) -> 
-                pattern, 
-                Seq.map snd data |> Array.ofSeq
-            )
+        let mutable amount: ScaledTime = 0.0f<ms/rate>
+        let mutable total_time: ScaledTime = 0.0f<ms/rate>
 
-        let patterns = ResizeArray<PatternId * PatternLocation>()
+        let mutable current_start = Seq.head times
+        let mutable previous_end = current_start
+        let mutable current_end = current_start + PATTERN_DURATION
 
-        for pattern_id, data in groups do
-            let mutable current_n = 0
-            let mutable current_bpm = 0
-            let mutable current_density = 0.0f
-            let mutable current_start = 0.0f<ms/rate>
-            let mutable current_end = 0.0f<ms/rate>
+        let add (rest_time: ScaledTime) (pattern_time: ScaledTime) =
+            let falloff_floor = REST_FALLOFF_FLOOR * total_time
+            total_time <- total_time + pattern_time
+            amount <- pattern_time + max falloff_floor (amount - rest_time * REST_FALLOFF_RATE)
 
-            let finish() =
-                let density = current_density / float32 current_n
-                patterns.Add((pattern_id, { BPM = current_bpm; Time = current_start; Duration = current_end - current_start; AverageDensity = density }))
-                current_n <- 0
+        for time in times do
+            if current_end < time then 
+                add (current_start - previous_end) (current_end - current_start)
+                current_start <- time
+                previous_end <- current_end
+                current_end <- current_start + PATTERN_DURATION
+            else
+                current_end <- time + PATTERN_DURATION
+        
+        add (current_start - previous_end) (current_end - current_start)
 
-            for token in data do
-                if current_n > 0 && token.BPM.Value = current_bpm && token.Time <= current_end then
-                    current_n <- current_n + 1
-                    current_density <- current_density + token.Density
-                    current_end <- token.Time + PATTERN_DURATION
-                else
-                    if current_n > 0 then current_end <- min current_end token.Time; finish()
-                    current_n <- 1
-                    current_bpm <- token.BPM.Value
-                    current_density <- token.Density
-                    current_start <- token.Time
-                    current_end <- token.Time + PATTERN_DURATION
+        amount
 
-            finish()
-
-        patterns
+    let private find_density_percentile (sorted_densities: float32 array) (percentile: float32) =
+        let index = percentile * float32 sorted_densities.Length |> floor |> int
+        sorted_densities.[index]
 
     type PatternBreakdown = 
         { 
-            TotalTime: ScaledTime
+            Amount: ScaledTime
             Density25: float32
             Density75: float32
         }
+    
+    let private pattern_breakdown (patterns: (PatternId * BPMClusteredPattern) seq) =
+            
+        let results = Dictionary<PatternId * int, PatternBreakdown>()
 
-    let private find_density_percentile (sorted_data: PatternLocation array) (total_time: ScaledTime) (percentile: float32) =
-        let mutable cumulative_t = 0.0f<ms/rate>
-        let mutable cumulative_d = 0.0f<ms/rate>
-        let mutable i = 0
-        let target_time = percentile * total_time
-        while cumulative_t + sorted_data.[i].Time < target_time do
-            cumulative_t <- cumulative_t + sorted_data.[i].Time
-            cumulative_d <- cumulative_d + sorted_data.[i].Time * sorted_data.[i].AverageDensity
-            i <- i + 1
-        let f = (total_time - cumulative_t) / sorted_data.[i].Time
-        cumulative_t <- cumulative_t + sorted_data.[i].Time * f
-        cumulative_d <- cumulative_d + sorted_data.[i].Time * f * sorted_data.[i].AverageDensity
+        let groups = patterns |> Array.ofSeq |> Array.groupBy (fun (pattern, info) -> (pattern, info.BPM.Value))
 
-        cumulative_d / cumulative_t
-
-    let pattern_breakdown (patterns: (PatternId * PatternLocation) seq) =
-        
-        let coverage = Dictionary<PatternId * int, PatternBreakdown>()
-        let groups = patterns |> Array.ofSeq |> Array.groupBy (fun (pattern, info) -> (pattern, info.BPM))
         for (key, data) in groups do
-            let sorted_data = data |> Array.map snd |> Array.sortBy (fun info -> info.AverageDensity)
-            let total_time = sorted_data |> Array.sumBy (fun info -> info.Time)
-
-            coverage.Add(
+            let times = data |> Array.map (fun (_, data) -> data.Time)
+            let sorted_data = data |> Array.map (fun (_, data) -> data.Density) |> Array.sort
+            let amount = pattern_amount times
+            printfn "%A %.0f" key amount
+    
+            results.Add(
                 key, 
                 { 
-                    TotalTime = total_time
-                    Density25 = find_density_percentile sorted_data total_time 0.25f
-                    Density75 = find_density_percentile sorted_data total_time 0.75f
+                    Amount = amount
+                    Density25 = find_density_percentile sorted_data 0.25f
+                    Density75 = find_density_percentile sorted_data 0.75f
                 }
             )
-
-        coverage
-
-    let ln_percent (chart: Chart) : float32 =
-        let mutable notes = 0
-        let mutable lnotes = 0
-
-        for { Data = nr } in chart.Notes do
-            for n in nr do
-                if n = NoteType.NORMAL then
-                    notes <- notes + 1
-                elif n = NoteType.HOLDHEAD then
-                    notes <- notes + 1
-                    lnotes <- lnotes + 1
-
-        float32 lnotes / float32 notes
-
-    let sv_time (chart: Chart) : Time =
-        if chart.SV.Length = 0 then 0.0f<ms> else
-
-        let mutable total = 0.0f<ms>
-
-        let mutable time = chart.FirstNote
-        let mutable vel = 1.0f
-        for sv in chart.SV do
-            if not (System.Single.IsFinite vel) || abs(vel - 1.0f) > 0.01f then
-                total <- total + (sv.Time - time)
-            vel <- sv.Data
-            time <- sv.Time
-            
-        if not (System.Single.IsFinite vel) || abs(vel - 1.0f) > 0.01f then
-            total <- total + (chart.LastNote - time)
-
-        total
+    
+        results
 
     type PatternDetailsEntry = { Pattern: PatternId; BPM: int; Amount: ScaledTime; Density25: float32; Density75: float32 }
     type PatternDetailsReport = { Patterns: PatternDetailsEntry list; LNPercent: float32; SVAmount: Time }
@@ -558,7 +537,6 @@ module Patterns =
         let data = 
             analyse rate chart
             |> cluster_pattern_bpms
-            |> pattern_locations
             |> pattern_breakdown
 
         {
@@ -568,7 +546,7 @@ module Patterns =
                     { 
                         Pattern = p
                         BPM = bpm
-                        Amount = data.[(p, bpm)].TotalTime
+                        Amount = data.[(p, bpm)].Amount
                         Density25 = data.[(p, bpm)].Density25
                         Density75 = data.[(p, bpm)].Density75
                     }
@@ -586,28 +564,9 @@ module Patterns =
     type LibraryPatternData = { Patterns: LibraryPatternEntry list; LNPercent: float32; SVAmount: Time }
     
     let generate_cached_pattern_data (rate: float32, chart: Chart) : LibraryPatternData =
-        let data = 
-            analyse rate chart
-            |> cluster_pattern_bpms
-            |> pattern_locations
-            |> pattern_breakdown
-    
-        let importance (p, bpm) =
-            match p with
-            | Stream s -> float32 (bpm * bpm) * 0.25f
-            | Jack s -> float32 (bpm * bpm)
-    
-        //printfn "---"
-        //for (p, bpm) in data.Keys do
-        //    printfn "%O @ %iBPM has density quartiles %f %f" p bpm data.[(p, bpm)].Density25 data.[(p, bpm)].Density75
-    
+        // stubbed out for now
         {
-            Patterns = 
-                data.Keys
-                |> Seq.map ( fun (p, bpm) -> { Pattern = p; BPM = bpm; Score = data.[(p, bpm)].TotalTime * importance (p, bpm) / 1_000_000.0f } )
-                |> Seq.sortByDescending (fun x -> x.Score )
-                |> List.ofSeq
-                |> List.truncate 10
+            Patterns = []
             LNPercent = ln_percent chart
             SVAmount = sv_time chart
         }
