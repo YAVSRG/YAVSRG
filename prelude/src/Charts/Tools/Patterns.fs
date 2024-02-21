@@ -198,6 +198,15 @@ module Patterns =
 
     module ``4K`` =
 
+        let CHORDSTREAM : Pattern =
+            function
+            |      { Notes = x; Jacks = 0 }
+                :: { Jacks = 0 }
+                :: { Jacks = 0 }
+                :: { Jacks = 0 }
+                :: _ when x > 1 -> 4
+            | _ -> 0
+
         let HANDSTREAM : Pattern =
             function
             |      { Notes = 3; Jacks = 0 }
@@ -210,7 +219,7 @@ module Patterns =
         let JUMPSTREAM : Pattern =
             function
             |      { Notes = 2; Jacks = 0 }
-                :: { Jacks = 0 }
+                :: { Notes = 1; Jacks = 0 }
                 :: { Notes = a; Jacks = 0 }
                 :: { Notes = b; Jacks = 0 }
                 :: _ when a < 3 && b < 3 -> 4
@@ -332,9 +341,9 @@ module Patterns =
                 :: _ when x > 1 && y > 1 && z > 1 -> 3
             | _ -> 0
 
-    type PatternToken = { Time: ScaledTime; MsPerBeat: float32<ms/beat>; Density: float32 }
+    type MatchedPattern = { Time: ScaledTime; MsPerBeat: float32<ms/beat>; Density: float32 }
 
-    let matches (patterns: IDictionary<PatternId, Pattern>) (data: RowInfo list) : (PatternId * PatternToken) seq =
+    let matches (patterns: IDictionary<PatternId, Pattern>) (data: RowInfo list) : (PatternId * MatchedPattern) seq =
         let mutable data = data
         seq {
             while not data.IsEmpty do
@@ -353,14 +362,9 @@ module Patterns =
 
     let analysis_4k = dict [
             Stream "Streams", Common.STREAMS
-            Stream "Jumpstream", ``4K``.JUMPSTREAM
-            Stream "Jumptrill", ``4K``.JUMPTRILL
-            Stream "Split trill", ``4K``.SPLITTRILL
-            Stream "Rolls", ``4K``.ROLL
-            Stream "Handstream", ``4K``.HANDSTREAM
+            Stream "Chordstream", ``4K``.CHORDSTREAM
             Jack "Jacks", Common.JACKS
-            Jack "Chordjacks", Common.CHORDJACKS
-            Jack "Jumpgluts", ``4K``.JUMPGLUTS
+            // todo: mixed streams
         ]
 
     let analysis_generic = dict [
@@ -390,66 +394,82 @@ module Patterns =
         elif chart.Keys = 7 then matches analysis_7k data
         else matches analysis_generic data
 
-    type PatternLocation = { Time: ScaledTime; Duration: ScaledTime; BPM: int; AverageDensity: float32 }
-
-    type private BPMCluster = { mutable MsPerBeat: float32<ms/beat>; mutable Size: int }
-
+    type private BPMCluster = 
+        { 
+            mutable TotalMs: float32<ms/beat>
+            mutable AverageMsPerBeat: float32<ms/beat>
+            mutable Count: int
+            mutable PrecalculatedBPM: int option
+        }
+        member this.Add value =
+            this.Count <- this.Count + 1
+            this.TotalMs <- this.TotalMs + value
+            this.AverageMsPerBeat <- this.TotalMs / float32 this.Count
+        member this.Calculate() = this.PrecalculatedBPM <- 60000.0f<ms/minute> / this.AverageMsPerBeat |> float32 |> round |> int |> Some
+        member this.Value = this.PrecalculatedBPM.Value
     let private BPM_CLUSTER_THRESHOLD = 5.0f<ms/beat>
 
-    let pattern_locations (pattern_tokens: (PatternId * PatternToken) seq) : (PatternId * PatternLocation) seq =
+    type private BPMClusteredPattern = { Time: ScaledTime; BPM: BPMCluster; Density: float32 }
+
+    let private cluster_pattern_bpms (matched_patterns: (PatternId * MatchedPattern) seq) : (PatternId * BPMClusteredPattern) array =
+        let clusters = ResizeArray<BPMCluster>()
+        let get_cluster value =
+            match clusters |> Seq.tryFind (fun c -> abs (c.AverageMsPerBeat - value) < BPM_CLUSTER_THRESHOLD) with
+            | Some existing_cluster -> 
+                existing_cluster.Add value
+                existing_cluster
+            | None -> 
+                let new_cluster = { Count = 1; TotalMs = value; AverageMsPerBeat = value; PrecalculatedBPM = None }
+                clusters.Add new_cluster
+                new_cluster
+
+        let result = 
+            matched_patterns
+            |> Seq.map (fun (pattern, info) -> (pattern, { Time = info.Time; BPM = get_cluster info.MsPerBeat; Density = info.Density }))
+            |> Array.ofSeq
+
+        clusters |> Seq.iter (fun cluster -> cluster.Calculate())
+
+        result
+
+    type PatternLocation = { Time: ScaledTime; Duration: ScaledTime; BPM: int; AverageDensity: float32 }
+
+    let private pattern_locations (pattern_tokens: (PatternId * BPMClusteredPattern) seq) : (PatternId * PatternLocation) seq =
         let PATTERN_DURATION = 600.0f<ms/rate>
 
         let groups =
             pattern_tokens
-            |> Seq.filter (fun (_, token) -> token.MsPerBeat <= (60000.0f<ms/minute> / 85.0f<beat/minute>))
+            |> Seq.filter (fun (_, token) -> token.BPM.Value >= 85)
             |> Seq.groupBy fst
             |> Array.ofSeq
             |> Array.map (fun (pattern, data) -> 
-                    pattern, 
-                    Seq.map snd data |> Array.ofSeq
-                )
-
-        let clusters = ResizeArray<BPMCluster>()
-        let cluster value =
-            match clusters |> Seq.tryFind (fun c -> abs (c.MsPerBeat - value) < BPM_CLUSTER_THRESHOLD) with
-            | Some c -> 
-                c.MsPerBeat <- (c.MsPerBeat * float32 c.Size + value) / (float32 c.Size + 1.0f)
-                c.Size <- c.Size + 1
-            | None -> clusters.Add({ Size = 1; MsPerBeat = value })
-        for _, data in groups do
-            for token in data do cluster token.MsPerBeat
+                pattern, 
+                Seq.map snd data |> Array.ofSeq
+            )
 
         let patterns = ResizeArray<PatternId * PatternLocation>()
 
         for pattern_id, data in groups do
             let mutable current_n = 0
-            let mutable current_mspb = 0.0f<ms/beat>
+            let mutable current_bpm = 0
             let mutable current_density = 0.0f
             let mutable current_start = 0.0f<ms/rate>
             let mutable current_end = 0.0f<ms/rate>
 
             let finish() =
-                let mspb = current_mspb / float32 current_n
                 let density = current_density / float32 current_n
-                let clustered_mspb =
-                    match clusters |> Seq.tryFind (fun c -> abs (c.MsPerBeat - mspb) < BPM_CLUSTER_THRESHOLD) with
-                    | Some c -> c.MsPerBeat
-                    | None -> mspb
-                let bpm = (60000.0f<ms/minute> / clustered_mspb |> float32 |> round |> int)
-
-                patterns.Add((pattern_id, { BPM = bpm; Time = current_start; Duration = current_end - current_start; AverageDensity = density }))
+                patterns.Add((pattern_id, { BPM = current_bpm; Time = current_start; Duration = current_end - current_start; AverageDensity = density }))
                 current_n <- 0
 
             for token in data do
-                if current_n > 0 && (abs ((current_mspb / float32 current_n) - token.MsPerBeat) < BPM_CLUSTER_THRESHOLD) && token.Time <= current_end then
+                if current_n > 0 && token.BPM.Value = current_bpm && token.Time <= current_end then
                     current_n <- current_n + 1
-                    current_mspb <- current_mspb + token.MsPerBeat
                     current_density <- current_density + token.Density
                     current_end <- token.Time + PATTERN_DURATION
                 else
                     if current_n > 0 then current_end <- min current_end token.Time; finish()
                     current_n <- 1
-                    current_mspb <- token.MsPerBeat
+                    current_bpm <- token.BPM.Value
                     current_density <- token.Density
                     current_start <- token.Time
                     current_end <- token.Time + PATTERN_DURATION
@@ -460,27 +480,42 @@ module Patterns =
 
     type PatternBreakdown = 
         { 
-            mutable TotalTime: ScaledTime
-            mutable DensityTime: ScaledTime
-            mutable Bursts: ResizeArray<ScaledTime * ScaledTime>
-            mutable Runs: ResizeArray<ScaledTime * ScaledTime>
-            mutable Sprints: ResizeArray<ScaledTime * ScaledTime>
-            mutable Marathons: ResizeArray<ScaledTime * ScaledTime>
+            TotalTime: ScaledTime
+            Density25: float32
+            Density75: float32
         }
+
+    let private find_density_percentile (sorted_data: PatternLocation array) (total_time: ScaledTime) (percentile: float32) =
+        let mutable cumulative_t = 0.0f<ms/rate>
+        let mutable cumulative_d = 0.0f<ms/rate>
+        let mutable i = 0
+        let target_time = percentile * total_time
+        while cumulative_t + sorted_data.[i].Time < target_time do
+            cumulative_t <- cumulative_t + sorted_data.[i].Time
+            cumulative_d <- cumulative_d + sorted_data.[i].Time * sorted_data.[i].AverageDensity
+            i <- i + 1
+        let f = (total_time - cumulative_t) / sorted_data.[i].Time
+        cumulative_t <- cumulative_t + sorted_data.[i].Time * f
+        cumulative_d <- cumulative_d + sorted_data.[i].Time * f * sorted_data.[i].AverageDensity
+
+        cumulative_d / cumulative_t
 
     let pattern_breakdown (patterns: (PatternId * PatternLocation) seq) =
         
         let coverage = Dictionary<PatternId * int, PatternBreakdown>()
-        for (pattern, info) in patterns do
-            let key = (pattern, info.BPM)
-            if not <| coverage.ContainsKey(key) then coverage.Add(key, { TotalTime = 0.0f<ms/rate>; DensityTime = 0.0f<ms/rate>; Bursts = ResizeArray<_>(); Runs = ResizeArray<_>(); Sprints = ResizeArray<_>(); Marathons = ResizeArray<_>() })
-            coverage.[key].TotalTime <- coverage.[key].TotalTime + info.Duration
-            coverage.[key].DensityTime <- coverage.[key].DensityTime + info.Duration * info.AverageDensity
-            match info.Duration with
-            | x when x < 2000.0f<ms/rate> -> coverage.[key].Bursts.Add((info.Time, info.Duration))
-            | x when x < 5000.0f<ms/rate> -> coverage.[key].Runs.Add((info.Time, info.Duration))
-            | x when x < 30000.0f<ms/rate> -> coverage.[key].Sprints.Add((info.Time, info.Duration))
-            | _ -> coverage.[key].Marathons.Add((info.Time, info.Duration))
+        let groups = patterns |> Array.ofSeq |> Array.groupBy (fun (pattern, info) -> (pattern, info.BPM))
+        for (key, data) in groups do
+            let sorted_data = data |> Array.map snd |> Array.sortBy (fun info -> info.AverageDensity)
+            let total_time = sorted_data |> Array.sumBy (fun info -> info.Time)
+
+            coverage.Add(
+                key, 
+                { 
+                    TotalTime = total_time
+                    Density25 = find_density_percentile sorted_data total_time 0.25f
+                    Density75 = find_density_percentile sorted_data total_time 0.75f
+                }
+            )
 
         coverage
 
@@ -516,24 +551,59 @@ module Patterns =
 
         total
 
-    [<Json.AutoCodec>]
-    type PatternReportEntry = { Pattern: PatternId; BPM: int; Score: float32<ms/rate> }
-    [<Json.AutoCodec>]
-    type PatternReport = { Patterns: PatternReportEntry list; LNPercent: float32; SVAmount: Time }
-    let generate_pattern_report (rate: float32, chart: Chart) : PatternReport =
+    type PatternDetailsEntry = { Pattern: PatternId; BPM: int; Amount: ScaledTime; Density25: float32; Density75: float32 }
+    type PatternDetailsReport = { Patterns: PatternDetailsEntry list; LNPercent: float32; SVAmount: Time }
+    
+    let generate_detailed_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
         let data = 
             analyse rate chart
+            |> cluster_pattern_bpms
             |> pattern_locations
             |> pattern_breakdown
 
+        {
+            Patterns = 
+                data.Keys
+                |> Seq.map ( fun (p, bpm) -> 
+                    { 
+                        Pattern = p
+                        BPM = bpm
+                        Amount = data.[(p, bpm)].TotalTime
+                        Density25 = data.[(p, bpm)].Density25
+                        Density75 = data.[(p, bpm)].Density75
+                    }
+                )
+                |> Seq.sortByDescending (fun x -> x.Amount)
+                |> List.ofSeq
+                |> List.truncate 10
+            LNPercent = ln_percent chart
+            SVAmount = sv_time chart
+        }
+    
+    [<Json.AutoCodec>]
+    type LibraryPatternEntry = { Pattern: PatternId; BPM: int; Score: float32<ms/rate> }
+    [<Json.AutoCodec>]
+    type LibraryPatternData = { Patterns: LibraryPatternEntry list; LNPercent: float32; SVAmount: Time }
+    
+    let generate_cached_pattern_data (rate: float32, chart: Chart) : LibraryPatternData =
+        let data = 
+            analyse rate chart
+            |> cluster_pattern_bpms
+            |> pattern_locations
+            |> pattern_breakdown
+    
         let importance (p, bpm) =
             match p with
             | Stream s -> float32 (bpm * bpm) * 0.25f
             | Jack s -> float32 (bpm * bpm)
-
+    
+        //printfn "---"
+        //for (p, bpm) in data.Keys do
+        //    printfn "%O @ %iBPM has density quartiles %f %f" p bpm data.[(p, bpm)].Density25 data.[(p, bpm)].Density75
+    
         {
             Patterns = 
-                data.Keys 
+                data.Keys
                 |> Seq.map ( fun (p, bpm) -> { Pattern = p; BPM = bpm; Score = data.[(p, bpm)].TotalTime * importance (p, bpm) / 1_000_000.0f } )
                 |> Seq.sortByDescending (fun x -> x.Score )
                 |> List.ofSeq
@@ -542,7 +612,7 @@ module Patterns =
             SVAmount = sv_time chart
         }
 
-    let categorise_chart (report: PatternReport) =
+    let categorise_chart (report: LibraryPatternData) =
         let isJack = fun e -> match e.Pattern with Jack _ -> true | _ -> false
         let isStream = fun e -> match e.Pattern with Stream _ -> true | _ -> false
         let jacks = report.Patterns |> List.filter isJack
@@ -559,4 +629,3 @@ module Patterns =
         elif jack_total / total > 0.4f then 
             (List.head jacks).Pattern.ToString()
         else "Unknown"
-
