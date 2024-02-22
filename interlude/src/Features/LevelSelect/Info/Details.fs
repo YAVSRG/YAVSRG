@@ -5,9 +5,9 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Charts.Tools.Patterns
+open Prelude.Gameplay.Difficulty
 open Interlude.UI.Menu
 open Interlude.UI.Components
-open Interlude.Features
 open Interlude.Features.Gameplay
 
 [<RequireQualifiedAccess>]
@@ -45,26 +45,47 @@ type Patterns(display: Setting<Display>) =
     override this.Draw() =
         base.Draw()
 
-        let mutable b =
-            this.Bounds.SliceTop(25.0f).Shrink(10.0f, 0.0f).Translate(0.0f, 50.0f)
+        let mutable b = this.Bounds.SliceTop(60.0f).Shrink(20.0f, 0.0f).Translate(0.0f, 60.0f)
+
+        let BAR_L = b.Left + 165.0f
+        let BAR_R = b.Right - 5.0f
+        let BAR_WIDTH = BAR_R - BAR_L
         
         for entry in patterns do
             Text.fill_b (
                 Style.font,
-                (if entry.Mixed then sprintf "Mixed %O (about %i BPM)" entry.Pattern entry.BPM else sprintf "%i BPM %O" entry.BPM entry.Pattern),
-                b,
+                (sprintf "%O" entry.Pattern),
+                b.TrimBottom(25.0f).SliceLeft(160.0f),
                 Colors.text,
-                Alignment.CENTER
+                Alignment.LEFT
             )
             Text.fill_b (
                 Style.font,
-                sprintf "%.0f %.2f %.2f %.2f %.2f %.2f" (entry.Amount / 1000.0f<ms>) entry.Density10 entry.Density25 entry.Density50 entry.Density75 entry.Density90,
-                b.Translate(0.0f, 25.0f),
+                (if entry.Mixed then sprintf "Mixed, ~%i BPM" entry.BPM else sprintf "%i BPM" entry.BPM),
+                b.SliceBottom(30.0f).SliceLeft(160.0f),
                 Colors.text_subheading,
-                Alignment.CENTER
+                Alignment.LEFT
             )
+            Draw.rect (b.TrimLeft(160.0f).SliceLeft(5.0f).Shrink(0.0f, 20.0f)) Colors.white
+            Draw.rect (b.SliceRight(5.0f).Shrink(0.0f, 20.0f)) Colors.white
 
-            b <- b.Translate(0.0f, 50.0f)
+            let density_color (nps: float32) =
+                nps * 2.0f |> float |> physical_color
+
+            let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms/rate> / 100.0f)
+            let bar (lo_pc, lo_val, hi_pc, hi_val) =
+                Draw.untextured_quad 
+                    (Rect.Create(BAR_L + lo_pc * BAR_WIDTH * bar_scale, b.Top + 22.5f, BAR_L + hi_pc * BAR_WIDTH * bar_scale, b.Top + 37.5f).AsQuad)
+                    struct (density_color lo_val, density_color hi_val, density_color hi_val, density_color lo_val)
+
+            bar (0.0f, entry.Density10, 0.1f, entry.Density10)
+            bar (0.1f, entry.Density10, 0.25f, entry.Density25)
+            bar (0.25f, entry.Density25, 0.5f, entry.Density50)
+            bar (0.5f, entry.Density50, 0.75f, entry.Density75)
+            bar (0.75f, entry.Density75, 0.9f, entry.Density90)
+            bar (0.9f, entry.Density90, 1.0f, entry.Density90)
+
+            b <- b.Translate(0.0f, 60.0f)
 
     member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
-        patterns <- info.Patterns.Patterns
+        patterns <- info.Patterns.Patterns |> List.truncate 8

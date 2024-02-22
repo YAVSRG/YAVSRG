@@ -178,7 +178,7 @@ module Summary =
             |> pattern_breakdown
             |> Seq.sortByDescending (fun x -> x.Amount)
             |> List.ofSeq
-            |> List.truncate 10
+            |> List.truncate 16
 
         let is_useless (pattern: PatternBreakdown) =
             breakdown |> Seq.exists (fun p -> p.Pattern = pattern.Pattern && p.Amount * 0.5f > pattern.Amount && p.BPM > pattern.BPM && p.Mixed = pattern.Mixed)
