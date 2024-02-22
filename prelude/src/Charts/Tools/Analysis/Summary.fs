@@ -138,8 +138,11 @@ module Summary =
             BPM: int
             Mixed: bool
             Amount: ScaledTime
+            Density10: float32
             Density25: float32
+            Density50: float32
             Density75: float32
+            Density90: float32
         }
     
     let private pattern_breakdown (patterns: (PatternId * BPMClusteredPattern) seq) : PatternBreakdown seq =
@@ -157,25 +160,31 @@ module Summary =
                     BPM = bpm
                     Mixed = mixed
                     Amount = amount
+                    Density10 = find_density_percentile sorted_data 0.10f
                     Density25 = find_density_percentile sorted_data 0.25f
+                    Density50 = find_density_percentile sorted_data 0.50f
                     Density75 = find_density_percentile sorted_data 0.75f
+                    Density90 = find_density_percentile sorted_data 0.90f
                 }
         }
+
     type PatternDetailsReport = { Patterns: PatternBreakdown list; LNPercent: float32; SVAmount: Time }
     
     let generate_detailed_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
-        let data = 
+        let breakdown = 
             Patterns.analyse rate chart
             |> cluster_pattern_bpms
             |> Seq.filter (fun (_, info) -> info.BPM.Value >= 85)
             |> pattern_breakdown
+            |> Seq.sortByDescending (fun x -> x.Amount)
+            |> List.ofSeq
+            |> List.truncate 10
+
+        let is_useless (pattern: PatternBreakdown) =
+            breakdown |> Seq.exists (fun p -> p.Pattern = pattern.Pattern && p.Amount * 0.5f > pattern.Amount && p.BPM > pattern.BPM && p.Mixed = pattern.Mixed)
 
         {
-            Patterns = 
-                data
-                |> Seq.sortByDescending (fun x -> x.Amount)
-                |> List.ofSeq
-                |> List.truncate 10
+            Patterns = breakdown |> List.filter (is_useless >> not)
             LNPercent = ln_percent chart
             SVAmount = sv_time chart
         }

@@ -56,16 +56,16 @@ module Patterns =
                 :: _ when a > 1 && b > 1 -> 2
             | _ -> 0
 
-    module ``4K`` =
-
         let CHORDSTREAM : Pattern =
             function
-            |      { Notes = x; Jacks = 0 }
-                :: { Jacks = 0 }
-                :: { Jacks = 0 }
-                :: { Jacks = 0 }
-                :: _ when x > 1 -> 4
+            |      { Notes = a; Jacks = 0 }
+                :: { Notes = b; Jacks = 0 }
+                :: { Notes = c; Jacks = 0 }
+                :: { Notes = d; Jacks = 0 }
+                :: _ when a > 1 && (b > 1 || c > 1 || d > 1) -> 4
             | _ -> 0
+
+    module ``4K`` =
 
         let HANDSTREAM : Pattern =
             function
@@ -233,30 +233,20 @@ module Patterns =
 
     let analysis_4k = dict [
             Stream "Stream", Common.STREAM
-            Stream "Chordstream", ``4K``.CHORDSTREAM
+            Stream "Chordstream", Common.CHORDSTREAM
             Jack "Jacks", Common.JACKS
-            // todo: mixed streams
         ]
 
     let analysis_generic = dict [
             Stream "Streams", Common.STREAM
-            Stream "Light chordstream", ``7K``.LIGHT_CHORDSTREAM
-            Stream "Dense chordstream", ``7K``.DENSE_CHORDSTREAM
+            Stream "Chordstream", Common.CHORDSTREAM
             Jack "Jacks", Common.JACKS
-            Jack "Chordjacks", Common.CHORDJACKS
-            Jack "Gluts", Common.GLUTS
         ]
 
     let analysis_7k = dict [
             Stream "Streams", Common.STREAM
-            Stream "Light chordstream", ``7K``.LIGHT_CHORDSTREAM
-            Stream "Dense chordstream", ``7K``.DENSE_CHORDSTREAM
-            Stream "Double streams", ``7K``.DOUBLE_STREAMS
-            Stream "Double stairs", ``7K``.DOUBLE_STAIRS
-            Stream "Chord rolls", ``7K``.CHORD_ROLL
+            Stream "Chordstream", Common.CHORDSTREAM
             Jack "Jacks", Common.JACKS
-            Jack "Chordjacks", Common.CHORDJACKS
-            Jack "Gluts", Common.GLUTS
         ]
 
     let analyse (rate: float32) (chart: Chart) : (PatternId * MatchedPattern) array =

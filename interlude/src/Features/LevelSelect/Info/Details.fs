@@ -57,7 +57,7 @@ type Details(display: Setting<Display>) =
                 )
                 Text.fill_b (
                     Style.font,
-                    sprintf "%.0f %.2f %.2f" (entry.Amount / 1000.0f<ms>) entry.Density25 entry.Density75,
+                    sprintf "%.0f %.2f %.2f %.2f %.2f %.2f" (entry.Amount / 1000.0f<ms>) entry.Density10 entry.Density25 entry.Density50 entry.Density75 entry.Density90,
                     b.Translate(0.0f, 25.0f),
                     Colors.text_subheading,
                     Alignment.CENTER
