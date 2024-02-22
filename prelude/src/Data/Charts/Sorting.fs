@@ -141,7 +141,7 @@ module Sorting =
                 "patterns",
                 fun (c, _) ->
                     match Library.patterns.TryGetValue(c.Hash) with
-                    | true, report -> 0, Patterns.categorise_chart report
+                    | true, report -> 0, Summary.categorise_chart report
                     | false, _ -> -1, "Not analysed"
             ]
 

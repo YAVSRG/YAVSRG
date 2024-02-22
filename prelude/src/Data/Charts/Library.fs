@@ -17,7 +17,7 @@ module Library =
 
     // ---- Loading and saving ----
 
-    type Patterns = ConcurrentDictionary<string, Patterns.LibraryPatternData>
+    type Patterns = ConcurrentDictionary<string, Summary.LibraryPatternData>
 
     // todo: redesign this init and save logic. at least it's more controlled than it was before
     let mutable cache : Cache = Unchecked.defaultof<_>
@@ -297,7 +297,7 @@ module Library =
                     for entry in cache.Entries.Values do
                         if not (patterns.ContainsKey entry.Hash) then
                             match Cache.load entry cache with
-                            | Some c -> patterns.[entry.Hash] <- Patterns.generate_cached_pattern_data (1.0f, c)
+                            | Some c -> patterns.[entry.Hash] <- Summary.generate_cached_pattern_data (1.0f, c)
                             | None -> ()
                 }
         }

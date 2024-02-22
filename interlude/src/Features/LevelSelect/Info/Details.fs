@@ -50,7 +50,7 @@ type Details(display: Setting<Display>) =
             for entry in p.Patterns do
                 Text.fill_b (
                     Style.font,
-                    sprintf "%i BPM %O" entry.BPM entry.Pattern,
+                    (if entry.Mixed then sprintf "Mixed %O (about %i BPM)" entry.Pattern entry.BPM else sprintf "%i BPM %O" entry.BPM entry.Pattern),
                     b,
                     Colors.text,
                     Alignment.CENTER
@@ -58,7 +58,7 @@ type Details(display: Setting<Display>) =
                 Text.fill_b (
                     Style.font,
                     sprintf "%.0f %.2f %.2f" (entry.Amount / 1000.0f<ms>) entry.Density25 entry.Density75,
-                    b.Translate(0.0f, 25.0f).Shrink(0.0f, 2.5f),
+                    b.Translate(0.0f, 25.0f),
                     Colors.text_subheading,
                     Alignment.CENTER
                 )

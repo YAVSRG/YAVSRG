@@ -89,7 +89,7 @@ module Gameplay =
         let mutable WITH_MODS: ModdedChart option = None
         let mutable FMT_NOTECOUNTS: string option = None
         let mutable RATING: RatingReport option = None
-        let mutable PATTERNS: Patterns.PatternDetailsReport option = None
+        let mutable PATTERNS: Summary.PatternDetailsReport option = None
 
         let mutable WITH_COLORS: ColoredChart option = None
 
@@ -112,7 +112,7 @@ module Gameplay =
                 WithMods: ModdedChart
                 NotecountsString: string
                 Rating: RatingReport
-                Patterns: Patterns.PatternDetailsReport
+                Patterns: Summary.PatternDetailsReport
 
                 WithColors: ColoredChart
             }
@@ -184,7 +184,7 @@ module Gameplay =
                                     with_mods.Keys
                                 )
 
-                            let patterns = Patterns.generate_detailed_pattern_data (rate, chart)
+                            let patterns = Summary.generate_detailed_pattern_data (rate, chart)
                             let note_counts = format_notecounts with_mods
 
                             yield
@@ -219,7 +219,7 @@ module Gameplay =
                                     with_mods.Keys
                                 )
 
-                            let patterns = Patterns.generate_detailed_pattern_data (rate, chart)
+                            let patterns = Summary.generate_detailed_pattern_data (rate, chart)
                             let note_counts = format_notecounts with_mods
 
                             yield
