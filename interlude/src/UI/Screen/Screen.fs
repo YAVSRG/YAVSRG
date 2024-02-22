@@ -1,5 +1,7 @@
 ﻿namespace Interlude.UI
 
+open System
+open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Audio
@@ -8,6 +10,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.Content
 open Interlude.UI
+open Interlude.Utils
 
 module Toolbar =
     let HEIGHT = 70.0f
@@ -20,6 +23,22 @@ module Toolbar =
 
     let moving () =
         was_hidden <> hidden || slideout_amount.Moving
+
+    open Prelude.Data
+
+    let take_screenshot() =
+        let id = DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
+        let path = Path.Combine(get_game_folder "Screenshots", id)
+        let img = Render.screenshot ()
+        ImageServices.save_image_jpg.Request((img, path), img.Dispose)
+
+        Notifications.action_feedback_button (
+            Icons.IMAGE,
+            %"notification.screenshot",
+            id,
+            %"notification.screenshot.open_folder",
+            fun () -> open_directory (get_game_folder "Screenshots")
+        )
 
 module Screen =
 

@@ -6,6 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Charts.Tools.Patterns
+open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay.Chart
@@ -123,6 +124,7 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
             change_rate (-0.05f)
         elif (%%"downrate").Tapped() then
             change_rate (-0.1f)
+        elif (%%"screenshot").Tapped() then Toolbar.take_screenshot()
 
     override this.Close() =
         if dragging then

@@ -188,6 +188,8 @@ and Menu(top_level: Page) as this =
         back_button.Update(elapsed_ms, moved)
         volume.Update(elapsed_ms, moved)
 
+        if (%%"screenshot").Tapped() then Toolbar.take_screenshot()
+
     override this.Close() =
         base.Close()
         Selection.unclamp ()

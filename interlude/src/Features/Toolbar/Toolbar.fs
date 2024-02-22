@@ -115,22 +115,7 @@ type Toolbar() =
                 then
                     Noteskins.EditNoteskinPage(true).Show()
         )
-        |+ HotkeyAction(
-            "screenshot",
-            fun () ->
-                let id = DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
-                let path = Path.Combine(get_game_folder "Screenshots", id)
-                let img = Render.screenshot ()
-                ImageServices.save_image_jpg.Request((img, path), img.Dispose)
-
-                Notifications.action_feedback_button (
-                    Icons.IMAGE,
-                    %"notification.screenshot",
-                    id,
-                    %"notification.screenshot.open_folder",
-                    fun () -> open_directory (get_game_folder "Screenshots")
-                )
-        )
+        |+ HotkeyAction("screenshot", Toolbar.take_screenshot)
         |+ HotkeyAction(
             "reload_themes",
             fun () ->
