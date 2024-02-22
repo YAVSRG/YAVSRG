@@ -18,12 +18,13 @@ open Interlude.Features.Gameplay
 type ChartInfo() as this =
     inherit StaticContainer(NodeType.None)
 
-    let display =
-        Setting.simple Display.Local |> Setting.trigger (fun _ -> this.Refresh())
+    let display = 
+        Setting.simple Display.Local
+        |> Setting.trigger (fun _ -> this.Refresh())
 
     let scoreboard = Scoreboard(display, Position = Position.TrimBottom 120.0f)
     let online = Leaderboard(display, Position = Position.TrimBottom 120.0f)
-    let details = Details(display, Position = Position.TrimBottom 120.0f)
+    let patterns = Patterns(display, Position = Position.TrimBottom 120.0f)
 
     let mutable rating = 0.0
     let mutable notecounts = ""
@@ -39,7 +40,7 @@ type ChartInfo() as this =
         this
         |+ Conditional((fun () -> display.Value = Display.Local), scoreboard)
         |+ Conditional((fun () -> display.Value = Display.Online), online)
-        |+ Conditional((fun () -> display.Value = Display.Details), details)
+        |+ Conditional((fun () -> display.Value = Display.Patterns), patterns)
 
         |+ Text(
             (fun () -> sprintf "%s %.2f" Icons.STAR rating),
@@ -160,17 +161,18 @@ type ChartInfo() as this =
 
         LevelSelect.on_refresh_all.Add this.Refresh
         LevelSelect.on_refresh_details.Add this.Refresh
+        Chart.on_chart_change_finished.Add this.OnChartUpdated
 
-    member this.Refresh() =
+    member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
         match display.Value with
-        | Display.Local -> scoreboard.Refresh()
-        | Display.Online -> online.Refresh()
-        | _ -> ()
+        | Display.Local -> scoreboard.OnChartUpdated(info)
+        | Display.Online -> online.OnChartUpdated(info)
+        | Display.Patterns -> patterns.OnChartUpdated(info)
 
-        Chart.when_loaded
-        <| fun info ->
-            rating <- info.Rating.Physical
-            notecounts <- info.NotecountsString
+        rating <- info.Rating.Physical
+        notecounts <- info.NotecountsString
+
+    member this.Refresh() = Chart.when_loaded this.OnChartUpdated
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

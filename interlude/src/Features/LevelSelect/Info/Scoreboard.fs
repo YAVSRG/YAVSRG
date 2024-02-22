@@ -6,7 +6,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Charts
-open Prelude.Charts.Tools.NoteColors
 open Prelude.Gameplay
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
@@ -17,7 +16,7 @@ open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
-open Interlude.Features.Gameplay.Chart
+open Interlude.Features.Gameplay
 open Interlude.Features.Score
 
 module Scoreboard =
@@ -207,7 +206,7 @@ module Scoreboard =
                 member this.Handle(action) = action ()
             }
 
-        let load (info: LoadedChartInfo) =
+        let load (info: Chart.LoadedChartInfo) =
             score_loader.Request
                 {
                     RulesetId = Content.Rulesets.current_hash
@@ -335,20 +334,20 @@ type Scoreboard(display: Setting<Display>) as this =
         base.Update(elapsed_ms, moved)
         Loader.score_loader.Join()
 
-    member this.Refresh() =
-        Chart.when_loaded
-        <| fun info ->
-            if
-                (
-                    let v = info.SaveData.Scores.Count <> count in
-                    count <- info.SaveData.Scores.Count
-                    v
-                ) || info.CacheInfo.Hash <> last_loaded
-            then
-                last_loaded <- info.CacheInfo.Hash
-                Loader.load info
-            elif scoring <> Content.Rulesets.current_hash then
-                Loader.container.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
-                scoring <- Content.Rulesets.current_hash
+    member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
+        if
+            (
+                let v = info.SaveData.Scores.Count <> count in
+                count <- info.SaveData.Scores.Count
+                v
+            ) || info.CacheInfo.Hash <> last_loaded
+        then
+            last_loaded <- info.CacheInfo.Hash
+            Loader.load info
+        elif scoring <> Content.Rulesets.current_hash then
+            Loader.container.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
+            scoring <- Content.Rulesets.current_hash
 
-            Loader.container.Filter <- filterer ()
+        Loader.container.Filter <- filterer ()
+
+    member this.Refresh() = Chart.when_loaded this.OnChartUpdated

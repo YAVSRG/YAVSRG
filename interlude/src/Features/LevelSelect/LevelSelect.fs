@@ -39,7 +39,7 @@ type LevelSelectScreen() =
         )
 
     let refresh () =
-        info_panel.Refresh()
+        Chart.if_loaded (fun info -> info_panel.OnChartUpdated(info))
         Tree.refresh ()
 
     let random_chart () =
@@ -208,7 +208,6 @@ type LevelSelectScreen() =
 
         |* info_panel
 
-        Chart.on_chart_change_finished.Add info_panel.Refresh
         Comments.init this
 
         LevelSelect.on_refresh_all.Add refresh

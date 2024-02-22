@@ -117,7 +117,25 @@ module Gameplay =
                 WithColors: ColoredChart
             }
 
-        let private chart_change_finished = Event<unit>()
+        let private create_loaded_chart_info () =
+            {
+                CacheInfo = CACHE_DATA.Value
+                LibraryContext = LIBRARY_CTX
+                DurationString = FMT_DURATION
+                BpmString = FMT_BPM
+
+                Chart = CHART.Value
+                SaveData = SAVE_DATA.Value
+
+                WithMods = WITH_MODS.Value
+                NotecountsString = FMT_NOTECOUNTS.Value
+                Rating = RATING.Value
+                Patterns = PATTERNS.Value
+
+                WithColors = WITH_COLORS.Value
+            }
+
+        let private chart_change_finished = Event<LoadedChartInfo>()
         let on_chart_change_finished = chart_change_finished.Publish
         let private chart_change_started = Event<LoadingChartInfo>()
         let on_chart_change_started = chart_change_started.Publish
@@ -147,7 +165,7 @@ module Gameplay =
 
                                 yield
                                     fun () ->
-                                        chart_change_finished.Trigger()
+                                        chart_change_finished.Trigger (create_loaded_chart_info())
                                         on_load_succeeded <- []
                             | Some chart ->
 
@@ -194,7 +212,7 @@ module Gameplay =
                                     RATING <- Some rating
                                     PATTERNS <- Some patterns
                                     FMT_NOTECOUNTS <- Some note_counts
-                                    chart_change_finished.Trigger()
+                                    chart_change_finished.Trigger  (create_loaded_chart_info())
 
                             yield
                                 fun () ->
@@ -231,7 +249,7 @@ module Gameplay =
                                     FMT_NOTECOUNTS <- Some note_counts
 
                                     if is_interrupted_load then
-                                        chart_change_finished.Trigger()
+                                        chart_change_finished.Trigger (create_loaded_chart_info())
 
                             yield
                                 fun () ->
@@ -326,59 +344,14 @@ module Gameplay =
 
         let if_loaded (action: LoadedChartInfo -> unit) =
             if WITH_COLORS.IsSome then 
-                action {
-                    CacheInfo = CACHE_DATA.Value
-                    LibraryContext = LIBRARY_CTX
-                    DurationString = FMT_DURATION
-                    BpmString = FMT_BPM
-
-                    Chart = CHART.Value
-                    SaveData = SAVE_DATA.Value
-
-                    WithMods = WITH_MODS.Value
-                    NotecountsString = FMT_NOTECOUNTS.Value
-                    Rating = RATING.Value
-                    Patterns = PATTERNS.Value
-
-                    WithColors = WITH_COLORS.Value
-                }
+                action (create_loaded_chart_info())
 
         let when_loaded (action: LoadedChartInfo -> unit) =
             if WITH_COLORS.IsSome then
-                action {
-                    CacheInfo = CACHE_DATA.Value
-                    LibraryContext = LIBRARY_CTX
-                    DurationString = FMT_DURATION
-                    BpmString = FMT_BPM
-
-                    Chart = CHART.Value
-                    SaveData = SAVE_DATA.Value
-
-                    WithMods = WITH_MODS.Value
-                    NotecountsString = FMT_NOTECOUNTS.Value
-                    Rating = RATING.Value
-                    Patterns = PATTERNS.Value
-
-                    WithColors = WITH_COLORS.Value
-                }
+                action (create_loaded_chart_info())
             else
                 on_load_succeeded <- (fun () -> 
-                    action {
-                        CacheInfo = CACHE_DATA.Value
-                        LibraryContext = LIBRARY_CTX
-                        DurationString = FMT_DURATION
-                        BpmString = FMT_BPM
-
-                        Chart = CHART.Value
-                        SaveData = SAVE_DATA.Value
-
-                        WithMods = WITH_MODS.Value
-                        NotecountsString = FMT_NOTECOUNTS.Value
-                        Rating = RATING.Value
-                        Patterns = PATTERNS.Value
-
-                        WithColors = WITH_COLORS.Value
-                    }
+                    action (create_loaded_chart_info())
                 ) :: on_load_succeeded
 
         let color_this_chart(with_mods: ModdedChart) =

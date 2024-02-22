@@ -292,7 +292,7 @@ type Leaderboard(display: Setting<Display>) as this =
 
         this
         |+ StylishButton(
-            (fun () -> display.Set Display.Details),
+            (fun () -> display.Set Display.Patterns),
             K <| Localisation.localise "levelselect.info.leaderboard.name",
             !%Palette.MAIN_100,
             Hotkey = "scoreboard_storage",
@@ -374,11 +374,10 @@ type Leaderboard(display: Setting<Display>) as this =
         base.Update(elapsed_ms, moved)
         Loader.score_loader.Join()
 
-    member this.Refresh() =
-        Chart.when_loaded
-        <| fun info ->
+    member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
+        if info.CacheInfo.Hash <> last_loaded || scoring <> Content.Rulesets.current_hash then
+            last_loaded <- info.CacheInfo.Hash
+            scoring <- Content.Rulesets.current_hash
+            Loader.load state info.CacheInfo info.Chart
 
-            if info.CacheInfo.Hash <> last_loaded || scoring <> Content.Rulesets.current_hash then
-                last_loaded <- info.CacheInfo.Hash
-                scoring <- Content.Rulesets.current_hash
-                Loader.load state info.CacheInfo info.Chart
+    member this.Refresh() = Chart.when_loaded this.OnChartUpdated
