@@ -1,16 +1,21 @@
-0.7.17
+0.7.18
 ====
 
-Still on the UI improvement grindset, but also some new features :o
+Hey I have some new stuff for You
 
-# UI improvements
-- Improved the appearance of dropdowns, and dropdowns now correctly open with the right thing selected
-- Game automatically retries connecting to the server (once) if disconnected
-- Search bar in level select has been made slightly longer to look better
-- Folders in level select are slimmer, have icons and show how many charts are in them
+# New features and UI improvements
+- Playlists now display how long they last if played back to back
+- Improvements to practice mode so it feels less cluttered
+- You can now take screenshots even in menus and on the chart preview
+- Some upgrades to pattern analysis in progress, this update gets you a sneak peek at the halfway point
+- Discord Rich Prescence
+- Clicking on a text entry will keep it focused until you click something else
 
-# New features
-- You can change rates while paused in practice mode
-- You can add charts to collections from the score screen (for endless mode users)
-- You can play your playlists back-to-back by enabling endless mode and then playing a chart from your playlist in Collections view
+# Bug fixes
+- Fixed bug in how timestamps are saved/converted from UTC
+- Fixed ingame progress timer showing -1:-1 as a song ends
+- Fixed the LN rendering glitch when seeking to an earlier point in a song in previews and practice mode
+- Possibly fixed being "Not logged in" even though the logs say you logged in fine
+
+More stuff coming soon but I am busy this weekend and moving house the next so we'll see
 
