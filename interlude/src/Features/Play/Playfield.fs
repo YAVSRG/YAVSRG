@@ -173,7 +173,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         // note_seek = index of the next row to appear, or notes.Length if none left
         while note_seek < chart.Notes.Length && chart.Notes.[note_seek].Time < begin_time do
-            let { Data = struct (nr, _) } = chart.Notes.[note_seek]
+            let nr = chart.Notes.[note_seek].Data
 
             for k = 0 to keys - 1 do
                 if nr.[k] = NoteType.HOLDHEAD then
@@ -299,7 +299,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         // todo: also put a cap at -playfield_height when *negative sv comes into play
         while column_pos < playfield_height && note_peek < chart.Notes.Length do
 
-            let { Time = t; Data = struct (nd, color) } = chart.Notes.[note_peek]
+            let { Time = t; Data = nr } = chart.Notes.[note_peek]
+            let color = chart.Colors.[note_peek].Data
             // update vertical position + scroll speed based on sv
             while (sv_peek < sv.Length && sv.[sv_peek].Time < t) do
                 let { Time = t2; Data = v } = sv.[sv_peek]
@@ -314,16 +315,16 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
             for k in 0 .. (keys - 1) do
                 if
-                    nd.[k] = NoteType.NORMAL
+                    nr.[k] = NoteType.NORMAL
                     && not (vanishing_notes && state.Scoring.IsNoteHit note_peek k)
                 then
                     draw_note (k, column_pos, int color.[k])
 
-                elif nd.[k] = NoteType.HOLDHEAD then
+                elif nr.[k] = NoteType.HOLDHEAD then
                     // assert hold_states.[k] = NoHold
                     hold_states.[k] <- HeadOnscreen(column_pos, note_peek)
 
-                elif nd.[k] = NoteType.HOLDTAIL then
+                elif nr.[k] = NoteType.HOLDTAIL then
                     match hold_states.[k] with
                     | HeadOffscreen i ->
                         let hold_state = state.Scoring.HoldState i k
@@ -342,7 +343,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                             let headpos = if hold_state.ShowInReceptor then hitposition else begin_pos
 
                             let head_and_body_color =
-                                let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
+                                let colors = chart.Colors.[i].Data in int colors.[k]
 
                             if headpos < tailpos then
                                 draw_body (k, headpos, tailpos, head_and_body_color, tint)
@@ -377,7 +378,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                                     headpos
 
                             let head_and_body_color =
-                                let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
+                                let colors = chart.Colors.[i].Data in int colors.[k]
 
                             if headpos < tailpos then
                                 draw_body (k, headpos, tailpos, head_and_body_color, tint)
@@ -411,7 +412,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     let headpos = if hold_state.ShowInReceptor then hitposition else begin_pos
 
                     let head_and_body_color =
-                        let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
+                        let colors = chart.Colors.[i].Data in int colors.[k]
 
                     if headpos < tailpos then
                         draw_body (k, headpos, tailpos, head_and_body_color, tint)
@@ -443,7 +444,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                             headpos
 
                     let head_and_body_color =
-                        let { Data = struct (_, colors) } = chart.Notes.[i] in int colors.[k]
+                        let colors = chart.Colors.[i].Data in int colors.[k]
 
                     if headpos < tailpos then
                         draw_body (k, headpos, tailpos, head_and_body_color, tint)

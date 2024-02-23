@@ -34,20 +34,19 @@ module NoteColors =
     type ColorDataSets = ColorData array // color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
     type Colorizer<'state> = 'state -> TimeItem<NoteRow> -> ('state * ColorData)
 
-    type private ColorNoteRow = (struct (NoteRow * ColorData))
-
     type ColoredChart =
         {
             Source: ModdedChart
-            Notes: TimeArray<ColorNoteRow>
+            Colors: TimeArray<ColorData>
         }
         member this.Keys = this.Source.Keys
         member this.BPM = this.Source.BPM
         member this.SV = this.Source.SV
         member this.ModsSelected = this.Source.ModsSelected
         member this.ModsApplied = this.Source.ModsApplied
-        member this.FirstNote = this.Notes.[0].Time
-        member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
+        member this.FirstNote = this.Source.FirstNote
+        member this.LastNote = this.Source.LastNote
+        member this.Notes = this.Source.Notes
 
     let private roughly_divisible (a: Time) (b: Time) =
         Time.abs (a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
@@ -56,12 +55,12 @@ module NoteColors =
         List.tryFind ((fun i -> DDR_VALUES.[i]) >> fun n -> roughly_divisible delta (ms_per_beat / n)) [ 0..7 ]
         |> Option.defaultValue DDR_VALUES.Length
 
-    let private column_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorNoteRow> =
+    let private column_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorData> =
 
         let c = [| for i in 0 .. (mc.Keys - 1) -> color_data.[i] |]
-        mc.Notes |> TimeArray.map (fun nr -> struct (nr, c))
+        mc.Notes |> TimeArray.map (fun _ -> c)
 
-    let private chord_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorNoteRow> =
+    let private chord_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorData> =
 
         let mutable previous_colors: ColorData = Array.zeroCreate mc.Keys
 
@@ -84,10 +83,10 @@ module NoteColors =
                 else
                     previous_colors.[k] <- color_data.[index]
 
-            struct (nr, colors)
+            colors
         )
 
-    let private ddr_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorNoteRow> =
+    let private ddr_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorData> =
 
         let mutable previous_colors: ColorData = Array.zeroCreate mc.Keys
 
@@ -120,7 +119,7 @@ module NoteColors =
 
             {
                 Time = time
-                Data = struct (nr, colors)
+                Data = colors
             }
         )
 
@@ -134,7 +133,7 @@ module NoteColors =
 
         {
             Source = mc
-            Notes = colored_notes
+            Colors = colored_notes
         }
 
     [<Json.AutoCodec(false)>]
