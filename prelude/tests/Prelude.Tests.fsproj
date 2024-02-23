@@ -1,18 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>Prelude_Test</RootNamespace>
+	  <TargetFramework>net8.0</TargetFramework>
+
+	  <IsPackable>false</IsPackable>
+	  <GenerateProgramFile>false</GenerateProgramFile>
+	  <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tests\Wife3.fs" />
-    <Compile Include="Tests\Caramell.fs" />
-    <Compile Include="Tests\OsuScoreMigration.fs" />
-    <Compile Include="Tests\Sail.fs" />
-    <Compile Include="Tests\Trendy.fs" />
-    <Compile Include="Tests\Imports.fs" />
+    <Compile Include="Scoring\Helpers.fs" />
+    <Compile Include="Scoring\SCJ4.fs" />
+    <Compile Include="Scoring\OsuOd8.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -21,7 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="8.0.100" />
+	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+	<PackageReference Include="NUnit" Version="3.13.3" />
+	<PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+	<PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
+	<PackageReference Include="coverlet.collector" Version="6.0.0" />
   </ItemGroup>
 
 </Project>
