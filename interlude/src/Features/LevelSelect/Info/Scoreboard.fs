@@ -16,7 +16,6 @@ open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
-open Interlude.Features.Gameplay
 open Interlude.Features.Score
 
 module Scoreboard =
@@ -105,7 +104,7 @@ module Scoreboard =
 
             |+ Text(
                 K(
-                    format_timespan (DateTime.UtcNow - Timestamp.to_datetime score_info.TimePlayed)
+                    format_timespan (DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset score_info.TimePlayed)
                     + if score_info.ImportedFromOsu then
                           " " + Icons.DOWNLOAD
                       else

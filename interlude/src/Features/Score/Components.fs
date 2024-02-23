@@ -58,7 +58,7 @@ type TopBanner(score_info: ScoreInfo) as this =
         )
 
         |+ Text(
-            (score_info.TimePlayed |> Timestamp.to_datetime).ToString(),
+            (score_info.TimePlayed |> Timestamp.to_datetime).ToLocalTime().ToString(),
             Align = Alignment.RIGHT,
             Position =
                 {

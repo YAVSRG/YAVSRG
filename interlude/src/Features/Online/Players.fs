@@ -29,7 +29,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
         scores
         |> Array.map (fun score ->
             score,
-            (DateTimeOffset.Now - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp)
+            (DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp)
              |> format_timespan)
             + " ago"
         )

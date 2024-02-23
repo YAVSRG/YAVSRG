@@ -65,7 +65,10 @@ module Utils =
                 ((ms / 1_000f<ms>) % 60f |> floor |> int)
 
     let format_timespan (ts: TimeSpan) =
-        if ts.TotalDays > 365.0 then
+        
+        if ts < TimeSpan.Zero then
+            "IN THE FUTURE?"
+        elif ts.TotalDays > 365.0 then
             sprintf "%.0fy" (ts.TotalDays / 365.0)
         elif ts.TotalDays > 30.0 then
             sprintf "%.0fmo" (ts.TotalDays / 30.0)
