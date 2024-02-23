@@ -19,7 +19,7 @@ type Display =
 type Patterns(display: Setting<Display>) =
     inherit StaticContainer(NodeType.None)
 
-    let mutable patterns : Summary.PatternBreakdown list = []
+    let mutable patterns : PatternSummary.PatternBreakdown list = []
 
     override this.Init(parent: Widget) =
         base.Init parent

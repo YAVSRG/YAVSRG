@@ -72,30 +72,26 @@ module Sorting =
             let pattern_to_find =
                 match pattern.ToLower() with
                 | "streams"
-                | "stream" -> Stream "Streams"
+                | "speed"
+                | "stream" -> Stream "Stream"
                 | "jumpstream"
-                | "js" -> Stream "Jumpstream"
+                | "js"
                 | "handstream"
-                | "hs" -> Stream "Handstream"
-                | "jacks" -> Jack "Jacks"
+                | "hs"
+                | "cs" -> Stream "Chordstream"
+                | "jacks"
                 | "chords"
                 | "chordjack"
                 | "chordjacks"
-                | "cj" -> Jack "Chordjacks"
-                | "doublestream"
-                | "doublestreams"
-                | "ds" -> Stream "Double streams"
-                | "chordstream"
-                | "chordstreams"
-                | "cs" -> Stream "Dense chordstream"
+                | "cj" -> Jack "Jacks"
                 | _ -> Stream ""
 
             let matching =
                 p
                 |> Seq.where (fun x -> x.Pattern = pattern_to_find)
-                |> Seq.sumBy (fun x -> x.Score)
+                |> Seq.sumBy (fun x -> x.Amount)
 
-            let total = p |> Seq.sumBy (fun x -> x.Score)
+            let total = p |> Seq.sumBy (fun x -> x.Amount)
             matching / total > 0.4f
 
         else
@@ -141,7 +137,7 @@ module Sorting =
                 "patterns",
                 fun (c, _) ->
                     match Library.patterns.TryGetValue(c.Hash) with
-                    | true, report -> 0, Summary.categorise_chart report
+                    | true, report -> 0, report.Category
                     | false, _ -> -1, "Not analysed"
             ]
 

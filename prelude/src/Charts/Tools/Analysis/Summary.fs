@@ -5,7 +5,7 @@ open Percyqaz.Data
 open Prelude
 open Prelude.Charts
 
-module Summary =
+module PatternSummary =
     
     let ln_percent (chart: Chart) : float32 =
         let mutable notes = 0
@@ -132,6 +132,7 @@ module Summary =
         let index = percentile * float32 sorted_densities.Length |> floor |> int
         sorted_densities.[index]
 
+    [<Json.AutoCodec>]
     type PatternBreakdown = 
         {
             Pattern: PatternId
@@ -168,7 +169,37 @@ module Summary =
                 }
         }
 
-    type PatternDetailsReport = { Patterns: PatternBreakdown list; LNPercent: float32; SVAmount: Time }
+    let categorise_chart (patterns: PatternBreakdown list) =
+        let is_jacks = fun e -> match e.Pattern with Jack _ -> true | _ -> false
+        let is_stream = fun e -> match e.Pattern with Stream "Stream" -> true | _ -> false
+        let is_cs = fun e -> match e.Pattern with Stream "Chordstream" -> true | _ -> false
+        let jacks = patterns |> List.filter is_jacks
+        let streams = patterns |> List.filter is_stream
+        let chordstream = patterns |> List.filter is_cs
+        let mixed = patterns |> List.filter (_.Mixed)
+    
+        let total = patterns |> List.sumBy (fun e -> e.Amount)
+        let stream_pc = streams |> List.sumBy (fun e -> e.Amount) |> fun x -> x / total
+        let jack_pc = jacks |> List.sumBy (fun e -> e.Amount) |> fun x -> x / total
+        let cs_pc = chordstream |> List.sumBy (fun e -> e.Amount) |> fun x -> x / total
+        let mixed_pc = mixed |> List.sumBy (fun e -> e.Amount) |> fun x -> x / total
+    
+        if cs_pc > 0.5f then
+            "JS/HS"
+        elif mixed_pc > 0.5f then
+            "Stream tech"
+        elif jack_pc > 0.8f then
+            "Chordjacks"
+        elif jack_pc > 0.3f && stream_pc > 0.3f && mixed_pc > 0.3f then 
+            "Hybrid tech"
+        elif stream_pc > 0.3f && jack_pc > 0.3f then
+            "Hybrid"
+        elif stream_pc > 0.5f && mixed_pc < 0.2f then
+            "Speed"
+        else "Unknown"
+
+    [<Json.AutoCodec>]
+    type PatternDetailsReport = { Patterns: PatternBreakdown list; LNPercent: float32; SVAmount: Time; Category: string }
     
     let generate_detailed_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
         let breakdown = 
@@ -183,39 +214,33 @@ module Summary =
         let is_useless (pattern: PatternBreakdown) =
             breakdown |> Seq.exists (fun p -> p.Pattern = pattern.Pattern && p.Amount * 0.5f > pattern.Amount && p.BPM > pattern.BPM && p.Mixed = pattern.Mixed)
 
+        let patterns = breakdown |> List.filter (is_useless >> not)
+
         {
-            Patterns = breakdown |> List.filter (is_useless >> not)
+            Patterns = patterns
             LNPercent = ln_percent chart
             SVAmount = sv_time chart
+            Category = categorise_chart patterns
         }
     
-    [<Json.AutoCodec>]
-    type LibraryPatternEntry = { Pattern: PatternId; BPM: int; Score: float32<ms/rate> }
-    [<Json.AutoCodec>]
-    type LibraryPatternData = { Patterns: LibraryPatternEntry list; LNPercent: float32; SVAmount: Time }
-    
-    let generate_cached_pattern_data (rate: float32, chart: Chart) : LibraryPatternData =
-        // stubbed out for now
-        {
-            Patterns = []
-            LNPercent = ln_percent chart
-            SVAmount = sv_time chart
-        }
+    let generate_cached_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
+         let breakdown = 
+             Patterns.analyse rate chart
+             |> cluster_pattern_bpms
+             |> Seq.filter (fun (_, info) -> info.BPM.Value >= 85)
+             |> pattern_breakdown
+             |> Seq.sortByDescending (fun x -> x.Amount)
+             |> List.ofSeq
+             |> List.truncate 16
 
-    let categorise_chart (report: LibraryPatternData) =
-        let isJack = fun e -> match e.Pattern with Jack _ -> true | _ -> false
-        let isStream = fun e -> match e.Pattern with Stream _ -> true | _ -> false
-        let jacks = report.Patterns |> List.filter isJack
-        let streams = report.Patterns |> List.filter isStream
+         let is_useless (pattern: PatternBreakdown) =
+             breakdown |> Seq.exists (fun p -> p.Pattern = pattern.Pattern && p.Amount * 0.5f > pattern.Amount && p.BPM > pattern.BPM && p.Mixed = pattern.Mixed)
 
-        let total = report.Patterns |> List.sumBy (fun e -> e.Score)
-        let stream_total = streams |> List.sumBy (fun e -> e.Score)
-        let jack_total = jacks |> List.sumBy (fun e -> e.Score)
+         let patterns = breakdown |> List.filter (is_useless >> not) |> List.truncate 6
 
-        if stream_total / total > 0.3f && jack_total / total > 0.3f then
-            "Hybrid"
-        elif stream_total / total > 0.4f then
-            (List.head streams).Pattern.ToString()
-        elif jack_total / total > 0.4f then 
-            (List.head jacks).Pattern.ToString()
-        else "Unknown"
+         {
+             Patterns = patterns
+             LNPercent = ln_percent chart
+             SVAmount = sv_time chart
+             Category = categorise_chart patterns
+         }

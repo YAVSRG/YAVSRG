@@ -79,10 +79,10 @@ module Suggestion =
                                     | Jack _ -> abs (p.BPM - p2.BPM) |> min 25 |> (fun i -> 1.0f - float32 i / 25.0f)
 
                                 let duration_similarity =
-                                    abs (p.Score - p2.Score)
+                                    abs (p.Amount - p2.Amount)
                                     |> float32
-                                    |> min 1000.0f
-                                    |> fun i -> 1.0f - i / 1000.0f
+                                    |> min 20000.0f
+                                    |> fun i -> 1.0f - i / 40000.0f
 
                                 similarity_score <- similarity_score + duration_similarity * bpm_similarity
 

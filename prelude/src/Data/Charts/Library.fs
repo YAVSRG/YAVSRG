@@ -17,7 +17,7 @@ module Library =
 
     // ---- Loading and saving ----
 
-    type Patterns = ConcurrentDictionary<string, Summary.LibraryPatternData>
+    type Patterns = ConcurrentDictionary<string, PatternSummary.PatternDetailsReport>
 
     // todo: redesign this init and save logic. at least it's more controlled than it was before
     let mutable cache : Cache = Unchecked.defaultof<_>
@@ -32,7 +32,7 @@ module Library =
         patterns <-
             let path = Path.Combine(get_game_folder "Data", "patterns.json")
             
-            if File.GetLastWriteTimeUtc(path) > DateTime.Parse("12/12/2023") then
+            if File.GetLastWriteTimeUtc(path) > DateTime.Parse("23/02/2024") then
                 load_important_json_file "Patterns" (Path.Combine(get_game_folder "Data", "patterns.json")) false
             else
                 Logging.Info("Pattern analysis has updated, you will need to cache patterns again")
@@ -297,7 +297,7 @@ module Library =
                     for entry in cache.Entries.Values do
                         if not (patterns.ContainsKey entry.Hash) then
                             match Cache.load entry cache with
-                            | Some c -> patterns.[entry.Hash] <- Summary.generate_cached_pattern_data (1.0f, c)
+                            | Some c -> patterns.[entry.Hash] <- PatternSummary.generate_cached_pattern_data (1.0f, c)
                             | None -> ()
                 }
         }
