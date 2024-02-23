@@ -6,7 +6,7 @@ open Prelude.Charts
 
 type HitEventGutsInternal =
     | Hit_ of delta: Time * is_hold_head: bool * missed: bool
-    | Release_ of delta: Time * missed: bool * overhold: bool * dropped: bool
+    | Release_ of delta: Time * missed: bool * overhold: bool * dropped: bool * missed_head: bool
 
 type HitEventGuts =
     | Hit of
@@ -216,14 +216,20 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
                     let dropped =
                         match hold_states.[k] with
                         | Dropped, _
+                        | MissedHeadThenHeld, _
                         | MissedHead, _ -> true
+                        | _ -> false
+                    
+                    let missed_head =
+                        match hold_states.[k] with
+                        | MissedHeadThenHeld, _ -> true
                         | _ -> false
 
                     this._HandleEvent
                         {
                             Time = t - first_note + miss_window
                             Column = k
-                            Guts = Release_(deltas.[k], true, overhold, dropped)
+                            Guts = Release_(deltas.[k], true, overhold, dropped, missed_head)
                         }
 
                     match hold_states.[k] with
@@ -330,7 +336,8 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
                                 deltas.[k],
                                 false,
                                 false,
-                                fst hold_states.[k] = Dropped || fst hold_states.[k] = MissedHeadThenHeld
+                                fst hold_states.[k] = Dropped || fst hold_states.[k] = MissedHeadThenHeld,
+                                fst hold_states.[k] = MissedHeadThenHeld
                             )
                     }
 
@@ -439,7 +446,7 @@ type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
                                 IsHold = isHold
                             |}
 
-                | Release_(delta, missed, overhold, dropped) ->
+                | Release_(delta, missed, overhold, dropped, missed_head) ->
                     let headJudgement = head_judgements.[ev.Column]
 
                     match config.Accuracy.HoldNoteBehaviour with
@@ -449,7 +456,7 @@ type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
 
                         this.State.Add(point_func delta judgement, 1.0, judgement)
 
-                        if config.Judgements.[judgement].BreaksCombo then
+                        if config.Judgements.[judgement].BreaksCombo || missed_head then
                             this.State.BreakCombo true
                         else
                             this.State.IncrCombo()

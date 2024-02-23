@@ -158,4 +158,23 @@ module ``osu OD8`` =
         Assert.AreEqual(1, result.ComboBreaks)
         Assert.AreEqual(1, result.Judgements.[0])
         Assert.AreEqual(1, result.Judgements.[5])
+    
+    [<Test>]
+    let HoldNote_Miss () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+        let replay =
+            ReplayBuilder()
+                .Build()
+        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let result = scoring.State
+        
+        printfn "%A" result
+        
+        Assert.AreEqual(0, result.BestCombo)
+        Assert.AreEqual(0, result.CurrentCombo)
+        Assert.AreEqual(1, result.ComboBreaks)
+        Assert.AreEqual(1, result.Judgements.[5])
         
