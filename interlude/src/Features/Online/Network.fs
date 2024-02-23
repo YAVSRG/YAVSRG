@@ -160,20 +160,19 @@ module Network =
     let client =
         { new Client(target_ip, 32767) with
 
-            override this.OnConnected() = sync <| fun () -> status <- Connected
+            override this.OnConnected() = status <- Connected
 
             override this.OnDisconnected() =
+                status <-
+                    if status = Connecting then
+                        ConnectionFailed
+                    else
+                        NotConnected
                 sync
                 <| fun () ->
                     if lobby.IsSome then
                         lobby <- None
                         Events.leave_lobby_ev.Trigger()
-
-                    status <-
-                        if status = Connecting then
-                            ConnectionFailed
-                        else
-                            NotConnected
 
             override this.OnPacketReceived(packet: Downstream) =
                 match packet with
@@ -203,20 +202,20 @@ module Network =
                     credentials.Token <- token
                     this.Send(Upstream.LOGIN credentials.Token)
                 | Downstream.LOGIN_SUCCESS name ->
+                    Logging.Info(sprintf "Logged in as %s" name)
+                    credentials.Username <- name
+                    status <- LoggedIn
                     sync
                     <| fun () ->
-                        Logging.Info(sprintf "Logged in as %s" name)
-                        credentials.Username <- name
-                        API.Client.authenticate credentials.Token
-                        status <- LoggedIn
+                    API.Client.authenticate credentials.Token
 
-                        if Screen.current_type <> Screen.Type.SplashScreen then
-                            Notifications.system_feedback (Icons.GLOBE, [ name ] %> "notification.network.login", "")
+                    if Screen.current_type <> Screen.Type.SplashScreen then
+                        Notifications.system_feedback (Icons.GLOBE, [ name ] %> "notification.network.login", "")
 
-                        Events.successful_login_ev.Trigger name
+                    Events.successful_login_ev.Trigger name
                 | Downstream.LOGIN_FAILED reason ->
-                    credentials.Token <- ""
                     Logging.Info(sprintf "Login failed: %s" reason)
+                    credentials.Token <- ""
 
                     sync
                     <| fun () -> 
@@ -379,7 +378,6 @@ module Network =
     let init_window() =
         if target_ip.ToString() <> "0.0.0.0" then
             connect ()
-        // todo: reconnect automatically on amicable disconnect (not connection failure or kick)
 
     let deinit () =
         if status <> NotConnected then
