@@ -26,21 +26,26 @@ let launch (instance: int) =
         Utils.splash_message_picker "CrashSplashes.txt"
         >> (fun s -> Logging.Critical s)
 
-    try
-        Startup.init_startup instance
-    with err ->
-        Logging.Critical("Something went wrong when loading some of the game config/data, preventing the game from opening", err)
-        crash_splash ()
-        Console.ReadLine() |> ignore
+    let successful_startup =
+        try
+            Startup.init_startup instance
+            true
+        with err ->
+            Logging.Critical("Something went wrong when loading some of the game config/data, preventing the game from opening", err)
+            crash_splash ()
+            Console.ReadLine() |> ignore
+            false
 
-    Window.after_init.Add(fun () -> AppDomain.CurrentDomain.ProcessExit.Add(fun args -> Startup.deinit true crash_splash))
-    Window.on_file_drop.Add(Import.Import.handle_file_drop)
+    if successful_startup then
 
-    use icon_stream = Utils.get_resource_stream ("icon.png")
-    use icon = Utils.Bitmap.load icon_stream
-    Launch.entry_point (Options.config, "Interlude", Startup.init_window instance, Some icon)
+        Window.after_init.Add(fun () -> AppDomain.CurrentDomain.ProcessExit.Add(fun args -> Startup.deinit true crash_splash))
+        Window.on_file_drop.Add(Import.Import.handle_file_drop)
 
-    Startup.deinit false crash_splash
+        use icon_stream = Utils.get_resource_stream ("icon.png")
+        use icon = Utils.Bitmap.load icon_stream
+        Launch.entry_point (Options.config, "Interlude", Startup.init_window instance, Some icon)
+
+        Startup.deinit false crash_splash
 
 [<EntryPoint>]
 let main argv =

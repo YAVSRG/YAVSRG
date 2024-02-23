@@ -32,7 +32,7 @@ module Library =
         patterns <-
             let path = Path.Combine(get_game_folder "Data", "patterns.json")
             
-            if File.GetLastWriteTimeUtc(path) > DateTime.Parse("23/02/2024") then
+            if File.GetLastWriteTimeUtc(path) |> Timestamp.from_datetime > 1708696457993L then
                 load_important_json_file "Patterns" (Path.Combine(get_game_folder "Data", "patterns.json")) false
             else
                 Logging.Info("Pattern analysis has updated, you will need to cache patterns again")
