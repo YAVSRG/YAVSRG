@@ -26,13 +26,9 @@ type ISelection(node_type: NodeType) =
 and [<RequireQualifiedAccess>] NodeType =
     | None
     | Leaf
+    | FocusTrap
     | Switch of (unit -> ISelection)
     | Button of (unit -> unit)
-    member this._IsLeaf =
-        match this with
-        | Leaf -> true
-        | _ -> false
-
     member this._IsNone =
         match this with
         | None -> true
@@ -110,17 +106,32 @@ module Selection =
 
 
     let rec focus (item: ISelection) =
+
+        match get_focused_element () with
+        | Some x when leaf_is_selected && item <> x && (match x.NodeType with NodeType.FocusTrap -> true | _ -> false) -> ()
+        | _ ->
+
         match item.NodeType with
         | NodeType.None -> focus_tree []
         | NodeType.Leaf -> focus_tree item.FocusTree
-        | NodeType.Switch f -> focus (f ())
+        | NodeType.FocusTrap -> focus_tree item.FocusTree
+        | NodeType.Switch f -> 
+            let target = f ()
+            if target = item then 
+                focus_tree item.FocusTree 
+            else focus target
         | NodeType.Button a -> focus_tree item.FocusTree
 
     let rec select (item: ISelection) =
         match item.NodeType with
         | NodeType.None -> select_tree []
         | NodeType.Leaf -> select_tree item.FocusTree
-        | NodeType.Switch f -> select (f ())
+        | NodeType.FocusTrap -> select_tree item.FocusTree
+        | NodeType.Switch f -> 
+            let target = f ()
+            if target = item then 
+                select_tree item.FocusTree 
+            else select target
         | NodeType.Button a ->
             focus_tree item.FocusTree
             a ()
@@ -144,6 +155,7 @@ module Selection =
                     match h.NodeType with
                     | NodeType.None -> up ()
                     | NodeType.Leaf -> ()
+                    | NodeType.FocusTrap -> ()
                     | NodeType.Switch _ -> up ()
                     | NodeType.Button _ -> ()
                 | None -> ()

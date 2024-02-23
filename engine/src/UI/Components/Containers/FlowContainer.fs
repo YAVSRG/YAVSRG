@@ -36,9 +36,8 @@ module FlowContainer =
         member private this.WhoIsFocused: int option =
             Seq.tryFindIndex (fun c -> c.Widget.Focused) children
 
-        member private this.WhoShouldFocus =
-            if children.Count = 0 then
-                failwithf "Tried to focus this %O with no children" this
+        member private this.WhoShouldFocus : ISelection =
+            if children.Count = 0 then this else
 
             if last_selected >= children.Count then
                 last_selected <- 0

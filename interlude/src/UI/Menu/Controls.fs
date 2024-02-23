@@ -327,7 +327,7 @@ type PageTextEntry(name, setting) =
     inherit
         PageSetting(
             name,
-            let te = TextEntry(setting, "none") in
+            let te = TextEntry(setting, "none", false) in
 
             te
             |+ Frame(
@@ -449,7 +449,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
         )
 
     let hex_editor =
-        { new TextEntry(hex, "none", Position = Position.TrimLeft(50.0f).SliceTop PRETTYHEIGHT) with
+        { new TextEntry(hex, "none", false, Position = Position.TrimLeft(50.0f).SliceTop PRETTYHEIGHT) with
             override this.OnDeselected() =
                 base.OnDeselected()
                 hex.Value <- s.Value.ToHex()

@@ -59,6 +59,7 @@ type NetworkStatus() =
         | None -> ()
 
         if Mouse.hover this.Bounds && Mouse.left_click () then
+            Selection.clear()
             this.ToggleDropdown()
 
         if

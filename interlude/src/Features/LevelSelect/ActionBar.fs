@@ -29,6 +29,7 @@ module Comments =
                                 | _ -> ""
                             ),
                         "comment",
+                        true,
                         Position = Position.Margin(20.0f, 10.0f),
                         Clickable = false) with
             override this.OnDeselected() =

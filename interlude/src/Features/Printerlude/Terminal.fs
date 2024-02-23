@@ -110,6 +110,7 @@ module Terminal =
         let rec add_input () =
             Input.listen_to_text (
                 current_line,
+                false,
                 fun () ->
                     if shown then
                         sync add_input

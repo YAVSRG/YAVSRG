@@ -41,7 +41,7 @@ type Chat() =
         ScrollContainer(messages, Position = Position.TrimBottom(60.0f).Margin(5.0f))
 
     let chatline =
-        TextEntry(current_message, "none", Position = Position.SliceBottom(50.0f).Margin(5.0f))
+        TextEntry(current_message, "none", true, Position = Position.SliceBottom(50.0f).Margin(5.0f))
 
     let mutable last_msg: Widget option = None
 

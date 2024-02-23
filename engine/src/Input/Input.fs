@@ -204,12 +204,13 @@ module Input =
 
     /// Used for UIs that let the user type some text into the provided text buffer
     /// In this mode keybindings do not activate (so something bound to A will not fire, it will type 'a' into the buffer instead)
+    /// `mouse_cancel` set to true will cause the listener to automatically disconnect itself when the mouse is moved too much
     /// `on_remove` is called when the text listening mode is exited
-    let listen_to_text (s: Setting<string>, on_remove: unit -> unit) =
+    let listen_to_text (s: Setting<string>, mouse_cancel: bool, on_remove: unit -> unit) =
         remove_listener ()
         input_listener <- InputListener.Text(s, on_remove)
         InputThread.typing <- true
-        input_listener_mouse_cancel <- 0f
+        input_listener_mouse_cancel <- if mouse_cancel then 0f else -infinityf
 
     /// Used for UIs that let the user bind a key to a hotkey
     /// The very next button (or modifier + button combo) they press will be passed to `callback`

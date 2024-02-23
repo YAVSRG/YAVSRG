@@ -11,13 +11,15 @@ open Prelude.Data.Charts.Sorting
 open Interlude.UI
 open Interlude.Utils
 
-type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
-    inherit StaticContainer(NodeType.Leaf)
+type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as this =
+    inherit StaticContainer(if focus_trap then NodeType.FocusTrap else NodeType.Leaf)
 
     let ticker = Animation.Counter(600.0)
 
     let toggle () =
         if this.Selected then this.Focus() else this.Select()
+
+    let mutable selected_via_click = false
 
     member val Clickable = true with get, set
 
@@ -42,9 +44,11 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
 
         if this.Clickable then
             this.Add(
-                let c = Clickable.Focus this in
-                c.OnRightClick <- (fun () -> setting.Set "")
-                c
+                Clickable(
+                    (fun () -> selected_via_click <- true; this.Select()),
+                    OnHover = (fun b -> if b && not this.Focused then this.Focus()),
+                    OnRightClick = (fun () -> setting.Set "")
+                )
             )
 
     override this.OnSelected() =
@@ -53,10 +57,13 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
 
         Input.listen_to_text (
             setting |> Setting.trigger (fun v -> Style.key.Play()),
+            not selected_via_click,
             fun () ->
                 if this.Selected then
                     this.Focus()
         )
+
+        selected_via_click <- false
 
     override this.OnDeselected() =
         base.OnDeselected()
@@ -285,6 +292,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
         TextEntry(
             s |> Setting.trigger (fun _ -> this.StartSearch()),
             "search",
+            true,
             Position = Position.Margin(10.0f, 0.0f),
             ColorFunc =
                 fun () ->
