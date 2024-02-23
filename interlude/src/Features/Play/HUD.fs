@@ -307,7 +307,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state: PlayState) =
         let text =
             match conf.Label with
             | HUD.ProgressMeterLabel.Countdown ->
-                let time_left = (duration - now) / Gameplay.rate.Value
+                let time_left = (duration - now) / Gameplay.rate.Value |> max 0.0f<ms>
 
                 sprintf
                     "%i:%02i"
