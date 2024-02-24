@@ -105,7 +105,7 @@ type TableCard(online_table: Tables.List.Table) as this =
 module Tables =
 
     type TableList() as this =
-        inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
+        inherit StaticContainer(NodeType.Container(fun _ -> Some this.Items))
 
         let flow = FlowContainer.Vertical<TableCard>(200.0f, Spacing = 15.0f)
         let scroll = ScrollContainer(flow, Margin = Style.PADDING)

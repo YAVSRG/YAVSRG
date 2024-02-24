@@ -87,7 +87,7 @@ type Image(sprite: Sprite) =
 
 [<Sealed>]
 type Conditional(condition: unit -> bool, child: Widget) =
-    inherit StaticWidget(NodeType.Switch(fun () -> child))
+    inherit StaticWidget(NodeType.Container(fun () -> Some child))
 
     override this.Init(parent: Widget) =
         base.Init parent
@@ -103,7 +103,7 @@ type Conditional(condition: unit -> bool, child: Widget) =
         if moved || condition () then
             child.Update(elapsed_ms, moved)
 
-    override this.Focusable = child.Focusable && condition ()
+    override this.Focusable = condition () && base.Focusable
 
 [<Sealed>]
 type Frame() =

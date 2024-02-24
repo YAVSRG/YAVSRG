@@ -104,7 +104,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
 module Rulesets =
 
     type RulesetSearch() as this =
-        inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
+        inherit StaticContainer(NodeType.Container(fun _ -> Some this.Items))
 
         let grid =
             GridFlowContainer<RulesetCard>(80.0f, 2, Spacing = (15.0f, 15.0f), WrapNavigation = false)

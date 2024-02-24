@@ -13,7 +13,7 @@ open Interlude.Features.Online
 module ImportScreen =
 
     let container =
-        SwapContainer(Position = Position.TrimLeft(400.0f).Margin(50.0f, 20.0f), Current = Mounts.tab)
+        SwapContainer(Mounts.tab, Position = Position.TrimLeft(400.0f).Margin(50.0f, 20.0f))
 
     let switch_to_noteskins () = container.Current <- Noteskins.tab
     let switch_to_rulesets () = container.Current <- Rulesets.tab
@@ -27,7 +27,7 @@ module ImportScreen =
         || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
 type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
-    inherit StaticContainer(NodeType.Switch(fun _ -> this.Button))
+    inherit StaticContainer(NodeType.Container(fun _ -> Some this.Button))
 
     let button = Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f, 5.0f))
 
@@ -45,7 +45,7 @@ type private TabButton(icon: string, name: string, container: SwapContainer, tar
         this |* button
 
 type private Sidebar() as this =
-    inherit StaticContainer(NodeType.Switch(fun _ -> this.Flow))
+    inherit StaticContainer(NodeType.Container(fun _ -> Some this.Flow))
 
     let flow =
         FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(130.0f).Margin(10.0f))

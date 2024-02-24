@@ -10,7 +10,7 @@ open Percyqaz.Flux.Graphics
 /// Also automatically scrolls to show the selected item when navigating
 [<Sealed>]
 type ScrollContainer<'T when 'T :> Widget and 'T :> DynamicSize>(child: 'T) =
-    inherit StaticWidget(NodeType.Switch(K child))
+    inherit StaticWidget(NodeType.Container(K (Some child)))
 
     static let SENSITIVITY = 100.0f
 

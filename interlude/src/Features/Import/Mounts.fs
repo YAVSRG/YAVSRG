@@ -217,7 +217,7 @@ module Mounts =
             button.Init this
 
     type Control(game: Game, setting: Setting<MountedChartSource option>) as this =
-        inherit FrameContainer(NodeType.Switch(fun _ -> this.WhoShouldFocus))
+        inherit FrameContainer(NodeType.Container(fun _ -> Some this.VisibleButtons))
 
         let create_button =
             Button(
@@ -277,16 +277,16 @@ module Mounts =
             create_button.Init this
             edit_buttons.Init this
 
-        member private this.WhoShouldFocus: Widget =
+        member private this.VisibleButtons: Widget =
             if setting.Value.IsSome then edit_buttons else create_button
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
-            this.WhoShouldFocus.Update(elapsed_ms, moved)
+            this.VisibleButtons.Update(elapsed_ms, moved)
 
         override this.Draw() =
             base.Draw()
-            this.WhoShouldFocus.Draw()
+            this.VisibleButtons.Draw()
 
     let tab =
         NavigationContainer.Column<Widget>()

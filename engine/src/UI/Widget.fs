@@ -11,13 +11,13 @@ type Widget(node_type) =
     let mutable focused = false
     let mutable selected = false
 
+    member this.Selected = selected
+    member this.Focused = focused
+
     member this.Parent =
         match _parent with
         | Some p -> p
         | None -> failwithf "%O has no parent (probably due to not calling init)" this
-
-    member this.Selected = selected
-    member this.Focused = focused
 
     member val Initialised = false with get, set
     member val Bounds = Rect.ZERO with get, set
@@ -44,16 +44,16 @@ type Widget(node_type) =
         else
             this.Parent.FocusTree
 
-    override this.Focus() =
+    member this.Focus() =
         if not this.NodeType._IsNone then
             Selection.focus this
 
-    override this.OnFocus() = focused <- true
-    override this.OnUnfocus() = focused <- false
-
-    override this.Select() =
+    member this.Select() =
         if not this.NodeType._IsNone then
             Selection.select this
+
+    override this.OnFocus() = focused <- true
+    override this.OnUnfocus() = focused <- false
 
     override this.OnSelected() = selected <- true
     override this.OnDeselected() = selected <- false

@@ -8,9 +8,6 @@ type ISelection(node_type: NodeType) =
     member this.NodeType = node_type
     abstract member FocusTree: ISelection list
 
-    abstract member Select: unit -> unit
-    abstract member Focus: unit -> unit
-
     abstract member OnFocus: unit -> unit
     abstract member OnUnfocus: unit -> unit
     abstract member OnSelected: unit -> unit
@@ -21,13 +18,17 @@ type ISelection(node_type: NodeType) =
     default this.Focusable =
         match node_type with
         | NodeType.None -> false
+        | NodeType.Container f ->
+            match f() with
+            | Some child -> child.Focusable
+            | None -> false
         | _ -> true
 
 and [<RequireQualifiedAccess>] NodeType =
     | None
     | Leaf
     | FocusTrap
-    | Switch of (unit -> ISelection)
+    | Container of (unit -> ISelection option)
     | Button of (unit -> unit)
     member this._IsNone =
         match this with
@@ -115,11 +116,10 @@ module Selection =
         | NodeType.None -> focus_tree []
         | NodeType.Leaf -> focus_tree item.FocusTree
         | NodeType.FocusTrap -> focus_tree item.FocusTree
-        | NodeType.Switch f -> 
-            let target = f ()
-            if target = item then 
-                focus_tree item.FocusTree 
-            else focus target
+        | NodeType.Container f ->
+            match f () with
+            | Some child -> focus child
+            | None -> focus_tree item.FocusTree
         | NodeType.Button a -> focus_tree item.FocusTree
 
     let rec select (item: ISelection) =
@@ -127,11 +127,10 @@ module Selection =
         | NodeType.None -> select_tree []
         | NodeType.Leaf -> select_tree item.FocusTree
         | NodeType.FocusTrap -> select_tree item.FocusTree
-        | NodeType.Switch f -> 
-            let target = f ()
-            if target = item then 
-                select_tree item.FocusTree 
-            else select target
+        | NodeType.Container f ->
+            match f () with
+            | Some child -> select child
+            | None -> select_tree item.FocusTree
         | NodeType.Button a ->
             focus_tree item.FocusTree
             a ()
@@ -156,7 +155,7 @@ module Selection =
                     | NodeType.None -> up ()
                     | NodeType.Leaf -> ()
                     | NodeType.FocusTrap -> ()
-                    | NodeType.Switch _ -> up ()
+                    | NodeType.Container _ -> up ()
                     | NodeType.Button _ -> ()
                 | None -> ()
 

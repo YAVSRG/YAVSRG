@@ -233,13 +233,12 @@ type private PlayerList() =
     let friends = FriendList()
     let search = SearchList()
 
-    let swap =
-        SwapContainer(Current = online, Position = Position.TrimTop(50.0f).Margin(40.0f))
+    let swap = SwapContainer(online, Position = Position.TrimTop(50.0f).Margin(40.0f))
 
     let button (label: string, cmp) =
         let button = Button(label, (fun () -> swap.Current <- cmp))
         FrameContainer(
-            NodeType.Switch(fun () -> button),
+            NodeType.Container(fun () -> Some button),
             Border = K Color.Transparent,
             Fill =
                 fun () ->
@@ -291,11 +290,7 @@ type Profile() as this =
                 else
                     this.Offline()
             , fun data ->
-                let color_picker =
-                    SwapContainer(
-                        Current = Dummy(),
-                        Position = Position.TrimRight(40.0f).TrimTop(70.0f).SliceRight(300.0f).SliceTop(500.0f)
-                    )
+                let color_picker = SwapContainer(Position = Position.TrimRight(40.0f).TrimTop(70.0f).SliceRight(300.0f).SliceTop(500.0f))
 
                 let has_colors = data.Badges |> Seq.exists (fun b -> not (List.isEmpty b.Colors))
 
@@ -415,7 +410,7 @@ type Profile() as this =
                                 Dropdown { 
                                     Items = badges |> Seq.map (fun (label, color) -> color, label)
                                     ColorFunc = fun c -> Color.FromArgb c, Colors.shadow_2
-                                    OnClose = fun () -> color_picker.Current <- Dummy()
+                                    OnClose = fun () -> color_picker.Current <- (Dummy())
                                     Setting = Setting.make save_color (fun () -> data.Color)
                                 }
 

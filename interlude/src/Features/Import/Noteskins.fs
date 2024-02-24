@@ -128,7 +128,7 @@ type NoteskinCard(data: RepoEntry) as this =
 module Noteskins =
 
     type NoteskinSearch() as this =
-        inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
+        inherit StaticContainer(NodeType.Container(fun _ -> Some this.Items))
 
         let grid =
             GridFlowContainer<NoteskinCard>(380.0f, 3, Spacing = (15.0f, 15.0f), WrapNavigation = false)

@@ -241,7 +241,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
     override this.Init(parent) =
 
         let friends_list = FlowContainer.Vertical(70.0f)
-        let swap = SwapContainer(Current = friends_list)
+        let swap = SwapContainer(friends_list)
 
         if Network.status = Network.Status.LoggedIn then
             Friends.List.get (fun response ->
@@ -402,8 +402,7 @@ type private TableStats() =
                 for i, (chart_id, grade, rating) in top_scores |> Array.indexed do
                     table_bests_items.Add(TableScore(i, chart_id, grade, rating, ruleset))
 
-                let swap =
-                    SwapContainer(Current = table_breakdown, Position = Position.TrimTop(120.0f).Margin(40.0f))
+                let swap = SwapContainer(table_breakdown, Position = Position.TrimTop(120.0f).Margin(40.0f))
 
                 let button (label: string, cmp) =
                     StylishButton(

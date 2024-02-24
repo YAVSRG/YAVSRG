@@ -11,31 +11,23 @@ module NavigationContainer =
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>() as this =
-        inherit StaticWidget(NodeType.Switch(fun _ -> this.WhoShouldFocus))
+        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus))
 
         let children = ResizeArray<'T>()
         let mutable last_selected = 0
         
         member val WrapNavigation = true with get, set
 
-        override this.Focus() =
-            if children.Count > 0 then
-                base.Focus()
-
-        override this.Select() =
-            if children.Count > 0 then
-                base.Select()
-
         member private this.WhoIsFocused: int option =
             Seq.tryFindIndex (fun (c: 'T) -> c.Focused) children
 
-        member private this.WhoShouldFocus : ISelection =
-            if children.Count = 0 then this else
+        member private this.WhoShouldFocus : ISelection option =
+            if children.Count = 0 then None else
 
             if last_selected >= children.Count then
                 last_selected <- 0
 
-            children.[last_selected]
+            Some children.[last_selected]
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 
@@ -160,20 +152,12 @@ module NavigationContainer =
 
     [<Sealed>]
     type Grid<'T when 'T :> Widget>() as this =
-        inherit StaticWidget(NodeType.Switch(fun _ -> this.WhoShouldFocus))
+        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus))
 
         let mutable rows = 0
         let mutable columns = 0
         let mutable last_selected = 0
         let children = ResizeArray<GridSwitchItem<'T>>()
-
-        override this.Focus() =
-            if children.Count > 0 then
-                base.Focus()
-
-        override this.Select() =
-            if children.Count > 0 then
-                base.Select()
 
         member this.Clear() =
             children.Clear()
@@ -186,13 +170,13 @@ module NavigationContainer =
         member private this.WhoIsFocused: int option =
             Seq.tryFindIndex (fun (c: GridSwitchItem<'T>) -> c.Widget.Focused) children
 
-        member private this.WhoShouldFocus : ISelection =
-            if children.Count = 0 then this else
+        member private this.WhoShouldFocus : ISelection option =
+            if children.Count = 0 then None else
 
             if last_selected >= children.Count then
                 last_selected <- 0
 
-            children.[last_selected].Widget
+            Some children.[last_selected].Widget
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 

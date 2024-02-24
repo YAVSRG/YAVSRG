@@ -12,7 +12,7 @@ module FlowContainer =
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>(item_size: float32) as this =
-        inherit StaticWidget(NodeType.Switch(fun _ -> this.WhoShouldFocus))
+        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus))
 
         let mutable filter: 'T -> bool = K true
         let mutable sort: ('T -> 'T -> int) option = None
@@ -25,24 +25,16 @@ module FlowContainer =
         /// Total children in this container, visible or not
         member this.Count = children.Count
 
-        override this.Focus() =
-            if children.Count > 0 then
-                base.Focus()
-
-        override this.Select() =
-            if children.Count > 0 then
-                base.Select()
-
         member private this.WhoIsFocused: int option =
             Seq.tryFindIndex (fun c -> c.Widget.Focused) children
 
-        member private this.WhoShouldFocus : ISelection =
-            if children.Count = 0 then this else
+        member private this.WhoShouldFocus : ISelection option =
+            if children.Count = 0 then None else
 
             if last_selected >= children.Count then
                 last_selected <- 0
 
-            children.[last_selected].Widget
+            Some children.[last_selected].Widget
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 

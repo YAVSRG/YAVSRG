@@ -252,7 +252,7 @@ module Wiki =
 
                         folders.Add(
                             FrameContainer(
-                                NodeType.Switch(fun () -> links),
+                                NodeType.Container(fun () -> Some links),
                                 Fill = K Colors.cyan.O2,
                                 Border = K Colors.cyan_accent
                             )
@@ -262,7 +262,7 @@ module Wiki =
 
                     con.Add(
                         StaticContainer(
-                            NodeType.Switch(fun () -> folders),
+                            NodeType.Container(fun () -> Some folders),
                             Position = Position.Box(0.0f, 0.0f, 0.0f, y, max_width, 400.0f)
                         )
                         |+ Text(

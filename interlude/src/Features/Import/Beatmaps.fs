@@ -308,7 +308,7 @@ type private SortingDropdown
 module Beatmaps =
 
     type Beatmaps() as this =
-        inherit StaticContainer(NodeType.Switch(fun _ -> this.Items))
+        inherit StaticContainer(NodeType.Container(fun _ -> Some this.Items))
 
         let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
 

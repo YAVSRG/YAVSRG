@@ -227,9 +227,9 @@ type private Tabs() =
     let skillsets = EmptyState(Icons.BAR_CHART, %"misc.nyi")
     let goals = EmptyState(Icons.BAR_CHART, %"misc.nyi")
 
-    let swap = SwapContainer(Current = table, Position = Position.TrimTop 50.0f)
+    let swap = SwapContainer(table, Position = Position.TrimTop 50.0f)
 
-    let button (label: string, cmp) =
+    let button (label: string, cmp: Widget) =
         FrameContainer(
             NodeType.None,
             Border = K Color.Transparent,

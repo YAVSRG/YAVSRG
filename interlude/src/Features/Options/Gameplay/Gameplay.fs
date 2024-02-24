@@ -115,7 +115,7 @@ type LanecoverPage() as this =
     override this.OnClose() = ()
 
 type PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
-    inherit StaticContainer(NodeType.Switch(fun () -> this.Button))
+    inherit StaticContainer(NodeType.Container(fun () -> Some this.Button))
 
     let old_value =
         match options.KeymodePreferredPresets.[keymode - 3] with

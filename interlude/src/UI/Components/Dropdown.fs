@@ -51,7 +51,7 @@ type DropdownOptions<'T when 'T : equality> =
     }
 
 type Dropdown<'T when 'T : equality>(options: DropdownOptions<'T>) as this =
-    inherit FrameContainer(NodeType.Switch(fun _ -> this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
+    inherit FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 
@@ -99,7 +99,7 @@ type DropdownMenuOptions =
     }
 
 type DropdownMenu(options: DropdownMenuOptions) as this =
-    inherit FrameContainer(NodeType.Switch(fun _ -> this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
+    inherit FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 

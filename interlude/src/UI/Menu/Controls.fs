@@ -190,7 +190,7 @@ type Divider() =
             (struct (Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White))
 
 type PageSetting(name, widget: Widget) as this =
-    inherit StaticContainer(NodeType.Switch(fun _ -> this.Child))
+    inherit StaticContainer(NodeType.Container(fun _ -> Some this.Child))
 
     let mutable widget = widget
 
@@ -342,12 +342,12 @@ type PageTextEntry(name, setting) =
         )
 
 type CaseSelector(name: string, cases: string array, controls: Widget array array, setting: Setting<int>) as this =
-    inherit StaticWidget(NodeType.Switch(fun _ -> this._selector ()))
+    inherit StaticWidget(NodeType.Container(fun _ -> Some this._selector))
 
     let selector =
         PageSetting(name, Selector<int>(Array.indexed cases, setting)).Pos(200.0f)
 
-    member this._selector() = selector
+    member this._selector = selector
 
     member this.Pos(pos) =
         selector.Pos(pos) |> ignore
@@ -427,7 +427,7 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
                 control.Init this
 
 type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
-    inherit StaticContainer(NodeType.Switch(fun _ -> this.HexEditor))
+    inherit StaticContainer(NodeType.Container(fun _ -> Some this.HexEditor))
 
     let (H, S, V) = s.Value.ToHsv()
     let mutable H = H

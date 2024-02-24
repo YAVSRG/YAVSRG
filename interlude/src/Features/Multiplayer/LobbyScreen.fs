@@ -201,7 +201,7 @@ type LobbyScreen() =
 
     let main = Lobby()
 
-    let swap = SwapContainer(Current = list)
+    let swap = SwapContainer(list)
 
     override this.OnEnter(_) =
         in_lobby <- Network.lobby.IsSome

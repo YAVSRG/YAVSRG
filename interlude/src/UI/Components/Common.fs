@@ -285,7 +285,7 @@ module LoadingIndicator =
             draw b (x + 0.666f) 0.1f color
 
 type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
-    inherit FrameContainer(NodeType.Switch(fun _ -> this.TextEntry))
+    inherit FrameContainer(NodeType.Container(fun _ -> Some this.TextEntry))
     let search_timer = new Diagnostics.Stopwatch()
 
     let text_entry =

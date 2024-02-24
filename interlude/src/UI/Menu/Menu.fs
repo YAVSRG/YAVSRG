@@ -10,12 +10,12 @@ open Interlude.Utils
 
 [<AbstractClass>]
 type Page() as this =
-    inherit DynamicContainer(NodeType.Switch(fun _ -> this._content))
+    inherit DynamicContainer(NodeType.Container(fun _ -> this._content))
 
     let mutable is_current = false
-    let mutable content = None
+    let mutable content : Widget option = None
 
-    member private this._content = content.Value
+    member private this._content = content |> Option.map (fun x -> x :> ISelection)
 
     abstract member Title: string
     abstract member OnClose: unit -> unit
