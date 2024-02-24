@@ -40,7 +40,7 @@ module NavigationContainer =
                     index <- (index + children.Count - 1) % children.Count
 
                 last_selected <- index
-                children.[index].Focus()
+                children.[index].Focus false
             | None -> ()
 
         member this.Next() =
@@ -52,7 +52,7 @@ module NavigationContainer =
                     index <- (index + 1) % children.Count
 
                 last_selected <- index
-                children.[index].Focus()
+                children.[index].Focus false
             | None -> ()
 
         member this.CanPrevious() =
@@ -75,7 +75,7 @@ module NavigationContainer =
             match this.WhoIsFocused with
             | Some i ->
                 last_selected <- i
-                children.[i].Select()
+                children.[i].Select false
             | None -> ()
 
         abstract member Navigate: unit -> unit
@@ -202,7 +202,7 @@ module NavigationContainer =
                 match found with
                 | Some i ->
                     last_selected <- i
-                    children.[i].Widget.Focus()
+                    children.[i].Widget.Focus false
                 | None -> ()
             | None -> ()
 
@@ -228,7 +228,7 @@ module NavigationContainer =
                 match found with
                 | Some i ->
                     last_selected <- i
-                    children.[i].Widget.Focus()
+                    children.[i].Widget.Focus false
                 | None -> ()
             | None -> ()
 
@@ -254,7 +254,7 @@ module NavigationContainer =
                 match found with
                 | Some i ->
                     last_selected <- i
-                    children.[i].Widget.Focus()
+                    children.[i].Widget.Focus false
                 | None -> ()
             | None -> ()
 
@@ -280,7 +280,7 @@ module NavigationContainer =
                 match found with
                 | Some i ->
                     last_selected <- i
-                    children.[i].Widget.Focus()
+                    children.[i].Widget.Focus false
                 | None -> ()
             | None -> ()
 
@@ -371,7 +371,7 @@ module NavigationContainer =
                     match this.WhoIsFocused with
                     | Some i ->
                         last_selected <- i
-                        children.[i].Widget.Select()
+                        children.[i].Widget.Select false
                     | None -> ()
 
         override this.Draw() =

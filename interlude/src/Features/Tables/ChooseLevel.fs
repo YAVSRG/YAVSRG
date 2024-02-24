@@ -35,10 +35,10 @@ type private LevelButton(name, action) =
         |* Clickable.Focus this
 
         base.Init parent
-
-    override this.OnFocus() =
+        
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         if this.Focused then
@@ -58,7 +58,7 @@ type SelectTableLevelPage(table: Table, action: int -> unit) as this =
             container |* LevelButton(table.Info.LevelName level, (fun () -> action level))
 
         if container.Focused then
-            container.Focus()
+            container.Focus false
 
     do
         refresh ()

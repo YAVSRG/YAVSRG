@@ -17,9 +17,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
     let ticker = Animation.Counter(600.0)
 
     let toggle () =
-        if this.Selected then this.Focus() else this.Select()
-
-    let mutable selected_via_click = false
+        if this.Selected then this.Focus false else this.Select false
 
     member val Clickable = true with get, set
 
@@ -45,28 +43,26 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
         if this.Clickable then
             this.Add(
                 Clickable(
-                    (fun () -> selected_via_click <- true; this.Select()),
-                    OnHover = (fun b -> if b && not this.Focused then this.Focus()),
+                    (fun () -> this.Select true),
+                    OnHover = (fun b -> if b && not this.Focused then this.Focus true),
                     OnRightClick = (fun () -> setting.Set "")
                 )
             )
 
-    override this.OnSelected() =
-        base.OnSelected()
+    override this.OnSelected (by_mouse: bool) =
+        base.OnSelected by_mouse
         Style.text_open.Play()
 
         Input.listen_to_text (
             setting |> Setting.trigger (fun v -> Style.key.Play()),
-            not selected_via_click,
+            not by_mouse,
             fun () ->
                 if this.Selected then
-                    this.Focus()
+                    this.Focus true
         )
 
-        selected_via_click <- false
-
-    override this.OnDeselected() =
-        base.OnDeselected()
+    override this.OnDeselected (by_mouse: bool) =
+        base.OnDeselected by_mouse
         Style.text_close.Play()
         Input.remove_listener ()
 
@@ -114,10 +110,10 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
         )
 
         base.Init parent
-
-    override this.OnFocus() =
+        
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     static member Selector<'T>(label: string, values: ('T * string) array, setting: Setting<'T>, color_func) =
         let mutable current = array.IndexOf(values |> Array.map fst, setting.Value)
@@ -156,10 +152,10 @@ type InlaidButton(label, action, icon) =
         )
 
         base.Init parent
-
-    override this.OnFocus() =
+        
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         let area = this.Bounds.TrimBottom(15.0f)

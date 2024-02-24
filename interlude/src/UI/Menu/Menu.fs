@@ -41,7 +41,7 @@ type Page() as this =
         if returning then
             this.OnReturnTo()
 
-        content.Value.Focus()
+        content.Value.Focus false
         is_current <- true
 
     member this.MoveDown() =
@@ -168,7 +168,7 @@ and Menu(top_level: Page) as this =
         base.Update(elapsed_ms, moved)
 
         if (%%"exit").Tapped() then
-            Selection.up ()
+            Selection.up false
 
         let mutable i = 0
 

@@ -52,9 +52,9 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
         )
         |* Clickable.Focus this
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     member this.Install() =
         match status with

@@ -21,7 +21,7 @@ type SwapContainer(current: Widget) as this =
                 else
                     assert (child.Parent = this)
 
-            if old_child.Focused then child.Focus()
+            if old_child.Focused then child.Focus false
 
             swapped_last_frame <- true
 

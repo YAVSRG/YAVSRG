@@ -286,9 +286,9 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
             Position = Position.TrimRight(160.0f).SliceRight(200.0f).Margin(20.0f, 5.0f)
         )
     
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Init (parent: Widget) =
         this
@@ -345,9 +345,9 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
             Position = Position.TrimRight(100.0f).SliceRight(200.0f).Margin(20.0f, 20.0f)
         )
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Init (parent: Widget) =
         this

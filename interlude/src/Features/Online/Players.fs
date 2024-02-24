@@ -415,7 +415,7 @@ type Profile() as this =
                                 }
 
                             color_picker.Current <- dropdown
-                            dropdown.Focus()
+                            dropdown.Focus false
                         ),
                         Icons.REFRESH_CCW,
                         Position = Position.TrimRight(40.0f).SliceTop(70.0f).SliceRight(300.0f)

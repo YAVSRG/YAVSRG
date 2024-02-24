@@ -129,9 +129,9 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
     //    ,
     //    Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         base.Draw()

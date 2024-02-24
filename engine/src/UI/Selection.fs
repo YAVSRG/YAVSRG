@@ -8,10 +8,10 @@ type ISelection(node_type: NodeType) =
     member this.NodeType = node_type
     abstract member FocusTree: ISelection list
 
-    abstract member OnFocus: unit -> unit
-    abstract member OnUnfocus: unit -> unit
-    abstract member OnSelected: unit -> unit
-    abstract member OnDeselected: unit -> unit
+    abstract member OnFocus: bool -> unit
+    abstract member OnUnfocus: bool -> unit
+    abstract member OnSelected: bool -> unit
+    abstract member OnDeselected: bool -> unit
 
     abstract member Focusable: bool
 
@@ -42,16 +42,27 @@ module Selection =
     let mutable private current_clamp_tree: ISelection list = []
 
     let get_focused_element () = List.tryHead current_tree
+    let get_selected_element () = if leaf_is_selected then List.tryHead current_tree else None
 
     // Test if a proposed tree is rooted under the required parent
-    let private check_clamp (tree: ISelection list) =
-        if current_clamp_tree.IsEmpty then
+    let private check_clamp (by_mouse: bool) (tree: ISelection list) =
+        
+        if 
+            by_mouse 
+            && (
+                match get_selected_element() with
+                | Some x when List.tryHead tree <> Some x && (match x.NodeType with NodeType.FocusTrap -> true | _ -> false) -> true
+                | _ -> false
+            )
+        then
+            false
+        elif current_clamp_tree.IsEmpty then
             true
         else
             let l = current_clamp_tree.Length
             tree.Length >= l && List.skip (tree.Length - l) tree = current_clamp_tree
 
-    let private diff (xs: ISelection list) (ys: ISelection list) =
+    let private diff (by_mouse: bool) (xs: ISelection list) (ys: ISelection list) =
         let mutable xs = xs
         let mutable ys = ys
         let mutable difference_found = false
@@ -64,102 +75,95 @@ module Selection =
                 difference_found <- true
 
         for x in List.rev xs do
-            x.OnUnfocus()
+            x.OnUnfocus by_mouse
 
         for y in ys do
-            y.OnFocus()
+            y.OnFocus by_mouse
 
-    let rec private focus_tree (tree: ISelection list) =
+    let rec private focus_tree (by_mouse: bool) (tree: ISelection list) =
 
-        if not (check_clamp tree) then
+        if not (check_clamp by_mouse tree) then
             ()
         else
 
         if leaf_is_selected then
             match List.tryHead current_tree with
-            | Some w -> w.OnDeselected()
+            | Some w -> w.OnDeselected by_mouse
             | None -> ()
 
             leaf_is_selected <- false
 
-        diff (List.rev current_tree) (List.rev tree)
+        diff by_mouse (List.rev current_tree) (List.rev tree)
         current_tree <- tree
 
-    let rec private select_tree (tree: ISelection list) =
-        if not (check_clamp tree) then
+    let rec private select_tree (by_mouse: bool) (tree: ISelection list) =
+        if not (check_clamp by_mouse tree) then
             ()
         else
 
         if tree <> current_tree && leaf_is_selected then
             match List.tryHead current_tree with
-            | Some w -> w.OnDeselected()
+            | Some w -> w.OnDeselected by_mouse
             | None -> ()
 
-        diff (List.rev current_tree) (List.rev tree)
+        diff by_mouse (List.rev current_tree) (List.rev tree)
 
         if tree <> current_tree || not leaf_is_selected then
             match List.tryHead tree with
-            | Some w -> w.OnSelected()
+            | Some w -> w.OnSelected by_mouse
             | None -> ()
 
         leaf_is_selected <- true
         current_tree <- tree
 
 
-    let rec focus (item: ISelection) =
-
-        match get_focused_element () with
-        | Some x when leaf_is_selected && item <> x && (match x.NodeType with NodeType.FocusTrap -> true | _ -> false) -> ()
-        | _ ->
-
+    let rec focus (by_mouse: bool) (item: ISelection) =
         match item.NodeType with
-        | NodeType.None -> focus_tree []
-        | NodeType.Leaf -> focus_tree item.FocusTree
-        | NodeType.FocusTrap -> focus_tree item.FocusTree
+        | NodeType.None -> focus_tree by_mouse []
+        | NodeType.Leaf -> focus_tree by_mouse item.FocusTree
+        | NodeType.FocusTrap -> focus_tree by_mouse item.FocusTree
         | NodeType.Container f ->
             match f () with
-            | Some child -> focus child
-            | None -> focus_tree item.FocusTree
-        | NodeType.Button a -> focus_tree item.FocusTree
+            | Some child -> focus by_mouse child
+            | None -> focus_tree by_mouse item.FocusTree
+        | NodeType.Button _ -> focus_tree by_mouse item.FocusTree
 
-    let rec select (item: ISelection) =
+    let rec select (by_mouse: bool) (item: ISelection) =
         match item.NodeType with
-        | NodeType.None -> select_tree []
-        | NodeType.Leaf -> select_tree item.FocusTree
-        | NodeType.FocusTrap -> select_tree item.FocusTree
+        | NodeType.None -> select_tree by_mouse []
+        | NodeType.Leaf -> select_tree by_mouse item.FocusTree
+        | NodeType.FocusTrap -> select_tree by_mouse item.FocusTree
         | NodeType.Container f ->
             match f () with
-            | Some child -> select child
-            | None -> select_tree item.FocusTree
+            | Some child -> select by_mouse child
+            | None -> select_tree by_mouse item.FocusTree
         | NodeType.Button a ->
-            focus_tree item.FocusTree
+            focus_tree by_mouse item.FocusTree
             a ()
 
     let rec clamp_to (item: ISelection) = current_clamp_tree <- item.FocusTree
 
     let unclamp () = current_clamp_tree <- []
 
-    let rec up () =
+    let rec up (by_mouse: bool) =
         if leaf_is_selected then
-            focus_tree current_tree
+            focus_tree by_mouse current_tree
         else
             match current_tree with
             | [] -> ()
             | head :: rest ->
-                head.OnUnfocus()
+                head.OnUnfocus by_mouse
                 current_tree <- rest
 
                 match List.tryHead rest with
                 | Some h ->
                     match h.NodeType with
-                    | NodeType.None -> up ()
-                    | NodeType.Leaf -> ()
-                    | NodeType.FocusTrap -> ()
-                    | NodeType.Container _ -> up ()
-                    | NodeType.Button _ -> ()
+                    | NodeType.None -> up by_mouse
+                    | NodeType.Container _ -> if not by_mouse then up false
+                    | _ -> ()
                 | None -> ()
 
-    let clear () = focus_tree []
+    let clear () = focus_tree false []
 
 // drag and drop system is unfinished
 // todo: finish it

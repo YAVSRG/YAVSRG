@@ -37,23 +37,15 @@ type private ModeButton(label: string, mode: SyncMode, state: PracticeState) =
 
         base.Init parent
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         if state.SyncMode.Value = mode then
             Draw.rect this.Bounds Colors.shadow_2.O3
 
         base.Draw()
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        if this.Focused && not this.Selected && (%%"right").Tapped() then
-            this.Select()
-        elif this.Selected && (%%"left").Tapped() then
-            this.Focus()
 
 type SyncSuggestionControls(state: PracticeState) =
     inherit SlideoutContent(

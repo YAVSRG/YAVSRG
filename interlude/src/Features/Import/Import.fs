@@ -88,7 +88,7 @@ type ImportScreen() as this =
         )
 
     override this.OnEnter _ =
-        sidebar.Focus()
+        sidebar.Focus false
         DiscordRPC.in_menus ("Importing new content")
 
     override this.OnExit _ = ()

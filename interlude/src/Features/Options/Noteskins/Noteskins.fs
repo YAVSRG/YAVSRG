@@ -92,9 +92,9 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
         base.Update(elapsed_ms, moved)
         preview_fade.Update elapsed_ms
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         if this.IsCurrent then

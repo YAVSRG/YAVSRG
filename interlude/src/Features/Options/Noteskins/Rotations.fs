@@ -36,26 +36,26 @@ type RotationPicker(rotation: Setting<float>) as this =
         |* Clickable(
             (fun () ->
                 (if not this.Selected then
-                     this.Select())
+                     this.Select true)
 
                 fd ()
             ),
             OnRightClick =
                 (fun () ->
                     (if not this.Selected then
-                         this.Select())
+                         this.Select true)
 
                     bk ()
                 ),
             OnHover =
                 fun b ->
                     if b && not this.Focused then
-                        this.Focus()
+                        this.Focus true
         )
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         if this.Selected then

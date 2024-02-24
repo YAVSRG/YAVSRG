@@ -22,7 +22,7 @@ module System =
             match b with
             | Key(k, (ctrl, _, shift)) ->
                 set <| Key(k, (ctrl, false, shift))
-                this.Focus()
+                this.Focus false
                 Style.key.Play()
             | _ -> Input.listen_to_next_key input_callback
 
@@ -43,25 +43,25 @@ module System =
             |* Clickable(
                 (fun () ->
                     if not this.Selected then
-                        this.Select()
+                        this.Select true
                 ),
                 OnHover =
                     fun b ->
                         if b then
-                            this.Focus()
+                            this.Focus true
             )
 
-        override this.OnFocus() =
+        override this.OnFocus (by_mouse: bool) =
+            base.OnFocus by_mouse
             Style.hover.Play()
-            base.OnFocus()
 
-        override this.OnSelected() =
-            base.OnSelected()
+        override this.OnSelected (by_mouse: bool) =
+            base.OnSelected by_mouse
             Style.click.Play()
             Input.listen_to_next_key input_callback
 
-        override this.OnDeselected() =
-            base.OnDeselected()
+        override this.OnDeselected (by_mouse: bool) =
+            base.OnDeselected by_mouse
             Input.remove_listener ()
 
     type HotkeysPage() as this =
@@ -279,8 +279,8 @@ module System =
                 |+ PageSetting(
                     "system.audiooffset",
                     { new Slider(options.AudioOffset, Step = 1f) with
-                        override this.OnDeselected() =
-                            base.OnDeselected()
+                        override this.OnDeselected (by_mouse: bool) =
+                            base.OnDeselected by_mouse
                             Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
                     }
                 )

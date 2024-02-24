@@ -66,9 +66,9 @@ type TableCard(online_table: Tables.List.Table) as this =
 
         base.Init parent
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     member this.Install() =
         match status with

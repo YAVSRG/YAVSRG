@@ -42,9 +42,9 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
 
         base.Init parent
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         let state = current_state ()

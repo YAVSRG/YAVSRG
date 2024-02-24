@@ -32,8 +32,8 @@ module Comments =
                         true,
                         Position = Position.Margin(20.0f, 10.0f),
                         Clickable = false) with
-            override this.OnDeselected() =
-                base.OnDeselected()
+            override this.OnDeselected (by_mouse: bool) =
+                base.OnDeselected by_mouse
 
                 match Chart.SAVE_DATA with
                 | Some d -> d.Comment <- d.Comment.Trim()
@@ -62,7 +62,7 @@ module Comments =
             Position = Position.SliceTop 55.0f
         )
 
-    let begin_edit () = editor.Select()
+    let begin_edit () = editor.Select false
 
     let init (parent: Widget) = editor.Init parent
 
@@ -101,10 +101,10 @@ type private ActionButton(icon, action, active) =
         )
 
         base.Init parent
-
-    override this.OnFocus() =
+        
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         let area = this.Bounds.SliceTop(this.Bounds.Height + 5.0f)

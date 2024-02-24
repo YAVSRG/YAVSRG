@@ -35,21 +35,21 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
                 )
         )
         |* Clickable(
-            this.Select,
+            (fun () -> this.Select true),
             OnHover =
                 fun b ->
                     if b then
                         if Mouse.held Mouse.LEFT then
-                            this.Select()
+                            this.Select true
                         else
-                            this.Focus()
+                            this.Focus true
         )
 
         base.Init parent
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         base.Draw()
@@ -369,6 +369,6 @@ type TextureCard(id: string, on_click: unit -> unit) as this =
         |+ Text(id, Align = Alignment.CENTER, Position = Position.Margin(Style.PADDING).SliceBottom(25.0f))
         |* Clickable.Focus this
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()

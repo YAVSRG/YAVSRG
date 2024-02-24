@@ -21,20 +21,12 @@ module private Dropdown =
 
         do
             this
-            |+ Clickable(
-                this.Select,
-                OnHover =
-                    (fun b ->
-                        if b && not this.Focused then
-                            this.Focus()
-                    ),
-                Floating = true
-            )
+            |+ Clickable.Focus(this, Floating = true)
             |* Text(label, Align = Alignment.LEFT, Position = Position.Margin(10.0f, 5.0f), Color = K color)
 
-        override this.OnFocus() =
+        override this.OnFocus (by_mouse: bool) =
+            base.OnFocus by_mouse
             Style.hover.Play()
-            base.OnFocus()
 
         override this.Draw() =
             if this.Focused then
@@ -82,7 +74,7 @@ type Dropdown<'T when 'T : equality>(options: DropdownOptions<'T>) as this =
         |> this.Add
 
         base.Init parent
-        what_to_focus.Focus()
+        what_to_focus.Focus false
 
     member this.Close() = options.OnClose()
     member private this.Items = flow
@@ -127,7 +119,7 @@ type DropdownMenu(options: DropdownMenuOptions) as this =
         |> this.Add
 
         base.Init parent
-        this.Focus()
+        this.Focus false
 
     member this.Close() = options.OnClose()
     member private this.Items = flow

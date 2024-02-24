@@ -193,9 +193,9 @@ type private CollectionButton(icon, name, action) as this =
 
         base.Init parent
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         let color =
@@ -224,7 +224,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit, is_disabled:
                 grid.Add(CollectionButton(p.Icon.Value, name, (fun () -> on_select (name, collection)), Disabled = is_disabled (name, collection)))
 
         if grid.Focused then
-            grid.Focus()
+            grid.Focus false
 
     do
         refresh ()

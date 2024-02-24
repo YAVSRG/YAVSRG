@@ -134,7 +134,7 @@ module Scoreboard =
                     }
             )
 
-            |* Clickable(this.Select, OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
+            |* Clickable((fun () -> this.Select true), OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
 
             base.Init parent
 
@@ -142,9 +142,9 @@ module Scoreboard =
 
         member this.FadeOut() = fade.Target <- 0.0f
 
-        override this.OnFocus() =
+        override this.OnFocus (by_mouse: bool) =
+            base.OnFocus by_mouse
             Style.hover.Play()
-            base.OnFocus()
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
@@ -325,7 +325,7 @@ type Scoreboard(display: Setting<Display>) as this =
                 if Loader.container.Focused then
                     Selection.clear ()
                 else
-                    Loader.container.Focus()
+                    Loader.container.Focus false
         )
         |* Conditional((fun () -> count = 0), EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty"))
 

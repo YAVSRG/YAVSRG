@@ -44,19 +44,17 @@ type Widget(node_type) =
         else
             this.Parent.FocusTree
 
-    member this.Focus() =
-        if not this.NodeType._IsNone then
-            Selection.focus this
+    member this.Focus (by_mouse: bool) =
+        if this.Focusable then Selection.focus by_mouse this
 
-    member this.Select() =
-        if not this.NodeType._IsNone then
-            Selection.select this
+    member this.Select (by_mouse: bool) =
+        if this.Focusable then Selection.select by_mouse this
 
-    override this.OnFocus() = focused <- true
-    override this.OnUnfocus() = focused <- false
+    override this.OnFocus _ = focused <- true
+    override this.OnUnfocus _ = focused <- false
 
-    override this.OnSelected() = selected <- true
-    override this.OnDeselected() = selected <- false
+    override this.OnSelected _ = selected <- true
+    override this.OnDeselected _ = selected <- false
 
     override this.ToString() =
         if _parent.IsNone then "*" else _parent.Value.ToString()

@@ -43,13 +43,13 @@ type Slider(setting: Setting.Bounded<float32>) as this =
         )
         |* Clickable(
             (fun () ->
-                this.Select()
+                this.Select true
                 dragging <- true
             ),
             OnHover =
                 (fun b ->
                     if b && not this.Focused then
-                        this.Focus()
+                        this.Focus true
                 )
         )
 
@@ -64,9 +64,9 @@ type Slider(setting: Setting.Bounded<float32>) as this =
     static member Percent(setting) =
         Slider(setting, Format = (fun x -> sprintf "%.0f%%" (x * 100.0f)))
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -140,21 +140,21 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
         |* Clickable(
             (fun () ->
                 (if not this.Selected then
-                     this.Select())
+                     this.Select true)
 
                 fd ()
             ),
             OnHover =
                 fun b ->
                     if b && not this.Focused then
-                        this.Focus()
+                        this.Focus true
         )
 
         this.Position <- Position.SliceLeft 100.0f
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -205,7 +205,7 @@ type PageSetting(name, widget: Widget) as this =
                 w.Init this
 
                 if old_widget.Focused then
-                    w.Focus()
+                    w.Focus false
 
     member val Width = PRETTYWIDTH with get, set
     member val Height = PRETTYHEIGHT with get, set
@@ -277,19 +277,13 @@ type PageButton(name, action) as this =
             Align = Alignment.LEFT,
             Position = Position.Margin(Style.PADDING)
         )
-        |* Clickable(
-            this.Select,
-            OnHover =
-                fun b ->
-                    if b then
-                        this.Focus()
-        )
+        |* Clickable.Focus this
 
         base.Init parent
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         if this.Focused then
@@ -365,11 +359,11 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
             let current_controls = controls.[setting.Value]
 
             if n = -1 then
-                current_controls.[current_controls.Length - 1].Focus()
+                current_controls.[current_controls.Length - 1].Focus false
             elif n = 0 then
-                selector.Focus()
+                selector.Focus false
             else
-                current_controls.[n - 1].Focus()
+                current_controls.[n - 1].Focus false
         | None -> ()
 
     member this.Next() =
@@ -377,15 +371,15 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
         | Some n ->
             let current_controls = controls.[setting.Value]
 
-            if n = -1 then current_controls.[0].Focus()
-            elif n = current_controls.Length - 1 then selector.Focus()
-            else current_controls.[n + 1].Focus()
+            if n = -1 then current_controls.[0].Focus false
+            elif n = current_controls.Length - 1 then selector.Focus false
+            else current_controls.[n + 1].Focus false
         | None -> ()
 
     member this.SelectFocusedChild() =
         match this.WhoIsFocused with
-        | Some -1 -> selector.Select()
-        | Some n -> controls.[setting.Value].[n].Select()
+        | Some -1 -> selector.Select false
+        | Some n -> controls.[setting.Value].[n].Select false
         | None -> ()
 
     override this.Draw() =
@@ -450,8 +444,8 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
 
     let hex_editor =
         { new TextEntry(hex, "none", false, Position = Position.TrimLeft(50.0f).SliceTop PRETTYHEIGHT) with
-            override this.OnDeselected() =
-                base.OnDeselected()
+            override this.OnDeselected (by_mouse: bool) =
+                base.OnDeselected by_mouse
                 hex.Value <- s.Value.ToHex()
         }
 
@@ -461,9 +455,9 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
 
     member private this.HexEditor = hex_editor
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         base.Draw()

@@ -467,7 +467,7 @@ type Slideout(content: SlideoutContent) =
     member this.Open() =
         if not is_open then
             is_open <- true
-            content.Focus()
+            content.Focus false
             this.Position <- Position.SliceTop(height)
             this.OnOpen()
 
@@ -486,7 +486,7 @@ type Slideout(content: SlideoutContent) =
 
         if is_open then
             if (%%"exit").Tapped() && content.Focused then
-                Selection.up ()
+                Selection.up false
 
             if this.AutoCloseWhen content then
                 this.Close()

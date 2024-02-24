@@ -137,7 +137,7 @@ module PlayScreen =
                     (fun () ->
                         Song.pause ()
                         recommended_offset <- LocalAudioSync.get_automatic screen.State info.SaveData |> float32
-                        offset_slider.Select()
+                        offset_slider.Select false
                     ),
                 OnClose = close,
                 AutoCloseWhen = (fun (_: SlideoutContent) -> not offset_slider.Selected)

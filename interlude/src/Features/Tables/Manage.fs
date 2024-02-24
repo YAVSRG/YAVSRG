@@ -41,9 +41,9 @@ type private TableButton(name, action) =
 
         base.Init parent
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         if this.Focused then
@@ -91,7 +91,7 @@ type ManageTablesPage(table_changed) as this =
         | None -> ()
 
         if container.Focused then
-            container.Focus()
+            container.Focus false
 
     do
         refresh ()

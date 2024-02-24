@@ -60,8 +60,8 @@ type Clickable(on_left_click) =
 
     static member Focus(w: Widget) =
         Clickable(
-            w.Select,
-            OnHover = fun b -> if b && not w.Focused then w.Focus()
+            (fun () -> w.Select true),
+            OnHover = fun b -> if b && not w.Focused then w.Focus true
         )
 
 [<Sealed>]

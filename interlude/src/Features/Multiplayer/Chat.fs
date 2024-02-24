@@ -112,7 +112,7 @@ type Chat() =
                         OnHover =
                             fun b ->
                                 if b then
-                                    container.Focus()
+                                    container.Focus true
                     )
                     |+ Text(
                         sprintf "%i. %s" place username,
@@ -218,6 +218,6 @@ type Chat() =
                 Lobby.chat current_message.Value
                 current_message.Set ""
             else
-                chatline.Select()
+                chatline.Select false
 
         base.Update(elapsed_ms, moved)

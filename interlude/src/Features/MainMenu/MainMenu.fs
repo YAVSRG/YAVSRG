@@ -41,9 +41,9 @@ type private MenuButton(on_click, label: string, pos) =
         base.Init parent
         this.Hide()
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Draw() =
         Draw.untextured_quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.color !*Palette.HIGHLIGHT_100)

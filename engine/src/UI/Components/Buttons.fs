@@ -19,9 +19,9 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
 
     new(text: string, on_click: unit -> unit) = Button(K text, on_click)
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Init(parent: Widget) =
         this
@@ -37,13 +37,13 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
         |+ Clickable(
             (fun () ->
                 if not (this.Disabled()) then
-                    this.Select()
+                    this.Select true
             ),
             Floating = this.Floating,
             OnHover =
                 fun b ->
                     if b && not (this.Disabled()) then
-                        this.Focus()
+                        this.Focus true
         )
         |* HotkeyAction(
             this.Hotkey,
@@ -71,9 +71,9 @@ type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click
 
     new(text: string, icon, icon_size, on_click: unit -> unit) = IconButton(K text, icon, icon_size, on_click)
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
     override this.Init(parent: Widget) =
         this
@@ -102,12 +102,12 @@ type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click
         |+ Clickable(
             (fun () ->
                 if not (this.Disabled()) then
-                    this.Select()
+                    this.Select true
             ),
             OnHover =
                 fun b ->
                     if b && not (this.Disabled()) then
-                        this.Focus()
+                        this.Focus true
         )
         |* HotkeyAction(
             this.Hotkey,

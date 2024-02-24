@@ -123,7 +123,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             match found with
             | Some i ->
                 last_selected <- i
-                children.[i].Widget.Focus()
+                children.[i].Widget.Focus false
             | None -> ()
         | None -> ()
 
@@ -154,7 +154,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             match found with
             | Some i ->
                 last_selected <- i
-                children.[i].Widget.Focus()
+                children.[i].Widget.Focus false
             | None -> ()
         | None -> ()
 
@@ -184,7 +184,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             match found with
             | Some i ->
                 last_selected <- i
-                children.[i].Widget.Focus()
+                children.[i].Widget.Focus false
             | None -> ()
         | None -> ()
 
@@ -214,7 +214,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             match found with
             | Some i ->
                 last_selected <- i
-                children.[i].Widget.Focus()
+                children.[i].Widget.Focus false
             | None -> ()
         | None -> ()
 
@@ -314,7 +314,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 match this.WhoIsFocused with
                 | Some i ->
                     last_selected <- i
-                    children.[i].Widget.Select()
+                    children.[i].Widget.Select false
                 | None -> ()
 
     override this.Draw() =

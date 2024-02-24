@@ -48,7 +48,7 @@ module FlowContainer =
                     index <- (index + children.Count - 1) % children.Count
 
                 last_selected <- index
-                children.[index].Widget.Focus()
+                children.[index].Widget.Focus false
             | None -> ()
 
         member this.Next() =
@@ -61,22 +61,22 @@ module FlowContainer =
                     index <- (index + 1) % children.Count
 
                 last_selected <- index
-                children.[index].Widget.Focus()
+                children.[index].Widget.Focus false
             | None -> ()
 
         member this.SelectFocusedChild() =
             match this.WhoIsFocused with
             | Some i ->
                 last_selected <- i
-                children.[i].Widget.Select()
+                children.[i].Widget.Select false
             | None -> ()
 
-        override this.OnUnfocus() =
+        override this.OnUnfocus (by_mouse: bool) =
             match this.WhoIsFocused with
             | Some i -> last_selected <- i
             | None -> ()
 
-            base.OnUnfocus()
+            base.OnUnfocus by_mouse
 
         abstract member Navigate: unit -> unit
 

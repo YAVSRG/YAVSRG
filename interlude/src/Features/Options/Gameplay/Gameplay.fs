@@ -43,7 +43,7 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             progress <- progress + 1
 
             if progress = int keymode.Value then
-                this.Focus()
+                this.Focus false
             else
                 Input.listen_to_next_key input_callback
 
@@ -58,30 +58,21 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             Color = (fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1),
             Align = Alignment.LEFT
         )
-        |* Clickable(
-            (fun () ->
-                if not this.Selected then
-                    this.Select()
-            ),
-            OnHover =
-                fun b ->
-                    if b then
-                        this.Focus()
-        )
+        |* Clickable.Focus this
 
-    override this.OnFocus() =
+    override this.OnFocus (by_mouse: bool) =
+        base.OnFocus by_mouse
         Style.hover.Play()
-        base.OnFocus()
 
-    override this.OnSelected() =
-        base.OnSelected()
+    override this.OnSelected (by_mouse: bool) =
+        base.OnSelected by_mouse
         progress <- 0
         refresh_text ()
         Style.click.Play()
         Input.listen_to_next_key input_callback
 
-    override this.OnDeselected() =
-        base.OnDeselected()
+    override this.OnDeselected (by_mouse: bool) =
+        base.OnDeselected by_mouse
         Input.remove_listener ()
 
         text <-
@@ -375,8 +366,8 @@ type GameplayPage() as this =
         |+ PageSetting(
             "system.audiooffset",
             { new Slider(options.AudioOffset, Step = 1f) with
-                override this.OnDeselected() =
-                    base.OnDeselected()
+                override this.OnDeselected (by_mouse: bool) =
+                    base.OnDeselected by_mouse
                     Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
             }
         )
