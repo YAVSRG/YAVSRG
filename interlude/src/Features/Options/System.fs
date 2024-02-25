@@ -40,7 +40,11 @@ module System =
                 Align = Alignment.LEFT,
                 Position = Position.TrimLeft 20.0f
             )
-            |* Clickable.Focus this
+            |* Clickable.Focus(this, OnHover = fun b -> 
+                if b && not this.Focused then
+                    this.Focus true
+                elif not b && this.FocusedByMouse && not this.Selected then
+                    Selection.up true)
 
         override this.OnFocus (by_mouse: bool) =
             base.OnFocus by_mouse

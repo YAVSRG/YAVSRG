@@ -58,7 +58,12 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             Color = (fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1),
             Align = Alignment.LEFT
         )
-        |* Clickable.Focus this
+        |* Clickable.Focus(this, OnHover = fun b -> 
+            if b && not this.Focused then
+                this.Focus true
+            elif not b && this.FocusedByMouse && not this.Selected then
+                Selection.up true
+        )
 
     override this.OnFocus (by_mouse: bool) =
         base.OnFocus by_mouse

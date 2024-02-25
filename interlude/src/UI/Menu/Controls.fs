@@ -44,6 +44,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
         |* Clickable(
             (fun () ->
                 this.Select true
+                Style.click.Play()
                 dragging <- true
             ),
             OnHover =
@@ -216,7 +217,7 @@ type PageSetting(name, widget: Widget) as this =
         this
         |* Text(
             K(%(sprintf "%s.name" name) + ":"),
-            Color = (fun () -> (if this.Focused then Colors.text_yellow_2 else Colors.text)),
+            Color = (fun () -> (if widget.Focused then Colors.text_yellow_2 else Colors.text)),
             Align = Alignment.LEFT,
             Position =
                 Position

@@ -26,13 +26,13 @@ type private TableButton(name, action) =
             Color =
                 (fun () ->
                     ((if this.Focused then
-                          Palette.color (255, 1.0f, 0.5f)
+                          Colors.yellow_accent
                       else
                           Colors.white),
-                     (if Some name = options.Table.Value then
+                     (if (match Content.Table with Some t -> t.Info.Name = name | None -> false) then
                           Palette.color (255, 0.5f, 0.0f)
                       else
-                          Colors.black))
+                          Colors.shadow_2))
                 ),
             Align = Alignment.LEFT,
             Position = Position.Margin Style.PADDING
@@ -47,7 +47,7 @@ type private TableButton(name, action) =
 
     override this.Draw() =
         if this.Focused then
-            Draw.rect this.Bounds (!*Palette.HOVER)
+            Draw.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
 

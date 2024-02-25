@@ -36,7 +36,7 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
         |* Text(
             ModState.get_mod_desc id,
             Color = (fun () -> (if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2),
-            Position = Position.TrimTop(TOP_HEIGHT).Margin(20.0f, 0.0f),
+            Position = Position.TrimTop(TOP_HEIGHT - 2f).Margin(20.0f, 0.0f),
             Align = Alignment.LEFT
         )
 
@@ -48,14 +48,14 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
 
     override this.Draw() =
         let state = current_state ()
-        Draw.rect (this.Bounds.SliceTop(TOP_HEIGHT)) (if state >= 0 then Colors.pink.O3 else Colors.shadow_2.O3)
+        Draw.rect (this.Bounds.SliceTop(TOP_HEIGHT)) (if state >= 0 then Colors.pink.O3 else Colors.shadow_2.O2)
 
         Draw.rect
             (this.Bounds.TrimTop(TOP_HEIGHT))
             (if state >= 0 then
                  Colors.pink_shadow.O3
              else
-                 Colors.black.O3)
+                 Colors.shadow_1.O3)
 
         if state >= 0 then
             Text.fill_b (

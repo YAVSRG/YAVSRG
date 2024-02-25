@@ -42,9 +42,12 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
 
         if this.Clickable then
             this.Add(
-                Clickable(
-                    (fun () -> this.Select true),
-                    OnHover = (fun b -> if b && not this.Focused then this.Focus true),
+                Clickable.Focus(this,
+                    OnHover = (fun b -> 
+                        if b && not this.Focused then 
+                            this.Focus true
+                        elif not b && not focus_trap && this.FocusedByMouse then
+                            Selection.up true),
                     OnRightClick = (fun () -> setting.Set "")
                 )
             )
