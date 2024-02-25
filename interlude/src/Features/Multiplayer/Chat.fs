@@ -109,10 +109,11 @@ type Chat() =
                                 Transitions.Flags.Default
                             |> ignore
                         ),
-                        OnHover =
-                            fun b ->
-                                if b then
-                                    container.Focus true
+                        OnHover = fun b -> 
+                            if b && not container.Focused then 
+                                container.Focus true
+                            elif not b && container.FocusedByMouse then
+                                Selection.up true
                     )
                     |+ Text(
                         sprintf "%i. %s" place username,

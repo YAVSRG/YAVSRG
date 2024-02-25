@@ -133,8 +133,8 @@ module Scoreboard =
                         Bottom = 0.6f %+ 0.0f
                     }
             )
-
-            |* Clickable((fun () -> this.Select true), OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
+            
+            |* Clickable.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
 
             base.Init parent
 

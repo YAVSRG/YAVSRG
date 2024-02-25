@@ -12,7 +12,7 @@ open Interlude.Utils
 open Interlude.Features
 
 type GameplayKeybinder(keymode: Setting<Keymode>) as this =
-    inherit StaticContainer(NodeType.Leaf)
+    inherit StaticContainer(NodeType.FocusTrap)
 
     let mutable progress = 0
 

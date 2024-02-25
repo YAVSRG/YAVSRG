@@ -14,7 +14,7 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
-type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as this =
+type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
     inherit StaticContainer(NodeType.Leaf)
 
     let sprite = Content.Texture "note"
@@ -28,25 +28,19 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) as th
         Setting.app (fun x -> (x + 1uy) % n) color
         Style.click.Play()
 
-    do
+    override this.Init(parent: Widget) =
         this
         |+ Tooltip(
             Callout.Normal
                 .Title(sprintf "%s: %O" (%"noteskins.edit.notecolors.name") style)
                 .Body(%(sprintf "noteskins.edit.notecolors.%s.%i" (style.ToString().ToLower()) index))
         )
-        |* Clickable(
-            (fun () ->
-                (if not this.Selected then
-                     this.Select true)
+        |* Clickable.Focus this
+        base.Init parent
 
-                fd ()
-            ),
-            OnHover =
-                fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-        )
+    override this.OnSelected (by_mouse: bool) =
+        base.OnSelected by_mouse
+        if by_mouse then fd()
 
     override this.OnFocus (by_mouse: bool) =
         base.OnFocus by_mouse

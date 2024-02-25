@@ -22,25 +22,15 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) as this =
     do
         this
         |+ Text((fun () -> sprintf "%.0f" spacing.Value), Align = Alignment.CENTER, Color = K Colors.text_subheading)
-        |* Clickable(
-            (fun () ->
-                (if not this.Selected then
-                     this.Select true)
+        |* Clickable.Focus(this, 
+            OnRightClick = fun () ->
+                if not this.Selected then this.Select true
+                add -5.0f
+            )
 
-                add 5.0f
-            ),
-            OnRightClick =
-                (fun () ->
-                    (if not this.Selected then
-                         this.Select true)
-
-                    add -5.0f
-                ),
-            OnHover =
-                fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-        )
+    override this.OnSelected (by_mouse: bool) =
+        base.OnSelected by_mouse
+        if by_mouse then add 5.0f
 
     override this.OnFocus (by_mouse: bool) =
         base.OnFocus by_mouse

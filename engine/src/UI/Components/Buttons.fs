@@ -34,17 +34,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
                     elif this.Focused then Colors.text_yellow_2
                     else Colors.text
         )
-        |+ Clickable(
-            (fun () ->
-                if not (this.Disabled()) then
-                    this.Select true
-            ),
-            Floating = this.Floating,
-            OnHover =
-                fun b ->
-                    if b && not (this.Disabled()) then
-                        this.Focus true
-        )
+        |+ Clickable.Focus(this, Floating = this.Floating)
         |* HotkeyAction(
             this.Hotkey,
             fun () ->
@@ -53,6 +43,8 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
         )
 
         base.Init parent
+
+    override this.Focusable = not (this.Disabled()) && base.Focusable
 
 // todo: look into getting rid of this in favour of normal buttons with icons as part of the label
 type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click: unit -> unit) as this =
@@ -99,16 +91,7 @@ type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click
                 ),
             Position = Position.TrimLeft icon_size
         )
-        |+ Clickable(
-            (fun () ->
-                if not (this.Disabled()) then
-                    this.Select true
-            ),
-            OnHover =
-                fun b ->
-                    if b && not (this.Disabled()) then
-                        this.Focus true
-        )
+        |+ Clickable.Focus(this)
         |* HotkeyAction(
             this.Hotkey,
             fun () ->
@@ -117,3 +100,5 @@ type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click
         )
 
         base.Init parent
+
+    override this.Focusable = not (this.Disabled()) && base.Focusable

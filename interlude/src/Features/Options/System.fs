@@ -14,7 +14,7 @@ open Interlude.UI.Components
 module System =
 
     type Keybinder(hotkey: Hotkey) as this =
-        inherit StaticContainer(NodeType.Leaf)
+        inherit StaticContainer(NodeType.FocusTrap)
 
         let set = fun v -> Hotkeys.set hotkey v
 
@@ -40,16 +40,7 @@ module System =
                 Align = Alignment.LEFT,
                 Position = Position.TrimLeft 20.0f
             )
-            |* Clickable(
-                (fun () ->
-                    if not this.Selected then
-                        this.Select true
-                ),
-                OnHover =
-                    fun b ->
-                        if b then
-                            this.Focus true
-            )
+            |* Clickable.Focus this
 
         override this.OnFocus (by_mouse: bool) =
             base.OnFocus by_mouse
