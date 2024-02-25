@@ -2,6 +2,7 @@
 
 open System
 open SixLabors.ImageSharp
+open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -64,6 +65,9 @@ module Background =
                                             Color.FromArgb(255, c)
                                         else
                                             Content.ThemeConfig.DefaultAccentColor
+
+                            if bmp.Width * 3 / 4 > Viewport.rwidth then
+                                bmp.Mutate(fun img -> img.Resize(Viewport.rwidth, 0) |> ignore)
 
                             return Some(bmp, col)
                         with err ->

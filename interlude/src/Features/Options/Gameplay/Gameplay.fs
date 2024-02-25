@@ -39,6 +39,7 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
 
         match b with
         | Key(k, _) ->
+            // todo: prevent duplicates
             binds.[progress] <- Key(k, (false, false, false))
             progress <- progress + 1
 
