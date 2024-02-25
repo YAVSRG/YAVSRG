@@ -124,6 +124,7 @@ module FlowContainer =
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved || refresh)
 
+            profile "update flow container" <| fun () ->
             let moved =
                 if refresh then
                     refresh <- false
@@ -132,9 +133,9 @@ module FlowContainer =
                 else
                     moved
 
-            for { Widget = c; Visible = visible } in children do
-                if visible && (moved || this.Floating || c.VisibleBounds.Visible) then
-                    c.Update(elapsed_ms, moved)
+            for child in children do
+                if child.Visible && (moved || this.Floating || child.Widget.VisibleBounds.Visible) then
+                    child.Widget.Update(elapsed_ms, moved)
 
             if this.AllowNavigation && this.Focused then
                 this.Navigate()

@@ -9,10 +9,12 @@ type Widget(node_type) =
 
     let mutable _parent = None
     let mutable focused = false
+    let mutable focused_by_mouse = false
     let mutable selected = false
 
     member this.Selected = selected
     member this.Focused = focused
+    member this.FocusedByMouse = focused_by_mouse
 
     member this.Parent =
         match _parent with
@@ -50,8 +52,8 @@ type Widget(node_type) =
     member this.Select (by_mouse: bool) =
         if this.Focusable then Selection.select by_mouse this
 
-    override this.OnFocus _ = focused <- true
-    override this.OnUnfocus _ = focused <- false
+    override this.OnFocus by_mouse = if not focused then focused <- true; focused_by_mouse <- by_mouse
+    override this.OnUnfocus _ = focused <- false; focused_by_mouse <- false
 
     override this.OnSelected _ = selected <- true
     override this.OnDeselected _ = selected <- false

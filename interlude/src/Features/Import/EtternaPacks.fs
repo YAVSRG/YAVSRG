@@ -83,7 +83,7 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
 
             status <- Downloading
 
-    do
+    override this.Init(parent: Widget) =
         this
         |+ Text(
             data.name,
@@ -139,6 +139,8 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
             , Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f)
         )
         |* Button(Icons.DOWNLOAD, download, Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
+
+        base.Init parent
 
     override this.OnFocus (by_mouse: bool) =
         base.OnFocus by_mouse
@@ -206,9 +208,9 @@ module EtternaPacks =
                         {|
                             data: ResizeArray<EtternaOnlinePack>
                         |}) ->
-                        sync (fun () ->
-                            for p in d.data do
-                                flow.Add(EtternaPackCard(p.id, p.attributes))
+                        let cards = d.data.ToArray() |> Array.map (fun p -> EtternaPackCard(p.id, p.attributes))
+                        sync (fun () -> 
+                            flow |* cards
                             loading <- false
                         )
                     | None -> 
@@ -229,8 +231,6 @@ module EtternaPacks =
             |* scroll
 
             base.Init parent
-
-        override this.Focusable = flow.Focusable
 
         member this.Items = flow
 

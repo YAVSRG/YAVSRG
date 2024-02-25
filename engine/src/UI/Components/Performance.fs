@@ -3,12 +3,14 @@
 open System.Drawing
 open System.Diagnostics
 open OpenTK.Windowing.GraphicsLibraryFramework
+open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 
 type PerformanceMonitor() =
     inherit StaticWidget(NodeType.None)
 
+    let dump_profiling = Key(Keys.F2, (true, true, true))
     let all_bind = Key(Keys.F3, (true, true, true))
     let graph_bind = Key(Keys.F4, (true, true, true))
 
@@ -23,6 +25,9 @@ type PerformanceMonitor() =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
+
+        if dump_profiling.Tapped() then
+            dump_profiling_info()
 
         if all_bind.Tapped() then
             enable <- not enable

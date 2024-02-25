@@ -51,7 +51,7 @@ type Chat() =
         match last_msg with
         | Some m ->
             if m.Bounds.Top - message_box.RemainingScrollAnimation - message_box.Bounds.Bottom < 200.0f then
-                message_box.Scroll infinityf
+                sync(fun () -> message_box.Scroll infinityf)
         | None -> ()
 
         last_msg <- Some w
