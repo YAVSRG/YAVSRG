@@ -92,6 +92,10 @@ and Menu(top_level: Page) as this =
 
     let volume = Volume()
 
+    let exit_key = HotkeyHoldAction("exit", 
+        (fun () -> Selection.up false),
+        Menu.Exit)
+
     static let mutable _instance = None
     do _instance <- Some this
 
@@ -151,6 +155,7 @@ and Menu(top_level: Page) as this =
         base.Init parent
         back_button.Init this
         volume.Init this
+        exit_key.Init this
         this.ShowPage top_level
 
     override this.Draw() =
@@ -167,8 +172,7 @@ and Menu(top_level: Page) as this =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (%%"exit").Tapped() then
-            Selection.up false
+        exit_key.Update(elapsed_ms, moved)
 
         let mutable i = 0
 

@@ -81,6 +81,29 @@ type HotkeyAction(hotkey: Hotkey, action) =
     override this.Draw() = ()
 
 [<Sealed>]
+type HotkeyHoldAction(hotkey: Hotkey, on_tap, on_hold) =
+    inherit StaticWidget(NodeType.None)
+
+    let mutable hold_time_remaining = 0.0
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if (%%hotkey).Tapped() then
+            hold_time_remaining <- 500.0
+
+        if (%%hotkey).Pressed() then
+            if hold_time_remaining > 0.0 then
+                hold_time_remaining <- hold_time_remaining - elapsed_ms
+                if hold_time_remaining < 0 then
+                    on_hold()
+
+        if (%%hotkey).Released() && hold_time_remaining > 0.0 then
+            on_tap()
+            
+    override this.Draw() = ()
+
+[<Sealed>]
 type Image(sprite: Sprite) =
     inherit StaticWidget(NodeType.None)
 
