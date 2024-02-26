@@ -35,12 +35,22 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
                 .Title(sprintf "%s: %O" (%"noteskins.edit.notecolors.name") style)
                 .Body(%(sprintf "noteskins.edit.notecolors.%s.%i" (style.ToString().ToLower()) index))
         )
-        |* Clickable.Focus this
+        |* Clickable(
+            (fun () -> 
+                if not this.Selected then this.Select true
+                fd()
+            ),
+            OnHover = (fun b -> 
+                if b && not this.Focused then 
+                    this.Focus true
+                elif not b && this.FocusedByMouse then
+                    Selection.up true
+            ),
+            OnRightClick = fun () ->
+                if not this.Selected then this.Select true
+                bk ()
+        )
         base.Init parent
-
-    override this.OnSelected (by_mouse: bool) =
-        base.OnSelected by_mouse
-        if by_mouse then fd()
 
     override this.OnFocus (by_mouse: bool) =
         base.OnFocus by_mouse

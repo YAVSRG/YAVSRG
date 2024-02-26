@@ -12,25 +12,32 @@ open Interlude.Utils
 open Interlude.UI.Menu
 open Interlude.Options
 
-type SpacingPicker(spacing: Setting.Bounded<float32>) as this =
+type SpacingPicker(spacing: Setting.Bounded<float32>) =
     inherit StaticContainer(NodeType.Leaf)
 
     let add (amount) =
         Setting.app (fun x -> x + amount) spacing
         Style.click.Play()
 
-    do
+    override this.Init(parent: Widget) =
         this
         |+ Text((fun () -> sprintf "%.0f" spacing.Value), Align = Alignment.CENTER, Color = K Colors.text_subheading)
-        |* Clickable.Focus(this, 
+        |* Clickable(
+            (fun () -> 
+                this.Select true
+                add 5.0f
+            ),
+            OnHover = (fun b -> 
+                if b && not this.Focused then 
+                    this.Focus true
+                elif not b && this.FocusedByMouse then
+                    Selection.up true
+            ),
             OnRightClick = fun () ->
                 if not this.Selected then this.Select true
                 add -5.0f
-            )
-
-    override this.OnSelected (by_mouse: bool) =
-        base.OnSelected by_mouse
-        if by_mouse then add 5.0f
+        )
+        base.Init this
 
     override this.OnFocus (by_mouse: bool) =
         base.OnFocus by_mouse
@@ -110,7 +117,7 @@ type PlayfieldSettingsPage() as this =
             .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
         |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
             .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
-        |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true), Height = PRETTYHEIGHT * 2f)
+        |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true), Height = PRETTYHEIGHT * 1.5f)
             .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
         |. 0.5f
         |+ PageSetting("noteskins.edit.columnwidth", Slider(column_width, Step = 1f))

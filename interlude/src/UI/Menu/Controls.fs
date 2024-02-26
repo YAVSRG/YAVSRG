@@ -121,7 +121,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
 
         base.Draw()
 
-type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
+type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
     inherit StaticContainer(NodeType.Leaf)
 
     let mutable index =
@@ -139,15 +139,18 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
         setting.Value <- fst items.[index]
         Style.click.Play()
 
-    do
-        this |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
-        |* Clickable.Focus this
-
-        this.Position <- Position.SliceLeft 100.0f
-
-    override this.OnSelected (by_mouse: bool) =
-        base.OnSelected by_mouse
-        if by_mouse then fd()
+    override this.Init(parent: Widget) =
+        this
+        |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
+        |* Clickable(
+            (fun () -> this.Select true; fd()),
+            OnHover = fun b -> 
+                if b && not this.Focused then 
+                    this.Focus true
+                elif not b && this.FocusedByMouse then
+                    Selection.up true
+        )
+        base.Init parent
 
     override this.OnFocus (by_mouse: bool) =
         base.OnFocus by_mouse

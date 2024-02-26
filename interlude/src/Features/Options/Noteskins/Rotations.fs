@@ -33,14 +33,21 @@ type RotationPicker(rotation: Setting<float>) as this =
             Align = Alignment.LEFT,
             Color = K Colors.text_subheading
         )
-        |* Clickable.Focus(this, OnRightClick = fun () ->
-            if not this.Selected then this.Select true
-            bk ()
+        |* Clickable(
+            (fun () -> 
+                if not this.Selected then this.Select true
+                fd()
+            ),
+            OnHover = (fun b -> 
+                if b && not this.Focused then 
+                    this.Focus true
+                elif not b && this.FocusedByMouse then
+                    Selection.up true
+            ),
+            OnRightClick = fun () ->
+                if not this.Selected then this.Select true
+                bk ()
         )
-
-    override this.OnSelected (by_mouse: bool) =
-        base.OnSelected by_mouse
-        if by_mouse then fd()
 
     override this.OnFocus (by_mouse: bool) =
         base.OnFocus by_mouse

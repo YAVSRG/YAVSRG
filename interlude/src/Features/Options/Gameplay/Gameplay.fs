@@ -103,7 +103,7 @@ type LanecoverPage() as this =
             .Tooltip(Tooltip.Info "gameplay.lanecover.sudden")
         |+ PageSetting("gameplay.lanecover.fadelength", Slider(options.LaneCover.FadeLength, Step = 5.0f))
             .Tooltip(Tooltip.Info "gameplay.lanecover.fadelength")
-        |+ PageSetting("gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true), Height = PRETTYHEIGHT * 2.0f)
+        |+ PageSetting("gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true), Height = PRETTYHEIGHT * 1.5f)
         |+ preview
         |>> this.Content
 
