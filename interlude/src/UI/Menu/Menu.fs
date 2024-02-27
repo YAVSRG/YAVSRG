@@ -21,9 +21,9 @@ type Page() as this =
     abstract member OnClose: unit -> unit
     abstract member OnDestroy: unit -> unit
     default this.OnDestroy() = ()
+
     abstract member OnReturnTo: unit -> unit
     default this.OnReturnTo() = ()
-
     member this.Content(w: Widget) =
         this.Add(w)
         content <- Some w
@@ -202,66 +202,17 @@ and Menu(top_level: Page) as this =
 type Page with
     member this.Show() = Menu.ShowPage this
 
-[<AutoOpen>]
-module Helpers =
-
-    let column () = NavigationContainer.Column<Widget>()
-    let row () = NavigationContainer.Row<Widget>()
-
-    let refreshable_row number cons =
-        let r = NavigationContainer.Row()
-
-        let refresh () =
-            r.Clear()
-            let n = number ()
-
-            for i in 0 .. (n - 1) do
-                r.Add(cons i n)
-
-        refresh ()
-        r, refresh
-    
-    type PageContent =
-        {
-            Container: NavigationContainer.Column<Widget>
-            mutable Y: float32
-        }
-        
-        static member (|+) (parent: PageContent, child: PageButton) = parent |+ (child.Pos parent.Y :> Widget)
-        static member (|+) (parent: PageContent, child: PageSetting) = parent |+ (child.Pos parent.Y :> Widget)
-        static member (|+) (parent: PageContent, child: Widget) : PageContent =
-            parent.Container.Add child
-            parent.Y <- parent.Y + PRETTYHEIGHT
-            parent
-
-        static member (|.) (parent: PageContent, gap: float32) = 
-            parent.Y <- parent.Y + PRETTYHEIGHT * gap
-            parent
-
-        static member (|-) (parent: PageContent, origin: float32) = 
-            parent.Y <- origin * 100.0f
-            parent
-            
-        static member (|>>) (parent: PageContent, func: Widget -> unit) = func parent.Container
-    
-    let menu (start: float32) = { Container = NavigationContainer.Column<Widget>(); Y = start * 100.0f }
-
-    type PageSetting with
-        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
-    type PageButton with
-        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
-    type StaticContainer with
-        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
-
 type ConfirmPage(prompt: string, yes: unit -> unit) =
     inherit Page()
 
     override this.Init(parent) =
-        menu 3.0f
-        |+ PageButton.Once("confirm.yes", fork Menu.Back yes)
-        |+ PageButton.Once("confirm.no", Menu.Back)
+        let pos = menu_pos 3.0f
+
+        column()
+        |+ PageButton.Once("confirm.yes", fork Menu.Back yes).Pos(pos.Step())
+        |+ PageButton.Once("confirm.no", Menu.Back).Pos(pos.Step())
         |+ Text(prompt, Position = Position.Row(100.0f, PRETTYHEIGHT))
-        |>> this.Content
+        |> this.Content
         base.Init parent
 
     override this.Title = %"confirm"

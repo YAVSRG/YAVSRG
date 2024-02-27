@@ -94,7 +94,7 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
 
 [<AbstractClass>]
 type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
-    inherit NoteskinPreview(0.35f, true)
+    inherit NoteskinPreview(scale, true)
 
     let keycount = int (Gameplay.Chart.keymode())
 
@@ -108,8 +108,9 @@ type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
                 let cfg = Content.NoteskinConfig
 
                 let width =
-                    cfg.ColumnWidth
+                    (cfg.ColumnWidth
                     * float32 keycount
+                    + Array.sum (cfg.KeymodeColumnSpacing keycount))
                     * scale
 
                 let (screenAlign, columnAlign) = cfg.PlayfieldAlignment

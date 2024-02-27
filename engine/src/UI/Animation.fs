@@ -98,6 +98,7 @@ module Animation =
         member val Interval = milliseconds with get, set
         member this.Time = elapsed
         member this.Loops = loops
+        member this.Reset() = elapsed <- 0.0; loops <- 0;
 
     // TERMINATING ANIMATIONS - These animations can "complete" after a condition and are deleted afterwards
 
@@ -115,7 +116,8 @@ module Animation =
         inherit Animation()
         let mutable elapsed = 0.0
         let mutable frameskip = false
-        member this.Elapsed = elapsed
+        member val Interval = total_ms with get, set
+        member this.Elapsed = min elapsed this.Interval
         member this.FrameSkip() = frameskip <- true
         member this.Reset() = elapsed <- 0.0
 
@@ -125,7 +127,7 @@ module Animation =
             else
                 elapsed <- elapsed + elapsed_ms
 
-        override this.Complete = elapsed >= total_ms
+        override this.Complete = elapsed >= this.Interval
 
     // COMPOSING ANIMATIONS
 

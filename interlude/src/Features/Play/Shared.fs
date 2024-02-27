@@ -129,7 +129,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
     inherit StaticWidget(NodeType.None)
     let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
     let sprite = Content.Texture "receptorlighting"
-    let light_time = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
+    //let light_time = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
 
     let column_spacing = ns.KeymodeColumnSpacing keys
 
@@ -168,11 +168,10 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
             sliders
 
     override this.Draw() =
-        let threshold = 1.0f - light_time
 
         let f k (s: Animation.Fade) =
-            if s.Value > threshold then
-                let p = (s.Value - threshold) / light_time
+            if s.Value > 0.5f then
+                let p = 0.5f//(s.Value - threshold) / light_time
                 let a = 255.0f * p |> int
 
                 Draw.sprite
@@ -198,8 +197,8 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     let timers = Array.zeroCreate keys
     let mem = Array.zeroCreate keys
     let holding = Array.create keys false
-    let explode_time = Math.Clamp(ns.Explosions.FadeTime, 0f, 0.99f)
-    let animation = Animation.Counter ns.Explosions.AnimationFrameTime
+    let explode_time = 0.5f // Math.Clamp(ns.Explosions.FadeTime, 0f, 0.99f)
+    let animation = Animation.Counter ns.NoteExplosionSettings.AnimationFrameTime
     let rotation = Noteskins.note_rotation keys
 
     let column_spacing = ns.KeymodeColumnSpacing keys
@@ -220,13 +219,13 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
     let handle_event (ev: HitEvent<HitEventGuts>) =
         match ev.Guts with
-        | Hit e when (ns.Explosions.ExplodeOnMiss || not e.Missed) ->
+        | Hit e when (ns.NoteExplosionSettings.ExplodeOnMiss || not e.Missed) ->
             sliders.[ev.Column].Target <- 1.0f
             sliders.[ev.Column].Value <- 1.0f
             timers.[ev.Column] <- ev.Time
             holding.[ev.Column] <- true
             mem.[ev.Column] <- ev.Guts
-        | Hit e when (ns.Explosions.ExplodeOnMiss || not e.Missed) ->
+        | Hit e when (ns.NoteExplosionSettings.ExplodeOnMiss || not e.Missed) ->
             sliders.[ev.Column].Value <- 1.0f
             timers.[ev.Column] <- ev.Time
             mem.[ev.Column] <- ev.Guts
@@ -257,48 +256,48 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
         let columnwidth = ns.ColumnWidth
         let threshold = 1.0f - explode_time
 
-        let f k (s: Animation.Fade) =
-            if s.Value > threshold then
-                let p = (s.Value - threshold) / explode_time
-                let a = 255.0f * p |> int
+        //let f k (s: Animation.Fade) =
+        //    if s.Value > threshold then
+        //        let p = (s.Value - threshold) / explode_time
+        //        let a = 255.0f * p |> int
 
-                let box =
-                    (if options.Upscroll.Value then
-                         Rect.Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top, columnwidth, columnwidth)
-                     else
-                         Rect.Box(
-                             this.Bounds.Left + column_positions.[k],
-                             this.Bounds.Bottom - columnwidth,
-                             columnwidth,
-                             columnwidth
-                         ))
-                        .Expand((ns.Explosions.Scale - 1.0f) * columnwidth * 0.5f)
-                        .Expand(ns.Explosions.ExpandAmount * (1.0f - p) * columnwidth)
+        //        let box =
+        //            (if options.Upscroll.Value then
+        //                 Rect.Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top, columnwidth, columnwidth)
+        //             else
+        //                 Rect.Box(
+        //                     this.Bounds.Left + column_positions.[k],
+        //                     this.Bounds.Bottom - columnwidth,
+        //                     columnwidth,
+        //                     columnwidth
+        //                 ))
+        //                .Expand((ns.Explosions.Scale - 1.0f) * columnwidth * 0.5f)
+        //                .Expand(ns.Explosions.ExpandAmount * (1.0f - p) * columnwidth)
 
-                match mem.[k] with
-                | Hit e ->
-                    let color =
-                        if ns.Explosions.Colors = ExplosionColors.Column then
-                            k
-                        else
-                            match e.Judgement with
-                            | Some j -> int j
-                            | None -> 0
+        //        match mem.[k] with
+        //        | Hit e ->
+        //            let color =
+        //                if ns.Explosions.Colors = ExplosionColors.Column then
+        //                    k
+        //                else
+        //                    match e.Judgement with
+        //                    | Some j -> int j
+        //                    | None -> 0
 
-                    let frame =
-                        (state.CurrentChartTime() - timers.[k])
-                        / Time.ofFloat ns.Explosions.AnimationFrameTime
-                        |> int
+        //            let frame =
+        //                (state.CurrentChartTime() - timers.[k])
+        //                / Time.ofFloat ns.Explosions.AnimationFrameTime
+        //                |> int
 
-                    Draw.quad
-                        (box.AsQuad |> rotation k)
-                        (Quad.color (Color.FromArgb(a, Color.White)))
-                        (Sprite.pick_texture
-                            (frame, color)
-                            (Content.Texture (if e.IsHold then "holdexplosion" else "noteexplosion")))
-                | _ -> ()
+        //            Draw.quad
+        //                (box.AsQuad |> rotation k)
+        //                (Quad.color (Color.FromArgb(a, Color.White)))
+        //                (Sprite.pick_texture
+        //                    (frame, color)
+        //                    (Content.Texture (if e.IsHold then "holdexplosion" else "noteexplosion")))
+        //        | _ -> ()
 
-        Array.iteri f sliders
+        () //Array.iteri f sliders
 
 type LaneCover() =
     inherit StaticWidget(NodeType.None)
@@ -393,7 +392,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         if noteskin_config.EnableColumnLight then
             playfield.Add(new ColumnLighting(with_colors.Keys, noteskin_config, state))
 
-        if noteskin_config.Explosions.Enable then
+        if noteskin_config.UseExplosions then
             playfield.Add(new Explosions(with_colors.Keys, noteskin_config, state))
 
         playfield.Add(LaneCover())

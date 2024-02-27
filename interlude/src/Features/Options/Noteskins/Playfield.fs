@@ -37,7 +37,7 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
                 if not this.Selected then this.Select true
                 add -5.0f
         )
-        base.Init this
+        base.Init parent
 
     override this.OnFocus (by_mouse: bool) =
         base.OnFocus by_mouse
@@ -112,28 +112,32 @@ type PlayfieldSettingsPage() as this =
             )
 
     do
-        menu 2.0f
+        let pos = menu_pos 2.0f
+        column()
         |+ PageSetting("noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
             .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
+            .Pos(pos.Step())
         |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
             .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
-        |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true), Height = PRETTYHEIGHT * 1.5f)
+            .Pos(pos.Step())
+        |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true))
             .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
-        |. 0.5f
+            .Pos(pos.Step 2.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
         |+ PageSetting("noteskins.edit.columnwidth", Slider(column_width, Step = 1f))
             .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
+            .Pos(pos.Step())
         |+ PageSetting("noteskins.edit.fillcolumngaps", Selector<_>.FromBool(fill_gaps))
             .Tooltip(Tooltip.Info("noteskins.edit.fillcolumngaps"))
+            .Pos(pos.Step())
         |+ PageSetting("noteskins.edit.useadvancedcolumnspacing", Selector<_>.FromBool(use_advanced_column_spacing))
             .Tooltip(Tooltip.Info("noteskins.edit.useadvancedcolumnspacing"))
-
+            .Pos(pos.Step())
         |+ Conditional(
             (fun () -> not use_advanced_column_spacing.Value),
             PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
-                .Pos(720.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
+                .Pos(pos.Y)
         )
-
         |+ Conditional(
             (fun () -> use_advanced_column_spacing.Value),
             PageSetting(
@@ -141,16 +145,16 @@ type PlayfieldSettingsPage() as this =
                 Selector<Keymode>
                     .FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
             )
-                .Pos(720.0f)
+                .Pos(pos.Step())
         )
 
         |+ Conditional(
             (fun () -> use_advanced_column_spacing.Value),
-            PageSetting("noteskins.edit.advancedcolumnspacing", _spacings, Width = Viewport.vwidth - 200.0f)
-                .Pos(790.0f, Viewport.vwidth - 200.0f, PRETTYHEIGHT)
+            PageSetting("noteskins.edit.advancedcolumnspacing", _spacings)
+                .Pos(pos.Step(), Viewport.vwidth - 200.0f)
                 .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
         )
-        |>> this.Content
+        |> this.Content
 
     override this.Draw() =
         base.Draw()

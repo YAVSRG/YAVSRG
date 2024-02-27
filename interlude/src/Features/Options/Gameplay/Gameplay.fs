@@ -94,18 +94,23 @@ type LanecoverPage() as this =
     let preview = NoteskinPreview(0.35f, true)
 
     do
-        menu 2.0f
+        let pos = menu_pos 2.0f
+        column()
         |+ PageSetting("gameplay.lanecover.enabled", Selector<_>.FromBool options.LaneCover.Enabled)
-        |. 0.5f
+            .Pos(pos.Step 1.5f, PRETTYWIDTH, PRETTYHEIGHT)
         |+ PageSetting("gameplay.lanecover.hidden", Slider.Percent(options.LaneCover.Hidden))
             .Tooltip(Tooltip.Info "gameplay.lanecover.hidden")
+            .Pos(pos.Step())
         |+ PageSetting("gameplay.lanecover.sudden", Slider.Percent(options.LaneCover.Sudden))
             .Tooltip(Tooltip.Info "gameplay.lanecover.sudden")
+            .Pos(pos.Step())
         |+ PageSetting("gameplay.lanecover.fadelength", Slider(options.LaneCover.FadeLength, Step = 5.0f))
             .Tooltip(Tooltip.Info "gameplay.lanecover.fadelength")
-        |+ PageSetting("gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true), Height = PRETTYHEIGHT * 1.5f)
+            .Pos(pos.Step())
+        |+ PageSetting("gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true))
+            .Pos(pos.Step 1.5f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
         |+ preview
-        |>> this.Content
+        |> this.Content
 
     override this.Title = %"gameplay.lanecover.name"
     override this.OnDestroy() = preview.Destroy()
@@ -171,8 +176,9 @@ type EditPresetPage(preset_id: int, setting: Setting<Preset option>) as this =
         for keymode = 3 to 10 do
             keymode_preference.Add(PresetKeymodeCheckbox(preset_id, keymode))
 
-        menu 2.0f
-        |+ PageTextEntry("gameplay.preset.name", name)
+        let pos = menu_pos 2.0f
+        column()
+        |+ PageTextEntry("gameplay.preset.name", name).Pos(pos.Step())
         |+ PageSetting(
             "gameplay.preset.mode",
             Selector<PresetMode>(
@@ -185,10 +191,12 @@ type EditPresetPage(preset_id: int, setting: Setting<Preset option>) as this =
             )
         )
             .Tooltip(Tooltip.Info("gameplay.preset.mode"))
-        |+ PageSetting("gameplay.preset.keymode_preference", keymode_preference, Width = PRETTYTEXTWIDTH + 800.0f + 70.0f)
+            .Pos(pos.Step())
+        |+ PageSetting("gameplay.preset.keymode_preference", keymode_preference)
             .Tooltip(Tooltip.Info("gameplay.preset.keymode_preference"))
+            .Pos(pos.Step(), PRETTYTEXTWIDTH + 800.0f + 70.0f)
         |+ delete_button
-        |>> this.Content
+        |> this.Content
 
     override this.Title = preset.Name
 
@@ -360,15 +368,20 @@ type GameplayPage() as this =
         )
 
     do
-        menu 1.0f
+        let pos = menu_pos 1.0f
+        column()
         |+ PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
             .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
+            .Pos(pos.Step())
         |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Tooltip(Tooltip.Info("gameplay.hitposition"))
+            .Pos(pos.Step())
         |+ PageSetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll)
             .Tooltip(Tooltip.Info("gameplay.upscroll"))
+            .Pos(pos.Step())
         |+ PageSetting("gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
             .Tooltip(Tooltip.Info("gameplay.backgrounddim"))
+            .Pos(pos.Step())
         |+ PageSetting(
             "system.audiooffset",
             { new Slider(options.AudioOffset, Step = 1f) with
@@ -378,26 +391,30 @@ type GameplayPage() as this =
             }
         )
             .Tooltip(Tooltip.Info("system.audiooffset"))
+            .Pos(pos.Step())
         |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
             .Tooltip(Tooltip.Info("system.visualoffset"))
-        |. 0.5f
+            .Pos(pos.Step 1.5f)
         |+ PageSetting(
             "generic.keymode",
             Selector<_>
                 .FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
         )
-        |+ PageSetting("gameplay.keybinds", binds, Width = Viewport.vwidth - 200.0f)
+            .Pos(pos.Step())
+        |+ PageSetting("gameplay.keybinds", binds)
             .Tooltip(Tooltip.Info("gameplay.keybinds"))
-        |. 0.5f
+            .Pos(pos.Step 1.5f, Viewport.vwidth - 200.0f)
         |+ PageButton("gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
             .Tooltip(Tooltip.Info("gameplay.lanecover"))
+            .Pos(pos.Step())
         |+ PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerPage))
             .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
+            .Pos(pos.Step())
         |+ preview
         |+ preset_buttons 1 options.Preset1
         |+ preset_buttons 2 options.Preset2
         |+ preset_buttons 3 options.Preset3
-        |>> this.Content
+        |> this.Content
 
     override this.Title = %"gameplay.name"
     override this.OnDestroy() = preview.Destroy()

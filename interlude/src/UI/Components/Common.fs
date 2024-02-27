@@ -184,6 +184,31 @@ type InlaidButton(label, action, icon) =
 
         base.Draw()
 
+module RadioButtons =
+
+
+    type RadioButtonOptions<'T> =
+        {
+            Setting: Setting<'T>
+            Options: ('T * string * (unit -> bool)) array
+            Height: float32
+        }
+
+    let private create_button (label: string) (value: 'T) (setting: Setting<'T>) (disabled: unit -> bool) =
+        { new Button(label, fun () -> setting.Set value) with
+            override this.Draw() =
+                if setting.Value = value then
+                    Draw.rect this.Bounds Colors.shadow_2.O3
+                base.Draw()
+        }
+
+    let create (options: RadioButtonOptions<'T>) =
+        GridFlowContainer(options.Height, options.Options.Length, Spacing = (20.0f, 0.0f), WrapNavigation = false)
+        |+ seq {
+            for value, label, disabled in options.Options do
+                yield create_button label value options.Setting disabled
+        }
+
 module LoadingIndicator =
 
     type Strip(is_loading: unit -> bool) =

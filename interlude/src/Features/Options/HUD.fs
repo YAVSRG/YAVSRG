@@ -11,7 +11,6 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.Options
 open Interlude.UI.Menu
-open Interlude.UI.Components
 open Interlude.Features.OptionsMenu.Gameplay
 
 [<AutoOpen>]
@@ -232,7 +231,7 @@ type EditAccuracyMeterPage() as this =
     let show_name = Setting.simple data.ShowName
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Text.fill (Style.font, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
 
@@ -284,7 +283,7 @@ type EditHitMeterPage() as this =
         Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Draw.rect
                     (Rect.Create(
@@ -347,7 +346,7 @@ type EditComboMeterPage() as this =
     let growth_amount = Setting.simple data.Growth |> Setting.bound 0.0f 0.05f
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Text.fill (Style.font, "727", bounds, Color.White, Alignment.CENTER)
         }
@@ -390,7 +389,7 @@ type EditSkipButtonPage() as this =
     let preview_text = [ (%%"skip").ToString() ] %> "play.skiphint"
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
         }
@@ -416,7 +415,7 @@ type EditProgressMeterPage() as this =
     let label = Setting.simple data.Label
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 let x, y = bounds.Center
                 let r = (min bounds.Width bounds.Height) * 0.5f
@@ -492,7 +491,7 @@ type EditPacemakerPage() as this =
     let default_pos = HUD.Pacemaker.Default.Position
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Text.fill_b (Style.font, Icons.FLAG, bounds, Colors.text, Alignment.CENTER)
         }
@@ -516,7 +515,7 @@ type EditJudgementCountsPage() as this =
     let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0 1000.0
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Draw.rect bounds (Color.FromArgb(127, 255, 255, 255))
         }
@@ -557,7 +556,7 @@ type EditJudgementMeterPage() as this =
     let rs = Rulesets.current
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Text.fill (Style.font, rs.JudgementName 0, bounds, rs.JudgementColor 0, Alignment.CENTER)
         }
@@ -612,7 +611,7 @@ type EditEarlyLateMeterPage() as this =
     let late_color = Setting.simple data.LateColor
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Text.fill (Style.font, early_text.Value, bounds, early_color.Value, Alignment.CENTER)
         }
@@ -663,7 +662,7 @@ type RateModMeterPage() as this =
     let show_mods = Setting.simple data.ShowMods
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Text.fill_b (
                     Style.font,
@@ -702,7 +701,7 @@ type BPMMeterPage() as this =
     let default_pos = HUD.BPMMeter.Default.Position
 
     let preview =
-        { new ConfigPreview(0.5f, pos) with
+        { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
                 Text.fill_b (Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER)
         }

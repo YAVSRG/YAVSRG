@@ -514,6 +514,7 @@ module Storage =
             "holdbody"
             "holdtail"
             "holdexplosion"
+            "releaseexplosion"
             "receptorlighting"
             "stageleft"
             "stageright"

@@ -10,36 +10,38 @@ open Prelude.Charts.Tools.NoteColors
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
 type ExplosionColors =
-    | Column
+    | Note
     | Judgements
+
+[<Json.AutoCodec(false)>]
+type ExplosionConfig =
+    {
+        Scale: float32
+        AnimationFrameTime: float
+        ExplodeOnMiss: bool
+        Colors: ExplosionColors
+
+        UseBuiltInAnimation: bool
+        Duration: float
+        ExpandAmount: float32
+    }
+    static member Default =
+        {
+            Scale = 1.0f
+            AnimationFrameTime = 50.0
+            ExplodeOnMiss = false
+            Colors = ExplosionColors.Note
+
+            UseBuiltInAnimation = true
+            Duration = 600.0
+            ExpandAmount = 0.15f
+        }
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
 type ReceptorStyle =
     | Rotate
     | Flip
-
-[<Json.AutoCodec(false)>]
-type Explosions =
-    {
-        Enable: bool
-        Scale: float32
-        FadeTime: float32
-        ExpandAmount: float32
-        ExplodeOnMiss: bool
-        AnimationFrameTime: float
-        Colors: ExplosionColors
-    }
-    static member Default =
-        {
-            Enable = true
-            Scale = 1.0f
-            FadeTime = 1.0f
-            ExpandAmount = 0.15f
-            ExplodeOnMiss = false
-            AnimationFrameTime = 50.0
-            Colors = ExplosionColors.Column
-        }
 
 [<Json.AutoCodec(false)>]
 type NoteskinConfig =
@@ -77,14 +79,20 @@ type NoteskinConfig =
         /// When true, enables `stageleft` and `stageright` textures drawn next to the playfield
         EnableStageTextures: bool
 
-        /// ???
-        ColumnLightTime: float32
+        /// Milliseconds duration of column light animation
+        ColumnLightDuration: float
         /// Set to false to disable column lighting when keys are pressed
         EnableColumnLight: bool
-        /// ???
+
+        /// Millisecond duration of each frame on note/hold texture animations
         AnimationFrameTime: float
+
+        /// 
+        UseExplosions: bool
         /// Config for explosion animations
-        Explosions: Explosions
+        NoteExplosionSettings: ExplosionConfig
+        HoldExplosionSettings: ExplosionConfig
+        ReleaseExplosionSettings: ExplosionConfig
 
         /// Enables rotation for notes. Set this to true if your notes are arrows/should rotate depending on which column they are in
         /// Applies to receptors, notes and if UseHoldTailTexture is false it applies to tails too.
@@ -123,10 +131,13 @@ type NoteskinConfig =
                 |]
             FillColumnGaps = false
             EnableStageTextures = false
-            ColumnLightTime = 0.4f
+            ColumnLightDuration = 200.0
             EnableColumnLight = true
             AnimationFrameTime = 200.0
-            Explosions = Explosions.Default
+            UseExplosions = false
+            NoteExplosionSettings = ExplosionConfig.Default
+            HoldExplosionSettings = ExplosionConfig.Default
+            ReleaseExplosionSettings = ExplosionConfig.Default
             NoteColors = ColorConfig.Default
             UseRotation = false
             Rotations =
@@ -137,7 +148,6 @@ type NoteskinConfig =
                     [| 90.0; 135.0; 0.0; 180.0; 225.0; 270.0 |]
                     [| 135.0; 90.0; 45.0; 0.0; 315.0; 270.0; 225.0 |]
                     [| 90.0; 0.0; 180.0; 270.0; 90.0; 0.0; 180.0; 270.0 |]
-                    // todo: agree on rotations for 9b (popn doesn't have any so maybe all 0s is standard)
                     [| 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0 |]
                     [| 45.0; 135.0; 0.0; 225.0; 315.0; 45.0; 135.0; 0.0; 225.0; 315.0 |]
                 |]
@@ -225,9 +235,11 @@ type Noteskin(storage) as this =
             yield "holdbody"
             yield "holdtail"
             yield "receptor"
-            if this.Config.Explosions.Enable then
+            if this.Config.UseExplosions then
                 yield "noteexplosion"
                 yield "holdexplosion"
+                if not this.Config.HoldExplosionSettings.UseBuiltInAnimation then
+                    yield "releaseexplosion"
             if this.Config.EnableColumnLight then
                 yield "receptorlighting"
             if this.Config.EnableStageTextures then

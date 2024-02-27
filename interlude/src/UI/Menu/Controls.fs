@@ -10,6 +10,37 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 
+[<AutoOpen>]
+module Helpers =
+
+    let column () = NavigationContainer.Column<Widget>()
+    let row () = NavigationContainer.Row<Widget>()
+
+    let refreshable_row number cons =
+        let r = NavigationContainer.Row()
+
+        let refresh () =
+            r.Clear()
+            let n = number ()
+
+            for i in 0 .. (n - 1) do
+                r.Add(cons i n)
+
+        refresh ()
+        r, refresh
+    
+    type MenuPositionHelper =
+        {
+            mutable Y: float32
+        }
+        member this.Step(height_mult: float32) =
+            let pos = this.Y
+            this.Y <- this.Y + PRETTYHEIGHT * height_mult
+            pos
+        member this.Step() = this.Step(1.0f)
+
+    let menu_pos (start: float32) = { Y = 100.0f * start }
+
 type Slider(setting: Setting.Bounded<float32>) as this =
     inherit StaticContainer(NodeType.Leaf)
 
@@ -207,14 +238,11 @@ type PageSetting(name, widget: Widget) as this =
                 if old_widget.Focused then
                     w.Focus false
 
-    member val Width = PRETTYWIDTH with get, set
-    member val Height = PRETTYHEIGHT with get, set
-
     member this.Pos(y, width, height) =
         this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height)
         this
-    member this.Pos(y, width) = this.Pos(y, width, this.Height)
-    member this.Pos(y) = this.Pos(y, this.Width, this.Height)
+    member this.Pos(y, width) = this.Pos(y, width, PRETTYHEIGHT)
+    member this.Pos(y) = this.Pos(y, PRETTYWIDTH, PRETTYHEIGHT)
 
     override this.Init(parent) =
         this
@@ -291,13 +319,11 @@ type PageButton(name, action) as this =
 
         base.Draw()
         
-    member val Width = PRETTYWIDTH with get, set
-        
     member this.Pos(y, width, height) =
         this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height)
         this
     member this.Pos(y, width) = this.Pos(y, width, PRETTYHEIGHT)
-    member this.Pos(y) = this.Pos(y, this.Width, PRETTYHEIGHT)
+    member this.Pos(y) = this.Pos(y, PRETTYWIDTH, PRETTYHEIGHT)
 
     member val Enabled = true with get, set
 
@@ -343,7 +369,7 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
 
     member this._selector = selector
 
-    member this.Pos(pos) =
+    member this.Pos(pos: float32) =
         selector.Pos(pos) |> ignore
         this
 
@@ -556,3 +582,12 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             let y = Mouse.y ()
             A <- (y - alpha_picker.Top) / alpha_picker.Height
             s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
+
+[<AutoOpen>]
+module Helpers2 =
+    type PageSetting with
+        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
+    type PageButton with
+        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
+    type StaticContainer with
+        member this.Tooltip(content: Callout) = this |+ Tooltip(content)

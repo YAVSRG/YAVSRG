@@ -7,6 +7,7 @@ open Prelude.Common
 open Prelude.Data.Content
 open Interlude.Content
 open Interlude.Utils
+open Interlude.UI.Components
 open Interlude.UI.Menu
 
 type AnimationSettingsPage() as this =
@@ -14,109 +15,156 @@ type AnimationSettingsPage() as this =
 
     let data = Content.NoteskinConfig
 
-    let enable_column_light = Setting.simple data.EnableColumnLight
-
-    let column_light_time =
-        Setting.bounded data.ColumnLightTime 0.1f 1.0f |> Setting.roundf 2
-
-    let note_animation_time = Setting.bounded data.AnimationFrameTime 10.0 1000.0
-
-    // todo: replace column and explosion fade percentages with a real timing system
-    // todo: option to disable fading of explosions
-    let enable_explosions = Setting.simple data.Explosions.Enable
-
-    let explosion_animation_time =
-        Setting.bounded data.Explosions.AnimationFrameTime 10.0 1000.0
-
-    let explosion_fade_time =
-        Setting.bounded data.Explosions.FadeTime 0.1f 1.0f |> Setting.roundf 2
-
-    let explosion_scale = Setting.bounded data.Explosions.Scale 0.5f 2.0f
-    let explosion_expand = Setting.percentf data.Explosions.ExpandAmount
-    let explosion_on_miss = Setting.simple data.Explosions.ExplodeOnMiss
-    let explosion_colors = Setting.simple data.Explosions.Colors
-
     let note = Content.Texture "note"
     let noteexplosion = Content.Texture "noteexplosion"
     let holdexplosion = Content.Texture "holdexplosion"
+    let releaseexplosion = Content.Texture "releaseexplosion"
     let receptor = Content.Texture "receptor"
     let columnlighting = Content.Texture "receptorlighting"
-    let mutable test_event_i = 0
-
+        
+    let mutable holding = false
     let test_events = Animation.Counter 1000.0
-    let note_frames = Animation.Counter(data.AnimationFrameTime)
-    let explosion_frames = Animation.Counter(data.Explosions.AnimationFrameTime)
-    let explosion_fade = Animation.Fade 0.0f
-    let hold_explosion_fade = Animation.Fade 0.0f
+    let f_note = Animation.Counter(data.AnimationFrameTime)
+
+    let t_columnlight = Animation.Delay(data.HoldExplosionSettings.Duration)
+
+    let f_note_ex = Animation.Counter(data.NoteExplosionSettings.AnimationFrameTime)
+    let t_note_ex = Animation.Delay(data.NoteExplosionSettings.Duration)
+
+    let f_hold_ex = Animation.Counter(data.HoldExplosionSettings.AnimationFrameTime)
+    let t_hold_ex = Animation.Delay(data.HoldExplosionSettings.Duration)
+
+    let note_animation_time = Setting.bounded data.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_note.set_Interval
+    let enable_column_light = Setting.simple data.EnableColumnLight
+    let column_light_duration = Setting.bounded data.ColumnLightDuration 0.0 1000.0 |> Setting.round 0 |> Setting.trigger t_columnlight.set_Interval
+
+    let enable_explosions = Setting.simple data.UseExplosions
+
+    let explosion_frame_time_note = Setting.bounded data.NoteExplosionSettings.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_note_ex.set_Interval
+    let explosion_colors_note = Setting.simple data.NoteExplosionSettings.Colors
+    let explosion_on_miss_note = Setting.simple data.NoteExplosionSettings.ExplodeOnMiss
+    let explosion_builtin_note = Setting.simple data.NoteExplosionSettings.UseBuiltInAnimation
+    let explosion_duration_note = Setting.bounded data.NoteExplosionSettings.Duration 50.0 1000 |> Setting.round 0 |> Setting.trigger t_note_ex.set_Interval
+    let explosion_scale_note = Setting.bounded data.NoteExplosionSettings.Scale 0.5f 2.0f
+    let explosion_expand_note = Setting.percentf data.NoteExplosionSettings.ExpandAmount
+
+    let explosion_frame_time_hold = Setting.bounded data.HoldExplosionSettings.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_hold_ex.set_Interval
+    let explosion_colors_hold = Setting.simple data.HoldExplosionSettings.Colors
+    let explosion_on_miss_hold = Setting.simple data.HoldExplosionSettings.ExplodeOnMiss
+    let explosion_builtin_hold = Setting.simple data.HoldExplosionSettings.UseBuiltInAnimation
+    let explosion_duration_hold = Setting.bounded data.HoldExplosionSettings.Duration 50.0 1000 |> Setting.round 0 |> Setting.trigger t_hold_ex.set_Interval
+    let explosion_scale_hold = Setting.bounded data.HoldExplosionSettings.Scale 0.5f 2.0f
+    let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount
 
     do
-        menu 2.0f
-        |+ PageSetting("noteskins.edit.enablecolumnlight", Selector<_>.FromBool enable_column_light)
-            .Tooltip(Tooltip.Info("noteskins.edit.enablecolumnlight"))
-        |+ PageSetting("noteskins.edit.columnlighttime", Slider.Percent(column_light_time))
-            .Tooltip(Tooltip.Info("noteskins.edit.columnlighttime"))
-        |. 0.5f
-        |+ PageSetting(
-            "noteskins.edit.animationtime",
-            Slider(
-                note_animation_time
-                |> Setting.trigger (fun v -> note_frames.Interval <- max 10.0 v)
-                |> Setting.f32,
-                Step = 1f
+        let general_tab =
+            let pos = menu_pos 3.0f
+            NavigationContainer.Column<Widget>(WrapNavigation = false)
+            |+ PageSetting("noteskins.animations.enablecolumnlight", Selector<_>.FromBool enable_column_light)
+                .Tooltip(Tooltip.Info("noteskins.animations.enablecolumnlight"))
+                .Pos(pos.Step())
+            |+ PageSetting("noteskins.animations.columnlighttime", Slider(column_light_duration |> Setting.f32, Step = 1f))
+                .Tooltip(Tooltip.Info("noteskins.animations.columnlighttime"))
+                .Pos(pos.Step 1.5f)
+            |+ PageSetting(
+                "noteskins.animations.animationtime",
+                Slider(
+                    note_animation_time
+                    |> Setting.f32,
+                    Step = 1f
+                )
             )
-        )
-            .Tooltip(Tooltip.Info("noteskins.edit.animationtime"))
-        |. 0.5f
-        |+ PageSetting("noteskins.edit.enableexplosions", Selector<_>.FromBool enable_explosions)
-            .Tooltip(Tooltip.Info("noteskins.edit.enableexplosions"))
-        |+ PageSetting(
-            "noteskins.edit.explosionanimationtime",
-            Slider(
-                explosion_animation_time
-                |> Setting.trigger (fun v -> explosion_frames.Interval <- max 10.0 v)
-                |> Setting.f32,
-                Step = 1f
+                .Tooltip(Tooltip.Info("noteskins.animations.animationtime"))
+                .Pos(pos.Step 1.5f)
+            |+ PageSetting("noteskins.animations.enableexplosions", Selector<_>.FromBool enable_explosions)
+                .Tooltip(Tooltip.Info("noteskins.animations.enableexplosions"))
+                .Pos(pos.Step())
+
+        let note_explosion_tab =
+            let pos = menu_pos 3.0f
+            NavigationContainer.Column<Widget>(WrapNavigation = false)
+            |+ PageSetting(
+                "noteskins.animations.explosionanimationtime",
+                Slider(explosion_frame_time_note |> Setting.f32, Step = 1f)
             )
-        )
-            .Tooltip(Tooltip.Info("noteskins.edit.explosionanimationtime"))
-        |+ PageSetting("noteskins.edit.explosionfadetime", Slider.Percent(explosion_fade_time))
-            .Tooltip(Tooltip.Info("noteskins.edit.explosionfadetime"))
-        |+ PageSetting("noteskins.edit.explosionscale", Slider.Percent(explosion_scale))
-            .Tooltip(Tooltip.Info("noteskins.edit.explosionscale"))
-        |+ PageSetting("noteskins.edit.explosionexpand", Slider.Percent(explosion_expand))
-            .Tooltip(Tooltip.Info("noteskins.edit.explosionexpand"))
-        |+ PageSetting("noteskins.edit.explodeonmiss", Selector<_>.FromBool(explosion_on_miss))
-            .Tooltip(Tooltip.Info("noteskins.edit.explodeonmiss"))
-        |+ PageSetting(
-            "noteskins.edit.explosioncolors",
-            Selector(
-                [| ExplosionColors.Column, "Column"; ExplosionColors.Judgements, "Judgements" |],
-                explosion_colors
+                .Tooltip(Tooltip.Info("noteskins.animations.explosionanimationtime"))
+                .Pos(pos.Step())
+            |+ PageSetting("noteskins.animations.explodeonmiss", Selector<_>.FromBool(explosion_on_miss_note))
+                .Tooltip(Tooltip.Info("noteskins.animations.explodeonmiss"))
+                .Pos(pos.Step())
+            |+ PageSetting(
+                "noteskins.animations.explosioncolors",
+                Selector(
+                    [| ExplosionColors.Note, "Note"; ExplosionColors.Judgements, "Judgements" |],
+                    explosion_colors_note
+                )
             )
-        )
-            .Tooltip(Tooltip.Info("noteskins.edit.explosioncolors"))
-        |>> this.Content
+                .Tooltip(Tooltip.Info("noteskins.animations.explosioncolors"))
+                .Pos(pos.Step())
+            |+ PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_note)
+                .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
+                .Pos(pos.Step())
+            |+ Conditional(explosion_builtin_note.Get, 
+                PageSetting("noteskins.animations.explosionduration", Slider(explosion_duration_note |> Setting.f32, Step = 1f))
+                    .Tooltip(Tooltip.Info("noteskins.animations.explosionduration"))
+                    .Pos(pos.Step())
+            )
+            |+ Conditional(explosion_builtin_note.Get, 
+                PageSetting("noteskins.animations.explosionscale", Slider.Percent(explosion_scale_note))
+                    .Tooltip(Tooltip.Info("noteskins.animations.explosionscale"))
+                    .Pos(pos.Step())
+            )
+            |+ Conditional(explosion_builtin_note.Get, 
+                PageSetting("noteskins.animations.explosionexpand", Slider.Percent(explosion_expand_note))
+                    .Tooltip(Tooltip.Info("noteskins.animations.explosionexpand"))
+                    .Pos(pos.Step())
+            )
+
+        let tabs = SwapContainer(general_tab)
+        let tab_buttons = 
+            RadioButtons.create {
+                Setting = Setting.make tabs.set_Current tabs.get_Current
+                Options =
+                    [|
+                        general_tab, "General", K false
+                        note_explosion_tab, "Note explosions", (fun () -> not enable_explosions.Value)
+                        note_explosion_tab, "Hold explosions", (fun () -> not enable_explosions.Value)
+                        note_explosion_tab, "Release explosions", (fun () -> not enable_explosions.Value || not explosion_builtin_hold.Value)
+                    |]
+                Height = 50.0f
+            }
+        tab_buttons.Position <- Position.Box(0.0f, 0.0f, 100.0f, 200.0f, PRETTYWIDTH, PRETTYHEIGHT)
+
+        NavigationContainer.Column<Widget>()
+        |+ tab_buttons
+        |+ tabs
+        |> this.Content
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        explosion_fade.Update elapsed_ms
-        explosion_fade.Update elapsed_ms
-        hold_explosion_fade.Update elapsed_ms
-        explosion_frames.Update elapsed_ms
-        note_frames.Update elapsed_ms
+        f_note.Update elapsed_ms
+        f_note_ex.Update elapsed_ms
+        f_hold_ex.Update elapsed_ms
+
+        t_columnlight.Update elapsed_ms
+        t_note_ex.Update elapsed_ms
+        t_hold_ex.Update elapsed_ms
+        t_columnlight.Update elapsed_ms
+
         test_events.Update elapsed_ms
 
-        if test_event_i < test_events.Loops then
-            test_event_i <- test_events.Loops
-            explosion_fade.Value <- 1.0f
+        if holding <> (test_events.Loops % 2 = 0) then
+            holding <- test_events.Loops % 2 = 0
 
-            if test_event_i % 2 = 0 then
-                hold_explosion_fade.Target <- 0.0f
-                hold_explosion_fade.Value <- 1.0f
+            if holding then
+                t_note_ex.Reset()
+                f_note_ex.Reset()
+                f_hold_ex.Reset()
             else
-                hold_explosion_fade.Target <- 1.0f
-                hold_explosion_fade.Snap()
+                t_columnlight.Reset()
+                t_hold_ex.Reset()
+                f_hold_ex.Reset()
 
     override this.Draw() =
         base.Draw()
@@ -129,53 +177,53 @@ type AnimationSettingsPage() as this =
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
             (Quad.color Color.White)
-            (Sprite.pick_texture (note_frames.Loops, 0) receptor)
+            (Sprite.pick_texture (f_note.Loops, 0) receptor)
 
         if enable_explosions.Value then
-            let threshold = max 0.0f (1.0f - explosion_fade_time.Value)
 
-            let p =
-                (explosion_fade.Value - threshold) / explosion_fade_time.Value
-                |> min 1.0f
-                |> max 0.0f
+            let percent_remaining =
+                1.0 - (t_note_ex.Elapsed / explosion_duration_note.Value)
+                |> min 1.0
+                |> max 0.0
+                |> float32
 
-            let a = 255.0f * p |> int
+            let a = 255.0f * percent_remaining |> int
 
             Draw.quad
                 (Rect
                     .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                    .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
-                    .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
+                    .Expand((explosion_scale_note.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
+                    .Expand(explosion_expand_note.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                     .AsQuad)
                 (Quad.color (Color.White.O4a a))
-                (Sprite.pick_texture (explosion_frames.Loops, 0) noteexplosion)
+                (Sprite.pick_texture (f_note_ex.Loops, 0) noteexplosion)
 
-        // draw hold explosion example
+        //// draw hold explosion example
         bottom <- bottom - COLUMN_WIDTH * 2.0f
 
-        Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
-            (Quad.color Color.White)
-            (Sprite.pick_texture (note_frames.Loops, 0) receptor)
+        //Draw.quad
+        //    (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
+        //    (Quad.color Color.White)
+        //    (Sprite.pick_texture (note_frames.Loops, 0) receptor)
 
-        if enable_explosions.Value then
-            let threshold = max 0.0f (1.0f - explosion_fade_time.Value)
+        //if enable_explosions.Value then
+        
+        //    let percent_remaining =
+        //        1.0 - (note_ex_duration.Elapsed / explosion_duration_note.Value)
+        //        |> min 1.0
+        //        |> max 0.0
+        //        |> float32
 
-            let p =
-                (hold_explosion_fade.Value - threshold) / explosion_fade_time.Value
-                |> min 1.0f
-                |> max 0.0f
+        //    let a = 255.0f * percent_remaining |> int
 
-            let a = 255.0f * p |> int
-
-            Draw.quad
-                (Rect
-                    .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                    .Expand((explosion_scale.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
-                    .Expand(explosion_expand.Value * (1.0f - p) * COLUMN_WIDTH)
-                    .AsQuad)
-                (Quad.color (Color.White.O4a a))
-                (Sprite.pick_texture (explosion_frames.Loops, 0) holdexplosion)
+        //    Draw.quad
+        //        (Rect
+        //            .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+        //            .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
+        //            .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
+        //            .AsQuad)
+        //        (Quad.color (Color.White.O4a a))
+        //        (Sprite.pick_texture (explosion_frames_hold.Loops, 0) holdexplosion)
 
         // draw note animation example
         bottom <- bottom - COLUMN_WIDTH * 2.0f
@@ -183,7 +231,7 @@ type AnimationSettingsPage() as this =
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
             (Quad.color Color.White)
-            (Sprite.pick_texture (note_frames.Loops, 0) note)
+            (Sprite.pick_texture (f_note.Loops, 0) note)
 
         // draw column light example
         bottom <- bottom + COLUMN_WIDTH * 4.0f
@@ -192,21 +240,22 @@ type AnimationSettingsPage() as this =
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
             (Quad.color Color.White)
-            (Sprite.pick_texture (note_frames.Loops, int hold_explosion_fade.Target) receptor)
+            (Sprite.pick_texture (f_note.Loops, if holding then 1 else 0) receptor)
 
         if enable_column_light.Value then
-            let threshold = max 0.0f (1.0f - column_light_time.Value)
 
-            let p =
-                (hold_explosion_fade.Value - threshold) / column_light_time.Value
-                |> min 1.0f
-                |> max 0.0f
+            let percent_remaining =
+                if holding then 1.0f else
+                    1.0 - (t_columnlight.Elapsed / t_columnlight.Interval)
+                    |> min 1.0
+                    |> max 0.0
+                    |> float32
 
-            let a = 255.0f * p |> int |> min 255 |> max 0
+            let a = 255.0f * percent_remaining |> int |> min 255 |> max 0
 
             Draw.sprite
                 (Sprite.aligned_box_x
-                    (left + COLUMN_WIDTH * 0.5f, bottom, 0.5f, 1.0f, COLUMN_WIDTH * p, 1.0f / p)
+                    (left + COLUMN_WIDTH * 0.5f, bottom, 0.5f, 1.0f, COLUMN_WIDTH * percent_remaining, 1.0f / percent_remaining)
                     columnlighting)
                 (Color.White.O4a a)
                 columnlighting
@@ -217,16 +266,17 @@ type AnimationSettingsPage() as this =
         Noteskins.save_config
             { Content.NoteskinConfig with
                 EnableColumnLight = enable_column_light.Value
-                ColumnLightTime = column_light_time.Value
+                ColumnLightDuration = column_light_duration.Value
                 AnimationFrameTime = note_animation_time.Value
-                Explosions =
+                UseExplosions = enable_explosions.Value
+                NoteExplosionSettings =
                     {
-                        Enable = enable_explosions.Value
-                        Scale = explosion_scale.Value
-                        FadeTime = explosion_fade_time.Value
-                        ExpandAmount = explosion_expand.Value
-                        ExplodeOnMiss = explosion_on_miss.Value
-                        AnimationFrameTime = explosion_animation_time.Value
-                        Colors = explosion_colors.Value
+                        AnimationFrameTime = explosion_frame_time_note.Value
+                        Scale = explosion_scale_note.Value
+                        Colors = explosion_colors_note.Value
+                        ExplodeOnMiss = explosion_on_miss_note.Value
+                        UseBuiltInAnimation = explosion_builtin_note.Value
+                        Duration = explosion_duration_note.Value
+                        ExpandAmount = explosion_expand_note.Value
                     }
             }

@@ -336,12 +336,16 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         if this.Initialised then
             child.Init this
             refresh <- true
-
-    static member (|+)(parent: #GridFlowContainer<_>, child: #Widget) =
+    
+    static member (|+)(parent: #GridFlowContainer<'T>, child: 'T) =
         parent.Add child
         parent
-
-    static member (|*)(parent: #GridFlowContainer<_>, child: #Widget) = parent.Add child
+    static member (|+)(parent: #GridFlowContainer<'T>, children: 'T seq) =
+        Seq.iter parent.Add children
+        parent
+    
+    static member (|*)(parent: #GridFlowContainer<'T>, child: 'T) = parent.Add child
+    static member (|*)(parent: #GridFlowContainer<'T>, children: 'T seq) = Seq.iter parent.Add children
     
     interface DynamicSize with
         member this.Size = content_height

@@ -19,9 +19,10 @@ type EditNoteskinPage(from_hotkey: bool) as this =
     let preview = NoteskinPreview(0.35f, true)
 
     do
-        menu 2.0f
+        let pos = menu_pos 2.0f
+        column()
         |+ PageTextEntry("noteskins.edit.noteskinname", name)
-        |. 0.5f
+            .Pos(pos.Step 1.5f, PRETTYWIDTH, PRETTYHEIGHT)
         |+ PageButton(
             "noteskins.edit.playfield",
             fun () ->
@@ -33,6 +34,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.edit.playfield"))
+            .Pos(pos.Step())
         |+ PageButton(
             "noteskins.edit.holdnotes",
             fun () ->
@@ -44,6 +46,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.edit.holdnotes"))
+            .Pos(pos.Step())
         |+ PageButton(
             "noteskins.edit.colors",
             fun () ->
@@ -55,6 +58,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.edit.colors"))
+            .Pos(pos.Step())
         |+ PageButton(
             "noteskins.edit.rotations",
             fun () ->
@@ -66,6 +70,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.edit.rotations"))
+            .Pos(pos.Step())
         |+ PageButton(
             "noteskins.edit.animations",
             fun () ->
@@ -77,6 +82,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.edit.animations"))
+            .Pos(pos.Step())
         |+ (
             let grid = 
                 GridFlowContainer<TextureCard>(
@@ -91,7 +97,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
             grid
         )
         |+ preview
-        |>> this.Content
+        |> this.Content
 
         this.Add(
             Conditional(
