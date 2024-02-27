@@ -260,7 +260,7 @@ type AnimationSettingsPage() as this =
                 (Color.White.O4a a)
                 columnlighting
 
-    override this.Title = %"noteskins.edit.animations.name"
+    override this.Title = %"noteskins.animations.name"
 
     override this.OnClose() =
         Noteskins.save_config

@@ -72,7 +72,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
             .Tooltip(Tooltip.Info("noteskins.edit.rotations"))
             .Pos(pos.Step())
         |+ PageButton(
-            "noteskins.edit.animations",
+            "noteskins.animations",
             fun () ->
                 { new AnimationSettingsPage() with
                     override this.OnClose() =
@@ -81,7 +81,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                 }
                     .Show()
         )
-            .Tooltip(Tooltip.Info("noteskins.edit.animations"))
+            .Tooltip(Tooltip.Info("noteskins.animations"))
             .Pos(pos.Step())
         |+ (
             let grid = 
