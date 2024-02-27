@@ -10,7 +10,7 @@ module LayoutConstants =
 
     let PRETTYTEXTWIDTH = 425.0f
     let PRETTYHEIGHT = 70.0f
-    let PRETTYWIDTH = 1200.0f
+    let PRETTYWIDTH = 1100.0f
 
 type Tooltip(content: Callout) =
     inherit StaticWidget(NodeType.None)

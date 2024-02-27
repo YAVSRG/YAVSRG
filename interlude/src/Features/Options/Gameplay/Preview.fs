@@ -5,6 +5,8 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Content
+open Interlude.Utils
+open Interlude.UI
 open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Play
@@ -59,12 +61,9 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
         this
         |* (bounds_placeholder
             |+ Text(
-                "PREVIEW",
-                Position =
-                    { Position.Default with
-                        Top = 1.0f %+ 0.0f
-                        Bottom = 1.0f %+ 50.0f
-                    }
+                Icons.EYE + " " + %"misc.preview",
+                Align = Alignment.LEFT,
+                Position = Position.Margin(20.0f, 10.0f).SliceTop(30.0f)
             ))
 
     member this.PreviewBounds = bounds_placeholder.Bounds
@@ -80,8 +79,11 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
 
     override this.Draw() =
         fbo.Bind true
+        Interlude.UI.Background.draw(Viewport.bounds, Colors.white, 1.0f)
+        Draw.rect Viewport.bounds (Color.Black.O4a (Interlude.Options.options.BackgroundDim.Value * 255.0f |> int))
         renderer.Draw()
         fbo.Unbind()
+        Draw.rect (bounds_placeholder.Bounds.Translate(10.0f, 10.0f)) Colors.shadow_2.O2
         Draw.sprite bounds_placeholder.Bounds Color.White fbo.sprite
         base.Draw()
 

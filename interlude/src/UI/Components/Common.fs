@@ -372,6 +372,8 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
         if search_timer.ElapsedMilliseconds > this.DebounceTime then
             search_timer.Reset()
             callback ()
+        // eat a button press for some trigger happy users
+        elif search_timer.IsRunning && (%%"select").Tapped() then ()
 
 type WIP() as this =
     inherit StaticWidget(NodeType.None)

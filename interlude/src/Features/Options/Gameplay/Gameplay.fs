@@ -395,6 +395,12 @@ type GameplayPage() as this =
         |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
             .Tooltip(Tooltip.Info("system.visualoffset"))
             .Pos(pos.Step 1.5f)
+        |+ PageButton("gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
+            .Tooltip(Tooltip.Info("gameplay.lanecover"))
+            .Pos(pos.Step())
+        |+ PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerPage))
+            .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
+            .Pos(pos.Step 1.5f)
         |+ PageSetting(
             "generic.keymode",
             Selector<_>
@@ -404,12 +410,6 @@ type GameplayPage() as this =
         |+ PageSetting("gameplay.keybinds", binds)
             .Tooltip(Tooltip.Info("gameplay.keybinds"))
             .Pos(pos.Step 1.5f, Viewport.vwidth - 200.0f)
-        |+ PageButton("gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
-            .Tooltip(Tooltip.Info("gameplay.lanecover"))
-            .Pos(pos.Step())
-        |+ PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerPage))
-            .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
-            .Pos(pos.Step())
         |+ preview
         |+ preset_buttons 1 options.Preset1
         |+ preset_buttons 2 options.Preset2

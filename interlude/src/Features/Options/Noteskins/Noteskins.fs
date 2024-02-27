@@ -103,7 +103,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
             Draw.rect this.Bounds Colors.yellow_accent.O1
 
         match preview with
-        | Some p -> Draw.sprite (this.Bounds.SliceLeft 100.0f) (Colors.white.O4a preview_fade.Alpha) p
+        | Some p -> Draw.sprite (this.Bounds.SliceLeft(100.0f).Shrink(5.0f)) (Colors.white.O4a preview_fade.Alpha) p
         | None -> ()
 
         base.Draw()
@@ -159,7 +159,7 @@ type NoteskinsPage() as this =
             NavigationContainer.Column<Widget>()
             |+ PageButton("noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
                 .Tooltip(Tooltip.Info("noteskins.edit"))
-                .Pos(1080.0f - 100.0f - PRETTYHEIGHT * 2.0f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT)
+                .Pos(760.0f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT * 1.2f)
             |+ PageButton("noteskins.edit.export", (fun () ->
                     if not (Noteskins.export_current ()) then
                         Notifications.error (
@@ -170,29 +170,25 @@ type NoteskinsPage() as this =
                 Icon = Icons.UPLOAD
             )
                 .Tooltip(Tooltip.Info("noteskins.edit.export"))
-                .Pos(1080.0f - 100.0f - PRETTYHEIGHT, PRETTYWIDTH * 0.5f, PRETTYHEIGHT)
+                .Pos(760.0f + PRETTYHEIGHT * 1.2f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT * 1.2f)
             |+ Text(
                 "Current",
-                Position = Position.Row(100.0f, 50.0f).Margin(100.0f, 0.0f),
+                Position = Position.Row(180.0f, 50.0f).Margin(100.0f, 0.0f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT
             )
             |+ Text(
                 (fun () -> Content.NoteskinConfig.Name),
-                Position = Position.Row(130.0f, 100.0f).Margin(100.0f, 0.0f),
+                Position = Position.Row(210.0f, 100.0f).Margin(100.0f, 0.0f),
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )
             |+ preview
 
         let right_side =
-            NavigationContainer.Column<Widget>(Position = { Position.Default with Left = 0.35f %+ 50.0f })
-            |+ ScrollContainer(
-                grid,
-                Position = Position.Margin(100.0f).TrimBottom(PRETTYHEIGHT)
-            )
+            NavigationContainer.Column<Widget>(Position = { Position.Default with Left = 0.35f %+ 50.0f }.Margin(100.0f, 0.0f).TrimTop(150.0f).TrimBottom(50.0f))
             |+ (
-                GridFlowContainer(PRETTYHEIGHT, 2, Position = Position.Margin(100.0f).SliceBottom(PRETTYHEIGHT))
+                GridFlowContainer(PRETTYHEIGHT, 2, WrapNavigation = false, Position = Position.SliceTop(PRETTYHEIGHT))
                 |+ PageButton(
                     "noteskins.get_more",
                     (fun () ->
@@ -203,6 +199,10 @@ type NoteskinsPage() as this =
                 )
                 |+ PageButton("noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
                     .Tooltip(Tooltip.Info("noteskins.open_folder"))
+            )
+            |+ ScrollContainer(
+                grid,
+                Position = Position.TrimTop(PRETTYHEIGHT * 1.5f)
             )
 
         row()
