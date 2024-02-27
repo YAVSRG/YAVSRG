@@ -192,12 +192,32 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
 type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     inherit StaticWidget(NodeType.None)
 
-    let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
-    let timers = Array.zeroCreate keys
-    let mem = Array.zeroCreate keys
-    let holding = Array.create keys false
-    let explode_time = 0.5f // Math.Clamp(ns.Explosions.FadeTime, 0f, 0.99f)
-    let animation = Animation.Counter ns.NoteExplosionSettings.AnimationFrameTime
+    let note_colors : int array = Array.zeroCreate keys
+    let hold_colors : int array = Array.zeroCreate keys
+    let holding : bool array = Array.create keys false
+
+    let note_durations = Array.init keys (fun _ -> Animation.Delay ns.NoteExplosionSettings.Duration)
+    let note_frames = Array.init keys (fun _ -> Animation.Counter ns.NoteExplosionSettings.AnimationFrameTime)
+
+    let hold_durations = Array.init keys (fun _ -> Animation.Delay ns.HoldExplosionSettings.Duration)
+    let hold_frames = Array.init keys (fun _ -> Animation.Counter ns.HoldExplosionSettings.AnimationFrameTime)
+
+    let release_durations = Array.init keys (fun _ -> Animation.Delay ns.ReleaseExplosionSettings.Duration)
+    let release_frames = Array.init keys (fun _ -> Animation.Counter ns.ReleaseExplosionSettings.AnimationFrameTime)
+
+    let release_settings = if ns.HoldExplosionSettings.UseBuiltInAnimation then ns.HoldExplosionSettings else ns.ReleaseExplosionSettings
+
+    let update_animations elapsed_ms =
+        for k = 0 to keys - 1 do
+            note_durations.[k].Update elapsed_ms
+            note_frames.[k].Update elapsed_ms
+
+            hold_durations.[k].Update elapsed_ms
+            hold_frames.[k].Update elapsed_ms
+
+            release_durations.[k].Update elapsed_ms
+            release_frames.[k].Update elapsed_ms
+
     let rotation = Noteskins.note_rotation keys
 
     let column_spacing = ns.KeymodeColumnSpacing keys
@@ -218,16 +238,30 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
     let handle_event (ev: HitEvent<HitEventGuts>) =
         match ev.Guts with
-        | Hit e when (ns.NoteExplosionSettings.ExplodeOnMiss || not e.Missed) ->
-            sliders.[ev.Column].Target <- 1.0f
-            sliders.[ev.Column].Value <- 1.0f
-            timers.[ev.Column] <- ev.Time
+        | Hit e when not e.Missed ->
+            note_colors.[ev.Column] <-
+                match ns.NoteExplosionSettings.Colors with
+                | ExplosionColors.Note -> int state.WithColors.Colors.[ev.Index].Data.[ev.Column]
+                | ExplosionColors.Judgements -> e.Judgement |> Option.defaultValue -1
+            note_durations.[ev.Column].Reset()
+            note_frames.[ev.Column].Reset()
+
+        | Hit e when (e.IsHold && not e.Missed) ->
+            hold_colors.[ev.Column] <-
+                match ns.HoldExplosionSettings.Colors with
+                | ExplosionColors.Note -> int state.WithColors.Colors.[ev.Index].Data.[ev.Column]
+                | ExplosionColors.Judgements -> e.Judgement |> Option.defaultValue -1
+            hold_frames.[ev.Column].Reset()
             holding.[ev.Column] <- true
-            mem.[ev.Column] <- ev.Guts
-        | Hit e when (ns.NoteExplosionSettings.ExplodeOnMiss || not e.Missed) ->
-            sliders.[ev.Column].Value <- 1.0f
-            timers.[ev.Column] <- ev.Time
-            mem.[ev.Column] <- ev.Guts
+
+        | Release e when holding.[ev.Column] && not e.Missed ->
+            hold_colors.[ev.Column] <-
+                match release_settings.Colors with
+                | ExplosionColors.Note -> hold_colors.[ev.Column]
+                | ExplosionColors.Judgements -> e.Judgement |> Option.defaultValue -1
+            release_durations.[ev.Column].Reset()
+            release_frames.[ev.Column].Reset()
+            holding.[ev.Column] <- false
         | _ -> ()
 
     do
@@ -243,19 +277,24 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        animation.Update elapsed_ms
-        sliders |> Array.iter (fun s -> s.Update elapsed_ms)
+        update_animations elapsed_ms
 
         for k = 0 to (keys - 1) do
             if holding.[k] && state.Scoring.KeyState |> Bitmask.has_key k |> not then
+                hold_colors.[k] <-
+                    match release_settings.Colors with
+                    | ExplosionColors.Note -> hold_colors.[k]
+                    | ExplosionColors.Judgements -> -1
+                release_durations.[k].Reset()
+                release_frames.[k].Reset()
                 holding.[k] <- false
-                sliders.[k].Target <- 0.0f
 
     override this.Draw() =
-        let columnwidth = ns.ColumnWidth
-        let threshold = 1.0f - explode_time
+        ()
+        //let columnwidth = ns.ColumnWidth
+        //let threshold = 1.0f - explode_time
 
-        //let f k (s: Animation.Fade) =
+        //let draw_column k (s: Animation.Fade) =
         //    if s.Value > threshold then
         //        let p = (s.Value - threshold) / explode_time
         //        let a = 255.0f * p |> int
@@ -296,7 +335,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
         //                    (Content.Texture (if e.IsHold then "holdexplosion" else "noteexplosion")))
         //        | _ -> ()
 
-        () //Array.iteri f sliders
+        //Array.iteri draw_column sliders
 
 type LaneCover() =
     inherit StaticWidget(NodeType.None)
@@ -372,7 +411,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
     let state: PlayState =
         {
             Chart = chart
-            WithMods = with_colors.Source
+            WithColors = with_colors
             Ruleset = ruleset
             Scoring = scoring
             ScoringChanged = Event<unit>()

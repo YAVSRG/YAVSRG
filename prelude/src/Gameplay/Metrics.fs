@@ -27,6 +27,7 @@ type HitEventGuts =
 
 type HitEvent<'Guts> =
     {
+        Index: int
         Time: ChartTime
         Column: int
         Guts: 'Guts
@@ -191,6 +192,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
                 if status.[k] = HitStatus.HIT_REQUIRED then
                     this._HandleEvent
                         {
+                            Index = note_seek_passive
                             Time = t - first_note + miss_window
                             Column = k
                             Guts = Hit_(deltas.[k], false, true)
@@ -201,6 +203,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
                     this._HandleEvent
                         {
+                            Index = note_seek_passive
                             Time = t - first_note + miss_window
                             Column = k
                             Guts = Hit_(deltas.[k], true, true)
@@ -227,6 +230,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
                     this._HandleEvent
                         {
+                            Index = note_seek_passive
                             Time = t - first_note + miss_window
                             Column = k
                             Guts = Release_(deltas.[k], true, overhold, dropped, missed_head)
@@ -283,6 +287,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
                 this._HandleEvent
                     {
+                        Index = earliest_note
                         Time = chart_time
                         Column = k
                         Guts = Hit_(deltas.[k], is_hold_head, false)
@@ -329,6 +334,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
                 this._HandleEvent
                     {
+                        Index = found
                         Time = chart_time
                         Column = k
                         Guts =
@@ -391,6 +397,7 @@ type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
 
     override this.HandleEvent ev =
         {
+            Index = ev.Index
             Time = ev.Time
             Column = ev.Column
             Guts =

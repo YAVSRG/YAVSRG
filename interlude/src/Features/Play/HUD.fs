@@ -271,7 +271,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let duration =
-        let chart = state.WithMods
+        let chart = state.WithColors
         chart.LastNote - chart.FirstNote
 
     override this.Draw() =
@@ -330,7 +330,7 @@ type SkipButton(conf: HUD.SkipButton, state: PlayState) =
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"
     let mutable active = true
 
-    let first_note = state.WithMods.FirstNote
+    let first_note = state.WithColors.FirstNote
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -551,9 +551,9 @@ type RateModMeter(conf: HUD.RateModMeter, state: PlayState) as this =
 type BPMMeter(conf: HUD.BPMMeter, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
 
-    let first_note = state.WithMods.FirstNote
+    let first_note = state.WithColors.FirstNote
     let mutable i = 0
-    let bpms = state.WithMods.BPM
+    let bpms = state.WithColors.BPM
     let mutable last_seen_time = -Time.infinity
 
     do

@@ -4,6 +4,7 @@ open System
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Tools
+open Prelude.Charts.Tools.NoteColors
 open Prelude.Gameplay
 open Interlude.Features.Gameplay.Chart
 
@@ -17,7 +18,7 @@ type PacemakerInfo =
 type PlayState =
     {
         Chart: Chart
-        WithMods: ModdedChart
+        WithColors: ColoredChart
         Ruleset: Ruleset
         mutable Scoring: IScoreMetric
         ScoringChanged: Event<unit>
@@ -29,7 +30,7 @@ type PlayState =
 
         {
             Chart = info.Chart
-            WithMods = info.WithMods
+            WithColors = info.WithMods
             Ruleset = s.Ruleset
             Scoring = s
             ScoringChanged = Event<unit>()
