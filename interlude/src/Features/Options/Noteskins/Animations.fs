@@ -26,7 +26,7 @@ type AnimationSettingsPage() as this =
     let test_events = Animation.Counter 1000.0
     let f_note = Animation.Counter(data.AnimationFrameTime)
 
-    let t_columnlight = Animation.Delay(data.HoldExplosionSettings.Duration)
+    let t_columnlight = Animation.Delay(data.ColumnLightDuration)
 
     let f_note_ex = Animation.Counter(data.NoteExplosionSettings.AnimationFrameTime)
     let t_note_ex = Animation.Delay(data.NoteExplosionSettings.Duration)

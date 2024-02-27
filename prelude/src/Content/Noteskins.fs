@@ -131,7 +131,7 @@ type NoteskinConfig =
                 |]
             FillColumnGaps = false
             EnableStageTextures = false
-            ColumnLightDuration = 200.0
+            ColumnLightDuration = 100.0
             EnableColumnLight = true
             AnimationFrameTime = 200.0
             UseExplosions = false

@@ -127,9 +127,8 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit) =
 
 type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
     inherit StaticWidget(NodeType.None)
-    let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
+    let timers = Array.init keys (fun _ -> Animation.Delay ns.ColumnLightDuration)
     let sprite = Content.Texture "receptorlighting"
-    //let light_time = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
 
     let column_spacing = ns.KeymodeColumnSpacing keys
 
@@ -158,37 +157,37 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        sliders |> Array.iter (fun s -> s.Update elapsed_ms)
+        timers |> Array.iter (fun s -> s.Update elapsed_ms)
 
         Array.iteri
-            (fun k (s: Animation.Fade) ->
+            (fun k (s: Animation.Delay) ->
                 if state.Scoring.KeyState |> Bitmask.has_key k then
-                    s.Value <- 1.0f
+                    s.Reset()
             )
-            sliders
+            timers
 
     override this.Draw() =
 
-        let f k (s: Animation.Fade) =
-            if s.Value > 0.5f then
-                let p = 0.5f//(s.Value - threshold) / light_time
-                let a = 255.0f * p |> int
+        let draw_column k (s: Animation.Delay) =
+            if not s.Complete then
+                let percent_remaining = 1.0f - float32 (s.Elapsed / s.Interval) |> min 1.0f |> max 0.0f
+                let a = 255.0f * percent_remaining |> int
 
                 Draw.sprite
                     (let x = ns.ColumnWidth * 0.5f + column_positions.[k]
 
                      if options.Upscroll.Value then
                          Sprite.aligned_box_x
-                             (this.Bounds.Left + x, this.Bounds.Top, 0.5f, 1.0f, ns.ColumnWidth * p, -1.0f / p)
+                             (this.Bounds.Left + x, this.Bounds.Top, 0.5f, 1.0f, ns.ColumnWidth * percent_remaining, -1.0f / percent_remaining)
                              sprite
                      else
                          Sprite.aligned_box_x
-                             (this.Bounds.Left + x, this.Bounds.Bottom, 0.5f, 1.0f, ns.ColumnWidth * p, 1.0f / p)
+                             (this.Bounds.Left + x, this.Bounds.Bottom, 0.5f, 1.0f, ns.ColumnWidth * percent_remaining, 1.0f / percent_remaining)
                              sprite)
                     (Color.FromArgb(a, Color.White))
                     sprite
 
-        Array.iteri f sliders
+        Array.iteri draw_column timers
 
 type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     inherit StaticWidget(NodeType.None)
