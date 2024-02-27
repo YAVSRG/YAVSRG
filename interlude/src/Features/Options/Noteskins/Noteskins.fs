@@ -116,7 +116,7 @@ type NoteskinsPage() as this =
     let grid =
         GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
-    let rec tryEditNoteskin () =
+    let rec try_edit_noteskin () =
         let ns = Content.Noteskin
 
         if ns.IsEmbedded then
@@ -155,21 +155,22 @@ type NoteskinsPage() as this =
     do
         refresh ()
 
-        this.Content(
+        let left_side = 
             NavigationContainer.Column<Widget>()
-            |+ (FlowContainer.LeftToRight<Widget>(250.0f, Position = Position.Row(230.0f, 50.0f).Margin(100.0f, 0.0f))
-                |+ Button(Icons.EDIT_2 + " " + %"noteskins.edit.name", tryEditNoteskin)
-                    .Tooltip(Tooltip.Info("noteskins.edit"))
-                |+ Button(
-                    Icons.EDIT_2 + " " + %"noteskins.edit.export.name",
-                    fun () ->
-                        if not (Noteskins.export_current ()) then
-                            Notifications.error (
-                                %"notification.export_noteskin_failure.title",
-                                %"notification.export_noteskin_failure.body"
-                            )
-                )
-                    .Tooltip(Tooltip.Info("noteskins.edit.export")))
+            |+ PageButton("noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
+                .Tooltip(Tooltip.Info("noteskins.edit"))
+                .Pos(1080.0f - 100.0f - PRETTYHEIGHT * 2.0f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT)
+            |+ PageButton("noteskins.edit.export", (fun () ->
+                    if not (Noteskins.export_current ()) then
+                        Notifications.error (
+                            %"notification.export_noteskin_failure.title",
+                            %"notification.export_noteskin_failure.body"
+                        )
+                ),
+                Icon = Icons.UPLOAD
+            )
+                .Tooltip(Tooltip.Info("noteskins.edit.export"))
+                .Pos(1080.0f - 100.0f - PRETTYHEIGHT, PRETTYWIDTH * 0.5f, PRETTYHEIGHT)
             |+ Text(
                 "Current",
                 Position = Position.Row(100.0f, 50.0f).Margin(100.0f, 0.0f),
@@ -182,32 +183,32 @@ type NoteskinsPage() as this =
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )
+            |+ preview
+
+        let right_side =
+            NavigationContainer.Column<Widget>(Position = { Position.Default with Left = 0.35f %+ 50.0f })
             |+ ScrollContainer(
                 grid,
-                Position =
-                    {
-                        Left = 0.35f %+ 150.0f
-                        Right = 1.0f %- 100.0f
-                        Top = 0.0f %+ 190.0f
-                        Bottom = 1.0f %- 190.0f
-                    }
+                Position = Position.Margin(100.0f).TrimBottom(PRETTYHEIGHT)
             )
-            |+ PageButton("noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
-                .Pos(830.0f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT)
-                .Tooltip(Tooltip.Info("noteskins.open_folder"))
-            |+ PageButton(
-                "noteskins.get_more",
-                (fun () ->
-                    Menu.Exit()
-
-                    if Screen.change Screen.Type.Import Transitions.Flags.Default then
-                        Interlude.Features.Import.ImportScreen.switch_to_noteskins ()
+            |+ (
+                GridFlowContainer(PRETTYHEIGHT, 2, Position = Position.Margin(100.0f).SliceBottom(PRETTYHEIGHT))
+                |+ PageButton(
+                    "noteskins.get_more",
+                    (fun () ->
+                        Menu.Exit()
+                        if Screen.change Screen.Type.Import Transitions.Flags.Default then
+                            Interlude.Features.Import.ImportScreen.switch_to_noteskins ()
+                    )
                 )
+                |+ PageButton("noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
+                    .Tooltip(Tooltip.Info("noteskins.open_folder"))
             )
-                .Pos(900.0f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT)
-        )
 
-        this |* preview
+        row()
+        |+ left_side
+        |+ right_side
+        |> this.Content
 
     override this.Title = %"noteskins.name"
 

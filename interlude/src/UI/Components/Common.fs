@@ -186,7 +186,6 @@ type InlaidButton(label, action, icon) =
 
 module RadioButtons =
 
-
     type RadioButtonOptions<'T> =
         {
             Setting: Setting<'T>
@@ -196,6 +195,10 @@ module RadioButtons =
 
     let private create_button (label: string) (value: 'T) (setting: Setting<'T>) (disabled: unit -> bool) =
         { new Button(label, fun () -> setting.Set value) with
+            override this.Init(parent) =
+                this.Disabled <- disabled
+                base.Init parent
+
             override this.Draw() =
                 if setting.Value = value then
                     Draw.rect this.Bounds Colors.shadow_2.O3
