@@ -213,13 +213,13 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
         if ns.NoteExplosionSettings.UseBuiltInAnimation then
             float32 ns.NoteExplosionSettings.Duration * 1.0f<ms> * Gameplay.rate.Value
         else
-            float32 ns.AnimationFrameTime * float32 note_explosion.Columns * 1.0f<ms> * Gameplay.rate.Value
+            float32 ns.NoteExplosionSettings.AnimationFrameTime * float32 note_explosion.Columns * 1.0f<ms> * Gameplay.rate.Value
 
     let release_duration = 
         if ns.HoldExplosionSettings.UseBuiltInAnimation then
-            float32 ns.NoteExplosionSettings.Duration * 1.0f<ms> * Gameplay.rate.Value
+            float32 ns.HoldExplosionSettings.Duration * 1.0f<ms> * Gameplay.rate.Value
         else
-            float32 ns.AnimationFrameTime * float32 release_explosion.Columns * 1.0f<ms> * Gameplay.rate.Value
+            float32 ns.HoldExplosionSettings.AnimationFrameTime * float32 release_explosion.Columns * 1.0f<ms> * Gameplay.rate.Value
 
     let EXPLOSION_POOL_SIZE = 10
     let explosion_pool : Explosion array = Array.init EXPLOSION_POOL_SIZE (fun _ -> { Column = 0; Color = 0; IsRelease = false; Time = -Time.infinity })
@@ -319,7 +319,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
         for k = 0 to keys - 1 do
             if not holding.[k] then () else
 
-            let frame = float32 (now - holding_since.[k]) / float32 ns.HoldExplosionSettings.AnimationFrameTime |> floor |> int
+            let frame = float32 (now - holding_since.[k]) / Gameplay.rate.Value / float32 ns.HoldExplosionSettings.AnimationFrameTime |> floor |> int
 
             let bounds =
                 (if options.Upscroll.Value then
@@ -347,11 +347,11 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
             // release animations
             if ex.IsRelease then 
 
-                let percent_remaining = 1.0f - (now - ex.Time) / release_duration |> min 1.0f
+                let percent_remaining = (1.0f - (now - ex.Time) / release_duration) |> min 1.0f
 
                 if percent_remaining < 0.0f then () else
 
-                let frame = float32 (now - ex.Time) / float32 ns.HoldExplosionSettings.AnimationFrameTime |> float |> int
+                let frame = float32 (now - ex.Time) / Gameplay.rate.Value / float32 ns.HoldExplosionSettings.AnimationFrameTime |> floor |> int
 
                 let expand = if ns.HoldExplosionSettings.UseBuiltInAnimation then 1.0f - percent_remaining else 0.0f
                 let alpha = if ns.HoldExplosionSettings.UseBuiltInAnimation then 255.0f * percent_remaining |> int else 255
@@ -379,11 +379,11 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
             // tap animations
             else
             
-                let percent_remaining = 1.0f - (now - ex.Time) / note_duration |> min 1.0f
+                let percent_remaining = (1.0f - (now - ex.Time) / note_duration) |> min 1.0f
             
                 if percent_remaining < 0.0f then () else
             
-                let frame = float32 (now - ex.Time) / float32 ns.NoteExplosionSettings.AnimationFrameTime |> float |> int
+                let frame = float32 (now - ex.Time) / Gameplay.rate.Value / float32 ns.NoteExplosionSettings.AnimationFrameTime |> floor |> int
             
                 let expand = if ns.NoteExplosionSettings.UseBuiltInAnimation then 1.0f - percent_remaining else 0.0f
                 let alpha = if ns.NoteExplosionSettings.UseBuiltInAnimation then 255.0f * percent_remaining |> int else 255
