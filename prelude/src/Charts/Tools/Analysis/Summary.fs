@@ -58,7 +58,7 @@ module PatternSummary =
 
     type private BPMClusteredPattern = { Time: ScaledTime; BPM: BPMCluster; Density: float32; Mixed: bool }
 
-    let private cluster_pattern_bpms (matched_patterns: (PatternId * Patterns.MatchedPattern) array) : (PatternId * BPMClusteredPattern) array =
+    let private cluster_pattern_bpms (matched_patterns: Patterns.MatchedCorePattern array) : (PatternId * BPMClusteredPattern) array =
         let clusters = ResizeArray<BPMCluster>()
         let mixed_clusters = Dictionary<PatternId, BPMCluster>()
 
@@ -84,10 +84,10 @@ module PatternSummary =
 
         let result = 
             matched_patterns
-            |> Array.map (fun (pattern, info) -> 
-                (pattern, { 
+            |> Array.map (fun info -> 
+                (info.Pattern, {
                     Time = info.Time
-                    BPM = if info.Mixed then get_mixed_cluster pattern info.MsPerBeat else get_cluster info.MsPerBeat
+                    BPM = if info.Mixed then get_mixed_cluster info.Pattern info.MsPerBeat else get_cluster info.MsPerBeat
                     Density = info.Density
                     Mixed = info.Mixed
                 }))
