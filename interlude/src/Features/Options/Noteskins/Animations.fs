@@ -44,7 +44,7 @@ type AnimationSettingsPage() as this =
     let explosion_colors_note = Setting.simple data.NoteExplosionSettings.Colors
     let explosion_builtin_note = Setting.simple data.NoteExplosionSettings.UseBuiltInAnimation
     let explosion_duration_note = Setting.bounded data.NoteExplosionSettings.Duration 50.0 1000 |> Setting.round 0 |> Setting.trigger t_note_ex.set_Interval
-    let explosion_scale_note = Setting.bounded data.NoteExplosionSettings.Scale 0.5f 2.0f
+    let explosion_scale_note = Setting.bounded data.NoteExplosionSettings.Scale 0.5f 5.0f
     let explosion_expand_note = Setting.percentf data.NoteExplosionSettings.ExpandAmount
 
     let explosion_frame_time_hold = Setting.bounded data.HoldExplosionSettings.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_hold_ex.set_Interval
@@ -52,7 +52,7 @@ type AnimationSettingsPage() as this =
     let explosion_hold_use_release = Setting.simple data.HoldExplosionSettings.UseReleaseExplosion
     let explosion_builtin_release = Setting.simple data.HoldExplosionSettings.ReleaseUseBuiltInAnimation
     let explosion_duration_hold = Setting.bounded data.HoldExplosionSettings.Duration 50.0 1000 |> Setting.round 0 |> Setting.trigger t_hold_ex.set_Interval
-    let explosion_scale_hold = Setting.bounded data.HoldExplosionSettings.Scale 0.5f 2.0f
+    let explosion_scale_hold = Setting.bounded data.HoldExplosionSettings.Scale 0.5f 5.0f
     let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount
 
     do
