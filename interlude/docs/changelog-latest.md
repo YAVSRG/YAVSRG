@@ -1,17 +1,20 @@
-0.7.18.2
+0.7.18.3
 ====
 
-I've rewritten some parts of how the mouse interacts with UI elements based on recent feedback
-If you notice any unusual behaviour or bugs as a result please let me know
+Thank you to all the new players who have given me plenty of feedback, bug reports and ideas
+
+# Bug fixes
+- Fixed several bugs in mouse interactions with some options menus
+- Fixed color pickers overlapping with other components in some pages
 
 # Improvements
-- All buttons/hoverables should no longer feel "sticky" when hovered with the mouse - moving the mouse away will "unhover" them
-- All buttons/hoverables will still be sticky-highlighted when hovered using keyboard controls, working as before
-- Went and tweaked/improved several tiny details of UI to work better
-- Multiplayer chat should now correctly scroll to show the latest message
-- You can now hold escape to exit out of nested menu pages so you don't have to spam the button
-- Hold note combo bug in osu!mania ruleset reported by CommandoBlack should now be fixed
-- Background images signficantly bigger than the game window are downscaled for performance
+- Improved appearance of Noteskins selection menu
+- Improved appearance of previews in all options menus
+- Prompt before exiting the game
+- Some invisible UX fixes you won't even notice.. :)
 
-Some improvements to noteskin explosion animations are planned for next release
+# New features
+- Explosion animations have received a rework! You can now do many more powerful and nicer looking things with them
+
+Due to the explosion rework, column lighting and explosion animation speeds have been reset for all skins, you may need to set them again to your preference.
 
