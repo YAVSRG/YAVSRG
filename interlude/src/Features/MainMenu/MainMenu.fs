@@ -107,6 +107,8 @@ type MainMenuScreen() as this =
     let splash_subtitle_fade = Animation.Fade 0.0f
     let button_sequence = Animation.Group()
 
+    let mutable confirmed_exit = false
+
     do
         this
         |+ play
@@ -168,7 +170,12 @@ type MainMenuScreen() as this =
         quit.Hide()
         Background.dim 0.7f
 
-    override this.OnBack() = Some Screen.Type.SplashScreen
+    override this.OnBack() = 
+        if confirmed_exit then
+            Some Screen.Type.SplashScreen
+        else
+            Menu.ConfirmPage(%"menu.exit_prompt", fun () -> confirmed_exit <- true; Screen.back Transitions.Flags.UnderLogo |> ignore).Show()
+            None
 
     override this.Draw() =
         let c = this.Bounds.CenterX
