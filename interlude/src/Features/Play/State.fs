@@ -19,19 +19,18 @@ type PlayState =
     {
         Chart: Chart
         WithColors: ColoredChart
-        Ruleset: Ruleset
         mutable Scoring: IScoreMetric
         ScoringChanged: Event<unit>
         CurrentChartTime: unit -> ChartTime
         Pacemaker: PacemakerInfo
     }
+    member this.Ruleset = this.Scoring.Ruleset
     static member Dummy (info: LoadedChartInfo) =
         let s = Metrics.create_dummy info.WithMods
 
         {
             Chart = info.Chart
-            WithColors = info.WithMods
-            Ruleset = s.Ruleset
+            WithColors = info.WithColors
             Scoring = s
             ScoringChanged = Event<unit>()
             CurrentChartTime = fun () -> 0.0f<ms>

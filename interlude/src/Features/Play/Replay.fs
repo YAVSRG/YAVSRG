@@ -390,7 +390,7 @@ module ReplayScreen =
             scoring <- Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
             screen.State.ChangeScoring scoring
 
-        { new IPlayScreen(chart, with_colors, PacemakerInfo.None, ruleset, scoring) with
+        { new IPlayScreen(chart, with_colors, PacemakerInfo.None, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x

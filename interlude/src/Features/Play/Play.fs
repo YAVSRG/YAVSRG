@@ -143,7 +143,7 @@ module PlayScreen =
                 AutoCloseWhen = (fun (_: SlideoutContent) -> not offset_slider.Selected)
             )
 
-        { new IPlayScreen(info.Chart, info.WithColors, pacemaker_info, ruleset, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, pacemaker_info, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x
@@ -284,7 +284,7 @@ module PlayScreen =
             Lobby.play_data (ms.ToArray())
             packet_count <- packet_count + 1
 
-        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, ruleset, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x

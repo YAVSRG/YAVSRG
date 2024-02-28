@@ -189,40 +189,67 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
 
         Array.iteri draw_column timers
 
+[<Struct>]
+type private Explosion = 
+    {
+        Column: int
+        Color: int
+        IsRelease: bool
+        Time: Time
+    }
+
 type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     inherit StaticWidget(NodeType.None)
 
-    let note_colors : int array = Array.zeroCreate keys
     let hold_colors : int array = Array.zeroCreate keys
     let holding : bool array = Array.create keys false
+    let holding_since : Time array = Array.create keys 0.0f<ms>
 
-    let note_durations = Array.init keys (fun _ -> Animation.Delay ns.NoteExplosionSettings.Duration)
-    let note_frames = Array.init keys (fun _ -> Animation.Counter ns.NoteExplosionSettings.AnimationFrameTime)
+    let note_explosion = Content.Texture "noteexplosion"
+    let hold_explosion = Content.Texture "holdexplosion"
+    let release_explosion = if ns.HoldExplosionSettings.UseReleaseExplosion then Content.Texture "releaseexplosion" else hold_explosion
 
-    let hold_durations = Array.init keys (fun _ -> Animation.Delay ns.HoldExplosionSettings.Duration)
-    let hold_frames = Array.init keys (fun _ -> Animation.Counter ns.HoldExplosionSettings.AnimationFrameTime)
+    let note_duration = 
+        if ns.NoteExplosionSettings.UseBuiltInAnimation then
+            float32 ns.NoteExplosionSettings.Duration * 1.0f<ms> * Gameplay.rate.Value
+        else
+            float32 ns.AnimationFrameTime * float32 note_explosion.Columns * 1.0f<ms> * Gameplay.rate.Value
 
-    let release_durations = Array.init keys (fun _ -> Animation.Delay ns.ReleaseExplosionSettings.Duration)
-    let release_frames = Array.init keys (fun _ -> Animation.Counter ns.ReleaseExplosionSettings.AnimationFrameTime)
+    let release_duration = 
+        if ns.HoldExplosionSettings.UseBuiltInAnimation then
+            float32 ns.NoteExplosionSettings.Duration * 1.0f<ms> * Gameplay.rate.Value
+        else
+            float32 ns.AnimationFrameTime * float32 release_explosion.Columns * 1.0f<ms> * Gameplay.rate.Value
 
-    let release_settings = if ns.HoldExplosionSettings.UseBuiltInAnimation then ns.HoldExplosionSettings else ns.ReleaseExplosionSettings
+    let EXPLOSION_POOL_SIZE = 10
+    let explosion_pool : Explosion array = Array.init EXPLOSION_POOL_SIZE (fun _ -> { Column = 0; Color = 0; IsRelease = false; Time = -Time.infinity })
+    let mutable explosion_pool_pointer = 0
 
-    let update_animations elapsed_ms =
-        for k = 0 to keys - 1 do
-            note_durations.[k].Update elapsed_ms
-            note_frames.[k].Update elapsed_ms
-
-            hold_durations.[k].Update elapsed_ms
-            hold_frames.[k].Update elapsed_ms
-
-            release_durations.[k].Update elapsed_ms
-            release_frames.[k].Update elapsed_ms
+    let add_note_explosion (column: int, color: int) =
+        explosion_pool.[explosion_pool_pointer] <-
+            {
+                Column = column
+                Color = color
+                IsRelease = false
+                Time = state.CurrentChartTime()
+            }
+        explosion_pool_pointer <- (explosion_pool_pointer + 1) % EXPLOSION_POOL_SIZE
+    
+    let add_release_explosion (column: int, color: int) =
+        explosion_pool.[explosion_pool_pointer] <-
+            {
+                Column = column
+                Color = color
+                IsRelease = true
+                Time = state.CurrentChartTime()
+            }
+        explosion_pool_pointer <- (explosion_pool_pointer + 1) % EXPLOSION_POOL_SIZE
 
     let rotation = Noteskins.note_rotation keys
-
-    let column_spacing = ns.KeymodeColumnSpacing keys
-
+    
+    let column_width = ns.ColumnWidth
     let column_positions =
+        let column_spacing = ns.KeymodeColumnSpacing keys
         let mutable x = 0.0f
 
         Array.init
@@ -231,36 +258,34 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                 let v = x
 
                 if i + 1 < keys then
-                    x <- x + ns.ColumnWidth + column_spacing.[i]
+                    x <- x + column_width + column_spacing.[i]
 
                 v
             )
 
     let handle_event (ev: HitEvent<HitEventGuts>) =
         match ev.Guts with
-        | Hit e when not e.Missed ->
-            note_colors.[ev.Column] <-
-                match ns.NoteExplosionSettings.Colors with
-                | ExplosionColors.Note -> int state.WithColors.Colors.[ev.Index].Data.[ev.Column]
-                | ExplosionColors.Judgements -> e.Judgement |> Option.defaultValue -1
-            note_durations.[ev.Column].Reset()
-            note_frames.[ev.Column].Reset()
-
         | Hit e when (e.IsHold && not e.Missed) ->
             hold_colors.[ev.Column] <-
                 match ns.HoldExplosionSettings.Colors with
                 | ExplosionColors.Note -> int state.WithColors.Colors.[ev.Index].Data.[ev.Column]
                 | ExplosionColors.Judgements -> e.Judgement |> Option.defaultValue -1
-            hold_frames.[ev.Column].Reset()
             holding.[ev.Column] <- true
+            holding_since.[ev.Column] <- state.CurrentChartTime()
+
+        | Hit e when not e.Missed ->
+            let color =
+                match ns.NoteExplosionSettings.Colors with
+                | ExplosionColors.Note -> int state.WithColors.Colors.[ev.Index].Data.[ev.Column]
+                | ExplosionColors.Judgements -> e.Judgement |> Option.defaultValue -1
+            add_note_explosion (ev.Column, color)
 
         | Release e when holding.[ev.Column] && not e.Missed ->
-            hold_colors.[ev.Column] <-
-                match release_settings.Colors with
+            let color =
+                match ns.HoldExplosionSettings.Colors with
                 | ExplosionColors.Note -> hold_colors.[ev.Column]
                 | ExplosionColors.Judgements -> e.Judgement |> Option.defaultValue -1
-            release_durations.[ev.Column].Reset()
-            release_frames.[ev.Column].Reset()
+            add_release_explosion (ev.Column, color)
             holding.[ev.Column] <- false
         | _ -> ()
 
@@ -277,65 +302,111 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        update_animations elapsed_ms
 
         for k = 0 to (keys - 1) do
             if holding.[k] && state.Scoring.KeyState |> Bitmask.has_key k |> not then
-                hold_colors.[k] <-
-                    match release_settings.Colors with
+                let color =
+                    match ns.HoldExplosionSettings.Colors with
                     | ExplosionColors.Note -> hold_colors.[k]
                     | ExplosionColors.Judgements -> -1
-                release_durations.[k].Reset()
-                release_frames.[k].Reset()
+                add_release_explosion (k, color)
                 holding.[k] <- false
 
     override this.Draw() =
-        ()
-        //let columnwidth = ns.ColumnWidth
-        //let threshold = 1.0f - explode_time
+        let now = state.CurrentChartTime()
 
-        //let draw_column k (s: Animation.Fade) =
-        //    if s.Value > threshold then
-        //        let p = (s.Value - threshold) / explode_time
-        //        let a = 255.0f * p |> int
+        // hold animations
+        for k = 0 to keys - 1 do
+            if not holding.[k] then () else
 
-        //        let box =
-        //            (if options.Upscroll.Value then
-        //                 Rect.Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top, columnwidth, columnwidth)
-        //             else
-        //                 Rect.Box(
-        //                     this.Bounds.Left + column_positions.[k],
-        //                     this.Bounds.Bottom - columnwidth,
-        //                     columnwidth,
-        //                     columnwidth
-        //                 ))
-        //                .Expand((ns.Explosions.Scale - 1.0f) * columnwidth * 0.5f)
-        //                .Expand(ns.Explosions.ExpandAmount * (1.0f - p) * columnwidth)
+            let frame = float32 (now - holding_since.[k]) / float32 ns.HoldExplosionSettings.AnimationFrameTime |> floor |> int
 
-        //        match mem.[k] with
-        //        | Hit e ->
-        //            let color =
-        //                if ns.Explosions.Colors = ExplosionColors.Column then
-        //                    k
-        //                else
-        //                    match e.Judgement with
-        //                    | Some j -> int j
-        //                    | None -> 0
+            let bounds =
+                (if options.Upscroll.Value then
+                     Rect.Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top, column_width, column_width)
+                 else
+                     Rect.Box(
+                         this.Bounds.Left + column_positions.[k],
+                         this.Bounds.Bottom - column_width,
+                         column_width,
+                         column_width
+                     ))
+                    .Expand((ns.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
 
-        //            let frame =
-        //                (state.CurrentChartTime() - timers.[k])
-        //                / Time.ofFloat ns.Explosions.AnimationFrameTime
-        //                |> int
+            Draw.quad
+                (bounds.AsQuad |> rotation k)
+                (Quad.color Color.White)
+                (Sprite.pick_texture
+                    (frame, hold_colors.[k])
+                    hold_explosion)
 
-        //            Draw.quad
-        //                (box.AsQuad |> rotation k)
-        //                (Quad.color (Color.FromArgb(a, Color.White)))
-        //                (Sprite.pick_texture
-        //                    (frame, color)
-        //                    (Content.Texture (if e.IsHold then "holdexplosion" else "noteexplosion")))
-        //        | _ -> ()
+        for i = 0 to EXPLOSION_POOL_SIZE - 1 do
 
-        //Array.iteri draw_column sliders
+            let ex = explosion_pool.[i]
+
+            // release animations
+            if ex.IsRelease then 
+
+                let percent_remaining = 1.0f - (now - ex.Time) / release_duration |> min 1.0f
+
+                if percent_remaining < 0.0f then () else
+
+                let frame = float32 (now - ex.Time) / float32 ns.HoldExplosionSettings.AnimationFrameTime |> float |> int
+
+                let expand = if ns.HoldExplosionSettings.UseBuiltInAnimation then 1.0f - percent_remaining else 0.0f
+                let alpha = if ns.HoldExplosionSettings.UseBuiltInAnimation then 255.0f * percent_remaining |> int else 255
+
+                let bounds =
+                    (if options.Upscroll.Value then
+                            Rect.Box(this.Bounds.Left + column_positions.[ex.Column], this.Bounds.Top, column_width, column_width)
+                        else
+                            Rect.Box(
+                                this.Bounds.Left + column_positions.[ex.Column],
+                                this.Bounds.Bottom - column_width,
+                                column_width,
+                                column_width
+                            ))
+                        .Expand((ns.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
+                        .Expand(ns.HoldExplosionSettings.ExpandAmount * expand * column_width)
+
+                Draw.quad
+                    (bounds.AsQuad |> rotation ex.Column)
+                    (Quad.color (Color.FromArgb(alpha, Color.White)))
+                    (Sprite.pick_texture
+                        (frame, ex.Color)
+                        release_explosion)
+
+            // tap animations
+            else
+            
+                let percent_remaining = 1.0f - (now - ex.Time) / note_duration |> min 1.0f
+            
+                if percent_remaining < 0.0f then () else
+            
+                let frame = float32 (now - ex.Time) / float32 ns.NoteExplosionSettings.AnimationFrameTime |> float |> int
+            
+                let expand = if ns.NoteExplosionSettings.UseBuiltInAnimation then 1.0f - percent_remaining else 0.0f
+                let alpha = if ns.NoteExplosionSettings.UseBuiltInAnimation then 255.0f * percent_remaining |> int else 255
+            
+                let bounds =
+                    (if options.Upscroll.Value then
+                            Rect.Box(this.Bounds.Left + column_positions.[ex.Column], this.Bounds.Top, column_width, column_width)
+                        else
+                            Rect.Box(
+                                this.Bounds.Left + column_positions.[ex.Column],
+                                this.Bounds.Bottom - column_width,
+                                column_width,
+                                column_width
+                            ))
+                        .Expand((ns.NoteExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
+                        .Expand(ns.NoteExplosionSettings.ExpandAmount * expand * column_width)
+            
+                Draw.quad
+                    (bounds.AsQuad |> rotation ex.Column)
+                    (Quad.color (Color.FromArgb(alpha, Color.White)))
+                    (Sprite.pick_texture
+                        (frame, ex.Color)
+                        note_explosion)
 
 type LaneCover() =
     inherit StaticWidget(NodeType.None)
@@ -403,7 +474,7 @@ module Utils =
             if pos.Float then screen.Add w else playfield.Add w
 
 [<AbstractClass>]
-type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerInfo, ruleset: Ruleset, scoring: IScoreMetric) as this =
+type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerInfo, scoring: IScoreMetric) as this =
     inherit Screen()
 
     let first_note = with_colors.FirstNote
@@ -412,7 +483,6 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         {
             Chart = chart
             WithColors = with_colors
-            Ruleset = ruleset
             Scoring = scoring
             ScoringChanged = Event<unit>()
             CurrentChartTime = fun () -> Song.time_with_offset () - first_note

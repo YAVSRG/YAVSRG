@@ -145,7 +145,7 @@ module PracticeScreen =
                 resume_from_current_place <- false
             )
 
-        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, Rulesets.current, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x

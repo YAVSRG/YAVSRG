@@ -14,11 +14,10 @@ type ExplosionColors =
     | Judgements
 
 [<Json.AutoCodec(false)>]
-type ExplosionConfig =
+type NoteExplosionConfig =
     {
         Scale: float32
         AnimationFrameTime: float
-        ExplodeOnMiss: bool
         Colors: ExplosionColors
 
         UseBuiltInAnimation: bool
@@ -29,10 +28,35 @@ type ExplosionConfig =
         {
             Scale = 1.0f
             AnimationFrameTime = 50.0
-            ExplodeOnMiss = false
             Colors = ExplosionColors.Note
 
             UseBuiltInAnimation = true
+            Duration = 600.0
+            ExpandAmount = 0.15f
+        }
+
+[<Json.AutoCodec(false)>]
+type HoldExplosionConfig =
+    {
+        // todo: second scale, frametime, colors for release explosion
+        Scale: float32
+        AnimationFrameTime: float
+        Colors: ExplosionColors
+
+        UseReleaseExplosion: bool
+        ReleaseUseBuiltInAnimation: bool
+        Duration: float
+        ExpandAmount: float32
+    }
+    member this.UseBuiltInAnimation = not this.UseReleaseExplosion || this.ReleaseUseBuiltInAnimation
+    static member Default =
+        {
+            Scale = 1.0f
+            AnimationFrameTime = 50.0
+            Colors = ExplosionColors.Note
+
+            UseReleaseExplosion = false
+            ReleaseUseBuiltInAnimation = true
             Duration = 600.0
             ExpandAmount = 0.15f
         }
@@ -90,9 +114,8 @@ type NoteskinConfig =
         /// 
         UseExplosions: bool
         /// Config for explosion animations
-        NoteExplosionSettings: ExplosionConfig
-        HoldExplosionSettings: ExplosionConfig
-        ReleaseExplosionSettings: ExplosionConfig
+        NoteExplosionSettings: NoteExplosionConfig
+        HoldExplosionSettings: HoldExplosionConfig
 
         /// Enables rotation for notes. Set this to true if your notes are arrows/should rotate depending on which column they are in
         /// Applies to receptors, notes and if UseHoldTailTexture is false it applies to tails too.
@@ -135,9 +158,8 @@ type NoteskinConfig =
             EnableColumnLight = true
             AnimationFrameTime = 200.0
             UseExplosions = false
-            NoteExplosionSettings = ExplosionConfig.Default
-            HoldExplosionSettings = ExplosionConfig.Default
-            ReleaseExplosionSettings = ExplosionConfig.Default
+            NoteExplosionSettings = NoteExplosionConfig.Default
+            HoldExplosionSettings = HoldExplosionConfig.Default
             NoteColors = ColorConfig.Default
             UseRotation = false
             Rotations =
@@ -238,7 +260,7 @@ type Noteskin(storage) as this =
             if this.Config.UseExplosions then
                 yield "noteexplosion"
                 yield "holdexplosion"
-                if not this.Config.HoldExplosionSettings.UseBuiltInAnimation then
+                if not this.Config.HoldExplosionSettings.UseReleaseExplosion then
                     yield "releaseexplosion"
             if this.Config.EnableColumnLight then
                 yield "receptorlighting"

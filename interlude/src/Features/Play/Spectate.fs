@@ -93,14 +93,13 @@ module SpectateScreen =
             screen.State.ChangeScoring scoring
 
         let first_note = info.WithMods.FirstNote
-        let ruleset = Rulesets.current
 
         let mutable wait_for_load = 1000.0
         let mutable exiting = false
 
         Lobby.start_spectating ()
 
-        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, ruleset, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
             override this.AddWidgets() =
                 let inline add_widget x =
                     add_widget (this, this.Playfield, this.State) x

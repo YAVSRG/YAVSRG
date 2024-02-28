@@ -33,9 +33,6 @@ type AnimationSettingsPage() as this =
 
     let f_hold_ex = Animation.Counter(data.HoldExplosionSettings.AnimationFrameTime)
     let t_hold_ex = Animation.Delay(data.HoldExplosionSettings.Duration)
-    
-    let f_release_ex = Animation.Counter(data.ReleaseExplosionSettings.AnimationFrameTime)
-    let t_release_ex = Animation.Delay(data.ReleaseExplosionSettings.Duration)
 
     let note_animation_time = Setting.bounded data.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_note.set_Interval
     let enable_column_light = Setting.simple data.EnableColumnLight
@@ -45,7 +42,6 @@ type AnimationSettingsPage() as this =
 
     let explosion_frame_time_note = Setting.bounded data.NoteExplosionSettings.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_note_ex.set_Interval
     let explosion_colors_note = Setting.simple data.NoteExplosionSettings.Colors
-    let explosion_on_miss_note = Setting.simple data.NoteExplosionSettings.ExplodeOnMiss
     let explosion_builtin_note = Setting.simple data.NoteExplosionSettings.UseBuiltInAnimation
     let explosion_duration_note = Setting.bounded data.NoteExplosionSettings.Duration 50.0 1000 |> Setting.round 0 |> Setting.trigger t_note_ex.set_Interval
     let explosion_scale_note = Setting.bounded data.NoteExplosionSettings.Scale 0.5f 2.0f
@@ -53,19 +49,11 @@ type AnimationSettingsPage() as this =
 
     let explosion_frame_time_hold = Setting.bounded data.HoldExplosionSettings.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_hold_ex.set_Interval
     let explosion_colors_hold = Setting.simple data.HoldExplosionSettings.Colors
-    let explosion_on_miss_hold = Setting.simple data.HoldExplosionSettings.ExplodeOnMiss
-    let explosion_builtin_hold = Setting.simple data.HoldExplosionSettings.UseBuiltInAnimation
+    let explosion_hold_use_release = Setting.simple data.HoldExplosionSettings.UseReleaseExplosion
+    let explosion_builtin_release = Setting.simple data.HoldExplosionSettings.ReleaseUseBuiltInAnimation
     let explosion_duration_hold = Setting.bounded data.HoldExplosionSettings.Duration 50.0 1000 |> Setting.round 0 |> Setting.trigger t_hold_ex.set_Interval
     let explosion_scale_hold = Setting.bounded data.HoldExplosionSettings.Scale 0.5f 2.0f
     let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount
-    
-    let explosion_frame_time_release = Setting.bounded data.ReleaseExplosionSettings.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_release_ex.set_Interval
-    let explosion_colors_release = Setting.simple data.ReleaseExplosionSettings.Colors
-    let explosion_on_miss_release = Setting.simple data.ReleaseExplosionSettings.ExplodeOnMiss
-    let explosion_builtin_release = Setting.simple data.ReleaseExplosionSettings.UseBuiltInAnimation
-    let explosion_duration_release = Setting.bounded data.ReleaseExplosionSettings.Duration 50.0 1000 |> Setting.round 0 |> Setting.trigger t_release_ex.set_Interval
-    let explosion_scale_release = Setting.bounded data.ReleaseExplosionSettings.Scale 0.5f 2.0f
-    let explosion_expand_release = Setting.percentf data.ReleaseExplosionSettings.ExpandAmount
 
     do
         let general_tab =
@@ -99,9 +87,6 @@ type AnimationSettingsPage() as this =
                 Slider(explosion_frame_time_note |> Setting.f32, Step = 1f)
             )
                 .Tooltip(Tooltip.Info("noteskins.animations.explosionanimationtime"))
-                .Pos(pos.Step())
-            |+ PageSetting("noteskins.animations.explodeonmiss", Selector<_>.FromBool(explosion_on_miss_note))
-                .Tooltip(Tooltip.Info("noteskins.animations.explodeonmiss"))
                 .Pos(pos.Step())
             |+ PageSetting(
                 "noteskins.animations.explosioncolors",
@@ -140,9 +125,6 @@ type AnimationSettingsPage() as this =
             )
                 .Tooltip(Tooltip.Info("noteskins.animations.explosionanimationtime"))
                 .Pos(pos.Step())
-            |+ PageSetting("noteskins.animations.explodeonmiss", Selector<_>.FromBool(explosion_on_miss_hold))
-                .Tooltip(Tooltip.Info("noteskins.animations.explodeonmiss"))
-                .Pos(pos.Step())
             |+ PageSetting(
                 "noteskins.animations.explosioncolors",
                 Selector(
@@ -152,61 +134,26 @@ type AnimationSettingsPage() as this =
             )
                 .Tooltip(Tooltip.Info("noteskins.animations.explosioncolors"))
                 .Pos(pos.Step())
-            |+ PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_hold)
-                .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
+            |+ PageSetting("noteskins.animations.usereleaseanimation", Selector<_>.FromBool explosion_hold_use_release)
+                .Tooltip(Tooltip.Info("noteskins.animations.usereleaseanimation"))
                 .Pos(pos.Step())
-            |+ Conditional(explosion_builtin_hold.Get, 
+            |+ Conditional(explosion_builtin_release.Get,
+                PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_release)
+                    .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
+                    .Pos(pos.Step())
+            )
+            |+ Conditional((fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value), 
                 PageSetting("noteskins.animations.explosionduration", Slider(explosion_duration_hold |> Setting.f32, Step = 1f))
                     .Tooltip(Tooltip.Info("noteskins.animations.explosionduration"))
                     .Pos(pos.Step())
             )
-            |+ Conditional(explosion_builtin_hold.Get, 
+            |+ Conditional((fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value), 
                 PageSetting("noteskins.animations.explosionscale", Slider.Percent(explosion_scale_hold))
                     .Tooltip(Tooltip.Info("noteskins.animations.explosionscale"))
                     .Pos(pos.Step())
             )
-            |+ Conditional(explosion_builtin_hold.Get, 
+            |+ Conditional((fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value), 
                 PageSetting("noteskins.animations.explosionexpand", Slider.Percent(explosion_expand_hold))
-                    .Tooltip(Tooltip.Info("noteskins.animations.explosionexpand"))
-                    .Pos(pos.Step())
-            )
-
-        let release_explosion_tab =
-            let pos = menu_pos 3.0f
-            NavigationContainer.Column<Widget>(WrapNavigation = false)
-            |+ PageSetting(
-                "noteskins.animations.explosionanimationtime",
-                Slider(explosion_frame_time_release |> Setting.f32, Step = 1f)
-            )
-                .Tooltip(Tooltip.Info("noteskins.animations.explosionanimationtime"))
-                .Pos(pos.Step())
-            |+ PageSetting("noteskins.animations.explodeonmiss", Selector<_>.FromBool(explosion_on_miss_release))
-                .Tooltip(Tooltip.Info("noteskins.animations.explodeonmiss"))
-                .Pos(pos.Step())
-            |+ PageSetting(
-                "noteskins.animations.explosioncolors",
-                Selector(
-                    [| ExplosionColors.Note, "Note"; ExplosionColors.Judgements, "Judgements" |],
-                    explosion_colors_release
-                )
-            )
-                .Tooltip(Tooltip.Info("noteskins.animations.explosioncolors"))
-                .Pos(pos.Step())
-            |+ PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_release)
-                .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
-                .Pos(pos.Step())
-            |+ Conditional(explosion_builtin_release.Get, 
-                PageSetting("noteskins.animations.explosionduration", Slider(explosion_duration_release |> Setting.f32, Step = 1f))
-                    .Tooltip(Tooltip.Info("noteskins.animations.explosionduration"))
-                    .Pos(pos.Step())
-            )
-            |+ Conditional(explosion_builtin_release.Get, 
-                PageSetting("noteskins.animations.explosionscale", Slider.Percent(explosion_scale_release))
-                    .Tooltip(Tooltip.Info("noteskins.animations.explosionscale"))
-                    .Pos(pos.Step())
-            )
-            |+ Conditional(explosion_builtin_release.Get, 
-                PageSetting("noteskins.animations.explosionexpand", Slider.Percent(explosion_expand_release))
                     .Tooltip(Tooltip.Info("noteskins.animations.explosionexpand"))
                     .Pos(pos.Step())
             )
@@ -220,7 +167,6 @@ type AnimationSettingsPage() as this =
                         general_tab, "General", K false
                         note_explosion_tab, "Note explosions", (fun () -> not enable_explosions.Value)
                         hold_explosion_tab, "Hold explosions", (fun () -> not enable_explosions.Value)
-                        release_explosion_tab, "Release explosions", (fun () -> not enable_explosions.Value || explosion_builtin_hold.Value)
                     |]
                 Height = 50.0f
             }
@@ -237,12 +183,10 @@ type AnimationSettingsPage() as this =
         f_note.Update elapsed_ms
         f_note_ex.Update elapsed_ms
         f_hold_ex.Update elapsed_ms
-        f_release_ex.Update elapsed_ms
 
         t_columnlight.Update elapsed_ms
         t_note_ex.Update elapsed_ms
         t_hold_ex.Update elapsed_ms
-        t_release_ex.Update elapsed_ms
         t_columnlight.Update elapsed_ms
 
         test_events.Update elapsed_ms
@@ -257,9 +201,7 @@ type AnimationSettingsPage() as this =
             else
                 t_columnlight.Reset()
                 t_hold_ex.Reset()
-                t_release_ex.Reset()
                 f_hold_ex.Reset()
-                f_release_ex.Reset()
 
     override this.Draw() =
         base.Draw()
@@ -306,7 +248,7 @@ type AnimationSettingsPage() as this =
 
         if enable_explosions.Value then
 
-            if explosion_builtin_hold.Value || holding then
+            if not explosion_hold_use_release.Value || holding then
 
                 let percent_remaining =
                     if holding then
@@ -332,23 +274,23 @@ type AnimationSettingsPage() as this =
         
                 let percent_remaining =
                     if explosion_builtin_release.Value then
-                        1.0 - (t_release_ex.Elapsed / explosion_duration_release.Value)
+                        1.0 - (t_hold_ex.Elapsed / explosion_duration_hold.Value)
                         |> min 1.0
                         |> max 0.0
                         |> float32
                     else
-                        if f_release_ex.Loops > releaseexplosion.Columns then 0.0f else 1.0f
+                        if f_hold_ex.Loops > releaseexplosion.Columns then 0.0f else 1.0f
 
                 let a = 255.0f * percent_remaining |> int
 
                 Draw.quad
                     (Rect
                         .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                        .Expand((explosion_scale_release.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
-                        .Expand(explosion_expand_release.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
+                        .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
+                        .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                         .AsQuad)
                     (Quad.color (Color.White.O4a a))
-                    (Sprite.pick_texture (f_release_ex.Loops, 0) releaseexplosion)
+                    (Sprite.pick_texture (f_hold_ex.Loops, 0) releaseexplosion)
 
         // draw note animation example
         bottom <- bottom - COLUMN_WIDTH * 2.0f
@@ -399,9 +341,18 @@ type AnimationSettingsPage() as this =
                         AnimationFrameTime = explosion_frame_time_note.Value
                         Scale = explosion_scale_note.Value
                         Colors = explosion_colors_note.Value
-                        ExplodeOnMiss = explosion_on_miss_note.Value
                         UseBuiltInAnimation = explosion_builtin_note.Value
                         Duration = explosion_duration_note.Value
                         ExpandAmount = explosion_expand_note.Value
+                    }
+                HoldExplosionSettings =
+                    {
+                        AnimationFrameTime = explosion_frame_time_hold.Value
+                        Scale = explosion_scale_hold.Value
+                        Colors = explosion_colors_hold.Value
+                        UseReleaseExplosion = explosion_hold_use_release.Value
+                        ReleaseUseBuiltInAnimation = explosion_builtin_release.Value
+                        Duration = explosion_duration_hold.Value
+                        ExpandAmount = explosion_expand_hold.Value
                     }
             }
