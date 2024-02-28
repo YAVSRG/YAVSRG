@@ -17,11 +17,14 @@ module Advanced =
                 column ()
                 |+ PageSetting("advanced.enableconsole", Selector<_>.FromBool options.EnableConsole)
                     .Pos(200.0f)
-                |+ PageSetting("advanced.vanishingnotes", Selector<_>.FromBool options.VanishingNotes)
+                |+ PageSetting("advanced.confirmexit", Selector<_>.FromBool options.ConfirmExit)
                     .Pos(270.0f)
+                    .Tooltip(Tooltip.Info("advanced.confirmexit"))
+                |+ PageSetting("advanced.vanishingnotes", Selector<_>.FromBool options.VanishingNotes)
+                    .Pos(340.0f)
                     .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
                 |+ PageSetting("advanced.autocalibrateoffset", Selector<_>.FromBool options.AutoCalibrateOffset)
-                    .Pos(340.0f)
+                    .Pos(410.0f)
                     .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
                 |+ PageButton
                     .Once(
@@ -43,10 +46,10 @@ module Advanced =
                                 %"notification.pattern_cache_started.body"
                             )
                     )
-                    .Pos(410.0f)
+                    .Pos(480.0f)
                     .Tooltip(Tooltip.Info("advanced.buildpatterncache"))
                 |+ PageSetting("advanced.advancedrecommendations", Selector<_>.FromBool options.AdvancedRecommendations)
-                    .Pos(480.0f)
+                    .Pos(550.0f)
                     .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
             )
 

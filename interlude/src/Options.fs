@@ -133,6 +133,7 @@ module Options =
             AutoCalibrateOffset: Setting<bool>
             AdvancedRecommendations: Setting<bool>
             ScoreGraphMode: Setting<ScoreGraphMode>
+            ConfirmExit: Setting<bool>
         }
         static member Default =
             {
@@ -245,6 +246,7 @@ module Options =
                 AutoCalibrateOffset = Setting.simple false
                 AdvancedRecommendations = Setting.simple false
                 ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
+                ConfirmExit = Setting.simple true
             }
 
     let mutable internal config: Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>

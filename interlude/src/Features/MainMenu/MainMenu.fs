@@ -171,7 +171,7 @@ type MainMenuScreen() as this =
         Background.dim 0.7f
 
     override this.OnBack() = 
-        if confirmed_exit then
+        if not Interlude.Options.options.ConfirmExit.Value || confirmed_exit then
             Some Screen.Type.SplashScreen
         else
             Menu.ConfirmPage(%"menu.exit_prompt", fun () -> confirmed_exit <- true; Screen.back Transitions.Flags.UnderLogo |> ignore).Show()
