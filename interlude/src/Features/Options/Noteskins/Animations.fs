@@ -137,7 +137,7 @@ type AnimationSettingsPage() as this =
             |+ PageSetting("noteskins.animations.usereleaseanimation", Selector<_>.FromBool explosion_hold_use_release)
                 .Tooltip(Tooltip.Info("noteskins.animations.usereleaseanimation"))
                 .Pos(pos.Step())
-            |+ Conditional(explosion_builtin_release.Get,
+            |+ Conditional(explosion_hold_use_release.Get,
                 PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_release)
                     .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
                     .Pos(pos.Step())

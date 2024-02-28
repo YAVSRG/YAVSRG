@@ -31,7 +31,7 @@ type NoteExplosionConfig =
             Colors = ExplosionColors.Note
 
             UseBuiltInAnimation = true
-            Duration = 600.0
+            Duration = 300.0
             ExpandAmount = 0.15f
         }
 
@@ -57,7 +57,7 @@ type HoldExplosionConfig =
 
             UseReleaseExplosion = false
             ReleaseUseBuiltInAnimation = true
-            Duration = 600.0
+            Duration = 300.0
             ExpandAmount = 0.15f
         }
 
@@ -213,6 +213,68 @@ type NoteskinConfig =
         else
             Array.create (keymode - 1) this.ColumnSpacing
 
+module NoteskinExplosionMigration =
+
+    [<RequireQualifiedAccess>]
+    [<Json.AutoCodec>]
+    type ExplosionColorsOld =
+        | Column
+        | Judgements
+    
+    [<Json.AutoCodec(false)>]
+    type Explosions =
+        {
+            Enable: bool option
+            Scale: float32
+            FadeTime: float32
+            ExpandAmount: float32
+            ExplodeOnMiss: bool
+            AnimationFrameTime: float
+            Colors: ExplosionColorsOld
+        }
+
+    [<Json.AutoCodec(false)>]
+    type NoteskinMigrationModel =
+        {
+            Explosions: Explosions option
+        }
+
+    let patch (model: NoteskinMigrationModel) (config: NoteskinConfig) =
+        match model.Explosions with
+        | Some explosions ->
+            Logging.Info(sprintf "Migrating noteskin '%s' to new explosions system" config.Name)
+            if explosions.ExplodeOnMiss then
+                Logging.Warn("Explosions on miss is no longer supported, complain to me if you were using it and want it back")
+            { config with
+                UseExplosions = explosions.Enable |> Option.defaultValue true
+                NoteExplosionSettings =
+                    {
+                        AnimationFrameTime = explosions.AnimationFrameTime
+                        UseBuiltInAnimation = true
+                        Scale = explosions.Scale
+                        ExpandAmount = explosions.ExpandAmount
+                        Colors = 
+                            match explosions.Colors with 
+                            | ExplosionColorsOld.Column -> ExplosionColors.Note
+                            | ExplosionColorsOld.Judgements -> ExplosionColors.Judgements
+                        Duration = 300.0
+                    }
+                HoldExplosionSettings =
+                    {
+                        AnimationFrameTime = explosions.AnimationFrameTime
+                        ReleaseUseBuiltInAnimation = true
+                        UseReleaseExplosion = false
+                        Scale = explosions.Scale
+                        ExpandAmount = explosions.ExpandAmount
+                        Colors = 
+                            match explosions.Colors with 
+                            | ExplosionColorsOld.Column -> ExplosionColors.Note
+                            | ExplosionColorsOld.Judgements -> ExplosionColors.Judgements
+                        Duration = 300.0
+                    }
+            }
+        | None -> config
+
 type Noteskin(storage) as this =
     inherit Storage(storage)
 
@@ -220,9 +282,9 @@ type Noteskin(storage) as this =
 
     do
         config <-
-            match this.TryGetJson<NoteskinConfig>(true, "noteskin.json") with
-            | Some data -> data.Validate
-            | None -> failwith "noteskin.json was missing or didn't load properly"
+            match this.TryGetJson<NoteskinExplosionMigration.NoteskinMigrationModel>(false, "noteskin.json"), this.TryGetJson<NoteskinConfig>(true, "noteskin.json") with
+            | Some migration_patch, Some data -> NoteskinExplosionMigration.patch migration_patch data.Validate
+            | _ -> failwith "noteskin.json was missing or didn't load properly"
 
     member this.Config
         with set conf =
@@ -260,7 +322,7 @@ type Noteskin(storage) as this =
             if this.Config.UseExplosions then
                 yield "noteexplosion"
                 yield "holdexplosion"
-                if not this.Config.HoldExplosionSettings.UseReleaseExplosion then
+                if this.Config.HoldExplosionSettings.UseReleaseExplosion then
                     yield "releaseexplosion"
             if this.Config.EnableColumnLight then
                 yield "receptorlighting"
