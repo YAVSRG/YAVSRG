@@ -23,7 +23,7 @@ module Debug =
             themes.Child <-
                 Selector(Themes.list (), options.Theme)
 
-        let tryEditTheme () =
+        let try_edit_theme () =
             let theme = Content.Theme
 
             match theme.Source with
@@ -59,30 +59,8 @@ module Debug =
                     )
                     .Pos(200.0f)
                     .Tooltip(Tooltip.Info("debug.rebuildcache"))
-                |+ PageButton
-                    .Once(
-                        "debug.downloadupdate",
-                        (fun () ->
-                            if AutoUpdate.update_available then
-                                AutoUpdate.apply_update (fun () ->
-                                    Notifications.system_feedback (
-                                        Icons.ALERT_OCTAGON,
-                                        %"notification.update_installed.title",
-                                        %"notification.update_installed.body"
-                                    )
-                                )
-
-                                Notifications.system_feedback (
-                                    Icons.ALERT_OCTAGON,
-                                    %"notification.update_installing.title",
-                                    %"notification.update_installing.body"
-                                )
-                        ),
-                        Enabled = (AutoUpdate.update_available && not AutoUpdate.update_started)
-                    )
-                    .Pos(270.0f)
                 |+ themes.Pos(580.0f).Tooltip(Tooltip.Info("themes.theme"))
-                |+ PageButton("themes.edittheme", tryEditTheme)
+                |+ PageButton("themes.edittheme", try_edit_theme)
                     .Pos(650.0f)
                     .Tooltip(Tooltip.Info("themes.edittheme"))
                 |+ PageButton("themes.showthemesfolder", (fun () -> open_directory (get_game_folder "Themes")))
