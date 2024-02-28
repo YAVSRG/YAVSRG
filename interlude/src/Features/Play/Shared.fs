@@ -280,7 +280,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                 | ExplosionColors.Judgements -> e.Judgement |> Option.defaultValue -1
             add_note_explosion (ev.Column, color)
 
-        | Release e when holding.[ev.Column] && not e.Missed ->
+        | Release e when holding.[ev.Column] ->
             let color =
                 match ns.HoldExplosionSettings.Colors with
                 | ExplosionColors.Note -> hold_colors.[ev.Column]
