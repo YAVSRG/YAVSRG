@@ -78,7 +78,7 @@ gameplay.preset.name.name=Name
 gameplay.preset.save.prompt=Save and overwrite preset '%0'?
 gameplay.preset.save=Save
 gameplay.scrollspeed.name=Scroll speed
-gameplay.scrollspeed.tooltip=Controls the scroll speed of notes.\nIt's a linear scale, 100% = 1 pixel scrolled per millisecond.
+gameplay.scrollspeed.tooltip=Controls the scroll speed of notes.\nIt's a linear scale, 100% = 1 pixel scrolled per millisecond.\n\n*Etterna scroll speed equivalent is only correct if your columns are the same width.
 gameplay.upscroll.name=Upscroll
 gameplay.upscroll.tooltip=Set this to true if you want notes to scroll upwards instead of downwards.
 generic.keymode.name=Keymode

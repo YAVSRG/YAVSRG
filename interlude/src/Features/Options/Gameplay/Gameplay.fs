@@ -370,9 +370,23 @@ type GameplayPage() as this =
     do
         let pos = menu_pos 1.0f
         column()
-        |+ PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
-            .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
-            .Pos(pos.Step())
+        |+ ( 
+            let column_width = Interlude.Content.Content.NoteskinConfig.ColumnWidth
+
+            PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
+                .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
+                .Pos(pos.Step 1.5f)
+            |+ Text(
+                (fun () -> 
+                    sprintf "%.1f on osu! = %.1f on Quaver = C%.0f on Etterna*" 
+                        (options.ScrollSpeed.Value * 31.0f / 2.38f)
+                        (options.ScrollSpeed.Value * 33.9f / 2.38f)
+                        (60000.0f * options.ScrollSpeed.Value / column_width)
+                ),
+                Align = Alignment.CENTER,
+                Position = Position.TrimLeft(PRETTYTEXTWIDTH).Margin(5.0f, -30.0f).SliceBottom(35.0f)
+            )
+        )
         |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Tooltip(Tooltip.Info("gameplay.hitposition"))
             .Pos(pos.Step())
