@@ -322,15 +322,19 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
             let frame = float32 (now - holding_since.[k]) / Gameplay.rate.Value / float32 ns.HoldExplosionSettings.AnimationFrameTime |> floor |> int
 
             let bounds =
-                (if options.Upscroll.Value then
-                     Rect.Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top, column_width, column_width)
-                 else
-                     Rect.Box(
-                         this.Bounds.Left + column_positions.[k],
-                         this.Bounds.Bottom - column_width,
-                         column_width,
-                         column_width
-                     ))
+                (
+                    if options.Upscroll.Value then
+                         Rect
+                            .Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top, column_width, column_width)
+                            .Translate(0.0f, column_width * ns.HoldExplosionSettings.Offset)
+                    else
+                        Rect.Box(
+                            this.Bounds.Left + column_positions.[k],
+                            this.Bounds.Bottom - column_width,
+                            column_width,
+                            column_width
+                        ).Translate(0.0f, -column_width * ns.HoldExplosionSettings.Offset)
+                )
                     .Expand((ns.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
 
             Draw.quad
@@ -357,15 +361,19 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                 let alpha = if ns.HoldExplosionSettings.UseBuiltInAnimation then 255.0f * percent_remaining |> int else 255
 
                 let bounds =
-                    (if options.Upscroll.Value then
-                            Rect.Box(this.Bounds.Left + column_positions.[ex.Column], this.Bounds.Top, column_width, column_width)
+                    (
+                        if options.Upscroll.Value then
+                            Rect
+                                .Box(this.Bounds.Left + column_positions.[ex.Column], this.Bounds.Top, column_width, column_width)
+                                .Translate(0.0f, column_width * ns.HoldExplosionSettings.Offset)
                         else
                             Rect.Box(
                                 this.Bounds.Left + column_positions.[ex.Column],
                                 this.Bounds.Bottom - column_width,
                                 column_width,
                                 column_width
-                            ))
+                            ).Translate(0.0f, -column_width * ns.HoldExplosionSettings.Offset)
+                    )
                         .Expand((ns.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
                         .Expand(ns.HoldExplosionSettings.ExpandAmount * expand * column_width)
 
@@ -389,15 +397,19 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                 let alpha = if ns.NoteExplosionSettings.UseBuiltInAnimation then 255.0f * percent_remaining |> int else 255
             
                 let bounds =
-                    (if options.Upscroll.Value then
-                            Rect.Box(this.Bounds.Left + column_positions.[ex.Column], this.Bounds.Top, column_width, column_width)
+                    (
+                        if options.Upscroll.Value then
+                            Rect
+                                .Box(this.Bounds.Left + column_positions.[ex.Column], this.Bounds.Top, column_width, column_width)
+                                .Translate(0.0f, column_width * ns.NoteExplosionSettings.Offset)
                         else
                             Rect.Box(
                                 this.Bounds.Left + column_positions.[ex.Column],
                                 this.Bounds.Bottom - column_width,
                                 column_width,
                                 column_width
-                            ))
+                            ).Translate(0.0f, -column_width * ns.NoteExplosionSettings.Offset)
+                    )
                         .Expand((ns.NoteExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
                         .Expand(ns.NoteExplosionSettings.ExpandAmount * expand * column_width)
             

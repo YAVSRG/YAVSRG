@@ -19,6 +19,7 @@ type NoteExplosionConfig =
         Scale: float32
         AnimationFrameTime: float
         Colors: ExplosionColors
+        Offset: float32
 
         UseBuiltInAnimation: bool
         Duration: float
@@ -29,6 +30,7 @@ type NoteExplosionConfig =
             Scale = 1.0f
             AnimationFrameTime = 50.0
             Colors = ExplosionColors.Note
+            Offset = 0.0f
 
             UseBuiltInAnimation = true
             Duration = 300.0
@@ -42,6 +44,7 @@ type HoldExplosionConfig =
         Scale: float32
         AnimationFrameTime: float
         Colors: ExplosionColors
+        Offset: float32
 
         UseReleaseExplosion: bool
         ReleaseUseBuiltInAnimation: bool
@@ -54,6 +57,7 @@ type HoldExplosionConfig =
             Scale = 1.0f
             AnimationFrameTime = 50.0
             Colors = ExplosionColors.Note
+            Offset = 0.0f
 
             UseReleaseExplosion = false
             ReleaseUseBuiltInAnimation = true
@@ -252,6 +256,7 @@ module NoteskinExplosionMigration =
                         AnimationFrameTime = explosions.AnimationFrameTime
                         UseBuiltInAnimation = true
                         Scale = explosions.Scale
+                        Offset = 0.0f
                         ExpandAmount = explosions.ExpandAmount
                         Colors = 
                             match explosions.Colors with 
@@ -265,6 +270,7 @@ module NoteskinExplosionMigration =
                         ReleaseUseBuiltInAnimation = true
                         UseReleaseExplosion = false
                         Scale = explosions.Scale
+                        Offset = 0.0f
                         ExpandAmount = explosions.ExpandAmount
                         Colors = 
                             match explosions.Colors with 

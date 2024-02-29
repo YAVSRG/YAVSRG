@@ -42,6 +42,7 @@ type AnimationSettingsPage() as this =
 
     let explosion_frame_time_note = Setting.bounded data.NoteExplosionSettings.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_note_ex.set_Interval
     let explosion_colors_note = Setting.simple data.NoteExplosionSettings.Colors
+    let explosion_offset_note = Setting.bounded data.NoteExplosionSettings.Offset -1.0f 1.0f
     let explosion_builtin_note = Setting.simple data.NoteExplosionSettings.UseBuiltInAnimation
     let explosion_duration_note = Setting.bounded data.NoteExplosionSettings.Duration 50.0 1000 |> Setting.round 0 |> Setting.trigger t_note_ex.set_Interval
     let explosion_scale_note = Setting.bounded data.NoteExplosionSettings.Scale 0.5f 5.0f
@@ -49,6 +50,7 @@ type AnimationSettingsPage() as this =
 
     let explosion_frame_time_hold = Setting.bounded data.HoldExplosionSettings.AnimationFrameTime 10.0 1000.0 |> Setting.round 0 |> Setting.trigger f_hold_ex.set_Interval
     let explosion_colors_hold = Setting.simple data.HoldExplosionSettings.Colors
+    let explosion_offset_hold = Setting.bounded data.HoldExplosionSettings.Offset -1.0f 1.0f
     let explosion_hold_use_release = Setting.simple data.HoldExplosionSettings.UseReleaseExplosion
     let explosion_builtin_release = Setting.simple data.HoldExplosionSettings.ReleaseUseBuiltInAnimation
     let explosion_duration_hold = Setting.bounded data.HoldExplosionSettings.Duration 50.0 1000 |> Setting.round 0 |> Setting.trigger t_hold_ex.set_Interval
@@ -97,6 +99,9 @@ type AnimationSettingsPage() as this =
             )
                 .Tooltip(Tooltip.Info("noteskins.animations.explosioncolors"))
                 .Pos(pos.Step())
+            |+ PageSetting("noteskins.animations.explosionoffset", Slider.Percent(explosion_offset_note))
+                .Tooltip(Tooltip.Info("noteskins.animations.explosionoffset"))
+                .Pos(pos.Step())
             |+ PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_note)
                 .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
                 .Pos(pos.Step())
@@ -133,6 +138,9 @@ type AnimationSettingsPage() as this =
                 )
             )
                 .Tooltip(Tooltip.Info("noteskins.animations.explosioncolors"))
+                .Pos(pos.Step())
+            |+ PageSetting("noteskins.animations.explosionoffset", Slider.Percent(explosion_offset_hold))
+                .Tooltip(Tooltip.Info("noteskins.animations.explosionoffset"))
                 .Pos(pos.Step())
             |+ PageSetting("noteskins.animations.usereleaseanimation", Selector<_>.FromBool explosion_hold_use_release)
                 .Tooltip(Tooltip.Info("noteskins.animations.usereleaseanimation"))
@@ -234,6 +242,7 @@ type AnimationSettingsPage() as this =
                     .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                     .Expand((explosion_scale_note.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                     .Expand(explosion_expand_note.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
+                    .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_note.Value)
                     .AsQuad)
                 (Quad.color (Color.White.O4a a))
                 (Sprite.pick_texture (f_note_ex.Loops, 0) noteexplosion)
@@ -266,6 +275,7 @@ type AnimationSettingsPage() as this =
                         .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                         .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
+                        .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)
                         .AsQuad)
                     (Quad.color (Color.White.O4a a))
                     (Sprite.pick_texture (f_hold_ex.Loops, 0) holdexplosion)
@@ -288,6 +298,7 @@ type AnimationSettingsPage() as this =
                         .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                         .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
+                        .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)
                         .AsQuad)
                     (Quad.color (Color.White.O4a a))
                     (Sprite.pick_texture (f_hold_ex.Loops, 0) releaseexplosion)
@@ -341,6 +352,7 @@ type AnimationSettingsPage() as this =
                         AnimationFrameTime = explosion_frame_time_note.Value
                         Scale = explosion_scale_note.Value
                         Colors = explosion_colors_note.Value
+                        Offset = explosion_offset_note.Value
                         UseBuiltInAnimation = explosion_builtin_note.Value
                         Duration = explosion_duration_note.Value
                         ExpandAmount = explosion_expand_note.Value
@@ -350,6 +362,7 @@ type AnimationSettingsPage() as this =
                         AnimationFrameTime = explosion_frame_time_hold.Value
                         Scale = explosion_scale_hold.Value
                         Colors = explosion_colors_hold.Value
+                        Offset = explosion_offset_hold.Value
                         UseReleaseExplosion = explosion_hold_use_release.Value
                         ReleaseUseBuiltInAnimation = explosion_builtin_release.Value
                         Duration = explosion_duration_hold.Value

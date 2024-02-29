@@ -712,3 +712,5 @@ wiki.close=Close
 wiki.contents=Table of contents
 wiki.home=Home
 wiki.openinbrowser=Open in browser
+noteskins.animations.explosionoffset.name=Vertical offset
+noteskins.animations.explosionoffset.tooltip=Increase this value to adjust your explosions closer to the middle of the screen.\nNegative values will move it away from the center instead.
