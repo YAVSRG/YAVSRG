@@ -73,18 +73,18 @@ module Sorting =
                 match pattern.ToLower() with
                 | "streams"
                 | "speed"
-                | "stream" -> Stream "Stream"
+                | "stream" -> Stream
                 | "jumpstream"
                 | "js"
                 | "handstream"
                 | "hs"
-                | "cs" -> Stream "Chordstream"
+                | "cs" -> Stream
                 | "jacks"
                 | "chords"
                 | "chordjack"
                 | "chordjacks"
-                | "cj" -> Jack "Jacks"
-                | _ -> Stream ""
+                | "cj" -> Jack
+                | _ -> Stream
 
             let matching =
                 p

@@ -75,8 +75,9 @@ module Suggestion =
                             if p.Pattern = p2.Pattern then
                                 let bpm_similarity =
                                     match p.Pattern with
-                                    | Stream _ -> abs (p.BPM - p2.BPM) |> min 50 |> (fun i -> 1.0f - float32 i / 50.0f)
-                                    | Jack _ -> abs (p.BPM - p2.BPM) |> min 25 |> (fun i -> 1.0f - float32 i / 25.0f)
+                                    | Stream -> abs (p.BPM - p2.BPM) |> min 50 |> (fun i -> 1.0f - float32 i / 50.0f)
+                                    | Chordstream -> abs (p.BPM - p2.BPM) |> min 50 |> (fun i -> 1.0f - float32 i / 50.0f)
+                                    | Jack -> abs (p.BPM - p2.BPM) |> min 25 |> (fun i -> 1.0f - float32 i / 25.0f)
 
                                 let duration_similarity =
                                     abs (p.Amount - p2.Amount)

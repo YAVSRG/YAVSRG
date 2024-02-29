@@ -58,9 +58,9 @@ module PatternSummary =
 
     type private BPMClusteredPattern = { Time: ScaledTime; BPM: BPMCluster; Density: float32; Mixed: bool }
 
-    let private cluster_pattern_bpms (matched_patterns: Patterns.MatchedCorePattern array) : (PatternId * BPMClusteredPattern) array =
+    let private cluster_pattern_bpms (matched_patterns: Patterns.MatchedCorePattern array) : (CorePatternType * BPMClusteredPattern) array =
         let clusters = ResizeArray<BPMCluster>()
-        let mixed_clusters = Dictionary<PatternId, BPMCluster>()
+        let mixed_clusters = Dictionary<CorePatternType, BPMCluster>()
 
         let get_cluster value : BPMCluster =
             match clusters |> Seq.tryFind (fun c -> abs (c.OriginalMsPerBeat - value) < BPM_CLUSTER_THRESHOLD) with
@@ -135,7 +135,7 @@ module PatternSummary =
     [<Json.AutoCodec>]
     type PatternBreakdown = 
         {
-            Pattern: PatternId
+            Pattern: CorePatternType
             BPM: int
             Mixed: bool
             Amount: ScaledTime
@@ -144,38 +144,50 @@ module PatternSummary =
             Density50: float32
             Density75: float32
             Density90: float32
+            Specifics: string array
         }
     
-    let private pattern_breakdown (patterns: (PatternId * BPMClusteredPattern) seq) : PatternBreakdown seq =
+    let private pattern_breakdown (specific_patterns: Patterns.MatchedSpecificPattern array) (patterns: (CorePatternType * BPMClusteredPattern) seq) : PatternBreakdown seq =
             
         let groups = patterns |> Array.ofSeq |> Array.groupBy (fun (pattern, info) -> (pattern, info.BPM.Value, info.Mixed))
+
 
         seq {
             for ((pattern, bpm, mixed), data) in groups do
                 let times = data |> Array.map (fun (_, data) -> data.Time)
-                let sorted_data = data |> Array.map (fun (_, data) -> data.Density) |> Array.sort
+                let sorted_densities = data |> Array.map (fun (_, data) -> data.Density) |> Array.sort
                 let amount = pattern_amount times
+
+                let approx_mspb = 60000.0f<ms> / (float32 bpm * 1.0f<beat>)
+
+                let matching_specifics = 
+                    specific_patterns
+                    |> Array.filter (fun x -> fst x.Pattern = pattern && abs (x.MsPerBeat - approx_mspb) < BPM_CLUSTER_THRESHOLD)
+                    |> Array.map (fun x -> snd x.Pattern)
+                    |> Array.countBy id
+                    //|> Array.filter (fun (_, count) -> count > times.Length / 100)
+                    |> Array.sortByDescending snd
+                    |> Array.truncate 3
+                    |> Array.map fst
     
                 yield { 
                     Pattern = pattern
                     BPM = bpm
                     Mixed = mixed
                     Amount = amount
-                    Density10 = find_density_percentile sorted_data 0.10f
-                    Density25 = find_density_percentile sorted_data 0.25f
-                    Density50 = find_density_percentile sorted_data 0.50f
-                    Density75 = find_density_percentile sorted_data 0.75f
-                    Density90 = find_density_percentile sorted_data 0.90f
+                    Density10 = find_density_percentile sorted_densities 0.10f
+                    Density25 = find_density_percentile sorted_densities 0.25f
+                    Density50 = find_density_percentile sorted_densities 0.50f
+                    Density75 = find_density_percentile sorted_densities 0.75f
+                    Density90 = find_density_percentile sorted_densities 0.90f
+                    Specifics = matching_specifics
                 }
         }
 
     let categorise_chart (patterns: PatternBreakdown list) =
-        let is_jacks = fun e -> match e.Pattern with Jack _ -> true | _ -> false
-        let is_stream = fun e -> match e.Pattern with Stream "Stream" -> true | _ -> false
-        let is_cs = fun e -> match e.Pattern with Stream "Chordstream" -> true | _ -> false
-        let jacks = patterns |> List.filter is_jacks
-        let streams = patterns |> List.filter is_stream
-        let chordstream = patterns |> List.filter is_cs
+        let jacks = patterns |> List.filter (fun e -> e.Pattern = Jack)
+        let streams = patterns |> List.filter (fun e -> e.Pattern = Stream)
+        let chordstream = patterns |> List.filter (fun e -> e.Pattern = Chordstream)
         let mixed = patterns |> List.filter (_.Mixed)
     
         let total = patterns |> List.sumBy (fun e -> e.Amount)
@@ -202,11 +214,12 @@ module PatternSummary =
     type PatternDetailsReport = { Patterns: PatternBreakdown list; LNPercent: float32; SVAmount: Time; Category: string }
     
     let generate_detailed_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
+        let core_patterns, specific_patterns = Patterns.analyse rate chart
         let breakdown = 
-            Patterns.analyse rate chart
+            core_patterns
             |> cluster_pattern_bpms
-            |> Seq.filter (fun (_, info) -> info.BPM.Value >= 85)
-            |> pattern_breakdown
+            |> Seq.filter (fun (_, info) -> info.BPM.Value >= 70)
+            |> pattern_breakdown specific_patterns
             |> Seq.sortByDescending (fun x -> x.Amount)
             |> List.ofSeq
             |> List.truncate 16
@@ -224,23 +237,24 @@ module PatternSummary =
         }
     
     let generate_cached_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
-         let breakdown = 
-             Patterns.analyse rate chart
-             |> cluster_pattern_bpms
-             |> Seq.filter (fun (_, info) -> info.BPM.Value >= 85)
-             |> pattern_breakdown
-             |> Seq.sortByDescending (fun x -> x.Amount)
-             |> List.ofSeq
-             |> List.truncate 16
+        let core_patterns, specific_patterns = Patterns.analyse rate chart
+        let breakdown = 
+            core_patterns
+            |> cluster_pattern_bpms
+            |> Seq.filter (fun (_, info) -> info.BPM.Value >= 70)
+            |> pattern_breakdown specific_patterns
+            |> Seq.sortByDescending (fun x -> x.Amount)
+            |> List.ofSeq
+            |> List.truncate 16
 
-         let is_useless (pattern: PatternBreakdown) =
-             breakdown |> Seq.exists (fun p -> p.Pattern = pattern.Pattern && p.Amount * 0.5f > pattern.Amount && p.BPM > pattern.BPM && p.Mixed = pattern.Mixed)
+        let is_useless (pattern: PatternBreakdown) =
+            breakdown |> Seq.exists (fun p -> p.Pattern = pattern.Pattern && p.Amount * 0.5f > pattern.Amount && p.BPM > pattern.BPM && p.Mixed = pattern.Mixed)
 
-         let patterns = breakdown |> List.filter (is_useless >> not) |> List.truncate 6
+        let patterns = breakdown |> List.filter (is_useless >> not) |> List.truncate 6
 
-         {
-             Patterns = patterns
-             LNPercent = ln_percent chart
-             SVAmount = sv_time chart
-             Category = categorise_chart patterns
-         }
+        {
+            Patterns = patterns
+            LNPercent = ln_percent chart
+            SVAmount = sv_time chart
+            Category = categorise_chart patterns
+        }

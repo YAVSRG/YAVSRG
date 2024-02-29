@@ -66,8 +66,15 @@ type Patterns(display: Setting<Display>) =
                 Colors.text_subheading,
                 Alignment.LEFT
             )
-            Draw.rect (b.TrimLeft(160.0f).SliceLeft(5.0f).Shrink(0.0f, 20.0f)) Colors.white
-            Draw.rect (b.SliceRight(5.0f).Shrink(0.0f, 20.0f)) Colors.white
+            Text.fill_b (
+                Style.font,
+                String.concat ", " entry.Specifics,
+                b.SliceBottom(30.0f).TrimLeft(160.0f),
+                Colors.text_subheading,
+                Alignment.LEFT
+            )
+            Draw.rect (b.SliceLeft(5.0f).SliceTop(20.0f).Translate(160.0f, 10.0f)) Colors.white
+            Draw.rect (b.SliceRight(5.0f).SliceTop(20.0f).Translate(0.0f, 10.0f)) Colors.white
 
             let density_color (nps: float32) =
                 nps * 2.0f |> float |> physical_color
@@ -75,7 +82,7 @@ type Patterns(display: Setting<Display>) =
             let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms/rate> / 100.0f)
             let bar (lo_pc, lo_val, hi_pc, hi_val) =
                 Draw.untextured_quad 
-                    (Rect.Create(BAR_L + lo_pc * BAR_WIDTH * bar_scale, b.Top + 22.5f, BAR_L + hi_pc * BAR_WIDTH * bar_scale, b.Top + 37.5f).AsQuad)
+                    (Rect.Create(BAR_L + lo_pc * BAR_WIDTH * bar_scale, b.Top + 12.5f, BAR_L + hi_pc * BAR_WIDTH * bar_scale, b.Top + 27.5f).AsQuad)
                     struct (density_color lo_val, density_color hi_val, density_color hi_val, density_color lo_val)
 
             bar (0.0f, entry.Density10, 0.1f, entry.Density10)
