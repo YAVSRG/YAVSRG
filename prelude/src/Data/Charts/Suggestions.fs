@@ -2,7 +2,6 @@
 
 open System
 open Prelude
-open Prelude.Charts
 open Prelude.Charts.Tools.Patterns
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
@@ -28,6 +27,7 @@ module Suggestion =
 
             let report = Library.patterns.[cache_info.Hash]
             let patterns = report.Patterns
+            let total_pattern_amount = patterns |> Seq.sumBy (fun x -> x.Amount)
 
             let min_difficulty = cache_info.Physical - 0.5
             let max_difficulty = cache_info.Physical + 0.5
@@ -72,22 +72,22 @@ module Suggestion =
 
                     for p in patterns do
                         for p2 in candidate_patterns.Patterns do
-                            if p.Pattern = p2.Pattern then
+                            if p.Pattern = p2.Pattern && p.Mixed = p2.Mixed then
                                 let bpm_similarity =
                                     match p.Pattern with
-                                    | Stream -> abs (p.BPM - p2.BPM) |> min 50 |> (fun i -> 1.0f - float32 i / 50.0f)
-                                    | Chordstream -> abs (p.BPM - p2.BPM) |> min 50 |> (fun i -> 1.0f - float32 i / 50.0f)
-                                    | Jack -> abs (p.BPM - p2.BPM) |> min 25 |> (fun i -> 1.0f - float32 i / 25.0f)
+                                    | Stream -> abs (p.BPM - p2.BPM) |> min 30 |> (fun i -> 1.0f - float32 i / 30.0f)
+                                    | Chordstream -> abs (p.BPM - p2.BPM) |> min 30 |> (fun i -> 1.0f - float32 i / 30.0f)
+                                    | Jack -> abs (p.BPM - p2.BPM) |> min 15 |> (fun i -> 1.0f - float32 i / 15.0f)
 
                                 let duration_similarity =
-                                    abs (p.Amount - p2.Amount)
-                                    |> float32
-                                    |> min 20000.0f
-                                    |> fun i -> 1.0f - i / 40000.0f
+                                    (min p.Amount p2.Amount) / total_pattern_amount
 
-                                similarity_score <- similarity_score + duration_similarity * bpm_similarity
+                                let bonus_similarity =
+                                    if Array.tryHead p.Specifics = Array.tryHead p2.Specifics then 1.2f else 1.0f
 
-                    if similarity_score > 0.0f then
+                                similarity_score <- similarity_score + duration_similarity * bpm_similarity * bonus_similarity
+
+                    if similarity_score > 0.5f then
                         yield entry, similarity_score
             }
             |> Seq.sortByDescending snd

@@ -78,7 +78,7 @@ module Sorting =
                 | "js"
                 | "handstream"
                 | "hs"
-                | "cs" -> Stream
+                | "cs" -> Chordstream
                 | "jacks"
                 | "chords"
                 | "chordjack"
