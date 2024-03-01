@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Play
 
-open System
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
@@ -173,7 +172,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
                 let percent_remaining = 1.0f - float32 (s.Elapsed / s.Interval) |> min 1.0f |> max 0.0f
                 let a = 255.0f * percent_remaining |> int
 
-                Draw.sprite
+                Draw.quad
                     (let x = ns.ColumnWidth * 0.5f + column_positions.[k]
 
                      if options.Upscroll.Value then
@@ -183,9 +182,9 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
                      else
                          Sprite.aligned_box_x
                              (this.Bounds.Left + x, this.Bounds.Bottom, 0.5f, 1.0f, ns.ColumnWidth * percent_remaining, 1.0f / percent_remaining)
-                             sprite)
-                    (Color.FromArgb(a, Color.White))
-                    sprite
+                             sprite).AsQuad
+                    (Quad.color (Color.FromArgb(a, Color.White)))
+                    (Sprite.pick_texture (0, k) sprite)
 
         Array.iteri draw_column timers
 

@@ -367,8 +367,8 @@ module Sprite =
     // todo: relocate, remove or rename this, only used for Interlude's song background image
     let tiling (scale, left, top) (sprite: Sprite) (quad: Quad) : QuadTexture =
 
-        let width = float32 sprite.GridWidth * scale
-        let height = float32 sprite.GridHeight * scale
+        let width = float32 sprite.Width * scale
+        let height = float32 sprite.Height * scale
 
         Texture(
             sprite.Texture,
@@ -378,7 +378,7 @@ module Sprite =
 
     let aligned_box_x (x_origin, y_origin, x_offset, y_offset, x_scale, y_mult) (sprite: Sprite) : Rect =
         let width = x_scale
-        let height = float32 sprite.GridHeight / float32 sprite.GridWidth * width * y_mult
+        let height = float32 sprite.Height / float32 sprite.Width * width * y_mult
         let left = x_origin - x_offset * width
         let top = y_origin - y_offset * height
         Rect.Box(left, top, width, height)
