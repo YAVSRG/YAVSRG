@@ -84,6 +84,8 @@ type HotkeyAction(hotkey: Hotkey, action) =
 type HotkeyHoldAction(hotkey: Hotkey, on_tap, on_hold) =
     inherit StaticWidget(NodeType.None)
 
+    let HOLD_TIME_MS = 150.0
+
     let mutable hold_time_remaining = 0.0
 
     override this.Update(elapsed_ms, moved) =
@@ -91,7 +93,7 @@ type HotkeyHoldAction(hotkey: Hotkey, on_tap, on_hold) =
 
         if (%%hotkey).Tapped() then
             on_tap()
-            hold_time_remaining <- 500.0
+            hold_time_remaining <- HOLD_TIME_MS
 
         if (%%hotkey).Pressed() then
             if hold_time_remaining > 0.0 then

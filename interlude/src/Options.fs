@@ -134,6 +134,7 @@ module Options =
             AdvancedRecommendations: Setting<bool>
             ScoreGraphMode: Setting<ScoreGraphMode>
             ConfirmExit: Setting<bool>
+            HoldToGiveUp: Setting<bool>
         }
         static member Default =
             {
@@ -247,6 +248,7 @@ module Options =
                 AdvancedRecommendations = Setting.simple false
                 ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
                 ConfirmExit = Setting.simple true
+                HoldToGiveUp = Setting.simple true
             }
 
     let mutable internal config: Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>

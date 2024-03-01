@@ -1,13 +1,9 @@
 ﻿namespace Interlude.Features.Toolbar
 
-open System
-open System.IO
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Prelude.Common
-open Prelude.Data
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu

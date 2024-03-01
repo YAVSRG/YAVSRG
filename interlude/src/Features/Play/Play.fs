@@ -161,13 +161,23 @@ module PlayScreen =
                 add_widget BPMMeter
 
                 let offset_slideout = offset_slideout this
-                this
-                |+ HotkeyAction("retry", fun () ->
+
+                let retry() =
                     Screen.change_new
                         (fun () -> play_screen (info, pacemaker_mode) :> Screen.T)
                         Screen.Type.Play
                         Transitions.Flags.Default
                     |> ignore
+                let give_up() = Screen.back Transitions.Flags.Default |> ignore
+
+                this
+                |+ HotkeyHoldAction("retry", 
+                    (if options.HoldToGiveUp.Value then ignore else retry),
+                    (if options.HoldToGiveUp.Value then retry else ignore)
+                )
+                |+ HotkeyHoldAction("exit", 
+                    (if options.HoldToGiveUp.Value then ignore else give_up),
+                    (if options.HoldToGiveUp.Value then give_up else ignore)
                 )
                 |+ HotkeyAction("options", offset_slideout.Open)
                 |* offset_slideout
@@ -300,6 +310,14 @@ module PlayScreen =
                 add_widget RateModMeter
                 add_widget BPMMeter
                 add_widget MultiplayerScoreTracker
+                
+                let give_up() = Screen.back Transitions.Flags.Default |> ignore
+
+                this
+                |* HotkeyHoldAction("exit", 
+                    (if options.HoldToGiveUp.Value then ignore else give_up),
+                    (if options.HoldToGiveUp.Value then give_up else ignore)
+                )
 
             override this.OnEnter(previous) =
                 Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
