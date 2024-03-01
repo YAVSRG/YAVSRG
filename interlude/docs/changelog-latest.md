@@ -1,20 +1,20 @@
-0.7.18.3
+0.7.18.4
 ====
 
-Thank you to all the new players who have given me plenty of feedback, bug reports and ideas
+Dropping an update before I move house, containing even more stuff directly from user feedback this week
 
 # Bug fixes
-- Fixed several bugs in mouse interactions with some options menus
-- Fixed color pickers overlapping with other components in some pages
+- Fixed hold explosions continuing forever if you start holding an LN and never release the key
 
 # Improvements
-- Improved appearance of Noteskins selection menu
-- Improved appearance of previews in all options menus
-- Prompt before exiting the game
-- Some invisible UX fixes you won't even notice.. :)
+- Explosion scale soft cap lifted from 200% to 500%
+- Huge stride/improvement in pattern analysis and recommendation algorithm again
+  You will have to recache patterns once again to use endless mode
+- (Advanced) setting to disable the confirmation to exit the game
 
 # New features
-- Explosion animations have received a rework! You can now do many more powerful and nicer looking things with them
-
-Due to the explosion rework, column lighting and explosion animation speeds have been reset for all skins, you may need to set them again to your preference.
+- Vertical offset setting for explosions, allowing for a little more flexibility in skinning
+- (Advanced) setting to hold esc/ctrl R to exit/retry (for players with switches that rattle or keep accidentally bumping these keys)
+- Column lighting technically now supports different images per column, customisation in-UI coming later
+- Scroll speed setting shows approximate scroll speeds as they would be in other VSRGs
 
