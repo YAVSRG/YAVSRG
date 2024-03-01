@@ -20,11 +20,14 @@ module Advanced =
                 |+ PageSetting("advanced.confirmexit", Selector<_>.FromBool options.ConfirmExit)
                     .Pos(270.0f)
                     .Tooltip(Tooltip.Info("advanced.confirmexit"))
-                |+ PageSetting("advanced.vanishingnotes", Selector<_>.FromBool options.VanishingNotes)
+                |+ PageSetting("advanced.holdtogiveup", Selector<_>.FromBool options.HoldToGiveUp)
                     .Pos(340.0f)
+                    .Tooltip(Tooltip.Info("advanced.holdtogiveup"))
+                |+ PageSetting("advanced.vanishingnotes", Selector<_>.FromBool options.VanishingNotes)
+                    .Pos(410.0f)
                     .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
                 |+ PageSetting("advanced.autocalibrateoffset", Selector<_>.FromBool options.AutoCalibrateOffset)
-                    .Pos(410.0f)
+                    .Pos(480.0f)
                     .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
                 |+ PageButton
                     .Once(
@@ -46,10 +49,10 @@ module Advanced =
                                 %"notification.pattern_cache_started.body"
                             )
                     )
-                    .Pos(480.0f)
+                    .Pos(550.0f)
                     .Tooltip(Tooltip.Info("advanced.buildpatterncache"))
                 |+ PageSetting("advanced.advancedrecommendations", Selector<_>.FromBool options.AdvancedRecommendations)
-                    .Pos(550.0f)
+                    .Pos(620.0f)
                     .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
             )
 

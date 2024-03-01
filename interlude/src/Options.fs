@@ -248,7 +248,7 @@ module Options =
                 AdvancedRecommendations = Setting.simple false
                 ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
                 ConfirmExit = Setting.simple true
-                HoldToGiveUp = Setting.simple true
+                HoldToGiveUp = Setting.simple false
             }
 
     let mutable internal config: Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>
