@@ -43,11 +43,11 @@ module Noteskins =
         let missing_textures = ResizeArray()
         let available_textures = ResizeArray()
 
-        let required_textures = ResizeArray(ns.Noteskin.RequiredTextures)
+        let required_textures = Set.ofSeq ns.Noteskin.RequiredTextures
 
-        for texture_id in Storage.NOTESKIN_TEXTURES do
+        for texture_id in NoteskinTextureRules.list() do
             match ns.Noteskin.GetTexture texture_id with
-            | Some(img, config) ->
+            | TextureOk (img, config) ->
                 available_textures.Add
                     {
                         Label = texture_id
@@ -56,16 +56,20 @@ module Noteskins =
                         Columns = config.Columns
                         DisposeImageAfter = true
                     }
-            | None ->
-                if required_textures.Contains(texture_id) then
-                    Logging.Warn(
+            | TextureError reason ->
+                if required_textures.Contains texture_id then
+                    Logging.Error(
                         sprintf
-                            "Noteskin texture '%s' in '%s' didn't load properly, so it will appear as a white square ingame."
+                            "Problem with noteskin texture '%s' in '%s': %s\nIt will appear as a white square ingame."
                             texture_id
                             ns.Noteskin.Config.Name
+                            reason
                     )
 
                 missing_textures.Add texture_id
+            | TextureNotRequired ->
+                missing_textures.Add texture_id
+                
 
         let atlas, sprites =
             Sprite.upload_many
@@ -242,5 +246,5 @@ module Noteskins =
 
     let preview_loader =
         { new Async.Service<Noteskin, (Bitmap * TextureConfig) option>() with
-            override this.Handle(ns) = async { return ns.GetTexture "note" }
+            override this.Handle(ns) = async { return match ns.GetTexture "note" with TextureOk (bmp, config) -> Some (bmp, config) | _ -> None }
         }

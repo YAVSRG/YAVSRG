@@ -132,7 +132,15 @@ module Common =
     type Bitmap = Image<PixelFormats.Rgba32>
 
     module Bitmap =
-        let load (stream: Stream) : Bitmap = Bitmap.Load<PixelFormats.Rgba32> stream
+        let from_stream (close_stream: bool) (stream: Stream) : Bitmap option =
+            let img =
+                try
+                    Some (Bitmap.Load<PixelFormats.Rgba32> stream)
+                with
+                | :? UnknownImageFormatException -> None
+                | :? InvalidImageContentException -> None
+            if close_stream then stream.Dispose()
+            img
 
     type Color = Drawing.Color
 

@@ -64,7 +64,7 @@ type Theme(storage) as this =
             this.WriteJson(config, "theme.json")
         and get () = config
 
-    member this.GetTexture(name: string) : (Bitmap * TextureConfig) option =
+    member this.GetTexture(name: string) : TextureLoadResult =
         let name =
             if
                 (name = "logo" || name = "rain")
@@ -74,13 +74,14 @@ type Theme(storage) as this =
             else
                 name
 
-        let require_square = name <> "background"
+        let rules =
+            {
+                IsRequired = true
+                MustBeSquare = name <> "background"
+                MaxGridSize = (1, 1)
+            }
 
-        match this.LoadTexture(name, require_square, "Textures") with
-        | Ok res -> res
-        | Error err ->
-            Logging.Error(sprintf "Error loading theme texture '%s': %s" name err.Message)
-            None
+        this.LoadTexture(name, rules, "Textures")
 
     member this.GetSound(name: string) : Stream option =
         this.TryReadFile("Sounds", name + ".wav")
@@ -110,3 +111,21 @@ type Theme(storage) as this =
 
     static member FromFolderName(name: string) =
         Theme.FromPath(get_game_folder (Path.Combine("Themes", name)))
+
+module Theme =
+
+    let TEXTURES = [| "background"; "rain"; "logo"; "cursor" |]
+
+    let SOUNDS =
+        [|
+            "hello"
+            "click"
+            "hover"
+            "text-open"
+            "text-close"
+            "key"
+            "notify-error"
+            "notify-info"
+            "notify-system"
+            "notify-task"
+        |]

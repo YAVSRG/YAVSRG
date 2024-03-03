@@ -35,6 +35,18 @@ type StorageType =
         | Embedded _ -> "[Embedded Assets]"
         | Folder f -> Path.GetFileName f + "/"
 
+type TextureRules =
+    {
+        IsRequired: bool
+        MustBeSquare: bool
+        MaxGridSize: int * int
+    }
+
+type TextureLoadResult =
+| TextureOk of Bitmap * TextureConfig
+| TextureNotRequired
+| TextureError of reason: string
+
 type Storage(storage: StorageType) =
 
     let mutable texture_config_cache: Map<string, TextureConfig> = Map.empty
@@ -230,101 +242,109 @@ type Storage(storage: StorageType) =
         texture_config_cache <- texture_config_cache.Add(id, info)
         this.WriteJson<TextureConfig>(info, Array.append path [| name + ".json" |])
 
-    member private this.LoadGridTexture(config: TextureConfig, name: string, path: string array) : Bitmap option =
-        if config.Columns < 1 then
-            failwith "Columns must be a positive number"
-        elif config.Rows < 1 then
-            failwith "Rows must be a positive number"
+    member private this.LoadGridTexture(config: TextureConfig, name: string, path: string array, must_be_square: bool) : Result<Bitmap, string> =
 
         match this.TryReadFile(Array.append path [| name + ".png" |]) with
         | Some stream ->
-            let img = Bitmap.load stream
-            stream.Dispose()
-            Some img
-        | None -> None
+            match Bitmap.from_stream true stream with
+            | None -> Error "This is not a valid image"
+            | Some img -> 
+                let w = img.Width / config.Columns
+                let h = img.Height / config.Rows
+                if must_be_square && w <> h then
+                    Error (sprintf "This texture needs to be only square images, but currently each image is %ix%i" w h)
+                else
+                    Ok img
+        | None -> Error (sprintf "Couldn't find expected file '%s.png' (as one grid image)" name)
 
     member private this.LoadLooseTextures
         (
             config: TextureConfig,
             name: string,
             path: string array,
-            require_square: bool
-        ) : Bitmap option =
-        if config.Columns < 1 then
-            failwith "Columns must be a positive number"
-        elif config.Rows < 1 then
-            failwith "Rows must be a positive number"
+            must_be_square: bool
+        ) : Result<Bitmap, string> =
 
         let load_img row column =
             match this.TryReadFile(Array.append path [| sprintf "%s-%i-%i.png" name row column |]) with
-            | Some stream ->
-                let i = Bitmap.load stream in
-                stream.Dispose()
-                i
-            | None -> failwithf "Couldn't load texture file (%i,%i)" row column
+            | Some stream -> 
+                match Bitmap.from_stream true stream with
+                | None -> failwithf "%s-%i-%i.png is not a valid image" name row column
+                | Some img -> img
+            | None -> failwithf "Couldn't find expected file '%s-%i-%i.png' (as part of one or many textures making up a grid)" name row column
 
-        let base_img = load_img 0 0
+        try
 
-        if require_square && base_img.Height <> base_img.Width then
-            failwith "Textures must be square"
+            let base_img = load_img 0 0
 
-        let atlas =
-            new Bitmap(base_img.Width * config.Columns, base_img.Height * config.Rows)
+            if must_be_square && base_img.Width <> base_img.Height then
+                failwithf "This texture needs to be only square images, but %s-0-0 is %ix%i" name base_img.Width base_img.Height
 
-        for row in 0 .. config.Rows - 1 do
-            for col in 0 .. config.Columns - 1 do
-                use img = if (row, col) = (0, 0) then base_img else load_img row col
+            let atlas =
+                new Bitmap(base_img.Width * config.Columns, base_img.Height * config.Rows)
 
-                if img.Height <> base_img.Height || img.Width <> base_img.Width then
-                    failwithf "All images must be the same dimensions, (%i, %i) doesn't match (0, 0)" row col
+            for row in 0 .. config.Rows - 1 do
+                for col in 0 .. config.Columns - 1 do
+                    use img = if (row, col) = (0, 0) then base_img else load_img row col
 
-                atlas.Mutate<PixelFormats.Rgba32>(fun context ->
-                    context.DrawImage(img, Point(col * base_img.Width, row * base_img.Height), 1.0f)
-                    |> ignore
-                )
+                    if img.Height <> base_img.Height || img.Width <> base_img.Width then
+                        failwithf "All images must be the same dimensions, (%i, %i) doesn't match (0, 0)" row col
 
-        Some atlas
+                    atlas.Mutate<PixelFormats.Rgba32>(fun context ->
+                        context.DrawImage(img, Point(col * base_img.Width, row * base_img.Height), 1.0f)
+                        |> ignore
+                    )
+
+            Ok atlas
+        with err ->
+            Error err.Message
 
     member internal this.LoadTexture
         (
             name: string,
-            require_square: bool,
+            rules: TextureRules,
             [<ParamArray>] path: string array
-        ) : Result<(Bitmap * TextureConfig) option, exn> =
-        let info: TextureConfig = this.GetTextureConfig(name, path)
+        ) : TextureLoadResult =
 
-        match info.Mode with
-        | Grid ->
-            try
-                match this.LoadGridTexture(info, name, path) with
-                | Some img -> Ok(Some(img, info))
-                | None -> Ok None
-            with err ->
-                Error err
-        | Loose ->
-            try
-                match this.LoadLooseTextures(info, name, path, require_square) with
-                | Some img -> Ok(Some(img, info))
-                | None -> Ok None
-            with err ->
-                Error err
+        if rules.IsRequired then
+
+            let config: TextureConfig = this.GetTextureConfig(name, path)
+
+            let max_rows, max_columns = rules.MaxGridSize
+            if config.Columns < 1 then TextureError "Columns must be a positive number"
+            elif config.Columns > max_columns then TextureError (sprintf "Columns must be at most %i for this texture" max_columns)
+            elif config.Rows < 1 then TextureError "Rows must be a positive number"
+            elif config.Rows > max_rows then TextureError (sprintf "Rows must be at most %i for this texture" max_rows)
+            else
+
+            match config.Mode with
+            | Grid ->
+                match this.LoadGridTexture(config, name, path, rules.MustBeSquare) with
+                | Ok img -> TextureOk(img, config)
+                | Error reason -> TextureError reason
+            | Loose ->
+                match this.LoadLooseTextures(config, name, path, rules.MustBeSquare) with
+                | Ok img -> TextureOk(img, config)
+                | Error reason -> TextureError reason
+        else
+            TextureNotRequired
 
     member this.SplitTexture(name: string, [<ParamArray>] path: string array) =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-            let info: TextureConfig = this.GetTextureConfig(name, path)
+            let config: TextureConfig = this.GetTextureConfig(name, path)
 
-            match info.Mode with
+            match config.Mode with
             | Grid ->
-                match this.LoadGridTexture(info, name, path) with
-                | None -> Logging.Error(sprintf "Couldn't split texture '%s' because it couldn't be loaded" name)
-                | Some img ->
-                let w = img.Width / info.Columns
-                let h = img.Height / info.Rows
+                match this.LoadGridTexture(config, name, path, false) with
+                | Error _ -> Logging.Error(sprintf "Couldn't split texture '%s' because it couldn't be loaded" name)
+                | Ok img ->
+                let w = img.Width / config.Columns
+                let h = img.Height / config.Rows
 
-                for row in 0 .. info.Rows - 1 do
-                    for col in 0 .. info.Columns - 1 do
+                for row in 0 .. config.Rows - 1 do
+                    for col in 0 .. config.Columns - 1 do
                         use tex = new Bitmap(w, h)
 
                         tex.Mutate<PixelFormats.Rgba32>(fun context ->
@@ -334,27 +354,27 @@ type Storage(storage: StorageType) =
                         tex.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
 
                 File.Delete(Path.Combine(f, Path.Combine path, sprintf "%s.png" name))
-                this.WriteTextureConfig({ info with Mode = Loose }, name, path)
+                this.WriteTextureConfig({ config with Mode = Loose }, name, path)
             | Loose -> ()
 
     member this.StitchTexture(name: string, [<ParamArray>] path: string array) =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-            let info: TextureConfig = this.GetTextureConfig(name, path)
+            let config: TextureConfig = this.GetTextureConfig(name, path)
 
-            match info.Mode with
+            match config.Mode with
             | Loose ->
-                match this.LoadLooseTextures(info, name, path, false) with
-                | None -> Logging.Error(sprintf "Couldn't stitch texture '%s' because it couldn't be loaded" name)
-                | Some img ->
+                match this.LoadLooseTextures(config, name, path, false) with
+                | Error _ -> Logging.Error(sprintf "Couldn't stitch texture '%s' because it couldn't be loaded" name)
+                | Ok img ->
                 img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s.png" name))
 
-                for row in 0 .. info.Rows - 1 do
-                    for col in 0 .. info.Columns - 1 do
+                for row in 0 .. config.Rows - 1 do
+                    for col in 0 .. config.Columns - 1 do
                         File.Delete(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
 
-                this.WriteTextureConfig({ info with Mode = Loose }, name, path)
+                this.WriteTextureConfig({ config with Mode = Loose }, name, path)
             | Grid -> ()
 
     member private this.MutateGridTexture((col, row), action, name: string, [<ParamArray>] path: string array) : bool =
@@ -372,13 +392,16 @@ type Storage(storage: StorageType) =
 
         match this.TryReadFile(Array.append path [| sprintf "%s-%i-%i.png" name row col |]) with
         | Some stream ->
-            let img = Bitmap.load stream in
-            stream.Dispose()
-            img.Mutate<PixelFormats.Rgba32>(fun context -> action context |> ignore)
-            img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
-            true
+            match Bitmap.from_stream true stream with
+            | None ->
+                Logging.Warn (sprintf "%s-%i-%i.png is not a valid image" name row col)
+                false
+            | Some img ->
+                img.Mutate<PixelFormats.Rgba32>(fun context -> action context |> ignore)
+                img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
+                true
         | None -> 
-            Logging.Warn (sprintf "Couldn't load texture file (%i,%i)" row col)
+            Logging.Warn (sprintf "Couldn't find file %s-%i-%i.png" name row col)
             false
 
     member this.VerticalFlipTexture((col, row), name: string, [<ParamArray>] path: string array) =
@@ -502,36 +525,3 @@ type Storage(storage: StorageType) =
         with err ->
             Logging.Error("Error removing texture column", err)
             false
-
-module Storage =
-
-    let NOTESKIN_TEXTURES =
-        [|
-            "note"
-            "noteexplosion"
-            "receptor"
-            "holdhead"
-            "holdbody"
-            "holdtail"
-            "holdexplosion"
-            "releaseexplosion"
-            "receptorlighting"
-            "stageleft"
-            "stageright"
-        |]
-
-    let THEME_TEXTURES = [| "background"; "rain"; "logo"; "cursor" |]
-
-    let THEME_SOUNDS =
-        [|
-            "hello"
-            "click"
-            "hover"
-            "text-open"
-            "text-close"
-            "key"
-            "notify-error"
-            "notify-info"
-            "notify-system"
-            "notify-task"
-        |]

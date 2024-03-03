@@ -45,11 +45,11 @@ module Themes =
         let missing_textures = ResizeArray()
         let available_textures = ResizeArray()
 
-        for id in Storage.THEME_TEXTURES do
+        for id in Theme.TEXTURES do
             Sprites.remove id
 
             match current.GetTexture id with
-            | Some(img, config) ->
+            | TextureOk(img, config) ->
                 available_textures.Add
                     {
                         Label = id
@@ -58,14 +58,11 @@ module Themes =
                         Columns = config.Columns
                         DisposeImageAfter = true
                     }
-            | None ->
-                Logging.Warn(
-                    sprintf
-                        "Theme texture '%s' didn't load properly, so it will appear as a white square ingame."
-                        id
-                )
+            | TextureError reason ->
+                Logging.Error(sprintf "Problem with theme texture '%s': %s\nIt will appear as a white square ingame." id reason)
                 // todo: fall back to default theme textures like it used to
                 missing_textures.Add id
+            | TextureNotRequired -> failwith "currently impossible as all theme textures are required"
 
         let atlas, sprites =
             Sprite.upload_many "THEME" true false (available_textures.ToArray())
@@ -76,7 +73,7 @@ module Themes =
         for id in missing_textures do
             Sprites.add id (Texture.create_default_sprite atlas)
 
-        for id in Storage.THEME_SOUNDS do
+        for id in Theme.SOUNDS do
             match current.GetSound id with
             | Some stream -> SoundEffect.FromStream(id, stream) |> Sounds.add id
             | None ->

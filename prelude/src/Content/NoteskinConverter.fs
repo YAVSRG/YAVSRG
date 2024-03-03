@@ -629,7 +629,7 @@ module SkinConversions =
 
             let load_bmp f =
                 use s = File.Open(f, FileMode.Open)
-                Bitmap.load s
+                Bitmap.from_stream false s |> Option.get
 
             // Copy all the textures and ensure they are square
             // todo: for ln textures the image should stretch instead of being squared if h < w

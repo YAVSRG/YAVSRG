@@ -217,6 +217,63 @@ type NoteskinConfig =
         else
             Array.create (keymode - 1) this.ColumnSpacing
 
+type NoteskinTextureRules =
+    {
+        IsRequired: NoteskinConfig -> bool
+        MustBeSquare: NoteskinConfig -> bool
+        MaxGridSize: NoteskinConfig -> int * int
+    }
+    member this.Evaluate (config: NoteskinConfig) : TextureRules =
+        {
+            IsRequired = this.IsRequired config
+            MustBeSquare = this.MustBeSquare config
+            MaxGridSize = this.MaxGridSize config
+        }
+
+module NoteskinTextureRules =
+
+    let DEFAULT =
+        {
+            IsRequired = K true
+            MustBeSquare = K true
+            MaxGridSize = K (16, 32)
+        }
+        
+    let TEXTURES : Map<string, NoteskinTextureRules> =
+        Map.ofList [
+            "note", DEFAULT
+            "holdhead", DEFAULT
+            "holdbody", DEFAULT
+            "holdtail", DEFAULT
+            "receptor", {
+                IsRequired = K true
+                MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Rotate
+                MaxGridSize = K (2, 32)
+            }
+            "noteexplosion", { DEFAULT with IsRequired = fun config -> config.UseExplosions }
+            "holdexplosion", { DEFAULT with IsRequired = fun config -> config.UseExplosions }
+            "releaseexplosion", { DEFAULT with IsRequired = fun config -> config.UseExplosions && config.HoldExplosionSettings.UseReleaseExplosion }
+            "receptorlighting", {
+                IsRequired = fun config -> config.EnableColumnLight
+                MustBeSquare = K false
+                MaxGridSize = K (10, 32)
+            }
+            "stageleft", {
+                IsRequired = fun config -> config.EnableStageTextures
+                MustBeSquare = K false
+                MaxGridSize = K (1, 1)
+            }
+            "stageright", {
+                IsRequired = fun config -> config.EnableStageTextures
+                MustBeSquare = K false
+                MaxGridSize = K (1, 1)
+            }
+        ]
+
+    let get (config: NoteskinConfig) (name: string) = TEXTURES.[name].Evaluate config
+
+    let list () : string seq = TEXTURES.Keys :> string seq
+
 module NoteskinExplosionMigration =
 
     [<RequireQualifiedAccess>]
@@ -298,44 +355,11 @@ type Noteskin(storage) as this =
             this.WriteJson(config, "noteskin.json")
         and get () = config
 
-    member this.GetTexture(name: string) : (Bitmap * TextureConfig) option =
-        let require_square = name <> "receptor" && name <> "receptorlighting" && name <> "stageright" && name <> "stageleft"
-        // todo: user warning if receptor is not square but mode is set to Rotate
-        match this.LoadTexture(name, require_square) with
-        | Ok res ->
-            if config.ReceptorStyle = ReceptorStyle.Rotate && name = "receptor" then
-                Option.iter
-                    (fun (img: Bitmap, config: TextureConfig) ->
-                        if img.Width / config.Columns <> img.Height / config.Rows then
-                            Logging.Warn(
-                                "This skin should have ReceptorStyle set to Flip as it uses non-square receptors"
-                            )
-                    )
-                    res
-
-            res
-        | Error err ->
-            Logging.Error(sprintf "Error loading noteskin texture '%s': %s" name err.Message)
-            None
+    member this.GetTexture(name: string) : TextureLoadResult = this.LoadTexture(name, NoteskinTextureRules.get this.Config name)
 
     member this.RequiredTextures =
-        seq {
-            yield "note"
-            yield "holdhead"
-            yield "holdbody"
-            yield "holdtail"
-            yield "receptor"
-            if this.Config.UseExplosions then
-                yield "noteexplosion"
-                yield "holdexplosion"
-                if this.Config.HoldExplosionSettings.UseReleaseExplosion then
-                    yield "releaseexplosion"
-            if this.Config.EnableColumnLight then
-                yield "receptorlighting"
-            if this.Config.EnableStageTextures then
-                yield "stageleft"
-                yield "stageright"
-        }
+        NoteskinTextureRules.list()
+        |> Seq.filter (NoteskinTextureRules.get this.Config >> _.IsRequired)
 
     static member FromZipStream(stream: Stream) =
         new Noteskin(Embedded(new ZipArchive(stream)))
