@@ -184,3 +184,29 @@ module Validation =
         match Array.tryFind (function ValidationError { Element = "receptor" } -> true | _ -> false) validation_results with
         | None -> Assert.Fail("Expected an error message for image size on 'receptor' texture")
         | _ -> ()
+
+    [<Test>]
+    let WithRowsAndColumnsBackwards () =
+        use receptor_grid_bmp = new Bitmap(200, 700)
+        let noteskin = 
+            InMemoryNoteskinBuilder({ NoteskinConfig.Default with ReceptorStyle = ReceptorStyle.Rotate })
+                .AddImageFile("note.png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody.png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead.png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail.png", ONEPIXELIMAGE)
+                .AddJsonFile("receptor.json", { Columns = 7; Rows = 2; Mode = Grid })
+                .AddImageFile("receptor.png", receptor_grid_bmp)
+                .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
+                .Build()
+        
+        let validation_results = 
+            noteskin.Validate()
+            |> Array.ofSeq
+    
+        printfn "%A" validation_results
+        
+        Assert.AreEqual(1, validation_results.Length)
+
+        match Array.tryFind (function ValidationError { Element = "receptor" } -> true | _ -> false) validation_results with
+        | None -> Assert.Fail("Expected an error message for image size on 'receptor' texture")
+        | _ -> ()

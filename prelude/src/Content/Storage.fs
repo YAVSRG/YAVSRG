@@ -420,14 +420,15 @@ type Storage(storage: StorageType) =
                                     Message = sprintf "'%s.png' has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i" name config.Columns config.Rows img.Width img.Height
                                     SuggestedFix = None
                                 }
-                        let w = img.Width / config.Columns
-                        let h = img.Height / config.Rows
-                        if rules.MustBeSquare && w <> h then
-                            yield ValidationError {
-                                Element = name
-                                Message = sprintf "'%s.png' needs to be only square images, but currently each image is %ix%i" name w h
-                                SuggestedFix = None
-                            }
+                        else
+                            let w = img.Width / config.Columns
+                            let h = img.Height / config.Rows
+                            if rules.MustBeSquare && w <> h then
+                                yield ValidationError {
+                                    Element = name
+                                    Message = sprintf "'%s.png' needs to be only square images, but currently each image is %ix%i" name w h
+                                    SuggestedFix = None
+                                }
                         if not rules.IsRequired then
                             yield ValidationWarning {
                                 Element = name
