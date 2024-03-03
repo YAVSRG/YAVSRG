@@ -46,7 +46,8 @@
     <Compile Include="Content\Themes.fs" />
     <Compile Include="Content\HUD.fs" />
     <Compile Include="Content\Noteskins.fs" />
-    <Compile Include="Content\NoteskinConverter.fs" />
+    <Compile Include="Content\NoteskinConversion\osu!\Parser.fs" />
+    <Compile Include="Content\NoteskinConversion\osu!\Converter.fs" />
     <Compile Include="Backbeat\Archive.fs" />
     <Compile Include="Data\Web.fs" />
     <Compile Include="Data\Images.fs" />

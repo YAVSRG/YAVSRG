@@ -1,51 +1,56 @@
 ﻿namespace Interlude.Features.Import
 
+open System.IO
+open System.IO.Compression
+open System.Text.RegularExpressions
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data.Charts
+open Prelude
+open Prelude.Data.Content.Noteskin
+open Prelude.Data.Content.NoteskinConversion.``osu!``
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Options
+open Interlude.Content
 
 [<AutoOpen>]
 module Import =
 
-    open System.IO
-    open System.IO.Compression
-    open System.Text.RegularExpressions
-    open Prelude
-    open Prelude.Data.Content
-    open Prelude.Data.Content.Noteskin
-    open Interlude.Options
-    open Interlude.Content
-
     let charts_updated_ev = Event<unit>()
     let charts_updated = charts_updated_ev.Publish
 
-    type ImportOsuNoteskinPage(ini: OsuSkin.OsuSkinIni, source_path: string, target_path: string) as this =
+    type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, target_path: string) =
         inherit Page()
         
         let keymode: Setting<Keymode> = Setting.simple Keymode.``4K``
+        let is_arrows: Setting<bool> = Setting.simple false
 
-        do
-            this.Content(
-                column ()
-                |+ PageSetting("osuskinimport.keymode", Selector<Keymode>.FromEnum(keymode))
-                    .Pos(200.0f)
-                |+ PageButton
-                    .Once(
-                        "osuskinimport.confirm",
-                        fun () ->
-                            try
-                                SkinConversions.Osu.convert ini source_path target_path (int keymode.Value)
-                            with err ->
-                                Logging.Error("Error while converting to noteskin", err)
-
-                            Noteskins.load ()
-                            Menu.Back()
-                    )
-                    .Pos(400.0f)
+        override this.Init(parent: Widget) =
+            column ()
+            |+ PageSetting("osuskinimport.keymode", Selector<Keymode>.FromEnum(keymode))
+                .Pos(200.0f)
+            |+ Conditional(
+                (fun () -> keymode.Value = Keymode.``4K``),
+                PageSetting("osuskinimport.isarrows", Selector<_>.FromBool(is_arrows))
+                    .Pos(270.0f)
             )
+            |+ PageButton
+                .Once(
+                    "osuskinimport.confirm",
+                    fun () ->
+                        try
+                            OsuSkinConverter.convert ini source_path target_path (int keymode.Value) (keymode.Value = Keymode.``4K`` && is_arrows.Value)
+                        with err ->
+                            Logging.Error("Error while converting to noteskin", err)
+
+                        Noteskins.load ()
+                        Menu.Back()
+                )
+                .Pos(400.0f)
+            |> this.Content
+            base.Init parent
 
         override this.Title = ini.General.Name
         override this.OnClose() = ()
@@ -96,16 +101,19 @@ module Import =
     let import_osu_noteskin (path: string) =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
 
-        match SkinConversions.Osu.check_before_convert path with
+        match OsuSkinConverter.check_before_convert path with
         | Ok ini ->
+            sync <| fun () ->
+            Menu.Exit()
             ImportOsuNoteskinPage(
                 ini,
                 path,
                 Path.Combine(get_game_folder "Noteskins", id + "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss"))
             )
                 .Show()
-        | Error err -> Logging.Error("Error while parsing osu! skin.ini\n" + err)
-    // todo: error toast
+        | Error err -> 
+            Logging.Error("Error while parsing osu! skin.ini\n" + err)
+            // todo: error toast
 
     let handle_file_drop (path: string) =
         match Mounts.drop_func with
@@ -127,12 +135,12 @@ module Import =
             let target = Path.Combine(get_game_folder "Downloads", id)
             ZipFile.ExtractToDirectory(path, target)
             import_osu_noteskin target
-        // todo: clean up extracted noteskin in downloads
+            // todo: clean up extracted noteskin in downloads
 
         | Unknown -> // Treat it as a chart/pack/library import
 
             if Directory.Exists path && Path.GetFileName path = "Songs" then
-                ConfirmUnlinkedSongsImport(path).Show()
+                sync <| fun () -> Menu.Exit(); ConfirmUnlinkedSongsImport(path).Show()
             else
 
             Library.Imports.auto_convert.Request(
@@ -140,7 +148,7 @@ module Import =
                 fun success ->
                     if success then
                         Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")
-                        charts_updated_ev.Trigger()
+                        sync <| fun () -> charts_updated_ev.Trigger()
                     else
                         Notifications.error (%"notification.import_failure", "")
             )

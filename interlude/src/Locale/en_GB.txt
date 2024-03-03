@@ -624,6 +624,7 @@ options.ingame_help.name=Ingame help
 options.name=Options
 osuskinimport.confirm.name=Import!
 osuskinimport.keymode.name=Keymode to import
+osuskinimport.isarrows.name=This skin uses arrows
 play.skiphint=Press %0 to skip
 practice.info.accept_suggestion=Accept suggested setting
 practice.info.options=Show options

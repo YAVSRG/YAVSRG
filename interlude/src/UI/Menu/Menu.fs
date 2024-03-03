@@ -128,12 +128,12 @@ and Menu(top_level: Page) as this =
 
     static member Back() =
         match _instance with
-        | None -> failwith "No instance of menu/pages to back out of"
+        | None -> ()
         | Some instance -> instance.Back()
 
     static member Exit() =
         match _instance with
-        | None -> failwith "No instance of menu/pages to close"
+        | None -> ()
         | Some instance -> instance.Exit()
 
     member private this.Back() =
