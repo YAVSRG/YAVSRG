@@ -281,6 +281,10 @@ type Storage(storage: StorageType) =
             match Bitmap.from_stream true stream with
             | None -> Error "This is not a valid image"
             | Some img -> 
+                if img.Width % config.Columns <> 0 || img.Height % config.Rows <> 0 then
+                    Error (sprintf "This texture has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i" config.Columns config.Rows img.Width img.Height)
+                else
+
                 let w = img.Width / config.Columns
                 let h = img.Height / config.Rows
                 if must_be_square && w <> h then
