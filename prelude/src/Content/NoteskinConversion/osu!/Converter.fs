@@ -238,24 +238,24 @@ module OsuSkinConverter =
             | None -> ()
         | None -> ()
 
-        //match get_single_filename (keymode_settings.StageLight, source) with
-        //| Some stage_light ->
-        //    use base_image = load_bmp stage_light
-        //    for k = 0 to keymode - 1 do
-        //        let stage_light_color = keymode_settings.ColourLightΔ.[k]
-        //        use colored = base_image.Clone()
-        //        let color_brush = RecolorBrush(
-        //            SixLabors.ImageSharp.Color.White,
-        //            SixLabors.ImageSharp.Color.FromRgba(stage_light_color.R, stage_light_color.G, stage_light_color.B, stage_light_color.A),
-        //            1.0f
-        //        )
-        //        colored.Mutate(fun img -> 
-        //            img.Fill(color_brush).Opacity(float32 stage_light_color.A / 255.0f) |> ignore
-        //        )
-        //        colored.Save(Path.Combine(target, sprintf "receptorlighting-%i-0.png" k))
-        //    JSON.ToFile (Path.Combine(target, "receptorlighting.json"), false) { Rows = keymode; Columns = 1; Mode = Loose }
-        //    columnlighting <- true
-        //| None -> ()
+        match get_single_filename (keymode_settings.StageLight, source) with
+        | Some stage_light ->
+            use base_image = load_bmp stage_light
+            for k = 0 to keymode - 1 do
+                let stage_light_color = keymode_settings.ColourLightΔ.[k]
+                use colored = base_image.Clone()
+                let color_brush = RecolorBrush(
+                    SixLabors.ImageSharp.Color.White,
+                    SixLabors.ImageSharp.Color.FromRgba(stage_light_color.R, stage_light_color.G, stage_light_color.B, stage_light_color.A),
+                    1.0f
+                )
+                colored.Mutate(fun img -> 
+                    img.Fill(color_brush).Opacity(float32 stage_light_color.A / 255.0f) |> ignore
+                )
+                colored.Save(Path.Combine(target, sprintf "receptorlighting-%i-0.png" k))
+            JSON.ToFile (Path.Combine(target, "receptorlighting.json"), false) { Rows = keymode; Columns = 1; Mode = Loose }
+            columnlighting <- true
+        | None -> ()
 
         // Generate noteskin.json
         let color_config: ColorConfig =
