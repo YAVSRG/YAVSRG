@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Noteskins\Helpers.fs" />
+    <Compile Include="Noteskins\Validation.fs" />
     <Compile Include="Scoring\Helpers.fs" />
     <Compile Include="Scoring\SCJ4.fs" />
     <Compile Include="Scoring\OsuOd8.fs" />
