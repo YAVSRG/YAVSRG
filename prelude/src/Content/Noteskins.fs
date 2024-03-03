@@ -115,7 +115,7 @@ type NoteskinConfig =
         /// Millisecond duration of each frame on note/hold texture animations
         AnimationFrameTime: float
 
-        /// 
+        /// Enables explosion animations
         UseExplosions: bool
         /// Config for explosion animations
         NoteExplosionSettings: NoteExplosionConfig
@@ -360,6 +360,12 @@ type Noteskin(storage) as this =
     member this.RequiredTextures =
         NoteskinTextureRules.list()
         |> Seq.filter (NoteskinTextureRules.get this.Config >> _.IsRequired)
+
+    member this.Validate() : ValidationMessage seq =
+        seq {
+            for texture_id in NoteskinTextureRules.list() do
+                yield! this.ValidateTexture(texture_id, NoteskinTextureRules.get this.Config texture_id)
+        }
 
     static member FromZipStream(stream: Stream) =
         new Noteskin(Embedded(new ZipArchive(stream)))
