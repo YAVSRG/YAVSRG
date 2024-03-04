@@ -337,28 +337,22 @@ type Storage(storage: StorageType) =
 
     member internal this.LoadTexture(name: string, rules: TextureRules, [<ParamArray>] path: string array) : TextureLoadResult =
 
-        if rules.IsRequired then
+        let config: TextureConfig = this.GetTextureConfig(name, path)
+        match
+            let max_rows, max_columns = rules.MaxGridSize in
 
-            let config: TextureConfig = this.GetTextureConfig(name, path)
-
-            let max_rows, max_columns = rules.MaxGridSize
-            if config.Columns < 1 then TextureError "Columns must be a positive number"
-            elif config.Columns > max_columns then TextureError (sprintf "Columns must be at most %i for this texture" max_columns)
-            elif config.Rows < 1 then TextureError "Rows must be a positive number"
-            elif config.Rows > max_rows then TextureError (sprintf "Rows must be at most %i for this texture" max_rows)
+            if config.Columns < 1 then Error "Columns must be a positive number"
+            elif config.Columns > max_columns then Error (sprintf "Columns must be at most %i for this texture" max_columns)
+            elif config.Rows < 1 then Error "Rows must be a positive number"
+            elif config.Rows > max_rows then Error (sprintf "Rows must be at most %i for this texture" max_rows)
             else
 
             match config.Mode with
-            | Grid ->
-                match this.LoadGridTexture(config, name, path, rules.MustBeSquare) with
-                | Ok img -> TextureOk(img, config)
-                | Error reason -> TextureError reason
-            | Loose ->
-                match this.LoadLooseTextures(config, name, path, rules.MustBeSquare) with
-                | Ok img -> TextureOk(img, config)
-                | Error reason -> TextureError reason
-        else
-            TextureNotRequired
+            | Grid -> this.LoadGridTexture(config, name, path, rules.MustBeSquare)
+            | Loose -> this.LoadLooseTextures(config, name, path, rules.MustBeSquare)
+        with
+        | Ok img -> TextureOk(img, config)
+        | Error reason -> if rules.IsRequired then TextureError reason else TextureNotRequired
     
     member internal this.ValidateTexture(name: string, rules: TextureRules, [<ParamArray>] path: string array) : ValidationMessage seq =
 

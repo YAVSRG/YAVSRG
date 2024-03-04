@@ -5,6 +5,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude.Common
+open Prelude.Data.Content
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
@@ -272,10 +273,8 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
 type TextureEditPage(texture_id: string) as this =
     inherit Page()
 
-    let max_frames, max_colors =
-        match texture_id with
-        | "receptor" -> 16, 2
-        | _ -> 16, 16
+    let texture_rules = NoteskinTextureRules.get Content.NoteskinConfig texture_id
+    let max_colors, max_frames = texture_rules.MaxGridSize
 
     let texture_editor =
         TextureEditGrid(
@@ -360,7 +359,6 @@ type TextureCard(id: string, on_click: unit -> unit) as this =
                 )
         )
 
-    // todo: refresh on return from editor
     let sprite = Content.Texture id
 
     do
