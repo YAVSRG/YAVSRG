@@ -84,7 +84,7 @@ type HotkeyAction(hotkey: Hotkey, action) =
 type HotkeyHoldAction(hotkey: Hotkey, on_tap, on_hold) =
     inherit StaticWidget(NodeType.None)
 
-    let HOLD_TIME_MS = 150.0
+    let HOLD_TIME_MS = 200.0
 
     let mutable hold_time_remaining = 0.0
 

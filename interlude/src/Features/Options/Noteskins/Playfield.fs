@@ -75,6 +75,7 @@ type PlayfieldSettingsPage() as this =
     let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
     let align_offset = Setting.percentf (snd data.PlayfieldAlignment)
     let playfield_color = Setting.simple data.PlayfieldColor
+    let use_stage_textures = Setting.simple data.EnableStageTextures
 
     let column_width = Setting.bounded data.ColumnWidth 10.0f 300.0f |> Setting.roundf 0
 
@@ -119,6 +120,9 @@ type PlayfieldSettingsPage() as this =
             .Pos(pos.Step())
         |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
             .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
+            .Pos(pos.Step())
+        |+ PageSetting("noteskins.edit.usestagetextures", Selector<_>.FromBool use_stage_textures)
+            .Tooltip(Tooltip.Info("noteskins.edit.usestagetextures"))
             .Pos(pos.Step())
         |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true))
             .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
@@ -241,4 +245,5 @@ type PlayfieldSettingsPage() as this =
                 PlayfieldColor = playfield_color.Value
                 PlayfieldAlignment = align_anchor.Value, align_offset.Value
                 UseAdvancedColumnSpacing = use_advanced_column_spacing.Value
+                EnableStageTextures = use_stage_textures.Value
             }

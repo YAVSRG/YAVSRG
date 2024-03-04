@@ -201,6 +201,9 @@ module RadioButtons =
 
             override this.Draw() =
                 if setting.Value = value then
+                    Draw.rect (this.Bounds.Expand Style.PADDING) Colors.pink_accent.O2
+                    Draw.rect this.Bounds Colors.pink_shadow.O2
+                else
                     Draw.rect this.Bounds Colors.shadow_2.O3
                 base.Draw()
         }
