@@ -134,7 +134,7 @@ module Noteskins =
             GridFlowContainer<NoteskinCard>(380.0f, 3, Spacing = (15.0f, 15.0f), WrapNavigation = false)
 
         let scroll =
-            ScrollContainer(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
+            ScrollContainer(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(110.0f))
 
         let mutable loading = true
         let mutable failed = false
@@ -171,7 +171,8 @@ module Noteskins =
                 Position = Position.SliceTop 60.0f
             ) |+ LoadingIndicator.Border(fun () -> loading))
             |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to noteskins repository"))
-            |+ Text(%"imports.noteskins.hint", Position = Position.SliceBottom 55.0f)
+            |+ Text(%"imports.noteskins.hint", Position = Position.SliceBottom(100.0f).SliceTop(50.0f))
+            |+ Text(%"imports.noteskins.hint2", Position = Position.SliceBottom 50.0f)
             |* scroll
 
             base.Init parent
