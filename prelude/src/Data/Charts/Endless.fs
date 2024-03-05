@@ -1,23 +1,41 @@
-﻿namespace Prelude.Data.Charts.Suggestions
+﻿namespace Prelude.Data.Charts.Endless
 
 open System
 open Prelude
+open Prelude.Gameplay.Mods
 open Prelude.Charts.Tools.Patterns
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
+open Prelude.Data.Charts.Collections
 open Prelude.Data.Scores
 
-type ChallengeLevel =
-    | TooEasy
-    | JustRight
-    | TooHard
+[<RequireQualifiedAccess>]
+type VarietyLevel =
+    | Low
+    | High
+
+[<RequireQualifiedAccess>]
+type SuggestionMode =
+    | Fun
+    | Snipe
+    | Challenge
+
+type ChartSuggestionContext =
+    {
+        BaseChart: CachedChart
+        Filter: Filter
+        Rate: float32
+        Mods: ModState
+    }
 
 module Suggestion =
 
     let mutable recommended_recently = Set.empty
 
-    let get_similar_suggestions (cache_info: CachedChart) (filter: Filter) : CachedChart seq option =
+    let get_similar_suggestions (ctx: ChartSuggestionContext) : CachedChart seq option =
+
+        let cache_info = ctx.BaseChart
 
         recommended_recently <- Set.add cache_info.Hash recommended_recently
 
@@ -56,7 +74,7 @@ module Suggestion =
                     | _ -> true
                 )
 
-                |> Filter.apply filter
+                |> Filter.apply ctx.Filter
 
             seq {
                 for entry in candidates do
@@ -94,10 +112,10 @@ module Suggestion =
             |> Seq.map fst
             |> Some
 
-    let get_suggestion (cache_info: CachedChart) (filter: Filter) =
+    let get_suggestion (ctx: ChartSuggestionContext) =
         let rand = Random()
 
-        match get_similar_suggestions cache_info filter with
+        match get_similar_suggestions ctx with
         | Some matches ->
             let best_matches = matches |> Seq.truncate 100 |> Array.ofSeq
 
@@ -128,3 +146,59 @@ module Suggestion =
             Some charts.[rand.Next charts.Length]
         else
             None
+
+[<RequireQualifiedAccess>]
+type EndlessModeState =
+    | Playlist of (CachedChart * PlaylistEntryInfo) list
+    | Normal of ChartSuggestionContext
+
+module EndlessModeState =
+
+    let private shuffle_playlist_charts (items: 'T seq) =
+        let random = new Random()
+        items
+        |> Seq.map (fun x -> x, random.Next())
+        |> Seq.sortBy snd
+        |> Seq.map fst
+    
+    let create_from_playlist (shuffle: bool) (playlist: Playlist) =
+        playlist.Charts
+        |> Seq.choose (fun (c, info) ->
+            match Cache.by_hash c.Hash Library.cache with
+            | Some cc -> Some (cc, info)
+            | None -> None
+        )
+        |> if shuffle then shuffle_playlist_charts else id
+        |> List.ofSeq
+        |> EndlessModeState.Playlist
+
+    let create (ctx: ChartSuggestionContext) = EndlessModeState.Normal ctx
+
+    type Next =
+        {
+            Chart: CachedChart
+            Rate: float32
+            Mods: ModState
+            NewState: EndlessModeState
+        }
+
+    let next (state: EndlessModeState) : Next option =
+        match state with
+        | EndlessModeState.Playlist [] -> None
+        | EndlessModeState.Playlist ((chart, { Rate = rate; Mods = mods }) :: xs) ->
+            Some {
+                Chart = chart
+                Rate = rate.Value
+                Mods = mods.Value
+                NewState = EndlessModeState.Playlist xs
+            }
+        | EndlessModeState.Normal ctx ->
+            match Suggestion.get_suggestion ctx with
+            | Some next_cc ->
+                Some {
+                    Chart = next_cc
+                    Rate = ctx.Rate
+                    Mods = ctx.Mods
+                    NewState = EndlessModeState.Normal { ctx with BaseChart = next_cc }
+                }
+            | None -> None

@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Sorting
+open Prelude.Data.Charts.Endless
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Play
@@ -21,6 +22,8 @@ module LevelSelect =
 
     let on_refresh_all = refresh_all_event.Publish
     let on_refresh_details = refresh_details_event.Publish
+    
+    let mutable filter: Filter = []
 
     do 
         Interlude.Features.Import.Import.charts_updated.Add refresh_all
@@ -31,30 +34,45 @@ module LevelSelect =
                 refresh_details ()
         )
 
-    let play () =
+    let try_play (info: Chart.LoadedChartInfo) : bool =
+        if
+            Screen.change_new
+                (fun () ->
+                    PlayScreen.play_screen (
+                        info,
+                        if options.EnablePacemaker.Value then PacemakerMode.Setting else PacemakerMode.None
+                    )
+                )
+                Screen.Type.Play
+                Transitions.Flags.Default
+        then 
+            info.SaveData.LastPlayed <- System.DateTime.UtcNow
+            true
+        else false
+
+    let choose_this_chart () =
 
         Chart.when_loaded <| fun info ->
 
         if Network.lobby.IsSome then
             if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
                 Lobby.select_chart (info.CacheInfo, rate.Value, selected_mods.Value)
-        else if
-            Screen.change_new
-                (fun () ->
-                    if autoplay then
-                        ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T
-                    else
-                        PlayScreen.play_screen (info,
-                            if options.EnablePacemaker.Value then
-                                PacemakerMode.Setting
-                            else
-                                PacemakerMode.None
-                        )
-                )
-                (if autoplay then Screen.Type.Replay else Screen.Type.Play)
-                Transitions.Flags.Default
+        elif
+            if autoplay then
+                Screen.change_new
+                    (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)
+                    Screen.Type.Replay
+                    Transitions.Flags.Default
+            else try_play info
         then
-            info.SaveData.LastPlayed <- DateTime.UtcNow
+            if endless_mode.Value then 
+                Endless.begin_endless_mode <| 
+                    EndlessModeState.create { 
+                        BaseChart = info.CacheInfo
+                        Filter = filter
+                        Rate = rate.Value
+                        Mods = selected_mods.Value
+                    }
 
     let challenge_score (score_info: ScoreInfo) =
         Chart.if_loaded <| fun info ->

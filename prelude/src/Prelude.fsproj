@@ -57,7 +57,7 @@
     <Compile Include="Data\Charts\Collections.fs" />
     <Compile Include="Data\Charts\Library.fs" />
     <Compile Include="Data\Charts\Sorting.fs" />
-    <Compile Include="Data\Charts\Suggestions.fs" />
+    <Compile Include="Data\Charts\Endless.fs" />
     <Compile Include="Data\osu!.fs" />
   </ItemGroup>
 

@@ -111,7 +111,7 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
             this.Close()
         elif (%%"select").Tapped() then
             this.Close()
-            LevelSelect.play ()
+            LevelSelect.choose_this_chart ()
         elif (%%"uprate_small").Tapped() then
             change_rate (0.01f)
         elif (%%"uprate_half").Tapped() then

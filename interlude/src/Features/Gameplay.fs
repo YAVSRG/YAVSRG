@@ -16,6 +16,7 @@ open Prelude.Gameplay.Difficulty
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
+open Prelude.Data.Charts.Endless
 open Prelude.Data.Scores
 open Interlude.Content
 open Interlude.Options
@@ -448,6 +449,36 @@ module Gameplay =
         else
             ImprovementFlags.Default
 
+    module Endless =
+    
+        // todo: remove the holes from this system by making a proper way to wait for song to load
+        let rec retry_until_song_loaded (info: Chart.LoadedChartInfo) (action: Chart.LoadedChartInfo -> bool) =
+            if not (action info) then
+                sync (fun () -> retry_until_song_loaded info action)
+
+        let mutable private state : EndlessModeState option = None
+
+        let begin_endless_mode (initial_state: EndlessModeState) = state <- Some initial_state
+
+        let exit_endless_mode () = state <- None
+
+        let continue_endless_mode (when_loaded: Chart.LoadedChartInfo -> bool) : bool =
+            match state with
+            | Some endless_mode ->
+                match EndlessModeState.next endless_mode with
+                | Some next ->
+                    Chart._rate.Set next.Rate
+                    Chart._selected_mods.Set next.Mods
+                    Chart.change(next.Chart, LibraryContext.None, false)
+                    Chart.when_loaded <| (fun info -> retry_until_song_loaded info when_loaded)
+                    state <- Some next.NewState
+                    true
+                | None ->
+                    Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
+                    exit_endless_mode()
+                    false
+            | None -> false
+
     module Multiplayer =
 
         let replays = new Dictionary<string, IScoreMetric * (unit -> ScoreInfo)>()
@@ -544,7 +575,7 @@ module Gameplay =
         | None ->
             Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
 
-            match Suggestions.Suggestion.get_random [] with
+            match Endless.Suggestion.get_random [] with
             | Some cc -> Chart.change (cc, LibraryContext.None, true)
             | None ->
                 Logging.Debug "No charts installed"

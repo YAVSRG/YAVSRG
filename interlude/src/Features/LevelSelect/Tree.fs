@@ -281,7 +281,7 @@ module Tree =
                 hover.Target <- 1.0f
 
                 if this.LeftClick(origin) then
-                    if this.Selected then LevelSelect.play () else this.Select()
+                    if this.Selected then LevelSelect.choose_this_chart () else this.Select()
                 elif this.RightClick(origin) then
                     ChartContextMenu(cc, context).Show()
                 elif (%%"delete").Tapped() then
@@ -440,7 +440,6 @@ module Tree =
             else
                 b
 
-    let mutable filter: Filter = []
     let mutable private groups: GroupItem list = []
     let mutable private last_item: ChartItem option = None
     let mutable is_empty = false
@@ -456,17 +455,17 @@ module Tree =
                 }
 
             match options.LibraryMode.Value with
-            | LibraryMode.Collections -> get_collection_groups sorting_modes.[options.ChartSortMode.Value] filter
+            | LibraryMode.Collections -> get_collection_groups sorting_modes.[options.ChartSortMode.Value] LevelSelect.filter
             | LibraryMode.Table -> 
                 match Content.Table with
-                | Some table -> get_table_groups table sorting_modes.[options.ChartSortMode.Value] filter
+                | Some table -> get_table_groups table sorting_modes.[options.ChartSortMode.Value] LevelSelect.filter
                 | None -> get_empty_view ()
             | LibraryMode.All ->
                 get_groups
                     ctx
                     grouping_modes.[options.ChartGroupMode.Value]
                     sorting_modes.[options.ChartSortMode.Value]
-                    filter
+                    LevelSelect.filter
         // if exactly 1 result, switch to it
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()

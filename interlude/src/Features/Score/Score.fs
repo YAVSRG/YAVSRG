@@ -105,8 +105,6 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
             Some Screen.Type.Lobby
         elif
             played_just_now
-            && Gameplay.endless_mode.Value
-            && options.AdvancedRecommendations.Value
             && ScoreScreenHelpers.continue_endless_mode ()
         then
             None

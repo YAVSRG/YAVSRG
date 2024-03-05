@@ -6,11 +6,10 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
-open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
-open Prelude.Data.Charts.Suggestions
+open Prelude.Data.Charts.Endless
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
@@ -44,76 +43,23 @@ type LevelSelectScreen() =
 
     let random_chart () =
         if options.AdvancedRecommendations.Value && Chart.CACHE_DATA.IsSome then
-            match Suggestion.get_suggestion Chart.CACHE_DATA.Value Tree.filter with
+            match Suggestion.get_suggestion { BaseChart = Chart.CACHE_DATA.Value; Filter = LevelSelect.filter; Rate = rate.Value; Mods = selected_mods.Value } with
             | Some c ->
                 Tree.switch_chart (c, LibraryContext.None, "")
                 refresh ()
             | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
         else
-            match Suggestion.get_random Tree.filter with
+            match Suggestion.get_random LevelSelect.filter with
             | Some c ->
                 Tree.switch_chart (c, LibraryContext.None, "")
                 refresh ()
             | None -> ()
 
-    let continue_endless_mode () : bool =
-        let rec play_when_song_loads (info: Chart.LoadedChartInfo) =
-            let success =
-                Screen.change_new
-                    (fun () ->
-                        PlayScreen.play_screen (info,
-                            if options.EnablePacemaker.Value then
-                                PacemakerMode.Setting
-                            else
-                                PacemakerMode.None
-                        )
-                    )
-                    Screen.Type.Play
-                    Transitions.Flags.Default
-
-            if not success then
-                sync (fun () -> play_when_song_loads info)
-            else
-                info.SaveData.LastPlayed <- System.DateTime.UtcNow
-
-        match Chart.LIBRARY_CTX with
-        | LibraryContext.Playlist (pos, playlist_id, _) ->
-            match Library.collections.GetPlaylist playlist_id with
-            | Some playlist ->
-                match
-                    seq {
-                        while pos + 1 < playlist.Charts.Count do
-                            let entry, data = playlist.Charts.[pos + 1]
-                            match Cache.by_hash entry.Hash Library.cache with
-                            | Some cc -> yield cc, data
-                            | None -> 
-                                playlist.RemoveAt(pos) |> ignore
-                                Logging.Debug(sprintf "Removed chart %s from playlist '%s' because it could not be found" entry.Hash playlist_id)
-                    }
-                    |> Seq.tryHead
-                with
-                | Some (next_chart, data) ->
-                    Chart.change(next_chart, LibraryContext.Playlist(pos + 1, playlist_id, data), false)
-                    Chart.when_loaded <| play_when_song_loads
-                    true
-                | None -> false
-            | None -> false
-
-        | _ ->
-
-        match Suggestion.get_suggestion Chart.CACHE_DATA.Value Tree.filter with
-        | Some c ->
-            Chart.change (c, LibraryContext.None, false)
-            Chart.when_loaded <| play_when_song_loads
-            true
-        | None ->
-            Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
-            false
-
     override this.Init(parent: Widget) =
         base.Init parent
 
-        ScoreScreenHelpers.continue_endless_mode <- continue_endless_mode
+        ScoreScreenHelpers.continue_endless_mode <-
+            fun () -> Endless.continue_endless_mode (fun info -> LevelSelect.try_play info)
 
         Setting.app (fun s -> if sorting_modes.ContainsKey s then s else "title") options.ChartSortMode
         Setting.app (fun s -> if grouping_modes.ContainsKey s then s else "pack") options.ChartGroupMode
@@ -154,7 +100,7 @@ type LevelSelectScreen() =
         |+ SearchBox(
             search_text,
             (fun f ->
-                Tree.filter <- f
+                LevelSelect.filter <- f
                 refresh ()
             ),
             Position =
@@ -170,21 +116,21 @@ type LevelSelectScreen() =
         |+ Conditional(
             (fun () -> Tree.is_empty),
             StaticContainer(NodeType.None)
-            |+ Conditional((fun () -> Tree.filter <> []), EmptyState(Icons.SEARCH, %"levelselect.empty.search"))
+            |+ Conditional((fun () -> LevelSelect.filter <> []), EmptyState(Icons.SEARCH, %"levelselect.empty.search"))
             |+ Conditional(
                 (fun () ->
-                    Tree.filter = []
+                    LevelSelect.filter = []
                     && options.LibraryMode.Value = LibraryMode.Table
                     && Content.Table.IsNone
                 ),
                 EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
             )
             |+ Conditional(
-                (fun () -> Tree.filter = [] && options.LibraryMode.Value = LibraryMode.Collections),
+                (fun () -> LevelSelect.filter = [] && options.LibraryMode.Value = LibraryMode.Collections),
                 EmptyState(Icons.FOLDER, %"levelselect.empty.no_collections")
             )
             |+ Conditional(
-                (fun () -> Tree.filter = [] && options.LibraryMode.Value = LibraryMode.All),
+                (fun () -> LevelSelect.filter = [] && options.LibraryMode.Value = LibraryMode.All),
                 EmptyState(Icons.FOLDER, %"levelselect.empty.no_charts")
             ),
             Position =
@@ -218,7 +164,7 @@ type LevelSelectScreen() =
         Comments.update (elapsed_ms, moved)
 
         if (%%"select").Tapped() then
-            LevelSelect.play ()
+            LevelSelect.choose_this_chart ()
 
         elif (%%"next").Tapped() then
             Tree.next ()
@@ -272,6 +218,7 @@ type LevelSelectScreen() =
         Comments.draw ()
 
     override this.OnEnter prev =
+        Endless.exit_endless_mode()
         Song.on_finish <- SongFinishAction.LoopFromPreview
 
         if Cache.recache_service.Status <> Async.ServiceStatus.Idle then

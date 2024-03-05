@@ -8,6 +8,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
+open Prelude.Data.Charts.Endless
 open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
@@ -65,7 +66,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 Icon = Icons.ARROW_DOWN_CIRCLE,
                 Enabled = (index + 1 < Library.collections.GetPlaylist(name).Value.Charts.Count)
             )
-            |* PageButton(
+            |+ PageButton(
                 "chart.remove_from_collection",
                 (fun () ->
                     if CollectionActions.remove_from (name, Library.collections.Get(name).Value, cc, context) then
@@ -73,6 +74,20 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 ),
                 Icon = Icons.FOLDER_MINUS,
                 Text = [ name ] %> "chart.remove_from_collection.name"
+            )
+            |+ PageButton.Once("playlist.play", 
+                (fun () ->
+                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist false (Library.collections.GetPlaylist(name).Value))
+                    Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                ),
+                Icon = Icons.PLAY
+            )
+            |* PageButton.Once("playlist.play_shuffled", 
+                (fun () ->
+                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist true (Library.collections.GetPlaylist(name).Value))
+                    Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                ),
+                Icon = Icons.SHUFFLE
             )
 
         match Content.Table, Chart.CHART with
@@ -104,6 +119,41 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                     Menu.Back()
         )
             .Show()
+
+type PlaylistContextMenu(name: string, playlist: Playlist) =
+    inherit Page()
+
+    override this.Init(parent) =
+        column()
+        |+ PageButton("collections.edit", 
+            (fun () -> 
+                EditPlaylistPage(name, playlist).Show()
+            ),
+            Icon = Icons.EDIT_2
+        )
+            .Pos(200.0f)
+        |+ PageButton.Once("playlist.play", 
+            (fun () ->
+                Endless.begin_endless_mode (EndlessModeState.create_from_playlist false playlist)
+                Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+            ),
+            Icon = Icons.PLAY
+        )
+            .Pos(300.0f)
+        |+ PageButton.Once("playlist.play_shuffled", 
+            (fun () ->
+                Endless.begin_endless_mode (EndlessModeState.create_from_playlist true playlist)
+                Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+            ),
+            Icon = Icons.SHUFFLE
+        )
+            .Pos(370.0f)
+        |> this.Content
+
+        base.Init parent
+
+    override this.Title = name
+    override this.OnClose() = ()
 
 type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGroupContext) as this =
     inherit Page()
@@ -141,7 +191,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         match context with
         | LibraryGroupContext.None -> GroupContextMenu(name, charts, context).Show()
         | LibraryGroupContext.Folder id -> EditFolderPage(id, Library.collections.GetFolder(id).Value).Show()
-        | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value).Show()
+        | LibraryGroupContext.Playlist id -> PlaylistContextMenu(id, Library.collections.GetPlaylist(id).Value).Show()
         | LibraryGroupContext.Table lvl -> ()
 
 type ScoreContextMenu(score_info: ScoreInfo) as this =
