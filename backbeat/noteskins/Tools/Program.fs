@@ -9,8 +9,13 @@ open SixLabors.ImageSharp.Processing
 let check_noteskin_textures (ns: Noteskin) =
     for tex in ns.RequiredTextures do
         match ns.GetTexture tex with
-        | Some _ -> ()
-        | None -> printfn "Missing texture: %s" tex
+        | TextureError reason -> printfn "Missing texture: %s (%s)" tex reason
+        | _ -> ()
+
+let get_texture (id: string) (ns: Noteskin) =
+    match ns.GetTexture id with
+    | TextureOk (a, b) -> a, b
+    | _ -> failwithf "Failed to get texture '%s' for noteskin '%s'" id ns.Config.Name
 
 let generate_preview (ns: Noteskin, target_file: string) =
     let img: Bitmap = new Bitmap(640, 480)
@@ -51,7 +56,7 @@ let generate_preview (ns: Noteskin, target_file: string) =
     // todo: playfield
 
     // receptors
-    let receptor = ns.GetTexture("receptor").Value
+    let receptor = get_texture "receptor" ns
 
     use unpressed_receptor = gen_tex (0, 0) receptor
     use r = rotate_tex rotations.[0] unpressed_receptor in
@@ -66,7 +71,7 @@ let generate_preview (ns: Noteskin, target_file: string) =
 
     // notes
 
-    let note = ns.GetTexture("note").Value
+    let note = get_texture "note" ns
 
     use note_tex = gen_tex (2, 0) note
     use r = rotate_tex rotations.[0] note_tex
@@ -86,9 +91,9 @@ let generate_preview (ns: Noteskin, target_file: string) =
 
     // hold
 
-    let holdhead = ns.GetTexture("holdhead").Value
-    let holdbody = ns.GetTexture("holdbody").Value
-    let holdtail = ns.GetTexture("holdtail").Value
+    let holdhead = get_texture "holdhead" ns
+    let holdbody = get_texture "holdbody" ns
+    let holdtail = get_texture "holdtail" ns
 
     use body = gen_tex (2, 1) holdbody |> stretch_tex 240 in
     draw_tex (200, 180) body
