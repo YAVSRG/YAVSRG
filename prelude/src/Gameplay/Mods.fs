@@ -124,10 +124,17 @@ module Mods =
         "inverse"
         { EMPTY_MOD with
             Status = ModStatus.Unranked
-            States = 1
+            States = 1 // todo: in future support half-size/double-size gaps? code is already there
             Exclusions = [ "noln" ]
             Apply = fun s mc -> Inverse.apply (s > 0) mc
         }
+        
+    //add_mod
+    //    "more_notes"
+    //    { EMPTY_MOD with
+    //        Status = ModStatus.Unstored
+    //        Apply = fun s mc -> MoreNotes.apply mc
+    //    }
 
     // todo: randomiser mod with seed
 

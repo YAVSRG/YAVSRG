@@ -215,3 +215,36 @@ module Inverse =
             Notes = output |> Array.ofSeq
         },
         true
+
+module MoreNotes =
+
+    let apply (chart: ModdedChartInternal) : ModdedChartInternal * bool =
+
+        if chart.Keys <> 4 then chart, false else
+        
+        let mutable previous_nr : NoteRow = Array.zeroCreate chart.Keys
+
+        let add_note (if_jack_in_column: int) (add_to_column: int) (nr: NoteRow) =
+            if 
+                (nr.[if_jack_in_column] = NoteType.NORMAL || nr.[if_jack_in_column] = NoteType.HOLDHEAD)
+                && previous_nr.[if_jack_in_column] = NoteType.NORMAL
+                && nr.[add_to_column] = NoteType.NOTHING
+            then
+                nr.[add_to_column] <- NoteType.NORMAL
+            nr
+               
+        let new_notes =
+            chart.Notes
+            |> TimeArray.map (fun nr ->
+                let new_notes =
+                    nr
+                    |> NoteRow.clone
+                    |> add_note 0 1
+                    |> add_note 1 0
+                    |> add_note 2 3
+                    |> add_note 3 2
+                previous_nr <- nr
+                new_notes
+            )
+
+        { chart with Notes = new_notes }, true
