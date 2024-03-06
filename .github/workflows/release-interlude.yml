@@ -30,8 +30,8 @@ jobs:
       id: package
       run: |
         cd interlude/tools
-        dotnet run --nologo -v q --property WarningLevel=0 /clp:ErrorsOnly -- release_win64
-        echo "VERSION=v$(dotnet run -- version)" >> $GITHUB_OUTPUT
+        dotnet run -- release_win64
+        echo "VERSION=v$(dotnet run -v q -- version)" >> $GITHUB_OUTPUT
         
     - name: Create Release
       uses: ncipollo/release-action@v1

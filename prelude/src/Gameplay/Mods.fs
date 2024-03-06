@@ -83,7 +83,6 @@ module Mods =
                 if available_mods.ContainsKey id then
                     Some(id, available_mods.[id], state)
                 else
-                    Logging.Error(sprintf "Unrecognised mod id: %s" id)
                     None
             )
             |> Seq.sortBy (fun (id, m, state) -> m.Priority)
