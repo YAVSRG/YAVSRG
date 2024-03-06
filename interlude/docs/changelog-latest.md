@@ -1,20 +1,27 @@
-0.7.18.4
+0.7.18.5
 ====
 
-Dropping an update before I move house, containing even more stuff directly from user feedback this week
+I've mostly done internal code changes this week
+To stick to the frequent release schedule I've been doing, here are some small things before those code changes pay off
 
 # Bug fixes
-- Fixed hold explosions continuing forever if you start holding an LN and never release the key
+- Watching a chart in auto-play mode no longer counts as "playing" it for the database/sort by recently played view
+- Improved how LN bodies convert from osu! -> Interlude in many cases
 
-# Improvements
-- Explosion scale soft cap lifted from 200% to 500%
-- Huge stride/improvement in pattern analysis and recommendation algorithm again
-  You will have to recache patterns once again to use endless mode
-- (Advanced) setting to disable the confirmation to exit the game
+# Skinning
+- Improved automatic validation of noteskins under the hood
+- Improved the osu! -> Interlude noteskin converter:
+	- Option to convert arrow skins correctly
+	- Converter attempts to convert stage-left and stage-right
+	- Converter attempts to convert column lighting
+- Improved guidance on the import screen towards importing your own osu! skin
+- Can enable/disable stage textures in-game
 
-# New features
-- Vertical offset setting for explosions, allowing for a little more flexibility in skinning
-- (Advanced) setting to hold esc/ctrl R to exit/retry (for players with switches that rattle or keep accidentally bumping these keys)
-- Column lighting technically now supports different images per column, customisation in-UI coming later
-- Scroll speed setting shows approximate scroll speeds as they would be in other VSRGs
+# Endless mode
+- Many changes under the hood that will pay off soon
+- Playing a playlist has changed
+	- Right click on the playlist or any song in it to play (instead of turning on endless mode and then playing)
+	- New option to play it in a shuffled order
+	
+As usual stay tuned in the Discord for discussions and updates on what I'm working on next
 
