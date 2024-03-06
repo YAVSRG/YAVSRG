@@ -11,13 +11,10 @@
     <RepositoryUrl>https://github.com/YAVSRG/Prelude</RepositoryUrl>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup>
     <Optimize>True</Optimize>
     <Tailcalls>True</Tailcalls>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>True</Optimize>
+	<NoWarn>NU1903</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
