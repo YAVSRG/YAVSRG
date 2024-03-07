@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI
 
 open System
-open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
