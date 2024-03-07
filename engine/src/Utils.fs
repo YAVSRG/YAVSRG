@@ -1,6 +1,5 @@
 ﻿namespace Percyqaz.Flux
 
-open System
 open System.IO
 open System.Reflection
 open System.Threading
@@ -20,8 +19,7 @@ module Utils =
 
     type Bitmap = Image<PixelFormats.Rgba32>
 
-    module Bitmap =
-        let load (stream: Stream) : Bitmap = Bitmap.Load<PixelFormats.Rgba32> stream
+    //do Configuration.Default.PreferContiguousImageBuffers <- true
 
     let lerp x a b : float32 = (b - a) * x + a
 

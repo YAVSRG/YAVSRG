@@ -132,6 +132,9 @@ module Common =
     type Bitmap = Image<PixelFormats.Rgba32>
 
     module Bitmap =
+    
+        //do Configuration.Default.PreferContiguousImageBuffers <- true
+
         let from_stream (close_stream: bool) (stream: Stream) : Bitmap option =
             let img =
                 try
@@ -143,7 +146,6 @@ module Common =
             img
 
     type Color = Drawing.Color
-
 
     let get_game_folder name =
         let p = Path.Combine(Directory.GetCurrentDirectory(), name)

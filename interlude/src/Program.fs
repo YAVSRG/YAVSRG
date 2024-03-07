@@ -6,6 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Flux
 open Percyqaz.Flux.Windowing
+open Prelude
 open Interlude
 open Interlude.UI
 open Interlude.Features
@@ -42,8 +43,8 @@ let launch (instance: int) =
         Window.on_file_drop.Add(Import.Import.handle_file_drop)
 
         use icon_stream = Utils.get_resource_stream ("icon.png")
-        use icon = Utils.Bitmap.load icon_stream
-        Launch.entry_point (Options.config, "Interlude", Startup.init_window instance, Some icon)
+        let icon = Bitmap.from_stream true icon_stream
+        Launch.entry_point (Options.config, "Interlude", Startup.init_window instance, icon)
 
         Startup.deinit false crash_splash
 

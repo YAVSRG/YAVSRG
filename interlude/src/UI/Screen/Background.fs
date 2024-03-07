@@ -35,7 +35,11 @@ module Background =
                     | Some file ->
 
                         try
-                            let! (bmp: Bitmap) = Image.LoadAsync file |> Async.AwaitTask
+                            use stream = IO.File.OpenRead file
+                            match Bitmap.from_stream true stream with
+                            | None -> 
+                                return (failwith "Unsupported or invalid image format")
+                            | Some bmp ->
 
                             let col =
                                 if Content.ThemeConfig.OverrideAccentColor then
