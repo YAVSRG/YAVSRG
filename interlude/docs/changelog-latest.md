@@ -1,27 +1,10 @@
-0.7.18.5
+0.7.18.6
 ====
 
-I've mostly done internal code changes this week
-To stick to the frequent release schedule I've been doing, here are some small things before those code changes pay off
+This update has nothing new, it's just me testing that the release pipeline still works after the ImageSharp CVE caused build warnings to appear
 
-# Bug fixes
-- Watching a chart in auto-play mode no longer counts as "playing" it for the database/sort by recently played view
-- Improved how LN bodies convert from osu! -> Interlude in many cases
+I will have to upgrade ImageSharp to a patched version at some point but for now feel free to execute as much arbitrary code on your own machine as you like
 
-# Skinning
-- Improved automatic validation of noteskins under the hood
-- Improved the osu! -> Interlude noteskin converter:
-	- Option to convert arrow skins correctly
-	- Converter attempts to convert stage-left and stage-right
-	- Converter attempts to convert column lighting
-- Improved guidance on the import screen towards importing your own osu! skin
-- Can enable/disable stage textures in-game
-
-# Endless mode
-- Many changes under the hood that will pay off soon
-- Playing a playlist has changed
-	- Right click on the playlist or any song in it to play (instead of turning on endless mode and then playing)
-	- New option to play it in a shuffled order
-	
-As usual stay tuned in the Discord for discussions and updates on what I'm working on next
+This update also includes updating GLFW 3.3.7 -> 3.3.8 which looks like it contains fixes for the segfaults on M1/M2
+Perhaps this will mean I can start doing official releases for macOS?
 
