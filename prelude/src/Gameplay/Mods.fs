@@ -135,7 +135,7 @@ module Mods =
     //        Apply = fun s mc -> MoreNotes.apply mc
     //    }
 
-    // todo: randomiser mod with seed
+     //todo: randomiser mod with seed
 
     (*
         Mod application pipeline

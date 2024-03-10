@@ -243,7 +243,7 @@ module MoreNotes =
                     |> add_note 1 0
                     |> add_note 2 3
                     |> add_note 3 2
-                previous_nr <- nr
+                previous_nr <- new_notes
                 new_notes
             )
 
