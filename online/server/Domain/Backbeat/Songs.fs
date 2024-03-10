@@ -29,6 +29,13 @@ type Song =
             Source = song.Source
             Tags = song.Tags
         }
+    member this.FormattedArtists =
+        String.concat ", " this.Artists
+        + if this.OtherArtists <> [] then
+              " ft. " + String.concat ", " this.OtherArtists
+          else
+              ""
+    member this.FormattedTitle = this.FormattedArtists + " - " + this.Title
 
 [<Json.AutoCodec>]
 type ChartSource =
@@ -101,21 +108,20 @@ module Songs =
                 Title,
                 AlternativeTitles,
                 Source,
-                Tags,
                 tokenize="trigram"
             );
 
             CREATE TRIGGER songs_fts_ai AFTER INSERT ON songs BEGIN
-              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags) 
-              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source, new.Tags);
+              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source) 
+              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source);
             END;
 
             CREATE TRIGGER songs_fts_ad AFTER UPDATE ON songs BEGIN
               DELETE FROM songs_fts
               WHERE rowid = old.Id;
 
-              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags) 
-              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source, new.Tags);
+              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source) 
+              VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source);
             END;
 
             CREATE TRIGGER songs_fts_au AFTER DELETE ON songs BEGIN
@@ -549,13 +555,13 @@ module Songs =
 
     open System.Text.RegularExpressions
     let search_songs (search_query: string) : (int64 * Song) array =
-        let stripped_query = Regex.Replace(search_query, @"[^a-zA-Z0-9]+", "")
+        let stripped_query = Regex.Replace(search_query, @"[^a-zA-Z0-9\s]+", " ")
         if stripped_query = "" then [||] else
         let db_query : Query<unit, int64 * Song> =
             {
                 SQL = $"""
-                SELECT Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags FROM songs_fts
-                WHERE songs_fts MATCH '"{stripped_query}"'
+                SELECT Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source FROM songs_fts
+                WHERE songs_fts MATCH '{stripped_query}'
                 ORDER BY rank DESC
                 LIMIT 20;
                 """
@@ -570,7 +576,7 @@ module Songs =
                         Title = r.String
                         AlternativeTitles = r.Json JSON
                         Source = r.StringOption
-                        Tags = r.Json JSON
+                        Tags = []
                     }
                 )
             }

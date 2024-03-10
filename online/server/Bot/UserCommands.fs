@@ -52,11 +52,12 @@ module UserCommands =
                     do! reply "Enter a search term, for example: $search PLANET//SHAPER artist:Camellia creator:Evening"
 
                 | query :: _ ->
-                    let matches = Backbeat.Charts.search query |> List.ofSeq
+                    let matches = Backbeat.Songs.search_songs query
 
-                    match matches with
-                    | [] -> do! reply "No matches found."
-                    | (song, charts) :: [] ->
+                    if matches.Length = 0 then
+                        do! reply "No matches found."
+                    elif matches.Length = 1 then
+                        let song = snd matches.[0]
                         let embed =
                             EmbedBuilder(Title = song.Title)
                                 .AddField(
@@ -80,27 +81,27 @@ module UserCommands =
 
                         embed.WithColor(Color.Blue) |> ignore
 
-                        for chart in charts do
-                            embed.AddField(
-                                chart.DifficultyName + " by " + String.concat ", " chart.Creators,
-                                String.concat "  |  " (chart.Sources |> List.map Backbeat.Charts.format_source)
-                            )
-                            |> ignore
+                        //for chart in charts do
+                        //    embed.AddField(
+                        //        chart.DifficultyName + " by " + String.concat ", " chart.Creators,
+                        //        String.concat "  |  " (chart.Sources |> List.map Backbeat.Charts.format_source)
+                        //    )
+                        //    |> ignore
 
                         do! reply_embed (embed.Build())
-                    | _ ->
+                    else
                         let embed =
                             EmbedBuilder(
                                 Title =
                                     match matches.Length with
-                                    | 30 -> "30+ matches found"
+                                    | 20 -> "20+ matches found"
                                     | i -> sprintf "%i matches found" i
                             )
                                 .WithDescription(
                                     String.concat
                                         "\n"
-                                        (List.map
-                                            (fun (song: Song, charts) -> song.FormattedTitle.Replace("*", "\\*"))
+                                        (Array.map
+                                            (fun (_, song: Backbeat.Song) -> song.FormattedTitle.Replace("*", "\\*"))
                                             matches)
                                 )
                                 .WithColor(Color.Blue)
