@@ -74,7 +74,11 @@ type ReceptorStyle =
 type NoteskinConfig =
     {
         Name: string
+        Version: string
+        /// Who originally created the noteskin
         Author: string
+        /// Who ported or made an edit to the skin - None if same person as Author
+        Editor: string option
 
         /// Contains settings for the color scheme of notes
         NoteColors: ColorConfig
@@ -130,11 +134,14 @@ type NoteskinConfig =
         ReceptorStyle: ReceptorStyle
 
         LinearSampling: bool
+        // HUD: HUD
     }
     static member Default =
         {
             Name = "Unnamed Noteskin"
+            Version = "v1"
             Author = "Unknown"
+            Editor = None
             FlipHoldTail = true
             UseHoldTailTexture = true
             HoldNoteTrim = 0.0f
@@ -178,6 +185,7 @@ type NoteskinConfig =
                 |]
             ReceptorStyle = ReceptorStyle.Rotate
             LinearSampling = true
+            // HUD = HUD.Default
         }
 
     member this.Validate =
