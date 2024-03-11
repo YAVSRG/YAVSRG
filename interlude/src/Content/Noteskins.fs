@@ -152,7 +152,7 @@ module Noteskins =
         for zip in
             Directory.EnumerateFiles(get_game_folder "Noteskins")
             |> Seq.filter (fun p -> Path.GetExtension(p).ToLower() = ".isk") do
-            let target = Path.GetFileNameWithoutExtension zip
+            let target = Path.Combine(Path.GetDirectoryName zip, Path.GetFileNameWithoutExtension zip)
 
             if Directory.Exists(target) then
                 Logging.Info(sprintf "%s has already been extracted, deleting" (Path.GetFileName zip))
