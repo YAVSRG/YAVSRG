@@ -1,63 +1,126 @@
 {
     "Noteskins": [{
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/AkaiHaato.isk", 
-        "Name": "Akai Haato", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/AkaiHaato.png"
+        "Author": "Wagg",
+        "Name": "Wagemania",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Wagemania.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Wagemania.png",
+            "Version": "v1"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Delta.isk", 
-        "Name": "Delta", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Delta.png"
+        "Author": "Wafles",
+        "Name": "Wafles",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Wafles4.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Wafles4.png",
+            "Version": "4"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Eliminate.isk", 
-        "Name": "Eliminate", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Eliminate.png"
+        "Author": "Lifly",
+        "Name": "Waffle",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/WaffleV3.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/WaffleV3.png",
+            "Version": "v3"
+        }, {
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/WaffleV2.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/WaffleV2.png",
+            "Version": "v2"
+        }, {
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Waffle.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Waffle.png",
+            "Version": "v1"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/FelopesSkin.isk", 
-        "Name": "Felopes Skin", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/FelopesSkin.png"
+        "Author": "Percyqaz",
+        "Name": "Purple Rain",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/PurpleRain.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/PurpleRain.png",
+            "Version": "1.0"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Funkin.isk", 
-        "Name": "Funkin'", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Funkin.png"
+        "Author": "Unknown",
+        "Name": "MultiplyByZero",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/MultiplyByZero.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/MultiplyByZero.png",
+            "Version": "1.0"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/K1RA_rounded.isk", 
-        "Name": "K1RA rounded", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/K1RA_rounded.png"
+        "Author": "Sprrumnk",
+        "Name": "Koros Loki",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/LokiBars.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/LokiBars.png",
+            "Version": "Bars"
+        }, {
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/LokiArrows.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/LokiArrows.png",
+            "Version": "Arrows"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/LokiArrows.isk", 
-        "Name": "Koros Loki (Arrows)", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/LokiArrows.png"
+        "Author": "DJ K1RA",
+        "Name": "K1RA rounded",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/K1RA_rounded.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/K1RA_rounded.png",
+            "Version": "v1"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/LokiBars.isk", 
-        "Name": "Koros Loki (Bars)", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/LokiBars.png"
+        "Author": "ecafree2",
+        "Name": "Funkin'",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Funkin.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Funkin.png",
+            "Version": "1.1"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/MultiplyByZero.isk", 
-        "Name": "MultiplyByZero", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/MultiplyByZero.png"
+        "Author": "Felopes",
+        "Name": "Felopes Skin",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/FelopesSkin.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/FelopesSkin.png",
+            "Version": "1.0"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/PurpleRain.isk", 
-        "Name": "Purple Rain v1", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/PurpleRain.png"
+        "Author": "Eliminate & Others",
+        "Name": "Eliminate",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Eliminate.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Eliminate.png",
+            "Version": "3"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Waffle.isk", 
-        "Name": "Waffle", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Waffle.png"
+        "Author": "Shakesoda",
+        "Name": "Delta",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Delta.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Delta.png",
+            "Version": "v1"
+        }]
     }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/WaffleV2.isk", 
-        "Name": "Waffle v2", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/WaffleV2.png"
-    }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/WaffleV3.isk", 
-        "Name": "Waffle v3", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/WaffleV3.png"
-    }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Wafles4.isk", 
-        "Name": "Wafles4", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Wafles4.png"
-    }, {
-        "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/Wagemania.isk", 
-        "Name": "Wagemania", 
-        "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/Wagemania.png"
+        "Author": "Jianshyy",
+        "Name": "Akai Haato",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/AkaiHaato.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/AkaiHaato.png",
+            "Version": "Akai Haato"
+        }]
     }]
 }
