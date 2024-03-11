@@ -1,7 +1,9 @@
 ﻿// load all noteskins in folders
 
 open System.IO
-open Prelude.Data.Content
+open Prelude.Content
+open Prelude.Content.Noteskins
+open Prelude.Content.Noteskins.Repo
 open Prelude.Common
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
@@ -122,7 +124,7 @@ let root =
     | "Tools" -> "../"
     | _ -> "../../../../" // run from bin/net6.0
 
-let skins = ResizeArray<Noteskin.RepoEntry>()
+let skins = ResizeArray<NoteskinGroup>()
 
 Path.Combine(root, "Noteskins") |> Path.GetFullPath |> printfn "%s"
 
@@ -140,11 +142,16 @@ for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) |
         skins.Add
             {
                 Name = ns.Config.Name
-                Download = sprintf "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/%s" filename
-                Preview =
-                    sprintf
-                        "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/%s"
-                        (Path.ChangeExtension(filename, ".png"))
+                Versions = [|
+                    {
+                        Version = "v1"
+                        Download = sprintf "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/%s" filename
+                        Preview =
+                            sprintf
+                                "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/%s"
+                                (Path.ChangeExtension(filename, ".png"))
+                    }
+                |]
             }
 
         printfn "Added to list!"
@@ -155,7 +162,7 @@ for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) |
 
 let existing_skins =
     match JSON.FromFile(Path.Combine(root, "index.json")) with
-    | Ok(repo: Noteskin.Repo) -> repo.Noteskins |> Seq.map (fun ns -> ns.Name)
+    | Ok(repo: NoteskinRepo) -> repo.Noteskins |> Seq.map (fun ns -> ns.Name)
     | Error e -> raise e
 
 let newly_added = ResizeArray [ "✨ Newly added noteskins ✨" ]
@@ -170,5 +177,5 @@ else
     File.WriteAllText(Path.Combine(root, "new.txt"), "")
 
 printfn "Generating index.json ..."
-let repo: Noteskin.Repo = { Noteskins = List.ofSeq skins }
+let repo: NoteskinRepo = { Noteskins = Array.ofSeq skins }
 JSON.ToFile (Path.Combine(root, "index.json"), true) repo

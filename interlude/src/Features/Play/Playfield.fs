@@ -7,7 +7,7 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Charts
 open Prelude.Charts.Tools.NoteColors
-open Prelude.Data.Content
+open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features

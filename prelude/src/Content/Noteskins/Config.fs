@@ -1,9 +1,10 @@
-﻿namespace Prelude.Data.Content
+﻿namespace Prelude.Content.Noteskins
 
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude.Common
 open Prelude.Charts.Tools.NoteColors
+open Prelude.Content
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
@@ -242,7 +243,7 @@ module NoteskinTextureRules =
             "note", DEFAULT
             "holdhead", DEFAULT
             "holdbody", DEFAULT
-            "holdtail", DEFAULT
+            "holdtail", { DEFAULT with IsRequired = fun config -> config.UseHoldTailTexture }
             "receptor", {
                 IsRequired = K true
                 MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Rotate

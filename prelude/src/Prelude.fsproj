@@ -44,6 +44,8 @@
     <Compile Include="Content\Noteskins\HUD.fs" />
     <Compile Include="Content\Noteskins\Config.fs" />
     <Compile Include="Content\Noteskins\Noteskin.fs" />
+    <Compile Include="Content\Noteskins\Repo.fs" />
+    <Compile Include="Content\Noteskins\Conversions\Helpers.fs" />
     <Compile Include="Content\Noteskins\Conversions\osu!\Parser.fs" />
     <Compile Include="Content\Noteskins\Conversions\osu!\Converter.fs" />
     <Compile Include="Backbeat\Archive.fs" />

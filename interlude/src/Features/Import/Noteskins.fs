@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
-open Prelude.Data.Content.Noteskin
+open Prelude.Content.Noteskins.Repo
 open Prelude.Data
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
@@ -13,7 +13,7 @@ open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Content
 
-type NoteskinCard(data: RepoEntry) as this =
+type NoteskinCard(data: NoteskinGroup) as this =
     inherit
         FrameContainer(
             NodeType.Button(fun () ->
@@ -65,7 +65,7 @@ type NoteskinCard(data: RepoEntry) as this =
                 )
 
             WebServices.download_file.Request(
-                (data.Download, target, ignore),
+                (data.Versions.[0].Download, target, ignore),
                 fun success ->
                     if success then
                         sync Noteskins.load
@@ -144,13 +144,13 @@ module Noteskins =
                 "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/noteskins/index.json",
                 fun data ->
                     match data with
-                    | Some(d: Content.Noteskin.Repo) ->
+                    | Some(d: NoteskinRepo) ->
                         sync (fun () ->
                             for ns in d.Noteskins do
                                 let nc = NoteskinCard ns
 
                                 ImageServices.get_cached_image.Request(
-                                    ns.Preview,
+                                    ns.Versions.[0].Preview,
                                     fun img -> sync (fun () -> nc.LoadPreview img)
                                 )
 

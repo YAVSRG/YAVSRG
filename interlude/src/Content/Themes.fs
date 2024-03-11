@@ -8,7 +8,8 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude
-open Prelude.Data.Content
+open Prelude.Content
+open Prelude.Content.Themes
 open Interlude
 
 module Themes =

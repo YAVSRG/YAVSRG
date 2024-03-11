@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Content.NoteskinConversion.``osu!``
+﻿namespace Prelude.Content.Noteskins.Conversion
 
 open System.IO
 open SixLabors.ImageSharp
@@ -7,7 +7,8 @@ open SixLabors.ImageSharp.Drawing.Processing
 open Percyqaz.Common
 open Prelude.Common
 open Prelude.Charts.Tools.NoteColors
-open Prelude.Data.Content
+open Prelude.Content
+open Prelude.Content.Noteskins
 
 module OsuSkinConverter =
 

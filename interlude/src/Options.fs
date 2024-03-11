@@ -342,7 +342,7 @@ module Options =
 
     module HUDOptions =
 
-        open Prelude.Data.Content.HUD
+        open Prelude.Content.Noteskins.HUD
 
         let private cache = Dictionary<string, obj>()
 

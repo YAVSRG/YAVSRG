@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Content
+﻿namespace Prelude.Content
 
 open System
 open System.IO

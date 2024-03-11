@@ -8,7 +8,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
-open Prelude.Data.Content
+open Prelude.Content.Noteskins
 open Interlude
 open Interlude.UI
 open Interlude.Content

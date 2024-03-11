@@ -11,7 +11,7 @@ open Prelude.Charts.Tools
 open Prelude.Charts.Tools.NoteColors
 open Prelude.Charts.Tools.Patterns
 open Prelude.Gameplay
-open Prelude.Data.Content
+open Prelude.Content.Noteskins
 open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content

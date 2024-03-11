@@ -1,10 +1,11 @@
-namespace Prelude.Data.Content
+namespace Prelude.Content.Themes
 
 open System.IO
 open System.IO.Compression
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude.Common
+open Prelude.Content
 
 (*
     Default config values for themes, textures, noteskins, widget layouts

@@ -7,8 +7,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data.Charts
 open Prelude
-open Prelude.Data.Content.Noteskin
-open Prelude.Data.Content.NoteskinConversion.``osu!``
+open Prelude.Content.Noteskins.Conversion
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu

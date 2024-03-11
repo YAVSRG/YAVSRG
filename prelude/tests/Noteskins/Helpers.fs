@@ -1,15 +1,10 @@
 ﻿namespace Prelude.Tests.Noteskins
 
-open NUnit.Framework
-open System
 open System.IO
 open System.IO.Compression
 open SixLabors.ImageSharp
-open SixLabors.ImageSharp.Processing
-open Percyqaz.Common
-open Percyqaz.Data
 open Prelude.Common
-open Prelude.Data.Content
+open Prelude.Content.Noteskins
 
 module Helpers =
     

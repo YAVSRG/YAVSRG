@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Content.NoteskinConversion.``osu!``
+﻿namespace Prelude.Content.Noteskins.Conversion
 
 open Prelude.Common
 

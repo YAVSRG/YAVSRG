@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Tools.Features
 
 open Percyqaz.Shell
-open Prelude.Data.Content
+open Prelude.Content.Noteskins
 open Interlude.Tools
 
 module Assets =

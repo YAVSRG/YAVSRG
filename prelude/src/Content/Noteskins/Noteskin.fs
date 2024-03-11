@@ -1,9 +1,10 @@
-﻿namespace Prelude.Data.Content
+﻿namespace Prelude.Content.Noteskins
 
 open System.IO
 open System.IO.Compression
 open Percyqaz.Common
 open Percyqaz.Data
+open Prelude.Content
 
 module NoteskinExplosionMigration =
 
@@ -103,30 +104,3 @@ type Noteskin(storage) as this =
         new Noteskin(Embedded(new ZipArchive(stream)))
 
     static member FromPath(path: string) = new Noteskin(Folder path)
-
-module Noteskin =
-
-    let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|Unknown|) (path: string) =
-        if Directory.Exists path then
-            if File.Exists(Path.Combine(path, "skin.ini")) then
-                OsuSkinFolder
-            else
-                Unknown
-        else
-            let s = Path.GetExtension(path).ToLower()
-
-            match s with
-            | ".isk" -> InterludeSkinArchive
-            | ".osk" -> OsuSkinArchive
-            | _ -> Unknown
-
-    [<Json.AutoCodec>]
-    type RepoEntry =
-        {
-            Name: string
-            Preview: string
-            Download: string
-        }
-
-    [<Json.AutoCodec>]
-    type Repo = { Noteskins: RepoEntry list }

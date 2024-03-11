@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features.OptionsMenu.Themes
 
 open Percyqaz.Common
-open Prelude.Data.Content
 open Interlude.Content
 open Interlude.UI.Menu
 

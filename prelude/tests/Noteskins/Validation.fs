@@ -2,7 +2,8 @@
 
 open NUnit.Framework
 open Prelude.Common
-open Prelude.Data.Content
+open Prelude.Content
+open Prelude.Content.Noteskins
 open Helpers
 
 module Validation =
