@@ -12,7 +12,7 @@ module FlowContainer =
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>(item_size: float32) as this =
-        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus))
+        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map (fun x -> x :> ISelection)))
 
         let mutable filter: 'T -> bool = K true
         let mutable sort: ('T -> 'T -> int) option = None
@@ -28,7 +28,7 @@ module FlowContainer =
         member private this.WhoIsFocused: int option =
             Seq.tryFindIndex (fun c -> c.Widget.Focused) children
 
-        member private this.WhoShouldFocus : ISelection option =
+        member private this.WhoShouldFocus : Widget option =
             if children.Count = 0 then None else
 
             if last_selected >= children.Count then
@@ -49,7 +49,7 @@ module FlowContainer =
 
                 last_selected <- index
                 children.[index].Widget.Focus false
-            | None -> ()
+            | None -> this.WhoShouldFocus.Value.Focus false
 
         member this.Next() =
             match this.WhoIsFocused with
@@ -62,7 +62,7 @@ module FlowContainer =
 
                 last_selected <- index
                 children.[index].Widget.Focus false
-            | None -> ()
+            | None -> this.WhoShouldFocus.Value.Focus false
 
         member this.SelectFocusedChild() =
             match this.WhoIsFocused with
@@ -124,7 +124,6 @@ module FlowContainer =
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved || refresh)
 
-            profile "update flow container" <| fun () ->
             let moved =
                 if refresh then
                     refresh <- false
@@ -137,7 +136,7 @@ module FlowContainer =
                 if child.Visible && (moved || this.Floating || child.Widget.VisibleBounds.Visible) then
                     child.Widget.Update(elapsed_ms, moved)
 
-            if this.AllowNavigation && this.Focused then
+            if this.AllowNavigation && this.Focused && children.Count > 0 then
                 this.Navigate()
 
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit

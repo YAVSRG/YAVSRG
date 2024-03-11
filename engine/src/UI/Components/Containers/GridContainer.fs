@@ -15,7 +15,7 @@ type private GridFlowItem<'T when 'T :> Widget> =
 
 /// Container that automatically positions its contents packed in a grid arrangement
 type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
-    inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus))
+    inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map (fun x -> x :> ISelection)))
 
     let mutable spacing = 0.0f, 0.0f
     let mutable filter: 'T -> bool = K true
@@ -51,7 +51,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     member private this.WhoIsFocused: int option =
         Seq.tryFindIndex (fun (c: GridFlowItem<'T>) -> c.Widget.Focused) children
 
-    member private this.WhoShouldFocus : ISelection option =
+    member private this.WhoShouldFocus : Widget option =
         if children.Count = 0 then None else
 
         if last_selected >= children.Count then
@@ -125,7 +125,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 last_selected <- i
                 children.[i].Widget.Focus false
             | None -> ()
-        | None -> ()
+        | None -> this.WhoShouldFocus.Value.Focus false
 
     member private this.Down() =
         match this.WhoIsFocused with
@@ -156,7 +156,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 last_selected <- i
                 children.[i].Widget.Focus false
             | None -> ()
-        | None -> ()
+        | None -> this.WhoShouldFocus.Value.Focus false
 
     member private this.Left() =
         match this.WhoIsFocused with
@@ -186,7 +186,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 last_selected <- i
                 children.[i].Widget.Focus false
             | None -> ()
-        | None -> ()
+        | None -> this.WhoShouldFocus.Value.Focus false
 
     member private this.Right() =
         match this.WhoIsFocused with
@@ -216,7 +216,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 last_selected <- i
                 children.[i].Widget.Focus false
             | None -> ()
-        | None -> ()
+        | None -> this.WhoShouldFocus.Value.Focus false
 
     override this.Init(parent: Widget) =
         base.Init parent
@@ -237,7 +237,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 children.Any(fun (item: GridFlowItem<'T>) ->
                     item.X = c.X && item.Y < c.Y && item.Widget.Focusable && item.Visible
                 )
-            | None -> false
+            | None -> true
 
     member private this.CanDown() =
         if this.WrapNavigation then
@@ -251,7 +251,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 children.Any(fun (item: GridFlowItem<'T>) ->
                     item.X = c.X && item.Y > c.Y && item.Widget.Focusable && item.Visible
                 )
-            | None -> false
+            | None -> true
 
     member private this.CanLeft() =
         if this.WrapNavigation then
@@ -265,7 +265,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 children.Any(fun (item: GridFlowItem<'T>) ->
                     item.X < c.X && item.Y = c.Y && item.Widget.Focusable && item.Visible
                 )
-            | None -> false
+            | None -> true
 
     member private this.CanRight() =
         if this.WrapNavigation then
@@ -279,7 +279,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 children.Any(fun (item: GridFlowItem<'T>) ->
                     item.X > c.X && item.Y = c.Y && item.Widget.Focusable && item.Visible
                 )
-            | None -> false
+            | None -> true
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved || refresh)
@@ -296,7 +296,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             if visible && (moved || this.Floating || c.VisibleBounds.Visible) then
                 c.Update(elapsed_ms, moved)
 
-        if this.Focused then
+        if this.Focused && children.Count > 0 then
 
             if this.CanUp() && (%%"up").Tapped() then
                 this.Up()

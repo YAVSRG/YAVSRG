@@ -11,7 +11,7 @@ module NavigationContainer =
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>() as this =
-        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus))
+        inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map (fun x -> x :> ISelection)))
 
         let children = ResizeArray<'T>()
         let mutable last_selected = 0
@@ -21,7 +21,7 @@ module NavigationContainer =
         member private this.WhoIsFocused: int option =
             Seq.tryFindIndex (fun (c: 'T) -> c.Focused) children
 
-        member private this.WhoShouldFocus : ISelection option =
+        member private this.WhoShouldFocus : Widget option =
             if children.Count = 0 then None else
 
             if last_selected >= children.Count then
@@ -41,7 +41,7 @@ module NavigationContainer =
 
                 last_selected <- index
                 children.[index].Focus false
-            | None -> ()
+            | None -> this.WhoShouldFocus.Value.Focus false
 
         member this.Next() =
             match this.WhoIsFocused with
@@ -53,7 +53,7 @@ module NavigationContainer =
 
                 last_selected <- index
                 children.[index].Focus false
-            | None -> ()
+            | None -> this.WhoShouldFocus.Value.Focus false
 
         member this.CanPrevious() =
             if this.WrapNavigation then
@@ -61,7 +61,7 @@ module NavigationContainer =
             else
                 match this.WhoIsFocused with
                 | Some i -> Seq.indexed children |> Seq.exists (fun (idx, c) -> idx < i && c.Focusable)
-                | None -> false
+                | None -> true
         
         member this.CanNext() =
             if this.WrapNavigation then
@@ -69,7 +69,7 @@ module NavigationContainer =
             else
                 match this.WhoIsFocused with
                 | Some i -> Seq.indexed children |> Seq.exists (fun (idx, c) -> idx > i && c.Focusable)
-                | None -> false
+                | None -> true
 
         member this.SelectFocusedChild() =
             match this.WhoIsFocused with
@@ -90,7 +90,7 @@ module NavigationContainer =
             for i = children.Count - 1 downto 0 do
                 children.[i].Update(elapsed_ms, moved)
 
-            if this.Focused then
+            if this.Focused && children.Count > 0 then
                 this.Navigate()
 
         member this.Add(child: 'T) =
