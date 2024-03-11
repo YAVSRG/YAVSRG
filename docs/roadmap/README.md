@@ -26,6 +26,6 @@ Discussion around these features normally takes place on Discord
 
 ### List of key areas by priority
 
-[[Tables]]
 [[Endless mode]]
-[[Challenge your friends]]
+[[Noteskins]]
+[[Tables]]

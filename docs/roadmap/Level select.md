@@ -5,3 +5,7 @@
 	- Add the selected charts to a collection
 	- Create a new folder or playlist with the selected charts
 - UI to cycle between subtitle/difficulty name, source pack/folder, comment underneath each chart
+
+[[Practice mode]]
+[[Replay mode]]
+[[Gameplay mode]]

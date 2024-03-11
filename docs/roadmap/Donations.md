@@ -6,4 +6,4 @@ Ideally find a way to set up patreon so you enter your Interlude username and it
 
 ### Ideas for possible donator rewards
 - You get on the [[Credits]] screen
-- That's it for now I think, I love giving out free features for all
+- Possible donator version of [[Endless mode]] where the server-side can provide you with way better recs based on specific patterns
