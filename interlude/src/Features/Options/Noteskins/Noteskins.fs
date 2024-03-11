@@ -79,7 +79,21 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
             Position = Position.TrimLeft(100.0f).Margin(Style.PADDING).SliceTop(70.0f)
         )
         |+ Text(
-            K(sprintf "Created by %s" ns.Config.Author),
+            K(
+                let has_other_versions = 
+                    Noteskins.list()
+                    |> Seq.map (snd >> _.Config)
+                    |> Seq.tryFind (fun cfg -> cfg.Name = ns.Config.Name && cfg.Version <> ns.Config.Version)
+                    |> Option.isSome
+
+                (
+                    if has_other_versions then
+                        sprintf "%s, By %s" ns.Config.Version ns.Config.Author
+                    else 
+                        sprintf "By %s" ns.Config.Author
+                )
+                + (match ns.Config.Editor with Some e -> ", Edit by " + e | None -> "")
+            ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
             Position = Position.TrimLeft(100.0f).Margin(7.5f, Style.PADDING).SliceBottom(30.0f)
