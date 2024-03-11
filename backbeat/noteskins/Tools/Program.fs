@@ -27,11 +27,19 @@ let existing_skins =
 
 let mutable updated_repo = existing_skins
 
+let fix_me_path = Path.Combine(root, "FixMe")
+
 for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) |> Seq.sort do
     let filename = Path.GetFileName noteskin_file
+    let fixme_folder = Path.Combine(fix_me_path, Path.GetFileNameWithoutExtension filename)
+
+    if Path.Exists fixme_folder then
+        use ns = Noteskin.FromPath fixme_folder
+        ns.CompressToZip noteskin_file |> ignore
+        Directory.Delete(fixme_folder, true)
 
     try
-        let ns = Noteskin.FromZipStream(File.OpenRead noteskin_file)
+        use ns = Noteskin.FromZipStream(File.OpenRead noteskin_file)
         Logging.Info(sprintf "Loaded: '%s' by %s" ns.Config.Name ns.Config.Author)
         let validation = ns.Validate() |> Array.ofSeq
 
@@ -40,6 +48,21 @@ for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) |
                 match msg with
                 | ValidationWarning w -> Logging.Warn(sprintf "'%s': %s" w.Element w.Message)
                 | ValidationError e -> Logging.Error(sprintf "'%s': %s" e.Element e.Message)
+            ns.ExtractToFolder fixme_folder |> ignore
+            let fixme_ns = Noteskin.FromPath fixme_folder
+            fixme_ns.Validate()
+            |> Seq.iter (
+                function
+                | ValidationWarning w -> w.SuggestedFix |> Option.iter (fun s -> s.Action())
+                | ValidationError e -> e.SuggestedFix |> Option.iter (fun s -> s.Action())
+            )
+            fixme_ns.Validate() 
+            |> Seq.tryHead 
+            |> (
+                function
+                | Some _ -> Logging.Warn("Couldn't fix all these issues automatically. Go fix it manually then rerun")
+                | None -> Logging.Info("Fixed all validation issues automatically. Rerun this tool with the fixed version")
+            )
         else
             
         generate_preview (ns, Path.Combine(root, "Previews", (Path.ChangeExtension(filename, ".png"))))
@@ -55,6 +78,7 @@ for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) |
             newly_added.Add ns.Config.Name
     with err ->
         Logging.Error(sprintf "Error loading %s: %O" filename err)
+    Logging.Info ""
 
 if newly_added.Count > 1 then
     File.WriteAllText(Path.Combine(root, "new.txt"), String.concat "\n- " newly_added)
@@ -63,3 +87,4 @@ else
 
 JSON.ToFile (Path.Combine(root, "index.json"), true) updated_repo
 Logging.Info "OK :)"
+Logging.Shutdown()

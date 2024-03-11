@@ -209,7 +209,7 @@ module Noteskins =
         let target = Path.Combine(get_game_folder "Noteskins", id)
 
         if id <> "" && not (Directory.Exists target) then
-            current.ExtractToFolder(target)
+            current.ExtractToFolder(target) |> ignore
             load ()
             selected_id.Value <- id
 

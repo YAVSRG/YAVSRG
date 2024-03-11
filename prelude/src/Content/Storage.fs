@@ -224,12 +224,12 @@ type Storage(storage: StorageType) =
             target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
             JSON.ToFile (target, true) data
 
-    member this.ExtractToFolder target_directory =
+    member this.ExtractToFolder target_directory : bool =
         Directory.CreateDirectory target_directory |> ignore
 
         match storage with
-        | Embedded z -> z.ExtractToDirectory target_directory
-        | Folder _ -> failwith "Can only extract zip to folder"
+        | Embedded z -> z.ExtractToDirectory target_directory; true
+        | Folder _ -> Logging.Error("Can only extract a compressed zip to a folder"); false
 
     member this.CompressToZip target : bool =
         if File.Exists target then
@@ -748,3 +748,9 @@ type Storage(storage: StorageType) =
         with err ->
             Logging.Error("Error removing texture column", err)
             false
+
+    interface IDisposable with
+        member this.Dispose() =
+            match this.Source with
+            | Embedded archive -> archive.Dispose()
+            | Folder _ -> ()

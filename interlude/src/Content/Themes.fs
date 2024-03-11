@@ -143,7 +143,7 @@ module Themes =
         let target = Path.Combine(get_game_folder "Themes", id)
 
         if id <> "" && not (Directory.Exists target) then
-            DEFAULT.ExtractToFolder(target)
+            DEFAULT.ExtractToFolder(target) |> ignore
             load ()
             selected_id.Value <- id
 
