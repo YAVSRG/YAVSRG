@@ -6,3 +6,5 @@
 
 more [[Prelude]] Features like [[Pattern generation]]
 Things that would be cool to have a library for even if I don't immediately use it in Interlude - Could be used in other rhythm game stuff I do
+
+[[Localisation]]
