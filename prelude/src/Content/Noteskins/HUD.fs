@@ -329,5 +329,36 @@ module HUD =
                     }
             }
 
-// todo: song info
-// todo: real time clock
+    // todo: song info
+    // todo: real time clock
+    // todo: multiplayer player list
+
+[<Json.AutoCodec(false)>]
+type HUD =
+    {
+        AccuracyMeter: HUD.AccuracyMeter
+        BPMMeter: HUD.BPMMeter
+        Combo: HUD.Combo
+        EarlyLateMeter: HUD.EarlyLateMeter
+        HitMeter: HUD.HitMeter
+        JudgementCounts: HUD.JudgementCounts
+        JudgementMeter: HUD.JudgementMeter
+        Pacemaker: HUD.Pacemaker
+        ProgressMeter: HUD.ProgressMeter
+        RateModMeter: HUD.RateModMeter
+        SkipButton: HUD.SkipButton
+    }
+    static member Default =
+        { // todo: consider making these optional for some kind of override/hud transfer system?
+            AccuracyMeter = HUD.AccuracyMeter.Default
+            BPMMeter = HUD.BPMMeter.Default
+            Combo = HUD.Combo.Default
+            EarlyLateMeter = HUD.EarlyLateMeter.Default
+            HitMeter = HUD.HitMeter.Default
+            JudgementCounts = HUD.JudgementCounts.Default
+            JudgementMeter = HUD.JudgementMeter.Default
+            Pacemaker = HUD.Pacemaker.Default
+            ProgressMeter = HUD.ProgressMeter.Default
+            RateModMeter = HUD.RateModMeter.Default
+            SkipButton = HUD.SkipButton.Default
+        }
