@@ -4,9 +4,9 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Backbeat
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
-open Prelude.Data.Charts.Tables
 open Interlude.Web.Shared.Requests
 open Interlude.UI
 open Interlude.UI.Menu

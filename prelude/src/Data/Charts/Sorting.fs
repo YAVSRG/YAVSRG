@@ -3,10 +3,9 @@
 open System
 open System.Collections.Generic
 open Percyqaz.Data
-open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
-open Prelude.Data.Charts.Tables
+open Prelude.Backbeat
 open Prelude.Data.Charts.Collections
 open Prelude.Charts.Tools.Patterns
 

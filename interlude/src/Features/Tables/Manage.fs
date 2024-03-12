@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Data.Charts.Tables
+open Prelude.Backbeat
 open Interlude.Content
 open Interlude.Options
 open Interlude.Utils

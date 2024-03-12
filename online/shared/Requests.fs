@@ -173,7 +173,7 @@ module Tables =
 
         let ROUTE = (GET, "/tables")
 
-        open Prelude.Data.Charts.Tables
+        open Prelude.Backbeat
 
         [<Json.AutoCodec>]
         type Table =

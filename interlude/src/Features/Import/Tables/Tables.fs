@@ -2,8 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Prelude.Data.Charts
-open Prelude.Data.Charts.Tables
+open Prelude.Backbeat
 open Interlude.Web.Shared.Requests
 open Interlude.Content
 open Interlude.UI.Components

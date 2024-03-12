@@ -6,8 +6,8 @@ open FParsec
 open Percyqaz.Common
 open Prelude.Data
 open Prelude.Gameplay
+open Prelude.Backbeat
 open Prelude.Backbeat.Archive
-open Prelude.Data.Charts.Tables
 open Interlude.Web.Server.Domain.Core
 
 module Backbeat =

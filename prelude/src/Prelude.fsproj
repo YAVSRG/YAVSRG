@@ -48,12 +48,12 @@
     <Compile Include="Content\Noteskins\Conversions\Helpers.fs" />
     <Compile Include="Content\Noteskins\Conversions\osu!\Parser.fs" />
     <Compile Include="Content\Noteskins\Conversions\osu!\Converter.fs" />
+    <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
     <Compile Include="Data\Web.fs" />
     <Compile Include="Data\Images.fs" />
     <Compile Include="Data\Charts\Caching.fs" />
     <Compile Include="Data\Scores.fs" />
-    <Compile Include="Data\Charts\Tables.fs" />
     <Compile Include="Data\Charts\Collections.fs" />
     <Compile Include="Data\Charts\Library.fs" />
     <Compile Include="Data\Charts\Sorting.fs" />

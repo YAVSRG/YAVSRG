@@ -4,10 +4,9 @@ open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
+open Prelude.Backbeat
 
 module Tables =
-
-    open Prelude.Data.Charts.Tables
 
     let mutable initialised = false
     let private _selected_id : Setting<string option> = Setting.simple None

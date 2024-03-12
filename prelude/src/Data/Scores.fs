@@ -219,3 +219,12 @@ module Scores =
         
     let save_offset (d: ChartSaveData) (offset: Time) =
         d.Offset <- offset
+    
+    let get_best_grade_above (ruleset_id: string) (rate: float32) (chart_hash: string) =
+        match get chart_hash with
+        | Some d ->
+            if d.PersonalBests.ContainsKey ruleset_id then
+                PersonalBests.get_best_above rate d.PersonalBests.[ruleset_id].Grade
+            else
+                None
+        | None -> None

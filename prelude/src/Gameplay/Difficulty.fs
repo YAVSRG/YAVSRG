@@ -326,8 +326,6 @@ module Difficulty =
         with _ ->
             Color.Red
 
-    type PerformanceMetricState = Time array * float * float array * float * float array
-
     let calculate_score_rating (rr: RatingReport) (keys: int) (scoring: IScoreMetric) =
         let lastTimes = Array.create keys 0.0f<ms>
         let mutable pv = 0.01

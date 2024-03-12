@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Web.Server.Domain.Services
 
 open Percyqaz.Common
-open Prelude.Data.Charts.Tables
+open Prelude.Backbeat
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Backbeat
 

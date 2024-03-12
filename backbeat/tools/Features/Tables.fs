@@ -6,7 +6,7 @@
  open Percyqaz.Common
  open Percyqaz.Shell
  open Prelude.Common
- open Prelude.Data.Charts.Tables
+ open Prelude.Backbeat
  open Prelude.Data.Charts.Collections
  open Prelude.Data.Charts.Caching
  open Backbeat.Features.Archive

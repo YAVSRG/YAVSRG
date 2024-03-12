@@ -5,9 +5,9 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Gameplay
+open Prelude.Backbeat
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
-open Prelude.Data.Charts.Tables
 open Prelude.Data.Scores
 open Interlude.Utils
 open Interlude.Content
@@ -341,7 +341,12 @@ type private TableStats() =
     inherit StaticContainer(NodeType.None)
 
     let table = Content.Table
-    let score_data = match table with Some table -> Table.ratings table |> Array.ofSeq | None -> [||]
+    let score_data = 
+        match table with
+        | Some table -> 
+            Table.ratings (Scores.get_best_grade_above table.Info.RulesetId 1.0f) table
+            |> Array.ofSeq 
+        | None -> [||]
 
     let top_scores =
         score_data

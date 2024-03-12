@@ -3,9 +3,9 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Charts
+open Prelude.Backbeat
 open Prelude.Data.Scores
 open Prelude.Data.Charts
-open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Endless
