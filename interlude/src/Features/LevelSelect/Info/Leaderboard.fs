@@ -5,11 +5,12 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
+open Prelude.Charts
+open Prelude.Charts.Processing.Difficulty
+open Prelude.Gameplay
+open Prelude.Gameplay.Performance
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
-open Prelude.Gameplay
-open Prelude.Charts
-open Prelude.Gameplay.Difficulty
 open Interlude
 open Interlude.UI
 open Interlude.Utils

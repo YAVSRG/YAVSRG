@@ -9,7 +9,7 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Charts
-open Prelude.Gameplay.Difficulty
+open Prelude.Charts.Processing.Difficulty
 
 [<Json.AutoCodec(true)>]
 type CachedChart =

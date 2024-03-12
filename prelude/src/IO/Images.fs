@@ -24,7 +24,7 @@ module ImageServices =
         }
 
     let get_cached_image =
-        { new Async.Service<string, Bitmap>() with
+        { new Async.Service<string, Bitmap option>() with
             override this.Handle(url: string) =
                 async {
                     let cached_file_name =
@@ -33,12 +33,15 @@ module ImageServices =
                         Path.Combine(get_game_folder ("Downloads"), name)
 
                     if File.Exists(cached_file_name) then
-                        return! Image.LoadAsync<PixelFormats.Rgba32>(cached_file_name) |> Async.AwaitTask
+                        let stream = File.Open(cached_file_name, FileMode.Open)
+                        return! Bitmap.from_stream_async true stream
                     else
-                        let! image = WebServices.download_image.RequestAsync(url)
-                        let clone = image.Clone()
-                        save_image_png.Request((image, cached_file_name), image.Dispose)
-                        return clone
+                        match! WebServices.download_image.RequestAsync(url) with
+                        | Some image ->
+                            let clone = image.Clone()
+                            save_image_png.Request((image, cached_file_name), image.Dispose)
+                            return Some clone
+                        | None -> return None
                 }
         }
 
@@ -53,6 +56,7 @@ module ImageServices =
                 sprintf "https://emoji.aranja.com/static/emoji-data/img-twitter-72/%s.png" info.Emoji
             )
             |> Async.RunSynchronously
+            |> Option.get
 
         banner.Mutate(fun ctx ->
             let rows = 4

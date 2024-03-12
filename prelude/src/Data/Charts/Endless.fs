@@ -3,7 +3,7 @@
 open System
 open Prelude
 open Prelude.Gameplay.Mods
-open Prelude.Charts.Tools.Patterns
+open Prelude.Charts.Processing.Patterns
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting

@@ -4,9 +4,9 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude.Common
-open Prelude.Gameplay.Mods
-open Prelude.Gameplay.Difficulty
 open Prelude.Charts
+open Prelude.Charts.Processing.Difficulty
+open Prelude.Gameplay.Mods
 open Interlude.Features
 open Interlude.Options
 open Interlude.Utils

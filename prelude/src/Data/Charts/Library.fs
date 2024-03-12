@@ -8,7 +8,7 @@ open Percyqaz.Data
 open Percyqaz.Common
 open Prelude.Common
 open Prelude.Charts.Conversions
-open Prelude.Charts.Tools.Patterns
+open Prelude.Charts.Processing.Patterns
 open Prelude.Data.Charts.Caching
 
 open Collections

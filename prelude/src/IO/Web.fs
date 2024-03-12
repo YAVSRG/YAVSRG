@@ -1,26 +1,25 @@
 ﻿namespace Prelude.Data
 
-open System
 open System.IO
 open System.Net
 open System.Net.Http
-open System.Threading.Tasks
-open System.ComponentModel
 open SixLabors.ImageSharp
 open Percyqaz.Common
 open Prelude.Common
 
 module WebServices =
 
-    let private download_string_client =
-        let handler = new HttpClientHandler()
-        handler.AutomaticDecompression <- DecompressionMethods.Deflate ||| DecompressionMethods.GZip
-        let client = new HttpClient(handler)
-        client.DefaultRequestHeaders.Add("User-Agent", "Interlude")
-        client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate")
-        client
-
+    // todo: stop logging errors from these services. instead return appropriate result types and it's the caller's job to do the logging
     let download_string =
+
+        let download_string_client =
+            let handler = new HttpClientHandler()
+            handler.AutomaticDecompression <- DecompressionMethods.Deflate ||| DecompressionMethods.GZip
+            let client = new HttpClient(handler)
+            client.DefaultRequestHeaders.Add("User-Agent", "Interlude")
+            client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate")
+            client
+
         { new Async.Service<string, string option>() with
             override this.Handle(url: string) =
                 async {
@@ -33,28 +32,31 @@ module WebServices =
                 }
         }
 
-    let private download_image_client = new HttpClient()
 
     let download_image =
-        { new Async.Service<string, Bitmap>() with
+
+        let download_image_client = new HttpClient()
+
+        { new Async.Service<string, Bitmap option>() with
             override this.Handle(url: string) =
                 async {
-                    use! stream = Async.AwaitTask(download_image_client.GetStreamAsync url)
-                    use! img = Async.AwaitTask(Bitmap.LoadAsync stream)
-                    return img.CloneAs<PixelFormats.Rgba32>()
+                    let! stream = Async.AwaitTask(download_image_client.GetStreamAsync url)
+                    return! Bitmap.from_stream_async true stream
                 }
         }
 
     let download_file =
-        let client = new HttpClient()
-        client.DefaultRequestHeaders.Add("User-Agent", "Interlude")
+
+        let download_file_client = new HttpClient()
+        download_file_client.DefaultRequestHeaders.Add("User-Agent", "Interlude")
+
         { new Async.Service<string * string * (float32 -> unit), bool>() with
             override this.Handle((url: string, target: string, progress: float32 -> unit)) : Async<bool> =
                 async {
                     let intermediate_file = target + ".download"
                     
                     try
-                        use! response = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead) |> Async.AwaitTask
+                        use! response = download_file_client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead) |> Async.AwaitTask
                         if not response.IsSuccessStatusCode then
                             Logging.Error("Failed to download file from " + url, response.StatusCode.ToString())
                             return false

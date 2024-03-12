@@ -5,7 +5,7 @@ open System.IO
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Tools.NoteColors
+open Prelude.Charts.Processing.NoteColors
 open Prelude.Data.Charts
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching

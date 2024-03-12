@@ -7,12 +7,13 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Tools
-open Prelude.Charts.Tools.NoteColors
-open Prelude.Charts.Tools.Patterns
+open Prelude.Charts.Processing
+open Prelude.Charts.Processing.NoteColors
+open Prelude.Charts.Processing.Patterns
+open Prelude.Charts.Processing.Difficulty
+open Prelude.Gameplay.Performance
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay
-open Prelude.Gameplay.Difficulty
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections

@@ -564,6 +564,8 @@ module Metrics =
         scoring.Update Time.infinity
         scoring
 
-    let create_dummy (chart: Charts.Tools.ModdedChart) : ScoreMetric =
+    open Prelude.Charts.Processing
+
+    let create_dummy (chart: ModdedChart) : ScoreMetric =
         let ruleset = PrefabRulesets.SC.create 4
         create ruleset chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f

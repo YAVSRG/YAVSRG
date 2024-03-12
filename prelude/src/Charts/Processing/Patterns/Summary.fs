@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Tools.Patterns
+﻿namespace Prelude.Charts.Processing.Patterns
 
 open System.Collections.Generic
 open Percyqaz.Data

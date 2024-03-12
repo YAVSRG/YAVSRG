@@ -7,8 +7,8 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Tools
-open Prelude.Charts.Tools.NoteColors
+open Prelude.Charts.Processing
+open Prelude.Charts.Processing.NoteColors
 open Prelude.Data.Scores
 open Prelude.Gameplay
 open Interlude.Content

@@ -8,6 +8,8 @@ open Percyqaz.Flux.UI
 open Prelude.Charts
 open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.``osu!``
+open Prelude.Charts.Processing.Difficulty
+open Prelude.Charts.Processing.Layout
 open Prelude.Gameplay
 open Prelude.Data.``osu!``
 open Prelude.Data.Scores
@@ -160,7 +162,7 @@ module Scores =
                         replay = Replay.compress_string replay_data
                         rate = MathF.Round(combined_rate, 2)
                         selectedMods = mods
-                        layout = Layout.Layout.LeftTwo
+                        layout = Layout.LeftTwo
                         keycount = chart.Keys
                     }
 

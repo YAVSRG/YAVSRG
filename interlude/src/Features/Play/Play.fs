@@ -7,7 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
-open Prelude.Charts.Tools
+open Prelude.Charts.Processing
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI

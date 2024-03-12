@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Features.OptionsMenu.Noteskins
 
-open Prelude.Charts.Tools.NoteColors
+open Prelude.Charts.Processing.NoteColors
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input

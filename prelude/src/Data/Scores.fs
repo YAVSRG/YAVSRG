@@ -8,11 +8,12 @@ open Percyqaz.Data
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Tools
+open Prelude.Charts.Processing
+open Prelude.Charts.Processing.Difficulty
+open Prelude.Charts.Processing.Layout
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
-open Prelude.Gameplay.Difficulty
-open Prelude.Gameplay.Layout
+open Prelude.Gameplay.Performance
 open Prelude.Data.Charts.Caching
 
 [<Json.AutoCodec(true)>]

@@ -139,7 +139,9 @@ type NoteskinGroupPage(group: NoteskinGroup) =
 
             ImageServices.get_cached_image.Request(
                 version.Preview,
-                fun img -> sync (fun () -> nc.LoadPreview img)
+                function
+                | Some img -> sync (fun () -> nc.LoadPreview img)
+                | None -> Logging.Warn("Failed to load noteskin preview", version.Preview)
             )
 
             flow.Add nc
@@ -251,7 +253,9 @@ module Noteskins =
 
                                 ImageServices.get_cached_image.Request(
                                     ns.Versions.[0].Preview,
-                                    fun img -> sync (fun () -> nc.LoadPreview img)
+                                    function
+                                    | Some img -> sync (fun () -> nc.LoadPreview img)
+                                    | None -> Logging.Warn("Failed to load noteskin preview", ns.Versions.[0].Preview)
                                 )
 
                                 grid.Add nc

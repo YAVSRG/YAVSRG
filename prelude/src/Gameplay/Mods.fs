@@ -5,7 +5,7 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Tools
+open Prelude.Charts.Processing
 
 module Mods =
     (*

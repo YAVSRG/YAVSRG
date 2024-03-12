@@ -144,6 +144,21 @@ module Common =
                 | :? InvalidImageContentException -> None
             if close_stream then stream.Dispose()
             img
+        
+        let from_stream_async (close_stream: bool) (stream: Stream) : Async<Bitmap option> =
+            async {
+                match! Bitmap.LoadAsync<PixelFormats.Rgba32> stream |> Async.AwaitTask |> Async.Catch with
+                | Choice1Of2 success ->
+                    if close_stream then stream.Dispose()
+                    return Some success
+                | Choice2Of2 exn ->
+                    if close_stream then stream.Dispose()
+                    return
+                        match exn with
+                        | :? UnknownImageFormatException -> None
+                        | :? InvalidImageContentException -> None
+                        | _ -> raise exn
+            }
 
     type Color = Drawing.Color
 

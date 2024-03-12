@@ -159,11 +159,13 @@ type private Image(width, title, url) as this =
     do
         ImageServices.get_cached_image.Request(
             url,
-            fun bmp ->
+            function 
+            | Some bmp ->
                 sync (fun () -> 
                     sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp)))
                     fade.Target <- 1.0f
                 )
+            | None -> Logging.Warn("Failed to load wiki image", url)
         )
 
         this

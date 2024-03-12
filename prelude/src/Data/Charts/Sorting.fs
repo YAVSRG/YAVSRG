@@ -7,7 +7,7 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Data.Charts.Collections
-open Prelude.Charts.Tools.Patterns
+open Prelude.Charts.Processing.Patterns
 
 module Sorting =
 

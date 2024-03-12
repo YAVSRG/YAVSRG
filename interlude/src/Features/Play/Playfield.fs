@@ -6,7 +6,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Charts
-open Prelude.Charts.Tools.NoteColors
+open Prelude.Charts.Processing.NoteColors
 open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.Options

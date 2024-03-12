@@ -20,12 +20,9 @@
   <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="IO\Web.fs" />
+    <Compile Include="IO\Images.fs" />
     <Compile Include="Charts\Interlude.fs" />
-    <Compile Include="Charts\Tools\Analysis\Analyser.fs" />
-    <Compile Include="Charts\Tools\Analysis\Patterns.fs" />
-    <Compile Include="Charts\Tools\Analysis\Summary.fs" />
-    <Compile Include="Charts\Tools\Mods.fs" />
-    <Compile Include="Charts\Tools\NoteColors.fs" />
     <Compile Include="Charts\Formats\osu!.fs" />
     <Compile Include="Charts\Formats\StepMania.fs" />
     <Compile Include="Charts\Conversions\Shared.fs" />
@@ -33,11 +30,17 @@
     <Compile Include="Charts\Conversions\StepMania.fs" />
     <Compile Include="Charts\Conversions\Interlude.fs" />
     <Compile Include="Charts\Conversions\Helpers.fs" />
+    <Compile Include="Charts\Processing\Patterns\Analyser.fs" />
+    <Compile Include="Charts\Processing\Patterns\Patterns.fs" />
+    <Compile Include="Charts\Processing\Patterns\Summary.fs" />
+    <Compile Include="Charts\Processing\Difficulty.fs" />
+    <Compile Include="Charts\Processing\Mods.fs" />
+    <Compile Include="Charts\Processing\Colors.fs" />
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\Replays.fs" />
     <Compile Include="Gameplay\Rulesets.fs" />
     <Compile Include="Gameplay\Metrics.fs" />
-    <Compile Include="Gameplay\Difficulty.fs" />
+    <Compile Include="Gameplay\Performance.fs" />
     <Compile Include="Gameplay\PersonalBests.fs" />
     <Compile Include="Content\Storage.fs" />
     <Compile Include="Content\Themes.fs" />
@@ -50,8 +53,6 @@
     <Compile Include="Content\Noteskins\Conversions\osu!\Converter.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
-    <Compile Include="Data\Web.fs" />
-    <Compile Include="Data\Images.fs" />
     <Compile Include="Data\Charts\Caching.fs" />
     <Compile Include="Data\Scores.fs" />
     <Compile Include="Data\Charts\Collections.fs" />

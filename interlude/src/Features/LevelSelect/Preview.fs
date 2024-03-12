@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Prelude.Common
-open Prelude.Charts.Tools.Patterns
+open Prelude.Charts.Processing.Patterns
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content

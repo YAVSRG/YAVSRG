@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.Score
 
 open Prelude
-open Prelude.Charts.Tools.NoteColors
+open Prelude.Charts.Processing.NoteColors
 open Prelude.Gameplay
 open Prelude.Charts
 open Prelude.Data.Scores

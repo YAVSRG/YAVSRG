@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Tools
+﻿namespace Prelude.Charts.Processing
 
 open System
 open Percyqaz.Common
