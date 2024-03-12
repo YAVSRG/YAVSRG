@@ -1,9 +1,9 @@
 name: Noteskins
 
 on:
-  push:
-    branches: [ "main" ]
-    paths: "backbeat/noteskins/Noteskins/**"
+  #push:
+  #  branches: [ "main" ]
+  #  paths: "backbeat/noteskins/Noteskins/**"
   workflow_dispatch:
   # for debug purposes
 
