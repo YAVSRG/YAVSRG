@@ -11,7 +11,6 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.NoteColors
 open Prelude.Charts.Processing.Patterns
 open Prelude.Charts.Processing.Difficulty
-open Prelude.Gameplay.Performance
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay
 open Prelude.Data.Charts
@@ -90,7 +89,7 @@ module Gameplay =
 
         let mutable WITH_MODS: ModdedChart option = None
         let mutable FMT_NOTECOUNTS: string option = None
-        let mutable RATING: RatingReport option = None
+        let mutable RATING: DifficultyRating option = None
         let mutable PATTERNS: PatternSummary.PatternDetailsReport option = None
 
         let mutable WITH_COLORS: ColoredChart option = None
@@ -113,7 +112,7 @@ module Gameplay =
 
                 WithMods: ModdedChart
                 NotecountsString: string
-                Rating: RatingReport
+                Rating: DifficultyRating
                 Patterns: PatternSummary.PatternDetailsReport
 
                 WithColors: ColoredChart
@@ -197,12 +196,7 @@ module Gameplay =
                             let with_mods = apply_mods mods chart
                             let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
-                            let rating =
-                                RatingReport(
-                                    with_mods.Notes,
-                                    rate,
-                                    with_mods.Keys
-                                )
+                            let rating = DifficultyRating.calculate rate with_mods.Notes
 
                             let patterns = PatternSummary.generate_detailed_pattern_data (rate, chart)
                             let note_counts = format_notecounts with_mods
@@ -232,12 +226,7 @@ module Gameplay =
                             let with_mods = apply_mods mods chart
                             let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
-                            let rating =
-                                RatingReport(
-                                    with_mods.Notes,
-                                    rate,
-                                    with_mods.Keys
-                                )
+                            let rating = DifficultyRating.calculate rate with_mods.Notes
 
                             let patterns = PatternSummary.generate_detailed_pattern_data (rate, chart)
                             let note_counts = format_notecounts with_mods
@@ -419,7 +408,7 @@ module Gameplay =
             Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
 
             Rating = info.Rating
-            Physical = calculate_score_rating info.Rating info.WithMods.Keys scoring |> fst
+            Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
             
             ImportedFromOsu = false
         }
@@ -528,7 +517,7 @@ module Gameplay =
                                 Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
 
                                 Rating = info.Rating
-                                Physical = calculate_score_rating info.Rating info.WithMods.Keys scoring |> fst
+                                Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
 
                                 ImportedFromOsu = false
                             }
@@ -558,7 +547,7 @@ module Gameplay =
                         Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
 
                         Rating = info.Rating
-                        Physical = calculate_score_rating info.Rating info.WithMods.Keys scoring |> fst
+                        Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
                         
                         ImportedFromOsu = false
                     }

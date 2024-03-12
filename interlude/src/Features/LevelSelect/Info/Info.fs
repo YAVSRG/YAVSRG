@@ -44,7 +44,7 @@ type ChartInfo() as this =
 
         |+ Text(
             (fun () -> sprintf "%s %.2f" Icons.STAR rating),
-            Color = (fun () -> Color.White, physical_color rating),
+            Color = (fun () -> Color.White, DifficultyRating.physical_color rating),
             Align = Alignment.LEFT,
             Position =
                 {

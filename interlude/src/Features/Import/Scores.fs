@@ -9,7 +9,6 @@ open Prelude.Charts
 open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.``osu!``
 open Prelude.Charts.Processing.Difficulty
-open Prelude.Charts.Processing.Layout
 open Prelude.Gameplay
 open Prelude.Data.``osu!``
 open Prelude.Data.Scores

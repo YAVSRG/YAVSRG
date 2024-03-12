@@ -77,7 +77,7 @@ type Patterns(display: Setting<Display>) =
             Draw.rect (b.SliceRight(5.0f).SliceTop(20.0f).Translate(0.0f, 10.0f)) Colors.white
 
             let density_color (nps: float32) =
-                nps * 2.0f |> float |> physical_color
+                nps * 2.0f |> float |> DifficultyRating.physical_color
 
             let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms/rate> / 100.0f)
             let bar (lo_pc, lo_val, hi_pc, hi_val) =

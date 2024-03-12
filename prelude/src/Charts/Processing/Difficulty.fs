@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Processing
+﻿namespace Prelude.Charts.Processing.Difficulty
 
 open System
 open Prelude
@@ -9,21 +9,22 @@ open Prelude.Charts
     Used in the difficulty calculation to model how some things strain your hand(s) differently depending on which fingers are used
 *)
 
+type Layout =
+    | Spread = 0
+    | OneHand = 1
+    | LeftOne = 2
+    | RightOne = 3
+    | LeftTwo = 4
+    | RightTwo = 5
+    | BMSLeft = 6
+    | BMSRight = 7
+
 module Layout =
 
-    type Layout =
-        | Spread = 0
-        | OneHand = 1
-        | LeftOne = 2
-        | RightOne = 3
-        | LeftTwo = 4
-        | RightTwo = 5
-        | BMSLeft = 6
-        | BMSRight = 7
-
     type Hand = int list
+    type LayoutInfo = Hand list
 
-    let getFingerPosition k h =
+    let get_finger_position k h =
         let rec f k h i =
             match h with
             | n :: fs -> if n = k then i else f k fs (i + 1)
@@ -31,12 +32,9 @@ module Layout =
 
         f k h 0
 
-    let getHandBitMask h = h |> Seq.ofList |> Bitmask.ofSeq
+    let get_hand_bit_mask (h: Hand) = h |> Seq.ofList |> Bitmask.ofSeq
 
-    //Expected to only contain up to 2 elements but this allows mappings
-    type LayoutInfo = Hand list
-
-    let getLayoutInfo (l, keycount) : LayoutInfo option =
+    let info (l, keycount) : LayoutInfo option =
         match (l, keycount) with
         | (Layout.OneHand, 3) -> Some [ [ 0; 1; 2 ] ]
         | (Layout.LeftOne, 3) -> Some [ [ 0; 1 ]; [ 2 ] ]
@@ -77,7 +75,7 @@ module Layout =
 
         | _ -> None
 
-    let getLayoutName (l, keycount) =
+    let name (l, keycount) =
         match (l, keycount) with
         | (Layout.OneHand, 3) -> "One-Handed"
         | (Layout.LeftOne, 3) -> "2k+1"
@@ -118,7 +116,7 @@ module Layout =
 
         | _ -> "Unknown Layout"
 
-    let getAvailableLayouts (k: int) =
+    let list (k: int) =
         [
             (Layout.Spread, k)
             (Layout.OneHand, k)
@@ -129,7 +127,7 @@ module Layout =
             (Layout.BMSLeft, k)
             (Layout.BMSRight, k)
         ]
-        |> List.filter (getLayoutInfo >> Option.isSome)
+        |> List.filter (info >> Option.isSome)
         |> List.map (fun (a, b) -> a)
 
 (*
@@ -138,9 +136,19 @@ module Layout =
     Is just a port of the original C# version I wrote when I was 18
 *)
 
-module Difficulty =
+type DifficultyRating =
+    {
+        Physical: float
+        Technical: float
 
-    open Layout
+        PhysicalData: float array
+        TechnicalData: float array
+
+        PhysicalComposite: float array2d
+        TechnicalComposite: float array2d
+    }
+
+module DifficultyRating =
 
     let private jackCurve delta =
         let widthScale = 0.02
@@ -173,7 +181,7 @@ module Difficulty =
 
             Math.Pow(sumpow / count, 1.0 / power)
 
-    let staminaFunc value input delta =
+    let stamina_func value input delta =
         let staminaBaseFunc ratio = 1.0 + 0.105 * ratio
         let staminaDecayFunc delta = Math.Exp(-0.00044 * delta)
         let v = Math.Max(value * staminaDecayFunc (float delta), 0.01)
@@ -186,11 +194,12 @@ module Difficulty =
     let private OHTNERF = 3.0
     let private SCALING_VALUE = 0.55
 
-    type RatingReport(notes: TimeArray<NoteRow>, rate: float32, keys) =
+    let calculate (rate: float32) (notes: TimeArray<NoteRow>) : DifficultyRating =
+        let keys = notes.[0].Data.Length
         let layoutData =
-            getAvailableLayouts keys
+            Layout.list keys
             |> List.head
-            |> fun l -> getLayoutInfo (l, keys) |> fun x -> x.Value
+            |> fun l -> Layout.info (l, keys) |> fun x -> x.Value
 
         let fingers = Array.zeroCreate<Time> keys
 
@@ -251,13 +260,13 @@ module Difficulty =
                 if hits > 0us then
                     List.fold
                         (fun h hand ->
-                            let handHits = hits &&& getHandBitMask hand
+                            let handHits = hits &&& Layout.get_hand_bit_mask hand
 
                             for k in Bitmask.toSeq handHits do
-                                updateNoteDifficulty (k, i, offset, getHandBitMask hand)
+                                updateNoteDifficulty (k, i, offset, Layout.get_hand_bit_mask hand)
 
                                 currentStrain.[k] <-
-                                    staminaFunc
+                                    stamina_func
                                         (currentStrain.[k])
                                         (physicalComposite.[i, k] * SCALING_VALUE)
                                         ((offset - fingers.[k]) / rate)
@@ -279,14 +288,16 @@ module Difficulty =
 
             (overallDifficulty physicalData, overallDifficulty technicalData)
 
-        member this.Physical = physical
-        member this.Technical = technical
+        {
+            Physical = physical
+            Technical = technical
 
-        member this.PhysicalData = physicalData
-        member this.TechnicalData = technicalData
+            PhysicalData = physicalData
+            TechnicalData = technicalData
 
-        member this.PhysicalComposite = physicalComposite
-        member this.TechnicalComposite = technicalComposite
+            PhysicalComposite = physicalComposite
+            TechnicalComposite = technicalComposite
+        }
 
     let technical_color v =
         try

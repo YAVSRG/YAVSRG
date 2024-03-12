@@ -8,7 +8,6 @@ open Prelude.Common
 open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
-open Prelude.Gameplay.Performance
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Interlude
@@ -186,7 +185,7 @@ module Leaderboard =
                             let with_mods = Mods.apply_mods score.Mods req.Chart
                             let replay_data = Replay.decompress_string score.Replay
                             let scoring = Metrics.run req.Ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
-                            let rating = RatingReport(with_mods.Notes, score.Rate, with_mods.Keys)
+                            let rating = DifficultyRating.calculate score.Rate with_mods.Notes
                             let score_info =
                                 {
                                     CachedChart = req.CachedChart
@@ -203,7 +202,7 @@ module Leaderboard =
                                     Grade = Grade.calculate req.Ruleset.Grading.Grades scoring.State
 
                                     Rating = rating
-                                    Physical = calculate_score_rating rating with_mods.Keys scoring |> fst
+                                    Physical = Performance.calculate rating with_mods.Keys scoring |> fst
                                     
                                     ImportedFromOsu = false
                                 }

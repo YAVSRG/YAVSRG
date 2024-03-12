@@ -10,7 +10,6 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Difficulty
-open Prelude.Charts.Processing.Layout
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Performance
@@ -79,7 +78,7 @@ type ScoreInfo =
         mutable Lamp: int
         mutable Grade: int
 
-        Rating: RatingReport
+        Rating: DifficultyRating
         Physical: float
 
         ImportedFromOsu: bool
@@ -103,7 +102,7 @@ module ScoreInfo =
         let with_mods = apply_mods score.selectedMods chart
         let replay_data = score.replay |> Replay.decompress_string
         let scoring = Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.rate
-        let difficulty = RatingReport(with_mods.Notes, score.rate, with_mods.Keys)
+        let difficulty = DifficultyRating.calculate score.rate with_mods.Notes
         {
             CachedChart = cc
             Chart = chart
@@ -119,9 +118,9 @@ module ScoreInfo =
             Grade = Grade.calculate ruleset.Grading.Grades scoring.State
 
             Rating = difficulty
-            Physical = calculate_score_rating difficulty with_mods.Keys scoring |> fst
+            Physical = calculate difficulty with_mods.Keys scoring |> fst
 
-            ImportedFromOsu = score.layout = Layout.Layout.LeftTwo
+            ImportedFromOsu = score.layout = Layout.LeftTwo
         }
 
     let to_score (score_info: ScoreInfo) =
@@ -130,7 +129,7 @@ module ScoreInfo =
             replay = score_info.Replay |> Replay.compress_string
             rate = score_info.Rate
             selectedMods = score_info.Mods
-            layout = Layout.Layout.Spread
+            layout = Layout.Spread
             keycount = score_info.WithMods.Keys
         }
 

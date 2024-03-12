@@ -6,7 +6,7 @@ open Prelude.Charts.Processing.Difficulty
 
 module Performance =
     
-    let private confidenceValue (delta: Time) =
+    let private confidence_value (delta: Time) =
         let delta = float delta
     
         let phi x =
@@ -25,10 +25,10 @@ module Performance =
     
         phi ((17.95 - Math.Max(2.0, Math.Abs delta)) / 15.0)
     
-    let private performanceFunc b value deviation delta =
-        staminaFunc b (value * confidenceValue deviation) delta
+    let private performance_func b value deviation delta =
+        DifficultyRating.stamina_func b (value * confidence_value deviation) delta
 
-    let calculate_score_rating (rr: RatingReport) (keys: int) (scoring: IScoreMetric) =
+    let calculate (rr: DifficultyRating) (keys: int) (scoring: IScoreMetric) =
         let lastTimes = Array.create keys 0.0f<ms>
         let mutable pv = 0.01
         let mutable tv = 0.01
@@ -43,10 +43,10 @@ module Performance =
             for k = 0 to (keys - 1) do
                 if hit.[k] = HitStatus.HIT_ACCEPTED then
                     pvs.[k] <-
-                        performanceFunc (pvs.[k]) (rr.PhysicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
+                        performance_func (pvs.[k]) (rr.PhysicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
 
                     tvs.[k] <-
-                        performanceFunc (tvs.[k]) (rr.TechnicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
+                        performance_func (tvs.[k]) (rr.TechnicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
 
                     lastTimes.[k] <- time
                     c <- c + 1.0
