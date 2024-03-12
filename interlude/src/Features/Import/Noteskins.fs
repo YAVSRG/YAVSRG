@@ -241,8 +241,7 @@ module Noteskins =
 
         override this.Init(parent) =
             WebServices.download_json (
-                "https://raw.githubusercontent.com/YAVSRG/YAVSRG/1f6ce29d540576dce77253ea319c4ce2516616a4/backbeat/noteskins/index.json",
-                //"https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/noteskins/index.json",
+                "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/noteskins/index.json",
                 fun data ->
                     match data with
                     | Some(d: NoteskinRepo) ->

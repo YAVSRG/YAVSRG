@@ -1,10 +1,19 @@
-0.7.18.6
+0.7.18.7
 ====
 
-This update has nothing new, it's just me testing that the release pipeline still works after the ImageSharp CVE caused build warnings to appear
+Small noteskin update, needed to release changes I've done so far so that the ingame noteskin repo works again
 
-I will have to upgrade ImageSharp to a patched version at some point but for now feel free to execute as much arbitrary code on your own machine as you like
+# New features
+- Noteskin list on import screen now groups skins by versions and lets you browse which version you want
+- Noteskin selection on options menu now indicates noteskin versions
+- Some stuff to indicate original creator of a noteskin vs someone who made an edit to it
 
-This update also includes updating GLFW 3.3.7 -> 3.3.8 which looks like it contains fixes for the segfaults on M1/M2
-Perhaps this will mean I can start doing official releases for macOS?
+# Bug fixes
+- `holdtail` texture is no longer required in a noteskin if `UseHoldTailTexture` is false
+- Fixed a crash when installing a skin you already have installed
+- Some improvements to keyboard navigating a container after hovering over something in it
+
+# Technical stuff
+- Some core libraries are now built against .NET 8 instead of .NET standard 2.1
+- Improved how files download after getting rid of some outdated code for .NET standard
 
