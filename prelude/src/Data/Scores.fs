@@ -57,8 +57,6 @@ type ChartSaveData =
             Comment = ""
         }
 
-
-
 [<RequireQualifiedAccess>]
 type ScorePlayedBy =
     | You
@@ -228,3 +226,13 @@ module Scores =
             else
                 None
         | None -> None
+
+    // upcoming
+    type ChartSaveDataV2 =
+        {
+            Offset: Setting<Time> // get and settable setting, marks the score as dirty and this gets intermittently saved + on shutdown
+            LastPlayed: Setting<DateTime> // get and settable setting, marks the score as dirty and this gets intermittently saved + on shutdown
+            Comment: Setting<string> // get and settable setting, marks the score as dirty and this gets intermittently saved + on shutdown
+            Scores: Setting<Score list> // readonly, underlying list gets modified by internal methods
+            PersonalBests: Setting<Map<string, Bests>> // readonly, underlying map gets modified by internal methods
+        }
