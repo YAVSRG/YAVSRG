@@ -182,4 +182,4 @@ module Archive =
             str.Replace("https://", "").Replace("http://", "") |> into_base64
 
         let unpickle (str: string) =
-            "https://" + Uri.EscapeUriString(from_base64 str)
+            "https://" + Uri.EscapeDataString(from_base64 str)

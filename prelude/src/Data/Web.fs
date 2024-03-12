@@ -46,49 +46,55 @@ module WebServices =
         }
 
     let download_file =
+        let client = new HttpClient()
+        client.DefaultRequestHeaders.Add("User-Agent", "Interlude")
         { new Async.Service<string * string * (float32 -> unit), bool>() with
             override this.Handle((url: string, target: string, progress: float32 -> unit)) : Async<bool> =
                 async {
                     let intermediate_file = target + ".download"
-                    use client = new WebClient()
-                    client.Headers.Add("User-Agent", "Interlude")
-                    let tcs = new TaskCompletionSource<unit>(url)
-
-                    let completed =
-                        new AsyncCompletedEventHandler(fun cs ce ->
-                            if ce.UserState = (tcs :> obj) then
-                                if ce.Error <> null then
-                                    tcs.TrySetException ce.Error |> ignore
-                                elif ce.Cancelled then
-                                    tcs.TrySetCanceled() |> ignore
-                                else
-                                    tcs.TrySetResult() |> ignore
-                        )
-
-                    let prog =
-                        new DownloadProgressChangedEventHandler(fun _ e ->
-                            progress (float32 e.ProgressPercentage / 100.0f)
-                        )
-
-                    client.DownloadFileCompleted.AddHandler completed
-                    client.DownloadProgressChanged.AddHandler prog
-
+                    
                     try
+                        use! response = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead) |> Async.AwaitTask
+                        if not response.IsSuccessStatusCode then
+                            Logging.Error("Failed to download file from " + url, response.StatusCode.ToString())
+                            return false
+                        else
+
+                        let total_bytes = response.Content.Headers.ContentLength.GetValueOrDefault -1L
+
+                        use! content_stream = response.Content.ReadAsStreamAsync() |> Async.AwaitTask
+
+                        let BUFFER_SIZE = 8192
+                        let buffer : byte array = Array.zeroCreate BUFFER_SIZE
+                        let mutable bytes_read = 0L
+                        let mutable total_bytes_read = 0L
+
                         if File.Exists intermediate_file then
                             File.Delete intermediate_file
 
-                        client.DownloadFileAsync(new Uri(url), intermediate_file, tcs)
-                        do! tcs.Task |> Async.AwaitTask
+                        let file_stream = new FileStream(intermediate_file, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize = 8192, useAsync = true)
 
-                        if isNull tcs.Task.Exception then
-                            if File.Exists target then
-                                File.Delete target
+                        let read() = async {
+                            let! r = content_stream.ReadAsync(buffer, 0, buffer.Length) |> Async.AwaitTask
+                            bytes_read <- r
+                            return bytes_read > 0
+                        }
 
-                            File.Move(intermediate_file, target)
-                            return true
-                        else
-                            Logging.Error("Failed to download file from " + url, tcs.Task.Exception)
-                            return false
+                        while! read() do
+                            do! file_stream.WriteAsync(buffer, 0, int bytes_read) |> Async.AwaitTask
+                            total_bytes_read <- total_bytes_read + bytes_read
+
+                            let percent_progress = if total_bytes > 0 then float32 total_bytes_read / float32 total_bytes else 0.0f
+                            progress percent_progress
+
+                        do! file_stream.FlushAsync() |> Async.AwaitTask
+                        file_stream.Dispose()
+
+                        if File.Exists target then
+                            File.Delete target
+
+                        File.Move(intermediate_file, target)
+                        return true
 
                     with err ->
                         Logging.Error("Failed to download file from " + url, err)
