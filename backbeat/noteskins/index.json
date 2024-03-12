@@ -21,6 +21,16 @@
         "Author": "Lifly",
         "Name": "Waffle",
         "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/WaffleV4.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/WaffleV4.png",
+            "Version": "v4"
+        }, {
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/WaffleV3Bars.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/WaffleV3Bars.png",
+            "Version": "v3 Bars"
+        }, {
             "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/WaffleV3.isk",
             "Editor": null,
             "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/WaffleV3.png",
