@@ -1,5 +1,7 @@
 ﻿namespace Prelude.Gameplay
 
+open Percyqaz.Data
+
 [<RequireQualifiedAccess>]
 type Improvement<'T> =
     | FasterBetter of rate_increase: float32 * improvement: 'T
@@ -83,3 +85,12 @@ module PersonalBests =
                     (value, rate) :: (v, r) :: xs, Improvement.New
 
         loop bests
+
+[<Json.AutoCodec(true)>]
+type Bests =
+    {
+        Lamp: PersonalBests<int>
+        Accuracy: PersonalBests<float>
+        Grade: PersonalBests<int>
+    }
+    static member Default = { Lamp = []; Accuracy = []; Grade = [] }

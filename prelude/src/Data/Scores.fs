@@ -27,15 +27,6 @@ type Score =
     }
     static member Default = { time = Unchecked.defaultof<_>; replay = ""; rate = 1.0f; selectedMods = Map.empty; layout = Layout.Spread; keycount = 4 }
 
-[<Json.AutoCodec(true)>]
-type Bests =
-    {
-        Lamp: PersonalBests<int>
-        Accuracy: PersonalBests<float>
-        Grade: PersonalBests<int>
-    }
-    static member Default = { Lamp = []; Accuracy = []; Grade = [] }
-
 [<Json.AutoCodec(false)>]
 type ChartSaveData =
     {
@@ -211,12 +202,6 @@ module Scores =
                 Accuracy = Improvement.New
                 Grade = Improvement.New
             }
-
-    let save_comment (d: ChartSaveData) (comment: string) =
-        d.Comment <- comment
-        
-    let save_offset (d: ChartSaveData) (offset: Time) =
-        d.Offset <- offset
     
     let get_best_grade_above (ruleset_id: string) (rate: float32) (chart_hash: string) =
         match get chart_hash with
@@ -226,13 +211,3 @@ module Scores =
             else
                 None
         | None -> None
-
-    // upcoming
-    type ChartSaveDataV2 =
-        {
-            Offset: Setting<Time> // get and settable setting, marks the score as dirty and this gets intermittently saved + on shutdown
-            LastPlayed: Setting<DateTime> // get and settable setting, marks the score as dirty and this gets intermittently saved + on shutdown
-            Comment: Setting<string> // get and settable setting, marks the score as dirty and this gets intermittently saved + on shutdown
-            Scores: Setting<Score list> // readonly, underlying list gets modified by internal methods
-            PersonalBests: Setting<Map<string, Bests>> // readonly, underlying map gets modified by internal methods
-        }
