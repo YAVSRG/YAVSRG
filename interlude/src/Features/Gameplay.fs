@@ -369,7 +369,7 @@ module Gameplay =
 
     let presets_on_chart_changed =
         let mutable previous_keymode = None
-        fun cc ->
+        fun (cc: CachedChart) ->
             match previous_keymode with
             | Some k when k <> cc.Keys -> Presets.keymode_changed cc.Keys
             | _ -> ()

@@ -6,7 +6,7 @@ open System.IO.Compression
 open System.Collections.Concurrent
 open Percyqaz.Data
 open Percyqaz.Common
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Conversions
 open Prelude.Charts.Processing.Patterns
 open Prelude.Data.Charts.Caching

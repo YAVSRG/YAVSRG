@@ -5,43 +5,16 @@ open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Gameplay
-open Prelude.Gameplay.Mods
-
-type DbCell<'T>(value: 'T) =
-    let mutable value = value
-
-    member this.Value 
-        with get() = value
-        and internal set new_value = value <- new_value
-
-type NewScore =
-    {
-        Timestamp: int64
-        Replay: string
-        Rate: float32
-        Mods: ModState
-        IsImported: bool
-        Keys: int
-    }
+open Prelude.Data.Scores
 
 type NewChartSaveData =
     {
-        Offset: Setting<Time> // get and settable setting, marks the score as dirty and this gets intermittently saved + on shutdown
-        LastPlayed: Setting<int64> // get and settable setting, marks the score as dirty and this gets intermittently saved + on shutdown
-        Comment: Setting<string> // get and settable setting, marks the score as dirty and this gets intermittently saved + on shutdown
+        Offset: Setting<Time>
+        LastPlayed: Setting<int64>
+        Comment: Setting<string>
         Breakpoints: Setting<Time list>
-        Scores: DbCell<NewScore list> // readonly, underlying list gets modified by internal methods
-        PersonalBests: DbCell<Map<string, Bests>> // readonly, underlying map gets modified by internal methods
-    }
-
-type internal DbChartData =
-    {
-        Offset: Time
-        LastPlayed: int64
-        Comment: string
-        Breakpoints: Time list
-        Scores: NewScore list
-        PersonalBests: Map<string, Bests>
+        Scores: DbCell<NewScore list>
+        PersonalBests: DbCell<Map<string, Bests>>
     }
 
 type internal ChangeTracker<'T> =
@@ -64,18 +37,14 @@ type ScoreDatabase =
         ChangedOffsets: ChangeTracker<Time>
         ChangedLastPlayed: ChangeTracker<int64>
         ChangedComments: ChangeTracker<string>
-        ChangedBreakpoints: ChangeTracker<Time list>
+        ChangedBreakpoints: ChangeTracker<ChartTime list>
     }
-
-module Migrations =
-    
-    let setup_database (db: Database) = db
 
 module ScoreDatabase =
 
-    let create (path: string) : ScoreDatabase = 
+    let create (database: Database) : ScoreDatabase = 
         {
-            Database = Database.from_file path |> Migrations.setup_database
+            Database = database
             Cache = Dictionary()
             LockObject = obj()
             ChangedOffsets = ChangeTracker.Empty
@@ -116,10 +85,21 @@ module ScoreDatabase =
         db.ChangedComments.Dump |> some_db_stuff
         db.ChangedBreakpoints.Dump |> some_db_stuff
 
+    let save_score (chart_id: string) (score: NewScore) (db: ScoreDatabase) =
+        DbScore.save chart_id score db.Database |> ignore
+        match get_cached chart_id db with
+        | None -> ()
+        | Some existing_data ->
+            existing_data.Scores.Value <- score :: existing_data.Scores.Value
+
     let save_score_and_bests (chart_id: string) (score: NewScore) (ruleset_id: string) (bests: Bests) (db: ScoreDatabase) =
-        // save some stuff in the database here
+        DbScore.save chart_id score db.Database |> ignore
+        // save bests stuff in the database here
         match get_cached chart_id db with
         | None -> ()
         | Some existing_data ->
             existing_data.Scores.Value <- score :: existing_data.Scores.Value
             existing_data.PersonalBests.Value <- Map.add ruleset_id bests existing_data.PersonalBests.Value
+
+    let delete_score (chart_id: string) (timestamp: int64) (db: ScoreDatabase) : bool =
+        DbScore.delete_by_timestamp chart_id timestamp db.Database > 0

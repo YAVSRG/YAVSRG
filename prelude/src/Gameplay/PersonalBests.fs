@@ -85,12 +85,3 @@ module PersonalBests =
                     (value, rate) :: (v, r) :: xs, Improvement.New
 
         loop bests
-
-[<Json.AutoCodec(true)>]
-type Bests =
-    {
-        Lamp: PersonalBests<int>
-        Accuracy: PersonalBests<float>
-        Grade: PersonalBests<int>
-    }
-    static member Default = { Lamp = []; Accuracy = []; Grade = [] }
