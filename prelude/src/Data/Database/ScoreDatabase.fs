@@ -63,15 +63,16 @@ module ScoreDatabase =
         | Some existing -> existing
         | None ->
             // lock here
-            let stuff_from_db : DbChartData = failwith "some database fetch"
+            let chart_db_data : DbChartData = DbChartData.get chart_id db.Database
+            let scores = DbScore.by_chart_id chart_id db.Database
             let new_info : NewChartSaveData =
                 {
-                    Offset = Setting.simple stuff_from_db.Offset |> Setting.trigger (db.ChangedOffsets.Add chart_id)
-                    LastPlayed = Setting.simple stuff_from_db.LastPlayed |> Setting.trigger (db.ChangedLastPlayed.Add chart_id)
-                    Comment = Setting.simple stuff_from_db.Comment |> Setting.trigger (db.ChangedComments.Add chart_id)
-                    Breakpoints = Setting.simple stuff_from_db.Breakpoints |> Setting.trigger (db.ChangedBreakpoints.Add chart_id)
-                    Scores = DbCell(stuff_from_db.Scores)
-                    PersonalBests = DbCell(stuff_from_db.PersonalBests)
+                    Offset = Setting.simple chart_db_data.Offset |> Setting.trigger (db.ChangedOffsets.Add chart_id)
+                    LastPlayed = Setting.simple chart_db_data.LastPlayed |> Setting.trigger (db.ChangedLastPlayed.Add chart_id)
+                    Comment = Setting.simple chart_db_data.Comment |> Setting.trigger (db.ChangedComments.Add chart_id)
+                    Breakpoints = Setting.simple chart_db_data.Breakpoints |> Setting.trigger (db.ChangedBreakpoints.Add chart_id)
+                    Scores = DbCell(List.ofArray scores)
+                    PersonalBests = DbCell(chart_db_data.PersonalBests)
                 }
             db.Cache.[chart_id] <- new_info
             new_info
@@ -89,17 +90,22 @@ module ScoreDatabase =
         DbScore.save chart_id score db.Database |> ignore
         match get_cached chart_id db with
         | None -> ()
-        | Some existing_data ->
-            existing_data.Scores.Value <- score :: existing_data.Scores.Value
+        | Some existing_data -> existing_data.Scores.Value <- score :: existing_data.Scores.Value
 
-    let save_score_and_bests (chart_id: string) (score: NewScore) (ruleset_id: string) (bests: Bests) (db: ScoreDatabase) =
-        DbScore.save chart_id score db.Database |> ignore
-        // save bests stuff in the database here
+    let save_bests (chart_id: string) (bests: Map<string, Bests>) (db: ScoreDatabase) =
+        DbChartData.save_personal_bests chart_id bests db.Database
         match get_cached chart_id db with
         | None -> ()
-        | Some existing_data ->
-            existing_data.Scores.Value <- score :: existing_data.Scores.Value
-            existing_data.PersonalBests.Value <- Map.add ruleset_id bests existing_data.PersonalBests.Value
+        | Some existing_data -> existing_data.PersonalBests.Value <- bests
 
     let delete_score (chart_id: string) (timestamp: int64) (db: ScoreDatabase) : bool =
-        DbScore.delete_by_timestamp chart_id timestamp db.Database > 0
+        if DbScore.delete_by_timestamp chart_id timestamp db.Database > 0 then
+            match get_cached chart_id db with
+            | None -> ()
+            | Some existing_data -> 
+                existing_data.Scores.Value <- 
+                    existing_data.Scores.Value
+                    |> List.filter (fun s -> s.Timestamp <> timestamp)
+            true
+        else
+            false
