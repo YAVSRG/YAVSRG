@@ -5,7 +5,7 @@
 settings.json
 **/*.zip
 **/*.mp3
-**/*.png
+archive/**/*.png
 Charts
 archive/yav
 archive/tmp
