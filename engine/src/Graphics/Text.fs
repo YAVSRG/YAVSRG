@@ -57,7 +57,7 @@ module Fonts =
                     |> ignore
                 )
             with err ->
-                Logging.Error(sprintf "Exception occurred rendering glyph with code point %i" (int c), err)
+                Logging.Warn(sprintf "Exception occurred rendering glyph with code point %i" (int c))
 
             char_lookup.Add(
                 c,

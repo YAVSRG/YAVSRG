@@ -40,8 +40,9 @@ module WebServices =
         { new Async.Service<string, Bitmap option>() with
             override this.Handle(url: string) =
                 async {
-                    let! stream = Async.AwaitTask(download_image_client.GetStreamAsync url)
-                    return! Bitmap.from_stream_async true stream
+                    match! Async.AwaitTask(download_image_client.GetStreamAsync url) |> Async.Catch with
+                    | Choice1Of2 stream -> return! Bitmap.from_stream_async true stream
+                    | Choice2Of2 exn -> return None
                 }
         }
 
@@ -58,7 +59,7 @@ module WebServices =
                     try
                         use! response = download_file_client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead) |> Async.AwaitTask
                         if not response.IsSuccessStatusCode then
-                            Logging.Error("Failed to download file from " + url, response.StatusCode.ToString())
+                            Logging.Error(sprintf "Download from %s failed (%O)" url response.StatusCode)
                             return false
                         else
 
