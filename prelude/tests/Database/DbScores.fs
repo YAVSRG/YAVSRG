@@ -32,16 +32,16 @@ module DbScores =
                 Keys = 4
             }
 
-        DbScore.save "roundtrip" score_1 db
-        DbScore.save "roundtrip" score_2 db
+        DbScores.save "roundtrip" score_1 db
+        DbScores.save "roundtrip" score_2 db
 
-        let result = DbScore.by_chart_id "roundtrip" db
+        let result = DbScores.by_chart_id "roundtrip" db
 
         Assert.AreEqual(2, result.Length)
         Assert.Contains(score_1, result)
         Assert.Contains(score_2, result)
 
-        Assert.AreEqual(0, (DbScore.by_chart_id "doesntexist" db).Length)
+        Assert.AreEqual(0, (DbScores.by_chart_id "doesntexist" db).Length)
 
         conn.Dispose()
 
@@ -68,15 +68,15 @@ module DbScores =
                 Keys = 4
             }
     
-        DbScore.save_batch ["roundtrip", score_1; "roundtrip", score_2] db
+        DbScores.save_batch ["roundtrip", score_1; "roundtrip", score_2] db
     
-        let result = DbScore.by_chart_id "roundtrip" db
+        let result = DbScores.by_chart_id "roundtrip" db
     
         Assert.AreEqual(2, result.Length)
         Assert.Contains(score_1, result)
         Assert.Contains(score_2, result)
     
-        Assert.AreEqual(0, (DbScore.by_chart_id "doesntexist" db).Length)
+        Assert.AreEqual(0, (DbScores.by_chart_id "doesntexist" db).Length)
     
         conn.Dispose()
 
@@ -105,14 +105,14 @@ module DbScores =
                 Keys = 4
             }
         
-        DbScore.save "delete" score_1 db
-        DbScore.save "delete" score_2 db
+        DbScores.save "delete" score_1 db
+        DbScores.save "delete" score_2 db
 
-        Assert.NotZero(DbScore.delete_by_timestamp "delete" ts db)
-        Assert.Zero(DbScore.delete_by_timestamp "delete" (ts - 500L) db)
-        Assert.Zero(DbScore.delete_by_timestamp "doesntexist" ts db)
+        Assert.NotZero(DbScores.delete_by_timestamp "delete" ts db)
+        Assert.Zero(DbScores.delete_by_timestamp "delete" (ts - 500L) db)
+        Assert.Zero(DbScores.delete_by_timestamp "doesntexist" ts db)
         
-        let result = DbScore.by_chart_id "delete" db
+        let result = DbScores.by_chart_id "delete" db
         
         Assert.AreEqual(1, result.Length)
         Assert.Contains(score_2, result)

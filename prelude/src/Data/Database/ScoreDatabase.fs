@@ -53,6 +53,7 @@ module ScoreDatabase =
             ChangedBreakpoints = ChangeTracker.Empty
         }
 
+    // todo: add locks to all operations
     let get_cached (chart_id: string) (db: ScoreDatabase) : NewChartSaveData option =
         match db.Cache.TryGetValue chart_id with
         | true, res -> Some res
@@ -62,9 +63,8 @@ module ScoreDatabase =
         match get_cached chart_id db with
         | Some existing -> existing
         | None ->
-            // lock here
             let chart_db_data : DbChartData = DbChartData.get chart_id db.Database
-            let scores = DbScore.by_chart_id chart_id db.Database
+            let scores = DbScores.by_chart_id chart_id db.Database
             let new_info : NewChartSaveData =
                 {
                     Offset = Setting.simple chart_db_data.Offset |> Setting.trigger (db.ChangedOffsets.Add chart_id)
@@ -78,16 +78,13 @@ module ScoreDatabase =
             new_info
 
     let save_changes (db: ScoreDatabase) =
-
-        let some_db_stuff (data: (string * 'T) array) = failwith "nyi"
-
-        db.ChangedOffsets.Dump |> some_db_stuff
-        db.ChangedLastPlayed.Dump |> some_db_stuff
-        db.ChangedComments.Dump |> some_db_stuff
-        db.ChangedBreakpoints.Dump |> some_db_stuff
+        DbChartData.save_offsets db.ChangedOffsets.Dump db.Database
+        DbChartData.save_last_played db.ChangedLastPlayed.Dump db.Database
+        DbChartData.save_comments db.ChangedComments.Dump db.Database
+        DbChartData.save_breakpoints db.ChangedBreakpoints.Dump db.Database
 
     let save_score (chart_id: string) (score: NewScore) (db: ScoreDatabase) =
-        DbScore.save chart_id score db.Database |> ignore
+        DbScores.save chart_id score db.Database |> ignore
         match get_cached chart_id db with
         | None -> ()
         | Some existing_data -> existing_data.Scores.Value <- score :: existing_data.Scores.Value
@@ -99,7 +96,7 @@ module ScoreDatabase =
         | Some existing_data -> existing_data.PersonalBests.Value <- bests
 
     let delete_score (chart_id: string) (timestamp: int64) (db: ScoreDatabase) : bool =
-        if DbScore.delete_by_timestamp chart_id timestamp db.Database > 0 then
+        if DbScores.delete_by_timestamp chart_id timestamp db.Database > 0 then
             match get_cached chart_id db with
             | None -> ()
             | Some existing_data -> 

@@ -13,7 +13,7 @@ type DbCell<'T>(value: 'T) =
         with get() = value
         and internal set new_value = value <- new_value
 
-module DbScore =
+module DbScores =
 
     let internal CREATE_TABLE : NonQuery<unit> =
         { NonQuery.without_parameters() with
@@ -236,7 +236,7 @@ module DatabaseSetup =
     let private migrate (db: Database) =
         Database.migrate
             "AddScoresTable"
-            (fun db -> DbScore.CREATE_TABLE.Execute () db |> expect |> ignore)
+            (fun db -> DbScores.CREATE_TABLE.Execute () db |> expect |> ignore)
             db
         Database.migrate
             "AddChartDataTable"
