@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Data.Charts.Endless
 
 open System
+open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Mods
 open Prelude.Charts.Processing.Patterns
@@ -9,6 +10,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Scores
+open Prelude.Data
 
 [<RequireQualifiedAccess>]
 type VarietyLevel =
@@ -27,6 +29,7 @@ type ChartSuggestionContext =
         Filter: Filter
         Rate: float32
         Mods: ModState
+        ScoreDatabase: ScoreDatabase
     }
 
 module Suggestion =
@@ -56,7 +59,8 @@ module Suggestion =
             let max_ln_pc = report.LNPercent + 0.1f
             let min_ln_pc = report.LNPercent - 0.1f
 
-            let now = DateTime.UtcNow
+            let now = Timestamp.now()
+            let TWO_DAYS = 2L * 24L * 3600_000L
 
             let candidates =
                 Library.cache.Entries.Values
@@ -69,12 +73,10 @@ module Suggestion =
                     let ln_pc = Library.patterns.[x.Hash].LNPercent in ln_pc >= min_ln_pc && ln_pc <= max_ln_pc
                 )
                 |> Seq.filter (fun x ->
-                    match Scores.get x.Hash with
-                    | Some d -> (now - d.LastPlayed).TotalDays > 2.0
-                    | _ -> true
+                    now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed.Value > TWO_DAYS
                 )
 
-                |> Filter.apply ctx.Filter
+                |> Filter.apply_seq (ctx.Filter, { ScoreDatabase = ctx.ScoreDatabase })
 
             seq {
                 for entry in candidates do
@@ -137,10 +139,10 @@ module Suggestion =
                 Some res
         | None -> None
 
-    let get_random (filter: Filter) : CachedChart option =
+    let get_random (filter_by: Filter, filter_ctx: FilteringContext) : CachedChart option =
         let rand = Random()
 
-        let charts = Filter.apply filter Library.cache.Entries.Values |> Array.ofSeq
+        let charts = Filter.apply_seq (filter_by, filter_ctx) Library.cache.Entries.Values |> Array.ofSeq
 
         if charts.Length > 0 then
             Some charts.[rand.Next charts.Length]

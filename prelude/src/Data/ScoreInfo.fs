@@ -1,47 +1,11 @@
 ﻿namespace Prelude.Data.Scores
 
-open System
-open System.Collections.Generic
-open Percyqaz.Data
-open Percyqaz.Common
-open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Data.Charts.Caching
-
-[<Json.AutoCodec(true)>]
-type Bests =
-    {
-        Lamp: PersonalBests<int>
-        Accuracy: PersonalBests<float>
-        Grade: PersonalBests<int>
-    }
-    static member Default = { Lamp = []; Accuracy = []; Grade = [] }
-
-[<Json.AutoCodec(true)>]
-type Score =
-    {
-        time: DateTime
-        replay: string
-        rate: float32
-        selectedMods: ModState
-        layout: Layout
-        keycount: int
-    }
-    static member Default = { time = Unchecked.defaultof<_>; replay = ""; rate = 1.0f; selectedMods = Map.empty; layout = Layout.Spread; keycount = 4 }
-
-type NewScore =
-    {
-        Timestamp: int64
-        Replay: byte array
-        Rate: float32
-        Mods: ModState
-        IsImported: bool
-        Keys: int
-    }
 
 [<RequireQualifiedAccess>]
 type ScorePlayedBy =
@@ -84,19 +48,19 @@ type ScoreInfo =
 
 module ScoreInfo =
 
-    let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
-        let with_mods = apply_mods score.selectedMods chart
-        let replay_data = score.replay |> Replay.decompress_string
-        let scoring = Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.rate
-        let difficulty = DifficultyRating.calculate score.rate with_mods.Notes
+    let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: NewScore) : ScoreInfo =
+        let with_mods = apply_mods score.Mods chart
+        let replay_data = score.Replay |> Replay.decompress_bytes
+        let scoring = Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+        let difficulty = DifficultyRating.calculate score.Rate with_mods.Notes
         {
             CachedChart = cc
             Chart = chart
             WithMods = with_mods
 
             PlayedBy = ScorePlayedBy.You
-            TimePlayed = score.time |> Timestamp.from_datetime
-            Rate = score.rate
+            TimePlayed = score.Timestamp
+            Rate = score.Rate
 
             Replay = replay_data
             Scoring = scoring
@@ -106,17 +70,17 @@ module ScoreInfo =
             Rating = difficulty
             Physical = Performance.calculate difficulty with_mods.Keys scoring |> fst
 
-            ImportedFromOsu = score.layout = Layout.LeftTwo
+            ImportedFromOsu = score.IsImported
         }
 
-    let to_score (score_info: ScoreInfo) =
+    let to_score (score_info: ScoreInfo) : NewScore =
         {
-            time = score_info.TimePlayed |> Timestamp.to_datetime
-            replay = score_info.Replay |> Replay.compress_string
-            rate = score_info.Rate
-            selectedMods = score_info.Mods
-            layout = Layout.Spread
-            keycount = score_info.WithMods.Keys
+            Timestamp = score_info.TimePlayed
+            Replay = score_info.Replay |> Replay.compress_bytes
+            Rate = score_info.Rate
+            Mods = score_info.Mods
+            IsImported = score_info.ImportedFromOsu
+            Keys = score_info.WithMods.Keys
         }
 
 module Bests =

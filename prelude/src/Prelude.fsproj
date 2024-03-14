@@ -53,15 +53,16 @@
     <Compile Include="Content\Noteskins\Conversions\osu!\Converter.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
-    <Compile Include="Data\Charts\Caching.fs" />
-    <Compile Include="Data\Database\Types.fs" />
+    <Compile Include="Data\Database\Scores.fs" />
     <Compile Include="Data\Database\LegacyScores.fs" />
     <Compile Include="Data\Database\Database.fs" />
     <Compile Include="Data\Database\ScoreDatabase.fs" />
+    <Compile Include="Data\Charts\Caching.fs" />
     <Compile Include="Data\Charts\Collections.fs" />
     <Compile Include="Data\Charts\Library.fs" />
     <Compile Include="Data\Charts\Sorting.fs" />
     <Compile Include="Data\Charts\Endless.fs" />
+    <Compile Include="Data\ScoreInfo.fs" />
     <Compile Include="Data\osu!.fs" />
   </ItemGroup>
 

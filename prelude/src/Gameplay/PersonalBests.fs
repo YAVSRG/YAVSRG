@@ -85,3 +85,10 @@ module PersonalBests =
                     (value, rate) :: (v, r) :: xs, Improvement.New
 
         loop bests
+
+type Bests =
+    {
+        Lamp: PersonalBests<int>
+        Accuracy: PersonalBests<float>
+        Grade: PersonalBests<int>
+    }

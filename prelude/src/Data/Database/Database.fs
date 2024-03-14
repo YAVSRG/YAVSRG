@@ -4,6 +4,7 @@ open System.IO
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
+open Prelude.Gameplay
 open Prelude.Data.Scores
 
 type DbCell<'T>(value: 'T) =

@@ -2,17 +2,28 @@
 
 open System
 open System.Collections.Generic
+open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Data.Charts.Collections
 open Prelude.Charts.Processing.Patterns
+open Prelude.Data
 
+// todo: make into separate Grouping, Filtering and Sorting modules
 module Sorting =
 
     open Prelude.Data.Charts.Caching
     open FParsec
+
+    type GroupingContext =
+        {
+            Rate: float32
+            RulesetId: string
+            Ruleset: Ruleset
+            ScoreDatabase: ScoreDatabase
+        }
 
     let private first_character (s: string) =
         if s.Length = 0 then
@@ -22,24 +33,23 @@ module Sorting =
         else
             "?"
 
-    let format_date_last_played (c: CachedChart, _) =
-        match Data.Scores.Scores.get c.Hash with
-        | Some d ->
-            let days_ago = (DateTime.Today - d.LastPlayed).TotalDays
+    let private format_date_last_played (cc: CachedChart, ctx: GroupingContext) =
+        let now = Timestamp.now()
+        let ONE_DAY = 24L * 3600_000L
+        let days_ago = (now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed.Value) / ONE_DAY
 
-            if days_ago < 0 then 0, "Today"
-            elif days_ago < 1 then 1, "Yesterday"
-            elif days_ago < 7 then 2, "This week"
-            elif days_ago < 30 then 3, "This month"
-            elif days_ago < 60 then 4, "A month ago"
-            elif days_ago < 90 then 5, "2 months ago"
-            elif days_ago < 120 then 6, "3 months ago"
-            elif days_ago < 210 then 7, "6 months ago"
-            elif days_ago < 3600 then 8, "A long time ago"
-            else 9, "Never"
-        | None -> 9, "Never"
+        if days_ago < 0 then 0, "Today"
+        elif days_ago < 1 then 1, "Yesterday"
+        elif days_ago < 7 then 2, "This week"
+        elif days_ago < 30 then 3, "This month"
+        elif days_ago < 60 then 4, "A month ago"
+        elif days_ago < 90 then 5, "2 months ago"
+        elif days_ago < 120 then 6, "3 months ago"
+        elif days_ago < 210 then 7, "6 months ago"
+        elif days_ago < 3600 then 8, "A long time ago"
+        else 9, "Never"
 
-    let format_date_added (c: CachedChart, _) =
+    let private format_date_added (c: CachedChart, _) =
         let days_ago = (DateTime.Today - c.DateAdded).TotalDays
 
         if days_ago < 0 then 0, "Today"
@@ -52,21 +62,58 @@ module Sorting =
         elif days_ago < 210 then 7, "6 months ago"
         else 8, "A long time ago"
 
-    type GroupContext =
+    let grade_achieved (cc: CachedChart, ctx: GroupingContext) =
+        let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
+        if data.PersonalBests.Value.ContainsKey ctx.RulesetId then
+            match PersonalBests.get_best_above ctx.Rate data.PersonalBests.Value.[ctx.RulesetId].Grade with
+            | Some i -> i, ctx.Ruleset.GradeName i
+            | None -> -2, "No grade achieved"
+        else
+            -2, "No grade achieved"
+
+    let lamp_achieved (cc: CachedChart, ctx: GroupingContext) =
+        let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
+        if data.PersonalBests.Value.ContainsKey ctx.RulesetId then
+            match PersonalBests.get_best_above ctx.Rate data.PersonalBests.Value.[ctx.RulesetId].Lamp with
+            | Some i -> i, ctx.Ruleset.LampName i
+            | None -> -2, "No lamp achieved"
+        else
+            -2, "No lamp achieved"
+
+    type GroupMethod = CachedChart * GroupingContext -> int * string
+
+    let grouping_modes: IDictionary<string, GroupMethod> =
+        dict
+            [
+                "none", (fun (c, _) -> 0, "No grouping")
+                "pack", (fun (c, _) -> 0, c.Folder)
+                "date_played", format_date_last_played
+                "date_installed", format_date_added
+                "grade", grade_achieved
+                "lamp", lamp_achieved
+                "title", (fun (c, _) -> 0, first_character c.Title)
+                "artist", (fun (c, _) -> 0, first_character c.Artist)
+                "creator", (fun (c, _) -> 0, first_character c.Creator)
+                "keymode", (fun (c, _) -> c.Keys, c.Keys.ToString() + "K")
+                "patterns",
+                fun (c, _) ->
+                    match Library.patterns.TryGetValue(c.Hash) with
+                    | true, report -> 0, report.Category
+                    | false, _ -> -1, "Not analysed"
+            ]
+
+    type FilteringContext =
         {
-            Rate: float32
-            RulesetId: string
-            Ruleset: Ruleset
+            ScoreDatabase: ScoreDatabase
         }
 
-    let has_comment (c: CachedChart, comment: string) =
-        match Data.Scores.Scores.get c.Hash with
-        | Some d -> d.Comment.Contains(comment, StringComparison.OrdinalIgnoreCase)
-        | None -> false
+    let private has_comment (query: string) (cc: CachedChart, ctx: FilteringContext) =
+        let comment = (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).Comment.Value
+        not (String.IsNullOrEmpty comment) && comment.Contains(query, StringComparison.OrdinalIgnoreCase)
 
-    let has_pattern (c: CachedChart, pattern: string) =
-        if Library.patterns.ContainsKey c.Hash then
-            let p = Library.patterns.[c.Hash].Patterns
+    let private has_pattern (pattern: string) (cc: CachedChart, _: FilteringContext) =
+        if Library.patterns.ContainsKey cc.Hash then
+            let p = Library.patterns.[cc.Hash].Patterns
 
             let pattern_to_find =
                 match pattern.ToLower() with
@@ -95,50 +142,6 @@ module Sorting =
 
         else
             false
-
-    let grade_achieved (c: CachedChart, ctx: GroupContext) =
-        match Data.Scores.Scores.get c.Hash with
-        | Some d ->
-            if d.PersonalBests.ContainsKey ctx.RulesetId then
-                match PersonalBests.get_best_above ctx.Rate d.PersonalBests.[ctx.RulesetId].Grade with
-                | Some i -> i, ctx.Ruleset.GradeName i
-                | None -> -2, "No grade achieved"
-            else
-                -2, "No grade achieved"
-        | None -> -2, "No grade achieved"
-
-    let lamp_achieved (c: CachedChart, ctx: GroupContext) =
-        match Data.Scores.Scores.get c.Hash with
-        | Some d ->
-            if d.PersonalBests.ContainsKey ctx.RulesetId then
-                match PersonalBests.get_best_above ctx.Rate d.PersonalBests.[ctx.RulesetId].Lamp with
-                | Some i -> i, ctx.Ruleset.LampName i
-                | None -> -2, "No lamp achieved"
-            else
-                -2, "No lamp achieved"
-        | None -> -2, "No lamp achieved"
-
-    type GroupMethod = CachedChart * GroupContext -> int * string
-
-    let grouping_modes: IDictionary<string, GroupMethod> =
-        dict
-            [
-                "none", (fun (c, _) -> 0, "No grouping")
-                "pack", (fun (c, _) -> 0, c.Folder)
-                "date_played", format_date_last_played
-                "date_installed", format_date_added
-                "grade", grade_achieved
-                "lamp", lamp_achieved
-                "title", (fun (c, _) -> 0, first_character c.Title)
-                "artist", (fun (c, _) -> 0, first_character c.Artist)
-                "creator", (fun (c, _) -> 0, first_character c.Creator)
-                "keymode", (fun (c, _) -> c.Keys, c.Keys.ToString() + "K")
-                "patterns",
-                fun (c, _) ->
-                    match Library.patterns.TryGetValue(c.Hash) with
-                    | true, report -> 0, report.Category
-                    | false, _ -> -1, "Not analysed"
-            ]
 
     let private compare_by (f: CachedChart -> IComparable) =
         fun a b -> f(fst a).CompareTo <| f (fst b)
@@ -201,19 +204,19 @@ module Sorting =
             | Success(x, _, _) -> x
             | Failure(f, _, _) -> [ Impossible ]
 
-        let private _f (filter: Filter) (c: CachedChart) : bool =
+        let private apply (filter: Filter, ctx: FilteringContext) (cc: CachedChart) : bool =
             let s =
-                (c.Title
+                (cc.Title
                  + " "
-                 + c.Artist
+                 + cc.Artist
                  + " "
-                 + c.Creator
+                 + cc.Creator
                  + " "
-                 + c.DifficultyName
+                 + cc.DifficultyName
                  + " "
-                 + (c.Subtitle |> Option.defaultValue "")
+                 + (cc.Subtitle |> Option.defaultValue "")
                  + " "
-                 + c.Folder)
+                 + cc.Folder)
                     .ToLower()
 
             List.forall
@@ -222,26 +225,26 @@ module Sorting =
                 | String str -> s.Contains str
                 | Equals("k", n)
                 | Equals("key", n)
-                | Equals("keys", n) -> c.Keys.ToString() = n
+                | Equals("keys", n) -> cc.Keys.ToString() = n
                 | Equals("c", str)
-                | Equals("comment", str) -> has_comment (c, str)
-                | Equals("p", str) -> has_pattern (c, str)
-                | Equals("pattern", str) -> has_pattern (c, str)
+                | Equals("comment", str) -> has_comment str (cc, ctx)
+                | Equals("p", str) -> has_pattern str (cc, ctx)
+                | Equals("pattern", str) -> has_pattern str (cc, ctx)
                 | MoreThan("d", d)
-                | MoreThan("diff", d) -> c.Physical > d
+                | MoreThan("diff", d) -> cc.Physical > d
                 | LessThan("d", d)
-                | LessThan("diff", d) -> c.Physical < d
+                | LessThan("diff", d) -> cc.Physical < d
                 | MoreThan("l", l)
-                | MoreThan("length", l) -> float (c.Length / 1000.0f<ms>) > l
+                | MoreThan("length", l) -> float (cc.Length / 1000.0f<ms>) > l
                 | LessThan("l", l)
-                | LessThan("length", l) -> float (c.Length / 1000.0f<ms>) < l
+                | LessThan("length", l) -> float (cc.Length / 1000.0f<ms>) < l
                 | _ -> true)
                 filter
 
-        let apply (filter: Filter) (charts: CachedChart seq) = Seq.filter (_f filter) charts
+        let apply_seq (filter: Filter, ctx: FilteringContext) (charts: CachedChart seq) = Seq.filter (apply (filter, ctx)) charts
 
-        let applyf (filter: Filter) (charts: (CachedChart * LibraryContext) seq) =
-            Seq.filter (fun (c, _) -> _f filter c) charts
+        let apply_ctx_seq (filter: Filter, ctx: FilteringContext) (charts: (CachedChart * LibraryContext) seq) =
+            Seq.filter (fun (cc, _) -> apply (filter, ctx) cc) charts
 
     [<RequireQualifiedAccess; Json.AutoCodec>]
     type LibraryMode =
@@ -258,16 +261,15 @@ module Sorting =
     type LexSortedGroups = Dictionary<int * string, Group>
 
     let get_groups
-        (ctx: GroupContext)
-        (grouping: GroupMethod)
-        (sorting: SortMethod)
-        (filter: Filter)
+        (filter_by: Filter, filter_ctx: FilteringContext)
+        (group_by: GroupMethod, group_ctx: GroupingContext)
+        (sort_by: SortMethod)
         : LexSortedGroups =
 
         let groups = new Dictionary<int * string, Group>()
 
-        for c in Filter.apply filter Library.cache.Entries.Values do
-            let s = grouping (c, ctx)
+        for cc in Filter.apply_seq (filter_by, filter_ctx) Library.cache.Entries.Values do
+            let s = group_by (cc, group_ctx)
 
             if groups.ContainsKey s |> not then
                 groups.Add(
@@ -278,7 +280,7 @@ module Sorting =
                     }
                 )
 
-            groups.[s].Charts.Add(c, LibraryContext.None)
+            groups.[s].Charts.Add(cc, LibraryContext.None)
 
         for g in groups.Keys |> Seq.toArray do
             groups.[g] <-
@@ -286,11 +288,11 @@ module Sorting =
                     Charts = groups.[g].Charts |> Seq.distinctBy (fun (cc, _) -> cc.Hash) |> ResizeArray
                 }
 
-            groups.[g].Charts.Sort sorting
+            groups.[g].Charts.Sort sort_by
 
         groups
 
-    let get_collection_groups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+    let get_collection_groups (filter_by: Filter, filter_ctx: FilteringContext) (sort_by: SortMethod) : LexSortedGroups =
 
         let groups = new Dictionary<int * string, Group>()
 
@@ -311,11 +313,9 @@ module Sorting =
                     //Logging.Warn(sprintf "Could not find chart: %s [%s] for collection %s" entry.Path entry.Hash name)
                     None
             )
-            |> Filter.applyf filter
+            |> Filter.apply_ctx_seq (filter_by, filter_ctx)
             |> ResizeArray<CachedChart * LibraryContext>
-            |> fun x ->
-                x.Sort sorting
-                x
+            |> fun x -> x.Sort sort_by; x
             |> fun x ->
                 if x.Count > 0 then
                     groups.Add(
@@ -344,7 +344,7 @@ module Sorting =
                     //Logging.Warn(sprintf "Could not find chart: %s [%s] for playlist %s" entry.Path entry.Hash name)
                     None
             )
-            |> Filter.applyf filter
+            |> Filter.apply_ctx_seq (filter_by, filter_ctx)
             |> ResizeArray<CachedChart * LibraryContext>
             |> fun x ->
                 if x.Count > 0 then
@@ -358,7 +358,7 @@ module Sorting =
 
         groups
 
-    let get_table_groups (table: Table) (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+    let get_table_groups (filter_by: Filter, filter_ctx: FilteringContext) (sort_by: SortMethod) (table: Table) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
         for level, charts in table.Charts |> Seq.groupBy (fun x -> x.Level) do
             charts
@@ -369,11 +369,9 @@ module Sorting =
                     Cache.by_hash c.Hash Library.cache
                     |> Option.map (fun x -> x, LibraryContext.Table level)
             )
-            |> Filter.applyf filter
+            |> Filter.apply_ctx_seq (filter_by, filter_ctx)
             |> ResizeArray<CachedChart * LibraryContext>
-            |> fun x ->
-                x.Sort sorting
-                x
+            |> fun x -> x.Sort sort_by; x
             |> fun x ->
                 if x.Count > 0 then
                     groups.Add(
