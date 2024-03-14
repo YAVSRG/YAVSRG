@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Data.Scores
+open Prelude.Data
 open Prelude.Gameplay
 open Interlude.Options
 open Interlude.Features
@@ -68,7 +68,7 @@ module PracticeState =
             if options.AudioVolume.Value = 0.0 then options.VisualOffset.Value + mean / 1.0f<ms> else options.VisualOffset.Value
 
         let local_audio_offset_suggestion =
-            let local_audio_offset = LocalAudioSync.offset_setting state.Chart state.SaveData
+            let local_audio_offset = LocalAudioSync.offset_setting state.SaveData
             if options.AudioVolume.Value > 0.0 then local_audio_offset.Value - mean else local_audio_offset.Value
 
         state.SyncSuggestions <-
@@ -86,7 +86,7 @@ module PracticeState =
         | Some suggestions ->
 
         match state.SyncMode.Value with
-        | SyncMode.AUDIO_OFFSET -> (LocalAudioSync.offset_setting state.Chart state.SaveData).Set suggestions.AudioOffset
+        | SyncMode.AUDIO_OFFSET -> (LocalAudioSync.offset_setting state.SaveData).Set suggestions.AudioOffset
         | SyncMode.HIT_POSITION -> (options.HitPosition |> Setting.roundf 0).Set suggestions.HitPosition
         | SyncMode.SCROLL_SPEED -> (options.ScrollSpeed |> Setting.roundf 2).Set suggestions.ScrollSpeed
         | SyncMode.VISUAL_OFFSET -> (options.VisualOffset |> Setting.roundf 0).Set suggestions.VisualOffset

@@ -7,6 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
+open Prelude.Data
 open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
@@ -126,11 +127,11 @@ module Tree =
             last_cached_flag <- cache_flag
 
             if chart_save_data.IsNone then
-                chart_save_data <- Scores.get cc.Hash
+                chart_save_data <- Some (ScoreDatabase.get cc.Hash Content.Scores)
 
             match chart_save_data with
-            | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
-                personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
+            | Some d when d.PersonalBests.Value.ContainsKey Rulesets.current_hash ->
+                personal_bests <- Some d.PersonalBests.Value.[Rulesets.current_hash]
                 grade <- get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName
                 lamp <- get_pb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
             | _ -> ()
@@ -146,7 +147,7 @@ module Tree =
                 //else
                 ""
                 + match chart_save_data with
-                  | Some c when c.Comment <> "" -> Icons.MESSAGE_SQUARE
+                  | Some c when not (System.String.IsNullOrEmpty c.Comment.Value) -> Icons.MESSAGE_SQUARE
                   | _ -> ""
 
         override this.Bounds(top) =
@@ -257,13 +258,13 @@ module Tree =
             if
                 Comments.fade.Value > 0.01f
                 && chart_save_data.IsSome
-                && chart_save_data.Value.Comment <> ""
+                && chart_save_data.Value.Comment.Value <> ""
             then
                 Draw.rect bounds (Palette.color (Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
 
                 Text.fill_b (
                     Style.font,
-                    chart_save_data.Value.Comment,
+                    chart_save_data.Value.Comment.Value,
                     bounds.Shrink(30.0f, 15.0f),
                     (Colors.white.O4a Comments.fade.Alpha, Colors.shadow_1.O4a Comments.fade.Alpha),
                     Alignment.CENTER
@@ -447,25 +448,26 @@ module Tree =
     let refresh () =
         // fetch groups
         let library_groups =
-            let ctx: GroupContext =
+            // todo: combine these context types into one?
+            let ctx: GroupingContext =
                 {
                     Rate = rate.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
+                    ScoreDatabase = Content.Scores
                 }
 
             match options.LibraryMode.Value with
-            | LibraryMode.Collections -> get_collection_groups sorting_modes.[options.ChartSortMode.Value] LevelSelect.filter
+            | LibraryMode.Collections -> get_collection_groups (LevelSelect.filter, { ScoreDatabase = Content.Scores }) sorting_modes.[options.ChartSortMode.Value]
             | LibraryMode.Table -> 
                 match Content.Table with
-                | Some table -> get_table_groups table sorting_modes.[options.ChartSortMode.Value] LevelSelect.filter
+                | Some table -> get_table_groups (LevelSelect.filter, { ScoreDatabase = Content.Scores }) sorting_modes.[options.ChartSortMode.Value] table
                 | None -> get_empty_view ()
             | LibraryMode.All ->
                 get_groups
-                    ctx
-                    grouping_modes.[options.ChartGroupMode.Value]
+                    (LevelSelect.filter, { ScoreDatabase = Content.Scores })
+                    (grouping_modes.[options.ChartGroupMode.Value], ctx)
                     sorting_modes.[options.ChartSortMode.Value]
-                    LevelSelect.filter
         // if exactly 1 result, switch to it
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()

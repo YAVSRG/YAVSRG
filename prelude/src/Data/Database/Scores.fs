@@ -2,7 +2,7 @@
 
 open Prelude.Gameplay.Mods
 
-type NewScore =
+type Score =
     {
         Timestamp: int64
         Replay: byte array

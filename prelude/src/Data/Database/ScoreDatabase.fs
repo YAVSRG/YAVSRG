@@ -7,13 +7,13 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Data.Scores
 
-type NewChartSaveData =
+type ChartSaveData =
     {
         Offset: Setting<Time>
         LastPlayed: Setting<int64>
         Comment: Setting<string>
         Breakpoints: Setting<Time list>
-        Scores: DbCell<NewScore list>
+        Scores: DbCell<Score list>
         PersonalBests: DbCell<Map<string, Bests>>
     }
 
@@ -33,7 +33,7 @@ type internal ChangeTracker<'T> =
 type ScoreDatabase =
     internal {
         Database : Database
-        Cache: Dictionary<string, NewChartSaveData>
+        Cache: Dictionary<string, ChartSaveData>
         LockObject: obj
         ChangedOffsets: ChangeTracker<Time>
         ChangedLastPlayed: ChangeTracker<int64>
@@ -54,18 +54,18 @@ module ScoreDatabase =
             ChangedBreakpoints = ChangeTracker.Empty
         }
 
-    let get_cached (chart_id: string) (db: ScoreDatabase) : NewChartSaveData option = lock db.LockObject <| fun () ->
+    let get_cached (chart_id: string) (db: ScoreDatabase) : ChartSaveData option = lock db.LockObject <| fun () ->
         match db.Cache.TryGetValue chart_id with
         | true, res -> Some res
         | false, _ -> None
 
-    let get (chart_id: string) (db: ScoreDatabase) : NewChartSaveData = lock db.LockObject <| fun () ->
+    let get (chart_id: string) (db: ScoreDatabase) : ChartSaveData = lock db.LockObject <| fun () ->
         match get_cached chart_id db with
         | Some existing -> existing
         | None ->
             let chart_db_data : DbChartData = DbChartData.get chart_id db.Database
             let scores = DbScores.by_chart_id chart_id db.Database
-            let new_info : NewChartSaveData =
+            let new_info : ChartSaveData =
                 {
                     Offset = Setting.simple chart_db_data.Offset |> Setting.trigger (db.ChangedOffsets.Add chart_id)
                     LastPlayed = Setting.simple chart_db_data.LastPlayed |> Setting.trigger (db.ChangedLastPlayed.Add chart_id)
@@ -83,7 +83,7 @@ module ScoreDatabase =
         DbChartData.save_comments db.ChangedComments.Dump db.Database
         DbChartData.save_breakpoints db.ChangedBreakpoints.Dump db.Database
 
-    let save_score (chart_id: string) (score: NewScore) (db: ScoreDatabase) = lock db.LockObject <| fun () ->
+    let save_score (chart_id: string) (score: Score) (db: ScoreDatabase) = lock db.LockObject <| fun () ->
         DbScores.save chart_id score db.Database |> ignore
         match get_cached chart_id db with
         | None -> ()

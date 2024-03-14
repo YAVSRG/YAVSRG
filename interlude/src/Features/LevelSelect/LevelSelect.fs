@@ -43,13 +43,21 @@ type LevelSelectScreen() =
 
     let random_chart () =
         if options.AdvancedRecommendations.Value && Chart.CACHE_DATA.IsSome then
-            match Suggestion.get_suggestion { BaseChart = Chart.CACHE_DATA.Value; Filter = LevelSelect.filter; Rate = rate.Value; Mods = selected_mods.Value } with
+            let ctx = 
+                { 
+                    BaseChart = Chart.CACHE_DATA.Value
+                    Filter = LevelSelect.filter
+                    Rate = rate.Value
+                    Mods = selected_mods.Value
+                    ScoreDatabase = Content.Scores
+                }
+            match Suggestion.get_suggestion ctx with
             | Some c ->
                 Tree.switch_chart (c, LibraryContext.None, "")
                 refresh ()
             | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
         else
-            match Suggestion.get_random LevelSelect.filter with
+            match Suggestion.get_random (LevelSelect.filter, { ScoreDatabase = Content.Scores }) with
             | Some c ->
                 Tree.switch_chart (c, LibraryContext.None, "")
                 refresh ()

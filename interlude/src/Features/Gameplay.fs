@@ -17,6 +17,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Endless
+open Prelude.Data
 open Prelude.Data.Scores
 open Interlude.Content
 open Interlude.Options
@@ -172,19 +173,15 @@ module Gameplay =
 
                             Background.load (Cache.background_path chart Library.cache)
 
-                            let save_data = Scores.get_or_create chart
+                            let save_data = ScoreDatabase.get cc.Hash Content.Scores
 
                             yield
                                 fun () ->
                                     CHART <- Some chart
 
-                                    if abs (save_data.Offset - chart.FirstNote) > 500.0f<ms> then
-                                        save_data.Offset <- chart.FirstNote
-                                        Logging.Debug("Resetting offset for chart as it looks like a new audio file for the same chart")
-
                                     Song.change (
                                         Cache.audio_path chart Library.cache,
-                                        save_data.Offset - chart.FirstNote,
+                                        save_data.Offset.Value,
                                         rate,
                                         (chart.Header.PreviewTime, chart.LastNote),
                                         play_audio
@@ -432,12 +429,22 @@ module Gameplay =
                         ignore
                     )
 
-                Scores.save_score_pbs save_data Rulesets.current_hash score_info
+                let new_bests, improvement_flags =
+                    match Map.tryFind Rulesets.current_hash save_data.PersonalBests.Value with
+                    | Some existing_bests ->
+                        Bests.update score_info existing_bests
+                    | None -> Bests.create score_info, ImprovementFlags.New
+
+                // todo: option to only save a score if it's an improvement on an old one
+
+                ScoreDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.Scores
+                ScoreDatabase.save_bests score_info.CachedChart.Hash (Map.add Rulesets.current_hash new_bests save_data.PersonalBests.Value) Content.Scores
+                improvement_flags
             else
-                Scores.save_score save_data score_info
-                ImprovementFlags.Default
+                ScoreDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.Scores
+                ImprovementFlags.None
         else
-            ImprovementFlags.Default
+            ImprovementFlags.None
 
     module Endless =
     
@@ -565,7 +572,7 @@ module Gameplay =
         | None ->
             Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
 
-            match Endless.Suggestion.get_random [] with
+            match Suggestion.get_random ([], { ScoreDatabase = Content.Scores }) with
             | Some cc -> Chart.change (cc, LibraryContext.None, true)
             | None ->
                 Logging.Debug "No charts installed"

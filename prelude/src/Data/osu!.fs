@@ -78,17 +78,17 @@ module ``osu!`` =
 
     let private read_byte (br: BinaryReader) = br.ReadByte()
     let private read_short (br: BinaryReader) = br.ReadInt16()
-    let private read_int (br: BinaryReader) = br.ReadInt32() |> debug
-    let private read_long (br: BinaryReader) = br.ReadInt64() |> debug
-    let private read_single (br: BinaryReader) = br.ReadSingle() |> debug
-    let private read_double (br: BinaryReader) = br.ReadDouble() |> debug
+    let private read_int (br: BinaryReader) = br.ReadInt32()
+    let private read_long (br: BinaryReader) = br.ReadInt64()
+    let private read_single (br: BinaryReader) = br.ReadSingle()
+    let private read_double (br: BinaryReader) = br.ReadDouble()
     let private read_bool (br: BinaryReader) = br.ReadByte() <> 0x00uy
 
     let private read_string (br: BinaryReader) =
         let b = br.ReadByte()
 
         if b = 0x00uy then ""
-        elif b = 0x0buy then br.ReadString() |> debug
+        elif b = 0x0buy then br.ReadString()
         else failwith "Unknown byte while reading string"
 
     let private read_int_double_pair (br: BinaryReader) =
@@ -356,6 +356,7 @@ module ``osu!`` =
                 Scores = Array.init (read_int br) (fun i -> ScoreDatabase_Score.Read br)
             }
 
+    // todo: rename to OsuScoreDatabase
     type ScoreDatabase =
         {
             Version: int

@@ -8,8 +8,9 @@ open Prelude.Common
 open Prelude.Charts
 open Prelude.Gameplay
 open Prelude.Data.Scores
+open Prelude.Data
 open Prelude.Data.Charts.Caching
-open Interlude
+open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Options
@@ -38,7 +39,7 @@ module Scoreboard =
                 NodeType.Button(
                     (fun () ->
                         Screen.change_new
-                            (fun () -> new ScoreScreen(score_info, ImprovementFlags.Default, false) :> Screen)
+                            (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
                             Screen.Type.Score
                             Transitions.Flags.Default
                         |> ignore
@@ -174,7 +175,7 @@ module Scoreboard =
             { new Async.SwitchServiceSeq<Request, unit -> unit>() with
                 member this.Process(req: Request) =
                     seq {
-                        for score in req.ChartSaveData.Scores do
+                        for score in req.ChartSaveData.Scores.Value do
                             let score_info = ScoreInfo.from_score req.CachedChart req.CurrentChart req.Ruleset score
 
                             if score_info.ModStatus() = Mods.ModStatus.Ranked then
@@ -190,15 +191,12 @@ module Scoreboard =
 
                         match req.NewBests with
                         | None -> ()
-                        | Some b ->
-                            yield
-                                fun () ->
-                                    if
-                                        not (req.ChartSaveData.PersonalBests.ContainsKey req.RulesetId)
-                                        || b <> req.ChartSaveData.PersonalBests.[req.RulesetId]
-                                    then
-                                        LevelSelect.refresh_details ()
-                                        req.ChartSaveData.PersonalBests.[req.RulesetId] <- b
+                        | Some new_bests ->
+                            let old_bests = req.ChartSaveData.PersonalBests.Value
+                            let new_bests = Map.add req.RulesetId new_bests old_bests
+                            if new_bests <> old_bests then
+                                ScoreDatabase.save_bests req.CachedChart.Hash new_bests Content.Scores
+                                yield fun () -> LevelSelect.refresh_details ()
 
                     }
 
@@ -208,8 +206,8 @@ module Scoreboard =
         let load (info: Chart.LoadedChartInfo) =
             score_loader.Request
                 {
-                    RulesetId = Content.Rulesets.current_hash
-                    Ruleset = Content.Rulesets.current
+                    RulesetId = Rulesets.current_hash
+                    Ruleset = Rulesets.current
                     CachedChart = info.CacheInfo
                     CurrentChart = info.Chart
                     ChartSaveData = info.SaveData
@@ -336,16 +334,16 @@ type Scoreboard(display: Setting<Display>) as this =
     member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
         if
             (
-                let v = info.SaveData.Scores.Count <> count in
-                count <- info.SaveData.Scores.Count
+                let v = info.SaveData.Scores.Value.Length <> count in
+                count <- info.SaveData.Scores.Value.Length
                 v
             ) || info.CacheInfo.Hash <> last_loaded
         then
             last_loaded <- info.CacheInfo.Hash
             Loader.load info
-        elif scoring <> Content.Rulesets.current_hash then
-            Loader.container.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
-            scoring <- Content.Rulesets.current_hash
+        elif scoring <> Rulesets.current_hash then
+            Loader.container.Iter(fun score -> score.Data.Ruleset <- Rulesets.current)
+            scoring <- Rulesets.current_hash
 
         Loader.container.Filter <- filterer ()
 

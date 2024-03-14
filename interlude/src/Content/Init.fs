@@ -1,8 +1,13 @@
 ﻿namespace Interlude.Content
 
 open Percyqaz.Common
+open Prelude.Data.Charts
 
-type Content() =
+type Content () =
+
+    static member init_startup () =
+        Library.init_startup ()
+        Data.init_startup ()
 
     static member init_window () =
         Logging.Info "===== Loading game content ====="
@@ -10,6 +15,12 @@ type Content() =
         Rulesets.init_window ()
         Themes.init_window ()
         Noteskins.init_window ()
+
+    static member deinit () =
+        Library.deinit ()
+        Data.deinit ()
+
+    static member Scores = Data.score_db
 
     static member Table = Tables.current
     static member ThemeConfig = Themes.current_config

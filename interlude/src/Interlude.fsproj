@@ -40,6 +40,7 @@
     <Compile Include="Content\Themes.fs" />
     <Compile Include="Content\Noteskins.fs" />
     <Compile Include="Content\Tables.fs" />
+    <Compile Include="Content\Data.fs" />
     <Compile Include="Content\Init.fs" />
     <Compile Include="Options.fs" />
     <Compile Include="UI\Icons.fs" />

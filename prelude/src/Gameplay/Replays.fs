@@ -115,6 +115,9 @@ module Replay =
     let compress_string (data: ReplayData) : string =
         Convert.ToBase64String(compress_bytes data)
 
+    let compressed_string_to_bytes (data: string) = Convert.FromBase64String data
+    let compressed_bytes_to_string (data: byte array) = Convert.ToBase64String data
+
     let BYTES_PER_ROW = 6
     let MAX_ROWS_PER_SECOND = 200
     let MAX_BYTES_PER_SECOND = MAX_ROWS_PER_SECOND * BYTES_PER_ROW

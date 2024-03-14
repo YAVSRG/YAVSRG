@@ -12,10 +12,12 @@ open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
 open Prelude.Data.``osu!``
 open Prelude.Data.Scores
+open Prelude.Data
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library.Imports
 open Interlude.Options
+open Interlude.Content
 
 module Scores =
 
@@ -111,7 +113,7 @@ module Scores =
 
             match find_matching_chart beatmap_data chart with
             | None -> ()
-            | Some(chart, _, rate) ->
+            | Some(chart, chart_hash, rate) ->
 
             chart_count <- chart_count + 1
 
@@ -157,26 +159,18 @@ module Scores =
 
                 let score: Score =
                     {
-                        time = DateTime.FromFileTimeUtc(replay_info.Timestamp).ToLocalTime()
-                        replay = Replay.compress_string replay_data
-                        rate = MathF.Round(combined_rate, 2)
-                        selectedMods = mods
-                        layout = Layout.LeftTwo
-                        keycount = chart.Keys
+                        Timestamp = DateTime.FromFileTimeUtc(replay_info.Timestamp).ToLocalTime() |> Timestamp.from_datetime
+                        Replay = Replay.compress_bytes replay_data
+                        Rate = MathF.Round(combined_rate, 2)
+                        Mods = mods
+                        IsImported = true
+                        Keys = chart.Keys
                     }
 
-                sync
-                <| fun () ->
-                    let data = Scores.get_or_create chart
+                if not (ScoreDatabase.delete_score chart_hash score.Timestamp Content.Scores) then
+                    score_count <- score_count + 1
 
-                    if
-                        data.Scores.RemoveAll(fun s ->
-                            s.time.ToUniversalTime().Ticks = score.time.ToUniversalTime().Ticks
-                        ) = 0
-                    then
-                        score_count <- score_count + 1
-
-                    data.Scores.Add(score)
+                ScoreDatabase.save_score chart_hash score Content.Scores
 
         Logging.Info(sprintf "Finished importing osu! scores (%i scores from %i maps)" score_count chart_count)
 

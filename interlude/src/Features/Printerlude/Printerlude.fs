@@ -12,6 +12,8 @@ open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.``osu!``
+open Prelude.Data
+open Prelude.Gameplay
 open Interlude
 open Interlude.Content
 open Interlude.Utils
@@ -108,22 +110,22 @@ module Printerlude =
                     let lookup = res.Scores |> Seq.map (fun s -> s.Hash, s.Score) |> Map.ofSeq
 
                     for chart in table.Charts do
+                        let data = ScoreDatabase.get chart.Hash Content.Scores
                         if
-                            Scores.data.Entries.ContainsKey(chart.Hash)
-                            && Scores.data.Entries.[chart.Hash].PersonalBests.ContainsKey(table.Info.RulesetId)
-                            && Scores.data.Entries.[chart.Hash].PersonalBests.[table.Info.RulesetId].Accuracy
-                                |> Prelude.Gameplay.PersonalBests.get_best_above 1.0f
-                                |> Option.defaultValue 0.0
-                                |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
+                            data.PersonalBests.Value.ContainsKey(table.Info.RulesetId)
+                            && data.PersonalBests.Value.[table.Info.RulesetId].Accuracy
+                            |> PersonalBests.get_best_above 1.0f
+                            |> Option.defaultValue 0.0
+                            |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
                         then
-                            for score in Scores.data.Entries.[chart.Hash].Scores do
+                            for score in data.Scores.Value do
                                 Charts.Scores.Save.post (
                                     ({
                                         ChartId = chart.Hash
-                                        Replay = score.replay
-                                        Rate = score.rate
-                                        Mods = score.selectedMods
-                                        Timestamp = score.time
+                                        Replay = score.Replay |> Replay.compressed_bytes_to_string
+                                        Rate = score.Rate
+                                        Mods = score.Mods
+                                        Timestamp = Timestamp.to_datetime score.Timestamp
                                     }
                                     : Charts.Scores.Save.Request),
                                     ignore
@@ -134,16 +136,14 @@ module Printerlude =
             { new Async.Service<string, unit>() with
                 override this.Handle(ruleset_id) =
                     async {
-                        match Content.Rulesets.by_hash ruleset_id with
+                        match Rulesets.by_hash ruleset_id with
                         | None -> ()
                         | Some ruleset ->
 
-                        for hash in Scores.data.Entries.Keys |> Seq.toArray do
-                            let data = Scores.data.Entries.[hash]
+                        for hash in Library.cache.Entries.Keys |> Seq.toArray do
+                            let data = ScoreDatabase.get hash Content.Scores
 
-                            if data.Scores.Count = 0 then
-                                ()
-                            else
+                            if not data.Scores.Value.IsEmpty then
 
                                 match Cache.by_hash hash Library.cache with
                                 | None -> ()
@@ -153,14 +153,19 @@ module Printerlude =
                                 | None -> ()
                                 | Some chart ->
 
-                                for score in data.Scores do
+                                let existing_bests = data.PersonalBests.Value
+                                let mutable new_bests = existing_bests
+
+                                for score in data.Scores.Value do
                                     let score_info = ScoreInfo.from_score cc chart ruleset score
 
-                                    if data.PersonalBests.ContainsKey ruleset_id then
-                                        let new_bests, _ = Bests.update score_info data.PersonalBests.[ruleset_id]
-                                        data.PersonalBests.[ruleset_id] <- new_bests
+                                    if data.PersonalBests.Value.ContainsKey ruleset_id then
+                                        let ruleset_bests, _ = Bests.update score_info data.PersonalBests.Value.[ruleset_id]
+                                        new_bests <- Map.add ruleset_id ruleset_bests new_bests
                                     else
-                                        data.PersonalBests.[ruleset_id] <- Bests.create score_info
+                                        new_bests <- Map.add ruleset_id (Bests.create score_info) new_bests
+                                if new_bests <> existing_bests then
+                                    ScoreDatabase.save_bests hash new_bests Content.Scores
 
                         Logging.Info(sprintf "Finished processing personal bests for %s" ruleset.Name)
                     }

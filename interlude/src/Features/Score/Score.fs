@@ -28,8 +28,8 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
     let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.HitEvents
 
     let previous_personal_bests =
-        if Gameplay.Chart.SAVE_DATA.Value.PersonalBests.ContainsKey Rulesets.current_hash then
-            Some Gameplay.Chart.SAVE_DATA.Value.PersonalBests.[Rulesets.current_hash]
+        if Gameplay.Chart.SAVE_DATA.Value.PersonalBests.Value.ContainsKey Rulesets.current_hash then
+            Some Gameplay.Chart.SAVE_DATA.Value.PersonalBests.Value.[Rulesets.current_hash]
         else
             None
         |> ref
@@ -39,7 +39,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
     let graph = new ScoreGraph(score_info)
 
     let refresh () =
-        personal_bests := ImprovementFlags.Default
+        personal_bests := ImprovementFlags.None
 
         grade
         := Grade.calculate_with_target score_info.Ruleset.Grading.Grades score_info.Accuracy

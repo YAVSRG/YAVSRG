@@ -48,7 +48,7 @@ type ScoreInfo =
 
 module ScoreInfo =
 
-    let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: NewScore) : ScoreInfo =
+    let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
         let with_mods = apply_mods score.Mods chart
         let replay_data = score.Replay |> Replay.decompress_bytes
         let scoring = Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
@@ -73,7 +73,7 @@ module ScoreInfo =
             ImportedFromOsu = score.IsImported
         }
 
-    let to_score (score_info: ScoreInfo) : NewScore =
+    let to_score (score_info: ScoreInfo) : Score =
         {
             Timestamp = score_info.TimePlayed
             Replay = score_info.Replay |> Replay.compress_bytes

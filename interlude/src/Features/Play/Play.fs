@@ -89,7 +89,7 @@ module PlayScreen =
 
         let mutable recommended_offset = 0.0f
 
-        let offset_setting = LocalAudioSync.offset_setting info.Chart info.SaveData
+        let offset_setting = LocalAudioSync.offset_setting info.SaveData
         let offset_slideout (screen: IPlayScreen) =
 
             let offset_slider =

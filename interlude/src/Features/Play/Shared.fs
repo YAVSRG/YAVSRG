@@ -12,7 +12,7 @@ open Prelude.Charts.Processing.NoteColors
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Content.Noteskins
-open Prelude.Data.Scores
+open Prelude.Data
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -22,14 +22,10 @@ open Interlude.Features.Play
 
 module LocalAudioSync =
 
-    let offset_setting (chart: Chart) (save_data: ChartSaveData) =
-        Setting.make
-            (fun v ->
-                save_data.Offset <- v + chart.FirstNote
-                Song.set_local_offset v
-            )
-            (fun () -> save_data.Offset - chart.FirstNote)
+    let offset_setting (save_data: ChartSaveData) =
+        save_data.Offset
         |> Setting.roundt 0
+        |> Setting.trigger Song.set_local_offset
 
     let get_automatic (state: PlayState) (save_data: ChartSaveData) =
         let mutable sum = 0.0f<ms>
@@ -44,15 +40,13 @@ module LocalAudioSync =
 
         let mean = sum / count * Gameplay.rate.Value
 
-        let first_note = state.Chart.FirstNote
-
         if count < 10.0f then
-            save_data.Offset - first_note
+            save_data.Offset.Value
         else
-            save_data.Offset - first_note - mean * 1.25f
+            save_data.Offset.Value - mean * 1.25f
 
     let apply_automatic (state: PlayState) (save_data: ChartSaveData)=
-        let setting = offset_setting state.Chart save_data
+        let setting = offset_setting save_data
         setting.Value <- get_automatic state save_data
 
 type Timeline(with_mods: ModdedChart, on_seek: Time -> unit) =

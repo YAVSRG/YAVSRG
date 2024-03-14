@@ -33,7 +33,7 @@ module DbScores =
             """
         }
 
-    let private SAVE : NonQuery<string * NewScore> =
+    let private SAVE : NonQuery<string * Score> =
         {
             SQL = """
                 INSERT INTO scores (ChartId, Timestamp, Replay, Rate, Mods, IsImported, Keys)
@@ -59,11 +59,11 @@ module DbScores =
                 p.Byte (byte score.Keys)
             )
         }
-    let save (chart_id: string) (score: NewScore) (db: Database) : unit = SAVE.Execute (chart_id, score) db |> expect |> ignore
+    let save (chart_id: string) (score: Score) (db: Database) : unit = SAVE.Execute (chart_id, score) db |> expect |> ignore
 
-    let save_batch (batched_scores: (string * NewScore) seq) (db: Database) : unit = SAVE.Batch batched_scores db |> expect |> ignore
+    let save_batch (batched_scores: (string * Score) seq) (db: Database) : unit = SAVE.Batch batched_scores db |> expect |> ignore
 
-    let private BY_CHART_ID : Query<string, NewScore> =
+    let private BY_CHART_ID : Query<string, Score> =
         {
             SQL = """SELECT Timestamp, Replay, Rate, Mods, IsImported, Keys FROM scores WHERE ChartId = @ChartId;"""
             Parameters = [ "@ChartId", SqliteType.Text, -1 ]
@@ -84,7 +84,7 @@ module DbScores =
                 }
             )
         }
-    let by_chart_id (chart_id: string) (db: Database) : NewScore array = BY_CHART_ID.Execute chart_id db |> expect
+    let by_chart_id (chart_id: string) (db: Database) : Score array = BY_CHART_ID.Execute chart_id db |> expect
 
     let private DELETE_BY_TIMESTAMP : NonQuery<string * int64> =
         {

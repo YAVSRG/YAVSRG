@@ -64,7 +64,7 @@ module DbChartData =
     let Bests_RoundTrip() =
         let db, conn = DatabaseSetup.in_memory()
             
-        let bests = (Map.ofList ["SCJ4", { Accuracy = PersonalBests.Empty; Grade = PersonalBests.Empty; Lamp = PersonalBests.Empty }]) 
+        let bests = (Map.ofList ["SCJ4", { Bests.Accuracy = PersonalBests.Empty; Grade = PersonalBests.Empty; Lamp = PersonalBests.Empty }]) 
 
         DbChartData.save_personal_bests "bests" bests db
         Assert.AreEqual(DbChartData.get "bests" db, { DbChartData.DEFAULT with PersonalBests = bests } )

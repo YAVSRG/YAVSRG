@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Prelude.Charts
 open Prelude.Backbeat
 open Prelude.Data.Scores
+open Prelude.Data
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
@@ -240,12 +241,10 @@ type ScoreContextMenu(score_info: ScoreInfo) as this =
         ConfirmPage(
             [ score_name ] %> "misc.confirmdelete",
             fun () ->
-                match Chart.SAVE_DATA.Value.Scores |> Seq.tryFind (fun s -> Timestamp.from_datetime s.time = score_info.TimePlayed) with
-                | Some score_to_delete ->
-                    Chart.SAVE_DATA.Value.Scores.Remove score_to_delete |> ignore
+                if ScoreDatabase.delete_score score_info.CachedChart.Hash score_info.TimePlayed Content.Scores then
                     LevelSelect.refresh_all ()
                     Notifications.action_feedback (Icons.TRASH, [ score_name ] %> "notification.deleted", "")
-                | None -> Logging.Debug("Couldn't find score matching timestamp to delete")
+                else Logging.Debug("Couldn't find score matching timestamp to delete")
 
                 if is_submenu then
                     Menu.Back()

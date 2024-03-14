@@ -26,7 +26,7 @@ module Library =
 
     let mutable patterns: Patterns = Unchecked.defaultof<_>
 
-    let init_startup() =
+    let init_startup () =
         cache <- Cache.from_path (get_game_folder "Songs")
         collections <- load_important_json_file "Collections" (Path.Combine(get_game_folder "Data", "collections.json")) false
         patterns <-

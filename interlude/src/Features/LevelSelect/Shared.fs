@@ -6,6 +6,7 @@ open Percyqaz.Flux.UI
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Endless
+open Interlude.Content
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Play
@@ -46,7 +47,8 @@ module LevelSelect =
                 Screen.Type.Play
                 Transitions.Flags.Default
         then 
-            info.SaveData.LastPlayed <- System.DateTime.UtcNow
+            // todo: move to play/multiplay screens?
+            info.SaveData.LastPlayed.Value <- Timestamp.now()
             true
         else false
 
@@ -67,11 +69,12 @@ module LevelSelect =
         then
             if endless_mode.Value then 
                 Endless.begin_endless_mode <| 
-                    EndlessModeState.create { 
+                    EndlessModeState.create {
                         BaseChart = info.CacheInfo
                         Filter = filter
                         Rate = rate.Value
                         Mods = selected_mods.Value
+                        ScoreDatabase = Content.Scores
                     }
 
     let challenge_score (score_info: ScoreInfo) =
@@ -83,6 +86,7 @@ module LevelSelect =
                 Screen.Type.Play
                 Transitions.Flags.Default
         then
-            info.SaveData.LastPlayed <- DateTime.UtcNow
+            // todo: move to play/multiplay screens?
+            info.SaveData.LastPlayed.Value <- Timestamp.now()
             rate.Set score_info.Rate
             selected_mods.Set score_info.Mods

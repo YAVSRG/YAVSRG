@@ -20,12 +20,12 @@ module Comments =
         { new TextEntry(Setting.make
                             (fun s ->
                                 match Chart.SAVE_DATA with
-                                | Some d -> d.Comment <- s
+                                | Some d -> d.Comment.Set s
                                 | _ -> ()
                             )
                             (fun () ->
                                 match Chart.SAVE_DATA with
-                                | Some d -> d.Comment
+                                | Some d -> d.Comment.Value
                                 | _ -> ""
                             ),
                         "comment",
@@ -36,7 +36,7 @@ module Comments =
                 base.OnDeselected by_mouse
 
                 match Chart.SAVE_DATA with
-                | Some d -> d.Comment <- d.Comment.Trim()
+                | Some d -> d.Comment.Value <- d.Comment.Value.Trim()
                 | _ -> ()
 
                 LevelSelect.refresh_details ()

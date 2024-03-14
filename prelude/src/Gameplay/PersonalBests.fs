@@ -16,11 +16,17 @@ type ImprovementFlags =
         Accuracy: Improvement<float>
         Grade: Improvement<int>
     }
-    static member Default =
+    static member None =
         {
             Lamp = Improvement.None
             Accuracy = Improvement.None
             Grade = Improvement.None
+        }
+    static member New =
+        {
+            Lamp = Improvement.New
+            Accuracy = Improvement.New
+            Grade = Improvement.New
         }
 
 type PersonalBests<'T> = ('T * float32) list
@@ -86,9 +92,11 @@ module PersonalBests =
 
         loop bests
 
+[<Json.AutoCodec(true)>]
 type Bests =
     {
         Lamp: PersonalBests<int>
         Accuracy: PersonalBests<float>
         Grade: PersonalBests<int>
     }
+    static member Default = { Lamp = []; Accuracy = []; Grade = [] }

@@ -56,7 +56,7 @@ type SyncSuggestionControls(state: PracticeState) =
         |+ ModeButton(%"system.visualoffset.name", SyncMode.VISUAL_OFFSET, state),
         160.0f)
 
-    let local_audio_offset = LocalAudioSync.offset_setting state.Chart state.SaveData |> Setting.bound -200.0f<ms> 200.0f<ms>
+    let local_audio_offset = LocalAudioSync.offset_setting state.SaveData |> Setting.bound -200.0f<ms> 200.0f<ms>
     let visual_offset = options.VisualOffset |> Setting.roundf 0
     let scroll_speed = options.ScrollSpeed |> Setting.roundf 2
     let hit_position = options.HitPosition |> Setting.roundf 0

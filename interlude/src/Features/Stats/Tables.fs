@@ -8,7 +8,7 @@ open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
-open Prelude.Data.Scores
+open Prelude.Data
 open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
@@ -214,7 +214,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
     let rs_hash = Ruleset.hash ruleset
 
     let score_of (hash: string) =
-        (Scores.get hash).Value.PersonalBests.[rs_hash].Accuracy
+        (ScoreDatabase.get hash Content.Scores).PersonalBests.Value.[rs_hash].Accuracy
         |> PersonalBests.get_best_above 1.0f
         |> Option.get
 
@@ -344,7 +344,10 @@ type private TableStats() =
     let score_data = 
         match table with
         | Some table -> 
-            Table.ratings (Scores.get_best_grade_above table.Info.RulesetId 1.0f) table
+            Table.ratings (fun chart_id -> 
+                (ScoreDatabase.get chart_id Content.Scores).PersonalBests.Value
+                |> Map.tryFind table.Info.RulesetId
+                |> Option.bind (fun bests -> PersonalBests.get_best_above 1.0f bests.Grade)) table
             |> Array.ofSeq 
         | None -> [||]
 
