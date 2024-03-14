@@ -33,6 +33,14 @@ module DbScores =
             """
         }
 
+    let internal CREATE_INDEX : NonQuery<unit> =
+        { NonQuery.without_parameters() with
+            SQL = """
+            CREATE INDEX idx_scores_chartid
+            ON scores (ChartId ASC);
+            """
+        }
+
     let private SAVE : NonQuery<string * Score> =
         {
             SQL = """
@@ -97,6 +105,57 @@ module DbScores =
             FillParameters = fun p (chart_id, timestamp) -> p.String chart_id; p.Int64 timestamp
         }
     let delete_by_timestamp (chart_id: string) (timestamp: int64) (db: Database) = DELETE_BY_TIMESTAMP.Execute (chart_id, timestamp) db |> expect
+
+    let private FAST_LOAD : Query<int64, string * Score> =
+        {
+            SQL = """
+            SELECT ChartId, Timestamp, Replay, Rate, Mods, IsImported, Keys FROM scores
+            ORDER BY ChartId ASC
+            LIMIT 2000
+            OFFSET @Offset;
+            """
+            Parameters = [ "@Offset", SqliteType.Integer, 8 ]
+            FillParameters = fun p page -> p.Int64 (page * 2000L)
+            Read = (fun r ->
+                r.String,
+                {
+                    Timestamp = r.Int64
+                    Replay = 
+                        // todo: push into Percyqaz.Data
+                        use stream = r.Stream
+                        use ms = new MemoryStream()
+                        stream.CopyTo ms
+                        ms.ToArray()
+                    Rate = r.Float32
+                    Mods = r.Json JSON
+                    IsImported = r.Boolean
+                    Keys = int r.Byte
+                }
+            )
+        }
+    let fast_load (db: Database) : (string * Score list) seq =
+        let all_scores =
+            seq {
+                let mutable batch = 0L
+                let mutable next_batch = FAST_LOAD.Execute batch db |> expect
+                yield! next_batch
+                while next_batch.Length = 2000 do
+                    batch <- batch + 1L
+                    next_batch <- FAST_LOAD.Execute batch db |> expect
+                    yield! next_batch
+            }
+        seq {
+            let mutable current_chart = ""
+            let mutable current = []
+            for chart_id, score in all_scores do
+                if chart_id <> current_chart then
+                    if current_chart <> "" then 
+                        yield current_chart, current
+                        current <- []
+                        current_chart <- chart_id
+                current <- score :: current
+            if current_chart <> "" then yield current_chart, current
+        }
 
 type DbChartData =
     {
@@ -232,3 +291,34 @@ module DbChartData =
             FillParameters = fun p (chart_id, bests) -> p.String chart_id; p.Json JSON bests
         }
     let save_personal_bests (changes: (string * Map<string, Bests>) seq) (db: Database) = SAVE_PERSONAL_BESTS.Batch changes db |> expect |> ignore
+
+    let private FAST_LOAD : Query<int64, string * DbChartData> =
+        {
+            SQL = """
+            SELECT ChartId, Offset, LastPlayed, Comment, Breakpoints, PersonalBests FROM chart_data
+            LIMIT 1000
+            OFFSET @Offset;
+            """
+            Parameters = [ "@Offset", SqliteType.Integer, 8 ]
+            FillParameters = fun p page -> p.Int64 (page * 1000L)
+            Read = (fun r ->
+                r.String,
+                {
+                    Offset = r.Float32 |> Time.ofFloat
+                    LastPlayed = r.Int64
+                    Comment = r.String
+                    Breakpoints = r.Json JSON
+                    PersonalBests = r.Json JSON
+                }
+            )
+        }
+    let fast_load (db: Database) : (string * DbChartData) seq =
+        seq {
+            let mutable batch = 0L
+            let mutable next_batch = FAST_LOAD.Execute batch db |> expect
+            yield! next_batch
+            while next_batch.Length = 1000 do
+                batch <- batch + 1L
+                next_batch <- FAST_LOAD.Execute batch db |> expect
+                yield! next_batch
+        }

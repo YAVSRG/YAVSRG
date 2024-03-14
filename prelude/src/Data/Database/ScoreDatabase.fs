@@ -53,6 +53,7 @@ module ScoreDatabase =
         match get_cached chart_id db with
         | Some existing -> existing
         | None ->
+            // todo: can optimise even further by marking a db as fast-loaded
             let chart_db_data : DbChartData = DbChartData.get chart_id db.Database
             let scores = DbScores.by_chart_id chart_id db.Database
             let new_info : ChartSaveData =
@@ -92,7 +93,7 @@ module ScoreDatabase =
         else
             false
     
-    let private migrate (db: Database) =
+    let private migrate (db: Database) : Database =
         Database.migrate
             "AddScoresTable"
             (fun db -> DbScores.CREATE_TABLE.Execute () db |> expect |> ignore)
@@ -101,9 +102,13 @@ module ScoreDatabase =
             "AddChartDataTable"
             (fun db -> DbChartData.CREATE_TABLE.Execute () db |> expect |> ignore)
             db
+        Database.migrate
+            "AddChartIdIndexToScores"
+            (fun db -> DbScores.CREATE_INDEX.Execute () db |> expect |> ignore)
+            db
         db
 
-    let private legacy_migrate (db: ScoreDatabase) =
+    let private legacy_migrate (db: ScoreDatabase) : ScoreDatabase =
         match LegacyScoreDatabase.TryLoad() with
         | None -> db
         | Some legacy_db ->
@@ -150,3 +155,36 @@ module ScoreDatabase =
             ChangedBreakpoints = ChangeTracker.Empty
             ChangedPersonalBests = ChangeTracker.Empty
         }
+
+    let fast_load (db: ScoreDatabase) : ScoreDatabase = lock db.LockObject <| fun () ->
+        assert(db.Cache.Count = 0)
+        for chart_id, chart_db_data in DbChartData.fast_load db.Database do
+            db.Cache.Add(chart_id, 
+                {
+                    Offset = Setting.threadsafe chart_db_data.Offset |> Setting.trigger (db.ChangedOffsets.Add chart_id)
+                    LastPlayed = Setting.threadsafe chart_db_data.LastPlayed |> Setting.trigger (db.ChangedLastPlayed.Add chart_id)
+                    Comment = Setting.threadsafe chart_db_data.Comment |> Setting.trigger (db.ChangedComments.Add chart_id)
+                    Breakpoints = Setting.threadsafe chart_db_data.Breakpoints |> Setting.trigger (db.ChangedBreakpoints.Add chart_id)
+                    PersonalBests = Setting.threadsafe chart_db_data.PersonalBests |> Setting.trigger (db.ChangedPersonalBests.Add chart_id)
+                    Scores = DbCell []
+                }
+            )
+        printfn "fast loading scores"
+        let default_db_data = DbChartData.DEFAULT
+        for chart_id, scores in DbScores.fast_load db.Database do
+            match get_cached chart_id db with
+            | Some existing ->
+                assert(existing.Scores.Value.IsEmpty)
+                existing.Scores.Value <- scores
+            | None ->
+                db.Cache.Add(chart_id,
+                    {
+                        Offset = Setting.threadsafe default_db_data.Offset |> Setting.trigger (db.ChangedOffsets.Add chart_id)
+                        LastPlayed = Setting.threadsafe default_db_data.LastPlayed |> Setting.trigger (db.ChangedLastPlayed.Add chart_id)
+                        Comment = Setting.threadsafe default_db_data.Comment |> Setting.trigger (db.ChangedComments.Add chart_id)
+                        Breakpoints = Setting.threadsafe default_db_data.Breakpoints |> Setting.trigger (db.ChangedBreakpoints.Add chart_id)
+                        PersonalBests = Setting.threadsafe default_db_data.PersonalBests |> Setting.trigger (db.ChangedPersonalBests.Add chart_id)
+                        Scores = DbCell scores
+                    }
+                )
+        db

@@ -10,7 +10,7 @@ module private Data =
 
     let init_startup () =
         database <- Database.from_file "scores.db"
-        score_db <- ScoreDatabase.create database
+        score_db <- ScoreDatabase.create database |> ScoreDatabase.fast_load
 
     let deinit () =
         if not (isNull (score_db :> obj)) then ScoreDatabase.save_changes score_db
