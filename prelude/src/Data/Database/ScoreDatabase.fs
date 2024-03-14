@@ -108,6 +108,7 @@ module ScoreDatabase =
         | None -> db
         | Some legacy_db ->
             // mass import all scores
+            Logging.Debug("Found and loaded all scores in scores.json ...")
             seq {
                 for hash in legacy_db.Entries.Keys do
                     let data = legacy_db.Entries.[hash]
@@ -115,18 +116,27 @@ module ScoreDatabase =
                         yield hash, score.Migrate
             }
             |> fun scores -> DbScores.save_batch scores db.Database
+            
+            Logging.Debug("Copied all scores to database in new format")
 
             // mass import all other user data
             for hash in legacy_db.Entries.Keys do
                 let data = legacy_db.Entries.[hash]
-                let handle = get hash db
+
                 if data.PersonalBests.Count > 0 then
-                    handle.PersonalBests.Value <- Map.ofSeq (data.PersonalBests |> Seq.map (|KeyValue|) |> Seq.map (fun (k, v) -> (k, v.Migrate)))
-                if data.LastPlayed.Year > 2000 then handle.LastPlayed.Value <- Timestamp.from_datetime data.LastPlayed
-                if data.Comment <> "" then handle.Comment.Value <- data.Comment
+                    db.ChangedPersonalBests.Add hash <| Map.ofSeq (data.PersonalBests |> Seq.map (|KeyValue|) |> Seq.map (fun (k, v) -> (k, v.Migrate)))
+
+                if data.LastPlayed.Year > 2000 then 
+                    db.ChangedLastPlayed.Add hash <| Timestamp.from_datetime data.LastPlayed
+
+                if data.Comment <> "" then
+                    db.ChangedComments.Add hash <| data.Comment
 
             save_changes db
+            
+            Logging.Debug("Copied all other things (comments, personal bests, time last played) to database")
             LegacyScoreDatabase.MarkOld()
+            Logging.Debug("Marked scores.json as old. All done!")
             db
 
     let create (database: Database) : ScoreDatabase =

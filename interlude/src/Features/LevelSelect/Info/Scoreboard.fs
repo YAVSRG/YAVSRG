@@ -195,7 +195,7 @@ module Scoreboard =
                             let old_bests = req.ChartSaveData.PersonalBests.Value
                             let new_bests = Map.add req.RulesetId new_bests old_bests
                             if new_bests <> old_bests then
-                                ScoreDatabase.save_bests req.CachedChart.Hash new_bests Content.Scores
+                                req.ChartSaveData.PersonalBests.Value <- new_bests
                                 yield fun () -> LevelSelect.refresh_details ()
 
                     }

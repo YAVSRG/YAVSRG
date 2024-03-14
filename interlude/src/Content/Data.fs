@@ -9,7 +9,7 @@ module private Data =
     let mutable score_db : ScoreDatabase = Unchecked.defaultof<_>
 
     let init_startup () =
-        database <- DatabaseSetup.from_file "scores.db"
+        database <- Database.from_file "scores.db"
         score_db <- ScoreDatabase.create database
 
     let deinit () =

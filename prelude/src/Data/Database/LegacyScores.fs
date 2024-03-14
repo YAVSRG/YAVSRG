@@ -12,7 +12,7 @@ open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 
 [<Json.AutoCodec(true)>]
-type internal LegacyScore =
+type LegacyScore =
     {
         time: DateTime
         replay: string
@@ -34,7 +34,7 @@ type internal LegacyScore =
         }
 
 [<Json.AutoCodec(true)>]
-type internal LegacyBests =
+type LegacyBests =
     {
         Lamp: PersonalBests<int>
         Accuracy: PersonalBests<float>
@@ -50,7 +50,7 @@ type internal LegacyBests =
         }
 
 [<Json.AutoCodec(false)>]
-type internal LegacyChartSaveData =
+type LegacyChartSaveData =
     {
         [<Json.Required>]
         mutable Offset: Time
@@ -64,7 +64,7 @@ type internal LegacyChartSaveData =
 
 [<Json.AutoCodec(false)>]
 type LegacyScoreDatabase =
-    internal {
+    {
         Entries: ConcurrentDictionary<string, LegacyChartSaveData>
     }
     static member Default =

@@ -165,7 +165,7 @@ module Printerlude =
                                     else
                                         new_bests <- Map.add ruleset_id (Bests.create score_info) new_bests
                                 if new_bests <> existing_bests then
-                                    ScoreDatabase.save_bests hash new_bests Content.Scores
+                                    data.PersonalBests.Value <- new_bests
 
                         Logging.Info(sprintf "Finished processing personal bests for %s" ruleset.Name)
                     }
