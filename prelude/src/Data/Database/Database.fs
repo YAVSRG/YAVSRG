@@ -231,23 +231,4 @@ module DbChartData =
                 ]
             FillParameters = fun p (chart_id, bests) -> p.String chart_id; p.Json JSON bests
         }
-    let save_personal_bests (chart_id: string) (bests: Map<string, Bests>) (db: Database) = SAVE_PERSONAL_BESTS.Execute (chart_id, bests) db |> expect |> ignore
-
-module DatabaseSetup =
-    
-    let private migrate (db: Database) =
-        Database.migrate
-            "AddScoresTable"
-            (fun db -> DbScores.CREATE_TABLE.Execute () db |> expect |> ignore)
-            db
-        Database.migrate
-            "AddChartDataTable"
-            (fun db -> DbChartData.CREATE_TABLE.Execute () db |> expect |> ignore)
-            db
-        db
-
-    let from_file (filename: string) = Database.from_file filename |> migrate
-
-    let in_memory() = 
-        let db, conn = Database.in_memory "interlude"
-        migrate db, conn
+    let save_personal_bests (changes: (string * Map<string, Bests>) seq) (db: Database) = SAVE_PERSONAL_BESTS.Batch changes db |> expect |> ignore

@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Database\Helpers.fs" />
     <Compile Include="Database\ScoreDatabase.fs" />
     <Compile Include="Database\DbScores.fs" />
     <Compile Include="Database\DbChartData.fs" />

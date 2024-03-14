@@ -11,7 +11,7 @@ module DbScores =
 
     [<Test>]
     let RoundTrip() =
-        let db, conn = DatabaseSetup.in_memory()
+        let db, conn = in_memory()
 
         let score_1 = 
             {
@@ -47,7 +47,7 @@ module DbScores =
 
     [<Test>]
     let Batch_RoundTrip() =
-        let db, conn = DatabaseSetup.in_memory()
+        let db, conn = in_memory()
     
         let score_1 = 
             {
@@ -68,9 +68,9 @@ module DbScores =
                 Keys = 4
             }
     
-        DbScores.save_batch ["roundtrip", score_1; "roundtrip", score_2] db
+        DbScores.save_batch ["batch_roundtrip", score_1; "batch_roundtrip", score_2] db
     
-        let result = DbScores.by_chart_id "roundtrip" db
+        let result = DbScores.by_chart_id "batch_roundtrip" db
     
         Assert.AreEqual(2, result.Length)
         Assert.Contains(score_1, result)
@@ -82,7 +82,7 @@ module DbScores =
 
     [<Test>]
     let DeleteByTimestamp() =
-        let db, conn = DatabaseSetup.in_memory()
+        let db, conn = in_memory()
         
         let ts = Timestamp.now() - 500L
 

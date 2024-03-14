@@ -2,6 +2,7 @@
 
 open NUnit.Framework
 open Percyqaz.Common
+open Percyqaz.Data.Sqlite
 open Prelude.Data
 open Prelude.Data.Scores
 
@@ -9,7 +10,7 @@ module ScoreDatabase =
 
     [<Test>]
     let BasicRoundTrip() =
-        let db, conn = DatabaseSetup.in_memory()
+        let db, conn = in_memory()
 
         let score_db = ScoreDatabase.create db
         
