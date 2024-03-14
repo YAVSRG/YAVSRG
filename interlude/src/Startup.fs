@@ -7,7 +7,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing.NoteColors
 open Prelude.Data.Charts
-open Prelude.Data.Scores
+open Prelude.Data
 open Prelude.Data.Charts.Caching
 open Interlude
 open Interlude.Utils

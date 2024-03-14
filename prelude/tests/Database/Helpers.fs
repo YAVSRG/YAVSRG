@@ -13,7 +13,7 @@ type Setup() =
     [<OneTimeSetUp>]
     member _.Setup() =
         let db, _conn = Database.in_memory "interlude"
-        ScoreDatabase.create db |> ignore // ensures migration
+        ScoreDatabase.create false db |> ignore // ensures migration
         conn <- _conn // in-memory database persists until teardown where it gets disposed
 
     [<OneTimeTearDown>]

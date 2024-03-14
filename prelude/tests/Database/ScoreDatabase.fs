@@ -2,9 +2,7 @@
 
 open NUnit.Framework
 open Percyqaz.Common
-open Percyqaz.Data.Sqlite
 open Prelude.Data
-open Prelude.Data.Scores
 
 module ScoreDatabase =
 
@@ -12,18 +10,18 @@ module ScoreDatabase =
     let BasicRoundTrip() =
         let db, conn = in_memory()
 
-        let score_db = ScoreDatabase.create db
+        let score_db = ScoreDatabase.create false db
         
         let example_handle = ScoreDatabase.get "example" score_db
 
-        example_handle.Offset.Value <- 5.0f<ms>
-        example_handle.Offset.Value <- 10.0f<ms>
+        example_handle.Offset <- 5.0f<ms>
+        example_handle.Offset <- 10.0f<ms>
 
         printfn "%A" (DbChartData.get "example" db)
 
         ScoreDatabase.save_changes score_db
 
-        Assert.True(List.isEmpty example_handle.Scores.Value)
+        Assert.True(List.isEmpty example_handle.Scores)
 
         let score = 
             {
@@ -36,7 +34,7 @@ module ScoreDatabase =
             }
         ScoreDatabase.save_score "example" score score_db
 
-        Assert.False(List.isEmpty example_handle.Scores.Value)
+        Assert.False(List.isEmpty example_handle.Scores)
 
         ScoreDatabase.save_changes score_db
 

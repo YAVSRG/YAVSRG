@@ -4,7 +4,7 @@ open Prelude
 open Prelude.Charts.Processing.NoteColors
 open Prelude.Gameplay
 open Prelude.Charts
-open Prelude.Data.Scores
+open Prelude.Data
 
 type ScoreScreenStats =
     {

@@ -8,7 +8,7 @@ open Prelude.Common
 open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
-open Prelude.Data.Scores
+open Prelude.Data
 open Prelude.Data.Charts.Caching
 open Interlude
 open Interlude.UI
@@ -186,7 +186,7 @@ module Leaderboard =
                             let replay_data = Replay.decompress_string score.Replay
                             let scoring = Metrics.run req.Ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
                             let rating = DifficultyRating.calculate score.Rate with_mods.Notes
-                            let score_info =
+                            let score_info : ScoreInfo =
                                 {
                                     CachedChart = req.CachedChart
                                     Chart = req.Chart

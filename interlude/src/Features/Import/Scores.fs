@@ -4,14 +4,11 @@ open System
 open System.Text
 open System.IO
 open Percyqaz.Common
-open Percyqaz.Flux.UI
 open Prelude.Charts
 open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.``osu!``
-open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
 open Prelude.Data.``osu!``
-open Prelude.Data.Scores
 open Prelude.Data
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching

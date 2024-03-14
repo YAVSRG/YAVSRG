@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Data.Scores
+open Prelude.Data
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
@@ -20,12 +20,12 @@ module Comments =
         { new TextEntry(Setting.make
                             (fun s ->
                                 match Chart.SAVE_DATA with
-                                | Some d -> d.Comment.Set s
+                                | Some d -> d.Comment <- s
                                 | _ -> ()
                             )
                             (fun () ->
                                 match Chart.SAVE_DATA with
-                                | Some d -> d.Comment.Value
+                                | Some d -> d.Comment
                                 | _ -> ""
                             ),
                         "comment",
@@ -36,7 +36,7 @@ module Comments =
                 base.OnDeselected by_mouse
 
                 match Chart.SAVE_DATA with
-                | Some d -> d.Comment.Value <- d.Comment.Value.Trim()
+                | Some d -> d.Comment <- d.Comment.Trim()
                 | _ -> ()
 
                 LevelSelect.refresh_details ()

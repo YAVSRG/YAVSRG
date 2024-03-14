@@ -36,10 +36,10 @@ module Sorting =
     let private format_date_last_played (cc: CachedChart, ctx: GroupingContext) =
         let now = Timestamp.now()
         let ONE_DAY = 24L * 3600_000L
-        let days_ago = (now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed.Value) / ONE_DAY
+        let days_ago = (now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed) / ONE_DAY
 
-        if days_ago < 0 then 0, "Today"
-        elif days_ago < 1 then 1, "Yesterday"
+        if days_ago < 1 then 0, "Today"
+        elif days_ago < 2 then 1, "Yesterday"
         elif days_ago < 7 then 2, "This week"
         elif days_ago < 30 then 3, "This month"
         elif days_ago < 60 then 4, "A month ago"
@@ -52,8 +52,8 @@ module Sorting =
     let private format_date_added (c: CachedChart, _) =
         let days_ago = (DateTime.Today - c.DateAdded).TotalDays
 
-        if days_ago < 0 then 0, "Today"
-        elif days_ago < 1 then 1, "Yesterday"
+        if days_ago < 1 then 0, "Today"
+        elif days_ago < 2 then 1, "Yesterday"
         elif days_ago < 7 then 2, "This week"
         elif days_ago < 30 then 3, "This month"
         elif days_ago < 60 then 4, "A month ago"
@@ -64,8 +64,8 @@ module Sorting =
 
     let grade_achieved (cc: CachedChart, ctx: GroupingContext) =
         let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
-        if data.PersonalBests.Value.ContainsKey ctx.RulesetId then
-            match PersonalBests.get_best_above ctx.Rate data.PersonalBests.Value.[ctx.RulesetId].Grade with
+        if data.PersonalBests.ContainsKey ctx.RulesetId then
+            match PersonalBests.get_best_above ctx.Rate data.PersonalBests.[ctx.RulesetId].Grade with
             | Some i -> i, ctx.Ruleset.GradeName i
             | None -> -2, "No grade achieved"
         else
@@ -73,8 +73,8 @@ module Sorting =
 
     let lamp_achieved (cc: CachedChart, ctx: GroupingContext) =
         let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
-        if data.PersonalBests.Value.ContainsKey ctx.RulesetId then
-            match PersonalBests.get_best_above ctx.Rate data.PersonalBests.Value.[ctx.RulesetId].Lamp with
+        if data.PersonalBests.ContainsKey ctx.RulesetId then
+            match PersonalBests.get_best_above ctx.Rate data.PersonalBests.[ctx.RulesetId].Lamp with
             | Some i -> i, ctx.Ruleset.LampName i
             | None -> -2, "No lamp achieved"
         else
@@ -108,7 +108,7 @@ module Sorting =
         }
 
     let private has_comment (query: string) (cc: CachedChart, ctx: FilteringContext) =
-        let comment = (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).Comment.Value
+        let comment = (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).Comment
         not (String.IsNullOrEmpty comment) && comment.Contains(query, StringComparison.OrdinalIgnoreCase)
 
     let private has_pattern (pattern: string) (cc: CachedChart, _: FilteringContext) =

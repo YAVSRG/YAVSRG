@@ -7,7 +7,6 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Charts
 open Prelude.Gameplay
-open Prelude.Data.Scores
 open Prelude.Data
 open Prelude.Data.Charts.Caching
 open Interlude.Content
@@ -175,7 +174,7 @@ module Scoreboard =
             { new Async.SwitchServiceSeq<Request, unit -> unit>() with
                 member this.Process(req: Request) =
                     seq {
-                        for score in req.ChartSaveData.Scores.Value do
+                        for score in req.ChartSaveData.Scores do
                             let score_info = ScoreInfo.from_score req.CachedChart req.CurrentChart req.Ruleset score
 
                             if score_info.ModStatus() = Mods.ModStatus.Ranked then
@@ -192,10 +191,10 @@ module Scoreboard =
                         match req.NewBests with
                         | None -> ()
                         | Some new_bests ->
-                            let old_bests = req.ChartSaveData.PersonalBests.Value
+                            let old_bests = req.ChartSaveData.PersonalBests
                             let new_bests = Map.add req.RulesetId new_bests old_bests
                             if new_bests <> old_bests then
-                                req.ChartSaveData.PersonalBests.Value <- new_bests
+                                req.ChartSaveData.PersonalBests <- new_bests
                                 yield fun () -> LevelSelect.refresh_details ()
 
                     }
@@ -334,8 +333,8 @@ type Scoreboard(display: Setting<Display>) as this =
     member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
         if
             (
-                let v = info.SaveData.Scores.Value.Length <> count in
-                count <- info.SaveData.Scores.Value.Length
+                let v = info.SaveData.Scores.Length <> count in
+                count <- info.SaveData.Scores.Length
                 v
             ) || info.CacheInfo.Hash <> last_loaded
         then

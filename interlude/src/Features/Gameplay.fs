@@ -18,7 +18,6 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Endless
 open Prelude.Data
-open Prelude.Data.Scores
 open Interlude.Content
 open Interlude.Options
 open Interlude.Utils
@@ -181,7 +180,7 @@ module Gameplay =
 
                                     Song.change (
                                         Cache.audio_path chart Library.cache,
-                                        save_data.Offset.Value,
+                                        save_data.Offset,
                                         rate,
                                         (chart.Header.PreviewTime, chart.LastNote),
                                         play_audio
@@ -430,7 +429,7 @@ module Gameplay =
                     )
 
                 let new_bests, improvement_flags =
-                    match Map.tryFind Rulesets.current_hash save_data.PersonalBests.Value with
+                    match Map.tryFind Rulesets.current_hash save_data.PersonalBests with
                     | Some existing_bests ->
                         Bests.update score_info existing_bests
                     | None -> Bests.create score_info, ImprovementFlags.New
@@ -438,7 +437,7 @@ module Gameplay =
                 // todo: option to only save a score if it's an improvement on an old one
 
                 ScoreDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.Scores
-                save_data.PersonalBests.Value <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests.Value
+                save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
                 ScoreDatabase.save_changes Content.Scores
                 improvement_flags
             else

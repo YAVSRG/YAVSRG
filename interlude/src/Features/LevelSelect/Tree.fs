@@ -8,7 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data
-open Prelude.Data.Scores
+open Prelude.Data
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
@@ -130,8 +130,8 @@ module Tree =
                 chart_save_data <- Some (ScoreDatabase.get cc.Hash Content.Scores)
 
             match chart_save_data with
-            | Some d when d.PersonalBests.Value.ContainsKey Rulesets.current_hash ->
-                personal_bests <- Some d.PersonalBests.Value.[Rulesets.current_hash]
+            | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
+                personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
                 grade <- get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName
                 lamp <- get_pb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
             | _ -> ()
@@ -147,7 +147,7 @@ module Tree =
                 //else
                 ""
                 + match chart_save_data with
-                  | Some c when not (System.String.IsNullOrEmpty c.Comment.Value) -> Icons.MESSAGE_SQUARE
+                  | Some c when not (System.String.IsNullOrEmpty c.Comment) -> Icons.MESSAGE_SQUARE
                   | _ -> ""
 
         override this.Bounds(top) =
@@ -258,13 +258,13 @@ module Tree =
             if
                 Comments.fade.Value > 0.01f
                 && chart_save_data.IsSome
-                && chart_save_data.Value.Comment.Value <> ""
+                && chart_save_data.Value.Comment <> ""
             then
                 Draw.rect bounds (Palette.color (Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
 
                 Text.fill_b (
                     Style.font,
-                    chart_save_data.Value.Comment.Value,
+                    chart_save_data.Value.Comment,
                     bounds.Shrink(30.0f, 15.0f),
                     (Colors.white.O4a Comments.fade.Alpha, Colors.shadow_1.O4a Comments.fade.Alpha),
                     Alignment.CENTER

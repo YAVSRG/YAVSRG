@@ -9,7 +9,6 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
-open Prelude.Data.Scores
 open Prelude.Data
 
 [<RequireQualifiedAccess>]
@@ -73,7 +72,7 @@ module Suggestion =
                     let ln_pc = Library.patterns.[x.Hash].LNPercent in ln_pc >= min_ln_pc && ln_pc <= max_ln_pc
                 )
                 |> Seq.filter (fun x ->
-                    now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed.Value > TWO_DAYS
+                    now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > TWO_DAYS
                 )
 
                 |> Filter.apply_seq (ctx.Filter, { ScoreDatabase = ctx.ScoreDatabase })

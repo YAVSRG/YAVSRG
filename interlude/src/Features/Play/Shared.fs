@@ -23,7 +23,7 @@ open Interlude.Features.Play
 module LocalAudioSync =
 
     let offset_setting (save_data: ChartSaveData) =
-        save_data.Offset
+        Setting.make save_data.set_Offset save_data.get_Offset
         |> Setting.roundt 0
         |> Setting.trigger Song.set_local_offset
 
@@ -41,9 +41,9 @@ module LocalAudioSync =
         let mean = sum / count * Gameplay.rate.Value
 
         if count < 10.0f then
-            save_data.Offset.Value
+            save_data.Offset
         else
-            save_data.Offset.Value - mean * 1.25f
+            save_data.Offset - mean * 1.25f
 
     let apply_automatic (state: PlayState) (save_data: ChartSaveData)=
         let setting = offset_setting save_data

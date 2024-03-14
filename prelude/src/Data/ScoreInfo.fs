@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Scores
+﻿namespace Prelude.Data
 
 open Prelude.Charts
 open Prelude.Charts.Processing

@@ -5,15 +5,17 @@ open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Gameplay
-open Prelude.Data.Scores
+open Prelude.Gameplay.Mods
 
-type DbCell<'T>(value: 'T) =
-    let mutable value = value
-
-    // todo: consider adding lock here since technically one thread can read while another writes
-    member this.Value 
-        with get() = value
-        and internal set new_value = value <- new_value
+type Score =
+    {
+        Timestamp: int64
+        Replay: byte array
+        Rate: float32
+        Mods: ModState
+        IsImported: bool
+        Keys: int
+    }
 
 module DbScores =
 
@@ -111,11 +113,11 @@ module DbScores =
             SQL = """
             SELECT ChartId, Timestamp, Replay, Rate, Mods, IsImported, Keys FROM scores
             ORDER BY ChartId ASC
-            LIMIT 2000
+            LIMIT 1000
             OFFSET @Offset;
             """
             Parameters = [ "@Offset", SqliteType.Integer, 8 ]
-            FillParameters = fun p page -> p.Int64 (page * 2000L)
+            FillParameters = fun p page -> p.Int64 (page * 1000L)
             Read = (fun r ->
                 r.String,
                 {
@@ -139,7 +141,7 @@ module DbScores =
                 let mutable batch = 0L
                 let mutable next_batch = FAST_LOAD.Execute batch db |> expect
                 yield! next_batch
-                while next_batch.Length = 2000 do
+                while next_batch.Length = 1000 do
                     batch <- batch + 1L
                     next_batch <- FAST_LOAD.Execute batch db |> expect
                     yield! next_batch

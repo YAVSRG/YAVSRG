@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Gameplay
-open Prelude.Data.Scores
+open Prelude.Data
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -28,8 +28,8 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
     let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.HitEvents
 
     let previous_personal_bests =
-        if Gameplay.Chart.SAVE_DATA.Value.PersonalBests.Value.ContainsKey Rulesets.current_hash then
-            Some Gameplay.Chart.SAVE_DATA.Value.PersonalBests.Value.[Rulesets.current_hash]
+        if Gameplay.Chart.SAVE_DATA.Value.PersonalBests.ContainsKey Rulesets.current_hash then
+            Some Gameplay.Chart.SAVE_DATA.Value.PersonalBests.[Rulesets.current_hash]
         else
             None
         |> ref

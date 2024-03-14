@@ -3,7 +3,7 @@
 open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Prelude.Data.Scores
+open Prelude.Data
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Endless
 open Interlude.Content
@@ -48,7 +48,7 @@ module LevelSelect =
                 Transitions.Flags.Default
         then 
             // todo: move to play/multiplay screens?
-            info.SaveData.LastPlayed.Value <- Timestamp.now()
+            info.SaveData.LastPlayed <- Timestamp.now()
             true
         else false
 
@@ -87,6 +87,6 @@ module LevelSelect =
                 Transitions.Flags.Default
         then
             // todo: move to play/multiplay screens?
-            info.SaveData.LastPlayed.Value <- Timestamp.now()
+            info.SaveData.LastPlayed <- Timestamp.now()
             rate.Set score_info.Rate
             selected_mods.Set score_info.Mods

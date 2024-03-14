@@ -8,7 +8,6 @@ open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Prelude.Common
 open Prelude.Charts
-open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.``osu!``
@@ -112,13 +111,13 @@ module Printerlude =
                     for chart in table.Charts do
                         let data = ScoreDatabase.get chart.Hash Content.Scores
                         if
-                            data.PersonalBests.Value.ContainsKey(table.Info.RulesetId)
-                            && data.PersonalBests.Value.[table.Info.RulesetId].Accuracy
+                            data.PersonalBests.ContainsKey(table.Info.RulesetId)
+                            && data.PersonalBests.[table.Info.RulesetId].Accuracy
                             |> PersonalBests.get_best_above 1.0f
                             |> Option.defaultValue 0.0
                             |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
                         then
-                            for score in data.Scores.Value do
+                            for score in data.Scores do
                                 Charts.Scores.Save.post (
                                     ({
                                         ChartId = chart.Hash
@@ -143,7 +142,7 @@ module Printerlude =
                         for hash in Library.cache.Entries.Keys |> Seq.toArray do
                             let data = ScoreDatabase.get hash Content.Scores
 
-                            if not data.Scores.Value.IsEmpty then
+                            if not data.Scores.IsEmpty then
 
                                 match Cache.by_hash hash Library.cache with
                                 | None -> ()
@@ -153,19 +152,19 @@ module Printerlude =
                                 | None -> ()
                                 | Some chart ->
 
-                                let existing_bests = data.PersonalBests.Value
+                                let existing_bests = data.PersonalBests
                                 let mutable new_bests = existing_bests
 
-                                for score in data.Scores.Value do
+                                for score in data.Scores do
                                     let score_info = ScoreInfo.from_score cc chart ruleset score
 
-                                    if data.PersonalBests.Value.ContainsKey ruleset_id then
-                                        let ruleset_bests, _ = Bests.update score_info data.PersonalBests.Value.[ruleset_id]
+                                    if data.PersonalBests.ContainsKey ruleset_id then
+                                        let ruleset_bests, _ = Bests.update score_info data.PersonalBests.[ruleset_id]
                                         new_bests <- Map.add ruleset_id ruleset_bests new_bests
                                     else
                                         new_bests <- Map.add ruleset_id (Bests.create score_info) new_bests
                                 if new_bests <> existing_bests then
-                                    data.PersonalBests.Value <- new_bests
+                                    data.PersonalBests <- new_bests
 
                         Logging.Info(sprintf "Finished processing personal bests for %s" ruleset.Name)
                     }
