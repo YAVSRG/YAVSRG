@@ -108,7 +108,7 @@ module DbScores =
         }
     let delete_by_timestamp (chart_id: string) (timestamp: int64) (db: Database) = DELETE_BY_TIMESTAMP.Execute (chart_id, timestamp) db |> expect
 
-    let private FAST_LOAD : Query<int64, string * Score> =
+    let private FAST_LOAD : Query<int, string * Score> =
         {
             SQL = """
             SELECT ChartId, Timestamp, Replay, Rate, Mods, IsImported, Keys FROM scores
@@ -116,8 +116,8 @@ module DbScores =
             LIMIT 1000
             OFFSET @Offset;
             """
-            Parameters = [ "@Offset", SqliteType.Integer, 8 ]
-            FillParameters = fun p page -> p.Int64 (page * 1000L)
+            Parameters = [ "@Offset", SqliteType.Integer, 4 ]
+            FillParameters = fun p page -> p.Int32 (page * 1000)
             Read = (fun r ->
                 r.String,
                 {
@@ -138,11 +138,11 @@ module DbScores =
     let fast_load (db: Database) : (string * Score list) seq =
         let all_scores =
             seq {
-                let mutable batch = 0L
+                let mutable batch = 0
                 let mutable next_batch = FAST_LOAD.Execute batch db |> expect
                 yield! next_batch
                 while next_batch.Length = 1000 do
-                    batch <- batch + 1L
+                    batch <- batch + 1
                     next_batch <- FAST_LOAD.Execute batch db |> expect
                     yield! next_batch
             }
@@ -153,8 +153,8 @@ module DbScores =
                 if chart_id <> current_chart then
                     if current_chart <> "" then 
                         yield current_chart, current
-                        current <- []
-                        current_chart <- chart_id
+                    current <- []
+                    current_chart <- chart_id
                 current <- score :: current
             if current_chart <> "" then yield current_chart, current
         }
