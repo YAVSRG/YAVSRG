@@ -9,6 +9,7 @@ open Prelude.Data.Scores
 type DbCell<'T>(value: 'T) =
     let mutable value = value
 
+    // todo: consider adding lock here since technically one thread can read while another writes
     member this.Value 
         with get() = value
         and internal set new_value = value <- new_value

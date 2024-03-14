@@ -23,8 +23,9 @@ type internal ChangeTracker<'T> =
     }
     static member Empty = { Changes = Dictionary<string, 'T>() }
 
-    member this.Add (chart_id: string) (value: 'T) = this.Changes.[chart_id] <- value
-    member this.Dump : (string * 'T) array = 
+    member this.Add (chart_id: string) (value: 'T) = lock this <| fun () -> 
+        this.Changes.[chart_id] <- value
+    member this.Dump : (string * 'T) array = lock this <| fun () -> 
         let result = this.Changes |> Seq.map (|KeyValue|) |> Array.ofSeq
         this.Changes.Clear()
         result
@@ -53,13 +54,12 @@ module ScoreDatabase =
             ChangedBreakpoints = ChangeTracker.Empty
         }
 
-    // todo: add locks to all operations
-    let get_cached (chart_id: string) (db: ScoreDatabase) : NewChartSaveData option =
+    let get_cached (chart_id: string) (db: ScoreDatabase) : NewChartSaveData option = lock db.LockObject <| fun () ->
         match db.Cache.TryGetValue chart_id with
         | true, res -> Some res
         | false, _ -> None
 
-    let get (chart_id: string) (db: ScoreDatabase) : NewChartSaveData =
+    let get (chart_id: string) (db: ScoreDatabase) : NewChartSaveData = lock db.LockObject <| fun () ->
         match get_cached chart_id db with
         | Some existing -> existing
         | None ->
@@ -83,19 +83,19 @@ module ScoreDatabase =
         DbChartData.save_comments db.ChangedComments.Dump db.Database
         DbChartData.save_breakpoints db.ChangedBreakpoints.Dump db.Database
 
-    let save_score (chart_id: string) (score: NewScore) (db: ScoreDatabase) =
+    let save_score (chart_id: string) (score: NewScore) (db: ScoreDatabase) = lock db.LockObject <| fun () ->
         DbScores.save chart_id score db.Database |> ignore
         match get_cached chart_id db with
         | None -> ()
         | Some existing_data -> existing_data.Scores.Value <- score :: existing_data.Scores.Value
 
-    let save_bests (chart_id: string) (bests: Map<string, Bests>) (db: ScoreDatabase) =
+    let save_bests (chart_id: string) (bests: Map<string, Bests>) (db: ScoreDatabase) = lock db.LockObject <| fun () ->
         DbChartData.save_personal_bests chart_id bests db.Database
         match get_cached chart_id db with
         | None -> ()
         | Some existing_data -> existing_data.PersonalBests.Value <- bests
 
-    let delete_score (chart_id: string) (timestamp: int64) (db: ScoreDatabase) : bool =
+    let delete_score (chart_id: string) (timestamp: int64) (db: ScoreDatabase) : bool = lock db.LockObject <| fun () ->
         if DbScores.delete_by_timestamp chart_id timestamp db.Database > 0 then
             match get_cached chart_id db with
             | None -> ()
