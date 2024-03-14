@@ -60,6 +60,7 @@ module Releases =
             RuntimeId: string
             BassLibraryFile: string
             GLFWLibraryFile: string
+            SQLiteLibraryFile: string
             ExecutableFile: string
         }
 
@@ -111,6 +112,10 @@ module Releases =
             Path.Combine(build_dir, "publish", info.GLFWLibraryFile),
             Path.Combine(clean_dir, info.GLFWLibraryFile)
         )
+        File.Copy(
+            Path.Combine(build_dir, "publish", info.SQLiteLibraryFile),
+            Path.Combine(clean_dir, info.SQLiteLibraryFile)
+        )
 
         copy (Path.Combine(build_dir, "Locale")) (Path.Combine(clean_dir, "Locale"))
 
@@ -129,6 +134,7 @@ module Releases =
                 RuntimeId = "osx-arm64"
                 BassLibraryFile = "libbass.dylib"
                 GLFWLibraryFile = "libglfw.3.dylib"
+                SQLiteLibraryFile = "libe_sqlite3.dylib"
                 ExecutableFile = "Interlude"
             }
 
@@ -139,6 +145,7 @@ module Releases =
                 RuntimeId = "win-x64"
                 BassLibraryFile = "bass.dll"
                 GLFWLibraryFile = "glfw3.dll"
+                SQLiteLibraryFile = "e_sqlite3.dll"
                 ExecutableFile = "Interlude.exe"
             }
 
