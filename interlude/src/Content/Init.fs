@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Content
 
 open Percyqaz.Common
-open Prelude.Data.Library
 
 type Content () =
 
@@ -20,6 +19,8 @@ type Content () =
 
     static member Scores = Data.score_db
     static member Library = Data.library
+    static member Cache = Data.library.Cache
+    static member Collections = Data.library.Collections
 
     static member Table = Tables.current
     static member ThemeConfig = Themes.current_config

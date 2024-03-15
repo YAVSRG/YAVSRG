@@ -50,7 +50,7 @@ module Debug =
                         "debug.rebuildcache",
                         fun () ->
                             Caching.Cache.recache_service.Request(
-                                Content.Library.Cache,
+                                Content.Cache,
                                 fun () ->
                                     Notifications.task_feedback (Icons.FOLDER, %"notification.recache_complete", "")
                             )

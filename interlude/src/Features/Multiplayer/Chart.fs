@@ -63,7 +63,7 @@ module SelectedChart =
                     |> Map.filter (fun id _ -> available_mods.ContainsKey id)
                 )
             else
-                match Cache.by_hash chart.Hash Content.Library.Cache with
+                match Cache.by_hash chart.Hash Content.Cache with
                 | None ->
                     Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash)
                     Lobby.missing_chart ()

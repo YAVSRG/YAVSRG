@@ -49,7 +49,7 @@ module CollectionActions =
     let reorder_up (context: LibraryContext) : bool =
         match context with
         | LibraryContext.Playlist(index, id, data) ->
-            if Content.Library.Collections.GetPlaylist(id).Value.MoveChartUp index then
+            if Content.Collections.GetPlaylist(id).Value.MoveChartUp index then
                 if Chart.LIBRARY_CTX = context then
                     Chart.LIBRARY_CTX <- LibraryContext.Playlist(index - 1, id, data)
                     
@@ -62,7 +62,7 @@ module CollectionActions =
     let reorder_down (context: LibraryContext) : bool =
         match context with
         | LibraryContext.Playlist(index, id, data) ->
-            if Content.Library.Collections.GetPlaylist(id).Value.MoveChartDown index then
+            if Content.Collections.GetPlaylist(id).Value.MoveChartDown index then
                 if Chart.LIBRARY_CTX = context then
                     Chart.LIBRARY_CTX <- LibraryContext.Playlist(index + 1, id, data)
                     

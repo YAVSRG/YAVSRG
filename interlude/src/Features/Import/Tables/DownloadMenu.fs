@@ -66,7 +66,7 @@ module private TableDownloader =
         do
             for chart in charts do
                 statuses.[chart.Hash] <- 
-                    if (Cache.by_key (sprintf "%s/%s" table.Info.Name chart.Hash) Content.Library.Cache).IsNone then 
+                    if (Cache.by_key (sprintf "%s/%s" table.Info.Name chart.Hash) Content.Cache).IsNone then 
                         ChartStatus.Missing
                     else ChartStatus.Downloaded
 
@@ -210,12 +210,12 @@ module private TableDownloader =
             override _.Handle((state: DownloaderState, table_name: string, chart: Tables.Charts.ChartInfo)) =
                 async {
                     sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
-                    match Cache.by_hash chart.Hash Content.Library.Cache with
+                    match Cache.by_hash chart.Hash Content.Cache with
                     | Some cc -> 
-                        Cache.copy table_name cc Content.Library.Cache
+                        Cache.copy table_name cc Content.Cache
                         sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None -> 
-                        match! Cache.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Library.Cache with
+                        match! Cache.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Cache with
                         | true -> sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                         | false -> sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
                     return ()

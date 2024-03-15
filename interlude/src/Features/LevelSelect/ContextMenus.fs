@@ -40,7 +40,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             |* PageButton(
                 "chart.remove_from_collection",
                 (fun () ->
-                    if CollectionActions.remove_from (name, Content.Library.Collections.Get(name).Value, cc, context) then
+                    if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, cc, context) then
                         Menu.Back()
                 ),
                 Icon = Icons.FOLDER_MINUS,
@@ -64,12 +64,12 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                         Menu.Back()
                 ),
                 Icon = Icons.ARROW_DOWN_CIRCLE,
-                Enabled = (index + 1 < Content.Library.Collections.GetPlaylist(name).Value.Charts.Count)
+                Enabled = (index + 1 < Content.Collections.GetPlaylist(name).Value.Charts.Count)
             )
             |+ PageButton(
                 "chart.remove_from_collection",
                 (fun () ->
-                    if CollectionActions.remove_from (name, Content.Library.Collections.Get(name).Value, cc, context) then
+                    if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, cc, context) then
                         Menu.Back()
                 ),
                 Icon = Icons.FOLDER_MINUS,
@@ -77,14 +77,14 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             )
             |+ PageButton.Once("playlist.play", 
                 (fun () ->
-                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist false (Content.Library.Collections.GetPlaylist(name).Value) Content.Library)
+                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist false (Content.Collections.GetPlaylist(name).Value) Content.Library)
                     Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
                 ),
                 Icon = Icons.PLAY
             )
             |* PageButton.Once("playlist.play_shuffled", 
                 (fun () ->
-                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist true (Content.Library.Collections.GetPlaylist(name).Value) Content.Library)
+                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist true (Content.Collections.GetPlaylist(name).Value) Content.Library)
                     Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
                 ),
                 Icon = Icons.SHUFFLE
@@ -112,7 +112,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
         ConfirmPage(
             [ chart_name ] %> "misc.confirmdelete",
             fun () ->
-                Cache.delete cc Content.Library.Cache
+                Cache.delete cc Content.Cache
                 LevelSelect.refresh_all ()
 
                 if is_submenu then
@@ -179,7 +179,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         ConfirmPage(
             [ group_name ] %> "misc.confirmdelete",
             fun () ->
-                Cache.delete_many charts Content.Library.Cache
+                Cache.delete_many charts Content.Cache
                 LevelSelect.refresh_all ()
 
                 if is_submenu then
@@ -190,8 +190,8 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
     static member Show(name, charts, context) =
         match context with
         | LibraryGroupContext.None -> GroupContextMenu(name, charts, context).Show()
-        | LibraryGroupContext.Folder id -> EditFolderPage(id, Content.Library.Collections.GetFolder(id).Value).Show()
-        | LibraryGroupContext.Playlist id -> PlaylistContextMenu(id, Content.Library.Collections.GetPlaylist(id).Value).Show()
+        | LibraryGroupContext.Folder id -> EditFolderPage(id, Content.Collections.GetFolder(id).Value).Show()
+        | LibraryGroupContext.Playlist id -> PlaylistContextMenu(id, Content.Collections.GetPlaylist(id).Value).Show()
         | LibraryGroupContext.Table lvl -> ()
 
 type ScoreContextMenu(score_info: ScoreInfo) as this =

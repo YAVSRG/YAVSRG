@@ -310,11 +310,11 @@ module Tree =
             label <-
                 match context with
                 | LibraryGroupContext.Folder id -> 
-                    match Content.Library.Collections.GetFolder id with
+                    match Content.Collections.GetFolder id with
                     | Some folder -> sprintf "%s %i" folder.Icon.Value items.Count
                     | None -> sprintf "%s %i" Icons.FOLDER items.Count
                 | LibraryGroupContext.Playlist id -> 
-                    match Content.Library.Collections.GetPlaylist id with
+                    match Content.Collections.GetPlaylist id with
                     | Some playlist ->
                         let duration = items |> Seq.map (fun i -> i.PlaylistDuration) |> Seq.sum
                         sprintf "%s %s    %s %i"
