@@ -12,14 +12,16 @@ module Users =
     let permanently_delete_user (user_id: int64) =
         Logging.Info(sprintf "Permanently deleting user with id #%i\nSay goodbye to %A" user_id (User.by_id user_id))
 
-        Friends.on_user_deleted(user_id)
+        Friends.on_user_deleted (user_id)
 
         User.delete user_id
         Logging.Info("Delete successful")
 
     module Username =
 
-        let private ALPHANUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let private ALPHANUM =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
         let private SPECIAL = "-_' "
         let VALID_CHARACTERS = ALPHANUM + SPECIAL
 
@@ -47,141 +49,112 @@ module Users =
 
         let discord_id_is_taken (discord_id) = (User.by_discord_id discord_id).IsSome
 
-        let REGISTER_LOCK_OBJ = obj()
-        let register(username, discord_id) : Result<string, string> = lock REGISTER_LOCK_OBJ <| fun () ->
-            if (User.by_discord_id discord_id).IsSome then
-                Error "A user is already registered to this Discord account"
-            else
+        let REGISTER_LOCK_OBJ = obj ()
 
-            match Username.check username with
-            | Error reason -> Error(sprintf "Invalid username (%s)" reason)
-            | Ok() ->
+        let register (username, discord_id) : Result<string, string> =
+            lock REGISTER_LOCK_OBJ
+            <| fun () ->
+                if (User.by_discord_id discord_id).IsSome then
+                    Error "A user is already registered to this Discord account"
+                else
 
-            match User.by_username username with
-            | Some _ -> Error "Username is taken!"
-            | None ->
+                match Username.check username with
+                | Error reason -> Error(sprintf "Invalid username (%s)" reason)
+                | Ok() ->
 
-            let user = User.create(username, discord_id)
-            let id = User.save_new user
+                match User.by_username username with
+                | Some _ -> Error "Username is taken!"
+                | None ->
 
-            Logging.Info(
-                sprintf
-                    "New user '%s' registered with id %i to discord id %i"
-                    username
-                    id
-                    discord_id
-            )
+                let user = User.create (username, discord_id)
+                let id = User.save_new user
 
-            Discord.debug_log (sprintf "🥳 New user '%s' registered!" username)
+                Logging.Info(sprintf "New user '%s' registered with id %i to discord id %i" username id discord_id)
 
-            Ok user.AuthToken
+                Discord.debug_log (sprintf "🥳 New user '%s' registered!" username)
 
-        let login_via_token(token) : Result<int64 * string, unit> =
+                Ok user.AuthToken
+
+        let login_via_token (token) : Result<int64 * string, unit> =
             match User.by_auth_token token with
             | Some(id, user) ->
                 User.update_last_seen id
                 Ok(id, user.Username)
-            | None -> Error ()
+            | None -> Error()
 
-        let login_via_discord(discord_id) : Result<string, unit> =
+        let login_via_discord (discord_id) : Result<string, unit> =
             match User.by_discord_id discord_id with
             | Some(id, _) ->
-                let new_token = User.generate_auth_token()
+                let new_token = User.generate_auth_token ()
                 User.set_auth_token (id, new_token)
                 Ok new_token
-            | None -> Error ()
+            | None -> Error()
 
     module DiscordAuthFlow =
 
         [<RequireQualifiedAccess>]
         type private AuthFlowState =
-        | RegisterWaitingCallback of online_session_id: Guid
-        | RegisterWaitingUsername of online_session_id: Guid * discord_id: uint64
-        | LoginWaitingCallback of online_session_id: Guid
+            | RegisterWaitingCallback of online_session_id: Guid
+            | RegisterWaitingUsername of online_session_id: Guid * discord_id: uint64
+            | LoginWaitingCallback of online_session_id: Guid
 
         let private flow_id (session_id: Guid) = session_id.ToString("N")
         let private auth_flows = Dictionary<string, AuthFlowState>()
-        let private AUTH_FLOW_LOCK_OBJ = obj()
+        let private AUTH_FLOW_LOCK_OBJ = obj ()
 
-        let begin_register_with_discord id = lock AUTH_FLOW_LOCK_OBJ <| fun () ->
-            let new_flow = flow_id id
-            auth_flows.[new_flow] <- AuthFlowState.RegisterWaitingCallback id
+        let begin_register_with_discord id =
+            lock AUTH_FLOW_LOCK_OBJ
+            <| fun () ->
+                let new_flow = flow_id id
+                auth_flows.[new_flow] <- AuthFlowState.RegisterWaitingCallback id
 
-            let url =
-                @"https://discord.com/api/oauth2/authorize?client_id=420320424199716864&redirect_uri=https%3A%2F%2F"
-                + SECRETS.ApiBaseUrl
-                + @"%2Fauth%2Fdiscord&response_type=code&scope=identify&state="
-                + new_flow
+                let url =
+                    @"https://discord.com/api/oauth2/authorize?client_id=420320424199716864&redirect_uri=https%3A%2F%2F"
+                    + SECRETS.ApiBaseUrl
+                    + @"%2Fauth%2Fdiscord&response_type=code&scope=identify&state="
+                    + new_flow
 
-            Server.send (id, Downstream.DISCORD_AUTH_URL url)
+                Server.send (id, Downstream.DISCORD_AUTH_URL url)
 
-        let begin_login_with_discord id = lock AUTH_FLOW_LOCK_OBJ <| fun () ->
-            let new_flow = flow_id id
-            auth_flows.[new_flow] <- AuthFlowState.LoginWaitingCallback id
+        let begin_login_with_discord id =
+            lock AUTH_FLOW_LOCK_OBJ
+            <| fun () ->
+                let new_flow = flow_id id
+                auth_flows.[new_flow] <- AuthFlowState.LoginWaitingCallback id
 
-            let url =
-                @"https://discord.com/api/oauth2/authorize?client_id=420320424199716864&redirect_uri=https%3A%2F%2F"
-                + SECRETS.ApiBaseUrl
-                + @"%2Fauth%2Fdiscord&response_type=code&scope=identify&state="
-                + new_flow
+                let url =
+                    @"https://discord.com/api/oauth2/authorize?client_id=420320424199716864&redirect_uri=https%3A%2F%2F"
+                    + SECRETS.ApiBaseUrl
+                    + @"%2Fauth%2Fdiscord&response_type=code&scope=identify&state="
+                    + new_flow
 
-            Server.send (id, Downstream.DISCORD_AUTH_URL url)
+                Server.send (id, Downstream.DISCORD_AUTH_URL url)
 
-        let finish_register_with_discord (id, username) = lock AUTH_FLOW_LOCK_OBJ <| fun () ->
-            let flow_id = flow_id id
-            
-            if not (auth_flows.ContainsKey flow_id) then
-                Server.send (id, Downstream.REGISTRATION_FAILED "This authentication flow has expired")
-                false
-            else
-            
-            match auth_flows.[flow_id] with
-            | AuthFlowState.RegisterWaitingCallback _
-            | AuthFlowState.LoginWaitingCallback _ -> 
-                Server.kick (id, "Unexpected registration packet")
-                false
-            | AuthFlowState.RegisterWaitingUsername(expected_id, discord_id) ->
+        let finish_register_with_discord (id, username) =
+            lock AUTH_FLOW_LOCK_OBJ
+            <| fun () ->
+                let flow_id = flow_id id
 
-            if expected_id <> id then
-                Server.kick (id, "Unexpected registration packet")
-                false
-            else
-
-            match Auth.register (username, discord_id) with
-            | Error reason -> 
-                Server.send (id, Downstream.REGISTRATION_FAILED reason)
-                false
-            | Ok token ->
-
-            auth_flows.Remove(flow_id) |> ignore
-            Server.send (id, Downstream.AUTH_TOKEN token)
-            true
-
-        let receive_discord_callback (flow_id, discord_id, discord_tag) = lock AUTH_FLOW_LOCK_OBJ <| fun () ->
-            if not (auth_flows.ContainsKey flow_id) then
-                false
-            else
-
-            match auth_flows.[flow_id] with
-            | AuthFlowState.RegisterWaitingCallback id ->
-
-                if Auth.discord_id_is_taken(discord_id) then
-                    Logging.Info(sprintf "Discord account %s(%i) is already registered" discord_tag discord_id)
-                    auth_flows.Remove(flow_id) |> ignore
-                    Server.send (id, Downstream.REGISTRATION_FAILED(sprintf "%s is already linked to an existing account" discord_tag))
+                if not (auth_flows.ContainsKey flow_id) then
+                    Server.send (id, Downstream.REGISTRATION_FAILED "This authentication flow has expired")
                     false
                 else
 
-                Logging.Info(sprintf "Ready to link account to %s(%i)" discord_tag discord_id)
-                auth_flows.[flow_id] <- AuthFlowState.RegisterWaitingUsername(id, discord_id)
-                Server.send (id, Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag)
-                true
+                match auth_flows.[flow_id] with
+                | AuthFlowState.RegisterWaitingCallback _
+                | AuthFlowState.LoginWaitingCallback _ ->
+                    Server.kick (id, "Unexpected registration packet")
+                    false
+                | AuthFlowState.RegisterWaitingUsername(expected_id, discord_id) ->
 
-            | AuthFlowState.LoginWaitingCallback id ->
+                if expected_id <> id then
+                    Server.kick (id, "Unexpected registration packet")
+                    false
+                else
 
-                match Auth.login_via_discord(discord_id) with
-                | Error () ->
-                    Server.send (id, Downstream.LOGIN_FAILED "No user is registered to this Discord account")
+                match Auth.register (username, discord_id) with
+                | Error reason ->
+                    Server.send (id, Downstream.REGISTRATION_FAILED reason)
                     false
                 | Ok token ->
 
@@ -189,4 +162,45 @@ module Users =
                 Server.send (id, Downstream.AUTH_TOKEN token)
                 true
 
-            | _ -> false
+        let receive_discord_callback (flow_id, discord_id, discord_tag) =
+            lock AUTH_FLOW_LOCK_OBJ
+            <| fun () ->
+                if not (auth_flows.ContainsKey flow_id) then
+                    false
+                else
+
+                match auth_flows.[flow_id] with
+                | AuthFlowState.RegisterWaitingCallback id ->
+
+                    if Auth.discord_id_is_taken (discord_id) then
+                        Logging.Info(sprintf "Discord account %s(%i) is already registered" discord_tag discord_id)
+                        auth_flows.Remove(flow_id) |> ignore
+
+                        Server.send (
+                            id,
+                            Downstream.REGISTRATION_FAILED(
+                                sprintf "%s is already linked to an existing account" discord_tag
+                            )
+                        )
+
+                        false
+                    else
+
+                    Logging.Info(sprintf "Ready to link account to %s(%i)" discord_tag discord_id)
+                    auth_flows.[flow_id] <- AuthFlowState.RegisterWaitingUsername(id, discord_id)
+                    Server.send (id, Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag)
+                    true
+
+                | AuthFlowState.LoginWaitingCallback id ->
+
+                    match Auth.login_via_discord (discord_id) with
+                    | Error() ->
+                        Server.send (id, Downstream.LOGIN_FAILED "No user is registered to this Discord account")
+                        false
+                    | Ok token ->
+
+                    auth_flows.Remove(flow_id) |> ignore
+                    Server.send (id, Downstream.AUTH_TOKEN token)
+                    true
+
+                | _ -> false

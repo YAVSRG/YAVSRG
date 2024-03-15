@@ -374,13 +374,15 @@ module Input =
             || (this_frame.MouseY <> last_frame.MouseY)
         then
             last_time_mouse_moved <- DateTime.UtcNow.Ticks
-        if events_this_frame <> [] then last_input_event <- DateTime.UtcNow.Ticks
+
+        if events_this_frame <> [] then
+            last_input_event <- DateTime.UtcNow.Ticks
 
         scrolled_this_frame <- this_frame.MouseZ - last_frame.MouseZ
         this_frame_finished <- false
         update_input_listener ()
 
-    let button_pressed_recently() =
+    let button_pressed_recently () =
         (DateTime.UtcNow.Ticks - last_input_event) < 100L * 10_000L
 
 module Mouse =

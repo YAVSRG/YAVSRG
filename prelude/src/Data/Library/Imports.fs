@@ -66,7 +66,7 @@ module Imports =
                     )
                     |> List.ofSeq
                     |> fun charts -> Cache.add_new config.PackName charts cache
-                    // todo: also save the patterns to the pattern store
+                // todo: also save the patterns to the pattern store
                 }
         }
 
@@ -75,14 +75,10 @@ module Imports =
             override this.Handle((path, config, library)) =
                 async {
                     for song_folder in
-                        (
-                            Directory.EnumerateDirectories path
-                            |> 
-                                match config.ChangedAfter with
-                                | None -> id
-                                | Some timestamp -> Seq.filter (fun path -> Directory.GetLastWriteTime path >= timestamp)
-                        )
-                        do
+                        (Directory.EnumerateDirectories path
+                         |> match config.ChangedAfter with
+                            | None -> id
+                            | Some timestamp -> Seq.filter (fun path -> Directory.GetLastWriteTime path >= timestamp)) do
                         do! convert_song_folder.RequestAsync(song_folder, config, library)
                 }
         }
@@ -154,9 +150,7 @@ module Imports =
                             return true
                         | _ ->
                             Logging.Warn(
-                                sprintf
-                                    "%s: Extracted zip does not match the usual structure for a StepMania pack"
-                                    dir
+                                sprintf "%s: Extracted zip does not match the usual structure for a StepMania pack" dir
                             )
 
                             Directory.Delete(dir, true)
@@ -189,9 +183,7 @@ module Imports =
                                 Directory.Exists(dir)
                                 && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
                             then
-                                Logging.Error(
-                                    sprintf "Can't extract zip to %s because that folder exists already" dir
-                                )
+                                Logging.Error(sprintf "Can't extract zip to %s because that folder exists already" dir)
 
                                 return false
                             else

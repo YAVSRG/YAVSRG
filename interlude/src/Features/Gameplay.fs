@@ -166,7 +166,7 @@ module Gameplay =
 
                                 yield
                                     fun () ->
-                                        chart_change_finished.Trigger (create_loaded_chart_info())
+                                        chart_change_finished.Trigger(create_loaded_chart_info ())
                                         on_load_succeeded <- []
                             | Some chart ->
 
@@ -204,7 +204,7 @@ module Gameplay =
                                     RATING <- Some rating
                                     PATTERNS <- Some patterns
                                     FMT_NOTECOUNTS <- Some note_counts
-                                    chart_change_finished.Trigger  (create_loaded_chart_info())
+                                    chart_change_finished.Trigger(create_loaded_chart_info ())
 
                             yield
                                 fun () ->
@@ -213,7 +213,7 @@ module Gameplay =
 
                                     on_load_succeeded <- []
                         }
-                    | Update (is_interrupted_load, rate, mods) ->
+                    | Update(is_interrupted_load, rate, mods) ->
                         seq {
                             match CHART with
                             | None -> ()
@@ -236,7 +236,7 @@ module Gameplay =
                                     FMT_NOTECOUNTS <- Some note_counts
 
                                     if is_interrupted_load then
-                                        chart_change_finished.Trigger (create_loaded_chart_info())
+                                        chart_change_finished.Trigger(create_loaded_chart_info ())
 
                             yield
                                 fun () ->
@@ -265,7 +265,7 @@ module Gameplay =
                 override this.Handle(action) = action ()
             }
 
-        let keymode() : Keymode =
+        let keymode () : Keymode =
             match CACHE_DATA with
             | Some cc -> cc.Keys |> enum
             | None -> Keymode.``4K``
@@ -286,10 +286,11 @@ module Gameplay =
 
             WITH_COLORS <- None
 
-            chart_change_started.Trigger {
-                CacheInfo = cc
-                LibraryContext = LIBRARY_CTX
-            }
+            chart_change_started.Trigger
+                {
+                    CacheInfo = cc
+                    LibraryContext = LIBRARY_CTX
+                }
 
             FMT_DURATION <- format_duration CACHE_DATA
             FMT_BPM <- format_bpm CACHE_DATA
@@ -313,7 +314,7 @@ module Gameplay =
 
                 WITH_COLORS <- None
 
-                chart_loader.Request(Update (is_interrupted, _rate.Value, _selected_mods.Value))
+                chart_loader.Request(Update(is_interrupted, _rate.Value, _selected_mods.Value))
 
         let recolor () =
             if WITH_MODS.IsSome then
@@ -324,27 +325,26 @@ module Gameplay =
 
         let if_loading (action: LoadingChartInfo -> unit) =
             if CACHE_DATA.IsSome then
-                action {
-                    CacheInfo = CACHE_DATA.Value
-                    LibraryContext = LIBRARY_CTX
-                }
+                action
+                    {
+                        CacheInfo = CACHE_DATA.Value
+                        LibraryContext = LIBRARY_CTX
+                    }
 
         let if_loaded (action: LoadedChartInfo -> unit) =
-            if WITH_COLORS.IsSome then 
-                action (create_loaded_chart_info())
+            if WITH_COLORS.IsSome then
+                action (create_loaded_chart_info ())
 
         let when_loaded (action: LoadedChartInfo -> unit) =
             if WITH_COLORS.IsSome then
-                action (create_loaded_chart_info())
+                action (create_loaded_chart_info ())
             else
-                on_load_succeeded <- (fun () -> 
-                    action (create_loaded_chart_info())
-                ) :: on_load_succeeded
+                on_load_succeeded <- (fun () -> action (create_loaded_chart_info ())) :: on_load_succeeded
 
-        let color_this_chart(with_mods: ModdedChart) =
+        let color_this_chart (with_mods: ModdedChart) =
             apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
-        let init_window() = sync_forever chart_loader.Join
+        let init_window () = sync_forever chart_loader.Join
 
     let collections_on_rate_changed (library_ctx: LibraryContext) (v: float32) =
         match library_ctx with
@@ -356,7 +356,11 @@ module Gameplay =
         | LibraryContext.Playlist(_, _, d) -> d.Mods.Value <- mods
         | _ -> ()
 
-    let collections_on_chart_changed (library_ctx: LibraryContext) (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
+    let collections_on_chart_changed
+        (library_ctx: LibraryContext)
+        (rate: Setting.Bounded<float32>)
+        (mods: Setting<ModState>)
+        =
         match library_ctx with
         | LibraryContext.Playlist(_, _, d) ->
             rate.Value <- d.Rate.Value
@@ -365,37 +369,45 @@ module Gameplay =
 
     let presets_on_chart_changed =
         let mutable previous_keymode = None
+
         fun (cc: CachedChart) ->
             match previous_keymode with
             | Some k when k <> cc.Keys -> Presets.keymode_changed cc.Keys
             | _ -> ()
+
             previous_keymode <- Some cc.Keys
 
     let rate =
         Chart._rate
         |> Setting.trigger (fun v ->
-            Chart.if_loading <| fun info ->
-            collections_on_rate_changed info.LibraryContext v
-            Song.change_rate v
-            Chart.update ()
+            Chart.if_loading
+            <| fun info ->
+                collections_on_rate_changed info.LibraryContext v
+                Song.change_rate v
+                Chart.update ()
         )
 
     let selected_mods =
         Chart._selected_mods
         |> Setting.trigger (fun mods ->
-            Chart.if_loading <| fun info ->
-            collections_on_mods_changed info.LibraryContext mods
-            Chart.update ()
+            Chart.if_loading
+            <| fun info ->
+                collections_on_mods_changed info.LibraryContext mods
+                Chart.update ()
         )
 
-    let score_info_from_gameplay (info: Chart.LoadedChartInfo) (scoring: ScoreMetric) (replay_data: ReplayData) : ScoreInfo =
+    let score_info_from_gameplay
+        (info: Chart.LoadedChartInfo)
+        (scoring: ScoreMetric)
+        (replay_data: ReplayData)
+        : ScoreInfo =
         {
             CachedChart = info.CacheInfo
             Chart = info.Chart
             WithMods = info.WithMods
 
             PlayedBy = ScorePlayedBy.You
-            TimePlayed = Timestamp.now()
+            TimePlayed = Timestamp.now ()
             Rate = rate.Value
 
             Replay = replay_data
@@ -405,12 +417,13 @@ module Gameplay =
 
             Rating = info.Rating
             Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
-            
+
             ImportedFromOsu = false
         }
 
     let set_score (met_pacemaker: bool) (score_info: ScoreInfo) (save_data: ChartSaveData) : ImprovementFlags =
         let mod_status = score_info.ModStatus()
+
         if
             mod_status < ModStatus.Unstored
             && (options.SaveScoreIfUnderPace.Value || met_pacemaker)
@@ -430,8 +443,7 @@ module Gameplay =
 
                 let new_bests, improvement_flags =
                     match Map.tryFind Rulesets.current_hash save_data.PersonalBests with
-                    | Some existing_bests ->
-                        Bests.update score_info existing_bests
+                    | Some existing_bests -> Bests.update score_info existing_bests
                     | None -> Bests.create score_info, ImprovementFlags.New
 
                 // todo: option to only save a score if it's an improvement on an old one
@@ -447,13 +459,13 @@ module Gameplay =
             ImprovementFlags.None
 
     module Endless =
-    
+
         // todo: remove the holes from this system by making a proper way to wait for song to load
         let rec retry_until_song_loaded (info: Chart.LoadedChartInfo) (action: Chart.LoadedChartInfo -> bool) =
             if not (action info) then
                 sync (fun () -> retry_until_song_loaded info action)
 
-        let mutable private state : EndlessModeState option = None
+        let mutable private state: EndlessModeState option = None
 
         let begin_endless_mode (initial_state: EndlessModeState) = state <- Some initial_state
 
@@ -466,13 +478,13 @@ module Gameplay =
                 | Some next ->
                     Chart._rate.Set next.Rate
                     Chart._selected_mods.Set next.Mods
-                    Chart.change(next.Chart, LibraryContext.None, false)
+                    Chart.change (next.Chart, LibraryContext.None, false)
                     Chart.when_loaded <| (fun info -> retry_until_song_loaded info when_loaded)
                     state <- Some next.NewState
                     true
                 | None ->
                     Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
-                    exit_endless_mode()
+                    exit_endless_mode ()
                     false
             | None -> false
 
@@ -495,27 +507,24 @@ module Gameplay =
                     replays.Add(
                         username,
                         let scoring =
-                            Metrics.create
-                                Rulesets.current
-                                info.WithMods.Keys
-                                replay
-                                info.WithMods.Notes
-                                rate.Value
+                            Metrics.create Rulesets.current info.WithMods.Keys replay info.WithMods.Notes rate.Value
 
                         scoring,
                         fun () ->
                             if not (replay :> IReplayProvider).Finished then
                                 replay.Finish()
+
                             scoring.Update Time.infinity
 
                             let replay_data = (replay :> IReplayProvider).GetFullReplay()
+
                             {
                                 CachedChart = info.CacheInfo
                                 Chart = info.Chart
                                 WithMods = info.WithMods
 
                                 PlayedBy = ScorePlayedBy.Username username
-                                TimePlayed = Timestamp.now()
+                                TimePlayed = Timestamp.now ()
                                 Rate = rate.Value
 
                                 Replay = replay_data
@@ -533,32 +542,34 @@ module Gameplay =
         let add_own_replay (info: Chart.LoadedChartInfo, scoring: ScoreMetric, replay: LiveReplayProvider) =
             replays.Add(
                 Network.credentials.Username,
-                (scoring, fun () ->
-                    if not (replay :> IReplayProvider).Finished then
-                        replay.Finish()
-                    scoring.Update Time.infinity
+                (scoring,
+                 fun () ->
+                     if not (replay :> IReplayProvider).Finished then
+                         replay.Finish()
 
-                    let replay_data = (replay :> IReplayProvider).GetFullReplay()
-                    {
-                        CachedChart = info.CacheInfo
-                        Chart = info.Chart
-                        WithMods = info.WithMods
+                     scoring.Update Time.infinity
 
-                        PlayedBy = ScorePlayedBy.You
-                        TimePlayed = Timestamp.now()
-                        Rate = rate.Value
+                     let replay_data = (replay :> IReplayProvider).GetFullReplay()
 
-                        Replay = replay_data
-                        Scoring = scoring
-                        Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
-                        Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+                     {
+                         CachedChart = info.CacheInfo
+                         Chart = info.Chart
+                         WithMods = info.WithMods
 
-                        Rating = info.Rating
-                        Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
-                        
-                        ImportedFromOsu = false
-                    }
-                )
+                         PlayedBy = ScorePlayedBy.You
+                         TimePlayed = Timestamp.now ()
+                         Rate = rate.Value
+
+                         Replay = replay_data
+                         Scoring = scoring
+                         Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
+                         Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+
+                         Rating = info.Rating
+                         Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
+
+                         ImportedFromOsu = false
+                     })
             )
 
         let init_window () =
@@ -572,14 +583,16 @@ module Gameplay =
         | None ->
             Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
 
-            match 
-                Suggestion.get_random [] {
-                    Rate = rate.Value
-                    RulesetId = Rulesets.current_hash
-                    Ruleset = Rulesets.current
-                    Library = Content.Library
-                    ScoreDatabase = Content.Scores
-                }
+            match
+                Suggestion.get_random
+                    []
+                    {
+                        Rate = rate.Value
+                        RulesetId = Rulesets.current_hash
+                        Ruleset = Rulesets.current
+                        Library = Content.Library
+                        ScoreDatabase = Content.Scores
+                    }
             with
             | Some cc -> Chart.change (cc, LibraryContext.None, true)
             | None ->
@@ -587,7 +600,10 @@ module Gameplay =
                 Background.load None
 
         Multiplayer.init_window ()
-        Chart.init_window()
+        Chart.init_window ()
 
-        Chart.on_chart_change_started.Add(fun info -> collections_on_chart_changed info.LibraryContext Chart._rate Chart._selected_mods)
+        Chart.on_chart_change_started.Add(fun info ->
+            collections_on_chart_changed info.LibraryContext Chart._rate Chart._selected_mods
+        )
+
         Chart.on_chart_change_started.Add(fun info -> presets_on_chart_changed info.CacheInfo)

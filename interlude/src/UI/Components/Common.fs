@@ -17,7 +17,10 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
     let ticker = Animation.Counter(600.0)
 
     let toggle () =
-        if this.Selected then this.Focus false else this.Select false
+        if this.Selected then
+            this.Focus false
+        else
+            this.Select false
 
     member val Clickable = true with get, set
 
@@ -42,17 +45,20 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
 
         if this.Clickable then
             this.Add(
-                Clickable.Focus(this,
-                    OnHover = (fun b -> 
-                        if b && not this.Focused then 
-                            this.Focus true
-                        elif not b && not focus_trap && this.FocusedByMouse then
-                            Selection.up true),
+                Clickable.Focus(
+                    this,
+                    OnHover =
+                        (fun b ->
+                            if b && not this.Focused then
+                                this.Focus true
+                            elif not b && not focus_trap && this.FocusedByMouse then
+                                Selection.up true
+                        ),
                     OnRightClick = (fun () -> setting.Set "")
                 )
             )
 
-    override this.OnSelected (by_mouse: bool) =
+    override this.OnSelected(by_mouse: bool) =
         base.OnSelected by_mouse
         Style.text_open.Play()
 
@@ -64,7 +70,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
                     this.Focus true
         )
 
-    override this.OnDeselected (by_mouse: bool) =
+    override this.OnDeselected(by_mouse: bool) =
         base.OnDeselected by_mouse
         Style.text_close.Play()
         Input.remove_listener ()
@@ -113,8 +119,8 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
         )
 
         base.Init parent
-        
-    override this.OnFocus (by_mouse: bool) =
+
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -155,8 +161,8 @@ type InlaidButton(label, action, icon) =
         )
 
         base.Init parent
-        
-    override this.OnFocus (by_mouse: bool) =
+
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -194,7 +200,7 @@ module RadioButtons =
         }
 
     let private create_button (label: string) (value: 'T) (setting: Setting<'T>) (disabled: unit -> bool) =
-        { new Button(label, fun () -> setting.Set value) with
+        { new Button(label, (fun () -> setting.Set value)) with
             override this.Init(parent) =
                 this.Disabled <- disabled
                 base.Init parent
@@ -205,6 +211,7 @@ module RadioButtons =
                     Draw.rect this.Bounds Colors.pink_shadow.O2
                 else
                     Draw.rect this.Bounds Colors.shadow_2.O3
+
                 base.Draw()
         }
 
@@ -226,30 +233,32 @@ module LoadingIndicator =
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
             animation.Update elapsed_ms
-            fade.Target <- if is_loading() then 1.0f else 0.0f
+            fade.Target <- if is_loading () then 1.0f else 0.0f
             fade.Update elapsed_ms
 
         override this.Draw() =
-            if fade.Alpha = 0 then () else
+            if fade.Alpha = 0 then
+                ()
+            else
 
-            let tick_width = this.Bounds.Width * 0.2f
+                let tick_width = this.Bounds.Width * 0.2f
 
-            let pos =
-                -tick_width
-                + (this.Bounds.Width + tick_width) * float32 animation.Time / 1500.0f
+                let pos =
+                    -tick_width
+                    + (this.Bounds.Width + tick_width) * float32 animation.Time / 1500.0f
 
-            Draw.rect
-                (Rect.Create(
-                    this.Bounds.Left + max 0.0f pos,
-                    this.Bounds.Top,
-                    this.Bounds.Left + min this.Bounds.Width (pos + tick_width),
-                    this.Bounds.Bottom
-                ))
-                (Colors.white.O4a fade.Alpha)
+                Draw.rect
+                    (Rect.Create(
+                        this.Bounds.Left + max 0.0f pos,
+                        this.Bounds.Top,
+                        this.Bounds.Left + min this.Bounds.Width (pos + tick_width),
+                        this.Bounds.Bottom
+                    ))
+                    (Colors.white.O4a fade.Alpha)
 
     type Border(is_loading: unit -> bool) =
         inherit StaticWidget(NodeType.None)
-        
+
         let animation = Animation.Counter(1500.0)
         let fade = Animation.Fade 0.0f
 
@@ -265,11 +274,15 @@ module LoadingIndicator =
             if b > 1.0f || a < corner_1 then
                 Draw.rect
                     (Rect.Create(
-                        (if b > 1.0f then bounds.Left else bounds.Left + a * perimeter),
+                        (if b > 1.0f then
+                             bounds.Left
+                         else
+                             bounds.Left + a * perimeter),
                         bounds.Top,
                         bounds.Left + (b % 1.0f) * perimeter |> min bounds.Right,
-                        bounds.Top + Style.PADDING)
-                    ) color
+                        bounds.Top + Style.PADDING
+                    ))
+                    color
 
             if b > corner_1 && a < corner_2 then
                 Draw.rect
@@ -277,42 +290,47 @@ module LoadingIndicator =
                         bounds.Right - Style.PADDING,
                         bounds.Top + (a - corner_1) * perimeter |> max bounds.Top,
                         bounds.Right,
-                        bounds.Top + (b - corner_1) * perimeter |> min bounds.Bottom)
-                    ) color
-                    
+                        bounds.Top + (b - corner_1) * perimeter |> min bounds.Bottom
+                    ))
+                    color
+
             if b > corner_2 && a < corner_3 then
                 Draw.rect
                     (Rect.Create(
                         bounds.Right - (a - corner_2) * perimeter |> min bounds.Right,
                         bounds.Bottom - Style.PADDING,
                         bounds.Right - (b - corner_2) * perimeter |> max bounds.Left,
-                        bounds.Bottom)
-                    ) color
-            
+                        bounds.Bottom
+                    ))
+                    color
+
             if b > corner_3 && a < 1.0f then
                 Draw.rect
                     (Rect.Create(
                         bounds.Left,
                         bounds.Bottom - (a - corner_3) * perimeter |> min bounds.Bottom,
                         bounds.Left + Style.PADDING,
-                        bounds.Bottom - (b - corner_3) * perimeter |> max bounds.Top)
-                    ) color
-        
+                        bounds.Bottom - (b - corner_3) * perimeter |> max bounds.Top
+                    ))
+                    color
+
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
             animation.Update elapsed_ms
-            fade.Target <- if is_loading() then 1.0f else 0.0f
+            fade.Target <- if is_loading () then 1.0f else 0.0f
             fade.Update elapsed_ms
-        
-        override this.Draw() =
-            if fade.Alpha = 0 then () else
 
-            let b = this.Bounds.Expand(Style.PADDING)
-            let x = float32 (animation.Time / animation.Interval)
-            let color = Colors.white.O4a fade.Alpha
-            draw b x 0.1f color
-            draw b (x + 0.333f) 0.1f color
-            draw b (x + 0.666f) 0.1f color
+        override this.Draw() =
+            if fade.Alpha = 0 then
+                ()
+            else
+
+                let b = this.Bounds.Expand(Style.PADDING)
+                let x = float32 (animation.Time / animation.Interval)
+                let color = Colors.white.O4a fade.Alpha
+                draw b x 0.1f color
+                draw b (x + 0.333f) 0.1f color
+                draw b (x + 0.666f) 0.1f color
 
 type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit FrameContainer(NodeType.Container(fun _ -> Some this.TextEntry))
@@ -376,7 +394,8 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
             search_timer.Reset()
             callback ()
         // eat a button press for some trigger happy users
-        elif search_timer.IsRunning && (%%"select").Tapped() then ()
+        elif search_timer.IsRunning && (%%"select").Tapped() then
+            ()
 
 type WIP() as this =
     inherit StaticWidget(NodeType.None)

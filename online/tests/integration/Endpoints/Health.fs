@@ -10,9 +10,11 @@ module Health =
     let Status () =
         use done_signal = new AutoResetEvent(false)
 
-        Health.Status.get (Option.get >> fun (res: Health.Status.Response) -> 
-            printfn "%s" res.Status
-            done_signal.Set() |> ignore
+        Health.Status.get (
+            Option.get
+            >> fun (res: Health.Status.Response) ->
+                printfn "%s" res.Status
+                done_signal.Set() |> ignore
         )
 
         Assert.IsTrue(done_signal.WaitOne(500))

@@ -8,7 +8,7 @@ open Prelude.Data
 [<SetUpFixture>]
 type Setup() =
 
-    let mutable conn : IDisposable = Unchecked.defaultof<_>
+    let mutable conn: IDisposable = Unchecked.defaultof<_>
 
     [<OneTimeSetUp>]
     member _.Setup() =
@@ -17,10 +17,10 @@ type Setup() =
         conn <- _conn // in-memory database persists until teardown where it gets disposed
 
     [<OneTimeTearDown>]
-    member _.Teardown() =
-        conn.Dispose()
+    member _.Teardown() = conn.Dispose()
 
 [<AutoOpen>]
 module Helpers =
 
-    let in_memory () = Percyqaz.Data.Sqlite.Database.in_memory "interlude"
+    let in_memory () =
+        Percyqaz.Data.Sqlite.Database.in_memory "interlude"

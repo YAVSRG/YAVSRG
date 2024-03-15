@@ -15,6 +15,7 @@ module Backbeat =
     let rulesets = Dictionary<string, Ruleset>()
     let mutable songs = Songs()
     let mutable charts = Charts()
+
     let mutable packs =
         {
             Stepmania = new Dictionary<StepmaniaPackId, StepmaniaPack>()
@@ -23,49 +24,56 @@ module Backbeat =
 
     let init () =
         async {
-            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/songs.json" with
+            match!
+                WebServices.download_json_async
+                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/songs.json"
+            with
             | None -> failwith "Failed to download backbeat songs"
             | Some _songs ->
 
-            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/charts.json" with
+            match!
+                WebServices.download_json_async
+                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/charts.json"
+            with
             | None -> failwith "Failed to download backbeat charts"
             | Some _charts ->
-            
-            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/packs.json" with
+
+            match!
+                WebServices.download_json_async
+                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/packs.json"
+            with
             | None -> failwith "Failed to download backbeat packs"
             | Some _packs ->
 
-            match! WebServices.download_json_async "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json" with
+            match!
+                WebServices.download_json_async
+                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json"
+            with
             | None -> failwith "Failed to download backbeat rulesets"
             | Some(archive: PrefabRulesets.Repo) ->
-            
+
             packs <- _packs
             charts <- _charts
             songs <- _songs
 
-            Logging.Info(
-                sprintf
-                    "Backbeat downloads complete, %i Charts and %i Songs"
-                    charts.Count
-                    songs.Count
-            )
-            
+            Logging.Info(sprintf "Backbeat downloads complete, %i Charts and %i Songs" charts.Count songs.Count)
+
             for rs in archive.Rulesets.Values do
                 rulesets.[Ruleset.hash rs] <- rs
         }
 
     module Tables =
 
-        let CRESCENT : TableInfo =
+        let CRESCENT: TableInfo =
             {
                 Name = "Crescent"
                 Description = "A variety of interesting 4K charts to improve your skills with!"
                 Keymode = 4
                 RulesetId = Score.PRIMARY_RULESET
                 RatingCalculation = TableRatingCalculation.AverageTop50
-                Sections = 
+                Sections =
                     [
-                        { 
+                        {
                             Name = "ROOKIE"
                             Description = "Charts for complete beginners to get into the game!"
                             Color = 0xFF_43ef70
@@ -73,7 +81,7 @@ module Backbeat =
                             LevelStart = 0
                             LevelEnd = 9
                         }
-                        { 
+                        {
                             Name = "ADVANCED"
                             Description = "Charts that should be interesting and challenging to an experienced player."
                             Color = 0xFF_43e0ef
@@ -81,39 +89,44 @@ module Backbeat =
                             LevelStart = 10
                             LevelEnd = 19
                         }
-                        { 
+                        {
                             Name = "EXPERT"
-                            Description = "Fast, tiring, and technical charts for those who have played a serious amount of 4K."
+                            Description =
+                                "Fast, tiring, and technical charts for those who have played a serious amount of 4K."
                             Color = 0xFF_ef5d57
 
                             LevelStart = 20
                             LevelEnd = 29
                         }
-                        { 
+                        {
                             Name = "XTREME"
-                            Description = "Extremely difficult charts to push even the most powerful keyboard smashers to their limit!"
+                            Description =
+                                "Extremely difficult charts to push even the most powerful keyboard smashers to their limit!"
                             Color = 0xFF_ff85c0
 
                             LevelStart = 30
                             LevelEnd = 39
                         }
                     ]
-                LevelDisplayNames = 
-                    Map.ofSeq 
+                LevelDisplayNames =
+                    Map.ofSeq
                     <| seq {
                         for i = 0 to 9 do
                             yield i, sprintf "R-%02i" i
+
                         for i = 10 to 19 do
                             yield i, sprintf "A-%02i" i
+
                         for i = 20 to 29 do
                             yield i, sprintf "E-%02i" i
+
                         for i = 30 to 39 do
                             yield i, sprintf "X-%02i" i
                     }
             }
 
         // table ids must be lowercase
-        let TABLES : Map<string, TableInfo> = Map.ofList [ "crescent", CRESCENT ]
+        let TABLES: Map<string, TableInfo> = Map.ofList [ "crescent", CRESCENT ]
 
         let exists (table_id: string) = TABLES.ContainsKey table_id
 

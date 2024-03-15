@@ -7,7 +7,7 @@ open Prelude.Gameplay
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
-module Scores = 
+module Scores =
 
     module Scores = Interlude.Web.Tests.Domain.Core.Scores
 
@@ -16,22 +16,40 @@ module Scores =
         match Replay.decompress_string_untrusted 200000.0f<ms> Scores.CRESCENT_MOON_REPLAY_STRING with
         | Ok _ -> Assert.Pass()
         | Error e -> Assert.Fail(e)
-    
+
     [<Test>]
     let ScoreSubmission_HappyPath () =
         let user = User.create ("ScoreSubmissionHappyPath", 999999uL)
         let user_id = User.save_new user
 
-        let result = Scores.submit(user_id, Scores.CRESCENT_MOON, Scores.CRESCENT_MOON_REPLAY_STRING, 1.0f, Map.empty, Scores.TIMEPLAYED) |> Async.RunSynchronously
+        let result =
+            Scores.submit (
+                user_id,
+                Scores.CRESCENT_MOON,
+                Scores.CRESCENT_MOON_REPLAY_STRING,
+                1.0f,
+                Map.empty,
+                Scores.TIMEPLAYED
+            )
+            |> Async.RunSynchronously
 
         printfn "%A" result
-    
+
     [<Test>]
     let ScoreSubmission_FakeData () =
         let user = User.create ("ScoreSubmissionFakeData", 999999uL)
         let user_id = User.save_new user
 
-        let result = Scores.submit(user_id, Scores.CRESCENT_MOON, "FAKEREPLAYDATAFAKEREPLAYDATA", 1.0f, Map.empty, Scores.TIMEPLAYED) |> Async.RunSynchronously
+        let result =
+            Scores.submit (
+                user_id,
+                Scores.CRESCENT_MOON,
+                "FAKEREPLAYDATAFAKEREPLAYDATA",
+                1.0f,
+                Map.empty,
+                Scores.TIMEPLAYED
+            )
+            |> Async.RunSynchronously
 
         printfn "%A" result
 
@@ -40,6 +58,15 @@ module Scores =
         let user = User.create ("ScoreSubmissionBadModCombo", 999999uL)
         let user_id = User.save_new user
 
-        let result = Scores.submit(user_id, Scores.CRESCENT_MOON, Scores.CRESCENT_MOON_REPLAY_STRING, 1.0f, Map.ofList ["invalid", 999], Scores.TIMEPLAYED) |> Async.RunSynchronously
+        let result =
+            Scores.submit (
+                user_id,
+                Scores.CRESCENT_MOON,
+                Scores.CRESCENT_MOON_REPLAY_STRING,
+                1.0f,
+                Map.ofList [ "invalid", 999 ],
+                Scores.TIMEPLAYED
+            )
+            |> Async.RunSynchronously
 
         printfn "%A" result

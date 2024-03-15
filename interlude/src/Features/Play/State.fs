@@ -25,7 +25,8 @@ type PlayState =
         Pacemaker: PacemakerInfo
     }
     member this.Ruleset = this.Scoring.Ruleset
-    static member Dummy (info: LoadedChartInfo) =
+
+    static member Dummy(info: LoadedChartInfo) =
         let s = Metrics.create_dummy info.WithMods
 
         {

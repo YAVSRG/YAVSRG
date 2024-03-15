@@ -329,9 +329,9 @@ module HUD =
                     }
             }
 
-    // todo: song info
-    // todo: real time clock
-    // todo: multiplayer player list
+// todo: song info
+// todo: real time clock
+// todo: multiplayer player list
 
 [<Json.AutoCodec(false)>]
 type HUD =

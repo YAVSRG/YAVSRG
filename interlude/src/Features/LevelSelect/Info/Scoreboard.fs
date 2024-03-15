@@ -133,7 +133,7 @@ module Scoreboard =
                         Bottom = 0.6f %+ 0.0f
                     }
             )
-            
+
             |* Clickable.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
 
             base.Init parent
@@ -142,7 +142,7 @@ module Scoreboard =
 
         member this.FadeOut() = fade.Target <- 0.0f
 
-        override this.OnFocus (by_mouse: bool) =
+        override this.OnFocus(by_mouse: bool) =
             base.OnFocus by_mouse
             Style.hover.Play()
 
@@ -175,7 +175,8 @@ module Scoreboard =
                 member this.Process(req: Request) =
                     seq {
                         for score in req.ChartSaveData.Scores do
-                            let score_info = ScoreInfo.from_score req.CachedChart req.CurrentChart req.Ruleset score
+                            let score_info =
+                                ScoreInfo.from_score req.CachedChart req.CurrentChart req.Ruleset score
 
                             if score_info.ModStatus() = Mods.ModStatus.Ranked then
                                 req.NewBests <-
@@ -193,6 +194,7 @@ module Scoreboard =
                         | Some new_bests ->
                             let old_bests = req.ChartSaveData.PersonalBests
                             let new_bests = Map.add req.RulesetId new_bests old_bests
+
                             if new_bests <> old_bests then
                                 req.ChartSaveData.PersonalBests <- new_bests
                                 yield fun () -> LevelSelect.refresh_details ()
@@ -243,11 +245,7 @@ type Scoreboard(display: Setting<Display>) as this =
         | _ -> K true
 
     let scroll_container =
-        ScrollContainer(
-            Loader.container,
-            Margin = Style.PADDING,
-            Position = Position.TrimTop(55.0f).TrimBottom(50.0f)
-        )
+        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
 
     do
         Chart.on_chart_change_started.Add(fun info ->
@@ -332,11 +330,10 @@ type Scoreboard(display: Setting<Display>) as this =
 
     member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
         if
-            (
-                let v = info.SaveData.Scores.Length <> count in
-                count <- info.SaveData.Scores.Length
-                v
-            ) || info.CacheInfo.Hash <> last_loaded
+            (let v = info.SaveData.Scores.Length <> count in
+             count <- info.SaveData.Scores.Length
+             v)
+            || info.CacheInfo.Hash <> last_loaded
         then
             last_loaded <- info.CacheInfo.Hash
             Loader.load info

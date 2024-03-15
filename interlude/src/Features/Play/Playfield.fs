@@ -20,12 +20,12 @@ type private StageLeft() =
     override this.Draw() =
         let width = sprite.AspectRatio * this.Bounds.Height
         Draw.sprite (Rect.Box(this.Bounds.Left - width, this.Bounds.Top, width, this.Bounds.Height)) Color.White sprite
-        
+
 type private StageRight() =
     inherit StaticWidget(NodeType.None)
-        
+
     let sprite = Content.Texture "stageright"
-        
+
     override this.Draw() =
         let width = sprite.AspectRatio * this.Bounds.Height
         Draw.sprite (Rect.Box(this.Bounds.Right, this.Bounds.Top, width, this.Bounds.Height)) Color.White sprite
@@ -36,8 +36,7 @@ type private HoldRenderState =
     | HeadOnscreen of pos: float32 * index: int
     | NoHold
 
-type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinConfig, vanishing_notes: bool) as this
-    =
+type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinConfig, vanishing_notes: bool) as this =
     inherit StaticContainer(NodeType.None)
 
     let keys = chart.Keys
@@ -122,9 +121,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             noteskin_config.PlayfieldAlignment
 
         if noteskin_config.EnableStageTextures then
-            this
-            |+ StageLeft()
-            |* StageRight()
+            this |+ StageLeft() |* StageRight()
+
         this.Position <-
             {
                 Left = screen_align_percentage %- (width * playfield_align_percentage)
@@ -161,6 +159,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         if now < time then
             handle_seek_back_in_time ()
+
         time <- now
 
         let begin_time =
@@ -342,8 +341,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                             let tailpos = column_pos - holdnote_trim
                             let headpos = if hold_state.ShowInReceptor then hitposition else begin_pos
 
-                            let head_and_body_color =
-                                let colors = chart.Colors.[i].Data in int colors.[k]
+                            let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
                             if headpos < tailpos then
                                 draw_body (k, headpos, tailpos, head_and_body_color, tint)
@@ -377,8 +375,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                                 else
                                     headpos
 
-                            let head_and_body_color =
-                                let colors = chart.Colors.[i].Data in int colors.[k]
+                            let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
                             if headpos < tailpos then
                                 draw_body (k, headpos, tailpos, head_and_body_color, tint)
@@ -411,8 +408,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     let tailpos = bottom
                     let headpos = if hold_state.ShowInReceptor then hitposition else begin_pos
 
-                    let head_and_body_color =
-                        let colors = chart.Colors.[i].Data in int colors.[k]
+                    let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
                     if headpos < tailpos then
                         draw_body (k, headpos, tailpos, head_and_body_color, tint)
@@ -443,8 +439,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                         else
                             headpos
 
-                    let head_and_body_color =
-                        let colors = chart.Colors.[i].Data in int colors.[k]
+                    let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
                     if headpos < tailpos then
                         draw_body (k, headpos, tailpos, head_and_body_color, tint)

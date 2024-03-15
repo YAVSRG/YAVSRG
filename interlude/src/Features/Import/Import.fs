@@ -29,7 +29,8 @@ module ImportScreen =
 type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
     inherit StaticContainer(NodeType.Container(fun _ -> Some this.Button))
 
-    let button = Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f, 5.0f))
+    let button =
+        Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f, 5.0f))
 
     member this.Button = button
 
@@ -37,6 +38,7 @@ type private TabButton(icon: string, name: string, container: SwapContainer, tar
         if container.Current = target then
             Draw.rect this.Bounds Colors.shadow_2.O3
             Draw.rect (this.Bounds.Expand(Style.PADDING, 0.0f).SliceLeft(Style.PADDING)) !*Palette.MAIN
+
         base.Draw()
 
     override this.Init(parent) =
@@ -60,10 +62,25 @@ type private Sidebar() as this =
         this
         |+ Text(%"menu.import.name", Position = Position.SliceTop(80.0f).Margin(20.0f, 10.0f))
         |+ Text(
-            (fun () -> if ImportScreen.something_in_progress() then %"imports.in_progress" else %"imports.not_in_progress"), 
-            Color = (fun () -> if ImportScreen.something_in_progress() then Colors.text_green else Colors.text_subheading), 
-            Position = Position.TrimTop(60.0f).SliceTop(50.0f).Margin(20.0f, 5.0f))
-        |+ LoadingIndicator.Strip(ImportScreen.something_in_progress, Position = Position.Row(110.0f, Style.PADDING).Margin(20.0f, 0.0f))
+            (fun () ->
+                if ImportScreen.something_in_progress () then
+                    %"imports.in_progress"
+                else
+                    %"imports.not_in_progress"
+            ),
+            Color =
+                (fun () ->
+                    if ImportScreen.something_in_progress () then
+                        Colors.text_green
+                    else
+                        Colors.text_subheading
+                ),
+            Position = Position.TrimTop(60.0f).SliceTop(50.0f).Margin(20.0f, 5.0f)
+        )
+        |+ LoadingIndicator.Strip(
+            ImportScreen.something_in_progress,
+            Position = Position.Row(110.0f, Style.PADDING).Margin(20.0f, 0.0f)
+        )
         |* flow
 
     member this.Flow = flow
@@ -72,20 +89,14 @@ type private Sidebar() as this =
         Draw.rect this.Bounds Colors.shadow_2.O1
         Draw.rect (this.Bounds.Expand(Style.PADDING, 0.0f).SliceRight(Style.PADDING)) !*Palette.MAIN_100
         base.Draw()
-        
+
 
 type ImportScreen() as this =
     inherit Screen()
 
     let sidebar = Sidebar(Position = Position.SliceLeft(400.0f))
 
-    do 
-        this
-        |* (
-            NavigationContainer.Row<Widget>()
-            |+ sidebar
-            |+ ImportScreen.container
-        )
+    do this |* (NavigationContainer.Row<Widget>() |+ sidebar |+ ImportScreen.container)
 
     override this.OnEnter _ =
         sidebar.Focus false

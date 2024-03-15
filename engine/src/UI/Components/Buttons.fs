@@ -19,7 +19,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
 
     new(text: string, on_click: unit -> unit) = Button(K text, on_click)
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -63,7 +63,7 @@ type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click
 
     new(text: string, icon, icon_size, on_click: unit -> unit) = IconButton(K text, icon, icon_size, on_click)
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 

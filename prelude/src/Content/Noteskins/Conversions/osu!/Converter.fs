@@ -20,10 +20,9 @@ module OsuSkinConverter =
 
     let get_single_filename (id: string, path: string) : string option =
         let file = Path.Combine(path, id)
-        if File.Exists(file + "@2x.png") then
-            Some (file + "@2x.png")
-        elif File.Exists(file + ".png") then
-            Some (file + ".png")
+
+        if File.Exists(file + "@2x.png") then Some(file + "@2x.png")
+        elif File.Exists(file + ".png") then Some(file + ".png")
         else None
 
     let get_animation_frame_filenames (id: string, path: string) : string list =
@@ -49,16 +48,13 @@ module OsuSkinConverter =
                 failwithf "could not find texture in skin folder for %A" id
 
             result
-        
+
     let load_bmp f =
         use s = File.Open(f, FileMode.Open)
         Bitmap.from_stream false s |> Option.get
 
     let load_animation_frame_images (paths: string list list) =
-        paths
-        |> List.map (fun row -> 
-            row |> List.map load_bmp
-        )
+        paths |> List.map (fun row -> row |> List.map load_bmp)
 
     type ColumnTextures =
         {
@@ -69,57 +65,53 @@ module OsuSkinConverter =
         }
 
     let pad_to_square (width: int) (image: Bitmap) : Bitmap =
-        assert(image.Width = width)
+        assert (image.Width = width)
+
         if image.Height <> width then
             let new_image = new Bitmap(width, width)
-            new_image.Mutate(fun img ->
-                img.DrawImage(image, Point(0, (-image.Height + width) / 2), 1.0f) |> ignore
-            )
+            new_image.Mutate(fun img -> img.DrawImage(image, Point(0, (-image.Height + width) / 2), 1.0f) |> ignore)
 
             image.Dispose()
             new_image
-        else image
-    
+        else
+            image
+
     let stretch_to_square (width: int) (image: Bitmap) : Bitmap =
-        assert(image.Width = width)
-        image.Mutate(fun img ->
-            img.Resize(width, width) |> ignore
-        )
+        assert (image.Width = width)
+        image.Mutate(fun img -> img.Resize(width, width) |> ignore)
         image
 
     let rotate (rotate_mode: RotateMode) (image: Bitmap) : Bitmap =
         let image = pad_to_square image.Width image
-        image.Mutate(fun img ->
-            img.Rotate(rotate_mode) |> ignore
-        )
+        image.Mutate(fun img -> img.Rotate(rotate_mode) |> ignore)
         image
-    
+
     let grayscale (brightness: float32) (image: Bitmap) : Bitmap =
         let new_image = image.Clone()
         new_image.Mutate(fun i -> i.Grayscale().Brightness(brightness) |> ignore)
         new_image
-    
+
     let convert_element_textures (target: string) (element_name: string) (images: Bitmap list list) =
         let animation_frames = List.map List.length images |> List.max
         let colors = List.length images
         let width = images.Head.Head.Width
-    
+
         // todo: warn if widths don't match
-    
+
         for row = 0 to (colors - 1) do
             for column = 0 to (animation_frames - 1) do
                 let image = let r = images.[row] in r[column % r.Length]
-                
+
                 let square_image =
                     if element_name = "holdbody" then
                         stretch_to_square width image
-                    else 
+                    else
                         pad_to_square width image
-    
+
                 square_image.Save(Path.Combine(target, sprintf "%s-%i-%i.png" element_name row column))
 
                 square_image.Dispose()
-    
+
         JSON.ToFile
             (Path.Combine(target, element_name + ".json"), false)
             {
@@ -127,7 +119,7 @@ module OsuSkinConverter =
                 Columns = animation_frames
                 Mode = Loose
             }
-    
+
     let arrow_fix_4k (images: Bitmap list list) =
         match images with
         | left :: down :: up :: right :: [] ->
@@ -143,6 +135,7 @@ module OsuSkinConverter =
 
         if Directory.Exists target then
             failwith "a folder with this name already exists!"
+
         Directory.CreateDirectory target |> ignore
 
         let keymode_settings =
@@ -151,7 +144,8 @@ module OsuSkinConverter =
             |> Option.defaultValue (SkinIni.Mania.Default keymode)
 
         let colors = Array.zeroCreate 10
-        let textures = 
+
+        let textures =
             let result = ResizeArray<ColumnTextures>()
 
             for k = 0 to (keymode - 1) do
@@ -162,8 +156,10 @@ module OsuSkinConverter =
                         Body = keymode_settings.NoteImageΔL.[k]
                         Tail = keymode_settings.NoteImageΔT.[k]
                     }
+
                 if not (result.Contains tex) then
                     result.Add tex
+
                 colors.[k] <- byte (result.IndexOf tex)
 
             result |> List.ofSeq
@@ -183,7 +179,7 @@ module OsuSkinConverter =
             |> convert_element_textures target "note"
         with err ->
             Logging.Warn("Error converting note textures", err)
-        
+
         try
             textures
             |> List.map (fun x -> x.Head)
@@ -193,7 +189,7 @@ module OsuSkinConverter =
             |> convert_element_textures target "holdhead"
         with err ->
             Logging.Warn("Error converting hold head textures", err)
-        
+
         try
             textures
             |> List.map (fun x -> x.Body)
@@ -202,7 +198,7 @@ module OsuSkinConverter =
             |> convert_element_textures target "holdbody"
         with err ->
             Logging.Warn("Error converting hold body textures", err)
-        
+
         try
             textures
             |> List.map (fun x -> x.Tail)
@@ -216,7 +212,10 @@ module OsuSkinConverter =
 
         // Generate receptors
         try
-            use receptor_base = get_animation_frame_filenames (textures.[if textures.Length > 1 then 1 else 0].Note, source) |> List.head |> load_bmp
+            use receptor_base =
+                get_animation_frame_filenames (textures.[if textures.Length > 1 then 1 else 0].Note, source)
+                |> List.head
+                |> load_bmp
 
             use not_pressed = grayscale 0.5f receptor_base |> pad_to_square receptor_base.Width
             use pressed = grayscale 1.0f receptor_base |> pad_to_square receptor_base.Width
@@ -242,19 +241,34 @@ module OsuSkinConverter =
         match get_single_filename (keymode_settings.StageLight, source) with
         | Some stage_light ->
             use base_image = load_bmp stage_light
+
             for k = 0 to keymode - 1 do
                 let stage_light_color = keymode_settings.ColourLightΔ.[k]
                 use colored = base_image.Clone()
-                let color_brush = RecolorBrush(
-                    SixLabors.ImageSharp.Color.White,
-                    SixLabors.ImageSharp.Color.FromRgba(stage_light_color.R, stage_light_color.G, stage_light_color.B, stage_light_color.A),
-                    1.0f
-                )
-                colored.Mutate(fun img -> 
-                    img.Fill(color_brush).Opacity(float32 stage_light_color.A / 255.0f) |> ignore
-                )
+
+                let color_brush =
+                    RecolorBrush(
+                        SixLabors.ImageSharp.Color.White,
+                        SixLabors.ImageSharp.Color.FromRgba(
+                            stage_light_color.R,
+                            stage_light_color.G,
+                            stage_light_color.B,
+                            stage_light_color.A
+                        ),
+                        1.0f
+                    )
+
+                colored.Mutate(fun img -> img.Fill(color_brush).Opacity(float32 stage_light_color.A / 255.0f) |> ignore)
                 colored.Save(Path.Combine(target, sprintf "receptorlighting-%i-0.png" k))
-            JSON.ToFile (Path.Combine(target, "receptorlighting.json"), false) { Rows = keymode; Columns = 1; Mode = Loose }
+
+            JSON.ToFile
+                (Path.Combine(target, "receptorlighting.json"), false)
+                {
+                    Rows = keymode
+                    Columns = 1
+                    Mode = Loose
+                }
+
             columnlighting <- true
         | None -> ()
 
@@ -264,6 +278,7 @@ module OsuSkinConverter =
                 Style = ColorScheme.Column
                 UseGlobalColors = false
             }
+
         color_config.Colors.[keymode - 2] <- colors
 
         let config: NoteskinConfig =

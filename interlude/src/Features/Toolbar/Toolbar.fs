@@ -66,15 +66,19 @@ type Toolbar() =
             )
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
             |+ (InlaidButton(
-                %"menu.import.name",
-                (fun () ->
-                    if not Toolbar.hidden then
-                        Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
-                ),
-                Icons.DOWNLOAD,
-                Hotkey = "import"
-            ) |+ LoadingIndicator.Strip(
-                    (fun () -> Screen.current_type <> Screen.Type.Import && Import.ImportScreen.something_in_progress()), 
+                    %"menu.import.name",
+                    (fun () ->
+                        if not Toolbar.hidden then
+                            Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
+                    ),
+                    Icons.DOWNLOAD,
+                    Hotkey = "import"
+                )
+                |+ LoadingIndicator.Strip(
+                    (fun () ->
+                        Screen.current_type <> Screen.Type.Import
+                        && Import.ImportScreen.something_in_progress ()
+                    ),
                     Position = Position.SliceBottom(15.0f).SliceTop(Style.PADDING)
                 ))
                 .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))

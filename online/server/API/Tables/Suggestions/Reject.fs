@@ -26,12 +26,16 @@ module Reject =
             | Error e -> raise (BadRequestException None)
             | Ok(request: Request) ->
 
-            if not (Backbeat.Tables.exists request.TableId) then raise NotFoundException
-            if not (user.Badges.Contains Badge.TABLE_EDITOR) then raise PermissionDeniedException
+            if not (Backbeat.Tables.exists request.TableId) then
+                raise NotFoundException
+
+            if not (user.Badges.Contains Badge.TABLE_EDITOR) then
+                raise PermissionDeniedException
 
             let chart_id = request.ChartId.ToUpper()
 
             if TableSuggestion.reject request.TableId chart_id user_id request.Reason then
                 response.ReplyJson(true)
-            else response.ReplyJson(false)
+            else
+                response.ReplyJson(false)
         }

@@ -13,7 +13,7 @@ module NoteskinExplosionMigration =
     type ExplosionColorsOld =
         | Column
         | Judgements
-    
+
     [<Json.AutoCodec(false)>]
     type Explosions =
         {
@@ -27,17 +27,18 @@ module NoteskinExplosionMigration =
         }
 
     [<Json.AutoCodec(false)>]
-    type NoteskinMigrationModel =
-        {
-            Explosions: Explosions option
-        }
+    type NoteskinMigrationModel = { Explosions: Explosions option }
 
     let patch (model: NoteskinMigrationModel) (config: NoteskinConfig) =
         match model.Explosions with
         | Some explosions ->
             Logging.Info(sprintf "Migrating noteskin '%s' to new explosions system" config.Name)
+
             if explosions.ExplodeOnMiss then
-                Logging.Warn("Explosions on miss is no longer supported, complain to me if you were using it and want it back")
+                Logging.Warn(
+                    "Explosions on miss is no longer supported, complain to me if you were using it and want it back"
+                )
+
             { config with
                 UseExplosions = explosions.Enable |> Option.defaultValue true
                 NoteExplosionSettings =
@@ -47,8 +48,8 @@ module NoteskinExplosionMigration =
                         Scale = explosions.Scale
                         Offset = 0.0f
                         ExpandAmount = explosions.ExpandAmount
-                        Colors = 
-                            match explosions.Colors with 
+                        Colors =
+                            match explosions.Colors with
                             | ExplosionColorsOld.Column -> ExplosionColors.Note
                             | ExplosionColorsOld.Judgements -> ExplosionColors.Judgements
                         Duration = 300.0
@@ -61,8 +62,8 @@ module NoteskinExplosionMigration =
                         Scale = explosions.Scale
                         Offset = 0.0f
                         ExpandAmount = explosions.ExpandAmount
-                        Colors = 
-                            match explosions.Colors with 
+                        Colors =
+                            match explosions.Colors with
                             | ExplosionColorsOld.Column -> ExplosionColors.Note
                             | ExplosionColorsOld.Judgements -> ExplosionColors.Judgements
                         Duration = 300.0
@@ -78,7 +79,10 @@ type Noteskin(storage) as this =
 
     do
         config <-
-            match this.TryGetJson<NoteskinExplosionMigration.NoteskinMigrationModel>(false, "noteskin.json"), this.TryGetJson<NoteskinConfig>(true, "noteskin.json") with
+            match
+                this.TryGetJson<NoteskinExplosionMigration.NoteskinMigrationModel>(false, "noteskin.json"),
+                this.TryGetJson<NoteskinConfig>(true, "noteskin.json")
+            with
             | Some migration_patch, Some data -> NoteskinExplosionMigration.patch migration_patch data.Validate
             | _ -> failwith "noteskin.json was missing or didn't load properly"
 
@@ -88,15 +92,16 @@ type Noteskin(storage) as this =
             this.WriteJson(config, "noteskin.json")
         and get () = config
 
-    member this.GetTexture(name: string) : TextureLoadResult = this.LoadTexture(name, NoteskinTextureRules.get this.Config name)
+    member this.GetTexture(name: string) : TextureLoadResult =
+        this.LoadTexture(name, NoteskinTextureRules.get this.Config name)
 
     member this.RequiredTextures =
-        NoteskinTextureRules.list()
+        NoteskinTextureRules.list ()
         |> Seq.filter (NoteskinTextureRules.get this.Config >> _.IsRequired)
 
     member this.Validate() : ValidationMessage seq =
         seq {
-            for texture_id in NoteskinTextureRules.list() do
+            for texture_id in NoteskinTextureRules.list () do
                 yield! this.ValidateTexture(texture_id, NoteskinTextureRules.get this.Config texture_id)
         }
 

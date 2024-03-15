@@ -7,8 +7,7 @@ open Prelude.Common
 
 [<Json.AutoCodec>]
 [<RequireQualifiedAccess>]
-type TableRatingCalculation =
-    | AverageTop50
+type TableRatingCalculation = | AverageTop50
 
 [<Json.AutoCodec>]
 type TableSectionInfo =
@@ -32,14 +31,12 @@ type TableInfo =
         Sections: TableSectionInfo list
         LevelDisplayNames: Map<int, string>
     }
-    member this.LevelName (level: int) = Map.tryFind level this.LevelDisplayNames |> Option.defaultValue (level.ToString())
+    member this.LevelName(level: int) =
+        Map.tryFind level this.LevelDisplayNames
+        |> Option.defaultValue (level.ToString())
 
 [<Json.AutoCodec>]
-type TableChart =
-    {
-        Hash: string
-        Level: int
-    }
+type TableChart = { Hash: string; Level: int }
 
 [<Json.AutoCodec>]
 type TableClientFile =
@@ -57,22 +54,30 @@ type Table =
     }
 
 module Table =
-    
-    let load(id: string) : Table option =
+
+    let load (id: string) : Table option =
         let path = Path.Combine(get_game_folder "Data", "Tables", id + ".table")
+
         match JSON.FromFile path with
-        | Ok (file: TableClientFile) ->
-            Some { 
-                Id = id
-                LastUpdated = DateTimeOffset.op_Implicit(File.GetLastAccessTime path).ToUnixTimeMilliseconds()
-                Info = file.Info
-                Charts = file.Charts
-            }
+        | Ok(file: TableClientFile) ->
+            Some
+                {
+                    Id = id
+                    LastUpdated = DateTimeOffset.op_Implicit(File.GetLastAccessTime path).ToUnixTimeMilliseconds()
+                    Info = file.Info
+                    Charts = file.Charts
+                }
         | Error reason -> None
-    
-    let save(table: Table) =
+
+    let save (table: Table) =
         let path = Path.Combine(get_game_folder "Data", "Tables", table.Id + ".table")
-        JSON.ToFile (path, true) { Info = table.Info; Charts = table.Charts }
+
+        JSON.ToFile
+            (path, true)
+            {
+                Info = table.Info
+                Charts = table.Charts
+            }
 
     let points (info: TableInfo) (level: int, grade: int) =
         // currently hard-coded for SCJ4

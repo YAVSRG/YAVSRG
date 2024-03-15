@@ -37,7 +37,9 @@ module Secrets =
     let SECRETS =
         if not (File.Exists "./secrets/secrets.json") then
 #if DEBUG
-            Logging.Info "!!! Server assembly is being run outside of docker, or examined in unit tests. Using default values for secrets"
+            Logging.Info
+                "!!! Server assembly is being run outside of docker, or examined in unit tests. Using default values for secrets"
+
             Secrets.Default
         else
 #else

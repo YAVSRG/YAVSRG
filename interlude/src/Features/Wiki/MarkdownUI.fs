@@ -159,17 +159,16 @@ type private Image(width, title, url) as this =
     do
         ImageServices.get_cached_image.Request(
             url,
-            function 
+            function
             | Some bmp ->
-                sync (fun () -> 
+                sync (fun () ->
                     sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp)))
                     fade.Target <- 1.0f
                 )
             | None -> Logging.Warn("Failed to load wiki image", url)
         )
 
-        this
-        |+ LoadingIndicator.Border(fun () -> sprite.IsNone)
+        this |+ LoadingIndicator.Border(fun () -> sprite.IsNone)
         |* Frame(Border = K(Color.FromArgb(127, 255, 255, 255)), Fill = K Color.Transparent)
 
     override this.Width = width
@@ -403,8 +402,7 @@ type CodeBlock(max_width, code, language) as this =
         contents.Position <-
             Position.Box(0.0f, 0.0f, Heading.MARGIN_X * 2.0f, Heading.MARGIN_Y * 2.0f, contents.Width, contents.Height)
 
-        this
-        |+ Frame(Fill = K Colors.shadow_2.O2, Border = K Color.Transparent)
+        this |+ Frame(Fill = K Colors.shadow_2.O2, Border = K Color.Transparent)
         |* contents
 
     override this.Width = max_width

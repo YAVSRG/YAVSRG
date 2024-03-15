@@ -13,7 +13,7 @@ type Page() as this =
     inherit DynamicContainer(NodeType.Container(fun _ -> this._content))
 
     let mutable is_current = false
-    let mutable content : Widget option = None
+    let mutable content: Widget option = None
 
     member private this._content = content |> Option.map (fun x -> x :> ISelection)
 
@@ -24,6 +24,7 @@ type Page() as this =
 
     abstract member OnReturnTo: unit -> unit
     default this.OnReturnTo() = ()
+
     member this.Content(w: Widget) =
         this.Add(w)
         content <- Some w
@@ -92,9 +93,7 @@ and Menu(top_level: Page) as this =
 
     let volume = Volume()
 
-    let exit_key = HotkeyHoldAction("exit", 
-        (fun () -> Selection.up false),
-        Menu.Exit)
+    let exit_key = HotkeyHoldAction("exit", (fun () -> Selection.up false), Menu.Exit)
 
     static let mutable _instance = None
     do _instance <- Some this
@@ -192,7 +191,8 @@ and Menu(top_level: Page) as this =
         back_button.Update(elapsed_ms, moved)
         volume.Update(elapsed_ms, moved)
 
-        if (%%"screenshot").Tapped() then Toolbar.take_screenshot()
+        if (%%"screenshot").Tapped() then
+            Toolbar.take_screenshot ()
 
     override this.Close() =
         base.Close()
@@ -208,11 +208,12 @@ type ConfirmPage(prompt: string, yes: unit -> unit) =
     override this.Init(parent) =
         let pos = menu_pos 3.0f
 
-        column()
+        column ()
         |+ PageButton.Once("confirm.yes", fork Menu.Back yes).Pos(pos.Step())
         |+ PageButton.Once("confirm.no", Menu.Back).Pos(pos.Step())
         |+ Text(prompt, Position = Position.Row(100.0f, PRETTYHEIGHT))
         |> this.Content
+
         base.Init parent
 
     override this.Title = %"confirm"

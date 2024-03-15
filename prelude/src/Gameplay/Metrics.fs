@@ -222,7 +222,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
                         | MissedHeadThenHeld, _
                         | MissedHead, _ -> true
                         | _ -> false
-                    
+
                     let missed_head =
                         match hold_states.[k] with
                         | MissedHeadThenHeld, _ -> true
@@ -558,7 +558,7 @@ module Metrics =
 
     let create (ruleset: Ruleset) (keys: int) (replay: IReplayProvider) notes rate : ScoreMetric =
         ScoreMetric(ruleset, keys, replay, notes, rate)
-    
+
     let run (ruleset: Ruleset) (keys: int) (replay: IReplayProvider) notes rate : ScoreMetric =
         let scoring = ScoreMetric(ruleset, keys, replay, notes, rate)
         scoring.Update Time.infinity

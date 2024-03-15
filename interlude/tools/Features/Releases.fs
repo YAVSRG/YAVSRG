@@ -112,6 +112,7 @@ module Releases =
             Path.Combine(build_dir, "publish", info.GLFWLibraryFile),
             Path.Combine(clean_dir, info.GLFWLibraryFile)
         )
+
         File.Copy(
             Path.Combine(build_dir, "publish", info.SQLiteLibraryFile),
             Path.Combine(clean_dir, info.SQLiteLibraryFile)

@@ -45,12 +45,13 @@ type CachedChart =
             Keys = 4
             Length = 0.0f<ms>
             DateAdded = Unchecked.defaultof<_>
-            BPM = (0.0f<ms/beat>, 0.0f<ms/beat>)
+            BPM = (0.0f<ms / beat>, 0.0f<ms / beat>)
             DifficultyName = ""
             Physical = 0.0
             BackgroundFile = None
             AudioFile = None
         }
+
     member this.Key = sprintf "%s/%s" this.Folder this.Hash
 
 type Cache =

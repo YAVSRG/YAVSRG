@@ -59,25 +59,28 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             Color = (fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1),
             Align = Alignment.LEFT
         )
-        |* Clickable.Focus(this, OnHover = fun b -> 
-            if b && not this.Focused then
-                this.Focus true
-            elif not b && this.FocusedByMouse && not this.Selected then
-                Selection.up true
+        |* Clickable.Focus(
+            this,
+            OnHover =
+                fun b ->
+                    if b && not this.Focused then
+                        this.Focus true
+                    elif not b && this.FocusedByMouse && not this.Selected then
+                        Selection.up true
         )
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
-    override this.OnSelected (by_mouse: bool) =
+    override this.OnSelected(by_mouse: bool) =
         base.OnSelected by_mouse
         progress <- 0
         refresh_text ()
         Style.click.Play()
         Input.listen_to_next_key input_callback
 
-    override this.OnDeselected (by_mouse: bool) =
+    override this.OnDeselected(by_mouse: bool) =
         base.OnDeselected by_mouse
         Input.remove_listener ()
 
@@ -95,7 +98,8 @@ type LanecoverPage() as this =
 
     do
         let pos = menu_pos 2.0f
-        column()
+
+        column ()
         |+ PageSetting("gameplay.lanecover.enabled", Selector<_>.FromBool options.LaneCover.Enabled)
             .Pos(pos.Step 1.5f, PRETTYWIDTH, PRETTYHEIGHT)
         |+ PageSetting("gameplay.lanecover.hidden", Slider.Percent(options.LaneCover.Hidden))
@@ -177,7 +181,8 @@ type EditPresetPage(preset_id: int, setting: Setting<Preset option>) as this =
             keymode_preference.Add(PresetKeymodeCheckbox(preset_id, keymode))
 
         let pos = menu_pos 2.0f
-        column()
+
+        column ()
         |+ PageTextEntry("gameplay.preset.name", name).Pos(pos.Step())
         |+ PageSetting(
             "gameplay.preset.mode",
@@ -215,8 +220,7 @@ type EditPresetPage(preset_id: int, setting: Setting<Preset option>) as this =
 type GameplayPage() as this =
     inherit Page()
 
-    let keymode: Setting<Keymode> =
-        Setting.simple <| Gameplay.Chart.keymode()
+    let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
 
     let binds = GameplayKeybinder(keymode)
     let preview = NoteskinPreview(0.35f, true)
@@ -369,24 +373,24 @@ type GameplayPage() as this =
 
     do
         let pos = menu_pos 1.0f
-        column()
-        |+ ( 
-            let column_width = Interlude.Content.Content.NoteskinConfig.ColumnWidth
+
+        column ()
+        |+ (let column_width = Interlude.Content.Content.NoteskinConfig.ColumnWidth
 
             PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
                 .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
                 .Pos(pos.Step 1.5f)
             |+ Text(
-                (fun () -> 
-                    sprintf "%.1f on osu! = %.1f on Quaver = C%.0f on Etterna*" 
+                (fun () ->
+                    sprintf
+                        "%.1f on osu! = %.1f on Quaver = C%.0f on Etterna*"
                         (options.ScrollSpeed.Value * 31.0f / 2.38f)
                         (options.ScrollSpeed.Value * 33.9f / 2.38f)
                         (60000.0f * options.ScrollSpeed.Value / column_width)
                 ),
                 Align = Alignment.CENTER,
                 Position = Position.TrimLeft(PRETTYTEXTWIDTH).Margin(5.0f, -30.0f).SliceBottom(35.0f)
-            )
-        )
+            ))
         |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Tooltip(Tooltip.Info("gameplay.hitposition"))
             .Pos(pos.Step())
@@ -399,7 +403,7 @@ type GameplayPage() as this =
         |+ PageSetting(
             "system.audiooffset",
             { new Slider(options.AudioOffset, Step = 1f) with
-                override this.OnDeselected (by_mouse: bool) =
+                override this.OnDeselected(by_mouse: bool) =
                     base.OnDeselected by_mouse
                     Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
             }

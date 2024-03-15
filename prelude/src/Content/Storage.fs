@@ -107,15 +107,17 @@ type Storage(storage: StorageType) =
 
             reraise ()
         | _ -> reraise ()
-        
+
     member this.DeleteFile([<ParamArray>] path: string array) =
         let p = Path.Combine(path)
-        
+
         match storage with
         | Embedded _ -> ()
         | Folder f ->
             let p = Path.Combine(f, p)
-            if File.Exists p then File.Delete p
+
+            if File.Exists p then
+                File.Delete p
 
     /// Returns string names of files in the requested folder
     member this.GetFiles([<ParamArray>] path: string array) =
@@ -228,8 +230,12 @@ type Storage(storage: StorageType) =
         Directory.CreateDirectory target_directory |> ignore
 
         match storage with
-        | Embedded z -> z.ExtractToDirectory target_directory; true
-        | Folder _ -> Logging.Error("Can only extract a compressed zip to a folder"); false
+        | Embedded z ->
+            z.ExtractToDirectory target_directory
+            true
+        | Folder _ ->
+            Logging.Error("Can only extract a compressed zip to a folder")
+            false
 
     member this.CompressToZip target : bool =
         if File.Exists target then
@@ -274,24 +280,38 @@ type Storage(storage: StorageType) =
         texture_config_cache <- texture_config_cache.Add(id, info)
         this.WriteJson<TextureConfig>(info, Array.append path [| name + ".json" |])
 
-    member private this.LoadGridTexture(config: TextureConfig, name: string, path: string array, must_be_square: bool) : Result<Bitmap, string> =
+    member private this.LoadGridTexture
+        (
+            config: TextureConfig,
+            name: string,
+            path: string array,
+            must_be_square: bool
+        ) : Result<Bitmap, string> =
 
         match this.TryReadFile(Array.append path [| name + ".png" |]) with
         | Some stream ->
             match Bitmap.from_stream true stream with
             | None -> Error "This is not a valid image"
-            | Some img -> 
+            | Some img ->
                 if img.Width % config.Columns <> 0 || img.Height % config.Rows <> 0 then
-                    Error (sprintf "This texture has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i" config.Columns config.Rows img.Width img.Height)
+                    Error(
+                        sprintf
+                            "This texture has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i"
+                            config.Columns
+                            config.Rows
+                            img.Width
+                            img.Height
+                    )
                 else
 
                 let w = img.Width / config.Columns
                 let h = img.Height / config.Rows
+
                 if must_be_square && w <> h then
-                    Error (sprintf "This texture needs to be only square images, but currently each image is %ix%i" w h)
+                    Error(sprintf "This texture needs to be only square images, but currently each image is %ix%i" w h)
                 else
                     Ok img
-        | None -> Error (sprintf "Couldn't find expected file '%s.png' (as one grid image)" name)
+        | None -> Error(sprintf "Couldn't find expected file '%s.png' (as one grid image)" name)
 
     member private this.LoadLooseTextures
         (
@@ -303,18 +323,27 @@ type Storage(storage: StorageType) =
 
         let load_img row column =
             match this.TryReadFile(Array.append path [| sprintf "%s-%i-%i.png" name row column |]) with
-            | Some stream -> 
+            | Some stream ->
                 match Bitmap.from_stream true stream with
                 | None -> failwithf "%s-%i-%i.png is not a valid image" name row column
                 | Some img -> img
-            | None -> failwithf "Couldn't find expected file '%s-%i-%i.png' (as part of one or many textures making up a grid)" name row column
+            | None ->
+                failwithf
+                    "Couldn't find expected file '%s-%i-%i.png' (as part of one or many textures making up a grid)"
+                    name
+                    row
+                    column
 
         try
 
             let base_img = load_img 0 0
 
             if must_be_square && base_img.Width <> base_img.Height then
-                failwithf "This texture needs to be only square images, but %s-0-0 is %ix%i" name base_img.Width base_img.Height
+                failwithf
+                    "This texture needs to be only square images, but %s-0-0 is %ix%i"
+                    name
+                    base_img.Width
+                    base_img.Height
 
             let atlas =
                 new Bitmap(base_img.Width * config.Columns, base_img.Height * config.Rows)
@@ -335,16 +364,26 @@ type Storage(storage: StorageType) =
         with err ->
             Error err.Message
 
-    member internal this.LoadTexture(name: string, rules: TextureRules, [<ParamArray>] path: string array) : TextureLoadResult =
+    member internal this.LoadTexture
+        (
+            name: string,
+            rules: TextureRules,
+            [<ParamArray>] path: string array
+        ) : TextureLoadResult =
 
         let config: TextureConfig = this.GetTextureConfig(name, path)
+
         match
             let max_rows, max_columns = rules.MaxGridSize in
 
-            if config.Columns < 1 then Error "Columns must be a positive number"
-            elif config.Columns > max_columns then Error (sprintf "Columns must be at most %i for this texture" max_columns)
-            elif config.Rows < 1 then Error "Rows must be a positive number"
-            elif config.Rows > max_rows then Error (sprintf "Rows must be at most %i for this texture" max_rows)
+            if config.Columns < 1 then
+                Error "Columns must be a positive number"
+            elif config.Columns > max_columns then
+                Error(sprintf "Columns must be at most %i for this texture" max_columns)
+            elif config.Rows < 1 then
+                Error "Rows must be a positive number"
+            elif config.Rows > max_rows then
+                Error(sprintf "Rows must be at most %i for this texture" max_rows)
             else
 
             match config.Mode with
@@ -352,29 +391,43 @@ type Storage(storage: StorageType) =
             | Loose -> this.LoadLooseTextures(config, name, path, rules.MustBeSquare)
         with
         | Ok img -> TextureOk(img, config)
-        | Error reason -> if rules.IsRequired then TextureError reason else TextureNotRequired
-    
-    member internal this.ValidateTexture(name: string, rules: TextureRules, [<ParamArray>] path: string array) : ValidationMessage seq =
+        | Error reason ->
+            if rules.IsRequired then
+                TextureError reason
+            else
+                TextureNotRequired
+
+    member internal this.ValidateTexture
+        (
+            name: string,
+            rules: TextureRules,
+            [<ParamArray>] path: string array
+        ) : ValidationMessage seq =
 
         seq {
             let config: TextureConfig = this.GetTextureConfig(name, path) // todo: validation in this area too
 
             // Validate rows, columns
             let max_rows, max_columns = rules.MaxGridSize
+
             if config.Columns < 1 || config.Columns > max_columns then
-                yield ValidationError {
-                    Element = name
-                    Message = sprintf "Columns must be between %i and %i" 1 max_columns
-                    SuggestedFix = None
-                }
-            elif config.Rows < 1 || config.Rows > max_rows then 
-                yield ValidationError {
-                    Element = name
-                    Message = sprintf "Rows must be between %i and %i" 1 max_rows
-                    SuggestedFix = None
-                }
+                yield
+                    ValidationError
+                        {
+                            Element = name
+                            Message = sprintf "Columns must be between %i and %i" 1 max_columns
+                            SuggestedFix = None
+                        }
+            elif config.Rows < 1 || config.Rows > max_rows then
+                yield
+                    ValidationError
+                        {
+                            Element = name
+                            Message = sprintf "Rows must be between %i and %i" 1 max_rows
+                            SuggestedFix = None
+                        }
             else
-    
+
             match config.Mode with
 
             // Validate grid textures
@@ -383,173 +436,265 @@ type Storage(storage: StorageType) =
                 | Some stream ->
                     match Bitmap.from_stream true stream with
                     | None ->
-                        yield ValidationError {
-                            Element = name
-                            Message = sprintf "'%s.png' is not a valid image" name
-                            SuggestedFix = None
-                        }
-                    | Some img -> 
-                        if img.Width % config.Columns <> 0 || img.Height % config.Rows <> 0 then
-                            let could_rows_columns_swap = img.Width % config.Rows = 0 && img.Height % config.Columns = 0
-                            
-                            if could_rows_columns_swap then
-                                yield ValidationError {
+                        yield
+                            ValidationError
+                                {
                                     Element = name
-                                    Message = 
-                                        sprintf
-                                            "'%s.png' has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i\nPerhaps you've got rows and columns the wrong way around?"
-                                            name 
-                                            config.Columns config.Rows
-                                            img.Width img.Height
-                                    SuggestedFix =
-                                        Some {
-                                            Description = "Swap rows and columns"
-                                            Action = fun () ->
-                                                this.WriteTextureConfig(
-                                                    { this.GetTextureConfig(name, path) with Rows = config.Columns; Columns = config.Rows },
-                                                    name,
-                                                    path
-                                                )
-                                        }
-                                }
-                            else
-                                yield ValidationError {
-                                    Element = name
-                                    Message = sprintf "'%s.png' has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i" name config.Columns config.Rows img.Width img.Height
+                                    Message = sprintf "'%s.png' is not a valid image" name
                                     SuggestedFix = None
                                 }
+                    | Some img ->
+                        if img.Width % config.Columns <> 0 || img.Height % config.Rows <> 0 then
+                            let could_rows_columns_swap =
+                                img.Width % config.Rows = 0 && img.Height % config.Columns = 0
+
+                            if could_rows_columns_swap then
+                                yield
+                                    ValidationError
+                                        {
+                                            Element = name
+                                            Message =
+                                                sprintf
+                                                    "'%s.png' has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i\nPerhaps you've got rows and columns the wrong way around?"
+                                                    name
+                                                    config.Columns
+                                                    config.Rows
+                                                    img.Width
+                                                    img.Height
+                                            SuggestedFix =
+                                                Some
+                                                    {
+                                                        Description = "Swap rows and columns"
+                                                        Action =
+                                                            fun () ->
+                                                                this.WriteTextureConfig(
+                                                                    { this.GetTextureConfig(name, path) with
+                                                                        Rows = config.Columns
+                                                                        Columns = config.Rows
+                                                                    },
+                                                                    name,
+                                                                    path
+                                                                )
+                                                    }
+                                        }
+                            else
+                                yield
+                                    ValidationError
+                                        {
+                                            Element = name
+                                            Message =
+                                                sprintf
+                                                    "'%s.png' has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i"
+                                                    name
+                                                    config.Columns
+                                                    config.Rows
+                                                    img.Width
+                                                    img.Height
+                                            SuggestedFix = None
+                                        }
                         else
                             let w = img.Width / config.Columns
                             let h = img.Height / config.Rows
+
                             if rules.MustBeSquare && w <> h then
-                                yield ValidationError {
-                                    Element = name
-                                    Message = sprintf "'%s.png' needs to be only square images, but currently each image is %ix%i" name w h
-                                    SuggestedFix = None
-                                }
+                                yield
+                                    ValidationError
+                                        {
+                                            Element = name
+                                            Message =
+                                                sprintf
+                                                    "'%s.png' needs to be only square images, but currently each image is %ix%i"
+                                                    name
+                                                    w
+                                                    h
+                                            SuggestedFix = None
+                                        }
+
                         if not rules.IsRequired then
-                            yield ValidationWarning {
-                                Element = name
-                                Message = sprintf "%s is not used" name
-                                SuggestedFix =
-                                    Some {
-                                        Description = sprintf "Delete '%s.png'" name
-                                        Action = fun () ->
-                                            this.DeleteFile(Array.append path [| name + ".png" |])
-                                            this.DeleteFile(Array.append path [| name + ".json" |])
+                            yield
+                                ValidationWarning
+                                    {
+                                        Element = name
+                                        Message = sprintf "%s is not used" name
+                                        SuggestedFix =
+                                            Some
+                                                {
+                                                    Description = sprintf "Delete '%s.png'" name
+                                                    Action =
+                                                        fun () ->
+                                                            this.DeleteFile(Array.append path [| name + ".png" |])
+                                                            this.DeleteFile(Array.append path [| name + ".json" |])
+                                                }
                                     }
-                            }
                 | None ->
                     match this.TryReadFile(Array.append path [| name + "-0-0.png" |]) with
                     | Some _ ->
-                        yield ValidationError {
-                            Element = name
-                            Message = sprintf "'%s.png' is missing (as one grid image)\n'%s-0-0.png' exists as a loose texture, so it looks like the texture is set as Grid when it should be Loose" name name
-                            SuggestedFix = 
-                                Some {
-                                    Description = "Change the texture mode from Grid to Loose"
-                                    Action = fun () -> 
-                                        this.WriteTextureConfig(
-                                            { this.GetTextureConfig(name, path) with Mode = Loose },
-                                            name,
-                                            path
-                                        )
+                        yield
+                            ValidationError
+                                {
+                                    Element = name
+                                    Message =
+                                        sprintf
+                                            "'%s.png' is missing (as one grid image)\n'%s-0-0.png' exists as a loose texture, so it looks like the texture is set as Grid when it should be Loose"
+                                            name
+                                            name
+                                    SuggestedFix =
+                                        Some
+                                            {
+                                                Description = "Change the texture mode from Grid to Loose"
+                                                Action =
+                                                    fun () ->
+                                                        this.WriteTextureConfig(
+                                                            { this.GetTextureConfig(name, path) with
+                                                                Mode = Loose
+                                                            },
+                                                            name,
+                                                            path
+                                                        )
+                                            }
                                 }
-                        }
                     | None ->
                         if rules.IsRequired then
-                            yield ValidationError {
-                                Element = name
-                                Message = sprintf "'%s.png' is missing (as one grid image)" name
-                                SuggestedFix = None
-                            }
+                            yield
+                                ValidationError
+                                    {
+                                        Element = name
+                                        Message = sprintf "'%s.png' is missing (as one grid image)" name
+                                        SuggestedFix = None
+                                    }
 
             // Validate loose textures
             | Loose ->
                 let check_img (width, height) row column =
                     seq {
                         match this.TryReadFile(Array.append path [| sprintf "%s-%i-%i.png" name row column |]) with
-                        | Some stream -> 
+                        | Some stream ->
                             match Bitmap.from_stream true stream with
                             | None ->
-                                yield ValidationError {
-                                    Element = name
-                                    Message = sprintf "'%s-%i-%i.png' is not a valid image" name row column
-                                    SuggestedFix = None
-                                }
+                                yield
+                                    ValidationError
+                                        {
+                                            Element = name
+                                            Message = sprintf "'%s-%i-%i.png' is not a valid image" name row column
+                                            SuggestedFix = None
+                                        }
                             | Some img ->
                                 if (img.Width, img.Height) <> (width, height) then
-                                    yield ValidationError {
+                                    yield
+                                        ValidationError
+                                            {
+                                                Element = name
+                                                Message =
+                                                    sprintf
+                                                        "All images must be the same dimensions, (%i, %i) doesn't match (0, 0)"
+                                                        row
+                                                        column
+                                                SuggestedFix = None
+                                            }
+                        | None ->
+                            yield
+                                ValidationError
+                                    {
                                         Element = name
-                                        Message = sprintf "All images must be the same dimensions, (%i, %i) doesn't match (0, 0)" row column
+                                        Message =
+                                            sprintf
+                                                "'%s-%i-%i.png' is missing (as part of one or many textures making up a grid)"
+                                                name
+                                                row
+                                                column
                                         SuggestedFix = None
                                     }
-                        | None ->
-                            yield ValidationError {
-                                Element = name
-                                Message = sprintf "'%s-%i-%i.png' is missing (as part of one or many textures making up a grid)" name row column
-                                SuggestedFix = None
-                            }
                     }
 
                 match this.TryReadFile(Array.append path [| sprintf "%s-0-0.png" name |]) with
-                | Some stream -> 
+                | Some stream ->
                     match Bitmap.from_stream true stream with
                     | None ->
-                        yield ValidationError {
-                            Element = name
-                            Message = sprintf "'%s-0-0.png' is not a valid image" name
-                            SuggestedFix = None
-                        }
+                        yield
+                            ValidationError
+                                {
+                                    Element = name
+                                    Message = sprintf "'%s-0-0.png' is not a valid image" name
+                                    SuggestedFix = None
+                                }
                     | Some base_img ->
                         if rules.MustBeSquare && base_img.Width <> base_img.Height then
-                            yield ValidationError {
-                                Element = name
-                                Message = sprintf "This texture needs to be only square images, but '%s-0-0.png' is %ix%i" name base_img.Width base_img.Height
-                                SuggestedFix = None
-                            }
+                            yield
+                                ValidationError
+                                    {
+                                        Element = name
+                                        Message =
+                                            sprintf
+                                                "This texture needs to be only square images, but '%s-0-0.png' is %ix%i"
+                                                name
+                                                base_img.Width
+                                                base_img.Height
+                                        SuggestedFix = None
+                                    }
+
                         for row in 0 .. config.Rows - 1 do
                             for column in 0 .. config.Columns - 1 do
-                                if (row, column) <> (0, 0) then 
+                                if (row, column) <> (0, 0) then
                                     yield! check_img (base_img.Width, base_img.Height) row column
+
                         if not rules.IsRequired then
-                            yield ValidationWarning {
-                                Element = name
-                                Message = sprintf "%s is not used" name
-                                SuggestedFix =
-                                    Some {
-                                        Description = sprintf "Delete all %s images" name
-                                        Action = fun () ->
-                                            this.DeleteFile(Array.append path [| name + ".json" |])
-                                            for file in this.GetFiles path do
-                                                if file.StartsWith(name + "-") then
-                                                    this.DeleteFile(Array.append path [| file |])
+                            yield
+                                ValidationWarning
+                                    {
+                                        Element = name
+                                        Message = sprintf "%s is not used" name
+                                        SuggestedFix =
+                                            Some
+                                                {
+                                                    Description = sprintf "Delete all %s images" name
+                                                    Action =
+                                                        fun () ->
+                                                            this.DeleteFile(Array.append path [| name + ".json" |])
+
+                                                            for file in this.GetFiles path do
+                                                                if file.StartsWith(name + "-") then
+                                                                    this.DeleteFile(Array.append path [| file |])
+                                                }
                                     }
-                            }
                 | None ->
                     match this.TryReadFile(Array.append path [| name + ".png" |]) with
                     | Some _ ->
-                        yield ValidationError {
-                            Element = name
-                            Message = sprintf "'%s-0-0.png' is missing (as part of one or many textures making up a grid)\n'%s.png' exists as a grid texture, so it looks like the texture is set as Loose when it should be Grid" name name
-                            SuggestedFix = 
-                                Some {
-                                    Description = "Change the texture mode from Loose to Grid"
-                                    Action = fun () -> 
-                                        this.WriteTextureConfig(
-                                            { this.GetTextureConfig(name, path) with Mode = Grid },
-                                            name,
-                                            path
-                                        )
+                        yield
+                            ValidationError
+                                {
+                                    Element = name
+                                    Message =
+                                        sprintf
+                                            "'%s-0-0.png' is missing (as part of one or many textures making up a grid)\n'%s.png' exists as a grid texture, so it looks like the texture is set as Loose when it should be Grid"
+                                            name
+                                            name
+                                    SuggestedFix =
+                                        Some
+                                            {
+                                                Description = "Change the texture mode from Loose to Grid"
+                                                Action =
+                                                    fun () ->
+                                                        this.WriteTextureConfig(
+                                                            { this.GetTextureConfig(name, path) with
+                                                                Mode = Grid
+                                                            },
+                                                            name,
+                                                            path
+                                                        )
+                                            }
                                 }
-                        }
                     | None ->
                         if rules.IsRequired then
-                            yield ValidationError {
-                                Element = name
-                                Message = sprintf "'%s-0-0.png' is missing (as part of one or many textures making up a grid)" name
-                                SuggestedFix = None
-                            }
+                            yield
+                                ValidationError
+                                    {
+                                        Element = name
+                                        Message =
+                                            sprintf
+                                                "'%s-0-0.png' is missing (as part of one or many textures making up a grid)"
+                                                name
+                                        SuggestedFix = None
+                                    }
         }
 
     member this.SplitTexture(name: string, [<ParamArray>] path: string array) =
@@ -563,6 +708,7 @@ type Storage(storage: StorageType) =
                 match this.LoadGridTexture(config, name, path, false) with
                 | Error _ -> Logging.Error(sprintf "Couldn't split texture '%s' because it couldn't be loaded" name)
                 | Ok img ->
+
                 let w = img.Width / config.Columns
                 let h = img.Height / config.Rows
 
@@ -591,6 +737,7 @@ type Storage(storage: StorageType) =
                 match this.LoadLooseTextures(config, name, path, false) with
                 | Error _ -> Logging.Error(sprintf "Couldn't stitch texture '%s' because it couldn't be loaded" name)
                 | Ok img ->
+
                 img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s.png" name))
 
                 for row in 0 .. config.Rows - 1 do
@@ -608,7 +755,7 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> 
+        | Grid ->
             Logging.Warn(sprintf "Cannot mutate %s (%i, %i) as it is a grid texture" name col row)
             false
         | Loose ->
@@ -617,14 +764,14 @@ type Storage(storage: StorageType) =
         | Some stream ->
             match Bitmap.from_stream true stream with
             | None ->
-                Logging.Warn (sprintf "%s-%i-%i.png is not a valid image" name row col)
+                Logging.Warn(sprintf "%s-%i-%i.png is not a valid image" name row col)
                 false
             | Some img ->
                 img.Mutate<PixelFormats.Rgba32>(fun context -> action context |> ignore)
                 img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
                 true
-        | None -> 
-            Logging.Warn (sprintf "Couldn't find file %s-%i-%i.png" name row col)
+        | None ->
+            Logging.Warn(sprintf "Couldn't find file %s-%i-%i.png" name row col)
             false
 
     member this.VerticalFlipTexture((col, row), name: string, [<ParamArray>] path: string array) =
@@ -647,7 +794,7 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> 
+        | Grid ->
             Logging.Warn(sprintf "Cannot clone %s (*, %i) as it is a grid texture" name src_row)
             false
         | Loose ->
@@ -673,7 +820,7 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> 
+        | Grid ->
             Logging.Warn(sprintf "Cannot clone %s (%i, *) as it is a grid texture" name src_col)
             false
         | Loose ->
@@ -699,7 +846,7 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> 
+        | Grid ->
             Logging.Warn(sprintf "Cannot delete %s (*, %i) as it is a grid texture" name row)
             false
         | Loose ->
@@ -728,7 +875,7 @@ type Storage(storage: StorageType) =
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
         match info.Mode with
-        | Grid -> 
+        | Grid ->
             Logging.Warn(sprintf "Cannot delete %s (%i, *) as it is a grid texture" name col)
             false
         | Loose ->

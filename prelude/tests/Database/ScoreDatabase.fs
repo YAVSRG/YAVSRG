@@ -7,11 +7,11 @@ open Prelude.Data
 module ScoreDatabase =
 
     [<Test>]
-    let BasicRoundTrip() =
-        let db, conn = in_memory()
+    let BasicRoundTrip () =
+        let db, conn = in_memory ()
 
         let score_db = ScoreDatabase.create false db
-        
+
         let example_handle = ScoreDatabase.get "example" score_db
 
         example_handle.Offset <- 5.0f<ms>
@@ -23,15 +23,16 @@ module ScoreDatabase =
 
         Assert.True(List.isEmpty example_handle.Scores)
 
-        let score = 
+        let score =
             {
-                Timestamp = Timestamp.now()
+                Timestamp = Timestamp.now ()
                 Rate = 1.0f
                 Mods = Map.empty
-                Replay = [|0uy|]
+                Replay = [| 0uy |]
                 IsImported = false
                 Keys = 4
             }
+
         ScoreDatabase.save_score "example" score score_db
 
         Assert.False(List.isEmpty example_handle.Scores)

@@ -50,7 +50,10 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render: 'T -
         load this
 
         this
-        |+ LoadingIndicator.Strip((fun () -> status = WebRequestState.Loading), Position = Position.SliceTop(Style.PADDING))
+        |+ LoadingIndicator.Strip(
+            (fun () -> status = WebRequestState.Loading),
+            Position = Position.SliceTop(Style.PADDING)
+        )
         |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
         |* Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.GLOBE, %"misc.server_error"))
 

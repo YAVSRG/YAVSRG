@@ -19,7 +19,7 @@ type ISelection(node_type: NodeType) =
         match node_type with
         | NodeType.None -> false
         | NodeType.Container f ->
-            match f() with
+            match f () with
             | Some child -> child.Focusable
             | None -> false
         | _ -> true
@@ -42,16 +42,26 @@ module Selection =
     let mutable private current_clamp_tree: ISelection list = []
 
     let get_focused_element () = List.tryHead current_tree
-    let get_selected_element () = if leaf_is_selected then List.tryHead current_tree else None
+
+    let get_selected_element () =
+        if leaf_is_selected then List.tryHead current_tree else None
 
     // Test if a proposed tree is rooted under the required parent
     let private check_clamp (by_mouse: bool) (tree: ISelection list) =
-        
-        if 
-            by_mouse 
+
+        if
+            by_mouse
             && (
-                match get_selected_element() with
-                | Some x when List.tryHead tree <> Some x && (match x.NodeType with NodeType.FocusTrap -> true | _ -> false) -> true
+                match get_selected_element () with
+                | Some x when
+                    List.tryHead tree <> Some x
+                    && (
+                        match x.NodeType with
+                        | NodeType.FocusTrap -> true
+                        | _ -> false
+                    )
+                    ->
+                    true
                 | _ -> false
             )
         then
@@ -159,7 +169,9 @@ module Selection =
                 | Some h ->
                     match h.NodeType with
                     | NodeType.None -> up by_mouse
-                    | NodeType.Container _ -> if not by_mouse then up false
+                    | NodeType.Container _ ->
+                        if not by_mouse then
+                            up false
                     | _ -> ()
                 | None -> ()
 

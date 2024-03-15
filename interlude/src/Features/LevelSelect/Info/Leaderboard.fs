@@ -150,7 +150,7 @@ module Leaderboard =
 
         member this.FadeOut() = fade.Target <- 0.0f
 
-        override this.OnFocus (by_mouse: bool) =
+        override this.OnFocus(by_mouse: bool) =
             base.OnFocus by_mouse
             Style.hover.Play()
 
@@ -184,9 +184,18 @@ module Leaderboard =
                         for score in req.Scores do
                             let with_mods = Mods.apply_mods score.Mods req.Chart
                             let replay_data = Replay.decompress_string score.Replay
-                            let scoring = Metrics.run req.Ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+
+                            let scoring =
+                                Metrics.run
+                                    req.Ruleset
+                                    with_mods.Keys
+                                    (StoredReplayProvider replay_data)
+                                    with_mods.Notes
+                                    score.Rate
+
                             let rating = DifficultyRating.calculate score.Rate with_mods.Notes
-                            let score_info : ScoreInfo =
+
+                            let score_info: ScoreInfo =
                                 {
                                     CachedChart = req.CachedChart
                                     Chart = req.Chart
@@ -203,7 +212,7 @@ module Leaderboard =
 
                                     Rating = rating
                                     Physical = Performance.calculate rating with_mods.Keys scoring |> fst
-                                    
+
                                     ImportedFromOsu = false
                                 }
 
@@ -226,10 +235,7 @@ module Leaderboard =
                     ruleset_id,
                     function
                     | Some reply ->
-                        if
-                            (hash, ruleset_id)
-                            <> (cc.Hash, Content.Rulesets.current_hash)
-                        then
+                        if (hash, ruleset_id) <> (cc.Hash, Content.Rulesets.current_hash) then
                             ()
                         else
 
@@ -277,11 +283,7 @@ type Leaderboard(display: Setting<Display>) as this =
     let sort = Setting.map enum int options.ScoreSortMode
 
     let scroll_container =
-        ScrollContainer(
-            Loader.container,
-            Margin = Style.PADDING,
-            Position = Position.TrimTop(55.0f).TrimBottom(50.0f)
-        )
+        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
 
     do
         Chart.on_chart_change_started.Add(fun info ->

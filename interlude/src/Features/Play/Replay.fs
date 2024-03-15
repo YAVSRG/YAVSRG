@@ -259,9 +259,9 @@ module ReplayScreen =
             |+ Button(
                 (fun () ->
                     (if state.ShowInputOverlay.Value then
-                            Icons.CHECK_CIRCLE
-                        else
-                            Icons.CIRCLE)
+                         Icons.CHECK_CIRCLE
+                     else
+                         Icons.CIRCLE)
                     + " Input overlay"
                 ),
                 (fun () -> Setting.app not state.ShowInputOverlay),
@@ -270,9 +270,9 @@ module ReplayScreen =
             |+ Button(
                 (fun () ->
                     (if state.ShowHitOverlay.Value then
-                            Icons.CHECK_CIRCLE
-                        else
-                            Icons.CIRCLE)
+                         Icons.CHECK_CIRCLE
+                     else
+                         Icons.CIRCLE)
                     + " Hit overlay"
                 ),
                 (fun () -> Setting.app not state.ShowHitOverlay),
@@ -285,12 +285,7 @@ module ReplayScreen =
                 Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceBottom(50.0f).Margin(5.0f)
             )
 
-        SlideoutContent(
-            NavigationContainer.Row<Widget>()
-            |+ overlay_buttons
-            |+ dim_slider,
-            100.0f
-        )
+        SlideoutContent(NavigationContainer.Row<Widget>() |+ overlay_buttons |+ dim_slider, 100.0f)
         |+ Text(
             (Icons.PLAY + if state.IsAuto then " Autoplay" else " Watching replay"),
             Color = K Colors.text,
@@ -322,9 +317,7 @@ module ReplayScreen =
         let slideout = Slideout(replay_controls, AutoCloseWhen = K false)
 
         override this.Init(parent) =
-            this 
-            |+ Timeline(with_mods, on_seek)
-            |* slideout
+            this |+ Timeline(with_mods, on_seek) |* slideout
 
             base.Init parent
 
@@ -370,7 +363,7 @@ module ReplayScreen =
         let FIRST_NOTE = with_colors.FirstNote
         let ruleset = Rulesets.current
 
-        let state = 
+        let state =
             {
                 ShowInputOverlay = Setting.simple false
                 ShowHitOverlay = Setting.simple false
@@ -383,7 +376,8 @@ module ReplayScreen =
 
         let mutable replay_data = replay_data
 
-        let mutable scoring = Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+        let mutable scoring =
+            Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplayProvider(replay_data.GetFullReplay())
@@ -412,10 +406,25 @@ module ReplayScreen =
                 |+ { new StaticWidget(NodeType.None) with
                        override _.Draw() =
                            if state.ShowInputOverlay.Value || state.ShowHitOverlay.Value then
-                               Draw.rect this.Playfield.Bounds (Colors.black.O4a(255.0f * state.PlayfieldDim.Value |> int))
+                               Draw.rect
+                                   this.Playfield.Bounds
+                                   (Colors.black.O4a(255.0f * state.PlayfieldDim.Value |> int))
                    }
-                |+ InputOverlay(with_colors.Keys, replay_data.GetFullReplay(), this.State, this.Playfield, state.ShowInputOverlay)
-                |+ HitOverlay(rate, with_colors.Source, replay_data.GetFullReplay(), this.State, this.Playfield, state.ShowHitOverlay)
+                |+ InputOverlay(
+                    with_colors.Keys,
+                    replay_data.GetFullReplay(),
+                    this.State,
+                    this.Playfield,
+                    state.ShowInputOverlay
+                )
+                |+ HitOverlay(
+                    rate,
+                    with_colors.Source,
+                    replay_data.GetFullReplay(),
+                    this.State,
+                    this.Playfield,
+                    state.ShowHitOverlay
+                )
                 |* ControlOverlay(
                     with_colors.Source,
                     state,
@@ -448,9 +457,7 @@ module ReplayScreen =
                     | ReplayMode.Auto _ -> Screen.back Transitions.Flags.Default |> ignore
                     | ReplayMode.Replay(score_info, _) ->
                         Screen.change_new
-                            (fun () ->
-                                new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen
-                            )
+                            (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
                             Screen.Type.Score
                             Transitions.Flags.Default
                         |> ignore

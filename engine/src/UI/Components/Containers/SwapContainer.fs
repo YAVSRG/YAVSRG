@@ -21,7 +21,8 @@ type SwapContainer(current: Widget) as this =
                 else
                     assert (child.Parent = this)
 
-            if old_child.Focused then child.Focus false
+            if old_child.Focused then
+                child.Focus false
 
             swapped_last_frame <- true
 
@@ -30,8 +31,7 @@ type SwapContainer(current: Widget) as this =
 
         current.Init this
 
-    override this.Draw() = 
-        current.Draw()
+    override this.Draw() = current.Draw()
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -42,5 +42,5 @@ type SwapContainer(current: Widget) as this =
                 true
             else
                 moved
-            
+
         current.Update(elapsed_ms, moved)

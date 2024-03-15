@@ -35,8 +35,8 @@ type private LevelButton(name, action) =
         |* Clickable.Focus this
 
         base.Init parent
-        
-    override this.OnFocus (by_mouse: bool) =
+
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 

@@ -15,16 +15,17 @@ module Dummy =
             response: HttpResponse
         ) =
         async {
-            if SECRETS.IsProduction then failwith "This code should be unreachable in production!"
+            if SECRETS.IsProduction then
+                failwith "This code should be unreachable in production!"
 
             require_query_parameter query_params "username"
 
             let username = query_params.["username"].[0]
 
-            let token = 
+            let token =
                 match User.by_username username with
-                | Some (id, u) -> u.AuthToken
-                | None -> 
+                | Some(id, u) -> u.AuthToken
+                | None ->
                     let user = User.create (username, 0uL)
                     User.save_new user |> ignore
                     user.AuthToken

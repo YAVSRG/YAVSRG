@@ -17,7 +17,8 @@ module Online =
                     Server.kick (id, "Your client is out of date")
             | Upstream.BEGIN_LOGIN_WITH_DISCORD -> Users.DiscordAuthFlow.begin_login_with_discord id
             | Upstream.BEGIN_REGISTRATION_WITH_DISCORD -> Users.DiscordAuthFlow.begin_register_with_discord id
-            | Upstream.COMPLETE_REGISTRATION_WITH_DISCORD username -> Users.DiscordAuthFlow.finish_register_with_discord (id, username) |> ignore
+            | Upstream.COMPLETE_REGISTRATION_WITH_DISCORD username ->
+                Users.DiscordAuthFlow.finish_register_with_discord (id, username) |> ignore
             | Upstream.LOGIN token -> Session.login (id, token)
             | Upstream.LOGOUT -> Lobby.ensure_player_leaves_lobby (id, (fun () -> Session.logout id))
 

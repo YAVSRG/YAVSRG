@@ -18,10 +18,10 @@ module List =
             response: HttpResponse
         ) =
         async {
-            let tables : Table array = 
+            let tables: Table array =
                 Backbeat.Tables.TABLES
                 |> Map.toArray
-                |> Array.map (fun (id, info) -> 
+                |> Array.map (fun (id, info) ->
                     {
                         Id = id
                         Info = info
@@ -29,5 +29,5 @@ module List =
                     }
                 )
 
-            response.ReplyJson({ Tables = tables } : Response)
+            response.ReplyJson({ Tables = tables }: Response)
         }

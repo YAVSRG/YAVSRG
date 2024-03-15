@@ -41,7 +41,7 @@ type private MenuButton(on_click, label: string, pos) =
         base.Init parent
         this.Hide()
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -170,11 +170,19 @@ type MainMenuScreen() as this =
         quit.Hide()
         Background.dim 0.7f
 
-    override this.OnBack() = 
+    override this.OnBack() =
         if not Interlude.Options.options.ConfirmExit.Value || confirmed_exit then
             Some Screen.Type.SplashScreen
         else
-            Menu.ConfirmPage(%"menu.exit_prompt", fun () -> confirmed_exit <- true; Screen.back Transitions.Flags.UnderLogo |> ignore).Show()
+            Menu
+                .ConfirmPage(
+                    %"menu.exit_prompt",
+                    fun () ->
+                        confirmed_exit <- true
+                        Screen.back Transitions.Flags.UnderLogo |> ignore
+                )
+                .Show()
+
             None
 
     override this.Draw() =
@@ -183,8 +191,16 @@ type MainMenuScreen() as this =
         let a1 = splash_subtitle_fade.Value * splash_fade.Value * 255.0f |> int
         let a2 = splash_fade.Alpha
 
-        let heading_width = Text.measure(Style.font, splash) * 40.0f
-        Draw.rect (Rect.Box(c - heading_width * 0.5f - 20.0f, this.Bounds.Top - 25.0f + 40.0f * splash_fade.Value, heading_width + 40.0f, 70.0f)) (Colors.shadow_2.O1a a2)
+        let heading_width = Text.measure (Style.font, splash) * 40.0f
+
+        Draw.rect
+            (Rect.Box(
+                c - heading_width * 0.5f - 20.0f,
+                this.Bounds.Top - 25.0f + 40.0f * splash_fade.Value,
+                heading_width + 40.0f,
+                70.0f
+            ))
+            (Colors.shadow_2.O1a a2)
 
         Text.draw_aligned_b (
             Style.font,

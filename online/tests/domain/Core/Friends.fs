@@ -17,11 +17,11 @@ module Friends =
         Friends.add (id3, id1)
 
         Assert.IsEmpty(Friends.get_following_ids id2)
-        Assert.AreEqual(Friends.get_following_ids id1, Set.ofList [id2; id3])
+        Assert.AreEqual(Friends.get_following_ids id1, Set.ofList [ id2; id3 ])
         Assert.IsEmpty(Friends.get_following_ids 32767)
 
-        Assert.AreEqual(Friends.get_followers_ids id1, Set.ofList [id3])
-        Assert.AreEqual(Friends.get_followers_ids id3, Set.ofList [id1])
+        Assert.AreEqual(Friends.get_followers_ids id1, Set.ofList [ id3 ])
+        Assert.AreEqual(Friends.get_followers_ids id3, Set.ofList [ id1 ])
         Assert.IsEmpty(Friends.get_followers_ids 32767)
 
     [<Test>]
@@ -34,19 +34,19 @@ module Friends =
         Friends.add (id1, id3)
         Friends.add (id3, id1)
 
-        Assert.AreEqual(FriendRelation.None, Friends.relation(32767, 32767))
-        Assert.AreEqual(FriendRelation.None, Friends.relation(id1, 32767))
-        Assert.AreEqual(FriendRelation.None, Friends.relation(32767, id1))
-        Assert.AreEqual(FriendRelation.None, Friends.relation(id1, id1))
-        Assert.AreEqual(FriendRelation.Friend, Friends.relation(id1, id2))
-        Assert.AreEqual(FriendRelation.FollowsYou, Friends.relation(id2, id1))
-        Assert.AreEqual(FriendRelation.MutualFriend, Friends.relation(id1, id3))
-        Assert.AreEqual(FriendRelation.MutualFriend, Friends.relation(id3, id1))
+        Assert.AreEqual(FriendRelation.None, Friends.relation (32767, 32767))
+        Assert.AreEqual(FriendRelation.None, Friends.relation (id1, 32767))
+        Assert.AreEqual(FriendRelation.None, Friends.relation (32767, id1))
+        Assert.AreEqual(FriendRelation.None, Friends.relation (id1, id1))
+        Assert.AreEqual(FriendRelation.Friend, Friends.relation (id1, id2))
+        Assert.AreEqual(FriendRelation.FollowsYou, Friends.relation (id2, id1))
+        Assert.AreEqual(FriendRelation.MutualFriend, Friends.relation (id1, id3))
+        Assert.AreEqual(FriendRelation.MutualFriend, Friends.relation (id3, id1))
 
     [<Test>]
     let CannotFriendSelf () =
         let id1 = User.create ("CannotFriendSelf", 0uL) |> User.save_new
-        Assert.AreEqual(FriendRelation.None, Friends.relation(id1, id1))
+        Assert.AreEqual(FriendRelation.None, Friends.relation (id1, id1))
 
     [<Test>]
     let Remove () =
@@ -56,7 +56,7 @@ module Friends =
         Friends.add (id1, id2)
         Friends.remove (id1, id2)
 
-        Assert.AreEqual(FriendRelation.None, Friends.relation(id1, id2))
+        Assert.AreEqual(FriendRelation.None, Friends.relation (id1, id2))
 
     [<Test>]
     let Remove_Idempotent () =
@@ -71,29 +71,29 @@ module Friends =
         Friends.remove (id2, id1)
         Friends.remove (id2, id1)
 
-        Assert.AreEqual(FriendRelation.None, Friends.relation(id1, id2))
-        Assert.AreEqual(FriendRelation.None, Friends.relation(id2, id1))
-        
+        Assert.AreEqual(FriendRelation.None, Friends.relation (id1, id2))
+        Assert.AreEqual(FriendRelation.None, Friends.relation (id2, id1))
+
     [<Test>]
     let Add_Idempotent () =
         let id1 = User.create ("AddFriendIdempotentA", 0uL) |> User.save_new
         let id2 = User.create ("AddFriendIdempotentB", 0uL) |> User.save_new
-        
+
         Friends.add (id1, id2)
         Friends.add (id1, id2)
         Friends.add (id1, id2)
         Friends.add (id1, id2)
-        
-        Assert.AreEqual(FriendRelation.Friend, Friends.relation(id1, id2))
-        Assert.AreEqual(Friends.get_following_ids id1, Set.ofList [id2])
-        Assert.AreEqual(Friends.get_followers_ids id2, Set.ofList [id1])
-    
+
+        Assert.AreEqual(FriendRelation.Friend, Friends.relation (id1, id2))
+        Assert.AreEqual(Friends.get_following_ids id1, Set.ofList [ id2 ])
+        Assert.AreEqual(Friends.get_followers_ids id2, Set.ofList [ id1 ])
+
     [<Test>]
     let List () =
         let id1 = User.create ("FriendListA", 0uL) |> User.save_new
         let id2 = User.create ("FriendListB", 0uL) |> User.save_new
         let id3 = User.create ("FriendListC", 0uL) |> User.save_new
-    
+
         Friends.add (id1, id2)
         Friends.add (id1, id3)
 
@@ -101,17 +101,17 @@ module Friends =
         Assert.AreEqual(2, result.Length)
 
     [<Test>]
-    let Add_NonExistentUser() =
+    let Add_NonExistentUser () =
         let user_id = User.create ("AddNonExistentFriend", 0uL) |> User.save_new
 
         Assert.Throws(fun () -> Friends.add (user_id, 32767)) |> printfn "%O"
         Assert.Throws(fun () -> Friends.add (32767, user_id)) |> printfn "%O"
         Assert.Throws(fun () -> Friends.add (32767, 32768)) |> printfn "%O"
-    
+
     [<Test>]
-    let Remove_NonExistentUser() =
+    let Remove_NonExistentUser () =
         let user_id = User.create ("RemoveNonExistentFriend", 0uL) |> User.save_new
-    
+
         Assert.Throws(fun () -> Friends.remove (user_id, 32767)) |> printfn "%O"
         Assert.Throws(fun () -> Friends.remove (32767, user_id)) |> printfn "%O"
         Assert.Throws(fun () -> Friends.remove (32767, 32768)) |> printfn "%O"

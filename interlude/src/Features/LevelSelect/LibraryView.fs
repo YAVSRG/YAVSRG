@@ -52,12 +52,17 @@ type private ModeDropdown
         | Some _ -> this.Dropdown <- None
         | _ ->
             let d =
-                Dropdown { 
-                    Items = options
-                    ColorFunc = K Colors.text
-                    OnClose = fun () -> this.Dropdown <- None
-                    Setting = setting |> Setting.trigger (fun v -> display_value <- Seq.find (fun (id, _) -> id = v) options |> snd)
-                }
+                Dropdown
+                    {
+                        Items = options
+                        ColorFunc = K Colors.text
+                        OnClose = fun () -> this.Dropdown <- None
+                        Setting =
+                            setting
+                            |> Setting.trigger (fun v ->
+                                display_value <- Seq.find (fun (id, _) -> id = v) options |> snd
+                            )
+                    }
 
             d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
             d.Init this
@@ -200,7 +205,8 @@ type LibraryModeSettings() =
 
             elif (%%"collections").Tapped() then
                 Menu.ShowPage ManageCollectionsPage
-            elif (%%"table").Tapped() then ManageTablesPage(LevelSelect.refresh_all).Show() // todo: only need to refresh if view is table
+            elif (%%"table").Tapped() then
+                ManageTablesPage(LevelSelect.refresh_all).Show() // todo: only need to refresh if view is table
             elif (%%"reverse_sort_mode").Tapped() then
                 Setting.app not options.ChartSortReverse
                 LevelSelect.refresh_all ()

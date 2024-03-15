@@ -78,10 +78,7 @@ type Lobby() =
                 }
         )
         |+ StylishButton(
-            (fun () ->
-                Gameplay.Chart.if_loaded <| fun info ->
-                    Preview(info, ignore).Show()
-            ),
+            (fun () -> Gameplay.Chart.if_loaded <| fun info -> Preview(info, ignore).Show()),
             K(sprintf "%s %s" Icons.EYE (%"levelselect.preview.name")),
             !%Palette.MAIN_100,
             TiltLeft = false,
@@ -144,15 +141,16 @@ type Lobby() =
                 Screen.current_type = Screen.Type.Lobby
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.Play
             then
-                Gameplay.Chart.if_loaded <| fun info ->
-                if
-                    Screen.change_new
-                        (fun () -> PlayScreen.multiplayer_screen info)
-                        Screen.Type.Play
-                        Transitions.Flags.Default
-                    |> not
-                then
-                    Logging.Warn("Missed the start of the lobby song because you were changing screen")
+                Gameplay.Chart.if_loaded
+                <| fun info ->
+                    if
+                        Screen.change_new
+                            (fun () -> PlayScreen.multiplayer_screen info)
+                            Screen.Type.Play
+                            Transitions.Flags.Default
+                        |> not
+                    then
+                        Logging.Warn("Missed the start of the lobby song because you were changing screen")
 
         )
 
@@ -162,15 +160,16 @@ type Lobby() =
                 && Screen.current_type = Screen.Type.Lobby
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.Spectate
             then
-                Gameplay.Chart.if_loaded <| fun info ->
-                if
-                    Screen.change_new
-                        (fun () -> SpectateScreen.spectate_screen (info, username))
-                        Screen.Type.Replay
-                        Transitions.Flags.Default
-                    |> not
-                then
-                    Logging.Warn("Missed the start of spectating because you were changing screen")
+                Gameplay.Chart.if_loaded
+                <| fun info ->
+                    if
+                        Screen.change_new
+                            (fun () -> SpectateScreen.spectate_screen (info, username))
+                            Screen.Type.Replay
+                            Transitions.Flags.Default
+                        |> not
+                    then
+                        Logging.Warn("Missed the start of spectating because you were changing screen")
         )
 
         Network.Events.lobby_settings_updated.Add(fun () -> lobby_title <- Network.lobby.Value.Settings.Value.Name)

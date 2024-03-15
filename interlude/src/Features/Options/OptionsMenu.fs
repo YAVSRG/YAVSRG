@@ -23,7 +23,7 @@ module OptionsMenuRoot =
         member val Disabled = false with get, set
         member val Margin = (0.0f, 20.0f) with get, set
 
-        override this.OnFocus (by_mouse: bool) =
+        override this.OnFocus(by_mouse: bool) =
             base.OnFocus by_mouse
             Style.hover.Play()
 

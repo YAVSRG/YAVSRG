@@ -48,18 +48,20 @@ type NetworkStatus() =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
+
         if Network.status = Network.NotConnected then
             retry_timer.Update elapsed_ms
+
             if retry_timer.Complete then
                 retry_timer.Reset()
-                Network.connect()
+                Network.connect ()
 
         match this.Dropdown with
         | Some d -> d.Update(elapsed_ms, moved)
         | None -> ()
 
         if Mouse.hover this.Bounds && Mouse.left_click () then
-            Selection.clear()
+            Selection.clear ()
             this.ToggleDropdown()
 
         if
@@ -73,7 +75,7 @@ type NetworkStatus() =
         match Network.status with
         | Network.NotConnected -> [ (fun () -> Network.connect ()), Icons.GLOBE + " Connect" ]
         | Network.Connecting -> [ ignore, Icons.SLASH + " Cancel" ]
-        | Network.ConnectionFailed -> [  (fun () -> Network.connect ()), Icons.GLOBE + " Reconnect" ]
+        | Network.ConnectionFailed -> [ (fun () -> Network.connect ()), Icons.GLOBE + " Reconnect" ]
         | Network.Connected ->
             [
                 fun () ->
@@ -81,14 +83,12 @@ type NetworkStatus() =
                         Network.login_with_token ()
                     else
                         Menu.ShowPage LoginPage
-                ,
-                Icons.LOG_IN + " Log in"
+                , Icons.LOG_IN + " Log in"
             ]
         | Network.LoggedIn ->
             [
                 fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore
-                ,
-                Icons.USERS + " Multiplayer"
+                , Icons.USERS + " Multiplayer"
                 (fun () -> PlayersPage().Show()), Icons.SEARCH + " Players"
                 Network.logout, Icons.LOG_OUT + " Log out"
             ]
@@ -97,11 +97,12 @@ type NetworkStatus() =
         match this.Dropdown with
         | Some _ -> this.Dropdown <- None
         | None ->
-            let d = 
-                DropdownMenu { 
-                    Items = this.MenuItems
-                    OnClose = (fun () -> this.Dropdown <- None)
-                }
+            let d =
+                DropdownMenu
+                    {
+                        Items = this.MenuItems
+                        OnClose = (fun () -> this.Dropdown <- None)
+                    }
 
             d.Position <-
                 Position

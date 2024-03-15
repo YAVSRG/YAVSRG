@@ -23,13 +23,14 @@ module LevelSelect =
 
     let on_refresh_all = refresh_all_event.Publish
     let on_refresh_details = refresh_details_event.Publish
-    
+
     let mutable filter: Filter = []
 
-    do 
+    do
         Interlude.Features.Import.Import.charts_updated.Add refresh_all
-        Interlude.Features.Collections.CollectionActions.collection_modified.Add (fun () ->
-            if options.LibraryMode.Value = LibraryMode.Collections then 
+
+        Interlude.Features.Collections.CollectionActions.collection_modified.Add(fun () ->
+            if options.LibraryMode.Value = LibraryMode.Collections then
                 refresh_all ()
             else
                 refresh_details ()
@@ -41,55 +42,63 @@ module LevelSelect =
                 (fun () ->
                     PlayScreen.play_screen (
                         info,
-                        if options.EnablePacemaker.Value then PacemakerMode.Setting else PacemakerMode.None
+                        if options.EnablePacemaker.Value then
+                            PacemakerMode.Setting
+                        else
+                            PacemakerMode.None
                     )
                 )
                 Screen.Type.Play
                 Transitions.Flags.Default
-        then 
+        then
             // todo: move to play/multiplay screens?
-            info.SaveData.LastPlayed <- Timestamp.now()
+            info.SaveData.LastPlayed <- Timestamp.now ()
             true
-        else false
+        else
+            false
 
     let choose_this_chart () =
 
-        Chart.when_loaded <| fun info ->
+        Chart.when_loaded
+        <| fun info ->
 
-        if Network.lobby.IsSome then
-            if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
-                Lobby.select_chart (info.CacheInfo, rate.Value, selected_mods.Value)
-        elif
-            if autoplay then
-                Screen.change_new
-                    (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)
-                    Screen.Type.Replay
-                    Transitions.Flags.Default
-            else try_play info
-        then
-            if endless_mode.Value then 
-                Endless.begin_endless_mode <| 
-                    EndlessModeState.create {
-                        BaseChart = info.CacheInfo
-                        Filter = filter
-                        Mods = selected_mods.Value
-                        Rate = rate.Value
-                        RulesetId = Rulesets.current_hash
-                        Ruleset = Rulesets.current
-                        Library = Content.Library
-                        ScoreDatabase = Content.Scores
-                    }
+            if Network.lobby.IsSome then
+                if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
+                    Lobby.select_chart (info.CacheInfo, rate.Value, selected_mods.Value)
+            elif
+                if autoplay then
+                    Screen.change_new
+                        (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)
+                        Screen.Type.Replay
+                        Transitions.Flags.Default
+                else
+                    try_play info
+            then
+                if endless_mode.Value then
+                    Endless.begin_endless_mode
+                    <| EndlessModeState.create
+                        {
+                            BaseChart = info.CacheInfo
+                            Filter = filter
+                            Mods = selected_mods.Value
+                            Rate = rate.Value
+                            RulesetId = Rulesets.current_hash
+                            Ruleset = Rulesets.current
+                            Library = Content.Library
+                            ScoreDatabase = Content.Scores
+                        }
 
     let challenge_score (score_info: ScoreInfo) =
-        Chart.if_loaded <| fun info ->
+        Chart.if_loaded
+        <| fun info ->
 
-        if
-            Screen.change_new
-                (fun () -> PlayScreen.play_screen (info, PacemakerMode.Score(score_info.Rate, score_info.Replay)))
-                Screen.Type.Play
-                Transitions.Flags.Default
-        then
-            // todo: move to play/multiplay screens?
-            info.SaveData.LastPlayed <- Timestamp.now()
-            rate.Set score_info.Rate
-            selected_mods.Set score_info.Mods
+            if
+                Screen.change_new
+                    (fun () -> PlayScreen.play_screen (info, PacemakerMode.Score(score_info.Rate, score_info.Replay)))
+                    Screen.Type.Play
+                    Transitions.Flags.Default
+            then
+                // todo: move to play/multiplay screens?
+                info.SaveData.LastPlayed <- Timestamp.now ()
+                rate.Set score_info.Rate
+                selected_mods.Set score_info.Mods

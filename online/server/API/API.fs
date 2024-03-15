@@ -18,7 +18,9 @@ module API =
     do
         add_endpoint Health.Status.ROUTE Health.Status.handle
 
-        if not SECRETS.IsProduction then add_endpoint (GET, "/auth/dummy") Auth.Dummy.handle
+        if not SECRETS.IsProduction then
+            add_endpoint (GET, "/auth/dummy") Auth.Dummy.handle
+
         add_endpoint Auth.Discord.ROUTE Auth.Discord.handle
 
         add_endpoint Charts.Identify.ROUTE Charts.Identify.handle
@@ -70,7 +72,7 @@ module API =
                     |> ignore
                 | err ->
                     Logging.Error(sprintf "Unhandled exception in %O %s: %O" method route err)
-                    Discord.debug_log(sprintf "Unhandled exception in %O %s\n%s" method route (err.ToString()))
+                    Discord.debug_log (sprintf "Unhandled exception in %O %s\n%s" method route (err.ToString()))
                     response.MakeErrorResponse(500, "Internal error") |> ignore
             else
                 response.MakeErrorResponse(404, "Route not found") |> ignore

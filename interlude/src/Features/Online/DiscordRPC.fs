@@ -5,56 +5,63 @@ open DiscordRPC
 
 module DiscordRPC =
 
-    let private client = new DiscordRpcClient("420320424199716864", Logger = Logging.NullLogger())
-    
+    let private client =
+        new DiscordRpcClient("420320424199716864", Logger = Logging.NullLogger())
+
     let deinit () =
         if not client.IsDisposed then
             client.ClearPresence()
             client.Dispose()
 
     let init_window () =
-        client.OnConnectionFailed.Add (fun msg -> 
+        client.OnConnectionFailed.Add(fun msg ->
             Logging.Info("Discord not detected, disabling rich presence")
-            deinit())
+            deinit ()
+        )
         //client.RegisterUriScheme(null, null) |> ignore
         client.Initialize() |> ignore
 
     let in_menus (details: string) =
-        if client.IsDisposed then () else
+        if client.IsDisposed then
+            ()
+        else
 
-        let rp =
-            new RichPresence(State = "In menus", Details = details)
+            let rp = new RichPresence(State = "In menus", Details = details)
 
-        client.SetPresence(rp)
+            client.SetPresence(rp)
 
     let playing (mode: string, song: string) =
-        if client.IsDisposed then () else
+        if client.IsDisposed then
+            ()
+        else
 
-        let rp =
-            new RichPresence(
-                State = mode,
-                Details =
-                    (if song.Length > 48 then
-                         song.Substring(0, 44) + " ..."
-                     else
-                         song)
-            )
+            let rp =
+                new RichPresence(
+                    State = mode,
+                    Details =
+                        (if song.Length > 48 then
+                             song.Substring(0, 44) + " ..."
+                         else
+                             song)
+                )
 
-        client.SetPresence(rp)
+            client.SetPresence(rp)
 
     let playing_timed (mode: string, song: string, time_left: Time) =
-        if client.IsDisposed then () else
+        if client.IsDisposed then
+            ()
+        else
 
-        let rp =
-            new RichPresence(
-                State = mode,
-                Details =
-                    (if song.Length > 48 then
-                         song.Substring(0, 44) + " ..."
-                     else
-                         song)
-            )
+            let rp =
+                new RichPresence(
+                    State = mode,
+                    Details =
+                        (if song.Length > 48 then
+                             song.Substring(0, 44) + " ..."
+                         else
+                             song)
+                )
 
-        let now = System.DateTime.UtcNow
-        rp.Timestamps <- Timestamps(now, now.AddMilliseconds(float time_left))
-        client.SetPresence(rp)
+            let now = System.DateTime.UtcNow
+            rp.Timestamps <- Timestamps(now, now.AddMilliseconds(float time_left))
+            client.SetPresence(rp)

@@ -27,17 +27,29 @@ module Accept =
             | Error e -> raise (BadRequestException None)
             | Ok(request: Request) ->
 
-            if not (Backbeat.Tables.exists request.TableId) then raise NotFoundException
-            if not (user.Badges.Contains Badge.TABLE_EDITOR) then raise PermissionDeniedException
+            if not (Backbeat.Tables.exists request.TableId) then
+                raise NotFoundException
+
+            if not (user.Badges.Contains Badge.TABLE_EDITOR) then
+                raise PermissionDeniedException
 
             let chart_id = request.ChartId.ToUpper()
+
             match Backbeat.Charts.by_hash chart_id with
-            | Some (known_chart, _) ->
+            | Some(known_chart, _) ->
 
                 if known_chart.Keys <> Backbeat.Tables.TABLES.[request.TableId].Keymode then
 
-                    Logging.Debug(sprintf "Cannot accept chart %A into table %s because keymode doesn't match" known_chart request.TableId)
-                    TableSuggestion.reject request.TableId chart_id user_id "Wrong keymode" |> ignore
+                    Logging.Debug(
+                        sprintf
+                            "Cannot accept chart %A into table %s because keymode doesn't match"
+                            known_chart
+                            request.TableId
+                    )
+
+                    TableSuggestion.reject request.TableId chart_id user_id "Wrong keymode"
+                    |> ignore
+
                     response.ReplyJson(false)
 
                 elif TableSuggestion.accept request.TableId chart_id user_id request.Level then

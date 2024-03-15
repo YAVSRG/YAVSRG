@@ -22,7 +22,7 @@ module Import =
 
     type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, target_path: string) =
         inherit Page()
-        
+
         let keymode: Setting<Keymode> = Setting.simple Keymode.``4K``
         let is_arrows: Setting<bool> = Setting.simple false
 
@@ -40,7 +40,12 @@ module Import =
                     "osuskinimport.confirm",
                     fun () ->
                         try
-                            OsuSkinConverter.convert ini source_path target_path (int keymode.Value) (keymode.Value = Keymode.``4K`` && is_arrows.Value)
+                            OsuSkinConverter.convert
+                                ini
+                                source_path
+                                target_path
+                                (int keymode.Value)
+                                (keymode.Value = Keymode.``4K`` && is_arrows.Value)
                         with err ->
                             Logging.Error("Error while converting to noteskin", err)
 
@@ -49,6 +54,7 @@ module Import =
                 )
                 .Pos(400.0f)
             |> this.Content
+
             base.Init parent
 
         override this.Title = ini.General.Name
@@ -102,17 +108,18 @@ module Import =
 
         match OsuSkinConverter.check_before_convert path with
         | Ok ini ->
-            sync <| fun () ->
-            Menu.Exit()
-            ImportOsuNoteskinPage(
-                ini,
-                path,
-                Path.Combine(get_game_folder "Noteskins", id + "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss"))
-            )
-                .Show()
-        | Error err -> 
-            Logging.Error("Error while parsing osu! skin.ini\n" + err)
-            // todo: error toast
+            sync
+            <| fun () ->
+                Menu.Exit()
+
+                ImportOsuNoteskinPage(
+                    ini,
+                    path,
+                    Path.Combine(get_game_folder "Noteskins", id + "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss"))
+                )
+                    .Show()
+        | Error err -> Logging.Error("Error while parsing osu! skin.ini\n" + err)
+    // todo: error toast
 
     let handle_file_drop (path: string) =
         match Mounts.drop_func with
@@ -134,12 +141,15 @@ module Import =
             let target = Path.Combine(get_game_folder "Downloads", id)
             ZipFile.ExtractToDirectory(path, target)
             import_osu_noteskin target
-            // todo: clean up extracted noteskin in downloads
+        // todo: clean up extracted noteskin in downloads
 
         | Unknown -> // Treat it as a chart/pack/library import
 
             if Directory.Exists path && Path.GetFileName path = "Songs" then
-                sync <| fun () -> Menu.Exit(); ConfirmUnlinkedSongsImport(path).Show()
+                sync
+                <| fun () ->
+                    Menu.Exit()
+                    ConfirmUnlinkedSongsImport(path).Show()
             else
 
             Imports.auto_convert.Request(

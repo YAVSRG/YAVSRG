@@ -36,23 +36,30 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
                 .Body(%(sprintf "noteskins.edit.notecolors.%s.%i" (style.ToString().ToLower()) index))
         )
         |* Clickable(
-            (fun () -> 
-                if not this.Selected then this.Select true
-                fd()
+            (fun () ->
+                if not this.Selected then
+                    this.Select true
+
+                fd ()
             ),
-            OnHover = (fun b -> 
-                if b && not this.Focused then 
-                    this.Focus true
-                elif not b && this.FocusedByMouse then
-                    Selection.up true
-            ),
-            OnRightClick = fun () ->
-                if not this.Selected then this.Select true
-                bk ()
+            OnHover =
+                (fun b ->
+                    if b && not this.Focused then
+                        this.Focus true
+                    elif not b && this.FocusedByMouse then
+                        Selection.up true
+                ),
+            OnRightClick =
+                fun () ->
+                    if not this.Selected then
+                        this.Select true
+
+                    bk ()
         )
+
         base.Init parent
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -83,9 +90,8 @@ type ColorSettingsPage() as this =
     inherit Page()
 
     let data = Content.NoteskinConfig
-    
-    let keymode: Setting<Keymode> =
-        Setting.simple <| Gameplay.Chart.keymode()
+
+    let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
 
     let mutable note_colors = data.NoteColors
 

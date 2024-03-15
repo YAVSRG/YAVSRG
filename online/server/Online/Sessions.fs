@@ -18,54 +18,66 @@ module Session =
     let private session_id_to_state_map = Dictionary<Guid, SessionState>()
     let private username_to_session_id_map = Dictionary<string, Guid>()
 
-    let connect (session_id: Guid) = lock SESSION_STATE_LOCK_OBJ <| fun () ->
-        session_id_to_state_map.Add(session_id, SessionState.Nothing)
+    let connect (session_id: Guid) =
+        lock SESSION_STATE_LOCK_OBJ
+        <| fun () -> session_id_to_state_map.Add(session_id, SessionState.Nothing)
 
-    let disconnect (session_id: Guid) = lock SESSION_STATE_LOCK_OBJ <| fun () ->
-        if session_id_to_state_map.ContainsKey session_id then
+    let disconnect (session_id: Guid) =
+        lock SESSION_STATE_LOCK_OBJ
+        <| fun () ->
+            if session_id_to_state_map.ContainsKey session_id then
+                match session_id_to_state_map.[session_id] with
+                | SessionState.LoggedIn(_, username) ->
+                    username_to_session_id_map.Remove username |> ignore
+                    Logging.Info(sprintf "[<- %s" username)
+                | _ -> ()
+
+                session_id_to_state_map.Remove session_id |> ignore
+
+    let handshake (session_id: Guid) =
+        lock SESSION_STATE_LOCK_OBJ
+        <| fun () ->
+            match session_id_to_state_map.[session_id] with
+            | SessionState.Nothing ->
+                session_id_to_state_map.[session_id] <- SessionState.Handshake
+                Server.send (session_id, Downstream.HANDSHAKE_SUCCESS)
+            | _ -> Server.kick (session_id, "Handshake sent twice")
+
+    let login (session_id: Guid, auth_token) =
+        lock SESSION_STATE_LOCK_OBJ
+        <| fun () ->
+            match session_id_to_state_map.[session_id] with
+            | SessionState.Handshake ->
+                match Users.Auth.login_via_token auth_token with
+                | Ok(user_id, username) ->
+                    if username_to_session_id_map.ContainsKey(username) then
+                        session_id_to_state_map[username_to_session_id_map.[username]] <- SessionState.Handshake
+                        Server.kick (username_to_session_id_map.[username], "Logged in from another location")
+
+                    username_to_session_id_map.[username] <- session_id
+                    session_id_to_state_map.[session_id] <- SessionState.LoggedIn(user_id, username)
+                    Server.send (session_id, Downstream.LOGIN_SUCCESS username)
+                    Logging.Info(sprintf "[-> %s" username)
+                | Error() ->
+                    Logging.Info(sprintf "%O failed to authenticate" session_id)
+                    Server.send (session_id, Downstream.LOGIN_FAILED "Login token invalid or expired")
+            | SessionState.Nothing -> Server.kick (session_id, "Login sent before handshake")
+            | _ -> ()
+
+    let logout (session_id: Guid) =
+        lock SESSION_STATE_LOCK_OBJ
+        <| fun () ->
             match session_id_to_state_map.[session_id] with
             | SessionState.LoggedIn(_, username) ->
                 username_to_session_id_map.Remove username |> ignore
+                session_id_to_state_map.[session_id] <- SessionState.Handshake
                 Logging.Info(sprintf "[<- %s" username)
-            | _ -> ()
-            session_id_to_state_map.Remove session_id |> ignore
+            | _ -> Server.kick (session_id, "Not logged in")
 
-    let handshake (session_id: Guid) = lock SESSION_STATE_LOCK_OBJ <| fun () ->
-        match session_id_to_state_map.[session_id] with
-        | SessionState.Nothing ->
-            session_id_to_state_map.[session_id] <- SessionState.Handshake
-            Server.send (session_id, Downstream.HANDSHAKE_SUCCESS)
-        | _ -> Server.kick (session_id, "Handshake sent twice")
-
-    let login (session_id: Guid, auth_token) = lock SESSION_STATE_LOCK_OBJ <| fun () ->
-        match session_id_to_state_map.[session_id] with
-        | SessionState.Handshake ->
-            match Users.Auth.login_via_token auth_token with
-            | Ok(user_id, username) ->
-                if username_to_session_id_map.ContainsKey(username) then
-                    session_id_to_state_map[username_to_session_id_map.[username]] <- SessionState.Handshake
-                    Server.kick (username_to_session_id_map.[username], "Logged in from another location")
-
-                username_to_session_id_map.[username] <- session_id
-                session_id_to_state_map.[session_id] <- SessionState.LoggedIn(user_id, username)
-                Server.send (session_id, Downstream.LOGIN_SUCCESS username)
-                Logging.Info(sprintf "[-> %s" username)
-            | Error () ->
-                Logging.Info(sprintf "%O failed to authenticate" session_id)
-                Server.send (session_id, Downstream.LOGIN_FAILED "Login token invalid or expired")
-        | SessionState.Nothing -> Server.kick (session_id, "Login sent before handshake")
-        | _ -> ()
-
-    let logout (session_id: Guid) = lock SESSION_STATE_LOCK_OBJ <| fun () ->
-        match session_id_to_state_map.[session_id] with
-        | SessionState.LoggedIn(_, username) ->
-            username_to_session_id_map.Remove username |> ignore
-            session_id_to_state_map.[session_id] <- SessionState.Handshake
-            Logging.Info(sprintf "[<- %s" username)
-        | _ -> Server.kick (session_id, "Not logged in")
-
-    let list_online_users () = 
-        let states = lock SESSION_STATE_LOCK_OBJ <| fun () -> Array.ofSeq session_id_to_state_map.Values
+    let list_online_users () =
+        let states =
+            lock SESSION_STATE_LOCK_OBJ
+            <| fun () -> Array.ofSeq session_id_to_state_map.Values
 
         states
         |> Array.choose (
@@ -75,7 +87,10 @@ module Session =
         )
 
     let find_username_by_session_id (session_id: Guid) =
-        let ok, state = lock SESSION_STATE_LOCK_OBJ <| fun () -> session_id_to_state_map.TryGetValue session_id
+        let ok, state =
+            lock SESSION_STATE_LOCK_OBJ
+            <| fun () -> session_id_to_state_map.TryGetValue session_id
+
         if ok then
             match state with
             | SessionState.LoggedIn(_, username) -> Some username
@@ -83,15 +98,20 @@ module Session =
         else
             None
 
-    let find_session_id_by_username (username: string) = 
-        let ok, session_id = lock SESSION_STATE_LOCK_OBJ <| fun () -> username_to_session_id_map.TryGetValue username
+    let find_session_id_by_username (username: string) =
+        let ok, session_id =
+            lock SESSION_STATE_LOCK_OBJ
+            <| fun () -> username_to_session_id_map.TryGetValue username
+
         if ok then Some session_id else None
 
-    let find_session_ids_by_usernames (usernames: string array) = lock SESSION_STATE_LOCK_OBJ <| fun () ->
-        Array.map
-            (fun username ->
-                match username_to_session_id_map.TryGetValue username with
-                | true, id -> Some id
-                | false, _ -> None
-            )
-            usernames
+    let find_session_ids_by_usernames (usernames: string array) =
+        lock SESSION_STATE_LOCK_OBJ
+        <| fun () ->
+            Array.map
+                (fun username ->
+                    match username_to_session_id_map.TryGetValue username with
+                    | true, id -> Some id
+                    | false, _ -> None
+                )
+                usernames

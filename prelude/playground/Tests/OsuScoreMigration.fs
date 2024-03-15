@@ -106,16 +106,12 @@ module OsuScoreMigration =
 
         Logging.Info "Reading osu database ..."
 
-        use file =
-            Path.Combine(Imports.OSU_SONG_FOLDER, "..", "scores.db")
-            |> File.OpenRead
+        use file = Path.Combine(Imports.OSU_SONG_FOLDER, "..", "scores.db") |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)
         let scores = OsuScoreDatabase.Read(reader)
 
-        use file =
-            Path.Combine(Imports.OSU_SONG_FOLDER, "..", "osu!.db")
-            |> File.OpenRead
+        use file = Path.Combine(Imports.OSU_SONG_FOLDER, "..", "osu!.db") |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)
         let main_db = OsuDatabase.Read(reader)
@@ -124,11 +120,7 @@ module OsuScoreMigration =
             main_db.Beatmaps
             |> Seq.filter (fun b -> b.Mode = 3uy && round b.OverallDifficulty = 8.0f) do
             let osu_file =
-                Path.Combine(
-                    Imports.OSU_SONG_FOLDER,
-                    beatmap_data.FolderName,
-                    beatmap_data.Filename
-                )
+                Path.Combine(Imports.OSU_SONG_FOLDER, beatmap_data.FolderName, beatmap_data.Filename)
 
             let chart =
                 try
@@ -219,9 +211,7 @@ module OsuScoreMigration =
 
         Logging.Info "Reading osu database ..."
 
-        use file =
-            Path.Combine(Imports.OSU_SONG_FOLDER, "..", "osu!.db")
-            |> File.OpenRead
+        use file = Path.Combine(Imports.OSU_SONG_FOLDER, "..", "osu!.db") |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)
         let main_db = OsuDatabase.Read(reader)

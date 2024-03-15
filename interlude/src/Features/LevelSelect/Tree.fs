@@ -127,7 +127,7 @@ module Tree =
             last_cached_flag <- cache_flag
 
             if chart_save_data.IsNone then
-                chart_save_data <- Some (ScoreDatabase.get cc.Hash Content.Scores)
+                chart_save_data <- Some(ScoreDatabase.get cc.Hash Content.Scores)
 
             match chart_save_data with
             | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
@@ -159,9 +159,10 @@ module Tree =
 
         override this.Spacing = 5.0f
         member this.Chart = cc
+
         member this.PlaylistDuration =
             match context with
-            | LibraryContext.Playlist (_, _, data) -> cc.Length / data.Rate.Value
+            | LibraryContext.Playlist(_, _, data) -> cc.Length / data.Rate.Value
             | _ -> 0.0f<ms>
 
         member this.Select() = switch_chart (cc, context, group_name)
@@ -245,6 +246,7 @@ module Tree =
                 top + 34.0f,
                 Colors.text_subheading
             )
+
             Text.draw_b (
                 Style.font,
                 cc.Subtitle |> Option.defaultValue cc.DifficultyName,
@@ -253,6 +255,7 @@ module Tree =
                 top + 65.0f,
                 Colors.text_subheading
             )
+
             Text.draw_aligned_b (Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
             if
@@ -282,7 +285,10 @@ module Tree =
                 hover.Target <- 1.0f
 
                 if this.LeftClick(origin) then
-                    if this.Selected then LevelSelect.choose_this_chart () else this.Select()
+                    if this.Selected then
+                        LevelSelect.choose_this_chart ()
+                    else
+                        this.Select()
                 elif this.RightClick(origin) then
                     ChartContextMenu(cc, context).Show()
                 elif (%%"delete").Tapped() then
@@ -301,23 +307,27 @@ module Tree =
 
     type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: LibraryGroupContext) =
         inherit TreeItem()
-        
+
         let mutable last_cached_flag = -1
         let select_animation = Animation.Fade(0.0f)
         let mutable label = ""
-        let update_cached_info() =
+
+        let update_cached_info () =
             last_cached_flag <- cache_flag
+
             label <-
                 match context with
-                | LibraryGroupContext.Folder id -> 
+                | LibraryGroupContext.Folder id ->
                     match Content.Collections.GetFolder id with
                     | Some folder -> sprintf "%s %i" folder.Icon.Value items.Count
                     | None -> sprintf "%s %i" Icons.FOLDER items.Count
-                | LibraryGroupContext.Playlist id -> 
+                | LibraryGroupContext.Playlist id ->
                     match Content.Collections.GetPlaylist id with
                     | Some playlist ->
                         let duration = items |> Seq.map (fun i -> i.PlaylistDuration) |> Seq.sum
-                        sprintf "%s %s    %s %i"
+
+                        sprintf
+                            "%s %s    %s %i"
                             Icons.CLOCK
                             (format_duration_ms duration)
                             playlist.Icon.Value
@@ -327,10 +337,15 @@ module Tree =
                     sprintf "%s %i" Icons.FOLDER items.Count
                 | LibraryGroupContext.None -> sprintf "%s %i" Icons.FOLDER items.Count
 
-        do update_cached_info()
+        do update_cached_info ()
 
         override this.Bounds(top) =
-            Rect.Create(Viewport.vwidth * (0.5f - 0.05f * select_animation.Value), top, Viewport.vwidth - 15.0f, top + GROUP_HEIGHT)
+            Rect.Create(
+                Viewport.vwidth * (0.5f - 0.05f * select_animation.Value),
+                top,
+                Viewport.vwidth - 15.0f,
+                top + GROUP_HEIGHT
+            )
 
         override this.Selected = selected_group = name
         override this.Spacing = 20.0f
@@ -353,7 +368,7 @@ module Tree =
                      Palette.color (100, 0.7f, 0.0f))
 
             Text.fill_b (Style.font, name, bounds.Shrink(15.0f, 5.0f).TrimRight(100.0f), Colors.text, Alignment.LEFT)
-            Text.fill_b (Style.font, label, bounds.Shrink (15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
+            Text.fill_b (Style.font, label, bounds.Shrink(15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 
         member this.Draw(top, origin, originB) =
             let b = this.CheckBounds(top, origin, originB, this.OnDraw)
@@ -409,6 +424,7 @@ module Tree =
 
             select_animation.Target <- if this.Selected then 1.0f else 0.0f
             select_animation.Update elapsed_ms
+
             match scroll_to with
             | ScrollTo.Pack s when s = name ->
                 if this.Expanded then
@@ -458,13 +474,19 @@ module Tree =
                 }
 
             match options.LibraryMode.Value with
-            | LibraryMode.Collections -> get_collection_groups LevelSelect.filter sorting_modes.[options.ChartSortMode.Value] ctx
-            | LibraryMode.Table -> 
+            | LibraryMode.Collections ->
+                get_collection_groups LevelSelect.filter sorting_modes.[options.ChartSortMode.Value] ctx
+            | LibraryMode.Table ->
                 match Content.Table with
-                | Some table -> get_table_groups LevelSelect.filter sorting_modes.[options.ChartSortMode.Value] table ctx
+                | Some table ->
+                    get_table_groups LevelSelect.filter sorting_modes.[options.ChartSortMode.Value] table ctx
                 | None -> get_empty_view ()
             | LibraryMode.All ->
-                get_groups LevelSelect.filter grouping_modes.[options.ChartGroupMode.Value] sorting_modes.[options.ChartSortMode.Value] ctx
+                get_groups
+                    LevelSelect.filter
+                    grouping_modes.[options.ChartGroupMode.Value]
+                    sorting_modes.[options.ChartSortMode.Value]
+                    ctx
         // if exactly 1 result, switch to it
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()

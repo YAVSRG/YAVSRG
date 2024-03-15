@@ -419,6 +419,7 @@ type ScoreChartContextMenu(cc: CachedChart) as this =
                 (fun () -> AddToCollectionPage(cc).Show()),
                 Icon = Icons.FOLDER_PLUS
             )
+
         match Content.Table with
         | Some table ->
             if Network.status = Network.Status.LoggedIn && cc.Keys = table.Info.Keymode then
@@ -487,7 +488,9 @@ type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: Sco
                 }
         )
         |+ StylishButton(
-            (fun () -> ScoreScreenHelpers.watch_replay (score_info, Gameplay.Chart.color_this_chart(score_info.WithMods))),
+            (fun () ->
+                ScoreScreenHelpers.watch_replay (score_info, Gameplay.Chart.color_this_chart (score_info.WithMods))
+            ),
             sprintf "%s %s" Icons.FILM (%"score.watch_replay.name") |> K,
             !%Palette.DARK_100,
             Position =

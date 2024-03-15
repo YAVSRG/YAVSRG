@@ -21,7 +21,9 @@ module List =
             let user_id, _ = authorize headers
 
             let friends = Friends.friends_list user_id
-            let online = Session.find_session_ids_by_usernames (friends |> Array.map (fun (id, u) -> u.Username))
+
+            let online =
+                Session.find_session_ids_by_usernames (friends |> Array.map (fun (id, u) -> u.Username))
 
             response.ReplyJson(
                 {

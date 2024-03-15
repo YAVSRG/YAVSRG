@@ -34,29 +34,33 @@ type TableCard(online_table: Tables.List.Table) as this =
     let mutable existing = None
     let mutable status = TableStatus.NotInstalled
 
-    override this.Init (parent: Widget) =
+    override this.Init(parent: Widget) =
         this
-        |+ Text(online_table.Info.Name, Align = Alignment.CENTER, Position = Position.SliceTop(80.0f).Margin(20.0f, Style.PADDING))
+        |+ Text(
+            online_table.Info.Name,
+            Align = Alignment.CENTER,
+            Position = Position.SliceTop(80.0f).Margin(20.0f, Style.PADDING)
+        )
         |+ Text(
             online_table.Info.Description,
             Align = Alignment.CENTER,
             Position = Position.TrimTop(65.0f).SliceTop(60.0f).Margin(20.0f, Style.PADDING)
         )
         |+ Text(
-            fun () -> 
+            fun () ->
                 match status with
                 | TableStatus.NotInstalled -> "Click to install"
                 | TableStatus.OutOfDate -> "Click to update"
                 | TableStatus.Installing -> "Installing ..."
                 | TableStatus.Installed -> "Click to view"
-            ,
-            Align = Alignment.CENTER,
-            Position = Position.SliceBottom(60.0f).Margin(20.0f, Style.PADDING)
+            , Align = Alignment.CENTER
+            , Position = Position.SliceBottom(60.0f).Margin(20.0f, Style.PADDING)
         )
         |+ LoadingIndicator.Border(fun () -> status = TableStatus.Installing)
         |* Clickable.Focus this
 
         existing <- Tables.by_id online_table.Id
+
         status <-
             match existing with
             | Some table when table.LastUpdated < online_table.LastUpdated -> TableStatus.OutOfDate
@@ -65,7 +69,7 @@ type TableCard(online_table: Tables.List.Table) as this =
 
         base.Init parent
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -74,30 +78,36 @@ type TableCard(online_table: Tables.List.Table) as this =
         | TableStatus.NotInstalled
         | TableStatus.OutOfDate as current_status ->
             status <- TableStatus.Installing
-            Tables.Charts.get (online_table.Id,
+
+            Tables.Charts.get (
+                online_table.Id,
                 function
                 | Some charts ->
-                    sync(fun () ->
+                    sync (fun () ->
                         let table =
                             {
                                 Id = online_table.Id
                                 Info = online_table.Info
                                 LastUpdated = online_table.LastUpdated
-                                Charts = charts.Charts |> Array.map (fun c -> { Hash = c.Hash; Level = c.Level }) |> List.ofArray
+                                Charts =
+                                    charts.Charts
+                                    |> Array.map (fun c -> { Hash = c.Hash; Level = c.Level })
+                                    |> List.ofArray
                             }
+
                         Tables.install_or_update table
                         Tables.selected_id.Value <- Some table.Id
                         status <- TableStatus.Installed
                         existing <- Some table
                         TableDownloadMenu.OpenAfterInstall(table, charts)
                     )
-                | None -> 
+                | None ->
                     Logging.Error("Error getting charts for table")
                     // error toast
-                    sync(fun () -> status <- current_status)
+                    sync (fun () -> status <- current_status)
             )
         | TableStatus.Installing -> ()
-        | TableStatus.Installed -> 
+        | TableStatus.Installed ->
             Tables.selected_id.Value <- Some existing.Value.Id
             TableDownloadMenu.LoadOrOpen(existing.Value)
 
@@ -117,6 +127,7 @@ module Tables =
                         sync (fun () -> flow.Add(TableCard(table)))
                 | None -> Logging.Error("Error getting online tables list")
             )
+
             this |* scroll
             base.Init parent
 

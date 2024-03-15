@@ -43,8 +43,8 @@ type LevelSelectScreen() =
 
     let random_chart () =
         if options.AdvancedRecommendations.Value && Chart.CACHE_DATA.IsSome then
-            let ctx = 
-                { 
+            let ctx =
+                {
                     BaseChart = Chart.CACHE_DATA.Value
                     Filter = LevelSelect.filter
                     Mods = selected_mods.Value
@@ -54,20 +54,22 @@ type LevelSelectScreen() =
                     Library = Content.Library
                     ScoreDatabase = Content.Scores
                 }
+
             match Suggestion.get_suggestion ctx with
             | Some c ->
                 Tree.switch_chart (c, LibraryContext.None, "")
                 refresh ()
             | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
         else
-            let ctx = 
-                { 
+            let ctx =
+                {
                     Rate = rate.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
                     Library = Content.Library
                     ScoreDatabase = Content.Scores
                 }
+
             match Suggestion.get_random LevelSelect.filter ctx with
             | Some c ->
                 Tree.switch_chart (c, LibraryContext.None, "")
@@ -237,7 +239,7 @@ type LevelSelectScreen() =
         Comments.draw ()
 
     override this.OnEnter prev =
-        Endless.exit_endless_mode()
+        Endless.exit_endless_mode ()
         Song.on_finish <- SongFinishAction.LoopFromPreview
 
         if Cache.recache_service.Status <> Async.ServiceStatus.Idle then

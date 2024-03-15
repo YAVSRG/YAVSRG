@@ -21,13 +21,13 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
             Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
 
         playfield.Add(LaneCover())
-            
+
         if this.Initialised then
             playfield.Init this
 
         playfield :> Widget
 
-    let mutable renderer : Widget = Dummy()
+    let mutable renderer: Widget = Dummy()
 
     let w = Viewport.vwidth * scale
     let h = Viewport.vheight * scale
@@ -55,8 +55,7 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
     do
         fbo.Unbind()
 
-        Gameplay.Chart.if_loaded <| fun info -> 
-            renderer <- create_renderer info
+        Gameplay.Chart.if_loaded <| fun info -> renderer <- create_renderer info
 
         this
         |* (bounds_placeholder
@@ -79,8 +78,8 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
 
     override this.Draw() =
         fbo.Bind true
-        Interlude.UI.Background.draw(Viewport.bounds, Colors.white, 1.0f)
-        Draw.rect Viewport.bounds (Color.Black.O4a (Interlude.Options.options.BackgroundDim.Value * 255.0f |> int))
+        Interlude.UI.Background.draw (Viewport.bounds, Colors.white, 1.0f)
+        Draw.rect Viewport.bounds (Color.Black.O4a(Interlude.Options.options.BackgroundDim.Value * 255.0f |> int))
         renderer.Draw()
         fbo.Unbind()
         Draw.rect (bounds_placeholder.Bounds.Translate(10.0f, 10.0f)) Colors.shadow_2.O2
@@ -98,7 +97,7 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
 type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
     inherit NoteskinPreview(scale, true)
 
-    let keycount = int (Gameplay.Chart.keymode())
+    let keycount = int (Gameplay.Chart.keymode ())
 
     override this.Draw() =
         base.Draw()
@@ -110,9 +109,8 @@ type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
                 let cfg = Content.NoteskinConfig
 
                 let width =
-                    (cfg.ColumnWidth
-                    * float32 keycount
-                    + Array.sum (cfg.KeymodeColumnSpacing keycount))
+                    (cfg.ColumnWidth * float32 keycount
+                     + Array.sum (cfg.KeymodeColumnSpacing keycount))
                     * scale
 
                 let (screenAlign, columnAlign) = cfg.PlayfieldAlignment

@@ -34,12 +34,13 @@ module Rulesets =
                 let rulesets = Rulesets.list ()
 
                 let d =
-                    Dropdown { 
-                        Items = rulesets |> Seq.map (fun (id, rs) -> id, rs.Name)
-                        ColorFunc = K Colors.text
-                        OnClose = fun () -> this.Dropdown <- None
-                        Setting = setting
-                    }
+                    Dropdown
+                        {
+                            Items = rulesets |> Seq.map (fun (id, rs) -> id, rs.Name)
+                            ColorFunc = K Colors.text
+                            OnClose = fun () -> this.Dropdown <- None
+                            Setting = setting
+                        }
 
                 d.Position <-
                     Position

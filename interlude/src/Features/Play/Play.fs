@@ -34,14 +34,18 @@ module PlayScreen =
         let first_note = info.WithMods.FirstNote
         let liveplay = LiveReplayProvider first_note
 
-        let scoring = Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+        let scoring =
+            Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
         let pacemaker_info =
             match pacemaker_mode with
             | PacemakerMode.None -> PacemakerInfo.None
             | PacemakerMode.Score(rate, replay) ->
                 let replay_data = StoredReplayProvider(replay) :> IReplayProvider
-                let replay_scoring = Metrics.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
+
+                let replay_scoring =
+                    Metrics.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
+
                 PacemakerInfo.Replay replay_scoring
             | PacemakerMode.Setting ->
                 let setting =
@@ -90,6 +94,7 @@ module PlayScreen =
         let mutable recommended_offset = 0.0f
 
         let offset_setting = LocalAudioSync.offset_setting info.SaveData
+
         let offset_slideout (screen: IPlayScreen) =
 
             let offset_slider =
@@ -162,20 +167,24 @@ module PlayScreen =
 
                 let offset_slideout = offset_slideout this
 
-                let retry() =
+                let retry () =
                     Screen.change_new
                         (fun () -> play_screen (info, pacemaker_mode) :> Screen.T)
                         Screen.Type.Play
                         Transitions.Flags.Default
                     |> ignore
-                let give_up() = Screen.back Transitions.Flags.Default |> ignore
+
+                let give_up () =
+                    Screen.back Transitions.Flags.Default |> ignore
 
                 this
-                |+ HotkeyHoldAction("retry", 
+                |+ HotkeyHoldAction(
+                    "retry",
                     (if options.HoldToGiveUp.Value then ignore else retry),
                     (if options.HoldToGiveUp.Value then retry else ignore)
                 )
-                |+ HotkeyHoldAction("exit", 
+                |+ HotkeyHoldAction(
+                    "exit",
                     (if options.HoldToGiveUp.Value then ignore else give_up),
                     (if options.HoldToGiveUp.Value then give_up else ignore)
                 )
@@ -188,11 +197,7 @@ module PlayScreen =
 
                 base.OnEnter(previous)
 
-                DiscordRPC.playing_timed (
-                    "Playing",
-                    info.CacheInfo.Title,
-                    info.CacheInfo.Length / Gameplay.rate.Value
-                )
+                DiscordRPC.playing_timed ("Playing", info.CacheInfo.Title, info.CacheInfo.Length / Gameplay.rate.Value)
 
             override this.OnExit(next) =
                 if next = Screen.Type.Score then
@@ -236,8 +241,14 @@ module PlayScreen =
 
                     Screen.change_new
                         (fun () ->
-                            let score_info = Gameplay.score_info_from_gameplay info scoring ((liveplay :> IReplayProvider).GetFullReplay())
-                            (score_info, Gameplay.set_score (pacemaker_met this.State) score_info info.SaveData, true) |> ScoreScreen
+                            let score_info =
+                                Gameplay.score_info_from_gameplay
+                                    info
+                                    scoring
+                                    ((liveplay :> IReplayProvider).GetFullReplay())
+
+                            (score_info, Gameplay.set_score (pacemaker_met this.State) score_info info.SaveData, true)
+                            |> ScoreScreen
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default
@@ -269,7 +280,8 @@ module PlayScreen =
         let first_note = info.WithMods.FirstNote
         let liveplay = LiveReplayProvider first_note
 
-        let scoring = Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+        let scoring =
+            Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
@@ -310,11 +322,13 @@ module PlayScreen =
                 add_widget RateModMeter
                 add_widget BPMMeter
                 add_widget MultiplayerScoreTracker
-                
-                let give_up() = Screen.back Transitions.Flags.Default |> ignore
+
+                let give_up () =
+                    Screen.back Transitions.Flags.Default |> ignore
 
                 this
-                |* HotkeyHoldAction("exit", 
+                |* HotkeyHoldAction(
+                    "exit",
                     (if options.HoldToGiveUp.Value then ignore else give_up),
                     (if options.HoldToGiveUp.Value then give_up else ignore)
                 )
@@ -378,8 +392,13 @@ module PlayScreen =
                     Screen.change_new
                         (fun () ->
                             let score_info =
-                                Gameplay.score_info_from_gameplay info scoring ((liveplay :> IReplayProvider).GetFullReplay())
-                            (score_info, Gameplay.set_score true score_info info.SaveData, true) |> ScoreScreen
+                                Gameplay.score_info_from_gameplay
+                                    info
+                                    scoring
+                                    ((liveplay :> IReplayProvider).GetFullReplay())
+
+                            (score_info, Gameplay.set_score true score_info info.SaveData, true)
+                            |> ScoreScreen
                         )
                         Screen.Type.Score
                         Transitions.Flags.Default

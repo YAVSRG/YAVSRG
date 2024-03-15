@@ -15,19 +15,21 @@ module NavigationContainer =
 
         let children = ResizeArray<'T>()
         let mutable last_selected = 0
-        
+
         member val WrapNavigation = true with get, set
 
         member private this.WhoIsFocused: int option =
             Seq.tryFindIndex (fun (c: 'T) -> c.Focused) children
 
-        member private this.WhoShouldFocus : Widget option =
-            if children.Count = 0 then None else
+        member private this.WhoShouldFocus: Widget option =
+            if children.Count = 0 then
+                None
+            else
 
-            if last_selected >= children.Count then
-                last_selected <- 0
+                if last_selected >= children.Count then
+                    last_selected <- 0
 
-            Some children.[last_selected]
+                Some children.[last_selected]
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 
@@ -62,7 +64,7 @@ module NavigationContainer =
                 match this.WhoIsFocused with
                 | Some i -> Seq.indexed children |> Seq.exists (fun (idx, c) -> idx < i && c.Focusable)
                 | None -> true
-        
+
         member this.CanNext() =
             if this.WrapNavigation then
                 true
@@ -113,6 +115,7 @@ module NavigationContainer =
         static member (|+)(parent: #Base<'T>, child: 'T) =
             parent.Add child
             parent
+
         static member (|+)(parent: #Base<'T>, children: 'T seq) =
             Seq.iter parent.Add children
             parent
@@ -170,13 +173,15 @@ module NavigationContainer =
         member private this.WhoIsFocused: int option =
             Seq.tryFindIndex (fun (c: GridSwitchItem<'T>) -> c.Widget.Focused) children
 
-        member private this.WhoShouldFocus : ISelection option =
-            if children.Count = 0 then None else
+        member private this.WhoShouldFocus: ISelection option =
+            if children.Count = 0 then
+                None
+            else
 
-            if last_selected >= children.Count then
-                last_selected <- 0
+                if last_selected >= children.Count then
+                    last_selected <- 0
 
-            Some children.[last_selected].Widget
+                Some children.[last_selected].Widget
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 

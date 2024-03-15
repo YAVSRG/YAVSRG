@@ -40,22 +40,26 @@ module System =
                 Align = Alignment.LEFT,
                 Position = Position.TrimLeft 20.0f
             )
-            |* Clickable.Focus(this, OnHover = fun b -> 
-                if b && not this.Focused then
-                    this.Focus true
-                elif not b && this.FocusedByMouse && not this.Selected then
-                    Selection.up true)
+            |* Clickable.Focus(
+                this,
+                OnHover =
+                    fun b ->
+                        if b && not this.Focused then
+                            this.Focus true
+                        elif not b && this.FocusedByMouse && not this.Selected then
+                            Selection.up true
+            )
 
-        override this.OnFocus (by_mouse: bool) =
+        override this.OnFocus(by_mouse: bool) =
             base.OnFocus by_mouse
             Style.hover.Play()
 
-        override this.OnSelected (by_mouse: bool) =
+        override this.OnSelected(by_mouse: bool) =
             base.OnSelected by_mouse
             Style.click.Play()
             Input.listen_to_next_key input_callback
 
-        override this.OnDeselected (by_mouse: bool) =
+        override this.OnDeselected(by_mouse: bool) =
             base.OnDeselected by_mouse
             Input.remove_listener ()
 
@@ -108,12 +112,13 @@ module System =
             | Some _ -> this.Dropdown <- None
             | _ ->
                 let d =
-                    Dropdown { 
-                        Items = WindowResolution.presets |> Seq.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
-                        ColorFunc = K Colors.text
-                        OnClose = fun () -> this.Dropdown <- None
-                        Setting = setting
-                    }
+                    Dropdown
+                        {
+                            Items = WindowResolution.presets |> Seq.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
+                            ColorFunc = K Colors.text
+                            OnClose = fun () -> this.Dropdown <- None
+                            Setting = setting
+                        }
 
                 d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
                 d.Init this
@@ -153,12 +158,17 @@ module System =
             | Some _ -> this.Dropdown <- None
             | _ ->
                 let d =
-                    Dropdown { 
-                        Items = modes_thunk() |> Seq.map (fun mode -> mode, sprintf "%ix%i@%ihz" mode.Width mode.Height mode.RefreshRate)
-                        ColorFunc = K Colors.text
-                        OnClose = fun () -> this.Dropdown <- None
-                        Setting = setting
-                    }
+                    Dropdown
+                        {
+                            Items =
+                                modes_thunk ()
+                                |> Seq.map (fun mode ->
+                                    mode, sprintf "%ix%i@%ihz" mode.Width mode.Height mode.RefreshRate
+                                )
+                            ColorFunc = K Colors.text
+                            OnClose = fun () -> this.Dropdown <- None
+                            Setting = setting
+                        }
 
                 d.Position <- Position.SliceTop(560.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
                 d.Init this
@@ -274,7 +284,7 @@ module System =
                 |+ PageSetting(
                     "system.audiooffset",
                     { new Slider(options.AudioOffset, Step = 1f) with
-                        override this.OnDeselected (by_mouse: bool) =
+                        override this.OnDeselected(by_mouse: bool) =
                             base.OnDeselected by_mouse
                             Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
                     }

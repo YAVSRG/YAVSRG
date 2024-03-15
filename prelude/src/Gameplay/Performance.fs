@@ -5,26 +5,26 @@ open Prelude
 open Prelude.Charts.Processing.Difficulty
 
 module Performance =
-    
+
     let private confidence_value (delta: Time) =
         let delta = float delta
-    
+
         let phi x =
             let y = x / 1.414213562
-    
+
             Math.Max(
                 0.0,
                 Math.Min(
                     (0.5
-                        + Math.Pow(Math.PI, -0.5)
-                        * (y - Math.Pow(y, 3.0) / 3.0 + Math.Pow(y, 5.0) / 10.0 - Math.Pow(y, 7.0) / 42.0
-                            + Math.Pow(y, 9.0) / 216.0)),
+                     + Math.Pow(Math.PI, -0.5)
+                       * (y - Math.Pow(y, 3.0) / 3.0 + Math.Pow(y, 5.0) / 10.0 - Math.Pow(y, 7.0) / 42.0
+                          + Math.Pow(y, 9.0) / 216.0)),
                     1.0
                 )
             )
-    
+
         phi ((17.95 - Math.Max(2.0, Math.Abs delta)) / 15.0)
-    
+
     let private performance_func b value deviation delta =
         DifficultyRating.stamina_func b (value * confidence_value deviation) delta
 

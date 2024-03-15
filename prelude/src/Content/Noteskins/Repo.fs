@@ -11,7 +11,7 @@ module NoteskinPreview =
 
     let private get_texture (id: string) (ns: Noteskin) =
         match ns.GetTexture id with
-        | TextureOk (a, b) -> a, b
+        | TextureOk(a, b) -> a, b
         | _ -> failwithf "Failed to get texture '%s' for noteskin '%s'" id ns.Config.Name
 
     let render (ns: Noteskin) : Bitmap =
@@ -138,60 +138,78 @@ type NoteskinGroup =
     }
 
 [<Json.AutoCodec>]
-type NoteskinRepo = 
-    { 
+type NoteskinRepo =
+    {
         Noteskins: NoteskinGroup list
     }
     static member Empty = { Noteskins = [] }
 
 module NoteskinRepo =
 
-    let add (noteskin_info: NoteskinConfig) (download_link: string) (preview_image_link: string) (repo: NoteskinRepo) : NoteskinRepo * bool =
+    let add
+        (noteskin_info: NoteskinConfig)
+        (download_link: string)
+        (preview_image_link: string)
+        (repo: NoteskinRepo)
+        : NoteskinRepo * bool =
 
-        let name, author, version = noteskin_info.Name.Trim(), noteskin_info.Author.Trim(), noteskin_info.Version.Trim()
+        let name, author, version =
+            noteskin_info.Name.Trim(), noteskin_info.Author.Trim(), noteskin_info.Version.Trim()
+
         let editor = noteskin_info.Editor |> Option.map (_.Trim())
 
         match repo.Noteskins |> List.tryFind (fun x -> x.Name = name && x.Author = author) with
         | Some existing_group ->
             let new_group, new_skin_was_added =
-                match existing_group.Versions |> List.tryFind (fun x -> x.Version.ToLower() = version.ToLower()) with
+                match
+                    existing_group.Versions
+                    |> List.tryFind (fun x -> x.Version.ToLower() = version.ToLower())
+                with
                 | Some existing ->
                     { existing_group with
-                        Versions = 
-                            {
-                                Version = version
-                                Editor = editor
-                                Preview = preview_image_link
-                                Download = download_link
-                            } :: (existing_group.Versions |> List.except [existing])
-                    }, false
-                | None ->
-                    { existing_group with
-                        Versions = 
-                            {
-                                Version = version
-                                Editor = editor
-                                Preview = preview_image_link
-                                Download = download_link
-                            } :: existing_group.Versions
-                    }, true
-            { repo with
-                Noteskins =
-                    new_group :: (repo.Noteskins |> List.except [existing_group])
-            }, new_skin_was_added
-        | None ->
-            { repo with
-                Noteskins = 
-                    {
-                        Name = name
-                        Author = author
-                        Versions = [
+                        Versions =
                             {
                                 Version = version
                                 Editor = editor
                                 Preview = preview_image_link
                                 Download = download_link
                             }
-                        ]
-                    } :: repo.Noteskins
-            }, true
+                            :: (existing_group.Versions |> List.except [ existing ])
+                    },
+                    false
+                | None ->
+                    { existing_group with
+                        Versions =
+                            {
+                                Version = version
+                                Editor = editor
+                                Preview = preview_image_link
+                                Download = download_link
+                            }
+                            :: existing_group.Versions
+                    },
+                    true
+
+            { repo with
+                Noteskins = new_group :: (repo.Noteskins |> List.except [ existing_group ])
+            },
+            new_skin_was_added
+        | None ->
+            { repo with
+                Noteskins =
+                    {
+                        Name = name
+                        Author = author
+                        Versions =
+                            [
+                                {
+                                    Version = version
+                                    Editor = editor
+                                    Preview = preview_image_link
+                                    Download = download_link
+                                }
+                            ]
+                    }
+                    :: repo.Noteskins
+            },
+            true

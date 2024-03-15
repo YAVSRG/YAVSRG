@@ -32,7 +32,8 @@ module Wiki =
         let mutable index_content: MarkdownDocument array option = None
         let mutable index_table_of_contents: Map<string, WikiPage list> = Map.empty
 
-        let mutable page_cache_by_filename: Map<string, MarkdownDocument array option> = Map.empty
+        let mutable page_cache_by_filename: Map<string, MarkdownDocument array option> =
+            Map.empty
 
         let mutable pages_by_filename: Map<string, WikiPage> = Map.empty
 
@@ -166,10 +167,12 @@ module Wiki =
         inherit StaticContainer(nt)
 
         member val _Size = 0.0f with get, set
-        
+
         interface DynamicSize with
             member this.Size = this._Size
-            member this.OnSizeChanged with set _ = ()
+
+            member this.OnSizeChanged
+                with set _ = ()
 
     type Browser() as this =
         inherit Dialog()
@@ -181,10 +184,10 @@ module Wiki =
                 Position = Position.SliceTop(70.0f).Margin((Viewport.vwidth - 1400.0f) * 0.5f, 10.0f)
             )
             |+ Button(
-                fun () -> 
+                fun () ->
                     if page_history.Length < 2 then
-                        Icons.X + " " + %"wiki.close" 
-                    else 
+                        Icons.X + " " + %"wiki.close"
+                    else
                         Icons.ARROW_LEFT_CIRCLE + " " + %"menu.back"
                 , fun () ->
                     match page_history with

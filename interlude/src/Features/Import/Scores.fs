@@ -156,7 +156,9 @@ module Scores =
 
                 let score: Score =
                     {
-                        Timestamp = DateTime.FromFileTimeUtc(replay_info.Timestamp).ToLocalTime() |> Timestamp.from_datetime
+                        Timestamp =
+                            DateTime.FromFileTimeUtc(replay_info.Timestamp).ToLocalTime()
+                            |> Timestamp.from_datetime
                         Replay = Replay.compress_bytes replay_data
                         Rate = MathF.Round(combined_rate, 2)
                         Mods = mods

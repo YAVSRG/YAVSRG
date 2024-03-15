@@ -35,9 +35,11 @@ module Sorting =
             "?"
 
     let private format_date_last_played (cc: CachedChart, ctx: LibraryViewContext) =
-        let now = Timestamp.now()
+        let now = Timestamp.now ()
         let ONE_DAY = 24L * 3600_000L
-        let days_ago = (now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed) / ONE_DAY
+
+        let days_ago =
+            (now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed) / ONE_DAY
 
         if days_ago < 1 then 0, "Today"
         elif days_ago < 2 then 1, "Yesterday"
@@ -65,6 +67,7 @@ module Sorting =
 
     let grade_achieved (cc: CachedChart, ctx: LibraryViewContext) =
         let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
+
         if data.PersonalBests.ContainsKey ctx.RulesetId then
             match PersonalBests.get_best_above ctx.Rate data.PersonalBests.[ctx.RulesetId].Grade with
             | Some i -> i, ctx.Ruleset.GradeName i
@@ -74,6 +77,7 @@ module Sorting =
 
     let lamp_achieved (cc: CachedChart, ctx: LibraryViewContext) =
         let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
+
         if data.PersonalBests.ContainsKey ctx.RulesetId then
             match PersonalBests.get_best_above ctx.Rate data.PersonalBests.[ctx.RulesetId].Lamp with
             | Some i -> i, ctx.Ruleset.LampName i
@@ -105,7 +109,9 @@ module Sorting =
 
     let private has_comment (query: string) (cc: CachedChart, ctx: LibraryViewContext) =
         let comment = (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).Comment
-        not (String.IsNullOrEmpty comment) && comment.Contains(query, StringComparison.OrdinalIgnoreCase)
+
+        not (String.IsNullOrEmpty comment)
+        && comment.Contains(query, StringComparison.OrdinalIgnoreCase)
 
     let private has_pattern (pattern: string) (cc: CachedChart, ctx: LibraryViewContext) =
         if ctx.Library.Patterns.ContainsKey cc.Hash then
@@ -237,7 +243,8 @@ module Sorting =
                 | _ -> true)
                 filter
 
-        let apply_seq (filter: Filter, ctx: LibraryViewContext) (charts: CachedChart seq) = Seq.filter (apply (filter, ctx)) charts
+        let apply_seq (filter: Filter, ctx: LibraryViewContext) (charts: CachedChart seq) =
+            Seq.filter (apply (filter, ctx)) charts
 
         let apply_ctx_seq (filter: Filter, ctx: LibraryViewContext) (charts: (CachedChart * LibraryContext) seq) =
             Seq.filter (fun (cc, _) -> apply (filter, ctx) cc) charts
@@ -312,7 +319,9 @@ module Sorting =
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
             |> ResizeArray<CachedChart * LibraryContext>
-            |> fun x -> x.Sort sort_by; x
+            |> fun x ->
+                x.Sort sort_by
+                x
             |> fun x ->
                 if x.Count > 0 then
                     groups.Add(
@@ -355,8 +364,14 @@ module Sorting =
 
         groups
 
-    let get_table_groups (filter_by: Filter) (sort_by: SortMethod) (table: Table) (ctx: LibraryViewContext) : LexSortedGroups =
+    let get_table_groups
+        (filter_by: Filter)
+        (sort_by: SortMethod)
+        (table: Table)
+        (ctx: LibraryViewContext)
+        : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
+
         for level, charts in table.Charts |> Seq.groupBy (fun x -> x.Level) do
             charts
             |> Seq.choose (fun (c: TableChart) ->
@@ -368,16 +383,21 @@ module Sorting =
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
             |> ResizeArray<CachedChart * LibraryContext>
-            |> fun x -> x.Sort sort_by; x
+            |> fun x ->
+                x.Sort sort_by
+                x
             |> fun x ->
                 if x.Count > 0 then
                     groups.Add(
-                        (level, table.Info.LevelDisplayNames.TryFind level |> Option.defaultValue (level.ToString())),
+                        (level,
+                         table.Info.LevelDisplayNames.TryFind level
+                         |> Option.defaultValue (level.ToString())),
                         {
                             Charts = x
                             Context = LibraryGroupContext.Table level
                         }
                     )
+
         groups
 
     let get_empty_view () = new Dictionary<int * string, Group>()

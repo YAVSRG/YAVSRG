@@ -3,4 +3,4 @@
 type DynamicSize =
 
     abstract member Size: float32
-    abstract OnSizeChanged : (unit -> unit) with set
+    abstract OnSizeChanged: (unit -> unit) with set

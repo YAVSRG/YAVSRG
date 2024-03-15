@@ -35,11 +35,7 @@ module Charts =
         open Prelude.Backbeat.Archive
 
         [<Json.AutoCodec>]
-        type Info =
-            {
-                Song: Song
-                Chart: Chart
-            }
+        type Info = { Song: Song; Chart: Chart }
 
         [<Json.AutoCodec>]
         type Response = { Info: Info option }
@@ -168,7 +164,7 @@ module Tables =
 
         let get (table: string, callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE + "?table=" + escape table, callback)
-            
+
     module List =
 
         let ROUTE = (GET, "/tables")
@@ -193,11 +189,11 @@ module Tables =
     ///  table - id of table to get charts for e.g 'crescent' or 'mizu'
     ///  section - OPTIONAL: name of section to get charts for
     module Charts =
-        
+
         let ROUTE = (GET, "/tables/charts")
-        
+
         open Prelude.Backbeat.Archive
-        
+
         [<Json.AutoCodec>]
         type ChartInfo =
             {
@@ -206,13 +202,13 @@ module Tables =
                 Song: Song
                 Chart: Chart
             }
-        
+
         [<Json.AutoCodec>]
         type Response = { Charts: ChartInfo array }
 
         let get (table: string, callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE + "?table=" + table, callback)
-        
+
         let get_section (table: string, section: string, callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE + "?table=" + table + "&section=" + section, callback)
 
@@ -230,7 +226,7 @@ module Tables =
                     TableId: string
                     Level: int
                 }
-                
+
             [<Json.AutoCodec>]
             [<RequireQualifiedAccess>]
             type Response =
@@ -240,10 +236,10 @@ module Tables =
 
             let post (request: Request, callback: Response option -> unit) =
                 Client.post_return<Request, Response> (snd ROUTE, request, callback)
-                
+
         /// requires login token as Authorization header
         module ProvideDetails =
-            
+
             let ROUTE = (POST, "/tables/suggestions/details")
 
             [<Json.AutoCodec>]
@@ -258,7 +254,7 @@ module Tables =
                     Creator: string
                     Difficulty: string
                 }
-                
+
             let post (request: Request, callback: bool option -> unit) =
                 Client.post<Request> (snd ROUTE, request, callback)
 
@@ -316,8 +312,8 @@ module Tables =
             let ROUTE = (POST, "/tables/suggestions/accept")
 
             [<Json.AutoCodec>]
-            type Request = 
-                { 
+            type Request =
+                {
                     TableId: string
                     ChartId: string
                     Level: int
@@ -325,21 +321,21 @@ module Tables =
 
             let post (request: Request, callback: bool option -> unit) =
                 Client.post<Request> (snd ROUTE, request, callback)
-        
+
         /// requires login token as Authorization header
         /// requires 'table-editor' badge for permission
         module Reject =
-        
+
             let ROUTE = (POST, "/tables/suggestions/reject")
-        
+
             [<Json.AutoCodec>]
-            type Request = 
-                { 
+            type Request =
+                {
                     TableId: string
                     ChartId: string
                     Reason: string
                 }
-        
+
             let post (request: Request, callback: bool option -> unit) =
                 Client.post<Request> (snd ROUTE, request, callback)
 

@@ -20,8 +20,7 @@ module Debug =
         let themes = PageSetting("themes.theme", Dummy())
 
         let refresh () =
-            themes.Child <-
-                Selector(Themes.list (), options.Theme)
+            themes.Child <- Selector(Themes.list (), options.Theme)
 
         let try_edit_theme () =
             let theme = Content.Theme

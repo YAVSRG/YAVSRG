@@ -10,7 +10,7 @@ module Leaderboards =
     let Create_Exists () =
         Leaderboard.create "CreateExistsChartId" "CreateExistsRulesetId"
         Assert.True(Leaderboard.exists "CreateExistsChartId" "CreateExistsRulesetId")
-    
+
     [<Test>]
     let Create_Idempotent () =
         Assert.False(Leaderboard.exists "CreateIdempotent" "CreateIdempotent")
@@ -22,7 +22,7 @@ module Leaderboards =
     [<Test>]
     let DoesntExist () =
         Assert.False(Leaderboard.exists "DoesntExistChartId" "DoesntExistRulesetId")
-        
+
     [<Test>]
     let DoesntExist2 () =
         Leaderboard.create "DoesntExist2ChartId" "DoesntExist2ChartId"

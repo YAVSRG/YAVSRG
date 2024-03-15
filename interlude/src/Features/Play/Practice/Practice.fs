@@ -39,10 +39,13 @@ module PracticeScreen =
         let slideout = Slideout(sync_controls, AutoCloseWhen = K false)
 
         override this.Init(parent) =
-            this 
+            this
             |+ Timeline(with_mods, on_seek)
-            |+ Conditional((fun () -> show),
-                Callout.frame info_callout (fun (w, h) -> Position.Box(0.0f, 1.0f, 20.0f, -100.0f - h - 40.0f, w + 100.0f, h + 40.0f))
+            |+ Conditional(
+                (fun () -> show),
+                Callout.frame
+                    info_callout
+                    (fun (w, h) -> Position.Box(0.0f, 1.0f, 20.0f, -100.0f - h - 40.0f, w + 100.0f, h + 40.0f))
             )
             |* slideout
 
@@ -60,6 +63,7 @@ module PracticeScreen =
             elif not state.Paused.Value && show then
                 show <- false
                 slideout.Close()
+
                 this.Position <-
                     { Position.Default with
                         Bottom = 1.0f %+ 100.0f
@@ -75,11 +79,9 @@ module PracticeScreen =
         let mutable resume_from_current_place = false
 
         let last_allowed_practice_point =
-            info.WithMods.LastNote
-            - 5.0f<ms>
-            - Song.LEADIN_TIME * Gameplay.rate.Value
+            info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * Gameplay.rate.Value
 
-        let state : PracticeState =
+        let state: PracticeState =
             {
                 Chart = info.Chart
                 SaveData = info.SaveData
@@ -91,11 +93,15 @@ module PracticeScreen =
 
         let FIRST_NOTE = info.WithMods.FirstNote
 
-        let reset_to_practice_point() =
+        let reset_to_practice_point () =
             liveplay <- LiveReplayProvider FIRST_NOTE
-            scoring <- Metrics.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
 
-            let ignore_notes_before_time = state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * Gameplay.rate.Value
+            scoring <-
+                Metrics.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+
+            let ignore_notes_before_time =
+                state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * Gameplay.rate.Value
+
             let mutable i = 0
 
             while i < scoring.HitData.Length
@@ -115,18 +121,18 @@ module PracticeScreen =
                 | _ -> ()
             )
 
-        do reset_to_practice_point()
+        do reset_to_practice_point ()
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable input_key_state = 0us
 
         let restart (screen: IPlayScreen) =
-            reset_to_practice_point()
+            reset_to_practice_point ()
             screen.State.ChangeScoring scoring
             Song.play_from state.PracticePoint.Value
             state.Paused.Set false
 
-        let pause (_: IPlayScreen) = 
+        let pause (_: IPlayScreen) =
             Song.pause ()
             state.Paused.Set true
             PracticeState.update_suggestions scoring state
@@ -136,13 +142,17 @@ module PracticeScreen =
             if not scoring.Finished && resume_from_current_place then
                 Song.resume ()
                 state.Paused.Set false
-            else restart screen
+            else
+                restart screen
 
         let paused_overlay =
-            ControlOverlay(state, info.WithMods, fun t -> 
-                state.PracticePoint.Set t
-                Song.seek t
-                resume_from_current_place <- false
+            ControlOverlay(
+                state,
+                info.WithMods,
+                fun t ->
+                    state.PracticePoint.Set t
+                    Song.seek t
+                    resume_from_current_place <- false
             )
 
         { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
@@ -185,10 +195,12 @@ module PracticeScreen =
                     Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsed_ms
 
                 if (%%"retry").Tapped() then
-                    if state.Paused.Value then restart this
+                    if state.Paused.Value then
+                        restart this
 
                 elif (%%"accept_suggestion").Tapped() then
-                    if state.Paused.Value then PracticeState.accept_suggestion state
+                    if state.Paused.Value then
+                        PracticeState.accept_suggestion state
                     else
                         pause this
                         PracticeState.accept_suggestion state

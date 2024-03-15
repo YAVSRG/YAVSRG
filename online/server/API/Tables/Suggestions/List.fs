@@ -20,9 +20,9 @@ module List =
         async {
             require_query_parameter query_params "table"
             let _, _ = authorize headers
-        
+
             let table_id = query_params.["table"].[0].ToLower()
-        
+
             if not (Backbeat.Tables.exists table_id) then
                 raise NotFoundException
             else
@@ -30,9 +30,12 @@ module List =
             let pending = TableSuggestion.pending_by_table table_id
 
             let user_votes_to_level_votes (source: Map<int64, int>) : Map<int, int> =
-                source.Values |> Seq.groupBy id |> Seq.map (fun (level, votes) -> level, Seq.length votes) |> Map.ofSeq
+                source.Values
+                |> Seq.groupBy id
+                |> Seq.map (fun (level, votes) -> level, Seq.length votes)
+                |> Map.ofSeq
 
-            let suggestions = 
+            let suggestions =
                 pending
                 |> Array.map (fun p ->
                     {
@@ -42,5 +45,5 @@ module List =
                     }
                 )
 
-            response.ReplyJson({ Suggestions = suggestions } : Response)
+            response.ReplyJson({ Suggestions = suggestions }: Response)
         }

@@ -25,11 +25,12 @@ type private TableButton(name, action) =
             K(sprintf "%s  >" name),
             Color =
                 (fun () ->
-                    ((if this.Focused then
-                          Colors.yellow_accent
-                      else
-                          Colors.white),
-                     (if (match Content.Table with Some t -> t.Info.Name = name | None -> false) then
+                    ((if this.Focused then Colors.yellow_accent else Colors.white),
+                     (if
+                          (match Content.Table with
+                           | Some t -> t.Info.Name = name
+                           | None -> false)
+                      then
                           Palette.color (255, 0.5f, 0.0f)
                       else
                           Colors.shadow_2))
@@ -41,7 +42,7 @@ type private TableButton(name, action) =
 
         base.Init parent
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -71,22 +72,21 @@ type ManageTablesPage(table_changed) as this =
         )
         |* Dummy()
 
-        for e in Tables.list() do
+        for e in Tables.list () do
             container
             |* TableButton(
                 e.Info.Name,
                 fun () ->
                     options.Table.Set(Some e.Id)
 
-                    table_changed()
+                    table_changed ()
 
                     sync refresh
             )
 
         match Content.Table with
         | Some table ->
-            container 
-            |+ Dummy()
+            container |+ Dummy()
             |* PageButton("table.suggestions", (fun () -> SuggestionsPage(table).Show()))
         | None -> ()
 

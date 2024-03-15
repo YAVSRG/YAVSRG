@@ -27,7 +27,7 @@ type PerformanceMonitor() =
         base.Update(elapsed_ms, moved)
 
         if dump_profiling.Tapped() then
-            dump_profiling_info()
+            dump_profiling_info ()
 
         if all_bind.Tapped() then
             enable <- not enable

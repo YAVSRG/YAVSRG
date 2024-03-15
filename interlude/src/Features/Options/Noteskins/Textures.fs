@@ -48,7 +48,7 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
 
         base.Init parent
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -133,7 +133,7 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                     sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
                                     fun () ->
                                         if Content.Noteskin.DeleteGridTextureColumn(c, texture_id) then
-                                            Noteskins.reload_current()
+                                            Noteskins.reload_current ()
                                             this.Refresh()
                                 )
                                     .Show()
@@ -197,8 +197,8 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                          (src_row + 1),
                                      fun () ->
                                          if Content.Noteskin.AddGridTextureRow(src_row, texture_id) then
-                                            Noteskins.reload_current ()
-                                            this.Refresh()
+                                             Noteskins.reload_current ()
+                                             this.Refresh()
                                  )
                                      .Show()
                              ),
@@ -229,8 +229,8 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                                          (src_col + 1),
                                      fun () ->
                                          if Content.Noteskin.AddGridTextureColumn(src_col, texture_id) then
-                                            Noteskins.reload_current ()
-                                            this.Refresh()
+                                             Noteskins.reload_current ()
+                                             this.Refresh()
                                  )
                                      .Show()
                              ),
@@ -306,7 +306,7 @@ type TextureEditPage(texture_id: string) as this =
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
                             Content.Noteskin.RotateAnticlockwise((col, row), texture_id) |> ignore
-                            
+
                         Noteskins.reload_current ()
                         texture_editor.Refresh()
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
@@ -316,7 +316,7 @@ type TextureEditPage(texture_id: string) as this =
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
                             Content.Noteskin.VerticalFlipTexture((col, row), texture_id) |> ignore
-                            
+
                         Noteskins.reload_current ()
                         texture_editor.Refresh()
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
@@ -326,7 +326,7 @@ type TextureEditPage(texture_id: string) as this =
                     , fun () ->
                         for (col, row) in texture_editor.SelectedTextures do
                             Content.Noteskin.HorizontalFlipTexture((col, row), texture_id) |> ignore
-                            
+
                         Noteskins.reload_current ()
                         texture_editor.Refresh()
                     , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
@@ -367,6 +367,6 @@ type TextureCard(id: string, on_click: unit -> unit) as this =
         |+ Text(id, Align = Alignment.CENTER, Position = Position.Margin(Style.PADDING).SliceBottom(25.0f))
         |* Clickable.Focus this
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()

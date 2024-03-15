@@ -20,13 +20,13 @@ module Missing =
         async {
             require_query_parameter query_params "table"
             let _, _ = authorize headers
-        
+
             let table_id = query_params.["table"].[0].ToLower()
-        
+
             if not (Backbeat.Tables.exists table_id) then
                 raise NotFoundException
             else
 
             // not yet implemented
-            response.ReplyJson({ Charts = [||] } : Response)
+            response.ReplyJson({ Charts = [||] }: Response)
         }

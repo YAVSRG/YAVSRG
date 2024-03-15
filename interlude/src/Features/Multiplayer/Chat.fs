@@ -51,7 +51,7 @@ type Chat() =
         match last_msg with
         | Some m ->
             if m.Bounds.Top - message_box.RemainingScrollAnimation - message_box.Bounds.Bottom < 200.0f then
-                sync(fun () -> message_box.Scroll infinityf)
+                sync (fun () -> message_box.Scroll infinityf)
         | None -> ()
 
         last_msg <- Some w
@@ -109,11 +109,12 @@ type Chat() =
                                 Transitions.Flags.Default
                             |> ignore
                         ),
-                        OnHover = fun b -> 
-                            if b && not container.Focused then 
-                                container.Focus true
-                            elif not b && container.FocusedByMouse then
-                                Selection.up true
+                        OnHover =
+                            fun b ->
+                                if b && not container.Focused then
+                                    container.Focus true
+                                elif not b && container.FocusedByMouse then
+                                    Selection.up true
                     )
                     |+ Text(
                         sprintf "%i. %s" place username,

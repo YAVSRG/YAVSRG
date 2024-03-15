@@ -3,8 +3,7 @@ open Percyqaz.Shell.Shell
 open Backbeat.Features
 open Backbeat.Features.Archive
 
-let ctx =
-    ShellContext.Empty |> Archive.register |> Rulesets.register
+let ctx = ShellContext.Empty |> Archive.register |> Rulesets.register
 
 [<EntryPoint>]
 let main argv =

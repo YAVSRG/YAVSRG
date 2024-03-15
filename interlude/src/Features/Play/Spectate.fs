@@ -117,7 +117,8 @@ module SpectateScreen =
                 add_widget MultiplayerScoreTracker
 
                 this
-                |* ControlOverlay(info,
+                |* ControlOverlay(
+                    info,
                     ignore,
                     (fun () -> currently_spectating),
                     fun () ->

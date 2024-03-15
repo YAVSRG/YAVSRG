@@ -86,11 +86,11 @@ module Replay =
             output.[i] <- struct (br.ReadSingle() * 1.0f<ms>, br.ReadUInt16())
 
         output
-        
+
     let decompress_bytes (data: byte array) =
         use stream = new MemoryStream(data)
         decompress_from stream
-        
+
     let decompress_string (data: string) : ReplayData =
         let bytes = Convert.FromBase64String data
         decompress_bytes bytes
@@ -131,23 +131,30 @@ module Replay =
             use input_stream = new MemoryStream(bytes)
             use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
             use br = new BinaryReader(gzip_stream)
-    
-            let count : int = br.ReadInt32()
-            if count > max_rows then failwith "replay header indicates it is unreasonably big"
+
+            let count: int = br.ReadInt32()
+
+            if count > max_rows then
+                failwith "replay header indicates it is unreasonably big"
 
             let output = Array.zeroCreate count
             let mutable last_time = Single.NegativeInfinity
-    
+
             for i = 0 to (count - 1) do
                 let time = br.ReadSingle()
-                if Single.IsNaN time || Single.IsInfinity time then failwith "replay contains invalid float value"
-                if time < last_time then failwithf "replay goes backwards in time %f -> %f" last_time time
+
+                if Single.IsNaN time || Single.IsInfinity time then
+                    failwith "replay contains invalid float value"
+
+                if time < last_time then
+                    failwithf "replay goes backwards in time %f -> %f" last_time time
+
                 last_time <- time
                 output.[i] <- struct (time * 1.0f<ms>, br.ReadUInt16())
-    
+
             Ok output
         with err ->
-            Error (err.ToString())
+            Error(err.ToString())
 
     // the replay generated when Auto-play is enabled
     let perfect_replay (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =

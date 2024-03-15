@@ -127,7 +127,7 @@ module Mods =
             Exclusions = [ "noln" ]
             Apply = fun s mc -> Inverse.apply (s > 0) mc
         }
-        
+
     //add_mod
     //    "more_notes"
     //    { EMPTY_MOD with
@@ -135,14 +135,21 @@ module Mods =
     //        Apply = fun s mc -> MoreNotes.apply mc
     //    }
 
-     //todo: randomiser mod with seed
+    //todo: randomiser mod with seed
 
     (*
         Mod application pipeline
     *)
 
     let apply_mods (mods: ModState) (chart: Chart) : ModdedChart =
-        let mutable modchart_internal = { Keys = chart.Keys; Notes = chart.Notes; SV = chart.SV; BPM = chart.BPM }
+        let mutable modchart_internal =
+            {
+                Keys = chart.Keys
+                Notes = chart.Notes
+                SV = chart.SV
+                BPM = chart.BPM
+            }
+
         let mutable mods_applied = []
 
         for id, m, state in ModState.enumerate mods do

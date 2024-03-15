@@ -61,11 +61,12 @@ type Clickable(on_left_click) =
     static member Focus(w: Widget) =
         Clickable(
             (fun () -> w.Select true),
-            OnHover = fun b -> 
-                if b && not w.Focused then 
-                    w.Focus true
-                elif not b && w.FocusedByMouse then
-                    Selection.up true
+            OnHover =
+                fun b ->
+                    if b && not w.Focused then
+                        w.Focus true
+                    elif not b && w.FocusedByMouse then
+                        Selection.up true
         )
 
 [<Sealed>]
@@ -92,15 +93,16 @@ type HotkeyHoldAction(hotkey: Hotkey, on_tap, on_hold) =
         base.Update(elapsed_ms, moved)
 
         if (%%hotkey).Tapped() then
-            on_tap()
+            on_tap ()
             hold_time_remaining <- HOLD_TIME_MS
 
         if (%%hotkey).Pressed() then
             if hold_time_remaining > 0.0 then
                 hold_time_remaining <- hold_time_remaining - elapsed_ms
+
                 if hold_time_remaining < 0 then
-                    on_hold()
-            
+                    on_hold ()
+
     override this.Draw() = ()
 
 [<Sealed>]

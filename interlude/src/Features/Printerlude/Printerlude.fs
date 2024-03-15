@@ -110,12 +110,13 @@ module Printerlude =
 
                     for chart in table.Charts do
                         let data = ScoreDatabase.get chart.Hash Content.Scores
+
                         if
                             data.PersonalBests.ContainsKey(table.Info.RulesetId)
                             && data.PersonalBests.[table.Info.RulesetId].Accuracy
-                            |> PersonalBests.get_best_above 1.0f
-                            |> Option.defaultValue 0.0
-                            |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
+                               |> PersonalBests.get_best_above 1.0f
+                               |> Option.defaultValue 0.0
+                               |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
                         then
                             for score in data.Scores do
                                 Charts.Scores.Save.post (
@@ -163,6 +164,7 @@ module Printerlude =
                                         new_bests <- Map.add ruleset_id ruleset_bests new_bests
                                     else
                                         new_bests <- Map.add ruleset_id (Bests.create score_info) new_bests
+
                                 if new_bests <> existing_bests then
                                     data.PersonalBests <- new_bests
 
@@ -225,9 +227,9 @@ module Printerlude =
 
     let init_window (instance: int) =
         Terminal.exec_command <- exec
-        
-        logging_disposable <- 
-            Some 
+
+        logging_disposable <-
+            Some
             <| Logging.Subscribe(fun (level, main, details) -> sprintf "[%A] %s" level main |> Terminal.add_message)
 
         Terminal.add_message @"================================================"

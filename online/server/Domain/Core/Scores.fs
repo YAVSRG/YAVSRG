@@ -22,13 +22,14 @@ type Score =
         Lamp: int
         ReplayId: int64 option
     }
-    member this.WithReplay (replay_id) = { this with ReplayId = Some replay_id }
+    member this.WithReplay(replay_id) = { this with ReplayId = Some replay_id }
 
 module Score =
 
-    let internal CREATE_TABLE : NonQuery<unit> =
-        { NonQuery.without_parameters() with
-            SQL = """
+    let internal CREATE_TABLE: NonQuery<unit> =
+        { NonQuery.without_parameters () with
+            SQL =
+                """
             CREATE TABLE scores (
                 Id INTEGER PRIMARY KEY NOT NULL,
                 UserId INTEGER NOT NULL,
@@ -50,23 +51,25 @@ module Score =
             """
         }
 
-    let create (
-        user_id: int64,
-        chart_id: string,
-        ruleset_id: string,
-        time_played: int64,
-        rate: float32,
-        mods: Mods.ModState,
-        is_ranked: bool,
-        accuracy: float,
-        grade: int,
-        lamp: int) =
+    let create
+        (
+            user_id: int64,
+            chart_id: string,
+            ruleset_id: string,
+            time_played: int64,
+            rate: float32,
+            mods: Mods.ModState,
+            is_ranked: bool,
+            accuracy: float,
+            grade: int,
+            lamp: int
+        ) =
         {
             UserId = user_id
             ChartId = chart_id
             RulesetId = ruleset_id
             TimePlayed = time_played
-            TimeUploaded = Timestamp.now()
+            TimeUploaded = Timestamp.now ()
             Rate = MathF.Round(rate, 2)
             Mods = mods
             Ranked = is_ranked
@@ -76,9 +79,10 @@ module Score =
             ReplayId = None
         }
 
-    let private SAVE : Query<Score, int64> =
+    let private SAVE: Query<Score, int64> =
         {
-            SQL = """
+            SQL =
+                """
             INSERT INTO scores (UserId, ChartId, RulesetId, TimePlayed, TimeUploaded, Rate, Mods, Ranked, Accuracy, Grade, Lamp, ReplayId)
             VALUES (@UserId, @ChartId, @RulesetId, @TimePlayed, @TimeUploaded, @Rate, @Mods, @Ranked, @Accuracy, @Grade, @Lamp, @ReplayId)
             ON CONFLICT DO UPDATE SET TimeUploaded = excluded.TimeUploaded
@@ -99,25 +103,29 @@ module Score =
                     "@Lamp", SqliteType.Integer, 4
                     "@ReplayId", SqliteType.Integer, 8
                 ]
-            FillParameters = (fun p score ->
-                p.Int64 score.UserId
-                p.String score.ChartId
-                p.String score.RulesetId
-                p.Int64 score.TimePlayed
-                p.Int64 score.TimeUploaded
-                p.Float32 score.Rate
-                p.Json JSON score.Mods
-                p.Boolean score.Ranked
-                p.Float64 score.Accuracy
-                p.Int32 score.Grade
-                p.Int32 score.Lamp
-                p.Int64Option score.ReplayId
-            )
+            FillParameters =
+                (fun p score ->
+                    p.Int64 score.UserId
+                    p.String score.ChartId
+                    p.String score.RulesetId
+                    p.Int64 score.TimePlayed
+                    p.Int64 score.TimeUploaded
+                    p.Float32 score.Rate
+                    p.Json JSON score.Mods
+                    p.Boolean score.Ranked
+                    p.Float64 score.Accuracy
+                    p.Int32 score.Grade
+                    p.Int32 score.Lamp
+                    p.Int64Option score.ReplayId
+                )
             Read = fun r -> r.Int64
         }
-    let save (score: Score) : int64 = SAVE.Execute score core_db |> expect |> Array.exactlyOne
+
+    let save (score: Score) : int64 =
+        SAVE.Execute score core_db |> expect |> Array.exactlyOne
 
     let PRIMARY_RULESET = "SC(J4)548E5A"
+
     type RecentScore =
         {
             Id: int64
@@ -129,9 +137,11 @@ module Score =
             Grade: int
             Lamp: int
         }
-    let private GET_USER_RECENT : Query<int64, RecentScore> = 
+
+    let private GET_USER_RECENT: Query<int64, RecentScore> =
         {
-            SQL = """
+            SQL =
+                """
             SELECT Id, ChartId, TimePlayed, Rate, Mods, Accuracy, Grade, Lamp FROM scores
             WHERE UserId = @UserId AND RulesetId = 'SC(J4)548E5A'
             ORDER BY TimePlayed DESC
@@ -139,20 +149,23 @@ module Score =
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
             FillParameters = fun p id -> p.Int64 id
-            Read = (fun r ->
-                {
-                    Id = r.Int64
-                    ChartId = r.String
-                    TimePlayed = r.Int64
-                    Rate = r.Float32
-                    Mods = r.Json JSON
-                    Accuracy = r.Float64
-                    Grade = r.Int32
-                    Lamp = r.Int32
-                }
-            )
+            Read =
+                (fun r ->
+                    {
+                        Id = r.Int64
+                        ChartId = r.String
+                        TimePlayed = r.Int64
+                        Rate = r.Float32
+                        Mods = r.Json JSON
+                        Accuracy = r.Float64
+                        Grade = r.Int32
+                        Lamp = r.Int32
+                    }
+                )
         }
-    let get_user_recent (user_id: int64) = GET_USER_RECENT.Execute user_id core_db |> expect
+
+    let get_user_recent (user_id: int64) =
+        GET_USER_RECENT.Execute user_id core_db |> expect
 
     type LeaderboardScore =
         {
@@ -165,9 +178,11 @@ module Score =
             Lamp: int
             ReplayId: int64 option
         }
-    let private GET_LEADERBOARD : Query<string * string, LeaderboardScore> = 
+
+    let private GET_LEADERBOARD: Query<string * string, LeaderboardScore> =
         {
-            SQL = """
+            SQL =
+                """
             WITH UserBestScores AS (
                 SELECT 
                     UserId, TimePlayed, Rate, Mods, Accuracy, Grade, Lamp, ReplayId,
@@ -181,27 +196,29 @@ module Score =
             ORDER BY Accuracy DESC, TimePlayed ASC
             LIMIT 20;
             """
-            Parameters = 
-                [
-                    "@ChartId", SqliteType.Text, -1
-                    "@RulesetId", SqliteType.Text, -1
-                ]
-            FillParameters = fun p (chart_id, ruleset_id) -> p.String chart_id; p.String ruleset_id
-            Read = (fun r ->
-                {
-                    UserId = r.Int64
-                    TimePlayed = r.Int64
-                    Rate = r.Float32
-                    Mods = r.Json JSON
-                    Accuracy = r.Float64
-                    Grade = r.Int32
-                    Lamp = r.Int32
-                    ReplayId = r.Int64Option
-                }
-            )
+            Parameters = [ "@ChartId", SqliteType.Text, -1; "@RulesetId", SqliteType.Text, -1 ]
+            FillParameters =
+                fun p (chart_id, ruleset_id) ->
+                    p.String chart_id
+                    p.String ruleset_id
+            Read =
+                (fun r ->
+                    {
+                        UserId = r.Int64
+                        TimePlayed = r.Int64
+                        Rate = r.Float32
+                        Mods = r.Json JSON
+                        Accuracy = r.Float64
+                        Grade = r.Int32
+                        Lamp = r.Int32
+                        ReplayId = r.Int64Option
+                    }
+                )
         }
-    let get_leaderboard (chart_id: string) (ruleset_id: string) = GET_LEADERBOARD.Execute (chart_id, ruleset_id) core_db |> expect
-    
+
+    let get_leaderboard (chart_id: string) (ruleset_id: string) =
+        GET_LEADERBOARD.Execute (chart_id, ruleset_id) core_db |> expect
+
     type UserLeaderboardScore =
         {
             TimePlayed: int64
@@ -212,43 +229,55 @@ module Score =
             Lamp: int
             ReplayId: int64 option
         }
-    let private GET_USER_LEADERBOARD_SCORE : Query<int64 * string * string, UserLeaderboardScore> =
+
+    let private GET_USER_LEADERBOARD_SCORE: Query<int64 * string * string, UserLeaderboardScore> =
         {
-            SQL = """
+            SQL =
+                """
             SELECT TimePlayed, Rate, Mods, Accuracy, Grade, Lamp, ReplayId FROM scores
             WHERE UserId = @UserId AND RulesetId = @RulesetId AND Ranked = 1 AND ChartId = @ChartId
             ORDER BY Accuracy DESC
             LIMIT 1;
             """
-            Parameters = 
+            Parameters =
                 [
                     "@UserId", SqliteType.Integer, 8
                     "@ChartId", SqliteType.Text, -1
                     "@RulesetId", SqliteType.Text, -1
                 ]
-            FillParameters = (fun p (user_id, chart_id, ruleset_id) -> 
-                p.Int64 user_id
-                p.String chart_id
-                p.String ruleset_id
-            )
-            Read = (fun r ->
-                {
-                    TimePlayed = r.Int64
-                    Rate = r.Float32
-                    Mods = r.Json JSON
-                    Accuracy = r.Float64
-                    Grade = r.Int32
-                    Lamp = r.Int32
-                    ReplayId = r.Int64Option
-                }
-            )
+            FillParameters =
+                (fun p (user_id, chart_id, ruleset_id) ->
+                    p.Int64 user_id
+                    p.String chart_id
+                    p.String ruleset_id
+                )
+            Read =
+                (fun r ->
+                    {
+                        TimePlayed = r.Int64
+                        Rate = r.Float32
+                        Mods = r.Json JSON
+                        Accuracy = r.Float64
+                        Grade = r.Int32
+                        Lamp = r.Int32
+                        ReplayId = r.Int64Option
+                    }
+                )
         }
-    let get_user_leaderboard_score (user_id: int64) (chart_id: string) (ruleset_id: string) : UserLeaderboardScore option =
-        GET_USER_LEADERBOARD_SCORE.Execute (user_id, chart_id, ruleset_id) core_db |> expect |> Array.tryExactlyOne
 
-    let private AGGREGATE_USER_RANKED_GRADES : Query<int64 * string, string * int> =
+    let get_user_leaderboard_score
+        (user_id: int64)
+        (chart_id: string)
+        (ruleset_id: string)
+        : UserLeaderboardScore option =
+        GET_USER_LEADERBOARD_SCORE.Execute (user_id, chart_id, ruleset_id) core_db
+        |> expect
+        |> Array.tryExactlyOne
+
+    let private AGGREGATE_USER_RANKED_GRADES: Query<int64 * string, string * int> =
         {
-            SQL = """
+            SQL =
+                """
             WITH ChartBestGrades AS (
                 SELECT 
                     ChartId,
@@ -260,23 +289,22 @@ module Score =
             SELECT ChartId, Grade FROM ChartBestGrades
             WHERE ChartScoreRank = 1;
             """
-            Parameters = 
-                [
-                    "@UserId", SqliteType.Integer, 8
-                    "@RulesetId", SqliteType.Text, -1
-                ]
-            FillParameters = (fun p (user_id, ruleset_id) ->
-                p.Int64 user_id
-                p.String ruleset_id
-            )
+            Parameters = [ "@UserId", SqliteType.Integer, 8; "@RulesetId", SqliteType.Text, -1 ]
+            FillParameters =
+                (fun p (user_id, ruleset_id) ->
+                    p.Int64 user_id
+                    p.String ruleset_id
+                )
             Read = fun r -> r.String, r.Int32
         }
+
     let aggregate_user_ranked_grades (user_id: int64) (ruleset_id: string) =
         AGGREGATE_USER_RANKED_GRADES.Execute (user_id, ruleset_id) core_db |> expect
-        
-    let private AGGREGATE_USER_RANKED_SCORES : Query<int64 * string, string * float> =
+
+    let private AGGREGATE_USER_RANKED_SCORES: Query<int64 * string, string * float> =
         {
-            SQL = """
+            SQL =
+                """
             WITH ChartBestScores AS (
                 SELECT 
                     ChartId,
@@ -288,17 +316,15 @@ module Score =
             SELECT ChartId, Accuracy FROM ChartBestScores
             WHERE ChartScoreRank = 1;
             """
-            Parameters = 
-                [
-                    "@UserId", SqliteType.Integer, 8
-                    "@RulesetId", SqliteType.Text, -1
-                ]
-            FillParameters = (fun p (user_id, ruleset_id) ->
-                p.Int64 user_id
-                p.String ruleset_id
-            )
+            Parameters = [ "@UserId", SqliteType.Integer, 8; "@RulesetId", SqliteType.Text, -1 ]
+            FillParameters =
+                (fun p (user_id, ruleset_id) ->
+                    p.Int64 user_id
+                    p.String ruleset_id
+                )
             Read = fun r -> r.String, r.Float64
         }
+
     let aggregate_user_ranked_scores (user_id: int64) (ruleset_id: string) =
         AGGREGATE_USER_RANKED_SCORES.Execute (user_id, ruleset_id) core_db |> expect
 
@@ -314,34 +340,38 @@ module Score =
             Grade: int
             Lamp: int
         }
-    let BY_ID : Query<int64, ScoreByIdModel * int64 option> =
+
+    let BY_ID: Query<int64, ScoreByIdModel * int64 option> =
         {
-            SQL = """
+            SQL =
+                """
             SELECT UserId, ChartId, RulesetId, TimePlayed, Rate, Mods, Accuracy, Grade, Lamp, ReplayId FROM scores
             WHERE Id = @Id
             """
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p id -> p.Int64 id
-            Read = (fun r ->
-                {
-                    UserId = r.Int64
-                    ChartId = r.String
-                    RulesetId = r.String
-                    TimePlayed = r.Int64
-                    Rate = r.Float32
-                    Mods = r.Json JSON
-                    Accuracy = r.Float64
-                    Grade = r.Int32
-                    Lamp = r.Int32
-                },
-                r.Int64Option
-            )
+            Read =
+                (fun r ->
+                    {
+                        UserId = r.Int64
+                        ChartId = r.String
+                        RulesetId = r.String
+                        TimePlayed = r.Int64
+                        Rate = r.Float32
+                        Mods = r.Json JSON
+                        Accuracy = r.Float64
+                        Grade = r.Int32
+                        Lamp = r.Int32
+                    },
+                    r.Int64Option
+                )
         }
+
     let by_id (score_id: int64) =
         match BY_ID.Execute score_id core_db |> expect |> Array.tryExactlyOne with
-        | Some (score, Some replay_id) ->
+        | Some(score, Some replay_id) ->
             match Replay.by_id replay_id with
-            | Some replay -> Some (score, Some replay)
+            | Some replay -> Some(score, Some replay)
             | None -> failwithf "Score %A had replay id %A, but couldn't retrieve it by id" score replay_id
-        | Some (score, None) -> Some (score, None)
+        | Some(score, None) -> Some(score, None)
         | None -> None

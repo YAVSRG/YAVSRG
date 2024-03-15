@@ -98,7 +98,10 @@ module Animation =
         member val Interval = milliseconds with get, set
         member this.Time = elapsed
         member this.Loops = loops
-        member this.Reset() = elapsed <- 0.0; loops <- 0;
+
+        member this.Reset() =
+            elapsed <- 0.0
+            loops <- 0
 
     // TERMINATING ANIMATIONS - These animations can "complete" after a condition and are deleted afterwards
 

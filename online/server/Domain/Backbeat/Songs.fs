@@ -19,7 +19,7 @@ type Song =
         Source: string option
         Tags: string list
     }
-    static member OfPreludeSong (song: Prelude.Backbeat.Archive.Song) =
+    static member OfPreludeSong(song: Prelude.Backbeat.Archive.Song) =
         {
             Artists = song.Artists
             OtherArtists = song.OtherArtists
@@ -29,12 +29,14 @@ type Song =
             Source = song.Source
             Tags = song.Tags
         }
+
     member this.FormattedArtists =
         String.concat ", " this.Artists
         + if this.OtherArtists <> [] then
               " ft. " + String.concat ", " this.OtherArtists
           else
               ""
+
     member this.FormattedTitle = this.FormattedArtists + " - " + this.Title
 
 [<Json.AutoCodec>]
@@ -58,7 +60,7 @@ type Chart =
         AudioHash: string
         Sources: ChartSource list
     }
-    static member OfPreludeChart (chart: Prelude.Backbeat.Archive.Chart) =
+    static member OfPreludeChart(chart: Prelude.Backbeat.Archive.Chart) =
         {
             Creators = chart.Creators
             DifficultyName = chart.DifficultyName
@@ -71,21 +73,28 @@ type Chart =
             BPM = chart.BPM
             BackgroundHash = chart.BackgroundFile
             AudioHash = chart.AudioFile
-            Sources = 
-                chart.Sources 
+            Sources =
+                chart.Sources
                 |> List.choose (
-                    function 
+                    function
                     | Backbeat.Archive.ChartSource.CommunityPack _ -> None
-                    | Backbeat.Archive.ChartSource.Osu x -> ChartSource.Osu {| BeatmapId = x.BeatmapId; BeatmapSetId = x.BeatmapSetId |} |> Some
+                    | Backbeat.Archive.ChartSource.Osu x ->
+                        ChartSource.Osu
+                            {|
+                                BeatmapId = x.BeatmapId
+                                BeatmapSetId = x.BeatmapSetId
+                            |}
+                        |> Some
                     | Backbeat.Archive.ChartSource.Stepmania i -> ChartSource.Stepmania i |> Some
                 )
         }
 
 module Songs =
-    
-    let internal CREATE_TABLES : NonQuery<unit> =
-        { NonQuery.without_parameters() with
-            SQL = """
+
+    let internal CREATE_TABLES: NonQuery<unit> =
+        { NonQuery.without_parameters () with
+            SQL =
+                """
             BEGIN TRANSACTION;
 
             CREATE TABLE songs (
@@ -152,38 +161,43 @@ module Songs =
             """
         }
 
-    let private CHART_BY_ID : Query<string, int64 * Chart> = 
+    let private CHART_BY_ID: Query<string, int64 * Chart> =
         {
-            SQL = """
+            SQL =
+                """
             SELECT SongId, Creators, DifficultyName, Subtitle, Tags, Duration, PreviewTime, Notecount, Keys, BPM, BackgroundHash, AudioHash, Sources
             FROM charts
             WHERE Id = @ChartId;
             """
             Parameters = [ "@ChartId", SqliteType.Text, -1 ]
             FillParameters = fun p chart_id -> p.String chart_id
-            Read = (fun r -> 
-                r.Int64,
-                {
-                    Creators = r.Json JSON
-                    DifficultyName = r.String
-                    Subtitle = r.StringOption
-                    Tags = r.Json JSON
-                    Duration = r.Float32 |> Time.ofFloat
-                    PreviewTime = r.Float32 |> Time.ofFloat
-                    Notecount = r.Int32
-                    Keys = r.Byte |> int
-                    BPM = r.Json JSON
-                    BackgroundHash = r.String
-                    AudioHash = r.String
-                    Sources = r.Json JSON
-                }
-            )
+            Read =
+                (fun r ->
+                    r.Int64,
+                    {
+                        Creators = r.Json JSON
+                        DifficultyName = r.String
+                        Subtitle = r.StringOption
+                        Tags = r.Json JSON
+                        Duration = r.Float32 |> Time.ofFloat
+                        PreviewTime = r.Float32 |> Time.ofFloat
+                        Notecount = r.Int32
+                        Keys = r.Byte |> int
+                        BPM = r.Json JSON
+                        BackgroundHash = r.String
+                        AudioHash = r.String
+                        Sources = r.Json JSON
+                    }
+                )
         }
-    let chart_by_id (chart_id: string) : (int64 * Chart) option = CHART_BY_ID.Execute chart_id backbeat_db |> expect |> Array.tryExactlyOne
-    
-    let private CHART_AND_SONG_BY_ID : Query<string, int64 * Chart * Song> = 
+
+    let chart_by_id (chart_id: string) : (int64 * Chart) option =
+        CHART_BY_ID.Execute chart_id backbeat_db |> expect |> Array.tryExactlyOne
+
+    let private CHART_AND_SONG_BY_ID: Query<string, int64 * Chart * Song> =
         {
-            SQL = """
+            SQL =
+                """
             SELECT 
                 charts.SongId, charts.Creators, charts.DifficultyName, charts.Subtitle,
                 charts.Tags, charts.Duration, charts.PreviewTime, charts.Notecount,
@@ -196,61 +210,71 @@ module Songs =
             """
             Parameters = [ "@ChartId", SqliteType.Text, -1 ]
             FillParameters = fun p chart_id -> p.String chart_id
-            Read = (fun r -> 
-                r.Int64,
-                {
-                    Creators = r.Json JSON
-                    DifficultyName = r.String
-                    Subtitle = r.StringOption
-                    Tags = r.Json JSON
-                    Duration = r.Float32 |> Time.ofFloat
-                    PreviewTime = r.Float32 |> Time.ofFloat
-                    Notecount = r.Int32
-                    Keys = r.Byte |> int
-                    BPM = r.Json JSON
-                    BackgroundHash = r.String
-                    AudioHash = r.String
-                    Sources = r.Json JSON
-                },
-                {
-                    Artists = r.Json JSON
-                    OtherArtists = r.Json JSON
-                    Remixers = r.Json JSON
-                    Title = r.String
-                    AlternativeTitles = r.Json JSON
-                    Source = r.StringOption
-                    Tags = r.Json JSON
-                }
-            )
+            Read =
+                (fun r ->
+                    r.Int64,
+                    {
+                        Creators = r.Json JSON
+                        DifficultyName = r.String
+                        Subtitle = r.StringOption
+                        Tags = r.Json JSON
+                        Duration = r.Float32 |> Time.ofFloat
+                        PreviewTime = r.Float32 |> Time.ofFloat
+                        Notecount = r.Int32
+                        Keys = r.Byte |> int
+                        BPM = r.Json JSON
+                        BackgroundHash = r.String
+                        AudioHash = r.String
+                        Sources = r.Json JSON
+                    },
+                    {
+                        Artists = r.Json JSON
+                        OtherArtists = r.Json JSON
+                        Remixers = r.Json JSON
+                        Title = r.String
+                        AlternativeTitles = r.Json JSON
+                        Source = r.StringOption
+                        Tags = r.Json JSON
+                    }
+                )
         }
-    let chart_and_song_by_id (chart_id: string) : (int64 * Chart * Song) option = CHART_AND_SONG_BY_ID.Execute chart_id backbeat_db |> expect |> Array.tryExactlyOne
-    
-    let private SONG_BY_ID : Query<int64, Song> = 
+
+    let chart_and_song_by_id (chart_id: string) : (int64 * Chart * Song) option =
+        CHART_AND_SONG_BY_ID.Execute chart_id backbeat_db
+        |> expect
+        |> Array.tryExactlyOne
+
+    let private SONG_BY_ID: Query<int64, Song> =
         {
-            SQL = """
+            SQL =
+                """
             SELECT Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags
             FROM songs
             WHERE Id = @SongId;
             """
             Parameters = [ "@SongId", SqliteType.Integer, 8 ]
             FillParameters = fun p song_id -> p.Int64 song_id
-            Read = (fun r ->
-                {
-                    Artists = r.Json JSON
-                    OtherArtists = r.Json JSON
-                    Remixers = r.Json JSON
-                    Title = r.String
-                    AlternativeTitles = r.Json JSON
-                    Source = r.StringOption
-                    Tags = r.Json JSON
-                }
-            )
+            Read =
+                (fun r ->
+                    {
+                        Artists = r.Json JSON
+                        OtherArtists = r.Json JSON
+                        Remixers = r.Json JSON
+                        Title = r.String
+                        AlternativeTitles = r.Json JSON
+                        Source = r.StringOption
+                        Tags = r.Json JSON
+                    }
+                )
         }
-    let song_by_id (song_id: int64) : Song option = SONG_BY_ID.Execute song_id backbeat_db |> expect |> Array.tryExactlyOne
-    
-    let private SONG_BY_CHART_ID : Query<string, int64 * Song> = 
+
+    let song_by_id (song_id: int64) : Song option =
+        SONG_BY_ID.Execute song_id backbeat_db |> expect |> Array.tryExactlyOne
+
+    let private SONG_BY_CHART_ID: Query<string, int64 * Song> =
         {
-            SQL = """
+            SQL =
+                """
             SELECT
                 songs.Id, songs.Artists, songs.OtherArtists, songs.Remixers,
                 songs.Title, songs.AlternativeTitles, songs.Source, songs.Tags
@@ -260,24 +284,28 @@ module Songs =
             """
             Parameters = [ "@ChartId", SqliteType.Text, -1 ]
             FillParameters = fun p chart_id -> p.String chart_id
-            Read = (fun r ->
-                r.Int64,
-                {
-                    Artists = r.Json JSON
-                    OtherArtists = r.Json JSON
-                    Remixers = r.Json JSON
-                    Title = r.String
-                    AlternativeTitles = r.Json JSON
-                    Source = r.StringOption
-                    Tags = r.Json JSON
-                }
-            )
+            Read =
+                (fun r ->
+                    r.Int64,
+                    {
+                        Artists = r.Json JSON
+                        OtherArtists = r.Json JSON
+                        Remixers = r.Json JSON
+                        Title = r.String
+                        AlternativeTitles = r.Json JSON
+                        Source = r.StringOption
+                        Tags = r.Json JSON
+                    }
+                )
         }
-    let song_by_chart_id (chart_id: string) : (int64 * Song) option = SONG_BY_CHART_ID.Execute chart_id backbeat_db |> expect |> Array.tryExactlyOne
 
-    let private ADD_CHART_SONG : Query<string * Chart * Song, int64> = 
+    let song_by_chart_id (chart_id: string) : (int64 * Song) option =
+        SONG_BY_CHART_ID.Execute chart_id backbeat_db |> expect |> Array.tryExactlyOne
+
+    let private ADD_CHART_SONG: Query<string * Chart * Song, int64> =
         {
-            SQL = """
+            SQL =
+                """
             BEGIN TRANSACTION;
 
             INSERT INTO songs (Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags, LastUpdated)
@@ -289,102 +317,114 @@ module Songs =
             
             COMMIT;
             """
-            Parameters = [
-                "@Artists", SqliteType.Text, -1
-                "@OtherArtists", SqliteType.Text, -1
-                "@Remixers", SqliteType.Text, -1
-                "@Title", SqliteType.Text, -1
-                "@AlternativeTitles", SqliteType.Text, -1
-                "@Source", SqliteType.Text, -1
-                "@Tags", SqliteType.Text, -1
-                "@ChartId", SqliteType.Text, -1
-                "@Creators", SqliteType.Text, -1
-                "@DifficultyName", SqliteType.Text, -1
-                "@Subtitle", SqliteType.Text, -1
-                "@ChartTags", SqliteType.Text, -1
-                "@Duration", SqliteType.Real, 4
-                "@PreviewTime", SqliteType.Real, 4
-                "@Notecount", SqliteType.Integer, 4
-                "@Keys", SqliteType.Integer, 1
-                "@BPM", SqliteType.Text, -1
-                "@BackgroundHash", SqliteType.Text, -1
-                "@AudioHash", SqliteType.Text, -1
-                "@Sources", SqliteType.Text, -1
-                "@LastUpdated", SqliteType.Integer, 8
-            ]
-            FillParameters = (fun p (chart_id, chart, song) ->
-                p.Json JSON song.Artists
-                p.Json JSON song.OtherArtists
-                p.Json JSON song.Remixers
-                p.String song.Title
-                p.Json JSON song.AlternativeTitles
-                p.StringOption song.Source
-                p.Json JSON song.Tags
-                p.String chart_id
-                p.Json JSON chart.Creators
-                p.String chart.DifficultyName
-                p.StringOption chart.Subtitle
-                p.Json JSON chart.Tags
-                p.Float32 (float32 chart.Duration)
-                p.Float32 (float32 chart.PreviewTime)
-                p.Int32 chart.Notecount
-                p.Byte (uint8 chart.Keys)
-                p.Json JSON chart.BPM
-                p.String chart.BackgroundHash
-                p.String chart.AudioHash
-                p.Json JSON chart.Sources
-                p.Int64 (Timestamp.now())
-            )
+            Parameters =
+                [
+                    "@Artists", SqliteType.Text, -1
+                    "@OtherArtists", SqliteType.Text, -1
+                    "@Remixers", SqliteType.Text, -1
+                    "@Title", SqliteType.Text, -1
+                    "@AlternativeTitles", SqliteType.Text, -1
+                    "@Source", SqliteType.Text, -1
+                    "@Tags", SqliteType.Text, -1
+                    "@ChartId", SqliteType.Text, -1
+                    "@Creators", SqliteType.Text, -1
+                    "@DifficultyName", SqliteType.Text, -1
+                    "@Subtitle", SqliteType.Text, -1
+                    "@ChartTags", SqliteType.Text, -1
+                    "@Duration", SqliteType.Real, 4
+                    "@PreviewTime", SqliteType.Real, 4
+                    "@Notecount", SqliteType.Integer, 4
+                    "@Keys", SqliteType.Integer, 1
+                    "@BPM", SqliteType.Text, -1
+                    "@BackgroundHash", SqliteType.Text, -1
+                    "@AudioHash", SqliteType.Text, -1
+                    "@Sources", SqliteType.Text, -1
+                    "@LastUpdated", SqliteType.Integer, 8
+                ]
+            FillParameters =
+                (fun p (chart_id, chart, song) ->
+                    p.Json JSON song.Artists
+                    p.Json JSON song.OtherArtists
+                    p.Json JSON song.Remixers
+                    p.String song.Title
+                    p.Json JSON song.AlternativeTitles
+                    p.StringOption song.Source
+                    p.Json JSON song.Tags
+                    p.String chart_id
+                    p.Json JSON chart.Creators
+                    p.String chart.DifficultyName
+                    p.StringOption chart.Subtitle
+                    p.Json JSON chart.Tags
+                    p.Float32(float32 chart.Duration)
+                    p.Float32(float32 chart.PreviewTime)
+                    p.Int32 chart.Notecount
+                    p.Byte(uint8 chart.Keys)
+                    p.Json JSON chart.BPM
+                    p.String chart.BackgroundHash
+                    p.String chart.AudioHash
+                    p.Json JSON chart.Sources
+                    p.Int64(Timestamp.now ())
+                )
             Read = fun r -> r.Int64
         }
-    let add_chart_song (chart_id: string) (chart: Chart) (song: Song) : int64 = ADD_CHART_SONG.Execute (chart_id, chart, song) backbeat_db |> expect |> Array.exactlyOne
 
-    let private ADD_CHART : NonQuery<string * Chart * int64> = 
+    let add_chart_song (chart_id: string) (chart: Chart) (song: Song) : int64 =
+        ADD_CHART_SONG.Execute (chart_id, chart, song) backbeat_db
+        |> expect
+        |> Array.exactlyOne
+
+    let private ADD_CHART: NonQuery<string * Chart * int64> =
         {
-            SQL = """
+            SQL =
+                """
             INSERT INTO charts (Id, SongId, Creators, DifficultyName, Subtitle, Tags, Duration, PreviewTime, Notecount, Keys, BPM, BackgroundHash, AudioHash, Sources, LastUpdated)
             VALUES (@ChartId, @SongId, @Creators, @DifficultyName, @Subtitle, @ChartTags, @Duration, @PreviewTime, @Notecount, @Keys, @BPM, @BackgroundHash, @AudioHash, @Sources, @LastUpdated);
             """
-            Parameters = [
-                "@ChartId", SqliteType.Text, -1
-                "@SongId", SqliteType.Integer, 8
-                "@Creators", SqliteType.Text, -1
-                "@DifficultyName", SqliteType.Text, -1
-                "@Subtitle", SqliteType.Text, -1
-                "@ChartTags", SqliteType.Text, -1
-                "@Duration", SqliteType.Real, 4
-                "@PreviewTime", SqliteType.Real, 4
-                "@Notecount", SqliteType.Integer, 4
-                "@Keys", SqliteType.Integer, 1
-                "@BPM", SqliteType.Text, -1
-                "@BackgroundHash", SqliteType.Text, -1
-                "@AudioHash", SqliteType.Text, -1
-                "@Sources", SqliteType.Text, -1
-                "@LastUpdated", SqliteType.Integer, 8
-            ]
-            FillParameters = (fun p (chart_id, chart, song_id) ->
-                p.String chart_id
-                p.Int64 song_id
-                p.Json JSON chart.Creators
-                p.String chart.DifficultyName
-                p.StringOption chart.Subtitle
-                p.Json JSON chart.Tags
-                p.Float32 (float32 chart.Duration)
-                p.Float32 (float32 chart.PreviewTime)
-                p.Int32 chart.Notecount
-                p.Byte (uint8 chart.Keys)
-                p.Json JSON chart.BPM
-                p.String chart.BackgroundHash
-                p.String chart.AudioHash
-                p.Json JSON chart.Sources
-                p.Int64 (Timestamp.now())
-            )
+            Parameters =
+                [
+                    "@ChartId", SqliteType.Text, -1
+                    "@SongId", SqliteType.Integer, 8
+                    "@Creators", SqliteType.Text, -1
+                    "@DifficultyName", SqliteType.Text, -1
+                    "@Subtitle", SqliteType.Text, -1
+                    "@ChartTags", SqliteType.Text, -1
+                    "@Duration", SqliteType.Real, 4
+                    "@PreviewTime", SqliteType.Real, 4
+                    "@Notecount", SqliteType.Integer, 4
+                    "@Keys", SqliteType.Integer, 1
+                    "@BPM", SqliteType.Text, -1
+                    "@BackgroundHash", SqliteType.Text, -1
+                    "@AudioHash", SqliteType.Text, -1
+                    "@Sources", SqliteType.Text, -1
+                    "@LastUpdated", SqliteType.Integer, 8
+                ]
+            FillParameters =
+                (fun p (chart_id, chart, song_id) ->
+                    p.String chart_id
+                    p.Int64 song_id
+                    p.Json JSON chart.Creators
+                    p.String chart.DifficultyName
+                    p.StringOption chart.Subtitle
+                    p.Json JSON chart.Tags
+                    p.Float32(float32 chart.Duration)
+                    p.Float32(float32 chart.PreviewTime)
+                    p.Int32 chart.Notecount
+                    p.Byte(uint8 chart.Keys)
+                    p.Json JSON chart.BPM
+                    p.String chart.BackgroundHash
+                    p.String chart.AudioHash
+                    p.Json JSON chart.Sources
+                    p.Int64(Timestamp.now ())
+                )
         }
-    let add_chart (chart_id: string) (chart: Chart) (song_id: int64) = ADD_CHART.Execute (chart_id, chart, song_id) backbeat_db |> expect |> ignore
 
-    let private MERGE_SONGS : NonQuery<int64 * int64> =
+    let add_chart (chart_id: string) (chart: Chart) (song_id: int64) =
+        ADD_CHART.Execute (chart_id, chart, song_id) backbeat_db |> expect |> ignore
+
+    let private MERGE_SONGS: NonQuery<int64 * int64> =
         {
-            SQL = """
+            SQL =
+                """
             BEGIN TRANSACTION;
 
             UPDATE charts
@@ -397,13 +437,19 @@ module Songs =
             COMMIT;
             """
             Parameters = [ "@OldId", SqliteType.Integer, 8; "@NewId", SqliteType.Integer, 8 ]
-            FillParameters = fun p (old_id, new_id) -> p.Int64 old_id; p.Int64 new_id
+            FillParameters =
+                fun p (old_id, new_id) ->
+                    p.Int64 old_id
+                    p.Int64 new_id
         }
-    let merge_songs (old_song_id: int64) (new_song_id: int64) : bool = MERGE_SONGS.Execute (old_song_id, new_song_id) backbeat_db |> expect > 0
 
-    let private UPDATE_CHART : NonQuery<string * Chart> = 
+    let merge_songs (old_song_id: int64) (new_song_id: int64) : bool =
+        MERGE_SONGS.Execute (old_song_id, new_song_id) backbeat_db |> expect > 0
+
+    let private UPDATE_CHART: NonQuery<string * Chart> =
         {
-            SQL = """
+            SQL =
+                """
             UPDATE charts
             SET 
                 Creators = @Creators,
@@ -421,44 +467,49 @@ module Songs =
                 LastUpdated = @LastUpdated
             WHERE Id = @ChartId;
             """
-            Parameters = [
-                "@ChartId", SqliteType.Text, -1
-                "@Creators", SqliteType.Text, -1
-                "@DifficultyName", SqliteType.Text, -1
-                "@Subtitle", SqliteType.Text, -1
-                "@ChartTags", SqliteType.Text, -1
-                "@Duration", SqliteType.Real, 4
-                "@PreviewTime", SqliteType.Real, 4
-                "@Notecount", SqliteType.Integer, 4
-                "@Keys", SqliteType.Integer, 1
-                "@BPM", SqliteType.Text, -1
-                "@BackgroundHash", SqliteType.Text, -1
-                "@AudioHash", SqliteType.Text, -1
-                "@Sources", SqliteType.Text, -1
-                "@LastUpdated", SqliteType.Integer, 8
-            ]
-            FillParameters = (fun p (chart_id, chart) ->
-                p.String chart_id
-                p.Json JSON chart.Creators
-                p.String chart.DifficultyName
-                p.StringOption chart.Subtitle
-                p.Json JSON chart.Tags
-                p.Float32 (float32 chart.Duration)
-                p.Float32 (float32 chart.PreviewTime)
-                p.Int32 chart.Notecount
-                p.Byte (uint8 chart.Keys)
-                p.Json JSON chart.BPM
-                p.String chart.BackgroundHash
-                p.String chart.AudioHash
-                p.Json JSON chart.Sources
-                p.Int64 (Timestamp.now())
-            )
+            Parameters =
+                [
+                    "@ChartId", SqliteType.Text, -1
+                    "@Creators", SqliteType.Text, -1
+                    "@DifficultyName", SqliteType.Text, -1
+                    "@Subtitle", SqliteType.Text, -1
+                    "@ChartTags", SqliteType.Text, -1
+                    "@Duration", SqliteType.Real, 4
+                    "@PreviewTime", SqliteType.Real, 4
+                    "@Notecount", SqliteType.Integer, 4
+                    "@Keys", SqliteType.Integer, 1
+                    "@BPM", SqliteType.Text, -1
+                    "@BackgroundHash", SqliteType.Text, -1
+                    "@AudioHash", SqliteType.Text, -1
+                    "@Sources", SqliteType.Text, -1
+                    "@LastUpdated", SqliteType.Integer, 8
+                ]
+            FillParameters =
+                (fun p (chart_id, chart) ->
+                    p.String chart_id
+                    p.Json JSON chart.Creators
+                    p.String chart.DifficultyName
+                    p.StringOption chart.Subtitle
+                    p.Json JSON chart.Tags
+                    p.Float32(float32 chart.Duration)
+                    p.Float32(float32 chart.PreviewTime)
+                    p.Int32 chart.Notecount
+                    p.Byte(uint8 chart.Keys)
+                    p.Json JSON chart.BPM
+                    p.String chart.BackgroundHash
+                    p.String chart.AudioHash
+                    p.Json JSON chart.Sources
+                    p.Int64(Timestamp.now ())
+                )
         }
-    let update_chart (chart_id: string) (chart: Chart) : bool = UPDATE_CHART.Execute (chart_id, chart) backbeat_db |> expect = 1
 
-    let private UPDATE_SONG : NonQuery<int64 * Song> =
+    let update_chart (chart_id: string) (chart: Chart) : bool =
+        UPDATE_CHART.Execute (chart_id, chart) backbeat_db |> expect = 1
+
+    let private UPDATE_SONG: NonQuery<int64 * Song> =
         {
-            SQL = """
+            SQL =
+                """
             UPDATE songs
             SET
                 Artists = @Artists,
@@ -471,34 +522,39 @@ module Songs =
                 LastUpdated = @LastUpdated
             WHERE Id = @SongId;
             """
-            Parameters = [
-                "@SongId", SqliteType.Integer, 8
-                "@Artists", SqliteType.Text, -1
-                "@OtherArtists", SqliteType.Text, -1
-                "@Remixers", SqliteType.Text, -1
-                "@Title", SqliteType.Text, -1
-                "@AlternativeTitles", SqliteType.Text, -1
-                "@Source", SqliteType.Text, -1
-                "@Tags", SqliteType.Text, -1
-                "@LastUpdated", SqliteType.Integer, 8
-            ]
-            FillParameters = (fun p (song_id, song) ->
-                p.Int64 song_id
-                p.Json JSON song.Artists
-                p.Json JSON song.OtherArtists
-                p.Json JSON song.Remixers
-                p.String song.Title
-                p.Json JSON song.AlternativeTitles
-                p.StringOption song.Source
-                p.Json JSON song.Tags
-                p.Int64 (Timestamp.now())
-            )
+            Parameters =
+                [
+                    "@SongId", SqliteType.Integer, 8
+                    "@Artists", SqliteType.Text, -1
+                    "@OtherArtists", SqliteType.Text, -1
+                    "@Remixers", SqliteType.Text, -1
+                    "@Title", SqliteType.Text, -1
+                    "@AlternativeTitles", SqliteType.Text, -1
+                    "@Source", SqliteType.Text, -1
+                    "@Tags", SqliteType.Text, -1
+                    "@LastUpdated", SqliteType.Integer, 8
+                ]
+            FillParameters =
+                (fun p (song_id, song) ->
+                    p.Int64 song_id
+                    p.Json JSON song.Artists
+                    p.Json JSON song.OtherArtists
+                    p.Json JSON song.Remixers
+                    p.String song.Title
+                    p.Json JSON song.AlternativeTitles
+                    p.StringOption song.Source
+                    p.Json JSON song.Tags
+                    p.Int64(Timestamp.now ())
+                )
         }
-    let update_song (song_id: int64) (song: Song) : bool = UPDATE_SONG.Execute (song_id, song) backbeat_db |> expect = 1
-    
-    let private DELETE_CHART : NonQuery<string * int64> =
+
+    let update_song (song_id: int64) (song: Song) : bool =
+        UPDATE_SONG.Execute (song_id, song) backbeat_db |> expect = 1
+
+    let private DELETE_CHART: NonQuery<string * int64> =
         {
-            SQL = """
+            SQL =
+                """
             BEGIN TRANSACTION;
 
             DELETE FROM charts
@@ -514,17 +570,21 @@ module Songs =
             COMMIT;
             """
             Parameters = [ "@ChartId", SqliteType.Text, -1; "@SongId", SqliteType.Integer, 8 ]
-            FillParameters = fun p (chart_id, song_id) -> p.String chart_id; p.Int64 song_id
+            FillParameters =
+                fun p (chart_id, song_id) ->
+                    p.String chart_id
+                    p.Int64 song_id
         }
+
     let delete_chart (chart_id: string) : bool =
         match chart_by_id chart_id with
-        | Some (song_id, _) ->
-            DELETE_CHART.Execute (chart_id, song_id) backbeat_db |> expect > 0
+        | Some(song_id, _) -> DELETE_CHART.Execute (chart_id, song_id) backbeat_db |> expect > 0
         | None -> false
 
-    let private UPDATE_CHART_SONG_ID : NonQuery<string * int64 * int64> =
+    let private UPDATE_CHART_SONG_ID: NonQuery<string * int64 * int64> =
         {
-            SQL = """
+            SQL =
+                """
             BEGIN TRANSACTION;
 
             UPDATE charts
@@ -540,44 +600,59 @@ module Songs =
 
             COMMIT;
             """
-            Parameters = [ "@ChartId", SqliteType.Text, -1; "@OldSongId", SqliteType.Integer, 8; "@NewSongId", SqliteType.Integer, 8 ]
-            FillParameters = (fun p (chart_id, current_song_id, new_song_id) -> 
-                p.String chart_id
-                p.Int64 current_song_id
-                p.Int64 new_song_id
-            )
+            Parameters =
+                [
+                    "@ChartId", SqliteType.Text, -1
+                    "@OldSongId", SqliteType.Integer, 8
+                    "@NewSongId", SqliteType.Integer, 8
+                ]
+            FillParameters =
+                (fun p (chart_id, current_song_id, new_song_id) ->
+                    p.String chart_id
+                    p.Int64 current_song_id
+                    p.Int64 new_song_id
+                )
         }
+
     let update_chart_song_id (chart_id: string) (new_song_id: int64) =
         match chart_by_id chart_id with
-        | Some (current_song_id, _) when current_song_id <> new_song_id ->
-            UPDATE_CHART_SONG_ID.Execute (chart_id, current_song_id, new_song_id) backbeat_db |> expect > 0
+        | Some(current_song_id, _) when current_song_id <> new_song_id ->
+            UPDATE_CHART_SONG_ID.Execute (chart_id, current_song_id, new_song_id) backbeat_db
+            |> expect > 0
         | _ -> false
 
     open System.Text.RegularExpressions
+
     let search_songs (search_query: string) : (int64 * Song) array =
         let stripped_query = Regex.Replace(search_query, @"[^a-zA-Z0-9\s]+", " ").Trim()
-        if stripped_query = "" then [||] else
-        let db_query : Query<unit, int64 * Song> =
-            {
-                SQL = $"""
+
+        if stripped_query = "" then
+            [||]
+        else
+            let db_query: Query<unit, int64 * Song> =
+                {
+                    SQL =
+                        $"""
                 SELECT Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source FROM songs_fts
                 WHERE songs_fts MATCH '{stripped_query}'
                 ORDER BY rank DESC
                 LIMIT 20;
                 """
-                Parameters = []
-                FillParameters = fun p () -> ()
-                Read = (fun r ->
-                    r.Int64,
-                    {
-                        Artists = r.Json JSON
-                        OtherArtists = r.Json JSON
-                        Remixers = r.Json JSON
-                        Title = r.String
-                        AlternativeTitles = r.Json JSON
-                        Source = r.StringOption
-                        Tags = []
-                    }
-                )
-            }
-        db_query.Execute () backbeat_db |> expect
+                    Parameters = []
+                    FillParameters = fun p () -> ()
+                    Read =
+                        (fun r ->
+                            r.Int64,
+                            {
+                                Artists = r.Json JSON
+                                OtherArtists = r.Json JSON
+                                Remixers = r.Json JSON
+                                Title = r.String
+                                AlternativeTitles = r.Json JSON
+                                Source = r.StringOption
+                                Tags = []
+                            }
+                        )
+                }
+
+            db_query.Execute () backbeat_db |> expect

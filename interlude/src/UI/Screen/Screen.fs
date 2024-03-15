@@ -26,7 +26,7 @@ module Toolbar =
 
     open Prelude.Data
 
-    let take_screenshot() =
+    let take_screenshot () =
         let id = DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
         let path = Path.Combine(get_game_folder "Screenshots", id)
         let img = Render.screenshot ()
@@ -185,7 +185,10 @@ module Screen =
                 this.ShouldExit <- true
 
         override this.Draw() =
-            if current_type <> Type.Play || Interlude.Options.options.BackgroundDim.Value < 1.0f then
+            if
+                current_type <> Type.Play
+                || Interlude.Options.options.BackgroundDim.Value < 1.0f
+            then
                 Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
 
             screen_container.Draw()

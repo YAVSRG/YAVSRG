@@ -104,7 +104,9 @@ type ScoreGraph(score_info: ScoreInfo) =
                 | Release evData ->
                     match evData.Judgement with
                     | Some judgement ->
-                        h - 0.5f * evData.Delta / score_info.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS),
+                        h
+                        - 0.5f * evData.Delta / score_info.Scoring.MissWindow
+                          * (h - THICKNESS - HTHICKNESS),
                         Color.FromArgb(127, score_info.Ruleset.JudgementColor judgement)
                     | None -> 0.0f, Color.Transparent
 

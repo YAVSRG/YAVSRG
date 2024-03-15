@@ -28,7 +28,7 @@ module Helpers =
 
         refresh ()
         r, refresh
-    
+
     type MenuPositionHelper =
         {
             mutable Y: float32
@@ -37,6 +37,7 @@ module Helpers =
             let pos = this.Y
             this.Y <- this.Y + PRETTYHEIGHT * height_mult
             pos
+
         member this.Step() = this.Step(1.0f)
 
     let menu_pos (start: float32) = { Y = 100.0f * start }
@@ -98,7 +99,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
     static member Percent(setting) =
         Slider(setting, Format = (fun x -> sprintf "%.0f%%" (x * 100.0f)))
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -171,19 +172,23 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
         Style.click.Play()
 
     override this.Init(parent: Widget) =
-        this
-        |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
+        this |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
         |* Clickable(
-            (fun () -> this.Select true; fd()),
-            OnHover = fun b -> 
-                if b && not this.Focused then 
-                    this.Focus true
-                elif not b && this.FocusedByMouse then
-                    Selection.up true
+            (fun () ->
+                this.Select true
+                fd ()
+            ),
+            OnHover =
+                fun b ->
+                    if b && not this.Focused then
+                        this.Focus true
+                    elif not b && this.FocusedByMouse then
+                        Selection.up true
         )
+
         base.Init parent
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -241,6 +246,7 @@ type PageSetting(name, widget: Widget) as this =
     member this.Pos(y, width, height) =
         this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height)
         this
+
     member this.Pos(y, width) = this.Pos(y, width, PRETTYHEIGHT)
     member this.Pos(y) = this.Pos(y, PRETTYWIDTH, PRETTYHEIGHT)
 
@@ -309,7 +315,7 @@ type PageButton(name, action) as this =
 
         base.Init parent
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -318,10 +324,11 @@ type PageButton(name, action) as this =
             Draw.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
-        
+
     member this.Pos(y, width, height) =
         this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height)
         this
+
     member this.Pos(y, width) = this.Pos(y, width, PRETTYHEIGHT)
     member this.Pos(y) = this.Pos(y, PRETTYWIDTH, PRETTYHEIGHT)
 
@@ -397,9 +404,12 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
         | Some n ->
             let current_controls = controls.[setting.Value]
 
-            if n = -1 then current_controls.[0].Focus false
-            elif n = current_controls.Length - 1 then selector.Focus false
-            else current_controls.[n + 1].Focus false
+            if n = -1 then
+                current_controls.[0].Focus false
+            elif n = current_controls.Length - 1 then
+                selector.Focus false
+            else
+                current_controls.[n + 1].Focus false
         | None -> ()
 
     member this.SelectFocusedChild() =
@@ -470,7 +480,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
 
     let hex_editor =
         { new TextEntry(hex, "none", false, Position = Position.TrimLeft(50.0f).SliceTop PRETTYHEIGHT) with
-            override this.OnDeselected (by_mouse: bool) =
+            override this.OnDeselected(by_mouse: bool) =
                 base.OnDeselected by_mouse
                 hex.Value <- s.Value.ToHex()
         }
@@ -481,7 +491,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
 
     member private this.HexEditor = hex_editor
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -587,7 +597,9 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
 module Helpers2 =
     type PageSetting with
         member this.Tooltip(content: Callout) = this |+ Tooltip(content)
+
     type PageButton with
         member this.Tooltip(content: Callout) = this |+ Tooltip(content)
+
     type StaticContainer with
         member this.Tooltip(content: Callout) = this |+ Tooltip(content)

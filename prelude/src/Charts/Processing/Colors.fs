@@ -117,10 +117,7 @@ module NoteColors =
                 else
                     previous_colors.[k] <- color_data.[ddr_color]
 
-            {
-                Time = time
-                Data = colors
-            }
+            { Time = time; Data = colors }
         )
 
     let private apply_scheme (scheme: ColorScheme) (color_data: ColorData) (mc: ModdedChart) : ColoredChart =
@@ -131,10 +128,7 @@ module NoteColors =
             | ColorScheme.DDR -> ddr_colors color_data mc
             | _ -> column_colors (Array.zeroCreate mc.Keys) mc
 
-        {
-            Source = mc
-            Colors = colored_notes
-        }
+        { Source = mc; Colors = colored_notes }
 
     [<Json.AutoCodec(false)>]
     type ColorConfig =

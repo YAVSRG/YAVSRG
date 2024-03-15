@@ -25,12 +25,7 @@ module Identify =
             | Some(chart, song) ->
                 response.ReplyJson(
                     {
-                        Info =
-                            Some
-                                {
-                                    Song = song
-                                    Chart = chart
-                                }
+                        Info = Some { Song = song; Chart = chart }
                     }
                     : Response
                 )

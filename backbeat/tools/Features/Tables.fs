@@ -1,16 +1,16 @@
-﻿ namespace Backbeat.Features
+﻿namespace Backbeat.Features
 
- open System.IO
- open System.Diagnostics
- open System.Linq
- open Percyqaz.Common
- open Percyqaz.Shell
- open Prelude.Common
- open Prelude.Backbeat
- open Prelude.Data.Library.Collections
- open Prelude.Data.Library.Caching
- open Backbeat.Features.Archive
- open Backbeat.Utils
+open System.IO
+open System.Diagnostics
+open System.Linq
+open Percyqaz.Common
+open Percyqaz.Shell
+open Prelude.Common
+open Prelude.Backbeat
+open Prelude.Data.Library.Collections
+open Prelude.Data.Library.Caching
+open Backbeat.Features.Archive
+open Backbeat.Utils
 
 // module Tables =
 

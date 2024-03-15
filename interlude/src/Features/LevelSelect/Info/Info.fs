@@ -18,9 +18,8 @@ open Interlude.Features.Gameplay
 type ChartInfo() as this =
     inherit StaticContainer(NodeType.None)
 
-    let display = 
-        Setting.simple Display.Local
-        |> Setting.trigger (fun _ -> this.Refresh())
+    let display =
+        Setting.simple Display.Local |> Setting.trigger (fun _ -> this.Refresh())
 
     let scoreboard = Scoreboard(display, Position = Position.TrimBottom 120.0f)
     let online = Leaderboard(display, Position = Position.TrimBottom 120.0f)
@@ -112,10 +111,7 @@ type ChartInfo() as this =
             )
 
         |+ StylishButton(
-            (fun () ->
-                Chart.when_loaded
-                <| fun info -> Preview(info, change_rate).Show()
-            ),
+            (fun () -> Chart.when_loaded <| fun info -> Preview(info, change_rate).Show()),
             K(Icons.EYE + " " + %"levelselect.preview.name"),
             !%Palette.MAIN_100,
             Hotkey = "preview",

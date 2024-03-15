@@ -35,7 +35,7 @@ type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
             )
 
         match suggestion.BackbeatInfo with
-        | Some (chart, song) ->
+        | Some(chart, song) ->
             container
             |* button (
                 Icons.CHECK,
@@ -44,7 +44,12 @@ type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
                         sprintf "Add %s to level %i?" song.Title level,
                         fun () ->
                             Tables.Suggestions.Accept.post (
-                                ({ TableId = table.Id; ChartId = suggestion.ChartId; Level = level }: Tables.Suggestions.Accept.Request),
+                                ({
+                                    TableId = table.Id
+                                    ChartId = suggestion.ChartId
+                                    Level = level
+                                }
+                                : Tables.Suggestions.Accept.Request),
                                 function
                                 | Some true ->
                                     Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion applied!", "")
@@ -68,24 +73,32 @@ type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
             button (
                 Icons.EDIT_2,
                 fun () ->
-                    SelectTableLevelPage(table, fun level ->
-                        Tables.Suggestions.Vote.post (
-                            ({
-                                ChartId = suggestion.ChartId
-                                TableId = table.Id
-                                Level = level
-                            }
-                            : Tables.Suggestions.Vote.Request),
-                            function
-                            | Some Tables.Suggestions.Vote.Response.Ok -> Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                            | Some Tables.Suggestions.Vote.Response.OkDetailsRequired -> 
-                                // todo: send backbeat addition request with suggestion
-                                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                            | Some Tables.Suggestions.Vote.Response.Rejected -> Notifications.action_feedback (Icons.X_CIRCLE, "Suggestion rejected!", "This chart has already previously been rejected")
-                            | None -> Notifications.error ("Error sending suggestion", "")
-                        )
+                    SelectTableLevelPage(
+                        table,
+                        fun level ->
+                            Tables.Suggestions.Vote.post (
+                                ({
+                                    ChartId = suggestion.ChartId
+                                    TableId = table.Id
+                                    Level = level
+                                }
+                                : Tables.Suggestions.Vote.Request),
+                                function
+                                | Some Tables.Suggestions.Vote.Response.Ok ->
+                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                                | Some Tables.Suggestions.Vote.Response.OkDetailsRequired ->
+                                    // todo: send backbeat addition request with suggestion
+                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                                | Some Tables.Suggestions.Vote.Response.Rejected ->
+                                    Notifications.action_feedback (
+                                        Icons.X_CIRCLE,
+                                        "Suggestion rejected!",
+                                        "This chart has already previously been rejected"
+                                    )
+                                | None -> Notifications.error ("Error sending suggestion", "")
+                            )
 
-                        Menu.Back()
+                            Menu.Back()
                     )
                         .Show()
             )
@@ -97,26 +110,25 @@ type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
         this
         |+ Text(
             match suggestion.BackbeatInfo with
-            | Some (chart, song) -> song.Title 
+            | Some(chart, song) -> song.Title
             | None -> "???"
-            , 
-            Position = Position.Row(0.0f, 40.0f).Margin(10.0f, 0.0f), Align = Alignment.LEFT)
-        |+ Text(
-            match suggestion.BackbeatInfo with
-            | Some (chart, song) -> sprintf "%s  •  %s" song.FormattedArtists chart.FormattedCreators
-            | None -> "Metadata missing"
-            , 
-            Position = Position.Row(40.0f, 30.0f).Margin(10.0f, 0.0f),
-            Align = Alignment.LEFT
+            , Position = Position.Row(0.0f, 40.0f).Margin(10.0f, 0.0f)
+            , Align = Alignment.LEFT
         )
         |+ Text(
             match suggestion.BackbeatInfo with
-            | Some (chart, song) -> chart.DifficultyName
+            | Some(chart, song) -> sprintf "%s  •  %s" song.FormattedArtists chart.FormattedCreators
+            | None -> "Metadata missing"
+            , Position = Position.Row(40.0f, 30.0f).Margin(10.0f, 0.0f)
+            , Align = Alignment.LEFT
+        )
+        |+ Text(
+            match suggestion.BackbeatInfo with
+            | Some(chart, song) -> chart.DifficultyName
             | None -> "???"
-            , 
-            Position = Position.Row(70.0f, 30.0f).Margin(10.0f, 0.0f),
-            Align = Alignment.LEFT,
-            Color = K Colors.text_greyout
+            , Position = Position.Row(70.0f, 30.0f).Margin(10.0f, 0.0f)
+            , Align = Alignment.LEFT
+            , Color = K Colors.text_greyout
         )
         |* actions
 
@@ -128,7 +140,9 @@ type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
 
     interface DynamicSize with
         member this.Size = size
-        member this.OnSizeChanged with set _ = ()
+
+        member this.OnSizeChanged
+            with set _ = ()
 
 type SuggestionsList(table: Table) =
     inherit
@@ -144,7 +158,8 @@ type SuggestionsList(table: Table) =
                                 | Some result -> this.SetData result
                                 | None -> this.ServerError()
                     )
-                else this.Offline()
+                else
+                    this.Offline()
             , fun data ->
                 let fc = DynamicFlowContainer.Vertical<Suggestion>(Spacing = 30.0f)
 
@@ -168,23 +183,30 @@ type SuggestionsPage(table: Table) as this =
     override this.OnReturnTo() = sl.Reload()
 
 type SuggestChartPage(table: Table, cc: CachedChart) =
-    inherit SelectTableLevelPage(
-        table, 
-        fun level ->
-            Tables.Suggestions.Vote.post (
-                {
-                    ChartId = cc.Hash
-                    TableId = table.Id
-                    Level = level
-                },
-                function
-                | Some Tables.Suggestions.Vote.Response.Ok -> Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                | Some Tables.Suggestions.Vote.Response.OkDetailsRequired -> 
-                    // todo: send backbeat addition request with suggestion
-                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                | Some Tables.Suggestions.Vote.Response.Rejected -> Notifications.action_feedback (Icons.X_CIRCLE, "Suggestion rejected!", "This chart has already previously been rejected")
-                | None -> Notifications.error ("Error sending suggestion", "")
-            )
+    inherit
+        SelectTableLevelPage(
+            table,
+            fun level ->
+                Tables.Suggestions.Vote.post (
+                    {
+                        ChartId = cc.Hash
+                        TableId = table.Id
+                        Level = level
+                    },
+                    function
+                    | Some Tables.Suggestions.Vote.Response.Ok ->
+                        Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                    | Some Tables.Suggestions.Vote.Response.OkDetailsRequired ->
+                        // todo: send backbeat addition request with suggestion
+                        Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                    | Some Tables.Suggestions.Vote.Response.Rejected ->
+                        Notifications.action_feedback (
+                            Icons.X_CIRCLE,
+                            "Suggestion rejected!",
+                            "This chart has already previously been rejected"
+                        )
+                    | None -> Notifications.error ("Error sending suggestion", "")
+                )
 
-            Menu.Back()
+                Menu.Back()
         )

@@ -168,6 +168,7 @@ module Network =
                         ConnectionFailed
                     else
                         NotConnected
+
                 sync
                 <| fun () ->
                     if lobby.IsSome then
@@ -191,13 +192,11 @@ module Network =
                         open_url url
                 | Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag ->
                     Logging.Debug("Linking an account with: " + discord_tag)
-                    sync
-                    <| fun () -> Events.waiting_registration_ev.Trigger discord_tag
+                    sync <| fun () -> Events.waiting_registration_ev.Trigger discord_tag
                 | Downstream.REGISTRATION_FAILED reason ->
                     Logging.Info(sprintf "Registration failed: %s" reason)
                     Notifications.error (%"notification.network.registrationfailed", reason)
-                    sync
-                    <| fun () -> Events.registration_failed_ev.Trigger reason
+                    sync <| fun () -> Events.registration_failed_ev.Trigger reason
                 | Downstream.AUTH_TOKEN token ->
                     credentials.Token <- token
                     this.Send(Upstream.LOGIN credentials.Token)
@@ -205,24 +204,25 @@ module Network =
                     Logging.Info(sprintf "Logged in as %s" name)
                     credentials.Username <- name
                     status <- LoggedIn
+
                     sync
                     <| fun () ->
-                    API.Client.authenticate credentials.Token
+                        API.Client.authenticate credentials.Token
 
-                    if Screen.current_type <> Screen.Type.SplashScreen then
-                        Notifications.system_feedback (Icons.GLOBE, [ name ] %> "notification.network.login", "")
+                        if Screen.current_type <> Screen.Type.SplashScreen then
+                            Notifications.system_feedback (Icons.GLOBE, [ name ] %> "notification.network.login", "")
 
-                    Events.successful_login_ev.Trigger name
+                        Events.successful_login_ev.Trigger name
                 | Downstream.LOGIN_FAILED reason ->
                     Logging.Info(sprintf "Login failed: %s" reason)
                     credentials.Token <- ""
 
                     sync
-                    <| fun () -> 
-                    if Screen.current_type <> Screen.Type.SplashScreen then
-                        Notifications.error (%"notification.network.loginfailed", reason)
+                    <| fun () ->
+                        if Screen.current_type <> Screen.Type.SplashScreen then
+                            Notifications.error (%"notification.network.loginfailed", reason)
 
-                    Events.login_failed_ev.Trigger reason
+                        Events.login_failed_ev.Trigger reason
 
                 | Downstream.LOBBY_LIST lobbies ->
                     sync
@@ -375,7 +375,7 @@ module Network =
         lobby <- None
         client.Disconnect()
 
-    let init_window() =
+    let init_window () =
         if target_ip.ToString() <> "0.0.0.0" then
             connect ()
 

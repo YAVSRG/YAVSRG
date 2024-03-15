@@ -5,10 +5,10 @@ open NUnit.Framework
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
-module Users = 
+module Users =
 
     module Scores = Interlude.Web.Tests.Domain.Core.Scores
-    
+
     [<Test>]
     let DeleteUser_FullCleanup () =
         let user = User.create ("DeleteUser", 999999uL)
@@ -18,9 +18,28 @@ module Users =
         Friends.add (user_id, user2_id)
         Friends.add (user2_id, user_id)
 
-        let replay = Replay.create (user_id, Scores.CRESCENT_MOON, Scores.TIMEPLAYED, Scores.CRESCENT_MOON_REPLAY_DATA)
+        let replay =
+            Replay.create (user_id, Scores.CRESCENT_MOON, Scores.TIMEPLAYED, Scores.CRESCENT_MOON_REPLAY_DATA)
+
         let replay_id = Replay.save_leaderboard "RulesetId" replay
-        let score = Score.create(user_id, Scores.CRESCENT_MOON, "RulesetId", Scores.TIMEPLAYED, 1.0f, Map.empty, true, 0.98, 1, 3).WithReplay replay_id
+
+        let score =
+            Score
+                .create(
+                    user_id,
+                    Scores.CRESCENT_MOON,
+                    "RulesetId",
+                    Scores.TIMEPLAYED,
+                    1.0f,
+                    Map.empty,
+                    true,
+                    0.98,
+                    1,
+                    3
+                )
+                .WithReplay
+                replay_id
+
         let score_id = Score.save score
 
         Users.permanently_delete_user user_id

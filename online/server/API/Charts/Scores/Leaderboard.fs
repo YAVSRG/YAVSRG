@@ -27,7 +27,10 @@ module Leaderboard =
             let ruleset_id = query_params.["ruleset"].[0]
 
             let ruleset_id =
-                if ruleset_id <> Score.PRIMARY_RULESET && not (Leaderboard.exists chart_id ruleset_id) then
+                if
+                    ruleset_id <> Score.PRIMARY_RULESET
+                    && not (Leaderboard.exists chart_id ruleset_id)
+                then
                     Score.PRIMARY_RULESET
                 else
                     ruleset_id
@@ -38,22 +41,24 @@ module Leaderboard =
 
                 let scores: Score array =
                     info
-                    |> Array.map (
-                        fun (i, user, score, replay) ->
-                            {
-                                Username = user.Username
-                                Rank = i + 1
-                                Replay = replay.Data |> Convert.ToBase64String
-                                Rate = score.Rate
-                                Mods = score.Mods
-                                Timestamp =
-                                    DateTimeOffset
-                                        .FromUnixTimeMilliseconds(score.TimePlayed)
-                                        .UtcDateTime
-                            }
+                    |> Array.map (fun (i, user, score, replay) ->
+                        {
+                            Username = user.Username
+                            Rank = i + 1
+                            Replay = replay.Data |> Convert.ToBase64String
+                            Rate = score.Rate
+                            Mods = score.Mods
+                            Timestamp = DateTimeOffset.FromUnixTimeMilliseconds(score.TimePlayed).UtcDateTime
+                        }
                     )
 
-                response.ReplyJson({ Scores = scores; RulesetId = ruleset_id }: Response)
+                response.ReplyJson(
+                    {
+                        Scores = scores
+                        RulesetId = ruleset_id
+                    }
+                    : Response
+                )
 
             else
                 response.MakeErrorResponse(404) |> ignore

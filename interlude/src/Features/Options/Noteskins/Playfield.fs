@@ -23,23 +23,28 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
         this
         |+ Text((fun () -> sprintf "%.0f" spacing.Value), Align = Alignment.CENTER, Color = K Colors.text_subheading)
         |* Clickable(
-            (fun () -> 
+            (fun () ->
                 this.Select true
                 add 5.0f
             ),
-            OnHover = (fun b -> 
-                if b && not this.Focused then 
-                    this.Focus true
-                elif not b && this.FocusedByMouse then
-                    Selection.up true
-            ),
-            OnRightClick = fun () ->
-                if not this.Selected then this.Select true
-                add -5.0f
+            OnHover =
+                (fun b ->
+                    if b && not this.Focused then
+                        this.Focus true
+                    elif not b && this.FocusedByMouse then
+                        Selection.up true
+                ),
+            OnRightClick =
+                fun () ->
+                    if not this.Selected then
+                        this.Select true
+
+                    add -5.0f
         )
+
         base.Init parent
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -68,9 +73,8 @@ type PlayfieldSettingsPage() as this =
     inherit Page()
 
     let data = Content.NoteskinConfig
-    
-    let keymode: Setting<Keymode> =
-        Setting.simple <| Gameplay.Chart.keymode()
+
+    let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
 
     let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
     let align_offset = Setting.percentf (snd data.PlayfieldAlignment)
@@ -114,7 +118,8 @@ type PlayfieldSettingsPage() as this =
 
     do
         let pos = menu_pos 2.0f
-        column()
+
+        column ()
         |+ PageSetting("noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
             .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
             .Pos(pos.Step())

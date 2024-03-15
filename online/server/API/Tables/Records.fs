@@ -29,12 +29,14 @@ module Records =
 
             let table_id = query_params.["table"].[0].ToLower()
 
-            if not (Backbeat.Tables.exists table_id) then raise NotFoundException
+            if not (Backbeat.Tables.exists table_id) then
+                raise NotFoundException
 
             let table = Backbeat.Tables.TABLES.[table_id]
 
             // todo: aggregate grades and scores together
-            let scores = Score.aggregate_user_ranked_scores target_user_id table.RulesetId |> Map.ofArray
+            let scores =
+                Score.aggregate_user_ranked_scores target_user_id table.RulesetId |> Map.ofArray
 
             let charts = TableLevel.get_all table_id |> Array.map fst
             let ruleset = Backbeat.rulesets.[table.RulesetId]

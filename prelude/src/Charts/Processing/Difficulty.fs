@@ -196,6 +196,7 @@ module DifficultyRating =
 
     let calculate (rate: float32) (notes: TimeArray<NoteRow>) : DifficultyRating =
         let keys = notes.[0].Data.Length
+
         let layoutData =
             Layout.list keys
             |> List.head

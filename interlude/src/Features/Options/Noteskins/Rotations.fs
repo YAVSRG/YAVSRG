@@ -34,22 +34,28 @@ type RotationPicker(rotation: Setting<float>) as this =
             Color = K Colors.text_subheading
         )
         |* Clickable(
-            (fun () -> 
-                if not this.Selected then this.Select true
-                fd()
+            (fun () ->
+                if not this.Selected then
+                    this.Select true
+
+                fd ()
             ),
-            OnHover = (fun b -> 
-                if b && not this.Focused then 
-                    this.Focus true
-                elif not b && this.FocusedByMouse then
-                    Selection.up true
-            ),
-            OnRightClick = fun () ->
-                if not this.Selected then this.Select true
-                bk ()
+            OnHover =
+                (fun b ->
+                    if b && not this.Focused then
+                        this.Focus true
+                    elif not b && this.FocusedByMouse then
+                        Selection.up true
+                ),
+            OnRightClick =
+                fun () ->
+                    if not this.Selected then
+                        this.Select true
+
+                    bk ()
         )
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -84,9 +90,8 @@ type RotationSettingsPage() as this =
 
     let data = Content.NoteskinConfig
     let use_rotation = Setting.simple data.UseRotation
-    
-    let keymode: Setting<Keymode> =
-        Setting.simple <| Gameplay.Chart.keymode()
+
+    let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
 
     let receptor_style = Setting.simple data.ReceptorStyle
     let rotations = data.Rotations

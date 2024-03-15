@@ -96,6 +96,7 @@ type private CompareFriend
 
         if Network.status = Network.Status.LoggedIn then
             let table = Content.Table.Value
+
             Tables.Records.get (
                 name,
                 table.Id,
@@ -341,14 +342,18 @@ type private TableStats() =
     inherit StaticContainer(NodeType.None)
 
     let table = Content.Table
-    let score_data = 
+
+    let score_data =
         match table with
-        | Some table -> 
-            Table.ratings (fun chart_id -> 
-                (ScoreDatabase.get chart_id Content.Scores).PersonalBests
-                |> Map.tryFind table.Info.RulesetId
-                |> Option.bind (fun bests -> PersonalBests.get_best_above 1.0f bests.Grade)) table
-            |> Array.ofSeq 
+        | Some table ->
+            Table.ratings
+                (fun chart_id ->
+                    (ScoreDatabase.get chart_id Content.Scores).PersonalBests
+                    |> Map.tryFind table.Info.RulesetId
+                    |> Option.bind (fun bests -> PersonalBests.get_best_above 1.0f bests.Grade)
+                )
+                table
+            |> Array.ofSeq
         | None -> [||]
 
     let top_scores =
@@ -410,7 +415,8 @@ type private TableStats() =
                 for i, (chart_id, grade, rating) in top_scores |> Array.indexed do
                     table_bests_items.Add(TableScore(i, chart_id, grade, rating, ruleset))
 
-                let swap = SwapContainer(table_breakdown, Position = Position.TrimTop(120.0f).Margin(40.0f))
+                let swap =
+                    SwapContainer(table_breakdown, Position = Position.TrimTop(120.0f).Margin(40.0f))
 
                 let button (label: string, cmp) =
                     StylishButton(
@@ -424,7 +430,11 @@ type private TableStats() =
                     )
 
                 this
-                |+ Text(table.Info.Name, Position = Position.SliceTop(120.0f).Margin(40.0f, 10.0f), Align = Alignment.LEFT)
+                |+ Text(
+                    table.Info.Name,
+                    Position = Position.SliceTop(120.0f).Margin(40.0f, 10.0f),
+                    Align = Alignment.LEFT
+                )
                 |+ Text(
                     %"stats.table.skill_level",
                     Position = Position.Row(10.0f, 40.0f).Margin(40.0f, 0.0f),

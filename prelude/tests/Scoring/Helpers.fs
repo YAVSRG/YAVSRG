@@ -5,7 +5,7 @@ open Prelude.Charts
 open Prelude.Gameplay
 
 module Helpers =
-    
+
     type ChartBuilder(keycount: int) =
         let items = ResizeArray<TimeItem<NoteRow>>()
 
@@ -15,7 +15,7 @@ module Helpers =
             items.Add({ Time = time; Data = row })
 
             this
-        
+
         member this.Hold(time: Time, until: Time) : ChartBuilder =
             let head = Array.zeroCreate keycount
             head.[0] <- NoteType.HOLDHEAD
@@ -27,20 +27,19 @@ module Helpers =
 
             this
 
-        member this.Build() : TimeArray<NoteRow> =
-            items.ToArray()
+        member this.Build() : TimeArray<NoteRow> = items.ToArray()
 
     type ReplayBuilder() =
         let liveplay = LiveReplayProvider(0.0f<ms>)
 
         let mutable state = 0us
-        
+
         member this.KeyDown(time: Time, k: int) : ReplayBuilder =
             state <- state |> Bitmask.set_key k
 
             liveplay.Add(time, state)
             this
-            
+
         member this.KeyUp(time: Time, k: int) : ReplayBuilder =
             state <- state |> Bitmask.unset_key k
             liveplay.Add(time, state)

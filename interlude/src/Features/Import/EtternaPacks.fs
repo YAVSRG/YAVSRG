@@ -143,7 +143,7 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
 
         base.Init parent
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -209,12 +209,14 @@ module EtternaPacks =
                         {|
                             data: ResizeArray<EtternaOnlinePack>
                         |}) ->
-                        let cards = d.data.ToArray() |> Array.map (fun p -> EtternaPackCard(p.id, p.attributes))
-                        sync (fun () -> 
+                        let cards =
+                            d.data.ToArray() |> Array.map (fun p -> EtternaPackCard(p.id, p.attributes))
+
+                        sync (fun () ->
                             flow |* cards
                             loading <- false
                         )
-                    | None -> 
+                    | None ->
                         sync (fun () ->
                             failed <- true
                             loading <- false
@@ -223,10 +225,11 @@ module EtternaPacks =
 
             this
             |+ (SearchBox(
-                Setting.simple "",
-                (fun (f: Filter) -> flow.Filter <- EtternaPackCard.Filter f),
-                Position = Position.SliceTop 60.0f
-            ) |+ LoadingIndicator.Border(fun () -> loading))
+                    Setting.simple "",
+                    (fun (f: Filter) -> flow.Filter <- EtternaPackCard.Filter f),
+                    Position = Position.SliceTop 60.0f
+                )
+                |+ LoadingIndicator.Border(fun () -> loading))
             |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to EtternaOnline"))
             |+ Text(%"imports.disclaimer.etterna", Position = Position.SliceBottom 55.0f)
             |* scroll

@@ -57,28 +57,37 @@ module PracticeState =
 
         let mean = sum / count * Gameplay.rate.Value
 
-        let hit_position_suggestion = options.HitPosition.Value - mean * options.ScrollSpeed.Value * 1.0f< / ms>
-        
+        let hit_position_suggestion =
+            options.HitPosition.Value - mean * options.ScrollSpeed.Value * 1.0f< / ms>
+
         let expected_pixels = (1080.0f - options.HitPosition.Value) * 0.6f
         let current_lead_time = expected_pixels / (options.ScrollSpeed.Value * 1.0f< / ms>)
         let desired_lead_time = current_lead_time - mean
         let scroll_speed_suggestion = expected_pixels / float32 desired_lead_time
-        
+
         let visual_offset_suggestion =
-            if options.AudioVolume.Value = 0.0 then options.VisualOffset.Value + mean / 1.0f<ms> else options.VisualOffset.Value
+            if options.AudioVolume.Value = 0.0 then
+                options.VisualOffset.Value + mean / 1.0f<ms>
+            else
+                options.VisualOffset.Value
 
         let local_audio_offset_suggestion =
             let local_audio_offset = LocalAudioSync.offset_setting state.SaveData
-            if options.AudioVolume.Value > 0.0 then local_audio_offset.Value - mean else local_audio_offset.Value
+
+            if options.AudioVolume.Value > 0.0 then
+                local_audio_offset.Value - mean
+            else
+                local_audio_offset.Value
 
         state.SyncSuggestions <-
-            Some {
-                LooksAboutRight = Time.abs mean < 5.0f<ms>
-                AudioOffset = local_audio_offset_suggestion
-                VisualOffset = visual_offset_suggestion
-                HitPosition = hit_position_suggestion
-                ScrollSpeed = scroll_speed_suggestion
-            }
+            Some
+                {
+                    LooksAboutRight = Time.abs mean < 5.0f<ms>
+                    AudioOffset = local_audio_offset_suggestion
+                    VisualOffset = visual_offset_suggestion
+                    HitPosition = hit_position_suggestion
+                    ScrollSpeed = scroll_speed_suggestion
+                }
 
     let accept_suggestion (state: PracticeState) =
         match state.SyncSuggestions with
@@ -90,5 +99,5 @@ module PracticeState =
         | SyncMode.HIT_POSITION -> (options.HitPosition |> Setting.roundf 0).Set suggestions.HitPosition
         | SyncMode.SCROLL_SPEED -> (options.ScrollSpeed |> Setting.roundf 2).Set suggestions.ScrollSpeed
         | SyncMode.VISUAL_OFFSET -> (options.VisualOffset |> Setting.roundf 0).Set suggestions.VisualOffset
-        
+
         state.SyncSuggestions <- None

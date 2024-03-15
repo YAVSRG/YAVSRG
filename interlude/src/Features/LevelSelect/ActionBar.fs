@@ -32,7 +32,7 @@ module Comments =
                         true,
                         Position = Position.Margin(20.0f, 10.0f),
                         Clickable = false) with
-            override this.OnDeselected (by_mouse: bool) =
+            override this.OnDeselected(by_mouse: bool) =
                 base.OnDeselected by_mouse
 
                 match Chart.SAVE_DATA with
@@ -101,8 +101,8 @@ type private ActionButton(icon, action, active) =
         )
 
         base.Init parent
-        
-    override this.OnFocus (by_mouse: bool) =
+
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -130,12 +130,13 @@ type ActionBar(random_chart) =
         |+ ActionButton(
             Icons.TARGET,
             (fun () ->
-                Chart.when_loaded <| fun info ->
-                Screen.change_new
-                    (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
-                    Screen.Type.Practice
-                    Transitions.Flags.Default
-                |> ignore
+                Chart.when_loaded
+                <| fun info ->
+                    Screen.change_new
+                        (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
+                        Screen.Type.Practice
+                        Transitions.Flags.Default
+                    |> ignore
             ),
             (K false),
             Hotkey = "practice_mode",

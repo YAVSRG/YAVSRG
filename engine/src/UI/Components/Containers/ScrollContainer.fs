@@ -10,7 +10,7 @@ open Percyqaz.Flux.Graphics
 /// Also automatically scrolls to show the selected item when navigating
 [<Sealed>]
 type ScrollContainer<'T when 'T :> Widget and 'T :> DynamicSize>(child: 'T) =
-    inherit StaticWidget(NodeType.Container(K (Some child)))
+    inherit StaticWidget(NodeType.Container(K(Some child)))
 
     static let SENSITIVITY = 100.0f
 
@@ -39,14 +39,13 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> DynamicSize>(child: 'T) =
         if this.Focused && scroll_to_child_next_frame then
             scroll_to_child_next_frame <- false
 
-            match Selection.get_focused_element() with
+            match Selection.get_focused_element () with
             | None -> ()
             | Some child ->
 
 
             let selected_bounds =
-                (child :?> Widget)
-                    .Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
+                (child :?> Widget).Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
 
             if selected_bounds.Bottom > this.Bounds.Bottom then
                 scroll_amt <- scroll_amt + selected_bounds.Bottom - this.Bounds.Bottom + Style.PADDING
@@ -101,8 +100,9 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> DynamicSize>(child: 'T) =
                 .Translate(0.0f, -scroll_pos.Value)
                 .Margin(this.Margin)
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
+
         if Selection.get_focused_element () <> Some child then
             scroll_to_child_next_frame <- true
 

@@ -30,8 +30,12 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) as this 
                     | Some folder ->
                         Menu.Back()
                         on_create (new_name.Value, Folder folder)
-                    | None -> 
-                        Notifications.action_feedback (Icons.X, "Name is taken", "A collection already exists with that name")
+                    | None ->
+                        Notifications.action_feedback (
+                            Icons.X,
+                            "Name is taken",
+                            "A collection already exists with that name"
+                        )
                 )
             )
                 .Pos(400.0f)
@@ -67,8 +71,12 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) as thi
                     | Some playlist ->
                         Menu.Back()
                         on_create (new_name.Value, Playlist playlist)
-                    | None -> 
-                        Notifications.action_feedback (Icons.X, "Name is taken", "A collection already exists with that name")
+                    | None ->
+                        Notifications.action_feedback (
+                            Icons.X,
+                            "Name is taken",
+                            "A collection already exists with that name"
+                        )
                 )
             )
                 .Pos(400.0f)
@@ -103,7 +111,7 @@ type EditFolderPage(name: string, folder: Folder) as this =
                         [ name ] %> "misc.confirmdelete",
                         fun () ->
                             if Content.Collections.Delete name then
-                                CollectionActions.collection_modified_ev.Trigger ()
+                                CollectionActions.collection_modified_ev.Trigger()
 
                                 // todo: unselect collection when deleted
 
@@ -123,7 +131,7 @@ type EditFolderPage(name: string, folder: Folder) as this =
         if new_name.Value <> name && new_name.Value.Length > 1 then
             if Content.Collections.RenameCollection(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed collection '%s' to '%s'" name new_name.Value)
-                CollectionActions.collection_modified_ev.Trigger ()
+                CollectionActions.collection_modified_ev.Trigger()
             else
                 Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"
@@ -146,7 +154,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) as this =
                         [ name ] %> "misc.confirmdelete",
                         fun () ->
                             if Content.Collections.Delete name then
-                                CollectionActions.collection_modified_ev.Trigger ()
+                                CollectionActions.collection_modified_ev.Trigger()
 
                                 // todo: unselect collection when deleted
 
@@ -166,7 +174,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) as this =
         if new_name.Value <> name && new_name.Value.Length > 0 then
             if Content.Collections.RenamePlaylist(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
-                CollectionActions.collection_modified_ev.Trigger ()
+                CollectionActions.collection_modified_ev.Trigger()
             else
                 Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
                 Logging.Debug "Rename failed, maybe that name already exists?"
@@ -176,7 +184,9 @@ type private CollectionButton(icon, name, action) as this =
         StaticContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                if not this.Disabled then action ()
+
+                if not this.Disabled then
+                    action ()
             )
         )
 
@@ -187,21 +197,25 @@ type private CollectionButton(icon, name, action) as this =
         |+ Text(
             K(sprintf "%s %s" icon name),
             Align = Alignment.LEFT,
-            Color = (if this.Disabled then K Colors.text_greyout else K Colors.text),
-            Position = Position.Margin (20.0f, 15.0f)
+            Color =
+                (if this.Disabled then
+                     K Colors.text_greyout
+                 else
+                     K Colors.text),
+            Position = Position.Margin(20.0f, 15.0f)
         )
-        |> fun x -> if not this.Disabled then x.Add <| Clickable.Focus this
+        |> fun x ->
+            if not this.Disabled then
+                x.Add <| Clickable.Focus this
 
         base.Init parent
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
     override this.Draw() =
-        let color =
-            if this.Focused then Colors.pink_accent
-            else Colors.shadow_1
+        let color = if this.Focused then Colors.pink_accent else Colors.shadow_1
         let color = if this.Disabled then color.O3 else color
 
         Draw.rect this.Bounds color.O3
@@ -209,32 +223,56 @@ type private CollectionButton(icon, name, action) as this =
 
         base.Draw()
 
-type SelectCollectionPage(on_select: (string * Collection) -> unit, is_disabled: (string * Collection) -> bool, select_on_create: bool) as this =
+type SelectCollectionPage
+    (on_select: (string * Collection) -> unit, is_disabled: (string * Collection) -> bool, select_on_create: bool) as this
+    =
     inherit Page()
 
-    let grid = GridFlowContainer<CollectionButton>(PRETTYHEIGHT + 20.0f, 2, Spacing = (20.0f, 20.0f))
+    let grid =
+        GridFlowContainer<CollectionButton>(PRETTYHEIGHT + 20.0f, 2, Spacing = (20.0f, 20.0f))
 
     let refresh () =
         grid.Clear()
 
         for name, collection in Content.Collections.List do
             match collection with
-            | Folder f -> 
-                grid.Add(CollectionButton(f.Icon.Value, name, (fun () -> on_select (name, collection)), Disabled = is_disabled (name, collection)))
+            | Folder f ->
+                grid.Add(
+                    CollectionButton(
+                        f.Icon.Value,
+                        name,
+                        (fun () -> on_select (name, collection)),
+                        Disabled = is_disabled (name, collection)
+                    )
+                )
             | Playlist p ->
-                grid.Add(CollectionButton(p.Icon.Value, name, (fun () -> on_select (name, collection)), Disabled = is_disabled (name, collection)))
+                grid.Add(
+                    CollectionButton(
+                        p.Icon.Value,
+                        name,
+                        (fun () -> on_select (name, collection)),
+                        Disabled = is_disabled (name, collection)
+                    )
+                )
 
         if grid.Focused then
             grid.Focus false
 
     do
         refresh ()
+
         this.Content(
             NavigationContainer.Column<Widget>()
-            |+ PageButton("collections.create_folder", (fun () -> CreateFolderPage(if select_on_create then on_select else ignore).Show()))
+            |+ PageButton(
+                "collections.create_folder",
+                (fun () -> CreateFolderPage(if select_on_create then on_select else ignore).Show())
+            )
                 .Pos(150.0f)
                 .Tooltip(Tooltip.Info("collections.create_folder"))
-            |+ PageButton("collections.create_playlist", (fun () -> CreatePlaylistPage(if select_on_create then on_select else ignore).Show()))
+            |+ PageButton(
+                "collections.create_playlist",
+                (fun () -> CreatePlaylistPage(if select_on_create then on_select else ignore).Show())
+            )
                 .Pos(220.0f)
                 .Tooltip(Tooltip.Info("collections.create_playlist"))
             |+ ScrollContainer(grid, Position = Position.Margin(100.0f, 100.0f).TrimTop(280.0f))
@@ -245,25 +283,25 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit, is_disabled:
     override this.OnReturnTo() = refresh ()
 
 type ManageCollectionsPage() =
-    inherit SelectCollectionPage(
-        fun (name, collection) ->
-            match collection with
-            | Folder f -> EditFolderPage(name, f).Show()
-            | Playlist p -> EditPlaylistPage(name, p).Show()
-        ,
-        K false,
-        false
-    )
+    inherit
+        SelectCollectionPage(
+            fun (name, collection) ->
+                match collection with
+                | Folder f -> EditFolderPage(name, f).Show()
+                | Playlist p -> EditPlaylistPage(name, p).Show()
+            , K false
+            , false
+        )
 
 type AddToCollectionPage(cc: CachedChart) =
-    inherit SelectCollectionPage(
-        fun (name, collection) ->
-            if CollectionActions.add_to (name, collection, cc) then
-                Menu.Back()
-        ,
-        fun (_, collection) ->
-            match collection with
-            | Folder f -> f.Contains cc
-            | Playlist _ -> false
-        , true
-    )
+    inherit
+        SelectCollectionPage(
+            fun (name, collection) ->
+                if CollectionActions.add_to (name, collection, cc) then
+                    Menu.Back()
+            , fun (_, collection) ->
+                match collection with
+                | Folder f -> f.Contains cc
+                | Playlist _ -> false
+            , true
+        )

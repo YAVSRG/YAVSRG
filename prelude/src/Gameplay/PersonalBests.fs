@@ -22,6 +22,7 @@ type ImprovementFlags =
             Accuracy = Improvement.None
             Grade = Improvement.None
         }
+
     static member New =
         {
             Lamp = Improvement.New

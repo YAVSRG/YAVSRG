@@ -485,6 +485,7 @@ module Options =
             + "> Help! I have files in here, but they don't show up ingame?\n"
             + "Make sure they are .yav files, if so go to Options > Debug > Rebuild cache and let that run, it will re-add anything that's missing."
         )
+
         HUDOptions.init_startup ()
 
     let deinit () =

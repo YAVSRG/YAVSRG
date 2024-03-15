@@ -24,22 +24,28 @@ let launch (instance: int) =
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
     let crash_splash =
-        Utils.splash_message_picker "CrashSplashes.txt"
-        >> (fun s -> Logging.Critical s)
+        Utils.splash_message_picker "CrashSplashes.txt" >> (fun s -> Logging.Critical s)
 
     let successful_startup =
         try
             Startup.init_startup instance
             true
         with err ->
-            Logging.Critical("Something went wrong when loading some of the game config/data, preventing the game from opening", err)
+            Logging.Critical(
+                "Something went wrong when loading some of the game config/data, preventing the game from opening",
+                err
+            )
+
             crash_splash ()
             Console.ReadLine() |> ignore
             false
 
     if successful_startup then
 
-        Window.after_init.Add(fun () -> AppDomain.CurrentDomain.ProcessExit.Add(fun args -> Startup.deinit true crash_splash))
+        Window.after_init.Add(fun () ->
+            AppDomain.CurrentDomain.ProcessExit.Add(fun args -> Startup.deinit true crash_splash)
+        )
+
         Window.on_file_drop.Add(Import.Import.handle_file_drop)
 
         use icon_stream = Utils.get_resource_stream ("icon.png")
@@ -81,8 +87,7 @@ let main argv =
             | Some success -> printfn "%s" success
             | None -> printfn "Error: Connection timed out!"
 
-    else if m.WaitOne(TimeSpan.Zero, true)
-    then
+    else if m.WaitOne(TimeSpan.Zero, true) then
         launch (0)
         m.ReleaseMutex()
 

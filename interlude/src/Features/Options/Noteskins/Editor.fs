@@ -18,7 +18,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
 
     let preview = NoteskinPreview(0.35f, true)
 
-    let grid = 
+    let grid =
         GridFlowContainer<TextureCard>(
             150.0f,
             6,
@@ -26,15 +26,20 @@ type EditNoteskinPage(from_hotkey: bool) as this =
             Spacing = (15.0f, 15.0f),
             Position = Position.Box(0.0f, 0.0f, 100.0f, 680.0f, 975.0f, 315.0f)
         )
-    let refresh_texture_grid() =
+
+    let refresh_texture_grid () =
         grid.Clear()
-        for texture in Content.Noteskin.RequiredTextures |> Seq.except ["receptorlighting"; "stageleft"; "stageright"] do
+
+        for texture in
+            Content.Noteskin.RequiredTextures
+            |> Seq.except [ "receptorlighting"; "stageleft"; "stageright" ] do
             grid |* TextureCard(texture, (fun () -> TextureEditPage(texture).Show()))
 
     do
-        refresh_texture_grid()
+        refresh_texture_grid ()
         let pos = menu_pos 2.0f
-        column()
+
+        column ()
         |+ PageTextEntry("noteskins.edit.noteskinname", name)
             .Pos(pos.Step 1.5f, PRETTYWIDTH, PRETTYHEIGHT)
         |+ PageButton(
@@ -117,7 +122,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnReturnTo() =
-        refresh_texture_grid()
+        refresh_texture_grid ()
         base.OnReturnTo()
 
     override this.OnClose() =

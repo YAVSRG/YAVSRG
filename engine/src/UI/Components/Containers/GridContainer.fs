@@ -51,13 +51,15 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     member private this.WhoIsFocused: int option =
         Seq.tryFindIndex (fun (c: GridFlowItem<'T>) -> c.Widget.Focused) children
 
-    member private this.WhoShouldFocus : Widget option =
-        if children.Count = 0 then None else
+    member private this.WhoShouldFocus: Widget option =
+        if children.Count = 0 then
+            None
+        else
 
-        if last_selected >= children.Count then
-            last_selected <- 0
+            if last_selected >= children.Count then
+                last_selected <- 0
 
-        Some children.[last_selected].Widget
+            Some children.[last_selected].Widget
 
     override this.Focusable = if children.Count = 0 then false else base.Focusable
 
@@ -94,7 +96,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
 
         if height <> content_height then
             content_height <- height
-            size_change()
+            size_change ()
 
     member private this.Up() =
         match this.WhoIsFocused with
@@ -336,18 +338,20 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
         if this.Initialised then
             child.Init this
             refresh <- true
-    
+
     static member (|+)(parent: #GridFlowContainer<'T>, child: 'T) =
         parent.Add child
         parent
+
     static member (|+)(parent: #GridFlowContainer<'T>, children: 'T seq) =
         Seq.iter parent.Add children
         parent
-    
+
     static member (|*)(parent: #GridFlowContainer<'T>, child: 'T) = parent.Add child
     static member (|*)(parent: #GridFlowContainer<'T>, children: 'T seq) = Seq.iter parent.Add children
-    
+
     interface DynamicSize with
         member this.Size = content_height
+
         member this.OnSizeChanged
             with set v = size_change <- v

@@ -237,6 +237,7 @@ type private PlayerList() =
 
     let button (label: string, cmp) =
         let button = Button(label, (fun () -> swap.Current <- cmp))
+
         FrameContainer(
             NodeType.Container(fun () -> Some button),
             Border = K Color.Transparent,
@@ -290,7 +291,10 @@ type Profile() as this =
                 else
                     this.Offline()
             , fun data ->
-                let color_picker = SwapContainer(Position = Position.TrimRight(40.0f).TrimTop(70.0f).SliceRight(300.0f).SliceTop(500.0f))
+                let color_picker =
+                    SwapContainer(
+                        Position = Position.TrimRight(40.0f).TrimTop(70.0f).SliceRight(300.0f).SliceTop(500.0f)
+                    )
 
                 let has_colors = data.Badges |> Seq.exists (fun b -> not (List.isEmpty b.Colors))
 
@@ -407,12 +411,13 @@ type Profile() as this =
                                 )
 
                             let dropdown =
-                                Dropdown { 
-                                    Items = badges |> Seq.map (fun (label, color) -> color, label)
-                                    ColorFunc = fun c -> Color.FromArgb c, Colors.shadow_2
-                                    OnClose = fun () -> color_picker.Current <- (Dummy())
-                                    Setting = Setting.make save_color (fun () -> data.Color)
-                                }
+                                Dropdown
+                                    {
+                                        Items = badges |> Seq.map (fun (label, color) -> color, label)
+                                        ColorFunc = fun c -> Color.FromArgb c, Colors.shadow_2
+                                        OnClose = fun () -> color_picker.Current <- (Dummy())
+                                        Setting = Setting.make save_color (fun () -> data.Color)
+                                    }
 
                             color_picker.Current <- dropdown
                             dropdown.Focus false

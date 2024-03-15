@@ -20,11 +20,10 @@ module private Dropdown =
             )
 
         do
-            this
-            |+ Clickable.Focus(this, Floating = true)
+            this |+ Clickable.Focus(this, Floating = true)
             |* Text(label, Align = Alignment.LEFT, Position = Position.Margin(10.0f, 5.0f), Color = K color)
 
-        override this.OnFocus (by_mouse: bool) =
+        override this.OnFocus(by_mouse: bool) =
             base.OnFocus by_mouse
             Style.hover.Play()
 
@@ -34,7 +33,7 @@ module private Dropdown =
 
             base.Draw()
 
-type DropdownOptions<'T when 'T : equality> =
+type DropdownOptions<'T when 'T: equality> =
     {
         Items: ('T * string) seq
         Setting: Setting<'T>
@@ -42,8 +41,9 @@ type DropdownOptions<'T when 'T : equality> =
         OnClose: unit -> unit
     }
 
-type Dropdown<'T when 'T : equality>(options: DropdownOptions<'T>) as this =
-    inherit FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
+type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
+    inherit
+        FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 
@@ -62,12 +62,23 @@ type Dropdown<'T when 'T : equality>(options: DropdownOptions<'T>) as this =
             Input.finish_frame_events ()
 
     override this.Init(parent: Widget) =
-        let mutable what_to_focus : Widget = this
+        let mutable what_to_focus: Widget = this
+
         flow
         |+ seq {
             for (value, label) in options.Items do
-                let item = Dropdown.Item(label, options.ColorFunc value, fun () -> options.Setting.Set value; this.Close())
-                if value = options.Setting.Value then what_to_focus <- item
+                let item =
+                    Dropdown.Item(
+                        label,
+                        options.ColorFunc value,
+                        fun () ->
+                            options.Setting.Set value
+                            this.Close()
+                    )
+
+                if value = options.Setting.Value then
+                    what_to_focus <- item
+
                 yield item
         }
         |> ScrollContainer
@@ -91,7 +102,8 @@ type DropdownMenuOptions =
     }
 
 type DropdownMenu(options: DropdownMenuOptions) as this =
-    inherit FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
+    inherit
+        FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 
@@ -113,7 +125,14 @@ type DropdownMenu(options: DropdownMenuOptions) as this =
         flow
         |+ seq {
             for (action, label) in options.Items do
-                yield Dropdown.Item(label, Colors.text, fun () -> action(); this.Close())
+                yield
+                    Dropdown.Item(
+                        label,
+                        Colors.text,
+                        fun () ->
+                            action ()
+                            this.Close()
+                    )
         }
         |> ScrollContainer
         |> this.Add

@@ -7,7 +7,7 @@ open Prelude.Common
 open Prelude.Content.Noteskins
 
 module Helpers =
-    
+
     type InMemoryNoteskinBuilder(config: NoteskinConfig) =
         let memory_stream = new MemoryStream()
         let zip_archive = new ZipArchive(memory_stream, ZipArchiveMode.Create, true)
@@ -22,7 +22,7 @@ module Helpers =
             use stream = entry.Open()
             JSON.ToStream stream data
             this
-        
+
         member this.AddImageFile(path: string, image: Bitmap) : InMemoryNoteskinBuilder =
             let entry = zip_archive.CreateEntry(path)
             use stream = entry.Open()

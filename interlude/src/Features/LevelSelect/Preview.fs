@@ -19,7 +19,9 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
 
     // chord density is notes per second but n simultaneous notes count for 1 instead of n
     let samples =
-        int ((info.WithMods.LastNote - info.WithMods.FirstNote) / 1000.0f) |> max 10 |> min 400
+        int ((info.WithMods.LastNote - info.WithMods.FirstNote) / 1000.0f)
+        |> max 10
+        |> min 400
 
     let note_density, chord_density = Analysis.nps_cps samples info.WithMods
 
@@ -124,7 +126,8 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
             change_rate (-0.05f)
         elif (%%"downrate").Tapped() then
             change_rate (-0.1f)
-        elif (%%"screenshot").Tapped() then Toolbar.take_screenshot()
+        elif (%%"screenshot").Tapped() then
+            Toolbar.take_screenshot ()
 
     override this.Close() =
         if dragging then

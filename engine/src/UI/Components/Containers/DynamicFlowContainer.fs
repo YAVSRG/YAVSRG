@@ -29,13 +29,15 @@ module DynamicFlowContainer =
         member private this.WhoIsFocused: int option =
             Seq.tryFindIndex (fun c -> c.Widget.Focused) children
 
-        member private this.WhoShouldFocus : ISelection option =
-            if children.Count = 0 then None else
+        member private this.WhoShouldFocus: ISelection option =
+            if children.Count = 0 then
+                None
+            else
 
-            if last_selected >= children.Count then
-                last_selected <- 0
+                if last_selected >= children.Count then
+                    last_selected <- 0
 
-            Some children.[last_selected].Widget
+                Some children.[last_selected].Widget
 
         override this.Focusable = if children.Count = 0 then false else base.Focusable
 
@@ -72,8 +74,9 @@ module DynamicFlowContainer =
                 children.[i].Widget.Select false
             | None -> ()
 
-        override this.OnUnfocus (by_mouse: bool) =
+        override this.OnUnfocus(by_mouse: bool) =
             base.OnUnfocus by_mouse
+
             match this.WhoIsFocused with
             | Some i -> last_selected <- i
             | None -> ()
@@ -120,7 +123,9 @@ module DynamicFlowContainer =
                 if refresh_visible then
                     for c in children do
                         c.Visible <- filter c.Widget
+
                     refresh_visible <- false
+
                 if refresh then
                     refresh <- false
                     this.FlowContent children
@@ -182,6 +187,7 @@ module DynamicFlowContainer =
         static member (|+)(parent: #Base<'T>, child: 'T) =
             parent.Add child
             parent
+
         static member (|+)(parent: #Base<'T>, children: 'T seq) =
             Seq.iter parent.Add children
             parent
@@ -207,9 +213,9 @@ module DynamicFlowContainer =
                     b <- t + size
                     t <- t + size + this.Spacing
 
-            if b <> content_height then 
+            if b <> content_height then
                 content_height <- b
-                size_change()
+                size_change ()
 
         override this.Navigate() =
             if (%%"up").Tapped() then
@@ -221,18 +227,18 @@ module DynamicFlowContainer =
             if (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
-        override this.Init(parent) =
-            base.Init parent
+        override this.Init(parent) = base.Init parent
 
         interface DynamicSize with
             member this.Size = content_height
+
             member this.OnSizeChanged
                 with set v = size_change <- v
 
     [<Sealed>]
     type LeftToRight<'T when 'T :> Widget and 'T :> DynamicSize>() =
         inherit Base<'T>()
-        
+
         let mutable size_change = ignore
         let mutable content_width = 0.0f
 
@@ -247,9 +253,9 @@ module DynamicFlowContainer =
                     r <- l + size
                     l <- l + size + this.Spacing
 
-            if r <> content_width then 
+            if r <> content_width then
                 content_width <- r
-                size_change()
+                size_change ()
 
         override this.Navigate() =
             if (%%"left").Tapped() then
@@ -263,6 +269,7 @@ module DynamicFlowContainer =
 
         interface DynamicSize with
             member this.Size = content_width
+
             member this.OnSizeChanged
                 with set v = size_change <- v
 
@@ -294,7 +301,7 @@ module DynamicFlowContainer =
 
                 if l <> content_width then
                     content_width <- r
-                    size_change()
+                    size_change ()
 
         override this.Navigate() =
             if (%%"left").Tapped() then
@@ -305,8 +312,9 @@ module DynamicFlowContainer =
 
             if (%%"select").Tapped() then
                 this.SelectFocusedChild()
-                
+
         interface DynamicSize with
             member this.Size = content_width
+
             member this.OnSizeChanged
                 with set v = size_change <- v

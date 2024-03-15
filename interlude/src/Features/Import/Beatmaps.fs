@@ -130,7 +130,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
     //    ,
     //    Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -279,12 +279,17 @@ type private SortingDropdown
         | Some _ -> this.Dropdown <- None
         | _ ->
             let d =
-                Dropdown { 
-                    Items = options
-                    ColorFunc = K Colors.text
-                    OnClose = fun () -> this.Dropdown <- None
-                    Setting = setting |> Setting.trigger (fun v -> display_value <- Seq.find (fun (id, _) -> id = v) options |> snd)
-                }
+                Dropdown
+                    {
+                        Items = options
+                        ColorFunc = K Colors.text
+                        OnClose = fun () -> this.Dropdown <- None
+                        Setting =
+                            setting
+                            |> Setting.trigger (fun v ->
+                                display_value <- Seq.find (fun (id, _) -> id = v) options |> snd
+                            )
+                    }
 
             d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
             d.Init this
@@ -437,13 +442,14 @@ module Beatmaps =
 
             this
             |+ (SearchBox(
-                Setting.simple "",
-                (fun (f: Filter) ->
-                    filter <- f
-                    sync (fun () -> begin_search filter)
-                ),
-                Position = Position.SliceTop 60.0f
-            ) |+ LoadingIndicator.Border(fun () -> loading))
+                    Setting.simple "",
+                    (fun (f: Filter) ->
+                        filter <- f
+                        sync (fun () -> begin_search filter)
+                    ),
+                    Position = Position.SliceTop 60.0f
+                )
+                |+ LoadingIndicator.Border(fun () -> loading))
             |+ Text(%"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
             |+ scroll
             |+ (let r =

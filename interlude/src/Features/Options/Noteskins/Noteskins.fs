@@ -80,19 +80,21 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
         )
         |+ Text(
             K(
-                let has_other_versions = 
-                    Noteskins.list()
+                let has_other_versions =
+                    Noteskins.list ()
                     |> Seq.map (snd >> _.Config)
                     |> Seq.tryFind (fun cfg -> cfg.Name = ns.Config.Name && cfg.Version <> ns.Config.Version)
                     |> Option.isSome
 
-                (
-                    if has_other_versions then
-                        sprintf "%s, By %s" ns.Config.Version ns.Config.Author
-                    else 
-                        sprintf "By %s" ns.Config.Author
+                (if has_other_versions then
+                     sprintf "%s, By %s" ns.Config.Version ns.Config.Author
+                 else
+                     sprintf "By %s" ns.Config.Author)
+                + (
+                    match ns.Config.Editor with
+                    | Some e -> ", Edit by " + e
+                    | None -> ""
                 )
-                + (match ns.Config.Editor with Some e -> ", Edit by " + e | None -> "")
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
@@ -106,7 +108,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
         base.Update(elapsed_ms, moved)
         preview_fade.Update elapsed_ms
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -169,12 +171,14 @@ type NoteskinsPage() as this =
     do
         refresh ()
 
-        let left_side = 
+        let left_side =
             NavigationContainer.Column<Widget>()
             |+ PageButton("noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
                 .Tooltip(Tooltip.Info("noteskins.edit"))
                 .Pos(760.0f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT * 1.2f)
-            |+ PageButton("noteskins.edit.export", (fun () ->
+            |+ PageButton(
+                "noteskins.edit.export",
+                (fun () ->
                     if not (Noteskins.export_current ()) then
                         Notifications.error (
                             %"notification.export_noteskin_failure.title",
@@ -200,29 +204,30 @@ type NoteskinsPage() as this =
             |+ preview
 
         let right_side =
-            NavigationContainer.Column<Widget>(Position = { Position.Default with Left = 0.35f %+ 50.0f }.Margin(100.0f, 0.0f).TrimTop(150.0f).TrimBottom(50.0f))
-            |+ (
-                GridFlowContainer(PRETTYHEIGHT, 2, WrapNavigation = false, Position = Position.SliceTop(PRETTYHEIGHT))
+            NavigationContainer.Column<Widget>(
+                Position =
+                    { Position.Default with
+                        Left = 0.35f %+ 50.0f
+                    }
+                        .Margin(100.0f, 0.0f)
+                        .TrimTop(150.0f)
+                        .TrimBottom(50.0f)
+            )
+            |+ (GridFlowContainer(PRETTYHEIGHT, 2, WrapNavigation = false, Position = Position.SliceTop(PRETTYHEIGHT))
                 |+ PageButton(
                     "noteskins.get_more",
                     (fun () ->
                         Menu.Exit()
+
                         if Screen.change Screen.Type.Import Transitions.Flags.Default then
                             Interlude.Features.Import.ImportScreen.switch_to_noteskins ()
                     )
                 )
                 |+ PageButton("noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
-                    .Tooltip(Tooltip.Info("noteskins.open_folder"))
-            )
-            |+ ScrollContainer(
-                grid,
-                Position = Position.TrimTop(PRETTYHEIGHT * 1.5f)
-            )
+                    .Tooltip(Tooltip.Info("noteskins.open_folder")))
+            |+ ScrollContainer(grid, Position = Position.TrimTop(PRETTYHEIGHT * 1.5f))
 
-        row()
-        |+ left_side
-        |+ right_side
-        |> this.Content
+        row () |+ left_side |+ right_side |> this.Content
 
     override this.Title = %"noteskins.name"
 

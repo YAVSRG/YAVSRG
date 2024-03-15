@@ -58,6 +58,7 @@ module UserCommands =
                         do! reply "No matches found."
                     elif matches.Length = 1 then
                         let song = snd matches.[0]
+
                         let embed =
                             EmbedBuilder(Title = song.Title)
                                 .AddField(
@@ -199,10 +200,7 @@ module UserCommands =
                         let recent_scores = Score.get_user_recent user_id
 
                         let embed =
-                            let color =
-                                user_info.Color
-                                |> Drawing.Color.FromArgb
-                                |> Color.op_Explicit
+                            let color = user_info.Color |> Drawing.Color.FromArgb |> Color.op_Explicit
 
                             let embed =
                                 EmbedBuilder(

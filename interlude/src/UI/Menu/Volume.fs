@@ -17,7 +17,7 @@ type Volume() =
 
         fade.Update elapsed_ms
         slider.Update elapsed_ms
-        
+
         if (%%"volume_up").Pressed() then
             fade.Target <- 1.0f
             Setting.app ((+) (0.0003 * elapsed_ms)) options.AudioVolume

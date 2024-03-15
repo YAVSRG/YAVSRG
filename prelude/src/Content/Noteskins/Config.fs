@@ -50,7 +50,9 @@ type HoldExplosionConfig =
         Duration: float
         ExpandAmount: float32
     }
-    member this.UseBuiltInAnimation = not this.UseReleaseExplosion || this.ReleaseUseBuiltInAnimation
+    member this.UseBuiltInAnimation =
+        not this.UseReleaseExplosion || this.ReleaseUseBuiltInAnimation
+
     static member Default =
         {
             Scale = 1.0f
@@ -134,7 +136,7 @@ type NoteskinConfig =
         ReceptorStyle: ReceptorStyle
 
         LinearSampling: bool
-        // HUD: HUD
+    // HUD: HUD
     }
     static member Default =
         {
@@ -185,7 +187,7 @@ type NoteskinConfig =
                 |]
             ReceptorStyle = ReceptorStyle.Rotate
             LinearSampling = true
-            // HUD = HUD.Default
+        // HUD = HUD.Default
         }
 
     member this.Validate =
@@ -230,7 +232,7 @@ type NoteskinTextureRules =
         MustBeSquare: NoteskinConfig -> bool
         MaxGridSize: NoteskinConfig -> int * int
     }
-    member this.Evaluate (config: NoteskinConfig) : TextureRules =
+    member this.Evaluate(config: NoteskinConfig) : TextureRules =
         {
             IsRequired = this.IsRequired config
             MustBeSquare = this.MustBeSquare config
@@ -243,39 +245,56 @@ module NoteskinTextureRules =
         {
             IsRequired = K true
             MustBeSquare = K true
-            MaxGridSize = K (16, 32)
+            MaxGridSize = K(16, 32)
         }
-        
-    let TEXTURES : Map<string, NoteskinTextureRules> =
-        Map.ofList [
-            "note", DEFAULT
-            "holdhead", DEFAULT
-            "holdbody", DEFAULT
-            "holdtail", { DEFAULT with IsRequired = fun config -> config.UseHoldTailTexture }
-            "receptor", {
-                IsRequired = K true
-                MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Rotate
-                MaxGridSize = K (2, 32)
-            }
-            "noteexplosion", { DEFAULT with IsRequired = fun config -> config.UseExplosions }
-            "holdexplosion", { DEFAULT with IsRequired = fun config -> config.UseExplosions }
-            "releaseexplosion", { DEFAULT with IsRequired = fun config -> config.UseExplosions && config.HoldExplosionSettings.UseReleaseExplosion }
-            "receptorlighting", {
-                IsRequired = fun config -> config.EnableColumnLight
-                MustBeSquare = K false
-                MaxGridSize = K (10, 32)
-            }
-            "stageleft", {
-                IsRequired = fun config -> config.EnableStageTextures
-                MustBeSquare = K false
-                MaxGridSize = K (1, 1)
-            }
-            "stageright", {
-                IsRequired = fun config -> config.EnableStageTextures
-                MustBeSquare = K false
-                MaxGridSize = K (1, 1)
-            }
-        ]
+
+    let TEXTURES: Map<string, NoteskinTextureRules> =
+        Map.ofList
+            [
+                "note", DEFAULT
+                "holdhead", DEFAULT
+                "holdbody", DEFAULT
+                "holdtail",
+                { DEFAULT with
+                    IsRequired = fun config -> config.UseHoldTailTexture
+                }
+                "receptor",
+                {
+                    IsRequired = K true
+                    MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Rotate
+                    MaxGridSize = K(2, 32)
+                }
+                "noteexplosion",
+                { DEFAULT with
+                    IsRequired = fun config -> config.UseExplosions
+                }
+                "holdexplosion",
+                { DEFAULT with
+                    IsRequired = fun config -> config.UseExplosions
+                }
+                "releaseexplosion",
+                { DEFAULT with
+                    IsRequired = fun config -> config.UseExplosions && config.HoldExplosionSettings.UseReleaseExplosion
+                }
+                "receptorlighting",
+                {
+                    IsRequired = fun config -> config.EnableColumnLight
+                    MustBeSquare = K false
+                    MaxGridSize = K(10, 32)
+                }
+                "stageleft",
+                {
+                    IsRequired = fun config -> config.EnableStageTextures
+                    MustBeSquare = K false
+                    MaxGridSize = K(1, 1)
+                }
+                "stageright",
+                {
+                    IsRequired = fun config -> config.EnableStageTextures
+                    MustBeSquare = K false
+                    MaxGridSize = K(1, 1)
+                }
+            ]
 
     let get (config: NoteskinConfig) (name: string) = TEXTURES.[name].Evaluate config
 

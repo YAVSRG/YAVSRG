@@ -60,7 +60,9 @@ module Themes =
                         DisposeImageAfter = true
                     }
             | TextureError reason ->
-                Logging.Error(sprintf "Problem with theme texture '%s': %s\nIt will appear as a white square ingame." id reason)
+                Logging.Error(
+                    sprintf "Problem with theme texture '%s': %s\nIt will appear as a white square ingame." id reason
+                )
                 // todo: fall back to default theme textures like it used to
                 missing_textures.Add id
             | TextureNotRequired -> failwith "currently impossible as all theme textures are required"
@@ -106,34 +108,39 @@ module Themes =
         Style.notify_info <- Sounds.get "notify-info"
         Style.notify_system <- Sounds.get "notify-system"
         Style.notify_task <- Sounds.get "notify-task"
-    
+
     let init_window () =
         load ()
-    
+
         if not (loaded.ContainsKey _selected_id.Value) then
             Logging.Warn("Theme '" + _selected_id.Value + "' not found, switching to default")
             _selected_id.Value <- DEFAULT_ID
+
         current <- loaded.[_selected_id.Value]
         current_config <- current.Config
-        reload_current()
+        reload_current ()
         initialised <- true
 
     let selected_id =
-        Setting.make (fun new_id ->
-            if initialised then
-                let old_id = _selected_id.Value
-                if not (loaded.ContainsKey new_id) then
-                    Logging.Warn("Theme '" + new_id + "' not found, switching to default")
-                    _selected_id.Value <- DEFAULT_ID
-                else _selected_id.Value <- new_id
-                
-                if _selected_id.Value <> old_id then
-                    current <- loaded.[_selected_id.Value]
-                    current_config <- current.Config
-                    reload_current()
-            else
-                _selected_id.Value <- new_id
-        ) (fun () -> _selected_id.Value)
+        Setting.make
+            (fun new_id ->
+                if initialised then
+                    let old_id = _selected_id.Value
+
+                    if not (loaded.ContainsKey new_id) then
+                        Logging.Warn("Theme '" + new_id + "' not found, switching to default")
+                        _selected_id.Value <- DEFAULT_ID
+                    else
+                        _selected_id.Value <- new_id
+
+                    if _selected_id.Value <> old_id then
+                        current <- loaded.[_selected_id.Value]
+                        current_config <- current.Config
+                        reload_current ()
+                else
+                    _selected_id.Value <- new_id
+            )
+            (fun () -> _selected_id.Value)
 
     let list () =
         loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
@@ -151,6 +158,7 @@ module Themes =
                 { current_config with
                     Name = current_config.Name + " (Extracted)"
                 }
+
             true
         else
             false

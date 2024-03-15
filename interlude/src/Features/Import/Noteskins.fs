@@ -33,6 +33,7 @@ type NoteskinVersionCard(group: NoteskinGroup, version: NoteskinVersion) as this
         )
 
     let is_the_only_version = group.Versions.Length = 1
+
     let mutable status =
         if
             Noteskins.list ()
@@ -49,18 +50,22 @@ type NoteskinVersionCard(group: NoteskinGroup, version: NoteskinVersion) as this
 
     do
         this
-        |+ Text((if is_the_only_version then group.Name else version.Version),
+        |+ Text(
+            (if is_the_only_version then group.Name else version.Version),
             Align = Alignment.CENTER,
             Position = Position.SliceLeft(400.0f).SliceTop(70.0f).Margin(Style.PADDING)
         )
-        |+ Text((match version.Editor with Some e -> "Edit by " + e | None -> "By " + group.Author),
+        |+ Text(
+            (match version.Editor with
+             | Some e -> "Edit by " + e
+             | None -> "By " + group.Author),
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER,
             Position = Position.SliceLeft(400.0f).TrimTop(65.0f).SliceTop(55.0f).Margin(Style.PADDING)
         )
         |* Clickable.Focus this
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -71,8 +76,11 @@ type NoteskinVersionCard(group: NoteskinGroup, version: NoteskinVersion) as this
             let target =
                 Path.Combine(
                     get_game_folder "Noteskins",
-                    Regex("[^a-zA-Z0-9_-]").Replace(group.Name, "") 
-                    + (if is_the_only_version then "" else "-" + Regex("[^a-zA-Z0-9_-]").Replace(version.Version, ""))
+                    Regex("[^a-zA-Z0-9_-]").Replace(group.Name, "")
+                    + (if is_the_only_version then
+                           ""
+                       else
+                           "-" + Regex("[^a-zA-Z0-9_-]").Replace(version.Version, ""))
                     + ".isk"
                 )
 
@@ -125,13 +133,14 @@ type NoteskinVersionCard(group: NoteskinGroup, version: NoteskinVersion) as this
         preview <-
             Some
             <| Sprite.upload_one false true (SpriteUpload.OfImage("NOTESKIN_PREVIEW", img))
+
         preview_fade.Target <- 1.0f
 
 type NoteskinGroupPage(group: NoteskinGroup) =
     inherit Page()
 
     override this.Init(parent: Widget) =
-        
+
         let flow = FlowContainer.Vertical<NoteskinVersionCard>(520.0f, Spacing = 30.0f)
 
         for version in group.Versions do
@@ -147,14 +156,21 @@ type NoteskinGroupPage(group: NoteskinGroup) =
             flow.Add nc
 
         ScrollContainer(
-            flow, 
-            Margin = Style.PADDING, 
-            Position = { Left = 0.5f %- 540.0f; Right = 0.5f %+ 540.0f; Top = 0.0f %+ 200.0f; Bottom = 1.0f %- 0.0f}
+            flow,
+            Margin = Style.PADDING,
+            Position =
+                {
+                    Left = 0.5f %- 540.0f
+                    Right = 0.5f %+ 540.0f
+                    Top = 0.0f %+ 200.0f
+                    Bottom = 1.0f %- 0.0f
+                }
         )
         |> this.Content
 
         this
-        |* Text("By " + group.Author,
+        |* Text(
+            "By " + group.Author,
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
             Position = Position.TrimTop(80.0f).SliceTop(50.0f).Margin(20.0f, 0.0f)
@@ -190,7 +206,7 @@ type NoteskinGroupCard(data: NoteskinGroup) as this =
         |+ Text(data.Name, Align = Alignment.CENTER, Position = Position.Margin(Style.PADDING).SliceTop(70.0f))
         |* Clickable.Focus this
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -259,9 +275,10 @@ module Noteskins =
                                 )
 
                                 grid.Add nc
+
                             loading <- false
                         )
-                    | None -> 
+                    | None ->
                         sync (fun () ->
                             failed <- true
                             loading <- false
@@ -270,10 +287,11 @@ module Noteskins =
 
             this
             |+ (SearchBox(
-                Setting.simple "",
-                (fun (f: Filter) -> grid.Filter <- NoteskinGroupCard.Filter f),
-                Position = Position.SliceTop 60.0f
-            ) |+ LoadingIndicator.Border(fun () -> loading))
+                    Setting.simple "",
+                    (fun (f: Filter) -> grid.Filter <- NoteskinGroupCard.Filter f),
+                    Position = Position.SliceTop 60.0f
+                )
+                |+ LoadingIndicator.Border(fun () -> loading))
             |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to noteskins repository"))
             |+ Text(%"imports.noteskins.hint", Position = Position.SliceBottom(100.0f).SliceTop(50.0f))
             |+ Text(%"imports.noteskins.hint2", Position = Position.SliceBottom 50.0f)

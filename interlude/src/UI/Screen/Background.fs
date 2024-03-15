@@ -35,9 +35,9 @@ module Background =
 
                         try
                             use stream = IO.File.OpenRead file
+
                             match Bitmap.from_stream true stream with
-                            | None -> 
-                                return (failwith "Unsupported or invalid image format")
+                            | None -> return (failwith "Unsupported or invalid image format")
                             | Some bmp ->
 
                             let col =

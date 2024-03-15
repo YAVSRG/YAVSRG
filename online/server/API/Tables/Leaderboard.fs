@@ -39,5 +39,5 @@ module Leaderboard =
                     }
                 )
 
-            response.ReplyJson({ Players = players } : Response)
+            response.ReplyJson({ Players = players }: Response)
         }

@@ -52,7 +52,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
         )
         |* Clickable.Focus this
 
-    override this.OnFocus (by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
@@ -124,9 +124,10 @@ module Rulesets =
                         sync (fun () ->
                             for id in d.Rulesets.Keys do
                                 grid.Add(RulesetCard(id, d.Rulesets.[id]))
+
                             loading <- false
                         )
-                    | None -> 
+                    | None ->
                         sync (fun () ->
                             failed <- true
                             loading <- false
@@ -135,10 +136,11 @@ module Rulesets =
 
             this
             |+ (SearchBox(
-                Setting.simple "",
-                (fun (f: Filter) -> grid.Filter <- RulesetCard.Filter f),
-                Position = Position.SliceTop 60.0f
-            ) |+ LoadingIndicator.Border(fun () -> loading))
+                    Setting.simple "",
+                    (fun (f: Filter) -> grid.Filter <- RulesetCard.Filter f),
+                    Position = Position.SliceTop 60.0f
+                )
+                |+ LoadingIndicator.Border(fun () -> loading))
             |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to rulesets repository"))
             |* scroll
 

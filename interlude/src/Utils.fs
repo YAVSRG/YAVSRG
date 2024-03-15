@@ -55,17 +55,16 @@ module Utils =
 
     let format_duration_ms (ms: Time) =
         if ms > 3600_000f<ms> then
-            sprintf "%i:%02i:%02i" 
+            sprintf
+                "%i:%02i:%02i"
                 (ms / 3600_000f<ms> |> floor |> int)
                 ((ms / 60_000f<ms>) % 60f |> floor |> int)
                 ((ms / 1_000f<ms>) % 60f |> floor |> int)
-        else 
-            sprintf "%i:%02i"
-                ((ms / 60_000f<ms>) % 60f |> floor |> int)
-                ((ms / 1_000f<ms>) % 60f |> floor |> int)
+        else
+            sprintf "%i:%02i" ((ms / 60_000f<ms>) % 60f |> floor |> int) ((ms / 1_000f<ms>) % 60f |> floor |> int)
 
     let format_timespan (ts: TimeSpan) =
-        
+
         if ts < TimeSpan.Zero then
             "IN THE FUTURE?"
         elif ts.TotalDays > 365.0 then

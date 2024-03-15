@@ -21,9 +21,17 @@ type LegacyScore =
         layout: Layout
         keycount: int
     }
-    static member Default = { time = Unchecked.defaultof<_>; replay = ""; rate = 1.0f; selectedMods = Map.empty; layout = Layout.Spread; keycount = 4 }
+    static member Default =
+        {
+            time = Unchecked.defaultof<_>
+            replay = ""
+            rate = 1.0f
+            selectedMods = Map.empty
+            layout = Layout.Spread
+            keycount = 4
+        }
 
-    member this.Migrate : Score =
+    member this.Migrate: Score =
         {
             Timestamp = Timestamp.from_datetime this.time
             Replay = Replay.compressed_string_to_bytes this.replay
@@ -42,7 +50,7 @@ type LegacyBests =
     }
     static member Default = { Lamp = []; Accuracy = []; Grade = [] }
 
-    member this.Migrate : Bests =
+    member this.Migrate: Bests =
         {
             Lamp = this.Lamp
             Accuracy = this.Accuracy
@@ -60,7 +68,14 @@ type LegacyChartSaveData =
         mutable LastPlayed: DateTime
         mutable Comment: string
     }
-    static member Default = { Offset = 0.0f<ms>; Scores = List<LegacyScore>(); PersonalBests = Dictionary<string, LegacyBests>(); LastPlayed = DateTime.UnixEpoch; Comment = "" }
+    static member Default =
+        {
+            Offset = 0.0f<ms>
+            Scores = List<LegacyScore>()
+            PersonalBests = Dictionary<string, LegacyBests>()
+            LastPlayed = DateTime.UnixEpoch
+            Comment = ""
+        }
 
 [<Json.AutoCodec(false)>]
 type LegacyScoreDatabase =
@@ -71,8 +86,13 @@ type LegacyScoreDatabase =
         {
             Entries = new ConcurrentDictionary<string, LegacyChartSaveData>()
         }
-    static member TryLoad () : LegacyScoreDatabase option =
-        JSON.FromFile (Path.Combine(get_game_folder "Data", "scores.json"))
+
+    static member TryLoad() : LegacyScoreDatabase option =
+        JSON.FromFile(Path.Combine(get_game_folder "Data", "scores.json"))
         |> Result.toOption
-    static member MarkOld () =
-        File.Move(Path.Combine(get_game_folder "Data", "scores.json"), (Path.Combine(get_game_folder "Data", "scores.old")))
+
+    static member MarkOld() =
+        File.Move(
+            Path.Combine(get_game_folder "Data", "scores.json"),
+            (Path.Combine(get_game_folder "Data", "scores.old"))
+        )

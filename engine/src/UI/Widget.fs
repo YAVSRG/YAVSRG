@@ -46,14 +46,22 @@ type Widget(node_type) =
         else
             this.Parent.FocusTree
 
-    member this.Focus (by_mouse: bool) =
-        if this.Focusable then Selection.focus by_mouse this
+    member this.Focus(by_mouse: bool) =
+        if this.Focusable then
+            Selection.focus by_mouse this
 
-    member this.Select (by_mouse: bool) =
-        if this.Focusable then Selection.select by_mouse this
+    member this.Select(by_mouse: bool) =
+        if this.Focusable then
+            Selection.select by_mouse this
 
-    override this.OnFocus by_mouse = if not focused then focused <- true; focused_by_mouse <- by_mouse
-    override this.OnUnfocus _ = focused <- false; focused_by_mouse <- false
+    override this.OnFocus by_mouse =
+        if not focused then
+            focused <- true
+            focused_by_mouse <- by_mouse
+
+    override this.OnUnfocus _ =
+        focused <- false
+        focused_by_mouse <- false
 
     override this.OnSelected _ = selected <- true
     override this.OnDeselected _ = selected <- false
@@ -117,15 +125,15 @@ type StaticContainer(node_type) =
 
         for c in children do
             c.Init this
-        
+
     static member (|+)(parent: #StaticContainer, child: #Widget) =
         parent.Add child
         parent
-        
+
     static member (|+)(parent: #StaticContainer, children: #Widget seq) =
         Seq.iter parent.Add children
         parent
-        
+
     static member (|*)(parent: #StaticContainer, child: #Widget) = parent.Add child
     static member (|*)(parent: #StaticContainer, children: #Widget seq) = Seq.iter parent.Add children
 

@@ -33,26 +33,38 @@ type ScoreInfo =
 
         ImportedFromOsu: bool
     }
-    member this.Ruleset 
+    member this.Ruleset
         with get () = this.Scoring.Ruleset
         and set (ruleset) =
-            let scoring = Metrics.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
+            let scoring =
+                Metrics.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
+
             this.Scoring <- scoring
             this.Lamp <- Lamp.calculate ruleset.Grading.Lamps scoring.State
             this.Grade <- Grade.calculate ruleset.Grading.Grades scoring.State
+
     member this.Accuracy = this.Scoring.Value
     member this.Mods = this.WithMods.ModsApplied
 
-    member this.ModStatus () = match Mods.check this.Mods with Ok r -> r | Error msg -> failwith msg
-    member this.ModString () = Mods.format_mods (this.Rate, this.Mods, false)
+    member this.ModStatus() =
+        match Mods.check this.Mods with
+        | Ok r -> r
+        | Error msg -> failwith msg
+
+    member this.ModString() =
+        Mods.format_mods (this.Rate, this.Mods, false)
 
 module ScoreInfo =
 
     let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
         let with_mods = apply_mods score.Mods chart
         let replay_data = score.Replay |> Replay.decompress_bytes
-        let scoring = Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+
+        let scoring =
+            Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+
         let difficulty = DifficultyRating.calculate score.Rate with_mods.Notes
+
         {
             CachedChart = cc
             Chart = chart

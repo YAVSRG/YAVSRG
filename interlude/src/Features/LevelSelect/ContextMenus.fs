@@ -75,16 +75,30 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 Icon = Icons.FOLDER_MINUS,
                 Text = [ name ] %> "chart.remove_from_collection.name"
             )
-            |+ PageButton.Once("playlist.play", 
+            |+ PageButton.Once(
+                "playlist.play",
                 (fun () ->
-                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist false (Content.Collections.GetPlaylist(name).Value) Content.Library)
+                    Endless.begin_endless_mode (
+                        EndlessModeState.create_from_playlist
+                            false
+                            (Content.Collections.GetPlaylist(name).Value)
+                            Content.Library
+                    )
+
                     Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
                 ),
                 Icon = Icons.PLAY
             )
-            |* PageButton.Once("playlist.play_shuffled", 
+            |* PageButton.Once(
+                "playlist.play_shuffled",
                 (fun () ->
-                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist true (Content.Collections.GetPlaylist(name).Value) Content.Library)
+                    Endless.begin_endless_mode (
+                        EndlessModeState.create_from_playlist
+                            true
+                            (Content.Collections.GetPlaylist(name).Value)
+                            Content.Library
+                    )
+
                     Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
                 ),
                 Icon = Icons.SHUFFLE
@@ -92,7 +106,11 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
 
         match Content.Table, Chart.CHART with
         | Some table, Some chart ->
-            if Network.status = Network.Status.LoggedIn && cc.Keys = table.Info.Keymode && Chart.hash chart = cc.Hash then
+            if
+                Network.status = Network.Status.LoggedIn
+                && cc.Keys = table.Info.Keymode
+                && Chart.hash chart = cc.Hash
+            then
                 content
                 |* PageButton(
                     "chart.suggest_for_table",
@@ -124,29 +142,28 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
     inherit Page()
 
     override this.Init(parent) =
-        column()
-        |+ PageButton("collections.edit", 
-            (fun () -> 
-                EditPlaylistPage(name, playlist).Show()
-            ),
-            Icon = Icons.EDIT_2
-        )
+        column ()
+        |+ PageButton("collections.edit", (fun () -> EditPlaylistPage(name, playlist).Show()), Icon = Icons.EDIT_2)
             .Pos(200.0f)
-        |+ PageButton.Once("playlist.play", 
-            (fun () ->
-                Endless.begin_endless_mode (EndlessModeState.create_from_playlist false playlist Content.Library)
-                Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
-            ),
-            Icon = Icons.PLAY
-        )
+        |+ PageButton
+            .Once(
+                "playlist.play",
+                (fun () ->
+                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist false playlist Content.Library)
+                    Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                ),
+                Icon = Icons.PLAY
+            )
             .Pos(300.0f)
-        |+ PageButton.Once("playlist.play_shuffled", 
-            (fun () ->
-                Endless.begin_endless_mode (EndlessModeState.create_from_playlist true playlist Content.Library)
-                Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
-            ),
-            Icon = Icons.SHUFFLE
-        )
+        |+ PageButton
+            .Once(
+                "playlist.play_shuffled",
+                (fun () ->
+                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist true playlist Content.Library)
+                    Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                ),
+                Icon = Icons.SHUFFLE
+            )
             .Pos(370.0f)
         |> this.Content
 
@@ -209,7 +226,7 @@ type ScoreContextMenu(score_info: ScoreInfo) as this =
             |+ PageButton(
                 "score.watch_replay",
                 (fun () ->
-                    ScoreScreenHelpers.watch_replay (score_info, Chart.color_this_chart(score_info.WithMods))
+                    ScoreScreenHelpers.watch_replay (score_info, Chart.color_this_chart (score_info.WithMods))
                     Menu.Back()
                 ),
                 Icon = Icons.FILM
@@ -243,7 +260,8 @@ type ScoreContextMenu(score_info: ScoreInfo) as this =
                 if ScoreDatabase.delete_score score_info.CachedChart.Hash score_info.TimePlayed Content.Scores then
                     LevelSelect.refresh_all ()
                     Notifications.action_feedback (Icons.TRASH, [ score_name ] %> "notification.deleted", "")
-                else Logging.Debug("Couldn't find score matching timestamp to delete")
+                else
+                    Logging.Debug("Couldn't find score matching timestamp to delete")
 
                 if is_submenu then
                     Menu.Back()

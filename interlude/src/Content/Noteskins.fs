@@ -46,9 +46,9 @@ module Noteskins =
 
         let required_textures = Set.ofSeq ns.Noteskin.RequiredTextures
 
-        for texture_id in NoteskinTextureRules.list() do
+        for texture_id in NoteskinTextureRules.list () do
             match ns.Noteskin.GetTexture texture_id with
-            | TextureOk (img, config) ->
+            | TextureOk(img, config) ->
                 available_textures.Add
                     {
                         Label = texture_id
@@ -68,9 +68,8 @@ module Noteskins =
                     )
 
                 missing_textures.Add texture_id
-            | TextureNotRequired ->
-                missing_textures.Add texture_id
-                
+            | TextureNotRequired -> missing_textures.Add texture_id
+
 
         let atlas, sprites =
             Sprite.upload_many
@@ -103,37 +102,43 @@ module Noteskins =
         for (texture_id, sprite) in loaded.[_selected_id.Value].Sprites.Value do
             Sprites.add texture_id sprite.Copy
 
-    let selected_id = 
-        Setting.make (fun new_id ->
-            if initialised then
-                let old_id = _selected_id.Value
-                if not (loaded.ContainsKey new_id) then
-                    Logging.Warn("Theme '" + new_id + "' not found, switching to default")
-                    _selected_id.Value <- fst DEFAULTS.[0]
-                else _selected_id.Value <- new_id
-            
-                if _selected_id.Value <> old_id then
-                    match loaded.[old_id].TextureAtlas with
-                    | Some atlas -> Texture.unclaim_texture_unit atlas
-                    | None -> ()
+    let selected_id =
+        Setting.make
+            (fun new_id ->
+                if initialised then
+                    let old_id = _selected_id.Value
 
-                    if loaded.[_selected_id.Value].Sprites.IsNone then
-                        reload_noteskin_atlas _selected_id.Value
+                    if not (loaded.ContainsKey new_id) then
+                        Logging.Warn("Theme '" + new_id + "' not found, switching to default")
+                        _selected_id.Value <- fst DEFAULTS.[0]
+                    else
+                        _selected_id.Value <- new_id
 
-                    match loaded.[_selected_id.Value].TextureAtlas with
-                    | Some atlas -> Texture.claim_texture_unit atlas |> ignore
-                    | None ->
-                        reload_noteskin_atlas _selected_id.Value
-                        Texture.claim_texture_unit loaded.[_selected_id.Value].TextureAtlas.Value |> ignore
+                    if _selected_id.Value <> old_id then
+                        match loaded.[old_id].TextureAtlas with
+                        | Some atlas -> Texture.unclaim_texture_unit atlas
+                        | None -> ()
 
-                    current <- loaded.[_selected_id.Value].Noteskin
-                    current_config <- current.Config
-                
-                    for (texture_id, sprite) in loaded.[new_id].Sprites.Value do
-                        Sprites.add texture_id sprite.Copy
-            else
-                _selected_id.Value <- new_id
-        ) (fun () -> _selected_id.Value)
+                        if loaded.[_selected_id.Value].Sprites.IsNone then
+                            reload_noteskin_atlas _selected_id.Value
+
+                        match loaded.[_selected_id.Value].TextureAtlas with
+                        | Some atlas -> Texture.claim_texture_unit atlas |> ignore
+                        | None ->
+                            reload_noteskin_atlas _selected_id.Value
+
+                            Texture.claim_texture_unit loaded.[_selected_id.Value].TextureAtlas.Value
+                            |> ignore
+
+                        current <- loaded.[_selected_id.Value].Noteskin
+                        current_config <- current.Config
+
+                        for (texture_id, sprite) in loaded.[new_id].Sprites.Value do
+                            Sprites.add texture_id sprite.Copy
+                else
+                    _selected_id.Value <- new_id
+            )
+            (fun () -> _selected_id.Value)
 
     let load () =
 
@@ -152,7 +157,8 @@ module Noteskins =
         for zip in
             Directory.EnumerateFiles(get_game_folder "Noteskins")
             |> Seq.filter (fun p -> Path.GetExtension(p).ToLower() = ".isk") do
-            let target = Path.Combine(Path.GetDirectoryName zip, Path.GetFileNameWithoutExtension zip)
+            let target =
+                Path.Combine(Path.GetDirectoryName zip, Path.GetFileNameWithoutExtension zip)
 
             if Directory.Exists(target) then
                 Logging.Info(sprintf "%s has already been extracted, deleting" (Path.GetFileName zip))
@@ -182,10 +188,12 @@ module Noteskins =
         Logging.Info(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count DEFAULTS.Length)
 
     let init_window () =
-        load()
+        load ()
+
         if not (loaded.ContainsKey _selected_id.Value) then
             Logging.Warn("Noteskin '" + _selected_id.Value + "' not found, switching to default")
             _selected_id.Value <- fst DEFAULTS.[0]
+
         current <- loaded.[_selected_id.Value].Noteskin
         current_config <- current.Config
         reload_current ()
@@ -247,5 +255,11 @@ module Noteskins =
 
     let preview_loader =
         { new Async.Service<Noteskin, (Bitmap * TextureConfig) option>() with
-            override this.Handle(ns) = async { return match ns.GetTexture "note" with TextureOk (bmp, config) -> Some (bmp, config) | _ -> None }
+            override this.Handle(ns) =
+                async {
+                    return
+                        match ns.GetTexture "note" with
+                        | TextureOk(bmp, config) -> Some(bmp, config)
+                        | _ -> None
+                }
         }

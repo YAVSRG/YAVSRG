@@ -34,7 +34,7 @@ type ChartSuggestionContext =
         Library: Library
         ScoreDatabase: ScoreDatabase
     }
-    member this.LibraryViewContext : LibraryViewContext =
+    member this.LibraryViewContext: LibraryViewContext =
         {
             Rate = this.Rate
             RulesetId = this.RulesetId
@@ -70,7 +70,7 @@ module Suggestion =
             let max_ln_pc = report.LNPercent + 0.1f
             let min_ln_pc = report.LNPercent - 0.1f
 
-            let now = Timestamp.now()
+            let now = Timestamp.now ()
             let TWO_DAYS = 2L * 24L * 3600_000L
 
             let candidates =
@@ -83,9 +83,7 @@ module Suggestion =
                 |> Seq.filter (fun x ->
                     let ln_pc = ctx.Library.Patterns.[x.Hash].LNPercent in ln_pc >= min_ln_pc && ln_pc <= max_ln_pc
                 )
-                |> Seq.filter (fun x ->
-                    now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > TWO_DAYS
-                )
+                |> Seq.filter (fun x -> now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > TWO_DAYS)
 
                 |> Filter.apply_seq (ctx.Filter, ctx.LibraryViewContext)
 
@@ -107,16 +105,20 @@ module Suggestion =
                                 let bpm_similarity =
                                     match p.Pattern with
                                     | Stream -> abs (p.BPM - p2.BPM) |> min 30 |> (fun i -> 1.0f - float32 i / 30.0f)
-                                    | Chordstream -> abs (p.BPM - p2.BPM) |> min 30 |> (fun i -> 1.0f - float32 i / 30.0f)
+                                    | Chordstream ->
+                                        abs (p.BPM - p2.BPM) |> min 30 |> (fun i -> 1.0f - float32 i / 30.0f)
                                     | Jack -> abs (p.BPM - p2.BPM) |> min 15 |> (fun i -> 1.0f - float32 i / 15.0f)
 
-                                let duration_similarity =
-                                    (min p.Amount p2.Amount) / total_pattern_amount
+                                let duration_similarity = (min p.Amount p2.Amount) / total_pattern_amount
 
                                 let bonus_similarity =
-                                    if Array.tryHead p.Specifics = Array.tryHead p2.Specifics then 1.2f else 1.0f
+                                    if Array.tryHead p.Specifics = Array.tryHead p2.Specifics then
+                                        1.2f
+                                    else
+                                        1.0f
 
-                                similarity_score <- similarity_score + duration_similarity * bpm_similarity * bonus_similarity
+                                similarity_score <-
+                                    similarity_score + duration_similarity * bpm_similarity * bonus_similarity
 
                     if similarity_score > 0.5f then
                         yield entry, similarity_score
@@ -153,7 +155,9 @@ module Suggestion =
     let get_random (filter_by: Filter) (ctx: LibraryViewContext) : CachedChart option =
         let rand = Random()
 
-        let charts = Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values |> Array.ofSeq
+        let charts =
+            Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values
+            |> Array.ofSeq
 
         if charts.Length > 0 then
             Some charts.[rand.Next charts.Length]
@@ -169,16 +173,13 @@ module EndlessModeState =
 
     let private shuffle_playlist_charts (items: 'T seq) =
         let random = new Random()
-        items
-        |> Seq.map (fun x -> x, random.Next())
-        |> Seq.sortBy snd
-        |> Seq.map fst
-    
+        items |> Seq.map (fun x -> x, random.Next()) |> Seq.sortBy snd |> Seq.map fst
+
     let create_from_playlist (shuffle: bool) (playlist: Playlist) (library: Library) = // todo: could only pass cache in
         playlist.Charts
         |> Seq.choose (fun (c, info) ->
             match Cache.by_hash c.Hash library.Cache with
-            | Some cc -> Some (cc, info)
+            | Some cc -> Some(cc, info)
             | None -> None
         )
         |> if shuffle then shuffle_playlist_charts else id
@@ -198,20 +199,22 @@ module EndlessModeState =
     let next (state: EndlessModeState) : Next option =
         match state with
         | EndlessModeState.Playlist [] -> None
-        | EndlessModeState.Playlist ((chart, { Rate = rate; Mods = mods }) :: xs) ->
-            Some {
-                Chart = chart
-                Rate = rate.Value
-                Mods = mods.Value
-                NewState = EndlessModeState.Playlist xs
-            }
+        | EndlessModeState.Playlist((chart, { Rate = rate; Mods = mods }) :: xs) ->
+            Some
+                {
+                    Chart = chart
+                    Rate = rate.Value
+                    Mods = mods.Value
+                    NewState = EndlessModeState.Playlist xs
+                }
         | EndlessModeState.Normal ctx ->
             match Suggestion.get_suggestion ctx with
             | Some next_cc ->
-                Some {
-                    Chart = next_cc
-                    Rate = ctx.Rate
-                    Mods = ctx.Mods
-                    NewState = EndlessModeState.Normal { ctx with BaseChart = next_cc }
-                }
+                Some
+                    {
+                        Chart = next_cc
+                        Rate = ctx.Rate
+                        Mods = ctx.Mods
+                        NewState = EndlessModeState.Normal { ctx with BaseChart = next_cc }
+                    }
             | None -> None

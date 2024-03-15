@@ -240,7 +240,8 @@ module Lamp =
 
         loop -1
 
-    let calculate (lamps: Lamp array) (state: AccuracySystemState) : int = (calculate_with_target lamps state).Lamp
+    let calculate (lamps: Lamp array) (state: AccuracySystemState) : int =
+        (calculate_with_target lamps state).Lamp
 
 [<Json.AutoCodec>]
 type GradingConfig =

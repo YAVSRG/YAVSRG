@@ -6,7 +6,16 @@ open Interlude.Web.Server.Domain.Backbeat
 
 module Sources =
 
-    let test_source : Source = { Id = "ultra 7k megapack vol.1"; Mirrors = ["https://yavsrg.net/packs/ultra-7k-megapack-1"; "https://chart-pack-mirrors.io/ultra-7k-megapack-1"]; Namespace = "ultra-7k-megapack" }
+    let test_source: Source =
+        {
+            Id = "ultra 7k megapack vol.1"
+            Mirrors =
+                [
+                    "https://yavsrg.net/packs/ultra-7k-megapack-1"
+                    "https://chart-pack-mirrors.io/ultra-7k-megapack-1"
+                ]
+            Namespace = "ultra-7k-megapack"
+        }
 
     [<Test>]
     let Source_RoundTrip () =
