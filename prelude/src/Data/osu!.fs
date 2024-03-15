@@ -410,7 +410,7 @@ module ``osu!`` =
     open System.IO.Compression
     open Prelude.Charts.Conversions
     open Prelude.Charts.Formats.``osu!``
-    open Prelude.Data.Charts.Caching
+    open Prelude.Data.Library.Caching
 
     let create_osz (chart: Chart) (cache: Cache) (export_folder: string) =
         let beatmap = Interlude_To_Osu.convert chart

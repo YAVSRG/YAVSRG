@@ -8,7 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Content.Noteskins.Repo
 open Prelude.Data
-open Prelude.Data.Charts.Sorting
+open Prelude.Data.Library.Sorting
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components

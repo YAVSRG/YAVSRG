@@ -8,8 +8,8 @@ open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Prelude.Common
 open Prelude.Charts
-open Prelude.Data.Charts
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library
+open Prelude.Data.Library.Caching
 open Prelude.Data.``osu!``
 open Prelude.Data
 open Prelude.Gameplay

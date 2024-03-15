@@ -8,7 +8,7 @@ open Prelude.Common
 open Prelude.Charts
 open Prelude.Gameplay
 open Prelude.Data
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.UI
 open Interlude.Utils

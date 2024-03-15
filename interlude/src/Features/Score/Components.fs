@@ -402,7 +402,7 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
         Draw.rect (this.Bounds.TrimTop(160.0f).SliceTop(5.0f)) Colors.white
         base.Draw()
 
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Online

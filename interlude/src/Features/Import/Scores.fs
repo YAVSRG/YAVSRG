@@ -10,9 +10,9 @@ open Prelude.Charts.Formats.``osu!``
 open Prelude.Gameplay
 open Prelude.Data.``osu!``
 open Prelude.Data
-open Prelude.Data.Charts
-open Prelude.Data.Charts.Caching
-open Prelude.Data.Charts
+open Prelude.Data.Library
+open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.Options
 open Interlude.Content
 

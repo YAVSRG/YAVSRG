@@ -10,8 +10,8 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude.Common
-open Prelude.Data.Charts
-open Prelude.Data.Charts.Sorting
+open Prelude.Data.Library
+open Prelude.Data.Library.Sorting
 open Prelude.Data
 open Interlude.Content
 open Interlude.UI

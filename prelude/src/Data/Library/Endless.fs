@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Charts.Endless
+﻿namespace Prelude.Data.Library.Endless
 
 open System
 open Percyqaz.Common
@@ -6,10 +6,10 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Charts.Processing.Patterns
-open Prelude.Data.Charts
-open Prelude.Data.Charts.Caching
-open Prelude.Data.Charts.Sorting
-open Prelude.Data.Charts.Collections
+open Prelude.Data.Library
+open Prelude.Data.Library.Caching
+open Prelude.Data.Library.Sorting
+open Prelude.Data.Library.Collections
 open Prelude.Data
 
 [<RequireQualifiedAccess>]

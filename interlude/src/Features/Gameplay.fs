@@ -13,10 +13,10 @@ open Prelude.Charts.Processing.Patterns
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay
-open Prelude.Data.Charts
-open Prelude.Data.Charts.Caching
-open Prelude.Data.Charts.Collections
-open Prelude.Data.Charts.Endless
+open Prelude.Data.Library
+open Prelude.Data.Library.Caching
+open Prelude.Data.Library.Collections
+open Prelude.Data.Library.Endless
 open Prelude.Data
 open Interlude.Content
 open Interlude.Options

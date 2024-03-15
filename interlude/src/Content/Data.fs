@@ -2,7 +2,7 @@
 
 open Percyqaz.Data.Sqlite
 open Prelude.Data
-open Prelude.Data.Charts
+open Prelude.Data.Library
 
 module private Data =
     

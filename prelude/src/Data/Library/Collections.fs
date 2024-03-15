@@ -1,11 +1,11 @@
-﻿namespace Prelude.Data.Charts
+﻿namespace Prelude.Data.Library
 
 open System
 open System.Collections.Generic
 open Percyqaz.Data
 open Percyqaz.Common
 open Prelude.Gameplay.Mods
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 
 module Collections =
 

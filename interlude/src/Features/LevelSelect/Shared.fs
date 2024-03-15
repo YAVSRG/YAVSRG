@@ -4,8 +4,8 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data
-open Prelude.Data.Charts.Sorting
-open Prelude.Data.Charts.Endless
+open Prelude.Data.Library.Sorting
+open Prelude.Data.Library.Endless
 open Interlude.Content
 open Interlude.UI
 open Interlude.Options

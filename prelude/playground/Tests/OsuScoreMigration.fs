@@ -8,7 +8,7 @@ open Prelude.Charts
 open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.``osu!``
 open Prelude.Data.``osu!``
-open Prelude.Data.Charts
+open Prelude.Data.Library
 open Prelude.Gameplay
 open SevenZip.Compression
 

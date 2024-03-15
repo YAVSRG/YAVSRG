@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Features.OptionsMenu
 
-open Prelude.Data.Charts.Library
+open Prelude.Data.Library.Library
 open Interlude.Utils
 open Interlude.Options
 open Interlude.Content

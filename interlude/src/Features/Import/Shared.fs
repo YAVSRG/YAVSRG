@@ -5,7 +5,7 @@ open System.IO.Compression
 open System.Text.RegularExpressions
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Prelude.Data.Charts
+open Prelude.Data.Library
 open Prelude
 open Prelude.Content.Noteskins.Conversion
 open Interlude.Utils

@@ -9,7 +9,7 @@ open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
 open Prelude.Data
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 open Interlude
 open Interlude.UI
 open Interlude.Utils

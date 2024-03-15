@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Content
 
 open Percyqaz.Common
-open Prelude.Data.Charts
+open Prelude.Data.Library
 
 type Content () =
 

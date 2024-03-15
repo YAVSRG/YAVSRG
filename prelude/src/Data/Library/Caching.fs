@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Charts.Caching
+﻿namespace Prelude.Data.Library.Caching
 
 open System
 open System.IO

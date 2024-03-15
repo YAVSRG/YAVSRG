@@ -9,7 +9,7 @@ open Percyqaz.Data
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Mods
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 open Prelude.Gameplay
 open Interlude.UI
 open Interlude.Utils

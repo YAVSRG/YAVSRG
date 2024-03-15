@@ -7,7 +7,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Conversions
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 open Prelude.Backbeat.Archive
 open Backbeat.Utils
 

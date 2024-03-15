@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Charts
+﻿namespace Prelude.Data.Library
 
 open System
 open System.Collections.Generic
@@ -7,14 +7,14 @@ open Percyqaz.Data
 open Prelude
 open Prelude.Gameplay
 open Prelude.Backbeat
-open Prelude.Data.Charts.Collections
+open Prelude.Data.Library.Collections
 open Prelude.Charts.Processing.Patterns
 open Prelude.Data
 
 // todo: make into separate Grouping, Filtering and Sorting modules
 module Sorting =
 
-    open Prelude.Data.Charts.Caching
+    open Prelude.Data.Library.Caching
     open FParsec
 
     type LibraryViewContext =

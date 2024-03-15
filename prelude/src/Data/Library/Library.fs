@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Charts
+﻿namespace Prelude.Data.Library
 
 open System
 open System.IO
@@ -9,8 +9,8 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Conversions
 open Prelude.Charts.Processing.Patterns
-open Prelude.Data.Charts.Caching
-open Prelude.Data.Charts.Collections
+open Prelude.Data.Library.Caching
+open Prelude.Data.Library.Collections
 
 type Patterns = ConcurrentDictionary<string, PatternSummary.PatternDetailsReport>
 

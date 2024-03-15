@@ -4,7 +4,7 @@ open System.IO
 open Percyqaz.Common
 open Prelude.Backbeat.Archive
 open Prelude.Charts
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 open Backbeat.Utils
 open System.Collections.Concurrent
 open Bytewizer.Backblaze.Client

@@ -5,7 +5,7 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 
 [<RequireQualifiedAccess>]
 type ScorePlayedBy =

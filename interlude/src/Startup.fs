@@ -6,9 +6,9 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing.NoteColors
-open Prelude.Data.Charts
+open Prelude.Data.Library
 open Prelude.Data
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 open Interlude
 open Interlude.Utils
 open Interlude.Content

@@ -4,7 +4,7 @@ open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
-open Prelude.Data.Charts.Caching
+open Prelude.Data.Library.Caching
 open Prelude.Backbeat.Archive
 open Backbeat.Utils
 

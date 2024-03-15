@@ -9,8 +9,8 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Prelude.Common
 open Prelude.Gameplay.Mods
-open Prelude.Data.Charts.Sorting
-open Prelude.Data.Charts
+open Prelude.Data.Library.Sorting
+open Prelude.Data.Library
 open Interlude
 
 module Options =

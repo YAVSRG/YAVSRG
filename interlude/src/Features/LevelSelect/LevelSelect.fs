@@ -6,10 +6,10 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
-open Prelude.Data.Charts.Sorting
-open Prelude.Data.Charts.Caching
-open Prelude.Data.Charts.Collections
-open Prelude.Data.Charts.Endless
+open Prelude.Data.Library.Sorting
+open Prelude.Data.Library.Caching
+open Prelude.Data.Library.Collections
+open Prelude.Data.Library.Endless
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
