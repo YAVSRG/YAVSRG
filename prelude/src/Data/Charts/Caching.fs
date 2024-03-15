@@ -31,7 +31,7 @@ type CachedChart =
         BackgroundFile: string option
         AudioFile: string option
     }
-    // todo: this exists performance gain reasons. change to an sqlite database instead
+    // todo: this exists for performance gain reasons. change to an sqlite database instead
     static member Default =
         {
             Artist = ""
@@ -54,6 +54,7 @@ type CachedChart =
     member this.Key = sprintf "%s/%s" this.Folder this.Hash
 
 type Cache =
+    // todo: make internal
     {
         RootPath: string
         Entries: ConcurrentDictionary<string, CachedChart>

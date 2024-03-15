@@ -3,6 +3,7 @@
 open System
 open Percyqaz.Common
 open Prelude
+open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Charts.Processing.Patterns
 open Prelude.Data.Charts
@@ -26,10 +27,21 @@ type ChartSuggestionContext =
     {
         BaseChart: CachedChart
         Filter: Filter
-        Rate: float32
         Mods: ModState
+        Rate: float32
+        RulesetId: string
+        Ruleset: Ruleset
+        Library: Library
         ScoreDatabase: ScoreDatabase
     }
+    member this.LibraryViewContext : LibraryViewContext =
+        {
+            Rate = this.Rate
+            RulesetId = this.RulesetId
+            Ruleset = this.Ruleset
+            Library = this.Library
+            ScoreDatabase = this.ScoreDatabase
+        }
 
 module Suggestion =
 
@@ -41,11 +53,11 @@ module Suggestion =
 
         recommended_recently <- Set.add cache_info.Hash recommended_recently
 
-        if not (Library.patterns.ContainsKey cache_info.Hash) then
+        if not (ctx.Library.Patterns.ContainsKey cache_info.Hash) then
             None
         else
 
-            let report = Library.patterns.[cache_info.Hash]
+            let report = ctx.Library.Patterns.[cache_info.Hash]
             let patterns = report.Patterns
             let total_pattern_amount = patterns |> Seq.sumBy (fun x -> x.Amount)
 
@@ -62,24 +74,24 @@ module Suggestion =
             let TWO_DAYS = 2L * 24L * 3600_000L
 
             let candidates =
-                Library.cache.Entries.Values
+                ctx.Library.Cache.Entries.Values
                 |> Seq.filter (fun x -> x.Keys = cache_info.Keys)
                 |> Seq.filter (fun x -> x.Physical >= min_difficulty && x.Physical <= max_difficulty)
                 |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
                 |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
-                |> Seq.filter (fun x -> Library.patterns.ContainsKey x.Hash)
+                |> Seq.filter (fun x -> ctx.Library.Patterns.ContainsKey x.Hash)
                 |> Seq.filter (fun x ->
-                    let ln_pc = Library.patterns.[x.Hash].LNPercent in ln_pc >= min_ln_pc && ln_pc <= max_ln_pc
+                    let ln_pc = ctx.Library.Patterns.[x.Hash].LNPercent in ln_pc >= min_ln_pc && ln_pc <= max_ln_pc
                 )
                 |> Seq.filter (fun x ->
                     now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > TWO_DAYS
                 )
 
-                |> Filter.apply_seq (ctx.Filter, { ScoreDatabase = ctx.ScoreDatabase })
+                |> Filter.apply_seq (ctx.Filter, ctx.LibraryViewContext)
 
             seq {
                 for entry in candidates do
-                    let candidate_patterns = Library.patterns.[entry.Hash]
+                    let candidate_patterns = ctx.Library.Patterns.[entry.Hash]
 
                     let mutable similarity_score = 0.0f
 
@@ -138,10 +150,10 @@ module Suggestion =
                 Some res
         | None -> None
 
-    let get_random (filter_by: Filter, filter_ctx: FilteringContext) : CachedChart option =
+    let get_random (filter_by: Filter) (ctx: LibraryViewContext) : CachedChart option =
         let rand = Random()
 
-        let charts = Filter.apply_seq (filter_by, filter_ctx) Library.cache.Entries.Values |> Array.ofSeq
+        let charts = Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values |> Array.ofSeq
 
         if charts.Length > 0 then
             Some charts.[rand.Next charts.Length]
@@ -162,10 +174,10 @@ module EndlessModeState =
         |> Seq.sortBy snd
         |> Seq.map fst
     
-    let create_from_playlist (shuffle: bool) (playlist: Playlist) =
+    let create_from_playlist (shuffle: bool) (playlist: Playlist) (library: Library) =
         playlist.Charts
         |> Seq.choose (fun (c, info) ->
-            match Cache.by_hash c.Hash Library.cache with
+            match Cache.by_hash c.Hash library.Cache with
             | Some cc -> Some (cc, info)
             | None -> None
         )

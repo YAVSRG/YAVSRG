@@ -17,11 +17,12 @@ module Sorting =
     open Prelude.Data.Charts.Caching
     open FParsec
 
-    type GroupingContext =
+    type LibraryViewContext =
         {
             Rate: float32
             RulesetId: string
             Ruleset: Ruleset
+            Library: Library
             ScoreDatabase: ScoreDatabase
         }
 
@@ -33,7 +34,7 @@ module Sorting =
         else
             "?"
 
-    let private format_date_last_played (cc: CachedChart, ctx: GroupingContext) =
+    let private format_date_last_played (cc: CachedChart, ctx: LibraryViewContext) =
         let now = Timestamp.now()
         let ONE_DAY = 24L * 3600_000L
         let days_ago = (now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed) / ONE_DAY
@@ -62,7 +63,7 @@ module Sorting =
         elif days_ago < 210 then 7, "6 months ago"
         else 8, "A long time ago"
 
-    let grade_achieved (cc: CachedChart, ctx: GroupingContext) =
+    let grade_achieved (cc: CachedChart, ctx: LibraryViewContext) =
         let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
         if data.PersonalBests.ContainsKey ctx.RulesetId then
             match PersonalBests.get_best_above ctx.Rate data.PersonalBests.[ctx.RulesetId].Grade with
@@ -71,7 +72,7 @@ module Sorting =
         else
             -2, "No grade achieved"
 
-    let lamp_achieved (cc: CachedChart, ctx: GroupingContext) =
+    let lamp_achieved (cc: CachedChart, ctx: LibraryViewContext) =
         let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
         if data.PersonalBests.ContainsKey ctx.RulesetId then
             match PersonalBests.get_best_above ctx.Rate data.PersonalBests.[ctx.RulesetId].Lamp with
@@ -80,7 +81,7 @@ module Sorting =
         else
             -2, "No lamp achieved"
 
-    type GroupMethod = CachedChart * GroupingContext -> int * string
+    type GroupMethod = CachedChart * LibraryViewContext -> int * string
 
     let grouping_modes: IDictionary<string, GroupMethod> =
         dict
@@ -96,24 +97,19 @@ module Sorting =
                 "creator", (fun (c, _) -> 0, first_character c.Creator)
                 "keymode", (fun (c, _) -> c.Keys, c.Keys.ToString() + "K")
                 "patterns",
-                fun (c, _) ->
-                    match Library.patterns.TryGetValue(c.Hash) with
+                fun (c, ctx) ->
+                    match ctx.Library.Patterns.TryGetValue(c.Hash) with
                     | true, report -> 0, report.Category
                     | false, _ -> -1, "Not analysed"
             ]
 
-    type FilteringContext =
-        {
-            ScoreDatabase: ScoreDatabase
-        }
-
-    let private has_comment (query: string) (cc: CachedChart, ctx: FilteringContext) =
+    let private has_comment (query: string) (cc: CachedChart, ctx: LibraryViewContext) =
         let comment = (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).Comment
         not (String.IsNullOrEmpty comment) && comment.Contains(query, StringComparison.OrdinalIgnoreCase)
 
-    let private has_pattern (pattern: string) (cc: CachedChart, _: FilteringContext) =
-        if Library.patterns.ContainsKey cc.Hash then
-            let p = Library.patterns.[cc.Hash].Patterns
+    let private has_pattern (pattern: string) (cc: CachedChart, ctx: LibraryViewContext) =
+        if ctx.Library.Patterns.ContainsKey cc.Hash then
+            let p = ctx.Library.Patterns.[cc.Hash].Patterns
 
             let pattern_to_find =
                 match pattern.ToLower() with
@@ -204,7 +200,7 @@ module Sorting =
             | Success(x, _, _) -> x
             | Failure(f, _, _) -> [ Impossible ]
 
-        let private apply (filter: Filter, ctx: FilteringContext) (cc: CachedChart) : bool =
+        let private apply (filter: Filter, ctx: LibraryViewContext) (cc: CachedChart) : bool =
             let s =
                 (cc.Title
                  + " "
@@ -241,9 +237,9 @@ module Sorting =
                 | _ -> true)
                 filter
 
-        let apply_seq (filter: Filter, ctx: FilteringContext) (charts: CachedChart seq) = Seq.filter (apply (filter, ctx)) charts
+        let apply_seq (filter: Filter, ctx: LibraryViewContext) (charts: CachedChart seq) = Seq.filter (apply (filter, ctx)) charts
 
-        let apply_ctx_seq (filter: Filter, ctx: FilteringContext) (charts: (CachedChart * LibraryContext) seq) =
+        let apply_ctx_seq (filter: Filter, ctx: LibraryViewContext) (charts: (CachedChart * LibraryContext) seq) =
             Seq.filter (fun (cc, _) -> apply (filter, ctx) cc) charts
 
     [<RequireQualifiedAccess; Json.AutoCodec>]
@@ -261,15 +257,16 @@ module Sorting =
     type LexSortedGroups = Dictionary<int * string, Group>
 
     let get_groups
-        (filter_by: Filter, filter_ctx: FilteringContext)
-        (group_by: GroupMethod, group_ctx: GroupingContext)
+        (filter_by: Filter)
+        (group_by: GroupMethod)
         (sort_by: SortMethod)
+        (ctx: LibraryViewContext)
         : LexSortedGroups =
 
         let groups = new Dictionary<int * string, Group>()
 
-        for cc in Filter.apply_seq (filter_by, filter_ctx) Library.cache.Entries.Values do
-            let s = group_by (cc, group_ctx)
+        for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values do
+            let s = group_by (cc, ctx)
 
             if groups.ContainsKey s |> not then
                 groups.Add(
@@ -292,20 +289,20 @@ module Sorting =
 
         groups
 
-    let get_collection_groups (filter_by: Filter, filter_ctx: FilteringContext) (sort_by: SortMethod) : LexSortedGroups =
+    let get_collection_groups (filter_by: Filter) (sort_by: SortMethod) (ctx: LibraryViewContext) : LexSortedGroups =
 
         let groups = new Dictionary<int * string, Group>()
 
-        for name in Library.collections.Folders.Keys do
-            let collection = Library.collections.Folders.[name]
+        for name in ctx.Library.Collections.Folders.Keys do
+            let collection = ctx.Library.Collections.Folders.[name]
 
             collection.Charts
             |> Seq.choose (fun entry ->
-                match Cache.by_key entry.Path Library.cache with
+                match Cache.by_key entry.Path ctx.Library.Cache with
                 | Some cc -> Some(cc, LibraryContext.Folder name)
                 | None ->
 
-                match Cache.by_hash entry.Hash Library.cache with
+                match Cache.by_hash entry.Hash ctx.Library.Cache with
                 | Some cc ->
                     entry.Path <- cc.Key
                     Some(cc, LibraryContext.Folder name)
@@ -313,7 +310,7 @@ module Sorting =
                     //Logging.Warn(sprintf "Could not find chart: %s [%s] for collection %s" entry.Path entry.Hash name)
                     None
             )
-            |> Filter.apply_ctx_seq (filter_by, filter_ctx)
+            |> Filter.apply_ctx_seq (filter_by, ctx)
             |> ResizeArray<CachedChart * LibraryContext>
             |> fun x -> x.Sort sort_by; x
             |> fun x ->
@@ -326,17 +323,17 @@ module Sorting =
                         }
                     )
 
-        for name in Library.collections.Playlists.Keys do
-            let playlist = Library.collections.Playlists.[name]
+        for name in ctx.Library.Collections.Playlists.Keys do
+            let playlist = ctx.Library.Collections.Playlists.[name]
 
             playlist.Charts
             |> Seq.indexed
             |> Seq.choose (fun (i, (entry, info)) ->
-                match Cache.by_key entry.Path Library.cache with
+                match Cache.by_key entry.Path ctx.Library.Cache with
                 | Some cc -> Some(cc, LibraryContext.Playlist(i, name, info))
                 | None ->
 
-                match Cache.by_key entry.Hash Library.cache with
+                match Cache.by_key entry.Hash ctx.Library.Cache with
                 | Some cc ->
                     entry.Path <- cc.Key
                     Some(cc, LibraryContext.Playlist(i, name, info))
@@ -344,7 +341,7 @@ module Sorting =
                     //Logging.Warn(sprintf "Could not find chart: %s [%s] for playlist %s" entry.Path entry.Hash name)
                     None
             )
-            |> Filter.apply_ctx_seq (filter_by, filter_ctx)
+            |> Filter.apply_ctx_seq (filter_by, ctx)
             |> ResizeArray<CachedChart * LibraryContext>
             |> fun x ->
                 if x.Count > 0 then
@@ -358,18 +355,18 @@ module Sorting =
 
         groups
 
-    let get_table_groups (filter_by: Filter, filter_ctx: FilteringContext) (sort_by: SortMethod) (table: Table) : LexSortedGroups =
+    let get_table_groups (filter_by: Filter) (sort_by: SortMethod) (table: Table) (ctx: LibraryViewContext) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
         for level, charts in table.Charts |> Seq.groupBy (fun x -> x.Level) do
             charts
             |> Seq.choose (fun (c: TableChart) ->
-                match Cache.by_key (sprintf "%s/%s" table.Info.Name c.Hash) Library.cache with
+                match Cache.by_key (sprintf "%s/%s" table.Info.Name c.Hash) ctx.Library.Cache with
                 | Some cc -> Some(cc, LibraryContext.Table level)
                 | None ->
-                    Cache.by_hash c.Hash Library.cache
+                    Cache.by_hash c.Hash ctx.Library.Cache
                     |> Option.map (fun x -> x, LibraryContext.Table level)
             )
-            |> Filter.apply_ctx_seq (filter_by, filter_ctx)
+            |> Filter.apply_ctx_seq (filter_by, ctx)
             |> ResizeArray<CachedChart * LibraryContext>
             |> fun x -> x.Sort sort_by; x
             |> fun x ->
