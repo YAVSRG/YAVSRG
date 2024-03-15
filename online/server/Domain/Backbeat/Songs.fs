@@ -555,7 +555,7 @@ module Songs =
 
     open System.Text.RegularExpressions
     let search_songs (search_query: string) : (int64 * Song) array =
-        let stripped_query = Regex.Replace(search_query, @"[^a-zA-Z0-9\s]+", " ")
+        let stripped_query = Regex.Replace(search_query, @"[^a-zA-Z0-9\s]+", " ").Trim()
         if stripped_query = "" then [||] else
         let db_query : Query<unit, int64 * Song> =
             {

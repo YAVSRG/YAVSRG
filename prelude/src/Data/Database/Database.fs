@@ -81,12 +81,7 @@ module DbScores =
             Read = (fun r ->
                 {
                     Timestamp = r.Int64
-                    Replay = 
-                        // todo: push into Percyqaz.Data
-                        use stream = r.Stream
-                        use ms = new MemoryStream()
-                        stream.CopyTo ms
-                        ms.ToArray()
+                    Replay = r.Blob
                     Rate = r.Float32
                     Mods = r.Json JSON
                     IsImported = r.Boolean
@@ -122,12 +117,7 @@ module DbScores =
                 r.String,
                 {
                     Timestamp = r.Int64
-                    Replay = 
-                        // todo: push into Percyqaz.Data
-                        use stream = r.Stream
-                        use ms = new MemoryStream()
-                        stream.CopyTo ms
-                        ms.ToArray()
+                    Replay = r.Blob
                     Rate = r.Float32
                     Mods = r.Json JSON
                     IsImported = r.Boolean

@@ -54,7 +54,6 @@ type CachedChart =
     member this.Key = sprintf "%s/%s" this.Folder this.Hash
 
 type Cache =
-    // todo: make internal
     {
         RootPath: string
         Entries: ConcurrentDictionary<string, CachedChart>

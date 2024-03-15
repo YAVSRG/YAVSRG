@@ -206,12 +206,7 @@ module Replay =
                     ChartId = r.String
                     TimePlayed = r.Int64
                     TimeUploaded = r.Int64
-                    Data =
-                        // todo: push into Percyqaz.Data
-                        use stream = r.Stream
-                        use ms = new IO.MemoryStream()
-                        stream.CopyTo ms
-                        ms.ToArray()
+                    Data = r.Blob
                 }
             )
         }
@@ -233,12 +228,7 @@ module Replay =
                         ChartId = r.String
                         TimePlayed = r.Int64
                         TimeUploaded = r.Int64
-                        Data =
-                            // todo: push into Percyqaz.Data
-                            use stream = r.Stream
-                            use ms = new IO.MemoryStream()
-                            stream.CopyTo ms
-                            ms.ToArray()
+                        Data = r.Blob
                     }
                 )
             }
