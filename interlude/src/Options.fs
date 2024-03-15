@@ -10,7 +10,7 @@ open Percyqaz.Flux.Input.Bind
 open Prelude.Common
 open Prelude.Gameplay.Mods
 open Prelude.Data.Charts.Sorting
-open Prelude.Data.Charts.Library.Imports
+open Prelude.Data.Charts
 open Interlude
 
 module Options =
@@ -106,9 +106,9 @@ module Options =
             SaveScoreIfUnderPace: Setting<bool>
             SelectedMods: Setting<ModState>
 
-            OsuMount: Setting<MountedChartSource option>
-            StepmaniaMount: Setting<MountedChartSource option>
-            EtternaMount: Setting<MountedChartSource option>
+            OsuMount: Setting<Imports.MountedChartSource option>
+            StepmaniaMount: Setting<Imports.MountedChartSource option>
+            EtternaMount: Setting<Imports.MountedChartSource option>
 
             ChartSortMode: Setting<string>
             ChartSortReverse: Setting<bool>

@@ -8,6 +8,7 @@ open Prelude.Backbeat
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Interlude.Web.Shared.Requests
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -65,7 +66,7 @@ module private TableDownloader =
         do
             for chart in charts do
                 statuses.[chart.Hash] <- 
-                    if (Cache.by_key (sprintf "%s/%s" table.Info.Name chart.Hash) Library.cache).IsNone then 
+                    if (Cache.by_key (sprintf "%s/%s" table.Info.Name chart.Hash) Content.Library.Cache).IsNone then 
                         ChartStatus.Missing
                     else ChartStatus.Downloaded
 
@@ -209,12 +210,12 @@ module private TableDownloader =
             override _.Handle((state: DownloaderState, table_name: string, chart: Tables.Charts.ChartInfo)) =
                 async {
                     sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
-                    match Cache.by_hash chart.Hash Library.cache with
+                    match Cache.by_hash chart.Hash Content.Library.Cache with
                     | Some cc -> 
-                        Cache.copy table_name cc Library.cache
+                        Cache.copy table_name cc Content.Library.Cache
                         sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None -> 
-                        match! Cache.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Library.cache with
+                        match! Cache.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Library.Cache with
                         | true -> sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                         | false -> sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
                     return ()

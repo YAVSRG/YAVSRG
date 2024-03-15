@@ -5,9 +5,10 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Charts.Conversions
-open Prelude.Data.Charts.Library.Imports
+open Prelude.Data.Charts
 open Interlude.Options
 open Interlude.Utils
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -20,7 +21,7 @@ module Mounts =
         | Stepmania = 1
         | Etterna = 2
 
-    type EditorPage(setting: Setting<MountedChartSource option>) as this =
+    type EditorPage(setting: Setting<Imports.MountedChartSource option>) as this =
         inherit Page()
 
         let mount = setting.Value.Value
@@ -94,8 +95,8 @@ module Mounts =
                     }
 
             if import then
-                import_mounted_source.Request(
-                    setting.Value.Value,
+                Imports.import_mounted_source.Request(
+                    (setting.Value.Value, Content.Library),
                     fun () -> Notifications.task_feedback (Icons.FOLDER_PLUS, %"notification.import_success", "")
                 )
 
@@ -106,7 +107,7 @@ module Mounts =
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then
                     Logging.Info "Checking for new osu! songs to import.."
-                    import_mounted_source.Request(mount, ignore)
+                    Imports.import_mounted_source.Request((mount, Content.Library), ignore)
             else
                 Logging.Warn(
                     "osu! Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
@@ -118,7 +119,7 @@ module Mounts =
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then
                     Logging.Info "Checking for new Stepmania songs to import.."
-                    import_mounted_source.Request(mount, ignore)
+                    Imports.import_mounted_source.Request((mount, Content.Library), ignore)
             else
                 Logging.Warn(
                     "Stepmania Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
@@ -130,14 +131,14 @@ module Mounts =
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then
                     Logging.Info "Checking for new Etterna songs to import.."
-                    import_mounted_source.Request(mount, ignore)
+                    Imports.import_mounted_source.Request((mount, Content.Library), ignore)
             else
                 Logging.Warn(
                     "Etterna Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
                 )
         | None -> ()
 
-    type CreateDialog(game: Game, setting: Setting<MountedChartSource option>) as this =
+    type CreateDialog(game: Game, setting: Setting<Imports.MountedChartSource option>) as this =
         inherit Dialog()
 
         let text =
@@ -162,9 +163,9 @@ module Mounts =
                 %"imports.mount.create.auto",
                 (fun () ->
                     match game with
-                    | Game.Osu -> OSU_SONG_FOLDER
-                    | Game.Stepmania -> STEPMANIA_PACK_FOLDER
-                    | Game.Etterna -> ETTERNA_PACK_FOLDER
+                    | Game.Osu -> Imports.OSU_SONG_FOLDER
+                    | Game.Stepmania -> Imports.STEPMANIA_PACK_FOLDER
+                    | Game.Etterna -> Imports.ETTERNA_PACK_FOLDER
                     | _ -> failwith "impossible"
                     |> drop_func.Value
                 ),
@@ -181,16 +182,16 @@ module Mounts =
             drop_func <-
                 fun path ->
                     match game, path with
-                    | Game.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack("osu!", path) |> Some
+                    | Game.Osu, PackFolder -> setting.Value <- Imports.MountedChartSource.Pack("osu!", path) |> Some
                     | Game.Osu, _ -> Notifications.error (%"imports.mount.create.osu.error", "")
                     | Game.Stepmania, FolderOfPacks
-                    | Game.Etterna, FolderOfPacks -> setting.Value <- MountedChartSource.Library path |> Some
+                    | Game.Etterna, FolderOfPacks -> setting.Value <- Imports.MountedChartSource.Library path |> Some
                     | Game.Stepmania, _ -> Notifications.error (%"imports.mount.create.stepmania.error", "")
                     | Game.Etterna, _ -> Notifications.error (%"imports.mount.create.etterna.error", "")
                     | _ -> failwith "impossible"
 
                     if setting.Value.IsSome then
-                        import_mounted_source.Request(setting.Value.Value, ignore)
+                        Imports.import_mounted_source.Request((setting.Value.Value, Content.Library), ignore)
                         Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
                         this.Close()
                 |> Some
@@ -216,7 +217,7 @@ module Mounts =
             text.Init this
             button.Init this
 
-    type Control(game: Game, setting: Setting<MountedChartSource option>) as this =
+    type Control(game: Game, setting: Setting<Imports.MountedChartSource option>) as this =
         inherit FrameContainer(NodeType.Container(fun _ -> Some this.VisibleButtons))
 
         let create_button =

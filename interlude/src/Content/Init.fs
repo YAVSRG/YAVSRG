@@ -6,7 +6,6 @@ open Prelude.Data.Charts
 type Content () =
 
     static member init_startup () =
-        Library.init_startup ()
         Data.init_startup ()
 
     static member init_window () =
@@ -17,10 +16,10 @@ type Content () =
         Noteskins.init_window ()
 
     static member deinit () =
-        Library.deinit ()
         Data.deinit ()
 
     static member Scores = Data.score_db
+    static member Library = Data.library
 
     static member Table = Tables.current
     static member ThemeConfig = Themes.current_config

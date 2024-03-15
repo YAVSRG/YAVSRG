@@ -10,6 +10,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data
 open Interlude.Utils
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Components
 
@@ -67,8 +68,8 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
                 (data.download, target, (fun p -> progress <- p)),
                 fun completed ->
                     if completed then
-                        Library.Imports.convert_stepmania_pack_zip.Request(
-                            (target, id),
+                        Imports.convert_stepmania_pack_zip.Request(
+                            (target, id, Content.Library),
                             fun b ->
                                 if b then
                                     charts_updated_ev.Trigger()

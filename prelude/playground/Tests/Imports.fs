@@ -12,7 +12,7 @@ module Imports =
 
         Logging.Info "Running converter on all osu! songs ..."
 
-        for song in Directory.EnumerateDirectories Library.Imports.OSU_SONG_FOLDER do
+        for song in Directory.EnumerateDirectories Imports.OSU_SONG_FOLDER do
             for file in Directory.EnumerateFiles song do
                 if file.ToLower().EndsWith(".osu") then
                     for chart in

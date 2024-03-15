@@ -12,6 +12,7 @@ open Prelude.Data.Charts.Collections
 open Prelude.Gameplay.Mods
 open Interlude.Web.Shared
 open Interlude.Utils
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
@@ -62,7 +63,7 @@ module SelectedChart =
                     |> Map.filter (fun id _ -> available_mods.ContainsKey id)
                 )
             else
-                match Cache.by_hash chart.Hash Library.cache with
+                match Cache.by_hash chart.Hash Content.Library.Cache with
                 | None ->
                     Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash)
                     Lobby.missing_chart ()

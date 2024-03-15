@@ -78,8 +78,8 @@ module Import =
                     .Once(
                         "unlinkedsongsimport.confirm",
                         fun () ->
-                            Library.Imports.auto_convert.Request(
-                                (path, false),
+                            Imports.auto_convert.Request(
+                                (path, false, Content.Library),
                                 fun success ->
                                     if success then
                                         Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")
@@ -142,8 +142,8 @@ module Import =
                 sync <| fun () -> Menu.Exit(); ConfirmUnlinkedSongsImport(path).Show()
             else
 
-            Library.Imports.auto_convert.Request(
-                (path, false),
+            Imports.auto_convert.Request(
+                (path, false, Content.Library),
                 fun success ->
                     if success then
                         Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")

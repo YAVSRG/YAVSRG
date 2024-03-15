@@ -154,7 +154,7 @@ module Gameplay =
                     match req with
                     | Load(cc, play_audio, rate, mods) ->
                         seq {
-                            match Cache.load cc Library.cache with
+                            match Cache.load cc Content.Library.Cache with
                             | None ->
                                 // todo: set a proper error state to indicate this failed
                                 Background.load None
@@ -170,7 +170,7 @@ module Gameplay =
                                         on_load_succeeded <- []
                             | Some chart ->
 
-                            Background.load (Cache.background_path chart Library.cache)
+                            Background.load (Cache.background_path chart Content.Library.Cache)
 
                             let save_data = ScoreDatabase.get cc.Hash Content.Scores
 
@@ -179,7 +179,7 @@ module Gameplay =
                                     CHART <- Some chart
 
                                     Song.change (
-                                        Cache.audio_path chart Library.cache,
+                                        Cache.audio_path chart Content.Library.Cache,
                                         save_data.Offset,
                                         rate,
                                         (chart.Header.PreviewTime, chart.LastNote),
@@ -567,12 +567,20 @@ module Gameplay =
             Network.Events.player_status.Add player_status
 
     let init_window () =
-        match Cache.by_key options.CurrentChart.Value Library.cache with
+        match Cache.by_key options.CurrentChart.Value Content.Library.Cache with
         | Some cc -> Chart.change (cc, LibraryContext.None, true)
         | None ->
             Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
 
-            match Suggestion.get_random ([], { ScoreDatabase = Content.Scores }) with
+            match 
+                Suggestion.get_random [] {
+                    Rate = rate.Value
+                    RulesetId = Rulesets.current_hash
+                    Ruleset = Rulesets.current
+                    Library = Content.Library
+                    ScoreDatabase = Content.Scores
+                }
+            with
             | Some cc -> Chart.change (cc, LibraryContext.None, true)
             | None ->
                 Logging.Debug "No charts installed"

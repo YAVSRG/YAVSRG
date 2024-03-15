@@ -78,7 +78,7 @@ module Printerlude =
             | None -> failwith "No chart loaded to export"
             | Some c ->
                 try
-                    create_osz c Library.cache (get_game_folder "Exports")
+                    create_osz c Content.Library.Cache (get_game_folder "Exports")
                     Logging.Info "Exported."
                 with err ->
                     Logging.Error("Error while exporting as osz", err)
@@ -139,16 +139,16 @@ module Printerlude =
                         | None -> ()
                         | Some ruleset ->
 
-                        for hash in Library.cache.Entries.Keys |> Seq.toArray do
+                        for hash in Content.Library.Cache.Entries.Keys |> Seq.toArray do
                             let data = ScoreDatabase.get hash Content.Scores
 
                             if not data.Scores.IsEmpty then
 
-                                match Cache.by_hash hash Library.cache with
+                                match Cache.by_hash hash Content.Library.Cache with
                                 | None -> ()
                                 | Some cc ->
 
-                                match Cache.load cc Library.cache with
+                                match Cache.load cc Content.Library.Cache with
                                 | None -> ()
                                 | Some chart ->
 

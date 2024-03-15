@@ -47,8 +47,11 @@ type LevelSelectScreen() =
                 { 
                     BaseChart = Chart.CACHE_DATA.Value
                     Filter = LevelSelect.filter
-                    Rate = rate.Value
                     Mods = selected_mods.Value
+                    Rate = rate.Value
+                    RulesetId = Rulesets.current_hash
+                    Ruleset = Rulesets.current
+                    Library = Content.Library
                     ScoreDatabase = Content.Scores
                 }
             match Suggestion.get_suggestion ctx with
@@ -57,7 +60,15 @@ type LevelSelectScreen() =
                 refresh ()
             | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
         else
-            match Suggestion.get_random (LevelSelect.filter, { ScoreDatabase = Content.Scores }) with
+            let ctx = 
+                { 
+                    Rate = rate.Value
+                    RulesetId = Rulesets.current_hash
+                    Ruleset = Rulesets.current
+                    Library = Content.Library
+                    ScoreDatabase = Content.Scores
+                }
+            match Suggestion.get_random LevelSelect.filter ctx with
             | Some c ->
                 Tree.switch_chart (c, LibraryContext.None, "")
                 refresh ()

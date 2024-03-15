@@ -127,12 +127,12 @@ type private CompareFriend
                                         match
                                             Cache.by_key
                                                 (sprintf "%s/%s" (Content.Table.Value.Info.Name) chart_id)
-                                                Library.cache
+                                                Content.Library.Cache
                                         with
                                         | Some cc -> cc.Title
                                         | None ->
 
-                                        match Cache.by_hash chart_id Library.cache with
+                                        match Cache.by_hash chart_id Content.Library.Cache with
                                         | Some cc -> cc.Title
                                         | None -> sprintf "<%s>" chart_id
 
@@ -309,7 +309,7 @@ type private TableScore(position: int, chart_id: string, grade: int, rating: flo
     inherit StaticWidget(NodeType.None)
 
     let name =
-        match Cache.by_hash chart_id Library.cache with
+        match Cache.by_hash chart_id Content.Library.Cache with
         | Some cc -> cc.Title
         | None -> sprintf "<%s>" chart_id
 

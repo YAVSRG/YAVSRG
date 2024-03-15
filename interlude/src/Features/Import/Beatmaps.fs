@@ -13,6 +13,7 @@ open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Utils
@@ -75,8 +76,8 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
                 (sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.id, target, (fun p -> progress <- p)),
                 fun completed ->
                     if completed then
-                        Library.Imports.auto_convert.Request(
-                            (target, true),
+                        Imports.auto_convert.Request(
+                            (target, true, Content.Library),
                             fun b ->
                                 if b then
                                     charts_updated_ev.Trigger()

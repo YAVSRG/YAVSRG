@@ -51,7 +51,7 @@ module Library =
         library
 
     let save (library: Library) =
-        Cache.save library.Cache
+        Cache.save library.Cache // todo: only save if there are changes
         save_important_json_file (Path.Combine(get_game_folder "Data", "collections.json")) library.Collections
         save_important_json_file (Path.Combine(get_game_folder "Data", "patterns.json")) library.Patterns
 

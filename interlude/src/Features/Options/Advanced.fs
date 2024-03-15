@@ -3,6 +3,7 @@
 open Prelude.Data.Charts.Library
 open Interlude.Utils
 open Interlude.Options
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -34,7 +35,7 @@ module Advanced =
                         "advanced.buildpatterncache",
                         fun () ->
                             cache_patterns.Request(
-                                (),
+                                Content.Library,
                                 fun () ->
                                     Notifications.system_feedback (
                                         Icons.ALERT_OCTAGON,

@@ -174,7 +174,7 @@ module EndlessModeState =
         |> Seq.sortBy snd
         |> Seq.map fst
     
-    let create_from_playlist (shuffle: bool) (playlist: Playlist) (library: Library) =
+    let create_from_playlist (shuffle: bool) (playlist: Playlist) (library: Library) = // todo: could only pass cache in
         playlist.Charts
         |> Seq.choose (fun (c, info) ->
             match Cache.by_hash c.Hash library.Cache with

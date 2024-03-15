@@ -72,8 +72,11 @@ module LevelSelect =
                     EndlessModeState.create {
                         BaseChart = info.CacheInfo
                         Filter = filter
-                        Rate = rate.Value
                         Mods = selected_mods.Value
+                        Rate = rate.Value
+                        RulesetId = Rulesets.current_hash
+                        Ruleset = Rulesets.current
+                        Library = Content.Library
                         ScoreDatabase = Content.Scores
                     }
 

@@ -21,7 +21,7 @@ module ImportScreen =
 
     let something_in_progress () =
         WebServices.download_file.Status <> Async.ServiceStatus.Idle
-        || Library.Imports.convert_song_folder.Status <> Async.ServiceStatus.Idle
+        || Imports.convert_song_folder.Status <> Async.ServiceStatus.Idle
         || Caching.Cache.recache_service.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle

@@ -8,6 +8,7 @@ open Prelude.Charts
 open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.``osu!``
 open Prelude.Data.``osu!``
+open Prelude.Data.Charts
 open Prelude.Gameplay
 open SevenZip.Compression
 
@@ -106,14 +107,14 @@ module OsuScoreMigration =
         Logging.Info "Reading osu database ..."
 
         use file =
-            Path.Combine(Data.Charts.Library.Imports.OSU_SONG_FOLDER, "..", "scores.db")
+            Path.Combine(Imports.OSU_SONG_FOLDER, "..", "scores.db")
             |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)
         let scores = OsuScoreDatabase.Read(reader)
 
         use file =
-            Path.Combine(Data.Charts.Library.Imports.OSU_SONG_FOLDER, "..", "osu!.db")
+            Path.Combine(Imports.OSU_SONG_FOLDER, "..", "osu!.db")
             |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)
@@ -124,7 +125,7 @@ module OsuScoreMigration =
             |> Seq.filter (fun b -> b.Mode = 3uy && round b.OverallDifficulty = 8.0f) do
             let osu_file =
                 Path.Combine(
-                    Data.Charts.Library.Imports.OSU_SONG_FOLDER,
+                    Imports.OSU_SONG_FOLDER,
                     beatmap_data.FolderName,
                     beatmap_data.Filename
                 )
@@ -154,7 +155,7 @@ module OsuScoreMigration =
                     for score in scores.Scores do
                         let replay_file =
                             Path.Combine(
-                                Data.Charts.Library.Imports.OSU_SONG_FOLDER,
+                                Imports.OSU_SONG_FOLDER,
                                 "..",
                                 "Data",
                                 "r",
@@ -219,7 +220,7 @@ module OsuScoreMigration =
         Logging.Info "Reading osu database ..."
 
         use file =
-            Path.Combine(Data.Charts.Library.Imports.OSU_SONG_FOLDER, "..", "osu!.db")
+            Path.Combine(Imports.OSU_SONG_FOLDER, "..", "osu!.db")
             |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)

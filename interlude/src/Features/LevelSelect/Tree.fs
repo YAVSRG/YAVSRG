@@ -310,11 +310,11 @@ module Tree =
             label <-
                 match context with
                 | LibraryGroupContext.Folder id -> 
-                    match Library.collections.GetFolder id with
+                    match Content.Library.Collections.GetFolder id with
                     | Some folder -> sprintf "%s %i" folder.Icon.Value items.Count
                     | None -> sprintf "%s %i" Icons.FOLDER items.Count
                 | LibraryGroupContext.Playlist id -> 
-                    match Library.collections.GetPlaylist id with
+                    match Content.Library.Collections.GetPlaylist id with
                     | Some playlist ->
                         let duration = items |> Seq.map (fun i -> i.PlaylistDuration) |> Seq.sum
                         sprintf "%s %s    %s %i"
@@ -448,26 +448,23 @@ module Tree =
     let refresh () =
         // fetch groups
         let library_groups =
-            // todo: combine these context types into one?
-            let ctx: GroupingContext =
+            let ctx: LibraryViewContext =
                 {
                     Rate = rate.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
                     ScoreDatabase = Content.Scores
+                    Library = Content.Library
                 }
 
             match options.LibraryMode.Value with
-            | LibraryMode.Collections -> get_collection_groups (LevelSelect.filter, { ScoreDatabase = Content.Scores }) sorting_modes.[options.ChartSortMode.Value]
+            | LibraryMode.Collections -> get_collection_groups LevelSelect.filter sorting_modes.[options.ChartSortMode.Value] ctx
             | LibraryMode.Table -> 
                 match Content.Table with
-                | Some table -> get_table_groups (LevelSelect.filter, { ScoreDatabase = Content.Scores }) sorting_modes.[options.ChartSortMode.Value] table
+                | Some table -> get_table_groups LevelSelect.filter sorting_modes.[options.ChartSortMode.Value] table ctx
                 | None -> get_empty_view ()
             | LibraryMode.All ->
-                get_groups
-                    (LevelSelect.filter, { ScoreDatabase = Content.Scores })
-                    (grouping_modes.[options.ChartGroupMode.Value], ctx)
-                    sorting_modes.[options.ChartSortMode.Value]
+                get_groups LevelSelect.filter grouping_modes.[options.ChartGroupMode.Value] sorting_modes.[options.ChartSortMode.Value] ctx
         // if exactly 1 result, switch to it
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()

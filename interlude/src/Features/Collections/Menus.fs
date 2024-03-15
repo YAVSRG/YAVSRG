@@ -7,6 +7,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
 open Interlude.Utils
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -25,7 +26,7 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) as this 
             |+ PageButton(
                 "confirm.yes",
                 (fun () ->
-                    match collections.CreateFolder(new_name.Value, icon.Value) with
+                    match Content.Library.Collections.CreateFolder(new_name.Value, icon.Value) with
                     | Some folder ->
                         Menu.Back()
                         on_create (new_name.Value, Folder folder)
@@ -62,7 +63,7 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) as thi
             |+ PageButton(
                 "confirm.yes",
                 (fun () ->
-                    match collections.CreatePlaylist(new_name.Value, icon.Value) with
+                    match Content.Library.Collections.CreatePlaylist(new_name.Value, icon.Value) with
                     | Some playlist ->
                         Menu.Back()
                         on_create (new_name.Value, Playlist playlist)
@@ -101,7 +102,7 @@ type EditFolderPage(name: string, folder: Folder) as this =
                     ConfirmPage(
                         [ name ] %> "misc.confirmdelete",
                         fun () ->
-                            if collections.Delete name then
+                            if Content.Library.Collections.Delete name then
                                 CollectionActions.collection_modified_ev.Trigger ()
 
                                 // todo: unselect collection when deleted
@@ -120,7 +121,7 @@ type EditFolderPage(name: string, folder: Folder) as this =
 
     override this.OnClose() =
         if new_name.Value <> name && new_name.Value.Length > 1 then
-            if collections.RenameCollection(name, new_name.Value) then
+            if Content.Library.Collections.RenameCollection(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed collection '%s' to '%s'" name new_name.Value)
                 CollectionActions.collection_modified_ev.Trigger ()
             else
@@ -144,7 +145,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) as this =
                     ConfirmPage(
                         [ name ] %> "misc.confirmdelete",
                         fun () ->
-                            if collections.Delete name then
+                            if Content.Library.Collections.Delete name then
                                 CollectionActions.collection_modified_ev.Trigger ()
 
                                 // todo: unselect collection when deleted
@@ -163,7 +164,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) as this =
 
     override this.OnClose() =
         if new_name.Value <> name && new_name.Value.Length > 0 then
-            if collections.RenamePlaylist(name, new_name.Value) then
+            if Content.Library.Collections.RenamePlaylist(name, new_name.Value) then
                 Logging.Debug(sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
                 CollectionActions.collection_modified_ev.Trigger ()
             else
@@ -216,7 +217,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit, is_disabled:
     let refresh () =
         grid.Clear()
 
-        for name, collection in collections.List do
+        for name, collection in Content.Library.Collections.List do
             match collection with
             | Folder f -> 
                 grid.Add(CollectionButton(f.Icon.Value, name, (fun () -> on_select (name, collection)), Disabled = is_disabled (name, collection)))

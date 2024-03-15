@@ -177,7 +177,7 @@ module Startup =
     let migrate () =
 
         if Stats.total.MigrationVersion.IsNone then
-            if Library.cache.Entries.Count > 0 then
+            if Content.Library.Cache.Entries.Count > 0 then
                 Stats.total.MigrationVersion <- Some 0
             else
                 Stats.total.MigrationVersion <- Some MIGRATION_VERSION

@@ -12,7 +12,7 @@ open Prelude.Data.``osu!``
 open Prelude.Data
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
-open Prelude.Data.Charts.Library.Imports
+open Prelude.Data.Charts
 open Interlude.Options
 open Interlude.Content
 
@@ -56,14 +56,14 @@ module Scores =
         let find_matching_chart (beatmap_data: OsuDatabase_Beatmap) (chart: Chart) =
             let chart_hash = Chart.hash chart
 
-            match Cache.by_hash chart_hash Library.cache with
+            match Cache.by_hash chart_hash Content.Library.Cache with
             | None ->
                 match detect_rate_mod beatmap_data.Difficulty with
                 | Some rate ->
                     let chart = Chart.scale rate chart
                     let chart_hash = Chart.hash chart
 
-                    match Cache.by_hash chart_hash Library.cache with
+                    match Cache.by_hash chart_hash Content.Library.Cache with
                     | None ->
                         Logging.Warn(
                             sprintf
