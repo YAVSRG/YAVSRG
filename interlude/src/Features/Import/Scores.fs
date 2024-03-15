@@ -27,7 +27,7 @@ module Scores =
             use file = Path.Combine(m.SourceFolder, "..", "scores.db") |> File.OpenRead
             Logging.Info "Reading scores database .."
             use reader = new BinaryReader(file, Encoding.UTF8)
-            ScoreDatabase.Read(reader)
+            OsuScoreDatabase.Read(reader)
 
         Logging.Info(sprintf "Read score data, containing info about %i maps" scores.Beatmaps.Length)
 
@@ -128,7 +128,7 @@ module Scores =
                     try
                         use file = File.OpenRead replay_file
                         use br = new BinaryReader(file)
-                        Some(ScoreDatabase_Score.Read br)
+                        Some(OsuScoreDatabase_Score.Read br)
                     with err ->
                         Logging.Error(sprintf "Error loading replay file %s" replay_file, err)
                         None

@@ -13,7 +13,7 @@ open SevenZip.Compression
 
 module OsuScoreMigration =
 
-    let do_stuff (chart: Chart, replay: ReplayData, rate: float32, score_data: ScoreDatabase_Score) =
+    let do_stuff (chart: Chart, replay: ReplayData, rate: float32, score_data: OsuScoreDatabase_Score) =
         let metric =
             Metrics.run (PrefabRulesets.Osu.create 8.0f) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
 
@@ -62,7 +62,7 @@ module OsuScoreMigration =
 
             Console.ReadLine() |> ignore
 
-    let replay_generator (head_offset: int) (tail_offset: int) (hash: string) : ScoreDatabase_Score =
+    let replay_generator (head_offset: int) (tail_offset: int) (hash: string) : OsuScoreDatabase_Score =
         let raw =
             sprintf
                 "0|256|500|0,0|256|500|0,-1000|0|1|0,%i|1|1|0,%i|0|1|0,-12345|0|0|32767"
@@ -110,7 +110,7 @@ module OsuScoreMigration =
             |> File.OpenRead
 
         use reader = new BinaryReader(file, Text.Encoding.UTF8)
-        let scores = ScoreDatabase.Read(reader)
+        let scores = OsuScoreDatabase.Read(reader)
 
         use file =
             Path.Combine(Data.Charts.Library.Imports.OSU_SONG_FOLDER, "..", "osu!.db")
@@ -163,7 +163,7 @@ module OsuScoreMigration =
 
                         use file = File.OpenRead replay_file
                         use br = new BinaryReader(file)
-                        let replay_data = ScoreDatabase_Score.Read br
+                        let replay_data = OsuScoreDatabase_Score.Read br
 
                         let input = new MemoryStream(replay_data.CompressedReplayBytes.Value)
                         let output = new MemoryStream()

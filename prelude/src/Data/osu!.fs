@@ -268,7 +268,7 @@ module ``osu!`` =
                 UserPermissions = read_int br
             }
 
-    type ScoreDatabase_Score =
+    type OsuScoreDatabase_Score =
         {
             Mode: byte
             Version: int
@@ -345,27 +345,26 @@ module ``osu!`` =
 
             bw.Write this.OnlineScoreID
 
-    type ScoreDatabase_Beatmap =
+    type OsuScoreDatabase_Beatmap =
         {
             Hash: string
-            Scores: ScoreDatabase_Score array
+            Scores: OsuScoreDatabase_Score array
         }
         static member Read(br: BinaryReader) =
             {
                 Hash = read_string br
-                Scores = Array.init (read_int br) (fun i -> ScoreDatabase_Score.Read br)
+                Scores = Array.init (read_int br) (fun i -> OsuScoreDatabase_Score.Read br)
             }
 
-    // todo: rename to OsuScoreDatabase
-    type ScoreDatabase =
+    type OsuScoreDatabase =
         {
             Version: int
-            Beatmaps: ScoreDatabase_Beatmap array
+            Beatmaps: OsuScoreDatabase_Beatmap array
         }
         static member Read(br: BinaryReader) =
             {
                 Version = read_int br
-                Beatmaps = Array.init (read_int br) (fun i -> ScoreDatabase_Beatmap.Read br)
+                Beatmaps = Array.init (read_int br) (fun i -> OsuScoreDatabase_Beatmap.Read br)
             }
 
     open Prelude
@@ -374,7 +373,7 @@ module ``osu!`` =
     open Prelude.Charts
     open Prelude.Gameplay
 
-    let decode_replay (replay: ScoreDatabase_Score, chart: Chart, rate: float32) : ReplayData =
+    let decode_replay (replay: OsuScoreDatabase_Score, chart: Chart, rate: float32) : ReplayData =
         let input = new MemoryStream(replay.CompressedReplayBytes.Value)
         let output = new MemoryStream()
 
