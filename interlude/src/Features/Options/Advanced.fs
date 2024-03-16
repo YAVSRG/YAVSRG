@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Features.OptionsMenu
 
-open Prelude.Data.Library.Library
+open Prelude.Data.Library
 open Interlude.Utils
 open Interlude.Options
 open Interlude.Content
@@ -34,7 +34,7 @@ module Advanced =
                     .Once(
                         "advanced.buildpatterncache",
                         fun () ->
-                            cache_patterns.Request(
+                            Library.cache_patterns.Request(
                                 Content.Library,
                                 fun () ->
                                     Notifications.system_feedback (

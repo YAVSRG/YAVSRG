@@ -74,7 +74,7 @@ type Patterns(display: Setting<Display>) =
 
             Text.fill_b (
                 Style.font,
-                String.concat ", " entry.Specifics,
+                String.concat ", " (entry.Specifics |> Seq.map fst),
                 b.SliceBottom(30.0f).TrimLeft(160.0f),
                 Colors.text_subheading,
                 Alignment.LEFT
@@ -111,3 +111,4 @@ type Patterns(display: Setting<Display>) =
 
     member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
         patterns <- info.Patterns.Patterns |> List.truncate 8
+        //printfn "%A" info.Patterns.Category

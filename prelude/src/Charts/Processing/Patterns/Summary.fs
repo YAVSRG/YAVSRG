@@ -181,7 +181,7 @@ module PatternSummary =
             Density50: float32
             Density75: float32
             Density90: float32
-            Specifics: string array
+            Specifics: (string * int) array
         }
 
     let private pattern_breakdown
@@ -193,7 +193,6 @@ module PatternSummary =
             patterns
             |> Array.ofSeq
             |> Array.groupBy (fun (pattern, info) -> (pattern, info.BPM.Value, info.Mixed))
-
 
         seq {
             for ((pattern, bpm, mixed), data) in groups do
@@ -217,7 +216,6 @@ module PatternSummary =
                     //|> Array.filter (fun (_, count) -> count > times.Length / 100)
                     |> Array.sortByDescending snd
                     |> Array.truncate 3
-                    |> Array.map fst
 
                 yield
                     {
@@ -234,32 +232,130 @@ module PatternSummary =
                     }
         }
 
-    let categorise_chart (patterns: PatternBreakdown list) =
-        let jacks = patterns |> List.filter (fun e -> e.Pattern = Jack)
-        let streams = patterns |> List.filter (fun e -> e.Pattern = Stream)
-        let chordstream = patterns |> List.filter (fun e -> e.Pattern = Chordstream)
-        let mixed = patterns |> List.filter (_.Mixed)
+    [<Json.AutoCodec>]
+    type ChartCategorisation =
+        {
+            Category: string
+            MajorFeatures: string list
+            MinorFeatures: string list
+        }
 
-        let total = patterns |> List.sumBy (fun e -> e.Amount)
-        let stream_pc = streams |> List.sumBy (fun e -> e.Amount) |> (fun x -> x / total)
-        let jack_pc = jacks |> List.sumBy (fun e -> e.Amount) |> (fun x -> x / total)
-        let cs_pc = chordstream |> List.sumBy (fun e -> e.Amount) |> (fun x -> x / total)
-        let mixed_pc = mixed |> List.sumBy (fun e -> e.Amount) |> (fun x -> x / total)
+    type private CategoryFragment =
+        {
+            CorePattern: CorePatternType
+            Mixed: bool
+            BPM: int option
+            Specific: string option
+            Importance: ScaledTime
+        }
+        override this.ToString() =
+            match this.Specific with
+            | Some spec ->
+                if this.Mixed then 
+                    sprintf "~%iBPM Mixed %s" this.BPM.Value spec 
+                else 
+                    sprintf "%iBPM %s" this.BPM.Value spec
+            | None ->
+                match this.BPM with
+                | None ->
+                    match this.CorePattern with
+                    | Stream -> "Streams"
+                    | Chordstream -> "Chordstream"
+                    | Jack -> "Jacks"
+                | Some bpm ->
+                    match this.CorePattern with
+                    | Stream ->
+                        if this.Mixed then
+                            sprintf "~%iBPM Mixed Streams" bpm
+                        else
+                            sprintf "%iBPM Streams" bpm
+                    | Chordstream ->
+                        if this.Mixed then
+                            sprintf "~%iBPM Mixed Chordstream" bpm
+                        else
+                            sprintf "%iBPM Chordstream" bpm
+                    | Jack -> 
+                        if this.Mixed then
+                            sprintf "~%iBPM Mixed Jacks" bpm
+                        else
+                            sprintf "%iBPM Jacks" bpm
 
-        if cs_pc > 0.5f then
-            "JS/HS"
-        elif mixed_pc > 0.5f then
-            "Stream tech"
-        elif jack_pc > 0.8f then
-            "Chordjacks"
-        elif jack_pc > 0.3f && stream_pc > 0.3f && mixed_pc > 0.3f then
-            "Hybrid tech"
-        elif stream_pc > 0.3f && jack_pc > 0.3f then
-            "Hybrid"
-        elif stream_pc > 0.5f && mixed_pc < 0.2f then
-            "Speed"
-        else
-            "Unknown"
+    let categorise_chart (patterns: PatternBreakdown list) : ChartCategorisation =
+
+        let total = 0.01f<ms/rate> + (patterns |> List.sumBy (fun e -> e.Amount))
+        let average_density = (patterns |> List.sumBy (fun e -> e.Density50 * e.Amount)) / total
+
+        let importance (density: float32) (amount: float32<ms/rate>) =
+            density / average_density * amount
+
+        let fragments =
+            seq {
+                yield!
+                    seq {
+                        for p in patterns do
+                            let total_specs = p.Specifics |> Seq.sumBy snd
+
+                            for spec, count in p.Specifics do
+                                let spec_amount = p.Amount * float32 count / float32 total_specs
+                                yield {
+                                    CorePattern = p.Pattern
+                                    Mixed = p.Mixed
+                                    BPM = Some p.BPM
+                                    Specific = Some spec
+                                    Importance = importance p.Density50 spec_amount
+                                }
+                    } 
+                    |> Seq.sortByDescending _.Importance
+
+                yield! 
+                    seq {
+                        for p in patterns do
+                            yield {
+                                CorePattern = p.Pattern
+                                Mixed = p.Mixed
+                                BPM = Some p.BPM
+                                Specific = None
+                                Importance = importance p.Density50 p.Amount
+                            }
+                    }
+                    |> Seq.sortByDescending _.Importance
+
+                let backup_for_core_pattern (c: CorePatternType) =
+                    let ps = patterns |> List.filter (fun e -> e.Pattern = c) 
+                    let ps_total = 0.01f<ms/rate> + (ps |> List.sumBy (fun e -> e.Amount))
+                    {
+                        CorePattern = c
+                        Mixed = true
+                        BPM = None
+                        Specific = None
+                        Importance = importance ((ps |> List.sumBy (fun e -> e.Amount * e.Density50)) / ps_total) ps_total
+                    }
+
+                yield! 
+                    seq {
+                        yield backup_for_core_pattern Stream
+                        yield backup_for_core_pattern Chordstream
+                        yield backup_for_core_pattern Jack
+                    }
+                    |> Seq.sortByDescending _.Importance
+            }
+        
+        let mutable major : CategoryFragment list = []
+        for f in fragments |> Seq.filter (fun x -> x.Importance / total >= 0.25f) do
+            if
+                (major = [] || f.Importance > major.Head.Importance * 0.7f)
+                && (f.Specific.IsSome || major |> List.forall (fun x -> x.CorePattern <> f.CorePattern))
+                && (f.BPM.IsSome || major |> List.forall (fun x -> x.CorePattern <> f.CorePattern))
+            then
+                major <- major @ [f]
+        let mutable minor = fragments |> Seq.filter (fun x -> x.Importance / total < 0.25f) |> Seq.truncate 3 |> Seq.map _.ToString() |> List.ofSeq
+
+        let category = ""
+        {
+            Category = category
+            MajorFeatures = major |> List.map (fun x -> x.ToString())
+            MinorFeatures = minor
+        }
 
     [<Json.AutoCodec>]
     type PatternDetailsReport =
@@ -267,7 +363,7 @@ module PatternSummary =
             Patterns: PatternBreakdown list
             LNPercent: float32
             SVAmount: Time
-            Category: string
+            Category: ChartCategorisation
         }
 
     let generate_detailed_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =

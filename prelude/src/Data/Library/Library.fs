@@ -1,13 +1,9 @@
 ﻿namespace Prelude.Data.Library
 
-open System
 open System.IO
-open System.IO.Compression
 open System.Collections.Concurrent
-open Percyqaz.Data
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Conversions
 open Prelude.Charts.Processing.Patterns
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
@@ -23,8 +19,6 @@ type Library =
 
 module Library =
 
-    // ---- Loading and saving ----
-
     let load () : Library =
         let library =
             {
@@ -36,13 +30,9 @@ module Library =
                         false
                 Patterns =
                     let path = Path.Combine(get_game_folder "Data", "patterns.json")
-
-                    if File.GetLastWriteTimeUtc(path) |> Timestamp.from_datetime > 1709212606000L then
-                        load_important_json_file
-                            "Patterns"
-                            (Path.Combine(get_game_folder "Data", "patterns.json"))
-                            false
-                    else
+                    match JSON.FromFile path with
+                    | Ok res -> res
+                    | Error reason ->
                         Logging.Info("Pattern analysis has updated, you will need to cache patterns again")
                         Patterns()
             }

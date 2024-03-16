@@ -111,16 +111,12 @@ module Suggestion =
 
                                 let duration_similarity = (min p.Amount p2.Amount) / total_pattern_amount
 
-                                let bonus_similarity =
-                                    if Array.tryHead p.Specifics = Array.tryHead p2.Specifics then
-                                        1.2f
-                                    else
-                                        1.0f
+                                let bonus_similarity = 1.0f
 
                                 similarity_score <-
                                     similarity_score + duration_similarity * bpm_similarity * bonus_similarity
 
-                    if similarity_score > 0.5f then
+                    if similarity_score > 0.2f then
                         yield entry, similarity_score
             }
             |> Seq.sortByDescending snd

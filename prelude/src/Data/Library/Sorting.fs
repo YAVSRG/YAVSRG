@@ -103,7 +103,7 @@ module Sorting =
                 "patterns",
                 fun (c, ctx) ->
                     match ctx.Library.Patterns.TryGetValue(c.Hash) with
-                    | true, report -> 0, report.Category
+                    | true, report -> 0, report.Category.Category
                     | false, _ -> -1, "Not analysed"
             ]
 
