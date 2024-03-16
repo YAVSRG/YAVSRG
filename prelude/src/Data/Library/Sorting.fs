@@ -115,33 +115,8 @@ module Sorting =
 
     let private has_pattern (pattern: string) (cc: CachedChart, ctx: LibraryViewContext) =
         if ctx.Library.Patterns.ContainsKey cc.Hash then
-            let p = ctx.Library.Patterns.[cc.Hash].Patterns
-
-            let pattern_to_find =
-                match pattern.ToLower() with
-                | "streams"
-                | "speed"
-                | "stream" -> Stream
-                | "jumpstream"
-                | "js"
-                | "handstream"
-                | "hs"
-                | "cs" -> Chordstream
-                | "jacks"
-                | "chords"
-                | "chordjack"
-                | "chordjacks"
-                | "cj" -> Jack
-                | _ -> Stream
-
-            let matching =
-                p
-                |> Seq.where (fun x -> x.Pattern = pattern_to_find)
-                |> Seq.sumBy (fun x -> x.Amount)
-
-            let total = p |> Seq.sumBy (fun x -> x.Amount)
-            matching / total > 0.4f
-
+            let p = ctx.Library.Patterns.[cc.Hash].Category
+            p.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
         else
             false
 

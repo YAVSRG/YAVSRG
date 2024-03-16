@@ -287,7 +287,7 @@ module PatternSummary =
             (f.BPM.IsNone && this.BPM.IsSome)
             || (f.Specific.IsNone && this.Specific.IsSome)
 
-    let categorise_chart (patterns: PatternBreakdown list) : ChartCategorisation =
+    let categorise_chart (keys: int) (patterns: PatternBreakdown list) : ChartCategorisation =
 
         let total = 0.01f<ms/rate> + (patterns |> List.sumBy (fun e -> e.Amount))
         let average_density = (patterns |> List.sumBy (fun e -> e.Density50 * e.Amount)) / total
@@ -359,15 +359,65 @@ module PatternSummary =
                 && minor |> List.forall(fun x -> not (x.MoreUsefulThan f))
             )
 
+        let major = major |> List.filter is_not_duplicate_of_major
+        let minor = minor |> List.filter is_not_duplicate
+
+        let minor_specific (spec: string) =
+            minor |> List.tryFind (fun x -> x.Specific = Some spec)
+        let minor_category (c: CorePatternType) =
+            minor |> List.tryFind (fun x -> x.CorePattern = c)
+
         let category =
             match major with
             | [] -> "Uncategorised"
-            | x :: [] -> "Uncategorised"
-            | _ -> "Uncategorised"
+            | x :: [] ->
+                match x.CorePattern with
+                | Stream ->
+                    let is_hybrid = minor_category Jack |> Option.isSome
+                    let hybrid_suffix = if is_hybrid then " Hybrid" else ""
+                    let is_tech = x.Mixed
+                    let tech_suffix = if is_tech then " Tech" else ""
+                    "Stream" + hybrid_suffix + tech_suffix
+                | Chordstream ->
+                    let is_hybrid = minor_category Jack |> Option.isSome
+                    let hybrid_suffix = if is_hybrid then " Hybrid" else ""
+                    let is_tech = x.Mixed
+                    let tech_suffix = if is_tech then " Tech" else ""
+                    match x.Specific with
+                    | Some "Jumpstream" -> 
+                        match minor_specific "Handstream" with
+                        | Some _ -> "Jumpstream/Handstream" + hybrid_suffix + tech_suffix
+                        | _ -> "Jumpstream" + hybrid_suffix + tech_suffix
+                    | Some "Handstream" -> "Handstream" + hybrid_suffix + tech_suffix
+                    | _ ->
+                        match minor_specific "Handstream" with
+                        | Some _ -> "Jumpstream/Handstream" + hybrid_suffix + tech_suffix
+                        | None -> 
+                            if keys = 4 then 
+                                "Jumpstream" + hybrid_suffix + tech_suffix 
+                            else 
+                                "Chordstream" + hybrid_suffix + tech_suffix
+                | Jack ->
+                    match x.Specific with
+                    | Some "Chordjacks" -> "Chordjack"
+                    | _ -> "Jack"
+            | _ ->
+                let has_jacks = major |> List.exists (fun x -> x.CorePattern = Jack)
+                let has_streams = major |> List.exists (fun x -> x.CorePattern <> Jack)
+                let has_stream_tech = major |> List.exists (fun x -> x.CorePattern <> Jack && x.Mixed)
+                if has_streams && has_jacks then
+                    if has_stream_tech then "Hybrid Tech" else "Hybrid"
+                elif has_jacks then "Jack"
+                else
+                    let is_hybrid = minor_category Jack |> Option.isSome
+                    let hybrid_suffix = if is_hybrid then " Hybrid" else ""
+                    let tech_suffix = if has_stream_tech then " Tech" else ""
+                    "Stream" + hybrid_suffix + tech_suffix
+                    
         {
             Category = category
-            MajorFeatures = major |> List.filter is_not_duplicate_of_major |> List.map (fun x -> x.ToString())
-            MinorFeatures = minor |> List.filter is_not_duplicate |> List.map (fun x -> x.ToString())
+            MajorFeatures = major |> List.map (fun x -> x.ToString())
+            MinorFeatures = minor |> List.map (fun x -> x.ToString())
         }
 
     [<Json.AutoCodec>]
@@ -406,7 +456,7 @@ module PatternSummary =
             Patterns = patterns
             LNPercent = ln_percent chart
             SVAmount = sv_time chart
-            Category = categorise_chart patterns
+            Category = categorise_chart chart.Keys patterns
         }
 
     let generate_cached_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
@@ -436,5 +486,5 @@ module PatternSummary =
             Patterns = patterns
             LNPercent = ln_percent chart
             SVAmount = sv_time chart
-            Category = categorise_chart patterns
+            Category = categorise_chart chart.Keys patterns
         }

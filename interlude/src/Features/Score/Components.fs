@@ -5,6 +5,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude.Common
+open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Data
 open Interlude.Options
@@ -94,6 +95,17 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
     let mod_string = Mods.format_mods (score_info.Rate, score_info.Mods, false)
 
+    let category =
+        // temporary
+        match Gameplay.Chart.PATTERNS with
+        | Some p -> p.Category
+        | None -> PatternSummary.ChartCategorisation.Default
+
+    let category, main_elements, minor_elements =
+        category.Category,
+        String.concat ", " category.MajorFeatures,
+        String.concat ", " (List.truncate 3 category.MinorFeatures)
+
     override this.Init(parent) =
         this
         |+ Text(
@@ -147,6 +159,25 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             (fun () -> sprintf "M: %.1fms | SD: %.1fms" (!stats).TapMean (!stats).TapStandardDeviation),
             Position = Position.TrimTop(600.0f).SliceTop(40.0f).Margin(10.0f, 0.0f),
             Align = Alignment.RIGHT
+        )
+
+        this
+        |+ Text(
+            category,
+            Position = Position.TrimBottom(95.0f).SliceBottom(60.0f).Margin(20.0f, 0.0f),
+            Align = Alignment.LEFT
+        )
+        |+ Text(
+            main_elements,
+            Position = Position.TrimBottom(60.0f).SliceBottom(40.0f).Margin(20.0f, 0.0f),
+            Color = K Colors.text_subheading,
+            Align = Alignment.LEFT
+        )
+        |* Text(
+            minor_elements,
+            Position = Position.TrimBottom(30.0f).SliceBottom(30.0f).Margin(20.0f, 0.0f),
+            Color = K Colors.text_greyout,
+            Align = Alignment.LEFT
         )
 
         base.Init(parent)
