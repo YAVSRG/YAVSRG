@@ -1,12 +1,14 @@
 ﻿namespace Interlude.Features.MainMenu
 
 open Percyqaz.Common
-open Interlude.Options
-open Interlude.Utils
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
+open Prelude.Data.Library.Caching
+open Interlude.Options
+open Interlude.Utils
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Features.Online
@@ -136,8 +138,25 @@ type MainMenuScreen() as this =
                 %"notification.update_available.body"
             )
 
-        if prev = Screen.Type.SplashScreen && first_launch then
-            Wiki.show ()
+        if prev = Screen.Type.SplashScreen then
+            if 
+                Cache.cache_patterns_if_needed 
+                    Content.Cache 
+                    (fun () ->
+                        Notifications.system_feedback (
+                            Icons.ALERT_OCTAGON,
+                            %"notification.pattern_cache_complete.title",
+                            ""
+                        )
+                    )
+            then
+                Notifications.system_feedback (
+                    Icons.ALERT_OCTAGON,
+                    %"notification.pattern_cache_started.title",
+                    %"notification.pattern_cache_started.body"
+                )
+            if first_launch then
+                Wiki.show ()
 
         splash_text <- choose_splash ()
         Logo.move_menu ()

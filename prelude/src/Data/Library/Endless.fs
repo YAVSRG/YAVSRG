@@ -53,11 +53,10 @@ module Suggestion =
 
         recommended_recently <- Set.add cache_info.Hash recommended_recently
 
-        if not (ctx.Library.Patterns.ContainsKey cache_info.Hash) then
-            None
-        else
+        match Cache.patterns_by_hash cache_info.Hash ctx.Library.Cache with
+        | None -> None
+        | Some report ->
 
-            let report = ctx.Library.Patterns.[cache_info.Hash]
             let patterns = report.Patterns
             let total_pattern_amount = patterns |> Seq.sumBy (fun x -> x.Amount)
 
@@ -79,17 +78,16 @@ module Suggestion =
                 |> Seq.filter (fun x -> x.Physical >= min_difficulty && x.Physical <= max_difficulty)
                 |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
                 |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
-                |> Seq.filter (fun x -> ctx.Library.Patterns.ContainsKey x.Hash)
-                |> Seq.filter (fun x ->
-                    let ln_pc = ctx.Library.Patterns.[x.Hash].LNPercent in ln_pc >= min_ln_pc && ln_pc <= max_ln_pc
+                |> Seq.choose (fun x -> match Cache.patterns_by_hash x.Hash ctx.Library.Cache with Some p -> Some (x, p) | None -> None)
+                |> Seq.filter (fun (x, p) ->
+                    let ln_pc = p.LNPercent in ln_pc >= min_ln_pc && ln_pc <= max_ln_pc
                 )
-                |> Seq.filter (fun x -> now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > TWO_DAYS)
+                |> Seq.filter (fun (x, p) -> now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > TWO_DAYS)
 
-                |> Filter.apply_seq (ctx.Filter, ctx.LibraryViewContext)
+                |> Filter.apply_ctx_seq (ctx.Filter, ctx.LibraryViewContext)
 
             seq {
-                for entry in candidates do
-                    let candidate_patterns = ctx.Library.Patterns.[entry.Hash]
+                for entry, candidate_patterns in candidates do
 
                     let mutable similarity_score = 0.0f
 

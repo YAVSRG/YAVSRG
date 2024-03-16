@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Features.OptionsMenu
 
-open Prelude.Data.Library
+open Prelude.Data.Library.Caching
 open Interlude.Utils
 open Interlude.Options
 open Interlude.Content
@@ -34,8 +34,8 @@ module Advanced =
                     .Once(
                         "advanced.buildpatterncache",
                         fun () ->
-                            Library.cache_patterns.Request(
-                                Content.Library,
+                            Cache.cache_patterns.Request(
+                                (Content.Cache, true),
                                 fun () ->
                                     Notifications.system_feedback (
                                         Icons.ALERT_OCTAGON,

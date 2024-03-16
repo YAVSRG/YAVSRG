@@ -101,10 +101,10 @@ module Sorting =
                 "creator", (fun (c, _) -> 0, first_character c.Creator)
                 "keymode", (fun (c, _) -> c.Keys, c.Keys.ToString() + "K")
                 "patterns",
-                fun (c, ctx) ->
-                    match ctx.Library.Patterns.TryGetValue(c.Hash) with
-                    | true, report -> 0, report.Category.Category
-                    | false, _ -> -1, "Not analysed"
+                fun (cc, ctx) ->
+                    match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
+                    | None -> -1, "Not analysed"
+                    | Some report -> 0, report.Category.Category
             ]
 
     let private has_comment (query: string) (cc: CachedChart, ctx: LibraryViewContext) =
@@ -114,11 +114,9 @@ module Sorting =
         && comment.Contains(query, StringComparison.OrdinalIgnoreCase)
 
     let private has_pattern (pattern: string) (cc: CachedChart, ctx: LibraryViewContext) =
-        if ctx.Library.Patterns.ContainsKey cc.Hash then
-            let p = ctx.Library.Patterns.[cc.Hash].Category
-            p.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
-        else
-            false
+        match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
+        | Some report -> report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+        | None -> false
 
     let private compare_by (f: CachedChart -> IComparable) =
         fun a b -> f(fst a).CompareTo <| f (fst b)
@@ -221,7 +219,7 @@ module Sorting =
         let apply_seq (filter: Filter, ctx: LibraryViewContext) (charts: CachedChart seq) =
             Seq.filter (apply (filter, ctx)) charts
 
-        let apply_ctx_seq (filter: Filter, ctx: LibraryViewContext) (charts: (CachedChart * LibraryContext) seq) =
+        let apply_ctx_seq (filter: Filter, ctx: LibraryViewContext) (charts: (CachedChart * 'T) seq) =
             Seq.filter (fun (cc, _) -> apply (filter, ctx) cc) charts
 
     [<RequireQualifiedAccess; Json.AutoCodec>]

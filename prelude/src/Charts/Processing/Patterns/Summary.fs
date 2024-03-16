@@ -448,6 +448,7 @@ module PatternSummary =
             SVAmount: Time
             Category: ChartCategorisation
         }
+        static member Default = { Patterns = []; LNPercent = 0.0f; SVAmount = 0.0f<ms>; Category = ChartCategorisation.Default }
 
     let generate_detailed_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
         let core_patterns, specific_patterns = Patterns.analyse rate chart

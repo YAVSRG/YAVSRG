@@ -166,11 +166,6 @@ open Interlude.Features.Online
 //    Logging.Info "Running a recache ..."
 //    Cache.recache_service.RequestAsync Library.cache |> Async.RunSynchronously
 
-//let run_2 () =
-//    Logging.Info "---- ---- ----"
-//    Logging.Info "Please wait while Interlude caches what patterns you have in your charts - it shouldn't take long"
-//    Library.cache_patterns.RequestAsync() |> Async.RunSynchronously
-
 module Startup =
     let MIGRATION_VERSION = 2
 
@@ -186,11 +181,11 @@ module Startup =
         | None -> failwith "impossible"
         | Some i ->
             if i < 1 then
-                //Migrations.run_1 ()
+                // Originally a migration here for migrating to new hash format from before 0.7.2
                 Stats.total.MigrationVersion <- Some 1
 
             if i < 2 then
-                //Migrations.run_2 ()
+                // Originally a migration here for generating pattern data
                 Stats.total.MigrationVersion <- Some 2
 
     let init_startup (instance) =

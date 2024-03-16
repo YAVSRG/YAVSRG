@@ -10,6 +10,7 @@ open Percyqaz.Data
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
+open Prelude.Charts.Processing.Patterns
 
 [<Json.AutoCodec(true)>]
 type CachedChart =
@@ -58,6 +59,8 @@ type Cache =
     {
         RootPath: string
         Entries: ConcurrentDictionary<string, CachedChart>
+        Patterns: ConcurrentDictionary<string, PatternSummary.PatternDetailsReport>
+        mutable Changed: bool
     }
 
 module Cache =
@@ -78,12 +81,22 @@ module Cache =
         {
             RootPath = path
             Entries = load_important_json_file "Cache" (Path.Combine(path, "cache.json")) false
+            Patterns =
+                let path = Path.Combine(path, "patterns.json")
+                match JSON.FromFile path with
+                | Ok res -> res
+                | Error reason ->
+                    ConcurrentDictionary<string, PatternSummary.PatternDetailsReport>()
+            Changed = false
         }
 
     let save (cache: Cache) =
-        save_important_json_file (Path.Combine(cache.RootPath, "cache.json")) cache.Entries
+        if cache.Changed then
+            save_important_json_file (Path.Combine(cache.RootPath, "cache.json")) cache.Entries
+            JSON.ToFile (Path.Combine(cache.RootPath, "patterns.json"), true) cache.Patterns
+            cache.Changed <- false
 
-    let create_entry (folder_name: string) (file_time: DateTime) (chart: Chart) =
+    let private create_entry (folder_name: string) (file_time: DateTime) (chart: Chart) : CachedChart * PatternSummary.PatternDetailsReport =
         let last_note = chart.LastNote
         let rating = DifficultyRating.calculate 1.0f chart.Notes
 
@@ -110,7 +123,8 @@ module Cache =
                 match chart.Header.AudioFile with
                 | Asset s -> Some s
                 | _ -> None
-        }
+        },
+        PatternSummary.generate_cached_pattern_data (1.0f, chart)
 
     let private sha_256 = SHA256.Create()
 
@@ -167,6 +181,7 @@ module Cache =
                 async {
                     Logging.Debug(sprintf "Rebuilding chart cache @ %s" cache.RootPath)
                     cache.Entries.Clear()
+                    cache.Changed <- true
 
                     for folder in
                         Directory.EnumerateDirectories cache.RootPath
@@ -224,7 +239,7 @@ module Cache =
                                                         }
                                                 }
 
-                                            let entry =
+                                            let entry, patterns =
                                                 create_entry (Path.GetFileName folder) (File.GetCreationTimeUtc file) c
 
                                             let new_file = get_path entry cache
@@ -233,6 +248,8 @@ module Cache =
                                             File.Delete file
 
                                             cache.Entries.[entry.Key] <- entry
+                                            cache.Patterns.[entry.Hash] <- patterns
+                                            cache.Changed <- true
                                         with err ->
                                             Logging.Error(
                                                 sprintf "Error (likely assets) with caching a legacy yav file: %s" file,
@@ -252,7 +269,7 @@ module Cache =
                             | ".yav" ->
                                 match Chart.from_file file with
                                 | Some c ->
-                                    let entry = create_entry (Path.GetFileName folder) (File.GetCreationTimeUtc file) c
+                                    let entry, patterns = create_entry (Path.GetFileName folder) (File.GetCreationTimeUtc file) c
 
                                     match c.Header.BackgroundFile with
                                     | Relative _ ->
@@ -289,6 +306,8 @@ module Cache =
                                             File.Move(file, intended_path)
 
                                         cache.Entries.[entry.Key] <- entry
+                                        cache.Patterns.[entry.Hash] <- patterns
+                                        cache.Changed <- true
                                 | None -> ()
                             | _ -> ()
 
@@ -344,12 +363,14 @@ module Cache =
                         }
                 }
 
-            let entry = create_entry folder now c
+            let entry, patterns = create_entry folder now c
             let new_file = get_path entry cache
             Directory.CreateDirectory(Path.GetDirectoryName new_file) |> ignore
             Chart.to_file c new_file
 
             cache.Entries.[entry.Key] <- entry
+            cache.Patterns.[entry.Hash] <- patterns
+            cache.Changed <- true
 
     // For copying a chart from one folder to another
     let copy (folder: string) (entry: CachedChart) (cache: Cache) =
@@ -360,6 +381,7 @@ module Cache =
         else
 
             cache.Entries.[new_entry.Key] <- new_entry
+            cache.Changed <- true
             let target = get_path new_entry cache
             Directory.CreateDirectory(Path.GetDirectoryName target) |> ignore
             File.Copy(get_path entry cache, target)
@@ -425,12 +447,14 @@ module Cache =
                         }
                 }
 
-            let entry = create_entry folder DateTime.UtcNow chart
+            let entry, patterns = create_entry folder DateTime.UtcNow chart
             let target_path = get_path entry target
             Directory.CreateDirectory(Path.GetDirectoryName target_path) |> ignore
             Chart.to_file chart target_path
 
             target.Entries.[entry.Key] <- entry
+            target.Patterns.[entry.Hash] <- patterns
+            target.Changed <- true
 
     let load (entry: CachedChart) (cache: Cache) = get_path entry cache |> Chart.from_file
 
@@ -441,15 +465,46 @@ module Cache =
     let by_hash (id: string) (cache: Cache) : CachedChart option =
         Seq.tryFind (fun cc -> cc.Hash = id) cache.Entries.Values
 
-    let delete (c: CachedChart) (cache: Cache) =
-        cache.Entries.TryRemove c.Key |> ignore
-        let path = get_path c cache
+    let patterns_by_hash (id: string) (cache: Cache) : PatternSummary.PatternDetailsReport option =
+        let success, p = cache.Patterns.TryGetValue id
+        if success then Some p else None
+
+    let delete (cc: CachedChart) (cache: Cache) =
+        if cache.Entries.TryRemove (KeyValuePair(cc.Key, cc)) then 
+            cache.Patterns.TryRemove cc.Hash |> ignore
+            cache.Changed <- true
+        let path = get_path cc cache
 
         if File.Exists path then
             File.Delete path
     // todo: remove assets IF they aren't used by anything else in the cache
 
     let delete_many (cs: CachedChart seq) (cache: Cache) = Seq.iter (fun c -> delete c cache) cs
+
+    // Pattern stuff
+
+    let cache_patterns =
+        { new Async.Service<Cache * bool, unit>() with
+            override this.Handle((cache, force)) =
+                async {
+                    if force then 
+                        cache.Patterns.Clear()
+                        cache.Changed <- true
+                    for entry in cache.Entries.Values do
+                        if not (cache.Patterns.ContainsKey entry.Hash) then
+                            match load entry cache with
+                            | Some chart ->
+                                cache.Patterns.[entry.Hash] <- PatternSummary.generate_cached_pattern_data (1.0f, chart)
+                                cache.Changed <- true
+                            | None -> ()
+                }
+        }
+
+    let cache_patterns_if_needed (cache: Cache) (recache_complete_callback: unit -> unit) : bool =
+        if cache.Entries.Count > 0 && cache.Patterns.Count = 0 then
+            cache_patterns.Request((cache, true), recache_complete_callback)
+            true
+        else false
 
     // Download protocol
 
