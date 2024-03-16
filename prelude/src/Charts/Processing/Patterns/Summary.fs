@@ -239,11 +239,13 @@ module PatternSummary =
             MajorFeatures: string list
             MinorFeatures: string list
         }
+        static member Default = { Category = "Unknown"; MajorFeatures = []; MinorFeatures = [] }
 
+    // todo: make into a union for easier reasoning
     type private CategoryFragment =
         {
             CorePattern: CorePatternType
-            Mixed: bool
+            Mixed: bool // todo: turn 3-pronged with mixed, non mixed, combo of both
             BPM: int option
             Specific: string option
             Importance: ScaledTime
@@ -279,6 +281,11 @@ module PatternSummary =
                             sprintf "~%iBPM Mixed Jacks" bpm
                         else
                             sprintf "%iBPM Jacks" bpm
+        member this.MoreUsefulThan(f: CategoryFragment) =
+            if f.CorePattern <> this.CorePattern then false else
+
+            (f.BPM.IsNone && this.BPM.IsSome)
+            || (f.Specific.IsNone && this.Specific.IsSome)
 
     let categorise_chart (patterns: PatternBreakdown list) : ChartCategorisation =
 
@@ -290,35 +297,27 @@ module PatternSummary =
 
         let fragments =
             seq {
-                yield!
-                    seq {
-                        for p in patterns do
-                            let total_specs = p.Specifics |> Seq.sumBy snd
+                for p in patterns do
+                    let total_specs = p.Specifics |> Seq.sumBy snd
 
-                            for spec, count in p.Specifics do
-                                let spec_amount = p.Amount * float32 count / float32 total_specs
-                                yield {
-                                    CorePattern = p.Pattern
-                                    Mixed = p.Mixed
-                                    BPM = Some p.BPM
-                                    Specific = Some spec
-                                    Importance = importance p.Density50 spec_amount
-                                }
-                    } 
-                    |> Seq.sortByDescending _.Importance
+                    for spec, count in p.Specifics do
+                        let spec_amount = p.Amount * float32 count / float32 total_specs
+                        yield {
+                            CorePattern = p.Pattern
+                            Mixed = p.Mixed
+                            BPM = Some p.BPM
+                            Specific = Some spec
+                            Importance = importance p.Density50 spec_amount
+                        }
 
-                yield! 
-                    seq {
-                        for p in patterns do
-                            yield {
-                                CorePattern = p.Pattern
-                                Mixed = p.Mixed
-                                BPM = Some p.BPM
-                                Specific = None
-                                Importance = importance p.Density50 p.Amount
-                            }
+                for p in patterns do
+                    yield {
+                        CorePattern = p.Pattern
+                        Mixed = p.Mixed
+                        BPM = Some p.BPM
+                        Specific = None
+                        Importance = importance p.Density50 p.Amount
                     }
-                    |> Seq.sortByDescending _.Importance
 
                 let backup_for_core_pattern (c: CorePatternType) =
                     let ps = patterns |> List.filter (fun e -> e.Pattern = c) 
@@ -331,30 +330,44 @@ module PatternSummary =
                         Importance = importance ((ps |> List.sumBy (fun e -> e.Amount * e.Density50)) / ps_total) ps_total
                     }
 
-                yield! 
-                    seq {
-                        yield backup_for_core_pattern Stream
-                        yield backup_for_core_pattern Chordstream
-                        yield backup_for_core_pattern Jack
-                    }
-                    |> Seq.sortByDescending _.Importance
+                // todo: output something thats just a sum of mixed/non mixed
+                // then output these that combine mixed+non mixed
+                yield backup_for_core_pattern Stream
+                yield backup_for_core_pattern Chordstream
+                yield backup_for_core_pattern Jack
             }
+            |> Seq.sortByDescending _.Importance
+            |> List.ofSeq
         
-        let mutable major : CategoryFragment list = []
-        for f in fragments |> Seq.filter (fun x -> x.Importance / total >= 0.25f) do
-            if
-                (major = [] || f.Importance > major.Head.Importance * 0.7f)
-                && (f.Specific.IsSome || major |> List.forall (fun x -> x.CorePattern <> f.CorePattern))
-                && (f.BPM.IsSome || major |> List.forall (fun x -> x.CorePattern <> f.CorePattern))
-            then
-                major <- major @ [f]
-        let mutable minor = fragments |> Seq.filter (fun x -> x.Importance / total < 0.25f) |> Seq.truncate 3 |> Seq.map _.ToString() |> List.ofSeq
+        let top = List.head fragments
+        let major : CategoryFragment list =
+            fragments
+            |> List.filter (fun f -> f.Importance / top.Importance > 0.5f && f.Importance / total > 0.2f)
+        let minor = 
+            fragments
+            |> List.except major
+            |> List.filter (fun f -> f.Importance / total > 0.1f)
+        let is_not_duplicate_of_major (f: CategoryFragment) =
+            f.Specific.IsSome
+            || (
+                major |> List.forall(fun x -> not (x.MoreUsefulThan f))
+            )
+        let is_not_duplicate (f: CategoryFragment) =
+            f.Specific.IsSome
+            || (
+                major |> List.forall(fun x -> not (x.MoreUsefulThan f))
+                && minor |> List.forall(fun x -> not (x.MoreUsefulThan f))
+            )
 
-        let category = ""
+        let category =
+            match major with
+            | [] -> "Uncategorised"
+            | x :: [] -> "Uncategorised"
+            | _ -> "Uncategorised"
         {
             Category = category
-            MajorFeatures = major |> List.map (fun x -> x.ToString())
-            MinorFeatures = minor
+            MajorFeatures = major |> List.filter is_not_duplicate_of_major |> List.map (fun x -> x.ToString())
+            MinorFeatures = minor |> List.filter is_not_duplicate |> List.map (fun x -> x.ToString())
         }
 
     [<Json.AutoCodec>]
