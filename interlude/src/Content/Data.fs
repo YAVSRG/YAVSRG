@@ -1,6 +1,8 @@
 ﻿namespace Interlude.Content
 
+open System.IO
 open Percyqaz.Data.Sqlite
+open Prelude
 open Prelude.Data
 open Prelude.Data.Library
 
@@ -12,7 +14,7 @@ module private Data =
 
     let init_startup () =
         library <- Library.load ()
-        database <- Database.from_file "scores.db"
+        database <- Database.from_file (Path.Combine(get_game_folder "Data", "scores.db"))
         score_db <- ScoreDatabase.create true database
 
     let deinit () =
