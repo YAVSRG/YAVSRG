@@ -364,56 +364,76 @@ module PatternSummary =
 
         let minor_specific (spec: string) =
             minor |> List.tryFind (fun x -> x.Specific = Some spec)
-        let minor_category (c: CorePatternType) =
-            minor |> List.tryFind (fun x -> x.CorePattern = c)
+
+        let notable_jacks (list: CategoryFragment list) (bpm: int option) =
+            match bpm with
+            | Some b ->
+                let threshold = b / 2 + 5
+                list |> List.exists (fun x -> x.CorePattern = Jack && (x.BPM.IsNone || x.BPM.Value > threshold))
+            | None -> list |> List.exists (fun x -> x.CorePattern = Jack)
+
+        let stream_name_prefix (f: CategoryFragment) =
+            assert(f.CorePattern <> Jack)
+            if f.CorePattern = Stream then "Stream"
+            else
+                match f.Specific with
+                | Some "Jumpstream" -> 
+                    match minor_specific "Handstream" with
+                    | Some _ -> "Jumpstream/Handstream"
+                    | _ -> "Jumpstream"
+                | Some "Handstream" -> "Handstream"
+                | _ ->
+                    match minor_specific "Handstream" with
+                    | Some _ -> "Jumpstream/Handstream"
+                    | None -> 
+                        if keys = 4 then 
+                            "Jumpstream"
+                        else 
+                            "Chordstream"
 
         let category =
             match major with
             | [] -> "Uncategorised"
             | x :: [] ->
                 match x.CorePattern with
-                | Stream ->
-                    let is_hybrid = minor_category Jack |> Option.isSome
-                    let hybrid_suffix = if is_hybrid then " Hybrid" else ""
-                    let is_tech = x.Mixed
-                    let tech_suffix = if is_tech then " Tech" else ""
-                    "Stream" + hybrid_suffix + tech_suffix
+                | Stream
                 | Chordstream ->
-                    let is_hybrid = minor_category Jack |> Option.isSome
+                    let prefix = stream_name_prefix x
+                    let is_hybrid = notable_jacks minor x.BPM
                     let hybrid_suffix = if is_hybrid then " Hybrid" else ""
                     let is_tech = x.Mixed
                     let tech_suffix = if is_tech then " Tech" else ""
-                    match x.Specific with
-                    | Some "Jumpstream" -> 
-                        match minor_specific "Handstream" with
-                        | Some _ -> "Jumpstream/Handstream" + hybrid_suffix + tech_suffix
-                        | _ -> "Jumpstream" + hybrid_suffix + tech_suffix
-                    | Some "Handstream" -> "Handstream" + hybrid_suffix + tech_suffix
-                    | _ ->
-                        match minor_specific "Handstream" with
-                        | Some _ -> "Jumpstream/Handstream" + hybrid_suffix + tech_suffix
-                        | None -> 
-                            if keys = 4 then 
-                                "Jumpstream" + hybrid_suffix + tech_suffix 
-                            else 
-                                "Chordstream" + hybrid_suffix + tech_suffix
+                    prefix + hybrid_suffix + tech_suffix
                 | Jack ->
                     match x.Specific with
                     | Some "Chordjacks" -> "Chordjack"
                     | _ -> "Jack"
             | _ ->
-                let has_jacks = major |> List.exists (fun x -> x.CorePattern = Jack)
                 let has_streams = major |> List.exists (fun x -> x.CorePattern <> Jack)
                 let has_stream_tech = major |> List.exists (fun x -> x.CorePattern <> Jack && x.Mixed)
-                if has_streams && has_jacks then
+                let has_jacks = major |> List.exists (fun x -> x.CorePattern = Jack)
+                let has_notable_jacks =
+                    if has_jacks && has_streams then
+                        if major.[0].CorePattern = Jack then true
+                        else
+                            let s = major |> List.tryFind (fun x -> x.CorePattern = Chordstream)
+                            let j = major |> List.find (fun x -> x.CorePattern = Jack)
+                            s.IsNone || s.Value.BPM.IsNone || j.BPM.IsNone || (5 + s.Value.BPM.Value / 2 < j.BPM.Value)
+                    else false
+
+                if has_streams && has_notable_jacks then
                     if has_stream_tech then "Hybrid Tech" else "Hybrid"
-                elif has_jacks then "Jack"
-                else
-                    let is_hybrid = minor_category Jack |> Option.isSome
+
+                elif has_streams then
+                    let s = major |> List.find (fun x -> x.CorePattern <> Jack)
+                    let prefix = stream_name_prefix s
+                    let is_hybrid = notable_jacks minor s.BPM
                     let hybrid_suffix = if is_hybrid then " Hybrid" else ""
                     let tech_suffix = if has_stream_tech then " Tech" else ""
-                    "Stream" + hybrid_suffix + tech_suffix
-                    
+                    prefix + hybrid_suffix + tech_suffix
+
+                else "Jack"
+
         {
             Category = category
             MajorFeatures = major |> List.map (fun x -> x.ToString())
@@ -480,10 +500,10 @@ module PatternSummary =
                 && p.Mixed = pattern.Mixed
             )
 
-        let patterns = breakdown |> List.filter (is_useless >> not) |> List.truncate 6
+        let patterns = breakdown |> List.filter (is_useless >> not)
 
         {
-            Patterns = patterns
+            Patterns = patterns |> List.truncate 6
             LNPercent = ln_percent chart
             SVAmount = sv_time chart
             Category = categorise_chart chart.Keys patterns

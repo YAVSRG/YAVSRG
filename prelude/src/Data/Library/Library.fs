@@ -57,7 +57,7 @@ module Library =
             override this.Handle(library) =
                 async {
                     for entry in library.Cache.Entries.Values do
-                        if not (library.Patterns.ContainsKey entry.Hash) then
+                        //if not (library.Patterns.ContainsKey entry.Hash) then
                             match Cache.load entry library.Cache with
                             | Some c ->
                                 library.Patterns.[entry.Hash] <- PatternSummary.generate_cached_pattern_data (1.0f, c)
