@@ -136,4 +136,4 @@ type Patterns(display: Setting<Display>) =
 
     member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
         patterns <- info.Patterns.Patterns |> List.truncate 6
-        category <- info.Patterns.Category
+        category <- { info.Patterns.Category with MinorFeatures = info.Patterns.Category.MinorFeatures |> List.truncate 3 }
