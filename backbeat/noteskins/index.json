@@ -47,6 +47,15 @@
             "Version": "v1"
         }]
     }, {
+        "Author": "Sav",
+        "Name": "Sav Arrows",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/SavArrows.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/SavArrows.png",
+            "Version": "v1"
+        }]
+    }, {
         "Author": "Percyqaz",
         "Name": "Purple Rain",
         "Versions": [{
@@ -54,6 +63,15 @@
             "Editor": null,
             "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/PurpleRain.png",
             "Version": "1.0"
+        }]
+    }, {
+        "Author": "Janko",
+        "Name": "New Arrow Skin",
+        "Versions": [{
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/NewArrowSkin.isk",
+            "Editor": "Anas",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/NewArrowSkin.png",
+            "Version": "v1.5.2"
         }]
     }, {
         "Author": "Unknown",
