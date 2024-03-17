@@ -379,7 +379,7 @@ levelselect.rulesets.name=Ruleset switcher
 levelselect.rulesets.picker_hint=Pick more rulesets
 levelselect.rulesets.tooltip=This button lets you hot-switch rulesets.\nThis affects the ruleset you use when playing.\nDifferent rulesets can simulate how other games would score your performance.\nYou can select which rulesets are available in Options > Gameplay or pressing the special hotkey.
 levelselect.search.name=Chart searching
-levelselect.search.tooltip=Type here to search for charts!\nKeywords are separated by spaces. Put text "in quotes" to search for exact text.\nSome useful filters:\n- key=4 will match only 4K charts\n- length>120 will match only charts longer than 2 minutes\n- diff>6 will match only charts harder than 6.00 rating\n- comment="..." will match charts with comments matching the text
+levelselect.search.tooltip=Type here to search for charts!\nKeywords are separated by spaces. Put text "in quotes" to search for exact text.\nSome useful filters:\n- key=4 will match only 4K charts\n- length>120 will match only charts longer than 2 minutes\n- diff>6 will match only charts harder than 6.00 rating\n- comment="..." will match charts with comments matching the text\n- pattern=jumpstream will match all charts containing mostly jumpstream
 levelselect.selected_mods.downrate.hint=Decrease song speed
 levelselect.selected_mods.mods.hint=Select mods
 levelselect.selected_mods.name=Selected modifiers
