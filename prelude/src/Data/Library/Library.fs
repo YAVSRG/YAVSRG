@@ -1,14 +1,10 @@
 ﻿namespace Prelude.Data.Library
 
 open System.IO
-open System.Collections.Concurrent
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Processing.Patterns
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
-
-type Patterns = ConcurrentDictionary<string, PatternSummary.PatternDetailsReport>
 
 type Library =
     {

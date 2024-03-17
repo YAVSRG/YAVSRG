@@ -3,6 +3,7 @@
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Difficulty
+open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Data.Library.Caching
@@ -29,6 +30,7 @@ type ScoreInfo =
         mutable Grade: int
 
         Rating: DifficultyRating
+        Patterns: PatternInfo
         Physical: float
 
         ImportedFromOsu: bool
@@ -64,6 +66,7 @@ module ScoreInfo =
             Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
         let difficulty = DifficultyRating.calculate score.Rate with_mods.Notes
+        let patterns = PatternSummary.generate_detailed_pattern_data (score.Rate, chart)
 
         {
             CachedChart = cc
@@ -80,6 +83,7 @@ module ScoreInfo =
             Grade = Grade.calculate ruleset.Grading.Grades scoring.State
 
             Rating = difficulty
+            Patterns = patterns
             Physical = Performance.calculate difficulty with_mods.Keys scoring |> fst
 
             ImportedFromOsu = score.IsImported

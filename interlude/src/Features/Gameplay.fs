@@ -90,7 +90,7 @@ module Gameplay =
         let mutable WITH_MODS: ModdedChart option = None
         let mutable FMT_NOTECOUNTS: string option = None
         let mutable RATING: DifficultyRating option = None
-        let mutable PATTERNS: PatternSummary.PatternDetailsReport option = None
+        let mutable PATTERNS: PatternInfo option = None
 
         let mutable WITH_COLORS: ColoredChart option = None
 
@@ -113,7 +113,7 @@ module Gameplay =
                 WithMods: ModdedChart
                 NotecountsString: string
                 Rating: DifficultyRating
-                Patterns: PatternSummary.PatternDetailsReport
+                Patterns: PatternInfo
 
                 WithColors: ColoredChart
             }
@@ -416,6 +416,7 @@ module Gameplay =
             Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
 
             Rating = info.Rating
+            Patterns = info.Patterns
             Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
 
             ImportedFromOsu = false
@@ -533,6 +534,7 @@ module Gameplay =
                                 Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
 
                                 Rating = info.Rating
+                                Patterns = info.Patterns
                                 Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
 
                                 ImportedFromOsu = false
@@ -566,6 +568,7 @@ module Gameplay =
                          Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
 
                          Rating = info.Rating
+                         Patterns = info.Patterns
                          Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
 
                          ImportedFromOsu = false

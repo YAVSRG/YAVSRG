@@ -7,6 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
+open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Data
 open Prelude.Data.Library.Caching
@@ -194,6 +195,7 @@ module Leaderboard =
                                     score.Rate
 
                             let rating = DifficultyRating.calculate score.Rate with_mods.Notes
+                            let patterns = PatternSummary.generate_detailed_pattern_data (score.Rate, req.Chart)
 
                             let score_info: ScoreInfo =
                                 {
@@ -211,6 +213,7 @@ module Leaderboard =
                                     Grade = Grade.calculate req.Ruleset.Grading.Grades scoring.State
 
                                     Rating = rating
+                                    Patterns = patterns
                                     Physical = Performance.calculate rating with_mods.Keys scoring |> fst
 
                                     ImportedFromOsu = false

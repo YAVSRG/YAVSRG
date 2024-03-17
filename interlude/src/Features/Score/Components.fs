@@ -95,16 +95,11 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
     let mod_string = Mods.format_mods (score_info.Rate, score_info.Mods, false)
 
-    let category =
-        // temporary
-        match Gameplay.Chart.PATTERNS with
-        | Some p -> p.Category
-        | None -> PatternSummary.ChartCategorisation.Default
-
     let category, main_elements, minor_elements =
-        category.Category,
-        String.concat ", " category.MajorFeatures |> (function "" -> "--" | x -> x),
-        String.concat ", " (List.truncate 3 category.MinorFeatures) |> (function "" -> "--" | x -> x)
+        let c =  score_info.Patterns.Category
+        c.Category,
+        String.concat ", " c.MajorFeatures |> (function "" -> "--" | x -> x),
+        String.concat ", " (List.truncate 3 c.MinorFeatures) |> (function "" -> "--" | x -> x)
 
     override this.Init(parent) =
         this

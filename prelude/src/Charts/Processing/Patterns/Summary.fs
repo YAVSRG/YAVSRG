@@ -183,6 +183,19 @@ module PatternSummary =
             Density90: float32
             Specifics: (string * int) array
         }
+        static member Default =
+            { 
+                Pattern = Jack
+                BPM = 100
+                Mixed = false
+                Amount = 0.0f<ms/rate>
+                Density10 = 0.0f
+                Density25 = 0.0f
+                Density50 = 0.0f
+                Density75 = 0.0f
+                Density90 = 0.0f
+                Specifics = [||]
+            }
 
     let private pattern_breakdown
         (specific_patterns: Patterns.MatchedSpecificPattern array)
@@ -244,7 +257,7 @@ module PatternSummary =
     // todo: make into a union for easier reasoning
     type private CategoryFragment =
         {
-            CorePattern: CorePatternType
+            Pattern: CorePatternType
             Mixed: bool // todo: turn 3-pronged with mixed, non mixed, combo of both
             BPM: int option
             Specific: string option
@@ -260,12 +273,12 @@ module PatternSummary =
             | None ->
                 match this.BPM with
                 | None ->
-                    match this.CorePattern with
+                    match this.Pattern with
                     | Stream -> "Streams"
                     | Chordstream -> "Chordstream"
                     | Jack -> "Jacks"
                 | Some bpm ->
-                    match this.CorePattern with
+                    match this.Pattern with
                     | Stream ->
                         if this.Mixed then
                             sprintf "~%iBPM Mixed Streams" bpm
@@ -282,12 +295,12 @@ module PatternSummary =
                         else
                             sprintf "%iBPM Jacks" bpm
         member this.MoreUsefulThan(f: CategoryFragment) =
-            if f.CorePattern <> this.CorePattern then false else
+            if f.Pattern <> this.Pattern then false else
 
             (f.BPM.IsNone && this.BPM.IsSome)
             || (f.Specific.IsNone && this.Specific.IsSome)
 
-    let categorise_chart (keys: int) (patterns: PatternBreakdown list) : ChartCategorisation =
+    let private categorise_chart (keys: int) (patterns: PatternBreakdown list) : ChartCategorisation =
 
         let total = 0.01f<ms/rate> + (patterns |> List.sumBy (fun e -> e.Amount))
         let average_density = (patterns |> List.sumBy (fun e -> e.Density50 * e.Amount)) / total
@@ -303,7 +316,7 @@ module PatternSummary =
                     for spec, count in p.Specifics do
                         let spec_amount = p.Amount * float32 count / float32 total_specs
                         yield {
-                            CorePattern = p.Pattern
+                            Pattern = p.Pattern
                             Mixed = p.Mixed
                             BPM = Some p.BPM
                             Specific = Some spec
@@ -312,7 +325,7 @@ module PatternSummary =
 
                 for p in patterns do
                     yield {
-                        CorePattern = p.Pattern
+                        Pattern = p.Pattern
                         Mixed = p.Mixed
                         BPM = Some p.BPM
                         Specific = None
@@ -323,7 +336,7 @@ module PatternSummary =
                     let ps = patterns |> List.filter (fun e -> e.Pattern = c) 
                     let ps_total = 0.01f<ms/rate> + (ps |> List.sumBy (fun e -> e.Amount))
                     {
-                        CorePattern = c
+                        Pattern = c
                         Mixed = true
                         BPM = None
                         Specific = None
@@ -369,23 +382,23 @@ module PatternSummary =
             match bpm with
             | Some b ->
                 let threshold = b / 2 + 5
-                list |> List.exists (fun x -> x.CorePattern = Jack && (x.BPM.IsNone || x.BPM.Value > threshold))
-            | None -> list |> List.exists (fun x -> x.CorePattern = Jack)
+                list |> List.exists (fun x -> x.Pattern = Jack && (x.BPM.IsNone || x.BPM.Value > threshold))
+            | None -> list |> List.exists (fun x -> x.Pattern = Jack)
 
         let stream_name_prefix (f: CategoryFragment) =
-            assert(f.CorePattern <> Jack)
-            if f.CorePattern = Stream then "Stream"
+            assert(f.Pattern <> Jack)
+            if f.Pattern = Stream then "Stream"
             else
                 match f.Specific with
                 | Some "Jumpstream" -> 
                     match minor_specific "Handstream" with
-                    | Some _ -> "Jumpstream/Handstream"
+                    | Some x when x.BPM = f.BPM -> "Jumpstream/Handstream"
                     | _ -> "Jumpstream"
                 | Some "Handstream" -> "Handstream"
                 | _ ->
                     match minor_specific "Handstream" with
-                    | Some _ -> "Jumpstream/Handstream"
-                    | None -> 
+                    | Some x when x.BPM = f.BPM -> "Jumpstream/Handstream"
+                    | _ -> 
                         if keys = 4 then 
                             "Jumpstream"
                         else 
@@ -395,7 +408,7 @@ module PatternSummary =
             match major with
             | [] -> "Uncategorised"
             | x :: [] ->
-                match x.CorePattern with
+                match x.Pattern with
                 | Stream
                 | Chordstream ->
                     let prefix = stream_name_prefix x
@@ -407,17 +420,20 @@ module PatternSummary =
                 | Jack ->
                     match x.Specific with
                     | Some "Chordjacks" -> "Chordjack"
-                    | _ -> "Jack"
+                    | _ ->
+                        match minor_specific "Chordjacks" with
+                        | Some cj when x.BPM = cj.BPM -> "Chordjack"
+                        | _ -> "Jack"
             | _ ->
-                let has_streams = major |> List.exists (fun x -> x.CorePattern <> Jack)
-                let has_stream_tech = major |> List.exists (fun x -> x.CorePattern <> Jack && x.Mixed)
-                let has_jacks = major |> List.exists (fun x -> x.CorePattern = Jack)
+                let has_streams = major |> List.exists (fun x -> x.Pattern <> Jack)
+                let has_stream_tech = major |> List.exists (fun x -> x.Pattern <> Jack && x.Mixed)
+                let has_jacks = major |> List.exists (fun x -> x.Pattern = Jack)
                 let has_notable_jacks =
                     if has_jacks && has_streams then
-                        if major.[0].CorePattern = Jack then true
+                        if major.[0].Pattern = Jack then true
                         else
-                            let s = major |> List.tryFind (fun x -> x.CorePattern = Chordstream)
-                            let j = major |> List.find (fun x -> x.CorePattern = Jack)
+                            let s = major |> List.tryFind (fun x -> x.Pattern = Chordstream)
+                            let j = major |> List.find (fun x -> x.Pattern = Jack)
                             s.IsNone || s.Value.BPM.IsNone || j.BPM.IsNone || (5 + s.Value.BPM.Value / 2 < j.BPM.Value)
                     else false
 
@@ -425,14 +441,18 @@ module PatternSummary =
                     if has_stream_tech then "Hybrid Tech" else "Hybrid"
 
                 elif has_streams then
-                    let s = major |> List.find (fun x -> x.CorePattern <> Jack)
+                    let s = major |> List.find (fun x -> x.Pattern <> Jack)
                     let prefix = stream_name_prefix s
                     let is_hybrid = notable_jacks minor s.BPM
                     let hybrid_suffix = if is_hybrid then " Hybrid" else ""
                     let tech_suffix = if has_stream_tech then " Tech" else ""
                     prefix + hybrid_suffix + tech_suffix
 
-                else "Jack"
+                else
+                    let j = major |> List.find (fun x -> x.Pattern = Jack)
+                    match minor_specific "Chordjacks" with
+                    | Some cj when cj.BPM = j.BPM -> "Chordjack"
+                    | _ -> "Jack"
 
         {
             Category = category
@@ -441,7 +461,7 @@ module PatternSummary =
         }
 
     [<Json.AutoCodec>]
-    type PatternDetailsReport =
+    type Info =
         {
             Patterns: PatternBreakdown list
             LNPercent: float32
@@ -450,7 +470,7 @@ module PatternSummary =
         }
         static member Default = { Patterns = []; LNPercent = 0.0f; SVAmount = 0.0f<ms>; Category = ChartCategorisation.Default }
 
-    let generate_detailed_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
+    let generate_detailed_pattern_data (rate: float32, chart: Chart) : Info =
         let core_patterns, specific_patterns = Patterns.analyse rate chart
 
         let breakdown =
@@ -480,7 +500,7 @@ module PatternSummary =
             Category = categorise_chart chart.Keys patterns
         }
 
-    let generate_cached_pattern_data (rate: float32, chart: Chart) : PatternDetailsReport =
+    let generate_cached_pattern_data (rate: float32, chart: Chart) : Info =
         let core_patterns, specific_patterns = Patterns.analyse rate chart
 
         let breakdown =
@@ -509,3 +529,5 @@ module PatternSummary =
             SVAmount = sv_time chart
             Category = categorise_chart chart.Keys patterns
         }
+
+type PatternInfo = PatternSummary.Info

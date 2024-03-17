@@ -59,7 +59,7 @@ type Cache =
     {
         RootPath: string
         Entries: ConcurrentDictionary<string, CachedChart>
-        Patterns: ConcurrentDictionary<string, PatternSummary.PatternDetailsReport>
+        Patterns: ConcurrentDictionary<string, PatternInfo>
         mutable Changed: bool
     }
 
@@ -86,7 +86,7 @@ module Cache =
                 match JSON.FromFile path with
                 | Ok res -> res
                 | Error reason ->
-                    ConcurrentDictionary<string, PatternSummary.PatternDetailsReport>()
+                    ConcurrentDictionary<string, PatternInfo>()
             Changed = false
         }
 
@@ -96,7 +96,7 @@ module Cache =
             JSON.ToFile (Path.Combine(cache.RootPath, "patterns.json"), true) cache.Patterns
             cache.Changed <- false
 
-    let private create_entry (folder_name: string) (file_time: DateTime) (chart: Chart) : CachedChart * PatternSummary.PatternDetailsReport =
+    let private create_entry (folder_name: string) (file_time: DateTime) (chart: Chart) : CachedChart * PatternInfo =
         let last_note = chart.LastNote
         let rating = DifficultyRating.calculate 1.0f chart.Notes
 
@@ -465,7 +465,7 @@ module Cache =
     let by_hash (id: string) (cache: Cache) : CachedChart option =
         Seq.tryFind (fun cc -> cc.Hash = id) cache.Entries.Values
 
-    let patterns_by_hash (id: string) (cache: Cache) : PatternSummary.PatternDetailsReport option =
+    let patterns_by_hash (id: string) (cache: Cache) : PatternInfo option =
         let success, p = cache.Patterns.TryGetValue id
         if success then Some p else None
 
