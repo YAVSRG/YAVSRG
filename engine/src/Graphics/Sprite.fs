@@ -197,8 +197,8 @@ module Sprite =
         (images: SpriteUpload array)
         : Texture * (string * Sprite) array =
 
-        let width = images |> Array.map _.Image.Width |> Array.max
-        let height = images |> Array.map _.Image.Height |> Array.max
+        let width = if images.Length = 0 then 1 else images |> Array.map _.Image.Width |> Array.max
+        let height = if images.Length = 0 then 1 else images |> Array.map _.Image.Height |> Array.max
         let layers = images.Length + 1
 
         let texture = Texture.create (width, height, layers)
