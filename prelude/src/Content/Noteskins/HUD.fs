@@ -48,9 +48,47 @@ type HUDUserOptions =
 
         BPMMeterEnabled: bool
     }
+    static member Default =
+        {
+            AccuracyEnabled = true
+            AccuracyGradeColors = true
+            AccuracyShowName = true
+
+            TimingDisplayEnabled = true
+            TimingDisplayFadeTime = 1000.0f
+            TimingDisplayThickness = 5.0f
+            TimingDisplayShowGuide = true
+            TimingDisplayShowNonJudgements = true
+            TimingDisplayReleasesExtraHeight = 5.0f
+            TimingDisplayHalfScaleReleases = true
+
+            ComboEnabled = true
+            ComboLampColors = true
+
+            SkipButtonEnabled = true
+
+            JudgementMeterEnabled = false
+            JudgementMeterFadeTime = 800.0f
+            JudgementMeterIgnorePerfect = false
+            JudgementMeterPrioritiseLower = false
+
+            EarlyLateMeterEnabled = false
+            EarlyLateMeterFadeTime = 800.0f
+
+            ProgressMeterEnabled = true
+            ProgressMeterLabel = ProgressMeterLabel.None
+
+            JudgementCounterEnabled = false
+            JudgementCounterFadeTime = 200.0f
+
+            RateModMeterEnabled = false
+            RateModMeterShowMods = true
+
+            BPMMeterEnabled = false
+        }
 
 [<Json.AutoCodec(false)>]
-type HUDElementPosition =
+type HUDPosition =
     {
         RelativeToPlayfield: bool
         Left: float32 * float32
@@ -62,36 +100,145 @@ type HUDElementPosition =
 [<Json.AutoCodec(false)>]
 type HUDNoteskinOptions =
     {
-        AccuracyPosition: HUDElementPosition
+        AccuracyPosition: HUDPosition
 
-        TimingDisplayPosition: HUDElementPosition
+        TimingDisplayPosition: HUDPosition
 
-        ComboPosition: HUDElementPosition
+        ComboPosition: HUDPosition
         ComboGrowth: float32
         ComboPop: float32
 
-        SkipButtonPosition: HUDElementPosition
+        SkipButtonPosition: HUDPosition
 
-        JudgementMeterPosition: HUDElementPosition
+        JudgementMeterPosition: HUDPosition
 
-        EarlyLateMeterPosition: HUDElementPosition
+        EarlyLateMeterPosition: HUDPosition
         EarlyLateMeterEarlyText: string
         EarlyLateMeterLateText: string
         EarlyLateMeterEarlyColor: Color
         EarlyLateMeterLateColor: Color
 
-        ProgressMeterPosition: HUDElementPosition
+        ProgressMeterPosition: HUDPosition
         ProgressMeterColor: Color
         ProgressMeterBackgroundColor: Color
 
-        PacemakerPosition: HUDElementPosition
+        PacemakerPosition: HUDPosition
 
-        JudgementCounterPosition: HUDElementPosition
+        JudgementCounterPosition: HUDPosition
 
-        RateModMeterPosition: HUDElementPosition
+        RateModMeterPosition: HUDPosition
 
-        BPMMeterPosition: HUDElementPosition
+        BPMMeterPosition: HUDPosition
     }
+    static member Default =
+        {
+            AccuracyPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = (0.5f, -100.0f)
+                    Top = (0.0f, 40.0f)
+                    Right = (0.5f, 100.0f)
+                    Bottom = (0.0f, 120.0f)
+                }
+            
+            TimingDisplayPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = (0.5f, -300.0f)
+                    Top = (0.5f, 10.0f)
+                    Right = (0.5f, 300.0f)
+                    Bottom = (0.5f, 25.0f)
+                }
+
+            ComboPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = (0.5f, -100.0f)
+                    Top = (0.45f, -10.0f)
+                    Right = (0.5f, 100.0f)
+                    Bottom = (0.45f, 50.0f)
+                }
+            ComboGrowth = 0.01f
+            ComboPop = 5.0f
+
+            SkipButtonPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = (0.5f, -200.0f)
+                    Top = (0.6f, 20.0f)
+                    Right = (0.5f, 200.0f)
+                    Bottom = (0.6f, 120.0f)
+                }
+
+            JudgementMeterPosition = 
+                {
+                    RelativeToPlayfield = false
+                    Left = (0.5f, -128.0f)
+                    Top = (0.45f, -106.0f)
+                    Right = (0.5f, 128.0f)
+                    Bottom = (0.45f, -50.0f)
+                }
+
+            EarlyLateMeterPosition = 
+                {
+                    RelativeToPlayfield = true
+                    Left = 0.5f, -128.0f
+                    Top = 0.45f, -130.0f
+                    Right = 0.5f, 128.0f
+                    Bottom = 0.45f, -96.0f
+                }
+            EarlyLateMeterEarlyText = "Fast"
+            EarlyLateMeterLateText = "Slow"
+            EarlyLateMeterEarlyColor = Color.FromArgb(52, 79, 235)
+            EarlyLateMeterLateColor = Color.FromArgb(235, 52, 52)
+
+            ProgressMeterPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = 0.5f, 100.0f
+                    Top = 0.0f, 50.0f
+                    Right = 0.5f, 200.0f
+                    Bottom = 0.0f, 110.0f
+                }
+            ProgressMeterColor = Color.FromArgb(100, 220, 220, 220)
+            ProgressMeterBackgroundColor = Color.FromArgb(100, 20, 20, 20)
+
+            PacemakerPosition = 
+                {
+                    RelativeToPlayfield = true
+                    Left = 0.5f, -128.0f
+                    Top = 0.45f, -130.0f
+                    Right = 0.5f, 128.0f
+                    Bottom = 0.45f, -96.0f
+                }
+
+            JudgementCounterPosition = 
+                {
+                    RelativeToPlayfield = false
+                    Left = 0.0f, 20.0f
+                    Top = 1.0f, -320.0f
+                    Right = 0.0f, 220.0f
+                    Bottom = 1.0f, -20.0f
+                }
+
+            RateModMeterPosition = 
+                {
+                    RelativeToPlayfield = true
+                    Left = (0.5f, -100.0f)
+                    Top = (1.0f, -70.0f)
+                    Right = (0.5f, 100.0f)
+                    Bottom = (1.0f, -40.0f)
+                }
+                
+            BPMMeterPosition = 
+                {
+                    RelativeToPlayfield = true
+                    Left = (0.5f, -100.0f)
+                    Top = (1.0f, -40.0f)
+                    Right = (0.5f, 100.0f)
+                    Bottom = (1.0f, -10.0f)
+                }
+        }
 
 [<Json.AutoCodec(false)>]
 type WidgetPosition =

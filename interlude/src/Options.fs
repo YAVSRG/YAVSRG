@@ -11,6 +11,7 @@ open Prelude.Common
 open Prelude.Gameplay.Mods
 open Prelude.Data.Library.Sorting
 open Prelude.Data.Library
+open Prelude.Content.Noteskins
 open Interlude
 
 module Options =
@@ -129,6 +130,8 @@ module Options =
             SelectedPreset: Setting<int option>
             KeymodePreferredPresets: int option array
 
+            HUD: HUDUserOptions
+
             VanishingNotes: Setting<bool>
             AutoCalibrateOffset: Setting<bool>
             AdvancedRecommendations: Setting<bool>
@@ -242,6 +245,8 @@ module Options =
                 Preset3 = Setting.simple None
                 SelectedPreset = Setting.simple None
                 KeymodePreferredPresets = [| None; None; None; None; None; None; None; None |]
+
+                HUD = HUDUserOptions.Default
 
                 VanishingNotes = Setting.simple true
                 AutoCalibrateOffset = Setting.simple false
