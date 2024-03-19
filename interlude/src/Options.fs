@@ -388,18 +388,18 @@ module Options =
             load_id<RateModMeter> ()
             load_id<BPMMeter> ()
 
-        let get<'T> () =
-            let id = typeof<'T>.Name
+        //let get<'T> () =
+        //    let id = typeof<'T>.Name
 
-            if cache.ContainsKey id then
-                cache.[id] :?> 'T
-            else
-                failwithf "config not loaded: %s" id
+        //    if cache.ContainsKey id then
+        //        cache.[id] :?> 'T
+        //    else
+        //        failwithf "config not loaded: %s" id
 
-        let set<'T> (value: 'T) =
-            let id = typeof<'T>.Name
-            cache.[id] <- value
-            JSON.ToFile (Path.Combine(get_game_folder "Data", "HUD", id + ".json"), true) value
+        //let set<'T> (value: 'T) =
+        //    let id = typeof<'T>.Name
+        //    cache.[id] <- value
+        //    JSON.ToFile (Path.Combine(get_game_folder "Data", "HUD", id + ".json"), true) value
 
     module Presets =
 

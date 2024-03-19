@@ -8,6 +8,7 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.Web.Shared.Packets
 open Interlude.Content
+open Interlude.Options
 open Interlude.UI
 open Interlude.Features
 open Interlude.Features.Gameplay.Chart
@@ -101,20 +102,21 @@ module SpectateScreen =
 
         { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
             override this.AddWidgets() =
-                let inline add_widget x =
-                    add_widget (this, this.Playfield, this.State) x
+                let user_options = options.HUD
+                let noteskin_options = Content.NoteskinConfig.HUD
+                let inline add_widget position constructor =
+                    add_widget (this, this.Playfield, this.State, user_options, noteskin_options) position constructor
 
-                add_widget ComboMeter
-                add_widget SkipButton
-                add_widget ProgressMeter
-                add_widget AccuracyMeter
-                add_widget HitMeter
-                add_widget JudgementCounts
-                add_widget JudgementMeter
-                add_widget EarlyLateMeter
-                add_widget RateModMeter
-                add_widget BPMMeter
-                add_widget MultiplayerScoreTracker
+                if user_options.ComboEnabled then add_widget noteskin_options.ComboPosition Combo
+                if user_options.ProgressMeterEnabled then add_widget noteskin_options.ProgressMeterPosition ProgressMeter
+                if user_options.AccuracyEnabled then add_widget noteskin_options.AccuracyPosition Accuracy
+                if user_options.TimingDisplayEnabled then add_widget noteskin_options.TimingDisplayPosition TimingDisplay
+                if user_options.JudgementCounterEnabled then add_widget noteskin_options.JudgementCounterPosition JudgementCounter
+                if user_options.JudgementMeterEnabled then add_widget noteskin_options.JudgementMeterPosition JudgementMeter
+                if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter
+                if user_options.RateModMeterEnabled then add_widget noteskin_options.RateModMeterPosition RateModMeter
+                if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
+                add_widget noteskin_options.PacemakerPosition MultiplayerScoreTracker
 
                 this
                 |* ControlOverlay(

@@ -11,8 +11,8 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.NoteColors
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
-open Prelude.Content.Noteskins
 open Prelude.Data
+open Prelude.Content.Noteskins
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -545,24 +545,21 @@ type LaneCover() =
 module Utils =
 
     let inline add_widget
-        (screen: Screen, playfield: Playfield, state: PlayState)
-        (constructor: 'T * PlayState -> #Widget)
+        (screen: Screen, playfield: Playfield, state: PlayState, user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions)
+        (pos: HUDPosition)
+        (constructor: HUDUserOptions * HUDNoteskinOptions * PlayState -> #Widget)
         =
-        let config: ^T = HUDOptions.get<'T> ()
-        let pos: WidgetPosition = (^T: (member Position: WidgetPosition) config)
-
-        if pos.Enabled then
-            let w = constructor (config, state)
+            let w = constructor (user_options, noteskin_options, state)
 
             w.Position <-
                 {
-                    Left = pos.LeftA %+ pos.Left
-                    Top = pos.TopA %+ pos.Top
-                    Right = pos.RightA %+ pos.Right
-                    Bottom = pos.BottomA %+ pos.Bottom
+                    Left = pos.Left
+                    Top = pos.Top
+                    Right = pos.Right
+                    Bottom = pos.Bottom
                 }
 
-            if pos.Float then screen.Add w else playfield.Add w
+            if pos.RelativeToPlayfield then screen.Add w else playfield.Add w
 
 [<AbstractClass>]
 type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerInfo, scoring: IScoreMetric) as this

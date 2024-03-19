@@ -17,8 +17,8 @@ open Interlude.Features
 open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Stats
 open Interlude.Features.Online
-open Interlude.Features.Play.HUD
 open Interlude.Features.Score
+open Interlude.Features.Play.HUD
 
 [<RequireQualifiedAccess>]
 type PacemakerMode =
@@ -150,20 +150,22 @@ module PlayScreen =
 
         { new IPlayScreen(info.Chart, info.WithColors, pacemaker_info, scoring) with
             override this.AddWidgets() =
-                let inline add_widget x =
-                    add_widget (this, this.Playfield, this.State) x
+                let user_options = options.HUD
+                let noteskin_options = Content.NoteskinConfig.HUD
+                let inline add_widget position constructor =
+                    add_widget (this, this.Playfield, this.State, user_options, noteskin_options) position constructor
 
-                add_widget ComboMeter
-                add_widget SkipButton
-                add_widget ProgressMeter
-                add_widget AccuracyMeter
-                add_widget HitMeter
-                add_widget Pacemaker
-                add_widget JudgementCounts
-                add_widget JudgementMeter
-                add_widget EarlyLateMeter
-                add_widget RateModMeter
-                add_widget BPMMeter
+                if user_options.ComboEnabled then add_widget noteskin_options.ComboPosition Combo
+                if user_options.SkipButtonEnabled then add_widget noteskin_options.SkipButtonPosition SkipButton
+                if user_options.ProgressMeterEnabled then add_widget noteskin_options.ProgressMeterPosition ProgressMeter
+                if user_options.AccuracyEnabled then add_widget noteskin_options.AccuracyPosition Accuracy
+                if user_options.TimingDisplayEnabled then add_widget noteskin_options.TimingDisplayPosition TimingDisplay
+                if this.State.Pacemaker <> PacemakerInfo.None then add_widget noteskin_options.PacemakerPosition Pacemaker
+                if user_options.JudgementCounterEnabled then add_widget noteskin_options.JudgementCounterPosition JudgementCounter
+                if user_options.JudgementMeterEnabled then add_widget noteskin_options.JudgementMeterPosition JudgementMeter
+                if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter
+                if user_options.RateModMeterEnabled then add_widget noteskin_options.RateModMeterPosition RateModMeter
+                if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
 
                 let offset_slideout = offset_slideout this
 
@@ -308,20 +310,23 @@ module PlayScreen =
 
         { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
             override this.AddWidgets() =
-                let inline add_widget x =
-                    add_widget (this, this.Playfield, this.State) x
+                let user_options = options.HUD
+                let noteskin_options = Content.NoteskinConfig.HUD
+                let inline add_widget position constructor =
+                    add_widget (this, this.Playfield, this.State, user_options, noteskin_options) position constructor
 
-                add_widget AccuracyMeter
-                add_widget HitMeter
-                add_widget ComboMeter
-                add_widget ProgressMeter
-                add_widget Pacemaker
-                add_widget JudgementCounts
-                add_widget JudgementMeter
-                add_widget EarlyLateMeter
-                add_widget RateModMeter
-                add_widget BPMMeter
-                add_widget MultiplayerScoreTracker
+                if user_options.ComboEnabled then add_widget noteskin_options.ComboPosition Combo
+                if user_options.ProgressMeterEnabled then add_widget noteskin_options.ProgressMeterPosition ProgressMeter
+                if user_options.AccuracyEnabled then add_widget noteskin_options.AccuracyPosition Accuracy
+                if user_options.TimingDisplayEnabled then add_widget noteskin_options.TimingDisplayPosition TimingDisplay
+                if this.State.Pacemaker <> PacemakerInfo.None then add_widget noteskin_options.PacemakerPosition Pacemaker
+                if user_options.JudgementCounterEnabled then add_widget noteskin_options.JudgementCounterPosition JudgementCounter
+                if user_options.JudgementMeterEnabled then add_widget noteskin_options.JudgementMeterPosition JudgementMeter
+                if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter
+                if user_options.RateModMeterEnabled then add_widget noteskin_options.RateModMeterPosition RateModMeter
+                if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
+                // todo: better positioning + ability to isolate and test this component
+                add_widget noteskin_options.PacemakerPosition MultiplayerScoreTracker
 
                 let give_up () =
                     Screen.back Transitions.Flags.Default |> ignore

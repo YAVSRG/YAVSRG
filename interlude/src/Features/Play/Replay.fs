@@ -16,8 +16,8 @@ open Interlude.UI
 open Interlude.Options
 open Interlude.Features
 open Interlude.Features.Online
-open Interlude.Features.Play.HUD
 open Interlude.Features.Score
+open Interlude.Features.Play.HUD
 
 [<RequireQualifiedAccess>]
 type ReplayMode =
@@ -386,21 +386,25 @@ module ReplayScreen =
 
         { new IPlayScreen(chart, with_colors, PacemakerInfo.None, scoring) with
             override this.AddWidgets() =
-                let inline add_widget x =
-                    add_widget (this, this.Playfield, this.State) x
+                let user_options = options.HUD
+                let noteskin_options = Content.NoteskinConfig.HUD
+                let inline add_widget position constructor =
+                    add_widget (this, this.Playfield, this.State, user_options, noteskin_options) position constructor
 
-                add_widget ComboMeter
-                add_widget SkipButton
-                add_widget ProgressMeter
+                if user_options.ComboEnabled then add_widget noteskin_options.ComboPosition Combo
+                if user_options.SkipButtonEnabled then add_widget noteskin_options.SkipButtonPosition SkipButton
+                if user_options.ProgressMeterEnabled then add_widget noteskin_options.ProgressMeterPosition ProgressMeter
 
                 if not is_auto then
-                    add_widget AccuracyMeter
-                    add_widget (fun x -> Conditional((fun () -> not state.ShowHitOverlay.Value), HitMeter x))
-                    add_widget JudgementCounts
-                    add_widget JudgementMeter
-                    add_widget EarlyLateMeter
-                    add_widget RateModMeter
-                    add_widget BPMMeter
+                    if user_options.AccuracyEnabled then add_widget noteskin_options.AccuracyPosition Accuracy
+                    if user_options.TimingDisplayEnabled then 
+                        add_widget noteskin_options.TimingDisplayPosition 
+                            (fun x -> Conditional((fun () -> not state.ShowHitOverlay.Value), TimingDisplay x))
+                    if user_options.JudgementCounterEnabled then add_widget noteskin_options.JudgementCounterPosition JudgementCounter
+                    if user_options.JudgementMeterEnabled then add_widget noteskin_options.JudgementMeterPosition JudgementMeter
+                    if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter
+                    if user_options.RateModMeterEnabled then add_widget noteskin_options.RateModMeterPosition RateModMeter
+                    if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
 
                 this
                 |+ { new StaticWidget(NodeType.None) with

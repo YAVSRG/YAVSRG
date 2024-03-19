@@ -23,21 +23,21 @@ open Interlude.Utils
     They can all be toggled/repositioned/configured using themes
 *)
 
-type AccuracyMeter(conf: HUD.AccuracyMeter, state: PlayState) as this =
+type Accuracy(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
 
     let grades = state.Ruleset.Grading.Grades
 
     let color =
         Animation.Color(
-            if conf.GradeColors then
+            if user_options.AccuracyGradeColors then
                 Array.last(grades).Color
             else
                 Color.White
         )
 
     do
-        if conf.GradeColors then
+        if user_options.AccuracyGradeColors then
             state.SubscribeToHits(fun _ ->
                 color.Target <- Grade.calculate grades state.Scoring.State |> state.Ruleset.GradeColor
             )
@@ -53,7 +53,7 @@ type AccuracyMeter(conf: HUD.AccuracyMeter, state: PlayState) as this =
                 }
         )
 
-        if conf.ShowName then
+        if user_options.AccuracyShowName then
             this
             |* Text(
                 (fun () -> state.Scoring.Name),
@@ -70,7 +70,7 @@ type AccuracyMeter(conf: HUD.AccuracyMeter, state: PlayState) as this =
         color.Update elapsed_ms
 
 [<Struct>]
-type private HitMeterHit =
+type private TimingDisplayHit =
     {
         Time: Time
         Position: float32
@@ -78,14 +78,14 @@ type private HitMeterHit =
         Judgement: JudgementId option
     }
 
-type HitMeter(conf: HUD.HitMeter, state: PlayState) =
+type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let hits = ResizeArray<HitMeterHit>()
+    let hits = ResizeArray<TimingDisplayHit>()
     let mutable w = 0.0f
 
     let mutable last_seen_time = -Time.infinity
-    let ln_mult = if conf.HalfScaleReleases then 0.5f else 1.0f
-    let animation_time = conf.AnimationTime * Gameplay.rate.Value
+    let ln_mult = if user_options.TimingDisplayHalfScaleReleases then 0.5f else 1.0f
+    let animation_time = user_options.TimingDisplayFadeTime * Gameplay.rate.Value
 
     do
         state.SubscribeToHits(fun ev ->
@@ -127,9 +127,9 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
     override this.Draw() =
         let centre = this.Bounds.CenterX
 
-        if conf.ShowGuide then
+        if user_options.TimingDisplayShowGuide then
             Draw.rect
-                (Rect.Create(centre - conf.Thickness, this.Bounds.Top, centre + conf.Thickness, this.Bounds.Bottom))
+                (Rect.Create(centre - user_options.TimingDisplayThickness, this.Bounds.Top, centre + user_options.TimingDisplayThickness, this.Bounds.Bottom))
                 Color.White
 
         let now = state.CurrentChartTime()
@@ -137,9 +137,9 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
         for hit in hits do
             let r =
                 Rect.Create(
-                    centre + hit.Position - conf.Thickness,
+                    centre + hit.Position - user_options.TimingDisplayThickness,
                     this.Bounds.Top,
-                    centre + hit.Position + conf.Thickness,
+                    centre + hit.Position + user_options.TimingDisplayThickness,
                     this.Bounds.Bottom
                 )
 
@@ -156,17 +156,17 @@ type HitMeter(conf: HUD.HitMeter, state: PlayState) =
                         state.Ruleset.JudgementColor j
                     )
 
-            if conf.ShowNonJudgements || hit.Judgement.IsSome then
+            if user_options.TimingDisplayShowNonJudgements || hit.Judgement.IsSome then
                 Draw.rect
                     (if hit.IsRelease then
-                         r.Expand(0.0f, conf.ReleasesExtraHeight)
+                         r.Expand(0.0f, user_options.TimingDisplayReleasesExtraHeight)
                      else
                          r)
                     c
 
-type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
+type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let atime = conf.AnimationTime * Gameplay.rate.Value * 1.0f<ms>
+    let atime = user_options.JudgementMeterFadeTime * Gameplay.rate.Value * 1.0f<ms>
     let mutable tier = 0
     let mutable time = -Time.infinity
 
@@ -177,11 +177,11 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
                 | Hit e -> (e.Judgement, e.Delta)
                 | Release e -> (e.Judgement, e.Delta)
 
-            if judge.IsSome && (not conf.IgnorePerfectJudgements || judge.Value > 0) then
+            if judge.IsSome && (not user_options.JudgementMeterIgnorePerfect || judge.Value > 0) then
                 let j = judge.Value in
 
                 if
-                    not conf.PrioritiseLowerJudgements
+                    not user_options.JudgementMeterPrioritiseLower
                     || j >= tier
                     || ev.Time - atime > time
                     || ev.Time < time
@@ -204,9 +204,9 @@ type JudgementMeter(conf: HUD.JudgementMeter, state: PlayState) =
                 Alignment.CENTER
             )
 
-type EarlyLateMeter(conf: HUD.EarlyLateMeter, state: PlayState) =
+type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let atime = conf.AnimationTime * rate.Value * 1.0f<ms>
+    let atime = user_options.EarlyLateMeterFadeTime * rate.Value * 1.0f<ms>
     let mutable early = false
     let mutable time = -Time.infinity
 
@@ -230,13 +230,13 @@ type EarlyLateMeter(conf: HUD.EarlyLateMeter, state: PlayState) =
 
             Text.fill (
                 Style.font,
-                (if early then conf.EarlyText else conf.LateText),
+                (if early then noteskin_options.EarlyLateMeterEarlyText else noteskin_options.EarlyLateMeterLateText),
                 this.Bounds,
-                (if early then conf.EarlyColor else conf.LateColor).O4a a,
+                (if early then noteskin_options.EarlyLateMeterEarlyColor else noteskin_options.EarlyLateMeterLateColor).O4a a,
                 Alignment.CENTER
             )
 
-type ComboMeter(conf: HUD.Combo, state: PlayState) =
+type Combo(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let pop_animation = Animation.Fade(0.0f)
     let color = Animation.Color(Color.White)
@@ -246,12 +246,12 @@ type ComboMeter(conf: HUD.Combo, state: PlayState) =
         state.SubscribeToHits(fun _ ->
             hits <- hits + 1
 
-            if (conf.LampColors && hits > 50) then
+            if (user_options.ComboLampColors && hits > 50) then
                 color.Target <-
                     Lamp.calculate state.Ruleset.Grading.Lamps state.Scoring.State
                     |> state.Ruleset.LampColor
 
-            pop_animation.Value <- conf.Pop
+            pop_animation.Value <- noteskin_options.ComboPop
         )
 
     override this.Update(elapsed_ms, moved) =
@@ -263,11 +263,11 @@ type ComboMeter(conf: HUD.Combo, state: PlayState) =
         let combo = state.Scoring.State.CurrentCombo
 
         let amt =
-            pop_animation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
+            pop_animation.Value + (((combo, 1000) |> Math.Min |> float32) * noteskin_options.ComboGrowth)
 
         Text.fill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
 
-type ProgressMeter(conf: HUD.ProgressMeter, state: PlayState) =
+type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let duration =
@@ -295,17 +295,17 @@ type ProgressMeter(conf: HUD.ProgressMeter, state: PlayState) =
         for i = 0 to 29 do
             Draw.untextured_quad
                 (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
-                (Quad.color conf.BackgroundColor)
+                (Quad.color noteskin_options.ProgressMeterBackgroundColor)
 
             Draw.untextured_quad
                 (Quad.createv (inner i) (outer i) (outer (i + 1)) (inner (i + 1)))
                 (Quad.color Colors.white.O2)
 
         for i = 0 to pc * 29.9f |> floor |> int do
-            Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) (Quad.color conf.Color)
+            Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) (Quad.color noteskin_options.ProgressMeterColor)
 
         let text =
-            match conf.Label with
+            match user_options.ProgressMeterLabel with
             | ProgressMeterLabel.Countdown ->
                 let time_left = (duration - now) / Gameplay.rate.Value |> max 0.0f<ms>
 
@@ -324,7 +324,7 @@ type ProgressMeter(conf: HUD.ProgressMeter, state: PlayState) =
             Alignment.CENTER
         )
 
-type SkipButton(conf: HUD.SkipButton, state: PlayState) =
+type SkipButton(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"
@@ -346,7 +346,7 @@ type SkipButton(conf: HUD.SkipButton, state: PlayState) =
         if active then
             Text.fill_b (Style.font, text, this.Bounds, Colors.text, Alignment.CENTER)
 
-type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
+type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let color = Animation.Color(Color.White)
@@ -452,11 +452,11 @@ type Pacemaker(conf: HUD.Pacemaker, state: PlayState) =
 
             Text.fill_b (Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
 
-type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
+type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let judgement_animations =
-        Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(conf.AnimationTime))
+        Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(user_options.JudgementCounterFadeTime))
 
     do
         state.SubscribeToHits(fun h ->
@@ -488,7 +488,7 @@ type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
                     (r.Expand 5.0f)
                     (Color.FromArgb(
                         127
-                        - max 0 (int (127.0 * judgement_animations.[i].Elapsed / conf.AnimationTime)),
+                        - max 0 (int (127.0 * judgement_animations.[i].Elapsed / judgement_animations.[i].Interval)),
                         j.Color
                     ))
 
@@ -505,7 +505,7 @@ type JudgementCounts(conf: HUD.JudgementCounts, state: PlayState) =
             r <- r.Translate(0.0f, h)
 
 // todo: give this thing its own placement config + config on your username color vs other peoples
-type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
+type MultiplayerScoreTracker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     override this.Draw() =
@@ -536,19 +536,19 @@ type MultiplayerScoreTracker(conf: HUD.Pacemaker, state: PlayState) =
                 - Web.Shared.Packets.MULTIPLAYER_REPLAY_DELAY_MS * 2.0f<ms>
             )
 
-type RateModMeter(conf: HUD.RateModMeter, state: PlayState) as this =
+type RateModMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
 
     do
         let text =
-            if conf.ShowMods then
+            if user_options.RateModMeterShowMods then
                 Mods.format_mods (Gameplay.rate.Value, Gameplay.selected_mods.Value, Gameplay.autoplay)
             else
                 sprintf "%.2fx" Gameplay.rate.Value
 
         this |* Text(text, Color = K Colors.text_subheading, Align = Alignment.CENTER)
 
-type BPMMeter(conf: HUD.BPMMeter, state: PlayState) as this =
+type BPMMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) as this =
     inherit StaticContainer(NodeType.None)
 
     let first_note = state.WithColors.FirstNote

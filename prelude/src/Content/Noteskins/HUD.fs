@@ -41,7 +41,7 @@ type HUDUserOptions =
         ProgressMeterLabel: ProgressMeterLabel
 
         JudgementCounterEnabled: bool
-        JudgementCounterFadeTime: float32
+        JudgementCounterFadeTime: float
 
         RateModMeterEnabled: bool
         RateModMeterShowMods: bool
@@ -79,7 +79,7 @@ type HUDUserOptions =
             ProgressMeterLabel = ProgressMeterLabel.None
 
             JudgementCounterEnabled = false
-            JudgementCounterFadeTime = 200.0f
+            JudgementCounterFadeTime = 200.0
 
             RateModMeterEnabled = false
             RateModMeterShowMods = true
@@ -135,28 +135,28 @@ type HUDNoteskinOptions =
             AccuracyPosition =
                 {
                     RelativeToPlayfield = true
-                    Left = (0.5f, -100.0f)
-                    Top = (0.0f, 40.0f)
-                    Right = (0.5f, 100.0f)
-                    Bottom = (0.0f, 120.0f)
+                    Left = -100.0f, 0.5f
+                    Top = 40.0f, 0.0f
+                    Right = 100.0f, 0.5f
+                    Bottom = 120.0f, 0.0f
                 }
             
             TimingDisplayPosition =
                 {
                     RelativeToPlayfield = true
-                    Left = (0.5f, -300.0f)
-                    Top = (0.5f, 10.0f)
-                    Right = (0.5f, 300.0f)
-                    Bottom = (0.5f, 25.0f)
+                    Left = -300.0f, 0.5f
+                    Top = 10.0f, 0.5f
+                    Right = 300.0f, 0.5f
+                    Bottom = 25.0f, 0.5f
                 }
 
             ComboPosition =
                 {
                     RelativeToPlayfield = true
-                    Left = (0.5f, -100.0f)
-                    Top = (0.45f, -10.0f)
-                    Right = (0.5f, 100.0f)
-                    Bottom = (0.45f, 50.0f)
+                    Left = -100.0f, 0.5f
+                    Top = -10.0f, 0.45f
+                    Right = 100.0f, 0.5f
+                    Bottom = 50.0f, 0.45f
                 }
             ComboGrowth = 0.01f
             ComboPop = 5.0f
@@ -164,28 +164,28 @@ type HUDNoteskinOptions =
             SkipButtonPosition =
                 {
                     RelativeToPlayfield = true
-                    Left = (0.5f, -200.0f)
-                    Top = (0.6f, 20.0f)
-                    Right = (0.5f, 200.0f)
-                    Bottom = (0.6f, 120.0f)
+                    Left =  -200.0f, 0.5f
+                    Top = 20.0f, 0.6f
+                    Right = 200.0f, 0.5f
+                    Bottom = 120.0f, 0.6f
                 }
 
             JudgementMeterPosition = 
                 {
                     RelativeToPlayfield = false
-                    Left = (0.5f, -128.0f)
-                    Top = (0.45f, -106.0f)
-                    Right = (0.5f, 128.0f)
-                    Bottom = (0.45f, -50.0f)
+                    Left = -128.0f, 0.5f
+                    Top =  -106.0f, 0.45f
+                    Right = 128.0f, 0.5f
+                    Bottom = -50.0f, 0.45f
                 }
 
             EarlyLateMeterPosition = 
                 {
                     RelativeToPlayfield = true
-                    Left = 0.5f, -128.0f
-                    Top = 0.45f, -130.0f
-                    Right = 0.5f, 128.0f
-                    Bottom = 0.45f, -96.0f
+                    Left = -128.0f, 0.5f
+                    Top = -130.0f, 0.45f
+                    Right = 128.0f, 0.5f
+                    Bottom = -96.0f, 0.45f
                 }
             EarlyLateMeterEarlyText = "Fast"
             EarlyLateMeterLateText = "Slow"
@@ -195,10 +195,10 @@ type HUDNoteskinOptions =
             ProgressMeterPosition =
                 {
                     RelativeToPlayfield = true
-                    Left = 0.5f, 100.0f
-                    Top = 0.0f, 50.0f
-                    Right = 0.5f, 200.0f
-                    Bottom = 0.0f, 110.0f
+                    Left = 100.0f, 0.5f
+                    Top = 50.0f, 0.0f
+                    Right = 200.0f, 0.5f
+                    Bottom = 110.0f, 0.0f
                 }
             ProgressMeterColor = Color.FromArgb(100, 220, 220, 220)
             ProgressMeterBackgroundColor = Color.FromArgb(100, 20, 20, 20)
@@ -206,37 +206,37 @@ type HUDNoteskinOptions =
             PacemakerPosition = 
                 {
                     RelativeToPlayfield = true
-                    Left = 0.5f, -128.0f
-                    Top = 0.45f, -130.0f
-                    Right = 0.5f, 128.0f
-                    Bottom = 0.45f, -96.0f
+                    Left = -128.0f, 0.5f
+                    Top = -130.0f, 0.45f
+                    Right = 128.0f, 0.5f
+                    Bottom = -96.0f, 0.45f
                 }
 
             JudgementCounterPosition = 
                 {
                     RelativeToPlayfield = false
-                    Left = 0.0f, 20.0f
-                    Top = 1.0f, -320.0f
-                    Right = 0.0f, 220.0f
-                    Bottom = 1.0f, -20.0f
+                    Left = 20.0f, 0.0f
+                    Top = -320.0f, 1.0f
+                    Right = 220.0f, 0.0f
+                    Bottom = -20.0f, 1.0f
                 }
 
             RateModMeterPosition = 
                 {
                     RelativeToPlayfield = true
-                    Left = (0.5f, -100.0f)
-                    Top = (1.0f, -70.0f)
-                    Right = (0.5f, 100.0f)
-                    Bottom = (1.0f, -40.0f)
+                    Left = -100.0f, 0.5f
+                    Top = -70.0f, 1.0f
+                    Right = 100.0f, 0.5f
+                    Bottom = -40.0f, 1.0f
                 }
                 
             BPMMeterPosition = 
                 {
                     RelativeToPlayfield = true
-                    Left = (0.5f, -100.0f)
-                    Top = (1.0f, -40.0f)
-                    Right = (0.5f, 100.0f)
-                    Bottom = (1.0f, -10.0f)
+                    Left = -100.0f, 0.5f
+                    Top = -40.0f, 1.0f
+                    Right = 100.0f, 0.5f
+                    Bottom = -10.0f, 1.0f
                 }
         }
 
