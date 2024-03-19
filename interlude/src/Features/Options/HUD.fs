@@ -445,8 +445,8 @@ type EditProgressMeterPage() as this =
 
                 let text =
                     match label.Value with
-                    | HUD.ProgressMeterLabel.Countdown -> "7:27"
-                    | HUD.ProgressMeterLabel.Percentage -> "60%"
+                    | ProgressMeterLabel.Countdown -> "7:27"
+                    | ProgressMeterLabel.Percentage -> "60%"
                     | _ -> ""
 
                 Text.fill_b (
@@ -461,7 +461,7 @@ type EditProgressMeterPage() as this =
     do
         this.Content(
             position_editor pos default_pos
-            |+ PageSetting("hud.progressmeter.label", Selector<HUD.ProgressMeterLabel>.FromEnum(label))
+            |+ PageSetting("hud.progressmeter.label", Selector<ProgressMeterLabel>.FromEnum(label))
                 .Pos(550.0f)
             |+ PageSetting("hud.progressmeter.color", ColorPicker(color, true))
                 .Pos(620.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)

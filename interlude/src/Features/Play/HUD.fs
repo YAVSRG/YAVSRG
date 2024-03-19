@@ -306,14 +306,14 @@ type ProgressMeter(conf: HUD.ProgressMeter, state: PlayState) =
 
         let text =
             match conf.Label with
-            | HUD.ProgressMeterLabel.Countdown ->
+            | ProgressMeterLabel.Countdown ->
                 let time_left = (duration - now) / Gameplay.rate.Value |> max 0.0f<ms>
 
                 sprintf
                     "%i:%02i"
                     (time_left / 60000.0f<ms> |> floor |> int)
                     ((time_left % 60000.0f<ms>) / 1000.0f<ms> |> floor |> int)
-            | HUD.ProgressMeterLabel.Percentage -> sprintf "%.0f%%" (pc * 100.0f)
+            | ProgressMeterLabel.Percentage -> sprintf "%.0f%%" (pc * 100.0f)
             | _ -> ""
 
         Text.fill_b (

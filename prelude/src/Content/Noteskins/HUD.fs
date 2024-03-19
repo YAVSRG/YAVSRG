@@ -3,6 +3,96 @@
 open Percyqaz.Data
 open Prelude.Common
 
+[<RequireQualifiedAccess>]
+type ProgressMeterLabel =
+    | None = 0
+    | Countdown = 1
+    | Percentage = 2
+
+[<Json.AutoCodec(false)>]
+type HUDUserOptions =
+    {
+        AccuracyEnabled: bool
+        AccuracyGradeColors: bool
+        AccuracyShowName: bool
+
+        TimingDisplayEnabled: bool
+        TimingDisplayFadeTime: float32
+        TimingDisplayThickness: float32
+        TimingDisplayShowGuide: bool
+        TimingDisplayShowNonJudgements: bool
+        TimingDisplayReleasesExtraHeight: float32
+        TimingDisplayHalfScaleReleases: bool
+
+        ComboEnabled: bool
+        ComboLampColors: bool
+
+        SkipButtonEnabled: bool
+
+        JudgementMeterEnabled: bool
+        JudgementMeterFadeTime: float32
+        JudgementMeterIgnorePerfect: bool
+        JudgementMeterPrioritiseLower: bool
+
+        EarlyLateMeterEnabled: bool
+        EarlyLateMeterFadeTime: float32
+
+        ProgressMeterEnabled: bool
+        ProgressMeterLabel: ProgressMeterLabel
+
+        JudgementCounterEnabled: bool
+        JudgementCounterFadeTime: float32
+
+        RateModMeterEnabled: bool
+        RateModMeterShowMods: bool
+
+        BPMMeterEnabled: bool
+    }
+
+[<Json.AutoCodec(false)>]
+type HUDElementPosition =
+    {
+        RelativeToPlayfield: bool
+        Left: float32 * float32
+        Top: float32 * float32
+        Right: float32 * float32
+        Bottom: float32 * float32
+    }
+
+[<Json.AutoCodec(false)>]
+type HUDNoteskinOptions =
+    {
+        AccuracyPosition: HUDElementPosition
+
+        TimingDisplayPosition: HUDElementPosition
+
+        ComboPosition: HUDElementPosition
+        ComboGrowth: float32
+        ComboPop: float32
+
+        SkipButtonPosition: HUDElementPosition
+
+        JudgementMeterPosition: HUDElementPosition
+
+        EarlyLateMeterPosition: HUDElementPosition
+        EarlyLateMeterEarlyText: string
+        EarlyLateMeterLateText: string
+        EarlyLateMeterEarlyColor: Color
+        EarlyLateMeterLateColor: Color
+
+        ProgressMeterPosition: HUDElementPosition
+        ProgressMeterColor: Color
+        ProgressMeterBackgroundColor: Color
+
+        PacemakerPosition: HUDElementPosition
+
+        JudgementCounterPosition: HUDElementPosition
+
+        RateModMeterPosition: HUDElementPosition
+
+        BPMMeterPosition: HUDElementPosition
+    }
+
 [<Json.AutoCodec(false)>]
 type WidgetPosition =
     {
@@ -36,7 +126,7 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type AccuracyMeter =
         {
-            Position: WidgetPosition
+            Position: WidgetPosition // move to ns
             GradeColors: bool
             ShowName: bool
         }
@@ -62,7 +152,7 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type HitMeter =
         {
-            Position: WidgetPosition
+            Position: WidgetPosition // move to ns
             AnimationTime: float32
             Thickness: float32
             ShowGuide: bool
@@ -96,9 +186,9 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type Combo =
         {
-            Position: WidgetPosition
-            Growth: float32
-            Pop: float32
+            Position: WidgetPosition // move to ns
+            Growth: float32 // move to ns
+            Pop: float32 // move to ns
             LampColors: bool
         }
         static member Default =
@@ -124,7 +214,7 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type SkipButton =
         {
-            Position: WidgetPosition
+            Position: WidgetPosition // move to ns
         }
         static member Default =
             {
@@ -146,7 +236,7 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type JudgementMeter =
         {
-            Position: WidgetPosition
+            Position: WidgetPosition // move to ns
             AnimationTime: float32
             IgnorePerfectJudgements: bool
             PrioritiseLowerJudgements: bool
@@ -174,12 +264,12 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type EarlyLateMeter =
         {
-            Position: WidgetPosition
+            Position: WidgetPosition // move to ns
             AnimationTime: float32
-            EarlyText: string
-            EarlyColor: Color
-            LateText: string
-            LateColor: Color
+            EarlyText: string // move to ns
+            EarlyColor: Color // move to ns
+            LateText: string // move to ns
+            LateColor: Color // move to ns
         }
         static member Default =
             {
@@ -203,18 +293,12 @@ module HUD =
                 LateColor = Color.FromArgb(235, 52, 52)
             }
 
-    [<RequireQualifiedAccess>]
-    type ProgressMeterLabel =
-        | None = 0
-        | Countdown = 1
-        | Percentage = 2
-
     [<Json.AutoCodec(false)>]
     type ProgressMeter =
         {
-            Position: WidgetPosition
-            Color: Color
-            BackgroundColor: Color
+            Position: WidgetPosition // move to ns
+            Color: Color // move to ns
+            BackgroundColor: Color // move to ns
             Label: ProgressMeterLabel
         }
         static member Default =
@@ -240,7 +324,7 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type Pacemaker =
         {
-            Position: WidgetPosition
+            Position: WidgetPosition // move to ns
         }
         static member Default =
             {
@@ -262,7 +346,7 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type JudgementCounts =
         {
-            Position: WidgetPosition
+            Position: WidgetPosition // move to ns
             AnimationTime: float
         }
         static member Default =
@@ -286,7 +370,7 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type RateModMeter =
         {
-            Position: WidgetPosition
+            Position: WidgetPosition // move to ns
             ShowMods: bool
         }
         static member Default =
@@ -310,7 +394,7 @@ module HUD =
     [<Json.AutoCodec(false)>]
     type BPMMeter =
         {
-            Position: WidgetPosition
+            Position: WidgetPosition // move to ns
         }
         static member Default =
             {
@@ -332,33 +416,3 @@ module HUD =
 // todo: song info
 // todo: real time clock
 // todo: multiplayer player list
-
-[<Json.AutoCodec(false)>]
-type HUD =
-    {
-        AccuracyMeter: HUD.AccuracyMeter
-        BPMMeter: HUD.BPMMeter
-        Combo: HUD.Combo
-        EarlyLateMeter: HUD.EarlyLateMeter
-        HitMeter: HUD.HitMeter
-        JudgementCounts: HUD.JudgementCounts
-        JudgementMeter: HUD.JudgementMeter
-        Pacemaker: HUD.Pacemaker
-        ProgressMeter: HUD.ProgressMeter
-        RateModMeter: HUD.RateModMeter
-        SkipButton: HUD.SkipButton
-    }
-    static member Default =
-        { // todo: consider making these optional for some kind of override/hud transfer system?
-            AccuracyMeter = HUD.AccuracyMeter.Default
-            BPMMeter = HUD.BPMMeter.Default
-            Combo = HUD.Combo.Default
-            EarlyLateMeter = HUD.EarlyLateMeter.Default
-            HitMeter = HUD.HitMeter.Default
-            JudgementCounts = HUD.JudgementCounts.Default
-            JudgementMeter = HUD.JudgementMeter.Default
-            Pacemaker = HUD.Pacemaker.Default
-            ProgressMeter = HUD.ProgressMeter.Default
-            RateModMeter = HUD.RateModMeter.Default
-            SkipButton = HUD.SkipButton.Default
-        }
