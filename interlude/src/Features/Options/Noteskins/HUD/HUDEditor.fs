@@ -26,7 +26,7 @@ module HUDElement =
         | HUDElement.Accuracy -> %"hud.accuracy.name"
         | HUDElement.TimingDisplay -> %"hud.timingdisplay.name"
         | HUDElement.Combo -> %"hud.combo.name"
-        | HUDElement.SkipButton -> %"hud.skip.name"
+        | HUDElement.SkipButton -> %"hud.skipbutton.name"
         | HUDElement.JudgementMeter -> %"hud.judgementmeter.name"
         | HUDElement.EarlyLateMeter -> %"hud.earlylatemeter.name"
         | HUDElement.ProgressMeter -> %"hud.progressmeter.name"
@@ -168,18 +168,14 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
     let position = HUDElement.position_setting elem
 
     override this.Init(parent) =
-        child.Init this
         base.Init parent
+        child.Init this
 
     override this.Update(elapsed_ms, moved) =
 
         let mutable moved = moved
 
         match dragging_from with
-        | None -> 
-            if Mouse.hover this.Bounds && Mouse.left_click () then
-                dragging_from <- Some (Mouse.pos())
-                this.Select true
         | Some (x, y) ->
             let current = position.Value
             let new_x, new_y = Mouse.pos()
@@ -201,6 +197,10 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
                         Bottom = current.Bottom ^+ (new_y - y)
                     }
                 this.Focus true
+        | None -> 
+            if Mouse.hover this.Bounds && Mouse.left_click () then
+                dragging_from <- Some (Mouse.pos())
+                this.Select true
 
         base.Update(elapsed_ms, moved)
         child.Update(elapsed_ms, moved)
@@ -236,7 +236,7 @@ and PositionerContext =
             if pos.RelativeToPlayfield then this.Playfield.Add p else this.Screen.Add p
             this.Positioners <- this.Positioners.Add(e, p)
             if this.Selected = Some e then
-                p.Select true
+                p.Focus true
 
 type PositionerInfo(ctx: PositionerContext) =
     inherit FrameContainer(NodeType.None, Fill = K Colors.shadow_2.O3, Border = K Colors.cyan_accent)
@@ -252,7 +252,7 @@ type PositionerInfo(ctx: PositionerContext) =
                 match ctx.Selected with 
                 | Some e -> 
                     HUDElement.position_setting(e).Set(HUDElement.default_position e)
-                    ctx.Create e 
+                    sync (fun () -> ctx.Create e)
                 | None -> ()
             ),
             Position = Position.Row(85.0f, 60.0f).Margin(20.0f, 0.0f)
