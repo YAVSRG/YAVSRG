@@ -16,6 +16,8 @@ open Interlude.Features.OptionsMenu.Gameplay
 [<AutoOpen>]
 module private Helpers =
 
+    let DEFAULT_NOTESKIN_HUD = HUDNoteskinOptions.Default
+
     [<AbstractClass>]
     type PositionEditor(icon: string) =
         inherit StaticContainer(NodeType.Leaf)
@@ -89,23 +91,15 @@ module private Helpers =
         abstract member Left: unit -> unit
         abstract member Right: unit -> unit
 
-    let position_editor (setting: Setting<WidgetPosition>) (default_pos: WidgetPosition) =
+    let position_editor (setting: Setting<HUDPosition>) (default_pos: HUDPosition) =
         column ()
-        |+ PageSetting(
-            "hud.generic.enable",
-            Selector<_>
-                .FromBool(
-                    Setting.make
-                        (fun v -> setting.Set { setting.Value with Enabled = v })
-                        (fun () -> setting.Value.Enabled)
-                )
-        )
-            .Pos(100.0f)
         |+ PageSetting(
             "hud.generic.float",
             Selector<_>
                 .FromBool(
-                    Setting.make (fun v -> setting.Set { setting.Value with Float = v }) (fun () -> setting.Value.Float)
+                    Setting.make
+                        (fun v -> setting.Set { setting.Value with RelativeToPlayfield = not v })
+                        (fun () -> not setting.Value.RelativeToPlayfield)
                 )
         )
             .Pos(170.0f)
@@ -116,29 +110,29 @@ module private Helpers =
             { new PositionEditor(Icons.MOVE) with
                 override this.Up() =
                     { setting.Value with
-                        Top = setting.Value.Top - 5.0f
-                        Bottom = setting.Value.Bottom - 5.0f
+                        Top = setting.Value.Top ^- 5.0f
+                        Bottom = setting.Value.Bottom ^- 5.0f
                     }
                     |> setting.Set
 
                 override this.Down() =
                     { setting.Value with
-                        Top = setting.Value.Top + 5.0f
-                        Bottom = setting.Value.Bottom + 5.0f
+                        Top = setting.Value.Top ^+ 5.0f
+                        Bottom = setting.Value.Bottom ^+ 5.0f
                     }
                     |> setting.Set
 
                 override this.Left() =
                     { setting.Value with
-                        Left = setting.Value.Left - 5.0f
-                        Right = setting.Value.Right - 5.0f
+                        Left = setting.Value.Left ^- 5.0f
+                        Right = setting.Value.Right ^- 5.0f
                     }
                     |> setting.Set
 
                 override this.Right() =
                     { setting.Value with
-                        Left = setting.Value.Left + 5.0f
-                        Right = setting.Value.Right + 5.0f
+                        Left = setting.Value.Left ^+ 5.0f
+                        Right = setting.Value.Right ^+ 5.0f
                     }
                     |> setting.Set
             }
@@ -151,25 +145,25 @@ module private Helpers =
             { new PositionEditor(Icons.MAXIMIZE_2) with
                 override this.Up() =
                     { setting.Value with
-                        Top = setting.Value.Top - 5.0f
+                        Top = setting.Value.Top ^- 5.0f
                     }
                     |> setting.Set
 
                 override this.Down() =
                     { setting.Value with
-                        Bottom = setting.Value.Bottom + 5.0f
+                        Bottom = setting.Value.Bottom ^+ 5.0f
                     }
                     |> setting.Set
 
                 override this.Left() =
                     { setting.Value with
-                        Left = setting.Value.Left - 5.0f
+                        Left = setting.Value.Left ^- 5.0f
                     }
                     |> setting.Set
 
                 override this.Right() =
                     { setting.Value with
-                        Right = setting.Value.Right + 5.0f
+                        Right = setting.Value.Right ^+ 5.0f
                     }
                     |> setting.Set
             }
@@ -182,25 +176,25 @@ module private Helpers =
             { new PositionEditor(Icons.MINIMIZE_2) with
                 override this.Up() =
                     { setting.Value with
-                        Bottom = setting.Value.Bottom - 5.0f
+                        Bottom = setting.Value.Bottom ^- 5.0f
                     }
                     |> setting.Set
 
                 override this.Down() =
                     { setting.Value with
-                        Top = setting.Value.Top + 5.0f
+                        Top = setting.Value.Top ^+ 5.0f
                     }
                     |> setting.Set
 
                 override this.Left() =
                     { setting.Value with
-                        Right = setting.Value.Right - 5.0f
+                        Right = setting.Value.Right ^- 5.0f
                     }
                     |> setting.Set
 
                 override this.Right() =
                     { setting.Value with
-                        Left = setting.Value.Left + 5.0f
+                        Left = setting.Value.Left ^+ 5.0f
                     }
                     |> setting.Set
             }
@@ -211,508 +205,548 @@ module private Helpers =
         |+ PageButton(
             "hud.generic.reset",
             fun () ->
-                setting.Value <-
-                    { default_pos with
-                        Enabled = setting.Value.Enabled
-                    }
+                setting.Value <- default_pos
         )
             .Pos(450.0f)
             .Tooltip(Tooltip.Info("hud.generic.reset"))
 
-//type EditAccuracyMeterPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.AccuracyMeter> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.AccuracyMeter.Default.Position
-
-//    let grade_colors = Setting.simple data.GradeColors
-//    let show_name = Setting.simple data.ShowName
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Text.fill (Style.font, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
-
-//                if show_name.Value then
-//                    Text.fill (Style.font, "SC+ J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f)
-//        }
-
-//    do
-//        this.Content(
-//            position_editor pos default_pos
-//            |+ PageSetting("hud.accuracymeter.gradecolors", Selector<_>.FromBool grade_colors)
-//                .Pos(550.0f)
-//                .Tooltip(Tooltip.Info("hud.accuracymeter.gradecolors"))
-//            |+ PageSetting("hud.accuracymeter.showname", Selector<_>.FromBool show_name)
-//                .Pos(620.0f)
-//                .Tooltip(Tooltip.Info("hud.accuracymeter.showname"))
-//            |+ preview
-//        )
-
-//    override this.Title = %"hud.accuracymeter.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.AccuracyMeter>
-//            {
-//                Position = pos.Value
-//                GradeColors = grade_colors.Value
-//                ShowName = show_name.Value
-//            }
-
-//type EditHitMeterPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.HitMeter> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.HitMeter.Default.Position
-
-//    let show_guide = Setting.simple data.ShowGuide
-//    let show_non_judgements = Setting.simple data.ShowNonJudgements
-//    let thickness = Setting.simple data.Thickness |> Setting.bound 1.0f 25.0f
-
-//    let release_thickness =
-//        Setting.simple data.ReleasesExtraHeight |> Setting.bound 0.0f 20.0f
-
-//    let half_scale_releases = Setting.simple data.HalfScaleReleases
-
-//    let animation_time =
-//        Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Draw.rect
-//                    (Rect.Create(
-//                        bounds.CenterX - thickness.Value / 2.0f,
-//                        bounds.Top,
-//                        bounds.CenterX + thickness.Value / 2.0f,
-//                        bounds.Bottom
-//                    ))
-//                    Color.White
-//        }
-
-//    do
-//        this.Content(
-//            position_editor pos default_pos
-//            |+ PageSetting("hud.hitmeter.showguide", Selector<_>.FromBool show_guide)
-//                .Pos(550.0f)
-//                .Tooltip(Tooltip.Info("hud.hitmeter.showguide"))
-//            |+ PageSetting("hud.hitmeter.shownonjudgements", Selector<_>.FromBool show_non_judgements)
-//                .Pos(620.0f)
-//                .Tooltip(Tooltip.Info("hud.hitmeter.shownonjudgements"))
-//            |+ PageSetting("hud.hitmeter.halfscalereleases", Selector<_>.FromBool half_scale_releases)
-//                .Pos(690.0f)
-//                .Tooltip(Tooltip.Info("hud.hitmeter.halfscalereleases"))
-//            |+ PageSetting("hud.hitmeter.thickness", Slider(thickness, Step = 1f))
-//                .Pos(760.0f)
-//                .Tooltip(Tooltip.Info("hud.hitmeter.thickness"))
-//            |+ PageSetting("hud.hitmeter.releasesextraheight", Slider(release_thickness, Step = 1f))
-//                .Pos(830.0f)
-//                .Tooltip(Tooltip.Info("hud.hitmeter.releasesextraheight"))
-//            |+ PageSetting("hud.hitmeter.animationtime", Slider(animation_time, Step = 5f))
-//                .Pos(900.0f)
-//                .Tooltip(Tooltip.Info("hud.hitmeter.animationtime"))
-//            |+ preview
-//        )
-
-//    override this.Title = %"hud.hitmeter.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.HitMeter>
-//            { data with
-//                Position = pos.Value
-//                ShowGuide = show_guide.Value
-//                ShowNonJudgements = show_non_judgements.Value
-//                Thickness = thickness.Value
-//                ReleasesExtraHeight = release_thickness.Value
-//                AnimationTime = animation_time.Value
-//            }
-
-//type EditComboMeterPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.Combo> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.Combo.Default.Position
-
-//    let lamp_colors = Setting.simple data.LampColors
-//    let pop_amount = Setting.simple data.Pop |> Setting.bound 0.0f 20.0f
-//    let growth_amount = Setting.simple data.Growth |> Setting.bound 0.0f 0.05f
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Text.fill (Style.font, "727", bounds, Color.White, Alignment.CENTER)
-//        }
-
-//    do
-//        this.Content(
-//            position_editor pos default_pos
-//            |+ PageSetting("hud.combo.lampcolors", Selector<_>.FromBool lamp_colors)
-//                .Pos(550.0f)
-//                .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
-//            |+ PageSetting("hud.combo.pop", Slider(pop_amount, Step = 1f))
-//                .Pos(620.0f)
-//                .Tooltip(Tooltip.Info("hud.combo.pop"))
-//            |+ PageSetting("hud.combo.growth", Slider(growth_amount))
-//                .Pos(690.0f)
-//                .Tooltip(Tooltip.Info("hud.combo.growth"))
-//            |+ preview
-//        )
-
-//    override this.Title = %"hud.combo.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.Combo>
-//            {
-//                Position = pos.Value
-//                LampColors = lamp_colors.Value
-//                Pop = pop_amount.Value
-//                Growth = growth_amount.Value
-//            }
-
-//type EditSkipButtonPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.SkipButton> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.SkipButton.Default.Position
-
-//    let preview_text = [ (%%"skip").ToString() ] %> "play.skiphint"
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
-//        }
-
-//    do this.Content(position_editor pos default_pos |+ preview)
-
-//    override this.Title = %"hud.skipbutton.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.SkipButton> { Position = pos.Value }
-
-//type EditProgressMeterPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.ProgressMeter> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.ProgressMeter.Default.Position
-
-//    let color = Setting.simple data.Color
-//    let background_color = Setting.simple data.BackgroundColor
-//    let label = Setting.simple data.Label
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                let x, y = bounds.Center
-//                let r = (min bounds.Width bounds.Height) * 0.5f
-//                let angle = System.MathF.PI / 15.0f
-
-//                let outer i =
-//                    let angle = float32 i * angle
-//                    let struct (a, b) = System.MathF.SinCos(angle)
-//                    (x + r * a, y - r * b)
-
-//                let inner i =
-//                    let angle = float32 i * angle
-//                    let struct (a, b) = System.MathF.SinCos(angle)
-//                    (x + (r - 2f) * a, y - (r - 2f) * b)
-
-//                for i = 0 to 29 do
-//                    Draw.untextured_quad
-//                        (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
-//                        (Quad.color background_color.Value)
-
-//                    Draw.untextured_quad
-//                        (Quad.createv (inner i) (outer i) (outer (i + 1)) (inner (i + 1)))
-//                        (Quad.color Colors.white.O2)
-
-//                for i = 0 to 17 do
-//                    Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) (Quad.color color.Value)
-
-//                let text =
-//                    match label.Value with
-//                    | ProgressMeterLabel.Countdown -> "7:27"
-//                    | ProgressMeterLabel.Percentage -> "60%"
-//                    | _ -> ""
-
-//                Text.fill_b (
-//                    Style.font,
-//                    text,
-//                    bounds.Expand(0.0f, 20.0f).SliceBottom(20.0f),
-//                    Colors.text_subheading,
-//                    Alignment.CENTER
-//                )
-//        }
-
-//    do
-//        this.Content(
-//            position_editor pos default_pos
-//            |+ PageSetting("hud.progressmeter.label", Selector<ProgressMeterLabel>.FromEnum(label))
-//                .Pos(550.0f)
-//            |+ PageSetting("hud.progressmeter.color", ColorPicker(color, true))
-//                .Pos(620.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-//            |+ PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
-//                .Pos(725.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-//            |+ preview
-//        )
-
-//    override this.Title = %"hud.progressmeter.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.ProgressMeter>
-//            {
-//                Position = pos.Value
-//                Label = label.Value
-//                Color = color.Value
-//                BackgroundColor = background_color.Value
-//            }
-
-//type EditPacemakerPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.Pacemaker> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.Pacemaker.Default.Position
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Text.fill_b (Style.font, Icons.FLAG, bounds, Colors.text, Alignment.CENTER)
-//        }
-
-//    do this.Content(position_editor pos default_pos |+ preview)
-
-//    override this.Title = %"hud.pacemaker.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.Pacemaker> { Position = pos.Value }
-
-//type EditJudgementCountsPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.JudgementCounts> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.JudgementCounts.Default.Position
-
-//    let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0 1000.0
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Draw.rect bounds (Color.FromArgb(127, 255, 255, 255))
-//        }
-
-//    do
-//        this.Content(
-//            position_editor pos default_pos
-//            |+ PageSetting("hud.judgementcounts.animationtime", Slider(animation_time |> Setting.f32, Step = 5f))
-//                .Pos(550.0f)
-//                .Tooltip(Tooltip.Info("hud.judgementcounts.animationtime"))
-//            |+ preview
-//        )
-
-//    override this.Title = %"hud.judgementcounts.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.JudgementCounts>
-//            {
-//                Position = pos.Value
-//                AnimationTime = animation_time.Value
-//            }
-
-//type EditJudgementMeterPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.JudgementMeter> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.JudgementMeter.Default.Position
-
-//    let ignore_perfect_judgements = Setting.simple data.IgnorePerfectJudgements
-//    let prioritise_lower_judgements = Setting.simple data.PrioritiseLowerJudgements
-
-//    let animation_time =
-//        Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
-
-//    let rs = Rulesets.current
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Text.fill (Style.font, rs.JudgementName 0, bounds, rs.JudgementColor 0, Alignment.CENTER)
-//        }
-
-//    do
-//        this.Content(
-//            position_editor pos default_pos
-//            |+ PageSetting("hud.judgementmeter.animationtime", Slider(animation_time, Step = 5f))
-//                .Pos(550.0f)
-//                .Tooltip(Tooltip.Info("hud.judgementmeter.animationtime"))
-//            |+ PageSetting(
-//                "hud.judgementmeter.ignoreperfectjudgements",
-//                Selector<_>.FromBool(ignore_perfect_judgements)
-//            )
-//                .Pos(620.0f)
-//                .Tooltip(Tooltip.Info("hud.judgementmeter.ignoreperfectjudgements"))
-//            |+ PageSetting(
-//                "hud.judgementmeter.prioritiselowerjudgements",
-//                Selector<_>.FromBool(prioritise_lower_judgements)
-//            )
-//                .Pos(690.0f)
-//                .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
-//            |+ preview
-//        )
-
-//    override this.Title = %"hud.judgementmeter.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.JudgementMeter>
-//            {
-//                Position = pos.Value
-//                AnimationTime = animation_time.Value
-//                IgnorePerfectJudgements = ignore_perfect_judgements.Value
-//                PrioritiseLowerJudgements = prioritise_lower_judgements.Value
-//            }
-
-//type EditEarlyLateMeterPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.EarlyLateMeter> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.EarlyLateMeter.Default.Position
-
-//    let animation_time =
-//        Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
-
-//    let early_text = Setting.simple data.EarlyText
-//    let late_text = Setting.simple data.LateText
-//    let early_color = Setting.simple data.EarlyColor
-//    let late_color = Setting.simple data.LateColor
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Text.fill (Style.font, early_text.Value, bounds, early_color.Value, Alignment.CENTER)
-//        }
-
-//    do
-//        this.Content(
-//            position_editor pos default_pos
-//            |+ PageSetting("hud.earlylatemeter.animationtime", Slider(animation_time, Step = 5f))
-//                .Pos(550.0f)
-//                .Tooltip(Tooltip.Info("hud.earlylatemeter.animationtime"))
-//            |+ PageTextEntry("hud.earlylatemeter.earlytext", early_text)
-//                .Pos(620.0f)
-//                .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext"))
-//            |+ PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
-//                .Pos(690.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-//                .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
-//            |+ PageTextEntry("hud.earlylatemeter.latetext", late_text)
-//                .Pos(795.0f)
-//                .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
-//            |+ PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
-//                .Pos(865.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-//                .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
-//            |+ preview
-//        )
-
-//    override this.Title = %"hud.earlylatemeter.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.EarlyLateMeter>
-//            {
-//                Position = pos.Value
-//                AnimationTime = animation_time.Value
-//                EarlyText = early_text.Value
-//                EarlyColor = early_color.Value
-//                LateText = late_text.Value
-//                LateColor = late_color.Value
-//            }
-
-//type RateModMeterPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.RateModMeter> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.RateModMeter.Default.Position
-
-//    let show_mods = Setting.simple data.ShowMods
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Text.fill_b (
-//                    Style.font,
-//                    (if show_mods.Value then "1.00x, Mirror" else "1.00x"),
-//                    bounds,
-//                    Colors.text_subheading,
-//                    Alignment.CENTER
-//                )
-//        }
-
-//    do
-//        this.Content(
-//            position_editor pos default_pos
-//            |+ PageSetting("hud.ratemodmeter.showmods", Selector<_>.FromBool(show_mods))
-//                .Pos(550.0f)
-//                .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
-//            |+ preview
-//        )
-
-//    override this.Title = %"hud.ratemodmeter.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.RateModMeter>
-//            {
-//                Position = pos.Value
-//                ShowMods = show_mods.Value
-//            }
-
-//type BPMMeterPage() as this =
-//    inherit Page()
-
-//    let data = HUDOptions.get<HUD.BPMMeter> ()
-
-//    let pos = Setting.simple data.Position
-//    let default_pos = HUD.BPMMeter.Default.Position
-
-//    let preview =
-//        { new ConfigPreview(0.35f, pos) with
-//            override this.DrawComponent(bounds) =
-//                Text.fill_b (Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER)
-//        }
-
-//    do this.Content(position_editor pos default_pos |+ preview)
-
-//    override this.Title = %"hud.bpmmeter.name"
-//    override this.OnDestroy() = preview.Destroy()
-
-//    override this.OnClose() =
-//        HUDOptions.set<HUD.BPMMeter> { Position = pos.Value }
+type EditAccuracyPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.AccuracyPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.AccuracyPosition
+
+    let grade_colors = Setting.simple user_options.AccuracyGradeColors
+    let show_name = Setting.simple user_options.AccuracyShowName
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.fill (Style.font, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
+
+                if show_name.Value then
+                    Text.fill (Style.font, "SC+ J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f)
+        }
+
+    do
+        this.Content(
+            position_editor pos default_pos
+            |+ PageSetting("hud.accuracymeter.gradecolors", Selector<_>.FromBool grade_colors)
+                .Pos(550.0f)
+                .Tooltip(Tooltip.Info("hud.accuracymeter.gradecolors"))
+            |+ PageSetting("hud.accuracymeter.showname", Selector<_>.FromBool show_name)
+                .Pos(620.0f)
+                .Tooltip(Tooltip.Info("hud.accuracymeter.showname"))
+            |+ preview
+        )
+
+    override this.Title = %"hud.accuracymeter.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        options.HUD.Set 
+            { options.HUD.Value with
+                AccuracyGradeColors = grade_colors.Value
+                AccuracyShowName = show_name.Value
+            }
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                AccuracyPosition = pos.Value
+            }
+
+type EditTimingDisplayPage() as this =
+    inherit Page()
+    
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+    
+    let pos = Setting.simple noteskin_options.TimingDisplayPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.TimingDisplayPosition
+
+    let show_guide = Setting.simple user_options.TimingDisplayShowGuide
+    let show_non_judgements = Setting.simple user_options.TimingDisplayShowNonJudgements
+    let thickness = Setting.simple user_options.TimingDisplayThickness |> Setting.bound 1.0f 25.0f
+
+    let release_thickness =
+        Setting.simple user_options.TimingDisplayReleasesExtraHeight |> Setting.bound 0.0f 20.0f
+
+    let half_scale_releases = Setting.simple user_options.TimingDisplayHalfScaleReleases
+
+    let animation_time =
+        Setting.simple user_options.TimingDisplayFadeTime |> Setting.bound 100.0f 2000.0f
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Draw.rect
+                    (Rect.Create(
+                        bounds.CenterX - thickness.Value / 2.0f,
+                        bounds.Top,
+                        bounds.CenterX + thickness.Value / 2.0f,
+                        bounds.Bottom
+                    ))
+                    Color.White
+        }
+
+    do
+        this.Content(
+            position_editor pos default_pos
+            |+ PageSetting("hud.hitmeter.showguide", Selector<_>.FromBool show_guide)
+                .Pos(550.0f)
+                .Tooltip(Tooltip.Info("hud.hitmeter.showguide"))
+            |+ PageSetting("hud.hitmeter.shownonjudgements", Selector<_>.FromBool show_non_judgements)
+                .Pos(620.0f)
+                .Tooltip(Tooltip.Info("hud.hitmeter.shownonjudgements"))
+            |+ PageSetting("hud.hitmeter.halfscalereleases", Selector<_>.FromBool half_scale_releases)
+                .Pos(690.0f)
+                .Tooltip(Tooltip.Info("hud.hitmeter.halfscalereleases"))
+            |+ PageSetting("hud.hitmeter.thickness", Slider(thickness, Step = 1f))
+                .Pos(760.0f)
+                .Tooltip(Tooltip.Info("hud.hitmeter.thickness"))
+            |+ PageSetting("hud.hitmeter.releasesextraheight", Slider(release_thickness, Step = 1f))
+                .Pos(830.0f)
+                .Tooltip(Tooltip.Info("hud.hitmeter.releasesextraheight"))
+            |+ PageSetting("hud.hitmeter.animationtime", Slider(animation_time, Step = 5f))
+                .Pos(900.0f)
+                .Tooltip(Tooltip.Info("hud.hitmeter.animationtime"))
+            |+ preview
+        )
+
+    override this.Title = %"hud.hitmeter.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        options.HUD.Set 
+            { options.HUD.Value with
+                TimingDisplayShowGuide = show_guide.Value
+                TimingDisplayShowNonJudgements = show_non_judgements.Value
+                TimingDisplayThickness = thickness.Value
+                TimingDisplayReleasesExtraHeight = release_thickness.Value
+                TimingDisplayFadeTime = animation_time.Value
+            }
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                TimingDisplayPosition = pos.Value
+            }
+
+type EditComboPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.ComboPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.ComboPosition
+
+    let lamp_colors = Setting.simple user_options.ComboLampColors
+    let pop_amount = Setting.simple noteskin_options.ComboPop |> Setting.bound 0.0f 20.0f
+    let growth_amount = Setting.simple noteskin_options.ComboGrowth |> Setting.bound 0.0f 0.05f
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.fill (Style.font, "727", bounds, Color.White, Alignment.CENTER)
+        }
+
+    do
+        this.Content(
+            position_editor pos default_pos
+            |+ PageSetting("hud.combo.lampcolors", Selector<_>.FromBool lamp_colors)
+                .Pos(550.0f)
+                .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
+            |+ PageSetting("hud.combo.pop", Slider(pop_amount, Step = 1f))
+                .Pos(620.0f)
+                .Tooltip(Tooltip.Info("hud.combo.pop"))
+            |+ PageSetting("hud.combo.growth", Slider(growth_amount))
+                .Pos(690.0f)
+                .Tooltip(Tooltip.Info("hud.combo.growth"))
+            |+ preview
+        )
+
+    override this.Title = %"hud.combo.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        options.HUD.Set 
+            { options.HUD.Value with
+                ComboLampColors = lamp_colors.Value
+            }
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                ComboPosition = pos.Value
+                ComboPop = pop_amount.Value
+                ComboGrowth = growth_amount.Value
+            }
+
+type EditSkipButtonPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.SkipButtonPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.SkipButtonPosition
+
+    let preview_text = [ (%%"skip").ToString() ] %> "play.skiphint"
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
+        }
+
+    do this.Content(position_editor pos default_pos |+ preview)
+
+    override this.Title = %"hud.skipbutton.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                SkipButtonPosition = pos.Value
+            }
+
+type EditProgressMeterPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.ProgressMeterPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.ProgressMeterPosition
+
+    let color = Setting.simple noteskin_options.ProgressMeterColor
+    let background_color = Setting.simple noteskin_options.ProgressMeterBackgroundColor
+    let label = Setting.simple user_options.ProgressMeterLabel
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                let x, y = bounds.Center
+                let r = (min bounds.Width bounds.Height) * 0.5f
+                let angle = System.MathF.PI / 15.0f
+
+                let outer i =
+                    let angle = float32 i * angle
+                    let struct (a, b) = System.MathF.SinCos(angle)
+                    (x + r * a, y - r * b)
+
+                let inner i =
+                    let angle = float32 i * angle
+                    let struct (a, b) = System.MathF.SinCos(angle)
+                    (x + (r - 2f) * a, y - (r - 2f) * b)
+
+                for i = 0 to 29 do
+                    Draw.untextured_quad
+                        (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
+                        (Quad.color background_color.Value)
+
+                    Draw.untextured_quad
+                        (Quad.createv (inner i) (outer i) (outer (i + 1)) (inner (i + 1)))
+                        (Quad.color Colors.white.O2)
+
+                for i = 0 to 17 do
+                    Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) (Quad.color color.Value)
+
+                let text =
+                    match label.Value with
+                    | ProgressMeterLabel.Countdown -> "7:27"
+                    | ProgressMeterLabel.Percentage -> "60%"
+                    | _ -> ""
+
+                Text.fill_b (
+                    Style.font,
+                    text,
+                    bounds.Expand(0.0f, 20.0f).SliceBottom(20.0f),
+                    Colors.text_subheading,
+                    Alignment.CENTER
+                )
+        }
+
+    do
+        this.Content(
+            position_editor pos default_pos
+            |+ PageSetting("hud.progressmeter.label", Selector<ProgressMeterLabel>.FromEnum(label))
+                .Pos(550.0f)
+            |+ PageSetting("hud.progressmeter.color", ColorPicker(color, true))
+                .Pos(620.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+            |+ PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
+                .Pos(725.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+            |+ preview
+        )
+
+    override this.Title = %"hud.progressmeter.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        options.HUD.Set 
+            { options.HUD.Value with
+                ProgressMeterLabel = label.Value
+            }
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                ProgressMeterPosition = pos.Value
+                ProgressMeterColor = color.Value
+                ProgressMeterBackgroundColor = background_color.Value
+            }
+
+type EditPacemakerPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.PacemakerPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.PacemakerPosition
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.fill_b (Style.font, Icons.FLAG, bounds, Colors.text, Alignment.CENTER)
+        }
+
+    do this.Content(position_editor pos default_pos |+ preview)
+
+    override this.Title = %"hud.pacemaker.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                PacemakerPosition = pos.Value
+            }
+
+type EditJudgementCounterPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.JudgementCounterPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.JudgementCounterPosition
+
+    let animation_time = Setting.simple user_options.JudgementCounterFadeTime |> Setting.bound 100.0 1000.0
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Draw.rect bounds (Color.FromArgb(127, 255, 255, 255))
+        }
+
+    do
+        this.Content(
+            position_editor pos default_pos
+            |+ PageSetting("hud.judgementcounts.animationtime", Slider(animation_time |> Setting.f32, Step = 5f))
+                .Pos(550.0f)
+                .Tooltip(Tooltip.Info("hud.judgementcounts.animationtime"))
+            |+ preview
+        )
+
+    override this.Title = %"hud.judgementcounts.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        options.HUD.Set 
+            { options.HUD.Value with
+                JudgementCounterFadeTime = animation_time.Value
+            }
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                JudgementCounterPosition = pos.Value
+            }
+
+type EditJudgementMeterPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.JudgementMeterPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.JudgementMeterPosition
+
+    let ignore_perfect_judgements = Setting.simple user_options.JudgementMeterIgnorePerfect
+    let prioritise_lower_judgements = Setting.simple user_options.JudgementMeterPrioritiseLower
+
+    let animation_time = Setting.simple user_options.JudgementMeterFadeTime |> Setting.bound 100.0f 2000.0f
+
+    let rs = Rulesets.current
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.fill (Style.font, rs.JudgementName 0, bounds, rs.JudgementColor 0, Alignment.CENTER)
+        }
+
+    do
+        this.Content(
+            position_editor pos default_pos
+            |+ PageSetting("hud.judgementmeter.animationtime", Slider(animation_time, Step = 5f))
+                .Pos(550.0f)
+                .Tooltip(Tooltip.Info("hud.judgementmeter.animationtime"))
+            |+ PageSetting(
+                "hud.judgementmeter.ignoreperfectjudgements",
+                Selector<_>.FromBool(ignore_perfect_judgements)
+            )
+                .Pos(620.0f)
+                .Tooltip(Tooltip.Info("hud.judgementmeter.ignoreperfectjudgements"))
+            |+ PageSetting(
+                "hud.judgementmeter.prioritiselowerjudgements",
+                Selector<_>.FromBool(prioritise_lower_judgements)
+            )
+                .Pos(690.0f)
+                .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
+            |+ preview
+        )
+
+    override this.Title = %"hud.judgementmeter.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        options.HUD.Set 
+            { options.HUD.Value with
+                JudgementMeterFadeTime = animation_time.Value
+                JudgementMeterIgnorePerfect = ignore_perfect_judgements.Value
+                JudgementMeterPrioritiseLower = prioritise_lower_judgements.Value
+            }
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                JudgementMeterPosition = pos.Value
+            }
+
+type EditEarlyLateMeterPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.EarlyLateMeterPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.EarlyLateMeterPosition
+
+    let animation_time =
+        Setting.simple user_options.EarlyLateMeterFadeTime |> Setting.bound 100.0f 2000.0f
+
+    let early_text = Setting.simple noteskin_options.EarlyLateMeterEarlyText
+    let late_text = Setting.simple noteskin_options.EarlyLateMeterLateText
+    let early_color = Setting.simple noteskin_options.EarlyLateMeterEarlyColor
+    let late_color = Setting.simple noteskin_options.EarlyLateMeterLateColor
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.fill (Style.font, early_text.Value, bounds, early_color.Value, Alignment.CENTER)
+        }
+
+    do
+        this.Content(
+            position_editor pos default_pos
+            |+ PageSetting("hud.earlylatemeter.animationtime", Slider(animation_time, Step = 5f))
+                .Pos(550.0f)
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.animationtime"))
+            |+ PageTextEntry("hud.earlylatemeter.earlytext", early_text)
+                .Pos(620.0f)
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext"))
+            |+ PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
+                .Pos(690.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
+            |+ PageTextEntry("hud.earlylatemeter.latetext", late_text)
+                .Pos(795.0f)
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
+            |+ PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
+                .Pos(865.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
+            |+ preview
+        )
+
+    override this.Title = %"hud.earlylatemeter.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        options.HUD.Set 
+            { options.HUD.Value with
+                EarlyLateMeterFadeTime = animation_time.Value
+            }
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                EarlyLateMeterPosition = pos.Value
+                EarlyLateMeterEarlyText = early_text.Value
+                EarlyLateMeterEarlyColor = early_color.Value
+                EarlyLateMeterLateText = late_text.Value
+                EarlyLateMeterLateColor = late_color.Value
+            }
+
+type RateModMeterPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.RateModMeterPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.RateModMeterPosition
+
+    let show_mods = Setting.simple user_options.RateModMeterShowMods
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.fill_b (
+                    Style.font,
+                    (if show_mods.Value then "1.00x, Mirror" else "1.00x"),
+                    bounds,
+                    Colors.text_subheading,
+                    Alignment.CENTER
+                )
+        }
+
+    do
+        this.Content(
+            position_editor pos default_pos
+            |+ PageSetting("hud.ratemodmeter.showmods", Selector<_>.FromBool(show_mods))
+                .Pos(550.0f)
+                .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
+            |+ preview
+        )
+
+    override this.Title = %"hud.ratemodmeter.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        options.HUD.Set 
+            { options.HUD.Value with
+                RateModMeterShowMods = show_mods.Value
+            }
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                RateModMeterPosition = pos.Value
+            }
+
+type BPMMeterPage() as this =
+    inherit Page()
+
+    let user_options = options.HUD.Value
+    let noteskin_options = Content.NoteskinConfig.HUD
+
+    let pos = Setting.simple noteskin_options.BPMMeterPosition
+    let default_pos = DEFAULT_NOTESKIN_HUD.BPMMeterPosition
+
+    let preview =
+        { new ConfigPreview(0.35f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.fill_b (Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER)
+        }
+
+    do this.Content(position_editor pos default_pos |+ preview)
+
+    override this.Title = %"hud.bpmmeter.name"
+    override this.OnDestroy() = preview.Destroy()
+
+    override this.OnClose() =
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                BPMMeterPosition = pos.Value
+            }
 
 type EditHUDPage() as this =
     inherit Page()
@@ -723,28 +757,28 @@ type EditHUDPage() as this =
     do
         this.Content(
             grid
-            //|+ PageButton("hud.accuracymeter", (fun () -> Menu.ShowPage EditAccuracyMeterPage))
-            //    .Tooltip(Tooltip.Info("hud.accuracymeter"))
-            //|+ PageButton("hud.hitmeter", (fun () -> Menu.ShowPage EditHitMeterPage))
-            //    .Tooltip(Tooltip.Info("hud.hitmeter"))
-            //|+ PageButton("hud.combo", (fun () -> Menu.ShowPage EditComboMeterPage))
-            //    .Tooltip(Tooltip.Info("hud.combo"))
-            //|+ PageButton("hud.skipbutton", (fun () -> Menu.ShowPage EditSkipButtonPage))
-            //    .Tooltip(Tooltip.Info("hud.skipbutton"))
-            //|+ PageButton("hud.progressmeter", (fun () -> Menu.ShowPage EditProgressMeterPage))
-            //    .Tooltip(Tooltip.Info("hud.progressmeter"))
-            //|+ PageButton("hud.pacemaker", (fun () -> Menu.ShowPage EditPacemakerPage))
-            //    .Tooltip(Tooltip.Info("hud.pacemaker"))
-            //|+ PageButton("hud.judgementcounts", (fun () -> Menu.ShowPage EditJudgementCountsPage))
-            //    .Tooltip(Tooltip.Info("hud.judgementcounts"))
-            //|+ PageButton("hud.judgementmeter", (fun () -> Menu.ShowPage EditJudgementMeterPage))
-            //    .Tooltip(Tooltip.Info("hud.judgementmeter"))
-            //|+ PageButton("hud.earlylatemeter", (fun () -> Menu.ShowPage EditEarlyLateMeterPage))
-            //    .Tooltip(Tooltip.Info("hud.earlylatemeter"))
-            //|+ PageButton("hud.ratemodmeter", (fun () -> Menu.ShowPage RateModMeterPage))
-            //    .Tooltip(Tooltip.Info("hud.ratemodmeter"))
-            //|+ PageButton("hud.bpmmeter", (fun () -> Menu.ShowPage BPMMeterPage))
-            //    .Tooltip(Tooltip.Info("hud.bpmmeter"))
+            |+ PageButton("hud.accuracymeter", (fun () -> Menu.ShowPage EditAccuracyPage))
+                .Tooltip(Tooltip.Info("hud.accuracymeter"))
+            |+ PageButton("hud.hitmeter", (fun () -> Menu.ShowPage EditTimingDisplayPage))
+                .Tooltip(Tooltip.Info("hud.hitmeter"))
+            |+ PageButton("hud.combo", (fun () -> Menu.ShowPage EditComboPage))
+                .Tooltip(Tooltip.Info("hud.combo"))
+            |+ PageButton("hud.skipbutton", (fun () -> Menu.ShowPage EditSkipButtonPage))
+                .Tooltip(Tooltip.Info("hud.skipbutton"))
+            |+ PageButton("hud.progressmeter", (fun () -> Menu.ShowPage EditProgressMeterPage))
+                .Tooltip(Tooltip.Info("hud.progressmeter"))
+            |+ PageButton("hud.pacemaker", (fun () -> Menu.ShowPage EditPacemakerPage))
+                .Tooltip(Tooltip.Info("hud.pacemaker"))
+            |+ PageButton("hud.judgementcounts", (fun () -> Menu.ShowPage EditJudgementCounterPage))
+                .Tooltip(Tooltip.Info("hud.judgementcounts"))
+            |+ PageButton("hud.judgementmeter", (fun () -> Menu.ShowPage EditJudgementMeterPage))
+                .Tooltip(Tooltip.Info("hud.judgementmeter"))
+            |+ PageButton("hud.earlylatemeter", (fun () -> Menu.ShowPage EditEarlyLateMeterPage))
+                .Tooltip(Tooltip.Info("hud.earlylatemeter"))
+            |+ PageButton("hud.ratemodmeter", (fun () -> Menu.ShowPage RateModMeterPage))
+                .Tooltip(Tooltip.Info("hud.ratemodmeter"))
+            |+ PageButton("hud.bpmmeter", (fun () -> Menu.ShowPage BPMMeterPage))
+                .Tooltip(Tooltip.Info("hud.bpmmeter"))
         )
 
     override this.Title = %"hud.name"

@@ -386,7 +386,7 @@ module ReplayScreen =
 
         { new IPlayScreen(chart, with_colors, PacemakerInfo.None, scoring) with
             override this.AddWidgets() =
-                let user_options = options.HUD
+                let user_options = options.HUD.Value
                 let noteskin_options = Content.NoteskinConfig.HUD
                 let inline add_widget position constructor =
                     add_widget (this, this.Playfield, this.State, user_options, noteskin_options) position constructor

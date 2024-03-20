@@ -94,7 +94,7 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
     member this.Destroy() = fbo.Dispose()
 
 [<AbstractClass>]
-type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
+type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
     inherit NoteskinPreview(scale, true)
 
     let keycount = int (Gameplay.Chart.keymode ())
@@ -103,9 +103,7 @@ type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
         base.Draw()
 
         let container =
-            if config.Value.Float then
-                this.PreviewBounds
-            else
+            if config.Value.RelativeToPlayfield then
                 let cfg = Content.NoteskinConfig
 
                 let width =
@@ -123,21 +121,23 @@ type ConfigPreview(scale: float32, config: Setting<WidgetPosition>) =
                         this.PreviewBounds.Height
                     )
                     .Translate(-width * columnAlign, 0.0f)
+            else
+                this.PreviewBounds
 
         let width = container.Width
         let height = container.Height
 
-        let leftA = config.Value.LeftA * width + container.Left
-        let rightA = config.Value.RightA * width + container.Left
-        let topA = config.Value.TopA * height + container.Top
-        let bottomA = config.Value.BottomA * height + container.Top
+        let leftA = snd config.Value.Left * width + container.Left
+        let rightA = snd config.Value.Right * width + container.Left
+        let topA = snd config.Value.Top * height + container.Top
+        let bottomA = snd config.Value.Bottom * height + container.Top
 
         let bounds =
             Rect.Create(
-                leftA + config.Value.Left * scale,
-                topA + config.Value.Top * scale,
-                rightA + config.Value.Right * scale,
-                bottomA + config.Value.Bottom * scale
+                leftA + fst config.Value.Left * scale,
+                topA + fst config.Value.Top * scale,
+                rightA + fst config.Value.Right * scale,
+                bottomA + fst config.Value.Bottom * scale
             )
 
         // Draw container

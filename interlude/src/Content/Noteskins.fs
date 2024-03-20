@@ -38,6 +38,10 @@ module Noteskins =
         current.Config <- new_config
         current_config <- current.Config
 
+    let save_hud_config (new_hud: HUDNoteskinOptions) =
+        current.Config <- { current.Config with HUD = new_hud }
+        current_config <- current.Config
+
     let private reload_noteskin_atlas (target: string) =
         let ns = loaded.[target]
 
