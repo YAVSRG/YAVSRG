@@ -38,8 +38,9 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
         |* HotkeyAction(
             this.Hotkey,
             fun () ->
-                Style.click.Play()
-                on_click ()
+                if not (this.Disabled()) then
+                    Style.click.Play()
+                    on_click ()
         )
 
         base.Init parent

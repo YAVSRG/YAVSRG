@@ -13,6 +13,10 @@ open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Gameplay
 
+// todo: screen to click and drag components, you can see them all at once
+// these screens just show a preview of the component free floating outside of the context of the playfield, with no movement options
+// screen editor has a clickable gear on all components that opens the page, then refreshes the contents of its wrapped component
+
 [<AutoOpen>]
 module private Helpers =
 

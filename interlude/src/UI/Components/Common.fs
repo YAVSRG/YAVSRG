@@ -83,14 +83,16 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
     inherit
         StaticContainer(
             NodeType.Button(fun () ->
-                Style.click.Play()
-                on_click ()
+                if not (this.Disabled()) then
+                    Style.click.Play()
+                    on_click ()
             )
         )
 
     member val Hotkey: Hotkey = "none" with get, set
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set
+    member val Disabled: unit -> bool = K false with get, set
 
     member val TextColor =
         fun () -> (if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2 with get, set
@@ -106,7 +108,7 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
              <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom))
             (color_func () |> Quad.color)
 
-        Text.fill_b (Style.font, label_func (), this.Bounds, this.TextColor(), 0.5f)
+        Text.fill_b (Style.font, label_func (), this.Bounds, (if this.Disabled() then Colors.text_greyout else this.TextColor()), 0.5f)
         base.Draw()
 
     override this.Init(parent: Widget) =
@@ -114,8 +116,9 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
         |* HotkeyAction(
             this.Hotkey,
             fun () ->
-                Style.click.Play()
-                on_click ()
+                if not (this.Disabled()) then
+                    Style.click.Play()
+                    on_click ()
         )
 
         base.Init parent
@@ -123,6 +126,8 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
+
+    override this.Focusable = not (this.Disabled()) && base.Focusable
 
     static member Selector<'T>(label: string, values: ('T * string) array, setting: Setting<'T>, color_func) =
         let mutable current = array.IndexOf(values |> Array.map fst, setting.Value)
@@ -199,27 +204,25 @@ module RadioButtons =
             Height: float32
         }
 
-    let private create_button (label: string) (value: 'T) (setting: Setting<'T>) (disabled: unit -> bool) =
-        { new Button(label, (fun () -> setting.Set value)) with
-            override this.Init(parent) =
-                this.Disabled <- disabled
-                base.Init parent
-
-            override this.Draw() =
-                if setting.Value = value then
-                    Draw.rect (this.Bounds.Expand Style.PADDING) Colors.pink_accent.O2
-                    Draw.rect this.Bounds Colors.pink_shadow.O2
-                else
-                    Draw.rect this.Bounds Colors.shadow_2.O3
-
-                base.Draw()
-        }
-
     let create (options: RadioButtonOptions<'T>) =
-        GridFlowContainer(options.Height, options.Options.Length, Spacing = (20.0f, 0.0f), WrapNavigation = false)
+        GridFlowContainer(options.Height, options.Options.Length, Spacing = (options.Height * 0.5f, 0.0f), WrapNavigation = false)
         |+ seq {
+            let mutable i = 0
             for value, label, disabled in options.Options do
-                yield create_button label value options.Setting disabled
+                yield StylishButton(
+                    (fun () -> options.Setting.Set value),
+                    K label,
+                    (let i = i in fun () ->
+                        if options.Setting.Value = value then
+                            Colors.cyan
+                        else
+                            if i % 2 = 0 then Colors.black.O3 else Colors.shadow_2.O3
+                    ),
+                    Disabled = disabled,
+                    TiltRight = (i + 1 < options.Options.Length),
+                    TiltLeft = (i > 0)
+                )
+                i <- i + 1
         }
 
 module LoadingIndicator =
