@@ -225,8 +225,8 @@ type StoredReplayProvider(data: ReplayData) =
 
     new(data: string) = StoredReplayProvider(Replay.decompress_string data)
 
-    static member AutoPlay(keys, noteData) =
-        Replay.perfect_replay keys noteData |> StoredReplayProvider
+    static member AutoPlay(keys, notes) =
+        Replay.perfect_replay keys notes |> StoredReplayProvider
 
 type LiveReplayProvider(firstNote: Time) =
     let mutable i = 0

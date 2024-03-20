@@ -9,6 +9,20 @@ type ProgressMeterLabel =
     | Countdown = 1
     | Percentage = 2
 
+[<RequireQualifiedAccess>]
+type HUDElement =
+    | Accuracy
+    | TimingDisplay
+    | Combo
+    | SkipButton
+    | JudgementMeter
+    | EarlyLateMeter
+    | ProgressMeter
+    | JudgementCounter
+    | RateModMeter
+    | BPMMeter
+    | Pacemaker
+
 [<Json.AutoCodec(false)>]
 type HUDUserOptions =
     {

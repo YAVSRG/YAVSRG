@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.HUD
+﻿namespace Interlude.Features.OptionsMenu.Noteskins
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -11,6 +11,7 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.Options
 open Interlude.UI.Menu
+open Interlude.Features.Gameplay
 open Interlude.Features.OptionsMenu.Gameplay
 
 // todo: screen to click and drag components, you can see them all at once
@@ -758,6 +759,12 @@ type EditHUDPage() as this =
     let grid =
         GridFlowContainer<_>(PRETTYHEIGHT, 2, Spacing = (20.0f, 20.0f), Position = Position.Margin(100.0f, 200.0f))
 
+    let open_hud_editor () =
+        if
+            Chart.WITH_COLORS.IsSome 
+            && Screen.change_new (fun () -> HUDEditor.edit_hud_screen(Chart.CHART.Value, Chart.WITH_COLORS.Value)) Screen.Type.Practice Transitions.Flags.Default
+        then Menu.Exit()
+
     do
         this.Content(
             grid
@@ -783,6 +790,8 @@ type EditHUDPage() as this =
                 .Tooltip(Tooltip.Info("hud.ratemodmeter"))
             |+ PageButton("hud.bpmmeter", (fun () -> Menu.ShowPage BPMMeterPage))
                 .Tooltip(Tooltip.Info("hud.bpmmeter"))
+            |+ PageButton("hud.edit", open_hud_editor)
+                .Tooltip(Tooltip.Info("hud.edit"))
         )
 
     override this.Title = %"hud.name"

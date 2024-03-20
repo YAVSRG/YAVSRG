@@ -88,7 +88,7 @@ module OptionsMenuRoot =
                     fun () -> Noteskins.NoteskinsPage().Show()
                 )
                     .Tooltip(Tooltip.Info("noteskins"))
-                |+ TileButton(Callout.Normal.Icon(Icons.ZAP).Title(%"hud.name"), (fun () -> HUD.EditHUDPage().Show()))
+                |+ TileButton(Callout.Normal.Icon(Icons.ZAP).Title(%"hud.name"), (fun () -> Noteskins.EditHUDPage().Show()))
                     .Tooltip(Tooltip.Info("hud"))
                 |+ TileButton(
                     Callout.Normal.Icon(Icons.AIRPLAY).Title(%"system.name"),

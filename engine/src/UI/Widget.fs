@@ -120,6 +120,10 @@ type StaticContainer(node_type) =
         if this.Initialised then
             child.Init this
 
+    member this.Remove(child: Widget) : bool =
+        require_ui_thread ()
+        children.Remove child
+
     override this.Init(parent: Widget) =
         base.Init parent
 
