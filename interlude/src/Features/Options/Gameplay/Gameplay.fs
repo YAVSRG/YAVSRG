@@ -381,12 +381,12 @@ type GameplayPage() as this =
                 .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
                 .Pos(pos.Step 1.5f)
             |+ Text(
-                (fun () ->
-                    sprintf
-                        "%.1f on osu! = %.1f on Quaver = C%.0f on Etterna*"
-                        (options.ScrollSpeed.Value * 31.0f / 2.38f)
-                        (options.ScrollSpeed.Value * 33.9f / 2.38f)
-                        (60000.0f * options.ScrollSpeed.Value / column_width)
+                (fun () -> 
+                    [
+                        (options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1");
+                        (options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1");
+                        "2C" + (60000.0f * options.ScrollSpeed.Value / column_width).ToString("F0")
+                    ] %> "gameplay.scrollspeed.info"
                 ),
                 Align = Alignment.CENTER,
                 Position = Position.TrimLeft(PRETTYTEXTWIDTH).Margin(5.0f, -30.0f).SliceBottom(35.0f)

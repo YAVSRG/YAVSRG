@@ -7,6 +7,7 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Online
+open Interlude.Utils
 
 type NetworkStatus() =
     inherit StaticWidget(NodeType.None)
@@ -18,10 +19,10 @@ type NetworkStatus() =
 
         let text, color =
             match Network.status with
-            | Network.NotConnected -> Icons.USER_X + "  Offline", Colors.grey_2
-            | Network.Connecting -> Icons.GLOBE + "  Connecting..", Colors.grey_1
-            | Network.ConnectionFailed -> Icons.WIFI_OFF + "  Offline", Colors.red_accent
-            | Network.Connected -> Icons.GLOBE + "  Not logged in", Colors.green_accent
+            | Network.NotConnected -> Icons.USER_X + "  " + %"network.connection.offline", Colors.grey_2
+            | Network.Connecting -> Icons.GLOBE + "  " + %"network.connection.connecting" + "..", Colors.grey_1
+            | Network.ConnectionFailed -> Icons.WIFI_OFF + "  " + "network.connection.offline", Colors.red_accent
+            | Network.Connected -> Icons.GLOBE + "  " + %"network.connection.not_logged_in", Colors.green_accent
             | Network.LoggedIn -> Icons.GLOBE + "  " + Network.credentials.Username, Colors.green_accent
 
         Draw.rect area (Colors.shadow_1.O2)
@@ -36,7 +37,7 @@ type NetworkStatus() =
 
             Text.fill_b (
                 Style.font,
-                Icons.USERS + "  In a lobby",
+                Icons.USERS + "  " + %"network.multiplayer.in_lobby",
                 area.Shrink(10.0f, 5.0f),
                 Colors.text_subheading,
                 Alignment.CENTER
@@ -73,9 +74,9 @@ type NetworkStatus() =
 
     member this.MenuItems: ((unit -> unit) * string) seq =
         match Network.status with
-        | Network.NotConnected -> [ (fun () -> Network.connect ()), Icons.GLOBE + " Connect" ]
-        | Network.Connecting -> [ ignore, Icons.SLASH + " Cancel" ]
-        | Network.ConnectionFailed -> [ (fun () -> Network.connect ()), Icons.GLOBE + " Reconnect" ]
+        | Network.NotConnected -> [ (fun () -> Network.connect ()), Icons.GLOBE + " " + %"network.connection.connect" ]
+        | Network.Connecting -> [ ignore, Icons.SLASH + " " + %"network.connection.cancel" ]
+        | Network.ConnectionFailed -> [ (fun () -> Network.connect ()), Icons.GLOBE + " " + %"network.connection.reconnect" ]
         | Network.Connected ->
             [
                 fun () ->
@@ -83,14 +84,14 @@ type NetworkStatus() =
                         Network.login_with_token ()
                     else
                         Menu.ShowPage LoginPage
-                , Icons.LOG_IN + " Log in"
+                , Icons.LOG_IN + " " + %"network.login"
             ]
         | Network.LoggedIn ->
             [
                 fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore
-                , Icons.USERS + " Multiplayer"
-                (fun () -> PlayersPage().Show()), Icons.SEARCH + " Players"
-                Network.logout, Icons.LOG_OUT + " Log out"
+                , Icons.USERS + " " + %"network.multiplayer"
+                (fun () -> PlayersPage().Show()), Icons.SEARCH + " " + %"network.players"
+                Network.logout, Icons.LOG_OUT + " " + %"network.logout"
             ]
 
     member this.ToggleDropdown() =
