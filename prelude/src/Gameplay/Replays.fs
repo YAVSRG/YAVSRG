@@ -191,6 +191,19 @@ module Replay =
         }
         |> Array.ofSeq
 
+    let auto_replay_waving (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
+        let mutable last_time = -Time.infinity
+
+        let offset (time: Time) =
+            MathF.Cos(time / 1000.0f<ms>) * 45.0f<ms>
+
+        perfect_replay keys notes
+        |> Array.map (fun struct (time, r) ->
+            let new_time = max (last_time + 1.0f<ms>) (time + offset time)
+            last_time <- new_time
+            struct (new_time, r)
+        )
+
 type IReplayProvider =
     // are we at the end of the replay?
     abstract member Finished: bool
@@ -227,6 +240,9 @@ type StoredReplayProvider(data: ReplayData) =
 
     static member AutoPlay(keys, notes) =
         Replay.perfect_replay keys notes |> StoredReplayProvider
+
+    static member WavingAutoPlay(keys, notes) =
+        Replay.auto_replay_waving keys notes |> StoredReplayProvider
 
 type LiveReplayProvider(firstNote: Time) =
     let mutable i = 0

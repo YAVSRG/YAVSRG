@@ -686,7 +686,7 @@ module HUDEditor =
     let edit_hud_screen (chart: Chart, with_colors: ColoredChart) =
 
         let replay_data: IReplayProvider =
-            StoredReplayProvider.AutoPlay(with_colors.Keys, with_colors.Source.Notes)
+            StoredReplayProvider.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)
 
         let FIRST_NOTE = with_colors.FirstNote
         let ruleset = Rulesets.current
@@ -699,7 +699,7 @@ module HUDEditor =
         let mutable time = -Time.infinity
 
         let seek_backwards (screen: IPlayScreen) =
-            replay_data <- StoredReplayProvider.AutoPlay(with_colors.Keys, with_colors.Source.Notes)
+            replay_data <- StoredReplayProvider.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)
             scoring <- Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes Gameplay.rate.Value
             screen.State.ChangeScoring scoring
 
