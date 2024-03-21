@@ -145,6 +145,54 @@ type Rect =
             Bottom = this.Bottom - amount
         }
 
+    member inline this.BorderLeft amount =
+        {
+            Left = this.Left - amount
+            Top = this.Top
+            Right = this.Left
+            Bottom = this.Bottom
+        }
+
+    member inline this.BorderTop amount =
+        {
+            Left = this.Left
+            Top = this.Top - amount
+            Right = this.Right
+            Bottom = this.Top
+        }
+
+    member inline this.BorderRight amount =
+        {
+            Left = this.Right
+            Top = this.Top
+            Right = this.Right + amount
+            Bottom = this.Bottom
+        }
+
+    member inline this.BorderBottom amount =
+        {
+            Left = this.Left
+            Top = this.Bottom
+            Right = this.Right
+            Bottom = this.Bottom + amount
+        }
+
+    member inline this.BorderTopCorners amount =
+        {
+            Left = this.Left - amount
+            Top = this.Top - amount
+            Right = this.Right + amount
+            Bottom = this.Top
+        }
+
+    member inline this.BorderBottomCorners amount =
+        {
+            Left = this.Left - amount
+            Top = this.Bottom
+            Right = this.Right + amount
+            Bottom = this.Bottom + amount
+        }
+
 module Rect =
 
     let ZERO = Rect.Box(0.0f, 0.0f, 0.0f, 0.0f)

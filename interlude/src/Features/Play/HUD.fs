@@ -335,12 +335,14 @@ type SkipButton(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptio
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if active && state.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
-            if (%%"skip").Tapped() then
-                Song.pause ()
-                Song.play_from (first_note - Song.LEADIN_TIME)
-        else
-            active <- false
+        if Screen.current_type <> Screen.Type.Practice then // hack for HUD editor
+
+            if active && state.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
+                if (%%"skip").Tapped() then
+                    Song.pause ()
+                    Song.play_from (first_note - Song.LEADIN_TIME)
+            else
+                active <- false
 
     override this.Draw() =
         if active then

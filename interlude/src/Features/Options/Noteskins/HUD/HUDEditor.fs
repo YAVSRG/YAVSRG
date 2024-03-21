@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
@@ -163,9 +164,13 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
     inherit StaticWidget(NodeType.FocusTrap)
 
     let mutable dragging_from: (float32 * float32) option = None
+    let mutable hover = false
 
     let child = HUDElement.constructor elem (options.HUD.Value, Content.NoteskinConfig.HUD, ctx.State)
     let position = HUDElement.position_setting elem
+
+    let round (offset: float32, anchor: float32) =
+        System.MathF.Round(offset / 5.0f) * 5.0f, anchor
 
     override this.Init(parent) =
         base.Init parent
@@ -175,6 +180,8 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
 
         let mutable moved = moved
 
+        hover <- Mouse.hover this.Bounds
+
         match dragging_from with
         | Some (x, y) ->
             let current = position.Value
@@ -182,23 +189,23 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
             moved <- true
             this.Position <- 
                 {
-                    Left = current.Left ^+ (new_x - x)
-                    Top = current.Top ^+ (new_y - y)
-                    Right = current.Right ^+ (new_x - x)
-                    Bottom = current.Bottom ^+ (new_y - y)
+                    Left = current.Left ^+ (new_x - x) |> round
+                    Top = current.Top ^+ (new_y - y) |> round
+                    Right = current.Right ^+ (new_x - x) |> round
+                    Bottom = current.Bottom ^+ (new_y - y) |> round
                 }
             if not (Mouse.held Mouse.LEFT) then
                 dragging_from <- None
                 position.Value <- 
                     { position.Value with 
-                        Left = current.Left ^+ (new_x - x)
-                        Top = current.Top ^+ (new_y - y)
-                        Right = current.Right ^+ (new_x - x)
-                        Bottom = current.Bottom ^+ (new_y - y)
+                        Left = current.Left ^+ (new_x - x) |> round
+                        Top = current.Top ^+ (new_y - y) |> round
+                        Right = current.Right ^+ (new_x - x) |> round
+                        Bottom = current.Bottom ^+ (new_y - y) |> round
                     }
                 this.Focus true
         | None -> 
-            if Mouse.hover this.Bounds && Mouse.left_click () then
+            if hover && Mouse.left_click () then
                 dragging_from <- Some (Mouse.pos())
                 this.Select true
 
@@ -209,7 +216,37 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
         base.OnSelected by_mouse
         ctx.Selected <- Some elem
 
-    override this.Draw() = 
+    override this.Draw() =
+        if dragging_from.IsSome then
+            let pos = position.Value
+            let left_axis = this.Parent.Bounds.Left + this.Parent.Bounds.Width * snd pos.Left
+            let right_axis = this.Parent.Bounds.Left + this.Parent.Bounds.Width * snd pos.Right
+            Draw.rect (Rect.Create(left_axis - 2.5f, this.Parent.Bounds.Top, right_axis + 2.5f, this.Parent.Bounds.Bottom)) Colors.red_accent.O1
+            Draw.rect (Rect.Create(right_axis - 2.5f, this.Parent.Bounds.Top, right_axis + 2.5f, this.Parent.Bounds.Bottom)) Colors.red_accent.O1
+
+            let this_center_x, this_center_y = this.Bounds.Center
+            for other_positioner in ctx.Positioners.Values do
+                if other_positioner = this then () else
+                let other_center_x, other_center_y = other_positioner.Bounds.Center
+                if abs (this_center_x - other_center_x) < 5.0f then
+                    Draw.rect 
+                        (Rect.Create(other_center_x - 2.5f, min this.Bounds.Top other_positioner.Bounds.Top, other_center_x + 2.5f, max this.Bounds.Bottom other_positioner.Bounds.Bottom))
+                        Colors.green_accent.O1
+                if abs (this_center_y - other_center_y) < 5.0f then
+                    Draw.rect 
+                        (Rect.Create(min this.Bounds.Left other_positioner.Bounds.Left, other_center_y - 2.5f, max this.Bounds.Right other_positioner.Bounds.Right, other_center_y + 2.5f))
+                        Colors.green_accent.O1
+
+        if this.Focused then
+            Draw.rect (this.Bounds.BorderTopCorners Style.PADDING) Colors.yellow_accent
+            Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) Colors.yellow_accent
+            Draw.rect (this.Bounds.BorderLeft Style.PADDING) Colors.yellow_accent
+            Draw.rect (this.Bounds.BorderRight Style.PADDING) Colors.yellow_accent
+        elif hover then
+            Draw.rect (this.Bounds.BorderTopCorners Style.PADDING) Colors.white.O2
+            Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) Colors.white.O2
+            Draw.rect (this.Bounds.BorderLeft Style.PADDING) Colors.white.O2
+            Draw.rect (this.Bounds.BorderRight Style.PADDING) Colors.white.O2
         child.Draw()
 
 and PositionerContext =
@@ -320,10 +357,11 @@ module HUDEditor =
                     HUDElement.EarlyLateMeter
                     HUDElement.RateModMeter
                     HUDElement.BPMMeter
+                    HUDElement.Pacemaker
                 ] |> Seq.iter ctx.Create
 
                 this |* Conditional((fun () -> ctx.Selected.IsSome), PositionerInfo ctx)
-                // todo: way to turn on pacemaker/skip button/multiplayer player list
+                // todo: way to turn on multiplayer player list
 
             override this.OnEnter p =
                 DiscordRPC.in_menus ("Customising HUD")
