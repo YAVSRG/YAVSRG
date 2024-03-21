@@ -48,6 +48,7 @@ type Position with
         }
 
     member this.Margin amount = this.Margin(amount, amount)
+
     static member Margin(x, y) = Position.Default.Margin(x, y)
     static member Margin amount = Position.Margin(amount, amount)
 
@@ -64,50 +65,96 @@ type Position with
             Right = this.Left ^+ amount
         }
 
-    static member SliceLeft amount = Position.Default.SliceLeft amount
-
     member this.SliceTop amount =
         { this with
             Bottom = this.Top ^+ amount
         }
-
-    static member SliceTop amount = Position.Default.SliceTop amount
 
     member this.SliceRight amount =
         { this with
             Left = this.Right ^- amount
         }
 
-    static member SliceRight amount = Position.Default.SliceRight amount
-
     member this.SliceBottom amount =
         { this with
             Top = this.Bottom ^- amount
         }
 
+    static member SliceLeft amount = Position.Default.SliceLeft amount
+    static member SliceTop amount = Position.Default.SliceTop amount
+    static member SliceRight amount = Position.Default.SliceRight amount
     static member SliceBottom amount = Position.Default.SliceBottom amount
 
     member this.TrimLeft amount =
         { this with Left = this.Left ^+ amount }
 
-    static member TrimLeft amount = Position.Default.TrimLeft amount
-
     member this.TrimTop amount = { this with Top = this.Top ^+ amount }
-    static member TrimTop amount = Position.Default.TrimTop amount
 
     member this.TrimRight amount =
         { this with
             Right = this.Right ^- amount
         }
 
-    static member TrimRight amount = Position.Default.TrimRight amount
-
     member this.TrimBottom amount =
         { this with
             Bottom = this.Bottom ^- amount
         }
 
+    static member TrimLeft amount = Position.Default.TrimLeft amount
+    static member TrimTop amount = Position.Default.TrimTop amount
+    static member TrimRight amount = Position.Default.TrimRight amount
     static member TrimBottom amount = Position.Default.TrimBottom amount
+
+    member this.BorderLeft amount =
+        { this with
+            Left = this.Left ^- amount
+            Right = this.Left
+        }
+
+    member this.BorderTop amount =
+        { this with
+            Top = this.Top ^- amount
+            Bottom = this.Top
+        }
+
+    member this.BorderRight amount =
+        { this with
+            Left = this.Right
+            Right = this.Right ^+ amount
+        }
+
+    member this.BorderBottom amount =
+        { this with
+            Top = this.Bottom
+            Bottom = this.Bottom ^+ amount
+        }
+
+    static member BorderLeft amount = Position.Default.BorderLeft amount
+    static member BorderTop amount = Position.Default.BorderTop amount
+    static member BorderRight amount = Position.Default.BorderRight amount
+    static member BorderBottom amount = Position.Default.BorderBottom amount
+
+    member this.BorderTopCorners amount =
+        { this with
+            Left = this.Left ^- amount
+            Top = this.Top ^- amount
+            Right = this.Right ^+ amount
+            Bottom = this.Top
+        }
+
+    member this.BorderBottomCorners amount =
+        { this with
+            Left = this.Left ^- amount
+            Top = this.Bottom
+            Right = this.Right ^+ amount
+            Bottom = this.Bottom ^+ amount
+        }
+
+    static member BorderTopCorners amount =
+        Position.Default.BorderTopCorners amount
+
+    static member BorderBottomCorners amount =
+        Position.Default.BorderBottomCorners amount
 
     static member Row(y, height) =
         {

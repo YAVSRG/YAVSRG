@@ -67,7 +67,7 @@ module Rulesets =
             | Some d -> d.Update(elapsed_ms, moved)
             | None -> ()
 
-type PacemakerPage() as this =
+type PacemakerOptionsPage() as this =
     inherit Page()
 
     let ruleset_id = Rulesets.current_hash

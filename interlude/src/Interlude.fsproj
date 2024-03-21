@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -12,16 +11,13 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
-
   <PropertyGroup>
     <Optimize>True</Optimize>
     <Tailcalls>True</Tailcalls>
   </PropertyGroup>
-	
   <PropertyGroup>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
-
   <ItemGroup>
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -112,6 +108,7 @@
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
     <Compile Include="Features\Options\Gameplay\Preview.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Menus.fs" />
     <Compile Include="Features\Options\Noteskins\HUD\HUDEditor.fs" />
     <Compile Include="Features\Options\Noteskins\HUD\HUD.fs" />
     <Compile Include="Features\Options\Noteskins\Editor\Playfield.fs" />
@@ -140,20 +137,16 @@
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="8.0.100" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\engine\src\Percyqaz.Flux.fsproj" />
     <ProjectReference Include="..\..\libraries\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
     <ProjectReference Include="..\..\online\shared\Interlude.Web.Shared.fsproj" />
     <ProjectReference Include="..\..\prelude\src\Prelude.fsproj" />
   </ItemGroup>
-	
 </Project>

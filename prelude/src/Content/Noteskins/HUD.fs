@@ -168,9 +168,9 @@ type HUDNoteskinOptions =
                 {
                     RelativeToPlayfield = true
                     Left = -100.0f, 0.5f
-                    Top = -10.0f, 0.45f
+                    Top = -65.0f, 0.5f
                     Right = 100.0f, 0.5f
-                    Bottom = 50.0f, 0.45f
+                    Bottom = -5.0f, 0.5f
                 }
             ComboGrowth = 0.01f
             ComboPop = 5.0f
@@ -179,27 +179,27 @@ type HUDNoteskinOptions =
                 {
                     RelativeToPlayfield = true
                     Left =  -200.0f, 0.5f
-                    Top = 20.0f, 0.6f
+                    Top = 130.0f, 0.5f
                     Right = 200.0f, 0.5f
-                    Bottom = 120.0f, 0.6f
+                    Bottom = 230.0f, 0.5f
                 }
 
             JudgementMeterPosition = 
                 {
                     RelativeToPlayfield = false
                     Left = -128.0f, 0.5f
-                    Top =  -106.0f, 0.45f
+                    Top =  -160.0f, 0.5f
                     Right = 128.0f, 0.5f
-                    Bottom = -50.0f, 0.45f
+                    Bottom = -105.0f, 0.5f
                 }
 
             EarlyLateMeterPosition = 
                 {
                     RelativeToPlayfield = true
                     Left = -128.0f, 0.5f
-                    Top = -130.0f, 0.45f
+                    Top = -185.0f, 0.5f
                     Right = 128.0f, 0.5f
-                    Bottom = -96.0f, 0.45f
+                    Bottom = -150.0f, 0.5f
                 }
             EarlyLateMeterEarlyText = "Fast"
             EarlyLateMeterLateText = "Slow"
@@ -221,9 +221,9 @@ type HUDNoteskinOptions =
                 {
                     RelativeToPlayfield = true
                     Left = -128.0f, 0.5f
-                    Top = -130.0f, 0.45f
+                    Top = -185.0f, 0.5f
                     Right = 128.0f, 0.5f
-                    Bottom = -96.0f, 0.45f
+                    Bottom = -150.0f, 0.5f
                 }
 
             JudgementCounterPosition = 

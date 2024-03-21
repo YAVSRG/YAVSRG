@@ -416,7 +416,7 @@ type GameplayPage() as this =
         |+ PageButton("gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
             .Tooltip(Tooltip.Info("gameplay.lanecover"))
             .Pos(pos.Step())
-        |+ PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerPage))
+        |+ PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
             .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
             .Pos(pos.Step 1.5f)
         |+ PageSetting(
