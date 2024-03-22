@@ -36,6 +36,20 @@ module HUDElement =
         | HUDElement.BPMMeter -> %"hud.bpmmeter.name"
         | HUDElement.Pacemaker -> %"hud.pacemaker.name"
 
+    let tooltip (e: HUDElement) : string =
+        match e with
+        | HUDElement.Accuracy -> %"hud.accuracy.tooltip"
+        | HUDElement.TimingDisplay -> %"hud.timingdisplay.tooltip"
+        | HUDElement.Combo -> %"hud.combo.tooltip"
+        | HUDElement.SkipButton -> %"hud.skipbutton.tooltip"
+        | HUDElement.JudgementMeter -> %"hud.judgementmeter.tooltip"
+        | HUDElement.EarlyLateMeter -> %"hud.earlylatemeter.tooltip"
+        | HUDElement.ProgressMeter -> %"hud.progressmeter.tooltip"
+        | HUDElement.JudgementCounter -> %"hud.judgementcounter.tooltip"
+        | HUDElement.RateModMeter -> %"hud.ratemodmeter.tooltip"
+        | HUDElement.BPMMeter -> %"hud.bpmmeter.tooltip"
+        | HUDElement.Pacemaker -> %"hud.pacemaker.tooltip"
+
     let constructor (e: HUDElement) : HUDUserOptions * HUDNoteskinOptions * PlayState -> Widget =
         let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
 
@@ -320,6 +334,10 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
 
     let mutable dragging_from: (float32 * float32) option = None
     let mutable hover = false
+    let mutable repeat = -1
+    let mutable time = 0.0
+    let REPEAT_DELAY = 400.0
+    let REPEAT_INTERVAL = 40.0
 
     let child =
         HUDElement.constructor elem (options.HUD.Value, Content.NoteskinConfig.HUD, ctx.State)
@@ -327,6 +345,17 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
     let position = HUDElement.position_setting elem
 
     let mutable new_unsaved_pos: Position = Position.Default
+
+    let validate_pos (parent_bounds: Rect) (pos: Position) =
+        let bounds = Position.calculate pos parent_bounds
+
+        if bounds.Left + 5.0f > bounds.Right || bounds.Top + 5.0f > bounds.Bottom then
+            { pos with
+                Right = pos.Left ^+ max 5.0f bounds.Width
+                Bottom = pos.Top ^+ max 5.0f bounds.Height
+            }
+        else
+            pos
 
     let save_pos () =
         position.Set
@@ -339,8 +368,36 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
 
     override this.Position
         with set value =
+
+            let value =
+                if this.Initialised then
+                    let bounds = Position.calculate value this.Parent.Bounds
+
+                    if bounds.Left + 5.0f > bounds.Right || bounds.Top + 5.0f > bounds.Bottom then
+                        { value with
+                            Right = value.Left ^+ max 5.0f bounds.Width
+                            Bottom = value.Top ^+ max 5.0f bounds.Height
+                        }
+                    else
+                        value
+                else
+                    value
+
             base.set_Position value
             new_unsaved_pos <- value
+
+    member this.Move(x, y) =
+        let current = position.Value
+
+        this.Position <-
+            {
+                Left = current.Left ^+ x
+                Top = current.Top ^+ y
+                Right = current.Right ^+ x
+                Bottom = current.Bottom ^+ y
+            }
+
+        save_pos ()
 
     override this.Init(parent) =
         this
@@ -488,6 +545,54 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
     override this.Update(elapsed_ms, moved) =
 
         let mutable moved = moved
+
+        if this.Focused then
+            let u = (%%"up").Tapped()
+            let d = (%%"down").Tapped()
+            let l = (%%"left").Tapped()
+            let r = (%%"right").Tapped()
+
+            if u || d || l || r then
+                repeat <- 0
+                time <- 0
+
+                if u then
+                    this.Move(0.0f, -5.0f)
+
+                if d then
+                    this.Move(0.0f, 5.0f)
+
+                if l then
+                    this.Move(-5.0f, 0.0f)
+
+                if r then
+                    this.Move(5.0f, 0.0f)
+
+            if repeat >= 0 then
+                let u = (%%"up").Pressed()
+                let d = (%%"down").Pressed()
+                let l = (%%"left").Pressed()
+                let r = (%%"right").Pressed()
+
+                time <- time + elapsed_ms
+
+                if (float repeat * REPEAT_INTERVAL + REPEAT_DELAY < time) then
+                    repeat <- repeat + 1
+
+                    if u then
+                        this.Move(0.0f, -5.0f)
+
+                    if d then
+                        this.Move(0.0f, 5.0f)
+
+                    if l then
+                        this.Move(-5.0f, 0.0f)
+
+                    if r then
+                        this.Move(5.0f, 0.0f)
+
+                if not (u || d || l || r) then
+                    repeat <- -1
 
         hover <- Mouse.hover this.Bounds
 

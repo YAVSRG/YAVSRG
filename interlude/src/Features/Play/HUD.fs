@@ -84,7 +84,13 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
     let mutable w = 0.0f
 
     let mutable last_seen_time = -Time.infinity
-    let ln_mult = if user_options.TimingDisplayHalfScaleReleases then 0.5f else 1.0f
+
+    let ln_mult =
+        if user_options.TimingDisplayHalfScaleReleases then
+            0.5f
+        else
+            1.0f
+
     let animation_time = user_options.TimingDisplayFadeTime * Gameplay.rate.Value
 
     do
@@ -111,7 +117,7 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if w = 0.0f then
+        if w = 0.0f || moved then
             w <- this.Bounds.Width
 
         let now = state.CurrentChartTime()
@@ -129,7 +135,12 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
 
         if user_options.TimingDisplayShowGuide then
             Draw.rect
-                (Rect.Create(centre - user_options.TimingDisplayThickness, this.Bounds.Top, centre + user_options.TimingDisplayThickness, this.Bounds.Bottom))
+                (Rect.Create(
+                    centre - user_options.TimingDisplayThickness,
+                    this.Bounds.Top,
+                    centre + user_options.TimingDisplayThickness,
+                    this.Bounds.Bottom
+                ))
                 Color.White
 
         let now = state.CurrentChartTime()
@@ -177,7 +188,10 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
                 | Hit e -> (e.Judgement, e.Delta)
                 | Release e -> (e.Judgement, e.Delta)
 
-            if judge.IsSome && (not user_options.JudgementMeterIgnorePerfect || judge.Value > 0) then
+            if
+                judge.IsSome
+                && (not user_options.JudgementMeterIgnorePerfect || judge.Value > 0)
+            then
                 let j = judge.Value in
 
                 if
@@ -230,9 +244,17 @@ type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
 
             Text.fill (
                 Style.font,
-                (if early then noteskin_options.EarlyLateMeterEarlyText else noteskin_options.EarlyLateMeterLateText),
+                (if early then
+                     noteskin_options.EarlyLateMeterEarlyText
+                 else
+                     noteskin_options.EarlyLateMeterLateText),
                 this.Bounds,
-                (if early then noteskin_options.EarlyLateMeterEarlyColor else noteskin_options.EarlyLateMeterLateColor).O4a a,
+                (if early then
+                     noteskin_options.EarlyLateMeterEarlyColor
+                 else
+                     noteskin_options.EarlyLateMeterLateColor)
+                    .O4a
+                    a,
                 Alignment.CENTER
             )
 
@@ -263,7 +285,8 @@ type Combo(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, s
         let combo = state.Scoring.State.CurrentCombo
 
         let amt =
-            pop_animation.Value + (((combo, 1000) |> Math.Min |> float32) * noteskin_options.ComboGrowth)
+            pop_animation.Value
+            + (((combo, 1000) |> Math.Min |> float32) * noteskin_options.ComboGrowth)
 
         Text.fill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
 
@@ -302,7 +325,9 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
                 (Quad.color Colors.white.O2)
 
         for i = 0 to pc * 29.9f |> floor |> int do
-            Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) (Quad.color noteskin_options.ProgressMeterColor)
+            Draw.untextured_quad
+                (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
+                (Quad.color noteskin_options.ProgressMeterColor)
 
         let text =
             match user_options.ProgressMeterLabel with
