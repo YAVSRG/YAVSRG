@@ -738,7 +738,7 @@ type PositionerInfo(ctx: PositionerContext) =
             Position = Position.SliceTop(80.0f).Margin(20.0f, 5.0f)
         )
         |+ Button(
-            Icons.REFRESH_CW + " " + "Reset position",
+            Icons.REFRESH_CW + " " + %"hud.generic.reset",
             (fun () ->
                 match ctx.Selected with
                 | Some e ->
@@ -749,7 +749,7 @@ type PositionerInfo(ctx: PositionerContext) =
             Position = Position.Row(85.0f, 60.0f).Margin(20.0f, 0.0f)
         )
         |+ Button(
-            Icons.SETTINGS + " " + "Configure",
+            Icons.SETTINGS + " " + %"hud.generic.options",
             (fun () ->
                 match ctx.Selected with
                 | Some e -> HUDElement.show_menu e (fun () -> ctx.Create e)

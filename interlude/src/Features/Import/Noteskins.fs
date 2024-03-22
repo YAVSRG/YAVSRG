@@ -293,8 +293,8 @@ module Noteskins =
                 )
                 |+ LoadingIndicator.Border(fun () -> loading))
             |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to noteskins repository"))
-            |+ Text(%"imports.noteskins.hint", Position = Position.SliceBottom(100.0f).SliceTop(50.0f))
-            |+ Text(%"imports.noteskins.hint2", Position = Position.SliceBottom 50.0f)
+            |+ Text(%"imports.noteskins.hint_a", Position = Position.SliceBottom(100.0f).SliceTop(50.0f))
+            |+ Text(%"imports.noteskins.hint_b", Position = Position.SliceBottom 50.0f)
             |* scroll
 
             base.Init parent

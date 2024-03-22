@@ -43,7 +43,7 @@ type EditHUDPage() as this =
                else
                    []
             |+ Button(
-                Icons.SETTINGS + " " + "Options",
+                Icons.SETTINGS + " " + %"hud.generic.options",
                 (fun () -> HUDElement.show_menu e ignore),
                 Position = Position.TrimLeft(PRETTYTEXTWIDTH + 100.0f).Margin(Style.PADDING)
             )
