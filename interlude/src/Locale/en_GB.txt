@@ -81,6 +81,7 @@ gameplay.preset.save.prompt=Save and overwrite preset '%0'?
 gameplay.preset.save=Save
 gameplay.scrollspeed.name=Scroll speed
 gameplay.scrollspeed.tooltip=Controls the scroll speed of notes.\nIt's a linear scale, 100% = 1 pixel scrolled per millisecond.\n\n*Etterna scroll speed equivalent is only correct if your columns are the same width.
+gameplay.scrollspeed.info=%0 on osu! = %1 on Quaver = %2 on Etterna*
 gameplay.upscroll.name=Upscroll
 gameplay.upscroll.tooltip=Set this to true if you want notes to scroll upwards instead of downwards.
 generic.keymode.name=Keymode
@@ -425,6 +426,17 @@ login.login_with_discord.name=Login with Discord
 login.name=Login
 login.register_with_discord.name=Register with Discord
 login.waiting_for_discord=Waiting for Discord authentication in browser...
+network.multiplayer=Multiplayer
+network.players=Players
+network.logout=Log out
+network.login=Log in
+network.connection.cancel=Cancel
+network.connection.connect=Connect
+network.connection.reconnect=Reconnect
+network.connection.offline=Offline
+network.connection.connecting=Connecting
+network.connection.not_logged_in=Not logged in
+network.multiplayer.in_lobby=In a lobby
 menu.back=Back
 menu.changelog=What's New
 menu.discord=Join the Discord
