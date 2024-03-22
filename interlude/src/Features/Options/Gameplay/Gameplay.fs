@@ -381,12 +381,13 @@ type GameplayPage() as this =
                 .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
                 .Pos(pos.Step 1.5f)
             |+ Text(
-                (fun () -> 
+                (fun () ->
                     [
-                        (options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1");
-                        (options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1");
-                        "2C" + (60000.0f * options.ScrollSpeed.Value / column_width).ToString("F0")
-                    ] %> "gameplay.scrollspeed.info"
+                        (options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
+                        (options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
+                        "C" + (60000.0f * options.ScrollSpeed.Value / column_width).ToString("F0")
+                    ]
+                    %> "gameplay.scrollspeed.info"
                 ),
                 Align = Alignment.CENTER,
                 Position = Position.TrimLeft(PRETTYTEXTWIDTH).Margin(5.0f, -30.0f).SliceBottom(35.0f)
