@@ -101,11 +101,19 @@ type StaticContainer(node_type) =
 
     let children = ResizeArray<Widget>()
 
+    let mutable position_changed = false
+
+    override this.Position
+        with set (value) =
+            base.set_Position value
+            position_changed <- true
+
     override this.Draw() =
         for c in children do
             c.Draw()
 
     override this.Update(elapsed_ms, moved) =
+        let moved = if position_changed then position_changed <- false; true else moved
         base.Update(elapsed_ms, moved)
 
         // children are updated in reverse order

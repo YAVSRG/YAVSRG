@@ -115,7 +115,7 @@ type private ModSelectPage(on_close) as this =
         this.Content(
             NavigationContainer.Column<Widget>()
             |+ grid
-            |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerPage().Show()))
+            |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
                 .Pos(500.0f)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker"))
             |+ Conditional(
