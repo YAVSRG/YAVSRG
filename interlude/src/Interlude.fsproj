@@ -109,6 +109,7 @@
     <Compile Include="Features\Options\Gameplay\Preview.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
     <Compile Include="Features\Options\Noteskins\HUD\Menus.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\HUDElement.fs" />
     <Compile Include="Features\Options\Noteskins\HUD\HUDEditor.fs" />
     <Compile Include="Features\Options\Noteskins\HUD\HUD.fs" />
     <Compile Include="Features\Options\Noteskins\Editor\Playfield.fs" />

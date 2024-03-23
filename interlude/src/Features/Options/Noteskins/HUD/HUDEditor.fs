@@ -11,287 +11,14 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.NoteColors
 open Prelude.Gameplay
 open Prelude.Content.Noteskins
-open Interlude.Content
-open Interlude.Options
 open Interlude.Utils
+open Interlude.Options
 open Interlude.UI
+open Interlude.UI.Components
+open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Online
 open Interlude.Features.Play
-open Interlude.Features.Play.HUD
-
-module HUDElement =
-
-    let name (e: HUDElement) : string =
-        match e with
-        | HUDElement.Accuracy -> %"hud.accuracy.name"
-        | HUDElement.TimingDisplay -> %"hud.timingdisplay.name"
-        | HUDElement.Combo -> %"hud.combo.name"
-        | HUDElement.SkipButton -> %"hud.skipbutton.name"
-        | HUDElement.JudgementMeter -> %"hud.judgementmeter.name"
-        | HUDElement.EarlyLateMeter -> %"hud.earlylatemeter.name"
-        | HUDElement.ProgressMeter -> %"hud.progressmeter.name"
-        | HUDElement.JudgementCounter -> %"hud.judgementcounter.name"
-        | HUDElement.RateModMeter -> %"hud.ratemodmeter.name"
-        | HUDElement.BPMMeter -> %"hud.bpmmeter.name"
-        | HUDElement.Pacemaker -> %"hud.pacemaker.name"
-
-    let tooltip (e: HUDElement) : string =
-        match e with
-        | HUDElement.Accuracy -> %"hud.accuracy.tooltip"
-        | HUDElement.TimingDisplay -> %"hud.timingdisplay.tooltip"
-        | HUDElement.Combo -> %"hud.combo.tooltip"
-        | HUDElement.SkipButton -> %"hud.skipbutton.tooltip"
-        | HUDElement.JudgementMeter -> %"hud.judgementmeter.tooltip"
-        | HUDElement.EarlyLateMeter -> %"hud.earlylatemeter.tooltip"
-        | HUDElement.ProgressMeter -> %"hud.progressmeter.tooltip"
-        | HUDElement.JudgementCounter -> %"hud.judgementcounter.tooltip"
-        | HUDElement.RateModMeter -> %"hud.ratemodmeter.tooltip"
-        | HUDElement.BPMMeter -> %"hud.bpmmeter.tooltip"
-        | HUDElement.Pacemaker -> %"hud.pacemaker.tooltip"
-
-    let constructor (e: HUDElement) : HUDUserOptions * HUDNoteskinOptions * PlayState -> Widget =
-        let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
-
-        match e with
-        | HUDElement.Accuracy -> cast Accuracy
-        | HUDElement.TimingDisplay -> cast TimingDisplay
-        | HUDElement.Combo -> cast Combo
-        | HUDElement.SkipButton -> cast SkipButton
-        | HUDElement.JudgementMeter -> cast JudgementMeter
-        | HUDElement.EarlyLateMeter -> cast EarlyLateMeter
-        | HUDElement.ProgressMeter -> cast ProgressMeter
-        | HUDElement.JudgementCounter -> cast JudgementCounter
-        | HUDElement.RateModMeter -> cast RateModMeter
-        | HUDElement.BPMMeter -> cast BPMMeter
-        | HUDElement.Pacemaker -> cast Pacemaker
-
-    let enabled_setting (e: HUDElement) : Setting<bool> =
-        match e with
-        | HUDElement.Accuracy ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            AccuracyEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.AccuracyEnabled)
-        | HUDElement.TimingDisplay ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            TimingDisplayEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.TimingDisplayEnabled)
-        | HUDElement.Combo ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            ComboEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.ComboEnabled)
-        | HUDElement.SkipButton ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            SkipButtonEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.SkipButtonEnabled)
-        | HUDElement.JudgementMeter ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            JudgementMeterEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.JudgementMeterEnabled)
-        | HUDElement.EarlyLateMeter ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            EarlyLateMeterEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.EarlyLateMeterEnabled)
-        | HUDElement.ProgressMeter ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            ProgressMeterEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.ProgressMeterEnabled)
-        | HUDElement.JudgementCounter ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            JudgementCounterEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.JudgementCounterEnabled)
-        | HUDElement.RateModMeter ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            RateModMeterEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.RateModMeterEnabled)
-        | HUDElement.BPMMeter ->
-            Setting.make
-                (fun v ->
-                    options.HUD.Set
-                        { options.HUD.Value with
-                            BPMMeterEnabled = v
-                        }
-                )
-                (fun () -> options.HUD.Value.BPMMeterEnabled)
-        | HUDElement.Pacemaker -> // pacemaker cannot be toggled by the user like a setting, it is on depending on gameplay state
-            Setting.make (fun _ -> ()) (fun () -> true)
-
-    let position_setting (e: HUDElement) : Setting<HUDPosition> =
-        match e with
-        | HUDElement.Accuracy ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            AccuracyPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.AccuracyPosition)
-        | HUDElement.TimingDisplay ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            TimingDisplayPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.TimingDisplayPosition)
-        | HUDElement.Combo ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            ComboPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.ComboPosition)
-        | HUDElement.SkipButton ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            SkipButtonPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.SkipButtonPosition)
-        | HUDElement.JudgementMeter ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            JudgementMeterPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.JudgementMeterPosition)
-        | HUDElement.EarlyLateMeter ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            EarlyLateMeterPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.EarlyLateMeterPosition)
-        | HUDElement.ProgressMeter ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            ProgressMeterPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.ProgressMeterPosition)
-        | HUDElement.JudgementCounter ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            JudgementCounterPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.JudgementCounterPosition)
-        | HUDElement.RateModMeter ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            RateModMeterPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.RateModMeterPosition)
-        | HUDElement.BPMMeter ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            BPMMeterPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.BPMMeterPosition)
-        | HUDElement.Pacemaker ->
-            Setting.make
-                (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
-                            PacemakerPosition = v
-                        }
-                )
-                (fun () -> Content.NoteskinConfig.HUD.PacemakerPosition)
-
-    let default_position (e: HUDElement) : HUDPosition =
-        let all_defaults = HUDNoteskinOptions.Default
-
-        match e with
-        | HUDElement.Accuracy -> all_defaults.AccuracyPosition
-        | HUDElement.TimingDisplay -> all_defaults.TimingDisplayPosition
-        | HUDElement.Combo -> all_defaults.ComboPosition
-        | HUDElement.SkipButton -> all_defaults.SkipButtonPosition
-        | HUDElement.JudgementMeter -> all_defaults.JudgementMeterPosition
-        | HUDElement.EarlyLateMeter -> all_defaults.EarlyLateMeterPosition
-        | HUDElement.ProgressMeter -> all_defaults.ProgressMeterPosition
-        | HUDElement.JudgementCounter -> all_defaults.JudgementCounterPosition
-        | HUDElement.RateModMeter -> all_defaults.RateModMeterPosition
-        | HUDElement.BPMMeter -> all_defaults.BPMMeterPosition
-        | HUDElement.Pacemaker -> all_defaults.PacemakerPosition
-
-    let show_menu (e: HUDElement) (on_close: unit -> unit) =
-        match e with
-        | HUDElement.Accuracy -> AccuracyPage(on_close).Show()
-        | HUDElement.TimingDisplay -> TimingDisplayPage(on_close).Show()
-        | HUDElement.Combo -> ComboPage(on_close).Show()
-        | HUDElement.SkipButton -> SkipButtonPage(on_close).Show()
-        | HUDElement.JudgementMeter -> JudgementMeterPage(on_close).Show()
-        | HUDElement.EarlyLateMeter -> EarlyLateMeterPage(on_close).Show()
-        | HUDElement.ProgressMeter -> ProgressMeterPage(on_close).Show()
-        | HUDElement.JudgementCounter -> JudgementCounterPage(on_close).Show()
-        | HUDElement.RateModMeter -> RateModMeterPage(on_close).Show()
-        | HUDElement.BPMMeter -> BPMMeterPage(on_close).Show()
-        | HUDElement.Pacemaker -> PacemakerPage(on_close).Show()
 
 type SubPositioner(drag: (float32 * float32) * (float32 * float32) -> unit, finish_drag: unit -> unit) =
     inherit StaticWidget(NodeType.None)
@@ -623,7 +350,7 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
 
     override this.OnSelected by_mouse =
         base.OnSelected by_mouse
-        ctx.Selected <- Some elem
+        ctx.Selected <- elem
 
     override this.Draw() =
         if dragging_from.IsSome then
@@ -686,7 +413,7 @@ and PositionerContext =
         Screen: IPlayScreen
         Playfield: Playfield
         State: PlayState
-        mutable Selected: HUDElement option
+        mutable Selected: HUDElement
         mutable Positioners: Map<HUDElement, Positioner>
     }
     member this.Create(e: HUDElement) =
@@ -719,72 +446,206 @@ and PositionerContext =
 
             this.Positioners <- this.Positioners.Add(e, p)
 
-            if this.Selected = Some e then
-                p.Focus true
+            if this.Selected = e then
+                if p.Initialised then p.Focus true else sync(fun () -> p.Focus true)
+
+    member this.Select(e: HUDElement) =
+        if this.Selected <> e then
+            match this.Positioners.TryFind this.Selected with
+            | Some existing -> Selection.clear()
+            | None -> ()
+            this.Selected <- e
+            match this.Positioners.TryFind e with
+            | Some existing -> existing.Focus true
+            | None -> ()
+
+    member this.ChangePositionRelative(to_playfield: bool, anchor: float32) =
+        match this.Positioners.TryFind this.Selected with
+        | Some p ->
+            let setting = HUDElement.position_setting this.Selected
+            let current = setting.Value
+
+            let bounds = p.Bounds
+            let parent_bounds = if to_playfield then this.Playfield.Bounds else this.Screen.Bounds
+            let axis = parent_bounds.Left + parent_bounds.Width * anchor
+            setting.Set
+                {
+                    RelativeToPlayfield = to_playfield
+                    Left = anchor %+ (bounds.Left - axis)
+                    Top = current.Top
+                    Right = anchor %+ (bounds.Right - axis)
+                    Bottom = current.Bottom
+                }
+            this.Create this.Selected
+        | None -> ()
 
 type PositionerInfo(ctx: PositionerContext) =
     inherit FrameContainer(NodeType.None, Fill = K Colors.shadow_2.O3, Border = K Colors.cyan_accent)
 
-    let mutable left = true
+    let mutable bottom = true
+    let mutable dropdown: Widget option = None
+
+    let TOP_POSITION : Position = { Left = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Top = 0.0f %- 1.0f; Bottom = 0.0f %+ 60.0f }
+    let BOTTOM_POSITION : Position = { Left = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Top = 1.0f %- 60.0f; Bottom = 1.0f %+ 1.0f }
 
     override this.Init(parent) =
-        this
-        |+ Text(
-            (fun () ->
-                match ctx.Selected with
-                | Some e -> HUDElement.name e
-                | None -> ""
-            ),
-            Position = Position.SliceTop(80.0f).Margin(20.0f, 5.0f)
+        NavigationContainer.Row<Button>()
+        |+ Button(
+            (fun () -> HUDElement.name ctx.Selected),
+            this.ToggleElementDropdown,
+            Hotkey = "context_menu",
+            Position = Position.SliceLeft(400.0f).Margin(20.0f, 5.0f)
         )
         |+ Button(
-            Icons.REFRESH_CW + " " + %"hud.generic.reset",
+            (fun () -> if (HUDElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE else Icons.CIRCLE),
             (fun () ->
-                match ctx.Selected with
-                | Some e ->
-                    HUDElement.position_setting(e).Set(HUDElement.default_position e)
-                    sync (fun () -> ctx.Create e)
-                | None -> ()
+                Setting.app not (HUDElement.enabled_setting ctx.Selected)
+                sync (fun () -> ctx.Create ctx.Selected)
             ),
-            Position = Position.Row(85.0f, 60.0f).Margin(20.0f, 0.0f)
+            Disabled = (fun () -> HUDElement.can_toggle ctx.Selected |> not),
+            Position = Position.Column(400.0f, 100.0f).Margin(10.0f, 5.0f)
         )
         |+ Button(
-            Icons.SETTINGS + " " + %"hud.generic.options",
+            Icons.REFRESH_CW,
             (fun () ->
-                match ctx.Selected with
-                | Some e -> HUDElement.show_menu e (fun () -> ctx.Create e)
-                | None -> ()
+                HUDElement.position_setting(ctx.Selected).Set(HUDElement.default_position ctx.Selected)
+                sync (fun () -> ctx.Create ctx.Selected)
             ),
-            Position = Position.Row(145.0f, 60.0f).Margin(20.0f, 0.0f)
+            Position = Position.Column(500.0f, 100.0f).Margin(10.0f, 5.0f)
         )
-        |* Dummy()
+        |+ Button(
+            Icons.SETTINGS,
+            (fun () -> HUDElement.show_menu ctx.Selected (fun () -> ctx.Create ctx.Selected)),
+            Hotkey = "options",
+            Disabled = (fun () -> HUDElement.can_configure ctx.Selected |> not),
+            Position = Position.Column(600.0f, 100.0f).Margin(10.0f, 5.0f)
+        )
+        |+ Button(
+            Icons.LAYOUT,
+            this.ToggleAnchorDropdown,
+            Position = Position.Column(700.0f, 100.0f).Margin(10.0f, 5.0f)
+        )
+        |> this.Add
 
-        this.Position <- Position.SliceLeft(500.0f).SliceBottom(540.0f).Margin(20.0f)
+        this.Position <- BOTTOM_POSITION
         base.Init parent
 
-    override this.Update(elapsed_ms, moved) =
-        if ctx.Selected.IsNone then
-            ()
-        else
+    member private this.ToggleElementDropdown() =
+        match dropdown with
+        | Some _ -> dropdown <- None
+        | _ ->
+            let d =
+                Dropdown
+                    {
+                        Items = [
+                            HUDElement.Combo
+                            HUDElement.SkipButton
+                            HUDElement.ProgressMeter
+                            HUDElement.Accuracy
+                            HUDElement.TimingDisplay
+                            HUDElement.JudgementCounter
+                            HUDElement.JudgementMeter
+                            HUDElement.EarlyLateMeter
+                            HUDElement.RateModMeter
+                            HUDElement.BPMMeter
+                            HUDElement.Pacemaker
+                        ] |> List.map (fun e -> e, HUDElement.name e)
+                        ColorFunc = K Colors.text
+                        OnClose = fun () -> dropdown <- None
+                        Setting =
+                            Setting.make
+                                (fun v -> ctx.Select v)
+                                (fun () -> ctx.Selected)
+                    }
 
+            d.Position <- 
+                if bottom then 
+                    { 
+                        Left = 0.0f %+ 30.0f
+                        Top = 0.0f %- (10.0f + d.Height)
+                        Right = 0.0f %+ 370.0f
+                        Bottom = 0.0f %- 10.0f
+                    }
+                else
+                    {
+                        Left = 0.0f %+ 30.0f
+                        Top = 1.0f %+ 10.0f
+                        Right = 0.0f %+ 370.0f
+                        Bottom = 1.0f %+ (10.0f + d.Height)
+                    }
+            d.Init this
+            dropdown <- Some d
+
+    member private this.ToggleAnchorDropdown() =
+        match dropdown with
+        | Some _ -> dropdown <- None
+        | _ ->
+            let d =
+                DropdownMenu
+                    {
+                        Items = [
+                            (fun () -> ctx.ChangePositionRelative(true, Alignment.CENTER)), %"hud.editor.relative_to.playfield_center"
+                            (fun () -> ctx.ChangePositionRelative(true, Alignment.LEFT)), %"hud.editor.relative_to.playfield_left"
+                            (fun () -> ctx.ChangePositionRelative(true, Alignment.RIGHT)), %"hud.editor.relative_to.playfield_right"
+                            (fun () -> ctx.ChangePositionRelative(false, Alignment.CENTER)), %"hud.editor.relative_to.screen_center"
+                            (fun () -> ctx.ChangePositionRelative(false, Alignment.LEFT)), %"hud.editor.relative_to.screen_left"
+                            (fun () -> ctx.ChangePositionRelative(false, Alignment.RIGHT)), %"hud.editor.relative_to.screen_right"
+                        ]
+                        OnClose = fun () -> dropdown <- None
+                    }
+
+            d.Position <- 
+                if bottom then 
+                    { 
+                        Left = 1.0f %- 370.0f
+                        Top = 0.0f %- (10.0f + d.Height)
+                        Right = 1.0f %- 30.0f
+                        Bottom = 0.0f %- 10.0f
+                    }
+                else
+                    {
+                        Left = 1.0f %- 370.0f
+                        Top = 1.0f %+ 60.0f
+                        Right = 1.0f %- 30.0f
+                        Bottom = 1.0f %+ (60.0f + d.Height)
+                    }
+            d.Init this
+            d.Add (Text(%"hud.editor.relative_to", Position = Position.BorderTop 40.0f))
+            dropdown <- Some d
+
+    override this.Update(elapsed_ms, moved) =
         let mutable moved = moved
 
-        if
-            left
-            && ctx.Positioners.[ctx.Selected.Value].Bounds.Left - 100.0f < this.Bounds.Right
-        then
-            left <- false
-            moved <- true
-            this.Position <- Position.SliceRight(500.0f).SliceBottom(540.0f).Margin(20.0f)
-        elif
-            not left
-            && ctx.Positioners.[ctx.Selected.Value].Bounds.Right + 100.0f > this.Bounds.Left
-        then
-            left <- true
-            moved <- true
-            this.Position <- Position.SliceLeft(500.0f).SliceBottom(540.0f).Margin(20.0f)
+        if ctx.Positioners.ContainsKey ctx.Selected then
+            if
+                bottom
+                && (ctx.Positioners.[ctx.Selected].Bounds.Intersect this.Bounds).Visible
+                && ctx.Positioners.[ctx.Selected].Bounds.Top > 60.0f
+            then
+                bottom <- false
+                moved <- true
+                this.Position <- TOP_POSITION
+            elif
+                not bottom
+                && (ctx.Positioners.[ctx.Selected].Bounds.Intersect this.Bounds).Visible
+                && ctx.Positioners.[ctx.Selected].Bounds.Bottom < this.Parent.Bounds.Bottom - 60.0f
+            then
+                bottom <- true
+                moved <- true
+                this.Position <- BOTTOM_POSITION
+
+        match dropdown with
+        | Some d -> d.Update(elapsed_ms, moved)
+        | None -> ()
 
         base.Update(elapsed_ms, moved)
+
+    override this.Draw() =
+        base.Draw()
+        
+        match dropdown with
+        | Some d -> d.Draw()
+        | None -> ()
 
 module HUDEditor =
 
@@ -816,7 +677,7 @@ module HUDEditor =
                         Screen = this
                         Playfield = this.Playfield
                         State = this.State
-                        Selected = None
+                        Selected = HUDElement.Accuracy
                         Positioners = Map.empty
                     }
 
@@ -835,13 +696,16 @@ module HUDEditor =
                 ]
                 |> Seq.iter ctx.Create
 
-                this |* Conditional((fun () -> ctx.Selected.IsSome), PositionerInfo ctx)
+                this |* PositionerInfo ctx
             // todo: way to turn on multiplayer player list
 
             override this.OnEnter p =
                 DiscordRPC.in_menus ("Customising HUD")
-                // todo: don't play leadin
-                base.OnEnter p
+                Dialog.close ()
+                Background.dim (float32 options.BackgroundDim.Value)
+                Toolbar.hide ()
+                Song.on_finish <- SongFinishAction.LoopFromBeginning
+                Input.remove_listener ()
 
             override this.Update(elapsed_ms, moved) =
                 let now = Song.time_with_offset ()

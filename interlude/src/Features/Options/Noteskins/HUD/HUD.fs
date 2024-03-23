@@ -27,7 +27,7 @@ type EditHUDPage() as this =
 
         let body =
             NavigationContainer.Row<Widget>(WrapNavigation = false)
-            |+ if e <> HUDElement.Pacemaker then
+            |+ if HUDElement.can_toggle e then
                    [
                        Button(
                            (fun () ->
@@ -42,11 +42,16 @@ type EditHUDPage() as this =
                    ]
                else
                    []
-            |+ Button(
-                Icons.SETTINGS + " " + %"hud.generic.options",
-                (fun () -> HUDElement.show_menu e ignore),
-                Position = Position.TrimLeft(PRETTYTEXTWIDTH + 100.0f).Margin(Style.PADDING)
-            )
+            |+ if HUDElement.can_configure e then 
+                    [
+                        Button(
+                            Icons.SETTINGS + " " + %"hud.editor.options",
+                            (fun () -> HUDElement.show_menu e ignore),
+                            Position = Position.TrimLeft(PRETTYTEXTWIDTH + 100.0f).Margin(Style.PADDING)
+                        )
+                    ]
+                else 
+                    []
             |+ Text(
                 HUDElement.name e,
                 Align = Alignment.LEFT,
@@ -66,7 +71,7 @@ type EditHUDPage() as this =
     do
         this.Content(
             NavigationContainer.Column<Widget>(Position = Position.Margin(100.0f, 200.0f))
-            |+ PageButton("hud.edit", open_hud_editor, Position = Position.SliceTop(PRETTYHEIGHT))
+            |+ PageButton("hud.editor", open_hud_editor, Position = Position.SliceTop(PRETTYHEIGHT))
             |+ (GridFlowContainer<Widget>(
                     PRETTYHEIGHT,
                     2,
