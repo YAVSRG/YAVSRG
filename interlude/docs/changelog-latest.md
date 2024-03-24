@@ -1,11 +1,34 @@
-0.7.19.1
+0.7.19.2
 ====
 
-Fixes some issues and cut corners in pattern analysis based on this morning's feedback
+# Noteskinning update
 
-# Pattern analysis changes
-- Fixed a bug causing the game to load pattern data slower than it should
-- More charts categorised as "Jack" now correct get categorised as "Chordjack"
-- Fixed a bug where the score screen just shows patterns for your current chart + rate, not for the score
-- Added a tip about searching for patterns on the search box tooltip
+A large portion of HUD configuration has been **moved to noteskins**
+This means that noteskins are now in control of things like:
+
+- The position of HUD elements
+- The appearance of HUD elements
+
+Some settings that I think make more sense as user preference are **still part of the normal settings** and are **saved independently from noteskins** such as:
+
+- Which bits of the HUD are turned on
+- Special HUD behaviours like the label on the progress meter
+- Preferences like lane covers
+
+Please note that your existing HUD settings will be reset by this update - The original config files will not be deleted in case you need to refer to them
+
+# What's new
+- New ingame editor for positioning your HUD elements! You can now click and drag OR use arrow keys
+  Please break it and report bugs, I will do a follow up patch based on your feedback
+- Menuing around customising HUD elements ha been redesigned a bit to explain these changes around noteskins
+
+# Bug fixes
+- Fixed "Delete preset" button not having a position set
+- Improved loading speed of local scores scoreboard
+- Finishing importing a pack/song should no longer lag spike gameplay screens as you play
+- Localisation fixes and improvements including some from @ZeNyfh :)
+- Fixed crash when a noteskin has no textures
+
+# Misc
+- Spamming the screenshot key on the score screen now throws some confetti after taking 1 screenshot
 
