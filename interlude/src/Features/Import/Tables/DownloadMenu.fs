@@ -5,7 +5,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Backbeat
-open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Interlude.Web.Shared.Requests
 open Interlude.Content

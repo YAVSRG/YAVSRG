@@ -68,10 +68,16 @@ type EditHUDPage() as this =
         }
         |+ body
 
+    let noteskin_required =
+        Callout
+            .Small
+            .Title("Noteskin required")
+            .Body("You are on an embedded default noteskin which doesn't support adjusting HUD positions.\nMany settings, like which elements are on/off, are still available.")
+            .Button("Change noteskin", fun () -> Menu.Back(); NoteskinsPage().Show())
+
     do
         this.Content(
             NavigationContainer.Column<Widget>(Position = Position.Margin(100.0f, 200.0f))
-            |+ PageButton("hud.editor", open_hud_editor, Position = Position.SliceTop(PRETTYHEIGHT))
             |+ (GridFlowContainer<Widget>(
                     PRETTYHEIGHT,
                     2,
@@ -89,7 +95,13 @@ type EditHUDPage() as this =
                 |+ hud_configuration HUDElement.JudgementMeter
                 |+ hud_configuration HUDElement.EarlyLateMeter
                 |+ hud_configuration HUDElement.RateModMeter
-                |+ hud_configuration HUDElement.BPMMeter)
+                |+ hud_configuration HUDElement.BPMMeter
+            )
+            |+ (if Interlude.Content.Content.Noteskin.IsEmbedded then
+                    Callout.frame noteskin_required (fun (w, h) -> Position.Box(0.0f, -0.15f, w, h + 40.0f)) :> Widget
+                else
+                    PageButton("hud.editor", open_hud_editor, Position = Position.SliceTop(PRETTYHEIGHT))
+            )
         )
 
     override this.Title = %"hud.name"

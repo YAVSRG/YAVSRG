@@ -148,6 +148,8 @@ type Container(node_type) =
 
     static member (|*)(parent: #Container, child: #Widget) = parent.Add child
     static member (|*)(parent: #Container, children: #Widget seq) = Seq.iter parent.Add children
+    static member inline (|>>)(child: Widget, constructor: NodeType -> 'T) : 'T =
+        constructor (NodeType.Container (fun () -> Some child)) |+ child
 
 type private DynamicPosition(pos: Position) =
     let mutable pos = pos

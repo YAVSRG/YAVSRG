@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Data
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu

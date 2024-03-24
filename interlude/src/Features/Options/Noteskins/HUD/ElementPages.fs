@@ -277,7 +277,7 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
                 Text.fill_b (
                     Style.font,
                     text,
-                    bounds.Expand(0.0f, 20.0f).SliceBottom(20.0f),
+                    bounds.BorderBottom(40.0f * 0.35f),
                     Colors.text_subheading,
                     Alignment.CENTER
                 )
