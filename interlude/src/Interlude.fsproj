@@ -108,10 +108,10 @@
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
     <Compile Include="Features\Options\Gameplay\Preview.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
-    <Compile Include="Features\Options\Noteskins\HUD\Menus.fs" />
-    <Compile Include="Features\Options\Noteskins\HUD\HUDElement.fs" />
-    <Compile Include="Features\Options\Noteskins\HUD\HUDEditor.fs" />
-    <Compile Include="Features\Options\Noteskins\HUD\HUD.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\ElementPages.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Editor.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Page.fs" />
     <Compile Include="Features\Options\Noteskins\Editor\Playfield.fs" />
     <Compile Include="Features\Options\Noteskins\Editor\HoldNotes.fs" />
     <Compile Include="Features\Options\Noteskins\Editor\Colors.fs" />
