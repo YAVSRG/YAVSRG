@@ -186,7 +186,7 @@ type HUDNoteskinOptions =
 
             JudgementMeterPosition = 
                 {
-                    RelativeToPlayfield = false
+                    RelativeToPlayfield = true
                     Left = -128.0f, 0.5f
                     Top =  -160.0f, 0.5f
                     Right = 128.0f, 0.5f

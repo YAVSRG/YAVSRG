@@ -436,7 +436,17 @@ type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOption
 
     override this.Draw() =
         match state.Pacemaker with
-        | PacemakerInfo.None -> ()
+        | PacemakerInfo.None ->
+            Text.fill_b (
+                Style.font,
+                Icons.FLAG,
+                this.Bounds
+                    .SliceLeft(0.0f)
+                    .Expand(this.Bounds.Height, 0.0f)
+                    .Translate(this.Bounds.Width * 0.5f, 0.0f),
+                (color.Value, Color.Black),
+                Alignment.CENTER
+            )
         | PacemakerInfo.Accuracy _
         | PacemakerInfo.Replay _ ->
             Text.fill_b (
