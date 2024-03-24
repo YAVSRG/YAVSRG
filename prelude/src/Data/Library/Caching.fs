@@ -124,7 +124,7 @@ module Cache =
                 | Asset s -> Some s
                 | _ -> None
         },
-        PatternSummary.generate_cached_pattern_data (1.0f, chart)
+        PatternSummary.generate_pattern_data 1.0f chart
 
     let private sha_256 = SHA256.Create()
 
@@ -494,7 +494,7 @@ module Cache =
                         if not (cache.Patterns.ContainsKey entry.Hash) then
                             match load entry cache with
                             | Some chart ->
-                                cache.Patterns.[entry.Hash] <- PatternSummary.generate_cached_pattern_data (1.0f, chart)
+                                cache.Patterns.[entry.Hash] <- PatternSummary.generate_pattern_data 1.0f chart
                                 cache.Changed <- true
                             | None -> ()
                 }

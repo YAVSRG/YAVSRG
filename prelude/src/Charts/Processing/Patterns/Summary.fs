@@ -470,7 +470,7 @@ module PatternSummary =
         }
         static member Default = { Patterns = []; LNPercent = 0.0f; SVAmount = 0.0f<ms>; Category = ChartCategorisation.Default }
 
-    let generate_detailed_pattern_data (rate: float32, chart: Chart) : Info =
+    let generate_pattern_data_uncached (rate: float32) (chart: Chart) : Info =
         let core_patterns, specific_patterns = Patterns.analyse rate chart
 
         let breakdown =
@@ -500,34 +500,23 @@ module PatternSummary =
             Category = categorise_chart chart.Keys patterns
         }
 
-    let generate_cached_pattern_data (rate: float32, chart: Chart) : Info =
-        let core_patterns, specific_patterns = Patterns.analyse rate chart
+    let cached (f: 'A -> 'B -> 'C) : 'A -> 'B -> 'C =
+        let LOCK_OBJ = obj()
+        let mutable previous : ('A * 'B * 'C) option = None
+        fun (a: 'A) (b: 'B) ->
+            match
+                lock LOCK_OBJ (fun () ->
+                    match previous with
+                    | Some (_a, _b, _c) when a = _a && b = _b -> Some _c
+                    | _ -> None
+                )
+            with
+            | Some cached_calculation -> cached_calculation
+            | None ->
+                let res = f a b
+                previous <- Some (a, b, res)
+                res
 
-        let breakdown =
-            core_patterns
-            |> cluster_pattern_bpms
-            |> Seq.filter (fun (_, info) -> info.BPM.Value >= 70)
-            |> pattern_breakdown specific_patterns
-            |> Seq.sortByDescending (fun x -> x.Amount)
-            |> List.ofSeq
-            |> List.truncate 16
-
-        let is_useless (pattern: PatternBreakdown) =
-            breakdown
-            |> Seq.exists (fun p ->
-                p.Pattern = pattern.Pattern
-                && p.Amount * 0.5f > pattern.Amount
-                && p.BPM > pattern.BPM
-                && p.Mixed = pattern.Mixed
-            )
-
-        let patterns = breakdown |> List.filter (is_useless >> not)
-
-        {
-            Patterns = patterns |> List.truncate 6
-            LNPercent = ln_percent chart
-            SVAmount = sv_time chart
-            Category = categorise_chart chart.Keys patterns
-        }
+    let generate_pattern_data = generate_pattern_data_uncached |> cached
 
 type PatternInfo = PatternSummary.Info

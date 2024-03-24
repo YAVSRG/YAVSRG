@@ -194,7 +194,8 @@ module DifficultyRating =
     let private OHTNERF = 3.0
     let private SCALING_VALUE = 0.55
 
-    let calculate (rate: float32) (notes: TimeArray<NoteRow>) : DifficultyRating =
+    let private calculate_uncached (rate: float32) (notes: TimeArray<NoteRow>) : DifficultyRating =
+
         let keys = notes.[0].Data.Length
 
         let layoutData =
@@ -299,6 +300,25 @@ module DifficultyRating =
             PhysicalComposite = physicalComposite
             TechnicalComposite = technicalComposite
         }
+
+    let cached (f: 'A -> 'B -> 'C) : 'A -> 'B -> 'C =
+        let LOCK_OBJ = obj()
+        let mutable previous : ('A * 'B * 'C) option = None
+        fun (a: 'A) (b: 'B) ->
+            match
+                lock LOCK_OBJ (fun () ->
+                    match previous with
+                    | Some (_a, _b, _c) when a = _a && b = _b -> Some _c
+                    | _ -> None
+                )
+            with
+            | Some cached_calculation -> cached_calculation
+            | None ->
+                let res = f a b
+                previous <- Some (a, b, res)
+                res
+
+    let calculate = calculate_uncached |> cached
 
     let technical_color v =
         try

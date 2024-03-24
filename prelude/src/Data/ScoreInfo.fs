@@ -66,7 +66,7 @@ module ScoreInfo =
             Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
         let difficulty = DifficultyRating.calculate score.Rate with_mods.Notes
-        let patterns = PatternSummary.generate_detailed_pattern_data (score.Rate, chart)
+        let patterns = PatternSummary.generate_pattern_data score.Rate chart
 
         {
             CachedChart = cc

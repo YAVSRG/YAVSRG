@@ -194,7 +194,7 @@ module Gameplay =
 
                             let rating = DifficultyRating.calculate rate with_mods.Notes
 
-                            let patterns = PatternSummary.generate_detailed_pattern_data (rate, chart)
+                            let patterns = PatternSummary.generate_pattern_data rate chart
                             let note_counts = format_notecounts with_mods
 
                             yield
@@ -224,7 +224,7 @@ module Gameplay =
 
                             let rating = DifficultyRating.calculate rate with_mods.Notes
 
-                            let patterns = PatternSummary.generate_detailed_pattern_data (rate, chart)
+                            let patterns = PatternSummary.generate_pattern_data rate chart
                             let note_counts = format_notecounts with_mods
 
                             yield
