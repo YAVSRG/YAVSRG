@@ -13,7 +13,7 @@ module Rulesets = Interlude.Content.Rulesets
 module Rulesets =
 
     type QuickSwitcher(setting: Setting<string>) =
-        inherit StaticContainer(NodeType.None)
+        inherit Container(NodeType.None)
 
         override this.Init(parent: Widget) =
             this

@@ -164,7 +164,7 @@ module Wiki =
             }
 
     type WikiContent(nt) =
-        inherit StaticContainer(nt)
+        inherit Container(nt)
 
         member val _Size = 0.0f with get, set
 
@@ -264,7 +264,7 @@ module Wiki =
                         )
 
                     con.Add(
-                        StaticContainer(
+                        Container(
                             NodeType.Container(fun () -> Some folders),
                             Position = Position.Box(0.0f, 0.0f, 0.0f, y, max_width, 400.0f)
                         )

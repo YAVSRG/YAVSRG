@@ -268,7 +268,7 @@ open TableDownloader
 
 [<AbstractClass>]
 type private DownloadMenuFragment(nt: NodeType, height: float32) =
-    inherit StaticContainer(nt)
+    inherit Container(nt)
 
     abstract member Visible: bool
 

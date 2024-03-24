@@ -10,7 +10,7 @@ open Interlude.UI.Components
 open Interlude.Features.Online
 
 type private BasicStats() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     override this.Init(parent) =
         this
@@ -221,7 +221,7 @@ type private BasicStats() =
         base.Init parent
 
 type private Tabs() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let table = TableStats()
     let skillsets = EmptyState(Icons.BAR_CHART, %"misc.nyi")

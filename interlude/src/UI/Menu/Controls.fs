@@ -43,7 +43,7 @@ module Helpers =
     let menu_pos (start: float32) = { Y = 100.0f * start }
 
 type Slider(setting: Setting.Bounded<float32>) as this =
-    inherit StaticContainer(NodeType.Leaf)
+    inherit Container(NodeType.Leaf)
 
     let TEXTWIDTH = 130.0f
     let mutable dragging = false
@@ -154,7 +154,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
         base.Draw()
 
 type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
-    inherit StaticContainer(NodeType.Leaf)
+    inherit Container(NodeType.Leaf)
 
     let mutable index =
         items
@@ -226,7 +226,7 @@ type Divider() =
             (struct (Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White))
 
 type PageSetting(name, widget: Widget) as this =
-    inherit StaticContainer(NodeType.Container(fun _ -> Some this.Child))
+    inherit Container(NodeType.Container(fun _ -> Some this.Child))
 
     let mutable widget = widget
 
@@ -281,7 +281,7 @@ type PageSetting(name, widget: Widget) as this =
 
 type PageButton(name, action) as this =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun _ ->
                 if this.Enabled then
                     Style.click.Play()
@@ -457,7 +457,7 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
                 control.Init this
 
 type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
-    inherit StaticContainer(NodeType.Container(fun _ -> Some this.HexEditor))
+    inherit Container(NodeType.Container(fun _ -> Some this.HexEditor))
 
     let (H, S, V) = s.Value.ToHsv()
     let mutable H = H
@@ -601,5 +601,5 @@ module Helpers2 =
     type PageButton with
         member this.Tooltip(content: Callout) = this |+ Tooltip(content)
 
-    type StaticContainer with
+    type Container with
         member this.Tooltip(content: Callout) = this |+ Tooltip(content)

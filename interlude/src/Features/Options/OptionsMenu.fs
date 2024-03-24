@@ -11,7 +11,7 @@ module OptionsMenuRoot =
 
     type private TileButton(body: Callout, onclick: unit -> unit) =
         inherit
-            StaticContainer(
+            Container(
                 NodeType.Button(fun () ->
                     Style.click.Play()
                     onclick ()

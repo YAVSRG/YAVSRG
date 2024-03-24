@@ -56,7 +56,7 @@ module Screen =
 
     [<AbstractClass>]
     type T() =
-        inherit StaticContainer(NodeType.None)
+        inherit Container(NodeType.None)
         abstract member OnEnter: Type -> unit
         abstract member OnExit: Type -> unit
         abstract member OnBack: unit -> Type option

@@ -246,7 +246,7 @@ type NoteskinGroupCard(data: NoteskinGroup) as this =
 module Noteskins =
 
     type NoteskinSearch() as this =
-        inherit StaticContainer(NodeType.Container(fun _ -> Some this.Items))
+        inherit Container(NodeType.Container(fun _ -> Some this.Items))
 
         let grid =
             GridFlowContainer<NoteskinGroupCard>(340.0f, 3, Spacing = (15.0f, 15.0f), WrapNavigation = false)

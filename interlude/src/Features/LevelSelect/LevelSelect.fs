@@ -136,7 +136,7 @@ type LevelSelectScreen() =
 
         |+ Conditional(
             (fun () -> Tree.is_empty),
-            StaticContainer(NodeType.None)
+            Container(NodeType.None)
             |+ Conditional((fun () -> LevelSelect.filter <> []), EmptyState(Icons.SEARCH, %"levelselect.empty.search"))
             |+ Conditional(
                 (fun () ->

@@ -63,7 +63,7 @@ type InviteCard(sender: string, lobby: System.Guid) =
         base.Init parent
 
 type InviteList() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let container =
         FlowContainer.Vertical<InviteCard>(50.0f, Spacing = 10.0f, Position = Position.Margin(0.0f, 80.0f))
@@ -111,7 +111,7 @@ type LobbyInfoCard(info: LobbyInfo) =
     member this.Name = info.Name
 
 type LobbyList() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let searchtext = Setting.simple ""
 

@@ -16,7 +16,7 @@ open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 
 type ChartInfo() as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let display =
         Setting.simple Display.Local |> Setting.trigger (fun _ -> this.Refresh())
@@ -90,7 +90,7 @@ type ChartInfo() as this =
                 }
         )
 
-        |+ (StaticContainer(
+        |+ (Container(
                 NodeType.None,
                 Position =
                     {

@@ -27,7 +27,7 @@ module ImportScreen =
         || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
 type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
-    inherit StaticContainer(NodeType.Container(fun _ -> Some this.Button))
+    inherit Container(NodeType.Container(fun _ -> Some this.Button))
 
     let button =
         Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f, 5.0f))
@@ -47,7 +47,7 @@ type private TabButton(icon: string, name: string, container: SwapContainer, tar
         this |* button
 
 type private Sidebar() as this =
-    inherit StaticContainer(NodeType.Container(fun _ -> Some this.Flow))
+    inherit Container(NodeType.Container(fun _ -> Some this.Flow))
 
     let flow =
         FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(130.0f).Margin(10.0f))

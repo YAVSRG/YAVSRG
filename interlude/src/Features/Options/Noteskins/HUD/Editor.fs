@@ -54,7 +54,7 @@ type SubPositioner(drag: (float32 * float32) * (float32 * float32) -> unit, fini
                 Draw.rect this.Bounds Colors.white.O1
 
 type Positioner(elem: HUDElement, ctx: PositionerContext) =
-    inherit StaticContainer(NodeType.FocusTrap)
+    inherit Container(NodeType.FocusTrap)
 
     let round (offset: float32, anchor: float32) =
         System.MathF.Round(offset / 5.0f) * 5.0f, anchor
@@ -410,7 +410,7 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
 
 and PositionerContext =
     {
-        Screen: StaticContainer
+        Screen: Container
         Playfield: Playfield
         State: PlayState
         mutable Selected: HUDElement
@@ -674,7 +674,7 @@ module HUDEditor =
 
                 let ctx =
                     {
-                        Screen = StaticContainer(NodeType.None)
+                        Screen = Container(NodeType.None)
                         Playfield = this.Playfield
                         State = this.State
                         Selected = HUDElement.Accuracy

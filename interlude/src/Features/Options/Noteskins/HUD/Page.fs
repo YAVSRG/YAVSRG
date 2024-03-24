@@ -59,7 +59,7 @@ type EditHUDPage() as this =
             )
             |+ Tooltip(Tooltip.Info(HUDElement.tooltip e))
 
-        { new StaticContainer(NodeType.Container(K(Some body))) with
+        { new Container(NodeType.Container(K(Some body))) with
             override this.Draw() =
                 if this.Focused then
                     Draw.rect this.Bounds Colors.yellow_accent.O1

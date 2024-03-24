@@ -14,7 +14,7 @@ open Interlude.UI.Components
 module System =
 
     type Keybinder(hotkey: Hotkey) as this =
-        inherit StaticContainer(NodeType.FocusTrap)
+        inherit Container(NodeType.FocusTrap)
 
         let set = fun v -> Hotkeys.set hotkey v
 
@@ -98,7 +98,7 @@ module System =
         override this.OnClose() = ()
 
     type WindowedResolution(setting: Setting<int * int>) as this =
-        inherit StaticContainer(NodeType.Button(fun () -> this.ToggleDropdown()))
+        inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
         override this.Init(parent) =
             this
@@ -141,7 +141,7 @@ module System =
             | None -> ()
 
     type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> FullscreenVideoMode array) as this =
-        inherit StaticContainer(NodeType.Button(fun () -> this.ToggleDropdown()))
+        inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
         override this.Init(parent) =
             this

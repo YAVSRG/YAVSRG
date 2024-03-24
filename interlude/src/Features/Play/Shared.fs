@@ -625,7 +625,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
             Some Screen.Type.LevelSelect
 
 type SlideoutContent(content: Widget, height: float32) =
-    inherit StaticContainer(NodeType.Container(fun () -> Some content))
+    inherit Container(NodeType.Container(fun () -> Some content))
 
     override this.Init(parent: Widget) =
         this.Add content

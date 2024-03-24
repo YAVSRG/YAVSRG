@@ -39,7 +39,7 @@ module private Span =
 
         match background with
         | Some b ->
-            StaticContainer(NodeType.None)
+            Container(NodeType.None)
             |+ Frame(Border = K b, Fill = K b, Position = Position.Margin(0.0f, 5.0f))
             |+ t
             :> Widget
@@ -145,7 +145,7 @@ module private Span =
 
 [<AbstractClass>]
 type IParagraph() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     abstract member Width: float32
     abstract member Height: float32

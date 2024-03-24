@@ -11,7 +11,7 @@ open Interlude.Features.Play
 
 type private ModeButton(label: string, mode: SyncMode, state: PracticeState) =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
 

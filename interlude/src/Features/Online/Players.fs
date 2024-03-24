@@ -80,7 +80,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
             y <- y + h
 
 type private PlayerButton(username, color) =
-    inherit StaticContainer(NodeType.Button(fun () -> Players.switch (Some username)))
+    inherit Container(NodeType.Button(fun () -> Players.switch (Some username)))
 
     override this.Init(parent) =
         this
@@ -146,7 +146,7 @@ type private FriendList() =
 
                 for player in data.Friends do
                     contents.Add(
-                        StaticContainer(NodeType.None)
+                        Container(NodeType.None)
                         |+ PlayerButton(player.Username, player.Color)
                         |+ Text(
                             (if player.Online then "Online" else "Offline"),
@@ -174,7 +174,7 @@ type private FriendList() =
         base.Draw()
 
 type private SearchList() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let query = Setting.simple ""
 
@@ -227,7 +227,7 @@ type private SearchList() =
         base.Draw()
 
 type private PlayerList() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let online = OnlineList()
     let friends = FriendList()
@@ -298,7 +298,7 @@ type Profile() as this =
 
                 let has_colors = data.Badges |> Seq.exists (fun b -> not (List.isEmpty b.Colors))
 
-                StaticContainer(NodeType.None)
+                Container(NodeType.None)
                 |+ Text(
                     data.Username,
                     Color = K(Color.FromArgb data.Color, Colors.shadow_2),
@@ -442,7 +442,7 @@ type PlayersPage() as this =
     inherit Dialog()
 
     let contents =
-        StaticContainer(NodeType.None)
+        Container(NodeType.None)
         |+ PlayerList(
             Position =
                 { Position.Default with

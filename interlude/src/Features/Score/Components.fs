@@ -20,7 +20,7 @@ open Interlude.Features.Stats
 #nowarn "3370"
 
 type TopBanner(score_info: ScoreInfo) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     do
         this
@@ -91,7 +91,7 @@ type TopBanner(score_info: ScoreInfo) as this =
         base.Draw()
 
 type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mod_string = Mods.format_mods (score_info.Rate, score_info.Mods, false)
 
@@ -215,7 +215,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
 
 type Grade(grade: Grade.GradeResult ref, score_info: ScoreInfo) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     override this.Init(parent) =
         this
@@ -241,7 +241,7 @@ type Accuracy
         previous_personal_bests: Bests option ref,
         score_info: ScoreInfo
     ) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let LOWER_SIZE = 40.0f
     let new_record = sprintf "%s %s" Icons.AWARD (%"score.new_record")
@@ -326,7 +326,7 @@ type Lamp
         previous_personal_bests: Bests option ref,
         score_info: ScoreInfo
     ) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let LOWER_SIZE = 40.0f
     let new_record = sprintf "%s %s" Icons.AWARD (%"score.new_record")
@@ -382,10 +382,10 @@ type Lamp
         base.Draw()
 
 type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     override this.Init(parent) =
-        StaticContainer(
+        Container(
             NodeType.None,
             Position =
                 { Position.Default with
@@ -464,7 +464,7 @@ type ScoreChartContextMenu(cc: CachedChart) as this =
 
 type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> unit) as this
     =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     do
         graph.Position <-

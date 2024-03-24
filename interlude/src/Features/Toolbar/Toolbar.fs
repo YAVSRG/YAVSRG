@@ -23,7 +23,7 @@ type Toolbar() =
 
     let mutable collapsed_by_user = false
 
-    let container = StaticContainer(NodeType.None)
+    let container = Container(NodeType.None)
     let volume = Volume(Position = Position.Margin(0.0f, HEIGHT))
 
     do

@@ -12,7 +12,7 @@ open Interlude.Features
 open Interlude.Features.Play
 
 type NoteskinPreview(scale: float32, rhs: bool) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let fbo = FBO.create ()
 
@@ -33,7 +33,7 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
     let h = Viewport.vheight * scale
 
     let bounds_placeholder =
-        StaticContainer(
+        Container(
             NodeType.None,
             Position =
                 if rhs then

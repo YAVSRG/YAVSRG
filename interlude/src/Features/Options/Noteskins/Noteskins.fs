@@ -25,7 +25,7 @@ module private PreviewCleanup =
 
 type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun _ ->
                 if Noteskins.selected_id.Value <> id then
                     options.Noteskin.Set id

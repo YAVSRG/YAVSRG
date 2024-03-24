@@ -18,7 +18,7 @@ open Interlude.Features.Play.HUD
 module SpectateScreen =
 
     type Controls(who: unit -> string, cycle: unit -> unit) =
-        inherit StaticContainer(NodeType.None)
+        inherit Container(NodeType.None)
 
         override this.Init(parent) =
             this

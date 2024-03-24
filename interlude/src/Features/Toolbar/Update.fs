@@ -6,7 +6,7 @@ open Interlude.UI
 open Interlude.Utils
 
 type Updater() as this =
-    inherit StaticContainer(NodeType.Button(fun () -> this.Click()))
+    inherit Container(NodeType.Button(fun () -> this.Click()))
 
     do this |* Clickable.Focus this
 

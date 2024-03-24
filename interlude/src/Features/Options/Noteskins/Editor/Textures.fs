@@ -12,7 +12,7 @@ open Interlude.UI.Menu
 
 type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array array) =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 selected.[x].[y] <- not selected.[x].[y]
@@ -68,7 +68,7 @@ type DeleteButton(on_click) =
         base.Draw()
 
 type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as this =
-    inherit StaticContainer(NodeType.Container(fun () -> Some this.Items))
+    inherit Container(NodeType.Container(fun () -> Some this.Items))
 
     let mutable sprite = Unchecked.defaultof<Sprite>
     let mutable selected: bool array array = [||]

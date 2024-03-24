@@ -10,7 +10,7 @@ open Interlude.UI.Menu
 
 type private LevelButton(name, action) =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun _ ->
                 Style.click.Play()
                 action ()

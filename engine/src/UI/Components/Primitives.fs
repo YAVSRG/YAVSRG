@@ -163,7 +163,7 @@ type Frame() =
             Draw.rect base.Bounds fill
 
 type FrameContainer(nt: NodeType) =
-    inherit StaticContainer(nt)
+    inherit Container(nt)
 
     member val Fill = !%Palette.DARK with get, set
     member val Border = !%Palette.LIGHT with get, set

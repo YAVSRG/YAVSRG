@@ -15,7 +15,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 
 type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
-    inherit StaticContainer(NodeType.Leaf)
+    inherit Container(NodeType.Leaf)
 
     let sprite = Content.Texture "note"
     let n = byte sprite.Rows

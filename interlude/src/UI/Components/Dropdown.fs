@@ -12,7 +12,7 @@ module private Dropdown =
 
     type Item(label: string, color: Color * Color, onclick: unit -> unit) as this =
         inherit
-            StaticContainer(
+            Container(
                 NodeType.Button(fun () ->
                     Style.click.Play()
                     onclick ()

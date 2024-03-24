@@ -27,7 +27,7 @@ type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
 
     let vote_row (level: int) =
         let container =
-            StaticContainer(NodeType.None, Position = Position.Row(size, 40.0f))
+            Container(NodeType.None, Position = Position.Row(size, 40.0f))
             |+ Text(
                 sprintf "Level %02i - %i Votes" level (suggestion.Votes.[level]),
                 Position = Position.Margin(10.0f, 0.0f),
@@ -176,7 +176,7 @@ type SuggestionsPage(table: Table) as this =
 
     let sl = SuggestionsList(table)
 
-    do this.Content(StaticContainer(NodeType.Leaf) |+ sl)
+    do this.Content(Container(NodeType.Leaf) |+ sl)
 
     override this.Title = %"table.suggestions.name"
     override this.OnClose() = ()

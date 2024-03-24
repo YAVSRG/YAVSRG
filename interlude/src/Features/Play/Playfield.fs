@@ -37,7 +37,7 @@ type private HoldRenderState =
     | NoHold
 
 type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinConfig, vanishing_notes: bool) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let keys = chart.Keys
 

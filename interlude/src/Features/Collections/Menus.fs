@@ -180,7 +180,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) as this =
 
 type private CollectionButton(icon, name, action) as this =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
 

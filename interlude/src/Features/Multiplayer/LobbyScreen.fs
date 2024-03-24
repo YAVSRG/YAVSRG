@@ -45,7 +45,7 @@ type LobbySettingsPage(settings: LobbySettings) as this =
             }
 
 type Lobby() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mutable lobby_title = "Loading..."
 
@@ -182,7 +182,7 @@ type LobbyScreen() =
     let mutable in_lobby = false
 
     let list =
-        StaticContainer(NodeType.None)
+        Container(NodeType.None)
         |+ LobbyList(
             Position =
                 { Position.Default with

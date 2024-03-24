@@ -12,7 +12,7 @@ open Interlude.UI
 open Interlude.Utils
 
 type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as this =
-    inherit StaticContainer(if focus_trap then NodeType.FocusTrap else NodeType.Leaf)
+    inherit Container(if focus_trap then NodeType.FocusTrap else NodeType.Leaf)
 
     let ticker = Animation.Counter(600.0)
 
@@ -81,7 +81,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
 
 type StylishButton(on_click, label_func: unit -> string, color_func) as this =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 if not (this.Disabled()) then
                     Style.click.Play()
@@ -144,7 +144,7 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
 
 type InlaidButton(label, action, icon) =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 action ()

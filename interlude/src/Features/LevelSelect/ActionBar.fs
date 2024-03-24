@@ -43,7 +43,7 @@ module Comments =
         }
 
     let editor =
-        StaticContainer(NodeType.None, Position = Position.SliceBottom(160.0f))
+        Container(NodeType.None, Position = Position.SliceBottom(160.0f))
         |+ (FrameContainer(
                 NodeType.None,
                 Fill = K Colors.grey_2.O2,
@@ -81,7 +81,7 @@ module Comments =
 
 type private ActionButton(icon, action, active) =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 action ()
@@ -123,7 +123,7 @@ type private ActionButton(icon, action, active) =
         )
 
 type ActionBar(random_chart) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     override this.Init parent =
         this

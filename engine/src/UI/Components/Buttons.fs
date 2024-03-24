@@ -5,7 +5,7 @@ open Percyqaz.Flux.Input
 
 type Button(text: unit -> string, on_click: unit -> unit) as this =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 if not (this.Disabled()) then
                     Style.click.Play()
@@ -50,7 +50,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
 // todo: look into getting rid of this in favour of normal buttons with icons as part of the label
 type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click: unit -> unit) as this =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 if not (this.Disabled()) then
                     Style.click.Play()

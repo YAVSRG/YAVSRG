@@ -17,7 +17,7 @@ type Display =
     | Patterns
 
 type Patterns(display: Setting<Display>) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mutable patterns: PatternSummary.PatternBreakdown list = []
     let mutable category: PatternSummary.ChartCategorisation = PatternSummary.ChartCategorisation.Default

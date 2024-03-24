@@ -15,7 +15,7 @@ open Interlude.Features.Gameplay
 
 type private ModSelector(id, states: string[], current_state: unit -> int, action: unit -> unit) =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 action ()

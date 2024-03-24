@@ -16,7 +16,7 @@ open Interlude.Features.Score
 open Interlude.Features.Online
 
 type Chat() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let MESSAGE_HEIGHT = 40.0f
 
@@ -31,7 +31,7 @@ type Chat() =
             else
                 Network.lobby.Value.Players.[sender].Color, Colors.shadow_2
 
-        StaticContainer(NodeType.None)
+        Container(NodeType.None)
         |+ Text(sender, Color = K sender_color, Position = Position.SliceLeft w, Align = Alignment.RIGHT)
         |+ Text(": " + message, Color = K Colors.text, Position = Position.TrimLeft w, Align = Alignment.LEFT)
 
@@ -92,7 +92,7 @@ type Chat() =
                     let grade = data.Grade
 
                     let container =
-                        { new StaticContainer(NodeType.Leaf) with
+                        { new Container(NodeType.Leaf) with
                             override this.Draw() =
                                 if this.Focused then
                                     Draw.rect this.Bounds Colors.grey_2.O1
@@ -154,7 +154,7 @@ type Chat() =
 
             max 0 (seconds - elapsed)
 
-        StaticContainer(NodeType.None)
+        Container(NodeType.None)
         |+ Text(
             (fun () -> sprintf "%s %s: %i" Icons.CLOCK reason (seconds_left ())),
             Color =

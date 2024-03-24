@@ -24,7 +24,7 @@ type private WebRequestState =
     | Loaded = 3
 
 type private Leaderboard() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mutable status = WebRequestState.Loading
 
@@ -44,7 +44,7 @@ type private Leaderboard() =
 
                             for player in data.Players do
                                 contents.Add(
-                                    StaticContainer(NodeType.None)
+                                    Container(NodeType.None)
                                     |+ Text(
                                         player.Username,
                                         Color = K(Color.FromArgb player.Color, Colors.shadow_2),
@@ -86,7 +86,7 @@ type private CompareFriend
         name: string,
         on_back: unit -> unit
     ) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mutable status = WebRequestState.Loading
 
@@ -144,7 +144,7 @@ type private CompareFriend
                                             0.0
 
                                     contents.Add(
-                                        StaticContainer(NodeType.None)
+                                        Container(NodeType.None)
                                         |+ Text(name, Align = Alignment.CENTER, Position = Position.Margin(0.0f, 5.0f))
                                         |+ Text(
                                             (match your_score with
@@ -207,7 +207,7 @@ type private CompareFriend
 
 
 type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int option * float option) array) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mutable status = WebRequestState.Loading
     let mutable friends: Friends.List.Friend array option = None
@@ -235,7 +235,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
         |> Array.sortBy fst
 
     let friend (name: string, on_compare: unit -> unit) =
-        StaticContainer(NodeType.None)
+        Container(NodeType.None)
         |+ Text(name, Position = Position.Margin(20.0f, 5.0f), Align = Alignment.LEFT)
         |+ Button(K "Compare >", on_compare, Position = Position.SliceRight(250.0f).Margin(5.0f))
 
@@ -339,7 +339,7 @@ type private TableScore(position: int, chart_id: string, grade: int, rating: flo
         Text.fill_b (Style.font, sprintf "%.2f" rating, this.Bounds.Shrink(10.0f, 5.0f), text_color, Alignment.RIGHT)
 
 type private TableStats() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let table = Content.Table
 

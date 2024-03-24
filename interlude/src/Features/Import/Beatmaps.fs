@@ -57,7 +57,7 @@ type NeriNyanBeatmapSearchRequest =
 
 type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 this.Download()
@@ -242,7 +242,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
 
 type private SortingDropdown
     (options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mutable display_value =
         Seq.find (fun (id, _) -> id = setting.Value) options |> snd
@@ -314,7 +314,7 @@ type private SortingDropdown
 module Beatmaps =
 
     type Beatmaps() as this =
-        inherit StaticContainer(NodeType.Container(fun _ -> Some this.Items))
+        inherit Container(NodeType.Container(fun _ -> Some this.Items))
 
         let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
 

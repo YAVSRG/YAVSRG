@@ -220,7 +220,7 @@ module Scoreboard =
 open Scoreboard
 
 type Scoreboard(display: Setting<Display>) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mutable count = -1
 

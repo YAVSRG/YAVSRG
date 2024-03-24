@@ -24,7 +24,7 @@ open Interlude.Utils
 *)
 
 type Accuracy(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let grades = state.Ruleset.Grading.Grades
 
@@ -574,7 +574,7 @@ type MultiplayerScoreTracker(user_options: HUDUserOptions, noteskin_options: HUD
             )
 
 type RateModMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     do
         let text =
@@ -586,7 +586,7 @@ type RateModMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOpt
         this |* Text(text, Color = K Colors.text_subheading, Align = Alignment.CENTER)
 
 type BPMMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let first_note = state.WithColors.FirstNote
     let mutable i = 0

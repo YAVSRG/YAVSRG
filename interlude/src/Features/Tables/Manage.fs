@@ -12,7 +12,7 @@ open Interlude.UI.Menu
 
 type private TableButton(name, action) =
     inherit
-        StaticContainer(
+        Container(
             NodeType.Button(fun _ ->
                 Style.click.Play()
                 action ()

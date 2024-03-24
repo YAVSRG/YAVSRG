@@ -13,7 +13,7 @@ open Interlude.Utils
 open Interlude.UI.Menu
 
 type RotationPicker(rotation: Setting<float>) as this =
-    inherit StaticContainer(NodeType.Leaf)
+    inherit Container(NodeType.Leaf)
 
     let sprite = Content.Texture "note"
 

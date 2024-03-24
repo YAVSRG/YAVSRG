@@ -274,7 +274,7 @@ module Leaderboard =
 open Leaderboard
 
 type Leaderboard(display: Setting<Display>) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let state = Setting.simple State.NoLeaderboard
 

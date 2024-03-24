@@ -189,7 +189,7 @@ module EtternaPacks =
     //        )
 
     type EtternaPackSearch() as this =
-        inherit StaticContainer(NodeType.Container(fun _ -> Some this.Items))
+        inherit Container(NodeType.Container(fun _ -> Some this.Items))
 
         let flow = FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
 

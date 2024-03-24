@@ -12,7 +12,7 @@ open Interlude.Utils
 open Interlude.Features
 
 type GameplayKeybinder(keymode: Setting<Keymode>) as this =
-    inherit StaticContainer(NodeType.FocusTrap)
+    inherit Container(NodeType.FocusTrap)
 
     let mutable progress = 0
 
@@ -121,7 +121,7 @@ type LanecoverPage() as this =
     override this.OnClose() = ()
 
 type PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
-    inherit StaticContainer(NodeType.Container(fun () -> Some this.Button))
+    inherit Container(NodeType.Container(fun () -> Some this.Button))
 
     let old_value =
         match options.KeymodePreferredPresets.[keymode - 3] with
@@ -226,7 +226,7 @@ type GameplayPage() as this =
     let preview = NoteskinPreview(0.35f, true)
 
     let preset_buttons (preset_id: int) (setting: Setting<Preset option>) =
-        StaticContainer(
+        Container(
             NodeType.None,
             Position = Position.Box(1.0f, 1.0f, -1200.0f + float32 preset_id * 300.0f, -90.0f, 290.0f, 80.0f)
         )

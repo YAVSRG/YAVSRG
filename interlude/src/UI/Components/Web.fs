@@ -13,7 +13,7 @@ type private WebRequestState =
     | Loaded = 3
 
 type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render: 'T -> Widget) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mutable status = WebRequestState.Loading
 

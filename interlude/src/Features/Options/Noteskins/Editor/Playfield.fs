@@ -13,7 +13,7 @@ open Interlude.UI.Menu
 open Interlude.Options
 
 type SpacingPicker(spacing: Setting.Bounded<float32>) =
-    inherit StaticContainer(NodeType.Leaf)
+    inherit Container(NodeType.Leaf)
 
     let add (amount) =
         Setting.app (fun x -> x + amount) spacing

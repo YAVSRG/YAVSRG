@@ -16,7 +16,7 @@ open Interlude.Features.Tables
 
 type private ModeDropdown
     (options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let mutable display_value =
         Seq.find (fun (id, _) -> id = setting.Value) options |> snd
@@ -85,7 +85,7 @@ type private ModeDropdown
         | None -> ()
 
 type LibraryModeSettings() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     let group_selector =
         ModeDropdown(

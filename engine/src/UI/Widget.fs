@@ -96,7 +96,7 @@ type StaticWidget(node_type) =
         base.Init parent
         this.UpdateBounds()
 
-type StaticContainer(node_type) =
+type Container(node_type) =
     inherit StaticWidget(node_type)
 
     let children = ResizeArray<Widget>()
@@ -138,16 +138,16 @@ type StaticContainer(node_type) =
         for c in children do
             c.Init this
 
-    static member (|+)(parent: #StaticContainer, child: #Widget) =
+    static member (|+)(parent: #Container, child: #Widget) =
         parent.Add child
         parent
 
-    static member (|+)(parent: #StaticContainer, children: #Widget seq) =
+    static member (|+)(parent: #Container, children: #Widget seq) =
         Seq.iter parent.Add children
         parent
 
-    static member (|*)(parent: #StaticContainer, child: #Widget) = parent.Add child
-    static member (|*)(parent: #StaticContainer, children: #Widget seq) = Seq.iter parent.Add children
+    static member (|*)(parent: #Container, child: #Widget) = parent.Add child
+    static member (|*)(parent: #Container, children: #Widget seq) = Seq.iter parent.Add children
 
 type private DynamicPosition(pos: Position) =
     let mutable pos = pos

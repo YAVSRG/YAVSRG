@@ -83,7 +83,7 @@ module SelectedChart =
         ensure_selected ()
 
 type SelectedChart() =
-    inherit StaticContainer(NodeType.None)
+    inherit Container(NodeType.None)
 
     override this.Init(parent: Widget) =
 
