@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.LevelSelect
 
-open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data

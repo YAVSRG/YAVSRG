@@ -76,7 +76,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
                     Top = 0.75f %- 0.0f
                 }
         )
-        |* Sidebar(
+        |+ Sidebar(
             stats,
             score_info,
             Position =
@@ -87,6 +87,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
                     Bottom = 1.0f %- 60.0f
                 }
         )
+        |* Confetti()
 
     override this.Update(elapsed_ms, moved) = base.Update(elapsed_ms, moved)
 

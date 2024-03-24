@@ -111,11 +111,10 @@ type Toolbar() =
                     not Toolbar.hidden
                     && Screen.current_type <> Screen.Type.Play
                     && Screen.current_type <> Screen.Type.Replay
-                    && (not Interlude.Content.Content.Noteskin.IsEmbedded)
+                    && (not Content.Noteskin.IsEmbedded)
                 then
                     Noteskins.EditNoteskinPage(true).Show()
         )
-        |+ HotkeyAction("screenshot", Toolbar.take_screenshot)
         |+ HotkeyAction(
             "reload_themes",
             fun () ->
@@ -207,6 +206,9 @@ type Toolbar() =
         if not Toolbar.hidden && (%%"toolbar").Tapped() then
             collapsed_by_user <- not collapsed_by_user
             Toolbar.slideout_amount.Target <- if collapsed_by_user then 0.0f else 1.0f
+
+        if Screen.current_type <> Screen.Type.Score && (%%"screenshot").Tapped() then
+            Toolbar.take_screenshot()
 
         Terminal.update ()
 
