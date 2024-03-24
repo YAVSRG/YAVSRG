@@ -9,9 +9,135 @@ open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.Utils
 open Interlude.UI
-open Interlude.Options
 open Interlude.UI.Menu
+open Interlude.Options
+open Interlude.Features
 open Interlude.Features.OptionsMenu.Gameplay
+
+[<AbstractClass>]
+type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
+    inherit NoteskinPreview(scale, true)
+
+    let keycount = int (Gameplay.Chart.keymode ())
+
+    override this.Draw() =
+        base.Draw()
+
+        let container =
+            if config.Value.RelativeToPlayfield then
+                let cfg = Content.NoteskinConfig
+
+                let width =
+                    (cfg.ColumnWidth * float32 keycount
+                     + Array.sum (cfg.KeymodeColumnSpacing keycount))
+                    * scale
+
+                let (screenAlign, columnAlign) = cfg.PlayfieldAlignment
+
+                Rect
+                    .Box(
+                        this.PreviewBounds.Left + this.PreviewBounds.Width * screenAlign,
+                        this.PreviewBounds.Top,
+                        width,
+                        this.PreviewBounds.Height
+                    )
+                    .Translate(-width * columnAlign, 0.0f)
+            else
+                this.PreviewBounds
+
+        let width = container.Width
+        let height = container.Height
+
+        let leftA = snd config.Value.Left * width + container.Left
+        let rightA = snd config.Value.Right * width + container.Left
+        let topA = snd config.Value.Top * height + container.Top
+        let bottomA = snd config.Value.Bottom * height + container.Top
+
+        let bounds =
+            Rect.Create(
+                leftA + fst config.Value.Left * scale,
+                topA + fst config.Value.Top * scale,
+                rightA + fst config.Value.Right * scale,
+                bottomA + fst config.Value.Bottom * scale
+            )
+
+        // Draw container
+        Draw.rect
+            (Rect
+                .Create(container.Left, container.Top, container.Left, container.Bottom)
+                .Expand(2.0f, 0.0f))
+            Color.Red
+
+        Draw.rect
+            (Rect
+                .Create(container.Right, container.Top, container.Right, container.Bottom)
+                .Expand(2.0f, 0.0f))
+            Color.Red
+
+        Draw.rect
+            (Rect
+                .Create(container.Left, container.Top, container.Right, container.Top)
+                .Expand(0.0f, 2.0f))
+            Color.Red
+
+        Draw.rect
+            (Rect
+                .Create(container.Left, container.Bottom, container.Right, container.Bottom)
+                .Expand(0.0f, 2.0f))
+            Color.Red
+        // Draw alignments
+        Draw.rect (Rect.Create(leftA, container.Top, leftA, container.Bottom).Expand(2.0f, 0.0f)) Color.Orange
+        Draw.rect (Rect.Create(rightA, container.Top, rightA, container.Bottom).Expand(2.0f, 0.0f)) Color.Orange
+        Draw.rect (Rect.Create(container.Left, topA, container.Right, topA).Expand(0.0f, 2.0f)) Color.Orange
+
+        Draw.rect
+            (Rect
+                .Create(container.Left, bottomA, container.Right, bottomA)
+                .Expand(0.0f, 2.0f))
+            Color.Orange
+        // Draw bounds
+        Draw.rect
+            (Rect
+                .Create(bounds.Left, bounds.Top, bounds.Left, bounds.Bottom)
+                .Expand(2.0f, 0.0f))
+            Color.Lime
+
+        Draw.rect
+            (Rect
+                .Create(bounds.Right, bounds.Top, bounds.Right, bounds.Bottom)
+                .Expand(2.0f, 0.0f))
+            Color.Lime
+
+        Draw.rect
+            (Rect
+                .Create(bounds.Left, bounds.Top, bounds.Right, bounds.Top)
+                .Expand(0.0f, 2.0f))
+            Color.Lime
+
+        Draw.rect
+            (Rect
+                .Create(bounds.Left, bounds.Bottom, bounds.Right, bounds.Bottom)
+                .Expand(0.0f, 2.0f))
+            Color.Lime
+
+        this.DrawComponent(bounds)
+
+    abstract member DrawComponent: Rect -> unit
+
+[<AutoOpen>]
+module Shared =
+
+    let private noteskin_required =
+        Callout
+            .Small
+            .Title(%"hud.noteskin_required.title")
+            .Body(%"hud.noteskin_required.element")
+            .Button(%"hud.noteskin_required.button", fun () -> Menu.Back(); Menu.Back(); NoteskinsPage().Show())
+
+    let or_require_noteskin (items: Widget list) : Widget list =
+        if Content.Noteskin.IsEmbedded then
+            [ Callout.frame noteskin_required (fun (w, h) -> Position.Box(0.0f, 1.0f, 100.0f, -200.0f - h - 40.0f, w, h + 40.0f)) ]
+        else items
 
 type AccuracyPage(on_close: unit -> unit) as this =
     inherit Page()
@@ -30,7 +156,7 @@ type AccuracyPage(on_close: unit -> unit) as this =
                 Text.fill (Style.font, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
 
                 if show_name.Value then
-                    Text.fill (Style.font, "SC+ J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f)
+                    Text.fill (Style.font, "SC J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f)
         }
 
     do
@@ -136,11 +262,6 @@ type TimingDisplayPage(on_close: unit -> unit) as this =
                 TimingDisplayFadeTime = animation_time.Value
             }
 
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
-                TimingDisplayPosition = pos.Value
-            }
-
         on_close ()
 
 type ComboPage(on_close: unit -> unit) as this =
@@ -171,12 +292,14 @@ type ComboPage(on_close: unit -> unit) as this =
             |+ PageSetting("hud.combo.lampcolors", Selector<_>.FromBool lamp_colors)
                 .Pos(200.0f)
                 .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
-            |+ PageSetting("hud.combo.pop", Slider(pop_amount, Step = 1f))
-                .Pos(270.0f)
-                .Tooltip(Tooltip.Info("hud.combo.pop"))
-            |+ PageSetting("hud.combo.growth", Slider(growth_amount))
-                .Pos(340.0f)
-                .Tooltip(Tooltip.Info("hud.combo.growth"))
+            |+ ([
+                PageSetting("hud.combo.pop", Slider(pop_amount, Step = 1f))
+                    .Pos(270.0f)
+                    .Tooltip(Tooltip.Info("hud.combo.pop")) :> Widget
+                PageSetting("hud.combo.growth", Slider(growth_amount))
+                    .Pos(340.0f)
+                    .Tooltip(Tooltip.Info("hud.combo.growth"))
+            ] |> or_require_noteskin)
             |+ preview
         )
 
@@ -191,13 +314,13 @@ type ComboPage(on_close: unit -> unit) as this =
 
         Noteskins.save_hud_config
             { Content.NoteskinConfig.HUD with
-                ComboPosition = pos.Value
                 ComboPop = pop_amount.Value
                 ComboGrowth = growth_amount.Value
             }
 
         on_close ()
 
+// currently unused
 type SkipButtonPage(on_close: unit -> unit) as this =
     inherit Page()
 
@@ -220,11 +343,6 @@ type SkipButtonPage(on_close: unit -> unit) as this =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
-                SkipButtonPosition = pos.Value
-            }
-
         on_close ()
 
 type ProgressMeterPage(on_close: unit -> unit) as this =
@@ -288,10 +406,12 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
             column ()
             |+ PageSetting("hud.progressmeter.label", Selector<ProgressMeterLabel>.FromEnum(label))
                 .Pos(200.0f)
-            |+ PageSetting("hud.progressmeter.color", ColorPicker(color, true))
-                .Pos(270.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-            |+ PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
-                .Pos(375.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+            |+ ([
+                PageSetting("hud.progressmeter.color", ColorPicker(color, true))
+                    .Pos(270.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f) :> Widget
+                PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
+                    .Pos(375.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                ] |> or_require_noteskin)
             |+ preview
         )
 
@@ -306,13 +426,13 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
 
         Noteskins.save_hud_config
             { Content.NoteskinConfig.HUD with
-                ProgressMeterPosition = pos.Value
                 ProgressMeterColor = color.Value
                 ProgressMeterBackgroundColor = background_color.Value
             }
 
         on_close ()
 
+// currently unused
 type PacemakerPage(on_close: unit -> unit) as this =
     inherit Page()
 
@@ -333,11 +453,6 @@ type PacemakerPage(on_close: unit -> unit) as this =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
-                PacemakerPosition = pos.Value
-            }
-
         on_close ()
 
 type JudgementCounterPage(on_close: unit -> unit) as this =
@@ -374,11 +489,6 @@ type JudgementCounterPage(on_close: unit -> unit) as this =
         options.HUD.Set
             { options.HUD.Value with
                 JudgementCounterFadeTime = animation_time.Value
-            }
-
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
-                JudgementCounterPosition = pos.Value
             }
 
         on_close ()
@@ -441,11 +551,6 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
                 JudgementMeterPrioritiseLower = prioritise_lower_judgements.Value
             }
 
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
-                JudgementMeterPosition = pos.Value
-            }
-
         on_close ()
 
 type EarlyLateMeterPage(on_close: unit -> unit) as this =
@@ -477,18 +582,20 @@ type EarlyLateMeterPage(on_close: unit -> unit) as this =
             |+ PageSetting("hud.earlylatemeter.animationtime", Slider(animation_time, Step = 5f))
                 .Pos(200.0f)
                 .Tooltip(Tooltip.Info("hud.earlylatemeter.animationtime"))
-            |+ PageTextEntry("hud.earlylatemeter.earlytext", early_text)
-                .Pos(270.0f)
-                .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext"))
-            |+ PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
-                .Pos(340.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
-            |+ PageTextEntry("hud.earlylatemeter.latetext", late_text)
-                .Pos(445.0f)
-                .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
-            |+ PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
-                .Pos(515.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
-                .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
+            |+ ([
+                PageTextEntry("hud.earlylatemeter.earlytext", early_text)
+                    .Pos(270.0f)
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext")) :> Widget
+                PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
+                    .Pos(340.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
+                PageTextEntry("hud.earlylatemeter.latetext", late_text)
+                    .Pos(445.0f)
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
+                PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
+                    .Pos(515.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
+                ] |> or_require_noteskin)
             |+ preview
         )
 
@@ -552,13 +659,9 @@ type RateModMeterPage(on_close: unit -> unit) as this =
                 RateModMeterShowMods = show_mods.Value
             }
 
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
-                RateModMeterPosition = pos.Value
-            }
-
         on_close ()
 
+// currently unused
 type BPMMeterPage(on_close: unit -> unit) as this =
     inherit Page()
 
@@ -579,9 +682,4 @@ type BPMMeterPage(on_close: unit -> unit) as this =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
-                BPMMeterPosition = pos.Value
-            }
-
         on_close ()

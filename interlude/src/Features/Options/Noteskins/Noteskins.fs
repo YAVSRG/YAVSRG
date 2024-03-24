@@ -190,7 +190,7 @@ type NoteskinsPage() as this =
                 .Tooltip(Tooltip.Info("noteskins.edit.export"))
                 .Pos(760.0f + PRETTYHEIGHT * 1.2f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT * 1.2f)
             |+ Text(
-                "Current",
+                %"noteskins.current",
                 Position = Position.Row(180.0f, 50.0f).Margin(100.0f, 0.0f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT

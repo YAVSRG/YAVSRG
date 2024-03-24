@@ -200,7 +200,7 @@ type EditPresetPage(preset_id: int, setting: Setting<Preset option>) as this =
         |+ PageSetting("gameplay.preset.keymode_preference", keymode_preference)
             .Tooltip(Tooltip.Info("gameplay.preset.keymode_preference"))
             .Pos(pos.Step(), PRETTYTEXTWIDTH + 800.0f + 70.0f)
-        |+ delete_button
+        |+ delete_button.Pos(pos.Step())
         |> this.Content
 
     override this.Title = preset.Name

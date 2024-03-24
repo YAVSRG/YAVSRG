@@ -71,9 +71,9 @@ type EditHUDPage() as this =
     let noteskin_required =
         Callout
             .Small
-            .Title("Noteskin required")
-            .Body("You are on an embedded default noteskin which doesn't support adjusting HUD positions.\nMany settings, like which elements are on/off, are still available.")
-            .Button("Change noteskin", fun () -> Menu.Back(); NoteskinsPage().Show())
+            .Title(%"hud.noteskin_required.title")
+            .Body(%"hud.noteskin_required.general")
+            .Button(%"hud.noteskin_required.button", fun () -> Menu.Back(); NoteskinsPage().Show())
 
     do
         this.Content(
