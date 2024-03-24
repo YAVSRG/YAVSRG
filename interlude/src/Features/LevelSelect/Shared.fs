@@ -27,7 +27,7 @@ module LevelSelect =
     let mutable filter: Filter = []
 
     do
-        Interlude.Features.Import.Import.charts_updated.Add refresh_all
+        Interlude.Features.Import.Import.charts_updated.Add (fun () -> if Screen.current_type = Screen.Type.LevelSelect then refresh_all())
 
         Interlude.Features.Collections.CollectionActions.collection_modified.Add(fun () ->
             if options.LibraryMode.Value = LibraryMode.Collections then
