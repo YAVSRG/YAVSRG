@@ -16,7 +16,7 @@ type EditHUDPage() as this =
         if
             Chart.WITH_COLORS.IsSome
             && Screen.change_new
-                (fun () -> HUDEditor.edit_hud_screen (Chart.CHART.Value, Chart.WITH_COLORS.Value))
+                (fun () -> HUDEditor.edit_hud_screen (Chart.CHART.Value, Chart.WITH_COLORS.Value, fun () -> EditHUDPage().Show()))
                 Screen.Type.Practice
                 Transitions.Flags.Default
         then

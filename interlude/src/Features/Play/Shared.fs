@@ -559,7 +559,7 @@ module Utils =
                     Bottom = pos.Bottom
                 }
 
-            if pos.RelativeToPlayfield then screen.Add w else playfield.Add w
+            if pos.RelativeToPlayfield then playfield.Add w else screen.Add w
 
 [<AbstractClass>]
 type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerInfo, scoring: IScoreMetric) as this

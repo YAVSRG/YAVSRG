@@ -410,7 +410,7 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
 
 and PositionerContext =
     {
-        Screen: IPlayScreen
+        Screen: StaticContainer
         Playfield: Playfield
         State: PlayState
         mutable Selected: HUDElement
@@ -452,7 +452,7 @@ and PositionerContext =
     member this.Select(e: HUDElement) =
         if this.Selected <> e then
             match this.Positioners.TryFind this.Selected with
-            | Some existing -> Selection.clear()
+            | Some _ -> Selection.clear()
             | None -> ()
             this.Selected <- e
             match this.Positioners.TryFind e with
@@ -649,7 +649,7 @@ type PositionerInfo(ctx: PositionerContext) =
 
 module HUDEditor =
 
-    let edit_hud_screen (chart: Chart, with_colors: ColoredChart) =
+    let edit_hud_screen (chart: Chart, with_colors: ColoredChart, on_exit) =
 
         let replay_data: IReplayProvider =
             StoredReplayProvider.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)
@@ -674,7 +674,7 @@ module HUDEditor =
 
                 let ctx =
                     {
-                        Screen = this
+                        Screen = StaticContainer(NodeType.None)
                         Playfield = this.Playfield
                         State = this.State
                         Selected = HUDElement.Accuracy
@@ -696,7 +696,9 @@ module HUDEditor =
                 ]
                 |> Seq.iter ctx.Create
 
-                this |* PositionerInfo ctx
+                this 
+                |+ ctx.Screen 
+                |* PositionerInfo ctx
             // todo: way to turn on multiplayer player list
 
             override this.OnEnter p =
@@ -706,6 +708,10 @@ module HUDEditor =
                 Toolbar.hide ()
                 Song.on_finish <- SongFinishAction.LoopFromBeginning
                 Input.remove_listener ()
+
+            override this.OnExit s =
+                base.OnExit s
+                on_exit ()
 
             override this.Update(elapsed_ms, moved) =
                 let now = Song.time_with_offset ()
