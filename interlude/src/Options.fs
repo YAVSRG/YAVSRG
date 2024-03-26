@@ -345,62 +345,6 @@ module Options =
     let private CONFIG_PATH = Path.GetFullPath "config.json"
     let first_launch = not (File.Exists CONFIG_PATH)
 
-    module HUDOptions =
-
-        open Prelude.Content.Noteskins.HUD
-
-        let private cache = Dictionary<string, obj>()
-
-        let private load_id<'T> () =
-            let id = typeof<'T>.Name
-            cache.Remove(id) |> ignore
-
-            let path = Path.Combine(get_game_folder "Data", "HUD", id + ".json")
-
-            if File.Exists path then
-                match JSON.FromFile<'T>(path) with
-                | Ok v -> cache.Add(id, v)
-                | Error e ->
-                    Logging.Error(
-                        sprintf
-                            "Error while loading config for gameplay widget '%s'\n  If you edited the file manually, you may have made a mistake or need to close the file in your text editor"
-                            id
-                    )
-
-                    cache.Add(id, JSON.Default<'T>())
-            else
-                let default_value = JSON.Default<'T>()
-                JSON.ToFile (path, true) default_value
-                cache.Add(id, default_value)
-
-        let init_startup () =
-            Directory.CreateDirectory(Path.Combine(get_game_folder "Data", "HUD")) |> ignore
-
-            load_id<AccuracyMeter> ()
-            load_id<HitMeter> ()
-            load_id<Combo> ()
-            load_id<SkipButton> ()
-            load_id<ProgressMeter> ()
-            load_id<Pacemaker> ()
-            load_id<JudgementCounts> ()
-            load_id<JudgementMeter> ()
-            load_id<EarlyLateMeter> ()
-            load_id<RateModMeter> ()
-            load_id<BPMMeter> ()
-
-        //let get<'T> () =
-        //    let id = typeof<'T>.Name
-
-        //    if cache.ContainsKey id then
-        //        cache.[id] :?> 'T
-        //    else
-        //        failwithf "config not loaded: %s" id
-
-        //let set<'T> (value: 'T) =
-        //    let id = typeof<'T>.Name
-        //    cache.[id] <- value
-        //    JSON.ToFile (Path.Combine(get_game_folder "Data", "HUD", id + ".json"), true) value
-
     module Presets =
 
         let get (id: int) =
@@ -490,8 +434,6 @@ module Options =
             + "> Help! I have files in here, but they don't show up ingame?\n"
             + "Make sure they are .yav files, if so go to Options > Debug > Rebuild cache and let that run, it will re-add anything that's missing."
         )
-
-        HUDOptions.init_startup ()
 
     let deinit () =
         try

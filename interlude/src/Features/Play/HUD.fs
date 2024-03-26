@@ -180,6 +180,10 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
     let atime = user_options.JudgementMeterFadeTime * Gameplay.rate.Value * 1.0f<ms>
     let mutable tier = 0
     let mutable time = -Time.infinity
+    let mutable early_late = 0
+
+    let texture = Content.Texture "judgements"
+    let display = noteskin_options.GetJudgementMeterDisplay state.Ruleset
 
     do
         state.SubscribeToHits(fun ev ->
@@ -202,6 +206,7 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
                 then
                     tier <- j
                     time <- ev.Time
+                    early_late <- if delta > 0.0f<ms> then 1 else 0
         )
 
     override this.Draw() =
@@ -210,13 +215,17 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
                 255
                 - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
 
-            Text.fill (
-                Style.font,
-                state.Ruleset.JudgementName tier,
-                this.Bounds,
-                state.Ruleset.JudgementColor(tier).O4a a,
-                Alignment.CENTER
-            )
+            match display.[tier] with
+            | JudgementDisplayType.Name ->
+                Text.fill (
+                    Style.font,
+                    state.Ruleset.JudgementName tier,
+                    this.Bounds,
+                    state.Ruleset.JudgementColor(tier).O4a a,
+                    Alignment.CENTER
+                )
+            | JudgementDisplayType.Texture y ->
+                Draw.quad this.Bounds.AsQuad (Quad.color Color.White) (Sprite.pick_texture (early_late, y) texture)
 
 type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)

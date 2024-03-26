@@ -294,6 +294,12 @@ module NoteskinTextureRules =
                     MustBeSquare = K false
                     MaxGridSize = K(1, 1)
                 }
+                "judgements",
+                {
+                    IsRequired = fun config -> config.HUD.JudgementMeterUseTexture
+                    MustBeSquare = K false
+                    MaxGridSize = K(16, 2)
+                }
             ]
 
     let get (config: NoteskinConfig) (name: string) = TEXTURES.[name].Evaluate config
