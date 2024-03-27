@@ -10,7 +10,6 @@ open Prelude
 open Prelude.Data
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
 
 module Wiki =
 

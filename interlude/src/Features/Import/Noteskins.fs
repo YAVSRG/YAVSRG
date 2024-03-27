@@ -5,14 +5,12 @@ open System.Text.RegularExpressions
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Content.Noteskins.Repo
 open Prelude.Data
 open Prelude.Data.Library.Sorting
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.UI.Components
-open Interlude.Utils
 open Interlude.Content
 
 type NoteskinVersionCard(group: NoteskinGroup, version: NoteskinVersion) as this =

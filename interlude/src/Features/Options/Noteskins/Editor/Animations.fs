@@ -7,7 +7,7 @@ open Prelude.Common
 open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.Utils
-open Interlude.UI.Components
+open Interlude.UI
 open Interlude.UI.Menu
 
 type AnimationSettingsPage() as this =

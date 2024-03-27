@@ -12,7 +12,6 @@ open Interlude
 open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Features.Online
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu

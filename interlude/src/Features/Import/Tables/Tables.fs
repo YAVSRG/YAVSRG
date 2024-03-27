@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Prelude.Backbeat
 open Interlude.Web.Shared.Requests
 open Interlude.Content
-open Interlude.UI.Components
+open Interlude.UI
 
 [<RequireQualifiedAccess>]
 type private TableStatus =

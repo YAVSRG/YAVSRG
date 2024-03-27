@@ -42,9 +42,11 @@
     <Compile Include="Options.fs" />
     <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Callouts.fs" />
-    <Compile Include="UI\Components\Common.fs" />
-    <Compile Include="UI\Components\Dropdown.fs" />
-    <Compile Include="UI\Components\Web.fs" />
+    <Compile Include="UI\Loaders.fs" />
+    <Compile Include="UI\Buttons.fs" />
+    <Compile Include="UI\Inputs.fs" />
+    <Compile Include="UI\Dropdowns.fs" />
+    <Compile Include="UI\Web.fs" />
     <Compile Include="UI\Screen\Logo.fs" />
     <Compile Include="UI\Screen\Background.fs" />
     <Compile Include="UI\Screen\Transitions.fs" />

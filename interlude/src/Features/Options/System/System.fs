@@ -8,7 +8,6 @@ open Prelude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.UI.Components
 
 type private WindowedResolution(setting: Setting<int * int>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))

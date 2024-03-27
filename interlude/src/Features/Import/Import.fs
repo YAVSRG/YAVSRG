@@ -7,7 +7,6 @@ open Prelude
 open Prelude.Data
 open Prelude.Data.Library
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Features.Online
 
 module ImportScreen =

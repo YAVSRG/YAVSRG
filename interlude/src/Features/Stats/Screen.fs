@@ -3,10 +3,8 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Common
-open Interlude.Utils
+open Prelude
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Features.Online
 
 type private BasicStats() =

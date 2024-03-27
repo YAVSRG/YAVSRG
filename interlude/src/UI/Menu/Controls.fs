@@ -8,7 +8,6 @@ open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
 
 type Slider(setting: Setting.Bounded<float32>) as this =
     inherit Container(NodeType.Leaf)
@@ -425,6 +424,8 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
 type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
     inherit Container(NodeType.Container(fun _ -> Some this.HexEditor))
 
+    let HEX_EDITOR_HEIGHT = PRETTYHEIGHT * 0.6f
+
     let (H, S, V) = s.Value.ToHsv()
     let mutable H = H
     let mutable S = S
@@ -445,7 +446,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
         )
 
     let hex_editor =
-        { new TextEntry(hex, "none", false, Position = Position.TrimLeft(50.0f).SliceTop PRETTYHEIGHT) with
+        { new TextEntry(hex, "none", false, Position = Position.TrimLeft(50.0f).SliceTop HEX_EDITOR_HEIGHT) with
             override this.OnDeselected(by_mouse: bool) =
                 base.OnDeselected by_mouse
                 hex.Value <- s.Value.ToHex()
@@ -464,21 +465,21 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
     override this.Draw() =
         base.Draw()
 
-        let preview = this.Bounds.SliceTop(PRETTYHEIGHT).SliceLeft(50.0f).Shrink(5.0f)
+        let preview = this.Bounds.SliceTop(HEX_EDITOR_HEIGHT).SliceLeft(50.0f).Shrink(5.0f)
 
         let saturation_value_picker =
-            this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(200.0f).Shrink(5.0f)
+            this.Bounds.TrimTop(HEX_EDITOR_HEIGHT).SliceLeft(200.0f).Shrink(5.0f)
 
         let hue_picker =
             this.Bounds
-                .TrimTop(PRETTYHEIGHT)
+                .TrimTop(HEX_EDITOR_HEIGHT)
                 .SliceLeft(230.0f)
                 .TrimLeft(200.0f)
                 .Shrink(5.0f)
 
         let alpha_picker =
             this.Bounds
-                .TrimTop(PRETTYHEIGHT)
+                .TrimTop(HEX_EDITOR_HEIGHT)
                 .SliceLeft(260.0f)
                 .TrimLeft(230.0f)
                 .Shrink(5.0f)
@@ -527,18 +528,18 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
         base.Update(elapsed_ms, moved)
 
         let saturation_value_picker =
-            this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(200.0f).Shrink(5.0f)
+            this.Bounds.TrimTop(HEX_EDITOR_HEIGHT).SliceLeft(200.0f).Shrink(5.0f)
 
         let hue_picker =
             this.Bounds
-                .TrimTop(PRETTYHEIGHT)
+                .TrimTop(HEX_EDITOR_HEIGHT)
                 .SliceLeft(230.0f)
                 .TrimLeft(200.0f)
                 .Shrink(5.0f)
 
         let alpha_picker =
             this.Bounds
-                .TrimTop(PRETTYHEIGHT)
+                .TrimTop(HEX_EDITOR_HEIGHT)
                 .SliceLeft(260.0f)
                 .TrimLeft(230.0f)
                 .Shrink(5.0f)

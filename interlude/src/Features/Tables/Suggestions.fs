@@ -8,7 +8,6 @@ open Prelude.Data.Library.Caching
 open Prelude
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.UI.Components
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 

@@ -7,7 +7,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.UI
-open Interlude.Utils
 
 [<RequireQualifiedAccess>]
 type CalloutContent =

@@ -4,10 +4,9 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Common
+open Prelude
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Web.Shared.Requests
 
 module private Players =

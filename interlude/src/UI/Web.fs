@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Components
+﻿namespace Interlude.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI

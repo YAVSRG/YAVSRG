@@ -15,8 +15,6 @@ open Prelude.Data.Library.Sorting
 open Prelude.Data
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Components
-open Interlude.Utils
 
 [<Json.AutoCodec>]
 type NeriNyanBeatmap =

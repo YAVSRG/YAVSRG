@@ -12,7 +12,6 @@ open Prelude.Data
 open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Components
 
 [<Json.AutoCodec>]
 type EtternaOnlinePackAttributes =

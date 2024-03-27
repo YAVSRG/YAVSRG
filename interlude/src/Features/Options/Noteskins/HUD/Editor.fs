@@ -11,10 +11,8 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.NoteColors
 open Prelude.Gameplay
 open Prelude.Content.Noteskins
-open Interlude.Utils
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Online

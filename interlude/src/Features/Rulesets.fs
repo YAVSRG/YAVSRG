@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
-open Interlude.UI.Components
+open Interlude.UI
 open Interlude.UI.Menu
 
 module Rulesets = Interlude.Content.Rulesets

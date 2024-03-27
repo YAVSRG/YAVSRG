@@ -3,12 +3,10 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude
 open Prelude.Gameplay
 open Prelude.Data
 open Prelude.Data.Library.Sorting
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Content
 
 type private RulesetStatus =

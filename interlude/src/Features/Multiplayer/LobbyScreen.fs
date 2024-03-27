@@ -5,10 +5,8 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude.Common
 open Interlude.Web.Shared
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.UI.Components
 open Interlude.Options
 open Interlude.Features.Play
 open Interlude.Features.Online

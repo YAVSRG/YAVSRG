@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
 open Prelude.Data
@@ -13,7 +13,6 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Options
-open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Score

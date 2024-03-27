@@ -4,10 +4,10 @@ open Percyqaz.Common
 open Percyqaz.Data.Markdown
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Data
 open Interlude.Utils
-open Interlude.UI.Components
+open Interlude.UI
 
 type LinkHandler =
     {

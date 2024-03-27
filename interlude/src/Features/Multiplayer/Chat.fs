@@ -8,9 +8,7 @@ open Prelude
 open Prelude.Data
 open Prelude.Gameplay
 open Interlude.Web.Shared
-open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
 open Interlude.Features.Online

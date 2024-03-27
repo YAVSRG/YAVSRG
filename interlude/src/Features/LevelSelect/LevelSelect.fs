@@ -15,10 +15,8 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Online
-open Interlude.Features.Play
 open Interlude.Features.Score
 
 type LevelSelectScreen() =
