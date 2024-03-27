@@ -2,7 +2,7 @@
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
-open Interlude.Utils
+open Prelude
 open Interlude.UI
 
 [<AutoOpen>]

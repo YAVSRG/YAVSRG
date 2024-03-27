@@ -4,12 +4,11 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Charts
 open Prelude.Backbeat
+open Prelude
 open Prelude.Data
-open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
-open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu

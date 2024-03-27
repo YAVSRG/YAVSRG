@@ -3,11 +3,11 @@
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
+open Prelude
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Online
-open Interlude.Utils
 
 type NetworkStatus() =
     inherit StaticWidget(NodeType.None)

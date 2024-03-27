@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.OptionsMenu
 
 open Prelude.Data.Library.Caching
-open Interlude.Utils
+open Prelude
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI

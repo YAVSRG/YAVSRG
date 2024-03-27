@@ -4,8 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.Options
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components

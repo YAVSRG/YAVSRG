@@ -1,12 +1,11 @@
 ﻿namespace Interlude.Features.Play.Practice
 
 open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude
 open Interlude.Options
 open Interlude.UI
-open Interlude.Utils
 open Interlude.Features.Play
 
 type private ModeButton(label: string, mode: SyncMode, state: PracticeState) =

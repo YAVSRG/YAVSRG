@@ -3,9 +3,9 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
-open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu

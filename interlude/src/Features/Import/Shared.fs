@@ -8,7 +8,6 @@ open Percyqaz.Flux.UI
 open Prelude.Data.Library
 open Prelude
 open Prelude.Content.Noteskins.Conversion
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Options

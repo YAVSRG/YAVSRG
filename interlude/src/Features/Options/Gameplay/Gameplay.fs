@@ -3,9 +3,9 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
+open Prelude
 open Interlude.Options
 open Interlude.UI.Menu
-open Interlude.Utils
 open Interlude.Features
 
 type GameplayPage() as this =

@@ -1,13 +1,12 @@
 ﻿namespace Interlude.Features.Score
 
-open System.Drawing
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
+open Prelude
 open Prelude.Gameplay
 open Prelude.Data
-open Interlude.Utils
 open Interlude.UI.Menu
 open Interlude.Options
 

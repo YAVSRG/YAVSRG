@@ -2,8 +2,9 @@
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude
+open Interlude
 open Interlude.UI
-open Interlude.Utils
 
 type Updater() as this =
     inherit Container(NodeType.Button(fun () -> this.Click()))

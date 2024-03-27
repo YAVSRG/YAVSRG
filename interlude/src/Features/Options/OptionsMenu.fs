@@ -2,7 +2,7 @@
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Interlude.Utils
+open Prelude
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.LevelSelect

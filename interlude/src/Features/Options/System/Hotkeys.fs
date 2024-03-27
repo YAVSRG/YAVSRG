@@ -2,7 +2,7 @@
 
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Interlude.Utils
+open Prelude
 open Interlude.UI
 open Interlude.UI.Menu
 

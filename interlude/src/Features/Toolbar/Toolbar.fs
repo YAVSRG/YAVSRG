@@ -4,10 +4,11 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Utils
+open Interlude
 open Interlude.Options
 open Interlude.UI.Components
 open Interlude.Features
@@ -29,7 +30,7 @@ type Toolbar() =
     do
         container
         |+ Text(
-            version,
+            Utils.version,
             Align = Alignment.RIGHT,
             Position = Position.Box(1.0f, 1.0f, -305.0f, -HEIGHT, 300.0f, HEIGHT * 0.5f)
         )

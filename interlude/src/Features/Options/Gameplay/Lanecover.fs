@@ -1,9 +1,9 @@
 ﻿namespace Interlude.Features.OptionsMenu.Gameplay
 
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.Options
 open Interlude.UI.Menu
-open Interlude.Utils
 
 type LanecoverPage() as this =
     inherit Page()

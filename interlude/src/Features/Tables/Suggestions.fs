@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Backbeat
 open Prelude.Data.Library.Caching
-open Interlude.Utils
+open Prelude
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components

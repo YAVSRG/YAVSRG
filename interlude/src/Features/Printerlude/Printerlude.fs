@@ -8,7 +8,6 @@ open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Prelude.Common
 open Prelude.Charts
-open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Prelude.Data.``osu!``
 open Prelude.Data
@@ -67,7 +66,7 @@ module Printerlude =
 
         let show_version (io: IOContext) =
             io.WriteLine(sprintf "You are running %s" Utils.version)
-            io.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latest_version_name)
+            io.WriteLine(sprintf "The latest version online is %s" AutoUpdate.latest_version_name)
 
         let timescale (io: IOContext) (v: float) =
             UI.Screen.timescale <- System.Math.Clamp(v, 0.01, 10.0)

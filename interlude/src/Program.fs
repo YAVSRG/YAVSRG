@@ -91,7 +91,7 @@ let main argv =
         launch (0)
         m.ReleaseMutex()
 
-        if Utils.AutoUpdate.restart_on_exit then
+        if AutoUpdate.restart_on_exit then
             m.Dispose()
 
             if OperatingSystem.IsWindows() then
@@ -109,7 +109,7 @@ let main argv =
                     printfn "Automatic restart failed :("
                     printfn "%O" err
 
-    elif Prelude.Common.DEV_MODE then
+    elif DEV_MODE then
         let instances = Process.GetProcessesByName "Interlude" |> Array.length
         launch (instances - 1)
     else

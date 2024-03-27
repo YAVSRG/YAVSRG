@@ -6,6 +6,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Data.Library.Sorting
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
@@ -13,7 +14,6 @@ open Prelude.Data.Library.Endless
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu

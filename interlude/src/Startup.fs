@@ -1,16 +1,10 @@
 ﻿namespace Interlude.UI
 
-open System.Collections.Generic
-open System.IO
 open Percyqaz.Common
-open Prelude
-open Prelude.Charts
 open Prelude.Charts.Processing.NoteColors
-open Prelude.Data.Library
 open Prelude.Data
 open Prelude.Data.Library.Caching
 open Interlude
-open Interlude.Utils
 open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Stats

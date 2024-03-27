@@ -118,6 +118,15 @@ module Common =
             List.iteri (fun i x -> s <- s.Replace("%" + i.ToString(), x)) xs
             s
 
+    [<AutoOpen>]
+    module LocalisationOperators =
+
+        /// Shorthand operator to get the localised text from a locale string id
+        let (~%) = Localisation.localise
+
+        let inline (%>) (args: string list) (localisation_key: string) =
+            Localisation.localise_with args localisation_key
+
     (*
     Misc helpers (mostly data storage)
 *)

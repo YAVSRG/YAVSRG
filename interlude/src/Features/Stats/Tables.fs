@@ -9,7 +9,7 @@ open Prelude.Backbeat
 open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Prelude.Data
-open Interlude.Utils
+open Interlude
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Components

@@ -30,6 +30,7 @@
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
     <EmbeddedResource Include="Resources\default.zip" />
     <Compile Include="Utils.fs" />
+    <Compile Include="AutoUpdate.fs" />
     <Compile Include="Content\Sprites.fs" />
     <Compile Include="Content\Sounds.fs" />
     <Compile Include="Content\Rulesets.fs" />

@@ -2,10 +2,10 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.Options
-open Interlude.Utils
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
 

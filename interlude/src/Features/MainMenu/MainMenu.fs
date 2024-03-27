@@ -5,8 +5,10 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Data.Library.Caching
 open Interlude.Options
+open Interlude
 open Interlude.Utils
 open Interlude.Content
 open Interlude.UI

@@ -2,8 +2,8 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.Options
-open Interlude.Utils
 open Interlude.UI.Components
 open Interlude.UI.Menu
 

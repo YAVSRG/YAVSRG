@@ -4,10 +4,10 @@ open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Charts.Conversions
 open Prelude.Data.Library
 open Interlude.Options
-open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu

@@ -5,12 +5,12 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Gameplay.Mods
+open Prelude
 open Interlude.Features
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
-open Interlude.Utils
 open Interlude.Features.Gameplay
 
 type private ModSelector(id, states: string[], current_state: unit -> int, action: unit -> unit) =

@@ -3,10 +3,10 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Utils
 
 type private PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Button))

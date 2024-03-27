@@ -3,8 +3,8 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Utils
+open Prelude
 open Interlude.UI
-open Interlude.Utils
 
 type private WebRequestState =
     | Offline = 0

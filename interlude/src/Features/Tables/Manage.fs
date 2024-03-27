@@ -3,10 +3,10 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude
 open Prelude.Backbeat
 open Interlude.Content
 open Interlude.Options
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
