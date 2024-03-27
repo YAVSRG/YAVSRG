@@ -20,7 +20,7 @@ type NetworkStatus() =
             match Network.status with
             | Network.NotConnected -> Icons.USER_X + "  " + %"network.connection.offline", Colors.grey_2
             | Network.Connecting -> Icons.GLOBE + "  " + %"network.connection.connecting" + "..", Colors.grey_1
-            | Network.ConnectionFailed -> Icons.WIFI_OFF + "  " + "network.connection.offline", Colors.red_accent
+            | Network.ConnectionFailed -> Icons.WIFI_OFF + "  " + %"network.connection.offline", Colors.red_accent
             | Network.Connected -> Icons.GLOBE + "  " + %"network.connection.not_logged_in", Colors.green_accent
             | Network.LoggedIn -> Icons.GLOBE + "  " + Network.credentials.Username, Colors.green_accent
 
