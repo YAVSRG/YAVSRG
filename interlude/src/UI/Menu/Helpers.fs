@@ -19,10 +19,9 @@ module PageLayout =
     let PRETTYTEXTWIDTH = PRETTYHEIGHT * 6.0f
     let PRETTYWIDTH = 1080.0f
 
-    let PAGE_HEIGHT = 23
-    let PAGE_BOTTOM = PAGE_HEIGHT - 2
+    let PAGE_BOTTOM = 23
 
-    let PRETTY_MARGIN_Y = (1080.0f - (float32 PAGE_HEIGHT * 0.5f * PRETTYHEIGHT)) * 0.5f
+    let PRETTY_MARGIN_Y = (1080.0f - (float32 PAGE_BOTTOM * 0.5f * PRETTYHEIGHT)) * 0.5f
     let PRETTY_MARGIN_X = 100.0f
 
     let pretty_pos(start: int, height: int, width: PageWidth) =

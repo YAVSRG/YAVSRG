@@ -250,7 +250,7 @@ module Options =
 
                 VanishingNotes = Setting.simple true
                 AutoCalibrateOffset = Setting.simple false
-                AdvancedRecommendations = Setting.simple false
+                AdvancedRecommendations = Setting.simple true
                 ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
                 ConfirmExit = Setting.simple true
                 HoldToGiveUp = Setting.simple false

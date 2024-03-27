@@ -112,19 +112,15 @@ type private ModSelectPage(on_close) as this =
         )
 
     do
-        this.Content(
-            NavigationContainer.Column<Widget>()
-            |+ grid
-            |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
-                .Pos(500.0f)
-                .Tooltip(Tooltip.Info("gameplay.pacemaker"))
-            |+ Conditional(
-                options.AdvancedRecommendations.Get,
-                PageSetting("gameplay.endless_mode", Selector<_>.FromBool(endless_mode))
-                    .Pos(570.0f)
-                    .Tooltip(Tooltip.Info("gameplay.endless_mode"))
-            )
-        )
+        NavigationContainer.Column<Widget>()
+        |+ grid
+        |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
+            .Pos(10)
+            .Tooltip(Tooltip.Info("gameplay.pacemaker"))
+        |+ PageSetting("gameplay.endless_mode", Selector<_>.FromBool(endless_mode))
+            .Pos(12)
+            .Tooltip(Tooltip.Info("gameplay.endless_mode"))
+        |> this.Content
 
     override this.Title = %"mods.name"
     override this.OnClose() = on_close ()

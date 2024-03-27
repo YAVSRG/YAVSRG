@@ -33,20 +33,20 @@ type RegisterPage(discord_tag) as this =
     do
         this.Content(
             page_container()
-            |+ PageTextEntry("register.username", username).Pos(250.0f)
+            |+ PageTextEntry("register.username", username).Pos(2)
             |+ Text(
                 "Creating an account linked to " + discord_tag,
-                Position = Position.Box(0.0f, 0.0f, 100.0f, 150.0f, PRETTYWIDTH, PRETTYHEIGHT),
+                Position = pretty_pos(0, 2, PageWidth.Full),
                 Align = Alignment.LEFT
             )
-            |+ Callout.frame info (fun (w, h) -> Position.Row(340.0f, h).Margin(100.0f, 0.0f))
+            |+ Callout.frame info (fun (w, h) -> pretty_pos(3, 5, PageWidth.Custom w))
             |+ PageButton("register.terms_of_service", (fun () -> open_url ("https://yavsrg.net/terms_of_service")))
-                .Pos(650.0f)
+                .Pos(9)
             |+ PageButton("register.privacy_policy", (fun () -> open_url ("https://yavsrg.net/privacy_policy")))
-                .Pos(720.0f)
+                .Pos(11)
             |+ PageSetting("register.confirm_terms_of_service", Selector<_>.FromBool agree_tos)
-                .Pos(790.0f)
-            |+ submit_button.Pos(890.0f)
+                .Pos(13)
+            |+ submit_button.Pos(16)
         )
 
     override this.Title = %"register.name"

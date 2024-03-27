@@ -104,9 +104,13 @@
     <Compile Include="Features\LevelSelect\Info\Scoreboard.fs" />
     <Compile Include="Features\LevelSelect\Info\Info.fs" />
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />
-    <Compile Include="Features\Options\System.fs" />
+    <Compile Include="Features\Options\System\Hotkeys.fs" />
+    <Compile Include="Features\Options\System\System.fs" />
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
     <Compile Include="Features\Options\Gameplay\Preview.fs" />
+    <Compile Include="Features\Options\Gameplay\Keybinds.fs" />
+    <Compile Include="Features\Options\Gameplay\Lanecover.fs" />
+    <Compile Include="Features\Options\Gameplay\Presets.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
     <Compile Include="Features\Options\Noteskins\Editor\Playfield.fs" />
     <Compile Include="Features\Options\Noteskins\Editor\HoldNotes.fs" />

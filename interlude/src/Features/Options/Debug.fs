@@ -42,32 +42,31 @@ module Debug =
         do
             refresh ()
 
-            this.Content(
-                page_container()
-                |+ PageButton
-                    .Once(
-                        "debug.rebuildcache",
-                        fun () ->
-                            Caching.Cache.recache_service.Request(
-                                Content.Cache,
-                                fun () ->
-                                    Notifications.task_feedback (Icons.FOLDER, %"notification.recache_complete", "")
-                            )
+            page_container()
+            |+ PageButton
+                .Once(
+                    "debug.rebuildcache",
+                    fun () ->
+                        Caching.Cache.recache_service.Request(
+                            Content.Cache,
+                            fun () ->
+                                Notifications.task_feedback (Icons.FOLDER, %"notification.recache_complete", "")
+                        )
 
-                            Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
-                    )
-                    .Pos(0)
-                    .Tooltip(Tooltip.Info("debug.rebuildcache"))
-                |+ themes
-                    .Pos(3)
-                    .Tooltip(Tooltip.Info("themes.theme"))
-                |+ PageButton("themes.edittheme", try_edit_theme)
-                    .Pos(5)
-                    .Tooltip(Tooltip.Info("themes.edittheme"))
-                |+ PageButton("themes.showthemesfolder", (fun () -> open_directory (get_game_folder "Themes")))
-                    .Pos(7)
-                    .Tooltip(Tooltip.Info("themes.showthemesfolder"))
-            )
+                        Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
+                )
+                .Pos(0)
+                .Tooltip(Tooltip.Info("debug.rebuildcache"))
+            |+ themes
+                .Pos(3)
+                .Tooltip(Tooltip.Info("themes.theme"))
+            |+ PageButton("themes.edittheme", try_edit_theme)
+                .Pos(5)
+                .Tooltip(Tooltip.Info("themes.edittheme"))
+            |+ PageButton("themes.showthemesfolder", (fun () -> open_directory (get_game_folder "Themes")))
+                .Pos(7)
+                .Tooltip(Tooltip.Info("themes.showthemesfolder"))
+            |> this.Content
 
         override this.Title = %"debug.name"
         override this.OnClose() = ()

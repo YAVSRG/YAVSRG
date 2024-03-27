@@ -76,33 +76,32 @@ type EditHUDPage() as this =
             .Button(%"hud.noteskin_required.button", fun () -> Menu.Back(); NoteskinsPage().Show())
 
     do
-        this.Content(
-            NavigationContainer.Column<Widget>(Position = Position.Margin(100.0f, 200.0f))
-            |+ (GridFlowContainer<Widget>(
-                    PRETTYHEIGHT,
-                    2,
-                    Spacing = (10.0f, 10.0f),
-                    Position = Position.TrimTop(PRETTYHEIGHT + 50.0f),
-                    WrapNavigation = false
-                )
-                |+ hud_configuration HUDElement.Accuracy
-                |+ hud_configuration HUDElement.TimingDisplay
-                |+ hud_configuration HUDElement.Combo
-                |+ hud_configuration HUDElement.SkipButton
-                |+ hud_configuration HUDElement.ProgressMeter
-                |+ hud_configuration HUDElement.Pacemaker
-                |+ hud_configuration HUDElement.JudgementCounter
-                |+ hud_configuration HUDElement.JudgementMeter
-                |+ hud_configuration HUDElement.EarlyLateMeter
-                |+ hud_configuration HUDElement.RateModMeter
-                |+ hud_configuration HUDElement.BPMMeter
+        NavigationContainer.Column<Widget>(Position = Position.Margin(100.0f, 200.0f))
+        |+ (GridFlowContainer<Widget>(
+                PRETTYHEIGHT,
+                2,
+                Spacing = (10.0f, 10.0f),
+                Position = Position.TrimTop(PRETTYHEIGHT + 50.0f),
+                WrapNavigation = false
             )
-            |+ (if Interlude.Content.Content.Noteskin.IsEmbedded then
-                    Callout.frame noteskin_required (fun (w, h) -> Position.Box(0.0f, -0.15f, 0.0f, 0.0f, w, h)) :> Widget
-                else
-                    PageButton("hud.editor", open_hud_editor, Position = Position.SliceTop(PRETTYHEIGHT))
-            )
+            |+ hud_configuration HUDElement.Accuracy
+            |+ hud_configuration HUDElement.TimingDisplay
+            |+ hud_configuration HUDElement.Combo
+            |+ hud_configuration HUDElement.SkipButton
+            |+ hud_configuration HUDElement.ProgressMeter
+            |+ hud_configuration HUDElement.Pacemaker
+            |+ hud_configuration HUDElement.JudgementCounter
+            |+ hud_configuration HUDElement.JudgementMeter
+            |+ hud_configuration HUDElement.EarlyLateMeter
+            |+ hud_configuration HUDElement.RateModMeter
+            |+ hud_configuration HUDElement.BPMMeter
         )
+        |+ (if Interlude.Content.Content.Noteskin.IsEmbedded then
+                Callout.frame noteskin_required (fun (w, h) -> Position.Box(0.0f, -0.15f, 0.0f, 0.0f, w, h)) :> Widget
+            else
+                PageButton("hud.editor", open_hud_editor, Position = Position.SliceTop(PRETTYHEIGHT))
+        )
+        |> this.Content
 
     override this.Title = %"hud.name"
     override this.OnClose() = ()

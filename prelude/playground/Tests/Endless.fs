@@ -63,7 +63,7 @@ module Endless =
 
                 printfn ""
 
-                for p in library.Patterns.[next.Chart.Hash].Patterns do
+                for p in library.Cache.Patterns.[next.Chart.Hash].Patterns do
                     printfn "%.2fs of %iBPM%s %A [Density %.1f-%.1f] %s" 
                         (p.Amount / 1000.0f<ms>)
                         p.BPM
@@ -75,7 +75,7 @@ module Endless =
 
                 printfn ""
 
-                printfn "This is classed as: %A" (library.Patterns.[next.Chart.Hash].Category)
+                printfn "This is classed as: %A" (library.Cache.Patterns.[next.Chart.Hash].Category)
                 match Cache.load next.Chart library.Cache with
                 | Some chart ->
                     let d_100 = DifficultyRating.calculate 1.0f chart.Notes |> _.Physical

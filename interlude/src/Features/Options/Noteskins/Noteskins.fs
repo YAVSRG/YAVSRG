@@ -11,6 +11,7 @@ open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Import
 open Interlude.Features.OptionsMenu.Gameplay
 
 module private PreviewCleanup =
@@ -172,10 +173,10 @@ type NoteskinsPage() as this =
         refresh ()
 
         let left_side =
-            NavigationContainer.Column<Widget>()
+            NavigationContainer.Column<Widget>(Position = { Position.Default with Right = 0.35f %+ 0.0f }.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |+ PageButton("noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
                 .Tooltip(Tooltip.Info("noteskins.edit"))
-                .Pos(760.0f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT * 1.2f)
+                .Pos(PAGE_BOTTOM - 4, 2, PageWidth.Full)
             |+ PageButton(
                 "noteskins.edit.export",
                 (fun () ->
@@ -188,19 +189,20 @@ type NoteskinsPage() as this =
                 Icon = Icons.UPLOAD
             )
                 .Tooltip(Tooltip.Info("noteskins.edit.export"))
-                .Pos(760.0f + PRETTYHEIGHT * 1.2f, PRETTYWIDTH * 0.5f, PRETTYHEIGHT * 1.2f)
+                .Pos(PAGE_BOTTOM - 2, 2, PageWidth.Full)
             |+ Text(
                 %"noteskins.current",
-                Position = Position.Row(180.0f, 50.0f).Margin(100.0f, 0.0f),
+                Position = pretty_pos(0, 1, PageWidth.Full).SliceTop(PRETTYHEIGHT * 0.65f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT
             )
             |+ Text(
                 (fun () -> Content.NoteskinConfig.Name),
-                Position = Position.Row(210.0f, 100.0f).Margin(100.0f, 0.0f),
+                Position = pretty_pos (1, 3, PageWidth.Full),
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )
+            |>> Container
             |+ preview
 
         let right_side =
@@ -209,7 +211,7 @@ type NoteskinsPage() as this =
                     { Position.Default with
                         Left = 0.35f %+ 50.0f
                     }
-                        .Margin(100.0f, 0.0f)
+                        .Margin(PRETTY_MARGIN_X, 0.0f)
                         .TrimTop(150.0f)
                         .TrimBottom(50.0f)
             )
@@ -220,16 +222,16 @@ type NoteskinsPage() as this =
                         Menu.Exit()
 
                         if Screen.change Screen.Type.Import Transitions.Flags.Default then
-                            Interlude.Features.Import.ImportScreen.switch_to_noteskins ()
+                            ImportScreen.switch_to_noteskins ()
                     )
                 )
                 |+ PageButton("noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
                     .Tooltip(Tooltip.Info("noteskins.open_folder")))
             |+ ScrollContainer(grid, Position = Position.TrimTop(PRETTYHEIGHT * 1.5f))
 
-        NavigationContainer.Row<_>() 
-        |+ left_side 
-        |+ right_side 
+        NavigationContainer.Row<Widget>() 
+        |+ left_side
+        |+ right_side
         |> this.Content
 
     override this.Title = %"noteskins.name"

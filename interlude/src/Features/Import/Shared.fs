@@ -78,7 +78,7 @@ module Import =
                         Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
                         Menu.Back()
                 )
-                .Pos(500.0f)
+                .Pos(6)
             |+ PageButton
                 .Once(
                     "unlinkedsongsimport.confirm",
@@ -95,7 +95,7 @@ module Import =
 
                         Menu.Back()
                 )
-                .Pos(600.0f)
+                .Pos(9)
             |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h))
             |> this.Content
 

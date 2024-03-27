@@ -199,13 +199,6 @@ type PageSetting(name, widget: Widget) as this =
                 if old_widget.Focused then
                     w.Focus false
 
-    member this.Pos(y: float32, width, height) =
-        this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height)
-        this
-
-    member this.Pos(y: float32, width) = this.Pos(y, width, PRETTYHEIGHT)
-    member this.Pos(y: float32) = this.Pos(y, PRETTYWIDTH, PRETTYHEIGHT)
-
     member this.Pos(y: int) : PageSetting =
         this.Position <- pretty_pos (y, 2, PageWidth.Normal)
         this
@@ -293,13 +286,6 @@ type PageButton(name, action) as this =
 
         base.Draw()
 
-    member this.Pos(y: float32, width, height) =
-        this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height)
-        this
-
-    member this.Pos(y: float32, width) = this.Pos(y, width, PRETTYHEIGHT)
-    member this.Pos(y: float32) = this.Pos(y, PRETTYWIDTH, PRETTYHEIGHT)
-
     member this.Pos(y: int) : PageButton =
         this.Position <- pretty_pos (y, 2, PageWidth.Normal)
         this
@@ -334,16 +320,16 @@ type PageTextEntry(name, setting) =
     inherit
         PageSetting(
             name,
-            let te = TextEntry(setting, "none", false) in
+            let entry = TextEntry(setting, "none", false) in
 
-            te
+            entry
             |+ Frame(
                 Position = Position.Default.Margin(-15.0f, -5.0f),
                 Fill = K Color.Transparent,
                 Border =
                     fun () ->
-                        if te.Selected then Colors.pink_accent
-                        elif te.Focused then Colors.yellow_accent
+                        if entry.Selected then Colors.pink_accent
+                        elif entry.Focused then Colors.yellow_accent
                         else Colors.grey_2
             )
         )

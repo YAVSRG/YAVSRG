@@ -66,43 +66,42 @@ module OptionsMenuRoot =
         do
             let _, h = Callout.measure tooltip_hint
 
-            this.Content(
-                GridFlowContainer<Widget>(
-                    button_size,
-                    3,
-                    Spacing = (50.0f, h + 120.0f),
-                    Position =
-                        {
-                            Left = 0.0f %+ 200.0f
-                            Right = 1.0f %- 200.0f
-                            Top = 0.5f %- (60.0f + h * 0.5f + button_size)
-                            Bottom = 0.5f %+ (60.0f + h * 0.5f + button_size)
-                        }
-                )
-                |+ TileButton(
-                    Callout.Normal.Icon(Icons.SLIDERS).Title(%"gameplay.name"),
-                    fun () -> Gameplay.GameplayPage().Show()
-                )
-                |+ TileButton(
-                    Callout.Normal.Icon(Icons.IMAGE).Title(%"noteskins.name"),
-                    fun () -> Noteskins.NoteskinsPage().Show()
-                )
-                    .Tooltip(Tooltip.Info("noteskins"))
-                |+ TileButton(Callout.Normal.Icon(Icons.ZAP).Title(%"hud.name"), (fun () -> Noteskins.EditHUDPage().Show()))
-                    .Tooltip(Tooltip.Info("hud"))
-                |+ TileButton(
-                    Callout.Normal.Icon(Icons.AIRPLAY).Title(%"system.name"),
-                    fun () -> System.SystemPage().Show()
-                )
-                |+ TileButton(
-                    Callout.Normal.Icon(Icons.HEART).Title(%"advanced.name"),
-                    fun () -> Advanced.AdvancedPage().Show()
-                )
-                |+ TileButton(
-                    Callout.Normal.Icon(Icons.TERMINAL).Title(%"debug.name"),
-                    fun () -> Debug.DebugPage().Show()
-                )
+            GridFlowContainer<Widget>(
+                button_size,
+                3,
+                Spacing = (50.0f, h + 120.0f),
+                Position =
+                    {
+                        Left = 0.0f %+ 200.0f
+                        Right = 1.0f %- 200.0f
+                        Top = 0.5f %- (60.0f + h * 0.5f + button_size)
+                        Bottom = 0.5f %+ (60.0f + h * 0.5f + button_size)
+                    }
             )
+            |+ TileButton(
+                Callout.Normal.Icon(Icons.SLIDERS).Title(%"gameplay.name"),
+                fun () -> Gameplay.GameplayPage().Show()
+            )
+            |+ TileButton(
+                Callout.Normal.Icon(Icons.IMAGE).Title(%"noteskins.name"),
+                fun () -> Noteskins.NoteskinsPage().Show()
+            )
+                .Tooltip(Tooltip.Info("noteskins"))
+            |+ TileButton(Callout.Normal.Icon(Icons.ZAP).Title(%"hud.name"), (fun () -> Noteskins.EditHUDPage().Show()))
+                .Tooltip(Tooltip.Info("hud"))
+            |+ TileButton(
+                Callout.Normal.Icon(Icons.AIRPLAY).Title(%"system.name"),
+                fun () -> System.SystemPage().Show()
+            )
+            |+ TileButton(
+                Callout.Normal.Icon(Icons.HEART).Title(%"advanced.name"),
+                fun () -> Advanced.AdvancedPage().Show()
+            )
+            |+ TileButton(
+                Callout.Normal.Icon(Icons.TERMINAL).Title(%"debug.name"),
+                fun () -> Debug.DebugPage().Show()
+            )
+            |> this.Content
 
             this
             |* Callout.frame
