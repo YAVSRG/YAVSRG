@@ -99,13 +99,13 @@ type ColorSettingsPage() as this =
         let k = if note_colors.UseGlobalColors then 0 else int keycount - 2
         Setting.make (fun v -> note_colors.Colors.[k].[i] <- v) (fun () -> note_colors.Colors.[k].[i])
 
-    let NOTE_SCALE = PRETTYHEIGHT * 1.5f
+    let NOTE_SCALE = PRETTYHEIGHT * 1.5f - Style.PADDING * 2.0f
 
     let colors, refresh_colors =
         refreshable_row
             (fun () -> ColorScheme.count (int keymode.Value) note_colors.Style)
             (fun i k ->
-                let x = -60.0f * float32 k
+                let x = NOTE_SCALE * -0.5f * float32 k
                 let n = float32 i
 
                 NoteColorPicker(

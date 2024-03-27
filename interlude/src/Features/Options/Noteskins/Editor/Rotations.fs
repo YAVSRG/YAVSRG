@@ -9,7 +9,6 @@ open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.Features
 open Interlude.Options
-open Interlude.Utils
 open Interlude.UI.Menu
 
 type RotationPicker(rotation: Setting<float>) as this =
@@ -102,13 +101,13 @@ type RotationSettingsPage() as this =
         Setting.make (fun v -> rotations.[k].[i] <- v) (fun () -> rotations.[k].[i])
         |> Setting.round 1
 
-    let NOTE_SCALE = PRETTYHEIGHT * 1.5f
+    let NOTE_SCALE = PRETTYHEIGHT * 1.5f - Style.PADDING * 2.0f
 
     let _rotations, refresh_rotations =
         refreshable_row
             (fun () -> int keymode.Value)
             (fun i k ->
-                let x = -60.0f * float32 k
+                let x = NOTE_SCALE * -0.5f * float32 k
                 let n = float32 i
 
                 RotationPicker(

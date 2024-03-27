@@ -212,7 +212,7 @@ type AnimationSettingsPage() as this =
                     .Pos(14)
             )
 
-        let tabs = SwapContainer(general_tab)
+        let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).TrimTop(100.0f))
 
         let tab_buttons =
             RadioButtons.create
@@ -227,9 +227,12 @@ type AnimationSettingsPage() as this =
                     Height = 50.0f
                 }
 
-        tab_buttons.Position <- Position.Box(0.0f, 0.0f, 100.0f, 200.0f, PRETTYWIDTH, PRETTYHEIGHT)
+        tab_buttons.Position <- pretty_pos(0, 2, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
 
-        NavigationContainer.Column<Widget>() |+ tab_buttons |+ tabs |> this.Content
+        NavigationContainer.Column<Widget>()
+        |+ tab_buttons
+        |+ tabs
+        |> this.Content
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
