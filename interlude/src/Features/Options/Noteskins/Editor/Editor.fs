@@ -113,7 +113,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                         .Icon(Icons.INFO)
                         .Title(%"noteskins.edit.hotkey_hint")
                         .Hotkey("edit_noteskin"))
-                    (fun (w, h) -> Position.SliceTop(h + 40.0f + 40.0f).SliceRight(w + 40.0f).Margin(20.0f, 20.0f))
+                    (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
             )
         )
 

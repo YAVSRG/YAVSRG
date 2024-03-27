@@ -195,7 +195,7 @@ type EditPresetPage(preset_id: int, setting: Setting<Preset option>) as this =
             .Pos(2)
         |+ PageSetting("gameplay.preset.keymode_preference", keymode_preference)
             .Tooltip(Tooltip.Info("gameplay.preset.keymode_preference"))
-            .Pos(4, 2, PRETTYTEXTWIDTH + 800.0f + 70.0f)
+            .Pos(4, 2, PageWidth.Custom (PRETTYTEXTWIDTH + (keymode_preference :> DynamicSize).Size))
         |+ delete_button.Pos(6)
         |> this.Content
 
@@ -413,7 +413,7 @@ type GameplayPage() as this =
             .Pos(14)
         |+ PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
             .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
-            .Pos(16, 3)
+            .Pos(16)
         |+ PageSetting(
             "generic.keymode",
             Selector<_>
@@ -422,7 +422,8 @@ type GameplayPage() as this =
             .Pos(19)
         |+ PageSetting("gameplay.keybinds", binds)
             .Tooltip(Tooltip.Info("gameplay.keybinds"))
-            .Pos(21, 2, Viewport.vwidth - 200.0f)
+            .Pos(21, 2, PageWidth.Full)
+        |>> Container
         |+ preview
         |+ preset_buttons 1 options.Preset1
         |+ preset_buttons 2 options.Preset2

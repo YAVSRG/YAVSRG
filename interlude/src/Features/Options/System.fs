@@ -277,7 +277,7 @@ module System =
                     "system.audiodevice",
                     Selector(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
                 )
-                    .Pos(11, 2, 1700.0f)
+                    .Pos(11, 2, PageWidth.Full)
                     .Tooltip(Tooltip.Info("system.audiodevice"))
 
                 |+ PageSetting(
@@ -336,7 +336,7 @@ module System =
                     (fun () -> has_changed),
                     Callout.frame
                         (Callout.Small.Icon(Icons.AIRPLAY).Title(%"system.window_changes_hint"))
-                        (fun (w, h) -> Position.SliceTop(h + 40.0f + 40.0f).SliceRight(w + 40.0f).Margin(20.0f, 20.0f))
+                        (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
                 )
             )
 

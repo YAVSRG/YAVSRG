@@ -151,7 +151,7 @@ type ColorSettingsPage() as this =
                 .Pos(5)
                 .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
             |+ PageSetting("noteskins.edit.notecolors", colors)
-                .Pos(8, 3, Viewport.vwidth - 200.0f)
+                .Pos(8, 3, PageWidth.Full)
         )
 
     override this.Title = %"noteskins.edit.colors.name"

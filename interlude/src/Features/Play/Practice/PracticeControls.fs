@@ -146,19 +146,19 @@ type SyncSuggestionControls(state: PracticeState) =
             (fun () -> state.SyncMode.Value.Audio = 0 && options.AudioVolume.Value > 0.0),
             Callout.frame
                 (Callout.Small.Icon(Icons.VOLUME_X).Body(%"practice.mute_mandatory_hint"))
-                (fun (w, h) -> Position.Box(1.0f, 0.0f, -w - 20.0f, 20.0f, w, h + 40.0f))
+                (fun (w, h) -> Position.Box(1.0f, 0.0f, -w - 20.0f, 20.0f, w, h))
         )
         |+ Conditional(
             (fun () -> state.SyncMode.Value.Audio = 1 && options.AudioVolume.Value > 0.0),
             Callout.frame
                 (Callout.Small.Icon(Icons.VOLUME_X).Body(%"practice.mute_hint"))
-                (fun (w, h) -> Position.Box(1.0f, 0.0f, -w - 20.0f, 20.0f, w, h + 40.0f))
+                (fun (w, h) -> Position.Box(1.0f, 0.0f, -w - 20.0f, 20.0f, w, h))
         )
         |+ Conditional(
             (fun () -> state.SyncMode.Value.Audio = 2 && options.AudioVolume.Value = 0.0),
             Callout.frame
                 (Callout.Small.Icon(Icons.VOLUME_2).Body(%"practice.unmute_hint"))
-                (fun (w, h) -> Position.Box(1.0f, 0.0f, -w - 20.0f, 20.0f, w, h + 40.0f))
+                (fun (w, h) -> Position.Box(1.0f, 0.0f, -w - 20.0f, 20.0f, w, h))
         )
         |* Dummy() // todo: button to reset offsets
 

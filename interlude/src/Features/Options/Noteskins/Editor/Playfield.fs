@@ -161,7 +161,7 @@ type PlayfieldSettingsPage() as this =
         |+ Conditional(
             (fun () -> use_advanced_column_spacing.Value),
             PageSetting("noteskins.edit.advancedcolumnspacing", _spacings)
-                .Pos(20, 2, Viewport.vwidth - 200.0f)
+                .Pos(20, 2, PageWidth.Full)
                 .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
         )
         |> this.Content

@@ -70,6 +70,9 @@ type Widget(node_type) =
         if _parent.IsNone then "*" else _parent.Value.ToString()
         + " > "
         + this.GetType().Name
+    
+    static member inline (|>>)(child: Widget, constructor: NodeType -> 'T) : 'T =
+        constructor (NodeType.Container (fun () -> Some child)) |+ child
 
 [<AbstractClass>]
 type StaticWidget(node_type) =
@@ -148,8 +151,6 @@ type Container(node_type) =
 
     static member (|*)(parent: #Container, child: #Widget) = parent.Add child
     static member (|*)(parent: #Container, children: #Widget seq) = Seq.iter parent.Add children
-    static member inline (|>>)(child: Widget, constructor: NodeType -> 'T) : 'T =
-        constructor (NodeType.Container (fun () -> Some child)) |+ child
 
 type private DynamicPosition(pos: Position) =
     let mutable pos = pos

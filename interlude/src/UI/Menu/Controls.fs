@@ -207,15 +207,15 @@ type PageSetting(name, widget: Widget) as this =
     member this.Pos(y: float32) = this.Pos(y, PRETTYWIDTH, PRETTYHEIGHT)
 
     member this.Pos(y: int) : PageSetting =
-        this.Position <- pretty_pos (y, 2, PRETTYWIDTH)
+        this.Position <- pretty_pos (y, 2, PageWidth.Normal)
         this
 
     member this.Pos(y: int, h: int) : PageSetting =
-        this.Position <- pretty_pos (y, h, PRETTYWIDTH)
+        this.Position <- pretty_pos (y, h, PageWidth.Normal)
         this
 
-    member this.Pos(y: int, h: int, w: float32) : PageSetting =
-        this.Position <- pretty_pos (y, h, w)
+    member this.Pos(y: int, h: int, width: PageWidth) : PageSetting =
+        this.Position <- pretty_pos (y, h, width)
         this
 
     override this.Init(parent) =
@@ -301,15 +301,15 @@ type PageButton(name, action) as this =
     member this.Pos(y: float32) = this.Pos(y, PRETTYWIDTH, PRETTYHEIGHT)
 
     member this.Pos(y: int) : PageButton =
-        this.Position <- pretty_pos (y, 2, PRETTYWIDTH)
+        this.Position <- pretty_pos (y, 2, PageWidth.Normal)
         this
 
     member this.Pos(y: int, h: int) : PageButton =
-        this.Position <- pretty_pos (y, h, PRETTYWIDTH)
+        this.Position <- pretty_pos (y, h, PageWidth.Normal)
         this
 
-    member this.Pos(y: int, h: int, w: float32) : PageButton =
-        this.Position <- pretty_pos (y, h, w)
+    member this.Pos(y: int, h: int, width: PageWidth) : PageButton =
+        this.Position <- pretty_pos (y, h, width)
         this
 
     member val Enabled = true with get, set

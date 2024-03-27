@@ -96,7 +96,7 @@ module Import =
                         Menu.Back()
                 )
                 .Pos(600.0f)
-            |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h + 40.0f))
+            |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h))
             |> this.Content
 
         override this.Title = %"unlinkedsongsimport.name"

@@ -39,7 +39,7 @@ type RegisterPage(discord_tag) as this =
                 Position = Position.Box(0.0f, 0.0f, 100.0f, 150.0f, PRETTYWIDTH, PRETTYHEIGHT),
                 Align = Alignment.LEFT
             )
-            |+ Callout.frame info (fun (w, h) -> Position.Row(340.0f, h + 40.0f).Margin(100.0f, 0.0f))
+            |+ Callout.frame info (fun (w, h) -> Position.Row(340.0f, h).Margin(100.0f, 0.0f))
             |+ PageButton("register.terms_of_service", (fun () -> open_url ("https://yavsrg.net/terms_of_service")))
                 .Pos(650.0f)
             |+ PageButton("register.privacy_policy", (fun () -> open_url ("https://yavsrg.net/privacy_policy")))
@@ -89,7 +89,7 @@ type LoginPage() as this =
             |+ PageButton("login.register_with_discord", register).Pos(3)
             |+ Conditional(
                 (fun () -> waiting_for_browser),
-                Callout.frame info (fun (w, h) -> Position.Row(400.0f, h + 40.0f).Margin(100.0f, 0.0f))
+                Callout.frame info (fun (w, h) -> Position.Row(400.0f, h).Margin(100.0f, 0.0f))
             )
         )
 

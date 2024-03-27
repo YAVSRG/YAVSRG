@@ -111,8 +111,8 @@ module OptionsMenuRoot =
                     {
                         Left = 0.0f %+ 200.0f
                         Right = 1.0f %- 200.0f
-                        Top = 0.5f %- (20.0f + h * 0.5f)
-                        Bottom = 0.5f %+ (20.0f + h * 0.5f)
+                        Top = 0.5f %- (h * 0.5f)
+                        Bottom = 0.5f %+ (h * 0.5f)
                     }
                 )
 

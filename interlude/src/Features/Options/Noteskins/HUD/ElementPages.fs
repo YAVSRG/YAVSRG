@@ -136,7 +136,7 @@ module Shared =
 
     let or_require_noteskin (items: Widget list) : Widget list =
         if Content.Noteskin.IsEmbedded then
-            [ Callout.frame noteskin_required (fun (w, h) -> Position.Box(0.0f, 1.0f, 100.0f, -200.0f - h - 40.0f, w, h + 40.0f)) ]
+            [ Callout.frame noteskin_required (fun (w, h) -> Position.Box(0.0f, 1.0f, 100.0f, -200.0f - h, w, h)) ]
         else items
 
 type AccuracyPage(on_close: unit -> unit) as this =

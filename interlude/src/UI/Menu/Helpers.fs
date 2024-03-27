@@ -8,15 +8,32 @@ open Interlude.UI
 [<AutoOpen>]
 module PageLayout =
 
-    let PRETTYTEXTWIDTH = 425.0f
-    let PRETTYHEIGHT = 70.0f
+    [<Struct>]
+    [<RequireQualifiedAccess>]
+    type PageWidth =
+        | Normal
+        | Full
+        | Custom of float32
+
+    let PRETTYHEIGHT = 65.0f
+    let PRETTYTEXTWIDTH = PRETTYHEIGHT * 6.0f
     let PRETTYWIDTH = 1080.0f
-    let PRETTY_MARGIN_Y = (1080.0f - (10.0f * PRETTYHEIGHT)) * 0.5f
+
+    let PAGE_HEIGHT = 23
+    let PAGE_BOTTOM = PAGE_HEIGHT - 2
+
+    let PRETTY_MARGIN_Y = (1080.0f - (float32 PAGE_HEIGHT * 0.5f * PRETTYHEIGHT)) * 0.5f
     let PRETTY_MARGIN_X = 100.0f
 
-    let pretty_pos(start: int, height: int, width: float32) =
-        Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PRETTYHEIGHT, width, float32 height * 0.5f * PRETTYHEIGHT)
-
+    let pretty_pos(start: int, height: int, width: PageWidth) =
+        match width with
+        | PageWidth.Normal ->
+            Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PRETTYHEIGHT, PRETTYWIDTH, float32 height * 0.5f * PRETTYHEIGHT)
+        | PageWidth.Full ->
+            Position.Row(float32 start * 0.5f * PRETTYHEIGHT, float32 height * 0.5f * PRETTYHEIGHT)
+        | PageWidth.Custom w ->
+            Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PRETTYHEIGHT, w, float32 height * 0.5f * PRETTYHEIGHT)
+            
 type Tooltip(content: Callout) =
     inherit StaticWidget(NodeType.None)
 

@@ -45,7 +45,7 @@ module PracticeScreen =
                 (fun () -> show),
                 Callout.frame
                     info_callout
-                    (fun (w, h) -> Position.Box(0.0f, 1.0f, 20.0f, -100.0f - h - 40.0f, w + 100.0f, h + 40.0f))
+                    (fun (w, h) -> Position.Box(0.0f, 1.0f, 20.0f, -100.0f - h, w + 100.0f, h))
             )
             |* slideout
 

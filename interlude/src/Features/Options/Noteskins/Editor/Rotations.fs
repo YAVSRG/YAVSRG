@@ -134,7 +134,7 @@ type RotationSettingsPage() as this =
             )
                 .Pos(2)
             |+ PageSetting("noteskins.edit.rotations", _rotations)
-                .Pos(5, 3, Viewport.vwidth - 200.0f)
+                .Pos(5, 3, PageWidth.Full)
             |+ PageSetting(
                 "noteskins.edit.receptorstyle",
                 Selector(
