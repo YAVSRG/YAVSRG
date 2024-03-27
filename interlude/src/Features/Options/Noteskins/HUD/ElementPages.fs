@@ -32,16 +32,16 @@ type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
                      + Array.sum (cfg.KeymodeColumnSpacing keycount))
                     * scale
 
-                let (screenAlign, columnAlign) = cfg.PlayfieldAlignment
+                let (screen_align, playfield_align) = cfg.PlayfieldAlignment
 
                 Rect
                     .Box(
-                        this.PreviewBounds.Left + this.PreviewBounds.Width * screenAlign,
+                        this.PreviewBounds.Left + this.PreviewBounds.Width * screen_align,
                         this.PreviewBounds.Top,
                         width,
                         this.PreviewBounds.Height
                     )
-                    .Translate(-width * columnAlign, 0.0f)
+                    .Translate(-width * playfield_align, 0.0f)
             else
                 this.PreviewBounds
 
@@ -511,7 +511,20 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
         Setting.simple user_options.JudgementMeterFadeTime
         |> Setting.bound 100.0f 2000.0f
 
+    let use_texture =
+        Setting.simple noteskin_options.JudgementMeterUseTexture
+
+    let texture = Content.Texture "judgements"
     let rs = Rulesets.current
+    let JUDGEMENT_COUNT = rs.Judgements.Length
+    let judgement_display = 
+        match noteskin_options.JudgementMeterCustomDisplay.TryFind JUDGEMENT_COUNT with
+        | Some existing -> Array.copy existing
+        | None -> 
+            if texture.Rows = JUDGEMENT_COUNT then
+                Array.init JUDGEMENT_COUNT JudgementDisplayType.Texture
+            else
+                Array.create JUDGEMENT_COUNT JudgementDisplayType.Name
 
     let preview =
         { new ConfigPreview(0.35f, pos) with
@@ -537,6 +550,12 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
             )
                 .Pos(340.0f)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
+            |+ PageSetting(
+                "hud.judgementmeter.usetexture",
+                Selector<_>.FromBool(use_texture)
+            )
+                .Pos(410.0f)
+                .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
             |+ preview
         )
 
@@ -549,6 +568,12 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
                 JudgementMeterFadeTime = animation_time.Value
                 JudgementMeterIgnorePerfect = ignore_perfect_judgements.Value
                 JudgementMeterPrioritiseLower = prioritise_lower_judgements.Value
+            }
+
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                JudgementMeterUseTexture = use_texture.Value
+                JudgementMeterCustomDisplay = Content.NoteskinConfig.HUD.JudgementMeterCustomDisplay.Add (JUDGEMENT_COUNT, judgement_display)
             }
 
         on_close ()

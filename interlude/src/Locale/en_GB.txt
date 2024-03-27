@@ -737,3 +737,5 @@ wiki.close=Close
 wiki.contents=Table of contents
 wiki.home=Home
 wiki.openinbrowser=Open in browser
+hud.judgementmeter.usetexture.name=Use custom judgement images
+hud.judgementmeter.usetexture.tooltip=When enabled you can use images for judgements provided by your noteskin instead of just text.
