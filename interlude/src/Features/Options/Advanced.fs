@@ -15,20 +15,20 @@ module Advanced =
         do
 
             this.Content(
-                column ()
+                page_container ()
                 |+ PageSetting("advanced.enableconsole", Selector<_>.FromBool options.EnableConsole)
-                    .Pos(200.0f)
+                    .Pos(0)
                 |+ PageSetting("advanced.confirmexit", Selector<_>.FromBool options.ConfirmExit)
-                    .Pos(270.0f)
+                    .Pos(2)
                     .Tooltip(Tooltip.Info("advanced.confirmexit"))
                 |+ PageSetting("advanced.holdtogiveup", Selector<_>.FromBool options.HoldToGiveUp)
-                    .Pos(340.0f)
+                    .Pos(4)
                     .Tooltip(Tooltip.Info("advanced.holdtogiveup"))
                 |+ PageSetting("advanced.vanishingnotes", Selector<_>.FromBool options.VanishingNotes)
-                    .Pos(410.0f)
+                    .Pos(6)
                     .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
                 |+ PageSetting("advanced.autocalibrateoffset", Selector<_>.FromBool options.AutoCalibrateOffset)
-                    .Pos(480.0f)
+                    .Pos(8)
                     .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
                 |+ PageButton
                     .Once(
@@ -50,10 +50,10 @@ module Advanced =
                                 %"notification.pattern_cache_started.body"
                             )
                     )
-                    .Pos(550.0f)
+                    .Pos(10)
                     .Tooltip(Tooltip.Info("advanced.buildpatterncache"))
                 |+ PageSetting("advanced.advancedrecommendations", Selector<_>.FromBool options.AdvancedRecommendations)
-                    .Pos(620.0f)
+                    .Pos(12)
                     .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
             )
 

@@ -288,7 +288,7 @@ type TextureEditPage(texture_id: string) as this =
         Content.Noteskin.SplitTexture(texture_id)
 
         this.Content(
-            column ()
+            NavigationContainer.Column<Widget>()
             |+ texture_editor
             |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f, Position = Position.SliceRight(400.0f).Margin(50.0f))
                 |+ Button(

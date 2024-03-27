@@ -187,11 +187,3 @@ type Position with
             Right = anchorx %+ (x + width)
             Bottom = anchory %+ (y + height)
         }
-
-    static member Box(anchorx, anchory, width, height) =
-        {
-            Left = anchorx %+ 0.0f
-            Top = anchory %+ 0.0f
-            Right = anchorx %+ width
-            Bottom = anchory %+ height
-        }

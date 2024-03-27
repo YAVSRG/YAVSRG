@@ -200,7 +200,7 @@ type private CompareFriend
             Align = Alignment.RIGHT,
             Position = Position.SliceTop(50.0f).Margin(20.0f, 0.0f)
         )
-        |+ Button(K(Icons.ARROW_LEFT_CIRCLE + " Back"), on_back, Position = Position.Box(0.0f, 0.0f, 200.0f, 50.0f))
+        |+ Button(K(Icons.ARROW_LEFT_CIRCLE + " Back"), on_back, Position = Position.Box(0.0f, 0.0f, 0.0f, 0.0f, 200.0f, 50.0f))
         |* ScrollContainer(contents, Position = Position.Margin(10.0f, 0.0f).TrimTop(55.0f))
 
         base.Init parent

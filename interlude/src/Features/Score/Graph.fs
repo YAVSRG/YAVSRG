@@ -20,11 +20,11 @@ type ScoreGraphSettingsPage() as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("score.graph.settings.graph_mode", Selector<_>.FromEnum options.ScoreGraphMode)
-                .Pos(200.0f)
+                .Pos(0)
             |+ PageSetting("score.graph.settings.only_releases", Selector<_>.FromBool GraphSettings.only_releases)
-                .Pos(300.0f)
+                .Pos(3)
         )
 
     override this.Title = %"score.graph.settings"

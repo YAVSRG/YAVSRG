@@ -102,7 +102,7 @@ type RotationSettingsPage() as this =
         Setting.make (fun v -> rotations.[k].[i] <- v) (fun () -> rotations.[k].[i])
         |> Setting.round 1
 
-    let NOTE_WIDTH = 120.0f
+    let NOTE_SCALE = PRETTYHEIGHT * 1.5f
 
     let _rotations, refresh_rotations =
         refreshable_row
@@ -115,26 +115,26 @@ type RotationSettingsPage() as this =
                     g keymode.Value i,
                     Position =
                         { Position.Default with
-                            Left = 0.5f %+ (x + NOTE_WIDTH * n)
-                            Right = 0.5f %+ (x + NOTE_WIDTH * n + NOTE_WIDTH)
+                            Left = 0.5f %+ (x + NOTE_SCALE * n)
+                            Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
                         }
                 )
             )
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("noteskins.edit.userotation", Selector<_>.FromBool(use_rotation))
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("noteskins.edit.userotation"))
             |+ PageSetting(
                 "generic.keymode",
                 Selector<Keymode>
                     .FromEnum(keymode |> Setting.trigger (ignore >> refresh_rotations))
             )
-                .Pos(270.0f)
+                .Pos(2)
             |+ PageSetting("noteskins.edit.rotations", _rotations)
-                .Pos(370.0f, Viewport.vwidth - 200.0f, NOTE_WIDTH)
+                .Pos(5, 3, Viewport.vwidth - 200.0f)
             |+ PageSetting(
                 "noteskins.edit.receptorstyle",
                 Selector(
@@ -145,7 +145,7 @@ type RotationSettingsPage() as this =
                     receptor_style
                 )
             )
-                .Pos(470.0f)
+                .Pos(8)
                 .Tooltip(Tooltip.Info("noteskins.edit.receptorstyle"))
         )
 

@@ -161,12 +161,12 @@ type AccuracyPage(on_close: unit -> unit) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("hud.accuracy.gradecolors", Selector<_>.FromBool grade_colors)
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("hud.accuracy.gradecolors"))
             |+ PageSetting("hud.accuracy.showname", Selector<_>.FromBool show_name)
-                .Pos(270.0f)
+                .Pos(2)
                 .Tooltip(Tooltip.Info("hud.accuracy.showname"))
             |+ preview
         )
@@ -227,24 +227,24 @@ type TimingDisplayPage(on_close: unit -> unit) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("hud.timingdisplay.showguide", Selector<_>.FromBool show_guide)
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.showguide"))
             |+ PageSetting("hud.timingdisplay.shownonjudgements", Selector<_>.FromBool show_non_judgements)
-                .Pos(270.0f)
+                .Pos(2)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.shownonjudgements"))
             |+ PageSetting("hud.timingdisplay.halfscalereleases", Selector<_>.FromBool half_scale_releases)
-                .Pos(340.0f)
+                .Pos(4)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.halfscalereleases"))
             |+ PageSetting("hud.timingdisplay.thickness", Slider(thickness, Step = 1f))
-                .Pos(410.0f)
+                .Pos(6)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.thickness"))
             |+ PageSetting("hud.timingdisplay.releasesextraheight", Slider(release_thickness, Step = 1f))
-                .Pos(480.0f)
+                .Pos(8)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.releasesextraheight"))
             |+ PageSetting("hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
-                .Pos(550.0f)
+                .Pos(10)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.animationtime"))
             |+ preview
         )
@@ -288,16 +288,16 @@ type ComboPage(on_close: unit -> unit) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("hud.combo.lampcolors", Selector<_>.FromBool lamp_colors)
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
             |+ ([
                 PageSetting("hud.combo.pop", Slider(pop_amount, Step = 1f))
-                    .Pos(270.0f)
+                    .Pos(2)
                     .Tooltip(Tooltip.Info("hud.combo.pop")) :> Widget
                 PageSetting("hud.combo.growth", Slider(growth_amount))
-                    .Pos(340.0f)
+                    .Pos(4)
                     .Tooltip(Tooltip.Info("hud.combo.growth"))
             ] |> or_require_noteskin)
             |+ preview
@@ -403,14 +403,14 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("hud.progressmeter.label", Selector<ProgressMeterLabel>.FromEnum(label))
-                .Pos(200.0f)
+                .Pos(0)
             |+ ([
                 PageSetting("hud.progressmeter.color", ColorPicker(color, true))
-                    .Pos(270.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f) :> Widget
+                    .Pos(2, 3) :> Widget
                 PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
-                    .Pos(375.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                    .Pos(5, 3)
                 ] |> or_require_noteskin)
             |+ preview
         )
@@ -475,9 +475,9 @@ type JudgementCounterPage(on_close: unit -> unit) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("hud.judgementcounter.animationtime", Slider(animation_time |> Setting.f32, Step = 5f))
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("hud.judgementcounter.animationtime"))
             |+ preview
         )
@@ -534,27 +534,27 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("hud.judgementmeter.animationtime", Slider(animation_time, Step = 5f))
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.animationtime"))
             |+ PageSetting(
                 "hud.judgementmeter.ignoreperfectjudgements",
                 Selector<_>.FromBool(ignore_perfect_judgements)
             )
-                .Pos(270.0f)
+                .Pos(2)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.ignoreperfectjudgements"))
             |+ PageSetting(
                 "hud.judgementmeter.prioritiselowerjudgements",
                 Selector<_>.FromBool(prioritise_lower_judgements)
             )
-                .Pos(340.0f)
+                .Pos(4)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
             |+ PageSetting(
                 "hud.judgementmeter.usetexture",
                 Selector<_>.FromBool(use_texture)
             )
-                .Pos(410.0f)
+                .Pos(6)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
             |+ preview
         )
@@ -603,22 +603,22 @@ type EarlyLateMeterPage(on_close: unit -> unit) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("hud.earlylatemeter.animationtime", Slider(animation_time, Step = 5f))
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("hud.earlylatemeter.animationtime"))
             |+ ([
                 PageTextEntry("hud.earlylatemeter.earlytext", early_text)
-                    .Pos(270.0f)
+                    .Pos(2)
                     .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext")) :> Widget
                 PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
-                    .Pos(340.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                    .Pos(4, 3)
                     .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
                 PageTextEntry("hud.earlylatemeter.latetext", late_text)
-                    .Pos(445.0f)
+                    .Pos(7)
                     .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
                 PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
-                    .Pos(515.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+                    .Pos(9, 3)
                     .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
                 ] |> or_require_noteskin)
             |+ preview
@@ -668,9 +668,9 @@ type RateModMeterPage(on_close: unit -> unit) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("hud.ratemodmeter.showmods", Selector<_>.FromBool(show_mods))
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
             |+ preview
         )

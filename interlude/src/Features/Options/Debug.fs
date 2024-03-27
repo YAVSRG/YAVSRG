@@ -43,7 +43,7 @@ module Debug =
             refresh ()
 
             this.Content(
-                column ()
+                page_container()
                 |+ PageButton
                     .Once(
                         "debug.rebuildcache",
@@ -56,14 +56,16 @@ module Debug =
 
                             Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
                     )
-                    .Pos(200.0f)
+                    .Pos(0)
                     .Tooltip(Tooltip.Info("debug.rebuildcache"))
-                |+ themes.Pos(580.0f).Tooltip(Tooltip.Info("themes.theme"))
+                |+ themes
+                    .Pos(3)
+                    .Tooltip(Tooltip.Info("themes.theme"))
                 |+ PageButton("themes.edittheme", try_edit_theme)
-                    .Pos(650.0f)
+                    .Pos(5)
                     .Tooltip(Tooltip.Info("themes.edittheme"))
                 |+ PageButton("themes.showthemesfolder", (fun () -> open_directory (get_game_folder "Themes")))
-                    .Pos(720.0f)
+                    .Pos(7)
                     .Tooltip(Tooltip.Info("themes.showthemesfolder"))
             )
 

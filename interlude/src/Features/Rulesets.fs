@@ -105,9 +105,9 @@ type PacemakerOptionsPage() as this =
             |> Array.map (fun (i, l) -> (i, l.Name))
 
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace)
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
             |+ CaseSelector(
                 "gameplay.pacemaker.type",
@@ -115,13 +115,13 @@ type PacemakerOptionsPage() as this =
                 [|
                     [|
                         PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32))
-                            .Pos(370.0f)
+                            .Pos(5)
                     |]
-                    [| PageSetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(370.0f) |]
+                    [| PageSetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(5) |]
                 |],
                 utype
             )
-                .Pos(300.0f)
+                .Pos(3)
             |+ Text(
                 %"gameplay.pacemaker.hint",
                 Align = Alignment.CENTER,

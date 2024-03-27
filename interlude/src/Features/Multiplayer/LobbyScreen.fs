@@ -23,16 +23,15 @@ type LobbySettingsPage(settings: LobbySettings) as this =
     let auto_countdown = Setting.simple settings.AutomaticRoundCountdown
 
     do
-        this.Content(
-            column ()
-            |+ PageTextEntry("lobby.name", name).Pos(200.0f)
-            |+ PageSetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation))
-                .Pos(300.0f)
-                .Tooltip(Tooltip.Info("lobby.host_rotation"))
-            |+ PageSetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown))
-                .Pos(370.0f)
-                .Tooltip(Tooltip.Info("lobby.auto_countdown"))
-        )
+        page_container()
+        |+ PageTextEntry("lobby.name", name).Pos(0)
+        |+ PageSetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation))
+            .Pos(3)
+            .Tooltip(Tooltip.Info("lobby.host_rotation"))
+        |+ PageSetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown))
+            .Pos(5)
+            .Tooltip(Tooltip.Info("lobby.auto_countdown"))
+        |> this.Content
 
     override this.Title = %"lobby.name"
 

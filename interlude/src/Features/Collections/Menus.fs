@@ -18,10 +18,10 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) as this 
 
     do
         this.Content(
-            column ()
-            |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(200.0f)
+            page_container()
+            |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(0)
             |+ PageSetting("collections.edit.icon", Selector(CreateFolderPage.Icons, icon))
-                .Pos(300.0f)
+                .Pos(3)
             |+ PageButton(
                 "confirm.yes",
                 (fun () ->
@@ -37,7 +37,7 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) as this 
                         )
                 )
             )
-                .Pos(400.0f)
+                .Pos(6)
         )
 
     override this.Title = %"collections.create_folder.name"
@@ -59,10 +59,10 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) as thi
 
     do
         this.Content(
-            column ()
-            |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(200.0f)
+            page_container()
+            |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(0)
             |+ PageSetting("collections.edit.icon", Selector(CreatePlaylistPage.Icons, icon))
-                .Pos(300.0f)
+                .Pos(3)
             |+ PageButton(
                 "confirm.yes",
                 (fun () ->
@@ -78,7 +78,7 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) as thi
                         )
                 )
             )
-                .Pos(400.0f)
+                .Pos(6)
         )
 
     override this.Title = %"collections.create_playlist.name"
@@ -99,10 +99,10 @@ type EditFolderPage(name: string, folder: Folder) as this =
 
     do
         let content =
-            column ()
-            |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(200.0f)
+            page_container()
+            |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(0)
             |+ PageSetting("collections.edit.icon", Selector(CreateFolderPage.Icons, folder.Icon))
-                .Pos(270.0f)
+                .Pos(2)
             |+ PageButton(
                 "collections.edit.delete",
                 (fun () ->
@@ -120,7 +120,7 @@ type EditFolderPage(name: string, folder: Folder) as this =
                 ),
                 Icon = Icons.TRASH
             )
-                .Pos(370.0f)
+                .Pos(5)
 
         this.Content content
 
@@ -142,10 +142,10 @@ type EditPlaylistPage(name: string, playlist: Playlist) as this =
 
     do
         let content =
-            column ()
-            |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(200.0f)
+            page_container()
+            |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(0)
             |+ PageSetting("collections.edit.icon", Selector(CreatePlaylistPage.Icons, playlist.Icon))
-                .Pos(270.0f)
+                .Pos(2)
             |+ PageButton(
                 "collections.edit.delete",
                 (fun () ->
@@ -163,7 +163,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) as this =
                 ),
                 Icon = Icons.TRASH
             )
-                .Pos(370.0f)
+                .Pos(5)
 
         this.Content content
 
@@ -261,18 +261,18 @@ type SelectCollectionPage
         refresh ()
 
         this.Content(
-            NavigationContainer.Column<Widget>()
+            page_container()
             |+ PageButton(
                 "collections.create_folder",
                 (fun () -> CreateFolderPage(if select_on_create then on_select else ignore).Show())
             )
-                .Pos(150.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("collections.create_folder"))
             |+ PageButton(
                 "collections.create_playlist",
                 (fun () -> CreatePlaylistPage(if select_on_create then on_select else ignore).Show())
             )
-                .Pos(220.0f)
+                .Pos(2)
                 .Tooltip(Tooltip.Info("collections.create_playlist"))
             |+ ScrollContainer(grid, Position = Position.Margin(100.0f, 100.0f).TrimTop(280.0f))
         )

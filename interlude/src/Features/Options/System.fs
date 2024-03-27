@@ -233,7 +233,7 @@ module System =
                     )
                 )
             )
-                .Pos(340.0f)
+                .Pos(4)
                 .Tooltip(Tooltip.Info("system.monitor"))
 
         let windowed_resolution_select =
@@ -241,7 +241,7 @@ module System =
                 "system.windowresolution",
                 WindowedResolution(config.WindowResolution |> Setting.trigger mark_changed)
             )
-                .Pos(340.0f)
+                .Pos(4)
                 .Tooltip(Tooltip.Info("system.windowresolution"))
 
         let resolution_or_monitor = SwapContainer()
@@ -261,8 +261,7 @@ module System =
             window_mode_change (config.WindowMode.Value)
 
             this.Content(
-                column ()
-
+                page_container()
                 |+ PageSetting(
                     "system.audiovolume",
                     Slider.Percent(
@@ -271,14 +270,14 @@ module System =
                         |> Setting.f32
                     )
                 )
-                    .Pos(500.0f)
+                    .Pos(9)
                     .Tooltip(Tooltip.Info("system.audiovolume"))
 
                 |+ PageSetting(
                     "system.audiodevice",
                     Selector(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
                 )
-                    .Pos(570.0f, 1700.0f)
+                    .Pos(11, 2, 1700.0f)
                     .Tooltip(Tooltip.Info("system.audiodevice"))
 
                 |+ PageSetting(
@@ -289,22 +288,22 @@ module System =
                             Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
                     }
                 )
-                    .Pos(640.0f)
+                    .Pos(13)
                     .Tooltip(Tooltip.Info("system.audiooffset"))
 
                 |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
-                    .Pos(730.0f)
+                    .Pos(16)
                     .Tooltip(Tooltip.Info("system.visualoffset"))
 
                 |+ PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-                    .Pos(800.0f)
+                    .Pos(18)
                     .Tooltip(Tooltip.Info("system.hotkeys"))
 
                 |+ PageSetting(
                     "system.framelimit",
                     Selector.FromEnum(config.RenderMode |> Setting.trigger mark_changed)
                 )
-                    .Pos(200.0f)
+                    .Pos(0)
                     .Tooltip(Tooltip.Info("system.framelimit"))
 
                 |+ PageSetting(
@@ -315,7 +314,7 @@ module System =
                         |> Setting.trigger mark_changed
                     )
                 )
-                    .Pos(270.0f)
+                    .Pos(2)
                     .Tooltip(Tooltip.Info("system.windowmode"))
                 |+ resolution_or_monitor
                 |+ Conditional(
@@ -327,7 +326,7 @@ module System =
                             get_current_supported_video_modes
                         )
                     )
-                        .Pos(410.0f)
+                        .Pos(6)
                         .Tooltip(Tooltip.Info("system.videomode"))
                 )
             )

@@ -4,12 +4,10 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
-open Prelude.Common
 open Interlude.Web.Shared
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.UI.Components
 open Interlude.Features.Online
 
 type InvitePlayerPage() as this =
@@ -30,13 +28,13 @@ type InvitePlayerPage() as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageTextEntry(
                 "invite_to_lobby.username",
                 value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0)
             )
-                .Pos(200.0f)
-            |+ submit_button.Pos(300.0f)
+                .Pos(0)
+            |+ submit_button.Pos(3)
         )
 
     override this.Title = %"invite_to_lobby.name"

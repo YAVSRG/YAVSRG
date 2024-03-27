@@ -104,7 +104,7 @@ module PlayScreen =
                     |> Setting.bound -200.0f 200.0f,
                     Step = 1f,
                     Format = (fun v -> sprintf "%.0fms" v),
-                    Position = Position.Box(0.0f, 0.0f, 600.0f, 60.0f)
+                    Position = Position.SliceTop(60.0f).SliceLeft(600.0f)
                 )
 
             let close () =

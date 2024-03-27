@@ -32,7 +32,7 @@ type RegisterPage(discord_tag) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageTextEntry("register.username", username).Pos(250.0f)
             |+ Text(
                 "Creating an account linked to " + discord_tag,
@@ -84,9 +84,9 @@ type LoginPage() as this =
 
     do
         this.Content(
-            column ()
-            |+ PageButton("login.login_with_discord", login).Pos(200.0f)
-            |+ PageButton("login.register_with_discord", register).Pos(300.0f)
+            page_container()
+            |+ PageButton("login.login_with_discord", login).Pos(0)
+            |+ PageButton("login.register_with_discord", register).Pos(3)
             |+ Conditional(
                 (fun () -> waiting_for_browser),
                 Callout.frame info (fun (w, h) -> Position.Row(400.0f, h + 40.0f).Margin(100.0f, 0.0f))

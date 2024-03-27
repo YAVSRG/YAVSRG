@@ -11,7 +11,11 @@ type EditThemePage() as this =
 
     let name = Setting.simple data.Name
 
-    do this.Content(column () |+ PageTextEntry("themes.edittheme.themename", name).Pos(200.0f))
+    do 
+        page_container()
+        |+ PageTextEntry("themes.edittheme.themename", name)
+            .Pos(0)
+        |> this.Content
 
     override this.Title = data.Name
 

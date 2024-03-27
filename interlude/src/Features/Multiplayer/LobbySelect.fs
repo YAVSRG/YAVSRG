@@ -28,13 +28,13 @@ type CreateLobbyPage() as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageTextEntry(
                 "create_lobby.name",
                 value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0)
             )
-                .Pos(200.0f)
-            |+ submit_button.Pos(300.0f)
+                .Pos(0)
+            |+ submit_button.Pos(3)
         )
 
     override this.Title = %"create_lobby.name"

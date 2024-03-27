@@ -142,9 +142,9 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
     inherit Page()
 
     override this.Init(parent) =
-        column ()
+        page_container()
         |+ PageButton("collections.edit", (fun () -> EditPlaylistPage(name, playlist).Show()), Icon = Icons.EDIT_2)
-            .Pos(200.0f)
+            .Pos(0)
         |+ PageButton
             .Once(
                 "playlist.play",
@@ -154,7 +154,7 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
                 ),
                 Icon = Icons.PLAY
             )
-            .Pos(300.0f)
+            .Pos(3)
         |+ PageButton
             .Once(
                 "playlist.play_shuffled",
@@ -164,7 +164,7 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
                 ),
                 Icon = Icons.SHUFFLE
             )
-            .Pos(370.0f)
+            .Pos(5)
         |> this.Content
 
         base.Init parent
@@ -216,13 +216,13 @@ type ScoreContextMenu(score_info: ScoreInfo) as this =
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageButton(
                 "score.delete",
                 (fun () -> ScoreContextMenu.ConfirmDeleteScore(score_info, true)),
                 Icon = Icons.TRASH
             )
-                .Pos(200.0f)
+                .Pos(0)
             |+ PageButton(
                 "score.watch_replay",
                 (fun () ->
@@ -231,7 +231,7 @@ type ScoreContextMenu(score_info: ScoreInfo) as this =
                 ),
                 Icon = Icons.FILM
             )
-                .Pos(270.0f)
+                .Pos(2)
             |+ PageButton(
                 "score.challenge",
                 (fun () ->
@@ -241,7 +241,7 @@ type ScoreContextMenu(score_info: ScoreInfo) as this =
                 Icon = Icons.FLAG,
                 Enabled = Network.lobby.IsNone
             )
-                .Pos(340.0f)
+                .Pos(4)
                 .Tooltip(Tooltip.Info("score.challenge"))
         )
 

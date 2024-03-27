@@ -202,15 +202,15 @@ and Menu(top_level: Page) as this =
 type Page with
     member this.Show() = Menu.ShowPage this
 
+//todo: change into multiple choice page, takes list of choices and actions
+//then confirm is a static constructor
 type ConfirmPage(prompt: string, yes: unit -> unit) =
     inherit Page()
 
     override this.Init(parent) =
-        let pos = menu_pos 3.0f
-
-        column ()
-        |+ PageButton.Once("confirm.yes", fork Menu.Back yes).Pos(pos.Step())
-        |+ PageButton.Once("confirm.no", Menu.Back).Pos(pos.Step())
+        page_container()
+        |+ PageButton.Once("confirm.yes", fork Menu.Back yes).Pos(3)
+        |+ PageButton.Once("confirm.no", Menu.Back).Pos(5)
         |+ Text(prompt, Position = Position.Row(100.0f, PRETTYHEIGHT))
         |> this.Content
 

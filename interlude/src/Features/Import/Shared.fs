@@ -27,13 +27,13 @@ module Import =
         let is_arrows: Setting<bool> = Setting.simple false
 
         override this.Init(parent: Widget) =
-            column ()
+            page_container()
             |+ PageSetting("osuskinimport.keymode", Selector<Keymode>.FromEnum(keymode))
-                .Pos(200.0f)
+                .Pos(0)
             |+ Conditional(
                 (fun () -> keymode.Value = Keymode.``4K``),
                 PageSetting("osuskinimport.isarrows", Selector<_>.FromBool(is_arrows))
-                    .Pos(270.0f)
+                    .Pos(2)
             )
             |+ PageButton
                 .Once(
@@ -52,7 +52,7 @@ module Import =
                         Noteskins.load ()
                         Menu.Back()
                 )
-                .Pos(400.0f)
+                .Pos(5)
             |> this.Content
 
             base.Init parent
@@ -70,35 +70,34 @@ module Import =
                 .Body(%"unlinkedsongsimport.info.body")
 
         do
-            this.Content(
-                column ()
-                |+ PageButton
-                    .Once(
-                        "unlinkedsongsimport.link_intended",
-                        fun () ->
-                            Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
-                            Menu.Back()
-                    )
-                    .Pos(500.0f)
-                |+ PageButton
-                    .Once(
-                        "unlinkedsongsimport.confirm",
-                        fun () ->
-                            Imports.auto_convert.Request(
-                                (path, false, Content.Library),
-                                fun success ->
-                                    if success then
-                                        Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")
-                                        charts_updated_ev.Trigger()
-                                    else
-                                        Notifications.error (%"notification.import_failure", "")
-                            )
+            page_container()
+            |+ PageButton
+                .Once(
+                    "unlinkedsongsimport.link_intended",
+                    fun () ->
+                        Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
+                        Menu.Back()
+                )
+                .Pos(500.0f)
+            |+ PageButton
+                .Once(
+                    "unlinkedsongsimport.confirm",
+                    fun () ->
+                        Imports.auto_convert.Request(
+                            (path, false, Content.Library),
+                            fun success ->
+                                if success then
+                                    Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")
+                                    charts_updated_ev.Trigger()
+                                else
+                                    Notifications.error (%"notification.import_failure", "")
+                        )
 
-                            Menu.Back()
-                    )
-                    .Pos(600.0f)
-                |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h + 40.0f))
-            )
+                        Menu.Back()
+                )
+                .Pos(600.0f)
+            |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h + 40.0f))
+            |> this.Content
 
         override this.Title = %"unlinkedsongsimport.name"
         override this.OnClose() = ()

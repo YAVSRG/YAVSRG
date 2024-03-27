@@ -37,11 +37,10 @@ type EditNoteskinPage(from_hotkey: bool) as this =
 
     do
         refresh_texture_grid ()
-        let pos = menu_pos 2.0f
 
-        column ()
+        page_container()
         |+ PageTextEntry("noteskins.edit.noteskinname", name)
-            .Pos(pos.Step 1.5f, PRETTYWIDTH, PRETTYHEIGHT)
+            .Pos(0)
         |+ PageButton(
             "noteskins.edit.playfield",
             fun () ->
@@ -53,7 +52,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.edit.playfield"))
-            .Pos(pos.Step())
+            .Pos(3)
         |+ PageButton(
             "noteskins.edit.holdnotes",
             fun () ->
@@ -65,7 +64,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.edit.holdnotes"))
-            .Pos(pos.Step())
+            .Pos(5)
         |+ PageButton(
             "noteskins.edit.colors",
             fun () ->
@@ -77,7 +76,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.edit.colors"))
-            .Pos(pos.Step())
+            .Pos(7)
         |+ PageButton(
             "noteskins.edit.rotations",
             fun () ->
@@ -89,7 +88,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.edit.rotations"))
-            .Pos(pos.Step())
+            .Pos(9)
         |+ PageButton(
             "noteskins.animations",
             fun () ->
@@ -101,7 +100,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Show()
         )
             .Tooltip(Tooltip.Info("noteskins.animations"))
-            .Pos(pos.Step())
+            .Pos(11)
         |+ grid
         |+ preview
         |> this.Content

@@ -99,7 +99,7 @@ type ColorSettingsPage() as this =
         let k = if note_colors.UseGlobalColors then 0 else int keycount - 2
         Setting.make (fun v -> note_colors.Colors.[k].[i] <- v) (fun () -> note_colors.Colors.[k].[i])
 
-    let NOTE_WIDTH = 120.0f
+    let NOTE_SCALE = PRETTYHEIGHT * 1.5f
 
     let colors, refresh_colors =
         refreshable_row
@@ -114,15 +114,15 @@ type ColorSettingsPage() as this =
                     i,
                     Position =
                         { Position.Default with
-                            Left = 0.5f %+ (x + NOTE_WIDTH * n)
-                            Right = 0.5f %+ (x + NOTE_WIDTH * n + NOTE_WIDTH)
+                            Left = 0.5f %+ (x + NOTE_SCALE * n)
+                            Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
                         }
                 )
             )
 
     do
         this.Content(
-            column ()
+            page_container()
             |+ PageSetting(
                 "noteskins.edit.globalcolors",
                 Selector<_>
@@ -133,14 +133,14 @@ type ColorSettingsPage() as this =
                         |> Setting.trigger (ignore >> refresh_colors)
                     )
             )
-                .Pos(200.0f)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
             |+ PageSetting(
                 "generic.keymode",
                 Selector<Keymode>
                     .FromEnum(keymode |> Setting.trigger (ignore >> refresh_colors))
             )
-                .Pos(270.0f)
+                .Pos(2)
             |+ PageSetting(
                 "noteskins.edit.colorstyle",
                 Selector.FromEnum(
@@ -148,10 +148,10 @@ type ColorSettingsPage() as this =
                     |> Setting.trigger (ignore >> refresh_colors)
                 )
             )
-                .Pos(370.0f)
+                .Pos(5)
                 .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
             |+ PageSetting("noteskins.edit.notecolors", colors)
-                .Pos(470.0f, Viewport.vwidth - 200.0f, NOTE_WIDTH)
+                .Pos(8, 3, Viewport.vwidth - 200.0f)
         )
 
     override this.Title = %"noteskins.edit.colors.name"

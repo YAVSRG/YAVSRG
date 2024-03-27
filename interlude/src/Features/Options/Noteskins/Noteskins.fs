@@ -227,7 +227,10 @@ type NoteskinsPage() as this =
                     .Tooltip(Tooltip.Info("noteskins.open_folder")))
             |+ ScrollContainer(grid, Position = Position.TrimTop(PRETTYHEIGHT * 1.5f))
 
-        row () |+ left_side |+ right_side |> this.Content
+        NavigationContainer.Row<_>() 
+        |+ left_side 
+        |+ right_side 
+        |> this.Content
 
     override this.Title = %"noteskins.name"
 
