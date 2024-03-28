@@ -57,7 +57,11 @@ type EditHUDPage() as this =
                 Align = Alignment.LEFT,
                 Position = Position.SliceLeft(PRETTYTEXTWIDTH).Margin(Style.PADDING)
             )
-            |+ Tooltip(Tooltip.Info(HUDElement.tooltip e))
+            |+ Tooltip(
+                Callout.Normal
+                    .Title(HUDElement.name e)
+                    .Body(HUDElement.tooltip e)
+            )
 
         { new Container(NodeType.Container(K(Some body))) with
             override this.Draw() =

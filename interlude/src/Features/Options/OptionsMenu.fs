@@ -3,9 +3,12 @@
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.LevelSelect
+open Interlude.Features.OptionsMenu.Noteskins
+open Interlude.Features.Gameplay
 
 module OptionsMenuRoot =
 
@@ -84,10 +87,23 @@ module OptionsMenuRoot =
             )
             |+ TileButton(
                 Callout.Normal.Icon(Icons.IMAGE).Title(%"noteskins.name"),
-                fun () -> Noteskins.NoteskinsPage().Show()
+                fun () -> NoteskinsPage().Show()
             )
                 .Tooltip(Tooltip.Info("noteskins"))
-            |+ TileButton(Callout.Normal.Icon(Icons.ZAP).Title(%"hud.name"), (fun () -> Noteskins.EditHUDPage().Show()))
+            |+ TileButton(Callout.Normal.Icon(Icons.ZAP).Title(%"hud.name"), 
+                (fun () -> 
+                    if Content.Noteskin.IsEmbedded then
+                        EditHUDPage().Show()
+                    elif
+                        Chart.WITH_COLORS.IsSome
+                        && Screen.change_new
+                            (fun () -> HUDEditor.edit_hud_screen (Chart.CHART.Value, Chart.WITH_COLORS.Value, fun () -> OptionsPage().Show()))
+                            Screen.Type.Practice
+                            Transitions.Flags.Default
+                    then
+                        Menu.Exit()
+                )
+            )
                 .Tooltip(Tooltip.Info("hud"))
             |+ TileButton(
                 Callout.Normal.Icon(Icons.AIRPLAY).Title(%"system.name"),

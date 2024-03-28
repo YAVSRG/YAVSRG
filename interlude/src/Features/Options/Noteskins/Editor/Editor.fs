@@ -9,6 +9,9 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Gameplay
 
+module Helpers =
+    let mutable open_hud_editor: unit -> unit = ignore
+
 type EditNoteskinPage(from_hotkey: bool) as this =
     inherit Page()
 
@@ -101,21 +104,25 @@ type EditNoteskinPage(from_hotkey: bool) as this =
         )
             .Tooltip(Tooltip.Info("noteskins.animations"))
             .Pos(11)
-        |+ grid
-        |+ preview
-        |> this.Content
-
-        this.Add(
-            Conditional(
-                (fun () -> not from_hotkey),
-                Callout.frame
-                    (Callout.Small
-                        .Icon(Icons.INFO)
-                        .Title(%"noteskins.edit.hotkey_hint")
-                        .Hotkey("edit_noteskin"))
-                    (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
-            )
+        |+ PageButton(
+            "hud",
+            Helpers.open_hud_editor
         )
+            .Tooltip(Tooltip.Info("hud"))
+            .Pos(13)
+        |+ grid
+        |>> Container
+        |+ preview
+        |+ Conditional(
+            (fun () -> not from_hotkey),
+            Callout.frame
+                (Callout.Small
+                    .Icon(Icons.INFO)
+                    .Title(%"noteskins.edit.hotkey_hint")
+                    .Hotkey("edit_noteskin"))
+                (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
+        )
+        |> this.Content
 
     override this.Title = data.Name
     override this.OnDestroy() = preview.Destroy()

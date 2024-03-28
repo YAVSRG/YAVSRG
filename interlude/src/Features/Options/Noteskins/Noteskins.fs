@@ -173,7 +173,7 @@ type NoteskinsPage() as this =
         refresh ()
 
         let left_side =
-            NavigationContainer.Column<Widget>(Position = { Position.Default with Right = 0.35f %+ 0.0f }.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+            NavigationContainer.Column<Widget>(Position = { Position.Default with Right = 0.35f %+ PRETTY_MARGIN_X }.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |+ PageButton("noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
                 .Tooltip(Tooltip.Info("noteskins.edit"))
                 .Pos(PAGE_BOTTOM - 4, 2, PageWidth.Full)

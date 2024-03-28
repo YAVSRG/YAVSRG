@@ -6,7 +6,6 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Content.Noteskins
 open Interlude.Content
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 

@@ -7,7 +7,6 @@ open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Content.Noteskins
 open Interlude.Content
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Options

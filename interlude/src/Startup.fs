@@ -200,7 +200,6 @@ module Startup =
 
         ScoreScreenHelpers.watch_replay <-
             fun (score_info: ScoreInfo, with_colors: ColoredChart) ->
-
                 if
                     Screen.change_new
                         (fun () ->
@@ -211,6 +210,9 @@ module Startup =
                         Transitions.Flags.Default
                 then
                     Gameplay.rate.Value <- score_info.Rate
+
+        OptionsMenu.Noteskins.Helpers.open_hud_editor <-
+            fun () -> OptionsMenu.Noteskins.EditHUDPage().Show()
 
         AutoUpdate.check_for_updates ()
         Mounts.import_mounts_on_startup ()
