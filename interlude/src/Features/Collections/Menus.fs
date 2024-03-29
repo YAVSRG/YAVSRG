@@ -274,7 +274,7 @@ type SelectCollectionPage
             )
                 .Pos(2)
                 .Tooltip(Tooltip.Info("collections.create_playlist"))
-            |+ ScrollContainer(grid, Position = Position.Margin(100.0f, 100.0f).TrimTop(280.0f))
+            |+ ScrollContainer(grid, Position = pretty_pos(5, PAGE_BOTTOM - 5, PageWidth.Full))
         )
 
     override this.Title = %"collections.name"
