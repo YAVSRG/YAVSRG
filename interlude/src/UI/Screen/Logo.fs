@@ -9,13 +9,6 @@ open Interlude.Content
 
 module Logo =
 
-    type private State =
-        | Centre
-        | Menu
-        | Hidden
-
-    let mutable private state = Centre
-
     let GRADIENT = 1.61803f
     let PADDING = 10f
     let Y_PADDING_FOR_GRADIENT = PADDING * MathF.Sqrt(GRADIENT * GRADIENT + 1.0f)
@@ -32,13 +25,17 @@ module Logo =
 
     let LOWER_X_THICKNESS = LOWER_Y_THICKNESS / GRADIENT
 
+    let CENTER : Position = { Left = 0.5f %- 400.0f; Top = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Bottom = 0.5f %+ 400.0f }
+    let HIDDEN : Position = { Left = 0.0f %- 610.0f; Top = 0.5f %- 300.0f; Right = 0.0f %- 100.0f; Bottom = 0.5f %+ 300.0f }
+    let MENU : Position = { Left = 0.0f %- 0.0f; Top = 0.5f %- 400.0f; Right = 0.0f %+ 800.0f; Bottom = 0.5f %+ 400.0f }
+
     type Display() =
         inherit DynamicContainer(NodeType.None)
 
         let counter = Animation.Counter(10000000.0)
 
         override this.Draw() =
-            if state = Hidden then
+            if this.Bounds.Right < 0.0f then
                 ()
             else
                 base.Draw()
@@ -182,24 +179,8 @@ module Logo =
                     Stencil.finish ()
                     Draw.sprite breathe_bounds Colors.white (Content.Texture "logo")
 
-        member this.Move(l, t, r, b) =
-            this.Position <-
-                {
-                    Left = 0.5f %+ l
-                    Top = 0.5f %+ t
-                    Right = 0.5f %+ r
-                    Bottom = 0.5f %+ b
-                }
-
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
-
-            if moved then
-                match state with
-                | Centre -> this.Move(-400.0f, -400.0f, 400.0f, 400.0f)
-                | Hidden -> this.Move(-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
-                | Menu -> this.Move(-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)
-
             counter.Update elapsed_ms
 
     let display =
@@ -214,14 +195,11 @@ module Logo =
         )
 
     let move_center () =
-        state <- Centre
-        display.Move(-400.0f, -400.0f, 400.0f, 400.0f)
+        display.Position <- CENTER
 
     let move_offscreen () =
-        state <- Hidden
-        display.Move(-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
+        display.Position <- HIDDEN
         display.SnapPosition()
 
     let move_menu () =
-        state <- Menu
-        display.Move(-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)
+        display.Position <- MENU

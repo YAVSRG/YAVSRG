@@ -16,7 +16,7 @@ open Interlude.Features.Online
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 
-type private MenuButton(on_click, label: string, pos) =
+type private MenuButton(on_click, label: string, pos: Position) =
     inherit
         DynamicContainer(
             NodeType.Button(fun () ->
@@ -26,7 +26,8 @@ type private MenuButton(on_click, label: string, pos) =
         )
 
     override this.Init(parent) =
-        this |+ Clickable.Focus this
+        this 
+        |+ Clickable.Focus this
         |* Text(
             label,
             Align = Alignment.CENTER,
@@ -57,7 +58,7 @@ type private MenuButton(on_click, label: string, pos) =
     member this.Hide() =
         this.Position <-
             { pos with
-                Right = 0.0f %- Viewport.vwidth
+                Right = 0.0f %- 100.0f
             }
 
         this.SnapPosition()
@@ -65,7 +66,7 @@ type private MenuButton(on_click, label: string, pos) =
     member this.Show() =
         this.Position <-
             { pos with
-                Right = 0.0f %- Viewport.vwidth
+                Right = 0.0f %- 100.0f
             }
 
         this.SnapPosition()
