@@ -145,7 +145,7 @@ type SystemPage() as this =
                 )
             )
         )
-            .Pos(4)
+            .Pos(5)
             .Tooltip(Tooltip.Info("system.monitor"))
 
     let windowed_resolution_select =
@@ -153,7 +153,7 @@ type SystemPage() as this =
             "system.windowresolution",
             WindowedResolution(config.WindowResolution |> Setting.trigger mark_changed)
         )
-            .Pos(4)
+            .Pos(5)
             .Tooltip(Tooltip.Info("system.windowresolution"))
 
     let resolution_or_monitor = SwapContainer()
@@ -182,14 +182,14 @@ type SystemPage() as this =
                     |> Setting.f32
                 )
             )
-                .Pos(9)
+                .Pos(10)
                 .Tooltip(Tooltip.Info("system.audiovolume"))
 
             |+ PageSetting(
                 "system.audiodevice",
                 Selector(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
             )
-                .Pos(11, 2, PageWidth.Full)
+                .Pos(12, 2, PageWidth.Full)
                 .Tooltip(Tooltip.Info("system.audiodevice"))
 
             |+ PageSetting(
@@ -200,15 +200,15 @@ type SystemPage() as this =
                         Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
                 }
             )
-                .Pos(13)
+                .Pos(14)
                 .Tooltip(Tooltip.Info("system.audiooffset"))
 
             |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
-                .Pos(16)
+                .Pos(17)
                 .Tooltip(Tooltip.Info("system.visualoffset"))
 
             |+ PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-                .Pos(18)
+                .Pos(19)
                 .Tooltip(Tooltip.Info("system.hotkeys"))
 
             |+ PageSetting(
@@ -217,7 +217,14 @@ type SystemPage() as this =
             )
                 .Pos(0)
                 .Tooltip(Tooltip.Info("system.framelimit"))
-
+            |+ Conditional(
+                (fun () -> config.RenderMode.Value = FrameLimit.Unlimited),
+                Text(%"system.framelimit.unlimited_warning", 
+                    Color = K Colors.text_red,
+                    Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
+                    Align = Alignment.LEFT
+                )
+            )
             |+ PageSetting(
                 "system.windowmode",
                 Selector.FromEnum(
@@ -226,7 +233,7 @@ type SystemPage() as this =
                     |> Setting.trigger mark_changed
                 )
             )
-                .Pos(2)
+                .Pos(3)
                 .Tooltip(Tooltip.Info("system.windowmode"))
             |+ resolution_or_monitor
             |+ Conditional(
@@ -238,7 +245,7 @@ type SystemPage() as this =
                         get_current_supported_video_modes
                     )
                 )
-                    .Pos(6)
+                    .Pos(7)
                     .Tooltip(Tooltip.Info("system.videomode"))
             )
         )
