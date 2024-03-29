@@ -211,8 +211,8 @@ module Startup =
                 then
                     Gameplay.rate.Value <- score_info.Rate
 
-        OptionsMenu.Noteskins.Helpers.open_hud_editor <-
-            fun () -> OptionsMenu.Noteskins.EditHUDPage().Show()
+        OptionsMenu.Noteskins.Shared.choose_noteskins <-
+            fun () -> OptionsMenu.Noteskins.NoteskinsPage().Show()
 
         AutoUpdate.check_for_updates ()
         Mounts.import_mounts_on_startup ()

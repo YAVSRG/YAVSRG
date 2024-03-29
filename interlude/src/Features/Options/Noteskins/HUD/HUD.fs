@@ -77,7 +77,7 @@ type EditHUDPage() as this =
             .Small
             .Title(%"hud.noteskin_required.title")
             .Body(%"hud.noteskin_required.general")
-            .Button(%"hud.noteskin_required.button", fun () -> Menu.Back(); NoteskinsPage().Show())
+            .Button(%"hud.noteskin_required.button", fun () -> Menu.Back(); Shared.choose_noteskins())
 
     do
         NavigationContainer.Column<Widget>(Position = Position.Margin(100.0f, 200.0f))

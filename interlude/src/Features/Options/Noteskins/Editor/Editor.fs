@@ -9,9 +9,6 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Gameplay
 
-module Helpers =
-    let mutable open_hud_editor: unit -> unit = ignore
-
 type EditNoteskinPage(from_hotkey: bool) as this =
     inherit Page()
 
@@ -106,7 +103,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
             .Pos(11)
         |+ PageButton(
             "hud",
-            Helpers.open_hud_editor
+            fun () -> EditHUDPage().Show()
         )
             .Tooltip(Tooltip.Info("hud"))
             .Pos(13)
