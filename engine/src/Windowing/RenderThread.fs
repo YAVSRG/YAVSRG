@@ -24,14 +24,21 @@ module private FrameTimeStrategies =
 
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
+    type _LUID =
+        {
+            mutable LowPart: uint32
+            mutable HighPart: int32
+        }
+
+    [<Struct>]
+    [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
     type D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME =
         {
             [<MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)>]
             pDeviceName: string
             mutable hAdapter: uint
-            mutable AdapterLuidLowPart: uint
-            mutable AdapterLuidHighPart: int64
-            mutable VinPnSourceId: uint
+            mutable AdapterLuid: _LUID
+            mutable VinPnSourceId: uint32
         }
 
     [<DllImport("gdi32.dll", SetLastError = true)>]
@@ -49,8 +56,7 @@ module private FrameTimeStrategies =
         {
             hDc: IntPtr
             mutable hAdapter: uint
-            mutable AdapterLuidLowPart: uint
-            mutable AdapterLuidHighPart: int64
+            mutable AdapterLuid: _LUID
             mutable VinPnSourceId: uint
         }
 
@@ -68,10 +74,10 @@ module private FrameTimeStrategies =
     [<StructLayout(LayoutKind.Sequential)>]
     type D3DKMT_GETSCANLINE =
         {
-            hAdapter: uint
-            VinPnSourceId: uint
-            mutable InVerticalBlank: bool
-            mutable ScanLine: uint
+            hAdapter: uint32
+            VinPnSourceId: uint32
+            mutable InVerticalBlank: uint32 // actually only 1 byte but alignment
+            mutable ScanLine: uint32
         }
 
     [<DllImport("gdi32.dll")>]
@@ -235,6 +241,12 @@ type Strategy =
     | CpuTimingScanlineCorrection
     | CpuTiming
 
+[<AutoOpen>]
+module ScanlineCorrectionConstants =
+    
+    let DESIRED_SCANLINE_POSITION = -0.45
+    let SCANLINE_CORRECTION_STRENGTH = 0.1
+
 type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_init: unit -> unit) =
 
     let mutable resized = false
@@ -251,9 +263,6 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
     let mutable est_refresh_period = 1000.0 / 60.0
     let mutable is_focused = true
     let mutable strategy = Unlimited
-
-    let DESIRED_SCANLINE_POSITION = -0.05
-    let SCANLINE_CORRECTION_STRENGTH = 0.1
 
     let now () =
         total_frame_timer.Elapsed.TotalMilliseconds
@@ -325,8 +334,8 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
                 match FrameTimeStrategies.get_scanline () with
                 | Some(i, _) ->
                     let line_pc = float i / monitor_y
-                    let line_pc = if line_pc > 0.5 then line_pc - 1.0 else line_pc
                     let desired_pc = DESIRED_SCANLINE_POSITION
+                    let line_pc = if line_pc - desired_pc > 0.5 then line_pc - 1.0 else line_pc
                     (line_pc - desired_pc) * est_refresh_period * SCANLINE_CORRECTION_STRENGTH
                 | None ->
                     Logging.Warn("Switching to CPU timing without scanline correction")
