@@ -69,18 +69,20 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
             color_func
         )
 
-type InlaidButton(label, action, icon) =
+type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: string) =
     inherit
         Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                action ()
+                on_click ()
             )
         )
 
-    member val Hotkey = "none" with get, set
-    member val HoverText = label with get, set
-    member val HoverIcon = icon with get, set
+    new (label: string, on_click: unit -> unit, icon: string) = InlaidButton(K label, on_click, icon)
+
+    member val Hotkey : Hotkey = "none" with get, set
+    member val HoverText : string = label_func() with get, set
+    member val HoverIcon : string = icon with get, set
     member val UnfocusedColor = Colors.text_greyout with get, set
 
     override this.Init(parent) =
@@ -89,7 +91,7 @@ type InlaidButton(label, action, icon) =
             this.Hotkey,
             fun () ->
                 Style.click.Play()
-                action ()
+                on_click ()
         )
 
         base.Init parent
@@ -105,7 +107,7 @@ type InlaidButton(label, action, icon) =
             if this.Focused then
                 sprintf "%s %s" this.HoverIcon this.HoverText
             else
-                sprintf "%s %s" icon label
+                sprintf "%s %s" icon (label_func())
 
         Draw.rect area (Colors.shadow_1.O2)
 
