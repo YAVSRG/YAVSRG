@@ -107,7 +107,10 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
             )
 
         page_container()
-        |+ PageSetting("gameplay.rate", Slider(rate))
+        |+ PageSetting("gameplay.rate",
+            Slider(rate |> Setting.map id (fun v -> round (v / 0.05f) * 0.05f), 
+            Format = sprintf "%.02fx")
+        )
             .Pos(0)
             .Tooltip(Tooltip.Info("gameplay.rate"))
         |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i", 
