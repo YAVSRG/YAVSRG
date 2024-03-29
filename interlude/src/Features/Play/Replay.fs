@@ -468,16 +468,6 @@ module ReplayScreen =
 
                 if (%%"skip").Tapped() && Song.time () > 0.0f<ms> then
                     if Song.playing () then Song.pause () else Song.resume ()
-                elif (%%"uprate_small").Tapped() then
-                    playback_speed.Value <- playback_speed.Value + 0.01f
-                elif (%%"uprate_half").Tapped() then
-                    playback_speed.Value <- playback_speed.Value + 0.05f
-                elif (%%"uprate").Tapped() then
-                    playback_speed.Value <- playback_speed.Value + 0.1f
-                elif (%%"downrate_small").Tapped() then
-                    playback_speed.Value <- playback_speed.Value - 0.01f
-                elif (%%"downrate_half").Tapped() then
-                    playback_speed.Value <- playback_speed.Value - 0.05f
-                elif (%%"downrate").Tapped() then
-                    playback_speed.Value <- playback_speed.Value - 0.1f
+                else
+                    Gameplay.change_rate_hotkeys (fun change_by -> playback_speed.Value <- playback_speed.Value + change_by)
         }

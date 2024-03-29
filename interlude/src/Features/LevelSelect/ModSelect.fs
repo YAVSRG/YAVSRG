@@ -67,67 +67,84 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
 
         base.Draw()
 
-type private ModSelectPage(on_close) as this =
+type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit) as this =
     inherit Page()
 
-    let grid =
-        GridFlowContainer<Widget>(
-            100.0f,
-            3,
-            Spacing = (30f, 30f),
-            Position = Position.Margin(100.0f, 200.0f),
-            WrapNavigation = false
-        )
-
     do
-        grid
-        |* ModSelector(
-            "auto",
-            [| Icons.CHECK |],
-            (fun _ -> if autoplay then 0 else -1),
-            (fun _ -> autoplay <- not autoplay)
-        )
-
-        for id in available_mods.Keys do
-            grid
-            |* ModSelector(
-                id,
+        let mod_grid =
+            GridFlowContainer<Widget>(
+                100.0f,
+                3,
+                Spacing = (30f, 30f),
+                Position = pretty_pos (5, 9, PageWidth.Full),
+                WrapNavigation = false
+            )
+            |+ ModSelector(
+                "auto",
                 [| Icons.CHECK |],
-                (fun _ ->
-                    if selected_mods.Value.ContainsKey id then
-                        selected_mods.Value.[id]
-                    else
-                        -1
-                ),
-                (fun _ -> Setting.app (ModState.cycle id) selected_mods)
+                (fun _ -> if autoplay then 0 else -1),
+                (fun _ -> autoplay <- not autoplay)
+            )
+            |+ seq {
+                for id in available_mods.Keys do
+                    yield ModSelector(
+                        id,
+                        [| Icons.CHECK |],
+                        (fun _ ->
+                            if selected_mods.Value.ContainsKey id then
+                                selected_mods.Value.[id]
+                            else
+                                -1
+                        ),
+                        (fun _ -> Setting.app (ModState.cycle id) selected_mods)
+                    )
+            }
+            |+ ModSelector(
+                "pacemaker",
+                [| Icons.CHECK |],
+                (fun _ -> if options.EnablePacemaker.Value then 0 else -1),
+                (fun _ -> Setting.app not options.EnablePacemaker)
             )
 
-        grid
-        |* ModSelector(
-            "pacemaker",
-            [| Icons.CHECK |],
-            (fun _ -> if options.EnablePacemaker.Value then 0 else -1),
-            (fun _ -> Setting.app not options.EnablePacemaker)
-        )
+        page_container()
+        |+ PageSetting("gameplay.rate", Slider(rate))
+            .Pos(0)
+            .Tooltip(Tooltip.Info("gameplay.rate"))
+        |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i", 
+            Color = K Colors.text_subheading,
+            Align = Alignment.LEFT,
+            Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH))
+        |+ Text(%"gameplay.rate.hotkey_hint_ii", 
+            Color = K Colors.text_subheading,
+            Align = Alignment.LEFT,
+            Position = pretty_pos(3, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH))
 
-    do
-        NavigationContainer.Column<Widget>()
-        |+ grid
+        |+ mod_grid
+
         |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
-            .Pos(10)
+            .Pos(14)
             .Tooltip(Tooltip.Info("gameplay.pacemaker"))
         |+ PageSetting("gameplay.endless_mode", Selector<_>.FromBool(endless_mode))
-            .Pos(12)
+            .Pos(16)
             .Tooltip(Tooltip.Info("gameplay.endless_mode"))
+
         |> this.Content
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if (%%"autoplay").Tapped() then
+            autoplay <- not autoplay
+        else
+            change_rate_hotkeys change_rate
 
     override this.Title = %"mods.name"
     override this.OnClose() = on_close ()
 
-type ModSelect(on_close) =
+type ModSelect(change_rate: float32 -> unit, on_menu_close: unit -> unit) =
     inherit
         StylishButton(
-            (fun () -> ModSelectPage(on_close).Show()),
+            (fun () -> ModSelectPage(change_rate, on_menu_close).Show()),
             K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods.name")),
             (fun () -> Palette.color (100, 0.5f, 0.0f)),
             Hotkey = "mods"
@@ -138,3 +155,5 @@ type ModSelect(on_close) =
 
         if (%%"autoplay").Tapped() then
             autoplay <- not autoplay
+        else
+            change_rate_hotkeys change_rate

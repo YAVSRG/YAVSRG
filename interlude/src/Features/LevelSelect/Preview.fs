@@ -9,6 +9,7 @@ open Prelude.Charts.Processing.Patterns
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
+open Interlude.Features
 open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Play
 
@@ -114,20 +115,10 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
         elif (%%"select").Tapped() then
             this.Close()
             LevelSelect.choose_this_chart ()
-        elif (%%"uprate_small").Tapped() then
-            change_rate (0.01f)
-        elif (%%"uprate_half").Tapped() then
-            change_rate (0.05f)
-        elif (%%"uprate").Tapped() then
-            change_rate (0.1f)
-        elif (%%"downrate_small").Tapped() then
-            change_rate (-0.01f)
-        elif (%%"downrate_half").Tapped() then
-            change_rate (-0.05f)
-        elif (%%"downrate").Tapped() then
-            change_rate (-0.1f)
         elif (%%"screenshot").Tapped() then
             Toolbar.take_screenshot ()
+        else
+            Gameplay.change_rate_hotkeys change_rate
 
     override this.Close() =
         if dragging then

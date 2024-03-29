@@ -212,18 +212,8 @@ module PracticeScreen =
                 elif state.Paused.Value then
                     if (%%"skip").Tapped() then
                         resume this
-                    elif (%%"uprate_small").Tapped() then
-                        Gameplay.rate.Value <- Gameplay.rate.Value + 0.01f
-                    elif (%%"uprate_half").Tapped() then
-                        Gameplay.rate.Value <- Gameplay.rate.Value + 0.05f
-                    elif (%%"uprate").Tapped() then
-                        Gameplay.rate.Value <- Gameplay.rate.Value + 0.1f
-                    elif (%%"downrate_small").Tapped() then
-                        Gameplay.rate.Value <- Gameplay.rate.Value - 0.01f
-                    elif (%%"downrate_half").Tapped() then
-                        Gameplay.rate.Value <- Gameplay.rate.Value - 0.05f
-                    elif (%%"downrate").Tapped() then
-                        Gameplay.rate.Value <- Gameplay.rate.Value - 0.1f
+                    else
+                        Gameplay.change_rate_hotkeys (fun change_by -> Gameplay.rate.Value <- Gameplay.rate.Value + change_by)
 
                 elif not (liveplay :> IReplayProvider).Finished then
                     Input.pop_gameplay (

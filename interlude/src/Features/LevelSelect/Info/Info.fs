@@ -26,14 +26,14 @@ type ChartInfo() as this =
     let mutable rating = 0.0
     let mutable notecounts = ""
 
-    let change_rate v =
-        if Transitions.active then
-            ()
-        else
-            rate.Value <- rate.Value + v
-            LevelSelect.refresh_details ()
-
     do
+        let change_rate change_rate_by =
+            if Transitions.active then
+                ()
+            else
+                rate.Value <- rate.Value + change_rate_by
+                LevelSelect.refresh_details ()
+
         this
         |+ Conditional((fun () -> display.Value = Display.Local), scoreboard)
         |+ Conditional((fun () -> display.Value = Display.Online), online)
@@ -125,6 +125,7 @@ type ChartInfo() as this =
             .Tooltip(Tooltip.Info("levelselect.preview", "preview"))
 
         |+ ModSelect(
+            change_rate,
             scoreboard.Refresh,
             Position =
                 {
@@ -167,19 +168,3 @@ type ChartInfo() as this =
         notecounts <- info.NotecountsString
 
     member this.Refresh() = Chart.when_loaded this.OnChartUpdated
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        if (%%"uprate_small").Tapped() then
-            change_rate (0.01f)
-        elif (%%"uprate_half").Tapped() then
-            change_rate (0.05f)
-        elif (%%"uprate").Tapped() then
-            change_rate (0.1f)
-        elif (%%"downrate_small").Tapped() then
-            change_rate (-0.01f)
-        elif (%%"downrate_half").Tapped() then
-            change_rate (-0.05f)
-        elif (%%"downrate").Tapped() then
-            change_rate (-0.1f)

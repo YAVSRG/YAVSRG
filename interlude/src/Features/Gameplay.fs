@@ -5,6 +5,7 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
@@ -13,14 +14,12 @@ open Prelude.Charts.Processing.Patterns
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay
-open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
 open Prelude.Data
 open Interlude.Content
 open Interlude.Options
-open Interlude.Utils
 open Interlude.UI
 open Interlude.Features.Online
 open Interlude.Web.Shared
@@ -458,6 +457,20 @@ module Gameplay =
                 ImprovementFlags.None
         else
             ImprovementFlags.None
+
+    let change_rate_hotkeys(change_rate_by: float32 -> unit) =
+        if (%%"uprate_small").Tapped() then
+            change_rate_by (0.01f)
+        elif (%%"uprate_half").Tapped() then
+            change_rate_by (0.05f)
+        elif (%%"uprate").Tapped() then
+            change_rate_by (0.1f)
+        elif (%%"downrate_small").Tapped() then
+            change_rate_by (-0.01f)
+        elif (%%"downrate_half").Tapped() then
+            change_rate_by (-0.05f)
+        elif (%%"downrate").Tapped() then
+            change_rate_by (-0.1f)
 
     module Endless =
 
