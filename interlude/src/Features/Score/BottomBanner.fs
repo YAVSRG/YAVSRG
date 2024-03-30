@@ -77,8 +77,7 @@ type RulesetSwitcher(setting: Setting<string>) =
 
             d.Position <-
                 Position
-                    .SliceBottom(d.Height + 60.0f)
-                    .TrimBottom(60.0f)
+                    .BorderTop(min d.Height 500.0f)
                     .Margin(Style.PADDING, 0.0f)
                     .Translate(0.0f, -10.0f)
 
