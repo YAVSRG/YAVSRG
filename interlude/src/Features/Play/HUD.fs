@@ -228,7 +228,7 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
                 let scale = min (this.Bounds.Width / float32 texture.Width) (this.Bounds.Height / float32 texture.Height)
                 let w, h = float32 texture.Width * scale, float32 texture.Height * scale
                 Draw.quad 
-                    (Rect.Box(this.Bounds.CenterX - 0.5f * w, this.Bounds.CenterY - 0.5f * h, w, h).AsQuad)
+                    ((Sprite.fill this.Bounds texture).AsQuad)
                     (Quad.color Color.White)
                     (Sprite.pick_texture (early_late, y) texture)
 

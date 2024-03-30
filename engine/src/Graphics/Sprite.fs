@@ -382,3 +382,8 @@ module Sprite =
         let left = x_origin - x_offset * width
         let top = y_origin - y_offset * height
         Rect.Box(left, top, width, height)
+
+    let fill (bounds: Rect) (sprite: Sprite) : Rect =
+        let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
+        let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
+        Rect.Box(bounds.CenterX - 0.5f * w, bounds.CenterY - 0.5f * h, w, h)

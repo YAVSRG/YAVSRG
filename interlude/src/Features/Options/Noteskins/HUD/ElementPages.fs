@@ -10,118 +10,6 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Options
-open Interlude.Features
-open Interlude.Features.OptionsMenu.Gameplay
-
-[<AbstractClass>]
-type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
-    inherit NoteskinPreview(scale, true)
-
-    let keycount = int (Gameplay.Chart.keymode ())
-
-    override this.Draw() =
-        base.Draw()
-
-        let container =
-            if config.Value.RelativeToPlayfield then
-                let cfg = Content.NoteskinConfig
-
-                let width =
-                    (cfg.ColumnWidth * float32 keycount
-                     + Array.sum (cfg.KeymodeColumnSpacing keycount))
-                    * scale
-
-                let (screen_align, playfield_align) = cfg.PlayfieldAlignment
-
-                Rect
-                    .Box(
-                        this.PreviewBounds.Left + this.PreviewBounds.Width * screen_align,
-                        this.PreviewBounds.Top,
-                        width,
-                        this.PreviewBounds.Height
-                    )
-                    .Translate(-width * playfield_align, 0.0f)
-            else
-                this.PreviewBounds
-
-        let width = container.Width
-        let height = container.Height
-
-        let leftA = snd config.Value.Left * width + container.Left
-        let rightA = snd config.Value.Right * width + container.Left
-        let topA = snd config.Value.Top * height + container.Top
-        let bottomA = snd config.Value.Bottom * height + container.Top
-
-        let bounds =
-            Rect.Create(
-                leftA + fst config.Value.Left * scale,
-                topA + fst config.Value.Top * scale,
-                rightA + fst config.Value.Right * scale,
-                bottomA + fst config.Value.Bottom * scale
-            )
-
-        // Draw container
-        Draw.rect
-            (Rect
-                .Create(container.Left, container.Top, container.Left, container.Bottom)
-                .Expand(2.0f, 0.0f))
-            Color.Red
-
-        Draw.rect
-            (Rect
-                .Create(container.Right, container.Top, container.Right, container.Bottom)
-                .Expand(2.0f, 0.0f))
-            Color.Red
-
-        Draw.rect
-            (Rect
-                .Create(container.Left, container.Top, container.Right, container.Top)
-                .Expand(0.0f, 2.0f))
-            Color.Red
-
-        Draw.rect
-            (Rect
-                .Create(container.Left, container.Bottom, container.Right, container.Bottom)
-                .Expand(0.0f, 2.0f))
-            Color.Red
-        // Draw alignments
-        Draw.rect (Rect.Create(leftA, container.Top, leftA, container.Bottom).Expand(2.0f, 0.0f)) Color.Orange
-        Draw.rect (Rect.Create(rightA, container.Top, rightA, container.Bottom).Expand(2.0f, 0.0f)) Color.Orange
-        Draw.rect (Rect.Create(container.Left, topA, container.Right, topA).Expand(0.0f, 2.0f)) Color.Orange
-
-        Draw.rect
-            (Rect
-                .Create(container.Left, bottomA, container.Right, bottomA)
-                .Expand(0.0f, 2.0f))
-            Color.Orange
-        // Draw bounds
-        Draw.rect
-            (Rect
-                .Create(bounds.Left, bounds.Top, bounds.Left, bounds.Bottom)
-                .Expand(2.0f, 0.0f))
-            Color.Lime
-
-        Draw.rect
-            (Rect
-                .Create(bounds.Right, bounds.Top, bounds.Right, bounds.Bottom)
-                .Expand(2.0f, 0.0f))
-            Color.Lime
-
-        Draw.rect
-            (Rect
-                .Create(bounds.Left, bounds.Top, bounds.Right, bounds.Top)
-                .Expand(0.0f, 2.0f))
-            Color.Lime
-
-        Draw.rect
-            (Rect
-                .Create(bounds.Left, bounds.Bottom, bounds.Right, bounds.Bottom)
-                .Expand(0.0f, 2.0f))
-            Color.Lime
-
-        this.DrawComponent(bounds)
-
-    abstract member DrawComponent: Rect -> unit
 
 type AccuracyPage(on_close: unit -> unit) as this =
     inherit Page()
@@ -152,6 +40,7 @@ type AccuracyPage(on_close: unit -> unit) as this =
             |+ PageSetting("hud.accuracy.showname", Selector<_>.FromBool show_name)
                 .Pos(2)
                 .Tooltip(Tooltip.Info("hud.accuracy.showname"))
+            |>> Container
             |+ preview
         )
 
@@ -230,6 +119,7 @@ type TimingDisplayPage(on_close: unit -> unit) as this =
             |+ PageSetting("hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
                 .Pos(10)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.animationtime"))
+            |>> Container
             |+ preview
         )
 
@@ -284,6 +174,7 @@ type ComboPage(on_close: unit -> unit) as this =
                     .Pos(4)
                     .Tooltip(Tooltip.Info("hud.combo.growth"))
             ] |> or_require_noteskin)
+            |>> Container
             |+ preview
         )
 
@@ -396,6 +287,7 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
                 PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
                     .Pos(5, 3)
                 ] |> or_require_noteskin)
+            |>> Container
             |+ preview
         )
 
@@ -463,6 +355,7 @@ type JudgementCounterPage(on_close: unit -> unit) as this =
             |+ PageSetting("hud.judgementcounter.animationtime", Slider(animation_time |> Setting.f32, Step = 5f))
                 .Pos(0)
                 .Tooltip(Tooltip.Info("hud.judgementcounter.animationtime"))
+            |>> Container
             |+ preview
         )
 
@@ -499,8 +392,8 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
         Setting.simple noteskin_options.JudgementMeterUseTexture
 
     let texture = Content.Texture "judgements"
-    let rs = Rulesets.current
-    let JUDGEMENT_COUNT = rs.Judgements.Length
+    let ruleset = Rulesets.current
+    let JUDGEMENT_COUNT = ruleset.Judgements.Length
     let judgement_display = 
         match noteskin_options.JudgementMeterCustomDisplay.TryFind JUDGEMENT_COUNT with
         | Some existing -> Array.copy existing
@@ -513,7 +406,7 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
     let preview =
         { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
-                Text.fill (Style.font, rs.JudgementName 0, bounds, rs.JudgementColor 0, Alignment.CENTER)
+                Text.fill (Style.font, ruleset.JudgementName 0, bounds, ruleset.JudgementColor 0, Alignment.CENTER)
         }
 
     do
@@ -540,6 +433,7 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
             )
                 .Pos(6)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
+            |>> Container
             |+ preview
         )
 
@@ -605,6 +499,7 @@ type EarlyLateMeterPage(on_close: unit -> unit) as this =
                     .Pos(9, 3)
                     .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
                 ] |> or_require_noteskin)
+            |>> Container
             |+ preview
         )
 
@@ -656,6 +551,7 @@ type RateModMeterPage(on_close: unit -> unit) as this =
             |+ PageSetting("hud.ratemodmeter.showmods", Selector<_>.FromBool(show_mods))
                 .Pos(0)
                 .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
+            |>> Container
             |+ preview
         )
 
