@@ -139,7 +139,8 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
         Style.click.Play()
 
     override this.Init(parent: Widget) =
-        this |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
+        this 
+        |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
         |* Clickable(
             (fun () ->
                 this.Select true

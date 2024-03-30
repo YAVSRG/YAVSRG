@@ -193,6 +193,11 @@ type Rect =
             Bottom = this.Bottom + amount
         }
 
+    member inline this.SliceLeftPercent percent = this.SliceLeft (this.Width * percent)
+    member inline this.SliceTopPercent percent = this.SliceTop (this.Height * percent)
+    member inline this.SliceRightPercent percent = this.SliceRight (this.Width * percent)
+    member inline this.SliceBottomPercent percent = this.SliceBottom (this.Height * percent)
+
 module Rect =
 
     let ZERO = Rect.Box(0.0f, 0.0f, 0.0f, 0.0f)

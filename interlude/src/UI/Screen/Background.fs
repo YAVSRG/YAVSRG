@@ -114,7 +114,7 @@ module Background =
 
                     if fade.Target = 0.0f && fade.Value < 0.01f then
                         if not is_default then
-                            Sprite.destroy sprite
+                            Sprite.destroy sprite |> ignore
 
                         false
                     else

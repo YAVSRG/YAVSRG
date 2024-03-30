@@ -54,16 +54,20 @@ type Theme(storage) as this =
     let mutable config: ThemeConfig = ThemeConfig.Default
 
     do
-        config <-
-            match this.TryGetJson<ThemeConfig>(true, "theme.json") with
-            | Some data -> data.Validate
-            | None -> failwith "theme.json was missing or didn't load properly"
+        this.ReloadFromDisk()
 
     member this.Config
         with set conf =
             config <- conf
             this.WriteJson(config, "theme.json")
         and get () = config
+
+    override this.ReloadFromDisk() =
+        base.ReloadFromDisk()
+        config <-
+            match this.TryGetJson<ThemeConfig>(true, "theme.json") with
+            | Some data -> data.Validate
+            | None -> failwith "theme.json was missing or didn't load properly"
 
     member this.GetTexture(name: string) : TextureLoadResult =
         let name =

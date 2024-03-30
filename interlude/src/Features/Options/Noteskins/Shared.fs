@@ -136,3 +136,52 @@ type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
         this.DrawComponent(bounds)
 
     abstract member DrawComponent: Rect -> unit
+
+[<AbstractClass>]
+type ConfigPreviewNew(position: HUDPosition) =
+    inherit StaticWidget(NodeType.None)
+
+    let keycount = int (Gameplay.Chart.keymode ())
+    
+    let width, height =
+        let container =
+            if position.RelativeToPlayfield then
+                let cfg = Content.NoteskinConfig
+
+                let width =
+                    (cfg.ColumnWidth * float32 keycount
+                        + Array.sum (cfg.KeymodeColumnSpacing keycount))
+
+                Rect
+                    .Box(0.0f, 0.0f,
+                        width,
+                        Viewport.bounds.Height
+                    )
+            else
+                Viewport.bounds
+        let bounds = Position.calculate { Left = position.Left; Top = position.Top; Right = position.Right; Bottom = position.Bottom } container
+        bounds.Width, bounds.Height
+
+    override this.Draw() =
+        
+        let bounds = Rect.Box(this.Bounds.TrimLeft(PRETTYWIDTH).CenterX - width * 0.5f, this.Bounds.CenterY - height * 0.5f, width, height)
+        // Draw bounds
+        Draw.rect
+            (bounds.BorderLeft Style.PADDING)
+            Color.Lime
+
+        Draw.rect
+            (bounds.BorderTopCorners Style.PADDING)
+            Color.Lime
+
+        Draw.rect
+            (bounds.BorderRight Style.PADDING)
+            Color.Lime
+
+        Draw.rect
+            (bounds.BorderBottomCorners Style.PADDING)
+            Color.Lime
+
+        this.DrawComponent(bounds)
+
+    abstract member DrawComponent: Rect -> unit

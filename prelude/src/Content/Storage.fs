@@ -81,6 +81,9 @@ type Storage(storage: StorageType) =
         | Embedded _ -> true
         | _ -> false
 
+    abstract member ReloadFromDisk : unit -> unit
+    default this.ReloadFromDisk() = texture_config_cache <- Map.empty
+
     /// Returns stream for requested file, or None if that file doesn't exist
     /// Can throw exceptions for other IO errors
     member this.TryReadFile([<ParamArray>] path: string array) : Stream option =

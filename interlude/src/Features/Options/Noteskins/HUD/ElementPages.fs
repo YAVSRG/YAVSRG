@@ -4,7 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
-open Prelude.Common
+open Prelude
+open Prelude.Gameplay
 open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.UI
@@ -370,6 +371,84 @@ type JudgementCounterPage(on_close: unit -> unit) as this =
 
         on_close ()
 
+type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType array) =
+    inherit Container(NodeType.Leaf)
+
+    let texture = Content.Texture "judgements"
+
+    let fd () =
+        data.[i] <-
+            match data.[i] with
+            | JudgementDisplayType.Name ->
+                JudgementDisplayType.Texture 0
+            | JudgementDisplayType.Texture i ->
+                if i + 1 >= texture.Rows then 
+                    JudgementDisplayType.Name 
+                else JudgementDisplayType.Texture (i + 1)
+        Style.click.Play()
+
+    let bk () =
+        data.[i] <-
+            match data.[i] with
+            | JudgementDisplayType.Name ->
+                JudgementDisplayType.Texture (texture.Rows - 1)
+            | JudgementDisplayType.Texture 0 ->
+                JudgementDisplayType.Name 
+            | JudgementDisplayType.Texture i -> 
+                JudgementDisplayType.Texture (i - 1)
+        Style.click.Play()
+
+    override this.Init(parent: Widget) =
+        this
+        |* Clickable(
+            (fun () ->
+                this.Select true
+                fd ()
+            ),
+            OnHover =
+                fun b ->
+                    if b && not this.Focused then
+                        this.Focus true
+                    elif not b && this.FocusedByMouse then
+                        Selection.up true
+        )
+
+        base.Init parent
+
+    override this.Draw() =
+
+        if this.Focused then
+            Draw.rect this.Bounds Colors.yellow_accent.O2
+            if this.Selected then
+                Draw.rect (this.Bounds.SliceRightPercent(0.5f).SliceBottom(5.0f).Shrink(20.0f, 0.0f)) Colors.yellow_accent
+
+        Text.fill(Style.font, ruleset.JudgementName i, this.Bounds.SliceLeftPercent(0.5f).Shrink(10.0f, 5.0f), ruleset.JudgementColor i, Alignment.CENTER)
+        Text.fill_b(Style.font, Icons.ARROW_RIGHT, this.Bounds.Shrink(10.0f, 5.0f), Colors.text_greyout, Alignment.CENTER)
+
+        match data.[i] with
+        | JudgementDisplayType.Name ->
+            Text.fill(Style.font, ruleset.JudgementName i, this.Bounds.SliceRightPercent(0.5f).Shrink(10.0f, 5.0f), ruleset.JudgementColor i, Alignment.CENTER)
+        | JudgementDisplayType.Texture j ->
+            Draw.quad (Sprite.fill (this.Bounds.SliceRightPercent(0.5f).Shrink(10.0f, 5.0f)) texture).AsQuad (Quad.color Color.White) (Sprite.pick_texture (0, j) texture)
+
+    override this.OnFocus(by_mouse: bool) =
+        base.OnFocus by_mouse
+        Style.hover.Play()
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if this.Selected then
+            if (%%"left").Tapped() then
+                bk ()
+            elif (%%"right").Tapped() then
+                fd ()
+            elif (%%"up").Tapped() then
+                fd ()
+            elif (%%"down").Tapped() then
+                bk ()
+            
+
 type JudgementMeterPage(on_close: unit -> unit) as this =
     inherit Page()
 
@@ -404,7 +483,7 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
                 Array.create JUDGEMENT_COUNT JudgementDisplayType.Name
 
     let preview =
-        { new ConfigPreview(0.35f, pos) with
+        { new ConfigPreviewNew(pos.Value) with
             override this.DrawComponent(bounds) =
                 Text.fill (Style.font, ruleset.JudgementName 0, bounds, ruleset.JudgementColor 0, Alignment.CENTER)
         }
@@ -433,12 +512,20 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
             )
                 .Pos(6)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
+            |+ Conditional(use_texture.Get,
+                FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+                |+ seq {
+                    for i = 0 to ruleset.Judgements.Length - 1 do
+                        yield JudgementDisplayPicker(ruleset, i, judgement_display)
+                }
+                |> ScrollContainer,
+                Position = pretty_pos(8, PAGE_BOTTOM - 8, PageWidth.Normal)
+            )
             |>> Container
             |+ preview
         )
 
     override this.Title = %"hud.judgementmeter.name"
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
         options.HUD.Set

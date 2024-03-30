@@ -76,7 +76,7 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
 
     override this.Draw() =
         fbo.Bind true
-        Interlude.UI.Background.draw (Viewport.bounds, Colors.white, 1.0f)
+        Background.draw (Viewport.bounds, Colors.white, 1.0f)
         Draw.rect Viewport.bounds (Color.Black.O4a(Interlude.Options.options.BackgroundDim.Value * 255.0f |> int))
         renderer.Draw()
         fbo.Unbind()

@@ -15,9 +15,10 @@ module Sprites =
 
     let remove (id: string) =
         if cache.ContainsKey id then
-            Sprite.destroy cache.[id]
+            Sprite.destroy cache.[id] |> ignore
             cache.Remove id |> ignore
 
-    let add (id: string) (s: Sprite) =
-        remove id
-        cache.Add(id, s)
+    let add (destroy_existing: bool) (id: string) (s: Sprite) =
+        if destroy_existing then
+            remove id
+        cache.[id] <- s

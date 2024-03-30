@@ -42,7 +42,7 @@ module Themes =
         current.Config <- new_config
         current_config <- current.Config
 
-    let reload_current () =
+    let private load_current () =
         let missing_textures = ResizeArray()
         let available_textures = ResizeArray()
 
@@ -71,10 +71,10 @@ module Themes =
             Sprite.upload_many "THEME" true false (available_textures.ToArray())
 
         for id, sprite in sprites do
-            Sprites.add id sprite
+            Sprites.add true id sprite
 
         for id in missing_textures do
-            Sprites.add id (Texture.create_default_sprite atlas)
+            Sprites.add true id (Texture.create_default_sprite atlas)
 
         for id in Theme.SOUNDS do
             match current.GetSound id with
@@ -109,6 +109,11 @@ module Themes =
         Style.notify_system <- Sounds.get "notify-system"
         Style.notify_task <- Sounds.get "notify-task"
 
+    let reload_current() =
+        current.ReloadFromDisk()
+        current_config <- current.Config
+        load_current()
+
     let init_window () =
         load ()
 
@@ -118,7 +123,7 @@ module Themes =
 
         current <- loaded.[_selected_id.Value]
         current_config <- current.Config
-        reload_current ()
+        load_current ()
         initialised <- true
 
     let selected_id =
@@ -136,7 +141,7 @@ module Themes =
                     if _selected_id.Value <> old_id then
                         current <- loaded.[_selected_id.Value]
                         current_config <- current.Config
-                        reload_current ()
+                        load_current ()
                 else
                     _selected_id.Value <- new_id
             )

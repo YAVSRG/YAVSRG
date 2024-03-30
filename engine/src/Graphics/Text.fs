@@ -191,7 +191,7 @@ module Fonts =
             char_lookup.[c]
 
         member this.Dispose() =
-            char_lookup.Values |> Seq.iter Sprite.destroy
+            char_lookup.Values |> Seq.iter (Sprite.destroy >> ignore)
 
         member val CharSpacing = -0.04f with get, set
         member val SpaceWidth = 0.25f with get, set

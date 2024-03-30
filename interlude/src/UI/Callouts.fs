@@ -52,11 +52,13 @@ type Callout =
             this
 
     member this.Hotkey(h: Hotkey) =
+        assert(Hotkeys.get h |> K true)
         { this with
             Contents = this.Contents @ [ CalloutContent.Hotkey(None, h) ]
         }
 
     member this.Hotkey(desc: string, h: Hotkey) =
+        assert(Hotkeys.get h |> K true)
         { this with
             Contents = this.Contents @ [ CalloutContent.Hotkey(Some desc, h) ]
         }

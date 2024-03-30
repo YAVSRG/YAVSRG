@@ -118,7 +118,7 @@ type Toolbar() =
         |+ HotkeyAction(
             "reload_themes",
             fun () ->
-                if not Toolbar.hidden then
+                if not Toolbar.hidden && not (Dialog.exists()) then
                     Themes.reload_current ()
                     Noteskins.reload_current ()
                     Gameplay.Chart.recolor ()

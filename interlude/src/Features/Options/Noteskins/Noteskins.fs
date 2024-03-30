@@ -21,7 +21,7 @@ module private PreviewCleanup =
     let add (s: Sprite) = list <- s :: list
 
     let clear () =
-        List.iter Sprite.destroy list
+        list |> List.iter (Sprite.destroy >> ignore)
         list <- List.empty
 
 type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =

@@ -78,6 +78,16 @@ type Noteskin(storage) as this =
     let mutable config: NoteskinConfig = NoteskinConfig.Default
 
     do
+        this.ReloadFromDisk()
+
+    member this.Config
+        with set conf =
+            config <- conf
+            this.WriteJson(config, "noteskin.json")
+        and get () = config
+
+    override this.ReloadFromDisk() =
+        base.ReloadFromDisk()
         config <-
             match
                 this.TryGetJson<NoteskinExplosionMigration.NoteskinMigrationModel>(false, "noteskin.json"),
@@ -85,12 +95,6 @@ type Noteskin(storage) as this =
             with
             | Some migration_patch, Some data -> NoteskinExplosionMigration.patch migration_patch data.Validate
             | _ -> failwith "noteskin.json was missing or didn't load properly"
-
-    member this.Config
-        with set conf =
-            config <- conf
-            this.WriteJson(config, "noteskin.json")
-        and get () = config
 
     member this.GetTexture(name: string) : TextureLoadResult =
         this.LoadTexture(name, NoteskinTextureRules.get this.Config name)

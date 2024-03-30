@@ -46,10 +46,6 @@ type Sprite =
     member this.Height = this.GridHeight / this.Rows
     member this.AspectRatio = float32 this.Width / float32 this.Height
 
-    member this.Copy =
-        this.Texture.References <- this.Texture.References + 1
-        this
-
 [<Struct>]
 type QuadTexture =
     | NoTexture
@@ -337,6 +333,9 @@ module Sprite =
 
             if sprite.Texture.References = 0 then
                 Texture.destroy sprite.Texture
+                true
+            else false
+        else false
 
     let pick_texture (x: int, y: int) (sprite: Sprite) : QuadTexture =
         if sprite.PrecomputedQuad.IsSome then
@@ -387,3 +386,13 @@ module Sprite =
         let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
         Rect.Box(bounds.CenterX - 0.5f * w, bounds.CenterY - 0.5f * h, w, h)
+    
+    let fill_left (bounds: Rect) (sprite: Sprite) : Rect =
+        let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
+        let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
+        Rect.Box(bounds.Left, bounds.CenterY - 0.5f * h, w, h)
+    
+    let fill_right (bounds: Rect) (sprite: Sprite) : Rect =
+        let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
+        let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
+        Rect.Box(bounds.Right - w, bounds.CenterY - 0.5f * h, w, h)

@@ -74,7 +74,6 @@ module Noteskins =
                 missing_textures.Add texture_id
             | TextureNotRequired -> missing_textures.Add texture_id
 
-
         let atlas, sprites =
             Sprite.upload_many
                 ("NOTESKIN[" + ns.Noteskin.Config.Name + "]")
@@ -93,18 +92,21 @@ module Noteskins =
 
         match ns.Sprites with
         | Some existing ->
-            for _, s in existing do
-                Sprite.destroy s
+            for id, s in existing do
+                Sprite.destroy s |> ignore
         | None -> ()
 
         ns.TextureAtlas <- Some atlas
         ns.Sprites <- Some sprites
 
     let reload_current () =
+        current <- loaded.[_selected_id.Value].Noteskin
+        current.ReloadFromDisk()
+        current_config <- current.Config
         reload_noteskin_atlas _selected_id.Value
 
         for (texture_id, sprite) in loaded.[_selected_id.Value].Sprites.Value do
-            Sprites.add texture_id sprite.Copy
+            Sprites.add false texture_id sprite
 
     let selected_id =
         Setting.make
@@ -138,7 +140,7 @@ module Noteskins =
                         current_config <- current.Config
 
                         for (texture_id, sprite) in loaded.[new_id].Sprites.Value do
-                            Sprites.add texture_id sprite.Copy
+                            Sprites.add false texture_id sprite
                 else
                     _selected_id.Value <- new_id
             )
@@ -200,7 +202,10 @@ module Noteskins =
 
         current <- loaded.[_selected_id.Value].Noteskin
         current_config <- current.Config
-        reload_current ()
+        reload_noteskin_atlas _selected_id.Value
+
+        for (texture_id, sprite) in loaded.[_selected_id.Value].Sprites.Value do
+            Sprites.add false texture_id sprite
         initialised <- true
 
     let list () =
