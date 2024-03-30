@@ -151,7 +151,6 @@ type ChartInfo() as this =
             .Tooltip(
                 Tooltip
                     .Info("levelselect.rulesets", "ruleset_switch")
-                    .Hotkey(%"levelselect.rulesets.picker_hint", "ruleset_picker")
             )
 
         LevelSelect.on_refresh_all.Add this.Refresh
