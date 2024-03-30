@@ -298,7 +298,7 @@ module NoteskinTextureRules =
                 {
                     IsRequired = fun config -> config.HUD.JudgementMeterUseTexture
                     MustBeSquare = K false
-                    MaxGridSize = K(16, 2)
+                    MaxGridSize = K(16, 32)
                 }
             ]
 

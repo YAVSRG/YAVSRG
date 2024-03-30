@@ -51,7 +51,6 @@ type HUDUserOptions =
         SkipButtonEnabled: bool
 
         JudgementMeterEnabled: bool
-        JudgementMeterFadeTime: float32
         JudgementMeterIgnorePerfect: bool
         JudgementMeterPrioritiseLower: bool
 
@@ -89,7 +88,6 @@ type HUDUserOptions =
             SkipButtonEnabled = true
 
             JudgementMeterEnabled = false
-            JudgementMeterFadeTime = 800.0f
             JudgementMeterIgnorePerfect = false
             JudgementMeterPrioritiseLower = false
 
@@ -132,6 +130,9 @@ type HUDNoteskinOptions =
         SkipButtonPosition: HUDPosition
 
         JudgementMeterPosition: HUDPosition
+        JudgementMeterUseBuiltInAnimation: bool
+        JudgementMeterDuration: float32
+        JudgementMeterFrameTime: float32
         JudgementMeterUseTexture: bool
         JudgementMeterCustomDisplay: Map<int, JudgementDisplayType array>
 
@@ -202,6 +203,9 @@ type HUDNoteskinOptions =
                     Bottom = -105.0f, 0.5f
                 }
             JudgementMeterUseTexture = false
+            JudgementMeterUseBuiltInAnimation = true
+            JudgementMeterDuration = 800.0f
+            JudgementMeterFrameTime = 16.7f
             JudgementMeterCustomDisplay = Map.empty
 
             EarlyLateMeterPosition = 

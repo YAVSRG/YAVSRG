@@ -112,7 +112,6 @@ type Lobby() =
             .Tooltip(
                 Tooltip
                     .Info("levelselect.rulesets", "ruleset_switch")
-                    .Hotkey(%"levelselect.rulesets.picker_hint", "ruleset_picker")
             )
         |+ SelectedChart(
             Position =

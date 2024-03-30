@@ -420,7 +420,7 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
         if this.Focused then
             Draw.rect this.Bounds Colors.yellow_accent.O2
             if this.Selected then
-                Draw.rect (this.Bounds.SliceRightPercent(0.5f).SliceBottom(5.0f).Shrink(20.0f, 0.0f)) Colors.yellow_accent
+                Draw.rect (this.Bounds.SliceRightPercent(0.5f).SliceBottom(5.0f).Shrink(100.0f, 0.0f)) Colors.yellow_accent
 
         Text.fill(Style.font, ruleset.JudgementName i, this.Bounds.SliceLeftPercent(0.5f).Shrink(10.0f, 5.0f), ruleset.JudgementColor i, Alignment.CENTER)
         Text.fill_b(Style.font, Icons.ARROW_RIGHT, this.Bounds.Shrink(10.0f, 5.0f), Colors.text_greyout, Alignment.CENTER)
@@ -463,9 +463,16 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
     let prioritise_lower_judgements =
         Setting.simple user_options.JudgementMeterPrioritiseLower
 
-    let animation_time =
-        Setting.simple user_options.JudgementMeterFadeTime
+    let duration =
+        Setting.simple noteskin_options.JudgementMeterDuration
         |> Setting.bound 100.0f 2000.0f
+
+    let frame_time =
+        Setting.simple noteskin_options.JudgementMeterFrameTime
+        |> Setting.bound 2.0f 500.0f
+
+    let use_animation =
+        Setting.simple noteskin_options.JudgementMeterUseBuiltInAnimation
 
     let use_texture =
         Setting.simple noteskin_options.JudgementMeterUseTexture
@@ -491,38 +498,53 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
     do
         this.Content(
             page_container()
-            |+ PageSetting("hud.judgementmeter.animationtime", Slider(animation_time, Step = 5f))
-                .Pos(0)
-                .Tooltip(Tooltip.Info("hud.judgementmeter.animationtime"))
             |+ PageSetting(
                 "hud.judgementmeter.ignoreperfectjudgements",
                 Selector<_>.FromBool(ignore_perfect_judgements)
             )
-                .Pos(2)
+                .Pos(0)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.ignoreperfectjudgements"))
             |+ PageSetting(
                 "hud.judgementmeter.prioritiselowerjudgements",
                 Selector<_>.FromBool(prioritise_lower_judgements)
             )
-                .Pos(4)
+                .Pos(2)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
-            |+ PageSetting(
-                "hud.judgementmeter.usetexture",
-                Selector<_>.FromBool(use_texture)
-            )
-                .Pos(6)
-                .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
-            |+ Conditional(use_texture.Get,
-                FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
-                |+ seq {
-                    for i = 0 to ruleset.Judgements.Length - 1 do
-                        yield JudgementDisplayPicker(ruleset, i, judgement_display)
-                }
-                |> ScrollContainer,
-                Position = pretty_pos(8, PAGE_BOTTOM - 8, PageWidth.Normal)
-            )
+            |+ ([
+                Conditional((fun () -> not use_texture.Value || use_animation.Value),
+                    PageSetting("hud.judgementmeter.duration", Slider(duration, Step = 5f))
+                        .Pos(4)
+                        .Tooltip(Tooltip.Info("hud.judgementmeter.duration"))
+                ) :> Widget
+                PageSetting(
+                    "hud.judgementmeter.usetexture",
+                    Selector<_>.FromBool(use_texture)
+                )
+                    .Pos(6)
+                    .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
+                Conditional(use_texture.Get,
+                    PageSetting(
+                        "hud.judgementmeter.useanimation",
+                        Selector<_>.FromBool(use_animation)
+                    )
+                        .Pos(8)
+                        .Tooltip(Tooltip.Info("hud.judgementmeter.useanimation"))
+                )
+                Conditional(use_texture.Get,
+                    PageSetting("hud.judgementmeter.frametime", Slider(frame_time, Step = 5f))
+                        .Pos(10)
+                        .Tooltip(Tooltip.Info("hud.judgementmeter.frametime"))
+                )
+                Conditional(use_texture.Get,
+                    FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+                    |+ seq {
+                        for i = 0 to ruleset.Judgements.Length - 1 do
+                            yield JudgementDisplayPicker(ruleset, i, judgement_display)
+                    }
+                    |> ScrollContainer,
+                    Position = pretty_pos(12, PAGE_BOTTOM - 10, PageWidth.Normal)
+                )] |> or_require_noteskin)
             |>> Container
-            |+ preview
         )
 
     override this.Title = %"hud.judgementmeter.name"
@@ -530,14 +552,16 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
     override this.OnClose() =
         options.HUD.Set
             { options.HUD.Value with
-                JudgementMeterFadeTime = animation_time.Value
                 JudgementMeterIgnorePerfect = ignore_perfect_judgements.Value
                 JudgementMeterPrioritiseLower = prioritise_lower_judgements.Value
             }
 
         Noteskins.save_hud_config 
             { Content.NoteskinConfig.HUD with
+                JudgementMeterDuration = duration.Value
+                JudgementMeterFrameTime = frame_time.Value
                 JudgementMeterUseTexture = use_texture.Value
+                JudgementMeterUseBuiltInAnimation = use_animation.Value
                 JudgementMeterCustomDisplay = Content.NoteskinConfig.HUD.JudgementMeterCustomDisplay.Add (JUDGEMENT_COUNT, judgement_display)
             }
 

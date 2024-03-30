@@ -177,17 +177,23 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
 
 type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let atime = user_options.JudgementMeterFadeTime * Gameplay.rate.Value * 1.0f<ms>
     let mutable tier = 0
     let mutable time = -Time.infinity
-    let mutable early_late = 0
 
     let texture = Content.Texture "judgements"
     let display = noteskin_options.GetJudgementMeterDisplay state.Ruleset
+    let animated = not noteskin_options.JudgementMeterUseTexture || noteskin_options.JudgementMeterUseBuiltInAnimation
+    let duration = 
+        (
+            if animated then 
+                noteskin_options.JudgementMeterDuration
+            else
+                noteskin_options.JudgementMeterFrameTime * float32 texture.Columns
+        ) * rate.Value * 1.0f<ms>
 
     do
         state.SubscribeToHits(fun ev ->
-            let (judge, delta) =
+            let (judge, _) =
                 match ev.Guts with
                 | Hit e -> (e.Judgement, e.Delta)
                 | Release e -> (e.Judgement, e.Delta)
@@ -201,36 +207,39 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
                 if
                     not user_options.JudgementMeterPrioritiseLower
                     || j >= tier
-                    || ev.Time - atime > time
+                    || ev.Time - duration > time
                     || ev.Time < time
                 then
                     tier <- j
                     time <- ev.Time
-                    early_late <- if delta > 0.0f<ms> then 1 else 0
         )
 
     override this.Draw() =
         if time > -Time.infinity then
-            let a =
-                255
-                - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
 
-            match display.[tier] with
-            | JudgementDisplayType.Name ->
-                Text.fill (
-                    Style.font,
-                    state.Ruleset.JudgementName tier,
-                    this.Bounds,
-                    state.Ruleset.JudgementColor(tier).O4a a,
-                    Alignment.CENTER
-                )
-            | JudgementDisplayType.Texture y ->
-                let scale = min (this.Bounds.Width / float32 texture.Width) (this.Bounds.Height / float32 texture.Height)
-                let w, h = float32 texture.Width * scale, float32 texture.Height * scale
-                Draw.quad 
-                    ((Sprite.fill this.Bounds texture).AsQuad)
-                    (Quad.color Color.White)
-                    (Sprite.pick_texture (early_late, y) texture)
+            let time_ago = state.CurrentChartTime() - time
+            let percent = Math.Clamp(time_ago / duration, 0.0f, 1.0f)
+
+            if percent < 1.0f then
+            
+                let pop = if animated then max (1f + percent - 5.0f * percent * percent) (1f - 128f * MathF.Pow(percent - 0.5f, 8.0f)) else 1.0f
+                let alpha = Math.Clamp(255.0f * (((pop - 1.0f) * 2.0f) + 1.0f) |> int, 0, 255)
+                let bounds = this.Bounds.Expand((pop - 1.0f) * this.Bounds.Width, (pop - 1.0f) * this.Bounds.Height)
+
+                match display.[tier] with
+                | JudgementDisplayType.Name ->
+                    Text.fill (
+                        Style.font,
+                        state.Ruleset.JudgementName tier,
+                        bounds,
+                        state.Ruleset.JudgementColor(tier).O4a alpha,
+                        Alignment.CENTER
+                    )
+                | JudgementDisplayType.Texture y ->
+                    Draw.quad 
+                        ((Sprite.fill bounds texture).AsQuad)
+                        (Quad.color (Color.White.O4a alpha))
+                        (Sprite.pick_texture (float32 time_ago / noteskin_options.JudgementMeterFrameTime |> floor |> int, y) texture)
 
 type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
