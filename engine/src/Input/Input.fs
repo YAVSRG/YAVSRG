@@ -19,6 +19,12 @@ type Bind =
         | Key(k, m) -> Bind.ModifierString m + Bind.FormatKey k
         | Mouse b -> "M" + b.ToString()
 
+    member this.WithModifiers (ctrl, alt, shift) : Bind =
+        match this with
+        | Dummy -> Dummy
+        | Key (k, m) -> Key (k, (ctrl, alt, shift))
+        | Mouse b -> Mouse b
+
     static member private FormatKey(k: Keys) : string =
         match k with
         | Keys.D0 -> "0"

@@ -64,6 +64,11 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
     let REPEAT_DELAY = 400.0
     let REPEAT_INTERVAL = 40.0
 
+    let SMALL_UP = (%%"up").WithModifiers(false, false, true)
+    let SMALL_DOWN = (%%"down").WithModifiers(false, false, true)
+    let SMALL_LEFT = (%%"left").WithModifiers(false, false, true)
+    let SMALL_RIGHT = (%%"right").WithModifiers(false, false, true)
+
     let child =
         HUDElement.constructor elem (options.HUD.Value, Content.NoteskinConfig.HUD, ctx.State)
 
@@ -272,6 +277,11 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
         let mutable moved = moved
 
         if this.Focused then
+            if SMALL_UP.Tapped() then this.Move(0.0f, -1.0f)
+            elif SMALL_DOWN.Tapped() then this.Move(0.0f, 1.0f)
+            elif SMALL_LEFT.Tapped() then this.Move(-1.0f, 0.0f)
+            elif SMALL_RIGHT.Tapped() then this.Move(1.0f, 0.0f)
+
             let u = (%%"up").Tapped()
             let d = (%%"down").Tapped()
             let l = (%%"left").Tapped()

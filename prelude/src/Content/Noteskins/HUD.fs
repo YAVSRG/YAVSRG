@@ -204,8 +204,8 @@ type HUDNoteskinOptions =
                 }
             JudgementMeterUseTexture = false
             JudgementMeterUseBuiltInAnimation = true
-            JudgementMeterDuration = 800.0f
-            JudgementMeterFrameTime = 16.7f
+            JudgementMeterDuration = 300.0f
+            JudgementMeterFrameTime = 50f
             JudgementMeterCustomDisplay = Map.empty
 
             EarlyLateMeterPosition = 
