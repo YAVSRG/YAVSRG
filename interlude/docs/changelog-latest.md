@@ -1,34 +1,27 @@
-0.7.19.2
+0.7.19.3
 ====
 
-# Noteskinning update
+As usual thank you players new and old for trying the game and giving feedback :)
 
-A large portion of HUD configuration has been **moved to noteskins**
-This means that noteskins are now in control of things like:
+# Noteskin and HUD features
+- Noteskins now support custom textures for judgement indicators! Skinners rejoice - Template skins, documentation, etc coming soon
+- Judgement meter has an improved animation, which can be turned off if you want to use a texture-only animation
+- HUD editor is part of the noteskin editor + improved navigation to it
+- Hold shift + use arrow keys to make 1-pixel adjustments in the HUD editor
 
-- The position of HUD elements
-- The appearance of HUD elements
-
-Some settings that I think make more sense as user preference are **still part of the normal settings** and are **saved independently from noteskins** such as:
-
-- Which bits of the HUD are turned on
-- Special HUD behaviours like the label on the progress meter
-- Preferences like lane covers
-
-Please note that your existing HUD settings will be reset by this update - The original config files will not be deleted in case you need to refer to them
-
-# What's new
-- New ingame editor for positioning your HUD elements! You can now click and drag OR use arrow keys
-  Please break it and report bugs, I will do a follow up patch based on your feedback
-- Menuing around customising HUD elements ha been redesigned a bit to explain these changes around noteskins
+# UI improvements
+- Audio rates can be changed with a slider from the mods menu, to help more people find it
+- Ruleset switcher now correctly scrolls instead of clipping offscreen when you have lots installed
+- Score screen now shows who made the chart
+- Score screen slightly adjusted to look better
+- All menus have been overall re-scaled and adjusted to look more consistent
 
 # Bug fixes
-- Fixed "Delete preset" button not having a position set
-- Improved loading speed of local scores scoreboard
-- Finishing importing a pack/song should no longer lag spike gameplay screens as you play
-- Localisation fixes and improvements including some from @ZeNyfh :)
-- Fixed crash when a noteskin has no textures
+- Fixed a crash when viewing the tooltip on the ruleset picker
+- Fixed several issues with Smart frame cap on multi-monitor setups
+- Fixed parts of main menu disappearing if you tab out in fullscreen while it loads
+- Fixed hotkey for reloading themes/noteskins not reloading certain config about textures
 
-# Misc
-- Spamming the screenshot key on the score screen now throws some confetti after taking 1 screenshot
+Lots of UI code was changed for this update, I might have missed something  
+If you spot anything that looks wrong please report it
 
