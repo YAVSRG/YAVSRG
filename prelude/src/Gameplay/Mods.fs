@@ -2,7 +2,6 @@
 
 open System
 open System.Collections.Generic
-open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
@@ -53,11 +52,15 @@ module Mods =
 
         let r = new Random()
 
-        let get_mod_name id =
-            Localisation.localise ("mod." + id + ".name")
+        let get_mod_name (id: string) (state: int option) =
+            match state with
+            | Some i when i > 0 -> Localisation.localise (sprintf "mod.%s.%i.name" id i)
+            | _ -> Localisation.localise (sprintf "mod.%s.name" id)
 
-        let get_mod_desc id =
-            Localisation.localise ("mod." + id + ".desc")
+        let get_mod_desc (id: string) (state: int option) =
+            match state with
+            | Some i when i > 0 -> Localisation.localise (sprintf "mod.%s.%i.desc" id i)
+            | _ -> Localisation.localise (sprintf "mod.%s.desc" id)
 
         let cycle id (mods: ModState) : ModState =
             if (mods.ContainsKey id) then
@@ -128,12 +131,13 @@ module Mods =
             Apply = fun s mc -> Inverse.apply (s > 0) mc
         }
 
-    //add_mod
-    //    "more_notes"
-    //    { EMPTY_MOD with
-    //        Status = ModStatus.Unstored
-    //        Apply = fun s mc -> MoreNotes.apply mc
-    //    }
+    add_mod
+        "more_notes"
+        { EMPTY_MOD with
+            Status = ModStatus.Unstored
+            States = 2
+            Apply = fun s mc -> if s = 1 then MoreNotes.apply_chordjacks mc else MoreNotes.apply_minijacks mc
+        }
 
     //todo: randomiser mod with seed
 
@@ -175,11 +179,10 @@ module Mods =
             sprintf "%.2fx" rate
             :: (mods
                 |> ModState.enumerate
-                |> Seq.map (fun (id, _, _) -> id)
-                |> Seq.map (ModState.get_mod_name)
+                |> Seq.map (fun (id, _, state) -> ModState.get_mod_name id (Some state))
                 |> List.ofSeq)
         )
-        + if autoplay then ", " + ModState.get_mod_name "auto" else ""
+        + if autoplay then ", " + ModState.get_mod_name "auto" None else ""
 
     let check (mods: ModState) =
         try

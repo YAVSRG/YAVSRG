@@ -12,7 +12,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 
-type private ModSelector(id, states: string[], current_state: unit -> int, action: unit -> unit) =
+type private ModSelector(id, current_state: unit -> int option, action: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun () ->
@@ -24,21 +24,7 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
     let TOP_HEIGHT = 70.0f
 
     override this.Init(parent) =
-        this
-        |+ Clickable.Focus this
-        |+ Text(
-            ModState.get_mod_name id,
-            Color = (fun () -> (if this.Focused then Colors.yellow_accent else Colors.white), Colors.shadow_1),
-            Position = Position.SliceTop(TOP_HEIGHT).Margin(20.0f, 0.0f),
-            Align = Alignment.LEFT
-        )
-        |* Text(
-            ModState.get_mod_desc id,
-            Color = (fun () -> (if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2),
-            Position = Position.TrimTop(TOP_HEIGHT - 2f).Margin(20.0f, 0.0f),
-            Align = Alignment.LEFT
-        )
-
+        this |* Clickable.Focus this
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
@@ -47,23 +33,39 @@ type private ModSelector(id, states: string[], current_state: unit -> int, actio
 
     override this.Draw() =
         let state = current_state ()
-        Draw.rect (this.Bounds.SliceTop(TOP_HEIGHT)) (if state >= 0 then Colors.pink.O3 else Colors.shadow_2.O2)
+        Draw.rect (this.Bounds.SliceTop(TOP_HEIGHT)) (if state.IsSome then Colors.pink.O3 else Colors.shadow_2.O2)
 
         Draw.rect
             (this.Bounds.TrimTop(TOP_HEIGHT))
-            (if state >= 0 then
+            (if state.IsSome then
                  Colors.pink_shadow.O3
              else
                  Colors.shadow_1.O3)
 
-        if state >= 0 then
+        if state.IsSome then
             Text.fill_b (
                 Style.font,
-                states.[state],
+                Icons.CHECK,
                 this.Bounds.SliceTop(TOP_HEIGHT).Shrink(20.0f, 0.0f),
                 Colors.text,
                 Alignment.RIGHT
             )
+
+        Text.fill_b (
+            Style.font,
+            ModState.get_mod_name id state,
+            this.Bounds.SliceTop(TOP_HEIGHT).Shrink(20.0f, 0.0f),
+            (if this.Focused then Colors.text_yellow_2 else Colors.text), 
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            ModState.get_mod_desc id state,
+            this.Bounds.TrimTop(TOP_HEIGHT - 2.0f).Shrink(20.0f, 0.0f),
+            (if this.Focused then Colors.text_yellow_2 else Colors.text_subheading), 
+            Alignment.LEFT
+        )
 
         base.Draw()
 
@@ -81,28 +83,25 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
             )
             |+ ModSelector(
                 "auto",
-                [| Icons.CHECK |],
-                (fun _ -> if autoplay then 0 else -1),
+                (fun _ -> if autoplay then Some 0 else None),
                 (fun _ -> autoplay <- not autoplay)
             )
             |+ seq {
                 for id in available_mods.Keys do
                     yield ModSelector(
                         id,
-                        [| Icons.CHECK |],
                         (fun _ ->
                             if selected_mods.Value.ContainsKey id then
-                                selected_mods.Value.[id]
+                                Some selected_mods.Value.[id]
                             else
-                                -1
+                                None
                         ),
                         (fun _ -> Setting.app (ModState.cycle id) selected_mods)
                     )
             }
             |+ ModSelector(
                 "pacemaker",
-                [| Icons.CHECK |],
-                (fun _ -> if options.EnablePacemaker.Value then 0 else -1),
+                (fun _ -> if options.EnablePacemaker.Value then Some 0 else None),
                 (fun _ -> Setting.app not options.EnablePacemaker)
             )
 
@@ -125,10 +124,10 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         |+ mod_grid
 
         |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
-            .Pos(14)
+            .Pos(17)
             .Tooltip(Tooltip.Info("gameplay.pacemaker"))
         |+ PageSetting("gameplay.endless_mode", Selector<_>.FromBool(endless_mode))
-            .Pos(16)
+            .Pos(19)
             .Tooltip(Tooltip.Info("gameplay.endless_mode"))
 
         |> this.Content
