@@ -26,7 +26,12 @@ module DiscordRPC =
             ()
         else
 
-            let rp = new RichPresence(State = "In menus", Details = details)
+            let rp = 
+                new RichPresence(
+                    State = "In menus",
+                    Details = details,
+                    Assets = Assets(LargeImageKey = "icon", LargeImageText = "www.yavsrg.net")
+                )
 
             client.SetPresence(rp)
 
@@ -42,7 +47,8 @@ module DiscordRPC =
                         (if song.Length > 48 then
                              song.Substring(0, 44) + " ..."
                          else
-                             song)
+                             song),
+                    Assets = Assets(LargeImageKey = "icon", LargeImageText = "www.yavsrg.net")
                 )
 
             client.SetPresence(rp)
@@ -59,7 +65,8 @@ module DiscordRPC =
                         (if song.Length > 48 then
                              song.Substring(0, 44) + " ..."
                          else
-                             song)
+                             song),
+                    Assets = Assets(LargeImageKey = "icon", LargeImageText = "www.yavsrg.net")
                 )
 
             let now = System.DateTime.UtcNow
