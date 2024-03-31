@@ -64,17 +64,20 @@ module OsuSkinConverter =
             Tail: string
         }
 
-    let pad_to_square (width: int) (image: Bitmap) : Bitmap =
-        assert (image.Width = width)
+    let pad (width: int, height: int) (image: Bitmap) : Bitmap =
+        assert (image.Width <= width)
+        assert (image.Height <= height)
 
-        if image.Height <> width then
-            let new_image = new Bitmap(width, width)
-            new_image.Mutate(fun img -> img.DrawImage(image, Point(0, (-image.Height + width) / 2), 1.0f) |> ignore)
+        if image.Width <> width || image.Height <> height then
+            let new_image = new Bitmap(width, height)
+            new_image.Mutate(fun img -> img.DrawImage(image, Point((-image.Width + width) / 2, (-image.Height + height) / 2), 1.0f) |> ignore)
 
             image.Dispose()
             new_image
         else
             image
+
+    let pad_to_square (width: int) (image: Bitmap) : Bitmap = pad (width, width) image
 
     let stretch_to_square (width: int) (image: Bitmap) : Bitmap =
         assert (image.Width = width)
@@ -145,7 +148,7 @@ module OsuSkinConverter =
 
         let colors = Array.zeroCreate 10
 
-        let textures =
+        let core_textures =
             let result = ResizeArray<ColumnTextures>()
 
             for k = 0 to (keymode - 1) do
@@ -171,7 +174,7 @@ module OsuSkinConverter =
 
         // Generate main textures
         try
-            textures
+            core_textures
             |> List.map (fun x -> x.Note)
             |> List.map (fun x -> get_animation_frame_filenames (x, source))
             |> load_animation_frame_images
@@ -181,7 +184,7 @@ module OsuSkinConverter =
             Logging.Warn("Error converting note textures", err)
 
         try
-            textures
+            core_textures
             |> List.map (fun x -> x.Head)
             |> List.map (fun x -> get_animation_frame_filenames (x, source))
             |> load_animation_frame_images
@@ -191,7 +194,7 @@ module OsuSkinConverter =
             Logging.Warn("Error converting hold head textures", err)
 
         try
-            textures
+            core_textures
             |> List.map (fun x -> x.Body)
             |> List.map (fun x -> get_animation_frame_filenames (x, source))
             |> load_animation_frame_images
@@ -200,7 +203,7 @@ module OsuSkinConverter =
             Logging.Warn("Error converting hold body textures", err)
 
         try
-            textures
+            core_textures
             |> List.map (fun x -> x.Tail)
             |> List.map (fun x -> get_animation_frame_filenames (x, source))
             |> load_animation_frame_images
@@ -213,7 +216,7 @@ module OsuSkinConverter =
         // Generate receptors
         try
             use receptor_base =
-                get_animation_frame_filenames (textures.[if textures.Length > 1 then 1 else 0].Note, source)
+                get_animation_frame_filenames (core_textures.[if core_textures.Length > 1 then 1 else 0].Note, source)
                 |> List.head
                 |> load_bmp
 
@@ -272,6 +275,44 @@ module OsuSkinConverter =
             columnlighting <- true
         | None -> ()
 
+        // Generate judgement textures
+        let mutable judgements = false
+        try
+            let images =
+                [
+                    keymode_settings.Hit300g
+                    keymode_settings.Hit300
+                    keymode_settings.Hit200
+                    keymode_settings.Hit100
+                    keymode_settings.Hit50
+                    keymode_settings.Hit0
+                ]
+                |> List.map (fun x -> get_animation_frame_filenames (x, source))
+                |> load_animation_frame_images
+            let max_frames = images |> List.map (fun x -> x.Length) |> List.max
+            let max_width = images |> List.map (List.map _.Width >> List.max) |> List.max
+            let max_height = images |> List.map (List.map _.Height >> List.max) |> List.max
+
+            for row = 0 to images.Length - 1 do
+                for column = 0 to max_frames - 1 do
+                    let image = let r = images.[row] in r[column % r.Length]
+
+                    let padded = pad (max_width, max_height) image
+                    padded.Save(Path.Combine(target, sprintf "judgements-%i-%i.png" row column))
+                    padded.Dispose()
+
+            JSON.ToFile
+                (Path.Combine(target, "judgements.json"), false)
+                {
+                    Rows = images.Length
+                    Columns = max_frames
+                    Mode = Loose
+                }
+            judgements <- true
+        with err ->
+            Logging.Warn("Error converting judgement textures", err)
+
+
         // Generate noteskin.json
         let color_config: ColorConfig =
             { ColorConfig.Default with
@@ -295,6 +336,12 @@ module OsuSkinConverter =
                 UseRotation = is_arrows
                 EnableStageTextures = stage_textures
                 EnableColumnLight = columnlighting
+
+                HUD = 
+                    { HUDNoteskinOptions.Default with
+                        JudgementMeterFrameTime = 16.7f
+                        JudgementMeterUseTexture = judgements
+                    }
             }
 
         JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config
