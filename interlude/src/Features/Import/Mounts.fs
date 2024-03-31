@@ -100,7 +100,6 @@ module Mounts =
                 )
 
     let import_mounts_on_startup () =
-        // todo: ingame notification if mount has moved
         match options.OsuMount.Value with
         | Some mount ->
             if Directory.Exists mount.SourceFolder then
@@ -111,6 +110,7 @@ module Mounts =
                 Logging.Warn(
                     "osu! Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
                 )
+                Notifications.error(%"notification.mount_moved.osu", %"notification.mount_moved.body")
         | None -> ()
 
         match options.StepmaniaMount.Value with
@@ -123,6 +123,7 @@ module Mounts =
                 Logging.Warn(
                     "Stepmania Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
                 )
+                Notifications.error(%"notification.mount_moved.stepmania", %"notification.mount_moved.body")
         | None -> ()
 
         match options.EtternaMount.Value with
@@ -135,6 +136,7 @@ module Mounts =
                 Logging.Warn(
                     "Etterna Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
                 )
+                Notifications.error(%"notification.mount_moved.etterna", %"notification.mount_moved.body")
         | None -> ()
 
     type CreateDialog(game: Game, setting: Setting<Imports.MountedChartSource option>) as this =

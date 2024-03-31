@@ -116,8 +116,9 @@ module Import =
                     Path.Combine(get_game_folder "Noteskins", id + "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss"))
                 )
                     .Show()
-        | Error err -> Logging.Error("Error while parsing osu! skin.ini\n" + err)
-    // todo: error toast
+        | Error err -> 
+            Logging.Error("Error while parsing osu! skin.ini\n" + err)
+            Notifications.error(%"notification.skin_ini_parse_failed.title", %"notification.skin_ini_parse_failed.body")
 
     let handle_file_drop (path: string) =
         match Mounts.drop_func with
