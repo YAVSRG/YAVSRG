@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI
 
 open Percyqaz.Common
+open Percyqaz.Flux.Audio
 open Prelude.Charts.Processing.NoteColors
 open Prelude.Data
 open Prelude.Data.Library.Caching
@@ -198,6 +199,8 @@ module Startup =
                 LevelSelectScreen()
             |]
 
+        Devices.change_volume (Options.options.AudioVolume.Value, Options.options.AudioVolume.Value)
+
         ScoreScreenHelpers.watch_replay <-
             fun (score_info: ScoreInfo, with_colors: ColoredChart) ->
                 if
@@ -215,7 +218,6 @@ module Startup =
             fun () -> OptionsMenu.Noteskins.NoteskinsPage().Show()
 
         AutoUpdate.check_for_updates ()
-        Mounts.import_mounts_on_startup ()
 
         { new Screen.ScreenRoot(Toolbar()) with
             override this.Init() =
@@ -225,6 +227,7 @@ module Startup =
                 migrate ()
                 Gameplay.init_window ()
                 Network.init_window ()
+                Mounts.import_mounts_on_startup ()
                 base.Init()
         }
 

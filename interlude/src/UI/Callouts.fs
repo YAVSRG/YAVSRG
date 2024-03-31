@@ -492,7 +492,7 @@ module Notifications =
         ensure_ui_thread Style.notify_system.Play
 
     let error (title, description) =
-        add (
+        add_long (
             Callout.Small.Icon(Icons.ALERT_CIRCLE).Title(title).Body(description),
             (Colors.red_accent, Colors.red),
             Colors.text

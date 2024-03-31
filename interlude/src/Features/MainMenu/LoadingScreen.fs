@@ -1,12 +1,10 @@
 ﻿namespace Interlude.Features.MainMenu
 
-open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude
 open Interlude.UI
-open Interlude.Features.Online
 
 // Loading screen
 
