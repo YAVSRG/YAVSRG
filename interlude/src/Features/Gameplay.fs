@@ -137,6 +137,10 @@ module Gameplay =
 
         let private chart_change_finished = Event<LoadedChartInfo>()
         let on_chart_change_finished = chart_change_finished.Publish
+
+        let private chart_update_finished = Event<LoadedChartInfo>()
+        let on_chart_update_finished = chart_update_finished.Publish
+
         let private chart_change_started = Event<LoadingChartInfo>()
         let on_chart_change_started = chart_change_started.Publish
 
@@ -236,6 +240,8 @@ module Gameplay =
 
                                     if is_interrupted_load then
                                         chart_change_finished.Trigger(create_loaded_chart_info ())
+                                    else
+                                        chart_update_finished.Trigger(create_loaded_chart_info ())
 
                             yield
                                 fun () ->

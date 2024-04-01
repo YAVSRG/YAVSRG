@@ -156,6 +156,7 @@ type ChartInfo() as this =
         LevelSelect.on_refresh_all.Add this.Refresh
         LevelSelect.on_refresh_details.Add this.Refresh
         Chart.on_chart_change_finished.Add this.OnChartUpdated
+        Chart.on_chart_update_finished.Add (fun info -> rating <- info.Rating.Physical; notecounts <- info.NotecountsString)
 
     member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
         match display.Value with
