@@ -55,7 +55,6 @@ type HUDUserOptions =
         JudgementMeterPrioritiseLower: bool
 
         EarlyLateMeterEnabled: bool
-        EarlyLateMeterFadeTime: float32
 
         ProgressMeterEnabled: bool
         ProgressMeterLabel: ProgressMeterLabel
@@ -92,7 +91,6 @@ type HUDUserOptions =
             JudgementMeterPrioritiseLower = false
 
             EarlyLateMeterEnabled = false
-            EarlyLateMeterFadeTime = 800.0f
 
             ProgressMeterEnabled = true
             ProgressMeterLabel = ProgressMeterLabel.None
@@ -130,13 +128,16 @@ type HUDNoteskinOptions =
         SkipButtonPosition: HUDPosition
 
         JudgementMeterPosition: HUDPosition
-        JudgementMeterUseBuiltInAnimation: bool
         JudgementMeterDuration: float32
         JudgementMeterFrameTime: float32
         JudgementMeterUseTexture: bool
+        JudgementMeterUseBuiltInAnimation: bool
         JudgementMeterCustomDisplay: Map<int, JudgementDisplayType array>
 
         EarlyLateMeterPosition: HUDPosition
+        EarlyLateMeterDuration: float32
+        EarlyLateMeterUseTexture: bool
+        EarlyLateMeterFrameTime: float32
         EarlyLateMeterEarlyText: string
         EarlyLateMeterLateText: string
         EarlyLateMeterEarlyColor: Color
@@ -216,6 +217,9 @@ type HUDNoteskinOptions =
                     Right = 128.0f, 0.5f
                     Bottom = -150.0f, 0.5f
                 }
+            EarlyLateMeterDuration = 200.0f
+            EarlyLateMeterUseTexture = false
+            EarlyLateMeterFrameTime = 20.0f
             EarlyLateMeterEarlyText = "Fast"
             EarlyLateMeterLateText = "Slow"
             EarlyLateMeterEarlyColor = Color.FromArgb(52, 79, 235)

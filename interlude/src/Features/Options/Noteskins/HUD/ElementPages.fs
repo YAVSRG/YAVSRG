@@ -489,12 +489,6 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
             else
                 Array.create JUDGEMENT_COUNT JudgementDisplayType.Name
 
-    let preview =
-        { new ConfigPreviewNew(pos.Value) with
-            override this.DrawComponent(bounds) =
-                Text.fill (Style.font, ruleset.JudgementName 0, bounds, ruleset.JudgementColor 0, Alignment.CENTER)
-        }
-
     do
         this.Content(
             page_container()
@@ -575,57 +569,68 @@ type EarlyLateMeterPage(on_close: unit -> unit) as this =
 
     let pos = Setting.simple noteskin_options.EarlyLateMeterPosition
 
-    let animation_time =
-        Setting.simple user_options.EarlyLateMeterFadeTime
+    let duration =
+        Setting.simple noteskin_options.EarlyLateMeterDuration
         |> Setting.bound 100.0f 2000.0f
+
+    let frame_time =
+        Setting.simple noteskin_options.EarlyLateMeterFrameTime
+        |> Setting.bound 2.0f 500.0f
+
+    let use_texture = Setting.simple noteskin_options.EarlyLateMeterUseTexture
 
     let early_text = Setting.simple noteskin_options.EarlyLateMeterEarlyText
     let late_text = Setting.simple noteskin_options.EarlyLateMeterLateText
     let early_color = Setting.simple noteskin_options.EarlyLateMeterEarlyColor
     let late_color = Setting.simple noteskin_options.EarlyLateMeterLateColor
 
-    let preview =
-        { new ConfigPreview(0.35f, pos) with
-            override this.DrawComponent(bounds) =
-                Text.fill (Style.font, early_text.Value, bounds, early_color.Value, Alignment.CENTER)
-        }
-
     do
         this.Content(
             page_container()
-            |+ PageSetting("hud.earlylatemeter.animationtime", Slider(animation_time, Step = 5f))
-                .Pos(0)
-                .Tooltip(Tooltip.Info("hud.earlylatemeter.animationtime"))
             |+ ([
-                PageTextEntry("hud.earlylatemeter.earlytext", early_text)
+                PageSetting("hud.earlylatemeter.duration", Slider(duration, Step = 5f))
+                    .Pos(0)
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.duration")) :> Widget
+                PageSetting("hud.earlylatemeter.usetexture", Selector<_>.FromBool(use_texture))
                     .Pos(2)
-                    .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext")) :> Widget
-                PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
-                    .Pos(4, 3)
-                    .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
-                PageTextEntry("hud.earlylatemeter.latetext", late_text)
-                    .Pos(7)
-                    .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
-                PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
-                    .Pos(9, 3)
-                    .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.usetexture"))
+                Conditional(use_texture.Get, 
+                    PageSetting("hud.earlylatemeter.frametime", Slider(frame_time, Step = 5f))
+                        .Pos(4)
+                        .Tooltip(Tooltip.Info("hud.earlylatemeter.frametime"))
+                )
+                Conditional(use_texture.Get >> not, 
+                    PageTextEntry("hud.earlylatemeter.earlytext", early_text)
+                        .Pos(4)
+                        .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext"))
+                )
+                Conditional(use_texture.Get >> not, 
+                    PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
+                        .Pos(6, 3)
+                        .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
+                )
+                Conditional(use_texture.Get >> not, 
+                    PageTextEntry("hud.earlylatemeter.latetext", late_text)
+                        .Pos(9)
+                        .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
+                )
+                Conditional(use_texture.Get >> not, 
+                    PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
+                        .Pos(11, 3)
+                        .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
+                )
                 ] |> or_require_noteskin)
             |>> Container
-            |+ preview
         )
 
     override this.Title = %"hud.earlylatemeter.name"
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        options.HUD.Set
-            { options.HUD.Value with
-                EarlyLateMeterFadeTime = animation_time.Value
-            }
-
         Noteskins.save_hud_config
             { Content.NoteskinConfig.HUD with
                 EarlyLateMeterPosition = pos.Value
+                EarlyLateMeterDuration = duration.Value
+                EarlyLateMeterUseTexture = use_texture.Value
                 EarlyLateMeterEarlyText = early_text.Value
                 EarlyLateMeterEarlyColor = early_color.Value
                 EarlyLateMeterLateText = late_text.Value

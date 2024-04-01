@@ -243,9 +243,11 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
 
 type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let atime = user_options.EarlyLateMeterFadeTime * rate.Value * 1.0f<ms>
+    let duration = noteskin_options.EarlyLateMeterDuration * rate.Value * 1.0f<ms>
     let mutable early = false
     let mutable time = -Time.infinity
+
+    let texture = Content.Texture "early-late"
 
     do
         state.SubscribeToHits(fun ev ->
@@ -261,25 +263,30 @@ type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
 
     override this.Draw() =
         if time > -Time.infinity then
-            let a =
-                255
-                - Math.Clamp(255.0f * (state.CurrentChartTime() - time) / atime |> int, 0, 255)
 
-            Text.fill (
-                Style.font,
-                (if early then
-                     noteskin_options.EarlyLateMeterEarlyText
-                 else
-                     noteskin_options.EarlyLateMeterLateText),
-                this.Bounds,
-                (if early then
-                     noteskin_options.EarlyLateMeterEarlyColor
-                 else
-                     noteskin_options.EarlyLateMeterLateColor)
-                    .O4a
-                    a,
-                Alignment.CENTER
-            )
+            let time_ago = state.CurrentChartTime() - time
+
+            if time_ago < duration then
+
+                if noteskin_options.EarlyLateMeterUseTexture then
+                    Draw.quad 
+                        ((Sprite.fill this.Bounds texture).AsQuad)
+                        (Quad.color Color.White)
+                        (Sprite.pick_texture (float32 time_ago / noteskin_options.EarlyLateMeterFrameTime |> floor |> int, if early then 0 else 1) texture)
+                else
+                    Text.fill (
+                        Style.font,
+                        (if early then
+                             noteskin_options.EarlyLateMeterEarlyText
+                         else
+                             noteskin_options.EarlyLateMeterLateText),
+                        this.Bounds,
+                        (if early then
+                             noteskin_options.EarlyLateMeterEarlyColor
+                         else
+                             noteskin_options.EarlyLateMeterLateColor),
+                        Alignment.CENTER
+                    )
 
 type Combo(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)

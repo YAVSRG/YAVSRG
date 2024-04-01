@@ -300,6 +300,12 @@ module NoteskinTextureRules =
                     MustBeSquare = K false
                     MaxGridSize = K(16, 32)
                 }
+                "early-late",
+                {
+                    IsRequired = fun config -> config.HUD.EarlyLateMeterUseTexture
+                    MustBeSquare = K false
+                    MaxGridSize = K(2, 32)
+                }
             ]
 
     let get (config: NoteskinConfig) (name: string) = TEXTURES.[name].Evaluate config
