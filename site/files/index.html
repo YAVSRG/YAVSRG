@@ -18,64 +18,70 @@ Built to be as fun as possible, for both casual and serious rhythm gamers." prop
   <div class="flex flex-col h-screen justify-between">
 
     <!-- content -->
-	<div class="background-1">
-		<div class="py-4 items-center text-center">
-		  <div class="frame-green text-30 container p-4 mx-auto">Yet another vertically scrolling rhythm game</div>
+		<div class="py-1 header text-2xl lg:text-4xl">
+      <div class="flex items-center justify-between container mx-auto px-4">
+        <div class="flex flex-row lg:text-4xl items-center">
+          <img class="h-8 mr-4" src="favicon.png"/>
+          Yet another vertically scrolling rhythm game
+        </div>
+        <a href="https://github.com/YAVSRG/YAVSRG/releases/latest/download/Interlude-win64.zip" class="button text-2xl text-center text-green px-4 h-8 w-32">
+          Download
+        </a>
+      </div>
 		</div>
-	</div>
 
-    <div class="w-full p-10">
+    <div class="w-full p-10 pt-4">
 
-      <div class="container flex flex-col mx-auto space-y-4">
+      <div class="container mx-auto flex flex-col">
 
-        <div id="feature-carousel" class="relative frame text-20 text-center w-full p-10" data-carousel="slide" data-carousel-interval="7000">
+        <div id="feature-carousel" class="relative hidden frame text-2xl text-center w-full p-10" data-carousel="slide" data-carousel-interval="7000">
           <div style="aspect-ratio: 1920/1040;" class="relative overflow-hidden rounded-md">
               <div class="hidden duration-500 ease-in-out" data-carousel-item>
                   <img src="levelselect.jpg" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
                   <div class="overlay"></div>
                   <div class="absolute left-0 bottom-0 flex flex-col m-4">
-                    <p class="text-50 text-left text-green">Your new home</p>
-                    <p class="text-20 text-left">Everything you need for casual or serious play in one place</p>
+                    <p class="text-5xl text-left text-green">Your new home</p>
+                    <p class="text-2xl text-left">Everything you need for casual or serious play in one place</p>
                   </div>
               </div>
               <div class="hidden duration-500 ease-in-out" data-carousel-item>
                   <img src="import.png" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
                   <div class="overlay"></div>
                   <div class="absolute left-0 bottom-0 flex flex-col m-4">
-                    <p class="text-50 text-left text-green">Easy to set up</p>
-                    <p class="text-20 text-left">Ingame downloader for noteskins, charts and more</p>
+                    <p class="text-5xl text-left text-green">Easy to set up</p>
+                    <p class="text-2xl text-left">Ingame downloader for noteskins, charts and more</p>
                   </div>
               </div>
               <div class="hidden duration-500 ease-in-out" data-carousel-item>
                   <img src="tooltips.png" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
                   <div class="overlay"></div>
                   <div class="absolute left-0 bottom-0 flex flex-col m-4">
-                    <p class="text-50 text-left text-green">Easy to find things</p>
-                    <p class="text-20 text-left">Press the / key while hovering over most things for information and tips</p>
+                    <p class="text-5xl text-left text-green">Easy to find things</p>
+                    <p class="text-2xl text-left">Press the / key while hovering over most things for information and tips</p>
                   </div>
               </div>
               <div class="hidden duration-500 ease-in-out" data-carousel-item>
                   <img src="hud.png" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
                   <div class="overlay"></div>
                   <div class="absolute left-0 bottom-0 flex flex-col m-4">
-                    <p class="text-50 text-left text-green">Make yourself comfortable</p>
-                    <p class="text-20 text-left">Customise and reposition the gameplay HUD to your liking</p>
+                    <p class="text-5xl text-left text-green">Make yourself comfortable</p>
+                    <p class="text-2xl text-left">Customise and reposition the gameplay HUD to your liking</p>
                   </div>
               </div>
               <div class="hidden duration-500 ease-in-out" data-carousel-item>
                   <img src="practice.png" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
                   <div class="overlay"></div>
                   <div class="absolute left-0 bottom-0 flex flex-col m-4">
-                    <p class="text-50 text-left text-green">Make yourself comfortable</p>
-                    <p class="text-20 text-left">Tools for practising charts and getting the correct audio sync</p>
+                    <p class="text-5xl text-left text-green">Make yourself comfortable</p>
+                    <p class="text-2xl text-left">Tools for practising charts and getting the correct audio sync</p>
                   </div>
               </div>
               <div class="hidden duration-500 ease-in-out" data-carousel-item>
                   <img src="stats.jpg" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..."/>
                   <div class="overlay"></div>
                   <div class="absolute left-0 bottom-0 flex flex-col m-4">
-                    <p class="text-50 text-left text-green">Much more..</p>
-                    <p class="text-20 text-left">Leaderboard rankings, stats, multiplayer currently in development</p>
+                    <p class="text-5xl text-left text-green">Much more..</p>
+                    <p class="text-2xl text-left">Leaderboard rankings, stats, multiplayer currently in development</p>
                   </div>
               </div>
           </div>
@@ -97,29 +103,70 @@ Built to be as fun as possible, for both casual and serious rhythm gamers." prop
           </button>
         </div>
 
-        <div class="flex flex-row space-x-4 justify-between">
+        <div class="frame-top text-2xl w-full py-4 px-4">
+          <div class="flex flex-row space-x-8 items-center justify-between">
 
-          <div class="frame text-center text-20 w-40 p-4 flex flex-col justify-center">
-            <img class="rounded-full border-4 border-white" src="pfp.png"/>
-            <a href="https://github.com/percyqaz" class="text-20 hover:underline">Percyqaz</a>
-            <p class="leading-8 py-2">Maker of Interlude</p>
-          </div>
+            <div class="text-center text-2xl w-40 p-4 flex flex-col justify-center">
+              <img class="rounded-full border-4 border-white" src="pfp.png"/>
+              <a href="https://github.com/percyqaz" class="text-2xl hover:underline">Percyqaz</a>
+              <p class="leading-8 py-2">Maker of Interlude</p>
+            </div>
 
-          <div class="frame text-20 w-full py-4 px-6">
-            <h1 class="text-30">Interlude</h1>
-            <p>
-            Interlude is a hobby project I've been working on for fun since 2018; It's the culmination of many years of game development knowledge and experience playing VSRGs.
-            <br/>
-            <br/>
-            My aim is to make a VSRG client the way I like it, packed with cool ideas and quality of life to provide my "ideal VSRG experience" - If you like the same things as me, you will surely like this client too.
+            <p class="lg:text-3xl">
+              Interlude is a VSRG hobby project I've been working on for fun since 2018.
+              <br/>
+              Its goal is to be an ultra-convenient client full of quality-of-life features to help you have as much fun as possible.
+              <br/>
+              It's designed to work just the way I like it - If you like the same things as me, you will surely like this client too.
             </p>
-          </div>
 
+          </div>
         </div>
 
-        <div class="frame text-20 text-center w-full p-4 mb-0">
+        <div class="frame-middle-2 text-2xl p-4 lg:p-8 flex flex-col lg:flex-row items-center justify-between gap-x-8">
+          <div class="text-center w-full">
+            <h3 class="text-5xl">Now in open beta!</h3>
+            <p class="hidden lg:block text-3xl">
+              The game is free to anyone wants to try it out.
+              <br/>
+              I regularly release feature updates, improvements and bug fixes based on player feedback.
+            </p>
+          </div>
+          <div>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/sYY4wgmu1vk?si=Tqqpvy6XXvJWXqit" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>  
+        </div>
 
-          <h1 class="text-30">Like what you see?</h1>
+        <div class="frame-middle text-2xl text-left p-4">
+          <h3 class="text-3xl">Make yourself at home</h3>
+          <ul>
+            <li>Import your songs, scores and skins from osu!mania</li>
+            <li>Import your songs from Etterna</li>
+            <li>Tools for getting offset and scroll speed right</li>
+          </ul>
+        </div>
+
+        <div class="frame-middle-2 text-2xl text-right p-4">
+          <h3 class="text-3xl">Ease of use</h3>
+          <ul>
+            <li>Ingame downloads for songs, packs, noteskins and more</li>
+            <li>Edit your noteskin ingame</li>
+            <li>Built in tooltips and wiki</li>
+          </ul>
+        </div>
+
+        <div class="frame-middle text-2xl text-left p-4">
+          <h3 class="text-3xl">Just play</h3>
+          <ul>
+            <li>All your songs in one place</li>
+            <li>Intelligent suggestions on what to play next</li>
+            <li>'Endless mode' system to instantly play suggested songs one after another</li>
+          </ul>
+        </div>
+
+        <div class="frame-bottom text-2xl text-center p-4">
+
+          <h1 class="text-3xl">Like what you see?</h1>
 
           <p class="leading-8 mb-8">
             Interlude can only grow to its full potential with your help.
@@ -127,9 +174,9 @@ Built to be as fun as possible, for both casual and serious rhythm gamers." prop
           </p>
 
           <div class="w-full flex flex-col lg:flex-row justify-center gap-y-4 gap-x-20 items-center">
-            <a href="https://github.com/YAVSRG/YAVSRG/releases/latest/download/Interlude-win64.zip" class="lg:hidden button text-30 text-green px-6 py-1 w-56">Play now</a>
+            <a href="https://github.com/YAVSRG/YAVSRG/releases/latest/download/Interlude-win64.zip" class="lg:hidden button text-3xl text-green px-6 py-1 w-56">Play now</a>
             <a href="https://yavsrg.net/discord" class="button px-6 py-1">Join the Discord</a>
-            <a href="https://github.com/YAVSRG/YAVSRG/releases/latest/download/Interlude-win64.zip" class="hidden lg:block button text-30 text-green px-6 py-1 w-56">Play now</a>
+            <a href="https://github.com/YAVSRG/YAVSRG/releases/latest/download/Interlude-win64.zip" class="hidden lg:block button text-3xl text-green px-6 py-1 w-56">Play now</a>
             <a href="https://github.com/YAVSRG/YAVSRG" class="button px-6 py-1">Follow on GitHub</a>
           </div>
 
@@ -139,16 +186,16 @@ Built to be as fun as possible, for both casual and serious rhythm gamers." prop
     </div>
 
     <!-- footer -->
-    <footer class="footer text-20 px-4 flex flex-col lg:flex-row items-center justify-center gap-x-8">
-      <span>© Percyqaz 2018-2024</span>
-	  <div></div>
-	  <a href="index.html" class="hover:underline">Home</a>
-	  <a href="interlude/changelog.html" class="hover:underline">Changelog</a>
-	  <a href="interlude/wiki/index.html" class="hover:underline">Wiki</a>
-	  <div class="py-2"></div>
-	  <a href="terms_of_service.html" class="hover:underline">Terms</a>
-	  <a href="privacy_policy.html" class="hover:underline">Privacy</a>
-	  <a href="mailto:dmca@yavsrg.net" class="hover:underline">DMCA</a>
+    <footer class="footer text-2xl px-4 flex flex-col lg:flex-row items-center justify-center gap-x-8">
+        <span>© Percyqaz 2018-2024</span>
+        <div></div>
+        <a href="index.html">Home</a>
+        <a href="interlude/changelog.html">Changelog</a>
+        <a href="interlude/wiki/index.html">Wiki</a>
+        <div class="py-2"></div>
+        <a href="terms_of_service.html">Terms</a>
+        <a href="privacy_policy.html">Privacy</a>
+        <a href="mailto:dmca@yavsrg.net">DMCA</a>
     </footer>
 
   </div>
