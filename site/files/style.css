@@ -13,6 +13,7 @@
     --shadow-2-2a: #0a0911AA;
     --shadow-2-1a: #0a091177;
     --cyan: #1d869d;
+    --cyan-2: #0b6479;
     --cyan-accent: #43e0ef;
     --cyan-shadow: #084251;
     --cyan-shadow-2a: #084251AA;
@@ -87,7 +88,7 @@ li {
 }
 
 .background-1 {
-    background-color: var(--cyan);
+    background-color: var(--cyan-2);
 }
 
 .background-2 {
@@ -125,6 +126,13 @@ li {
 }
 
 .frame-middle-2 {
+    background-color: var(--cyan-2);
+    border-left: 5px solid var(--cyan-accent);
+    border-right: 5px solid var(--cyan-accent);
+    box-shadow: var(--shadow-2-3a) 5px 5px 0;
+}
+
+.frame-middle-3 {
     background-color: var(--cyan-shadow);
     border-left: 5px solid var(--cyan-accent);
     border-right: 5px solid var(--cyan-accent);

@@ -8,7 +8,7 @@ module MarkdownToHtml =
 
     let rec private paragraph (p: MarkdownParagraph) =
         match p with
-        | Heading(size, body, _) -> sprintf "<h%i class=\"text-30\">%s</h%i>" size (spans body) size
+        | Heading(size, body, _) -> sprintf "<h%i class=\"text-3xl\">%s</h%i>" size (spans body) size
         | Paragraph(body, _) -> sprintf "<p class=\"leading-8 mb-4\">%s</p>" (spans body)
         | Span(body, _) -> spans body
         | ListBlock(kind, items, _) ->
@@ -63,7 +63,7 @@ let build_page (file: string) (title: string) (content: string) =
 let build_mpage (file: string) (title: string) (contents: string array) =
     let content =
         contents
-        |> Array.map (sprintf "<div class=\"frame text-20 container flex flex-col mx-auto p-4\">%s</div>")
+        |> Array.map (sprintf "<div class=\"frame text-2xl container flex flex-col mx-auto p-4\">%s</div>")
         |> String.concat ""
 
     changelog_template.Replace("{{title}}", title).Replace("{{content}}", content)
@@ -123,7 +123,7 @@ let parse_wiki_file (path: string) =
     let html =
         split.[2].Split("::::", System.StringSplitOptions.TrimEntries)
         |> Array.map (Markdown.Parse >> MarkdownToHtml.render_document)
-        |> Array.map (sprintf "<div class=\"frame text-20 container flex flex-col mx-auto p-4\">%s</div>")
+        |> Array.map (sprintf "<div class=\"frame text-2xl container flex flex-col mx-auto p-4\">%s</div>")
         |> String.concat ""
 
     { Title = header_info.["title"]
@@ -152,7 +152,7 @@ let wiki_sidebar_content =
     |> Seq.map wiki_section
     |> String.concat ""
     |> sprintf
-        "<div class=\"frame text-20 container flex flex-col mx-auto p-4\"><h1 class=\"text-30\">Table of contents</h1>%s</div>"
+        "<div class=\"frame text-2xl container flex flex-col mx-auto p-4\"><h1 class=\"text-3xl\">Table of contents</h1>%s</div>"
 
 let wiki_template = File.ReadAllText("./templates/wiki.html")
 
@@ -167,7 +167,7 @@ let content =
         .ReadAllText("../interlude/docs/wiki/index.md")
         .Split([| "::::" |], System.StringSplitOptions.TrimEntries)
     |> Array.map (Markdown.Parse >> MarkdownToHtml.render_document)
-    |> Array.map (sprintf "<div class=\"frame text-20 container flex flex-col mx-auto p-4\">%s</div>")
+    |> Array.map (sprintf "<div class=\"frame text-2xl container flex flex-col mx-auto p-4\">%s</div>")
     |> String.concat ""
 
 wiki_template
