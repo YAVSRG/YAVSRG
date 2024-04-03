@@ -211,12 +211,12 @@ type SystemPage() as this =
                 .Pos(19)
                 .Tooltip(Tooltip.Info("system.hotkeys"))
 
-            |+ PageSetting(
-                "system.framelimit",
-                Selector.FromEnum(config.RenderMode |> Setting.trigger mark_changed)
+            |+ PageButton(
+                "system.performance",
+                (fun () -> PerformanceSettingsPage().Show())
             )
                 .Pos(0)
-                .Tooltip(Tooltip.Info("system.framelimit"))
+                .Tooltip(Tooltip.Info("system.performance"))
             |+ Conditional(
                 (fun () -> config.RenderMode.Value = FrameLimit.Unlimited),
                 Text(%"system.framelimit.unlimited_warning", 

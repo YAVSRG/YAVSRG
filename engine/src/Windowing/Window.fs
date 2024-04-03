@@ -2,7 +2,6 @@
 
 open System
 open FSharp.NativeInterop
-open OpenTK
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.Common
 open OpenTK.Windowing.GraphicsLibraryFramework
@@ -245,7 +244,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         was_fullscreen <- config.WindowMode.Value = WindowType.Fullscreen
 
         if OperatingSystem.IsWindows() then
-            FrameTimeStrategies.open_adapter (GLFW.GetWin32Adapter monitor_ptr) (GLFW.GetWin32Monitor monitor_ptr)
+            FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor_ptr) (GLFW.GetWin32Monitor monitor_ptr)
 
         sync
         <| fun () ->
@@ -255,6 +254,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 config.WindowMode.Value = WindowType.Fullscreen
                 || config.WindowMode.Value = WindowType.``Borderless Fullscreen``
             )
+            anti_jitter <- config.SmartCapAntiJitter.Value
 
     member this.EnableResize(callback) =
         if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Fixed then

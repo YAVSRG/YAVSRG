@@ -43,6 +43,7 @@ type Config =
         WindowResolution: Setting<int * int>
         FullscreenVideoMode: Setting<FullscreenVideoMode>
         RenderMode: Setting<FrameLimit>
+        SmartCapAntiJitter: Setting<bool>
         Display: Setting<int>
         AudioDevice: Setting<int>
     }
@@ -60,6 +61,7 @@ type Config =
                         RefreshRate = 60
                     }
             RenderMode = Setting.simple FrameLimit.Smart
+            SmartCapAntiJitter = Setting.simple true
             Display = Setting.simple 0
             AudioDevice = Setting.simple -1
         }
