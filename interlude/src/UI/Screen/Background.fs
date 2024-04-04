@@ -69,7 +69,7 @@ module Background =
                                         else
                                             Content.ThemeConfig.DefaultAccentColor
 
-                            if bmp.Width * 3 / 4 > Viewport.rwidth then
+                            if bmp.Width * 3 / 4 > Viewport.rwidth && Viewport.rwidth > 0 then
                                 bmp.Mutate(fun img -> img.Resize(Viewport.rwidth, 0) |> ignore)
 
                             return Some(bmp, col)

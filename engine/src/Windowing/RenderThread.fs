@@ -288,7 +288,7 @@ type Strategy =
 [<AutoOpen>]
 module SmartCapConstants =
     
-    let mutable screen_tearing_offset = -1.0
+    let SCREEN_TEAR_ADJUSTMENT = 1.0
     let mutable anti_jitter = true
 
 type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_init: unit -> unit) =
@@ -298,16 +298,13 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
     let fps_timer = Stopwatch()
     let last_frame_timer = Stopwatch()
     let total_frame_timer = Stopwatch.StartNew()
-    let mutable est_present_of_next_frame = 0.0
-    let mutable present_of_last_frame = 0.0
-    let mutable swap_of_last_frame = 0.0
+    let mutable estimated_next_frame = 0.0
+    let mutable real_next_frame = 0.0
     let mutable start_of_frame = 0.0
     let mutable frame_is_ready = 0.0
-    let mutable monitor_y = 1080.0
-    let mutable est_refresh_period = 1000.0 / 60.0
     let mutable is_focused = true
     let mutable strategy = Unlimited
-    let mutable cpu_timing_compensation = 0.0
+    let mutable last_frame = 0uL
 
     let now () =
         total_frame_timer.Elapsed.TotalMilliseconds
@@ -321,11 +318,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         Render.resize (newSize.X, newSize.Y)
         resized <- true
 
-    member this.RenderModeChanged(refresh_rate: int, monitor_height: int, fullscreen: bool) =
-        est_refresh_period <- 1000.0 / float refresh_rate
-        cpu_timing_compensation <- 0.0
-        monitor_y <- float monitor_height
-
+    member this.RenderModeChanged(fullscreen: bool) =
         strategy <-
             if this.RenderMode = FrameLimit.Smart then
                 if fullscreen then CpuTimingFullscreen else CpuTimingWindowed
@@ -355,38 +348,30 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         match strategy with
 
         | Unlimited ->
-            present_of_last_frame <- now ()
             Performance.visual_latency_lo <- 0.0
             Performance.visual_latency_hi <- 1.0
 
         | CpuTimingFullscreen ->
             let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
-            present_of_last_frame <- swap_of_last_frame
-            est_present_of_next_frame <- last_vblank + est_refresh_period + screen_tearing_offset
-            Performance.visual_latency_lo <- est_present_of_next_frame - present_of_last_frame
-            Performance.visual_latency_hi <- est_present_of_next_frame - present_of_last_frame
+            estimated_next_frame <- last_vblank + est_refresh_period
 
-            // apply correction
-            let how_late = present_of_last_frame - last_vblank
-            let how_early = est_present_of_next_frame - present_of_last_frame
-            printfn "late: %.2f early: %.2f" how_late how_early
-            if how_late < how_early then
-                cpu_timing_compensation <- cpu_timing_compensation - how_late * 0.001
-                printfn "%.2f" cpu_timing_compensation
-            else
-                cpu_timing_compensation <- cpu_timing_compensation + how_early * 0.001
-                printfn "%.2f" cpu_timing_compensation
+            if frame = last_frame then estimated_next_frame <- estimated_next_frame + est_refresh_period
 
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, est_present_of_next_frame + cpu_timing_compensation)
+            Performance.visual_latency_lo <- real_next_frame - frame_is_ready
+            Performance.visual_latency_hi <- Performance.visual_latency_lo
+            let time_taken_last_frame = frame_is_ready - start_of_frame
+
+            last_frame <- frame
+            
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - time_taken_last_frame - 3.0)
         
         | CpuTimingWindowed ->
             let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
-            present_of_last_frame <- swap_of_last_frame
-            est_present_of_next_frame <- last_vblank + est_refresh_period
-            Performance.visual_latency_lo <- est_present_of_next_frame - present_of_last_frame
-            Performance.visual_latency_hi <- est_present_of_next_frame - present_of_last_frame
+            estimated_next_frame <- last_vblank + est_refresh_period
+            Performance.visual_latency_lo <- estimated_next_frame - real_next_frame
+            Performance.visual_latency_hi <- estimated_next_frame - real_next_frame
 
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, est_present_of_next_frame)
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame)
 
         let elapsed_ms = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
@@ -415,9 +400,14 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         frame_is_ready <- now ()
         Performance.draw_time <- frame_is_ready - before_draw
 
+        match strategy with
+        | CpuTimingFullscreen ->
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - 1.5)
+        | _ -> ()
+
         if not ui_root.ShouldExit then
             window.Context.SwapBuffers()
-            swap_of_last_frame <- now ()
+            real_next_frame <- now ()
 
         // Performance profiling
         fps_count <- fps_count + 1
@@ -440,7 +430,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         Performance.frame_compensation <-
             fun () ->
                 if strategy <> Unlimited && anti_jitter then
-                    float32 (est_present_of_next_frame - now ()) * 1.0f<ms>
+                    float32 (estimated_next_frame - now ()) * 1.0f<ms>
                 else
                     0.0f<ms>
 

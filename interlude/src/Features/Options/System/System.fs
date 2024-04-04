@@ -217,14 +217,7 @@ type SystemPage() as this =
             )
                 .Pos(0)
                 .Tooltip(Tooltip.Info("system.performance"))
-            |+ Conditional(
-                (fun () -> config.RenderMode.Value = FrameLimit.Unlimited),
-                Text(%"system.framelimit.unlimited_warning", 
-                    Color = K Colors.text_red,
-                    Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
-                    Align = Alignment.LEFT
-                )
-            )
+
             |+ PageSetting(
                 "system.windowmode",
                 Selector.FromEnum(
