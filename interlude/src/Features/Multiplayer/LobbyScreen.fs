@@ -20,26 +20,34 @@ type LobbySettingsPage(settings: LobbySettings) as this =
     let host_rotation = Setting.simple settings.HostRotation
     let auto_countdown = Setting.simple settings.AutomaticRoundCountdown
 
-    do
-        page_container()
-        |+ PageTextEntry("lobby.name", name).Pos(0)
-        |+ PageSetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation))
-            .Pos(3)
-            .Tooltip(Tooltip.Info("lobby.host_rotation"))
-        |+ PageSetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown))
-            .Pos(5)
-            .Tooltip(Tooltip.Info("lobby.auto_countdown"))
-        |> this.Content
-
-    override this.Title = %"lobby.name"
-
-    override this.OnClose() =
+    let submit () =
         Lobby.settings
             {
                 Name = name.Value
                 HostRotation = host_rotation.Value
                 AutomaticRoundCountdown = auto_countdown.Value
             }
+
+    let submit_button =
+        PageButton (
+            "confirm.yes",
+            (fun () ->
+                submit ()
+                Menu.Back()
+            )
+        )
+
+    do
+        this.Content (
+            page_container()
+            |+ PageTextEntry("lobby.name", name |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0)).Pos(0)
+            |+ PageSetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation)).Pos(3)
+            |+ PageSetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown)).Pos(5)
+            |+ submit_button.Pos(7)
+        )
+
+    override this.Title = %"lobby.name"
+    override this.OnClose() = ()
 
 type Lobby() =
     inherit Container(NodeType.None)
