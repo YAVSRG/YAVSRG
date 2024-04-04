@@ -1,27 +1,26 @@
-0.7.19.3
+0.7.19.4
 ====
 
-As usual thank you players new and old for trying the game and giving feedback :)
+Slightly delayed feature update  
+I also redesigned the site a little, go check it out :)
+
+# Smart frame cap overhaul
+It should now run a lot smoother on more hardware, but needs some field testing  
+
+If the game now runs like absolute butter for you please let me know and applaud my genius in the Discord  
+If the game now runs worse for you please immediately complain in the Discord and I can take a look  
 
 # Noteskin and HUD features
-- Noteskins now support custom textures for judgement indicators! Skinners rejoice - Template skins, documentation, etc coming soon
-- Judgement meter has an improved animation, which can be turned off if you want to use a texture-only animation
-- HUD editor is part of the noteskin editor + improved navigation to it
-- Hold shift + use arrow keys to make 1-pixel adjustments in the HUD editor
+- Early/late meter now supports noteskin textures the same way the judgement meter does
 
-# UI improvements
-- Audio rates can be changed with a slider from the mods menu, to help more people find it
-- Ruleset switcher now correctly scrolls instead of clipping offscreen when you have lots installed
-- Score screen now shows who made the chart
-- Score screen slightly adjusted to look better
-- All menus have been overall re-scaled and adjusted to look more consistent
+# Other features
+- More informational toasts/notifications for various things such as when an osu! skin.ini fails to parse
+- osu! skin converter now converts judgement textures over to noteskins
+- New gameplay modifier: More notes -- This is experimental and subject to change, therefore you cannot save scores with it on
+- Discord rich presence activity now has an icon
 
 # Bug fixes
-- Fixed a crash when viewing the tooltip on the ruleset picker
-- Fixed several issues with Smart frame cap on multi-monitor setups
-- Fixed parts of main menu disappearing if you tab out in fullscreen while it loads
-- Fixed hotkey for reloading themes/noteskins not reloading certain config about textures
-
-Lots of UI code was changed for this update, I might have missed something  
-If you spot anything that looks wrong please report it
+- Fixed background images being smeared horizontally if the game initialised while minimised in fullscreen
+- Fixed LN% and note counts not updating when changing selected mods
+- Fixed a crash in the HUD editor nobody knew about
 
