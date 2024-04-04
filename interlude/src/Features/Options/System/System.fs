@@ -211,20 +211,13 @@ type SystemPage() as this =
                 .Pos(19)
                 .Tooltip(Tooltip.Info("system.hotkeys"))
 
-            |+ PageSetting(
-                "system.framelimit",
-                Selector.FromEnum(config.RenderMode |> Setting.trigger mark_changed)
+            |+ PageButton(
+                "system.performance",
+                (fun () -> PerformanceSettingsPage().Show())
             )
                 .Pos(0)
-                .Tooltip(Tooltip.Info("system.framelimit"))
-            |+ Conditional(
-                (fun () -> config.RenderMode.Value = FrameLimit.Unlimited),
-                Text(%"system.framelimit.unlimited_warning", 
-                    Color = K Colors.text_red,
-                    Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
-                    Align = Alignment.LEFT
-                )
-            )
+                .Tooltip(Tooltip.Info("system.performance"))
+
             |+ PageSetting(
                 "system.windowmode",
                 Selector.FromEnum(

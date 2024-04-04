@@ -112,6 +112,7 @@
     <Compile Include="Features\LevelSelect\Info\Info.fs" />
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />
     <Compile Include="Features\Options\System\Hotkeys.fs" />
+    <Compile Include="Features\Options\System\Performance.fs" />
     <Compile Include="Features\Options\System\System.fs" />
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
     <Compile Include="Features\Options\Gameplay\Preview.fs" />

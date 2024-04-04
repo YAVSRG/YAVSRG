@@ -4,10 +4,8 @@ open System
 open System.Threading
 open System.Diagnostics
 open System.Runtime.InteropServices
-open OpenTK
 open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
-open OpenTK.Windowing.Common
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
@@ -127,77 +125,6 @@ module private FrameTimeStrategies =
             hDc
         | None -> 0
 
-    let mutable private _hAdapter = 0u
-    let mutable private _VinPnSourceId = 0u
-
-    let close_adapter () =
-        if _hAdapter <> 0u then
-            let mutable info = { hAdapter = _hAdapter }
-
-            if D3DKMTCloseAdapter(&info) <> 0l then
-                Logging.Error("Error closing adapter after use")
-
-    let open_adapter (gdi_adapter_name: string) (glfw_monitor_name: string) =
-        close_adapter ()
-        let hDc = get_display_handle glfw_monitor_name
-
-        if hDc = 0 then
-            let mutable info =
-                { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME> with
-                    pDeviceName = gdi_adapter_name
-                }
-
-            if D3DKMTOpenAdapterFromGdiDisplayName &info <> 0l then
-                Logging.Error("Error getting adapter handle by GDI name")
-
-            _hAdapter <- info.hAdapter
-            _VinPnSourceId <- info.VinPnSourceId
-        else
-            let mutable info =
-                { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMHDC> with
-                    hDc = hDc
-                }
-
-            if D3DKMTOpenAdapterFromHdc &info <> 0l then
-                Logging.Error("Error getting adapter handle by hDc")
-
-            _hAdapter <- info.hAdapter
-            _VinPnSourceId <- info.VinPnSourceId
-
-            if not (DeleteDC hDc) then
-                Logging.Error("Error deleting hDc after use")
-
-    (* USING OPEN ADAPTER TO GET SYNC INFORMATION *)
-
-    let get_scanline () =
-        let mutable info =
-            { Unchecked.defaultof<D3DKMT_GETSCANLINE> with
-                hAdapter = _hAdapter
-                VinPnSourceId = _VinPnSourceId
-            }
-
-        if D3DKMTGetScanLine &info <> 0l then
-            Logging.Error("Error getting scanline from video adapter")
-            None
-        else
-            Some(info.ScanLine, info.InVerticalBlank)
-
-    let wait_for_vblank () =
-        let mutable info =
-            {
-                hAdapter = _hAdapter
-                hDevice = 0u
-                VinPnSourceId = _VinPnSourceId
-            }
-
-        let status = D3DKMTWaitForVerticalBlankEvent &info
-
-        if status <> 0l then
-            Logging.Error(sprintf "Error waiting for vblank (%i)" status)
-            false
-        else
-            true
-
     (* THREAD SLEEPING STRATEGIES *)
 
     let NATIVE_SLEEP_TRUST_THRESHOLD_MS =
@@ -235,17 +162,134 @@ module private FrameTimeStrategies =
                 while timer.Elapsed.TotalMilliseconds < until do
                     spin_wait.SpinOnce -1
 
+    module VBlankThread =
+
+        let mutable private _hAdapter = 0u
+        let mutable private _VinPnSourceId = 0u
+
+        let private close_adapter () =
+            if _hAdapter <> 0u then
+                let mutable info = { hAdapter = _hAdapter }
+
+                if D3DKMTCloseAdapter(&info) <> 0l then
+                    Logging.Error("Error closing adapter after use")
+
+        let private open_adapter (gdi_adapter_name: string) (glfw_monitor_name: string) =
+            close_adapter ()
+            let hDc = get_display_handle glfw_monitor_name
+
+            if hDc = 0 then
+                let mutable info =
+                    { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME> with
+                        pDeviceName = gdi_adapter_name
+                    }
+
+                if D3DKMTOpenAdapterFromGdiDisplayName &info <> 0l then
+                    Logging.Error("Error getting adapter handle by GDI name")
+
+                _hAdapter <- info.hAdapter
+                _VinPnSourceId <- info.VinPnSourceId
+            else
+                let mutable info =
+                    { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMHDC> with
+                        hDc = hDc
+                    }
+
+                if D3DKMTOpenAdapterFromHdc &info <> 0l then
+                    Logging.Error("Error getting adapter handle by hDc")
+
+                _hAdapter <- info.hAdapter
+                _VinPnSourceId <- info.VinPnSourceId
+
+                if not (DeleteDC hDc) then
+                    Logging.Error("Error deleting hDc after use")
+
+        (* USING OPEN ADAPTER TO GET SYNC INFORMATION *)
+
+        let private get_scanline () =
+            let mutable info =
+                { Unchecked.defaultof<D3DKMT_GETSCANLINE> with
+                    hAdapter = _hAdapter
+                    VinPnSourceId = _VinPnSourceId
+                }
+
+            if D3DKMTGetScanLine &info <> 0l then
+                Logging.Error("Error getting scanline from video adapter")
+                None
+            else
+                Some(info.ScanLine, info.InVerticalBlank)
+
+        let private wait_for_vblank () =
+            let mutable info =
+                {
+                    hAdapter = _hAdapter
+                    hDevice = 0u
+                    VinPnSourceId = _VinPnSourceId
+                }
+
+            let status = D3DKMTWaitForVerticalBlankEvent &info
+
+            if status <> 0l then
+                Logging.Error(sprintf "Error waiting for vblank (%i)" status)
+                false
+            else
+                true
+
+        (* LOOP *)
+
+        let private LOCK_OBJ = obj()
+        let mutable private _last_time = 0.0 // in thread
+        let mutable private _vblank_number = 0uL
+        let mutable private last_time = 0.0 // shared
+        let mutable private vblank_number = 0uL // shared
+        let mutable private est_period = 0.0
+        let mutable private sync_broken = true
+        let mutable private action_queue : (unit -> unit) list = []
+        let mutable private looping = true
+
+        let private loop (sw: Stopwatch) =
+            while looping do
+                if not sync_broken then
+                    let before = sw.Elapsed.TotalMilliseconds
+                    if not (wait_for_vblank()) then sync_broken <- true
+                    _last_time <- sw.Elapsed.TotalMilliseconds
+                    if _vblank_number > 240uL && abs (before + est_period - _last_time) > 1.0 then
+                        _last_time <- before + est_period
+                    else
+                        est_period <- est_period * 0.95 + (_last_time - before) * 0.05
+                    _vblank_number <- _vblank_number + 1uL
+                lock LOCK_OBJ <| fun () ->
+                    last_time <- _last_time
+                    vblank_number <- _vblank_number
+                    for action in action_queue do action()
+                    action_queue <- []
+
+        let start (sw: Stopwatch) =
+            Thread(fun () ->
+                loop sw
+            ).Start()
+
+        let stop () = looping <- false
+
+        let switch (period: float) (gdi_adapter_name: string) (glfw_monitor_name: string) =
+            lock LOCK_OBJ <| fun () ->
+                action_queue <- (fun () -> _vblank_number <- 0uL; sync_broken <- false; est_period <- period; open_adapter gdi_adapter_name glfw_monitor_name) :: action_queue
+
+        let get (sw: Stopwatch) =
+            lock LOCK_OBJ <| fun () ->
+            if sync_broken then 0uL, sw.Elapsed.TotalMilliseconds, est_period
+            else vblank_number, last_time, est_period
+            
 type Strategy =
     | Unlimited
-    | DwmSync
-    | CpuTimingScanlineCorrection
-    | CpuTiming
+    | CpuTimingWindowed
+    | CpuTimingFullscreen
 
 [<AutoOpen>]
-module ScanlineCorrectionConstants =
+module SmartCapConstants =
     
-    let DESIRED_SCANLINE_POSITION = -0.45
-    let SCANLINE_CORRECTION_STRENGTH = 0.1
+    let SCREEN_TEAR_ADJUSTMENT = 1.0
+    let mutable anti_jitter = true
 
 type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_init: unit -> unit) =
 
@@ -254,15 +298,13 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
     let fps_timer = Stopwatch()
     let last_frame_timer = Stopwatch()
     let total_frame_timer = Stopwatch.StartNew()
-    let mutable est_present_of_next_frame = 0.0
-    let mutable present_of_last_frame = 0.0
-    let mutable swap_of_last_frame = 0.0
+    let mutable estimated_next_frame = 0.0
+    let mutable real_next_frame = 0.0
     let mutable start_of_frame = 0.0
     let mutable frame_is_ready = 0.0
-    let mutable monitor_y = 1080.0
-    let mutable est_refresh_period = 1000.0 / 60.0
     let mutable is_focused = true
     let mutable strategy = Unlimited
+    let mutable last_frame = 0uL
 
     let now () =
         total_frame_timer.Elapsed.TotalMilliseconds
@@ -276,16 +318,10 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         Render.resize (newSize.X, newSize.Y)
         resized <- true
 
-    member this.RenderModeChanged(refresh_rate: int, monitor_height: int, fullscreen: bool) =
-        est_refresh_period <- 1000.0 / float refresh_rate
-        monitor_y <- float monitor_height
-
+    member this.RenderModeChanged(fullscreen: bool) =
         strategy <-
             if this.RenderMode = FrameLimit.Smart then
-                if OperatingSystem.IsWindows() then
-                    if fullscreen then CpuTimingScanlineCorrection else DwmSync
-                else
-                    CpuTiming
+                if fullscreen then CpuTimingFullscreen else CpuTimingWindowed
             else
                 Unlimited
 
@@ -300,6 +336,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         with fatal_err ->
             Logging.Critical("Fatal crash in UI thread", fatal_err)
             window.Close()
+        FrameTimeStrategies.VBlankThread.stop ()
 
     member this.Start() =
         let thread = Thread(this.Loop)
@@ -311,53 +348,30 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         match strategy with
 
         | Unlimited ->
-            present_of_last_frame <- now ()
             Performance.visual_latency_lo <- 0.0
             Performance.visual_latency_hi <- 1.0
 
-        | DwmSync ->
-            if not (FrameTimeStrategies.wait_for_vblank ()) then
-                Logging.Warn("Switching to CPU timing instead")
-                strategy <- CpuTiming
+        | CpuTimingFullscreen ->
+            let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
+            estimated_next_frame <- last_vblank + est_refresh_period
 
-            present_of_last_frame <- now ()
-            Performance.visual_latency_lo <- present_of_last_frame - frame_is_ready
-            Performance.visual_latency_hi <- present_of_last_frame - start_of_frame
-            est_present_of_next_frame <- present_of_last_frame + est_refresh_period
+            if frame = last_frame then estimated_next_frame <- estimated_next_frame + est_refresh_period
 
-        | CpuTimingScanlineCorrection ->
-            present_of_last_frame <- swap_of_last_frame
-            Performance.visual_latency_lo <- 0.0
-            Performance.visual_latency_hi <- est_refresh_period
+            Performance.visual_latency_lo <- real_next_frame - frame_is_ready
+            Performance.visual_latency_hi <- Performance.visual_latency_lo
+            let time_taken_last_frame = frame_is_ready - start_of_frame
 
-            let scanline_correction =
-                match FrameTimeStrategies.get_scanline () with
-                | Some(i, _) ->
-                    let line_pc = float i / monitor_y
-                    let desired_pc = DESIRED_SCANLINE_POSITION
-                    let line_pc = if line_pc - desired_pc > 0.5 then line_pc - 1.0 else line_pc
-                    (line_pc - desired_pc) * est_refresh_period * SCANLINE_CORRECTION_STRENGTH
-                | None ->
-                    Logging.Warn("Switching to CPU timing without scanline correction")
-                    strategy <- CpuTiming
-                    0.0
+            last_frame <- frame
+            
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - time_taken_last_frame - 3.0)
+        
+        | CpuTimingWindowed ->
+            let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
+            estimated_next_frame <- last_vblank + est_refresh_period
+            Performance.visual_latency_lo <- estimated_next_frame - real_next_frame
+            Performance.visual_latency_hi <- estimated_next_frame - real_next_frame
 
-            est_present_of_next_frame <- est_present_of_next_frame - scanline_correction
-
-            while est_present_of_next_frame < present_of_last_frame do
-                est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
-
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, est_present_of_next_frame)
-
-        | CpuTiming ->
-            present_of_last_frame <- swap_of_last_frame
-            Performance.visual_latency_lo <- 0.0
-            Performance.visual_latency_hi <- est_refresh_period
-
-            while est_present_of_next_frame < present_of_last_frame do
-                est_present_of_next_frame <- est_present_of_next_frame + est_refresh_period
-
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, est_present_of_next_frame)
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame)
 
         let elapsed_ms = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
@@ -386,9 +400,14 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         frame_is_ready <- now ()
         Performance.draw_time <- frame_is_ready - before_draw
 
+        match strategy with
+        | CpuTimingFullscreen ->
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - 1.5)
+        | _ -> ()
+
         if not ui_root.ShouldExit then
             window.Context.SwapBuffers()
-            swap_of_last_frame <- now ()
+            real_next_frame <- now ()
 
         // Performance profiling
         fps_count <- fps_count + 1
@@ -406,10 +425,12 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         Render.init ()
         Render.resize (window.ClientSize.X, window.ClientSize.Y)
 
+        FrameTimeStrategies.VBlankThread.start total_frame_timer
+
         Performance.frame_compensation <-
             fun () ->
-                if strategy <> Unlimited then
-                    float32 (est_present_of_next_frame - now ()) * 1.0f<ms>
+                if strategy <> Unlimited && anti_jitter then
+                    float32 (estimated_next_frame - now ()) * 1.0f<ms>
                 else
                     0.0f<ms>
 
