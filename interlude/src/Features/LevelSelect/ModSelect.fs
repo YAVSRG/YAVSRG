@@ -78,7 +78,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
                 100.0f,
                 3,
                 Spacing = (30f, 30f),
-                Position = pretty_pos (5, 9, PageWidth.Full),
+                Position = pretty_pos (5, PAGE_BOTTOM - 5, PageWidth.Full),
                 WrapNavigation = false
             )
             |+ ModSelector(

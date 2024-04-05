@@ -295,3 +295,18 @@ module MoreNotes =
                 )
 
             { chart with Notes = new_notes }, true
+
+module Randomise =
+    
+    let shuffle (seed: int) (chart: ModdedChartInternal) : ModdedChartInternal * bool =
+        let random = new Random(seed)
+        let shuffled_columns = Array.init chart.Keys id 
+        random.Shuffle shuffled_columns
+
+        let shuffle_notes (nr: NoteRow) : NoteRow =
+            let new_nr = NoteRow.create_empty chart.Keys
+            for i = 0 to chart.Keys - 1 do
+                new_nr.[i] <- nr.[shuffled_columns.[i]]
+            new_nr
+
+        { chart with Notes = TimeArray.map shuffle_notes chart.Notes }, true

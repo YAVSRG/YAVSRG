@@ -96,9 +96,10 @@ module Check =
             for m in Prelude.Gameplay.Mods.available_mods.Keys do
                 find (sprintf "mod.%s.name" m) "Mods"
                 find (sprintf "mod.%s.desc" m) "Mods"
-                for i in 1 .. Prelude.Gameplay.Mods.available_mods.[m].States - 1 do
-                    find (sprintf "mod.%s.%i.name" m i) "Mods"
-                    find (sprintf "mod.%s.%i.desc" m i) "Mods"
+                if Prelude.Gameplay.Mods.available_mods.[m].RandomSeed |> not then
+                    for i in 1 .. Prelude.Gameplay.Mods.available_mods.[m].States - 1 do
+                        find (sprintf "mod.%s.%i.name" m i) "Mods"
+                        find (sprintf "mod.%s.%i.desc" m i) "Mods"
 
             for i = 0 to 9 do
                 find (sprintf "noteskins.edit.notecolors.chord.%i" i) "Note color tooltips"

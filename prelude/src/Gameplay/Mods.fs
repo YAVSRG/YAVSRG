@@ -73,7 +73,7 @@ module Mods =
             else
                 let state =
                     if available_mods.[id].RandomSeed then
-                        r.Next(available_mods.[id].States)
+                        r.Next(-Int32.MinValue,0)
                     else
                         0
 
@@ -137,6 +137,15 @@ module Mods =
             Status = ModStatus.Unstored
             States = 2
             Apply = fun s mc -> if s = 1 then MoreNotes.apply_chordjacks mc else MoreNotes.apply_minijacks mc
+        }
+    
+    add_mod
+        "shuffle"
+        { EMPTY_MOD with
+            Status = ModStatus.Unstored
+            RandomSeed = true
+            Apply = fun s mc -> Randomise.shuffle s mc
+            Exclusions = [ "random" ]
         }
 
     //todo: randomiser mod with seed
