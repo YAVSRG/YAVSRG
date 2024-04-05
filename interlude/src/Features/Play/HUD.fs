@@ -609,9 +609,9 @@ type RateModMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOpt
     do
         let text =
             if user_options.RateModMeterShowMods then
-                Mods.format_mods (Gameplay.rate.Value, Gameplay.selected_mods.Value, Gameplay.autoplay)
+                Mods.format_mods (rate.Value, state.WithColors.ModsSelected, autoplay)
             else
-                sprintf "%.2fx" Gameplay.rate.Value
+                sprintf "%.2fx" rate.Value
 
         this |* Text(text, Color = K Colors.text_subheading, Align = Alignment.CENTER)
 
