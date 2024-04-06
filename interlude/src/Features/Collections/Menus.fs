@@ -228,7 +228,7 @@ type SelectCollectionPage
     inherit Page()
 
     let grid =
-        GridFlowContainer<CollectionButton>(PRETTYHEIGHT + 20.0f, 2, Spacing = (20.0f, 20.0f))
+        GridFlowContainer<CollectionButton>(PRETTYHEIGHT + 20.0f, 2, Spacing = (20.0f, 20.0f), WrapNavigation = false)
 
     let refresh () =
         grid.Clear()

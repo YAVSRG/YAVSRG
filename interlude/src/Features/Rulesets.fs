@@ -108,19 +108,23 @@ type PacemakerOptionsPage() as this =
             |+ PageSetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace)
                 .Pos(0)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
+            |+ PageSetting("gameplay.pacemaker.onlysavenewrecords", Selector<_>.FromBool options.OnlySaveNewRecords)
+                .Pos(2)
+                .Tooltip(Tooltip.Info("gameplay.pacemaker.onlysavenewrecords"))
             |+ CaseSelector(
                 "gameplay.pacemaker.type",
                 [| %"gameplay.pacemaker.accuracy.name"; %"gameplay.pacemaker.lamp.name" |],
                 [|
                     [|
                         PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32))
-                            .Pos(5)
+                            .Pos(7)
                     |]
-                    [| PageSetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(5) |]
+                    [| PageSetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(7) |]
                 |],
                 utype
             )
-                .Pos(3)
+                .Pos(5)
+            |>> Container
             |+ Text(
                 %"gameplay.pacemaker.hint",
                 Align = Alignment.CENTER,

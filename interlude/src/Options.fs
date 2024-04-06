@@ -105,6 +105,7 @@ module Options =
             Pacemakers: Dictionary<string, Pacemaker>
             EnablePacemaker: Setting<bool>
             SaveScoreIfUnderPace: Setting<bool>
+            OnlySaveNewRecords: Setting<bool>
             SelectedMods: Setting<ModState>
 
             OsuMount: Setting<Imports.MountedChartSource option>
@@ -166,6 +167,7 @@ module Options =
                 Pacemakers = Dictionary<string, Pacemaker>()
                 EnablePacemaker = Setting.simple false
                 SaveScoreIfUnderPace = Setting.simple true
+                OnlySaveNewRecords = Setting.simple false
                 SelectedMods = Setting.simple Map.empty
 
                 OsuMount = Setting.simple None

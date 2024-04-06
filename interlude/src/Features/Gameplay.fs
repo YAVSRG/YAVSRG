@@ -452,11 +452,10 @@ module Gameplay =
                     | Some existing_bests -> Bests.update score_info existing_bests
                     | None -> Bests.create score_info, ImprovementFlags.New
 
-                // todo: option to only save a score if it's an improvement on an old one
-
-                ScoreDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.Scores
-                save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
-                ScoreDatabase.save_changes Content.Scores
+                if not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None then
+                    ScoreDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.Scores
+                    save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
+                    ScoreDatabase.save_changes Content.Scores
                 improvement_flags
             else
                 ScoreDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.Scores

@@ -334,6 +334,7 @@ type PageTextEntry(name, setting) =
             )
         )
 
+// todo: this can be deleted and its uses refactored, it is superseded by a normal selector + conditionals
 type CaseSelector(name: string, cases: string array, controls: Widget array array, setting: Setting<int>) as this =
     inherit StaticWidget(NodeType.Container(fun _ -> Some this._selector))
 
