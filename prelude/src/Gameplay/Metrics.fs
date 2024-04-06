@@ -424,20 +424,32 @@ type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
                                     Judgement = Some judgement
                                     Missed = missed
                                     Delta = delta
-                                    IsHold = isHold
+                                    IsHold = true
                                 |}
 
                         | HoldNoteBehaviour.Osu _
                         | HoldNoteBehaviour.Normal _
-                        | HoldNoteBehaviour.OnlyJudgeReleases ->
+                        | HoldNoteBehaviour.OnlyJudgeReleases _ ->
                             Hit
                                 {|
                                     Judgement = None
                                     Missed = missed
                                     Delta = delta
-                                    IsHold = isHold
+                                    IsHold = true
                                 |}
                     else
+                        
+                    match config.Accuracy.HoldNoteBehaviour with 
+                    | HoldNoteBehaviour.OnlyJudgeReleases _ ->
+                        if missed then this.State.BreakCombo true else this.State.IncrCombo()
+                        Hit
+                            {|
+                                Judgement = None
+                                Missed = missed
+                                Delta = delta
+                                IsHold = false
+                            |}
+                    | _ ->
                         this.State.Add(point_func delta judgement, 1.0, judgement)
 
                         if config.Judgements.[judgement].BreaksCombo then
@@ -450,7 +462,7 @@ type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
                                 Judgement = Some judgement
                                 Missed = missed
                                 Delta = delta
-                                IsHold = isHold
+                                IsHold = false
                             |}
 
                 | Release_(delta, missed, overhold, dropped, missed_head) ->
@@ -535,8 +547,9 @@ type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
                                 Dropped = dropped
                             |}
 
-                    | HoldNoteBehaviour.OnlyJudgeReleases ->
-                        let judgement = window_func delta
+                    | HoldNoteBehaviour.OnlyJudgeReleases if_dropped ->
+                        let judgement = 
+                            if overhold || dropped then if_dropped else window_func delta
                         this.State.Add(point_func delta judgement, 1.0, judgement)
 
                         if config.Judgements.[judgement].BreaksCombo then
