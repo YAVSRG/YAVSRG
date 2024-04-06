@@ -147,6 +147,15 @@ module Mods =
             Apply = fun s mc -> Randomise.shuffle s mc
             Exclusions = [ "random" ]
         }
+    
+    add_mod
+        "random"
+        { EMPTY_MOD with
+            Status = ModStatus.Unstored
+            RandomSeed = true
+            Apply = fun s mc -> Randomise.randomise s mc
+            Exclusions = [ "shuffle" ]
+        }
 
     //todo: randomiser mod with seed
 
