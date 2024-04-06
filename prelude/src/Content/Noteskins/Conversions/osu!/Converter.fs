@@ -29,25 +29,29 @@ module OsuSkinConverter =
 
         let file = Path.Combine(path, id)
 
-        if File.Exists(file + "@2x.png") then
+        let rec find_2x_animation i =
+            if File.Exists(file + "-" + i.ToString() + "@2x.png") then
+                file + "-" + i.ToString() + "@2x.png" :: find_2x_animation (i + 1)
+            else []
+
+        let rec find_animation i =
+            if File.Exists(file + "-" + i.ToString() + ".png") then
+                file + "-" + i.ToString() + ".png" :: find_animation (i + 1)
+            else []
+
+        let animation_2x = find_2x_animation 0
+        let animation = find_animation 0
+
+        if animation_2x <> [] then
+            animation_2x
+        elif File.Exists(file + "@2x.png") then
             [ file + "@2x.png" ]
+        elif animation <> [] then
+            animation
         elif File.Exists(file + ".png") then
             [ file + ".png" ]
         else
-            let rec f i =
-                if File.Exists(file + "-" + i.ToString() + "@2x.png") then
-                    file + "-" + i.ToString() + "@2x.png" :: f (i + 1)
-                elif File.Exists(file + "-" + i.ToString() + ".png") then
-                    file + "-" + i.ToString() + ".png" :: f (i + 1)
-                else
-                    []
-
-            let result = f 0
-
-            if result.IsEmpty then
-                failwithf "could not find texture in skin folder for %A" id
-
-            result
+            failwithf "could not find texture in skin folder for %A" id
 
     let load_bmp f =
         use s = File.Open(f, FileMode.Open)
