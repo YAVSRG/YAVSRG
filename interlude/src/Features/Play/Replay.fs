@@ -258,22 +258,24 @@ module ReplayScreen =
             NavigationContainer.Column<Button>(Position = Position.SliceLeft(400.0f))
             |+ Button(
                 (fun () ->
-                    (if state.ShowInputOverlay.Value then
-                         Icons.CHECK_CIRCLE
-                     else
-                         Icons.CIRCLE)
-                    + " Input overlay"
+                    sprintf "%s %s"
+                        (if state.ShowInputOverlay.Value then
+                             Icons.CHECK_CIRCLE
+                         else
+                             Icons.CIRCLE)
+                        %"replay.input_overlay"
                 ),
                 (fun () -> Setting.app not state.ShowInputOverlay),
                 Position = Position.SliceTop(50.0f)
             )
             |+ Button(
                 (fun () ->
-                    (if state.ShowHitOverlay.Value then
-                         Icons.CHECK_CIRCLE
-                     else
-                         Icons.CIRCLE)
-                    + " Hit overlay"
+                    sprintf "%s %s"
+                        (if state.ShowHitOverlay.Value then
+                             Icons.CHECK_CIRCLE
+                         else
+                             Icons.CIRCLE)
+                        %"replay.hit_overlay"
                 ),
                 (fun () -> Setting.app not state.ShowHitOverlay),
                 Position = Position.SliceBottom(50.0f)
@@ -287,13 +289,13 @@ module ReplayScreen =
 
         SlideoutContent(NavigationContainer.Row<Widget>() |+ overlay_buttons |+ dim_slider, 100.0f)
         |+ Text(
-            (Icons.PLAY + if state.IsAuto then " Autoplay" else " Watching replay"),
+            sprintf "%s %s" Icons.PLAY (if state.IsAuto then %"replay.title.autoplay" else %"replay.title"),
             Color = K Colors.text,
             Align = Alignment.RIGHT,
             Position = Position.Margin(30.0f, 20.0f)
         )
         |+ Text(
-            "Playfield dim",
+            %"replay.playfield_dim",
             Color =
                 (fun () ->
                     if dim_slider.Focused then

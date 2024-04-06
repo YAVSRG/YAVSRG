@@ -118,10 +118,7 @@ module PlayScreen =
                 SlideoutContent(offset_slider, 100.0f)
                 |+ Text(
                     (fun () ->
-                        sprintf
-                            "Press %O to use recommended offset (%.0fms)"
-                            (%%"accept_suggestion")
-                            recommended_offset
+                        [(%%"accept_suggestion").ToString(); (sprintf "%.0fms" recommended_offset)] %> "play.localoffset.accept_hint"
                     ),
                     Position = Position.Box(0.0f, 0.0f, 0.0f, 60.0f, 600.0f, 40.0f)
                 )
@@ -135,7 +132,7 @@ module PlayScreen =
                     (Callout.Small
                         .Icon(Icons.INFO)
                         .Body(
-                            "Use a negative offset if you are hitting LATE and want to hit EARLIER.\nUse a positive offset if you are hitting EARLY and want to hit LATER."
+                            %"play.localoffset.hint_ii"
                         ))
                     (fun (w, h) -> Position.SliceRight(w)),
                 OnOpen =
@@ -260,13 +257,15 @@ module PlayScreen =
                 base.Draw()
 
                 if
-                    options.AutoCalibrateOffset.Value
-                    && this.State.CurrentChartTime() < 0.0f<ms>
+                    this.State.CurrentChartTime() < 0.0f<ms>
                     && Song.playing ()
                 then
                     Text.draw_b (
                         Style.font,
-                        sprintf "Local offset: %.0fms" offset_setting.Value,
+                        (
+                            if options.AutoCalibrateOffset.Value then [sprintf "%.0fms" offset_setting.Value] %> "play.localoffset.automatic"
+                            else [(%%"options").ToString()] %> "play.localoffset.hint"
+                        ),
                         20.0f,
                         this.Bounds.Left + 20.0f,
                         this.Bounds.Top + 20.0f,
