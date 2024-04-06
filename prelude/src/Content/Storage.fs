@@ -7,7 +7,7 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Percyqaz.Data
-open Prelude.Common
+open Prelude
 
 (*
     Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude

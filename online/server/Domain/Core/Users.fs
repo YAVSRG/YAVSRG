@@ -2,7 +2,7 @@
 
 open System
 open Percyqaz.Common
-open Prelude.Common
+open Prelude
 open Percyqaz.Data.Sqlite
 open Interlude.Web.Server
 

@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Content.Noteskins
 
 open Percyqaz.Data
-open Prelude.Common
+open Prelude
 open Prelude.Gameplay
 
 [<RequireQualifiedAccess>]

@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.UI

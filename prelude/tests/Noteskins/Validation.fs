@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Tests.Noteskins
 
 open NUnit.Framework
-open Prelude.Common
+open Prelude
 open Prelude.Content
 open Prelude.Content.Noteskins
 open Helpers

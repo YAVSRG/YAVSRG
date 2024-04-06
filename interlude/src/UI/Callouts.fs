@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Interlude.UI
 
 [<RequireQualifiedAccess>]

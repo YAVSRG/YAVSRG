@@ -3,7 +3,7 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
-open Prelude.Common
+open Prelude
 open Prelude.Gameplay
 open Prelude.Data
 open Interlude.UI

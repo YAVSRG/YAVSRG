@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
-open Prelude.Common
+open Prelude
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Prelude.Gameplay.Mods

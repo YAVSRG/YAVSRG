@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Data.Library
 open Prelude.Data.Library.Sorting
 open Prelude.Data

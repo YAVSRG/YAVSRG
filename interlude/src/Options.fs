@@ -7,7 +7,7 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
-open Prelude.Common
+open Prelude
 open Prelude.Gameplay.Mods
 open Prelude.Data.Library.Sorting
 open Prelude.Data.Library

@@ -4,7 +4,7 @@ open Prelude
 open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Data.Sqlite
-open Prelude.Common
+open Prelude
 open Interlude.Web.Server
 
 type Source =

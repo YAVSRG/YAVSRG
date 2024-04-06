@@ -5,7 +5,7 @@ open System.Diagnostics
 open System.Linq
 open Percyqaz.Common
 open Percyqaz.Shell
-open Prelude.Common
+open Prelude
 open Prelude.Backbeat
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Caching

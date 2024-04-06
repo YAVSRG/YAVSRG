@@ -6,7 +6,7 @@ open System.IO
 open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
-open Prelude.Common
+open Prelude
 open Prelude.Charts
 open Prelude.Data.Library.Caching
 open Prelude.Data.``osu!``

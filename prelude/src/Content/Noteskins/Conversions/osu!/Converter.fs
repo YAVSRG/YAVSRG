@@ -5,7 +5,7 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 open SixLabors.ImageSharp.Drawing.Processing
 open Percyqaz.Common
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Processing.NoteColors
 open Prelude.Content
 open Prelude.Content.Noteskins

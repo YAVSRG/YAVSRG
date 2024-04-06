@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
-open Prelude.Common
+open Prelude
 open Interlude.Web.Shared
 open Interlude.UI
 open Interlude.UI.Menu

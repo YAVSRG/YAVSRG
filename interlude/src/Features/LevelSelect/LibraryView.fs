@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Data.Library.Sorting
 open Interlude.Options
 open Interlude.UI

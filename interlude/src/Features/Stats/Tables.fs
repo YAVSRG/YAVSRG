@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Common
+open Prelude
 open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Data.Library.Caching

@@ -3,7 +3,7 @@ open Percyqaz.Common
 open Prelude.Content
 open Prelude.Content.Noteskins
 open Prelude.Content.Noteskins.Repo
-open Prelude.Common
+open Prelude
 open SixLabors.ImageSharp
 
 let root =

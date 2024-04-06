@@ -5,7 +5,7 @@ open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Interlude.Content
 
 module Background =

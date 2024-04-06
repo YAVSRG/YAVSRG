@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Data.Library.Sorting
 
 type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as this =

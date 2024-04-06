@@ -2,7 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Data
-open Prelude.Common
+open Prelude
 open Prelude.Charts.Processing.NoteColors
 open Prelude.Content
 

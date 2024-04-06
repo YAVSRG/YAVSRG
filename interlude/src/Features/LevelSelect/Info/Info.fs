@@ -2,7 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods

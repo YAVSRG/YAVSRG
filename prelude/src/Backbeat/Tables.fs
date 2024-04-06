@@ -3,7 +3,7 @@
 open System
 open System.IO
 open Percyqaz.Data
-open Prelude.Common
+open Prelude
 
 [<Json.AutoCodec>]
 [<RequireQualifiedAccess>]

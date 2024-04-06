@@ -1,6 +1,6 @@
 ﻿namespace Prelude.Content.Noteskins.Conversion
 
-open Prelude.Common
+open Prelude
 
 //https://osu.ppy.sh/wiki/no/Skinning/skin.ini#[mania]
 module SkinIni =

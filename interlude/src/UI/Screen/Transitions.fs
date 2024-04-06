@@ -3,7 +3,7 @@
 open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Interlude.UI
 open OpenTK.Mathematics
 
