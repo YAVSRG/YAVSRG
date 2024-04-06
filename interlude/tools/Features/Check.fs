@@ -93,11 +93,11 @@ module Check =
             for m in [ "auto"; "pacemaker" ] do
                 find (sprintf "mod.%s.name" m) "Mods"
                 find (sprintf "mod.%s.desc" m) "Mods"
-            for m in Prelude.Gameplay.Mods.available_mods.Keys do
+            for m in Prelude.Gameplay.Mods.AVAILABLE_MODS.Keys do
                 find (sprintf "mod.%s.name" m) "Mods"
                 find (sprintf "mod.%s.desc" m) "Mods"
-                if Prelude.Gameplay.Mods.available_mods.[m].RandomSeed |> not then
-                    for i in 1 .. Prelude.Gameplay.Mods.available_mods.[m].States - 1 do
+                if Prelude.Gameplay.Mods.AVAILABLE_MODS.[m].RandomSeed |> not then
+                    for i in 1 .. Prelude.Gameplay.Mods.AVAILABLE_MODS.[m].States - 1 do
                         find (sprintf "mod.%s.%i.name" m i) "Mods"
                         find (sprintf "mod.%s.%i.desc" m i) "Mods"
 

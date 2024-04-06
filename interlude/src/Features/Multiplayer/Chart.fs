@@ -57,7 +57,7 @@ module SelectedChart =
                 selected_mods.Set(
                     chart.Mods
                     |> Map.ofArray
-                    |> Map.filter (fun id _ -> available_mods.ContainsKey id)
+                    |> Map.filter (fun id _ -> AVAILABLE_MODS.ContainsKey id)
                 )
             else
                 match Cache.by_hash chart.Hash Content.Cache with
@@ -71,7 +71,7 @@ module SelectedChart =
                     selected_mods.Set(
                         chart.Mods
                         |> Map.ofArray
-                        |> Map.filter (fun id _ -> available_mods.ContainsKey id)
+                        |> Map.filter (fun id _ -> AVAILABLE_MODS.ContainsKey id)
                     )
 
     let switch (c: LobbyChart option) =

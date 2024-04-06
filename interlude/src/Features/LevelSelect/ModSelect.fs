@@ -87,7 +87,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
                 (fun _ -> autoplay <- not autoplay)
             )
             |+ seq {
-                for id in available_mods.Keys do
+                for id in AVAILABLE_MODS.Keys do
                     yield ModSelector(
                         id,
                         (fun _ ->

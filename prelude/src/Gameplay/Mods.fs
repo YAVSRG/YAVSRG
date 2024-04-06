@@ -1,7 +1,6 @@
 ﻿namespace Prelude.Gameplay
 
 open System
-open System.Collections.Generic
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
@@ -44,9 +43,75 @@ module Mods =
             Apply: int -> ModdedChartInternal -> ModdedChartInternal * bool
             Priority: int
         }
+        static member internal Default =
+            {
+                Status = ModStatus.Unstored
+                States = 1
+                Exclusions = []
+                RandomSeed = false
+                Apply = (fun _ mc -> mc, false)
+                Priority = 0
+            }
 
-    let available_mods = new Dictionary<string, Mod>()
-    let add_mod id obj = available_mods.Add(id, obj)
+    let AVAILABLE_MODS : Map<string, Mod> = 
+        Map.ofList [
+
+            "mirror",
+            { Mod.Default with
+                Status = ModStatus.Ranked
+                Exclusions = [ "shuffle"; "random" ]
+                Apply = fun _ mc -> Mirror.apply mc
+                Priority = 2
+            }
+
+            "shuffle",
+            { Mod.Default with
+                Status = ModStatus.Unstored
+                RandomSeed = true
+                Apply = fun s mc -> Randomise.shuffle s mc
+                Exclusions = [ "random"; "mirror" ]
+                Priority = 2
+            }
+            
+            "random",
+            { Mod.Default with
+                Status = ModStatus.Unstored
+                RandomSeed = true
+                Apply = fun s mc -> Randomise.randomise s mc
+                Exclusions = [ "shuffle"; "mirror" ]
+                Priority = 2
+            }
+
+            "nosv",
+            { Mod.Default with
+                Status = ModStatus.Unranked
+                Apply = fun _ mc -> NoSV.apply mc
+            }
+
+            "noln",
+            { Mod.Default with
+                Status = ModStatus.Unranked
+                Exclusions = [ "inverse" ]
+                Apply = fun _ mc -> NoLN.apply mc
+                Priority = 10
+            }
+
+            "inverse",
+            { Mod.Default with
+                Status = ModStatus.Unranked
+                States = 1 // todo: in future support half-size/double-size gaps? code is already there
+                Exclusions = [ "noln" ]
+                Apply = fun s mc -> Inverse.apply (s > 0) mc
+            }
+
+            "more_notes",
+            { Mod.Default with
+                Status = ModStatus.Unstored
+                States = 2
+                Apply = fun s mc -> if s = 1 then MoreNotes.apply_chordjacks mc else MoreNotes.apply_minijacks mc
+                Priority = 3
+            }
+        ]
 
     module ModState =
 
@@ -62,102 +127,33 @@ module Mods =
             | Some i when i > 0 -> Localisation.localise (sprintf "mod.%s.%i.desc" id i)
             | _ -> Localisation.localise (sprintf "mod.%s.desc" id)
 
-        let cycle id (mods: ModState) : ModState =
+        let cycle (id: string) (mods: ModState) : ModState =
             if (mods.ContainsKey id) then
                 let state = mods.[id] + 1
 
-                if state = available_mods.[id].States || available_mods.[id].RandomSeed then
+                if state = AVAILABLE_MODS.[id].States || AVAILABLE_MODS.[id].RandomSeed then
                     Map.remove id mods
                 else
                     Map.add id state mods
             else
                 let state =
-                    if available_mods.[id].RandomSeed then
+                    if AVAILABLE_MODS.[id].RandomSeed then
                         r.Next(-Int32.MinValue,0)
                     else
                         0
 
-                List.fold (fun m i -> Map.remove i m) (Map.add id state mods) available_mods.[id].Exclusions
+                List.fold (fun m i -> Map.remove i m) (Map.add id state mods) AVAILABLE_MODS.[id].Exclusions
 
         let enumerate (mods: ModState) =
             mods
             |> Map.toSeq
             |> Seq.choose (fun (id, state) ->
-                if available_mods.ContainsKey id then
-                    Some(id, available_mods.[id], state)
+                if AVAILABLE_MODS.ContainsKey id then
+                    Some(id, AVAILABLE_MODS.[id], state)
                 else
                     None
             )
-            |> Seq.sortBy (fun (id, m, state) -> m.Priority)
-
-    let private EMPTY_MOD =
-        {
-            Status = ModStatus.Unstored
-            States = 1
-            Exclusions = []
-            RandomSeed = false
-            Apply = (fun _ mc -> mc, false)
-            Priority = 0
-        }
-
-    add_mod
-        "mirror"
-        { EMPTY_MOD with
-            Status = ModStatus.Ranked
-            Apply = fun _ mc -> Mirror.apply mc
-        }
-
-    add_mod
-        "nosv"
-        { EMPTY_MOD with
-            Status = ModStatus.Unranked
-            Apply = fun _ mc -> NoSV.apply mc
-        }
-
-    add_mod
-        "noln"
-        { EMPTY_MOD with
-            Status = ModStatus.Unranked
-            Exclusions = [ "inverse" ]
-            Apply = fun _ mc -> NoLN.apply mc
-        }
-
-    add_mod
-        "inverse"
-        { EMPTY_MOD with
-            Status = ModStatus.Unranked
-            States = 1 // todo: in future support half-size/double-size gaps? code is already there
-            Exclusions = [ "noln" ]
-            Apply = fun s mc -> Inverse.apply (s > 0) mc
-        }
-
-    add_mod
-        "more_notes"
-        { EMPTY_MOD with
-            Status = ModStatus.Unstored
-            States = 2
-            Apply = fun s mc -> if s = 1 then MoreNotes.apply_chordjacks mc else MoreNotes.apply_minijacks mc
-        }
-    
-    add_mod
-        "shuffle"
-        { EMPTY_MOD with
-            Status = ModStatus.Unstored
-            RandomSeed = true
-            Apply = fun s mc -> Randomise.shuffle s mc
-            Exclusions = [ "random" ]
-        }
-    
-    add_mod
-        "random"
-        { EMPTY_MOD with
-            Status = ModStatus.Unstored
-            RandomSeed = true
-            Apply = fun s mc -> Randomise.randomise s mc
-            Exclusions = [ "shuffle" ]
-        }
-
-    //todo: randomiser mod with seed
+            |> Seq.sortByDescending (fun (id, m, state) -> m.Priority)
 
     (*
         Mod application pipeline
@@ -207,13 +203,13 @@ module Mods =
             let mutable status = ModStatus.Ranked
 
             for m in mods.Keys do
-                if available_mods.ContainsKey m then
-                    status <- max status available_mods.[m].Status
+                if AVAILABLE_MODS.ContainsKey m then
+                    status <- max status AVAILABLE_MODS.[m].Status
 
-                    if mods.[m] >= available_mods.[m].States then
+                    if mods.[m] >= AVAILABLE_MODS.[m].States then
                         failwithf "Mod '%s' in invalid state %i" m mods.[m]
 
-                    for e in available_mods.[m].Exclusions do
+                    for e in AVAILABLE_MODS.[m].Exclusions do
                         if mods.ContainsKey e then
                             failwithf "Mods '%s' and '%s' cannot both be selected" m e
                 else
