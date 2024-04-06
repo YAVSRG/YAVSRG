@@ -221,7 +221,7 @@ module FlowContainer =
             if (%%"down").Tapped() then
                 this.Next()
 
-            if (%%"select").Tapped() then
+            if Selection.get_focused_element() <> Some this && (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
         interface DynamicSize with
@@ -258,7 +258,7 @@ module FlowContainer =
             if (%%"right").Tapped() then
                 this.Next()
 
-            if (%%"select").Tapped() then
+            if Selection.get_focused_element() <> Some this && (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
         interface DynamicSize with
@@ -302,7 +302,7 @@ module FlowContainer =
             if (%%"right").Tapped() then
                 this.Previous()
 
-            if (%%"select").Tapped() then
+            if Selection.get_focused_element() <> Some this && (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
         interface DynamicSize with
