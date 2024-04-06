@@ -1,26 +1,19 @@
-0.7.19.4
+0.7.19.5
 ====
 
-Slightly delayed feature update  
-I also redesigned the site a little, go check it out :)
+I have not heard complaints about the new smart frame cap so that is good  
+Here are some more features :)
 
-# Smart frame cap overhaul
-It should now run a lot smoother on more hardware, but needs some field testing  
-
-If the game now runs like absolute butter for you please let me know and applaud my genius in the Discord  
-If the game now runs worse for you please immediately complain in the Discord and I can take a look  
-
-# Noteskin and HUD features
-- Early/late meter now supports noteskin textures the same way the judgement meter does
-
-# Other features
-- More informational toasts/notifications for various things such as when an osu! skin.ini fails to parse
-- osu! skin converter now converts judgement textures over to noteskins
-- New gameplay modifier: More notes -- This is experimental and subject to change, therefore you cannot save scores with it on
-- Discord rich presence activity now has an icon
+# New gameplay features
+- 'Shuffle' and 'Randomise' modifiers, check them out in the mods menu for more info
+- Option under pacemaker settings to only save scores that are a new record of some form
 
 # Bug fixes
-- Fixed background images being smeared horizontally if the game initialised while minimised in fullscreen
-- Fixed LN% and note counts not updating when changing selected mods
-- Fixed a crash in the HUD editor nobody knew about
+- Fixed pressing enter sometimes not playing the chart for some reason (I know the exact reason)
+- Fixed a bug causing osu! skin converter to use different textures to what osu! stable does
+- Fixed mod meter showing the wrong mods when watching replays
+
+# Other improvements
+- Text appears in top right reminding users of Ctrl-O to change local offset
+- Slight improvements to ingame noteskin texture editor
 
