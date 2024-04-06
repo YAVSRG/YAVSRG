@@ -8,6 +8,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Mods
 open Prelude.Content.Noteskins
 open Interlude
 open Interlude.UI
@@ -609,7 +610,7 @@ type RateModMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOpt
     do
         let text =
             if user_options.RateModMeterShowMods then
-                Mods.format_mods (rate.Value, state.WithColors.ModsSelected, autoplay)
+                Mods.format (rate.Value, state.WithColors.ModsSelected, autoplay)
             else
                 sprintf "%.2fx" rate.Value
 

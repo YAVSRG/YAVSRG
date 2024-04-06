@@ -4,11 +4,12 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Prelude.Common
+open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
+open Prelude.Gameplay.Mods
 open Prelude.Data
 open Prelude.Data.Library.Caching
 open Interlude
@@ -182,7 +183,7 @@ module Leaderboard =
                 member this.Process(req: Request) =
                     seq {
                         for score in req.Scores do
-                            let with_mods = Mods.apply_mods score.Mods req.Chart
+                            let with_mods = Mods.apply score.Mods req.Chart
                             let replay_data = Replay.decompress_string score.Replay
 
                             let scoring =

@@ -192,7 +192,7 @@ module Gameplay =
                                     SAVE_DATA <- Some save_data
                             // if chart is loaded we can safely restart from this point for different rates and mods
 
-                            let with_mods = apply_mods mods chart
+                            let with_mods = Mods.apply mods chart
                             let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
                             let rating = DifficultyRating.calculate rate with_mods.Notes
@@ -222,7 +222,7 @@ module Gameplay =
                             | None -> ()
                             | Some chart ->
 
-                            let with_mods = apply_mods mods chart
+                            let with_mods = Mods.apply mods chart
                             let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
 
                             let rating = DifficultyRating.calculate rate with_mods.Notes

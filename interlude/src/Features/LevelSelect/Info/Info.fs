@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
@@ -98,7 +97,7 @@ type ChartInfo() as this =
                         Bottom = 1.0f %- 60.0f
                     }
             )
-            |+ Text((fun () -> format_mods (rate.Value, selected_mods.Value, autoplay)), Align = Alignment.LEFT))
+            |+ Text((fun () -> Mods.format (rate.Value, selected_mods.Value, autoplay)), Align = Alignment.LEFT))
             .Tooltip(
                 Tooltip
                     .Info("levelselect.selected_mods")

@@ -53,7 +53,7 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
 
         Text.fill_b (
             Style.font,
-            ModState.get_mod_name id state,
+            Mods.name id state,
             this.Bounds.SliceTop(TOP_HEIGHT).Shrink(20.0f, 0.0f),
             (if this.Focused then Colors.text_yellow_2 else Colors.text), 
             Alignment.LEFT
@@ -61,7 +61,7 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
 
         Text.fill_b (
             Style.font,
-            ModState.get_mod_desc id state,
+            Mods.desc id state,
             this.Bounds.TrimTop(TOP_HEIGHT - 2.0f).Shrink(20.0f, 0.0f),
             (if this.Focused then Colors.text_yellow_2 else Colors.text_subheading), 
             Alignment.LEFT
@@ -87,7 +87,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
                 (fun _ -> autoplay <- not autoplay)
             )
             |+ seq {
-                for id in AVAILABLE_MODS.Keys do
+                for id in Mods.MENU_DISPLAY_ORDER do
                     yield ModSelector(
                         id,
                         (fun _ ->
@@ -96,7 +96,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
                             else
                                 None
                         ),
-                        (fun _ -> Setting.app (ModState.cycle id) selected_mods)
+                        (fun _ -> Setting.app (Mods.cycle id) selected_mods)
                     )
             }
             |+ ModSelector(

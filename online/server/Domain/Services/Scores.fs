@@ -1,9 +1,9 @@
 ﻿namespace Interlude.Web.Server.Domain.Services
 
 open Percyqaz.Common
-open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
+open Prelude.Gameplay.Mods
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
@@ -38,7 +38,7 @@ module Scores =
             chart_id: string,
             replay_untrusted_string: string,
             rate: float32,
-            mods: Mods.ModState,
+            mods: ModState,
             timestamp: int64
         ) =
         async {
@@ -51,7 +51,7 @@ module Scores =
             | Error message ->
                 Logging.Error(sprintf "Mod validation failed from user #%i: %s" user_id message)
                 return ScoreUploadOutcome.UploadFailed
-            | Ok Mods.ModStatus.Unstored -> return ScoreUploadOutcome.UploadFailed
+            | Ok ModStatus.Unstored -> return ScoreUploadOutcome.UploadFailed
             | Ok mod_ranked_status ->
 
             match! Backbeat.Charts.fetch.RequestAsync(chart_id) with
@@ -64,9 +64,9 @@ module Scores =
                 return ScoreUploadOutcome.UploadFailed
             | Ok replay ->
 
-            let is_ranked = rate >= 1.0f && mod_ranked_status = Mods.ModStatus.Ranked
+            let is_ranked = rate >= 1.0f && mod_ranked_status = ModStatus.Ranked
 
-            let mod_chart = Mods.apply_mods mods chart
+            let mod_chart = Mods.apply mods chart
 
             if not is_ranked then
                 return ScoreUploadOutcome.Unrated

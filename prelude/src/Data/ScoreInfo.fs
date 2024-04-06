@@ -54,12 +54,12 @@ type ScoreInfo =
         | Error msg -> failwith msg
 
     member this.ModString() =
-        Mods.format_mods (this.Rate, this.Mods, false)
+        Mods.format (this.Rate, this.Mods, false)
 
 module ScoreInfo =
 
     let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
-        let with_mods = apply_mods score.Mods chart
+        let with_mods = Mods.apply score.Mods chart
         let replay_data = score.Replay |> Replay.decompress_bytes
 
         let scoring =

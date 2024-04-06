@@ -3,8 +3,8 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Common
-open Prelude.Gameplay
+open Prelude
+open Prelude.Gameplay.Mods
 open Prelude.Data
 open Interlude.UI
 open Interlude.UI.Menu
@@ -12,7 +12,7 @@ open Interlude.UI.Menu
 type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
-    let mod_string = Mods.format_mods (score_info.Rate, score_info.Mods, false)
+    let mod_string = Mods.format (score_info.Rate, score_info.Mods, false)
 
     let category, main_elements, minor_elements =
         let c =  score_info.Patterns.Category
