@@ -363,7 +363,7 @@ type TextureCard(id: string, on_click: unit -> unit) as this =
 
     do
         this
-        |+ Image(sprite, Position = Position.Margin(20.0f))
+        |+ Image(sprite, Position = Position.Margin(20.0f), StretchToFill = false)
         |+ Text(id, Align = Alignment.CENTER, Position = Position.Margin(Style.PADDING).SliceBottom(25.0f))
         |* Clickable.Focus this
 

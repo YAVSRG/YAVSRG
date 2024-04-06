@@ -110,9 +110,13 @@ type Image(sprite: Sprite) =
     inherit StaticWidget(NodeType.None)
 
     member val Sprite = sprite with get, set
+    member val StretchToFill = true with get, set
 
     override this.Draw() =
-        Draw.sprite this.Bounds Color.White this.Sprite
+        if this.StretchToFill then
+            Draw.sprite this.Bounds Color.White this.Sprite
+        else
+            Draw.sprite (Sprite.fill this.Bounds this.Sprite) Color.White this.Sprite
 
 [<Sealed>]
 type Conditional<'T when 'T :> Widget>(condition: unit -> bool, child: 'T) =

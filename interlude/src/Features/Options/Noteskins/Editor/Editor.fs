@@ -20,19 +20,17 @@ type EditNoteskinPage(from_hotkey: bool) as this =
 
     let grid =
         GridFlowContainer<TextureCard>(
-            150.0f,
-            6,
+            PRETTYWIDTH / 8f,
+            8,
             WrapNavigation = false,
             Spacing = (15.0f, 15.0f),
-            Position = Position.Box(0.0f, 0.0f, 100.0f, 680.0f, 975.0f, 315.0f)
+            Position = pretty_pos(15, PAGE_BOTTOM - 15, PageWidth.Normal)
         )
 
     let refresh_texture_grid () =
         grid.Clear()
 
-        for texture in
-            Content.Noteskin.RequiredTextures
-            |> Seq.except [ "receptorlighting"; "stageleft"; "stageright" ] do
+        for texture in Content.Noteskin.RequiredTextures do
             grid |* TextureCard(texture, (fun () -> TextureEditPage(texture).Show()))
 
     do
