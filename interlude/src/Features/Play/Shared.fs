@@ -203,9 +203,18 @@ type private Explosion =
         IsRelease: bool
         Time: Time
     }
+    static member Nothing =
+        {
+            Column = 0
+            Color = 0
+            IsRelease = false
+            Time = -Time.infinity
+        }
 
 type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     inherit StaticWidget(NodeType.None)
+
+    let mutable last_time : Time = -Time.infinity
 
     let hold_colors: int array = Array.zeroCreate keys
     let holding: bool array = Array.create keys false
@@ -243,14 +252,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
     let explosion_pool: Explosion array =
         Array.init
             EXPLOSION_POOL_SIZE
-            (fun _ ->
-                {
-                    Column = 0
-                    Color = 0
-                    IsRelease = false
-                    Time = -Time.infinity
-                }
-            )
+            (fun _ -> Explosion.Nothing)
 
     let mutable explosion_pool_pointer = 0
 
@@ -350,6 +352,14 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
     override this.Draw() =
         let now = state.CurrentChartTime()
+
+        if now < last_time then
+            for i = 0 to EXPLOSION_POOL_SIZE - 1 do
+                explosion_pool.[i] <- Explosion.Nothing
+            for k = 0 to keys - 1 do
+                holding.[k] <- false
+
+        last_time <- now
 
         // hold animations
         for k = 0 to keys - 1 do
