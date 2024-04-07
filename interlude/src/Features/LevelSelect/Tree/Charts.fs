@@ -36,7 +36,14 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
         match chart_save_data with
         | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
             personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
-            grade <- get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName
+            grade <- 
+                match get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName with
+                | Some (grade, rate, color, text) when not Interlude.Options.options.TreeShowGradesOnly.Value ->
+                    match personal_bests.Value.Accuracy |> PersonalBests.get_best_above rate with
+                    | Some accuracy ->
+                        Some (grade, rate, color, sprintf "%.2f%%" (accuracy * 100.0))
+                    | None -> Some (grade, rate, color, text)
+                | otherwise -> otherwise
             lamp <- get_pb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
         | _ -> ()
 

@@ -119,11 +119,12 @@ module Options =
             ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
 
+            TreeShowGradesOnly: Setting<bool>
             Table: Setting<string option>
-            GameplayBinds: (Bind array) array
 
             EnableConsole: Setting<bool>
             Hotkeys: Dictionary<Hotkey, Bind>
+            GameplayBinds: (Bind array) array
 
             Preset1: Setting<Preset option>
             Preset2: Setting<Preset option>
@@ -181,6 +182,7 @@ module Options =
                 ChartGroupReverse = Setting.simple false
                 ScoreSortMode = Setting.simple 0
 
+                TreeShowGradesOnly = Setting.simple true
                 Table = Content.Tables.selected_id
 
                 EnableConsole = Setting.simple false
