@@ -9,7 +9,6 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
-open Prelude.Charts.Processing.NoteColors
 open Prelude.Charts.Processing.Patterns
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
@@ -193,7 +192,7 @@ module Gameplay =
                             // if chart is loaded we can safely restart from this point for different rates and mods
 
                             let with_mods = Mods.apply mods chart
-                            let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
+                            let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
                             let rating = DifficultyRating.calculate rate with_mods.Notes
 
@@ -223,7 +222,7 @@ module Gameplay =
                             | Some chart ->
 
                             let with_mods = Mods.apply mods chart
-                            let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
+                            let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
                             let rating = DifficultyRating.calculate rate with_mods.Notes
 
@@ -256,7 +255,7 @@ module Gameplay =
                             | None -> ()
                             | Some with_mods ->
 
-                            let with_colors = apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
+                            let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
                             yield fun () -> WITH_COLORS <- Some with_colors
 
                             yield
@@ -347,7 +346,7 @@ module Gameplay =
                 on_load_succeeded <- (fun () -> action (create_loaded_chart_info ())) :: on_load_succeeded
 
         let color_this_chart (with_mods: ModdedChart) =
-            apply_coloring (Content.NoteskinConfig.NoteColors) with_mods
+            NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
         let init_window () = sync_forever chart_loader.Join
 

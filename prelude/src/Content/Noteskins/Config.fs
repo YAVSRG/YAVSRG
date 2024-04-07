@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
-open Prelude.Charts.Processing.NoteColors
+open Prelude.Charts.Processing
 open Prelude.Content
 
 [<RequireQualifiedAccess>]

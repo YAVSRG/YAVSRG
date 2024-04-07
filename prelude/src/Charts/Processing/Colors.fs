@@ -11,49 +11,78 @@ open Prelude.Charts
 // Some players may find certain coloring systems useful, for example having color coding depending on the musical beat a note is snapped to
 // It is also common just to have simple column color variation to make columns appear distinct
 
-module NoteColors =
+type ColorScheme =
+    | Column = 0
+    | Chord = 1
+    | DDR = 2
+
+module ColorScheme =
 
     let DDR_VALUES =
         [| 1.0f; 2.0f; 3.0f; 4.0f; 6.0f; 8.0f; 12.0f; 16.0f |]
         |> Array.map (fun i -> i * 1.0f< / beat>)
 
-    type ColorScheme =
-        | Column = 0
-        | Chord = 1
-        | DDR = 2
+    let count (keycount: int) (scheme: ColorScheme) =
+        match scheme with
+        | ColorScheme.Column -> keycount
+        | ColorScheme.Chord -> keycount
+        | ColorScheme.DDR -> Array.length DDR_VALUES + 1
+        | _ -> keycount
 
-    module ColorScheme =
-        let count (keycount: int) (scheme: ColorScheme) =
-            match scheme with
-            | ColorScheme.Column -> keycount
-            | ColorScheme.Chord -> keycount
-            | ColorScheme.DDR -> Array.length DDR_VALUES + 1
-            | _ -> keycount
+type ColorData = byte array
 
-    type ColorData = byte array
-    type ColorDataSets = ColorData array // color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
-    type Colorizer<'state> = 'state -> TimeItem<NoteRow> -> ('state * ColorData)
+type ColoredChart =
+    {
+        Source: ModdedChart
+        Colors: TimeArray<ColorData>
+    }
+    member this.Keys = this.Source.Keys
+    member this.BPM = this.Source.BPM
+    member this.SV = this.Source.SV
+    member this.ModsSelected = this.Source.ModsSelected
+    member this.ModsApplied = this.Source.ModsApplied
+    member this.FirstNote = this.Source.FirstNote
+    member this.LastNote = this.Source.LastNote
+    member this.Notes = this.Source.Notes
 
-    type ColoredChart =
+[<Json.AutoCodec(false)>]
+type ColorConfig =
+    {
+        Style: ColorScheme
+        Colors: ColorData array
+        UseGlobalColors: bool
+    }
+    static member Default =
         {
-            Source: ModdedChart
-            Colors: TimeArray<ColorData>
+            Style = ColorScheme.Column
+            Colors = Array.init 9 (fun i -> Array.init 10 byte)
+            UseGlobalColors = true
         }
-        member this.Keys = this.Source.Keys
-        member this.BPM = this.Source.BPM
-        member this.SV = this.Source.SV
-        member this.ModsSelected = this.Source.ModsSelected
-        member this.ModsApplied = this.Source.ModsApplied
-        member this.FirstNote = this.Source.FirstNote
-        member this.LastNote = this.Source.LastNote
-        member this.Notes = this.Source.Notes
+
+    member this.Validate =
+        { this with
+            Colors =
+                if
+                    Array.forall (fun (x: ColorData) -> x.Length = 10) this.Colors
+                    && this.Colors.Length = 9
+                then
+                    this.Colors
+                else
+                    Logging.Error(
+                        "Problem with noteskin: Colors should be an 9x10 array - Please use the ingame editor"
+                    )
+
+                    ColorConfig.Default.Colors
+        }
+
+module NoteColors =
 
     let private roughly_divisible (a: Time) (b: Time) =
         Time.abs (a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
 
     let private ddr_func (delta: Time) (ms_per_beat: float32<ms / beat>) : int =
-        List.tryFind ((fun i -> DDR_VALUES.[i]) >> fun n -> roughly_divisible delta (ms_per_beat / n)) [ 0..7 ]
-        |> Option.defaultValue DDR_VALUES.Length
+        List.tryFind ((fun i -> ColorScheme.DDR_VALUES.[i]) >> fun n -> roughly_divisible delta (ms_per_beat / n)) [ 0..7 ]
+        |> Option.defaultValue ColorScheme.DDR_VALUES.Length
 
     let private column_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorData> =
 
@@ -130,36 +159,6 @@ module NoteColors =
 
         { Source = mc; Colors = colored_notes }
 
-    [<Json.AutoCodec(false)>]
-    type ColorConfig =
-        {
-            Style: ColorScheme
-            Colors: ColorDataSets
-            UseGlobalColors: bool
-        }
-        static member Default =
-            {
-                Style = ColorScheme.Column
-                Colors = Array.init 9 (fun i -> Array.init 10 byte)
-                UseGlobalColors = true
-            }
-
-        member this.Validate =
-            { this with
-                Colors =
-                    if
-                        Array.forall (fun (x: ColorData) -> x.Length = 10) this.Colors
-                        && this.Colors.Length = 9
-                    then
-                        this.Colors
-                    else
-                        Logging.Error(
-                            "Problem with noteskin: Colors should be an 9x10 array - Please use the ingame editor"
-                        )
-
-                        ColorConfig.Default.Colors
-            }
-
-    let apply_coloring (config: ColorConfig) (chart: ModdedChart) : ColoredChart =
+    let apply (config: ColorConfig) (chart: ModdedChart) : ColoredChart =
         let index = if config.UseGlobalColors then 0 else chart.Keys - 2
         apply_scheme config.Style config.Colors.[index] chart

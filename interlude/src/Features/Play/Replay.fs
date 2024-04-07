@@ -8,7 +8,6 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
-open Prelude.Charts.Processing.NoteColors
 open Prelude.Data
 open Prelude.Gameplay
 open Interlude.Content

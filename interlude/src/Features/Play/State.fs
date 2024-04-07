@@ -3,7 +3,7 @@
 open System
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing.NoteColors
+open Prelude.Charts.Processing
 open Prelude.Gameplay
 open Interlude.Features.Gameplay.Chart
 
