@@ -19,7 +19,7 @@ module Rulesets =
                 (sprintf "xs-%s" (d.Name.ToLower()), PrefabRulesets.Ex_Score.create d)
             )
             [ PrefabRulesets.Ex_Score.mizu ]
-        //@ [ "noodles", PrefabRulesets.Noodles.RULESET ]
+        @ [ "noodles", PrefabRulesets.Noodles.RULESET ]
 
     let main_rulesets =
         [ "osu-od-5"; "osu-od-8"; "sc-j4"; "sc-j5"; "wife-j4"; "xs-sdvx" ]
