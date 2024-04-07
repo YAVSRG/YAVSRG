@@ -10,7 +10,6 @@ open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.Features
 open Interlude.Options
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -21,11 +20,11 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
     let n = byte sprite.Rows
 
     let fd () =
-        Setting.app (fun x -> (x + n - 1uy) % n) color
+        Setting.app (fun x -> (x + 1uy) % n) color
         Style.click.Play()
 
     let bk () =
-        Setting.app (fun x -> (x + 1uy) % n) color
+        Setting.app (fun x -> (x + n - 1uy) % n) color
         Style.click.Play()
 
     override this.Init(parent: Widget) =

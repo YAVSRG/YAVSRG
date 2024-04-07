@@ -5,12 +5,13 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
+open Prelude.Content
 open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 
-type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array array) =
+type private TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array array) =
     inherit
         Container(
             NodeType.Button(fun () ->
@@ -56,7 +57,7 @@ type TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array ar
         base.Draw()
         Draw.quad this.Bounds.AsQuad (Quad.color Color.White) (Sprite.pick_texture (x, y) sprite)
 
-type DeleteButton(on_click) =
+type private DeleteButton(on_click) =
     inherit Button(K Icons.TRASH, on_click, Floating = true)
 
     member val VerticalPad = 0.0f with get, set
@@ -67,7 +68,7 @@ type DeleteButton(on_click) =
 
         base.Draw()
 
-type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as this =
+type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Items))
 
     let mutable sprite = Unchecked.defaultof<Sprite>
@@ -80,14 +81,16 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
         if sprite.Columns <> selected.Length || sprite.Rows <> selected.[0].Length then
             selected <- Array.init sprite.Columns (fun _ -> Array.zeroCreate sprite.Rows)
 
-        let size =
+        
+
+        let item_height =
             min
-                ((this.Bounds.Width - 10.0f * float32 (sprite.Columns - 1))
-                 / float32 sprite.Columns)
+                ((this.Bounds.Width - 10.0f * float32 (sprite.Columns - 1)) / float32 sprite.Columns / sprite.AspectRatio)
                 ((this.Bounds.Height - 10.0f * float32 (sprite.Rows - 1)) / float32 sprite.Rows)
+        let item_width = item_height * sprite.AspectRatio
 
         let grid_width =
-            size * float32 sprite.Columns + 10.0f * float32 (sprite.Columns - 1)
+            item_width * float32 sprite.Columns + 10.0f * float32 (sprite.Columns - 1)
 
         items <-
             NavigationContainer.Grid(
@@ -108,7 +111,7 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                         r,
                         selected,
                         Position =
-                            Position.Box(0.0f, 0.0f, float32 c * (size + 10.0f), float32 r * (size + 10.0f), size, size)
+                            Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), float32 r * (item_height + 10.0f), item_width, item_height)
                     ),
                     c + 2,
                     r + 2
@@ -120,29 +123,30 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                             K(sprintf "Frame %i" (c + 1)),
                             Color = K Colors.text_subheading,
                             Align = Alignment.CENTER,
-                            Position = Position.Box(0.0f, 0.0f, float32 c * (size + 10.0f), -90.0f, size, 40.0f)
+                            Position = Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -90.0f, item_width, 40.0f)
                         ),
                         c + 2,
                         0
                     )
 
-                    grid.Add(
-                        DeleteButton(
-                            (fun () ->
-                                ConfirmPage(
-                                    sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
-                                    fun () ->
-                                        if Content.Noteskin.DeleteGridTextureColumn(c, texture_id) then
-                                            Noteskins.reload_current ()
-                                            this.Refresh()
-                                )
-                                    .Show()
+                    if sprite.Columns > 1 then
+                        grid.Add(
+                            DeleteButton(
+                                (fun () ->
+                                    ConfirmPage(
+                                        sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
+                                        fun () ->
+                                            if Content.Noteskin.DeleteGridTextureColumn(c, texture_id) then
+                                                Noteskins.reload_current ()
+                                                this.Refresh()
+                                    )
+                                        .Show()
+                                ),
+                                Position = Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -50.0f, item_width, 40.0f)
                             ),
-                            Position = Position.Box(0.0f, 0.0f, float32 c * (size + 10.0f), -50.0f, size, 40.0f)
-                        ),
-                        c + 2,
-                        1
-                    )
+                            c + 2,
+                            1
+                        )
 
             grid.Add(
                 Text(
@@ -151,40 +155,41 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                     Align = Alignment.RIGHT,
                     Position =
                         Position
-                            .Box(0.0f, 0.0f, -250.0f, float32 r * (size + 10.0f), 200.0f, size)
-                            .Margin(10.0f, size * 0.5f - 20.0f)
+                            .Box(0.0f, 0.0f, -250.0f, float32 r * (item_height + 10.0f), 200.0f, item_height)
+                            .Margin(10.0f, item_height * 0.5f - 20.0f)
                 ),
                 0,
                 r + 1
             )
 
-            grid.Add(
-                DeleteButton(
-                    (fun () ->
-                        ConfirmPage(
-                            sprintf "Really PERMANENTLY delete color %i?" (r + 1),
-                            fun () ->
-                                if Content.Noteskin.DeleteGridTextureRow(r, texture_id) then
-                                    Noteskins.reload_current ()
-                                    this.Refresh()
-                        )
-                            .Show()
+            if sprite.Rows > 1 then
+                grid.Add(
+                    DeleteButton(
+                        (fun () ->
+                            ConfirmPage(
+                                sprintf "Really PERMANENTLY delete color %i?" (r + 1),
+                                fun () ->
+                                    if Content.Noteskin.DeleteGridTextureRow(r, texture_id) then
+                                        Noteskins.reload_current ()
+                                        this.Refresh()
+                            )
+                                .Show()
+                        ),
+                        VerticalPad = item_height * 0.5f - 20.0f,
+                        Position =
+                            Position
+                                .Box(0.0f, 0.0f, -50.0f, float32 r * (item_height + 10.0f), 40.0f, item_height)
+                                .Margin(0.0f, item_height * 0.5f - 20.0f)
                     ),
-                    VerticalPad = size * 0.5f - 20.0f,
-                    Position =
-                        Position
-                            .Box(0.0f, 0.0f, -50.0f, float32 r * (size + 10.0f), 40.0f, size)
-                            .Margin(0.0f, size * 0.5f - 20.0f)
-                ),
-                1,
-                r + 2
-            )
+                    1,
+                    r + 2
+                )
 
         items.Add(grid, 0, 0)
 
-        if sprite.Rows < max_colors then
+        if sprite.Rows < fst rules.MaxGridSize then
             items.Add(
-                { new Button(K(sprintf "%s %s" Icons.PLUS_CIRCLE "Add color"),
+                { new Button(K Icons.PLUS_CIRCLE,
                              (fun () ->
                                  let src_row =
                                      match Seq.tryHead this.SelectedTextures with
@@ -214,7 +219,7 @@ type TextureEditGrid(texture_id: string, max_frames: int, max_colors: int) as th
                 1
             )
 
-        if sprite.Columns < max_frames then
+        if sprite.Columns < snd rules.MaxGridSize then
             items.Add(
                 { new Button(K Icons.PLUS_CIRCLE,
                              (fun () ->
@@ -274,13 +279,11 @@ type TextureEditPage(texture_id: string) as this =
     inherit Page()
 
     let texture_rules = NoteskinTextureRules.get Content.NoteskinConfig texture_id
-    let max_colors, max_frames = texture_rules.MaxGridSize
 
     let texture_editor =
         TextureEditGrid(
             texture_id,
-            max_frames,
-            max_colors,
+            texture_rules,
             Position = Position.Box(0.5f, 0.0f, -375.0f, 200.0f, 750.0f, 750.0f)
         )
 

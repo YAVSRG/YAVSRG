@@ -848,6 +848,8 @@ type Storage(storage: StorageType) =
 
         let info: TextureConfig = this.GetTextureConfig(name, path)
 
+        if info.Rows <= 1 then false else
+
         match info.Mode with
         | Grid ->
             Logging.Warn(sprintf "Cannot delete %s (*, %i) as it is a grid texture" name row)
@@ -876,6 +878,8 @@ type Storage(storage: StorageType) =
         | Folder f ->
 
         let info: TextureConfig = this.GetTextureConfig(name, path)
+
+        if info.Columns <= 1 then false else
 
         match info.Mode with
         | Grid ->
