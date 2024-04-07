@@ -169,14 +169,25 @@ module EndlessModeState =
         let random = new Random()
         items |> Seq.map (fun x -> x, random.Next()) |> Seq.sortBy snd |> Seq.map fst
 
-    let create_from_playlist (shuffle: bool) (playlist: Playlist) (library: Library) = // todo: could only pass cache in
+    let create_from_playlist (from: int) (playlist: Playlist) (library: Library) =
+        playlist.Charts
+        |> Seq.skip from
+        |> Seq.choose (fun (c, info) ->
+            match Cache.by_hash c.Hash library.Cache with
+            | Some cc -> Some(cc, info)
+            | None -> None
+        )
+        |> List.ofSeq
+        |> EndlessModeState.Playlist
+
+    let create_from_playlist_shuffled (playlist: Playlist) (library: Library) =
         playlist.Charts
         |> Seq.choose (fun (c, info) ->
             match Cache.by_hash c.Hash library.Cache with
             | Some cc -> Some(cc, info)
             | None -> None
         )
-        |> if shuffle then shuffle_playlist_charts else id
+        |>  shuffle_playlist_charts
         |> List.ofSeq
         |> EndlessModeState.Playlist
 
