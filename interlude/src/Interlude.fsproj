@@ -116,8 +116,12 @@
     <Compile Include="Features\LevelSelect\Shared.fs" />
     <Compile Include="Features\LevelSelect\LibraryView.fs" />
     <Compile Include="Features\LevelSelect\ActionBar.fs" />
-    <Compile Include="Features\LevelSelect\ContextMenus.fs" />
-    <Compile Include="Features\LevelSelect\Tree.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus\Chart.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus\Groups.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus\Score.fs" />
+    <Compile Include="Features\LevelSelect\Tree\State.fs" />
+    <Compile Include="Features\LevelSelect\Tree\Display.fs" />
+    <Compile Include="Features\LevelSelect\Tree\Tree.fs" />
     <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
     <Compile Include="Features\LevelSelect\Info\Details.fs" />

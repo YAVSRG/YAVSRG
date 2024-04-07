@@ -55,7 +55,7 @@ type LevelSelectScreen() =
 
             match Suggestion.get_suggestion ctx with
             | Some c ->
-                Tree.switch_chart (c, LibraryContext.None, "")
+                TreeState.switch_chart (c, LibraryContext.None, "")
                 refresh ()
             | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
         else
@@ -70,7 +70,7 @@ type LevelSelectScreen() =
 
             match Suggestion.get_random LevelSelect.filter ctx with
             | Some c ->
-                Tree.switch_chart (c, LibraryContext.None, "")
+                TreeState.switch_chart (c, LibraryContext.None, "")
                 refresh ()
             | None -> ()
 
