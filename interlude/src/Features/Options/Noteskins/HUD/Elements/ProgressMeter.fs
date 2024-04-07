@@ -22,7 +22,7 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
     let label = Setting.simple user_options.ProgressMeterLabel
 
     let preview =
-        { new ConfigPreview(0.35f, pos) with
+        { new ConfigPreviewNew(pos.Value) with
             override this.DrawComponent(bounds) =
                 let x, y = bounds.Center
                 let r = (min bounds.Width bounds.Height) * 0.5f
@@ -59,7 +59,7 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
                 Text.fill_b (
                     Style.font,
                     text,
-                    bounds.BorderBottom(40.0f * 0.35f),
+                    bounds.BorderBottom(40.0f),
                     Colors.text_subheading,
                     Alignment.CENTER
                 )
@@ -81,7 +81,6 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
         )
 
     override this.Title = %"hud.progressmeter.name"
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
         options.HUD.Set

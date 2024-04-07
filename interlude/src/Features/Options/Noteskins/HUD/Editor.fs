@@ -26,7 +26,7 @@ type SubPositioner(drag: (float32 * float32) * (float32 * float32) -> unit, fini
 
     override this.Update(elapsed_ms, moved) =
 
-        hover <- Mouse.hover this.Bounds
+        hover <- this.Parent.Focused && Mouse.hover this.Bounds
 
         match dragging_from with
         | Some(x, y) ->
@@ -131,6 +131,7 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
 
     override this.Init(parent) =
         this
+        |+ child
         |+ SubPositioner(
             (fun ((old_x, old_y), (new_x, new_y)) ->
                 let current = position.Value
@@ -249,7 +250,7 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
                     Bottom = 0.5f %+ 5.0f
                 }
         )
-        |+ SubPositioner(
+        |* SubPositioner(
             (fun ((_, old_y), (_, new_y)) ->
                 let current = position.Value
 
@@ -268,7 +269,6 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
                     Right = 0.5f %+ 5.0f
                 }
         )
-        |* child
 
         base.Init parent
 
@@ -353,6 +353,8 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
             if hover && Mouse.left_click () then
                 dragging_from <- Some(Mouse.pos ())
                 this.Select true
+            elif hover && Mouse.right_click () then
+                HUDElement.show_menu elem (fun () -> ctx.Create elem)
 
         base.Update(elapsed_ms, moved)
 
@@ -361,6 +363,7 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
         ctx.Selected <- elem
 
     override this.Draw() =
+
         if dragging_from.IsSome then
             let pos = position.Value
             let left_axis = this.Parent.Bounds.Left + this.Parent.Bounds.Width * snd pos.Left
@@ -403,6 +406,8 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
                         ))
                         Colors.green_accent.O1
 
+        base.Draw()
+
         if this.Focused then
             Draw.rect (this.Bounds.BorderTopCorners Style.PADDING) Colors.yellow_accent
             Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) Colors.yellow_accent
@@ -413,8 +418,6 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
             Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) Colors.white.O2
             Draw.rect (this.Bounds.BorderLeft Style.PADDING) Colors.white.O2
             Draw.rect (this.Bounds.BorderRight Style.PADDING) Colors.white.O2
-
-        base.Draw()
 
 and PositionerContext =
     {
