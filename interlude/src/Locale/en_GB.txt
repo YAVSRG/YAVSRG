@@ -780,3 +780,7 @@ wiki.close=Close
 wiki.contents=Table of contents
 wiki.home=Home
 wiki.openinbrowser=Open in browser
+hud.judgementcounter.backgroundscale.name=Background scale
+hud.judgementcounter.backgroundscale.tooltip=
+hud.judgementcounter.usebackground.name=Use background
+hud.judgementcounter.usebackground.tooltip=When enabled, places a customisable texture behind the counter.

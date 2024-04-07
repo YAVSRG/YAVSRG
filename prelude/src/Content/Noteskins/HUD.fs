@@ -150,6 +150,8 @@ type HUDNoteskinOptions =
         PacemakerPosition: HUDPosition
 
         JudgementCounterPosition: HUDPosition
+        JudgementCounterUseBackground: bool
+        JudgementCounterBackgroundScale: float32
 
         RateModMeterPosition: HUDPosition
 
@@ -253,6 +255,8 @@ type HUDNoteskinOptions =
                     Right = 220.0f, 0.0f
                     Bottom = -20.0f, 1.0f
                 }
+            JudgementCounterUseBackground = false
+            JudgementCounterBackgroundScale = 1.1f
 
             RateModMeterPosition = 
                 {

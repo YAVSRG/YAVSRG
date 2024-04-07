@@ -521,12 +521,12 @@ type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOption
             Text.fill_b (Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
 
 type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
-    inherit StaticWidget(NodeType.None)
+    inherit Container(NodeType.None)
 
     let judgement_animations =
         Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(user_options.JudgementCounterFadeTime))
 
-    do
+    override this.Init(parent) =
         state.SubscribeToHits(fun h ->
             match h.Guts with
             | Hit x ->
@@ -537,6 +537,23 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                     judgement_animations[x.Judgement.Value].Reset()
         )
 
+        if noteskin_options.JudgementCounterUseBackground then
+            let lo = (1.0f - noteskin_options.JudgementCounterBackgroundScale) * 0.5f
+            let hi = 1.0f - lo
+            this 
+            |* Image(
+                Content.Texture "judgement-counter-bg",
+                StretchToFill = false,
+                Position = 
+                    { 
+                        Left = lo %+ 0.0f
+                        Top = lo %+ 0.0f
+                        Right = hi %+ 0.0f
+                        Bottom = hi %+ 0.0f
+                    }
+            )
+        base.Init parent
+
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
@@ -544,6 +561,7 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
             j.Update elapsed_ms
 
     override this.Draw() =
+        base.Draw()
         let h = this.Bounds.Height / float32 judgement_animations.Length
         let mutable r = this.Bounds.SliceTop(h).Shrink(5.0f)
 

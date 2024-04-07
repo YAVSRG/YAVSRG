@@ -344,6 +344,9 @@ type JudgementCounterPage(on_close: unit -> unit) as this =
         Setting.simple user_options.JudgementCounterFadeTime
         |> Setting.bound 100.0 1000.0
 
+    let use_background = Setting.simple noteskin_options.JudgementCounterUseBackground
+    let background_scale = Setting.simple noteskin_options.JudgementCounterBackgroundScale |> Setting.bound 0.5f 2.0f
+
     let preview =
         { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
@@ -356,6 +359,16 @@ type JudgementCounterPage(on_close: unit -> unit) as this =
             |+ PageSetting("hud.judgementcounter.animationtime", Slider(animation_time |> Setting.f32, Step = 5f))
                 .Pos(0)
                 .Tooltip(Tooltip.Info("hud.judgementcounter.animationtime"))
+            |+ ([
+                PageSetting("hud.judgementcounter.usebackground", Selector<_>.FromBool(use_background))
+                    .Pos(2)
+                    .Tooltip(Tooltip.Info("hud.judgementcounter.usebackground")) :> Widget
+                Conditional(use_background.Get, 
+                    PageSetting("hud.judgementcounter.backgroundscale", Slider.Percent(background_scale))
+                        .Pos(4)
+                        .Tooltip(Tooltip.Info("hud.judgementcounter.backgroundscale"))
+                )
+                ] |> or_require_noteskin)
             |>> Container
             |+ preview
         )
@@ -367,6 +380,12 @@ type JudgementCounterPage(on_close: unit -> unit) as this =
         options.HUD.Set
             { options.HUD.Value with
                 JudgementCounterFadeTime = animation_time.Value
+            }
+
+        Noteskins.save_hud_config 
+            { Content.NoteskinConfig.HUD with
+                JudgementCounterUseBackground = use_background.Value
+                JudgementCounterBackgroundScale = background_scale.Value
             }
 
         on_close ()
