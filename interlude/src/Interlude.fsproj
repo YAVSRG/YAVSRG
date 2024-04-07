@@ -92,6 +92,9 @@
     <Compile Include="Features\Play\State.fs" />
     <Compile Include="Features\Play\Playfield.fs" />
     <Compile Include="Features\Play\HUD.fs" />
+    <Compile Include="Features\Play\LaneCover.fs" />
+    <Compile Include="Features\Play\Explosions.fs" />
+    <Compile Include="Features\Play\ColumnLighting.fs" />
     <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Play\Play.fs" />
     <Compile Include="Features\Play\Replay.fs" />
