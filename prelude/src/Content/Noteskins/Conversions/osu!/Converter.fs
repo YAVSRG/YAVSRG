@@ -110,7 +110,7 @@ module OsuSkinConverter =
                 let image = let r = images.[row] in r[column % r.Length]
 
                 let square_image =
-                    if element_name = "holdbody" then
+                    if element_name = "holdbody" && image.Width > image.Height then
                         stretch_to_square width image
                     else
                         pad_to_square width image
