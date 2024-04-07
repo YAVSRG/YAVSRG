@@ -120,7 +120,8 @@
     <Compile Include="Features\LevelSelect\ContextMenus\Groups.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Score.fs" />
     <Compile Include="Features\LevelSelect\Tree\State.fs" />
-    <Compile Include="Features\LevelSelect\Tree\Display.fs" />
+    <Compile Include="Features\LevelSelect\Tree\Charts.fs" />
+    <Compile Include="Features\LevelSelect\Tree\Groups.fs" />
     <Compile Include="Features\LevelSelect\Tree\Tree.fs" />
     <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
