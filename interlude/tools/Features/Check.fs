@@ -22,6 +22,11 @@ module Check =
                     yield! walk_fs_files dir
         }
 
+    let check_linecounts() =
+        for filename, file_contents in walk_fs_files YAVSRG_PATH do
+            let lines = file_contents.Split('\n').Length
+            if lines > 300 then printfn "%s has %i lines" filename lines
+
     let check_locale (name: string) =
         let locale =
             let mapping = new Dictionary<string, string>()
@@ -125,4 +130,6 @@ module Check =
             printfn "Unused locale key: %s" m
 
     let register (ctx: ShellContext) : ShellContext =
-        ctx.WithCommand("check_locale", "Check locale for mistakes", (fun () -> check_locale "en_GB"))
+        ctx
+            .WithCommand("check_locale", "Check locale for mistakes", (fun () -> check_locale "en_GB"))
+            .WithCommand("check_linecounts", "Check for particularly large source code files", (fun () -> check_linecounts()))
