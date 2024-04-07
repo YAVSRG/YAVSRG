@@ -2,13 +2,10 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Gameplay
 open Prelude.Content.Noteskins
 open Interlude.Content
-open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Options
 
