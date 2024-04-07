@@ -121,7 +121,16 @@
     <Compile Include="Features\Options\Gameplay\Presets.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
     <Compile Include="Features\Options\Noteskins\Shared.fs" />
-    <Compile Include="Features\Options\Noteskins\HUD\ElementPages.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\Accuracy.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\TimingDisplay.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\Combo.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\SkipButton.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\ProgressMeter.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\Pacemaker.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\JudgementMeter.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\EarlyLateMeter.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\RateModMeter.fs" />
+    <Compile Include="Features\Options\Noteskins\HUD\Elements\BPMMeter.fs" />
     <Compile Include="Features\Options\Noteskins\HUD\Elements.fs" />
     <Compile Include="Features\Options\Noteskins\HUD\Editor.fs" />
     <Compile Include="Features\Options\Noteskins\HUD\HUD.fs" />
