@@ -1,19 +1,19 @@
-0.7.19.5
+0.7.19.6
 ====
 
-I have not heard complaints about the new smart frame cap so that is good  
-Here are some more features :)
+Yet Another Minor Feature Update
 
-# New gameplay features
-- 'Shuffle' and 'Randomise' modifiers, check them out in the mods menu for more info
-- Option under pacemaker settings to only save scores that are a new record of some form
+# New features
+- You can now play a playlist onwards from any point
+- New 'Noodles' ruleset available on the imports screen, for practising LN releases
+- New optional noteskin feature to have a custom background texture behind the judgement counter
+
+# Improvements
+- Various improvements to the HUD editor, most notable: you can right click on elements to open their settings
+- More various improvements to the noteskin texture editor
+- I tidied up some code in many places
 
 # Bug fixes
-- Fixed pressing enter sometimes not playing the chart for some reason (I know the exact reason)
-- Fixed a bug causing osu! skin converter to use different textures to what osu! stable does
-- Fixed mod meter showing the wrong mods when watching replays
-
-# Other improvements
-- Text appears in top right reminding users of Ctrl-O to change local offset
-- Slight improvements to ingame noteskin texture editor
+- Fixed a minor issue when osu! skin converter converts tall LN textures
+- Fixed explosion animations glitching out when a song loops during practice mode/editing HUD
 
