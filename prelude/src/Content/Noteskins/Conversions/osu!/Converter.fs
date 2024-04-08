@@ -76,7 +76,6 @@ module OsuSkinConverter =
             let new_image = new Bitmap(width, height)
             new_image.Mutate(fun img -> img.DrawImage(image, Point((-image.Width + width) / 2, (-image.Height + height) / 2), 1.0f) |> ignore)
 
-            image.Dispose()
             new_image
         else
             image
