@@ -169,7 +169,51 @@ type LevelSelectScreen() =
                 }
         )
 
-        |+ LibraryModeSettings()
+        |+ LibraryViewControls()
+
+        |+ StylishButton(
+            (fun () -> LevelSelect.choose_this_chart(); TreeState.click_cooldown <- 500.0),
+            K (sprintf "%s %s" Icons.PLAY %"levelselect.play"),
+            !%Palette.MAIN.O2,
+            TiltRight = false,
+            Position = Position.SliceBottom(50.0f).SliceRight(300.0f)
+        )
+        |+ Conditional(
+            (fun () -> match Chart.LIBRARY_CTX with LibraryContext.Playlist _ -> true | _ -> false),
+            StylishButton(
+                (fun () ->
+                    match Chart.LIBRARY_CTX with
+                    | LibraryContext.Playlist (_, name, _) ->
+                        Endless.begin_endless_mode (
+                            EndlessModeState.create_from_playlist
+                                0
+                                (Content.Collections.GetPlaylist(name).Value)
+                                Content.Library
+                        )
+
+                        Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                    | _ -> ()
+                ),
+                K (sprintf "%s %s" Icons.PLAY_CIRCLE %"playlist.play.name"),
+                !%Palette.DARK.O2,
+                Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f)
+            )
+        )
+        |+ Conditional(
+            (fun () -> match Chart.LIBRARY_CTX with LibraryContext.Playlist _ -> false | _ -> true),
+            StylishButton(
+                (fun () -> Chart.if_loaded(fun info -> EndlessModeMenu(info).Show())),
+                K (sprintf "%s %s" Icons.PLAY_CIRCLE %"levelselect.endless_mode"),
+                !%Palette.DARK.O2,
+                Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f)
+            )
+        )
+        |+ StylishButton(
+            (fun () -> Chart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),
+            K Icons.LIST,
+            !%Palette.MAIN.O2,
+            Position = Position.SliceBottom(50.0f).SliceRight(60.0f).Translate(-650.0f, 0.0f)
+        )
 
         |* info_panel
 

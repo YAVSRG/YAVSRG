@@ -4,8 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data
 open Prelude.Data.Library.Sorting
-open Prelude.Data.Library.Endless
-open Interlude.Content
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Play
@@ -64,7 +62,7 @@ module LevelSelect =
             if Network.lobby.IsSome then
                 if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
                     Lobby.select_chart (info.CacheInfo, rate.Value, selected_mods.Value)
-            elif
+            else
                 if autoplay then
                     Screen.change_new
                         (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)
@@ -72,20 +70,7 @@ module LevelSelect =
                         Transitions.Flags.Default
                 else
                     try_play info
-            then
-                if endless_mode.Value then
-                    Endless.begin_endless_mode
-                    <| EndlessModeState.create
-                        {
-                            BaseChart = info.CacheInfo
-                            Filter = filter
-                            Mods = selected_mods.Value
-                            Rate = rate.Value
-                            RulesetId = Rulesets.current_hash
-                            Ruleset = Rulesets.current
-                            Library = Content.Library
-                            ScoreDatabase = Content.Scores
-                        }
+                |> ignore
 
     let challenge_score (score_info: ScoreInfo) =
         Chart.if_loaded

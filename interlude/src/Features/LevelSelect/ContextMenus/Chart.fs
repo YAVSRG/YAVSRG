@@ -120,6 +120,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             |* PageButton.Once(
                 "chart.practice",
                 (fun () -> 
+                    Menu.Exit()
                     Chart.when_loaded(fun info ->
                         Screen.change_new
                             (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))

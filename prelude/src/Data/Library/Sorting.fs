@@ -156,6 +156,8 @@ module Sorting =
 
     module Filter =
 
+        let except_keywords = List.filter (function String _ -> false | Impossible -> false | _ -> true)
+
         let private string = " =<>\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLower()
 
         let private quoted_string =

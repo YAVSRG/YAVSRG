@@ -82,7 +82,7 @@ type private ModeDropdown
         | Some d -> d.Update(elapsed_ms, moved)
         | None -> ()
 
-type LibraryModeSettings() =
+type LibraryViewControls() =
     inherit Container(NodeType.None)
 
     let group_selector =

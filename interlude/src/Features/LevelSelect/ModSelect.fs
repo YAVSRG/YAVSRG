@@ -126,9 +126,6 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
             .Pos(17)
             .Tooltip(Tooltip.Info("gameplay.pacemaker"))
-        |+ PageSetting("gameplay.endless_mode", Selector<_>.FromBool(endless_mode))
-            .Pos(19)
-            .Tooltip(Tooltip.Info("gameplay.endless_mode"))
 
         |> this.Content
 

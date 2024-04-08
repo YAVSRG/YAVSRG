@@ -91,6 +91,9 @@ type PaletteColor =
             Brightness = lerp amount this.Brightness other.Brightness
             White = lerp amount this.White other.White
         }
+    member this.O1 = { this with Alpha = 63 }
+    member this.O2 = { this with Alpha = 127 }
+    member this.O3 = { this with Alpha = 223 }
 
 module Palette =
 
