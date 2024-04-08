@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Tools
 
+open System
 open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
@@ -27,7 +28,7 @@ module Check =
             let lines = file_contents.Split('\n').Length
             if lines > 300 then printfn "%s has %i lines" filename lines
 
-    let check_locale (name: string) =
+    let check_locale (name: string) (cli_fix_issues: bool) =
         let locale =
             let mapping = new Dictionary<string, string>()
             let path = Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", name + ".txt")
@@ -41,6 +42,8 @@ module Check =
                 lines
 
             mapping
+
+        let new_locale = Dictionary(locale)
 
         let mutable sources = Map.empty<string, string>
         let mutable found = Set.empty<string>
@@ -124,12 +127,32 @@ module Check =
             if locale.ContainsKey m then
                 locale.Remove m |> ignore
             else
-                printfn "Missing locale key: %s -- %s" m sources.[m]
+                printfn "'%s' is missing!\nFound in %s" m sources.[m]
+                if cli_fix_issues then
+                    printfn "----\n1. Enter new value\n2. Skip for now"
+                    match Console.Read() with
+                    | 49 ->
+                        printf "> "
+                        new_locale.Add(m, Console.ReadLine())
+                    | _ -> ()
 
         for m in locale.Keys do
             printfn "Unused locale key: %s" m
+            if cli_fix_issues then
+                printfn "----\n1. Remove it\n2. Skip for now"
+                match Console.Read() with
+                | 49 ->
+                    new_locale.Remove(m) |> ignore
+                | _ -> ()
+
+        if cli_fix_issues then
+            new_locale.Keys 
+            |> Seq.sort 
+            |> Seq.map (fun key -> sprintf "%s=%s" key (new_locale.[key].Replace("\n", "\\n")))
+            |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", name + ".txt"), contents)
 
     let register (ctx: ShellContext) : ShellContext =
         ctx
-            .WithCommand("check_locale", "Check locale for mistakes", (fun () -> check_locale "en_GB"))
+            .WithCommand("check_locale", "Check locale for mistakes", (fun () -> check_locale "en_GB" false))
+            .WithCommand("fix_locale", "Tool to automatically add locale keys", (fun () -> check_locale "en_GB" true))
             .WithCommand("check_linecounts", "Check for particularly large source code files", (fun () -> check_linecounts()))
