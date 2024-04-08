@@ -14,6 +14,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Collections
 open Interlude.Features.Tables
+open Interlude.Features.Play
 
 type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     inherit Page()
@@ -112,6 +113,22 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                     Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
                 ),
                 Icon = Icons.SHUFFLE
+            )
+
+        if Some cc = Chart.CACHE_DATA then
+            content
+            |* PageButton.Once(
+                "chart.practice",
+                (fun () -> 
+                    Chart.when_loaded(fun info ->
+                        Screen.change_new
+                            (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
+                            Screen.Type.Practice
+                            Transitions.Flags.Default
+                        |> ignore
+                    )
+                ),
+                Icon = Icons.TARGET
             )
 
         match Content.Table, Chart.CHART with
