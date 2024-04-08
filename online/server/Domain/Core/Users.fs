@@ -330,3 +330,13 @@ module User =
 
     let delete (id: int64) =
         DELETE.Execute id core_db |> expect |> ignore
+
+    let private COUNT: Query<unit, int64> =
+        {
+            SQL = """SELECT COUNT(1) FROM users"""
+            Parameters = []
+            FillParameters = fun p () -> ()
+            Read = fun r -> r.Int64
+        }
+    let count () : int64 =
+        COUNT.Execute () core_db |> expect |> Array.exactlyOne

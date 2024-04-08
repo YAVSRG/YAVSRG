@@ -253,3 +253,21 @@ module Users =
         let results = User.by_ids [| id1; id2; id1; 32767 |]
 
         Assert.AreEqual(2, results.Length)
+
+    [<Test>]
+    let Count() =
+        let original_count = User.count()
+
+        User.create ("Count1", 0uL) |> User.save_new |> ignore
+
+        let count_after_1 = User.count()
+        
+        User.create ("Count2", 0uL) |> User.save_new |> ignore
+        User.create ("Count3", 0uL) |> User.save_new |> ignore
+
+        let count_after_3 = User.count()
+
+        printfn "%i %i %i" original_count count_after_1 count_after_3
+        Assert.GreaterOrEqual(original_count, 0)
+        Assert.AreEqual(original_count + 1L, count_after_1)
+        Assert.AreEqual(original_count + 3L, count_after_3)

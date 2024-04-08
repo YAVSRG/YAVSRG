@@ -18,9 +18,10 @@ module AdminCommands =
 
     let user_list (page: int) =
         let user_list = User.list (page)
+        let user_count = User.count()
 
         let embed =
-            EmbedBuilder(Title = "All registered users")
+            EmbedBuilder(Title = sprintf "All registered users (%i)" user_count)
                 .WithDescription(
                     if user_list.Length = 0 then
                         "Empty page :("
