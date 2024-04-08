@@ -69,3 +69,4 @@ module internal DatabaseRef =
 module Discord =
 
     let mutable debug_log = fun (s: string) -> ()
+    let mutable feed_log = fun (s: string) -> ()

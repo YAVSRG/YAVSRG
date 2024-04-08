@@ -127,6 +127,7 @@ module Backbeat =
         let TABLES: Map<string, TableInfo> = Map.ofList [ "crescent", CRESCENT ]
 
         let exists (table_id: string) = TABLES.ContainsKey table_id
+        let get (table_id: string) = TABLES.TryFind table_id
 
     //// chart search by text
     module Charts =

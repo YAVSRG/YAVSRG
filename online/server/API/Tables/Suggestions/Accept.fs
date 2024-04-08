@@ -4,6 +4,7 @@ open NetCoreServer
 open Percyqaz.Common
 open Prelude
 open Interlude.Web.Shared.Requests
+open Interlude.Web.Server
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Backbeat
@@ -27,8 +28,9 @@ module Accept =
             | Error e -> raise (BadRequestException None)
             | Ok(request: Request) ->
 
-            if not (Backbeat.Tables.exists request.TableId) then
-                raise NotFoundException
+            match Backbeat.Tables.get request.TableId with
+            | None -> raise NotFoundException
+            | Some table ->
 
             if not (user.Badges.Contains Badge.TABLE_EDITOR) then
                 raise PermissionDeniedException
@@ -36,9 +38,9 @@ module Accept =
             let chart_id = request.ChartId.ToUpper()
 
             match Backbeat.Charts.by_hash chart_id with
-            | Some(known_chart, _) ->
+            | Some(known_chart, known_song) ->
 
-                if known_chart.Keys <> Backbeat.Tables.TABLES.[request.TableId].Keymode then
+                if known_chart.Keys <> table.Keymode then
 
                     Logging.Debug(
                         sprintf
@@ -55,7 +57,15 @@ module Accept =
                 elif TableSuggestion.accept request.TableId chart_id user_id request.Level then
 
                     TableLevel.add_or_move user_id request.TableId chart_id request.Level
-                    Leaderboard.create chart_id Backbeat.Tables.TABLES.[request.TableId].RulesetId
+                    let leaderboard_created = Leaderboard.create chart_id table.RulesetId
+
+                    sprintf "# :checkered_flag: %s\nNow in %s, %s%s"
+                        known_song.FormattedTitle
+                        table.Name
+                        (table.LevelName request.Level)
+                        (if leaderboard_created then "\nIt now has a leaderboard!" else "")
+                    |> Discord.feed_log
+
                     response.ReplyJson(true)
 
                 else

@@ -8,15 +8,15 @@ module Leaderboards =
 
     [<Test>]
     let Create_Exists () =
-        Leaderboard.create "CreateExistsChartId" "CreateExistsRulesetId"
+        Assert.True(Leaderboard.create "CreateExistsChartId" "CreateExistsRulesetId")
         Assert.True(Leaderboard.exists "CreateExistsChartId" "CreateExistsRulesetId")
 
     [<Test>]
     let Create_Idempotent () =
         Assert.False(Leaderboard.exists "CreateIdempotent" "CreateIdempotent")
-        Leaderboard.create "CreateIdempotent" "CreateIdempotent"
-        Leaderboard.create "CreateIdempotent" "CreateIdempotent"
-        Leaderboard.create "CreateIdempotent" "CreateIdempotent"
+        Assert.True(Leaderboard.create "CreateIdempotent" "CreateIdempotent")
+        Assert.False(Leaderboard.create "CreateIdempotent" "CreateIdempotent")
+        Assert.False(Leaderboard.create "CreateIdempotent" "CreateIdempotent")
         Assert.True(Leaderboard.exists "CreateIdempotent" "CreateIdempotent")
 
     [<Test>]
@@ -25,7 +25,7 @@ module Leaderboards =
 
     [<Test>]
     let DoesntExist2 () =
-        Leaderboard.create "DoesntExist2ChartId" "DoesntExist2ChartId"
+        Assert.True(Leaderboard.create "DoesntExist2ChartId" "DoesntExist2ChartId")
         Assert.False(Leaderboard.exists "WRONGCHARTID" "DoesntExist2RulesetId")
         Assert.False(Leaderboard.exists "WRONGCHARTID" "WRONGRULESETID")
         Assert.False(Leaderboard.exists "DoesntExist2ChartId" "WRONGRULESETID")

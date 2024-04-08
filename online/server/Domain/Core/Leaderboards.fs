@@ -35,8 +35,8 @@ module Leaderboard =
                 )
         }
 
-    let create (chart_id: string) (ruleset_id: string) =
-        CREATE.Execute (chart_id, ruleset_id) core_db |> expect |> ignore
+    let create (chart_id: string) (ruleset_id: string) : bool =
+        CREATE.Execute (chart_id, ruleset_id) core_db |> expect > 0
 
     let private EXISTS: Query<string * string, int32> =
         {
