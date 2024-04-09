@@ -477,6 +477,8 @@ module Gameplay =
 
     module Endless =
 
+        let priority = Setting.simple SuggestionPriority.Variety
+
         // todo: remove the holes from this system by making a proper way to wait for song to load
         let rec retry_until_song_loaded (info: Chart.LoadedChartInfo) (action: Chart.LoadedChartInfo -> bool) =
             if not (action info) then

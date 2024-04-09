@@ -89,7 +89,6 @@ type private Sidebar() as this =
         Draw.rect (this.Bounds.Expand(Style.PADDING, 0.0f).SliceRight(Style.PADDING)) !*Palette.MAIN_100
         base.Draw()
 
-
 type ImportScreen() as this =
     inherit Screen()
 

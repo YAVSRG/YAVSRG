@@ -40,10 +40,10 @@ type LevelSelectScreen() =
         Tree.refresh ()
 
     let random_chart () =
-        if options.AdvancedRecommendations.Value && Chart.CACHE_DATA.IsSome then
+        if options.AdvancedRecommendations.Value && Chart.RATING.IsSome then
             let ctx =
                 {
-                    BaseDifficulty = Chart.CACHE_DATA.Value.Physical * float rate.Value
+                    BaseDifficulty = Chart.RATING.Value.Physical
                     BaseChart = Chart.CACHE_DATA.Value, rate.Value
                     Filter = LevelSelect.filter |> Filter.except_keywords
                     Mods = selected_mods.Value
@@ -51,11 +51,12 @@ type LevelSelectScreen() =
                     Ruleset = Rulesets.current
                     Library = Content.Library
                     ScoreDatabase = Content.Scores
-                    Priority = SuggestionPriority.Variety
+                    Priority = Endless.priority.Value
                 }
 
             match Suggestion.get_suggestion ctx with
             | Some (cc, rate) ->
+                Chart._rate.Value <- rate
                 TreeState.switch_chart (cc, LibraryContext.None, "")
                 refresh ()
             | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")

@@ -49,87 +49,91 @@ module Suggestion =
             for p2 in other_patterns.Patterns do
                 if p.Pattern = p2.Pattern && p.Mixed = p2.Mixed then
                     let bpm_similarity =
-                        1.0f - 10.0f * MathF.Abs(MathF.Log(float32 p.BPM / float32 p2.BPM)) |> max 0.0f
+                        1.0f - 10.0f * MathF.Abs(MathF.Log(float32 p.BPM / float32 p2.BPM)) |> max -1.0f
                     similarity <- similarity + bpm_similarity * (min p.Amount p2.Amount) / total_amount
-        similarity
-                    
+        similarity   
 
-    let get_similar_suggestions (ctx: ChartSuggestionContext) : (CachedChart * float32) seq option =
+    let private get_suggestions (ctx: ChartSuggestionContext) : (CachedChart * float32) seq =
 
         let base_chart, rate = ctx.BaseChart
-        recommended_recently <- Set.add base_chart.Hash recommended_recently
 
         match Cache.patterns_by_hash base_chart.Hash ctx.Library.Cache with
-        | None -> None
+        | None -> Seq.empty
         | Some patterns ->
 
-            let total_pattern_amount = patterns.Patterns |> Seq.sumBy (fun x -> x.Amount)
+        recommended_recently <- Set.add base_chart.Hash recommended_recently
+        recommended_recently <- Set.add (base_chart.Title.ToLower()) recommended_recently
 
-            let min_difficulty = ctx.BaseDifficulty - 0.5
-            let max_difficulty = ctx.BaseDifficulty + 0.5
+        let min_difficulty = base_chart.Physical * 0.9
+        let max_difficulty = base_chart.Physical * 1.1
 
-            let min_length = base_chart.Length - 60000.0f<ms>
-            let max_length = min_length + 120000.0f<ms>
+        let min_length = base_chart.Length - 60000.0f<ms>
+        let max_length = min_length + 120000.0f<ms>
 
-            let max_ln_pc = patterns.LNPercent + 0.1f
-            let min_ln_pc = patterns.LNPercent - 0.1f
+        let max_ln_pc = patterns.LNPercent + 0.1f
+        let min_ln_pc = patterns.LNPercent - 0.1f
 
-            let now = Timestamp.now ()
-            let TWO_DAYS = 2L * 24L * 3600_000L
+        let now = Timestamp.now ()
+        let SEVEN_DAYS = 7L * 24L * 3600_000L
 
-            let candidates =
-                ctx.Library.Cache.Entries.Values
-                |> Seq.filter (fun x -> x.Keys = base_chart.Keys)
-                |> Seq.filter (fun x -> x.Physical >= min_difficulty && x.Physical <= max_difficulty)
-                |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
-                |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
-                |> Seq.choose (fun x -> match Cache.patterns_by_hash x.Hash ctx.Library.Cache with Some p -> Some (x, p) | None -> None)
-                |> Seq.filter (fun (x, p) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
-                |> Seq.filter (fun (x, p) -> now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > TWO_DAYS)
-                |> Filter.apply_ctx_seq (ctx.Filter, ctx.LibraryViewContext)
+        let candidates =
+            ctx.Library.Cache.Entries.Values
+            |> Seq.filter (fun x -> x.Keys = base_chart.Keys)
+            |> Seq.filter (fun x -> x.Physical >= min_difficulty && x.Physical <= max_difficulty)
+            |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
+            |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
+            |> Seq.filter (fun x -> not (recommended_recently.Contains (x.Title.ToLower())))
+            |> Seq.choose (fun x -> match Cache.patterns_by_hash x.Hash ctx.Library.Cache with Some p -> Some (x, p) | None -> None)
+            |> Seq.filter (fun (x, p) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
+            |> Seq.filter (fun (x, p) -> now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > SEVEN_DAYS)
+            |> Filter.apply_ctx_seq (ctx.Filter, ctx.LibraryViewContext)
 
-            seq {
-                for entry, candidate_patterns in candidates do
+        let total_pattern_amount = patterns.Patterns |> Seq.sumBy (fun x -> x.Amount)
 
-                    let mutable similarity_score = pattern_similarity total_pattern_amount patterns candidate_patterns
+        seq {
+            for entry, candidate_patterns in candidates do
 
-                    if patterns.SVAmount > 30000.0f<ms> && candidate_patterns.SVAmount < 30000.0f<ms> then
-                        similarity_score <- similarity_score - 0.5f
+                let mutable similarity_score = pattern_similarity total_pattern_amount patterns candidate_patterns
 
-                    if patterns.SVAmount < 30000.0f<ms> && candidate_patterns.SVAmount > patterns.SVAmount then
-                        similarity_score <- similarity_score - 0.5f
+                if (patterns.SVAmount < 30000.0f<ms>) <> (candidate_patterns.SVAmount < 30000.0f<ms>) then
+                    similarity_score <- similarity_score - 0.5f
 
-                    if similarity_score > 0.2f then
-                        yield entry, similarity_score
-            }
-            |> Seq.sortByDescending snd
-            |> Seq.map (fun (cc, similarity) -> (cc, rate))
-            |> Some
+                let difficulty_similarity =
+                    abs (entry.Physical * float rate - ctx.BaseDifficulty) / ctx.BaseDifficulty * 5.0
+                    |> min 1.0
+                    |> fun x -> 1.0 - x * x
+                    |> float32
+
+                similarity_score <- similarity_score * difficulty_similarity
+
+                yield entry, similarity_score
+        }
+        |> Seq.sortByDescending snd
+        |> Seq.map (fun (cc, _) -> (cc, rate))
 
     let get_suggestion (ctx: ChartSuggestionContext) : (CachedChart * float32) option =
         let rand = Random()
 
-        match get_similar_suggestions ctx with
-        | Some matches ->
-            let best_matches = matches |> Seq.truncate 100 |> Array.ofSeq
+        let best_matches = get_suggestions ctx |> Seq.truncate 50 |> Array.ofSeq
 
-            if best_matches.Length = 0 then
-                None
-            else
+        if best_matches.Length = 0 then
+            None
+        else
 
-                let cc, rate =
-                    let index =
-                        rand.NextDouble()
-                        |> fun x -> x * x
-                        |> fun x -> x * float best_matches.Length
-                        |> floor
-                        |> int
+            let cc, rate =
+                let index =
+                    rand.NextDouble()
+                    |> fun x -> x * x
+                    |> fun x -> x * float best_matches.Length
+                    |> floor
+                    |> int
 
-                    best_matches.[index]
+                best_matches.[index]
 
-                recommended_recently <- Set.add cc.Hash recommended_recently
-                Some (cc, rate)
-        | None -> None
+            recommended_recently <- Set.add cc.Hash recommended_recently
+            recommended_recently <- Set.add (cc.Title.ToLower()) recommended_recently
+
+            Some (cc, rate)
 
     let get_random (filter_by: Filter) (ctx: LibraryViewContext) : CachedChart option =
         let rand = Random()

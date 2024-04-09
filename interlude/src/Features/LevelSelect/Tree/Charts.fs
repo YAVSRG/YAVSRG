@@ -11,6 +11,7 @@ open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Interlude.UI
 open Interlude.Content
+open Interlude.Options
 open Interlude.Features.Gameplay
 
 open TreeState
@@ -38,7 +39,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
             personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
             grade <- 
                 match get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName with
-                | Some (grade, rate, color, text) when not Interlude.Options.options.TreeShowGradesOnly.Value ->
+                | Some (grade, rate, color, text) when not options.TreeShowGradesOnly.Value ->
                     match personal_bests.Value.Accuracy |> PersonalBests.get_best_above rate with
                     | Some accuracy ->
                         Some (grade, rate, color, sprintf "%.2f%%" (accuracy * 100.0))

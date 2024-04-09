@@ -40,18 +40,14 @@ module Endless =
             EndlessModeState.create {
                 Library = library
                 ScoreDatabase = score_db
-                BaseChart = start
+                BaseChart = start, 1.0f
+                BaseDifficulty = start.Physical
                 Filter = []
                 Ruleset = sc_j4
                 RulesetId = sc_j4_id
                 Mods = Map.empty
-                Rate = 1.0f
+                Priority = SuggestionPriority.Consistency
             }
-
-        let format_specifics (specifics: (string * int) array) =
-            specifics
-            |> Seq.map (fun (s, count) -> sprintf "%s (%i)" s count)
-            |> String.concat ", "
 
         let mutable loop = true
         while loop do
@@ -59,31 +55,11 @@ module Endless =
             | None -> Logging.Info("Nothing found :("); loop <- false
             | Some next ->
                 endless_mode_state <- next.NewState
-                printfn "Next chart: %s - %s [%s] by %s" next.Chart.Artist next.Chart.Title next.Chart.DifficultyName next.Chart.Creator
+                printfn "Next chart: %s - %s [%s] by %s ON RATE %.2f" next.Chart.Artist next.Chart.Title next.Chart.DifficultyName next.Chart.Creator next.Rate
 
                 printfn ""
-
-                for p in library.Cache.Patterns.[next.Chart.Hash].Patterns do
-                    printfn "%.2fs of %iBPM%s %A [Density %.1f-%.1f] %s" 
-                        (p.Amount / 1000.0f<ms>)
-                        p.BPM
-                        (if p.Mixed then " mixed" else "")
-                        p.Pattern
-                        p.Density50
-                        (p.Density75 * 300.0f / float32 p.BPM)
-                        (format_specifics p.Specifics)
-
-                printfn ""
-
-                printfn "This is classed as: %A" (library.Cache.Patterns.[next.Chart.Hash].Category)
                 match Cache.load next.Chart library.Cache with
                 | Some chart ->
-                    let d_100 = DifficultyRating.calculate 1.0f chart.Notes |> _.Physical
-                    let d_120 = DifficultyRating.calculate 1.2f chart.Notes |> _.Physical
-                    let d_80 = DifficultyRating.calculate 0.8f chart.Notes |> _.Physical
-                    printfn "%.2f -- %.2f -- %.2f" d_80 d_100 d_120
-                    printfn "Characteristic %.2f | %.2f" (d_80 - 0.8 * d_100) (d_120 - 1.2 * d_100)
+                    printfn "This is classed as: %A [%.2f]" (library.Cache.Patterns.[next.Chart.Hash].Category) (DifficultyRating.calculate 1.0f chart.Notes |> _.Physical)
                 | None -> ()
-
-
         
