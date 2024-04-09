@@ -75,7 +75,7 @@ module Startup =
         OptionsMenu.Noteskins.Shared.choose_noteskins <-
             fun () -> OptionsMenu.Noteskins.NoteskinsPage().Show()
 
-        AutoUpdate.check_for_updates ()
+        Updates.check_for_updates ()
 
         { new Screen.ScreenRoot(Toolbar()) with
             override this.Init() =

@@ -6,11 +6,11 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data
 open Prelude.Data.Library.Caching
+open Interlude
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Utils
 open Interlude.Features
 open Interlude.Features.Collections
 open Interlude.Features.Tables
@@ -116,7 +116,7 @@ type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: Sco
         this
         |+ graph
         |+ Text(
-            version + "  : :  www.yavsrg.net",
+            Updates.version + "  : :  www.yavsrg.net",
             Position = { Position.SliceBottom(50.0f) with Right = 0.35f %+ 0.0f }.Margin(20.0f, 5.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER

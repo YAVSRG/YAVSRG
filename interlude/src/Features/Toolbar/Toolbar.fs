@@ -29,7 +29,7 @@ type Toolbar() =
     do
         container
         |+ Text(
-            Utils.version,
+            Updates.version,
             Align = Alignment.RIGHT,
             Position = Position.Box(1.0f, 1.0f, -305.0f, -HEIGHT, 300.0f, HEIGHT * 0.5f)
         )
@@ -155,7 +155,7 @@ type Toolbar() =
                     | None -> ()
         )
         |+ Conditional(
-            (fun () -> AutoUpdate.update_available),
+            (fun () -> Updates.update_available),
             Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
         )
         |* volume

@@ -248,7 +248,7 @@ module Noteskins =
             let target = Path.Combine(get_game_folder "Exports", name + ".isk")
 
             if current.CompressToZip target then
-                Utils.open_directory (get_game_folder "Exports")
+                open_directory (get_game_folder "Exports")
                 true
             else
                 false

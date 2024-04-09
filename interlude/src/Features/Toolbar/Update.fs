@@ -15,7 +15,7 @@ type Updater() as this =
         let area = this.Bounds.Shrink(0.0f, 7.5f)
         Draw.rect area (Colors.shadow_1.O2)
 
-        if AutoUpdate.update_complete then
+        if Updates.update_complete then
             Text.fill_b (
                 Style.font,
                 Icons.REFRESH_CCW + " Restart game",
@@ -26,7 +26,7 @@ type Updater() as this =
                      Colors.text_green_2),
                 Alignment.CENTER
             )
-        elif AutoUpdate.update_started then
+        elif Updates.update_started then
             Text.fill_b (
                 Style.font,
                 Icons.DOWNLOAD + " Installing update..",
@@ -47,10 +47,10 @@ type Updater() as this =
             )
 
     member this.Click() =
-        if AutoUpdate.update_complete then
-            AutoUpdate.restart_on_exit <- true
+        if Updates.update_complete then
+            Updates.restart_on_exit <- true
             Screen.change Screen.Type.SplashScreen Transitions.Flags.UnderLogo |> ignore
-        elif AutoUpdate.update_started then
+        elif Updates.update_started then
             ()
         else
             Notifications.system_feedback (
@@ -59,7 +59,7 @@ type Updater() as this =
                 %"notification.update_installing.body"
             )
 
-            AutoUpdate.apply_update (fun () ->
+            Updates.apply_update (fun () ->
                 Notifications.system_feedback (
                     Icons.ALERT_OCTAGON,
                     %"notification.update_installed.title",

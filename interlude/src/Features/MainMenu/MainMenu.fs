@@ -133,7 +133,7 @@ type MainMenuScreen() as this =
         )
 
     override this.OnEnter prev =
-        if AutoUpdate.update_available then
+        if Updates.update_available then
             Notifications.system_feedback (
                 Icons.ALERT_OCTAGON,
                 %"notification.update_available.title",

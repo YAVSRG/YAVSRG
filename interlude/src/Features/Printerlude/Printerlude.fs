@@ -65,8 +65,8 @@ module Printerlude =
             | Some c -> Chart.diff cmp c
 
         let show_version (io: IOContext) =
-            io.WriteLine(sprintf "You are running %s" Utils.version)
-            io.WriteLine(sprintf "The latest version online is %s" AutoUpdate.latest_version_name)
+            io.WriteLine(sprintf "You are running %s" Updates.version)
+            io.WriteLine(sprintf "The latest version online is %s" Updates.latest_version_name)
 
         let timescale (io: IOContext) (v: float) =
             UI.Screen.timescale <- System.Math.Clamp(v, 0.01, 10.0)
@@ -189,7 +189,7 @@ module Printerlude =
                     fun (io: IOContext) (b: bool) ->
                         Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
                         Online.Network.credentials.Api <- (if b then "localhost" else "api.yavsrg.net")
-                        AutoUpdate.restart_on_exit <- true
+                        Updates.restart_on_exit <- true
                         UI.Screen.exit <- true
                 )
                 .WithIOCommand("timescale", "Sets the timescale of all UI animations, for testing", "speed", timescale)
@@ -206,12 +206,6 @@ module Printerlude =
 
     let io = { In = stdin; Out = context_writer }
 
-    ctx <-
-        ShellContext.Empty
-        |> Utils.register_ipc_commands
-        |> Utils.register_commands
-        |> Themes.register_commands
-
     let exec (s: string) =
         let current_stream_position = ms.Position
         ctx.Evaluate io s
@@ -225,6 +219,13 @@ module Printerlude =
     let ipc_commands = ShellContext.Empty |> Utils.register_ipc_commands
 
     let init_window (instance: int) =
+
+        ctx <-
+            ShellContext.Empty
+            |> Utils.register_ipc_commands
+            |> Utils.register_commands
+            |> Themes.register_commands
+
         Terminal.exec_command <- exec
 
         logging_disposable <-
@@ -244,3 +245,4 @@ module Printerlude =
     let deinit () =
         logging_disposable |> Option.iter (fun d -> d.Dispose())
         ipc_shutdown_token |> Option.iter (fun token -> token.Cancel())
+ 

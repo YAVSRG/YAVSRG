@@ -3,12 +3,32 @@
 open System
 open System.IO
 open System.Diagnostics
+open System.Reflection
 open Percyqaz.Common
 open System.IO.Compression
 open Percyqaz.Data
+open Prelude
 open Prelude.Data
 
-module AutoUpdate =
+module Updates =
+
+    /// Numeric version e.g. "0.5.16"
+    let short_version =
+        let v = Assembly.GetExecutingAssembly().GetName()
+
+        if v.Version.Revision <> 0 then
+            v.Version.ToString(4)
+        else
+            v.Version.ToString(3)
+
+    /// Full version string e.g. "Interlude 0.5.16"
+    let version =
+        let v = Assembly.GetExecutingAssembly().GetName()
+
+        if DEV_MODE then
+            sprintf "%s %s (dev build)" v.Name short_version
+        else
+            sprintf "%s %s" v.Name short_version
 
     let private get_interlude_location () =
         Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
@@ -70,7 +90,7 @@ module AutoUpdate =
             else
                 (int s.[0], int s.[1], int s.[2], 0)
 
-        let current = Utils.short_version
+        let current = short_version
         let incoming = release.tag_name.Replace("interlude-", "").Substring(1)
         latest_version_name <- incoming
 

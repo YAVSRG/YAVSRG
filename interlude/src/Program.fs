@@ -91,7 +91,7 @@ let main argv =
         launch (0)
         m.ReleaseMutex()
 
-        if AutoUpdate.restart_on_exit then
+        if Updates.restart_on_exit then
             m.Dispose()
 
             if OperatingSystem.IsWindows() then
