@@ -14,16 +14,17 @@ open Prelude.Data
 
 [<RequireQualifiedAccess>]
 type SuggestionPriority =
-    | Normal
+    | Variety
     //| SnipeScores
-    | LowVariety
+    | Consistency
 
 type ChartSuggestionContext =
     {
-        BaseChart: CachedChart
+        BaseDifficulty: float
+        BaseChart: CachedChart * float32
+        Priority: SuggestionPriority
         Filter: Filter
         Mods: ModState
-        Rate: float32
         RulesetId: string
         Ruleset: Ruleset
         Library: Library
@@ -31,7 +32,7 @@ type ChartSuggestionContext =
     }
     member this.LibraryViewContext: LibraryViewContext =
         {
-            Rate = this.Rate
+            Rate = let (cc, rate) = this.BaseChart in rate
             RulesetId = this.RulesetId
             Ruleset = this.Ruleset
             Library = this.Library
@@ -53,9 +54,9 @@ module Suggestion =
         similarity
                     
 
-    let get_similar_suggestions (ctx: ChartSuggestionContext) : CachedChart seq option =
+    let get_similar_suggestions (ctx: ChartSuggestionContext) : (CachedChart * float32) seq option =
 
-        let base_chart = ctx.BaseChart
+        let base_chart, rate = ctx.BaseChart
         recommended_recently <- Set.add base_chart.Hash recommended_recently
 
         match Cache.patterns_by_hash base_chart.Hash ctx.Library.Cache with
@@ -64,8 +65,8 @@ module Suggestion =
 
             let total_pattern_amount = patterns.Patterns |> Seq.sumBy (fun x -> x.Amount)
 
-            let min_difficulty = base_chart.Physical - 0.5
-            let max_difficulty = base_chart.Physical + 0.5
+            let min_difficulty = ctx.BaseDifficulty - 0.5
+            let max_difficulty = ctx.BaseDifficulty + 0.5
 
             let min_length = base_chart.Length - 60000.0f<ms>
             let max_length = min_length + 120000.0f<ms>
@@ -102,10 +103,10 @@ module Suggestion =
                         yield entry, similarity_score
             }
             |> Seq.sortByDescending snd
-            |> Seq.map fst
+            |> Seq.map (fun (cc, similarity) -> (cc, rate))
             |> Some
 
-    let get_suggestion (ctx: ChartSuggestionContext) =
+    let get_suggestion (ctx: ChartSuggestionContext) : (CachedChart * float32) option =
         let rand = Random()
 
         match get_similar_suggestions ctx with
@@ -116,7 +117,7 @@ module Suggestion =
                 None
             else
 
-                let res =
+                let cc, rate =
                     let index =
                         rand.NextDouble()
                         |> fun x -> x * x
@@ -126,8 +127,8 @@ module Suggestion =
 
                     best_matches.[index]
 
-                recommended_recently <- Set.add res.Hash recommended_recently
-                Some res
+                recommended_recently <- Set.add cc.Hash recommended_recently
+                Some (cc, rate)
         | None -> None
 
     let get_random (filter_by: Filter) (ctx: LibraryViewContext) : CachedChart option =
@@ -198,12 +199,20 @@ module EndlessModeState =
                 }
         | EndlessModeState.Normal ctx ->
             match Suggestion.get_suggestion ctx with
-            | Some next_cc ->
+            | Some (next_cc, rate) ->
                 Some
                     {
                         Chart = next_cc
-                        Rate = ctx.Rate
+                        Rate = rate
                         Mods = ctx.Mods
-                        NewState = EndlessModeState.Normal { ctx with BaseChart = next_cc }
+                        NewState = 
+                            EndlessModeState.Normal
+                                { ctx with
+                                    BaseChart =
+                                        match ctx.Priority with
+                                        | SuggestionPriority.Consistency -> ctx.BaseChart
+                                        | SuggestionPriority.Variety -> next_cc, rate
+                                    // base difficulty adjustment over time
+                                }
                     }
             | None -> None

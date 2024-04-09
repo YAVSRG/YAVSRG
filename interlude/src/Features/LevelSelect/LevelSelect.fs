@@ -43,19 +43,20 @@ type LevelSelectScreen() =
         if options.AdvancedRecommendations.Value && Chart.CACHE_DATA.IsSome then
             let ctx =
                 {
-                    BaseChart = Chart.CACHE_DATA.Value
-                    Filter = LevelSelect.filter
+                    BaseDifficulty = Chart.CACHE_DATA.Value.Physical * float rate.Value
+                    BaseChart = Chart.CACHE_DATA.Value, rate.Value
+                    Filter = LevelSelect.filter |> Filter.except_keywords
                     Mods = selected_mods.Value
-                    Rate = rate.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
                     Library = Content.Library
                     ScoreDatabase = Content.Scores
+                    Priority = SuggestionPriority.Variety
                 }
 
             match Suggestion.get_suggestion ctx with
-            | Some c ->
-                TreeState.switch_chart (c, LibraryContext.None, "")
+            | Some (cc, rate) ->
+                TreeState.switch_chart (cc, LibraryContext.None, "")
                 refresh ()
             | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
         else
