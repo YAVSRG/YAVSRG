@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -82,7 +82,7 @@
     <Compile Include="Features\Gameplay.fs" />
     <Compile Include="Features\Collections\Actions.fs" />
     <Compile Include="Features\Collections\Menus.fs" />
-    <Compile Include="Features\Score\Util.fs" />
+    <Compile Include="Features\Score\Utils.fs" />
     <Compile Include="Features\Score\TopBanner.fs" />
     <Compile Include="Features\Score\Sidebar.fs" />
     <Compile Include="Features\Score\Results.fs" />

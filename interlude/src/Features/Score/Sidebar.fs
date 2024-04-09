@@ -9,6 +9,8 @@ open Prelude.Data
 open Interlude.UI
 open Interlude.UI.Menu
 
+#nowarn "3370"
+
 type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 

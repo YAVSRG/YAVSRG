@@ -8,6 +8,8 @@ open Prelude.Gameplay
 open Prelude.Data
 open Interlude.UI
 
+#nowarn "3370"
+
 type Grade(grade: Grade.GradeResult ref, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
