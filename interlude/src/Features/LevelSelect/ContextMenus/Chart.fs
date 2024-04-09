@@ -21,7 +21,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
 
     do
         let content =
-            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
+            FlowContainer.Vertical(PRETTYHEIGHT, Position = pretty_pos(0, PAGE_BOTTOM, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |+ PageButton(
                 "chart.add_to_collection",
                 (fun () -> AddToCollectionPage(cc).Show()),

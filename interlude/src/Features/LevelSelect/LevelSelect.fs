@@ -172,7 +172,7 @@ type LevelSelectScreen() =
         |+ LibraryViewControls()
 
         |+ StylishButton(
-            (fun () -> LevelSelect.choose_this_chart(); TreeState.click_cooldown <- 500.0),
+            LevelSelect.choose_this_chart,
             K (sprintf "%s %s" Icons.PLAY %"levelselect.play"),
             !%Palette.MAIN.O2,
             TiltRight = false,

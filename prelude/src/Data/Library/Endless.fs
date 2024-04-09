@@ -13,15 +13,10 @@ open Prelude.Data.Library.Collections
 open Prelude.Data
 
 [<RequireQualifiedAccess>]
-type VarietyLevel =
-    | Low
-    | High
-
-[<RequireQualifiedAccess>]
-type SuggestionMode =
-    | Fun
-    | Snipe
-    | Challenge
+type SuggestionPriority =
+    | Normal
+    //| SnipeScores
+    | LowVariety
 
 type ChartSuggestionContext =
     {
@@ -47,72 +42,61 @@ module Suggestion =
 
     let mutable recommended_recently = Set.empty
 
+    let private pattern_similarity (total_amount: ScaledTime) (base_patterns: PatternInfo) (other_patterns: PatternInfo) : float32 =
+        let mutable similarity = 0.0f
+        for p in base_patterns.Patterns do
+            for p2 in other_patterns.Patterns do
+                if p.Pattern = p2.Pattern && p.Mixed = p2.Mixed then
+                    let bpm_similarity =
+                        1.0f - 10.0f * MathF.Abs(MathF.Log(float32 p.BPM / float32 p2.BPM)) |> max 0.0f
+                    similarity <- similarity + bpm_similarity * (min p.Amount p2.Amount) / total_amount
+        similarity
+                    
+
     let get_similar_suggestions (ctx: ChartSuggestionContext) : CachedChart seq option =
 
-        let cache_info = ctx.BaseChart
+        let base_chart = ctx.BaseChart
+        recommended_recently <- Set.add base_chart.Hash recommended_recently
 
-        recommended_recently <- Set.add cache_info.Hash recommended_recently
-
-        match Cache.patterns_by_hash cache_info.Hash ctx.Library.Cache with
+        match Cache.patterns_by_hash base_chart.Hash ctx.Library.Cache with
         | None -> None
-        | Some report ->
+        | Some patterns ->
 
-            let patterns = report.Patterns
-            let total_pattern_amount = patterns |> Seq.sumBy (fun x -> x.Amount)
+            let total_pattern_amount = patterns.Patterns |> Seq.sumBy (fun x -> x.Amount)
 
-            let min_difficulty = cache_info.Physical - 0.5
-            let max_difficulty = cache_info.Physical + 0.5
+            let min_difficulty = base_chart.Physical - 0.5
+            let max_difficulty = base_chart.Physical + 0.5
 
-            let min_length = cache_info.Length - 60000.0f<ms>
+            let min_length = base_chart.Length - 60000.0f<ms>
             let max_length = min_length + 120000.0f<ms>
 
-            let max_ln_pc = report.LNPercent + 0.1f
-            let min_ln_pc = report.LNPercent - 0.1f
+            let max_ln_pc = patterns.LNPercent + 0.1f
+            let min_ln_pc = patterns.LNPercent - 0.1f
 
             let now = Timestamp.now ()
             let TWO_DAYS = 2L * 24L * 3600_000L
 
             let candidates =
                 ctx.Library.Cache.Entries.Values
-                |> Seq.filter (fun x -> x.Keys = cache_info.Keys)
+                |> Seq.filter (fun x -> x.Keys = base_chart.Keys)
                 |> Seq.filter (fun x -> x.Physical >= min_difficulty && x.Physical <= max_difficulty)
                 |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
                 |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
                 |> Seq.choose (fun x -> match Cache.patterns_by_hash x.Hash ctx.Library.Cache with Some p -> Some (x, p) | None -> None)
-                |> Seq.filter (fun (x, p) ->
-                    let ln_pc = p.LNPercent in ln_pc >= min_ln_pc && ln_pc <= max_ln_pc
-                )
+                |> Seq.filter (fun (x, p) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
                 |> Seq.filter (fun (x, p) -> now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > TWO_DAYS)
-
                 |> Filter.apply_ctx_seq (ctx.Filter, ctx.LibraryViewContext)
 
             seq {
                 for entry, candidate_patterns in candidates do
 
-                    let mutable similarity_score = 0.0f
+                    let mutable similarity_score = pattern_similarity total_pattern_amount patterns candidate_patterns
 
-                    if report.SVAmount > 30000.0f<ms> && candidate_patterns.SVAmount < 30000.0f<ms> then
-                        similarity_score <- similarity_score - 1000.0f
+                    if patterns.SVAmount > 30000.0f<ms> && candidate_patterns.SVAmount < 30000.0f<ms> then
+                        similarity_score <- similarity_score - 0.5f
 
-                    if report.SVAmount < 30000.0f<ms> && candidate_patterns.SVAmount > report.SVAmount then
-                        similarity_score <- similarity_score - 1000.0f
-
-                    for p in patterns do
-                        for p2 in candidate_patterns.Patterns do
-                            if p.Pattern = p2.Pattern && p.Mixed = p2.Mixed then
-                                let bpm_similarity =
-                                    match p.Pattern with
-                                    | Stream -> abs (p.BPM - p2.BPM) |> min 30 |> (fun i -> 1.0f - float32 i / 30.0f)
-                                    | Chordstream ->
-                                        abs (p.BPM - p2.BPM) |> min 30 |> (fun i -> 1.0f - float32 i / 30.0f)
-                                    | Jack -> abs (p.BPM - p2.BPM) |> min 15 |> (fun i -> 1.0f - float32 i / 15.0f)
-
-                                let duration_similarity = (min p.Amount p2.Amount) / total_pattern_amount
-
-                                let bonus_similarity = 1.0f
-
-                                similarity_score <-
-                                    similarity_score + duration_similarity * bpm_similarity * bonus_similarity
+                    if patterns.SVAmount < 30000.0f<ms> && candidate_patterns.SVAmount > patterns.SVAmount then
+                        similarity_score <- similarity_score - 0.5f
 
                     if similarity_score > 0.2f then
                         yield entry, similarity_score

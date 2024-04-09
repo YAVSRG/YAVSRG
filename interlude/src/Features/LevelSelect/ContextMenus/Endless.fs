@@ -32,8 +32,9 @@ type EndlessModeMenu(info: Chart.LoadedChartInfo) as this =
 
     do
         let content =
-            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
+            page_container()
             |+ PageButton.Once("levelselect.endless_mode.start", start)
+                .Pos(0)
 
         this.Content content
 
