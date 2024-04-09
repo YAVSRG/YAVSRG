@@ -52,13 +52,13 @@ module Wiki =
                         if Cache.index_content.IsNone then
                             match!
                                 WebServices.download_string.RequestAsync(
-                                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.md"
+                                    sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.md" "githubusercontent"
                                 )
                             with
                             | Some md ->
                                 match!
                                     WebServices.download_json_async (
-                                        "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.json"
+                                        sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.json" "githubusercontent"
                                     )
                                 with
                                 | Some toc ->
@@ -90,9 +90,7 @@ module Wiki =
                         if Cache.page_cache_by_filename.[p.Filename].IsNone then
                             match!
                                 WebServices.download_string.RequestAsync(
-                                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/"
-                                    + p.Filename
-                                    + ".md"
+                                    sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/%s.md" "githubusercontent" p.Filename
                                 )
                             with
                             | Some md ->
@@ -114,7 +112,7 @@ module Wiki =
                         if Cache.changelog_content.IsNone then
                             match!
                                 WebServices.download_string.RequestAsync(
-                                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/interlude/docs/changelog.md"
+                                    sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/changelog.md" "githubusercontent"
                                 )
                             with
                             | Some md -> Cache.changelog_content <- Some [| Markdown.Parse md |]
@@ -122,7 +120,6 @@ module Wiki =
 
                         return Cache.changelog_content |> Option.defaultValue [||]
                 }
-
         }
 
     // todo: reimplement links to specific headers
