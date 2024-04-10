@@ -10,7 +10,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Content
 open Interlude.UI
-open Interlude.Utils
 
 module Toolbar =
     let HEIGHT = 70.0f

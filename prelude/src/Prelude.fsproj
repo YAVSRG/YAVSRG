@@ -7,8 +7,8 @@
     <PackageId>YAVSRG.Prelude</PackageId>
     <Authors>Percyqaz</Authors>
     <Product>Prelude</Product>
-    <PackageProjectUrl>https://github.com/YAVSRG/Prelude</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/YAVSRG/Prelude</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/YAVSRG/YAVSRG</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/YAVSRG/YAVSRG</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup>

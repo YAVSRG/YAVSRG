@@ -262,14 +262,6 @@ module Options =
 
     let mutable internal config: Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>
 
-    do
-        // Register decoding rules for Percyqaz.Flux config
-        JSON
-            .WithAutoCodec<Percyqaz.Flux.Windowing.Config>(false)
-            .WithAutoCodec<Percyqaz.Flux.Windowing.FullscreenVideoMode>()
-            .WithAutoCodec<Percyqaz.Flux.Input.Bind>()
-        |> ignore
-
     let mutable options: GameOptions = Unchecked.defaultof<_>
 
     module Hotkeys =
@@ -415,6 +407,13 @@ module Options =
             | None -> ()
 
     let init_startup (instance: int) =
+        // Register decoding rules for Percyqaz.Flux config
+        JSON
+            .WithAutoCodec<Percyqaz.Flux.Windowing.Config>(false)
+            .WithAutoCodec<Percyqaz.Flux.Windowing.FullscreenVideoMode>()
+            .WithAutoCodec<Percyqaz.Flux.Input.Bind>()
+        |> ignore
+
         config <- load_important_json_file "Config" CONFIG_PATH true
         Localisation.load_file config.Locale
 
