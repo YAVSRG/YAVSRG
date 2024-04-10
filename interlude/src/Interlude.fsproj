@@ -10,6 +10,8 @@
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <DebugType>embedded</DebugType>
+	<PublishTrimmed>True</PublishTrimmed>
+	<TrimMode>partial</TrimMode>
   </PropertyGroup>
   <PropertyGroup>
     <Optimize>True</Optimize>
