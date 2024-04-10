@@ -133,23 +133,32 @@ module RadioButtons =
             Height: float32
         }
 
-    let create (options: RadioButtonOptions<'T>) =
-        GridFlowContainer(options.Height, options.Options.Length, Spacing = (options.Height * 0.5f, 0.0f), WrapNavigation = false)
+    type TabButton(label: string, on_click: unit -> unit, is_disabled: unit -> bool, is_chosen: unit -> bool) =
+        inherit Button(label, on_click)
+
+        override this.Draw() =
+            if is_chosen() then
+                Draw.rect (this.Bounds.BorderTop(Style.PADDING).TrimRight(Style.PADDING)) Colors.grey_2.O2
+            else
+                Draw.rect (this.Bounds.SliceBottom(this.Bounds.Height + Style.PADDING)) (if this.Focused then Colors.yellow_accent.O1 else Colors.shadow_2.O1)
+                Draw.rect (this.Bounds.BorderBottom(Style.PADDING).TrimRight(Style.PADDING)) Colors.grey_2.O2
+            Draw.rect (this.Bounds.SliceRight(Style.PADDING).Expand(0.0f, Style.PADDING)) Colors.grey_2.O2
+            if this.Focused then
+                Draw.rect (this.Bounds.SliceBottom(Style.PADDING).Shrink(20.0f, 0.0f)) Colors.yellow_accent.O3
+            base.Draw()
+
+    // alternative designed to represent tabs on a tabbed container or view
+    let create_tabs (options: RadioButtonOptions<'T>) =
+        GridFlowContainer(options.Height, options.Options.Length, Spacing = (0.0f, 0.0f), WrapNavigation = false)
         |+ seq {
-            let mutable i = 0
             for value, label, disabled in options.Options do
-                yield StylishButton(
+                yield TabButton(
+                    label,
                     (fun () -> options.Setting.Set value),
-                    K label,
-                    (let i = i in fun () ->
-                        if options.Setting.Value = value then
-                            Colors.cyan
-                        else
-                            if i % 2 = 0 then Colors.black.O3 else Colors.shadow_2.O3
-                    ),
-                    Disabled = disabled,
-                    TiltRight = (i + 1 < options.Options.Length),
-                    TiltLeft = (i > 0)
+                    disabled,
+                    (fun () -> options.Setting.Value = value)
                 )
-                i <- i + 1
         }
+
+    // todo: alternative designed to look like actual radio buttons
+    let create (options: RadioButtonOptions<'T>) = failwith "nyi"

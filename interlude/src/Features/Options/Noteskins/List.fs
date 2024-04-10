@@ -8,7 +8,6 @@ open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.Features.Online
 open Interlude.Options
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Import

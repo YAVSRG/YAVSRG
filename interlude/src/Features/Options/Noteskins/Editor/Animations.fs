@@ -214,14 +214,14 @@ type AnimationSettingsPage() as this =
         let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).TrimTop(100.0f))
 
         let tab_buttons =
-            RadioButtons.create
+            RadioButtons.create_tabs
                 {
                     Setting = Setting.make tabs.set_Current tabs.get_Current
                     Options =
                         [|
-                            general_tab, "General", K false
-                            note_explosion_tab, "Note explosions", (fun () -> not enable_explosions.Value)
-                            hold_explosion_tab, "Hold explosions", (fun () -> not enable_explosions.Value)
+                            general_tab, %"noteskins.animations.general", K false
+                            note_explosion_tab, %"noteskins.edit.note_explosions", (fun () -> not enable_explosions.Value)
+                            hold_explosion_tab, %"noteskins.edit.hold_explosions", (fun () -> not enable_explosions.Value)
                         |]
                     Height = 50.0f
                 }
