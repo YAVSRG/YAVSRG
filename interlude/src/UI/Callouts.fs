@@ -224,13 +224,38 @@ module Callout =
                              Position = pos (w, h + PADDING * 2.0f)) with
             override this.Draw() =
                 base.Draw()
-                // todo: offset based on bounds vs h
-                draw (this.Bounds.Left, this.Bounds.Top + PADDING, w, h, Colors.text, callout)
+                draw (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, Colors.text, callout)
 
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
-                update (this.Bounds.Left, this.Bounds.Top + PADDING, w, h, callout)
+                update (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, callout)
         }
+
+    type Card(callout: Callout, border: Color, fill: Color) =
+        inherit StaticWidget(NodeType.None)
+
+        let w, h = measure callout
+        let PADDING = 20.0f
+
+        override this.Draw() =
+
+            Draw.rect (this.Bounds.BorderTopCorners Style.PADDING) border
+            Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) border
+            Draw.rect (this.Bounds.BorderLeft Style.PADDING) border
+            Draw.rect (this.Bounds.BorderRight Style.PADDING) border
+
+            Draw.rect this.Bounds fill
+
+            draw (this.Bounds.Left, this.Bounds.Top + PADDING, w, h, Colors.text, callout)
+
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            update (this.Bounds.Left, this.Bounds.Top + PADDING, w, h, callout)
+
+        interface DynamicSize with
+            member _.Size = h + PADDING * 2.0f
+            member _.OnSizeChanged
+                with set _ = ()
 
 type private Notification =
     {
@@ -254,8 +279,8 @@ type private Tooltip =
 module Notifications =
 
     let mutable private current_tooltip: Tooltip option = None
-    let private items = ResizeArray<Notification>()
     let mutable tooltip_available = false
+    let private items = ResizeArray<Notification>()
 
     type Display() =
         inherit Overlay(NodeType.None)

@@ -268,7 +268,7 @@ type AnimationSettingsPage() as this =
 
         // draw note explosion example
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio).AsQuad)
             (Quad.color Color.White)
             (Sprite.pick_texture (f_note.Loops, 0) receptor)
 
@@ -301,7 +301,7 @@ type AnimationSettingsPage() as this =
         bottom <- bottom - COLUMN_WIDTH * 2.0f
 
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio).AsQuad)
             (Quad.color Color.White)
             (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
 
@@ -368,7 +368,7 @@ type AnimationSettingsPage() as this =
         left <- left - COLUMN_WIDTH * 1.5f
 
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
+            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio).AsQuad)
             (Quad.color Color.White)
             (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
 
