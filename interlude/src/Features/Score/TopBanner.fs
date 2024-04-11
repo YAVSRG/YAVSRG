@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Data
 open Interlude.Features.Stats
 
@@ -34,7 +35,7 @@ type TopBanner(score_info: ScoreInfo) as this =
                 }
         )
         |+ Text(
-            sprintf "From %s  •  Charted by %s" score_info.CachedChart.Folder score_info.CachedChart.Creator,
+            sprintf "%s  •  %s" ([score_info.CachedChart.Folder] %> "score.source") ([score_info.CachedChart.Creator] %> "score.creator"),
             Align = Alignment.LEFT,
             Position =
                 {
@@ -58,8 +59,8 @@ type TopBanner(score_info: ScoreInfo) as this =
         )
         |* Text(
             match score_info.PlayedBy with
-            | ScorePlayedBy.Username p -> K(sprintf "Played by %s" p)
-            | ScorePlayedBy.You -> (fun () -> "Current session: " + Stats.format_short_time Stats.session.GameTime)
+            | ScorePlayedBy.Username p -> K([p] %> "score.played_by")
+            | ScorePlayedBy.You -> (fun () -> [Stats.format_short_time Stats.session.GameTime] %> "score.session_time")
             , Align = Alignment.RIGHT
             , Position =
                 {

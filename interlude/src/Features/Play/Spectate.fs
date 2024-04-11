@@ -23,7 +23,7 @@ module SpectateScreen =
         override this.Init(parent) =
             this
             |+ Text(
-                "Currently spectating",
+                %"spectate.title",
                 Color = K Colors.text_subheading,
                 Align = Alignment.CENTER,
                 Position = Position.SliceTop(40.0f)

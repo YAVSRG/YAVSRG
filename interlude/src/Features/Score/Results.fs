@@ -92,9 +92,9 @@ type Accuracy
                                 sprintf "%.2f%%" (v * 100.0), (v - score_info.Scoring.Value)
 
                         if distance_from_pb < 0.0001 then
-                            sprintf "Your record: %s" summary, (Colors.grey_2.O2, Colors.black)
+                            [summary] %> "score.your_record", (Colors.grey_2.O2, Colors.black)
                         else
-                            sprintf "%.2f%% from record: %s" (distance_from_pb * 100.0) summary,
+                            [sprintf "%.2f%%" (distance_from_pb * 100.0); summary] %> "score.compare_accuracy",
                             (Colors.grey_2.O2, Colors.black)
 
                     | None -> "--", (Colors.grey_2.O2, Colors.black)
@@ -169,7 +169,7 @@ type Lamp
                             else
                                 score_info.Ruleset.LampName v
 
-                        sprintf "Your record: %s" summary, (Colors.grey_2.O2, Colors.black)
+                        [summary] %> "score.your_record", (Colors.grey_2.O2, Colors.black)
 
                     | None -> "--", (Colors.grey_2.O2, Colors.black)
                 | None -> "--", (Colors.grey_2.O2, Colors.black)

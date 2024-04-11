@@ -74,15 +74,18 @@ type SyncSuggestionControls(state: PracticeState) =
         let suggestion_hint = %"practice.suggestions.hint"
         let about_right_hint = Icons.CHECK + " " + %"practice.suggestions.aboutright"
 
+        let current = %"practice.suggestions.current"
+        let suggested = %"practice.suggestions.suggested"
+
         this
 
         |+ Conditional(
             (fun () -> state.SyncMode.Value = SyncMode.HIT_POSITION),
             FlowContainer.Vertical<Widget>(50.0f, Spacing = 5.0f)
-            |+ Text(fun () -> sprintf "Current: %.0f" hit_position.Value)
+            |+ Text(fun () -> sprintf "%s: %.0f" current hit_position.Value)
             |+ Text(fun () ->
                 match state.SyncSuggestions with
-                | Some s -> sprintf "Suggested: %.0f" s.HitPosition
+                | Some s -> sprintf "%s: %.0f" suggested s.HitPosition
                 | None -> suggestion_hint
             )
             |+ Text(fun () ->
@@ -95,10 +98,10 @@ type SyncSuggestionControls(state: PracticeState) =
         |+ Conditional(
             (fun () -> state.SyncMode.Value = SyncMode.SCROLL_SPEED),
             FlowContainer.Vertical<Widget>(50.0f, Spacing = 5.0f)
-            |+ Text(fun () -> sprintf "Current: %.0f%%" (100.0f * scroll_speed.Value))
+            |+ Text(fun () -> sprintf "%s: %.0f%%" current (100.0f * scroll_speed.Value))
             |+ Text(fun () ->
                 match state.SyncSuggestions with
-                | Some s -> sprintf "Suggested: %.0f%%" (100.0f * s.ScrollSpeed)
+                | Some s -> sprintf "%s: %.0f%%" suggested (100.0f * s.ScrollSpeed)
                 | None -> suggestion_hint
             )
             |+ Text(fun () ->
@@ -111,10 +114,10 @@ type SyncSuggestionControls(state: PracticeState) =
         |+ Conditional(
             (fun () -> state.SyncMode.Value = SyncMode.VISUAL_OFFSET && options.AudioVolume.Value = 0.0),
             FlowContainer.Vertical<Widget>(50.0f, Spacing = 5.0f)
-            |+ Text(fun () -> sprintf "Current: %.0f" visual_offset.Value)
+            |+ Text(fun () -> sprintf "%s: %.0f" current visual_offset.Value)
             |+ Text(fun () ->
                 match state.SyncSuggestions with
-                | Some s -> sprintf "Suggested: %.0f" s.VisualOffset
+                | Some s -> sprintf "%s: %.0f" suggested s.VisualOffset
                 | None -> suggestion_hint
             )
             |+ Text(fun () ->
@@ -127,10 +130,10 @@ type SyncSuggestionControls(state: PracticeState) =
         |+ Conditional(
             (fun () -> state.SyncMode.Value = SyncMode.AUDIO_OFFSET && options.AudioVolume.Value > 0.0),
             FlowContainer.Vertical<Widget>(50.0f, Spacing = 5.0f)
-            |+ Text(fun () -> sprintf "Current: %.0f" local_audio_offset.Value)
+            |+ Text(fun () -> sprintf "%s: %.0f" current local_audio_offset.Value)
             |+ Text(fun () ->
                 match state.SyncSuggestions with
-                | Some s -> sprintf "Suggested: %.0f" s.AudioOffset
+                | Some s -> sprintf "%s: %.0f" suggested s.AudioOffset
                 | None -> suggestion_hint
             )
             |+ Text(fun () ->
