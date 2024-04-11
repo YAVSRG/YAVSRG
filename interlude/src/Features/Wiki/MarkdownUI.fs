@@ -6,7 +6,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data
-open Interlude.Utils
 open Interlude.UI
 
 type LinkHandler =

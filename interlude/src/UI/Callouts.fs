@@ -106,7 +106,9 @@ module Callout =
                 for x in xs do
                     width <- max width (Text.measure (Style.font, x) * size)
             | CalloutContent.Hotkey _ -> height <- height + text_size c.IsSmall
-            | CalloutContent.Button _ -> height <- height + spacing * 3.0f + text_size c.IsSmall
+            | CalloutContent.Button (text, _) ->
+                width <- max width (Text.measure (Style.font, text) * text_size c.IsSmall + spacing * 2.0f)
+                height <- height + spacing * 3.0f + text_size c.IsSmall
 
             height <- height + spacing
 

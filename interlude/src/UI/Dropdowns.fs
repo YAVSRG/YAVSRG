@@ -93,6 +93,7 @@ type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
     member this.Place(x, y, width) =
         this.Position <- Position.Box(0.0f, 0.0f, x, y, width, this.Height)
 
+    // todo: use IHeight interface
     member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE
 
 type DropdownMenuOptions =

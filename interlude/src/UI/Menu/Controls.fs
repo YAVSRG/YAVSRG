@@ -6,7 +6,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
-open Interlude.Utils
 open Interlude.UI
 
 type Slider(setting: Setting.Bounded<float32>) as this =

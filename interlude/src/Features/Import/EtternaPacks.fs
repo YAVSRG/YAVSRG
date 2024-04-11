@@ -9,7 +9,6 @@ open Prelude
 open Prelude.Data.Library
 open Prelude.Data.Library.Sorting
 open Prelude.Data
-open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
 

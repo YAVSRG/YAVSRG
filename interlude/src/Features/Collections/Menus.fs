@@ -30,11 +30,7 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) as this 
                         Menu.Back()
                         on_create (new_name.Value, Folder folder)
                     | None ->
-                        Notifications.action_feedback (
-                            Icons.X,
-                            "Name is taken",
-                            "A collection already exists with that name"
-                        )
+                        Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
                 )
             )
                 .Pos(6)
@@ -71,11 +67,7 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) as thi
                         Menu.Back()
                         on_create (new_name.Value, Playlist playlist)
                     | None ->
-                        Notifications.action_feedback (
-                            Icons.X,
-                            "Name is taken",
-                            "A collection already exists with that name"
-                        )
+                        Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
                 )
             )
                 .Pos(6)
@@ -129,10 +121,9 @@ type EditFolderPage(name: string, folder: Folder) as this =
     override this.OnClose() =
         if new_name.Value <> name && new_name.Value.Length > 1 then
             if Content.Collections.RenameCollection(name, new_name.Value) then
-                Logging.Debug(sprintf "Renamed collection '%s' to '%s'" name new_name.Value)
                 CollectionActions.collection_modified_ev.Trigger()
             else
-                Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
+                Notifications.action_feedback (Icons.X, %"notification.collection_rename_failed.title", %"notification.collection_rename_failed.body")
                 Logging.Debug "Rename failed, maybe that name already exists?"
 
 type EditPlaylistPage(name: string, playlist: Playlist) as this =
@@ -172,10 +163,9 @@ type EditPlaylistPage(name: string, playlist: Playlist) as this =
     override this.OnClose() =
         if new_name.Value <> name && new_name.Value.Length > 0 then
             if Content.Collections.RenamePlaylist(name, new_name.Value) then
-                Logging.Debug(sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
                 CollectionActions.collection_modified_ev.Trigger()
             else
-                Notifications.action_feedback (Icons.X, "Rename failed", "A collection already exists with that name")
+                Notifications.action_feedback (Icons.X, %"notification.collection_rename_failed.title", %"notification.collection_rename_failed.body")
                 Logging.Debug "Rename failed, maybe that name already exists?"
 
 type private CollectionButton(icon, name, action) as this =

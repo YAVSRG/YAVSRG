@@ -602,7 +602,7 @@ module Gameplay =
         match Cache.by_key options.CurrentChart.Value Content.Cache with
         | Some cc -> Chart.change (cc, LibraryContext.None, true)
         | None ->
-            Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
+            Logging.Info("Couldn't find cached chart: " + options.CurrentChart.Value)
 
             match
                 Suggestion.get_random

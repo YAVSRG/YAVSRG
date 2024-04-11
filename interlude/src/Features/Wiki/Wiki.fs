@@ -8,7 +8,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Data
-open Interlude.Utils
 open Interlude.UI
 
 module Wiki =
