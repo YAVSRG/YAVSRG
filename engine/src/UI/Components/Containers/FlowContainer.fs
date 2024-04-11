@@ -8,7 +8,7 @@ open Percyqaz.Flux.Utils
 /// Container that automatically positions its contents stacked in Vertical/Horizontal arrangements
 module FlowContainer =
 
-    type FlowItem<'T when 'T :> Widget> = { Widget: 'T; mutable Visible: bool }
+    type FlowItem<'T when 'T :> Widget> = { Widget: 'T; mutable Visible: bool } // todo: store size in this object, get it from the widget OR pass in when adding
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>(item_size: float32) as this =
@@ -224,9 +224,10 @@ module FlowContainer =
             if Selection.get_focused_element() <> Some this && (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
-        interface DynamicSize with
-            member this.Size = content_height
+        interface IHeight with
+            member this.Height = content_height
 
+        interface IResize with
             member this.OnSizeChanged
                 with set v = size_change <- v
 
@@ -261,9 +262,10 @@ module FlowContainer =
             if Selection.get_focused_element() <> Some this && (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
-        interface DynamicSize with
-            member this.Size = content_width
+        interface IWidth with
+            member this.Width = content_width
 
+        interface IResize with
             member this.OnSizeChanged
                 with set v = size_change <- v
 
@@ -305,8 +307,9 @@ module FlowContainer =
             if Selection.get_focused_element() <> Some this && (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
-        interface DynamicSize with
-            member this.Size = content_width
+        interface IWidth with
+            member this.Width = content_width
 
+        interface IResize with
             member this.OnSizeChanged
                 with set v = size_change <- v

@@ -271,9 +271,10 @@ type private DownloadMenuFragment(nt: NodeType, height: float32) =
 
     abstract member Visible: bool
 
-    interface DynamicSize with
-        member this.Size = height
+    interface IHeight with
+        member this.Height = height
 
+    interface IResize with
         member this.OnSizeChanged
             with set _ = ()
 

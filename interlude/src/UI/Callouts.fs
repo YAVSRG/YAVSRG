@@ -252,8 +252,10 @@ module Callout =
             base.Update(elapsed_ms, moved)
             update (this.Bounds.Left, this.Bounds.Top + PADDING, w, h, callout)
 
-        interface DynamicSize with
-            member _.Size = h + PADDING * 2.0f
+        interface IHeight with
+            member _.Height = h + PADDING * 2.0f
+
+        interface IResize with
             member _.OnSizeChanged
                 with set _ = ()
 

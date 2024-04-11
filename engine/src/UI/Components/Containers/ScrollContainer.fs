@@ -9,7 +9,7 @@ open Percyqaz.Flux.Graphics
 /// Container that wraps a child to allow vertical scrolling with the mouse wheel
 /// Also automatically scrolls to show the selected item when navigating
 [<Sealed>]
-type ScrollContainer<'T when 'T :> Widget and 'T :> DynamicSize>(child: 'T) =
+type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
     inherit StaticWidget(NodeType.Container(K(Some child)))
 
     static let SENSITIVITY = 100.0f
@@ -89,10 +89,13 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> DynamicSize>(child: 'T) =
 
     override this.Init(parent: Widget) =
         base.Init parent
+        child.Position <- Position.Margin(this.Margin)
         child.Init this
 
-        content_height <- child.Size
-        child.OnSizeChanged <- fun () -> content_height <- child.Size + this.Margin * 2.0f
+        content_height <- child.Height
+        match child :> obj with
+        | :? IResize as r -> r.OnSizeChanged <- fun () -> content_height <- child.Height + this.Margin * 2.0f
+        | _ -> ()
 
         child.Position <-
             Position

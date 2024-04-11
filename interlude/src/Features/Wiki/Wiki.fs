@@ -165,11 +165,8 @@ module Wiki =
 
         member val _Size = 0.0f with get, set
 
-        interface DynamicSize with
-            member this.Size = this._Size
-
-            member this.OnSizeChanged
-                with set _ = ()
+        interface IHeight with
+            member this.Height = this._Size
 
     type Browser() as this =
         inherit Dialog()

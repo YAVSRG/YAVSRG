@@ -350,8 +350,9 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     static member (|*)(parent: #GridFlowContainer<'T>, child: 'T) = parent.Add child
     static member (|*)(parent: #GridFlowContainer<'T>, children: 'T seq) = Seq.iter parent.Add children
 
-    interface DynamicSize with
-        member this.Size = content_height
+    interface IHeight with
+        member this.Height = content_height
 
+    interface IResize with
         member this.OnSizeChanged
             with set v = size_change <- v

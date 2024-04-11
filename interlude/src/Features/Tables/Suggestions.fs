@@ -14,7 +14,7 @@ open Interlude.Web.Shared.Requests
 type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
     inherit FrameContainer(NodeType.Leaf)
 
-    let mutable size = 100.0f
+    let mutable height = 100.0f
 
     // todo: tooltip on hover
     let button (icon: string, action) =
@@ -26,7 +26,7 @@ type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
 
     let vote_row (level: int) =
         let container =
-            Container(NodeType.None, Position = Position.Row(size, 40.0f))
+            Container(NodeType.None, Position = Position.Row(height, 40.0f))
             |+ Text(
                 sprintf "Level %02i - %i Votes" level (suggestion.Votes.[level]),
                 Position = Position.Margin(10.0f, 0.0f),
@@ -133,15 +133,16 @@ type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
 
         for level in suggestion.Votes.Keys do
             this |* vote_row level
-            size <- size + 40.0f
+            height <- height + 40.0f
 
         base.Init parent
 
-    interface DynamicSize with
-        member this.Size = size
+    interface IHeight with
+        member this.Height = height
 
-        member this.OnSizeChanged
-            with set _ = ()
+    interface IResize with
+        // todo: remove need for this
+        member this.OnSizeChanged with set _ = ()
 
 type SuggestionsList(table: Table) =
     inherit

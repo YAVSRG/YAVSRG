@@ -207,11 +207,8 @@ type SlideoutContent(content: Widget, height: float32) =
         this.Add content
         base.Init parent
 
-    interface DynamicSize with
-        member this.OnSizeChanged
-            with set _ = ()
-
-        member this.Size = height
+    interface IHeight with
+        member this.Height = height
 
 type Slideout(content: SlideoutContent) =
     inherit DynamicContainer(NodeType.None)
@@ -219,7 +216,7 @@ type Slideout(content: SlideoutContent) =
     let mutable is_open = false
 
     let MARGIN = 15.0f
-    let height = (content :> DynamicSize).Size + MARGIN * 2.0f
+    let height = (content :> IHeight).Height + MARGIN * 2.0f
 
     member val OnOpen = ignore with get, set
     member val OnClose = ignore with get, set

@@ -9,10 +9,10 @@ open Percyqaz.Flux.Utils
 /// Each item requests a size (height or width respectively depending on container direction) and can signal to the container that this size has changed
 module DynamicFlowContainer =
 
-    type FlowItem<'T when 'T :> Widget and 'T :> DynamicSize> = { Widget: 'T; mutable Visible: bool }
+    type FlowItem<'T when 'T :> Widget and 'T :> IResize> = { Widget: 'T; mutable Visible: bool }
 
     [<AbstractClass>]
-    type Base<'T when 'T :> Widget and 'T :> DynamicSize>() as this =
+    type Base<'T when 'T :> Widget and 'T :> IResize>() as this =
         inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus))
 
         let mutable filter: 'T -> bool = K true
@@ -196,7 +196,7 @@ module DynamicFlowContainer =
         static member (|*)(parent: #Base<'T>, children: 'T seq) = Seq.iter parent.Add children
 
     [<Sealed>]
-    type Vertical<'T when 'T :> Widget and 'T :> DynamicSize>() =
+    type Vertical<'T when 'T :> Widget and 'T :> IResize and 'T :> IHeight>() =
         inherit Base<'T>()
 
         let mutable size_change = ignore
@@ -208,10 +208,10 @@ module DynamicFlowContainer =
 
             for { Widget = c; Visible = visible } in children do
                 if visible then
-                    let size = c.Size
-                    c.Position <- Position.Row(t, size)
-                    b <- t + size
-                    t <- t + size + this.Spacing
+                    let height = c.Height
+                    c.Position <- Position.Row(t, height)
+                    b <- t + height
+                    t <- t + height + this.Spacing
 
             if b <> content_height then
                 content_height <- b
@@ -229,14 +229,15 @@ module DynamicFlowContainer =
 
         override this.Init(parent) = base.Init parent
 
-        interface DynamicSize with
-            member this.Size = content_height
+        interface IHeight with
+            member this.Height = content_height
 
+        interface IResize with
             member this.OnSizeChanged
                 with set v = size_change <- v
 
     [<Sealed>]
-    type LeftToRight<'T when 'T :> Widget and 'T :> DynamicSize>() =
+    type LeftToRight<'T when 'T :> Widget and 'T :> IResize and 'T :> IWidth>() =
         inherit Base<'T>()
 
         let mutable size_change = ignore
@@ -248,10 +249,10 @@ module DynamicFlowContainer =
 
             for { Widget = c; Visible = visible } in children do
                 if visible then
-                    let size = c.Size
-                    c.Position <- Position.Column(l, size)
-                    r <- l + size
-                    l <- l + size + this.Spacing
+                    let width = c.Width
+                    c.Position <- Position.Column(l, width)
+                    r <- l + width
+                    l <- l + width + this.Spacing
 
             if r <> content_width then
                 content_width <- r
@@ -267,14 +268,15 @@ module DynamicFlowContainer =
             if (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
-        interface DynamicSize with
-            member this.Size = content_width
+        interface IWidth with
+            member this.Width = content_width
 
+        interface IResize with
             member this.OnSizeChanged
                 with set v = size_change <- v
 
     [<Sealed>]
-    type RightToLeft<'T when 'T :> Widget and 'T :> DynamicSize>() =
+    type RightToLeft<'T when 'T :> Widget and 'T :> IWidth and 'T :> IResize>() =
         inherit Base<'T>()
 
         let mutable size_change = ignore
@@ -286,18 +288,18 @@ module DynamicFlowContainer =
 
             for { Widget = c; Visible = visible } in children do
                 if visible then
-                    let size = c.Size
+                    let width = c.Width
 
                     c.Position <-
                         {
-                            Left = 1.0f %- (r + size)
+                            Left = 1.0f %- (r + width)
                             Top = Position.min
                             Right = 1.0f %- r
                             Bottom = Position.max
                         }
 
-                    l <- r + size
-                    r <- r + size + this.Spacing
+                    l <- r + width
+                    r <- r + width + this.Spacing
 
                 if l <> content_width then
                     content_width <- r
@@ -313,8 +315,9 @@ module DynamicFlowContainer =
             if (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
-        interface DynamicSize with
-            member this.Size = content_width
+        interface IWidth with
+            member this.Width = content_width
 
+        interface IResize with
             member this.OnSizeChanged
                 with set v = size_change <- v

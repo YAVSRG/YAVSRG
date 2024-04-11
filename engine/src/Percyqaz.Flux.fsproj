@@ -30,7 +30,7 @@
 	  <Compile Include="UI\Widget.fs" />
 	  <Compile Include="UI\Style.fs" />
 	  <Compile Include="UI\Components\Primitives.fs" />
-	  <Compile Include="UI\Components\Containers\DynamicSize.fs" />
+	  <Compile Include="UI\Components\Containers\Size.fs" />
 	  <Compile Include="UI\Components\Containers\DynamicFlowContainer.fs" />
 	  <Compile Include="UI\Components\Containers\FlowContainer.fs" />
 	  <Compile Include="UI\Components\Containers\NavigationContainer.fs" />
