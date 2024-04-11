@@ -82,6 +82,10 @@ module OptionsMenuRoot =
                     }
             )
             |+ TileButton(
+                Callout.Normal.Icon(Icons.AIRPLAY).Title(%"system.name"),
+                fun () -> System.SystemPage().Show()
+            )
+            |+ TileButton(
                 Callout.Normal.Icon(Icons.SLIDERS).Title(%"gameplay.name"),
                 fun () -> Gameplay.GameplayPage().Show()
             )
@@ -90,6 +94,14 @@ module OptionsMenuRoot =
                 fun () -> NoteskinsPage().Show()
             )
                 .Tooltip(Tooltip.Info("noteskins"))
+            |+ TileButton(
+                Callout.Normal.Icon(Icons.TERMINAL).Title(%"debug.name"),
+                fun () -> Debug.DebugPage().Show()
+            )
+            |+ TileButton(
+                Callout.Normal.Icon(Icons.HEART).Title(%"advanced.name"),
+                fun () -> Advanced.AdvancedPage().Show()
+            )
             |+ TileButton(Callout.Normal.Icon(Icons.ZAP).Title(%"hud.name"), 
                 (fun () -> 
                     if Content.Noteskin.IsEmbedded then
@@ -105,18 +117,6 @@ module OptionsMenuRoot =
                 )
             )
                 .Tooltip(Tooltip.Info("hud"))
-            |+ TileButton(
-                Callout.Normal.Icon(Icons.AIRPLAY).Title(%"system.name"),
-                fun () -> System.SystemPage().Show()
-            )
-            |+ TileButton(
-                Callout.Normal.Icon(Icons.HEART).Title(%"advanced.name"),
-                fun () -> Advanced.AdvancedPage().Show()
-            )
-            |+ TileButton(
-                Callout.Normal.Icon(Icons.TERMINAL).Title(%"debug.name"),
-                fun () -> Debug.DebugPage().Show()
-            )
             |> this.Content
 
             this
