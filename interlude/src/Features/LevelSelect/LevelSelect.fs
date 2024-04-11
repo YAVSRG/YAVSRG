@@ -198,17 +198,22 @@ type LevelSelectScreen() =
                 ),
                 K (sprintf "%s %s" Icons.PLAY_CIRCLE %"playlist.play.name"),
                 !%Palette.DARK.O2,
-                Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f)
-            )
+                Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f),
+                Hotkey = "endless_mode",
+                Disabled = (fun () -> Network.lobby.IsSome)
+            ).Tooltip(Tooltip.Info("playlist.play").Hotkey("endless_mode"))
         )
         |+ Conditional(
             (fun () -> match Chart.LIBRARY_CTX with LibraryContext.Playlist _ -> false | _ -> true),
             StylishButton(
                 (fun () -> Chart.if_loaded(fun info -> EndlessModeMenu(info).Show())),
-                K (sprintf "%s %s" Icons.PLAY_CIRCLE %"levelselect.endless_mode"),
+                K (sprintf "%s %s" Icons.PLAY_CIRCLE %"levelselect.endless_mode.name"),
                 !%Palette.DARK.O2,
-                Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f)
+                Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f),
+                Hotkey = "endless_mode",
+                Disabled = (fun () -> Network.lobby.IsSome)
             )
+                .Tooltip(Tooltip.Info("levelselect.endless_mode").Hotkey("endless_mode"))
         )
         |+ StylishButton(
             (fun () -> Chart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),

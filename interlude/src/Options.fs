@@ -281,6 +281,7 @@ module Options =
             Hotkeys.register "next_group" (mk Keys.PageDown)
             Hotkeys.register "start" (mk Keys.Home)
             Hotkeys.register "end" (mk Keys.End)
+            Hotkeys.register "endless_mode" (shift Keys.E)
 
             Hotkeys.register "import" (ctrl Keys.I)
             Hotkeys.register "options" (ctrl Keys.O)

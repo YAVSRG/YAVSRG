@@ -50,5 +50,5 @@ type EndlessModeMenu(info: Chart.LoadedChartInfo) as this =
         |+ WIP()
         |> this.Content
 
-    override this.Title = %"levelselect.endless_mode"
+    override this.Title = %"levelselect.endless_mode.name"
     override this.OnClose() = ()
