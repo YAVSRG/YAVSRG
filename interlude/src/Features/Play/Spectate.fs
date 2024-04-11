@@ -38,7 +38,7 @@ module SpectateScreen =
             base.Draw()
 
     type ControlOverlay(info: LoadedChartInfo, on_seek, who, cycle) =
-        inherit DynamicContainer(NodeType.None)
+        inherit SlideContainer(NodeType.None)
 
         let mutable show = true
         let mutable show_timeout = 3000.0

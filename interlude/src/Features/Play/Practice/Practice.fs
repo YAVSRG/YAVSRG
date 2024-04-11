@@ -7,7 +7,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Interlude.Options
-open Interlude.Utils
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features
@@ -22,7 +21,7 @@ module PracticeScreen =
     let UNPAUSE_NOTE_LEADWAY = 800.0f<ms>
 
     type ControlOverlay(state: PracticeState, with_mods, on_seek) =
-        inherit DynamicContainer(NodeType.None)
+        inherit SlideContainer(NodeType.None)
 
         let mutable show = true
 

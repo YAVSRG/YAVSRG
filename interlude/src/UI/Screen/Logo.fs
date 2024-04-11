@@ -30,7 +30,7 @@ module Logo =
     let MENU : Position = { Left = 0.0f %- 0.0f; Top = 0.5f %- 400.0f; Right = 0.0f %+ 800.0f; Bottom = 0.5f %+ 400.0f }
 
     type Display() =
-        inherit DynamicContainer(NodeType.None)
+        inherit SlideContainer(NodeType.None)
 
         let counter = Animation.Counter(10000000.0)
 

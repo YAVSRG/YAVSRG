@@ -18,7 +18,7 @@ open Interlude.Features.OptionsMenu
 
 type private MenuButton(on_click, label: string, pos: Position) =
     inherit
-        DynamicContainer(
+        SlideContainer(
             NodeType.Button(fun () ->
                 Style.click.Play()
                 on_click ()

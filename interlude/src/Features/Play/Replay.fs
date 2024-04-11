@@ -309,7 +309,7 @@ module ReplayScreen =
         )
 
     type private ControlOverlay(with_mods: ModdedChart, state: ReplayState, on_seek: Time -> unit) =
-        inherit DynamicContainer(NodeType.None)
+        inherit SlideContainer(NodeType.None)
 
         let mutable show = true
         let mutable show_timeout = 3000.0

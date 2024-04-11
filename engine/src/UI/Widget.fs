@@ -152,7 +152,7 @@ type Container(node_type) =
     static member (|*)(parent: #Container, child: #Widget) = parent.Add child
     static member (|*)(parent: #Container, children: #Widget seq) = Seq.iter parent.Add children
 
-type private DynamicPosition(pos: Position) =
+type private SlideablePosition(pos: Position) =
     let mutable pos = pos
 
     let left_offset = Animation.Fade(fst pos.Left)
@@ -216,11 +216,10 @@ type private DynamicPosition(pos: Position) =
         if this.Moving then
             anim.Update elapsed_ms
 
-[<AbstractClass>]
-type DynamicContainer(node_type) =
+type SlideContainer(node_type) =
     inherit Widget(node_type)
 
-    let pos = DynamicPosition(Position.Default)
+    let pos = SlideablePosition(Position.Default)
     let children = ResizeArray<Widget>()
 
     override this.Position
@@ -270,16 +269,16 @@ type DynamicContainer(node_type) =
         for c in children do
             c.Init this
 
-    static member (|+)(parent: #DynamicContainer, child: #Widget) =
+    static member (|+)(parent: #SlideContainer, child: #Widget) =
         parent.Add child
         parent
 
-    static member (|+)(parent: #DynamicContainer, children: #Widget seq) =
+    static member (|+)(parent: #SlideContainer, children: #Widget seq) =
         Seq.iter parent.Add children
         parent
 
-    static member (|*)(parent: #DynamicContainer, child: #Widget) = parent.Add child
-    static member (|*)(parent: #DynamicContainer, children: #Widget seq) = Seq.iter parent.Add children
+    static member (|*)(parent: #SlideContainer, child: #Widget) = parent.Add child
+    static member (|*)(parent: #SlideContainer, children: #Widget seq) = Seq.iter parent.Add children
 
 [<AbstractClass>]
 type Overlay(node_type: NodeType) =

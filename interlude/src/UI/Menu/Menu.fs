@@ -10,7 +10,7 @@ open Interlude.UI
 
 [<AbstractClass>]
 type Page() as this =
-    inherit DynamicContainer(NodeType.Container(fun _ -> this._content))
+    inherit SlideContainer(NodeType.Container(fun _ -> this._content))
 
     let mutable is_current = false
     let mutable content: Widget option = None

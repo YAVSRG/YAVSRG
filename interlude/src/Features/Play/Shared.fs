@@ -211,7 +211,7 @@ type SlideoutContent(content: Widget, height: float32) =
         member this.Height = height
 
 type Slideout(content: SlideoutContent) =
-    inherit DynamicContainer(NodeType.None)
+    inherit SlideContainer(NodeType.None)
 
     let mutable is_open = false
 
