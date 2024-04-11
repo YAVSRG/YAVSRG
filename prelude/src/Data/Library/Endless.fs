@@ -49,9 +49,11 @@ module Suggestion =
             for p2 in other_patterns.Patterns do
                 if p.Pattern = p2.Pattern && p.Mixed = p2.Mixed then
                     let bpm_similarity =
-                        1.0f - 10.0f * MathF.Abs(MathF.Log(float32 p.BPM / float32 p2.BPM)) |> max -1.0f
-                    similarity <- similarity + bpm_similarity * (min p.Amount p2.Amount) / total_amount
-        similarity   
+                        1.0f - 10.0f * MathF.Abs(MathF.Log(float32 p.BPM / float32 p2.BPM)) |> max 0.0f
+                    let density_similarity =
+                        1.0f - 10.0f * MathF.Abs(MathF.Log(p.Density75 / p2.Density75)) |> max 0.0f
+                    similarity <- similarity + bpm_similarity * density_similarity * (min p.Amount p2.Amount) / total_amount
+        similarity
 
     let private get_suggestions (ctx: ChartSuggestionContext) : (CachedChart * float32) seq =
 
