@@ -140,10 +140,6 @@ type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
     interface IHeight with
         member this.Height = height
 
-    interface IResize with
-        // todo: remove need for this
-        member this.OnSizeChanged with set _ = ()
-
 type SuggestionsList(table: Table) =
     inherit
         WebRequestContainer<Tables.Suggestions.List.Response>(

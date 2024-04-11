@@ -6,13 +6,13 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Utils
 
 /// Container that automatically positions its contents stacked in Vertical/Horizontal arrangements
-/// Each item requests a size (height or width respectively depending on container direction) and can signal to the container that this size has changed
+/// Each item requests a size (height or width respectively depending on container direction) and can optionally signal to the container that this size has changed
 module DynamicFlowContainer =
 
-    type FlowItem<'T when 'T :> Widget and 'T :> IResize> = { Widget: 'T; mutable Visible: bool }
+    type FlowItem<'T when 'T :> Widget> = { Widget: 'T; mutable Visible: bool }
 
     [<AbstractClass>]
-    type Base<'T when 'T :> Widget and 'T :> IResize>() as this =
+    type Base<'T when 'T :> Widget>() as this =
         inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus))
 
         let mutable filter: 'T -> bool = K true
@@ -106,7 +106,7 @@ module DynamicFlowContainer =
 
         member this.Clear() =
             require_ui_thread ()
-            this.Iter(fun c -> c.OnSizeChanged <- ignore)
+            this.Iter(fun c -> match c :> obj with :? IResize as r -> r.OnSizeChanged <- ignore | _ -> ())
             children.Clear()
 
         override this.Draw() =
@@ -157,7 +157,9 @@ module DynamicFlowContainer =
 
             if this.Initialised then
                 child.Init this
-                child.OnSizeChanged <- fun () -> refresh <- true
+                match child :> obj with 
+                | :? IResize as r -> r.OnSizeChanged <- fun () -> refresh <- true
+                | _ -> ()
                 refresh <- true
 
         member this.Remove(child: 'T) =
@@ -166,7 +168,9 @@ module DynamicFlowContainer =
             match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
             | Some x ->
                 children.Remove x |> ignore
-                child.OnSizeChanged <- ignore
+                match child :> obj with 
+                | :? IResize as r -> r.OnSizeChanged <- ignore
+                | _ -> ()
                 refresh <- true
             | None -> Logging.Error(sprintf "%O is not in flow container %O, can't remove" child this)
 
@@ -176,7 +180,9 @@ module DynamicFlowContainer =
 
             for { Widget = child } in children do
                 child.Init this
-                child.OnSizeChanged <- fun () -> refresh <- true
+                match child :> obj with 
+                | :? IResize as r -> r.OnSizeChanged <- fun () -> refresh <- true
+                | _ -> ()
 
         member this.Iter(f: 'T -> unit) =
             require_ui_thread ()
@@ -196,7 +202,7 @@ module DynamicFlowContainer =
         static member (|*)(parent: #Base<'T>, children: 'T seq) = Seq.iter parent.Add children
 
     [<Sealed>]
-    type Vertical<'T when 'T :> Widget and 'T :> IResize and 'T :> IHeight>() =
+    type Vertical<'T when 'T :> Widget and 'T :> IHeight>() =
         inherit Base<'T>()
 
         let mutable size_change = ignore
@@ -237,7 +243,7 @@ module DynamicFlowContainer =
                 with set v = size_change <- v
 
     [<Sealed>]
-    type LeftToRight<'T when 'T :> Widget and 'T :> IResize and 'T :> IWidth>() =
+    type LeftToRight<'T when 'T :> Widget and 'T :> IWidth>() =
         inherit Base<'T>()
 
         let mutable size_change = ignore
@@ -276,7 +282,7 @@ module DynamicFlowContainer =
                 with set v = size_change <- v
 
     [<Sealed>]
-    type RightToLeft<'T when 'T :> Widget and 'T :> IWidth and 'T :> IResize>() =
+    type RightToLeft<'T when 'T :> Widget and 'T :> IWidth>() =
         inherit Base<'T>()
 
         let mutable size_change = ignore

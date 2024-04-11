@@ -255,10 +255,6 @@ module Callout =
         interface IHeight with
             member _.Height = h + PADDING * 2.0f
 
-        interface IResize with
-            member _.OnSizeChanged
-                with set _ = ()
-
 type private Notification =
     {
         Data: Callout

@@ -274,10 +274,6 @@ type private DownloadMenuFragment(nt: NodeType, height: float32) =
     interface IHeight with
         member this.Height = height
 
-    interface IResize with
-        member this.OnSizeChanged
-            with set _ = ()
-
 type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
     inherit DownloadMenuFragment(NodeType.None, 40.0f)
 
