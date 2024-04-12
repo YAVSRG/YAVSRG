@@ -15,7 +15,7 @@ module Problems =
     let problem_card (msg: ValidationMessage) =
         match msg with
         | ValidationWarning w ->
-            Callout.Card(
+            CalloutCard(
                 Callout
                     .Normal
                     .Title(w.Element)
@@ -23,7 +23,7 @@ module Problems =
                 |> fun c -> match w.SuggestedFix with Some fix -> c.Button(fix.Description, fix.Action) | None -> c
                 , Colors.yellow_accent, Colors.yellow_accent.O2)
         | ValidationError e ->
-            Callout.Card(
+            CalloutCard(
                 Callout
                     .Normal
                     .Title(e.Element)
@@ -32,7 +32,7 @@ module Problems =
                 , Colors.red_accent, Colors.red.O2)
 
     let problems_loader = 
-        { new Async.SwitchServiceSeq<Noteskin * DynamicFlowContainer.Vertical<Callout.Card>, (unit -> unit)>() with 
+        { new Async.SwitchServiceSeq<Noteskin * DynamicFlowContainer.Vertical<CalloutCard>, (unit -> unit)>() with 
             override this.Process((noteskin, container)) =
                 noteskin.Validate() |> Seq.map (fun msg -> fun () -> container |* problem_card msg)
             override this.Handle(action) = action()
@@ -57,7 +57,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
         )
 
     let problems_list =
-        DynamicFlowContainer.Vertical<Callout.Card>(
+        DynamicFlowContainer.Vertical<CalloutCard>(
             Spacing = 15.0f
        )
 

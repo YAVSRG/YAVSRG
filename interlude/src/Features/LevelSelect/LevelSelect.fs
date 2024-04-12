@@ -175,11 +175,12 @@ type LevelSelectScreen() =
 
         |+ StylishButton(
             LevelSelect.choose_this_chart,
-            K (sprintf "%s %s" Icons.PLAY %"levelselect.play"),
+            K (sprintf "%s %s" Icons.PLAY %"levelselect.play.name"),
             !%Palette.MAIN.O2,
             TiltRight = false,
             Position = Position.SliceBottom(50.0f).SliceRight(300.0f)
         )
+            .Tooltip(Tooltip.Info("levelselect.play").Hotkey("select"))
         |+ Conditional(
             (fun () -> match Chart.LIBRARY_CTX with LibraryContext.Playlist _ -> true | _ -> false),
             StylishButton(
@@ -221,6 +222,7 @@ type LevelSelectScreen() =
             !%Palette.MAIN.O2,
             Position = Position.SliceBottom(50.0f).SliceRight(60.0f).Translate(-650.0f, 0.0f)
         )
+            .Tooltip(Tooltip.Info("levelselect.context_menu").Hotkey("context_menu"))
 
         |* info_panel
 

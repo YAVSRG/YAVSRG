@@ -1,0 +1,148 @@
+﻿namespace Interlude.UI
+
+open System
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
+open Interlude.UI
+
+type private Tooltip =
+    {
+        Data: Callout
+        Size: float32 * float32
+        Fade: Animation.Fade
+        Target: Widget
+        Bind: Bind
+    }
+
+module Tooltip =
+
+    let mutable private current_tooltip: Tooltip option = None
+    let mutable internal tooltip_available = false
+
+    type private Display() =
+        inherit Overlay(NodeType.None)
+
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+
+            match current_tooltip with
+            | None -> ()
+            | Some t ->
+                t.Fade.Update elapsed_ms
+
+                if t.Fade.Target <> 0.0f then
+                    if t.Bind.Released() then
+                        t.Fade.Target <- 0.0f
+                elif t.Fade.Value < 0.01f then
+                    current_tooltip <- None
+
+                let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
+                let width, height = t.Size
+
+                let x =
+                    outline.CenterX - width * 0.5f
+                    |> min (Viewport.bounds.Width - width - 50.0f)
+                    |> max 50.0f
+
+                let y =
+                    if outline.Top > Viewport.bounds.CenterY then
+                        outline.Top - 50.0f - height - 60.0f
+                    else
+                        outline.Bottom + 50.0f
+
+                let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
+                Callout.update (callout_bounds.Left, callout_bounds.Top + 30.0f, width, height, t.Data)
+
+            tooltip_available <- false
+
+        override this.Draw() =
+            match current_tooltip with
+            | None -> ()
+            | Some t ->
+                let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
+
+                let c l =
+                    Math.Clamp((t.Fade.Value - l) / 0.25f, 0.0f, 1.0f)
+                // border around thing
+                Draw.rect
+                    (outline.SliceLeft(Style.PADDING).SliceBottom(outline.Height * c 0.0f))
+                    (Colors.yellow_accent.O3a t.Fade.Alpha)
+
+                Draw.rect
+                    (outline.SliceTop(Style.PADDING).SliceLeft(outline.Width * c 0.25f))
+                    (Colors.yellow_accent.O3a t.Fade.Alpha)
+
+                Draw.rect
+                    (outline.SliceRight(Style.PADDING).SliceTop(outline.Height * c 0.5f))
+                    (Colors.yellow_accent.O3a t.Fade.Alpha)
+
+                Draw.rect
+                    (outline.SliceBottom(Style.PADDING).SliceRight(outline.Width * c 0.75f))
+                    (Colors.yellow_accent.O3a t.Fade.Alpha)
+
+                // blackout effect
+                Draw.rect (Viewport.bounds.SliceLeft outline.Left) (Colors.shadow_2.O3a t.Fade.Alpha)
+                Draw.rect (Viewport.bounds.TrimLeft outline.Right) (Colors.shadow_2.O3a t.Fade.Alpha)
+
+                Draw.rect
+                    (Viewport.bounds
+                        .TrimLeft(outline.Left)
+                        .SliceLeft(outline.Width)
+                        .SliceTop(outline.Top))
+                    (Colors.shadow_2.O3a t.Fade.Alpha)
+
+                Draw.rect
+                    (Viewport.bounds
+                        .TrimLeft(outline.Left)
+                        .SliceLeft(outline.Width)
+                        .TrimTop(outline.Bottom))
+                    (Colors.shadow_2.O3a t.Fade.Alpha)
+
+                // draw tooltip
+                let width, height = t.Size
+
+                let x =
+                    outline.CenterX - width * 0.5f
+                    |> min (Viewport.bounds.Width - width - 50.0f)
+                    |> max 50.0f
+
+                let y =
+                    if outline.Top > Viewport.bounds.CenterY then
+                        outline.Top - 50.0f - height
+                    else
+                        outline.Bottom + 50.0f
+
+                let callout_bounds = Rect.Box(x, y, width, height)
+                Draw.rect callout_bounds (Colors.cyan.O3a t.Fade.Alpha)
+                let frame_bounds = callout_bounds.Expand(5.0f)
+                Draw.rect (frame_bounds.SliceTop 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceBottom 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceLeft 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceRight 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+
+                Callout.draw (
+                    callout_bounds.Left,
+                    callout_bounds.Top,
+                    width,
+                    height,
+                    (Colors.white.O4a t.Fade.Alpha, Colors.shadow_1.O4a t.Fade.Alpha),
+                    t.Data
+                )
+
+    let display : Widget = Display()
+
+    let show (b: Bind, w: Widget, body: Callout) =
+        let t: Tooltip =
+            {
+                Data = body
+                Size = Callout.measure body
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
+                Target = w
+                Bind = b
+            }
+
+        current_tooltip <- Some t
+
+    let available () =
+        tooltip_available <- true

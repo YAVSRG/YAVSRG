@@ -44,6 +44,8 @@
     <Compile Include="Options.fs" />
     <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Callouts.fs" />
+    <Compile Include="UI\Tooltips.fs" />
+    <Compile Include="UI\Notifications.fs" />
     <Compile Include="UI\Loaders.fs" />
     <Compile Include="UI\Buttons.fs" />
     <Compile Include="UI\Inputs.fs" />

@@ -46,7 +46,6 @@ type EndlessModeMenu(info: Chart.LoadedChartInfo) as this =
             )
         )
             .Pos(0)
-        |>> Container
         |> this.Content
 
     override this.Title = %"levelselect.endless_mode.name"

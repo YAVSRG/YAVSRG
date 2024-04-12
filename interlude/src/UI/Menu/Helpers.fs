@@ -42,10 +42,10 @@ type Tooltip(content: Callout) =
         base.Update(elapsed_ms, moved)
 
         if Mouse.hover this.Bounds then
-            Notifications.tooltip_available <- true
+            Tooltip.available()
 
             if (%%"tooltip").Tapped() then
-                Notifications.tooltip ((%%"tooltip"), this, content)
+                Tooltip.show ((%%"tooltip"), this, content)
 
     override this.Draw() = ()
 

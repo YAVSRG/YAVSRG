@@ -24,7 +24,6 @@ module OptionsMenuRoot =
         let body_width, body_height = Callout.measure body
 
         member val Disabled = false with get, set
-        member val Margin = (0.0f, 20.0f) with get, set
 
         override this.OnFocus(by_mouse: bool) =
             base.OnFocus by_mouse
@@ -44,8 +43,8 @@ module OptionsMenuRoot =
             Draw.rect (this.Bounds.Expand(0.0f, 5.0f).SliceBottom(5.0f)) color
 
             Callout.draw (
-                this.Bounds.Left + fst this.Margin,
-                this.Bounds.Top + snd this.Margin,
+                this.Bounds.Left,
+                this.Bounds.Top,
                 body_width,
                 body_height,
                 Colors.text,
@@ -55,9 +54,7 @@ module OptionsMenuRoot =
     type OptionsPage() as this =
         inherit Page()
 
-        let button_size =
-            let _, h = Callout.measure (Callout.Normal.Title("Example"))
-            h + 40.0f
+        let button_size = Callout.measure (Callout.Normal.Title("Example")) |> snd
 
         let tooltip_hint =
             Callout.Normal
