@@ -46,7 +46,7 @@ To build and run the game, run the build script:
 cd scripts
 chmod +x interlude_run.sh
 ./interlude_run.sh
-# On first startup, the game will tell you that you need the correct bass.dll/dynlib/so for your platform placed in ./src/bin/Debug/net8.0
+# On first startup, the game will tell you that you need the correct bass.dll/dynlib/so for your platform placed in ./interlude/src/bin/Debug/net8.0
 # Look for it here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib
 # If your platform isn't there contact me in the Discord or search online for it
 ```
