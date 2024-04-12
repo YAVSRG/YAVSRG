@@ -10,7 +10,7 @@ open Interlude.Tools.Utils
 
 module Check =
 
-    let rec walk_fs_files (dir: string) : (string * string) seq =
+    let rec private walk_fs_files (dir: string) : (string * string) seq =
         seq {
             for file in Directory.GetFiles(dir) do
                 if Path.GetExtension(file).ToLower() = ".fs" then
@@ -23,25 +23,27 @@ module Check =
                     yield! walk_fs_files dir
         }
 
+    let private load_locale (file: string) =
+        let mapping = new Dictionary<string, string>()
+        let path = Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt")
+        let lines = File.ReadAllLines path
+
+        Array.iter
+            (fun (l: string) ->
+                let s: string[] = l.Split([| '=' |], 2)
+                mapping.Add(s.[0], s.[1].Replace("\\n", "\n"))
+            )
+            lines
+
+        mapping
+
     let check_linecounts() =
         for filename, file_contents in walk_fs_files YAVSRG_PATH do
             let lines = file_contents.Split('\n').Length
             if lines > 300 then printfn "%s has %i lines" filename lines
 
-    let check_locale (name: string) (cli_fix_issues: bool) =
-        let locale =
-            let mapping = new Dictionary<string, string>()
-            let path = Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", name + ".txt")
-            let lines = File.ReadAllLines path
-
-            Array.iter
-                (fun (l: string) ->
-                    let s: string[] = l.Split([| '=' |], 2)
-                    mapping.Add(s.[0], s.[1].Replace("\\n", "\n"))
-                )
-                lines
-
-            mapping
+    let check_locale (file: string) (cli_fix_issues: bool) =
+        let locale = load_locale file
 
         let new_locale = Dictionary(locale)
 
@@ -129,27 +131,29 @@ module Check =
             else
                 printfn "'%s' is missing!\nFound in %s" m sources.[m]
                 if cli_fix_issues then
-                    printfn "----\n1. Enter new value\n2. Skip for now"
-                    match Console.Read() with
-                    | 49 ->
-                        printf "> "
-                        new_locale.Add(m, Console.ReadLine())
-                    | _ -> ()
+                    printf "Enter a value: (Leave blank to skip, enter a space to deliberately leave empty)\n> "
+                    match Console.ReadLine() with
+                    | "" -> ()
+                    | new_value -> 
+                        new_locale.Add(m, new_value.Trim())
 
         for m in locale.Keys do
             printfn "Unused locale key: %s" m
             if cli_fix_issues then
-                printfn "----\n1. Remove it\n2. Skip for now"
-                match Console.Read() with
-                | 49 ->
-                    new_locale.Remove(m) |> ignore
+                printfn "Remove it? [Y/N]"
+                match Console.ReadLine().ToLower() with
+                | "y" -> new_locale.Remove(m) |> ignore
                 | _ -> ()
 
         if cli_fix_issues then
             new_locale.Keys 
             |> Seq.sort 
             |> Seq.map (fun key -> sprintf "%s=%s" key (new_locale.[key].Replace("\n", "\\n")))
-            |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", name + ".txt"), contents)
+            |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt"), contents)
+
+    let locale_rename (file: string) (before: string) (after: string) =
+        let locale = load_locale file
+        failwith "nyi"
 
     let register (ctx: ShellContext) : ShellContext =
         ctx
