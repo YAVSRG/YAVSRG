@@ -215,7 +215,7 @@ type Chat() =
     override this.Update(elapsed_ms, moved) =
         if (%%"select").Tapped() then
             if chatline.Selected && current_message.Value <> "" then
-                Lobby.chat current_message.Value
+                Network.lobby.Value.SendMessage current_message.Value
                 current_message.Set ""
             else
                 chatline.Select false

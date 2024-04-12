@@ -68,7 +68,7 @@ module SpectateScreen =
                             Bottom = 1.0f %+ 100.0f
                         }
 
-    let spectate_screen (info: LoadedChartInfo, username: string) =
+    let spectate_screen (info: LoadedChartInfo, username: string, lobby: Network.Lobby) =
 
         let mutable currently_spectating = username
         let mutable scoring = fst Gameplay.Multiplayer.replays.[username]
@@ -98,7 +98,7 @@ module SpectateScreen =
         let mutable wait_for_load = 1000.0
         let mutable exiting = false
 
-        Lobby.start_spectating ()
+        lobby.StartSpectating()
 
         { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
             override this.AddWidgets() =

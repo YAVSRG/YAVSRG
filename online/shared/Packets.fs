@@ -63,12 +63,17 @@ module Packets =
             bw.Write this.Name
             bw.Write this.HostRotation
             bw.Write this.AutomaticRoundCountdown
-
         static member Read(br: BinaryReader) =
             {
                 Name = br.ReadString()
                 HostRotation = br.ReadBoolean()
                 AutomaticRoundCountdown = br.ReadBoolean()
+            }
+        static member Default =
+            {
+                Name = "Loading..."
+                HostRotation = false
+                AutomaticRoundCountdown = true
             }
 
     type LobbyInfo =

@@ -59,10 +59,11 @@ module LevelSelect =
         Chart.when_loaded
         <| fun info ->
 
-            if Network.lobby.IsSome then
+            match Network.lobby with
+            | Some lobby ->
                 if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
-                    Lobby.select_chart (info.CacheInfo, rate.Value, selected_mods.Value)
-            else
+                    lobby.SelectChart (info.CacheInfo, rate.Value, selected_mods.Value)
+            | None ->
                 if autoplay then
                     Screen.change_new
                         (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)

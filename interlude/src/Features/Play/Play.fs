@@ -275,7 +275,7 @@ module PlayScreen =
 
     open System.IO
 
-    let multiplayer_screen (info: LoadedChartInfo) =
+    let multiplayer_screen (info: LoadedChartInfo, lobby: Network.Lobby) =
 
         let ruleset = Rulesets.current
         let first_note = info.WithMods.FirstNote
@@ -288,7 +288,7 @@ module PlayScreen =
         let mutable key_state = 0us
         let mutable packet_count = 0
 
-        Lobby.start_playing ()
+        lobby.StartPlaying()
         Gameplay.Multiplayer.add_own_replay (info, scoring, liveplay)
 
         scoring.OnHit.Add(fun h ->
@@ -304,7 +304,7 @@ module PlayScreen =
             use ms = new MemoryStream()
             use bw = new BinaryWriter(ms)
             liveplay.ExportLiveBlock bw
-            Lobby.play_data (ms.ToArray())
+            lobby.SendReplayData(ms.ToArray())
             packet_count <- packet_count + 1
 
         { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
@@ -351,7 +351,7 @@ module PlayScreen =
                     LocalAudioSync.apply_automatic this.State info.SaveData
 
                 if next <> Screen.Type.Score then
-                    Lobby.abandon_play ()
+                    lobby.AbandonPlaying()
 
                 base.OnExit(next)
 
@@ -391,7 +391,7 @@ module PlayScreen =
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
                     liveplay.Finish()
                     send_replay_packet (now)
-                    Lobby.finish_playing ()
+                    lobby.FinishPlaying()
 
                     Screen.change_new
                         (fun () ->

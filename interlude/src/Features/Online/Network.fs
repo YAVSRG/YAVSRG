@@ -102,7 +102,7 @@ module Network =
     type Lobby =
         {
             Client: Client
-            mutable Settings: LobbySettings option
+            mutable Settings: LobbySettings
             Players: Dictionary<string, LobbyPlayer>
             mutable YouAreHost: bool
             mutable Spectate: bool
@@ -111,6 +111,40 @@ module Network =
             mutable GameInProgress: bool
             mutable Countdown: bool
         }
+        member this.SendMessage(msg: string) = this.Client.Send(Upstream.CHAT msg)
+        member this.InvitePlayer(username: string) = this.Client.Send(Upstream.INVITE_TO_LOBBY username)
+        member this.Leave () = this.Client.Send(Upstream.LEAVE_LOBBY)
+
+        member this.TransferHost(username: string) = this.Client.Send(Upstream.TRANSFER_HOST username)
+        member this.ChangeSettings (settings: LobbySettings) = this.Client.Send(Upstream.LOBBY_SETTINGS settings)
+
+        member this.ReportMissingChart() = this.Client.Send(Upstream.MISSING_CHART)
+        member this.SetReadyStatus(flag: ReadyFlag) =
+            if not this.GameInProgress then
+                this.ReadyStatus <- flag
+                this.Client.Send(Upstream.READY_STATUS flag)
+
+        member this.StartRound() = this.Client.Send(Upstream.START_GAME)
+        member this.CancelRound() = this.Client.Send(Upstream.CANCEL_GAME)
+        member this.StartPlaying() = this.Client.Send(Upstream.BEGIN_PLAYING)
+        member this.StartSpectating() = this.Client.Send(Upstream.BEGIN_SPECTATING)
+        member this.SendReplayData data = this.Client.Send(Upstream.PLAY_DATA data)
+        member this.FinishPlaying() = this.Client.Send(Upstream.FINISH_PLAYING false)
+        member this.AbandonPlaying() = this.Client.Send(Upstream.FINISH_PLAYING true)
+
+        member this.SelectChart (cc: CachedChart, rate: float32, mods: ModState) =
+            if this.YouAreHost then
+                this.Client.Send(
+                    Upstream.SELECT_CHART
+                        {
+                            Hash = cc.Hash
+                            Artist = cc.Artist
+                            Title = cc.Title
+                            Creator = cc.Creator
+                            Rate = rate
+                            Mods = Map.toArray mods
+                        }
+                )
 
     let mutable lobby_list: LobbyInfo array = [||]
     let mutable lobby_invites: LobbyInvite list = []
@@ -206,7 +240,7 @@ module Network =
                         Some
                             {
                                 Client = this
-                                Settings = None
+                                Settings = LobbySettings.Default
                                 Players =
                                     let d = new Dictionary<string, LobbyPlayer>()
 
@@ -259,7 +293,7 @@ module Network =
             | Downstream.LOBBY_SETTINGS s ->
                 sync
                 <| fun () ->
-                    lobby.Value.Settings <- Some s
+                    lobby.Value.Settings <- s
                     NetworkEvents.lobby_settings_updated_ev.Trigger()
             | Downstream.LOBBY_EVENT(kind, data) -> sync <| fun () -> NetworkEvents.lobby_event_ev.Trigger(kind, data)
             | Downstream.SYSTEM_MESSAGE msg ->
@@ -363,52 +397,6 @@ module Lobby =
 
     // todo: members of Lobby object
     open Network
-
-    let chat msg = client.Send(Upstream.CHAT msg)
     let refresh_list () = client.Send(Upstream.GET_LOBBIES)
     let create name = client.Send(Upstream.CREATE_LOBBY name)
-
-    let invite username =
-        client.Send(Upstream.INVITE_TO_LOBBY username)
-
     let join id = client.Send(Upstream.JOIN_LOBBY id)
-    let leave () = client.Send(Upstream.LEAVE_LOBBY)
-
-    let set_ready flag =
-        if not lobby.Value.GameInProgress then
-            client.Send(Upstream.READY_STATUS flag)
-
-    let transfer_host username =
-        client.Send(Upstream.TRANSFER_HOST username)
-
-    let settings (settings: LobbySettings) =
-        client.Send(Upstream.LOBBY_SETTINGS settings)
-
-    let missing_chart () = client.Send(Upstream.MISSING_CHART)
-
-    let start_round () = client.Send(Upstream.START_GAME)
-    let cancel_round () = client.Send(Upstream.CANCEL_GAME)
-
-    let start_playing () = client.Send(Upstream.BEGIN_PLAYING)
-    let start_spectating () = client.Send(Upstream.BEGIN_SPECTATING)
-    let play_data data = client.Send(Upstream.PLAY_DATA data)
-
-    let finish_playing () =
-        client.Send(Upstream.FINISH_PLAYING false)
-
-    let abandon_play () =
-        client.Send(Upstream.FINISH_PLAYING true)
-
-    let select_chart (cc: CachedChart, rate: float32, mods: ModState) =
-        if lobby.Value.YouAreHost then
-            client.Send(
-                Upstream.SELECT_CHART
-                    {
-                        Hash = cc.Hash
-                        Artist = cc.Artist
-                        Title = cc.Title
-                        Creator = cc.Creator
-                        Rate = rate
-                        Mods = Map.toArray mods
-                    }
-            )

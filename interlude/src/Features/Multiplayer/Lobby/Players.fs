@@ -10,11 +10,13 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Online
 
-type InvitePlayerPage() as this =
+type InvitePlayerPage(lobby: Network.Lobby) as this =
     inherit Page()
 
+    // todo: destroy this page entirely, invite from players menu
+
     let value = Setting.simple ""
-    let submit () = Lobby.invite value.Value
+    let submit () = lobby.InvitePlayer value.Value
 
     let submit_button =
         PageButton(
@@ -70,14 +72,12 @@ type Player(name: string, player: Network.LobbyPlayer) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if
-            Network.lobby.IsSome
-            && Network.lobby.Value.YouAreHost
-            && Mouse.hover this.Bounds
-            && Mouse.left_click ()
-        then
-            ConfirmPage([ name ] %> "lobby.confirm_transfer_host", (fun () -> Lobby.transfer_host name))
-                .Show()
+        match Network.lobby with
+        | Some lobby when lobby.YouAreHost ->
+            if Mouse.hover this.Bounds && Mouse.left_click () then
+                ConfirmPage([ name ] %> "lobby.confirm_transfer_host", (fun () -> lobby.TransferHost name))
+                    .Show()
+        | _ -> ()
 
     member this.Name = name
 
@@ -98,9 +98,9 @@ type PlayerList() =
             for username in l.Players.Keys do
                 other_players.Add(Player(username, l.Players.[username]))
 
-        other_players.Add(
-            Button(sprintf "%s %s" Icons.MAIL (%"lobby.send_invite"), (fun () -> Menu.ShowPage InvitePlayerPage))
-        )
+            other_players.Add(
+                Button(sprintf "%s %s" Icons.MAIL (%"lobby.send_invite"), (fun () -> InvitePlayerPage(l).Show()))
+            )
 
     override this.Init(parent) =
         this |* other_players_scroll

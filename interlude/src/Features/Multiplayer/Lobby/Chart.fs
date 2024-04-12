@@ -63,7 +63,7 @@ module SelectedChart =
                 match Cache.by_hash chart.Hash Content.Cache with
                 | None ->
                     Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash)
-                    Lobby.missing_chart ()
+                    Network.lobby.Value.ReportMissingChart()
                 | Some cc ->
                     Chart.change (cc, LibraryContext.None, true)
                     rate.Set chart.Rate
@@ -214,7 +214,7 @@ type SelectedChart() =
                     Chart.if_loaded
                     <| fun info -> //todo: store info in sync with selected chart in SelectedChart
                         Screen.change_new
-                            (fun () -> SpectateScreen.spectate_screen (info, username))
+                            (fun () -> SpectateScreen.spectate_screen (info, username, Network.lobby.Value))
                             Screen.Type.Replay
                             Transitions.Flags.Default
                         |> ignore
@@ -239,7 +239,7 @@ type SelectedChart() =
 
             StylishButton(
                 (fun () ->
-                    Network.lobby.Value.ReadyStatus <-
+                    Network.lobby.Value.SetReadyStatus (
                         match Network.lobby.Value.ReadyStatus with
                         | ReadyFlag.NotReady ->
                             if Network.lobby.Value.Spectate then
@@ -247,8 +247,7 @@ type SelectedChart() =
                             else
                                 ReadyFlag.Play
                         | _ -> ReadyFlag.NotReady
-
-                    Lobby.set_ready Network.lobby.Value.ReadyStatus
+                    )
                 ),
                 (fun () ->
                     match Network.lobby with
@@ -282,9 +281,9 @@ type SelectedChart() =
             StylishButton(
                 (fun () ->
                     if Network.lobby.Value.Countdown then
-                        Lobby.cancel_round ()
+                        Network.lobby.Value.CancelRound()
                     else
-                        Lobby.start_round ()
+                        Network.lobby.Value.StartRound()
                 ),
                 (fun () ->
                     if Network.lobby.Value.Countdown then

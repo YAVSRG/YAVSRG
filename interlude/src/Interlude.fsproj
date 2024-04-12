@@ -175,10 +175,10 @@
     <Compile Include="Features\Multiplayer\LobbySelect\Invites.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\List.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\LobbySelect.fs" />
-    <Compile Include="Features\Multiplayer\Chart.fs" />
-    <Compile Include="Features\Multiplayer\Players.fs" />
-    <Compile Include="Features\Multiplayer\Chat.fs" />
-    <Compile Include="Features\Multiplayer\LobbyScreen.fs" />
+    <Compile Include="Features\Multiplayer\Lobby\Chart.fs" />
+    <Compile Include="Features\Multiplayer\Lobby\Players.fs" />
+    <Compile Include="Features\Multiplayer\Lobby\Chat.fs" />
+    <Compile Include="Features\Multiplayer\Lobby\LobbyScreen.fs" />
     <Compile Include="Features\MainMenu\LoadingScreen.fs" />
     <Compile Include="Features\MainMenu\MainMenu.fs" />
     <Compile Include="Features\Printerlude\Terminal.fs" />

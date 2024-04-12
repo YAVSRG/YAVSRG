@@ -13,8 +13,10 @@ open Interlude.Features.Online
 open Interlude.Features.LevelSelect
 open Interlude.Features
 
-type LobbySettingsPage(settings: LobbySettings) as this =
+type LobbySettingsPage(lobby: Network.Lobby) as this =
     inherit Page()
+
+    let settings = lobby.Settings
 
     let name = Setting.simple settings.Name
     let host_rotation = Setting.simple settings.HostRotation
@@ -34,7 +36,7 @@ type LobbySettingsPage(settings: LobbySettings) as this =
     override this.Title = %"lobby.name"
 
     override this.OnClose() =
-        Lobby.settings
+        lobby.ChangeSettings
             {
                 Name = name.Value
                 HostRotation = host_rotation.Value
@@ -44,21 +46,18 @@ type LobbySettingsPage(settings: LobbySettings) as this =
 type Lobby() =
     inherit Container(NodeType.None)
 
-    let mutable lobby_title = "Loading..."
-
     override this.Init(parent) =
         this
         |+ Conditional(
             (fun () ->
                 Network.lobby.IsSome
-                && Network.lobby.Value.Settings.IsSome
                 && Network.lobby.Value.YouAreHost
             ),
-            Button(Icons.SETTINGS, (fun () -> LobbySettingsPage(Network.lobby.Value.Settings.Value).Show())),
+            Button(Icons.SETTINGS, (fun () -> LobbySettingsPage(Network.lobby.Value).Show())),
             Position = Position.SliceTop(90.0f).Margin(10.0f).SliceRight(70.0f)
         )
         |+ Text(
-            (fun () -> lobby_title),
+            (fun () -> match Network.lobby with Some lobby -> lobby.Settings.Name | None -> "!"),
             Align = Alignment.CENTER,
             Position =
                 { Position.SliceTop(90.0f).Margin(10.0f) with
@@ -141,7 +140,7 @@ type Lobby() =
                 <| fun info ->
                     if
                         Screen.change_new
-                            (fun () -> PlayScreen.multiplayer_screen info)
+                            (fun () -> PlayScreen.multiplayer_screen(info, Network.lobby.Value))
                             Screen.Type.Play
                             Transitions.Flags.Default
                         |> not
@@ -160,15 +159,13 @@ type Lobby() =
                 <| fun info ->
                     if
                         Screen.change_new
-                            (fun () -> SpectateScreen.spectate_screen (info, username))
+                            (fun () -> SpectateScreen.spectate_screen (info, username, Network.lobby.Value))
                             Screen.Type.Replay
                             Transitions.Flags.Default
                         |> not
                     then
                         Logging.Warn("Missed the start of spectating because you were changing screen")
         )
-
-        NetworkEvents.lobby_settings_updated.Add(fun () -> lobby_title <- Network.lobby.Value.Settings.Value.Name)
 
 // Screen
 
@@ -188,7 +185,7 @@ type LobbyScreen() =
     override this.OnBack() =
         match Network.lobby with
         | Some l ->
-            ConfirmPage("Leave this lobby?", Lobby.leave).Show()
+            ConfirmPage("Leave this lobby?", l.Leave).Show()
             None
         | None -> Some Screen.Type.LevelSelect
 
