@@ -1,19 +1,22 @@
-0.7.19.6
+0.7.19.7
 ====
 
-Yet Another Minor Feature Update
+This update should fix the antivirus issues some people were experiencing this week
 
 # New features
-- You can now play a playlist onwards from any point
-- New 'Noodles' ruleset available on the imports screen, for practising LN releases
-- New optional noteskin feature to have a custom background texture behind the judgement counter
+- Noteskins now (optionally) support a different receptor texture per column
+- osu! Skin converter now converts key textures + column lighting correctly
+- New level select buttons for entering endless mode + other actions
+- 'Problems' tab on noteskin editor that lists potential errors with your noteskin (and can help you fix them)
+- Option to practice a chart appears on the context menus of charts
 
 # Improvements
-- Various improvements to the HUD editor, most notable: you can right click on elements to open their settings
-- More various improvements to the noteskin texture editor
-- I tidied up some code in many places
+- Game's icon has been changed to match newer branding of the site and discord
+- Endless mode now tries to closely match the BPM/patterns when giving suggestions
+- Options menu has been slightly reorganised
+- Interlude.exe size has been reduced significantly
 
 # Bug fixes
-- Fixed a minor issue when osu! skin converter converts tall LN textures
-- Fixed explosion animations glitching out when a song loops during practice mode/editing HUD
+- Fixed two bugs in converting judgement textures from osu! skins
+- Removed parts of Interlude.exe that were causing false positives in some antivirus software
 

@@ -20,7 +20,7 @@ module Problems =
                     .Normal
                     .Title(w.Element)
                     .Body(w.Message)
-                |> fun c -> match w.SuggestedFix with Some fix -> c.Button(fix.Description, fix.Action) | None -> c
+                //|> fun c -> match w.SuggestedFix with Some fix -> c.Button(fix.Description, fix.Action) | None -> c
                 , Colors.yellow_accent, Colors.yellow_accent.O2)
         | ValidationError e ->
             CalloutCard(
@@ -28,7 +28,7 @@ module Problems =
                     .Normal
                     .Title(e.Element)
                     .Body(e.Message)
-                |> fun c -> match e.SuggestedFix with Some fix -> c.Button(fix.Description, fix.Action) | None -> c
+                //|> fun c -> match e.SuggestedFix with Some fix -> c.Button(fix.Description, fix.Action) | None -> c
                 , Colors.red_accent, Colors.red.O2)
 
     let problems_loader = 
