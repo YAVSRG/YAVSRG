@@ -262,7 +262,7 @@ module NoteskinTextureRules =
                 {
                     IsRequired = K true
                     MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Rotate
-                    MaxGridSize = K(2, 32)
+                    MaxGridSize = K(20, 32)
                 }
                 "noteexplosion",
                 { DEFAULT with

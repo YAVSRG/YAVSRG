@@ -97,6 +97,15 @@ module OsuSkinConverter =
         new_image.Mutate(fun i -> i.Grayscale().Brightness(brightness) |> ignore)
         new_image
 
+    let scale_receptor (target_width: int) (height: int) (is_2x_res: bool) (image: Bitmap) : Bitmap =
+        if is_2x_res then
+            image.Mutate(fun img -> img.Resize(target_width, image.Height) |> ignore)
+        else
+            image.Mutate(fun img -> img.Resize(target_width, image.Height * 2) |> ignore)
+        let new_image = new Bitmap(target_width, height)
+        new_image.Mutate(fun img -> img.DrawImage(image, Point(0, 0), 1.0f) |> ignore)
+        new_image
+
     let convert_element_textures (target: string) (element_name: string) (images: Bitmap list list) =
         let animation_frames = List.map List.length images |> List.max
         let colors = List.length images
@@ -174,6 +183,7 @@ module OsuSkinConverter =
         let mutable useholdtail = true
         let mutable columnlighting = false
         let mutable stage_textures = false
+        let mutable key_receptors = false
 
         // Generate main textures
         try
@@ -216,22 +226,43 @@ module OsuSkinConverter =
             flipholdtail <- true
             useholdtail <- false
 
-        // Generate receptors
+        // Convert keys to receptors
         try
-            use receptor_base =
-                get_animation_frame_filenames (core_textures.[if core_textures.Length > 1 then 1 else 0].Note, source)
-                |> List.head
-                |> load_bmp
-
-            use not_pressed = grayscale 0.5f receptor_base |> pad_to_square receptor_base.Width
-            use pressed = grayscale 1.0f receptor_base |> pad_to_square receptor_base.Width
-
-            not_pressed.Save(Path.Combine(target, "receptor-0-0.png"))
-            pressed.Save(Path.Combine(target, "receptor-1-0.png"))
-
-            JSON.ToFile (Path.Combine(target, "receptor.json"), false) { Rows = 2; Columns = 1; Mode = Loose }
+            let key_textures = 
+                Array.zip keymode_settings.KeyImageΔ keymode_settings.KeyImageΔD
+                // todo: distinct once receptor texture order exists
+                |> Seq.map (fun (not_pressed, pressed) -> [not_pressed; pressed])
+                |> List.concat
+                |> List.map (fun id -> get_single_filename(id, source).Value)
+                |> List.map (fun path -> (if path.Contains "@2" then true else false), load_bmp path)
+            let height =
+                key_textures
+                |> Seq.map (fun (is_2x, bmp) -> if is_2x then bmp.Height else bmp.Height * 2)
+                |> Seq.max
+            let width = float32 keymode_settings.ColumnWidth.[0] * 3.2f |> int
+            key_textures
+            |> Seq.map (fun (is_2x, bmp) -> scale_receptor width height is_2x bmp)
+            |> Seq.indexed
+            |> Seq.iter (fun (i, img) -> img.Save(Path.Combine(target, sprintf "receptor-%i-0.png" i)))
+            JSON.ToFile (Path.Combine(target, "receptor.json"), false) { Rows = key_textures.Length; Columns = 1; Mode = Loose }
+            key_receptors <- true
         with err ->
-            Logging.Warn("Error generating receptors", err)
+            Logging.Warn("Error converting keys to receptors", err)
+            try
+                use receptor_base =
+                    get_animation_frame_filenames (core_textures.[if core_textures.Length > 1 then 1 else 0].Note, source)
+                    |> List.head
+                    |> load_bmp
+
+                use not_pressed = grayscale 0.5f receptor_base |> pad_to_square receptor_base.Width
+                use pressed = grayscale 1.0f receptor_base |> pad_to_square receptor_base.Width
+
+                not_pressed.Save(Path.Combine(target, "receptor-0-0.png"))
+                pressed.Save(Path.Combine(target, "receptor-1-0.png"))
+
+                JSON.ToFile (Path.Combine(target, "receptor.json"), false) { Rows = 2; Columns = 1; Mode = Loose }
+            with err ->
+                Logging.Warn("Error generating placeholder receptors from note textures", err)
 
         // Generate extra textures
         match get_single_filename (keymode_settings.StageLeft, source) with
@@ -252,19 +283,15 @@ module OsuSkinConverter =
                 let stage_light_color = keymode_settings.ColourLightΔ.[k]
                 use colored = base_image.Clone()
 
-                let color_brush =
-                    RecolorBrush(
-                        SixLabors.ImageSharp.Color.White,
-                        SixLabors.ImageSharp.Color.FromRgba(
-                            stage_light_color.R,
-                            stage_light_color.G,
-                            stage_light_color.B,
-                            stage_light_color.A
-                        ),
-                        1.0f
-                    )
-
-                colored.Mutate(fun img -> img.Fill(color_brush).Opacity(float32 stage_light_color.A / 255.0f) |> ignore)
+                let color = SixLabors.ImageSharp.Color.FromRgb(stage_light_color.R, stage_light_color.G, stage_light_color.B)
+                colored.Mutate(fun img -> 
+                    img.Fill(
+                        GraphicsOptions(
+                            ColorBlendingMode = PixelFormats.PixelColorBlendingMode.Multiply, 
+                            AlphaCompositionMode = PixelFormats.PixelAlphaCompositionMode.SrcAtop
+                        ), color
+                    ) |> ignore
+                )
                 colored.Save(Path.Combine(target, sprintf "receptorlighting-%i-0.png" k))
 
             JSON.ToFile
@@ -339,6 +366,7 @@ module OsuSkinConverter =
                 UseRotation = is_arrows
                 EnableStageTextures = stage_textures
                 EnableColumnLight = columnlighting
+                ReceptorStyle = if key_receptors then ReceptorStyle.Flip else ReceptorStyle.Rotate
 
                 HUD = 
                     { HUDNoteskinOptions.Default with

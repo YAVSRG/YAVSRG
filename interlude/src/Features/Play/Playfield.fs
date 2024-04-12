@@ -242,6 +242,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 (Quad.color Color.White)
                 (Sprite.pick_texture
                     (animation.Loops,
+                    k * 2 +
                      if (state.Scoring.KeyState |> Bitmask.has_key k) then
                          1
                      else

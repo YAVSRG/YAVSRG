@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Tests\Images.fs" />
     <Compile Include="Tests\Endless.fs" />
     <Compile Include="Tests\Caramell.fs" />
     <Compile Include="Tests\Imports.fs" />
