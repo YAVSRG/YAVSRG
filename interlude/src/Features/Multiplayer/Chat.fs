@@ -182,10 +182,10 @@ type Chat() =
         )
         |* message_box
 
-        Network.Events.chat_message.Add(chat_msg >> add_msg)
-        Network.Events.system_message.Add(fun msg -> add_msg (Text(msg, Align = Alignment.CENTER)))
+        NetworkEvents.chat_message.Add(chat_msg >> add_msg)
+        NetworkEvents.system_message.Add(fun msg -> add_msg (Text(msg, Align = Alignment.CENTER)))
 
-        Network.Events.lobby_event.Add(fun (kind, data) ->
+        NetworkEvents.lobby_event.Add(fun (kind, data) ->
             let text, color =
                 match (kind, data) with
                 | LobbyEvent.Join, who -> sprintf "%s %s joined" Icons.LOG_IN who, Colors.green_accent
@@ -201,9 +201,9 @@ type Chat() =
             add_msg (Text(text, Color = (fun () -> color, Colors.shadow_1), Align = Alignment.CENTER))
         )
 
-        Network.Events.game_end.Add game_end_report
-        Network.Events.join_lobby.Add(fun () -> messages.Clear())
-        Network.Events.countdown.Add countdown
+        NetworkEvents.game_end.Add game_end_report
+        NetworkEvents.join_lobby.Add(fun () -> messages.Clear())
+        NetworkEvents.countdown.Add countdown
 
         base.Init parent
 

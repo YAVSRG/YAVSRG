@@ -62,6 +62,7 @@
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\Wiki.fs" />
     <Compile Include="Features\Online\DiscordRPC.fs" />
+    <Compile Include="Features\Online\Credentials.fs" />
     <Compile Include="Features\Online\Network.fs" />
     <Compile Include="Features\Online\Login.fs" />
     <Compile Include="Features\Online\Players.fs" />
@@ -170,7 +171,10 @@
     <Compile Include="Features\Options\Advanced.fs" />
     <Compile Include="Features\Options\Debug.fs" />
     <Compile Include="Features\Options\OptionsMenu.fs" />
-    <Compile Include="Features\Multiplayer\LobbySelect.fs" />
+    <Compile Include="Features\Multiplayer\LobbySelect\Create.fs" />
+    <Compile Include="Features\Multiplayer\LobbySelect\Invites.fs" />
+    <Compile Include="Features\Multiplayer\LobbySelect\List.fs" />
+    <Compile Include="Features\Multiplayer\LobbySelect\LobbySelect.fs" />
     <Compile Include="Features\Multiplayer\Chart.fs" />
     <Compile Include="Features\Multiplayer\Players.fs" />
     <Compile Include="Features\Multiplayer\Chat.fs" />

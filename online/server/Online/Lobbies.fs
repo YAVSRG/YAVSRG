@@ -12,11 +12,12 @@ open Interlude.Web.Server.Domain.Core
 type LobbyId = Guid
 type PlayerId = Guid
 
-exception MaliciousError of PlayerId * string
-exception UserError of PlayerId * string
-
 [<AutoOpen>]
 module Errors =
+
+    exception MaliciousError of PlayerId * string
+    exception UserError of PlayerId * string
+
     let malice id error_message =
         raise (MaliciousError(id, error_message))
 

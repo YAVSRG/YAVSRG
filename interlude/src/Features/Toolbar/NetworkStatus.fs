@@ -7,6 +7,7 @@ open Prelude
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Online
+open Interlude.Features.Multiplayer
 
 type NetworkStatus() =
     inherit StaticWidget(NodeType.None)
@@ -87,7 +88,10 @@ type NetworkStatus() =
             ]
         | Network.LoggedIn ->
             [
-                fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore
+                fun () ->
+                    match Network.lobby with
+                    | Some l ->  Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore
+                    | None -> LobbySelectPage().Show()
                 , Icons.USERS + " " + %"network.multiplayer"
                 (fun () -> PlayersPage().Show()), Icons.SEARCH + " " + %"network.players"
                 Network.logout, Icons.LOG_OUT + " " + %"network.logout"

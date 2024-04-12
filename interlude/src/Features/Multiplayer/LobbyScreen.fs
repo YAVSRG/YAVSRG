@@ -132,7 +132,7 @@ type Lobby() =
 
         base.Init parent
 
-        Network.Events.game_start.Add(fun () ->
+        NetworkEvents.game_start.Add(fun () ->
             if
                 Screen.current_type = Screen.Type.Lobby
                 && Network.lobby.Value.ReadyStatus = ReadyFlag.Play
@@ -150,7 +150,7 @@ type Lobby() =
 
         )
 
-        Network.Events.player_status.Add(fun (username, status) ->
+        NetworkEvents.player_status.Add(fun (username, status) ->
             if
                 status = LobbyPlayerStatus.Playing
                 && Screen.current_type = Screen.Type.Lobby
@@ -168,45 +168,17 @@ type Lobby() =
                         Logging.Warn("Missed the start of spectating because you were changing screen")
         )
 
-        Network.Events.lobby_settings_updated.Add(fun () -> lobby_title <- Network.lobby.Value.Settings.Value.Name)
+        NetworkEvents.lobby_settings_updated.Add(fun () -> lobby_title <- Network.lobby.Value.Settings.Value.Name)
 
 // Screen
 
 type LobbyScreen() =
     inherit Screen()
 
-    let mutable in_lobby = false
-
-    let list =
-        Container(NodeType.None)
-        |+ LobbyList(
-            Position =
-                { Position.Default with
-                    Right = 0.7f %+ 0.0f
-                }
-                    .Margin(200.0f, 100.0f)
-        )
-        |+ InviteList(
-            Position =
-                { Position.Default with
-                    Left = 0.7f %+ 0.0f
-                }
-                    .Margin(100.0f, 100.0f)
-        )
-
     let main = Lobby()
 
-    let swap = SwapContainer(list)
-
     override this.OnEnter(_) =
-        in_lobby <- Network.lobby.IsSome
-        swap.Current <- if in_lobby then main :> Widget else list
-
-        if not in_lobby then
-            Lobby.refresh_list ()
-
-        if in_lobby then
-            SelectedChart.switch Network.lobby.Value.Chart
+        SelectedChart.switch Network.lobby.Value.Chart
 
         Song.on_finish <- SongFinishAction.LoopFromPreview
         DiscordRPC.in_menus ("Multiplayer lobby")
@@ -214,23 +186,17 @@ type LobbyScreen() =
     override this.OnExit(_) = ()
 
     override this.OnBack() =
-        if in_lobby then
+        match Network.lobby with
+        | Some l ->
             ConfirmPage("Leave this lobby?", Lobby.leave).Show()
             None
-        else
-            Some Screen.Type.MainMenu
+        | None -> Some Screen.Type.LevelSelect
 
     override this.Init(parent) =
-        this |* swap
-
+        this |* main
         base.Init parent
 
-        Network.Events.join_lobby.Add(fun () ->
-            in_lobby <- true
-            swap.Current <- main
-        )
-
-        Network.Events.leave_lobby.Add(fun () ->
-            in_lobby <- false
-            swap.Current <- list
-        )
+    override this.Update(elapsed_ms, moved) =
+        match Network.lobby with
+        | None -> if not Transitions.active then Screen.back Transitions.Flags.Default |> ignore
+        | Some _ -> base.Update(elapsed_ms, moved)

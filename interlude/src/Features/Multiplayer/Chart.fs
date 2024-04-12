@@ -301,9 +301,9 @@ type SelectedChart() =
         )
 
         SelectedChart.switch Network.lobby.Value.Chart
-        Network.Events.join_lobby.Add(fun () -> SelectedChart.switch None)
+        NetworkEvents.join_lobby.Add(fun () -> SelectedChart.switch None)
 
-        Network.Events.change_chart.Add(fun () ->
+        NetworkEvents.change_chart.Add(fun () ->
             if Screen.current_type = Screen.Type.Lobby then
                 SelectedChart.switch Network.lobby.Value.Chart
         )

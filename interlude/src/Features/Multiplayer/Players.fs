@@ -106,8 +106,8 @@ type PlayerList() =
         this |* other_players_scroll
         refresh ()
 
-        Network.Events.join_lobby.Add refresh
-        Network.Events.lobby_players_updated.Add refresh
+        NetworkEvents.join_lobby.Add refresh
+        NetworkEvents.lobby_players_updated.Add refresh
 
         base.Init parent
 

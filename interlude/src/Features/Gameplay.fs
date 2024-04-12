@@ -594,9 +594,9 @@ module Gameplay =
             )
 
         let init_window () =
-            Network.Events.game_start.Add on_game_start
-            Network.Events.leave_lobby.Add on_leave_lobby
-            Network.Events.player_status.Add player_status
+            NetworkEvents.game_start.Add on_game_start
+            NetworkEvents.leave_lobby.Add on_leave_lobby
+            NetworkEvents.player_status.Add player_status
 
     let init_window () =
         match Cache.by_key options.CurrentChart.Value Content.Cache with

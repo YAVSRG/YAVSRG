@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -19,7 +18,7 @@ type RegisterPage(discord_tag) as this =
 
     let agree_tos = Setting.simple false |> Setting.trigger submit_button.set_Enabled
 
-    let handler = Network.Events.successful_login.Subscribe(fun _ -> Menu.Back())
+    let handler = NetworkEvents.successful_login.Subscribe(fun _ -> Menu.Back())
 
     let info =
         Callout.Normal
@@ -68,18 +67,14 @@ type LoginPage() as this =
             waiting_for_browser <- true
             Network.begin_registration ()
 
-    let a = Network.Events.successful_login.Subscribe(fun _ -> Menu.Back())
-
-    let b =
-        Network.Events.waiting_registration.Subscribe(fun discord_tag ->
+    let subscribed_events = 
+        NetworkEvents.successful_login.Subscribe(fun _ -> Menu.Back()),
+        NetworkEvents.waiting_registration.Subscribe(fun discord_tag ->
             waiting_for_browser <- false
             RegisterPage(discord_tag).Show()
-        )
-
-    let c = Network.Events.login_failed.Subscribe(fun _ -> waiting_for_browser <- false)
-
-    let d =
-        Network.Events.registration_failed.Subscribe(fun _ -> waiting_for_browser <- false)
+        ),
+        NetworkEvents.login_failed.Subscribe(fun _ -> waiting_for_browser <- false),
+        NetworkEvents.registration_failed.Subscribe(fun _ -> waiting_for_browser <- false)
 
     let info = Callout.Small.Icon(Icons.GLOBE).Title(%"login.waiting_for_discord")
 
@@ -97,6 +92,7 @@ type LoginPage() as this =
     override this.Title = %"login.name"
 
     override this.OnClose() =
+        let a,b,c,d = subscribed_events
         a.Dispose()
         b.Dispose()
         c.Dispose()
