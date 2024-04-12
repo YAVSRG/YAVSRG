@@ -95,8 +95,6 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
     let user_options = options.HUD.Value
     let noteskin_options = Content.NoteskinConfig.HUD
 
-    let pos = Setting.simple noteskin_options.JudgementMeterPosition
-
     let ignore_perfect_judgements =
         Setting.simple user_options.JudgementMeterIgnorePerfect
 

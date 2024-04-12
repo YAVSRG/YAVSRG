@@ -372,6 +372,10 @@ module OsuSkinConverter =
                     { HUDNoteskinOptions.Default with
                         JudgementMeterFrameTime = 16.7f
                         JudgementMeterUseTexture = judgements
+                        JudgementMeterCustomDisplay =
+                            if judgements then 
+                                Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
+                            else Map.empty
                     }
             }
 
