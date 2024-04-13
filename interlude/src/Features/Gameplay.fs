@@ -507,97 +507,6 @@ module Gameplay =
                     false
             | None -> false
 
-    module Multiplayer =
-
-        let replays = new Dictionary<string, IScoreMetric * (unit -> ScoreInfo)>()
-
-        let private on_leave_lobby () = replays.Clear()
-
-        let private on_game_start () = replays.Clear()
-
-        let private player_status (username, status) =
-            if status = LobbyPlayerStatus.Playing then
-
-                Chart.when_loaded
-                <| fun info ->
-
-                    let replay = Network.lobby.Value.Players.[username].Replay
-
-                    replays.Add(
-                        username,
-                        let scoring =
-                            Metrics.create Rulesets.current info.WithMods.Keys replay info.WithMods.Notes rate.Value
-
-                        scoring,
-                        fun () ->
-                            if not (replay :> IReplayProvider).Finished then
-                                replay.Finish()
-
-                            scoring.Update Time.infinity
-
-                            let replay_data = (replay :> IReplayProvider).GetFullReplay()
-
-                            {
-                                CachedChart = info.CacheInfo
-                                Chart = info.Chart
-                                WithMods = info.WithMods
-
-                                PlayedBy = ScorePlayedBy.Username username
-                                TimePlayed = Timestamp.now ()
-                                Rate = rate.Value
-
-                                Replay = replay_data
-                                Scoring = scoring
-                                Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
-                                Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
-
-                                Rating = info.Rating
-                                Patterns = info.Patterns
-                                Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
-
-                                ImportedFromOsu = false
-                            }
-                    )
-
-        let add_own_replay (info: Chart.LoadedChartInfo, scoring: ScoreMetric, replay: LiveReplayProvider) =
-            replays.Add(
-                Network.credentials.Username,
-                (scoring,
-                 fun () ->
-                     if not (replay :> IReplayProvider).Finished then
-                         replay.Finish()
-
-                     scoring.Update Time.infinity
-
-                     let replay_data = (replay :> IReplayProvider).GetFullReplay()
-
-                     {
-                         CachedChart = info.CacheInfo
-                         Chart = info.Chart
-                         WithMods = info.WithMods
-
-                         PlayedBy = ScorePlayedBy.You
-                         TimePlayed = Timestamp.now ()
-                         Rate = rate.Value
-
-                         Replay = replay_data
-                         Scoring = scoring
-                         Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
-                         Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
-
-                         Rating = info.Rating
-                         Patterns = info.Patterns
-                         Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
-
-                         ImportedFromOsu = false
-                     })
-            )
-
-        let init_window () =
-            NetworkEvents.game_start.Add on_game_start
-            NetworkEvents.leave_lobby.Add on_leave_lobby
-            NetworkEvents.player_status.Add player_status
-
     let init_window () =
         match Cache.by_key options.CurrentChart.Value Content.Cache with
         | Some cc -> Chart.change (cc, LibraryContext.None, true)
@@ -620,7 +529,6 @@ module Gameplay =
                 Logging.Debug "No charts installed"
                 Background.load None
 
-        Multiplayer.init_window ()
         Chart.init_window ()
 
         Chart.on_chart_change_started.Add(fun info ->

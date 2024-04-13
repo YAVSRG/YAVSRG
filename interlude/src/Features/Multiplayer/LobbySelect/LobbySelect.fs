@@ -51,8 +51,6 @@ type LobbySelectPage() =
         |> this.Content
         base.Init parent
 
-        Lobby.refresh_list()
-
     override this.Title = %"select_lobby.name"
     override this.OnClose() =
         let a, b, c = subscribed_events

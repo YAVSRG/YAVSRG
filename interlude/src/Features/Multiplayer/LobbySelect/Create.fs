@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Prelude
+open Interlude.Web.Shared
 open Interlude.UI.Menu
 open Interlude.Features.Online
 
@@ -9,7 +10,7 @@ type CreateLobbyPage() as this =
     inherit Page()
 
     let name = Setting.simple (Network.credentials.Username + "'s Lobby") |> Setting.alphanumeric
-    let submit () = Lobby.create name.Value
+    let submit () = Network.client.Send(Upstream.CREATE_LOBBY name.Value)
 
     let submit_button =
         PageButton(

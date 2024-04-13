@@ -6,6 +6,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
+open Prelude.Gameplay
 open Interlude.Web.Shared.Packets
 open Interlude.Content
 open Interlude.Options
@@ -68,18 +69,15 @@ module SpectateScreen =
                             Bottom = 1.0f %+ 100.0f
                         }
 
-    let spectate_screen (info: LoadedChartInfo, username: string, lobby: Lobby) =
+    let spectate_screen (info: LoadedChartInfo, username: string, replay_info: LobbyPlayerReplayInfo, lobby: Lobby) =
 
         let mutable currently_spectating = username
-        let mutable scoring = fst Gameplay.Multiplayer.replays.[username]
-        let mutable replay_data = Network.lobby.Value.Players.[username].Replay
+        let mutable scoring = replay_info.ScoreMetric
+        let mutable replay_data : OnlineReplayProvider = replay_info.Replay :?> OnlineReplayProvider
 
         let cycle_spectator (screen: IPlayScreen) =
             let users_available_to_spectate =
-                let players = Network.lobby.Value.Players
-
-                players.Keys
-                |> Seq.filter (fun p -> players.[p].Status = LobbyPlayerStatus.Playing)
+                lobby.Replays.Keys
                 |> Array.ofSeq
 
             let next_user =
@@ -87,11 +85,14 @@ module SpectateScreen =
                 | None -> users_available_to_spectate.[0]
                 | Some i -> users_available_to_spectate.[(i + 1) % users_available_to_spectate.Length]
 
-            currently_spectating <- next_user
-            scoring <- fst Gameplay.Multiplayer.replays.[next_user]
-            replay_data <- Network.lobby.Value.Players.[next_user].Replay
-            Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
-            screen.State.ChangeScoring scoring
+            match lobby.GetReplayInfo next_user with
+            | Some replay_info ->
+                currently_spectating <- next_user
+                scoring <- replay_info.ScoreMetric
+                replay_data <- replay_info.Replay :?> OnlineReplayProvider
+                Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
+                screen.State.ChangeScoring scoring
+            | None -> Logging.Warn(sprintf "Failed to switch to replay data for %s" next_user)
 
         let first_note = info.WithMods.FirstNote
 
@@ -116,7 +117,8 @@ module SpectateScreen =
                 if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter
                 if user_options.RateModMeterEnabled then add_widget noteskin_options.RateModMeterPosition RateModMeter
                 if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
-                add_widget noteskin_options.PacemakerPosition MultiplayerScoreTracker
+                add_widget noteskin_options.PacemakerPosition 
+                    (fun (user_options, noteskin_options, state) -> MultiplayerScoreTracker(user_options, noteskin_options, state, lobby.Replays))
 
                 this
                 |* ControlOverlay(

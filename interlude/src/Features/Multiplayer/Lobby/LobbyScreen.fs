@@ -4,6 +4,9 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude
+open Prelude.Gameplay
+open Prelude.Data
+open Interlude.Content
 open Interlude.Web.Shared
 open Interlude.UI
 open Interlude.UI.Menu
@@ -12,6 +15,7 @@ open Interlude.Features.Play
 open Interlude.Features.Online
 open Interlude.Features.LevelSelect
 open Interlude.Features
+open Interlude.Features.Gameplay
 
 type LobbySettingsPage(lobby: Lobby) as this =
     inherit Page()
@@ -133,7 +137,7 @@ type LobbyUI(lobby: Lobby) =
                 Screen.current_type = Screen.Type.Lobby
                 && lobby.ReadyStatus = ReadyFlag.Play
             then
-                Gameplay.Chart.if_loaded
+                Chart.if_loaded
                 <| fun info ->
                     if
                         Screen.change_new
@@ -147,16 +151,51 @@ type LobbyUI(lobby: Lobby) =
         )
 
         lobby.OnPlayerStatusChanged.Add(fun (username, status) ->
-            if
-                status = LobbyPlayerStatus.Playing
-                && Screen.current_type = Screen.Type.Lobby
-                && lobby.ReadyStatus = ReadyFlag.Spectate
-            then
-                Gameplay.Chart.if_loaded
+            if status = LobbyPlayerStatus.Playing then
+                Chart.if_loaded
                 <| fun info ->
+
+                let replay : OnlineReplayProvider = OnlineReplayProvider()
+                let scoring = Metrics.create Rulesets.current info.WithMods.Keys replay info.WithMods.Notes rate.Value
+                let replay_info =
+                    {
+                        Replay = replay
+                        ScoreMetric = scoring
+                        GetScoreInfo = fun () ->
+                            if not (replay :> IReplayProvider).Finished then
+                                replay.Finish()
+                            scoring.Update Time.infinity
+
+                            let replay_data = (replay :> IReplayProvider).GetFullReplay()
+
+                            {
+                                CachedChart = info.CacheInfo
+                                Chart = info.Chart
+                                WithMods = info.WithMods
+
+                                PlayedBy = ScorePlayedBy.Username username
+                                TimePlayed = Timestamp.now ()
+                                Rate = rate.Value
+
+                                Replay = replay_data
+                                Scoring = scoring
+                                Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
+                                Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+
+                                Rating = info.Rating
+                                Patterns = info.Patterns
+                                Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
+
+                                ImportedFromOsu = false
+                            }
+                    }
+                lobby.AddReplayInfo(username, replay_info)
+
+                if Screen.current_type = Screen.Type.Lobby && lobby.ReadyStatus = ReadyFlag.Spectate
+                then
                     if
                         Screen.change_new
-                            (fun () -> SpectateScreen.spectate_screen (info, username, lobby))
+                            (fun () -> SpectateScreen.spectate_screen (info, username, replay_info, lobby))
                             Screen.Type.Replay
                             Transitions.Flags.Default
                         |> not

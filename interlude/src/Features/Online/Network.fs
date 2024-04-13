@@ -3,172 +3,11 @@
 open System
 open System.Net
 open System.IO
-open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay.Mods
-open Prelude.Data.Library.Caching
-open Prelude.Gameplay
-open Prelude.Data
 open Interlude.UI
 open Interlude.Web.Shared
-
-type LobbyInvite =
-    {
-        InvitedBy: string
-        LobbyId: Guid
-    }
-
-type LobbyPlayer =
-    {
-        Color: Color
-        mutable Status: LobbyPlayerStatus
-    }
-    static member Create color =
-        {
-            Color = Color.FromArgb color
-            Status = LobbyPlayerStatus.NotReady
-        }
-
-type LobbyPlayerReplayInfo =
-    {
-        Replay: OnlineReplayProvider
-        ScoreMetric: IScoreMetric
-        GetScoreInfo: unit -> ScoreInfo
-    }
-
-type Lobby(client: Client, players: (string * int32) array) =
-
-    let players =
-        let d = new Dictionary<string, LobbyPlayer>()
-        for (username, color) in players do
-            d.Add(username, LobbyPlayer.Create color)
-        d
-
-    let replays =
-        new Dictionary<string, LobbyPlayerReplayInfo>()
-
-    let chat_message_ev = new Event<string * string>()
-    let system_message_ev = new Event<string>()
-    let lobby_settings_updated_ev = new Event<LobbySettings>() // pass settings
-    let lobby_event_ev = new Event<LobbyEvent * string>()
-    let lobby_players_updated_ev = new Event<unit>()
-    let player_status_ev = new Event<string * LobbyPlayerStatus>()
-    let change_chart_ev = new Event<unit>() // pass lobby chart
-    let countdown_ev = new Event<string * int>()
-    let game_start_ev = new Event<unit>()
-    let game_end_ev = new Event<unit>()
-
-    member this.OnChatMessage = chat_message_ev.Publish
-    member this.OnSystemMessage = system_message_ev.Publish
-    member this.OnSettingsUpdated = lobby_settings_updated_ev.Publish
-    member this.OnLobbyEvent = lobby_event_ev.Publish
-    member this.OnPlayersUpdated = lobby_players_updated_ev.Publish
-    member this.OnPlayerStatusChanged = player_status_ev.Publish
-    member this.OnChartChanged = change_chart_ev.Publish
-    member this.OnCountdown = countdown_ev.Publish
-    member this.OnGameStart = game_start_ev.Publish
-    member this.OnGameEnd = game_end_ev.Publish
-
-    member this.PlayerJoined(username: string, color: int32) =
-        this.Players.[username] <- LobbyPlayer.Create color
-        lobby_players_updated_ev.Trigger()
-    
-    member this.PlayerLeft(username: string) =
-        this.Players.Remove(username) |> ignore
-        lobby_players_updated_ev.Trigger()
-
-    member this.ChartSelected(lc: LobbyChart) =
-        this.Chart <- Some lc
-
-        for player in this.Players.Values do
-            player.Status <- LobbyPlayerStatus.NotReady
-
-        this.ReadyStatus <- ReadyFlag.NotReady
-        change_chart_ev.Trigger()
-        lobby_players_updated_ev.Trigger()
-
-    member this.UpdateSettings(settings: LobbySettings) =
-        this.Settings <- settings
-        lobby_settings_updated_ev.Trigger settings
-
-    member this.LobbyEvent(kind: LobbyEvent, player: string) =
-        lobby_event_ev.Trigger(kind, player)
-
-    member this.SystemMessage(msg: string) =
-        system_message_ev.Trigger msg
-
-    member this.ChatMessage(sender: string, msg: string) =
-        chat_message_ev.Trigger(sender, msg)
-
-    member this.PlayerStatus(username: string, status: LobbyPlayerStatus) =
-        this.Players.[username].Status <- status
-
-        if status = LobbyPlayerStatus.Playing then
-            this.Players.[username].Replay <- OnlineReplayProvider()
-
-        lobby_players_updated_ev.Trigger()
-        player_status_ev.Trigger(username, status)
-
-    member this.StartCountdown(reason: string, seconds: int) =
-        countdown_ev.Trigger(reason, seconds)
-
-    member this.GameStart() =
-        this.Countdown <- false
-        this.GameInProgress <- true
-        game_start_ev.Trigger()
-
-    member this.GameEnd() =
-        this.GameInProgress <- false
-        for player in this.Players.Values do
-            player.Status <- LobbyPlayerStatus.NotReady
-        this.ReadyStatus <- ReadyFlag.NotReady
-        game_end_ev.Trigger()
-
-    member val Settings: LobbySettings = LobbySettings.Default with get, set
-    member val Players: Dictionary<string, LobbyPlayer> = players with get
-    member val YouAreHost: bool = false with get, set
-    member val Spectate: bool = false with get, set
-    member val ReadyStatus: ReadyFlag = ReadyFlag.NotReady with get, set
-    member val Chart: LobbyChart option  = None with get, set
-    member val GameInProgress: bool = false with get, set
-    member val Countdown: bool = false with get, set
-
-    member this.SendMessage(msg: string) = client.Send(Upstream.CHAT msg)
-    member this.InvitePlayer(username: string) = client.Send(Upstream.INVITE_TO_LOBBY username)
-    member this.Leave () = client.Send(Upstream.LEAVE_LOBBY)
-
-    member this.TransferHost(username: string) = client.Send(Upstream.TRANSFER_HOST username)
-    member this.ChangeSettings (settings: LobbySettings) = client.Send(Upstream.LOBBY_SETTINGS settings)
-
-    member this.ReportMissingChart() = client.Send(Upstream.MISSING_CHART)
-    member this.SetReadyStatus(flag: ReadyFlag) =
-        if not this.GameInProgress then
-            this.ReadyStatus <- flag
-            client.Send(Upstream.READY_STATUS flag)
-
-    member this.StartRound() = client.Send(Upstream.START_GAME)
-    member this.CancelRound() = client.Send(Upstream.CANCEL_GAME)
-    member this.StartPlaying() = client.Send(Upstream.BEGIN_PLAYING)
-    member this.StartSpectating() = client.Send(Upstream.BEGIN_SPECTATING)
-    member this.SendReplayData data = client.Send(Upstream.PLAY_DATA data)
-    member this.FinishPlaying() = client.Send(Upstream.FINISH_PLAYING false)
-    member this.AbandonPlaying() = client.Send(Upstream.FINISH_PLAYING true)
-
-    member this.SelectChart (cc: CachedChart, rate: float32, mods: ModState) =
-        if this.YouAreHost then
-            client.Send(
-                Upstream.SELECT_CHART
-                    {
-                        Hash = cc.Hash
-                        Artist = cc.Artist
-                        Title = cc.Title
-                        Creator = cc.Creator
-                        Rate = rate
-                        Mods = Map.toArray mods
-                    }
-            )
 
 module NetworkEvents =
 
@@ -394,9 +233,12 @@ module Network =
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> 
-                        use ms = new MemoryStream(data)
-                        use br = new BinaryReader(ms)
-                        lobby.Players.[username].Replay.ImportLiveBlock br
+                        match lobby.GetReplayInfo username with
+                        | None -> Logging.Debug(sprintf "Unexpected replay data for %s" username)
+                        | Some replay_info ->
+                            use ms = new MemoryStream(data)
+                            use br = new BinaryReader(ms)
+                            (replay_info.Replay :?> Gameplay.OnlineReplayProvider).ImportLiveBlock br
 
     let client = new NetworkClient()
 
@@ -452,10 +294,4 @@ module Network =
 
         credentials.Save()
 
-module Lobby =
-
-    // todo: members of Lobby object
-    open Network
-    let refresh_list () = client.Send(Upstream.GET_LOBBIES)
-    let create name = client.Send(Upstream.CREATE_LOBBY name)
-    let join id = client.Send(Upstream.JOIN_LOBBY id)
+    let join_lobby id = client.Send(Upstream.JOIN_LOBBY id)

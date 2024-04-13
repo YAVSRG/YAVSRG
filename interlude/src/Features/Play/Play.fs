@@ -289,7 +289,41 @@ module PlayScreen =
         let mutable packet_count = 0
 
         lobby.StartPlaying()
-        Gameplay.Multiplayer.add_own_replay (info, scoring, liveplay)
+        lobby.AddReplayInfo(
+                Network.credentials.Username,
+                { 
+                    Replay = liveplay
+                    ScoreMetric = scoring
+                    GetScoreInfo = fun () ->
+                     if not (liveplay :> IReplayProvider).Finished then
+                         liveplay.Finish()
+
+                     scoring.Update Time.infinity
+
+                     let replay_data = (liveplay :> IReplayProvider).GetFullReplay()
+
+                     {
+                         CachedChart = info.CacheInfo
+                         Chart = info.Chart
+                         WithMods = info.WithMods
+
+                         PlayedBy = Data.ScorePlayedBy.You
+                         TimePlayed = Timestamp.now ()
+                         Rate = Gameplay.rate.Value
+
+                         Replay = replay_data
+                         Scoring = scoring
+                         Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
+                         Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+
+                         Rating = info.Rating
+                         Patterns = info.Patterns
+                         Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
+
+                         ImportedFromOsu = false
+                     }
+                }
+            )
 
         scoring.OnHit.Add(fun h ->
             match h.Guts with
@@ -325,7 +359,8 @@ module PlayScreen =
                 if user_options.RateModMeterEnabled then add_widget noteskin_options.RateModMeterPosition RateModMeter
                 if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
                 // todo: better positioning + ability to isolate and test this component
-                add_widget noteskin_options.PacemakerPosition MultiplayerScoreTracker
+                add_widget noteskin_options.PacemakerPosition 
+                    (fun (user_options, noteskin_options, state) -> MultiplayerScoreTracker(user_options, noteskin_options, state, lobby.Replays))
 
                 let give_up () =
                     Screen.back Transitions.Flags.Default |> ignore

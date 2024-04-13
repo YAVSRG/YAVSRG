@@ -202,18 +202,16 @@ type SelectedChart(lobby: Lobby) =
             ),
             StylishButton(
                 (fun () ->
-                    let username =
-                        lobby.Players.Keys.First(fun p ->
-                            lobby.Players.[p].Status = LobbyPlayerStatus.Playing
-                        ) // todo: or fail gracefully
-
-                    Chart.if_loaded
-                    <| fun info -> //todo: store info in sync with selected chart in SelectedChart
-                        Screen.change_new
-                            (fun () -> SpectateScreen.spectate_screen (info, username, Network.lobby.Value))
-                            Screen.Type.Replay
-                            Transitions.Flags.Default
-                        |> ignore
+                    match lobby.Replays |> Seq.tryHead with
+                    | Some (KeyValue (username, replay_info)) ->
+                        Chart.if_loaded
+                        <| fun info -> //todo: store info in sync with selected chart in SelectedChart
+                            Screen.change_new
+                                (fun () -> SpectateScreen.spectate_screen (info, username, replay_info, lobby))
+                                Screen.Type.Replay
+                                Transitions.Flags.Default
+                            |> ignore
+                    | None -> Logging.Debug("Couldn't find anyone with replay data to spectate")
                 ),
                 K(sprintf "%s %s" Icons.EYE (%"lobby.spectate")),
                 !%Palette.DARK_100,

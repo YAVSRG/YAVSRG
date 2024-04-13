@@ -21,7 +21,7 @@ type LobbyInfoCard(info: LobbyInfo) =
             Position = Position.SliceBottom(40.0f).Margin(5.0f),
             Align = Alignment.LEFT
         )
-        |+ Clickable(fun () -> Lobby.join info.Id)
+        |+ Clickable(fun () -> Network.join_lobby info.Id)
         |* Text(
             info.Players.ToString() + " " + Icons.USERS,
             Color = K Colors.text_subheading,
@@ -43,6 +43,7 @@ type LobbyList() =
 
     let mutable no_lobbies = false
 
+    let refresh_list () = Network.client.Send(Upstream.GET_LOBBIES)
     let create_lobby () = CreateLobbyPage().Show()
 
     member this.UpdateList() =
@@ -70,7 +71,7 @@ type LobbyList() =
             %"lobby_list.refresh",
             Icons.REFRESH_CCW,
             60.0f,
-            Lobby.refresh_list,
+            refresh_list,
             Position = Position.SliceBottom(60.0f).SliceRight(250.0f)
         )
         |* SearchBox(
@@ -80,4 +81,5 @@ type LobbyList() =
         )
 
         this.UpdateList()
+        refresh_list()
         base.Init parent

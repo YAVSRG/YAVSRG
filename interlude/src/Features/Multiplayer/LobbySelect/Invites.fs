@@ -14,7 +14,7 @@ type InviteCard(invite: LobbyInvite) =
             Icons.CHECK,
             (fun () ->
                 sync (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)
-                Lobby.join invite.LobbyId
+                Network.join_lobby invite.LobbyId
             ),
             Position = Position.TrimRight(50.0f).SliceRight(50.0f)
         )
