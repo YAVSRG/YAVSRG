@@ -75,7 +75,7 @@ type LobbyUI(lobby: Lobby) =
                 }
         )
         |+ StylishButton(
-            (fun () -> Gameplay.Chart.if_loaded <| fun info -> Preview(info, ignore).Show()),
+            (fun () -> Chart.if_loaded <| fun info -> Preview(info, ignore).Show()),
             K(sprintf "%s %s" Icons.EYE (%"levelselect.preview.name")),
             !%Palette.MAIN_100,
             TiltLeft = false,

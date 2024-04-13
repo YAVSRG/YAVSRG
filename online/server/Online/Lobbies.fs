@@ -127,15 +127,11 @@ module Lobby =
             None
 
     let private valid_lobby_name (proposed: string) : bool =
-        if (proposed.Length < 2 || proposed.Length > 30) then
+        if (proposed.Length < 3 || proposed.Length > 30) then
             false
-        else if
-
-            proposed.Trim().Length <> proposed.Length
-        then
+        elif proposed.Trim().Length <> proposed.Length then
             false
         else
-
             (Seq.forall (fun (c: char) -> Seq.contains c Users.Username.VALID_CHARACTERS) proposed)
 
     let private multicast (lobby: Lobby, packet: Downstream) =
@@ -618,7 +614,7 @@ module Lobby =
                                 { settings with
                                     Name = if valid_lobby_name settings.Name then settings.Name else lobby.Settings.Name
                                 }
-                            multicast (lobby, Downstream.LOBBY_SETTINGS settings)
+                            multicast (lobby, Downstream.LOBBY_SETTINGS lobby.Settings)
 
 
 

@@ -9,7 +9,6 @@ open Prelude.Data
 open Prelude.Gameplay
 open Interlude.Web.Shared
 open Interlude.UI
-open Interlude.Features.Gameplay
 open Interlude.Features.Score
 open Interlude.Features.Online
 
@@ -215,7 +214,7 @@ type Chat(lobby: Lobby) =
     override this.Update(elapsed_ms, moved) =
         if (%%"select").Tapped() then
             if chatline.Selected && current_message.Value <> "" then
-                Network.lobby.Value.SendMessage current_message.Value
+                lobby.SendMessage current_message.Value
                 current_message.Set ""
             else
                 chatline.Select false
