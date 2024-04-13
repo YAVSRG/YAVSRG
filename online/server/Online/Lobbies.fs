@@ -287,8 +287,8 @@ module Lobby =
                             lobby.Players.Remove player |> ignore
                             in_lobby.Remove player |> ignore
 
-                            multicast (lobby, Downstream.PLAYER_LEFT_LOBBY username)
                             multicast (lobby, Downstream.LOBBY_EVENT(LobbyEvent.Leave, username))
+                            multicast (lobby, Downstream.PLAYER_LEFT_LOBBY username)
                             Server.send (player, Downstream.YOU_LEFT_LOBBY)
 
                             if lobby.Players.Count = 0 then

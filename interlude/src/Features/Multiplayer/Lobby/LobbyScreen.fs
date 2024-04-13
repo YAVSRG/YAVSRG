@@ -141,7 +141,7 @@ type LobbyUI(lobby: Lobby) =
                 <| fun info ->
                     if
                         Screen.change_new
-                            (fun () -> PlayScreen.multiplayer_screen(info, lobby))
+                            (fun () -> PlayScreenMultiplayer.multiplayer_screen(info, lobby))
                             Screen.Type.Play
                             Transitions.Flags.Default
                         |> not

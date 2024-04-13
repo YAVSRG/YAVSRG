@@ -34,7 +34,7 @@ type LobbyPlayerReplayInfo =
         GetScoreInfo: unit -> ScoreInfo
     }
 
-type Lobby(client: Client, players: (string * int32) array) =
+type Lobby(client: Client, your_username: string, players: (string * int32) array) =
 
     let players =
         let d = new Dictionary<string, LobbyPlayer>()
@@ -93,7 +93,7 @@ type Lobby(client: Client, players: (string * int32) array) =
         lobby_settings_updated_ev.Trigger settings
 
     member this.LobbyEvent(kind: LobbyEvent, player: string) =
-        if this.Players.ContainsKey player then
+        if player = your_username || this.Players.ContainsKey player then
             lobby_event_ev.Trigger(kind, player)
         else
             Logging.Warn(sprintf "Received event from untracked player %s" player)
@@ -102,7 +102,7 @@ type Lobby(client: Client, players: (string * int32) array) =
         system_message_ev.Trigger msg
 
     member this.ChatMessage(sender: string, msg: string) =
-        if this.Players.ContainsKey sender then
+        if sender = your_username || this.Players.ContainsKey sender then
             chat_message_ev.Trigger(sender, msg)
         else
             Logging.Warn(sprintf "Received chat message from untracked player %s" sender)

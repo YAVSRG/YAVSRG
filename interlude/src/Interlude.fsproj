@@ -121,6 +121,7 @@
     <Compile Include="Features\Play\ColumnLighting.fs" />
     <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Play\Play.fs" />
+    <Compile Include="Features\Play\PlayMultiplayer.fs" />
     <Compile Include="Features\Play\Replay.fs" />
     <Compile Include="Features\Play\Spectate.fs" />
     <Compile Include="Features\Play\Practice\PracticeState.fs" />

@@ -134,7 +134,7 @@ module Network =
             | Downstream.YOU_JOINED_LOBBY (players: (string * int32) array) ->
                 sync
                 <| fun () ->
-                    lobby <- Some <| Lobby(this, players)
+                    lobby <- Some <| Lobby(this, credentials.Username, players)
                     NetworkEvents.join_lobby_ev.Trigger(lobby.Value)
             | Downstream.INVITED_TO_LOBBY(by_user, lobby_id) ->
                 sync 
