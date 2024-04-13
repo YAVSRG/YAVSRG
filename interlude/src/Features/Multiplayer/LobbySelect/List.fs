@@ -36,26 +36,26 @@ type LobbyInfoCard(info: LobbyInfo) =
 type LobbyList() =
     inherit Container(NodeType.None)
 
-    let searchtext = Setting.simple ""
+    let search_text = Setting.simple ""
 
-    let container =
-        FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f, Position = Position.Margin(0.0f, 80.0f))
+    let list_container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f)
 
     let mutable no_lobbies = false
+    // todo: loading state
 
     let refresh_list () = Network.client.Send(Upstream.GET_LOBBIES)
     let create_lobby () = CreateLobbyPage().Show()
 
-    member this.UpdateList() =
-        container.Clear()
-        no_lobbies <- Network.lobby_list.Length = 0
+    member this.UpdateList (lobbies: LobbyInfo array) =
+        no_lobbies <- lobbies.Length = 0
+        list_container.Clear()
 
-        for l in Network.lobby_list do
-            container.Add(LobbyInfoCard l)
+        for lobby in lobbies do
+            list_container.Add(LobbyInfoCard lobby)
 
     override this.Init(parent) =
         this
-        |+ container
+        |+ ScrollContainer(list_container, Position = Position.Margin(0.0f, 80.0f), Margin = Style.PADDING)
         |+ Conditional(
             (fun () -> no_lobbies),
             EmptyState(Icons.USERS, %"lobby_list.none", Subtitle = %"lobby_list.none.subtitle")
@@ -75,11 +75,10 @@ type LobbyList() =
             Position = Position.SliceBottom(60.0f).SliceRight(250.0f)
         )
         |* SearchBox(
-            searchtext,
-            (fun () -> container.Filter <- fun l -> l.Name.ToLower().Contains searchtext.Value),
+            search_text,
+            (fun () -> list_container.Filter <- fun l -> l.Name.ToLower().Contains search_text.Value),
             Position = Position.SliceTop 60.0f
         )
-
-        this.UpdateList()
-        refresh_list()
         base.Init parent
+
+        refresh_list()

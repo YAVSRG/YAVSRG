@@ -28,26 +28,14 @@ type LobbySelectPage() =
         )
 
     let subscribed_events =
-        NetworkEvents.receive_lobby_list.Subscribe (fun _ -> lobby_list.UpdateList()),
+        NetworkEvents.receive_lobby_list.Subscribe (fun lobbies -> lobby_list.UpdateList lobbies),
         NetworkEvents.receive_invite.Subscribe (fun _ -> invite_list.UpdateList()),
         NetworkEvents.join_lobby.Subscribe (fun lobby -> Menu.Exit(); Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore)
 
     override this.Init(parent) =
         Container(NodeType.Leaf)
-        |+ LobbyList(
-            Position =
-                { Position.Default with
-                    Right = 0.7f %+ 0.0f
-                }
-                    .Margin(200.0f, 100.0f)
-        )
-        |+ InviteList(
-            Position =
-                { Position.Default with
-                    Left = 0.7f %+ 0.0f
-                }
-                    .Margin(100.0f, 100.0f)
-        )
+        |+ lobby_list
+        |+ invite_list
         |> this.Content
         base.Init parent
 

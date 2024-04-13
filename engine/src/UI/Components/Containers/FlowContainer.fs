@@ -115,6 +115,7 @@ module FlowContainer =
         member this.Clear() =
             require_ui_thread ()
             children.Clear()
+            refresh <- true
 
         override this.Draw() =
             for i = children.Count - 1 downto 0 do

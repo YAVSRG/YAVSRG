@@ -23,7 +23,7 @@ module NetworkEvents =
     let successful_login_ev = new Event<string>()
     let successful_login = successful_login_ev.Publish
 
-    let receive_lobby_list_ev = new Event<unit>()
+    let receive_lobby_list_ev = new Event<LobbyInfo array>()
     let receive_lobby_list = receive_lobby_list_ev.Publish
 
     let receive_invite_ev = new Event<string * Guid>()
@@ -46,7 +46,6 @@ module Network =
 
     let mutable status = NotConnected
 
-    let mutable lobby_list: LobbyInfo array = [||]
     let mutable lobby_invites: LobbyInvite list = []
     let mutable lobby: Lobby option = None
 
@@ -130,9 +129,8 @@ module Network =
 
             | Downstream.LOBBY_LIST lobbies ->
                 sync
-                <| fun () ->
-                    lobby_list <- lobbies
-                    NetworkEvents.receive_lobby_list_ev.Trigger()
+                <| fun () -> 
+                    NetworkEvents.receive_lobby_list_ev.Trigger lobbies
             | Downstream.YOU_JOINED_LOBBY (players: (string * int32) array) ->
                 sync
                 <| fun () ->
