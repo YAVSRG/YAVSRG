@@ -288,9 +288,9 @@ module Packets =
         | SYSTEM_MESSAGE of string
         | CHAT of sender: string * message: string
         | PLAYER_STATUS of username: string * status: LobbyPlayerStatus
-        | COUNTDOWN of reason: string * seconds: int
+        | COUNTDOWN of reason: string * seconds: int // todo: merge countdown and game_countdown -> countdown_started
 
-        | GAME_COUNTDOWN of bool
+        | GAME_COUNTDOWN of bool // todo: become countdown_stopped
         | GAME_START
         | PLAY_DATA of username: string * data: byte array
         | GAME_END

@@ -13,7 +13,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Score
 open Interlude.Features.Online
 
-type Chat() =
+type Chat(lobby: Lobby) =
     inherit Container(NodeType.None)
 
     let MESSAGE_HEIGHT = 40.0f
@@ -27,7 +27,7 @@ type Chat() =
             if sender = Network.credentials.Username then
                 Colors.text_subheading // todo: know your own username color
             else
-                Network.lobby.Value.Players.[sender].Color, Colors.shadow_2
+                lobby.Players.[sender].Color, Colors.shadow_2
 
         Container(NodeType.None)
         |+ Text(sender, Color = K sender_color, Position = Position.SliceLeft w, Align = Alignment.RIGHT)
@@ -182,10 +182,10 @@ type Chat() =
         )
         |* message_box
 
-        NetworkEvents.chat_message.Add(chat_msg >> add_msg)
-        NetworkEvents.system_message.Add(fun msg -> add_msg (Text(msg, Align = Alignment.CENTER)))
+        lobby.OnChatMessage.Add(chat_msg >> add_msg)
+        lobby.OnSystemMessage.Add(fun msg -> add_msg (Text(msg, Align = Alignment.CENTER)))
 
-        NetworkEvents.lobby_event.Add(fun (kind, data) ->
+        lobby.OnLobbyEvent.Add(fun (kind, data) ->
             let text, color =
                 match (kind, data) with
                 | LobbyEvent.Join, who -> sprintf "%s %s joined" Icons.LOG_IN who, Colors.green_accent
@@ -201,9 +201,8 @@ type Chat() =
             add_msg (Text(text, Color = (fun () -> color, Colors.shadow_1), Align = Alignment.CENTER))
         )
 
-        NetworkEvents.game_end.Add game_end_report
-        NetworkEvents.join_lobby.Add(fun () -> messages.Clear())
-        NetworkEvents.countdown.Add countdown
+        lobby.OnGameEnd.Add game_end_report
+        lobby.OnCountdown.Add countdown
 
         base.Init parent
 

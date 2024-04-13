@@ -79,7 +79,7 @@ module SelectedChart =
         chart <- c
         ensure_selected ()
 
-type SelectedChart() =
+type SelectedChart(lobby: Lobby) =
     inherit Container(NodeType.None)
 
     override this.Init(parent: Widget) =
@@ -168,24 +168,21 @@ type SelectedChart() =
         )
 
         |+ Clickable(
-            fun () ->
-                if Network.lobby.IsSome && Network.lobby.Value.YouAreHost then
-                    Screen.change Screen.Type.LevelSelect Transitions.Flags.Default |> ignore
+            fun () -> if lobby.YouAreHost then Screen.change Screen.Type.LevelSelect Transitions.Flags.Default |> ignore
             , Position = Position.SliceTop(100.0f)
         )
 
         |+ Conditional(
-            (fun () ->
-                Network.lobby.IsSome
-                && SelectedChart.loaded ()
-                && not Network.lobby.Value.GameInProgress
-                && Network.lobby.Value.ReadyStatus = ReadyFlag.NotReady
+            (fun () -> 
+                SelectedChart.loaded ()
+                && not lobby.GameInProgress
+                && lobby.ReadyStatus = ReadyFlag.NotReady
             ),
 
             StylishButton(
-                (fun () -> Network.lobby.Value.Spectate <- not Network.lobby.Value.Spectate),
+                (fun () -> lobby.Spectate <- not lobby.Spectate),
                 (fun () ->
-                    if Network.lobby.Value.Spectate then
+                    if lobby.Spectate then
                         sprintf "%s %s" Icons.EYE (%"lobby.spectator")
                     else
                         sprintf "%s %s" Icons.PLAY (%"lobby.player")
@@ -200,16 +197,15 @@ type SelectedChart() =
 
         |+ Conditional(
             (fun () ->
-                Network.lobby.IsSome
-                && SelectedChart.loaded ()
-                && Network.lobby.Value.GameInProgress
+                SelectedChart.loaded ()
+                && lobby.GameInProgress
             ),
             StylishButton(
                 (fun () ->
                     let username =
-                        Network.lobby.Value.Players.Keys.First(fun p ->
-                            Network.lobby.Value.Players.[p].Status = LobbyPlayerStatus.Playing
-                        )
+                        lobby.Players.Keys.First(fun p ->
+                            lobby.Players.[p].Status = LobbyPlayerStatus.Playing
+                        ) // todo: or fail gracefully
 
                     Chart.if_loaded
                     <| fun info -> //todo: store info in sync with selected chart in SelectedChart
@@ -231,10 +227,9 @@ type SelectedChart() =
 
         |+ Conditional(
             (fun () ->
-                Network.lobby.IsSome
-                && SelectedChart.loaded ()
+                SelectedChart.loaded ()
                 && not Song.loading
-                && not Network.lobby.Value.GameInProgress
+                && not lobby.GameInProgress
             ),
 
             StylishButton(
@@ -272,21 +267,20 @@ type SelectedChart() =
 
         |* Conditional(
             (fun () ->
-                Network.lobby.IsSome
-                && Network.lobby.Value.YouAreHost
-                && Network.lobby.Value.ReadyStatus <> ReadyFlag.NotReady
-                && not Network.lobby.Value.GameInProgress
+                lobby.YouAreHost
+                && lobby.ReadyStatus <> ReadyFlag.NotReady
+                && not lobby.GameInProgress
             ),
 
             StylishButton(
                 (fun () ->
-                    if Network.lobby.Value.Countdown then
-                        Network.lobby.Value.CancelRound()
+                    if lobby.Countdown then
+                        lobby.CancelRound()
                     else
-                        Network.lobby.Value.StartRound()
+                        lobby.StartRound()
                 ),
                 (fun () ->
-                    if Network.lobby.Value.Countdown then
+                    if lobby.Countdown then
                         sprintf "%s %s" Icons.SLASH (%"lobby.cancel_game")
                     else
                         sprintf "%s %s" Icons.PLAY (%"lobby.start_game")
@@ -299,12 +293,12 @@ type SelectedChart() =
             )
         )
 
-        SelectedChart.switch Network.lobby.Value.Chart
-        NetworkEvents.join_lobby.Add(fun () -> SelectedChart.switch None)
+        SelectedChart.switch lobby.Chart
+        NetworkEvents.join_lobby.Add(fun lobby -> SelectedChart.switch None)
 
-        NetworkEvents.change_chart.Add(fun () ->
+        lobby.OnChartChanged.Add(fun () ->
             if Screen.current_type = Screen.Type.Lobby then
-                SelectedChart.switch Network.lobby.Value.Chart
+                SelectedChart.switch lobby.Chart
         )
 
         base.Init parent

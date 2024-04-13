@@ -13,7 +13,7 @@ open Interlude.Features.Online
 open Interlude.Features.LevelSelect
 open Interlude.Features
 
-type LobbySettingsPage(lobby: Network.Lobby) as this =
+type LobbySettingsPage(lobby: Lobby) as this =
     inherit Page()
 
     let settings = lobby.Settings
@@ -43,28 +43,25 @@ type LobbySettingsPage(lobby: Network.Lobby) as this =
                 AutomaticRoundCountdown = auto_countdown.Value
             }
 
-type Lobby() =
+type LobbyUI(lobby: Lobby) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
         this
         |+ Conditional(
-            (fun () ->
-                Network.lobby.IsSome
-                && Network.lobby.Value.YouAreHost
-            ),
-            Button(Icons.SETTINGS, (fun () -> LobbySettingsPage(Network.lobby.Value).Show())),
+            (fun () -> lobby.YouAreHost),
+            Button(Icons.SETTINGS, (fun () -> LobbySettingsPage(lobby).Show())),
             Position = Position.SliceTop(90.0f).Margin(10.0f).SliceRight(70.0f)
         )
         |+ Text(
-            (fun () -> match Network.lobby with Some lobby -> lobby.Settings.Name | None -> "!"),
+            (fun () -> lobby.Settings.Name),
             Align = Alignment.CENTER,
             Position =
                 { Position.SliceTop(90.0f).Margin(10.0f) with
                     Right = 0.4f %- 0.0f
                 }
         )
-        |+ PlayerList(
+        |+ PlayerList(lobby,
             Position =
                 {
                     Left = 0.0f %+ 50.0f
@@ -112,7 +109,7 @@ type Lobby() =
                 Tooltip
                     .Info("levelselect.rulesets", "ruleset_switch")
             )
-        |+ SelectedChart(
+        |+ SelectedChart(lobby,
             Position =
                 {
                     Left = 0.5f %+ 20.0f
@@ -121,7 +118,7 @@ type Lobby() =
                     Bottom = 0.5f %- 0.0f
                 }
         )
-        |* Chat(
+        |* Chat(lobby,
             Position =
                 { Position.Margin(20.0f) with
                     Left = 0.4f %+ 20.0f
@@ -131,16 +128,16 @@ type Lobby() =
 
         base.Init parent
 
-        NetworkEvents.game_start.Add(fun () ->
+        lobby.OnGameStart.Add(fun () ->
             if
                 Screen.current_type = Screen.Type.Lobby
-                && Network.lobby.Value.ReadyStatus = ReadyFlag.Play
+                && lobby.ReadyStatus = ReadyFlag.Play
             then
                 Gameplay.Chart.if_loaded
                 <| fun info ->
                     if
                         Screen.change_new
-                            (fun () -> PlayScreen.multiplayer_screen(info, Network.lobby.Value))
+                            (fun () -> PlayScreen.multiplayer_screen(info, lobby))
                             Screen.Type.Play
                             Transitions.Flags.Default
                         |> not
@@ -149,17 +146,17 @@ type Lobby() =
 
         )
 
-        NetworkEvents.player_status.Add(fun (username, status) ->
+        lobby.OnPlayerStatusChanged.Add(fun (username, status) ->
             if
                 status = LobbyPlayerStatus.Playing
                 && Screen.current_type = Screen.Type.Lobby
-                && Network.lobby.Value.ReadyStatus = ReadyFlag.Spectate
+                && lobby.ReadyStatus = ReadyFlag.Spectate
             then
                 Gameplay.Chart.if_loaded
                 <| fun info ->
                     if
                         Screen.change_new
-                            (fun () -> SpectateScreen.spectate_screen (info, username, Network.lobby.Value))
+                            (fun () -> SpectateScreen.spectate_screen (info, username, lobby))
                             Screen.Type.Replay
                             Transitions.Flags.Default
                         |> not
@@ -172,10 +169,20 @@ type Lobby() =
 type LobbyScreen() =
     inherit Screen()
 
-    let main = Lobby()
+    // todo: rename ui when lobby changes
+    let swap = SwapContainer()
+    let current_lobby = None
+
+    do
+        NetworkEvents.join_lobby.Add(fun lobby -> 
+            let lobby_ui = LobbyUI(lobby)
+            swap.Current <- lobby_ui
+        )
 
     override this.OnEnter(_) =
-        SelectedChart.switch Network.lobby.Value.Chart
+        match Network.lobby with
+        | Some lobby -> SelectedChart.switch lobby.Chart
+        | None -> ()
 
         Song.on_finish <- SongFinishAction.LoopFromPreview
         DiscordRPC.in_menus ("Multiplayer lobby")
@@ -184,13 +191,14 @@ type LobbyScreen() =
 
     override this.OnBack() =
         match Network.lobby with
-        | Some l ->
-            ConfirmPage("Leave this lobby?", l.Leave).Show()
+        | Some lobby ->
+            ConfirmPage("Leave this lobby?", lobby.Leave).Show()
             None
         | None -> Some Screen.Type.LevelSelect
 
     override this.Init(parent) =
-        this |* main
+        this |* swap
+
         base.Init parent
 
     override this.Update(elapsed_ms, moved) =

@@ -275,7 +275,7 @@ module PlayScreen =
 
     open System.IO
 
-    let multiplayer_screen (info: LoadedChartInfo, lobby: Network.Lobby) =
+    let multiplayer_screen (info: LoadedChartInfo, lobby: Lobby) =
 
         let ruleset = Rulesets.current
         let first_note = info.WithMods.FirstNote

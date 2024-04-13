@@ -4,7 +4,7 @@ open Percyqaz.Flux.UI
 open Interlude.UI
 open Interlude.Features.Online
 
-type InviteCard(invite: Network.LobbyInvite) =
+type InviteCard(invite: LobbyInvite) =
     inherit FrameContainer(NodeType.None)
 
     override this.Init(parent) =

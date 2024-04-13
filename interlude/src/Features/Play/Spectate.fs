@@ -68,7 +68,7 @@ module SpectateScreen =
                             Bottom = 1.0f %+ 100.0f
                         }
 
-    let spectate_screen (info: LoadedChartInfo, username: string, lobby: Network.Lobby) =
+    let spectate_screen (info: LoadedChartInfo, username: string, lobby: Lobby) =
 
         let mutable currently_spectating = username
         let mutable scoring = fst Gameplay.Multiplayer.replays.[username]

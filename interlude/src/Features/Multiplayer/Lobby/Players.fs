@@ -10,39 +10,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Online
 
-type InvitePlayerPage(lobby: Network.Lobby) as this =
-    inherit Page()
-
-    // todo: destroy this page entirely, invite from players menu
-
-    let value = Setting.simple ""
-    let submit () = lobby.InvitePlayer value.Value
-
-    let submit_button =
-        PageButton(
-            "confirm.yes",
-            (fun () ->
-                submit ()
-                Menu.Back()
-            ),
-            Enabled = false
-        )
-
-    do
-        this.Content(
-            page_container()
-            |+ PageTextEntry(
-                "invite_to_lobby.username",
-                value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0)
-            )
-                .Pos(0)
-            |+ submit_button.Pos(3)
-        )
-
-    override this.Title = %"invite_to_lobby.name"
-    override this.OnClose() = ()
-
-type Player(name: string, player: Network.LobbyPlayer) =
+type Player(lobby: Lobby, name: string, player: LobbyPlayer) =
     inherit StaticWidget(NodeType.None)
 
     override this.Draw() =
@@ -72,16 +40,13 @@ type Player(name: string, player: Network.LobbyPlayer) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        match Network.lobby with
-        | Some lobby when lobby.YouAreHost ->
-            if Mouse.hover this.Bounds && Mouse.left_click () then
-                ConfirmPage([ name ] %> "lobby.confirm_transfer_host", (fun () -> lobby.TransferHost name))
-                    .Show()
-        | _ -> ()
+        if lobby.YouAreHost && Mouse.hover this.Bounds && Mouse.left_click () then
+            ConfirmPage([ name ] %> "lobby.confirm_transfer_host", (fun () -> lobby.TransferHost name))
+                .Show()
 
     member this.Name = name
 
-type PlayerList() =
+type PlayerList(lobby: Lobby) =
     inherit Container(NodeType.None)
 
     let other_players = FlowContainer.Vertical<Widget>(50.0f, Spacing = 5.0f)
@@ -92,22 +57,18 @@ type PlayerList() =
     let refresh () =
         other_players.Clear()
 
-        match Network.lobby with
-        | None -> Logging.Error "Tried to update player list while not in a lobby"
-        | Some l ->
-            for username in l.Players.Keys do
-                other_players.Add(Player(username, l.Players.[username]))
+        for username in lobby.Players.Keys do
+            other_players.Add(Player(lobby, username, lobby.Players.[username]))
 
-            other_players.Add(
-                Button(sprintf "%s %s" Icons.MAIL (%"lobby.send_invite"), (fun () -> InvitePlayerPage(l).Show()))
-            )
+        other_players.Add(
+            Button(sprintf "%s %s" Icons.MAIL (%"lobby.send_invite"), (fun () -> PlayersPage().Show()))
+        )
 
     override this.Init(parent) =
         this |* other_players_scroll
         refresh ()
 
-        NetworkEvents.join_lobby.Add refresh
-        NetworkEvents.lobby_players_updated.Add refresh
+        lobby.OnPlayersUpdated.Add refresh
 
         base.Init parent
 
@@ -136,14 +97,7 @@ type PlayerList() =
 
         Text.fill_b (
             Style.font,
-            (if
-                 (match Network.lobby with
-                  | Some l -> l.YouAreHost
-                  | None -> false)
-             then
-                 Icons.STAR + " Host"
-             else
-                 ""),
+            (if lobby.YouAreHost then Icons.STAR + " Host" else ""),
             user_bounds.Shrink(10.0f, 0.0f),
             Colors.text,
             Alignment.RIGHT
