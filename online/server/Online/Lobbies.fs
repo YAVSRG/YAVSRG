@@ -82,12 +82,7 @@ type Lobby =
     static member Create(playerId, username, name) =
         {
             Owner = playerId
-            Settings =
-                {
-                    Name = name
-                    AutomaticRoundCountdown = false
-                    HostRotation = false
-                }
+            Settings = { LobbySettings.Default with Name = name }
             Host = playerId
             Chart = None
             CountdownId = 0
@@ -258,6 +253,9 @@ module Lobby =
                                 user_error player "Lobby no longer exists"
 
                             let lobby = lobbies.[lobby_id]
+
+                            if lobby.Players |> Seq.exists(fun p -> p.Value.Username = username) then
+                                malice player "Joined lobby twice"
 
                             let player_list =
                                 lobby.Players.Values
@@ -616,8 +614,10 @@ module Lobby =
                             if lobby.Host <> player then
                                 user_error player "You are not host"
 
-
-                            lobby.Settings <- settings
+                            lobby.Settings <-
+                                { settings with
+                                    Name = if valid_lobby_name settings.Name then settings.Name else lobby.Settings.Name
+                                }
                             multicast (lobby, Downstream.LOBBY_SETTINGS settings)
 
 
