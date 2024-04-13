@@ -117,12 +117,13 @@ type private Profile() =
             Position = Position.TrimTop(70.0f).SliceTop(40.0f).Margin(45.0f, 0.0f)
         )
         |+ Text(
-            sprintf
-                "Player since %O"
-                (DateTimeOffset
+            [
+                DateTimeOffset
                     .FromUnixTimeMilliseconds(data.DateSignedUp)
                     .ToLocalTime()
-                    .DateTime.ToShortDateString()),
+                    .DateTime.ToShortDateString()
+            ] 
+            %> "online.players.profile.playing_since",
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT,
             Position = Position.TrimTop(125.0f).SliceTop(45.0f).Margin(45.0f, 0.0f)
@@ -179,6 +180,16 @@ type private Profile() =
             )
         )
         |+ color_picker
+        // Invite button
+        |+ Conditional(
+            (fun () -> Network.lobby.IsSome && data.Username <> Network.credentials.Username),
+            InlaidButton(
+                %"online.players.profile.invite_to_lobby",
+                (fun () -> Network.lobby.Value.InvitePlayer(data.Username)),
+                Icons.SEND,
+                Position = Position.TrimRight(380.0f).SliceTop(70.0f).SliceRight(300.0f)
+            )
+        )
         :> Widget
 
     let container = WebRequestContainer<Players.Profile.View.Response>(load_profile, rerender)
