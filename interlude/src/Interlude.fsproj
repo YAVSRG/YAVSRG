@@ -66,7 +66,14 @@
     <Compile Include="Features\Online\LobbyState.fs" />
     <Compile Include="Features\Online\Network.fs" />
     <Compile Include="Features\Online\Login.fs" />
-    <Compile Include="Features\Online\Players.fs" />
+    <Compile Include="Features\Online\Players\Sidebar\Shared.fs" />
+    <Compile Include="Features\Online\Players\Sidebar\Online.fs" />
+    <Compile Include="Features\Online\Players\Sidebar\Friends.fs" />
+    <Compile Include="Features\Online\Players\Sidebar\Search.fs" />
+    <Compile Include="Features\Online\Players\Sidebar\Sidebar.fs" />
+    <Compile Include="Features\Online\Players\Profile\RecentScores.fs" />
+    <Compile Include="Features\Online\Players\Profile\Profile.fs" />
+    <Compile Include="Features\Online\Players\PlayerList.fs" />
     <Compile Include="Features\Stats\Stats.fs" />
     <Compile Include="Features\Stats\Tables.fs" />
     <Compile Include="Features\Stats\Screen.fs" />

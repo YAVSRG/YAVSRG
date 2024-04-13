@@ -9,7 +9,7 @@ open Interlude.Features.Online
 type CreateLobbyPage() as this =
     inherit Page()
 
-    let name = Setting.simple (Network.credentials.Username + "'s Lobby") |> Setting.alphanumeric
+    let name = Setting.simple (Network.credentials.Username + "'s lobby") |> Setting.alphanumeric
     let submit () = Network.client.Send(Upstream.CREATE_LOBBY name.Value)
 
     let submit_button =

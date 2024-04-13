@@ -9,6 +9,7 @@ open Interlude.Web.Shared
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Online
+open Interlude.Features.Online.Players
 
 type Player(lobby: Lobby, name: string, player: LobbyPlayer) =
     inherit StaticWidget(NodeType.None)
@@ -61,7 +62,7 @@ type PlayerList(lobby: Lobby) =
             other_players.Add(Player(lobby, username, lobby.Players.[username]))
 
         other_players.Add(
-            Button(sprintf "%s %s" Icons.MAIL (%"lobby.send_invite"), (fun () -> PlayersPage().Show()))
+            Button(sprintf "%s %s" Icons.MAIL (%"lobby.send_invite"), (fun () -> PlayerListPage().Show()))
         )
 
     override this.Init(parent) =

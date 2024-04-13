@@ -93,18 +93,27 @@ type Lobby(client: Client, players: (string * int32) array) =
         lobby_settings_updated_ev.Trigger settings
 
     member this.LobbyEvent(kind: LobbyEvent, player: string) =
-        lobby_event_ev.Trigger(kind, player)
+        if this.Players.ContainsKey player then
+            lobby_event_ev.Trigger(kind, player)
+        else
+            Logging.Warn(sprintf "Received event from untracked player %s" player)
 
     member this.SystemMessage(msg: string) =
         system_message_ev.Trigger msg
 
     member this.ChatMessage(sender: string, msg: string) =
-        chat_message_ev.Trigger(sender, msg)
+        if this.Players.ContainsKey sender then
+            chat_message_ev.Trigger(sender, msg)
+        else
+            Logging.Warn(sprintf "Received chat message from untracked player %s" sender)
 
     member this.PlayerStatus(username: string, status: LobbyPlayerStatus) =
-        this.Players.[username].Status <- status
-        lobby_players_updated_ev.Trigger()
-        player_status_ev.Trigger(username, status)
+        match this.Players.TryGetValue username with
+        | true, player -> 
+            player.Status <- status
+            lobby_players_updated_ev.Trigger()
+            player_status_ev.Trigger(username, status)
+        | false, _ -> Logging.Warn(sprintf "Received status for untracked player %s" username)
 
     member this.StartCountdown(reason: string, seconds: int) =
         countdown_ev.Trigger(reason, seconds)

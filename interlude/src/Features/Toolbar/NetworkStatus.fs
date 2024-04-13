@@ -7,6 +7,7 @@ open Prelude
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Online
+open Interlude.Features.Online.Players
 open Interlude.Features.Multiplayer
 
 type NetworkStatus() =
@@ -70,7 +71,7 @@ type NetworkStatus() =
             && Network.status = Network.LoggedIn
             && (%%"player_list").Tapped()
         then
-            PlayersPage().Show()
+            PlayerListPage().Show()
 
     member this.MenuItems: ((unit -> unit) * string) seq =
         match Network.status with
@@ -93,7 +94,7 @@ type NetworkStatus() =
                     | Some l ->  Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore
                     | None -> LobbySelectPage().Show()
                 , Icons.USERS + " " + %"network.multiplayer"
-                (fun () -> PlayersPage().Show()), Icons.SEARCH + " " + %"network.players"
+                (fun () -> PlayerListPage().Show()), Icons.SEARCH + " " + %"network.players"
                 Network.logout, Icons.LOG_OUT + " " + %"network.logout"
             ]
 
