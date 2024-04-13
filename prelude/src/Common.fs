@@ -107,11 +107,6 @@ module Common =
             if mapping.ContainsKey str then
                 mapping.[str]
             else
-                mapping.Add(str, str)
-
-                if DEV_MODE && loaded_path <> "" then
-                    File.AppendAllText(loaded_path, "\n" + str + "=" + str)
-
                 str
 
         let localise_with xs str =

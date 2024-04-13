@@ -12,7 +12,7 @@ type private WebRequestState =
     | ServerError = 2
     | Loaded = 3
 
-type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render: 'T -> Widget) as this =
+type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: WebRequestContainer<'T> -> 'T -> Widget) as this =
     inherit Container(NodeType.None)
 
     let mutable status = WebRequestState.Loading
@@ -20,7 +20,7 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render: 'T -
     let mutable content: Widget = Dummy()
 
     let rerender (v) =
-        content <- render v
+        content <- render_ui this v
 
         if this.Initialised && not content.Initialised then
             content.Init this

@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude
 open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
@@ -31,7 +32,7 @@ type private SearchList() =
                             this.Offline()
                     else
                         this.SetData { Matches = [||] }
-                , fun data ->
+                , fun _ data ->
                     if data.Matches.Length > 0 then
                         let contents = FlowContainer.Vertical<Widget>(60.0f)
 
@@ -43,9 +44,9 @@ type private SearchList() =
                         EmptyState(
                             Icons.SEARCH,
                             if query.Value.Trim().Length > 0 then
-                                "Nobody found :("
+                                %"online.players.search.no_results"
                             else
-                                "Search for someone"
+                                %"online.players.search.empty_search_bar"
                         )
                 , Position = Position.TrimTop(60.0f)
             )

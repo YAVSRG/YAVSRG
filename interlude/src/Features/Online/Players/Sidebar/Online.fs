@@ -20,7 +20,7 @@ type private OnlineList() =
                     )
                 else
                     this.Offline()
-            , fun data ->
+            , fun _ data ->
                 let contents = FlowContainer.Vertical<Widget>(60.0f)
 
                 for player in data.Players do

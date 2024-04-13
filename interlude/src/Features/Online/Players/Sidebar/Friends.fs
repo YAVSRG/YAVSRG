@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude
 open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
@@ -21,7 +22,7 @@ type private FriendList() =
                     )
                 else
                     this.Offline()
-            , fun data ->
+            , fun _ data ->
                 let contents = FlowContainer.Vertical<Widget>(60.0f)
 
                 for player in data.Friends do
@@ -29,7 +30,7 @@ type private FriendList() =
                         Container(NodeType.None)
                         |+ PlayerButton(player.Username, player.Color)
                         |+ Text(
-                            (if player.Online then "Online" else "Offline"),
+                            (if player.Online then %"online.players.status.online" else %"online.players.status.offline"),
                             Color =
                                 K(
                                     if player.Online then

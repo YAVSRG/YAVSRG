@@ -156,7 +156,7 @@ type SuggestionsList(table: Table) =
                     )
                 else
                     this.Offline()
-            , fun data ->
+            , fun _ data ->
                 let fc = DynamicFlowContainer.Vertical<Suggestion>(Spacing = 30.0f)
 
                 for s in data.Suggestions do
