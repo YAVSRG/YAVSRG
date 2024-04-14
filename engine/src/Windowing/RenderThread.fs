@@ -314,8 +314,8 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
     member val RenderMode = FrameLimit.Smart with get, set
 
-    member this.OnResize(newSize: Vector2i) =
-        Render.resize (newSize.X, newSize.Y)
+    member this.OnResize(width, height) =
+        Render.resize (width, height)
         resized <- true
 
     member this.RenderModeChanged(fullscreen: bool) =
@@ -353,9 +353,14 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
         | CpuTimingFullscreen ->
             let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
+            if frame = last_frame then FrameTimeStrategies.sleep_accurate (total_frame_timer, last_vblank + est_refresh_period * 1.2)
+
+            // todo: optimise out by assuming we got to next frame
+            let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
             estimated_next_frame <- last_vblank + est_refresh_period
 
-            if frame = last_frame then estimated_next_frame <- estimated_next_frame + est_refresh_period
+            if frame = last_frame then
+                estimated_next_frame <- estimated_next_frame + est_refresh_period
 
             Performance.visual_latency_lo <- real_next_frame - frame_is_ready
             Performance.visual_latency_hi <- Performance.visual_latency_lo
@@ -363,7 +368,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
             last_frame <- frame
             
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - time_taken_last_frame - 3.0)
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - time_taken_last_frame - 1.0)
         
         | CpuTimingWindowed ->
             let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
@@ -399,15 +404,17 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         Render.finish ()
         frame_is_ready <- now ()
         Performance.draw_time <- frame_is_ready - before_draw
+        //printfn "frame is ready %.2fms early" (estimated_next_frame - frame_is_ready)
 
         match strategy with
         | CpuTimingFullscreen ->
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - 1.5)
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - 0.5)
         | _ -> ()
 
         if not ui_root.ShouldExit then
             window.Context.SwapBuffers()
             real_next_frame <- now ()
+            //printfn "swapped frame %.2fms late" (real_next_frame - estimated_next_frame)
 
         // Performance profiling
         fps_count <- fps_count + 1
