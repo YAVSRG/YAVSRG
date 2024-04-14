@@ -23,6 +23,6 @@ type Content() =
     static member Table = Tables.current
     static member ThemeConfig = Themes.current_config
     static member Theme = Themes.current
-    static member NoteskinConfig = Noteskins.current_config
+    static member NoteskinConfig = Noteskins.current.Config
     static member Noteskin = Noteskins.current
     static member Texture(id: string) = Sprites.get id

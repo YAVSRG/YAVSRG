@@ -74,6 +74,8 @@ type SpriteUpload =
 
 module Texture =
 
+    let TRACE = false
+
     let MAX_TEXTURE_UNITS = GL.GetInteger GetPName.MaxTextureImageUnits
     let TOTAL_TEXTURE_UNITS = GL.GetInteger GetPName.MaxCombinedTextureImageUnits
     let MAX_TEXTURE_SIZE = GL.GetInteger GetPName.MaxTextureSize
@@ -103,7 +105,7 @@ module Texture =
                         GL.BindTexture(TextureTarget.Texture2DArray, texture.Handle)
                         GL.ActiveTexture(TextureUnit.Texture0)
 
-                        //Logging.Debug(sprintf "Texture has handle %i, index %i" texture.Handle i)
+                        if TRACE then Logging.Debug(sprintf "Texture slot [%i] <- %i" i texture.Handle)
                         i
 
             texture.TextureUnit <- texture_unit
@@ -111,6 +113,7 @@ module Texture =
 
     let unclaim_texture_unit (texture: Texture) =
         if texture.TextureUnit <> 0 then
+            if TRACE then Logging.Debug(sprintf "Texture slot [%i] -> %i" texture.TextureUnit texture.Handle)
             texture_unit_in_use.[texture.TextureUnit] <- false
             texture.TextureUnit <- 0
 
@@ -118,7 +121,7 @@ module Texture =
         assert (texture.References = 0)
         unclaim_texture_unit texture
         GL.DeleteTexture texture.Handle
-    //Logging.Debug(sprintf "Destroyed texture with handle %i" texture.Handle)
+        if TRACE then Logging.Debug(sprintf "Destroyed texture %i" texture.Handle)
 
     let create (width: int, height: int, layers: int) : Texture =
         let id = GL.GenTexture()
@@ -198,6 +201,8 @@ module Sprite =
         let layers = images.Length + 1
 
         let texture = Texture.create (width, height, layers)
+
+        if Texture.TRACE then Logging.Debug(sprintf "Texture %i created by %s" texture.Handle label)
 
         if use_texture_unit then
             Texture.claim_texture_unit texture |> ignore

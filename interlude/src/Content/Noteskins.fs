@@ -16,9 +16,87 @@ module Noteskins =
     type private LoadedNoteskin =
         {
             Noteskin: Noteskin
-            mutable TextureAtlas: Texture option
-            mutable Sprites: (string * Sprite) array option
+            mutable Textures: (Texture * (string * Sprite) array) option
         }
+
+        member this.ReloadAtlas() : Texture * (string * Sprite) array =
+            match this.Textures with
+            | Some (existing_atlas, existing_sprites) ->
+                Texture.unclaim_texture_unit existing_atlas
+                for id, s in existing_sprites do
+                    Sprite.destroy s |> ignore
+            | None -> ()
+
+            let missing_textures = ResizeArray()
+            let available_textures = ResizeArray()
+
+            let required_textures = Set.ofSeq this.Noteskin.RequiredTextures
+
+            for texture_id in NoteskinTextureRules.list () do
+                match this.Noteskin.GetTexture texture_id with
+                | TextureOk(img, config) ->
+                    available_textures.Add
+                        {
+                            Label = texture_id
+                            Image = img
+                            Rows = config.Rows
+                            Columns = config.Columns
+                            DisposeImageAfter = true
+                        }
+                | TextureError reason ->
+                    if required_textures.Contains texture_id then
+                        Logging.Error(
+                            sprintf
+                                "Problem with noteskin texture '%s' in '%s': %s\nIt will appear as a white square ingame."
+                                texture_id
+                                this.Noteskin.Config.Name
+                                reason
+                        )
+
+                    missing_textures.Add texture_id
+                | TextureNotRequired -> missing_textures.Add texture_id
+
+            let atlas, sprites =
+                Sprite.upload_many
+                    ("NOTESKIN[" + this.Noteskin.Config.Name + "]")
+                    false
+                    this.Noteskin.Config.LinearSampling
+                    (available_textures.ToArray())
+
+            let sprites =
+                Array.concat
+                    [
+                        sprites
+                        missing_textures
+                        |> Seq.map (fun id -> (id, Texture.create_default_sprite atlas))
+                        |> Array.ofSeq
+                    ]
+
+            this.Textures <- Some (atlas, sprites)
+            (atlas, sprites)
+
+        member this.Active(force_reload: bool) =
+            let atlas, sprites =
+                match this.Textures with
+                | Some (atlas, sprites) when not force_reload -> (atlas, sprites)
+                | _ -> this.ReloadAtlas()
+            Texture.claim_texture_unit atlas |> ignore
+            for (texture_id, sprite) in sprites do
+                Sprites.add false texture_id sprite
+        
+        member this.Inactive() =
+            match this.Textures with
+            | None -> ()
+            | Some (atlas, sprites) -> Texture.unclaim_texture_unit atlas
+
+        interface IDisposable with
+            member this.Dispose() =
+                if not this.Noteskin.IsEmbedded then (this.Noteskin :> IDisposable).Dispose()
+                match this.Textures with
+                | Some (atlas, sprites) -> 
+                    Texture.unclaim_texture_unit atlas
+                    sprites |> Array.iter (snd >> Sprite.destroy >> ignore)
+                | None -> ()
 
     let private DEFAULTS =
         let skins = [ "defaultBar.isk"; "defaultArrow.isk"; "defaultOrb.isk" ]
@@ -30,83 +108,19 @@ module Noteskins =
 
     let mutable private initialised = false
     let private loaded = new Dictionary<string, LoadedNoteskin>()
-    let _selected_id = Setting.simple <| fst DEFAULTS.[0]
+    let private _selected_id = Setting.simple <| fst DEFAULTS.[0]
     let mutable current = snd DEFAULTS.[0]
-    let mutable current_config = current.Config
 
     let save_config (new_config: NoteskinConfig) =
         current.Config <- new_config
-        current_config <- current.Config
 
     let save_hud_config (new_hud: HUDNoteskinOptions) =
         current.Config <- { current.Config with HUD = new_hud }
-        current_config <- current.Config
-
-    let private reload_noteskin_atlas (target: string) =
-        let ns = loaded.[target]
-
-        let missing_textures = ResizeArray()
-        let available_textures = ResizeArray()
-
-        let required_textures = Set.ofSeq ns.Noteskin.RequiredTextures
-
-        for texture_id in NoteskinTextureRules.list () do
-            match ns.Noteskin.GetTexture texture_id with
-            | TextureOk(img, config) ->
-                available_textures.Add
-                    {
-                        Label = texture_id
-                        Image = img
-                        Rows = config.Rows
-                        Columns = config.Columns
-                        DisposeImageAfter = true
-                    }
-            | TextureError reason ->
-                if required_textures.Contains texture_id then
-                    Logging.Error(
-                        sprintf
-                            "Problem with noteskin texture '%s' in '%s': %s\nIt will appear as a white square ingame."
-                            texture_id
-                            ns.Noteskin.Config.Name
-                            reason
-                    )
-
-                missing_textures.Add texture_id
-            | TextureNotRequired -> missing_textures.Add texture_id
-
-        let atlas, sprites =
-            Sprite.upload_many
-                ("NOTESKIN[" + ns.Noteskin.Config.Name + "]")
-                false
-                ns.Noteskin.Config.LinearSampling
-                (available_textures.ToArray())
-
-        let sprites =
-            Array.concat
-                [
-                    sprites
-                    missing_textures
-                    |> Seq.map (fun id -> (id, Texture.create_default_sprite atlas))
-                    |> Array.ofSeq
-                ]
-
-        match ns.Sprites with
-        | Some existing ->
-            for id, s in existing do
-                Sprite.destroy s |> ignore
-        | None -> ()
-
-        ns.TextureAtlas <- Some atlas
-        ns.Sprites <- Some sprites
 
     let reload_current () =
         current <- loaded.[_selected_id.Value].Noteskin
         current.ReloadFromDisk()
-        current_config <- current.Config
-        reload_noteskin_atlas _selected_id.Value
-
-        for (texture_id, sprite) in loaded.[_selected_id.Value].Sprites.Value do
-            Sprites.add false texture_id sprite
+        loaded.[_selected_id.Value].Active(true)
 
     let selected_id =
         Setting.make
@@ -115,40 +129,27 @@ module Noteskins =
                     let old_id = _selected_id.Value
 
                     if not (loaded.ContainsKey new_id) then
-                        Logging.Warn("Theme '" + new_id + "' not found, switching to default")
+                        Logging.Warn("Noteskin '" + new_id + "' not found, switching to default")
                         _selected_id.Value <- fst DEFAULTS.[0]
                     else
                         _selected_id.Value <- new_id
 
                     if _selected_id.Value <> old_id then
-                        match loaded.[old_id].TextureAtlas with
-                        | Some atlas -> Texture.unclaim_texture_unit atlas
-                        | None -> ()
 
-                        if loaded.[_selected_id.Value].Sprites.IsNone then
-                            reload_noteskin_atlas _selected_id.Value
+                        if loaded.ContainsKey old_id then
+                            loaded.[old_id].Inactive()
 
-                        match loaded.[_selected_id.Value].TextureAtlas with
-                        | Some atlas -> Texture.claim_texture_unit atlas |> ignore
-                        | None ->
-                            reload_noteskin_atlas _selected_id.Value
+                        loaded.[_selected_id.Value].Active(false)
 
-                            Texture.claim_texture_unit loaded.[_selected_id.Value].TextureAtlas.Value
-                            |> ignore
-
-                        current <- loaded.[_selected_id.Value].Noteskin
-                        current_config <- current.Config
-
-                        for (texture_id, sprite) in loaded.[new_id].Sprites.Value do
-                            Sprites.add false texture_id sprite
+                    current <- loaded.[_selected_id.Value].Noteskin
                 else
                     _selected_id.Value <- new_id
             )
             (fun () -> _selected_id.Value)
 
     let load () =
-
-        // todo: fix memory leak caused by this operation!
+        
+        for l in loaded.Values do (l :> IDisposable).Dispose()
         loaded.Clear()
 
         for (id, ns) in DEFAULTS do
@@ -156,8 +157,7 @@ module Noteskins =
                 id,
                 {
                     Noteskin = ns
-                    TextureAtlas = None
-                    Sprites = None
+                    Textures = None
                 }
             )
 
@@ -185,28 +185,22 @@ module Noteskins =
                     id,
                     {
                         Noteskin = ns
-                        TextureAtlas = None
-                        Sprites = None
+                        Textures = None
                     }
                 )
             with err ->
                 Logging.Error("  Failed to load noteskin '" + id + "'", err)
-
-        Logging.Info(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count DEFAULTS.Length)
-
-    let init_window () =
-        load ()
-
+        
         if not (loaded.ContainsKey _selected_id.Value) then
             Logging.Warn("Noteskin '" + _selected_id.Value + "' not found, switching to default")
             _selected_id.Value <- fst DEFAULTS.[0]
 
         current <- loaded.[_selected_id.Value].Noteskin
-        current_config <- current.Config
-        reload_noteskin_atlas _selected_id.Value
+        loaded.[_selected_id.Value].Active(false)
 
-        for (texture_id, sprite) in loaded.[_selected_id.Value].Sprites.Value do
-            Sprites.add false texture_id sprite
+    let init_window () =
+        load ()
+        Logging.Info(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count DEFAULTS.Length)
         initialised <- true
 
     let list () =
@@ -232,7 +226,7 @@ module Noteskins =
             selected_id.Value <- id
 
             save_config
-                { current_config with
+                { current.Config with
                     Name = skin_name
                     Author = Option.defaultValue "Unknown" username
                 }
@@ -256,8 +250,8 @@ module Noteskins =
 
     let note_rotation keys =
         let rotations =
-            if current_config.UseRotation then
-                current_config.Rotations.[keys - 3]
+            if current.Config.UseRotation then
+                current.Config.Rotations.[keys - 3]
             else
                 Array.zeroCreate keys
 

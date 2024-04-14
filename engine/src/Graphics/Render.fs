@@ -13,8 +13,8 @@ open Percyqaz.Common
 *)
 module Viewport =
 
-    let mutable (rwidth, rheight) = (1, 1)
-    let mutable (vwidth, vheight) = (1.0f, 1.0f)
+    let mutable (rwidth, rheight) = (1920, 1080)
+    let mutable (vwidth, vheight) = (1920.0f, 1080.0f)
     let mutable bounds = Rect.ZERO
 
     let create_projection (flip: bool) =
@@ -259,9 +259,6 @@ module Render =
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
         Shader.on Shader.main
-    //for i = 0 to 15 do
-    //    let loc = sprintf "samplers[%i]" i
-    //    Shader.setUniformInt (loc, i) Shader.main
 
     open SixLabors.ImageSharp
     open SixLabors.ImageSharp.Processing
@@ -271,8 +268,8 @@ module Render =
 
         GL.ReadPixels(0, 0, rwidth, rheight, PixelFormat.Rgba, PixelType.UnsignedByte, data)
 
-        let image: Image<PixelFormats.Rgba32> =
-            Image<PixelFormats.Rgba32>
+        let image: Image<Rgba32> =
+            Image<Rgba32>
                 .LoadPixelData(new Span<byte>(data.ToPointer(), (rwidth * rheight * 4)), rwidth, rheight)
 
         image.Mutate(fun i -> i.RotateFlip(RotateMode.Rotate180, FlipMode.Horizontal) |> ignore)
