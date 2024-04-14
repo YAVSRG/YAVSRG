@@ -13,6 +13,9 @@ open Prelude
     Parsing of storyboard shorthand notation
 *)
 
+// todo: rewrite this parser to be much dumber using string splitting
+// fparsec was not the way and I was just excited to use it in 2019, in fact this file is one of the first things I wrote in f#
+
 module ``osu!`` =
 
     (*

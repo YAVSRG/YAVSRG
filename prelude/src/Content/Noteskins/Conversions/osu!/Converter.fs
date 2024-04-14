@@ -110,20 +110,12 @@ module OsuSkinConverter =
         let colors = List.length images
         let width = images.Head.Head.Width
 
-        // todo: warn if widths don't match
-
         for row = 0 to (colors - 1) do
             for column = 0 to (animation_frames - 1) do
                 let image = let r = images.[row] in r[column % r.Length]
 
-                let square_image =
-                    if element_name = "holdbody" && image.Width > image.Height then
-                        stretch_to_square width image
-                    else
-                        pad_to_square width image
-
+                let square_image = pad_to_square width image
                 square_image.Save(Path.Combine(target, sprintf "%s-%i-%i.png" element_name row column))
-
                 square_image.Dispose()
 
         JSON.ToFile
@@ -133,6 +125,61 @@ module OsuSkinConverter =
                 Columns = animation_frames
                 Mode = Loose
             }
+
+    let convert_hold_body_textures (target: string) (images: Bitmap list list) : bool =
+        let animation_frames = List.map List.length images |> List.max
+        let colors = List.length images
+        let width = images.Head.Head.Width
+
+        let mutable percy_ln_fix = false
+
+        for row = 0 to (colors - 1) do
+            for column = 0 to (animation_frames - 1) do
+                let image = let r = images.[row] in r[column % r.Length]
+
+                let square_image =
+                    if image.Width > image.Height then
+                        stretch_to_square width image
+                    else
+                        pad_to_square width image
+
+                square_image.Save(Path.Combine(target, sprintf "holdbody-%i-%i.png" row column))
+
+                square_image.Dispose()
+
+                if image.Height > 2000 then
+                    Logging.Info("Detected 'percy ln' in skin, trying to guess what the tail texture should be")
+                    let mutable i = 0
+                    while i < image.Height && image.[image.Width / 2, i].A < 5uy do
+                        i <- i + 1
+                    let percy_tail_texture = new Bitmap(width, width / 2)
+                    percy_tail_texture.Mutate(fun img -> 
+                        img
+                            .DrawImage(image, Point((-image.Width + width) / 2, -i), 1.0f)
+                            .Flip(FlipMode.Vertical)
+                            .Resize(width, width) 
+                        |> ignore)
+
+                    percy_tail_texture.Save(Path.Combine(target, "holdtail-0-0.png"))
+                    JSON.ToFile
+                        (Path.Combine(target, "holdtail.json"), false)
+                        {
+                            Rows = 1
+                            Columns = 1
+                            Mode = Loose
+                        }
+
+                    percy_ln_fix <- true
+
+        JSON.ToFile
+            (Path.Combine(target, "holdbody.json"), false)
+            {
+                Rows = colors
+                Columns = animation_frames
+                Mode = Loose
+            }
+
+        percy_ln_fix
 
     let arrow_fix_4k (images: Bitmap list list) =
         match images with
@@ -185,6 +232,7 @@ module OsuSkinConverter =
         let mutable key_receptors = false
         let mutable combo_font = false
         let mutable combo_font_spacing = 0.0f
+        let mutable skip_tail_conversion = false
 
         // Generate main textures
         try
@@ -208,24 +256,29 @@ module OsuSkinConverter =
             Logging.Warn("Error converting hold head textures", err)
 
         try
-            core_textures
-            |> List.map (fun x -> x.Body)
-            |> List.map (fun x -> get_animation_frame_filenames (x, source))
-            |> load_animation_frame_images
-            |> convert_element_textures target "holdbody"
+            let percy_ln_detected =
+                core_textures
+                |> List.map (fun x -> x.Body)
+                |> List.map (fun x -> get_animation_frame_filenames (x, source))
+                |> load_animation_frame_images
+                |> convert_hold_body_textures target
+            if percy_ln_detected then
+                skip_tail_conversion <- true
+                flipholdtail <- true
         with err ->
             Logging.Warn("Error converting hold body textures", err)
 
-        try
-            core_textures
-            |> List.map (fun x -> x.Tail)
-            |> List.map (fun x -> get_animation_frame_filenames (x, source))
-            |> load_animation_frame_images
-            |> convert_element_textures target "holdtail"
-        with err ->
-            Logging.Warn("Error in holdtail textures - Using hold head textures for compatibility", err)
-            flipholdtail <- true
-            useholdtail <- false
+        if not skip_tail_conversion then
+            try
+                core_textures
+                |> List.map (fun x -> x.Tail)
+                |> List.map (fun x -> get_animation_frame_filenames (x, source))
+                |> load_animation_frame_images
+                |> convert_element_textures target "holdtail"
+            with err ->
+                Logging.Warn("Error in holdtail textures - Using hold head textures for compatibility", err)
+                flipholdtail <- true
+                useholdtail <- false
 
         // Convert keys to receptors
         try
