@@ -14,6 +14,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features
+open Interlude.Features.Pacemaker
 open Interlude.Features.Online
 open Interlude.Features.Score
 open Interlude.Features.Play.HUD
@@ -385,7 +386,7 @@ module ReplayScreen =
             scoring <- Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
             screen.State.ChangeScoring scoring
 
-        { new IPlayScreen(chart, with_colors, PacemakerInfo.None, scoring) with
+        { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with
             override this.AddWidgets() =
                 let user_options = options.HUD.Value
                 let noteskin_options = Content.NoteskinConfig.HUD

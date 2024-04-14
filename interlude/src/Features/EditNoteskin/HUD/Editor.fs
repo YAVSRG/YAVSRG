@@ -17,6 +17,7 @@ open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Online
 open Interlude.Features.Play
+open Interlude.Features.Pacemaker
 
 type SubPositioner(drag: (float32 * float32) * (float32 * float32) -> unit, finish_drag: unit -> unit) =
     inherit StaticWidget(NodeType.None)
@@ -680,7 +681,7 @@ module HUDEditor =
             scoring <- Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes Gameplay.rate.Value
             screen.State.ChangeScoring scoring
 
-        { new IPlayScreen(chart, with_colors, PacemakerInfo.None, scoring) with
+        { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with
             override this.AddWidgets() =
 
                 let ctx =

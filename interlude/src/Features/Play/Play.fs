@@ -12,23 +12,17 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Web.Shared
 open Interlude.Features
+open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Features.Score
 open Interlude.Features.Play.HUD
 
-[<RequireQualifiedAccess>]
-type PacemakerMode =
-    | None
-    | Score of rate: float32 * ReplayData
-    | Setting
-
 module PlayScreen =
 
-    let rec play_screen (info: LoadedChartInfo, pacemaker_mode: PacemakerMode) =
+    let rec play_screen (info: LoadedChartInfo, pacemaker_ctx: PacemakerCreationContext) =
 
         let ruleset = Rulesets.current
         let first_note = info.WithMods.FirstNote
@@ -36,51 +30,6 @@ module PlayScreen =
 
         let scoring =
             Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
-
-        let pacemaker_info =
-            match pacemaker_mode with
-            | PacemakerMode.None -> PacemakerInfo.None
-            | PacemakerMode.Score(rate, replay) ->
-                let replay_data = StoredReplayProvider(replay) :> IReplayProvider
-
-                let replay_scoring =
-                    Metrics.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
-
-                PacemakerInfo.Replay replay_scoring
-            | PacemakerMode.Setting ->
-                let setting =
-                    if options.Pacemakers.ContainsKey Rulesets.current_hash then
-                        options.Pacemakers.[Rulesets.current_hash]
-                    else
-                        Pacemaker.Default
-
-                match setting with
-                | Pacemaker.Accuracy acc -> PacemakerInfo.Accuracy acc
-                | Pacemaker.Lamp lamp ->
-                    let l = Rulesets.current.Grading.Lamps.[lamp]
-                    PacemakerInfo.Judgement(l.Judgement, l.JudgementThreshold)
-
-        let pacemaker_met (state: PlayState) =
-            match state.Pacemaker with
-            | PacemakerInfo.None -> true
-            | PacemakerInfo.Accuracy x -> scoring.Value >= x
-            | PacemakerInfo.Replay r ->
-                r.Update Time.infinity
-                scoring.Value >= r.Value
-            | PacemakerInfo.Judgement(judgement, count) ->
-                let actual =
-                    if judgement = -1 then
-                        scoring.State.ComboBreaks
-                    else
-                        let mutable c = scoring.State.Judgements.[judgement]
-
-                        for j = judgement + 1 to scoring.State.Judgements.Length - 1 do
-                            if scoring.State.Judgements.[j] > 0 then
-                                c <- 1000000
-
-                        c
-
-                actual <= count
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
@@ -91,9 +40,18 @@ module PlayScreen =
             | _ -> ()
         )
 
+        let pacemaker_state = PacemakerState.create info pacemaker_ctx
+
         let mutable recommended_offset = 0.0f
 
         let offset_setting = LocalAudioSync.offset_setting info.SaveData
+
+        let retry () =
+            Screen.change_new
+                (fun () -> play_screen (info, pacemaker_ctx) :> Screen.T)
+                Screen.Type.Play
+                Transitions.Flags.Default
+            |> ignore
 
         let offset_slideout (screen: IPlayScreen) =
 
@@ -107,13 +65,6 @@ module PlayScreen =
                     Position = Position.SliceTop(60.0f).SliceLeft(600.0f)
                 )
 
-            let close () =
-                Screen.change_new
-                    (fun () -> play_screen (info, pacemaker_mode) :> Screen.T)
-                    Screen.Type.Play
-                    Transitions.Flags.Default
-                |> ignore
-
             Slideout(
                 SlideoutContent(offset_slider, 100.0f)
                 |+ Text(
@@ -126,7 +77,7 @@ module PlayScreen =
                     "accept_suggestion",
                     fun () ->
                         offset_setting.Value <- recommended_offset * 1.0f<ms>
-                        close ()
+                        retry ()
                 )
                 |+ Callout.frame
                     (Callout.Small
@@ -141,11 +92,11 @@ module PlayScreen =
                         recommended_offset <- LocalAudioSync.get_automatic screen.State info.SaveData |> float32
                         offset_slider.Select false
                     ),
-                OnClose = close,
+                OnClose = retry,
                 AutoCloseWhen = (fun (_: SlideoutContent) -> not offset_slider.Selected)
             )
 
-        { new IPlayScreen(info.Chart, info.WithColors, pacemaker_info, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, pacemaker_state, scoring) with
             override this.AddWidgets() =
                 let user_options = options.HUD.Value
                 let noteskin_options = Content.NoteskinConfig.HUD
@@ -157,7 +108,7 @@ module PlayScreen =
                 if user_options.ProgressMeterEnabled then add_widget noteskin_options.ProgressMeterPosition ProgressMeter
                 if user_options.AccuracyEnabled then add_widget noteskin_options.AccuracyPosition Accuracy
                 if user_options.TimingDisplayEnabled then add_widget noteskin_options.TimingDisplayPosition TimingDisplay
-                if this.State.Pacemaker <> PacemakerInfo.None then add_widget noteskin_options.PacemakerPosition Pacemaker
+                if this.State.Pacemaker <> PacemakerState.None then add_widget noteskin_options.PacemakerPosition Pacemaker
                 if user_options.JudgementCounterEnabled then add_widget noteskin_options.JudgementCounterPosition JudgementCounter
                 if user_options.JudgementMeterEnabled then add_widget noteskin_options.JudgementMeterPosition JudgementMeter
                 if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter
@@ -165,13 +116,6 @@ module PlayScreen =
                 if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
 
                 let offset_slideout = offset_slideout this
-
-                let retry () =
-                    Screen.change_new
-                        (fun () -> play_screen (info, pacemaker_mode) :> Screen.T)
-                        Screen.Type.Play
-                        Transitions.Flags.Default
-                    |> ignore
 
                 let give_up () =
                     Screen.back Transitions.Flags.Default |> ignore
@@ -246,7 +190,7 @@ module PlayScreen =
                                     scoring
                                     ((liveplay :> IReplayProvider).GetFullReplay())
 
-                            (score_info, Gameplay.set_score (pacemaker_met this.State) score_info info.SaveData, true)
+                            (score_info, Gameplay.set_score (PacemakerState.pacemaker_met this.State.Scoring this.State.Pacemaker) score_info info.SaveData, true)
                             |> ScoreScreen
                         )
                         Screen.Type.Score

@@ -9,7 +9,7 @@ open Interlude.UI.Menu
 
 module Rulesets = Interlude.Content.Rulesets
 
-// todo: move these components to UI folder and put a ruleset editor in the options menu rulesets page
+// todo: move this UI folder and put a ruleset editor in the options menu rulesets page
 module Rulesets =
 
     type QuickSwitcher(setting: Setting<string>) =
@@ -65,77 +65,3 @@ module Rulesets =
             match this.Dropdown with
             | Some d -> d.Update(elapsed_ms, moved)
             | None -> ()
-
-type PacemakerOptionsPage() as this =
-    inherit Page()
-
-    let ruleset_id = Rulesets.current_hash
-
-    let existing =
-        if options.Pacemakers.ContainsKey ruleset_id then
-            options.Pacemakers.[ruleset_id]
-        else
-            Pacemaker.Default
-
-    let utype =
-        match existing with
-        | Pacemaker.Accuracy _ -> 0
-        | Pacemaker.Lamp _ -> 1
-        |> Setting.simple
-
-    let accuracy =
-        match existing with
-        | Pacemaker.Accuracy a -> a
-        | Pacemaker.Lamp _ -> 0.95
-        |> Setting.simple
-        |> Setting.bound 0.0 1.0
-        |> Setting.round 3
-
-    let lamp =
-        match existing with
-        | Pacemaker.Accuracy _ -> 0
-        | Pacemaker.Lamp l -> l
-        |> Setting.simple
-
-    do
-        let lamps =
-            Rulesets.current.Grading.Lamps
-            |> Array.indexed
-            |> Array.map (fun (i, l) -> (i, l.Name))
-
-        this.Content(
-            page_container()
-            |+ PageSetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace)
-                .Pos(0)
-                .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
-            |+ PageSetting("gameplay.pacemaker.onlysavenewrecords", Selector<_>.FromBool options.OnlySaveNewRecords)
-                .Pos(2)
-                .Tooltip(Tooltip.Info("gameplay.pacemaker.onlysavenewrecords"))
-            |+ CaseSelector(
-                "gameplay.pacemaker.type",
-                [| %"gameplay.pacemaker.accuracy.name"; %"gameplay.pacemaker.lamp.name" |],
-                [|
-                    [|
-                        PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32))
-                            .Pos(7)
-                    |]
-                    [| PageSetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(7) |]
-                |],
-                utype
-            )
-                .Pos(5)
-            |>> Container
-            |+ Text(
-                %"gameplay.pacemaker.hint",
-                Align = Alignment.CENTER,
-                Position = Position.SliceBottom(100.0f).TrimBottom(40.0f)
-            )
-        )
-
-    override this.Title = %"gameplay.pacemaker.name"
-
-    override this.OnClose() =
-        match utype.Value with
-        | 0 -> options.Pacemakers.[ruleset_id] <- Pacemaker.Accuracy accuracy.Value
-        | 1 -> options.Pacemakers.[ruleset_id] <- Pacemaker.Lamp lamp.Value
-        | _ -> failwith "impossible"

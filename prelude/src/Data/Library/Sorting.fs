@@ -68,22 +68,22 @@ module Sorting =
     let grade_achieved (cc: CachedChart, ctx: LibraryViewContext) =
         let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
 
-        if data.PersonalBests.ContainsKey ctx.RulesetId then
-            match PersonalBests.get_best_above ctx.Rate data.PersonalBests.[ctx.RulesetId].Grade with
-            | Some i -> i, ctx.Ruleset.GradeName i
-            | None -> -2, "No grade achieved"
-        else
-            -2, "No grade achieved"
+        match 
+            data.PersonalBests
+            |> Bests.ruleset_best_above ctx.RulesetId (_.Grade) ctx.Rate
+        with
+        | Some i -> i, ctx.Ruleset.GradeName i
+        | None -> -2, "No grade achieved"
 
     let lamp_achieved (cc: CachedChart, ctx: LibraryViewContext) =
         let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
 
-        if data.PersonalBests.ContainsKey ctx.RulesetId then
-            match PersonalBests.get_best_above ctx.Rate data.PersonalBests.[ctx.RulesetId].Lamp with
-            | Some i -> i, ctx.Ruleset.LampName i
-            | None -> -2, "No lamp achieved"
-        else
-            -2, "No lamp achieved"
+        match 
+            data.PersonalBests
+            |> Bests.ruleset_best_above ctx.RulesetId (_.Lamp) ctx.Rate
+        with
+        | Some i -> i, ctx.Ruleset.LampName i
+        | None -> -2, "No lamp achieved"
 
     type GroupMethod = CachedChart * LibraryViewContext -> int * string
 

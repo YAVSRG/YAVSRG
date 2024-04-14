@@ -7,6 +7,7 @@ open Prelude
 open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.Features
+open Interlude.Features.Pacemaker
 open Interlude.Features.EditNoteskin
 
 type GameplayPage() as this =

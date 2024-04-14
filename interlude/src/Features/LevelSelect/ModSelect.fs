@@ -6,10 +6,10 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Gameplay.Mods
 open Prelude
-open Interlude.Features
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
 
 type private ModSelector(id, current_state: unit -> int option, action: unit -> unit) =

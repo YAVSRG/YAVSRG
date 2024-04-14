@@ -14,6 +14,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Web.Shared
 open Interlude.Features
+open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Stats
 open Interlude.Features.Online
@@ -89,7 +90,7 @@ module PlayScreenMultiplayer =
             lobby.SendReplayData(ms.ToArray())
             packet_count <- packet_count + 1
 
-        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, PacemakerState.None, scoring) with
             override this.AddWidgets() =
                 let user_options = options.HUD.Value
                 let noteskin_options = Content.NoteskinConfig.HUD
@@ -100,7 +101,7 @@ module PlayScreenMultiplayer =
                 if user_options.ProgressMeterEnabled then add_widget noteskin_options.ProgressMeterPosition ProgressMeter
                 if user_options.AccuracyEnabled then add_widget noteskin_options.AccuracyPosition Accuracy
                 if user_options.TimingDisplayEnabled then add_widget noteskin_options.TimingDisplayPosition TimingDisplay
-                if this.State.Pacemaker <> PacemakerInfo.None then add_widget noteskin_options.PacemakerPosition Pacemaker
+                if this.State.Pacemaker <> PacemakerState.None then add_widget noteskin_options.PacemakerPosition Pacemaker
                 if user_options.JudgementCounterEnabled then add_widget noteskin_options.JudgementCounterPosition JudgementCounter
                 if user_options.JudgementMeterEnabled then add_widget noteskin_options.JudgementMeterPosition JudgementMeter
                 if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter

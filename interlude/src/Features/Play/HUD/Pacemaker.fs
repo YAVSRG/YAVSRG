@@ -8,7 +8,7 @@ open Prelude.Content.Noteskins
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Play
-open Interlude.Utils
+open Interlude.Features.Pacemaker
 
 type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
@@ -34,10 +34,10 @@ type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOption
 
     do
         match state.Pacemaker with
-        | PacemakerInfo.None
-        | PacemakerInfo.Accuracy _
-        | PacemakerInfo.Replay _ -> ()
-        | PacemakerInfo.Judgement(judgement, _) ->
+        | PacemakerState.None
+        | PacemakerState.Accuracy _
+        | PacemakerState.Replay _ -> ()
+        | PacemakerState.Judgement(judgement, _) ->
             color.Target <-
                 if judgement = -1 then
                     Rulesets.current.Judgements.[Rulesets.current.Judgements.Length - 1].Color
@@ -48,8 +48,8 @@ type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOption
         base.Update(elapsed_ms, moved)
 
         match state.Pacemaker with
-        | PacemakerInfo.None -> ()
-        | PacemakerInfo.Accuracy x ->
+        | PacemakerState.None -> ()
+        | PacemakerState.Accuracy x ->
             if position_cooldown.Complete then
                 ahead_by <- state.Scoring.State.PointsScored - state.Scoring.State.MaxPointsScored * x
                 update_flag_position ()
@@ -57,7 +57,7 @@ type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOption
 
             flag_position.Update elapsed_ms
             position_cooldown.Update elapsed_ms
-        | PacemakerInfo.Replay score ->
+        | PacemakerState.Replay score ->
             if position_cooldown.Complete then
                 score.Update(state.CurrentChartTime())
                 ahead_by <- state.Scoring.State.PointsScored - score.State.PointsScored
@@ -66,13 +66,13 @@ type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOption
 
             flag_position.Update elapsed_ms
             position_cooldown.Update elapsed_ms
-        | PacemakerInfo.Judgement(_, _) -> ()
+        | PacemakerState.Judgement(_, _) -> ()
 
         color.Update elapsed_ms
 
     override this.Draw() =
         match state.Pacemaker with
-        | PacemakerInfo.None ->
+        | PacemakerState.None ->
             Text.fill_b (
                 Style.font,
                 Icons.FLAG,
@@ -83,8 +83,8 @@ type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOption
                 (color.Value, Color.Black),
                 Alignment.CENTER
             )
-        | PacemakerInfo.Accuracy _
-        | PacemakerInfo.Replay _ ->
+        | PacemakerState.Accuracy _
+        | PacemakerState.Replay _ ->
             Text.fill_b (
                 Style.font,
                 Icons.FLAG,
@@ -95,7 +95,7 @@ type Pacemaker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOption
                 (color.Value, Color.Black),
                 Alignment.CENTER
             )
-        | PacemakerInfo.Judgement(judgement, count) ->
+        | PacemakerState.Judgement(judgement, count) ->
             let actual =
                 if judgement = -1 then
                     state.Scoring.State.ComboBreaks

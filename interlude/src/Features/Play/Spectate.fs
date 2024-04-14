@@ -12,6 +12,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features
+open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay.Chart
 open Interlude.Features.Online
 open Interlude.Features.Play.HUD
@@ -101,7 +102,7 @@ module SpectateScreen =
 
         lobby.StartSpectating()
 
-        { new IPlayScreen(info.Chart, info.WithColors, PacemakerInfo.None, scoring) with
+        { new IPlayScreen(info.Chart, info.WithColors, PacemakerState.None, scoring) with
             override this.AddWidgets() =
                 let user_options = options.HUD.Value
                 let noteskin_options = Content.NoteskinConfig.HUD

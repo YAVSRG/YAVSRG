@@ -6,6 +6,7 @@ open Prelude.Data
 open Prelude.Data.Library.Sorting
 open Interlude.UI
 open Interlude.Options
+open Interlude.Features.Pacemaker
 open Interlude.Features.Play
 open Interlude.Features.Online
 open Interlude.Features.Gameplay
@@ -40,9 +41,9 @@ module LevelSelect =
                     PlayScreen.play_screen (
                         info,
                         if options.EnablePacemaker.Value then
-                            PacemakerMode.Setting
+                            PacemakerCreationContext.FromUserSetting
                         else
-                            PacemakerMode.None
+                            PacemakerCreationContext.None
                     )
                 )
                 Screen.Type.Play
@@ -79,7 +80,7 @@ module LevelSelect =
 
             if
                 Screen.change_new
-                    (fun () -> PlayScreen.play_screen (info, PacemakerMode.Score(score_info.Rate, score_info.Replay)))
+                    (fun () -> PlayScreen.play_screen (info, PacemakerCreationContext.FromScore score_info))
                     Screen.Type.Play
                     Transitions.Flags.Default
             then

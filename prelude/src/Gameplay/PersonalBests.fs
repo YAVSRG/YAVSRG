@@ -101,3 +101,25 @@ type Bests =
         Grade: PersonalBests<int>
     }
     static member Default = { Lamp = []; Accuracy = []; Grade = [] }
+
+module Bests =
+    
+    let ruleset_best_below<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (maximum_rate: float32) (map: Map<string, Bests>) : 'T option =
+        match map.TryFind ruleset with
+        | None -> None
+        | Some bests -> PersonalBests.get_best_below maximum_rate (property bests)
+    
+    let ruleset_best_above<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (minimum_rate: float32) (map: Map<string, Bests>) : 'T option =
+        match map.TryFind ruleset with
+        | None -> None
+        | Some bests -> PersonalBests.get_best_above minimum_rate (property bests)
+    
+    let ruleset_best_below_with_rate<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (maximum_rate: float32) (map: Map<string, Bests>) : ('T * float32) option =
+        match map.TryFind ruleset with
+        | None -> None
+        | Some bests -> PersonalBests.get_best_below_with_rate maximum_rate (property bests)
+    
+    let ruleset_best_above_with_rate<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (minimum_rate: float32) (map: Map<string, Bests>) : ('T * float32) option =
+        match map.TryFind ruleset with
+        | None -> None
+        | Some bests -> PersonalBests.get_best_above_with_rate minimum_rate (property bests)

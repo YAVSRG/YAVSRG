@@ -16,6 +16,7 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features
+open Interlude.Features.Pacemaker
 open Interlude.Features.Online
 open Interlude.Features.Play
 
@@ -138,7 +139,7 @@ module Utils =
             if pos.RelativeToPlayfield then playfield.Add w else screen.Add w
 
 [<AbstractClass>]
-type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerInfo, scoring: IScoreMetric) as this
+type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerState, scoring: IScoreMetric) as this
     =
     inherit Screen()
 

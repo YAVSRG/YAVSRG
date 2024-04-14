@@ -6,13 +6,7 @@ open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Gameplay
 open Interlude.Features.Gameplay.Chart
-
-[<RequireQualifiedAccess>]
-type PacemakerInfo =
-    | None
-    | Accuracy of float
-    | Replay of IScoreMetric
-    | Judgement of target: JudgementId * max_count: int
+open Interlude.Features.Pacemaker
 
 type PlayState =
     {
@@ -21,7 +15,7 @@ type PlayState =
         mutable Scoring: IScoreMetric
         ScoringChanged: Event<unit>
         CurrentChartTime: unit -> ChartTime
-        Pacemaker: PacemakerInfo
+        Pacemaker: PacemakerState
     }
     member this.Ruleset = this.Scoring.Ruleset
 
@@ -34,7 +28,7 @@ type PlayState =
             Scoring = s
             ScoringChanged = Event<unit>()
             CurrentChartTime = fun () -> 0.0f<ms>
-            Pacemaker = PacemakerInfo.None
+            Pacemaker = PacemakerState.None
         }
 
     member this.SubscribeToHits(handler: HitEvent<HitEventGuts> -> unit) =

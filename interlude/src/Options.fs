@@ -29,13 +29,29 @@ module Options =
         | ``8K`` = 8
         | ``9K`` = 9
         | ``10K`` = 10
+        
+    [<Json.AutoCodec>]
+    [<RequireQualifiedAccess>]
+    type PacemakerMode =
+        | Accuracy
+        | Lamp
 
     [<Json.AutoCodec>]
     [<RequireQualifiedAccess>]
-    type Pacemaker =
-        | Accuracy of float
-        | Lamp of int
-        static member Default = Accuracy 0.95
+    type PacemakerSettings =
+        {
+            Accuracy: float
+            Lamp: int
+            UsePersonalBest: bool
+            Mode: PacemakerMode
+        }
+        static member Default =
+            {
+                Accuracy = 0.95
+                Lamp = 0
+                UsePersonalBest = true
+                Mode = PacemakerMode.Accuracy
+            }
 
     [<RequireQualifiedAccess>]
     type ScoreGraphMode =
@@ -102,7 +118,7 @@ module Options =
 
             SelectedRuleset: Setting<string>
             FailCondition: Setting<FailType>
-            Pacemakers: Dictionary<string, Pacemaker>
+            Pacemaker: Dictionary<string, PacemakerSettings>
             EnablePacemaker: Setting<bool>
             SaveScoreIfUnderPace: Setting<bool>
             OnlySaveNewRecords: Setting<bool>
@@ -165,7 +181,7 @@ module Options =
                 Noteskin = Content.Noteskins.selected_id
                 SelectedRuleset = Content.Rulesets.selected_id
                 FailCondition = Setting.simple FailType.EndOfSong
-                Pacemakers = Dictionary<string, Pacemaker>()
+                Pacemaker = Dictionary<string, PacemakerSettings>()
                 EnablePacemaker = Setting.simple false
                 SaveScoreIfUnderPace = Setting.simple true
                 OnlySaveNewRecords = Setting.simple false

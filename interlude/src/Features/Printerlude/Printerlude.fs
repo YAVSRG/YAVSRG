@@ -110,13 +110,11 @@ module Printerlude =
                     for chart in table.Charts do
                         let data = ScoreDatabase.get chart.Hash Content.Scores
 
-                        if
-                            data.PersonalBests.ContainsKey(table.Info.RulesetId)
-                            && data.PersonalBests.[table.Info.RulesetId].Accuracy
-                               |> PersonalBests.get_best_above 1.0f
-                               |> Option.defaultValue 0.0
-                               |> fun acc -> acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0)
-                        then
+                        match
+                            data.PersonalBests
+                            |> Bests.ruleset_best_above table.Info.RulesetId (_.Accuracy) 1.0f
+                        with
+                        | Some acc when acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0) ->
                             for score in data.Scores do
                                 Charts.Scores.Save.post (
                                     ({
@@ -129,6 +127,7 @@ module Printerlude =
                                     : Charts.Scores.Save.Request),
                                     ignore
                                 )
+                        | _ -> ()
             )
 
         let private personal_best_fixer =
