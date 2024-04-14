@@ -15,11 +15,6 @@ open Percyqaz.Common
 
 module private FrameTimeStrategies =
 
-    type MonitorEnumProc = delegate of IntPtr * IntPtr * IntPtr * IntPtr -> bool
-
-    [<DllImport("user32.dll")>]
-    extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumProc lpfnEnum, IntPtr dwData)
-
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
     type _LUID =
@@ -27,6 +22,16 @@ module private FrameTimeStrategies =
             mutable LowPart: uint32
             mutable HighPart: int32
         }
+
+    type MonitorEnumProc = delegate of IntPtr * IntPtr * IntPtr * IntPtr -> bool
+    [<DllImport("user32.dll")>]
+    extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumProc lpfnEnum, IntPtr dwData)
+
+    [<DllImport("gdi32.dll", SetLastError = true)>]
+    extern IntPtr CreateDC(string lpszDriver, string lpszDevice, string lpszOutput, IntPtr lpInitData)
+
+    [<DllImport("gdi32.dll", SetLastError = true)>]
+    extern bool DeleteDC(IntPtr hdc)
 
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
@@ -38,12 +43,6 @@ module private FrameTimeStrategies =
             mutable AdapterLuid: _LUID
             mutable VinPnSourceId: uint32
         }
-
-    [<DllImport("gdi32.dll", SetLastError = true)>]
-    extern IntPtr CreateDC(string lpszDriver, string lpszDevice, string lpszOutput, IntPtr lpInitData)
-
-    [<DllImport("gdi32.dll", SetLastError = true)>]
-    extern bool DeleteDC(IntPtr hdc)
 
     [<DllImport("gdi32.dll")>]
     extern int64 D3DKMTOpenAdapterFromGdiDisplayName(D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME& info)
@@ -98,6 +97,9 @@ module private FrameTimeStrategies =
 
     [<DllImport("winmm.dll")>]
     extern int64 private timeEndPeriod(int msec)
+
+    [<DllImport("dwmapi.dll")>]
+    extern int64 DwmFlush()
 
     (* GET DISPLAY HANDLE INFO *)
 
@@ -282,7 +284,8 @@ module private FrameTimeStrategies =
             
 type Strategy =
     | Unlimited
-    | CpuTimingWindowed
+    | WindowsCpuTimingWindowed
+    | NonWindowsCpuTimingWindowed
     | CpuTimingFullscreen
 
 [<AutoOpen>]
@@ -321,7 +324,8 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
     member this.RenderModeChanged(fullscreen: bool) =
         strategy <-
             if this.RenderMode = FrameLimit.Smart then
-                if fullscreen then CpuTimingFullscreen else CpuTimingWindowed
+                if fullscreen then CpuTimingFullscreen else 
+                    if OperatingSystem.IsWindows() then WindowsCpuTimingWindowed else NonWindowsCpuTimingWindowed
             else
                 Unlimited
 
@@ -370,11 +374,18 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
             
             FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - time_taken_last_frame - 1.0)
         
-        | CpuTimingWindowed ->
+        | WindowsCpuTimingWindowed ->
+            FrameTimeStrategies.DwmFlush() |> ignore
             let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
             estimated_next_frame <- last_vblank + est_refresh_period
-            Performance.visual_latency_lo <- estimated_next_frame - real_next_frame
-            Performance.visual_latency_hi <- estimated_next_frame - real_next_frame
+            Performance.visual_latency_lo <- frame_is_ready - real_next_frame
+            Performance.visual_latency_hi <- start_of_frame - real_next_frame
+        
+        | NonWindowsCpuTimingWindowed ->
+            let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
+            estimated_next_frame <- last_vblank + est_refresh_period
+            Performance.visual_latency_lo <- frame_is_ready - real_next_frame
+            Performance.visual_latency_hi <- start_of_frame - real_next_frame
 
             FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame)
 
@@ -404,7 +415,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         Render.finish ()
         frame_is_ready <- now ()
         Performance.draw_time <- frame_is_ready - before_draw
-        //printfn "frame is ready %.2fms early" (estimated_next_frame - frame_is_ready)
+        printfn "frame is ready %.2fms early" (estimated_next_frame - frame_is_ready)
 
         match strategy with
         | CpuTimingFullscreen ->
@@ -414,7 +425,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         if not ui_root.ShouldExit then
             window.Context.SwapBuffers()
             real_next_frame <- now ()
-            //printfn "swapped frame %.2fms late" (real_next_frame - estimated_next_frame)
+            printfn "swapped frame %.2fms late" (real_next_frame - estimated_next_frame)
 
         // Performance profiling
         fps_count <- fps_count + 1
