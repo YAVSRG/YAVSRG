@@ -25,10 +25,17 @@ type ComboPage(on_close: unit -> unit) as this =
     let growth_amount =
         Setting.simple noteskin_options.ComboGrowth |> Setting.bound 0.0f 0.05f
 
+    let use_font = Setting.simple noteskin_options.ComboUseFont
+    let font_spacing = Setting.simple noteskin_options.ComboFontSpacing |> Setting.bound -1.0f 1.0f
+
+    let texture = Content.Texture "combo-font"
     let preview =
-        { new ConfigPreview(0.35f, pos) with
+        { new ConfigPreviewNew(pos.Value) with
             override this.DrawComponent(bounds) =
-                Text.fill (Style.font, "727", bounds, Color.White, Alignment.CENTER)
+                if use_font.Value then
+                    Interlude.Features.Play.HUD.Combo.draw_noteskin_font(texture, bounds, Color.White, 727, font_spacing.Value)
+                else
+                    Text.fill (Style.font, "727", bounds, Color.White, Alignment.CENTER)
         }
 
     do
@@ -44,13 +51,20 @@ type ComboPage(on_close: unit -> unit) as this =
                 PageSetting("hud.combo.growth", Slider(growth_amount))
                     .Pos(4)
                     .Tooltip(Tooltip.Info("hud.combo.growth"))
+                PageSetting("hud.combo.use_font", Selector<_>.FromBool(use_font))
+                    .Pos(7)
+                    .Tooltip(Tooltip.Info("hud.combo.use_font"))
+                Conditional(use_font.Get,
+                    PageSetting("hud.combo.font_spacing", Slider.Percent(font_spacing))
+                        .Pos(9)
+                        .Tooltip(Tooltip.Info("hud.combo.font_spacing"))
+                )
             ] |> or_require_noteskin)
             |>> Container
             |+ preview
         )
 
     override this.Title = %"hud.combo.name"
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
         options.HUD.Set
@@ -62,6 +76,8 @@ type ComboPage(on_close: unit -> unit) as this =
             { Content.NoteskinConfig.HUD with
                 ComboPop = pop_amount.Value
                 ComboGrowth = growth_amount.Value
+                ComboUseFont = use_font.Value
+                ComboFontSpacing = font_spacing.Value
             }
 
         on_close ()

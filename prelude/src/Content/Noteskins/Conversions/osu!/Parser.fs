@@ -563,8 +563,6 @@ module SkinIni =
                 headers 
                 |> Seq.groupBy fst
                 |> Map.ofSeq
-            
-            printfn "%A" grouped_headers
 
             let get_header name : Header =
                 match grouped_headers.TryFind name with

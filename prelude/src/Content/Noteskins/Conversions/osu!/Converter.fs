@@ -369,7 +369,7 @@ module OsuSkinConverter =
                     Mode = Loose
                 }
             combo_font <- true
-            combo_font_spacing <- -0.5f * float32 ini.Fonts.ComboOverlap / float32 max_width
+            combo_font_spacing <- -2.0f * float32 ini.Fonts.ComboOverlap / float32 max_width
         with err ->
             Logging.Warn("Error converting combo font", err)
 
