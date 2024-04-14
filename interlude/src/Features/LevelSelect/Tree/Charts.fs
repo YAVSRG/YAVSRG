@@ -106,7 +106,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
                 <| new Vector2(left + stripe_length, top)
                 <| new Vector2(left + stripe_length, bottom - 25.0f)
                 <| new Vector2(left, bottom - 25.0f))
-            (struct (accent, Color.Transparent, Color.Transparent, accent))
+            (Quad.gradient_left_to_right accent Color.Transparent)
 
         let border = bounds.Expand(5.0f, 0.0f)
         let border_color = if this.Selected then !*Palette.LIGHT else color

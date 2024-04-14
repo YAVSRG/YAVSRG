@@ -99,7 +99,7 @@ type Patterns(display: Setting<Display>) =
                             b.Top + 27.5f
                         )
                         .AsQuad)
-                    struct (density_color lo_val, density_color hi_val, density_color hi_val, density_color lo_val)
+                    (Quad.gradient_left_to_right (density_color lo_val) (density_color hi_val))
 
             bar (0.0f, entry.Density10, 0.1f, entry.Density10)
             bar (0.1f, entry.Density10, 0.25f, entry.Density25)

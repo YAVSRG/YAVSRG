@@ -319,6 +319,7 @@ module Draw =
         Batch.vertex p3 u3 c3 layer
         Batch.vertex p4 u4 c4 layer
 
+    // todo: why do i have this
     let inline quad (q: Quad) (c: QuadColors) (t: QuadTexture) =
         match t with
         | NoTexture -> untextured_quad q c

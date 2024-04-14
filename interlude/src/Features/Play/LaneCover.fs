@@ -20,20 +20,14 @@ type LaneCover() =
 
                 Draw.untextured_quad
                     (bounds.SliceTop(amount).SliceBottom(fade_length).AsQuad)
-                    struct (options.LaneCover.Color.Value,
-                            options.LaneCover.Color.Value,
-                            Color.FromArgb(0, options.LaneCover.Color.Value),
-                            Color.FromArgb(0, options.LaneCover.Color.Value))
+                    (Quad.gradient_top_to_bottom options.LaneCover.Color.Value (options.LaneCover.Color.Value.O4a 0))
 
             let lower (amount: float32) =
                 Draw.rect (bounds.SliceBottom(amount - fade_length)) options.LaneCover.Color.Value
 
                 Draw.untextured_quad
                     (bounds.SliceBottom(amount).SliceTop(fade_length).AsQuad)
-                    struct (Color.FromArgb(0, options.LaneCover.Color.Value),
-                            Color.FromArgb(0, options.LaneCover.Color.Value),
-                            options.LaneCover.Color.Value,
-                            options.LaneCover.Color.Value)
+                    (Quad.gradient_top_to_bottom (options.LaneCover.Color.Value.O4a 0) options.LaneCover.Color.Value)
 
             let height = bounds.Height
 

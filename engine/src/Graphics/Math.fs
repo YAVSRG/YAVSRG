@@ -231,7 +231,8 @@ module Quad =
     let inline createv (c1x, c1y) (c2x, c2y) (c3x, c3y) (c4x, c4y) : Quad =
         struct (new Vector2(c1x, c1y), new Vector2(c2x, c2y), new Vector2(c3x, c3y), new Vector2(c4x, c4y))
 
-    // todo: helpers for directional gradients
+    let inline gradient_left_to_right (left: Color) (right: Color) = struct(left, right, right, left)
+    let inline gradient_top_to_bottom (top: Color) (bottom: Color) = struct(top, top, bottom, bottom)
 
     let flip_vertical (struct (c1, c2, c3, c4): Quad) : Quad = struct (c4, c3, c2, c1)
 

@@ -504,7 +504,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             Draw.untextured_quad
                 (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h))
                     .AsQuad
-                (struct (a, a, b, b))
+                (Quad.gradient_top_to_bottom a b)
 
         Draw.rect
             (Rect.Box(hue_picker.Left, hue_picker.Top + H * (hue_picker.Height - 5.0f), hue_picker.Width, 5.0f))
@@ -513,7 +513,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
         if allow_alpha then
             Draw.untextured_quad
                 alpha_picker.AsQuad
-                (struct (Color.FromArgb(0, s.Value), Color.FromArgb(0, s.Value), s.Value, s.Value))
+                (Quad.gradient_top_to_bottom (s.Value.O4a 0) s.Value)
 
             Draw.rect
                 (Rect.Box(
