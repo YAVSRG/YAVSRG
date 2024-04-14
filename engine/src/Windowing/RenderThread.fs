@@ -4,7 +4,6 @@ open System
 open System.Threading
 open System.Diagnostics
 open System.Runtime.InteropServices
-open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Flux.Audio
@@ -98,6 +97,7 @@ module private FrameTimeStrategies =
     [<DllImport("winmm.dll")>]
     extern int64 private timeEndPeriod(int msec)
 
+    // https://stackoverflow.com/questions/49244480/correct-way-to-wait-for-vblank-on-windows-10-in-windowed-mode
     [<DllImport("dwmapi.dll")>]
     extern int64 DwmFlush()
 
@@ -284,14 +284,15 @@ module private FrameTimeStrategies =
             
 type Strategy =
     | Unlimited
-    | WindowsCpuTimingWindowed
-    | NonWindowsCpuTimingWindowed
-    | CpuTimingFullscreen
+    | WindowsDwmFlush
+    | WindowsVblankSync
 
 [<AutoOpen>]
 module SmartCapConstants =
     
-    let SCREEN_TEAR_ADJUSTMENT = 1.0
+    let RENDER_TIME_LEADWAY = 0.5
+    let PRESENT_TIME_LEADWAY = 0.1
+    let mutable screen_tear_adjustment = 4.0
     let mutable anti_jitter = true
 
 type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_init: unit -> unit) =
@@ -324,8 +325,9 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
     member this.RenderModeChanged(fullscreen: bool) =
         strategy <-
             if this.RenderMode = FrameLimit.Smart then
-                if fullscreen then CpuTimingFullscreen else 
-                    if OperatingSystem.IsWindows() then WindowsCpuTimingWindowed else NonWindowsCpuTimingWindowed
+                if OperatingSystem.IsWindows() then
+                    if fullscreen then WindowsVblankSync else WindowsDwmFlush
+                else Unlimited
             else
                 Unlimited
 
@@ -340,7 +342,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         with fatal_err ->
             Logging.Critical("Fatal crash in UI thread", fatal_err)
             window.Close()
-        FrameTimeStrategies.VBlankThread.stop ()
+        if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.stop ()
 
     member this.Start() =
         let thread = Thread(this.Loop)
@@ -355,13 +357,13 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
             Performance.visual_latency_lo <- 0.0
             Performance.visual_latency_hi <- 1.0
 
-        | CpuTimingFullscreen ->
+        | WindowsVblankSync ->
             let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
             if frame = last_frame then FrameTimeStrategies.sleep_accurate (total_frame_timer, last_vblank + est_refresh_period * 1.2)
 
             // todo: optimise out by assuming we got to next frame
             let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
-            estimated_next_frame <- last_vblank + est_refresh_period
+            estimated_next_frame <- last_vblank + est_refresh_period - screen_tear_adjustment
 
             if frame = last_frame then
                 estimated_next_frame <- estimated_next_frame + est_refresh_period
@@ -372,22 +374,14 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
             last_frame <- frame
             
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - time_taken_last_frame - 1.0)
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - time_taken_last_frame - RENDER_TIME_LEADWAY)
         
-        | WindowsCpuTimingWindowed ->
+        | WindowsDwmFlush ->
             FrameTimeStrategies.DwmFlush() |> ignore
             let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
             estimated_next_frame <- last_vblank + est_refresh_period
             Performance.visual_latency_lo <- frame_is_ready - real_next_frame
             Performance.visual_latency_hi <- start_of_frame - real_next_frame
-        
-        | NonWindowsCpuTimingWindowed ->
-            let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
-            estimated_next_frame <- last_vblank + est_refresh_period
-            Performance.visual_latency_lo <- frame_is_ready - real_next_frame
-            Performance.visual_latency_hi <- start_of_frame - real_next_frame
-
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame)
 
         let elapsed_ms = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
@@ -418,8 +412,8 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         printfn "frame is ready %.2fms early" (estimated_next_frame - frame_is_ready)
 
         match strategy with
-        | CpuTimingFullscreen ->
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - 0.5)
+        | WindowsVblankSync ->
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - PRESENT_TIME_LEADWAY)
         | _ -> ()
 
         if not ui_root.ShouldExit then
@@ -445,7 +439,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         if window_x = 0 || window_y = 0 then Viewport.DEFAULT_SCREEN else (window_x, window_y)
         |> Render.resize
 
-        FrameTimeStrategies.VBlankThread.start total_frame_timer
+        if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.start total_frame_timer
 
         Performance.frame_compensation <-
             fun () ->
