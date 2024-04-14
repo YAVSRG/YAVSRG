@@ -312,6 +312,12 @@ module NoteskinTextureRules =
                     MustBeSquare = K false
                     MaxGridSize = K(1, 1)
                 }
+                "combo-font",
+                {
+                    IsRequired = fun config -> config.HUD.ComboUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(10, 1)
+                }
             ]
 
     let get (config: NoteskinConfig) (name: string) = TEXTURES.[name].Evaluate config

@@ -148,6 +148,7 @@ module Noteskins =
 
     let load () =
 
+        // todo: fix memory leak caused by this operation!
         loaded.Clear()
 
         for (id, ns) in DEFAULTS do

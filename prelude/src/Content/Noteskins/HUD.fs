@@ -124,6 +124,8 @@ type HUDNoteskinOptions =
         ComboPosition: HUDPosition
         ComboGrowth: float32
         ComboPop: float32
+        ComboUseFont: bool
+        ComboFontSpacing: float32
 
         SkipButtonPosition: HUDPosition
 
@@ -187,6 +189,8 @@ type HUDNoteskinOptions =
                 }
             ComboGrowth = 0.01f
             ComboPop = 5.0f
+            ComboUseFont = false
+            ComboFontSpacing = 0.0f
 
             SkipButtonPosition =
                 {

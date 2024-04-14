@@ -198,7 +198,36 @@ module SkinIni =
                 ComboOverlap = -2
             }
 
-    let private parse_fonts ((title, settings): Header) : Fonts = Fonts.Default
+    let private parse_fonts ((title, settings): Header) : Fonts =
+        let f (s: Fonts) (key, value) =
+            match key with
+            | "HitCirclePrefix" ->
+                { s with
+                    HitCirclePrefix = value
+                }
+            | "HitCircleOverlap" ->
+                { s with
+                    HitCircleOverlap = int value
+                }
+            | "ScorePrefix" ->
+                { s with
+                    ScorePrefix = value
+                }
+            | "ScoreOverlap" ->
+                { s with
+                    ScoreOverlap = int value
+                }
+            | "ComboPrefix" ->
+                { s with
+                    ComboPrefix = value
+                }
+            | "ComboOverlap" ->
+                { s with
+                    ComboOverlap = int value
+                }
+            | _ -> s
+
+        List.fold f Fonts.Default settings
 
     type CatchTheBeat =
         {
@@ -528,18 +557,41 @@ module SkinIni =
         }
 
     let private skin_ini_parser =
-        tuple5
-            (parse_header "General" .>> spaces)
-            (opt (parse_header "Colours" .>> spaces))
-            (opt (parse_header "Fonts" .>> spaces))
-            (opt (parse_header "CatchTheBeat" .>> spaces))
-            (many (parse_header "Mania" .>> spaces))
-        |>> fun (g, c, f, ctb, ms) ->
+        (many (parse_header .>> spaces))
+        |>> fun (headers: Header list) ->
+            let grouped_headers =
+                headers 
+                |> Seq.groupBy fst
+                |> Map.ofSeq
+            
+            printfn "%A" grouped_headers
+
+            let get_header name : Header =
+                match grouped_headers.TryFind name with
+                | Some v -> 
+                    match Seq.tryExactlyOne v with
+                    | Some h -> h
+                    | None -> failwithf "Skin.ini has multiple [%s] headers" name
+                | None -> failwithf "Skin.ini is missing header [%s]" name
+
+            let try_get_header name : Header option =
+                match grouped_headers.TryFind name with
+                | Some v ->
+                    match Seq.tryExactlyOne v with
+                    | Some h -> Some h
+                    | None -> failwithf "Skin.ini has multiple [%s] headers" name
+                | None -> None
+
+            let get_headers name : Header seq =
+                match grouped_headers.TryFind name with
+                | Some v -> v
+                | None -> []
+
             {
-                General = parse_general g
-                Colours = c |> Option.map parse_colours |> Option.defaultValue Colours.Default
-                Fonts = f |> Option.map parse_fonts |> Option.defaultValue Fonts.Default
-                Mania = List.map parse_mania ms
+                General = get_header "General" |> parse_general
+                Colours = try_get_header "Colours" |> Option.map parse_colours |> Option.defaultValue Colours.Default
+                Fonts = try_get_header "Fonts" |> Option.map parse_fonts |> Option.defaultValue Fonts.Default
+                Mania = get_headers "Mania" |> Seq.map parse_mania |> List.ofSeq
             }
 
     let parse file =

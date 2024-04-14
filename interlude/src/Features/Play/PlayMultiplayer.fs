@@ -37,40 +37,40 @@ module PlayScreenMultiplayer =
 
         lobby.StartPlaying()
         lobby.AddReplayInfo(
-                Network.credentials.Username,
-                { 
-                    Replay = liveplay
-                    ScoreMetric = scoring
-                    GetScoreInfo = fun () ->
-                     if not (liveplay :> IReplayProvider).Finished then
-                         liveplay.Finish()
+            Network.credentials.Username,
+            { 
+                Replay = liveplay
+                ScoreMetric = scoring
+                GetScoreInfo = fun () ->
+                    if not (liveplay :> IReplayProvider).Finished then
+                        liveplay.Finish()
 
-                     scoring.Update Time.infinity
+                    scoring.Update Time.infinity
 
-                     let replay_data = (liveplay :> IReplayProvider).GetFullReplay()
+                    let replay_data = (liveplay :> IReplayProvider).GetFullReplay()
 
-                     {
-                         CachedChart = info.CacheInfo
-                         Chart = info.Chart
-                         WithMods = info.WithMods
+                    {
+                        CachedChart = info.CacheInfo
+                        Chart = info.Chart
+                        WithMods = info.WithMods
 
-                         PlayedBy = Data.ScorePlayedBy.You
-                         TimePlayed = Timestamp.now ()
-                         Rate = Gameplay.rate.Value
+                        PlayedBy = Data.ScorePlayedBy.You
+                        TimePlayed = Timestamp.now ()
+                        Rate = Gameplay.rate.Value
 
-                         Replay = replay_data
-                         Scoring = scoring
-                         Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
-                         Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+                        Replay = replay_data
+                        Scoring = scoring
+                        Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
+                        Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
 
-                         Rating = info.Rating
-                         Patterns = info.Patterns
-                         Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
+                        Rating = info.Rating
+                        Patterns = info.Patterns
+                        Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
 
-                         ImportedFromOsu = false
-                     }
-                }
-            )
+                        ImportedFromOsu = false
+                    }
+            }
+        )
 
         scoring.OnHit.Add(fun h ->
             match h.Guts with

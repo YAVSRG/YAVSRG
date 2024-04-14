@@ -331,11 +331,22 @@ module ``osu!`` =
         .>>. (restOfLine true)
         .>> spaces
 
-    let private parse_header_title name =
+    let private parse_expected_header_title name =
         pstring ("[" + name + "]") .>> (restOfLine true) .>> spaces >>% name
 
-    let parse_header name : Parser<Header, unit> =
-        many comment >>. parse_header_title name
+    let private parse_header_title : Parser<string, unit> =
+        between (pchar '[') (pchar ']') (many1Satisfy isAsciiLetter)
+        .>> (restOfLine true) 
+        .>> spaces
+
+    let parse_expected_header name : Parser<Header, unit> =
+        many comment >>. parse_expected_header_title name
+        .>>. (many comment >>. many (parse_key_value .>> (many comment)))
+        .>> spaces
+        |>> Header
+
+    let parse_header : Parser<Header, unit> =
+        many comment >>. parse_header_title
         .>>. (many comment >>. many (parse_key_value .>> (many comment)))
         .>> spaces
         |>> Header
@@ -916,14 +927,14 @@ module ``osu!`` =
     let private parse_beatmap =
         tuple4
             (spaces >>. pstring "osu file format v" >>. restOfLine true .>> spaces)
-            (parse_header "General" .>> spaces) //General
-            (parse_header "Editor" .>> spaces) //Editor
-            (parse_header "Metadata" .>> spaces) //Metadata
+            (parse_expected_header "General" .>> spaces) //General
+            (parse_expected_header "Editor" .>> spaces) //Editor
+            (parse_expected_header "Metadata" .>> spaces) //Metadata
         .>>. tuple5
-            (parse_header "Difficulty" .>> spaces) (*Difficulty*)
+            (parse_expected_header "Difficulty" .>> spaces) (*Difficulty*)
             (parse_events .>> spaces)
             (parse_timing_points .>> spaces)
-            (optional (parse_header "Colours" .>> spaces))
+            (optional (parse_expected_header "Colours" .>> spaces))
             (parse_hit_objects .>> spaces)
         |>> fun ((format, general, editor, metadata), (difficulty, events, timingpoints, _, hitobjects)) ->
             {

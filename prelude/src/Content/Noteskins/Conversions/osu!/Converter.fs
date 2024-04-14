@@ -70,7 +70,6 @@ module OsuSkinConverter =
 
     let pad (width: int, height: int) (image: Bitmap) : Bitmap =
         assert (image.Width <= width)
-        assert (image.Height <= height)
 
         if image.Width <> width || image.Height <> height then
             let new_image = new Bitmap(width, height)
@@ -184,6 +183,8 @@ module OsuSkinConverter =
         let mutable columnlighting = false
         let mutable stage_textures = false
         let mutable key_receptors = false
+        let mutable combo_font = false
+        let mutable combo_font_spacing = 0.0f
 
         // Generate main textures
         try
@@ -264,7 +265,7 @@ module OsuSkinConverter =
             with err ->
                 Logging.Warn("Error generating placeholder receptors from note textures", err)
 
-        // Generate extra textures
+        // Generate stage textures
         match get_single_filename (keymode_settings.StageLeft, source) with
         | Some stage_left ->
             match get_single_filename (keymode_settings.StageRight, source) with
@@ -275,6 +276,7 @@ module OsuSkinConverter =
             | None -> ()
         | None -> ()
 
+        // Generate column lighting textures
         match get_single_filename (keymode_settings.StageLight, source) with
         | Some stage_light ->
             use base_image = load_bmp stage_light
@@ -290,7 +292,9 @@ module OsuSkinConverter =
                             ColorBlendingMode = PixelFormats.PixelColorBlendingMode.Multiply, 
                             AlphaCompositionMode = PixelFormats.PixelAlphaCompositionMode.SrcAtop
                         ), color
-                    ) |> ignore
+                    )
+                        .Opacity(float32 stage_light_color.A / 255.0f) 
+                    |> ignore
                 )
                 colored.Save(Path.Combine(target, sprintf "receptorlighting-%i-0.png" k))
 
@@ -342,6 +346,32 @@ module OsuSkinConverter =
         with err ->
             Logging.Warn("Error converting judgement textures", err)
 
+        // Generate combo font
+        try
+            let images = 
+                seq { 0 .. 9 }
+                |> Seq.map (fun i -> sprintf "%s-%i" ini.Fonts.ComboPrefix i)
+                |> Seq.map (fun id -> match get_single_filename(id, source) with Some f -> f | None -> failwithf "Couldn't find font image '%s'" id)
+                |> Seq.map load_bmp
+                |> Array.ofSeq
+            let max_width = images |> Seq.map _.Width |> Seq.max
+            let max_height = images |> Seq.map _.Height |> Seq.max
+            for i in 0 .. 9 do
+                let padded = pad (max_width, max_height) images.[i]
+                padded.Save(Path.Combine(target, sprintf "combo-font-%i-0.png" i))
+                padded.Dispose()
+                images.[i].Dispose()
+            JSON.ToFile
+                (Path.Combine(target, "combo-font.json"), false)
+                {
+                    Rows = 10
+                    Columns = 1
+                    Mode = Loose
+                }
+            combo_font <- true
+            combo_font_spacing <- -0.5f * float32 ini.Fonts.ComboOverlap / float32 max_width
+        with err ->
+            Logging.Warn("Error converting combo font", err)
 
         // Generate noteskin.json
         let color_config: ColorConfig =
@@ -376,6 +406,8 @@ module OsuSkinConverter =
                             if judgements then 
                                 Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
                             else Map.empty
+                        ComboUseFont = combo_font
+                        ComboFontSpacing = combo_font_spacing
                     }
             }
 
