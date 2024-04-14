@@ -423,7 +423,9 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
     member this.Init() =
         Devices.init audio_device
         Render.init ()
-        Render.resize (window.ClientSize.X, window.ClientSize.Y)
+        let window_x, window_y = window.ClientSize.X, window.ClientSize.Y
+        if window_x = 0 || window_y = 0 then Viewport.DEFAULT_SCREEN else (window_x, window_y)
+        |> Render.resize
 
         FrameTimeStrategies.VBlankThread.start total_frame_timer
 

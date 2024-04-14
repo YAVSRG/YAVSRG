@@ -13,7 +13,8 @@ open Percyqaz.Common
 *)
 module Viewport =
 
-    let mutable (rwidth, rheight) = (1920, 1080)
+    let DEFAULT_SCREEN = (1920, 1080)
+    let mutable (rwidth, rheight) = DEFAULT_SCREEN
     let mutable (vwidth, vheight) = (1920.0f, 1080.0f)
     let mutable bounds = Rect.ZERO
 
@@ -213,6 +214,8 @@ module Render =
         GL.Flush()
 
     let internal resize (width, height) =
+        assert(width <> 0 && height <> 0)
+        
         rwidth <- width
         rheight <- height
         GL.Viewport(new Rectangle(0, 0, width, height))
