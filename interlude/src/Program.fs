@@ -13,7 +13,7 @@ open Interlude.Features
 
 let launch (instance: int) =
     Logging.Verbosity <-
-        if Prelude.Common.DEV_MODE then
+        if DEV_MODE then
             LoggingLevel.DEBUG
         else
             LoggingLevel.INFO

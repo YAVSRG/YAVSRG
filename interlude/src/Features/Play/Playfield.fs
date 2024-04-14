@@ -281,11 +281,20 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 (Sprite.pick_texture (animation.Loops, color) holdbody)
 
         let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) =
+            let clip_percent = (clip - pos) / note_height
+
+            let quad_clip_correction (struct (lt, rt, rb, lb): Quad) =
+                if clip_percent > 0.0f then
+                    let height = rb.Y - rt.Y
+                    let correction = OpenTK.Mathematics.Vector2(0.0f, height * clip_percent)
+                    struct (lt + correction, rt + correction, rb, lb)
+                else struct (lt, rt, rb, lb)
+
             Draw.quad
                 ((Rect.Create(
                     left + column_positions.[k],
                     max clip pos,
-                    left + column_positions.[k] + column_width,
+                    left + column_positions.[k] + note_height,
                     pos + note_height
                   )
                   |> scroll_direction_transform bottom)
@@ -293,7 +302,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                  |> if useholdtail then id else rotation k)
                 tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
-                 |> fun x -> x.Transform hold_tail_flip)
+                 |> fun x -> x.Transform(quad_clip_correction).Transform(hold_tail_flip))
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
         // todo: also put a cap at -playfield_height when *negative sv comes into play
@@ -348,7 +357,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                                 draw_body (k, headpos, tailpos, head_and_body_color, tint)
 
                             if headpos - tailpos < note_height * 0.5f then
-                                draw_tail (k, tailpos, headpos, int color.[k], tint)
+                                draw_tail (k, tailpos, headpos + note_height * 0.5f, int color.[k], tint)
 
                             if not vanishing_notes || hold_state.ShowInReceptor then
                                 draw_head (k, headpos, head_and_body_color, tint)
@@ -382,7 +391,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                                 draw_body (k, headpos, tailpos, head_and_body_color, tint)
 
                             if headpos - tailpos < note_height * 0.5f then
-                                draw_tail (k, tailpos, headpos, int color.[k], tint)
+                                draw_tail (k, tailpos, headpos + note_height * 0.5f, int color.[k], tint)
 
                             draw_head (k, headpos, head_and_body_color, tint)
 
