@@ -73,5 +73,5 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
                 | JudgementDisplayType.Texture y ->
                     Draw.quad 
                         ((Sprite.fill bounds texture).AsQuad)
-                        (Quad.color (Color.White.O4a alpha))
+                        (Color.White.O4a alpha).AsQuad
                         (Sprite.pick_texture (float32 time_ago / noteskin_options.JudgementMeterFrameTime |> floor |> int, y) texture)

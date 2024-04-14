@@ -210,6 +210,12 @@ module Rect =
 type Quad = (struct (Vector2 * Vector2 * Vector2 * Vector2))
 type QuadColors = (struct (Color * Color * Color * Color))
 
+[<AutoOpen>]
+module QuadColorExtensions =
+
+    type Color with
+        member inline this.AsQuad = struct (this, this, this, this)
+
 module Quad =
 
     let parallelogram (amount: float32) (r: Rect) : Quad =
@@ -225,12 +231,9 @@ module Quad =
     let inline createv (c1x, c1y) (c2x, c2y) (c3x, c3y) (c4x, c4y) : Quad =
         struct (new Vector2(c1x, c1y), new Vector2(c2x, c2y), new Vector2(c3x, c3y), new Vector2(c4x, c4y))
 
-    // todo: Color.AsQuad extension
-    let color c : QuadColors = struct (c, c, c, c)
-
     // todo: helpers for directional gradients
 
-    let flip (struct (c1, c2, c3, c4): Quad) : Quad = struct (c4, c3, c2, c1)
+    let flip_vertical (struct (c1, c2, c3, c4): Quad) : Quad = struct (c4, c3, c2, c1)
 
     let map f (struct (c1, c2, c3, c4): Quad) : Quad = struct (f c1, f c2, f c3, f c4)
 

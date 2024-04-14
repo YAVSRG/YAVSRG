@@ -39,7 +39,7 @@ type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
                 if noteskin_options.EarlyLateMeterUseTexture then
                     Draw.quad 
                         ((Sprite.fill this.Bounds texture).AsQuad)
-                        (Quad.color Color.White)
+                        Color.White.AsQuad
                         (Sprite.pick_texture (float32 time_ago / noteskin_options.EarlyLateMeterFrameTime |> floor |> int, if early then 0 else 1) texture)
                 else
                     Text.fill (

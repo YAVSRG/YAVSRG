@@ -106,11 +106,11 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             if not (noteskin_config.FlipHoldTail) || options.Upscroll.Value then
                 q
             else
-                Quad.flip q
+                Quad.flip_vertical q
 
     let receptor_transform k =
         if noteskin_config.ReceptorStyle = ReceptorStyle.Flip then
-            if options.Upscroll.Value then Quad.flip else id
+            if options.Upscroll.Value then Quad.flip_vertical else id
         else
             rotation k
 
@@ -239,7 +239,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                  |> scroll_direction_transform bottom
                  |> _.AsQuad
                  |> receptor_transform k)
-                (Quad.color Color.White)
+                Color.White.AsQuad
                 (Sprite.pick_texture
                     (animation.Loops,
                     k * 2 +
@@ -255,19 +255,19 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                   |> scroll_direction_transform bottom)
                     .AsQuad
                  |> rotation k)
-                (Quad.color Color.White)
+                Color.White.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) note)
 
-        let inline draw_head (k, pos, color, tint) =
+        let inline draw_head (k: int, pos: float32, color: int, tint: Color) =
             Draw.quad
                 ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
                   |> scroll_direction_transform bottom)
                     .AsQuad
                  |> rotation k)
-                (Quad.color tint)
+                tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) holdhead)
 
-        let inline draw_body (k, pos_a, pos_b, color, tint) =
+        let inline draw_body (k: int, pos_a: float32, pos_b: float32, color: int, tint: Color) =
             Draw.quad
                 ((Rect.Create(
                     left + column_positions.[k],
@@ -277,10 +277,10 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                   )
                   |> scroll_direction_transform bottom)
                     .AsQuad)
-                (Quad.color tint)
+                tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) holdbody)
 
-        let inline draw_tail (k, pos, clip, color, tint) =
+        let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) =
             Draw.quad
                 ((Rect.Create(
                     left + column_positions.[k],
@@ -291,7 +291,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                   |> scroll_direction_transform bottom)
                     .AsQuad
                  |> if useholdtail then id else rotation k)
-                (Quad.color tint)
+                tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
                  |> fun x -> x.Transform hold_tail_flip)
 

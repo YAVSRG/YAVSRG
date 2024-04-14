@@ -36,16 +36,16 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
         for i = 0 to 29 do
             Draw.untextured_quad
                 (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
-                (Quad.color noteskin_options.ProgressMeterBackgroundColor)
+                noteskin_options.ProgressMeterBackgroundColor.AsQuad
 
             Draw.untextured_quad
                 (Quad.createv (inner i) (outer i) (outer (i + 1)) (inner (i + 1)))
-                (Quad.color Colors.white.O2)
+                Colors.white.O2.AsQuad
 
         for i = 0 to pc * 29.9f |> floor |> int do
             Draw.untextured_quad
                 (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
-                (Quad.color noteskin_options.ProgressMeterColor)
+                noteskin_options.ProgressMeterColor.AsQuad
 
         let text =
             match user_options.ProgressMeterLabel with

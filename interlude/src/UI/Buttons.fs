@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 
-type StylishButton(on_click, label_func: unit -> string, color_func) as this =
+type StylishButton(on_click, label_func: unit -> string, color_func: unit -> System.Drawing.Color) as this =
     inherit
         Container(
             NodeType.Button(fun () ->
@@ -28,12 +28,12 @@ type StylishButton(on_click, label_func: unit -> string, color_func) as this =
         let h = this.Bounds.Height
 
         Draw.untextured_quad
-            (Quad.create
-             <| Vector2(this.Bounds.Left, this.Bounds.Top)
-             <| Vector2(this.Bounds.Right + (if this.TiltRight then h * 0.5f else 0.0f), this.Bounds.Top)
-             <| Vector2(this.Bounds.Right, this.Bounds.Bottom)
-             <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom))
-            (color_func () |> Quad.color)
+            (Quad.createv
+                (this.Bounds.Left, this.Bounds.Top)
+                (this.Bounds.Right + (if this.TiltRight then h * 0.5f else 0.0f), this.Bounds.Top)
+                (this.Bounds.Right, this.Bounds.Bottom)
+                (this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom))
+            (color_func()).AsQuad
 
         Text.fill_b (Style.font, label_func (), this.Bounds, (if this.Disabled() then Colors.text_greyout else this.TextColor()), 0.5f)
         base.Draw()

@@ -41,14 +41,14 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
                 for i = 0 to 29 do
                     Draw.untextured_quad
                         (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
-                        (Quad.color background_color.Value)
+                        background_color.Value.AsQuad
 
                     Draw.untextured_quad
                         (Quad.createv (inner i) (outer i) (outer (i + 1)) (inner (i + 1)))
-                        (Quad.color Colors.white.O2)
+                        Colors.white.O2.AsQuad
 
                 for i = 0 to 17 do
-                    Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) (Quad.color color.Value)
+                    Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) color.Value.AsQuad
 
                 let text =
                     match label.Value with

@@ -272,7 +272,7 @@ type LevelSelectScreen() =
              <| Vector2(left + w + 85.0f, top)
              <| Vector2(left + w, top + 170.0f)
              <| Vector2(left, top + 170.0f))
-            (Quad.color !*Palette.DARK_100)
+            (!*Palette.DARK_100).AsQuad
 
         Draw.rect (this.Bounds.SliceTop(170.0f).SliceLeft(w).Shrink(20.0f)) (Colors.shadow_2.O2)
 
@@ -282,7 +282,7 @@ type LevelSelectScreen() =
              <| Vector2(right, top)
              <| Vector2(right, top + 170.0f)
              <| Vector2(left + w, top + 170.0f))
-            (Quad.color (Colors.shadow_2.O2))
+            Colors.shadow_2.O2.AsQuad
 
         Draw.rect (this.Bounds.SliceTop(175.0f).SliceBottom(5.0f)) (Palette.color (255, 0.8f, 0.0f))
 

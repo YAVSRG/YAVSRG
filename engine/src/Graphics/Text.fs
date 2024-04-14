@@ -276,10 +276,10 @@ module Text =
                 if (bg: Drawing.Color).A <> 0uy then
                     Draw.quad
                         ((r.Translate(shadow_spacing, shadow_spacing)).AsQuad)
-                        (Quad.color bg)
+                        bg.AsQuad
                         (Texture(s.Texture, s.Z, s.PrecomputedQuad.Value))
 
-                Draw.quad r.AsQuad (Quad.color fg) (Texture(s.Texture, s.Z, s.PrecomputedQuad.Value))
+                Draw.quad r.AsQuad fg.AsQuad (Texture(s.Texture, s.Z, s.PrecomputedQuad.Value))
                 x <- x + w + font.CharSpacing * scale
 
     let draw (font, text, scale, x, y, color) =

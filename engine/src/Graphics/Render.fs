@@ -325,7 +325,7 @@ module Draw =
         | Texture(tex, layer, uv) -> textured_quad q c tex layer uv
 
     let sprite (r: Rect) (c: Color) (s: Sprite) =
-        quad <| r.AsQuad <| Quad.color c <| Sprite.pick_texture (0, 0) s
+        quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s
 
     let rect (r: Rect) (c: Color) =
-        quad <| r.AsQuad <| Quad.color c <| NoTexture
+        quad r.AsQuad c.AsQuad <| NoTexture

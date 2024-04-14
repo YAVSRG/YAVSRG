@@ -72,7 +72,7 @@ module Logo =
                             (UPPER_TRIANGLE_2 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING))
                             (UPPER_TRIANGLE_3 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT))
                             (UPPER_TRIANGLE_3 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT)))
-                        (Quad.color Colors.blue)
+                        Colors.blue.AsQuad
 
                     let LOWER_LEFT_1 = Vector2(l + 0.1f * w, t + (0.95f - TRIANGLE_HEIGHT) * w)
 
@@ -89,7 +89,7 @@ module Logo =
                             (LOWER_LEFT_3 + Vector2(0.0f, -Y_PADDING_FOR_GRADIENT))
                             (LOWER_LEFT_4 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT))
                          |> Quad.translate (0.0f, breathe_2))
-                        (Quad.color Colors.blue)
+                        Colors.blue.AsQuad
 
                     let LOWER_RIGHT_1 = Vector2(r - 0.1f * w, t + (0.95f - TRIANGLE_HEIGHT) * w)
 
@@ -106,7 +106,7 @@ module Logo =
                             (LOWER_RIGHT_3 + Vector2(0.0f, -Y_PADDING_FOR_GRADIENT))
                             (LOWER_RIGHT_4 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT))
                          |> Quad.translate (0.0f, breathe_2))
-                        (Quad.color Colors.blue)
+                        Colors.blue.AsQuad
 
                     /// STENCIL FOR LIGHT BLUE PARTS WITH RAIN AND VISUALISER IN THEM
 
@@ -115,17 +115,17 @@ module Logo =
                     // center triangle
                     Draw.untextured_quad
                         (Quad.create UPPER_TRIANGLE_1 UPPER_TRIANGLE_2 UPPER_TRIANGLE_3 UPPER_TRIANGLE_3)
-                        (Quad.color Colors.cyan_accent)
+                        Colors.cyan_accent.AsQuad
 
                     Draw.untextured_quad
                         (Quad.create LOWER_LEFT_1 LOWER_LEFT_2 LOWER_LEFT_3 LOWER_LEFT_4
                          |> Quad.translate (0.0f, breathe_2))
-                        (Quad.color Colors.cyan_accent)
+                        Colors.cyan_accent.AsQuad
 
                     Draw.untextured_quad
                         (Quad.create LOWER_RIGHT_1 LOWER_RIGHT_2 LOWER_RIGHT_3 LOWER_RIGHT_4
                          |> Quad.translate (0.0f, breathe_2))
-                        (Quad.color Colors.cyan_accent)
+                        Colors.cyan_accent.AsQuad
 
                     Draw.sprite breathe_bounds Colors.white (Content.Texture "logo")
 
@@ -172,7 +172,7 @@ module Logo =
                                 (new Vector2(l + (i + 1.0f) * w / 32.0f, m - level))
                                 (new Vector2(l + (i + 1.0f) * w / 32.0f, b))
                                 (new Vector2(l + i * w / 32.0f, b)))
-                            (Quad.color (Colors.blue_accent.O3))
+                            Colors.blue_accent.O3.AsQuad
 
                         prev <- level
 

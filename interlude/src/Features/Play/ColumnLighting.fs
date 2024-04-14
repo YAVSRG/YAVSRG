@@ -80,7 +80,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
                               1.0f / percent_remaining)
                              sprite)
                         .AsQuad
-                    (Quad.color (Color.FromArgb(a, Color.White)))
+                    (Color.White.O4a(a).AsQuad)
                     (Sprite.pick_texture (0, k) sprite)
 
         Array.iteri draw_column timers

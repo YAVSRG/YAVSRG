@@ -208,7 +208,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
                 Draw.quad
                     (bounds.AsQuad |> rotation k)
-                    (Quad.color Color.White)
+                    Color.White.AsQuad
                     (Sprite.pick_texture (frame, hold_colors.[k]) hold_explosion)
 
         for i = 0 to EXPLOSION_POOL_SIZE - 1 do
@@ -267,7 +267,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
                     Draw.quad
                         (bounds.AsQuad |> rotation ex.Column)
-                        (Quad.color (Color.FromArgb(alpha, Color.White)))
+                        (Color.White.O4a alpha).AsQuad
                         (Sprite.pick_texture (frame, ex.Color) release_explosion)
 
             // tap animations
@@ -322,5 +322,5 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
                     Draw.quad
                         (bounds.AsQuad |> rotation ex.Column)
-                        (Quad.color (Color.FromArgb(alpha, Color.White)))
+                        (Color.White.O4a alpha).AsQuad
                         (Sprite.pick_texture (frame, ex.Color) note_explosion)

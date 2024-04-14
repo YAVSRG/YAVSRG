@@ -64,11 +64,11 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
 
             Draw.untextured_quad
                 (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (x + w, b.Bottom - note_next) (x + w, b.Bottom))
-                (Quad.color Colors.white.O2)
+                Colors.white.O2.AsQuad
 
             Draw.untextured_quad
                 (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (x + w, b.Bottom - chord_next) (x + w, b.Bottom))
-                (Quad.color chord_density_color)
+                chord_density_color.AsQuad
 
             x <- x + w
             note_prev <- note_next
@@ -76,11 +76,11 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
 
         Draw.untextured_quad
             (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (b.Right, b.Bottom - note_prev) (b.Right, b.Bottom))
-            (Quad.color Colors.white.O2)
+            Colors.white.O2.AsQuad
 
         Draw.untextured_quad
             (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
-            (Quad.color chord_density_color)
+            chord_density_color.AsQuad
 
         let percent = (Song.time () - start) / (info.WithMods.LastNote - start) |> min 1.0f
         let x = b.Width * percent

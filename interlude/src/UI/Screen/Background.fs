@@ -135,7 +135,7 @@ module Background =
 
                 Draw.quad
                     q
-                    (Quad.color color)
+                    color.AsQuad
                     (Sprite.tiling
                         (if bgaspect > screenaspect then
                              let scale = pheight / float32 bg.Height

@@ -269,7 +269,7 @@ type AnimationSettingsPage() as this =
         // draw note explosion example
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio).AsQuad)
-            (Quad.color Color.White)
+            Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, 0) receptor)
 
         if enable_explosions.Value then
@@ -294,7 +294,7 @@ type AnimationSettingsPage() as this =
                     .Expand(explosion_expand_note.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                     .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_note.Value)
                     .AsQuad)
-                (Quad.color (Color.White.O4a a))
+                (Color.White.O4a a).AsQuad
                 (Sprite.pick_texture (f_note_ex.Loops, 0) noteexplosion)
 
         // draw hold explosion example
@@ -302,7 +302,7 @@ type AnimationSettingsPage() as this =
 
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio).AsQuad)
-            (Quad.color Color.White)
+            Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
 
         if enable_explosions.Value then
@@ -327,7 +327,7 @@ type AnimationSettingsPage() as this =
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                         .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)
                         .AsQuad)
-                    (Quad.color (Color.White.O4a a))
+                    (Color.White.O4a a).AsQuad
                     (Sprite.pick_texture (f_hold_ex.Loops, 0) holdexplosion)
 
             else
@@ -352,7 +352,7 @@ type AnimationSettingsPage() as this =
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                         .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)
                         .AsQuad)
-                    (Quad.color (Color.White.O4a a))
+                    (Color.White.O4a a).AsQuad
                     (Sprite.pick_texture (f_hold_ex.Loops, 0) releaseexplosion)
 
         // draw note animation example
@@ -360,7 +360,7 @@ type AnimationSettingsPage() as this =
 
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
-            (Quad.color Color.White)
+            Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, 0) note)
 
         // draw column light example
@@ -369,7 +369,7 @@ type AnimationSettingsPage() as this =
 
         Draw.quad
             (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio).AsQuad)
-            (Quad.color Color.White)
+            Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
 
         if enable_column_light.Value then

@@ -39,7 +39,7 @@ module Transitions =
                 (o + d * endpoint + perp)
                 (o + d * endpoint - perp)
                 (o + d * startpoint - perp))
-            (Quad.color col)
+            col.AsQuad
 
     let private glint (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) =
         let t = 4.0f * (time - time * time)
@@ -63,10 +63,10 @@ module Transitions =
 
         let c = Color.FromArgb(Math.Clamp(t * 255.0f |> int, 0, 255), col)
 
-        Draw.untextured_quad q (Quad.color c)
-        Draw.untextured_quad q2 (Quad.color c)
-        Draw.untextured_quad (Quad.rotate_about o 180.0 q) (Quad.color c)
-        Draw.untextured_quad (Quad.rotate_about o 180.0 q2) (Quad.color c)
+        Draw.untextured_quad q c.AsQuad
+        Draw.untextured_quad q2 c.AsQuad
+        Draw.untextured_quad (Quad.rotate_about o 180.0 q) c.AsQuad
+        Draw.untextured_quad (Quad.rotate_about o 180.0 q2) c.AsQuad
 
     let private wedge (centre: Vector2) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
         let segments = int ((a2 - a1) / 0.10)
@@ -80,7 +80,7 @@ module Transitions =
 
             Draw.untextured_quad
                 (Quad.create (centre + ang1 * r2) (centre + ang2 * r2) (centre + ang2 * r1) (centre + ang1 * r1))
-                (Quad.color col)
+                col.AsQuad
 
     let private cwedge =
         wedge <| new Vector2(Viewport.vwidth * 0.5f, Viewport.vheight * 0.5f)
@@ -133,12 +133,13 @@ module Transitions =
             let r = size x
 
             Draw.untextured_quad
-                (Quad.create
-                 <| new Vector2(x - r, y)
-                 <| new Vector2(x, y - r)
-                 <| new Vector2(x + r, y)
-                 <| new Vector2(x, y + r))
-                (Quad.color Color.Transparent)
+                (Quad.createv
+                    (x - r, y)
+                    (x, y - r)
+                    (x + r, y)
+                    (x, y + r)
+                 )
+                Color.Transparent.AsQuad
 
         Stencil.start_stencilling false
 
@@ -180,7 +181,7 @@ module Transitions =
                      <| new Vector2(x + s, h) + v
                      <| new Vector2(x + s, h)
                      <| new Vector2(x, h))
-                    (Quad.color Color.Transparent)
+                    Color.Transparent.AsQuad
             else
                 Draw.untextured_quad
                     (Quad.create
@@ -188,7 +189,7 @@ module Transitions =
                      <| new Vector2(x + h + s, 0.0f)
                      <| new Vector2(x + h + s, 0.0f) - v
                      <| new Vector2(x + h, 0.0f) - v)
-                    (Quad.color Color.Transparent)
+                    Color.Transparent.AsQuad
 
         Stencil.start_stencilling false
 
