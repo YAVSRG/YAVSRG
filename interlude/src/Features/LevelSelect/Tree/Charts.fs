@@ -39,11 +39,11 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
             personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
             grade <- 
                 match get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName with
-                | Some (grade, rate, color, text) when not options.TreeShowGradesOnly.Value ->
-                    match personal_bests.Value.Accuracy |> PersonalBests.get_best_above rate with
-                    | Some accuracy ->
-                        Some (grade, rate, color, sprintf "%.2f%%" (accuracy * 100.0))
-                    | None -> Some (grade, rate, color, text)
+                | Some (grade, grade_rate, color, text) when not options.TreeShowGradesOnly.Value ->
+                    match personal_bests.Value.Accuracy |> PersonalBests.get_best_above_with_rate rate.Value with
+                    | Some (accuracy, accuracy_rate) ->
+                        Some (grade, accuracy_rate, color, sprintf "%.2f%%" (accuracy * 100.0))
+                    | None -> Some (grade, grade_rate, color, text)
                 | otherwise -> otherwise
             lamp <- get_pb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
         | _ -> ()
