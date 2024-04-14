@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Noteskins
+﻿namespace Interlude.Features.EditNoteskin
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -9,7 +9,6 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features
-open Interlude.Features.OptionsMenu.Gameplay
 
 [<AutoOpen>]
 module Shared =

@@ -15,6 +15,7 @@ open Interlude.Features.Stats
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 open Interlude.Features.Printerlude
+open Interlude.Features.EditNoteskin
 
 type Toolbar() =
     inherit Widget(NodeType.None)
@@ -113,7 +114,7 @@ type Toolbar() =
                     && Screen.current_type <> Screen.Type.Replay
                     && (not Content.Noteskin.IsEmbedded)
                 then
-                    Noteskins.EditNoteskinPage(true).Show()
+                    EditNoteskinPage(true).Show()
         )
         |+ HotkeyAction(
             "reload_themes",

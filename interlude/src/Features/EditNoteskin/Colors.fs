@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Noteskins
+﻿namespace Interlude.Features.EditNoteskin
 
 open Prelude.Charts.Processing
 open Percyqaz.Common

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Noteskins
+namespace Interlude.Features.EditNoteskin
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -6,28 +6,27 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Content.Noteskins
 open Interlude.Content
-open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Options
 
 // currently unused
-type PacemakerPage(on_close: unit -> unit) as this =
+type BPMMeterPage(on_close: unit -> unit) as this =
     inherit Page()
 
     let user_options = options.HUD.Value
     let noteskin_options = Content.NoteskinConfig.HUD
 
-    let pos = Setting.simple noteskin_options.PacemakerPosition
+    let pos = Setting.simple noteskin_options.BPMMeterPosition
 
     let preview =
         { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
-                Text.fill_b (Style.font, Icons.FLAG, bounds, Colors.text, Alignment.CENTER)
+                Text.fill_b (Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER)
         }
 
     do this.Content(preview)
 
-    override this.Title = %"hud.pacemaker.name"
+    override this.Title = %"hud.bpmmeter.name"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =

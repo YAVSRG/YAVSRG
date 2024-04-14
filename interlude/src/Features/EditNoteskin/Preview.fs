@@ -1,9 +1,8 @@
-﻿namespace Interlude.Features.OptionsMenu.Gameplay
+﻿namespace Interlude.Features.EditNoteskin
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Interlude.Utils
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features

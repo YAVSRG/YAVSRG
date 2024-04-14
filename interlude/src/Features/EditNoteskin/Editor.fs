@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Noteskins
+﻿namespace Interlude.Features.EditNoteskin
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -8,7 +8,6 @@ open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features.OptionsMenu.Gameplay
 
 module Problems =
 

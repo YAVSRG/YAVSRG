@@ -72,7 +72,7 @@ module Startup =
                 then
                     Gameplay.rate.Value <- score_info.Rate
 
-        OptionsMenu.Noteskins.Shared.choose_noteskins <-
+        EditNoteskin.Shared.choose_noteskins <-
             fun () -> OptionsMenu.Noteskins.NoteskinsPage().Show()
 
         Updates.check_for_updates ()

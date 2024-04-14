@@ -7,7 +7,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.LevelSelect
-open Interlude.Features.OptionsMenu.Noteskins
+open Interlude.Features.EditNoteskin
 open Interlude.Features.Gameplay
 
 module OptionsMenuRoot =
@@ -88,7 +88,7 @@ module OptionsMenuRoot =
             )
             |+ TileButton(
                 Callout.Normal.Icon(Icons.IMAGE).Title(%"noteskins.name"),
-                fun () -> NoteskinsPage().Show()
+                fun () -> Noteskins.NoteskinsPage().Show()
             )
                 .Tooltip(Tooltip.Info("noteskins"))
             |+ TileButton(
