@@ -66,7 +66,6 @@ module Imports =
                     )
                     |> List.ofSeq
                     |> fun charts -> Cache.add_new config.PackName charts cache
-                // todo: also save the patterns to the pattern store
                 }
         }
 

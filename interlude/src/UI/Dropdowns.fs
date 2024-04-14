@@ -96,6 +96,8 @@ type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
     // todo: use IHeight interface
     member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE
 
+// todo: dropdown holder component you can attach to any container, is a swap container that swaps between dropdown / dummy
+
 type DropdownMenuOptions =
     {
         Items: ((unit -> unit) * string) seq
