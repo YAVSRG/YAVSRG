@@ -295,12 +295,10 @@ module Draw =
         Batch.vertex p3 Vector2.Zero c3 0
         Batch.vertex p4 Vector2.Zero c4 0
 
-    let textured_quad
+    let quad
         (struct (p1, p2, p3, p4): Quad)
         (struct (c1, c2, c3, c4): QuadColors)
-        (t: Texture)
-        (layer: int)
-        (struct (u1, u2, u3, u4): Quad)
+        ({ Texture = t; Layer = layer; UV = struct (u1, u2, u3, u4) } : QuadTexture)
         =
 
         if last_texture_handle <> t.Handle then
@@ -319,14 +317,8 @@ module Draw =
         Batch.vertex p3 u3 c3 layer
         Batch.vertex p4 u4 c4 layer
 
-    // todo: why do i have this
-    let inline quad (q: Quad) (c: QuadColors) (t: QuadTexture) =
-        match t with
-        | NoTexture -> untextured_quad q c
-        | Texture(tex, layer, uv) -> textured_quad q c tex layer uv
-
     let sprite (r: Rect) (c: Color) (s: Sprite) =
         quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s
 
     let rect (r: Rect) (c: Color) =
-        quad r.AsQuad c.AsQuad <| NoTexture
+        untextured_quad r.AsQuad c.AsQuad

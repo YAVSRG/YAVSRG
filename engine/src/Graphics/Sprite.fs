@@ -48,12 +48,17 @@ type Sprite =
 
 [<Struct>]
 type QuadTexture =
-    | NoTexture
-    | Texture of Texture * layer: int * uv: Quad
-    member this.Transform(func: Quad -> Quad) =
-        match this with
-        | NoTexture -> NoTexture
-        | Texture(tex, layer, uv) -> Texture(tex, layer, func uv)
+    {
+        Texture: Texture
+        Layer: int
+        UV: Quad
+    }
+    member this.Transform(func: Quad -> Quad) = 
+        { 
+            Texture = this.Texture
+            Layer = this.Layer
+            UV = func this.UV
+        }
 
 type SpriteUpload =
     {
@@ -344,7 +349,7 @@ module Sprite =
 
     let pick_texture (x: int, y: int) (sprite: Sprite) : QuadTexture =
         if sprite.PrecomputedQuad.IsSome then
-            Texture(sprite.Texture, sprite.Z, sprite.PrecomputedQuad.Value)
+            { Texture = sprite.Texture; Layer = sprite.Z; UV = sprite.PrecomputedQuad.Value }
         else
 
             let stride_x =
@@ -366,7 +371,7 @@ module Sprite =
             if sprite.Rows = 1 && sprite.Columns = 1 then
                 sprite.PrecomputedQuad <- ValueSome quad
 
-            Texture(sprite.Texture, sprite.Z, quad)
+            { Texture = sprite.Texture; Layer = sprite.Z; UV = quad }
 
     // todo: relocate, remove or rename this, only used for Interlude's song background image
     let tiling (scale, left, top) (sprite: Sprite) (quad: Quad) : QuadTexture =
@@ -374,11 +379,11 @@ module Sprite =
         let width = float32 sprite.Width * scale
         let height = float32 sprite.Height * scale
 
-        Texture(
-            sprite.Texture,
-            sprite.Z,
-            Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height)) quad
-        )
+        {
+            Texture = sprite.Texture
+            Layer = sprite.Z
+            UV = Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height)) quad
+        }
 
     let aligned_box_x (x_origin, y_origin, x_offset, y_offset, x_scale, y_mult) (sprite: Sprite) : Rect =
         let width = x_scale
