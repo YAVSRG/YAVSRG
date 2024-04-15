@@ -1,22 +1,29 @@
-0.7.19.7
+0.7.19.8
 ====
 
-This update should fix the antivirus issues some people were experiencing this week
+I'm running out of things to say in these headlines  
+Soon these updates could do with screenshots/some prettier blog-style post showcasing what's new
 
-# New features
-- Noteskins now (optionally) support a different receptor texture per column
-- osu! Skin converter now converts key textures + column lighting correctly
-- New level select buttons for entering endless mode + other actions
-- 'Problems' tab on noteskin editor that lists potential errors with your noteskin (and can help you fix them)
-- Option to practice a chart appears on the context menus of charts
+Due to several bug reports coming in from people breaking multiplayer - you know who you are :) - I've refactored some of the code to improve its stability  
+Multiplayer should be more stable rather than less, but please report any more bugs you find
 
-# Improvements
-- Game's icon has been changed to match newer branding of the site and discord
-- Endless mode now tries to closely match the BPM/patterns when giving suggestions
-- Options menu has been slightly reorganised
-- Interlude.exe size has been reduced significantly
+# Multiplayer
+- Lobbies start with auto-countdown turned on by default
+- You can no longer rename your lobby to invalid names like the empty string
+- Fixed a bug where you can join a lobby twice, breaking it for everyone
+- In general I have removed exceptions from many execution paths and replaced them with graceful handling of unexpected cases
+
+# New features & Improvements
+- 'Smart' frame cap has been overhauled again and should work better for everyone, try it again if you're using 'Unlimited'
+- Noteskins now support custom fonts for the combo indicator, like osu! does
+- osu! skin converter now attempts to port 'percied' LN bodies correctly
+- osu! skin converter now ports combo fonts
+- Pacemaker has an option to automatically use your PB if available, instead of the fixed value
+- Keybind to change local offset is now distinct from the options menu key
 
 # Bug fixes
-- Fixed two bugs in converting judgement textures from osu! skins
-- Removed parts of Interlude.exe that were causing false positives in some antivirus software
+- osu! skin converter ports column lighting better
+- Fixed some crashes and issues in noteskin loading/reloading
+- Fixed some issues with tabbing out of fullscreen
+- Fixed a long-standing graphical issue with LN tails
 
