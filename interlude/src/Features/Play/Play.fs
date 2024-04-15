@@ -131,7 +131,7 @@ module PlayScreen =
                     (if options.HoldToGiveUp.Value then ignore else give_up),
                     (if options.HoldToGiveUp.Value then give_up else ignore)
                 )
-                |+ HotkeyAction("options", offset_slideout.Open)
+                |+ HotkeyAction("offset", offset_slideout.Open)
                 |* offset_slideout
 
             override this.OnEnter(previous) =
@@ -208,7 +208,7 @@ module PlayScreen =
                         Style.font,
                         (
                             if options.AutoCalibrateOffset.Value then [sprintf "%.0fms" offset_setting.Value] %> "play.localoffset.automatic"
-                            else [(%%"options").ToString()] %> "play.localoffset.hint"
+                            else [(%%"offset").ToString()] %> "play.localoffset.hint"
                         ),
                         20.0f,
                         this.Bounds.Left + 20.0f,

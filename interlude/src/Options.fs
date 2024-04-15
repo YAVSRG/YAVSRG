@@ -345,6 +345,7 @@ module Options =
 
             Hotkeys.register "skip" (mk Keys.Space)
             Hotkeys.register "retry" (ctrl Keys.R)
+            Hotkeys.register "offset" (ctrl Keys.O)
 
             Hotkeys.register "preset1" (ctrl Keys.F1)
             Hotkeys.register "preset2" (ctrl Keys.F2)
