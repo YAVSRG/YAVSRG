@@ -162,7 +162,7 @@ module OsuSkinConverter =
 
                     percy_tail_texture.Save(Path.Combine(target, "holdtail-0-0.png"))
                     JSON.ToFile
-                        (Path.Combine(target, "holdtail.json"), false)
+                        (Path.Combine(target, "holdtail.json"), true)
                         {
                             Rows = 1
                             Columns = 1
