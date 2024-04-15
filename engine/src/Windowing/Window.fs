@@ -244,6 +244,8 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 || config.WindowMode.Value = WindowType.``Borderless Fullscreen``
             )
             anti_jitter <- config.SmartCapAntiJitter.Value
+            tearline_position <- config.SmartCapTearlinePosition.Value
+            framerate_multiplier <- config.SmartCapFramerateMultiplier.Value
 
     member this.EnableResize(callback) =
         if base.WindowState = WindowState.Normal && base.WindowBorder = WindowBorder.Fixed then

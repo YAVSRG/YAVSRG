@@ -8,13 +8,15 @@ open Prelude
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
-open Interlude.Utils
 
 type PerformanceSettingsPage() as this =
     inherit Page()
 
+    let mutable closed = false
     let cycle = Animation.Counter(1500.0)
     let texture = Content.Texture "note"
+    let screen_tear_alignment = config.SmartCapTearlinePosition |> Setting.trigger (fun v -> tearline_position <- v) |> Setting.f32
+    let framerate_multiplier = config.SmartCapFramerateMultiplier |> Setting.trigger (fun v -> framerate_multiplier <- v)
 
     do
         this.Content(
@@ -44,6 +46,28 @@ type PerformanceSettingsPage() as this =
                     .Pos(2)
                     .Tooltip(Tooltip.Info("system.performance.antijitter"))
             )
+            |+ Conditional(
+                (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen),
+                PageSetting("system.performance.screen_tear_alignment", 
+                    Slider.Percent(screen_tear_alignment)
+                )
+                    .Pos(4)
+            )
+            |+ Conditional(
+                (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen),
+                Text(%"system.performance.screen_tear_alignment.hint", 
+                    Color = K Colors.text,
+                    Position = pretty_pos(6, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
+                    Align = Alignment.LEFT
+                )
+            )
+            |+ Conditional(
+                (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.WindowMode.Value = WindowType.Fullscreen),
+                PageSetting("system.performance.frame_multiplier", 
+                    Selector([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
+                )
+                    .Pos(7)
+            )
         )
 
     override this.Update(elapsed_ms, moved) =
@@ -52,14 +76,19 @@ type PerformanceSettingsPage() as this =
 
     override this.Draw() =
         base.Draw()
+        if closed then () else
         Draw.rect 
             (this.Bounds.SliceRight(200.0f).Shrink(20.0f))
             (Color.FromHsv(float32 (cycle.Time / cycle.Interval), 0.5f, 1.0f))
-        Draw.sprite 
-            (Rect.Box(this.Bounds.Right - 300.0f, this.Bounds.Top - 100.0f, 100.0f, 100.0f).Translate(0.0f, (this.Bounds.Height + 100.0f) * float32 (cycle.Time / cycle.Interval)))
-            Color.White
-            texture
 
-    override this.OnClose() = ()
+        for i = 0 to 10 do
+            let anti_jitter = Performance.frame_compensation () / 1.0f<ms>
+            let y = (float32 (cycle.Time / cycle.Interval) + (float32 i / 10.0f)) % 1.0f
+            Draw.sprite 
+                (Rect.Box(this.Bounds.Right - 300.0f, this.Bounds.Top - 100.0f, 100.0f, 100.0f).Translate(0.0f, (this.Bounds.Height + 100.0f) * y + anti_jitter))
+                Color.White
+                texture
+
+    override this.OnClose() = closed <- true
 
     override this.Title = %"system.performance.name"

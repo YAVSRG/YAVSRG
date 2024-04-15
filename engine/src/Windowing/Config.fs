@@ -44,6 +44,8 @@ type Config =
         FullscreenVideoMode: Setting<FullscreenVideoMode>
         RenderMode: Setting<FrameLimit>
         SmartCapAntiJitter: Setting<bool>
+        SmartCapFramerateMultiplier: Setting<float>
+        SmartCapTearlinePosition: Setting.Bounded<float>
         Display: Setting<int>
         AudioDevice: Setting<int>
     }
@@ -61,7 +63,9 @@ type Config =
                         RefreshRate = 60
                     }
             RenderMode = Setting.simple FrameLimit.Smart
-            SmartCapAntiJitter = Setting.simple true
+            SmartCapAntiJitter = Setting.simple false
+            SmartCapFramerateMultiplier = Setting.simple 8.0
+            SmartCapTearlinePosition = Setting.percent 0.85
             Display = Setting.simple 0
             AudioDevice = Setting.simple -1
         }

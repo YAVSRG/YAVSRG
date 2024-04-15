@@ -14,6 +14,8 @@ open Percyqaz.Common
 
 module private FrameTimeStrategies =
 
+    //https://github.com/glfw/glfw/issues/1157
+
     [<Struct>]
     [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
     type _LUID =
@@ -240,7 +242,6 @@ module private FrameTimeStrategies =
         (* LOOP *)
 
         let private LOCK_OBJ = obj()
-        let mutable sync_adjustment = 4.0
         let mutable private _last_time = 0.0 // in thread
         let mutable private _vblank_number = 0uL
         let mutable private last_time = 0.0 // shared
@@ -253,9 +254,9 @@ module private FrameTimeStrategies =
         let private loop (sw: Stopwatch) =
             while looping do
                 if not sync_broken then
-                    let before = sw.Elapsed.TotalMilliseconds - sync_adjustment
+                    let before = sw.Elapsed.TotalMilliseconds
                     if not (wait_for_vblank()) then sync_broken <- true
-                    _last_time <- sw.Elapsed.TotalMilliseconds - sync_adjustment
+                    _last_time <- sw.Elapsed.TotalMilliseconds
                     if _vblank_number > 240uL && abs (before + est_period - _last_time) > 1.0 then
                         _last_time <- before + est_period
                     else
@@ -278,10 +279,14 @@ module private FrameTimeStrategies =
             lock LOCK_OBJ <| fun () ->
                 action_queue <- (fun () -> _vblank_number <- 0uL; sync_broken <- false; est_period <- period; open_adapter gdi_adapter_name glfw_monitor_name) :: action_queue
 
-        let get (sw: Stopwatch) =
+        let get (sync_adjustment: float, sw: Stopwatch) =
             lock LOCK_OBJ <| fun () ->
             if sync_broken then 0uL, sw.Elapsed.TotalMilliseconds, est_period
-            else vblank_number, last_time, est_period
+            else 
+                let adjusted_last_time = last_time + sync_adjustment * est_period
+                if sw.Elapsed.TotalMilliseconds < adjusted_last_time then
+                    vblank_number - 0uL, adjusted_last_time - est_period, est_period
+                else vblank_number, adjusted_last_time, est_period
             
 type Strategy =
     | Unlimited
@@ -291,9 +296,9 @@ type Strategy =
 [<AutoOpen>]
 module SmartCapConstants =
     
-    let RENDER_TIME_LEADWAY = 0.5
-    let PRESENT_TIME_LEADWAY = 0.1
-    let mutable anti_jitter = true
+    let mutable anti_jitter = false
+    let mutable tearline_position = 0.75
+    let mutable framerate_multiplier = 8.0
 
 type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_init: unit -> unit) =
 
@@ -308,7 +313,6 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
     let mutable frame_is_ready = 0.0
     let mutable is_focused = true
     let mutable strategy = Unlimited
-    let mutable last_frame = 0uL
 
     let now () =
         total_frame_timer.Elapsed.TotalMilliseconds
@@ -363,37 +367,25 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
     member this.DispatchFrame() =
 
+        Performance.visual_latency_lo <- frame_is_ready - real_next_frame
+        Performance.visual_latency_hi <- start_of_frame - real_next_frame
+
         match strategy with
 
-        | Unlimited ->
-            Performance.visual_latency_lo <- 0.0
-            Performance.visual_latency_hi <- 1.0
+        | Unlimited -> ()
 
         | WindowsVblankSync ->
-            let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
-            if frame = last_frame then FrameTimeStrategies.sleep_accurate (total_frame_timer, last_vblank + est_refresh_period * 1.2)
-
-            // todo: optimise out by assuming we got to next frame
-            let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
+            let _, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
             estimated_next_frame <- last_vblank + est_refresh_period
 
-            if frame = last_frame then
-                estimated_next_frame <- estimated_next_frame + est_refresh_period
-
-            Performance.visual_latency_lo <- real_next_frame - frame_is_ready
-            Performance.visual_latency_hi <- Performance.visual_latency_lo
-            let time_taken_last_frame = frame_is_ready - start_of_frame
-
-            last_frame <- frame
-            
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - time_taken_last_frame - RENDER_TIME_LEADWAY)
+            let time_taken_to_render = frame_is_ready - start_of_frame
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, now() - time_taken_to_render + est_refresh_period / framerate_multiplier)
         
         | WindowsDwmFlush ->
             FrameTimeStrategies.DwmFlush() |> ignore
-            let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
+
+            let _, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
             estimated_next_frame <- last_vblank + est_refresh_period
-            Performance.visual_latency_lo <- frame_is_ready - real_next_frame
-            Performance.visual_latency_hi <- start_of_frame - real_next_frame
 
         let elapsed_ms = last_frame_timer.Elapsed.TotalMilliseconds
         last_frame_timer.Restart()
@@ -421,17 +413,10 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         Render.finish ()
         frame_is_ready <- now ()
         Performance.draw_time <- frame_is_ready - before_draw
-        //printfn "frame is ready %.2fms early" (estimated_next_frame - frame_is_ready)
-
-        match strategy with
-        | WindowsVblankSync ->
-            FrameTimeStrategies.sleep_accurate (total_frame_timer, estimated_next_frame - PRESENT_TIME_LEADWAY)
-        | _ -> ()
 
         if not ui_root.ShouldExit then
             window.Context.SwapBuffers()
             real_next_frame <- now ()
-            //printfn "swapped frame %.2fms late" (real_next_frame - estimated_next_frame)
 
         // Performance profiling
         fps_count <- fps_count + 1
