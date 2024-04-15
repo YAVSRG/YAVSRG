@@ -16,6 +16,8 @@ open Interlude.Content
 [<AutoOpen>]
 module Import =
 
+    let mutable on_file_drop : (string -> unit) option = None
+
     let charts_updated_ev = Event<unit>()
     let charts_updated = charts_updated_ev.Publish
 
@@ -121,7 +123,7 @@ module Import =
             Notifications.error(%"notification.skin_ini_parse_failed.title", %"notification.skin_ini_parse_failed.body")
 
     let handle_file_drop (path: string) =
-        match Mounts.drop_func with
+        match on_file_drop with
         | Some f -> f path
         | None ->
 
@@ -161,8 +163,14 @@ module Import =
                         Notifications.error (%"notification.import_failure", "")
             )
 
-type DownloadStatus =
+type private DownloadStatus =
     | NotDownloaded
     | Downloading
     | Installed
     | DownloadFailed
+
+[<RequireQualifiedAccess>]
+type private MountedGameType =
+    | Osu
+    | Stepmania
+    | Etterna
