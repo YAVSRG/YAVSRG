@@ -240,6 +240,7 @@ module private FrameTimeStrategies =
         (* LOOP *)
 
         let private LOCK_OBJ = obj()
+        let mutable sync_adjustment = 4.0
         let mutable private _last_time = 0.0 // in thread
         let mutable private _vblank_number = 0uL
         let mutable private last_time = 0.0 // shared
@@ -252,9 +253,9 @@ module private FrameTimeStrategies =
         let private loop (sw: Stopwatch) =
             while looping do
                 if not sync_broken then
-                    let before = sw.Elapsed.TotalMilliseconds
+                    let before = sw.Elapsed.TotalMilliseconds - sync_adjustment
                     if not (wait_for_vblank()) then sync_broken <- true
-                    _last_time <- sw.Elapsed.TotalMilliseconds
+                    _last_time <- sw.Elapsed.TotalMilliseconds - sync_adjustment
                     if _vblank_number > 240uL && abs (before + est_period - _last_time) > 1.0 then
                         _last_time <- before + est_period
                     else
@@ -292,7 +293,6 @@ module SmartCapConstants =
     
     let RENDER_TIME_LEADWAY = 0.5
     let PRESENT_TIME_LEADWAY = 0.1
-    let mutable screen_tear_adjustment = 4.0
     let mutable anti_jitter = true
 
 type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_init: unit -> unit) =
@@ -324,12 +324,24 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
     member this.RenderModeChanged(fullscreen: bool) =
         strategy <-
-            if this.RenderMode = FrameLimit.Smart then
-                if OperatingSystem.IsWindows() then
+            if OperatingSystem.IsWindows() then
+                // On windows:
+                //  Smart = Custom frame pacing strategies
+                //  Unlimited = Unlimited
+                if this.RenderMode = FrameLimit.Smart then
                     if fullscreen then WindowsVblankSync else WindowsDwmFlush
-                else Unlimited
+                else
+                    Unlimited
             else
-                Unlimited
+                // On non-windows:
+                //  Smart = GLFW's default Vsync
+                //  Unlimited = Unlimited
+                if this.RenderMode = FrameLimit.Smart then
+                    window.Context.SwapInterval <- 1
+                    Unlimited
+                else
+                    window.Context.SwapInterval <- 0
+                    Unlimited
 
     member private this.Loop() =
         window.Context.MakeCurrent()
@@ -363,7 +375,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
             // todo: optimise out by assuming we got to next frame
             let frame, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get total_frame_timer
-            estimated_next_frame <- last_vblank + est_refresh_period - screen_tear_adjustment
+            estimated_next_frame <- last_vblank + est_refresh_period
 
             if frame = last_frame then
                 estimated_next_frame <- estimated_next_frame + est_refresh_period
@@ -409,7 +421,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         Render.finish ()
         frame_is_ready <- now ()
         Performance.draw_time <- frame_is_ready - before_draw
-        printfn "frame is ready %.2fms early" (estimated_next_frame - frame_is_ready)
+        //printfn "frame is ready %.2fms early" (estimated_next_frame - frame_is_ready)
 
         match strategy with
         | WindowsVblankSync ->
@@ -419,7 +431,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         if not ui_root.ShouldExit then
             window.Context.SwapBuffers()
             real_next_frame <- now ()
-            printfn "swapped frame %.2fms late" (real_next_frame - estimated_next_frame)
+            //printfn "swapped frame %.2fms late" (real_next_frame - estimated_next_frame)
 
         // Performance profiling
         fps_count <- fps_count + 1
