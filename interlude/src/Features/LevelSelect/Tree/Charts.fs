@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.LevelSelect
 
 open OpenTK.Mathematics
+open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -40,9 +41,9 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
             grade <- 
                 match get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName with
                 | Some (grade, grade_rate, color, text) when not options.TreeShowGradesOnly.Value ->
-                    match personal_bests.Value.Accuracy |> PersonalBests.get_best_above_with_rate rate.Value with
-                    | Some (accuracy, accuracy_rate) ->
-                        Some (grade, accuracy_rate, color, sprintf "%.2f%%" (accuracy * 100.0))
+                    match get_pb personal_bests.Value.Accuracy (K Colors.white) (fun acc -> sprintf "%.2f%%" (acc * 100.0)) with
+                    | Some (accuracy, accuracy_rate, _, text) ->
+                        Some (grade, accuracy_rate, color, text)
                     | None -> Some (grade, grade_rate, color, text)
                 | otherwise -> otherwise
             lamp <- get_pb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
