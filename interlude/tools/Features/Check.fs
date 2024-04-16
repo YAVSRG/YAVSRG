@@ -177,6 +177,18 @@ module Check =
                 |> replaces 
                     """ (%> )"([a-z\-_\.]*)" """
                     "%s\"%s\""
+                |> replaces 
+                    """ PageSetting\((\s*)"([a-z\-_\.]*[^\.])" """
+                    "PageSetting(%s\"%s\""
+                |> replaces 
+                    """ PageButton\((\s*)"([a-z\-_\.]*[^\.])" """
+                    "PageButton(%s\"%s\""
+                |> replaces 
+                    """ PageButton(\s*.Once\(\s*)"([a-z\-_\.]*[^\.])" """
+                    "PageButton%s\"%s\""
+                |> replaces 
+                    """ Tooltip(\s*).Info\("([a-z\-_\.]*)" """
+                    "Tooltip%s.Info(\"%s\""
             
             if replaced_contents <> file_contents then
                 File.WriteAllText(filename, replaced_contents)
@@ -194,5 +206,5 @@ module Check =
         ctx
             .WithCommand("check_locale", "Check locale for mistakes", (fun () -> check_locale "en_GB" false))
             .WithCommand("fix_locale", "Tool to automatically add locale keys", (fun () -> check_locale "en_GB" true))
-            .WithCommand("replace_locale", "Tool to rename locale keys", "replaced_key", (fun arg -> locale_rename "en_GB" arg))
+            .WithCommand("rename_locale", "Tool to rename locale keys/namespaces", "replaced_key", (fun arg -> locale_rename "en_GB" arg))
             .WithCommand("check_linecounts", "Check for particularly large source code files", (fun () -> check_linecounts()))
