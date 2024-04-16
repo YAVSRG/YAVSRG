@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import.FromOsu
+namespace Interlude.Features.Import.FromOsu
 
 open System.IO
 open System.Text.RegularExpressions
@@ -23,24 +23,24 @@ module ImportSkins =
 
         override this.Init(parent: Widget) =
             page_container()
-            |+ PageSetting("osuskinimport.keymode", Selector<Keymode>.FromEnum(keymode))
+            |+ PageSetting("osu_skin_import.keymode", Selector<Keymode>.FromEnum(keymode))
                 .Pos(0)
             |+ Conditional(
                 (fun () -> keymode.Value = Keymode.``4K``),
-                PageSetting("osuskinimport.isarrows", Selector<_>.FromBool(is_arrows))
+                PageSetting("osu_skin_import.isarrows", Selector<_>.FromBool(is_arrows))
                     .Pos(2)
             )
             |+ 
                 match existing_folder with
                 | Some folder ->
                     [
-                        Text([folder] %> "osuskinimport.delete_prompt", Align = Alignment.LEFT, Position = pretty_pos(5, 2, PageWidth.Full).Margin(Style.PADDING))
-                        PageSetting("osuskinimport.delete_existing", Selector<_>.FromBool(delete_existing)).Pos(7)
+                        Text([folder] %> "osu_skin_import.delete_prompt", Align = Alignment.LEFT, Position = pretty_pos(5, 2, PageWidth.Full).Margin(Style.PADDING))
+                        PageSetting("osu_skin_import.delete_existing", Selector<_>.FromBool(delete_existing)).Pos(7)
                     ]
                 | None -> []
             |+ PageButton
                 .Once(
-                    "osuskinimport.confirm",
+                    "osu_skin_import.confirm",
                     fun () ->
                         try
                             OsuSkinConverter.convert
@@ -105,7 +105,7 @@ module ImportSkins =
         override this.Init(parent) =
             if List.isEmpty osu_skin_paths then
                 Container(NodeType.Leaf, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
-                |+ EmptyState(Icons.IMAGE, %"osuskinimport.no_skins_found")
+                |+ EmptyState(Icons.IMAGE, %"osu_skin_import.no_skins_found")
                 :> Widget
             else
                 FlowContainer.Vertical<_>(PRETTYHEIGHT, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
@@ -121,4 +121,4 @@ module ImportSkins =
             base.Init(parent)
 
         override this.OnClose() = ()
-        override this.Title = %"osuskinimport.list_skins"
+        override this.Title = %"osu_skin_import.list_skins"
