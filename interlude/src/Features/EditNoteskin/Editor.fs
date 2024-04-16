@@ -44,7 +44,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
     let data = noteskin.Config
     let name = Setting.simple data.Name
 
-    let preview = NoteskinPreview(0.35f, true)
+    let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE(0.35f).Translate(0.0f, -100.0f))
 
     let textures_grid =
         GridFlowContainer<TextureCard>(
@@ -170,9 +170,48 @@ type EditNoteskinPage(from_hotkey: bool) as this =
 
         tab_buttons.Position <- pretty_pos(0, 2, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
 
-        NavigationContainer.Column<Widget>()
-        |+ tab_buttons
-        |+ tabs
+        NavigationContainer.Row()
+        |+ (
+            NavigationContainer.Column<Widget>()
+            |+ tab_buttons
+            |+ tabs
+        )
+        |+ (
+            NavigationContainer.Column<Widget>(Position = Position.TrimLeft(PRETTYWIDTH + PRETTY_MARGIN_X).Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT * 3.0f))
+            |+ PageButton(
+                "noteskins.edit.export",
+                (fun () ->
+                    if not (Noteskins.export_current ()) then
+                        Notifications.error (
+                            %"notification.export_noteskin_failure.title",
+                            %"notification.export_noteskin_failure.body"
+                        )
+                ),
+                Icon = Icons.UPLOAD
+            )
+                .Tooltip(Tooltip.Info("noteskins.edit.export"))
+                .Pos(0, 2, PageWidth.Full)
+            |+ PageButton(
+                "noteskins.edit.open_folder",
+                (fun () ->
+                    Noteskins.open_current_folder () |> ignore
+                ),
+                Icon = Icons.FOLDER
+            )
+                .Pos(2, 2, PageWidth.Full)
+            |+ PageButton(
+                "noteskins.edit.delete",
+                (fun () ->
+                    ConfirmPage([name.Value] %> "noteskins.edit.delete.confirm",
+                        fun () ->
+                            if Noteskins.delete_current () then
+                                Menu.Back()
+                    ).Show()
+                ),
+                Icon = Icons.TRASH
+            )
+                .Pos(4, 2, PageWidth.Full)
+        )
         |>> Container
         |+ preview
         |+ Conditional(

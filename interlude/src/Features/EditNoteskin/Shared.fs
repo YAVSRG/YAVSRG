@@ -28,7 +28,7 @@ module Shared =
 
 [<AbstractClass>]
 type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
-    inherit NoteskinPreview(scale, true)
+    inherit NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE scale)
 
     let keycount = int (Gameplay.Chart.keymode ())
 

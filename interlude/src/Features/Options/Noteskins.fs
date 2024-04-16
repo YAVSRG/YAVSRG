@@ -127,7 +127,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
 type NoteskinsPage() as this =
     inherit Page()
 
-    let preview = NoteskinPreview(0.35f, false)
+    let preview = NoteskinPreview(NoteskinPreview.LEFT_HAND_SIDE 0.35f)
 
     let grid =
         GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
@@ -176,19 +176,6 @@ type NoteskinsPage() as this =
             |+ PageButton("noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
                 .Tooltip(Tooltip.Info("noteskins.edit"))
                 .Pos(PAGE_BOTTOM - 4, 2, PageWidth.Full)
-            |+ PageButton(
-                "noteskins.edit.export",
-                (fun () ->
-                    if not (Noteskins.export_current ()) then
-                        Notifications.error (
-                            %"notification.export_noteskin_failure.title",
-                            %"notification.export_noteskin_failure.body"
-                        )
-                ),
-                Icon = Icons.UPLOAD
-            )
-                .Tooltip(Tooltip.Info("noteskins.edit.export"))
-                .Pos(PAGE_BOTTOM - 2, 2, PageWidth.Full)
             |+ Text(
                 %"noteskins.current",
                 Position = pretty_pos(0, 1, PageWidth.Full).SliceTop(PRETTYHEIGHT * 0.65f),

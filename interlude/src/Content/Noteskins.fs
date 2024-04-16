@@ -112,7 +112,8 @@ module Noteskins =
     let mutable current = snd DEFAULTS.[0]
 
     let save_config (new_config: NoteskinConfig) =
-        current.Config <- new_config
+        if not current.IsEmbedded then
+            current.Config <- new_config
 
     let save_hud_config (new_hud: HUDNoteskinOptions) =
         current.Config <- { current.Config with HUD = new_hud }
@@ -235,9 +236,23 @@ module Noteskins =
         else
             false
 
+    let open_current_folder () =
+        match current.Source with
+        | Embedded _ -> false
+        | Folder f -> open_directory f; true
+
+    let delete_current () =
+        match current.Source with
+        | Embedded _ -> false
+        | Folder f ->
+            selected_id.Value <- fst DEFAULTS.[0]
+            Directory.Delete(f, true)
+            load()
+            true
+
     let export_current () =
         match current.Source with
-        | Embedded _ -> failwith "Current skin must not be an embedded default"
+        | Embedded _ -> false
         | Folder f ->
             let name = Path.GetFileName f
             let target = Path.Combine(get_game_folder "Exports", name + ".isk")

@@ -8,7 +8,7 @@ open Interlude.Content
 open Interlude.Features
 open Interlude.Features.Play
 
-type NoteskinPreview(scale: float32, rhs: bool) as this =
+type NoteskinPreview(position: Position) as this =
     inherit Container(NodeType.None)
 
     let fbo = FBO.create ()
@@ -26,27 +26,10 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
 
     let mutable renderer: Widget = Dummy()
 
-    let w = Viewport.vwidth * scale
-    let h = Viewport.vheight * scale
-
     let bounds_placeholder =
         Container(
             NodeType.None,
-            Position =
-                if rhs then
-                    {
-                        Left = 1.0f %- (50.0f + w)
-                        Top = 0.5f %- (h * 0.5f)
-                        Right = 1.0f %- 50.0f
-                        Bottom = 0.5f %+ (h * 0.5f)
-                    }
-                else
-                    {
-                        Left = 0.0f %+ 50.0f
-                        Top = 0.5f %- (h * 0.5f)
-                        Right = 0.0f %+ (50.0f + w)
-                        Bottom = 0.5f %+ (h * 0.5f)
-                    }
+            Position = position
         )
 
     do
@@ -89,3 +72,22 @@ type NoteskinPreview(scale: float32, rhs: bool) as this =
         renderer.Init this
 
     member this.Destroy() = fbo.Dispose()
+
+    static member LEFT_HAND_SIDE (scale: float32) : Position =
+        let w = Viewport.vwidth * scale
+        let h = Viewport.vheight * scale
+        {
+            Left = 0.0f %+ 50.0f
+            Top = 0.5f %- (h * 0.5f)
+            Right = 0.0f %+ (50.0f + w)
+            Bottom = 0.5f %+ (h * 0.5f)
+        }
+    static member RIGHT_HAND_SIDE (scale: float32) : Position =
+        let w = Viewport.vwidth * scale
+        let h = Viewport.vheight * scale
+        {
+            Left = 1.0f %- (50.0f + w)
+            Top = 0.5f %- (h * 0.5f)
+            Right = 1.0f %- 50.0f
+            Bottom = 0.5f %+ (h * 0.5f)
+        }
