@@ -14,11 +14,12 @@ open Interlude.Content
 
 module ImportSkins =
 
-    type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, target_path: string) =
+    type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, target_path: string, existing_folder: string option) =
         inherit Page()
 
         let keymode: Setting<Keymode> = Setting.simple Keymode.``4K``
         let is_arrows: Setting<bool> = Setting.simple false
+        let delete_existing: Setting<bool> = Setting.simple false
 
         override this.Init(parent: Widget) =
             page_container()
@@ -29,6 +30,14 @@ module ImportSkins =
                 PageSetting("osuskinimport.isarrows", Selector<_>.FromBool(is_arrows))
                     .Pos(2)
             )
+            |+ 
+                match existing_folder with
+                | Some folder ->
+                    [
+                        Text([folder] %> "osuskinimport.delete_prompt", Align = Alignment.LEFT, Position = pretty_pos(5, 2, PageWidth.Full).Margin(Style.PADDING))
+                        PageSetting("osuskinimport.delete_existing", Selector<_>.FromBool(delete_existing)).Pos(7)
+                    ]
+                | None -> []
             |+ PageButton
                 .Once(
                     "osuskinimport.confirm",
@@ -40,6 +49,11 @@ module ImportSkins =
                                 target_path
                                 (int keymode.Value)
                                 (keymode.Value = Keymode.``4K`` && is_arrows.Value)
+                            if delete_existing.Value then 
+                                try
+                                    Directory.Delete(Path.Combine(get_game_folder "Noteskins", existing_folder.Value), true)
+                                with err ->
+                                    Logging.Error("Error deleting old noteskin")
                             Noteskins.load ()
                             Noteskins.selected_id.Set (Path.GetFileName(target_path))
                         with err ->
@@ -47,7 +61,7 @@ module ImportSkins =
 
                         Menu.Exit()
                 )
-                .Pos(5)
+                .Pos(if existing_folder.IsSome then 10 else 5)
             |> this.Content
 
             base.Init parent
@@ -60,10 +74,12 @@ module ImportSkins =
 
         match OsuSkinConverter.check_before_convert path with
         | Ok ini ->
+            let existing_id = Noteskins.list() |> Seq.map fst |> Seq.tryFind (fun x -> x.StartsWith id)
             ImportOsuNoteskinPage(
                 ini,
                 path,
-                Path.Combine(get_game_folder "Noteskins", id + "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss"))
+                Path.Combine(get_game_folder "Noteskins", id + "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")),
+                existing_id
             )
                 .Show()
         | Error err -> 
