@@ -291,8 +291,12 @@ module Noteskins =
                 )
                 |+ LoadingIndicator.Border(fun () -> loading))
             |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to noteskins repository"))
-            |+ Text(%"imports.noteskins.hint_a", Position = Position.SliceBottom(100.0f).SliceTop(50.0f))
-            |+ Text(%"imports.noteskins.hint_b", Position = Position.SliceBottom 50.0f)
+            |+ Text(%"imports.noteskins.hint_a", Position = Position.TrimLeft(300.0f).SliceBottom(100.0f).SliceTop(50.0f), Align = Alignment.RIGHT)
+            |+ Text(%"imports.noteskins.hint_b", Position = Position.TrimLeft(300.0f).SliceBottom(50.0f), Align = Alignment.RIGHT)
+            |+ Button(Icons.DOWNLOAD + " " + %"osuskinimport.list_skins", 
+                (fun () -> FromOsu.ImportSkins.OsuSkinsListPage().Show()),
+                Position = Position.SliceLeft(300.0f).SliceBottom(70.0f).Translate(0.0f, -15.0f)
+            )
             |* scroll
 
             base.Init parent
