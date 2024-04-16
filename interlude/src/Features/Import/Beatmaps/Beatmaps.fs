@@ -2,10 +2,8 @@
 
 open System
 open System.Text.RegularExpressions
-open System.Text.Json
 open System.IO
 open Percyqaz.Common
-open Percyqaz.Data
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
@@ -15,43 +13,6 @@ open Prelude.Data.Library.Sorting
 open Prelude.Data
 open Interlude.Content
 open Interlude.UI
-
-[<Json.AutoCodec>]
-type NeriNyanBeatmap =
-    {
-        id: int
-        difficulty_rating: float
-        cs: float
-        version: string
-        mode: string
-    }
-
-[<Json.AutoCodec>]
-type NeriNyanBeatmapset =
-    {
-        id: int
-        artist: string
-        title: string
-        creator: string
-        favourite_count: int
-        play_count: int
-        status: string
-        beatmaps: NeriNyanBeatmap array
-    }
-
-[<Json.AutoCodec>]
-type NeriNyanBeatmapSearch = NeriNyanBeatmapset array
-
-[<Json.AutoCodec>]
-type NeriNyanBeatmapSearchRequest =
-    {
-        m: string
-        page: int
-        query: string
-        ranked: string
-        sort: string
-        cs: {| min: float; max: float |}
-    }
 
 type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
     inherit
@@ -334,10 +295,10 @@ module Beatmaps =
                         | Some bad_json ->
                             let fixed_json = Regex.Replace(bad_json, @"[^\u0000-\u007F]+", "")
 
-                            try
-                                let data = JsonSerializer.Deserialize<NeriNyanBeatmapSearch>(fixed_json)
+                            match JSON.FromString(fixed_json) with 
+                            | Ok data ->
                                 return Some data, action_at_bottom
-                            with err ->
+                            | Error err ->
                                 Logging.Error("Failed to parse json data from " + url, err)
                                 return None, action_at_bottom
                         | None -> return None, action_at_bottom
