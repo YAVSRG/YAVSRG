@@ -77,8 +77,9 @@
     <Compile Include="Features\Stats\Stats.fs" />
     <Compile Include="Features\Stats\Tables.fs" />
     <Compile Include="Features\Stats\Screen.fs" />
+    <Compile Include="Features\Import\FromOsu\ImportSkins.fs" />
+    <Compile Include="Features\Import\FromOsu\ImportScores.fs" />
     <Compile Include="Features\Import\Shared.fs" />
-    <Compile Include="Features\Import\Scores.fs" />
     <Compile Include="Features\Import\Mounts\Create.fs" />
     <Compile Include="Features\Import\Mounts\Edit.fs" />
     <Compile Include="Features\Import\Mounts\Display.fs" />

@@ -20,7 +20,7 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
         NavigationContainer.Row<Button>(WrapNavigation = false, Position = Position.SliceBottom(60.0f).Margin 5.0f)
         |+ Button(
             sprintf "%s %s" Icons.EDIT_2 (%"imports.mount.edit"),
-            (fun () -> EditMountPage(setting).Show()),
+            (fun () -> EditMountPage(game, setting).Show()),
             Position =
                 { Position.Default with
                     Right = 0.5f %+ 0.0f

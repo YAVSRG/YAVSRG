@@ -1,8 +1,8 @@
-﻿namespace Interlude.Features.Import
+﻿namespace Interlude.Features.Import.FromOsu
 
 open System
-open System.Text
 open System.IO
+open System.Text
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Charts.Conversions
@@ -14,7 +14,7 @@ open Prelude.Data.Library.Caching
 open Interlude.Options
 open Interlude.Content
 
-module Scores =
+module ImportScores =
 
     let private import_osu_scores () =
         match options.OsuMount.Value with
