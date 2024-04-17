@@ -60,14 +60,6 @@ module OsuSkinConverter =
     let load_animation_frame_images (paths: string list list) =
         paths |> List.map (fun row -> row |> List.map load_bmp)
 
-    type ColumnTextures =
-        {
-            Note: string
-            Head: string
-            Body: string
-            Tail: string
-        }
-
     let pad (width: int, height: int) (image: Bitmap) : Bitmap =
         assert (image.Width <= width)
 
@@ -148,7 +140,7 @@ module OsuSkinConverter =
                 square_image.Dispose()
 
                 if image.Height > 2000 then
-                    Logging.Info("Detected 'percy ln' in skin, trying to guess what the tail texture should be")
+                    Logging.Debug("Detected 'percy ln' in skin, trying to guess what the tail texture should be")
                     let mutable i = 0
                     while i < image.Height && image.[image.Width / 2, i].A < 5uy do
                         i <- i + 1
@@ -181,6 +173,24 @@ module OsuSkinConverter =
 
         percy_ln_fix
 
+    let detect_square_receptors (sample_receptor: Bitmap) : (Bitmap -> Bitmap) option =
+        let mutable top = 0
+        while top < sample_receptor.Height && sample_receptor.[sample_receptor.Width / 2, top].A < 5uy do
+            top <- top + 1
+        
+        let mutable bottom = sample_receptor.Height - 1
+        while bottom > top && sample_receptor.[sample_receptor.Width / 2, bottom].A < 5uy do
+            bottom <- bottom - 1
+
+        let height = bottom - top
+        if height > sample_receptor.Width / 2 && height < sample_receptor.Width * 3 / 2 then
+            Some (fun bmp ->
+                let new_bmp = new Bitmap(sample_receptor.Width, sample_receptor.Width)
+                new_bmp.Mutate(fun img -> img.DrawImage(bmp, Point((-bmp.Width + sample_receptor.Width) / 2, -top + (sample_receptor.Width - height) / 2), 1.0f) |> ignore)
+                new_bmp
+            )
+        else None
+
     let arrow_fix_4k (images: Bitmap list list) =
         match images with
         | left :: down :: up :: right :: [] ->
@@ -191,6 +201,14 @@ module OsuSkinConverter =
                 right |> List.map (rotate RotateMode.Rotate90)
             ]
         | not_4k -> not_4k
+
+    type ColumnTextures =
+        {
+            Note: string
+            Head: string
+            Body: string
+            Tail: string
+        }
 
     let convert (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
 
@@ -276,7 +294,7 @@ module OsuSkinConverter =
                 |> load_animation_frame_images
                 |> convert_element_textures target "holdtail"
             with err ->
-                Logging.Warn("Error in holdtail textures - Using hold head textures for compatibility", err)
+                Logging.Debug("Error in holdtail textures - Using hold head textures for compatibility", err)
                 flipholdtail <- true
                 useholdtail <- false
 
@@ -289,17 +307,31 @@ module OsuSkinConverter =
                 |> List.concat
                 |> List.map (fun id -> get_single_filename(id, source).Value)
                 |> List.map (fun path -> (if path.Contains "@2" then true else false), load_bmp path)
+
             let height =
                 key_textures
                 |> Seq.map (fun (is_2x, bmp) -> if is_2x then bmp.Height else bmp.Height * 2)
                 |> Seq.max
+
             let width = float32 keymode_settings.ColumnWidth.[0] * 3.2f |> int
-            key_textures
-            |> Seq.map (fun (is_2x, bmp) -> scale_receptor width height is_2x bmp)
-            |> Seq.indexed
-            |> Seq.iter (fun (i, img) -> img.Save(Path.Combine(target, sprintf "receptor-%i-0.png" i)))
+
+            let scaled = 
+                key_textures
+                |> Seq.map (fun (is_2x, bmp) -> scale_receptor width height is_2x bmp)
+                |> Array.ofSeq
+
+            match detect_square_receptors scaled.[0] with
+            | Some transform ->
+                Logging.Debug("Detected 'receptors' in osu mania key textures")
+                scaled
+                |> Seq.indexed
+                |> Seq.iter (fun (i, img) -> (transform img).Save(Path.Combine(target, sprintf "receptor-%i-0.png" i)))
+            | None ->
+                scaled
+                |> Seq.indexed
+                |> Seq.iter (fun (i, img) -> img.Save(Path.Combine(target, sprintf "receptor-%i-0.png" i)))
+                key_receptors <- true
             JSON.ToFile (Path.Combine(target, "receptor.json"), false) { Rows = key_textures.Length; Columns = 1; Mode = Loose }
-            key_receptors <- true
         with err ->
             Logging.Warn("Error converting keys to receptors", err)
             try
