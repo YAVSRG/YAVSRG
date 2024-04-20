@@ -308,9 +308,21 @@ module NoteskinTextureRules =
                 }
                 "judgement-counter-bg",
                 {
-                    IsRequired = fun config -> config.HUD.JudgementCounterUseBackground
+                    IsRequired = fun config -> config.HUD.JudgementCounterBackground.Enable
                     MustBeSquare = K false
                     MaxGridSize = K(1, 1)
+                }
+                "judgement-counter-judgements",
+                {
+                    IsRequired = fun config -> config.HUD.JudgementCounterUseJudgementTextures
+                    MustBeSquare = K false
+                    MaxGridSize = K(16, 1)
+                }
+                "judgement-counter-font",
+                {
+                    IsRequired = fun config -> config.HUD.JudgementCounterUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(10, 1)
                 }
                 "combo-font",
                 {

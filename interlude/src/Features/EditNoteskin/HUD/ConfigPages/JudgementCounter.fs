@@ -21,8 +21,10 @@ type JudgementCounterPage(on_close: unit -> unit) as this =
         Setting.simple user_options.JudgementCounterFadeTime
         |> Setting.bound 100.0 1000.0
 
-    let use_background = Setting.simple noteskin_options.JudgementCounterUseBackground
-    let background_scale = Setting.simple noteskin_options.JudgementCounterBackgroundScale |> Setting.bound 0.5f 2.0f
+    let use_background = Setting.simple noteskin_options.JudgementCounterBackground.Enable
+    let background_scale = Setting.simple noteskin_options.JudgementCounterBackground.Scale |> Setting.bound 0.5f 2.0f
+    let background_offset_x = Setting.percentf noteskin_options.JudgementCounterBackground.AlignmentX
+    let background_offset_y = Setting.percentf noteskin_options.JudgementCounterBackground.AlignmentY
 
     let preview =
         { new ConfigPreview(0.35f, pos) with
@@ -61,8 +63,13 @@ type JudgementCounterPage(on_close: unit -> unit) as this =
 
         Noteskins.save_hud_config 
             { Content.NoteskinConfig.HUD with
-                JudgementCounterUseBackground = use_background.Value
-                JudgementCounterBackgroundScale = background_scale.Value
+                JudgementCounterBackground = 
+                    {
+                        Enable = use_background.Value
+                        Scale = background_scale.Value
+                        AlignmentX = background_offset_x.Value
+                        AlignmentY = background_offset_y.Value
+                    }
             }
 
         on_close ()

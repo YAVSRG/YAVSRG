@@ -11,7 +11,7 @@ open Interlude.Features.Play
 
 module Combo =
     
-    let draw_noteskin_font(texture: Sprite, bounds: Rect, color: Color, combo: int, spacing: float32) =
+    let draw_combo_centered(texture: Sprite, bounds: Rect, color: Color, combo: int, spacing: float32) =
         let combo_text = combo.ToString()
         let char_width = float32 texture.Width
         let width = (float32 combo_text.Length + (float32 combo_text.Length - 1.0f) * spacing) * char_width
@@ -65,6 +65,6 @@ type Combo(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, s
         let bounds = this.Bounds.Expand amt
 
         if noteskin_options.ComboUseFont then
-            Combo.draw_noteskin_font(font_texture, bounds, color.Value, combo, noteskin_options.ComboFontSpacing)
+            Combo.draw_combo_centered(font_texture, bounds, color.Value, combo, noteskin_options.ComboFontSpacing)
         else
             Text.fill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)

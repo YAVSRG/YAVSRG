@@ -61,6 +61,7 @@ type HUDUserOptions =
 
         JudgementCounterEnabled: bool
         JudgementCounterFadeTime: float
+        JudgementCounterShowRatio: bool
 
         RateModMeterEnabled: bool
         RateModMeterShowMods: bool
@@ -97,6 +98,7 @@ type HUDUserOptions =
 
             JudgementCounterEnabled = false
             JudgementCounterFadeTime = 200.0
+            JudgementCounterShowRatio = false
 
             RateModMeterEnabled = false
             RateModMeterShowMods = true
@@ -115,9 +117,22 @@ type HUDPosition =
     }
 
 [<Json.AutoCodec(false)>]
+type BackgroundTextureOptions =
+    {
+        Enable: bool
+        Scale: float32
+        AlignmentX: float32
+        AlignmentY: float32
+    }
+
+[<Json.AutoCodec(false)>]
 type HUDNoteskinOptions =
     {
         AccuracyPosition: HUDPosition
+        AccuracyUseFont: bool
+        AccuracyFontSpacing: float32
+        AccuracyDotExtraSpacing: float32
+        AccuracyPercentExtraSpacing: float32
 
         TimingDisplayPosition: HUDPosition
 
@@ -128,6 +143,7 @@ type HUDNoteskinOptions =
         ComboFontSpacing: float32
 
         SkipButtonPosition: HUDPosition
+        SkipButtonBackground: BackgroundTextureOptions
 
         JudgementMeterPosition: HUDPosition
         JudgementMeterDuration: float32
@@ -148,12 +164,20 @@ type HUDNoteskinOptions =
         ProgressMeterPosition: HUDPosition
         ProgressMeterColor: Color
         ProgressMeterBackgroundColor: Color
+        ProgressMeterUseFont: bool
+        ProgressMeterFontSpacing: float32
+        ProgressMeterColonExtraSpacing: float32
+        ProgressMeterPercentExtraSpacing: float32
 
         PacemakerPosition: HUDPosition
 
         JudgementCounterPosition: HUDPosition
-        JudgementCounterUseBackground: bool
-        JudgementCounterBackgroundScale: float32
+        JudgementCounterBackground: BackgroundTextureOptions
+        JudgementCounterUseFont: bool
+        JudgementCounterFontSpacing: float32
+        JudgementCounterColonExtraSpacing: float32
+        JudgementCounterUseJudgementTextures: bool
+        JudgementCounterJudgementTextures: Map<int, int option array>
 
         RateModMeterPosition: HUDPosition
 
@@ -169,6 +193,10 @@ type HUDNoteskinOptions =
                     Right = 100.0f, 0.5f
                     Bottom = 120.0f, 0.0f
                 }
+            AccuracyUseFont = false
+            AccuracyFontSpacing = 0.0f
+            AccuracyDotExtraSpacing = 0.0f
+            AccuracyPercentExtraSpacing = 0.0f
             
             TimingDisplayPosition =
                 {
@@ -199,6 +227,13 @@ type HUDNoteskinOptions =
                     Top = 130.0f, 0.5f
                     Right = 200.0f, 0.5f
                     Bottom = 230.0f, 0.5f
+                }
+            SkipButtonBackground = 
+                {
+                    Enable = false
+                    Scale = 1.1f
+                    AlignmentX = 0.5f
+                    AlignmentY = 0.5f
                 }
 
             JudgementMeterPosition = 
@@ -241,6 +276,10 @@ type HUDNoteskinOptions =
                 }
             ProgressMeterColor = Color.FromArgb(100, 220, 220, 220)
             ProgressMeterBackgroundColor = Color.FromArgb(100, 20, 20, 20)
+            ProgressMeterUseFont = false
+            ProgressMeterFontSpacing = 0.0f
+            ProgressMeterColonExtraSpacing = 0.0f
+            ProgressMeterPercentExtraSpacing = 0.0f
 
             PacemakerPosition = 
                 {
@@ -259,8 +298,18 @@ type HUDNoteskinOptions =
                     Right = 220.0f, 0.0f
                     Bottom = -20.0f, 1.0f
                 }
-            JudgementCounterUseBackground = false
-            JudgementCounterBackgroundScale = 1.1f
+            JudgementCounterBackground =
+                {
+                    Enable = false
+                    Scale = 1.1f
+                    AlignmentX = 0.0f
+                    AlignmentY = 0.0f
+                }
+            JudgementCounterUseFont = false
+            JudgementCounterFontSpacing = 0.0f
+            JudgementCounterColonExtraSpacing = 0.0f
+            JudgementCounterUseJudgementTextures = false
+            JudgementCounterJudgementTextures = Map.empty
 
             RateModMeterPosition = 
                 {

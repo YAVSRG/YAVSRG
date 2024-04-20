@@ -25,8 +25,9 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                     judgement_animations[x.Judgement.Value].Reset()
         )
 
-        if noteskin_options.JudgementCounterUseBackground then
-            let lo = (1.0f - noteskin_options.JudgementCounterBackgroundScale) * 0.5f
+        let background = noteskin_options.JudgementCounterBackground
+        if background.Enable then
+            let lo = (1.0f - background.Scale) * 0.5f
             let hi = 1.0f - lo
             this 
             |* Image(
@@ -34,10 +35,10 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                 StretchToFill = false,
                 Position = 
                     { 
-                        Left = lo %+ 0.0f
-                        Top = lo %+ 0.0f
-                        Right = hi %+ 0.0f
-                        Bottom = hi %+ 0.0f
+                        Left = (lo - 0.5f + background.AlignmentX) %+ 0.0f
+                        Top = (lo - 0.5f + background.AlignmentY) %+ 0.0f
+                        Right = (hi - 0.5f + background.AlignmentX) %+ 0.0f
+                        Bottom = (hi - 0.5f + background.AlignmentY) %+ 0.0f
                     }
             )
         base.Init parent
