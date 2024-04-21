@@ -61,7 +61,6 @@ type HUDUserOptions =
 
         JudgementCounterEnabled: bool
         JudgementCounterFadeTime: float
-        JudgementCounterShowRatio: bool
 
         RateModMeterEnabled: bool
         RateModMeterShowMods: bool
@@ -98,7 +97,6 @@ type HUDUserOptions =
 
             JudgementCounterEnabled = false
             JudgementCounterFadeTime = 200.0
-            JudgementCounterShowRatio = false
 
             RateModMeterEnabled = false
             RateModMeterShowMods = true
@@ -175,9 +173,8 @@ type HUDNoteskinOptions =
         JudgementCounterBackground: BackgroundTextureOptions
         JudgementCounterUseFont: bool
         JudgementCounterFontSpacing: float32
-        JudgementCounterColonExtraSpacing: float32
         JudgementCounterUseJudgementTextures: bool
-        JudgementCounterJudgementTextures: Map<int, int option array>
+        JudgementCounterCustomDisplay: Map<int, int option array>
 
         RateModMeterPosition: HUDPosition
 
@@ -307,9 +304,8 @@ type HUDNoteskinOptions =
                 }
             JudgementCounterUseFont = false
             JudgementCounterFontSpacing = 0.0f
-            JudgementCounterColonExtraSpacing = 0.0f
             JudgementCounterUseJudgementTextures = false
-            JudgementCounterJudgementTextures = Map.empty
+            JudgementCounterCustomDisplay = Map.empty
 
             RateModMeterPosition = 
                 {
@@ -329,6 +325,14 @@ type HUDNoteskinOptions =
                     Bottom = -10.0f, 1.0f
                 }
         }
+
+    member this.GetJudgementCounterDisplay(for_ruleset: Ruleset) : int option array =
+        if this.JudgementCounterUseJudgementTextures then
+            match this.JudgementCounterCustomDisplay.TryFind for_ruleset.Judgements.Length with
+            | Some xs -> xs
+            | None -> Array.create for_ruleset.Judgements.Length None
+        else Array.create for_ruleset.Judgements.Length None
+
     member this.GetJudgementMeterDisplay(for_ruleset: Ruleset) : JudgementDisplayType array =
         if this.JudgementMeterUseTexture then
             match this.JudgementMeterCustomDisplay.TryFind for_ruleset.Judgements.Length with

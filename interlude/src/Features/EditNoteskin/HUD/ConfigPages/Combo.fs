@@ -8,6 +8,7 @@ open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
 open Interlude.Options
+open Interlude.Features.Play.HUD
 
 type ComboPage(on_close: unit -> unit) as this =
     inherit Page()
@@ -33,7 +34,7 @@ type ComboPage(on_close: unit -> unit) as this =
         { new ConfigPreviewNew(pos.Value) with
             override this.DrawComponent(bounds) =
                 if use_font.Value then
-                    Interlude.Features.Play.HUD.Combo.draw_noteskin_font(texture, bounds, Color.White, 727, font_spacing.Value)
+                    Combo.draw_combo_centered(texture, bounds, Color.White, 727, font_spacing.Value)
                 else
                     Text.fill (Style.font, "727", bounds, Color.White, Alignment.CENTER)
         }

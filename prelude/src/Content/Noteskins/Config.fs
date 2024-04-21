@@ -312,6 +312,12 @@ module NoteskinTextureRules =
                     MustBeSquare = K false
                     MaxGridSize = K(1, 1)
                 }
+                "skip-button-bg",
+                {
+                    IsRequired = fun config -> config.HUD.SkipButtonBackground.Enable
+                    MustBeSquare = K false
+                    MaxGridSize = K(1, 1)
+                }
                 "judgement-counter-judgements",
                 {
                     IsRequired = fun config -> config.HUD.JudgementCounterUseJudgementTextures
@@ -322,13 +328,25 @@ module NoteskinTextureRules =
                 {
                     IsRequired = fun config -> config.HUD.JudgementCounterUseFont
                     MustBeSquare = K false
-                    MaxGridSize = K(10, 1)
+                    MaxGridSize = K(13, 1)
                 }
                 "combo-font",
                 {
                     IsRequired = fun config -> config.HUD.ComboUseFont
                     MustBeSquare = K false
-                    MaxGridSize = K(10, 1)
+                    MaxGridSize = K(13, 1)
+                }
+                "accuracy-font",
+                {
+                    IsRequired = fun config -> config.HUD.AccuracyUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(13, 1)
+                }
+                "progress-meter-font",
+                {
+                    IsRequired = fun config -> config.HUD.ProgressMeterUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(13, 1)
                 }
             ]
 
