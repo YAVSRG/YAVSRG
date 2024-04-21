@@ -61,6 +61,7 @@ type HUDUserOptions =
 
         JudgementCounterEnabled: bool
         JudgementCounterFadeTime: float
+        JudgementCounterShowRatio: bool
 
         RateModMeterEnabled: bool
         RateModMeterShowMods: bool
@@ -97,6 +98,7 @@ type HUDUserOptions =
 
             JudgementCounterEnabled = false
             JudgementCounterFadeTime = 200.0
+            JudgementCounterShowRatio = false
 
             RateModMeterEnabled = false
             RateModMeterShowMods = true

@@ -8,6 +8,7 @@ open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Gameplay
 
 module Problems =
 
@@ -138,7 +139,15 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                 .Pos(14)
             |+ PageButton(
                 "hud",
-                fun () -> EditHUDPage().Show()
+                fun () ->
+                    if
+                        Chart.WITH_COLORS.IsSome
+                        && Screen.change_new
+                            (fun () -> HUDEditor.edit_hud_screen (Chart.CHART.Value, Chart.WITH_COLORS.Value, fun () -> EditNoteskinPage(true).Show()))
+                            Screen.Type.Practice
+                            Transitions.Flags.Default
+                    then
+                        Menu.Exit()
             )
                 .Tooltip(Tooltip.Info("hud"))
                 .Pos(16)

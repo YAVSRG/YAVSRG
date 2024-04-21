@@ -12,6 +12,7 @@ open Interlude.Features.Gameplay
 type EditHUDPage() as this =
     inherit Page()
 
+    // todo: remove this as it can no longer be seen ?
     let open_hud_editor () =
         if
             Chart.WITH_COLORS.IsSome

@@ -28,6 +28,34 @@ module JudgementCounter =
         for c in count_text do
             Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
             char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
+
+    let draw_ratio_centered(texture: Sprite, bounds: Rect, color: Color, (mv, pf) : int * int, spacing: float32, dot_spacing: float32, colon_spacing: float32) =
+        let ratio_text = sprintf "%.2f:1" (float mv / float pf)
+        let char_width = float32 texture.Width
+        let width = (dot_spacing * 2.0f + colon_spacing * 2.0f + float32 ratio_text.Length + (float32 ratio_text.Length - 1.0f) * spacing) * char_width
+        let height = float32 texture.Height
+        let scale = min (bounds.Width / width) (bounds.Height / height)
+
+        let mutable char_bounds = 
+            Rect.Box(
+                bounds.CenterX - width * scale * 0.5f,
+                bounds.CenterY - height * scale * 0.5f,
+                char_width * scale,
+                height * scale
+            )
+
+        for c in ratio_text do
+            if c = '.' then
+                char_bounds <- char_bounds.Translate(scale * dot_spacing * char_width, 0.0f)
+                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 10) texture)
+                char_bounds <- char_bounds.Translate(scale * (1.0f + dot_spacing + spacing) * char_width, 0.0f)
+            elif c = ':' then
+                char_bounds <- char_bounds.Translate(scale * colon_spacing * char_width, 0.0f)
+                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 11) texture)
+                char_bounds <- char_bounds.Translate(scale * (1.0f + colon_spacing + spacing) * char_width, 0.0f)
+            else
+                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+                char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
         
 type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit Container(NodeType.None)
@@ -76,7 +104,7 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
 
     override this.Draw() =
         base.Draw()
-        let h = this.Bounds.Height / float32 judgement_animations.Length
+        let h = this.Bounds.Height / float32 (judgement_animations.Length + if user_options.JudgementCounterShowRatio then 1 else 0)
         let mutable r = this.Bounds.SliceTop(h)
 
         for i = 0 to state.Ruleset.Judgements.Length - 1 do
@@ -113,3 +141,25 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                 )
 
             r <- r.Translate(0.0f, h)
+
+        if user_options.JudgementCounterShowRatio && state.Scoring.State.Judgements.Length > 1 then
+            let ratio = state.Scoring.State.Judgements.[0], state.Scoring.State.Judgements.[1]
+            if noteskin_options.JudgementCounterUseFont then
+                JudgementCounter.draw_ratio_centered(
+                    font,
+                    r.Shrink(5.0f),
+                    Color.White,
+                    ratio,
+                    noteskin_options.JudgementCounterFontSpacing,
+                    noteskin_options.JudgementCounterDotExtraSpacing,
+                    noteskin_options.JudgementCounterColonExtraSpacing
+                )
+            else
+                let (mv, pf) = ratio
+                Text.fill_b (
+                    Style.font,
+                    sprintf "%.2f:1" (float mv / float pf),
+                    r.Shrink(5.0f),
+                    (Color.White, Color.Black),
+                    Alignment.CENTER
+                )
