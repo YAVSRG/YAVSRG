@@ -28,6 +28,17 @@ type ScoreChartContextMenu(cc: CachedChart) as this =
                 (fun () -> AddToCollectionPage(cc).Show()),
                 Icon = Icons.FOLDER_PLUS
             )
+            |+ PageButton(
+                "chart.delete",
+                fun () -> 
+                    let chart_name = sprintf "%s [%s]" cc.Title cc.DifficultyName
+                    ConfirmPage(
+                        [ chart_name ] %> "misc.confirmdelete",
+                        fun () -> Cache.delete cc Content.Cache
+                    )
+                        .Show()
+                , Icon = Icons.TRASH
+            )
 
         match Content.Table with
         | Some table ->
