@@ -12,7 +12,7 @@ open Interlude.Features.Play
 module Accuracy =
 
     let draw_accuracy_centered(texture: Sprite, bounds: Rect, color: Color, accuracy: float, spacing: float32, dot_spacing: float32, percent_spacing: float32) =
-        let accuracy_text = sprintf "%.2f%%" (accuracy * 100.0)
+        let accuracy_text = sprintf "%.2f%%" (max 0.0 accuracy * 100.0)
         let char_width = float32 texture.Width
         let width = (dot_spacing * 2.0f + percent_spacing + float32 accuracy_text.Length + (float32 accuracy_text.Length - 1.0f) * spacing) * char_width
         let height = float32 texture.Height

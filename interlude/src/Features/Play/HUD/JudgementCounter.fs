@@ -30,7 +30,7 @@ module JudgementCounter =
             char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
     let draw_ratio_centered(texture: Sprite, bounds: Rect, color: Color, (mv, pf) : int * int, spacing: float32, dot_spacing: float32, colon_spacing: float32) =
-        let ratio_text = sprintf "%.2f:1" (float mv / float pf)
+        let ratio_text = if pf = 0 then sprintf "%.2f:0" (float mv) else sprintf "%.2f:1" (float mv / float pf)
         let char_width = float32 texture.Width
         let width = (dot_spacing * 2.0f + colon_spacing * 2.0f + float32 ratio_text.Length + (float32 ratio_text.Length - 1.0f) * spacing) * char_width
         let height = float32 texture.Height
@@ -158,7 +158,7 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                 let (mv, pf) = ratio
                 Text.fill_b (
                     Style.font,
-                    sprintf "%.2f:1" (float mv / float pf),
+                    (if pf = 0 then sprintf "%.2f:0" (float mv) else sprintf "%.2f:1" (float mv / float pf)),
                     r.Shrink(5.0f),
                     (Color.White, Color.Black),
                     Alignment.CENTER
