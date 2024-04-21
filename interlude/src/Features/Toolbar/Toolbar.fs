@@ -27,7 +27,7 @@ type Toolbar() =
     let container = Container(NodeType.None)
     let volume = Volume(Position = Position.Margin(0.0f, HEIGHT))
 
-    do
+    override this.Init(parent) =
         container
         |+ Text(
             Updates.version,
@@ -54,16 +54,8 @@ type Toolbar() =
             )
             |+ InlaidButton(
                 %"menu.options.name",
-                (fun () ->
-                    if
-                        not Toolbar.hidden
-                        && Screen.current_type <> Screen.Type.Play
-                        && Screen.current_type <> Screen.Type.Replay
-                    then
-                        OptionsMenuRoot.show ()
-                ),
-                Icons.SETTINGS,
-                Hotkey = "options"
+                (fun () -> if not Toolbar.hidden then OptionsMenuRoot.show ()),
+                Icons.SETTINGS
             )
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
             |+ (InlaidButton(
@@ -161,6 +153,22 @@ type Toolbar() =
         )
         |* volume
 
+        base.Init parent
+
+        this.Bounds <-
+            if Toolbar.hidden then
+                this.Parent.Bounds.Expand(0.0f, HEIGHT)
+            else
+                this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - Toolbar.slideout_amount.Value))
+
+        this.VisibleBounds <-
+            if Toolbar.hidden then
+                this.Parent.Bounds
+            else
+                this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
+
+        container.Init this
+
     override this.Draw() =
         if Toolbar.hidden then
             volume.Draw()
@@ -210,6 +218,9 @@ type Toolbar() =
 
         if Screen.current_type <> Screen.Type.Score && (%%"screenshot").Tapped() then
             Toolbar.take_screenshot()
+        
+        if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"options").Tapped() then
+            OptionsMenuRoot.show()
 
         Terminal.update ()
 
@@ -227,23 +238,6 @@ type Toolbar() =
                     this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
 
         container.Update(elapsed_ms, moved)
-
-    override this.Init(parent: Widget) =
-        base.Init parent
-
-        this.Bounds <-
-            if Toolbar.hidden then
-                this.Parent.Bounds.Expand(0.0f, HEIGHT)
-            else
-                this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - Toolbar.slideout_amount.Value))
-
-        this.VisibleBounds <-
-            if Toolbar.hidden then
-                this.Parent.Bounds
-            else
-                this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
-
-        container.Init this
 
     override this.Position
         with set _ = failwith "Position can not be set for toolbar"
