@@ -107,7 +107,7 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
         let now = state.CurrentChartTime()
         let percent = now / duration |> max 0.0f |> min 1.0f
 
-        ProgressMeter.draw_pie(this.Bounds, noteskin_options.ProgressMeterColor, noteskin_options.ProgressMeterBackgroundColor, percent)
+        ProgressMeter.draw_pie(this.Bounds.SliceTop(this.Bounds.Width), noteskin_options.ProgressMeterColor, noteskin_options.ProgressMeterBackgroundColor, percent)
 
         if noteskin_options.ProgressMeterUseFont then
 
@@ -116,7 +116,7 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
                     let time_left = (duration - now) / Gameplay.rate.Value |> max 0.0f<ms>
                     ProgressMeter.draw_countdown_centered (
                         font_texture,
-                        this.Bounds.BorderBottom(40.0f).Translate(0.0f, 5.0f), 
+                        this.Bounds.SliceBottom(this.Bounds.Width * noteskin_options.ProgressMeterLabelSize), 
                         Color.White,
                         time_left,
                         noteskin_options.ProgressMeterFontSpacing,
@@ -125,11 +125,11 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
                 | ProgressMeterLabel.Percentage ->
                     ProgressMeter.draw_percent_progress_centered (
                         font_texture,
-                        this.Bounds.BorderBottom(40.0f), 
+                        this.Bounds.SliceBottom(this.Bounds.Width * noteskin_options.ProgressMeterLabelSize), 
                         Color.White,
                         percent,
                         noteskin_options.ProgressMeterFontSpacing,
-                        noteskin_options.ProgressMeterColonExtraSpacing
+                        noteskin_options.ProgressMeterPercentExtraSpacing
                     )
                 | _ -> ()
 

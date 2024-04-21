@@ -52,13 +52,13 @@ type ComboPage(on_close: unit -> unit) as this =
                 PageSetting("hud.combo.growth", Slider(growth_amount))
                     .Pos(4)
                     .Tooltip(Tooltip.Info("hud.combo.growth"))
-                PageSetting("hud.combo.use_font", Selector<_>.FromBool(use_font))
+                PageSetting("hud.generic.use_font", Selector<_>.FromBool(use_font))
                     .Pos(7)
-                    .Tooltip(Tooltip.Info("hud.combo.use_font"))
+                    .Tooltip(Tooltip.Info("hud.generic.use_font"))
                 Conditional(use_font.Get,
-                    PageSetting("hud.combo.font_spacing", Slider.Percent(font_spacing))
+                    PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
                         .Pos(9)
-                        .Tooltip(Tooltip.Info("hud.combo.font_spacing"))
+                        .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
                 )
             ] |> or_require_noteskin)
             |>> Container

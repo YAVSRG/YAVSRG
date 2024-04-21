@@ -86,7 +86,7 @@ type HUDUserOptions =
 
             SkipButtonEnabled = true
 
-            JudgementMeterEnabled = false
+            JudgementMeterEnabled = true
             JudgementMeterIgnorePerfect = false
             JudgementMeterPrioritiseLower = false
 
@@ -162,6 +162,7 @@ type HUDNoteskinOptions =
         ProgressMeterPosition: HUDPosition
         ProgressMeterColor: Color
         ProgressMeterBackgroundColor: Color
+        ProgressMeterLabelSize: float32
         ProgressMeterUseFont: bool
         ProgressMeterFontSpacing: float32
         ProgressMeterColonExtraSpacing: float32
@@ -268,10 +269,10 @@ type HUDNoteskinOptions =
             ProgressMeterPosition =
                 {
                     RelativeToPlayfield = true
-                    Left = 100.0f, 0.5f
+                    Left = 120.0f, 0.5f
                     Top = 50.0f, 0.0f
-                    Right = 200.0f, 0.5f
-                    Bottom = 110.0f, 0.0f
+                    Right = 180.0f, 0.5f
+                    Bottom = 140.0f, 0.0f
                 }
             ProgressMeterColor = Color.FromArgb(100, 220, 220, 220)
             ProgressMeterBackgroundColor = Color.FromArgb(100, 20, 20, 20)
@@ -279,6 +280,7 @@ type HUDNoteskinOptions =
             ProgressMeterFontSpacing = 0.0f
             ProgressMeterColonExtraSpacing = 0.0f
             ProgressMeterPercentExtraSpacing = 0.0f
+            ProgressMeterLabelSize = 0.4f
 
             PacemakerPosition = 
                 {

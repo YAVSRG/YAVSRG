@@ -8,6 +8,7 @@ open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
 open Interlude.Options
+open Interlude.Features.Play.HUD
 
 type AccuracyPage(on_close: unit -> unit) as this =
     inherit Page()
@@ -20,10 +21,27 @@ type AccuracyPage(on_close: unit -> unit) as this =
     let grade_colors = Setting.simple user_options.AccuracyGradeColors
     let show_name = Setting.simple user_options.AccuracyShowName
 
+    let use_font = Setting.simple noteskin_options.AccuracyUseFont
+    let font_spacing = Setting.simple noteskin_options.AccuracyFontSpacing |> Setting.bound -1.0f 1.0f
+    let font_dot_spacing = Setting.simple noteskin_options.AccuracyDotExtraSpacing |> Setting.bound -1.0f 1.0f
+    let font_percent_spacing = Setting.simple noteskin_options.AccuracyPercentExtraSpacing |> Setting.bound -1.0f 1.0f
+
+    let texture = Content.Texture "accuracy-font"
     let preview =
-        { new ConfigPreview(0.35f, pos) with
+        { new ConfigPreviewNew(pos.Value) with
             override this.DrawComponent(bounds) =
-                Text.fill (Style.font, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
+                if use_font.Value then
+                    Accuracy.draw_accuracy_centered(
+                        texture,
+                        bounds.TrimBottom(bounds.Height * 0.4f),
+                        Color.White,
+                        0.9672,
+                        font_spacing.Value,
+                        font_dot_spacing.Value,
+                        font_percent_spacing.Value
+                    )
+                else
+                    Text.fill (Style.font, "96.72%", bounds.TrimBottom(bounds.Height * 0.3f), Color.White, 0.5f)
 
                 if show_name.Value then
                     Text.fill (Style.font, "SC J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f)
@@ -38,12 +56,31 @@ type AccuracyPage(on_close: unit -> unit) as this =
             |+ PageSetting("hud.accuracy.showname", Selector<_>.FromBool show_name)
                 .Pos(2)
                 .Tooltip(Tooltip.Info("hud.accuracy.showname"))
+            |+ ([
+                PageSetting("hud.generic.use_font", Selector<_>.FromBool(use_font))
+                    .Pos(7)
+                    .Tooltip(Tooltip.Info("hud.generic.use_font")) :> Widget
+                Conditional(use_font.Get,
+                    PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
+                        .Pos(9)
+                        .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+                )
+                Conditional(use_font.Get,
+                    PageSetting("hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
+                        .Pos(11)
+                        .Tooltip(Tooltip.Info("hud.generic.dot_spacing"))
+                )
+                Conditional(use_font.Get,
+                    PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
+                        .Pos(13)
+                        .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
+                )
+            ] |> or_require_noteskin)
             |>> Container
             |+ preview
         )
 
     override this.Title = %"hud.accuracy.name"
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
         options.HUD.Set
@@ -55,6 +92,11 @@ type AccuracyPage(on_close: unit -> unit) as this =
         Noteskins.save_hud_config
             { Content.NoteskinConfig.HUD with
                 AccuracyPosition = pos.Value
+
+                AccuracyUseFont = use_font.Value
+                AccuracyFontSpacing = font_spacing.Value
+                AccuracyDotExtraSpacing = font_dot_spacing.Value
+                AccuracyPercentExtraSpacing = font_percent_spacing.Value
             }
 
         on_close ()

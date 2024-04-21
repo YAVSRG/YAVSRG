@@ -8,6 +8,7 @@ open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
 open Interlude.Options
+open Interlude.Features.Play.HUD
 
 type ProgressMeterPage(on_close: unit -> unit) as this =
     inherit Page()
@@ -21,48 +22,59 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
     let background_color = Setting.simple noteskin_options.ProgressMeterBackgroundColor
     let label = Setting.simple user_options.ProgressMeterLabel
 
+    let label_size = Setting.percentf noteskin_options.ProgressMeterLabelSize
+
+    let use_font = Setting.simple noteskin_options.ProgressMeterUseFont
+    let font_spacing = Setting.simple noteskin_options.ProgressMeterFontSpacing |> Setting.bound -1.0f 1.0f
+    let font_colon_spacing = Setting.simple noteskin_options.ProgressMeterColonExtraSpacing |> Setting.bound -1.0f 1.0f
+    let font_percent_spacing = Setting.simple noteskin_options.ProgressMeterPercentExtraSpacing |> Setting.bound -1.0f 1.0f
+
+    let font_texture = Content.Texture "progress-meter-font"
+
     let preview =
         { new ConfigPreviewNew(pos.Value) with
             override this.DrawComponent(bounds) =
-                let x, y = bounds.Center
-                let r = (min bounds.Width bounds.Height) * 0.5f
-                let angle = System.MathF.PI / 15.0f
+                ProgressMeter.draw_pie(bounds.SliceTop(bounds.Width), color.Value, background_color.Value, 0.6f)
 
-                let outer i =
-                    let angle = float32 i * angle
-                    let struct (a, b) = System.MathF.SinCos(angle)
-                    (x + r * a, y - r * b)
+                if use_font.Value then
 
-                let inner i =
-                    let angle = float32 i * angle
-                    let struct (a, b) = System.MathF.SinCos(angle)
-                    (x + (r - 2f) * a, y - (r - 2f) * b)
+                    match label.Value  with
+                        | ProgressMeterLabel.Countdown ->
+                            let time_left = 447000.0f<ms>
+                            ProgressMeter.draw_countdown_centered (
+                                font_texture,
+                                bounds.SliceBottom(bounds.Width * label_size.Value), 
+                                Color.White,
+                                time_left,
+                                font_spacing.Value,
+                                font_colon_spacing.Value
+                            )
+                        | ProgressMeterLabel.Percentage ->
+                            ProgressMeter.draw_percent_progress_centered (
+                                font_texture,
+                                bounds.SliceBottom(bounds.Width * label_size.Value), 
+                                Color.White,
+                                0.6f,
+                                font_spacing.Value,
+                                font_percent_spacing.Value
+                            )
+                        | _ -> ()
 
-                for i = 0 to 29 do
-                    Draw.untextured_quad
-                        (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
-                        background_color.Value.AsQuad
+                else
 
-                    Draw.untextured_quad
-                        (Quad.createv (inner i) (outer i) (outer (i + 1)) (inner (i + 1)))
-                        Colors.white.O2.AsQuad
+                    let text =
+                        match label.Value with
+                        | ProgressMeterLabel.Countdown -> "7:27"
+                        | ProgressMeterLabel.Percentage -> "60%"
+                        | _ -> ""
 
-                for i = 0 to 17 do
-                    Draw.untextured_quad (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1))) color.Value.AsQuad
-
-                let text =
-                    match label.Value with
-                    | ProgressMeterLabel.Countdown -> "7:27"
-                    | ProgressMeterLabel.Percentage -> "60%"
-                    | _ -> ""
-
-                Text.fill_b (
-                    Style.font,
-                    text,
-                    bounds.BorderBottom(40.0f),
-                    Colors.text_subheading,
-                    Alignment.CENTER
-                )
+                    Text.fill_b (
+                        Style.font,
+                        text,
+                        bounds.SliceBottom(bounds.Width * label_size.Value),
+                        Colors.text_subheading,
+                        Alignment.CENTER
+                    )
         }
 
     do
@@ -71,11 +83,32 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
             |+ PageSetting("hud.progressmeter.label", Selector<ProgressMeterLabel>.FromEnum(label))
                 .Pos(0)
             |+ ([
+                PageSetting("hud.progressmeter.label_size", Slider.Percent(label_size))
+                    .Pos(2)
+                    .Tooltip(Tooltip.Info("hud.progressmeter.label_size")) :> Widget
                 PageSetting("hud.progressmeter.color", ColorPicker(color, true))
-                    .Pos(2, 3) :> Widget
+                    .Pos(4, 3)
                 PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
-                    .Pos(5, 3)
-                ] |> or_require_noteskin)
+                    .Pos(7, 3)
+                PageSetting("hud.generic.use_font", Selector<_>.FromBool(use_font))
+                    .Pos(10)
+                    .Tooltip(Tooltip.Info("hud.generic.use_font")) :> Widget
+                Conditional(use_font.Get,
+                    PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
+                        .Pos(12)
+                        .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+                )
+                Conditional(use_font.Get,
+                    PageSetting("hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
+                        .Pos(14)
+                        .Tooltip(Tooltip.Info("hud.generic.colon_spacing"))
+                )
+                Conditional(use_font.Get,
+                    PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
+                        .Pos(16)
+                        .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
+                )
+            ] |> or_require_noteskin)
             |>> Container
             |+ preview
         )
@@ -92,6 +125,12 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
             { Content.NoteskinConfig.HUD with
                 ProgressMeterColor = color.Value
                 ProgressMeterBackgroundColor = background_color.Value
+                ProgressMeterLabelSize = label_size.Value
+
+                ProgressMeterUseFont = use_font.Value
+                ProgressMeterFontSpacing = font_spacing.Value
+                ProgressMeterColonExtraSpacing = font_colon_spacing.Value
+                ProgressMeterPercentExtraSpacing = font_percent_spacing.Value
             }
 
         on_close ()

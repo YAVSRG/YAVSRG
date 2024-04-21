@@ -76,7 +76,7 @@ type Accuracy(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions
             this
             |* Text(
                 (fun () -> state.Scoring.Name),
-                Color = K(Color.White, Color.Transparent),
+                Color = K Colors.text_subheading,
                 Align = Alignment.CENTER,
                 Position =
                     { Position.Default with
