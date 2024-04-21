@@ -173,6 +173,8 @@ type HUDNoteskinOptions =
         JudgementCounterBackground: BackgroundTextureOptions
         JudgementCounterUseFont: bool
         JudgementCounterFontSpacing: float32
+        JudgementCounterDotExtraSpacing: float32
+        JudgementCounterColonExtraSpacing: float32
         JudgementCounterUseJudgementTextures: bool
         JudgementCounterCustomDisplay: Map<int, int option array>
 
@@ -304,6 +306,8 @@ type HUDNoteskinOptions =
                 }
             JudgementCounterUseFont = false
             JudgementCounterFontSpacing = 0.0f
+            JudgementCounterDotExtraSpacing = 0.0f
+            JudgementCounterColonExtraSpacing = 0.0f
             JudgementCounterUseJudgementTextures = false
             JudgementCounterCustomDisplay = Map.empty
 

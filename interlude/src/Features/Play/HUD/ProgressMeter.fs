@@ -58,7 +58,7 @@ module ProgressMeter =
         for c in progress_text do
             if c = '%' then
                 char_bounds <- char_bounds.Translate(scale * percent_spacing * char_width, 0.0f)
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 11) texture)
+                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 12) texture)
             else
                 Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
@@ -88,7 +88,7 @@ module ProgressMeter =
         for c in time_left_text do
             if c = ':' then
                 char_bounds <- char_bounds.Translate(scale * colon_spacing * char_width, 0.0f)
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 10) texture)
+                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 11) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing + colon_spacing) * char_width, 0.0f)
             else
                 Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)

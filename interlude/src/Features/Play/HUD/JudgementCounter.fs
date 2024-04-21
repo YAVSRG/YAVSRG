@@ -94,7 +94,7 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
             match display.[i] with
             | Some texture_index ->
                 Draw.quad 
-                        ((Sprite.fill (r.Shrink(5.0f)) texture).AsQuad)
+                        ((Sprite.fill_left (r.Shrink(5.0f)) texture).AsQuad)
                         Color.White.AsQuad
                         (Sprite.pick_texture (0, texture_index) texture)
             | None ->
@@ -103,13 +103,13 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
 
             if noteskin_options.JudgementCounterUseFont then
                 JudgementCounter.draw_count_right_aligned(font, r.Shrink(5.0f), Color.White, state.Scoring.State.Judgements.[i], noteskin_options.JudgementCounterFontSpacing)
-
-            Text.fill_b (
-                Style.font,
-                state.Scoring.State.Judgements.[i].ToString(),
-                r.Shrink(5.0f),
-                (Color.White, Color.Black),
-                Alignment.RIGHT
-            )
+            else
+                Text.fill_b (
+                    Style.font,
+                    state.Scoring.State.Judgements.[i].ToString(),
+                    r.Shrink(5.0f),
+                    (Color.White, Color.Black),
+                    Alignment.RIGHT
+                )
 
             r <- r.Translate(0.0f, h)

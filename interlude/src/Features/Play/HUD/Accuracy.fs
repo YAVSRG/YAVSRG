@@ -33,7 +33,7 @@ module Accuracy =
                 char_bounds <- char_bounds.Translate(scale * (1.0f + dot_spacing + spacing) * char_width, 0.0f)
             elif c = '%' then
                 char_bounds <- char_bounds.Translate(scale * percent_spacing * char_width, 0.0f)
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 11) texture)
+                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 12) texture)
             else
                 Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
@@ -86,6 +86,7 @@ type Accuracy(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions
         base.Init parent
 
     override this.Draw() =
+        base.Draw()
         if noteskin_options.AccuracyUseFont then
             let text_bounds = this.Bounds.SliceTop(this.Bounds.Height * 0.6f)
             Accuracy.draw_accuracy_centered(
