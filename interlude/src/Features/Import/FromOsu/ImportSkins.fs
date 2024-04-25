@@ -62,6 +62,13 @@ module ImportSkins =
                         Menu.Exit()
                 )
                 .Pos(if existing_folder.IsSome then 10 else 5)
+            |+ Callout.frame
+                (Callout.Normal
+                    .Icon(Icons.INFO)
+                    .Title(%"osu_skin_import.disclaimer.title")
+                    .Body(%"osu_skin_import.disclaimer.body")
+                )
+                (fun (w, h) -> pretty_pos(15, PAGE_BOTTOM - 15, PageWidth.Custom w))
             |> this.Content
 
             base.Init parent
