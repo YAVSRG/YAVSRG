@@ -135,9 +135,12 @@ type AnimationSettingsPage() as this =
             |+ PageSetting("noteskins.animations.explosionoffset", Slider.Percent(explosion_offset_note))
                 .Tooltip(Tooltip.Info("noteskins.animations.explosionoffset"))
                 .Pos(4)
+            |+ PageSetting("noteskins.animations.explosionscale", Slider.Percent(explosion_scale_note))
+                .Tooltip(Tooltip.Info("noteskins.animations.explosionscale"))
+                .Pos(6)
             |+ PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_note)
                 .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
-                .Pos(6)
+                .Pos(8)
             |+ Conditional(
                 explosion_builtin_note.Get,
                 PageSetting(
@@ -145,12 +148,6 @@ type AnimationSettingsPage() as this =
                     Slider(explosion_duration_note |> Setting.f32, Step = 1f)
                 )
                     .Tooltip(Tooltip.Info("noteskins.animations.explosionduration"))
-                    .Pos(8)
-            )
-            |+ Conditional(
-                explosion_builtin_note.Get,
-                PageSetting("noteskins.animations.explosionscale", Slider.Percent(explosion_scale_note))
-                    .Tooltip(Tooltip.Info("noteskins.animations.explosionscale"))
                     .Pos(10)
             )
             |+ Conditional(
@@ -180,14 +177,17 @@ type AnimationSettingsPage() as this =
             |+ PageSetting("noteskins.animations.explosionoffset", Slider.Percent(explosion_offset_hold))
                 .Tooltip(Tooltip.Info("noteskins.animations.explosionoffset"))
                 .Pos(4)
+            |+ PageSetting("noteskins.animations.explosionscale", Slider.Percent(explosion_scale_hold))
+                .Tooltip(Tooltip.Info("noteskins.animations.explosionscale"))
+                .Pos(6)
             |+ PageSetting("noteskins.animations.usereleaseanimation", Selector<_>.FromBool explosion_hold_use_release)
                 .Tooltip(Tooltip.Info("noteskins.animations.usereleaseanimation"))
-                .Pos(6)
+                .Pos(8)
             |+ Conditional(
                 explosion_hold_use_release.Get,
                 PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_release)
                     .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
-                    .Pos(8)
+                    .Pos(10)
             )
             |+ Conditional(
                 (fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value),
@@ -196,12 +196,6 @@ type AnimationSettingsPage() as this =
                     Slider(explosion_duration_hold |> Setting.f32, Step = 1f)
                 )
                     .Tooltip(Tooltip.Info("noteskins.animations.explosionduration"))
-                    .Pos(10)
-            )
-            |+ Conditional(
-                (fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value),
-                PageSetting("noteskins.animations.explosionscale", Slider.Percent(explosion_scale_hold))
-                    .Tooltip(Tooltip.Info("noteskins.animations.explosionscale"))
                     .Pos(12)
             )
             |+ Conditional(

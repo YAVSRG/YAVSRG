@@ -94,8 +94,22 @@ module private Image =
 
     let grayscale (brightness: float32) (image: Bitmap) : Bitmap =
         let new_image = image.Clone()
-        new_image.Mutate(fun i -> i.Grayscale().Brightness(brightness) |> ignore)
+        new_image.Mutate(fun img -> img.Grayscale().Brightness(brightness) |> ignore)
         new_image
+
+    type PixelFormats.Rgba32 with
+        member this.BlackToTransparent =
+            let new_alpha =
+                min 
+                    this.A
+                    (max this.R this.G |> max this.B)
+            PixelFormats.Rgba32(this.R, this.G, this.B, new_alpha)
+
+    let remove_black_bg (image: Bitmap) : Bitmap =
+        for x = 0 to image.Width - 1 do
+            for y = 0 to image.Height - 1 do
+                image.[x, y] <- image.[x, y].BlackToTransparent
+        image
 
 module OsuSkinConverter =
 
@@ -366,6 +380,9 @@ module OsuSkinConverter =
         let mutable judgement_textures = false
         let mutable judgement_counter_textures = false
 
+        let mutable note_explosions_scale = None
+        let mutable hold_explosions_scale = None
+
         // Generate main textures
         try
             core_textures
@@ -562,7 +579,7 @@ module OsuSkinConverter =
                     "mania-hit50"
                     "mania-hit0"
                 ]
-                |> List.map (fun x -> TextureFile.find(x, source).Value.Load.Image)
+                |> List.map (fun x -> TextureFile.find_animation_frames(x, source).Head.Load.Image)
             let max_width = images |> List.map _.Width |> List.max
             let max_height = images |> List.map _.Height |> List.max
 
@@ -629,8 +646,8 @@ module OsuSkinConverter =
             convert_font_with_extras (
                 source,
                 target,
-                ini.Fonts.ComboPrefix,
-                ini.Fonts.ComboOverlap,
+                ini.Fonts.ScorePrefix,
+                ini.Fonts.ScoreOverlap,
                 "judgement-counter-font"
             )
         with
@@ -638,6 +655,55 @@ module OsuSkinConverter =
             judgement_counter_font_info <- Some info
         | Error err ->
             Logging.Warn("Error converting judgement counter font", err)
+
+        // Convert explosions
+        try
+            let images = 
+                TextureFile.find_animation_frames (keymode_settings.LightingN, source)
+                |> List.map (_.Load >> _.Image)
+            
+            let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
+
+            for i, image in List.indexed images do
+                let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
+                padded.Save(Path.Combine(target, sprintf "noteexplosion-0-%i.png" i))
+                padded.Dispose()
+            
+
+            JSON.ToFile
+                (Path.Combine(target, "noteexplosion.json"), false)
+                {
+                    Rows = 1
+                    Columns = images.Length
+                    Mode = Loose
+                }
+            note_explosions_scale <- Some (480.0f / float32 max_dim)
+        with err ->
+            Logging.Warn("Error converting note explosions", err)
+        
+        try
+            let images = 
+                TextureFile.find_animation_frames (keymode_settings.LightingL, source)
+                |> List.map (_.Load >> _.Image)
+            
+            let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
+
+            for i, image in List.indexed images do
+                let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
+                padded.Save(Path.Combine(target, sprintf "holdexplosion-0-%i.png" i))
+                padded.Dispose()
+            
+
+            JSON.ToFile
+                (Path.Combine(target, "holdexplosion.json"), false)
+                {
+                    Rows = 1
+                    Columns = images.Length
+                    Mode = Loose
+                }
+            hold_explosions_scale <- Some (480.0f / float32 max_dim)
+        with err ->
+            Logging.Warn("Error converting hold explosions", err)
 
         // Generate noteskin.json
         let color_config: ColorConfig =
@@ -697,6 +763,16 @@ module OsuSkinConverter =
                         ProgressMeterColonExtraSpacing = progress_meter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
                         ProgressMeterPercentExtraSpacing = progress_meter_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
                     }
+
+                UseExplosions = note_explosions_scale.IsSome && hold_explosions_scale.IsSome
+                NoteExplosionSettings =
+                    match note_explosions_scale with
+                    | None -> NoteExplosionConfig.Default
+                    | Some scale -> { NoteExplosionConfig.Default with UseBuiltInAnimation = false; Scale = scale }
+                HoldExplosionSettings = 
+                    match hold_explosions_scale with
+                    | None -> HoldExplosionConfig.Default
+                    | Some scale -> { HoldExplosionConfig.Default with Scale = scale }
             }
 
         JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config
