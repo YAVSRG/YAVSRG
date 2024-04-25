@@ -14,7 +14,7 @@
   <PropertyGroup>
     <Optimize>True</Optimize>
     <Tailcalls>True</Tailcalls>
-	<NoWarn>NU1903</NoWarn>
+	<NoWarn>NU1903,NU1902</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

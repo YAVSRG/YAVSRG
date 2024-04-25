@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-	<NoWarn>NU1903</NoWarn>
+	<NoWarn>NU1903,NU1902</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
