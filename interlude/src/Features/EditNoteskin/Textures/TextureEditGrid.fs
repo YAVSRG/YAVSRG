@@ -338,38 +338,3 @@ type TextureEditPage(texture_id: string) as this =
 
     override this.Title = "Texture: " + texture_id
     override this.OnClose() = ()
-
-type TextureCard(id: string, on_click: unit -> unit) as this =
-    inherit
-        FrameContainer(
-            NodeType.Button(fun () ->
-                Style.click.Play()
-                on_click ()
-            ),
-            Fill =
-                (fun () ->
-                    if this.Focused then
-                        Colors.yellow_accent.O1
-                    else
-                        Colors.shadow_2.O2
-                ),
-            Border =
-                (fun () ->
-                    if this.Focused then
-                        Colors.yellow_accent
-                    else
-                        Colors.grey_2.O3
-                )
-        )
-
-    let sprite = Content.Texture id
-
-    do
-        this
-        |+ Image(sprite, Position = Position.Margin(20.0f), StretchToFill = false)
-        |+ Text(id, Align = Alignment.CENTER, Position = Position.Margin(Style.PADDING).SliceBottom(25.0f))
-        |* Clickable.Focus this
-
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
-        Style.hover.Play()

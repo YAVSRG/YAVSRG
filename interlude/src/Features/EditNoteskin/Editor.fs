@@ -3,40 +3,11 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Content
 open Prelude.Content.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
-
-module Problems =
-
-    let problem_card (msg: ValidationMessage) =
-        match msg with
-        | ValidationWarning w ->
-            CalloutCard(
-                Callout
-                    .Normal
-                    .Title(w.Element)
-                    .Body(w.Message)
-                //|> fun c -> match w.SuggestedFix with Some fix -> c.Button(fix.Description, fix.Action) | None -> c
-                , Colors.yellow_accent, Colors.yellow_accent.O2)
-        | ValidationError e ->
-            CalloutCard(
-                Callout
-                    .Normal
-                    .Title(e.Element)
-                    .Body(e.Message)
-                //|> fun c -> match e.SuggestedFix with Some fix -> c.Button(fix.Description, fix.Action) | None -> c
-                , Colors.red_accent, Colors.red.O2)
-
-    let problems_loader = 
-        { new Async.SwitchServiceSeq<Noteskin * DynamicFlowContainer.Vertical<CalloutCard>, (unit -> unit)>() with 
-            override this.Process((noteskin, container)) =
-                noteskin.Validate() |> Seq.map (fun msg -> fun () -> container |* problem_card msg)
-            override this.Handle(action) = action()
-        }
 
 type EditNoteskinPage(from_hotkey: bool) as this =
     inherit Page()
@@ -47,28 +18,12 @@ type EditNoteskinPage(from_hotkey: bool) as this =
 
     let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE(0.35f).Translate(0.0f, -100.0f))
 
-    let textures_grid =
-        GridFlowContainer<TextureCard>(
-            PRETTYWIDTH / 5f,
-            5,
-            WrapNavigation = false,
-            Spacing = (15.0f, 15.0f),
-            Position = pretty_pos(3, PAGE_BOTTOM - 3, PageWidth.Normal)
-        )
-
-    let problems_list =
-        DynamicFlowContainer.Vertical<CalloutCard>(
-            Spacing = 15.0f
-       )
+    let textures_tab, refresh_texture_grid = TextureGrid.create noteskin
+    let problems_tab, refresh_problems_list = Problems.create_list noteskin
 
     let refresh () =
-        textures_grid.Clear()
-
-        for texture in noteskin.RequiredTextures do
-            textures_grid |* TextureCard(texture, (fun () -> TextureEditPage(texture).Show()))
-
-        problems_list.Clear()
-        Problems.problems_loader.Request(noteskin, problems_list)
+        refresh_texture_grid()
+        refresh_problems_list()
 
     do
         refresh ()
@@ -151,16 +106,6 @@ type EditNoteskinPage(from_hotkey: bool) as this =
             )
                 .Tooltip(Tooltip.Info("hud"))
                 .Pos(16)
-
-        let textures_tab =
-            textures_grid
-
-        let problems_tab =
-            ScrollContainer(
-                problems_list,
-                Margin = Style.PADDING,
-                Position = pretty_pos(3, PAGE_BOTTOM - 3, PageWidth.Normal)
-            )
 
         let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 

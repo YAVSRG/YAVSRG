@@ -173,7 +173,9 @@
     <Compile Include="Features\EditNoteskin\Colors.fs" />
     <Compile Include="Features\EditNoteskin\Rotations.fs" />
     <Compile Include="Features\EditNoteskin\Animations.fs" />
-    <Compile Include="Features\EditNoteskin\Textures.fs" />
+    <Compile Include="Features\EditNoteskin\Textures\TextureEditGrid.fs" />
+    <Compile Include="Features\EditNoteskin\Textures\TextureList.fs" />
+    <Compile Include="Features\EditNoteskin\Problems.fs" />
     <Compile Include="Features\EditNoteskin\Editor.fs" />
     <Compile Include="Features\Options\System\Hotkeys.fs" />
     <Compile Include="Features\Options\System\Performance.fs" />
