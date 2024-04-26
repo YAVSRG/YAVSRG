@@ -1,1 +1,0 @@
-yavsrg || cli_setup.sh

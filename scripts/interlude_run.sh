@@ -1,1 +1,0 @@
-cd ../interlude/src && dotnet build --configuration Debug -v q && cd bin/Debug/net8.0 && dotnet run --project ../../..

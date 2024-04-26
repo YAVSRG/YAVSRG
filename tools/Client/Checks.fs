@@ -187,3 +187,6 @@ module Check =
         |> Seq.sort 
         |> Seq.map (fun key -> sprintf "%s=%s" key (locale.[key].Replace("\n", "\\n")))
         |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt"), contents)
+
+    let format_all_code () =
+        exec "fantomas" "."
