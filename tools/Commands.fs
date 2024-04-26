@@ -42,5 +42,9 @@
             .WithCommand("server_test_full", "Run entire suite of tests against server while it's running", Server.run_all_tests)
             .WithCommand("down_detector", "Ping several services Interlude depends on for status", Server.down_detector)
 
+            .WithCommand("noteskins_update", "Update the noteskins repo based on noteskins in the folder", Noteskins.generate_index)
+
             .WithCommand("debug_run", "Build and run the game in debug mode", Play.debug_run)
             .WithCommand("update", "Update local git repo to the latest stable tagged release", Play.update)
+            
+            .WithCommand("exit", "Closes the YAVSRG command line", fun () -> System.Environment.Exit(0))

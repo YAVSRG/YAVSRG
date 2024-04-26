@@ -23,6 +23,7 @@
     <Compile Include="Client\Assets.fs" />
     <Compile Include="Client\Play.fs" />
     <Compile Include="Server\Server.fs" />
+    <Compile Include="Content\Noteskins.fs" />
     <Compile Include="Commands.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

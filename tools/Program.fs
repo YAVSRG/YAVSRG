@@ -2,10 +2,7 @@
 open Percyqaz.Shell.Shell
 open YAVSRG.CLI
 
-let ctx =
-    ShellContext.Empty 
-    |> Commands.register
-    |> fun ctx -> ctx.WithCommand("exit", "Closes the YAVSRG command line", fun () -> System.Environment.Exit(0))
+let ctx = ShellContext.Empty |> Commands.register
 
 [<EntryPoint>]
 let main argv =
