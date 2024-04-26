@@ -1,1 +1,37 @@
-{"Features":[{"Title":"Level select","Folder":"Features","Filename":"level_select"},{"Title":"Noteskins","Folder":"Features","Filename":"noteskins"},{"Title":"Rulesets","Folder":"Features","Filename":"rulesets"}],"Getting started":[{"Title":"Adding songs","Folder":"Getting started","Filename":"adding_songs"},{"Title":"How to play","Folder":"Getting started","Filename":"how_to_play"},{"Title":"Performance","Folder":"Getting started","Filename":"performance"}],"Migrating":[{"Title":"osu!mania","Folder":"Migrating","Filename":"migrate_osu_mania"},{"Title":"StepMania/Etterna","Folder":"Migrating","Filename":"migrate_sm_etterna"}]}
+{
+    "Features": [{
+        "Filename": "level_select",
+        "Folder": "Features",
+        "Title": "Level select"
+    }, {
+        "Filename": "noteskins",
+        "Folder": "Features",
+        "Title": "Noteskins"
+    }, {
+        "Filename": "rulesets",
+        "Folder": "Features",
+        "Title": "Rulesets"
+    }],
+    "Getting started": [{
+        "Filename": "adding_songs",
+        "Folder": "Getting started",
+        "Title": "Adding songs"
+    }, {
+        "Filename": "how_to_play",
+        "Folder": "Getting started",
+        "Title": "How to play"
+    }, {
+        "Filename": "performance",
+        "Folder": "Getting started",
+        "Title": "Performance"
+    }],
+    "Migrating": [{
+        "Filename": "migrate_osu_mania",
+        "Folder": "Migrating",
+        "Title": "osu!mania"
+    }, {
+        "Filename": "migrate_sm_etterna",
+        "Folder": "Migrating",
+        "Title": "StepMania/Etterna"
+    }]
+}

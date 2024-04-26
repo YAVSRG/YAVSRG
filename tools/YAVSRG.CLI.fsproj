@@ -19,6 +19,7 @@
     <Compile Include="Client\Version.fs" />
     <Compile Include="Client\Releases.fs" />
     <Compile Include="Client\Assets.fs" />
+    <Compile Include="Docs\Wiki.fs" />
     <Compile Include="Docs\Site.fs" />
     <Compile Include="Commands.fs" />
     <Compile Include="Program.fs" />

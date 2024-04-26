@@ -21,3 +21,4 @@
             .WithCommand("bundle_assets", "Bundle all assets for build pipeline", Assets.bundle_assets)
 
             .WithCommand("generate_site", "Generate site and wiki pages", Site.generate_site)
+            .WithCommand("generate_wiki_toc", "Generate markdown wiki table of contents", Wiki.generate_toc)
