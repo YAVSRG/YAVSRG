@@ -4,24 +4,10 @@ open System
 open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
-open Percyqaz.Shell
 open Prelude.Gameplay.Mods
 open Interlude.Tools.Utils
 
 module Check =
-
-    let rec private walk_fs_files (dir: string) : (string * string) seq =
-        seq {
-            for file in Directory.GetFiles(dir) do
-                if Path.GetExtension(file).ToLower() = ".fs" then
-                    yield file, File.ReadAllText file
-
-            for dir in Directory.GetDirectories(dir) do
-                let name = Path.GetFileName dir
-
-                if name <> "bin" && name <> "obj" then
-                    yield! walk_fs_files dir
-        }
 
     let private load_locale (file: string) =
         let mapping = new Dictionary<string, string>()
@@ -42,7 +28,7 @@ module Check =
             let lines = file_contents.Split('\n').Length
             if lines > 300 then printfn "%s has %i lines" filename lines
 
-    let check_locale (file: string) (cli_fix_issues: bool) =
+    let locale_check (file: string) (cli_fix_issues: bool) =
         let locale = load_locale file
 
         let new_locale = Dictionary(locale)
@@ -156,7 +142,7 @@ module Check =
         for key in to_rename |> Array.truncate 5 do
             printfn "  %s" key
         if to_rename.Length > 5 then printfn "  ..."
-        printf "Rename to >"
+        printf "Rename to > "
         let after = Console.ReadLine()
 
         let replaces (reg: string) (fmt: Printf.StringFormat<string -> string -> string>) (input: string) : string =
@@ -201,10 +187,3 @@ module Check =
         |> Seq.sort 
         |> Seq.map (fun key -> sprintf "%s=%s" key (locale.[key].Replace("\n", "\\n")))
         |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt"), contents)
-
-    let register (ctx: ShellContext) : ShellContext =
-        ctx
-            .WithCommand("check_locale", "Check locale for mistakes", (fun () -> check_locale "en_GB" false))
-            .WithCommand("fix_locale", "Tool to automatically add locale keys", (fun () -> check_locale "en_GB" true))
-            .WithCommand("rename_locale", "Tool to rename locale keys/namespaces", "replaced_key", (fun arg -> locale_rename "en_GB" arg))
-            .WithCommand("check_linecounts", "Check for particularly large source code files", (fun () -> check_linecounts()))

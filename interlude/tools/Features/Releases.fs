@@ -1,58 +1,10 @@
 ﻿namespace Interlude.Tools.Features
 
-open Percyqaz.Shell
+open System.IO
+open System.IO.Compression
 open Interlude.Tools.Utils
 
 module Releases =
-
-    open System.IO
-    open System.IO.Compression
-
-    let mutable current_version =
-        let file = Path.Combine(INTERLUDE_SOURCE_PATH, "Interlude.fsproj")
-        let f = File.ReadAllText file
-
-        let i = f.IndexOf "<AssemblyVersion>"
-        let j = f.IndexOf "</AssemblyVersion>"
-
-        f.Substring(i, j - i).Substring("<AssemblyVersion>".Length)
-
-    let publish () =
-
-        let changelog = Path.Combine(YAVSRG_PATH, "interlude", "docs", "changelog.md")
-        let logtxt = File.ReadAllText(changelog)
-        let latest = logtxt.Split(current_version + "\r\n" + "====", 2).[0]
-
-        if latest.Trim() = "" then
-            failwithf "No changelog for new version. Create this first"
-
-        let v = latest.Split("====", 2).[0].Trim()
-        File.WriteAllText(Path.Combine(YAVSRG_PATH, "interlude", "docs", "changelog-latest.md"), latest)
-
-        printfn "Version: %s -> %s" current_version v
-        printfn "%s" latest
-        let file = Path.Combine(INTERLUDE_SOURCE_PATH, "Interlude.fsproj")
-        let mutable f = File.ReadAllText file
-
-        do
-            let i = f.IndexOf "<AssemblyVersion>"
-            let j = f.IndexOf "</AssemblyVersion>"
-
-            f <- f.Substring(0, i) + "<AssemblyVersion>" + v + f.Substring(j)
-
-        do
-            let i = f.IndexOf "<FileVersion>"
-            let j = f.IndexOf "</FileVersion>"
-
-            f <- f.Substring(0, i) + "<FileVersion>" + v + f.Substring(j)
-
-        File.WriteAllText(file, f)
-
-        current_version <- v
-
-        printfn "Creating git commit"
-
-        exec "git" (sprintf "commit -a -m \"🏷️ Version %s\"" v)
 
     type BuildPlatformInfo =
         {
@@ -139,7 +91,18 @@ module Releases =
                 ExecutableFile = "Interlude"
             }
 
-    let build_win64 () =
+    let build_linux_x64 () =
+        build_platform
+            {
+                Name = "linux-x64"
+                RuntimeId = "linux-x64"
+                BassLibraryFile = "libbass.so"
+                GLFWLibraryFile = "libglfw.so.3.3"
+                SQLiteLibraryFile = "libe_sqlite3.so"
+                ExecutableFile = "Interlude"
+            }
+
+    let build_win_x64 () =
         build_platform
             {
                 Name = "win64"
@@ -149,10 +112,3 @@ module Releases =
                 SQLiteLibraryFile = "e_sqlite3.dll"
                 ExecutableFile = "Interlude.exe"
             }
-
-    let register (ctx: ShellContext) : ShellContext =
-        ctx
-            .WithCommand("version", "Displays the current version of Interlude", (fun () -> current_version))
-            .WithCommand("publish", "Publishes a new version of Interlude", publish)
-            .WithCommand("release_win64", "Build an Interlude release and zip it for upload", build_win64)
-            .WithCommand("release_osx_arm64", "Build an Interlude release and zip it for upload", build_osx_arm64)

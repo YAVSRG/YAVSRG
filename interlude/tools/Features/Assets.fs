@@ -1,15 +1,13 @@
 ﻿namespace Interlude.Tools.Features
 
-open Percyqaz.Shell
+open System.IO
+open System.IO.Compression
 open Prelude.Content.Noteskins
 open Interlude.Tools
 
 module Assets =
 
-    open System.IO
-    open System.IO.Compression
-
-    let make_zip (source: string) (target_zip: string) =
+    let private make_zip (source: string) (target_zip: string) =
         printfn "Making zip: %s" target_zip
 
         if File.Exists target_zip then
@@ -17,11 +15,11 @@ module Assets =
 
         ZipFile.CreateFromDirectory(source, target_zip)
 
-    let cleanup_noteskin_json (id) =
+    let private cleanup_noteskin_json (id) =
         let ns = Path.Combine(Utils.ASSETS_PATH, id) |> Noteskin.FromPath
         ns.Config <- ns.Config
 
-    let main () =
+    let bundle_assets () =
         make_zip
         <| Path.Combine(Utils.ASSETS_PATH, "default")
         <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "default.zip")
@@ -43,6 +41,3 @@ module Assets =
         make_zip
         <| Path.Combine(Utils.ASSETS_PATH, "defaultOrb")
         <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "defaultOrb.isk")
-
-    let register (ctx: ShellContext) : ShellContext =
-        ctx.WithCommand("bundle_assets", "Bundle all assets for build pipeline", main)

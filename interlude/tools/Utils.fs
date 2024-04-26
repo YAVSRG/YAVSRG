@@ -21,3 +21,16 @@ module Utils =
 
     let exec (cmd: string) (args: string) =
         Process.Start(ProcessStartInfo(cmd, args)).WaitForExit()
+
+    let rec walk_fs_files (dir: string) : (string * string) seq =
+        seq {
+            for file in Directory.GetFiles(dir) do
+                if Path.GetExtension(file).ToLower() = ".fs" then
+                    yield file, File.ReadAllText file
+
+            for dir in Directory.GetDirectories(dir) do
+                let name = Path.GetFileName dir
+
+                if name <> "bin" && name <> "obj" then
+                    yield! walk_fs_files dir
+        }

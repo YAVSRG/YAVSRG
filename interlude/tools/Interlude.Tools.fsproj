@@ -15,9 +15,11 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
-    <Compile Include="Features\Check.fs" />
+    <Compile Include="Features\Checks.fs" />
+    <Compile Include="Features\Version.fs" />
     <Compile Include="Features\Releases.fs" />
     <Compile Include="Features\Assets.fs" />
+    <Compile Include="Commands.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

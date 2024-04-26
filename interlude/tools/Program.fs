@@ -1,10 +1,11 @@
 ﻿open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Interlude.Tools
-open Interlude.Tools.Features
 
 let ctx =
-    ShellContext.Empty |> Check.register |> Assets.register |> Releases.register
+    ShellContext.Empty 
+    |> Commands.register
+    |> fun ctx -> ctx.WithCommand("exit", "Closes the YAVSRG command line", fun () -> System.Environment.Exit(0))
 
 [<EntryPoint>]
 let main argv =
