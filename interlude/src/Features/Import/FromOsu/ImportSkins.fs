@@ -115,17 +115,18 @@ module ImportSkins =
                 |+ EmptyState(Icons.IMAGE, %"osu_skin_import.no_skins_found")
                 :> Widget
             else
-                FlowContainer.Vertical<_>(PRETTYHEIGHT, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
-                |+ seq {
-                    for path in osu_skin_paths do
-                        yield PageButton(System.String.Empty, 
-                            fun () ->
-                                import_osu_noteskin(path)
-                            , Text = Path.GetFileName(path)
-                        )
-                }
-                |> ScrollContainer
-                :> Widget
+                ScrollContainer(
+                    FlowContainer.Vertical<_>(PRETTYHEIGHT)
+                    |+ seq {
+                        for path in osu_skin_paths do
+                            yield PageButton(System.String.Empty, 
+                                fun () ->
+                                    import_osu_noteskin(path)
+                                , Text = Path.GetFileName(path)
+                            )
+                    },
+                    Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
+                ) :> Widget
             |> this.Content
             base.Init(parent)
 
