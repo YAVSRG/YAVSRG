@@ -1,24 +1,15 @@
-0.7.20
+0.7.20.1
 ====
 
-Major noteskin update
-Documentation and more sample skins coming this weekend
-
-# New features
-- Custom font support for accuracy meter, progress meter, judgement counter
-- Custom background image support for skip button
-- osu! Skin converter can be accessed from the imports menu rather than just when dropping a skin onto the window
-- Option to delete/replace imported skin with a new version when importing
-- You can open the options menu from the score screen (for endless mode)
-- You can delete charts from the score screen (for endless mode)
-
-# Improvements
-- osu! Skin converter converts explosions + fonts from osu skins
-- Ability to open skin folder/delete skin when editing it
+Patch update as an excuse for me to test out my new CI tools and make sure I didn't break anything
 
 # Bug fixes
-- osu! song imports ingame are fixed
-- Added protection from users running Interlude from a zipped archive
-- osu! Skin converter converts receptors better and not vertically offset
-- osu! Skin converter converts 'percy' long notes better
+- Swapped to Mino for osu! beatmap downloads as chimu.moe is down
+- Fixed osu! skin import list not scrolling when you have many
+
+# Improvements
+In the 'Textures' tab of the noteskin editor, you can now toggle between textures stored as a grid or as loose files  
+This is to suit your preference depending on how you like to edit/distribute images  
+
+In future I plan on enforcing grid textures for zipped .isks as they load faster and it's easier to copy paste a texture as a single grid from them
 
