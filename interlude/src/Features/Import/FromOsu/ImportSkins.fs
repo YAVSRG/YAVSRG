@@ -123,7 +123,9 @@ module ImportSkins =
                                 import_osu_noteskin(path)
                             , Text = Path.GetFileName(path)
                         )
-                } :> Widget
+                }
+                |> ScrollContainer
+                :> Widget
             |> this.Content
             base.Init(parent)
 
