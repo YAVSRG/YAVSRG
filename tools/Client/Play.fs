@@ -2,6 +2,7 @@
 
 open System.IO
 open System.IO.Compression
+open System.Diagnostics
 open YAVSRG.CLI.Utils
 
 module Play =
@@ -45,8 +46,8 @@ module Play =
             update()
 
         if File.Exists(Path.Combine(GAME_FOLDER, "Interlude.exe")) then
-            exec_at GAME_FOLDER "Interlude.exe" ""
+            Process.Start(Path.Combine(GAME_FOLDER, "Interlude.exe")).WaitForExit()
         elif File.Exists(Path.Combine(GAME_FOLDER, "Interlude")) then
-            exec_at GAME_FOLDER "Interlude" ""
+            Process.Start(Path.Combine(GAME_FOLDER, "Interlude")).WaitForExit()
         else
             printfn "Your GAME folder is missing an Interlude executable, run `yavsrg update` to fix it"

@@ -7,29 +7,29 @@ open YAVSRG.CLI.Utils
 module Releases =
 
     let README = """
-    Interlude - Keyboard-based vertically scrolling rhythm game.
-    Copyright (C) 2018-2024 Percyqaz
+Interlude - Keyboard-based vertically scrolling rhythm game.
+Copyright (C) 2018-2024 Percyqaz
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-    ----
+----
 
-    Thank you for playing Interlude!
-    Information, future updates and support available at:
-      https://yavsrg.net
-      OR https://discord.com/invite/tA22tWR
-      OR https://github.com/YAVSRG/YAVSRG
+Thank you for playing Interlude!
+Information, future updates and support available at:
+    https://yavsrg.net
+    OR https://discord.com/invite/tA22tWR
+    OR https://github.com/YAVSRG/YAVSRG
     """
 
     type BuildPlatformInfo =
@@ -43,8 +43,6 @@ module Releases =
         }
 
     let build_platform (info: BuildPlatformInfo) =
-
-        Directory.SetCurrentDirectory(INTERLUDE_SOURCE_PATH)
 
         let build_dir =
             Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net8.0", info.RuntimeId)
@@ -62,7 +60,7 @@ module Releases =
         with _ ->
             ()
 
-        exec
+        exec_at INTERLUDE_SOURCE_PATH
             "dotnet"
             $"publish --configuration Release -r {info.RuntimeId} -p:PublishSingleFile=True --self-contained true"
 
@@ -98,7 +96,7 @@ module Releases =
 
         copy (Path.Combine(build_dir, "Locale")) (Path.Combine(clean_dir, "Locale"))
 
-        File.WriteAllText(Path.Combine(clean_dir, "README.txt"), README)
+        File.WriteAllText(Path.Combine(clean_dir, "README.txt"), README.Trim() + "\n")
 
         printfn "Outputted to: %s" clean_dir
 
