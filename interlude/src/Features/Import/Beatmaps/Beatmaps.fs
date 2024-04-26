@@ -32,7 +32,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
                 Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
 
             WebServices.download_file.Request(
-                (sprintf "https://api.chimu.moe/v1/download/%i?n=1" data.id, target, (fun p -> progress <- p)),
+                (sprintf "https://catboy.best/d/%in" data.id, target, (fun p -> progress <- p)),
                 fun completed ->
                     if completed then
                         Imports.auto_convert.Request(
