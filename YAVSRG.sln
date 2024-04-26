@@ -11,7 +11,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Percyqaz.Flux", "engine\src
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude", "interlude\src\Interlude.fsproj", "{D5EFAE0B-7E9F-4856-98B5-80D3D3F37231}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Tools", "interlude\tools\Interlude.Tools.fsproj", "{811E948A-7F59-4BCE-A655-5CF4ED43E669}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "YAVSRG.CLI", "interlude\tools\YAVSRG.CLI.fsproj", "{811E948A-7F59-4BCE-A655-5CF4ED43E669}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude.Noteskins", "backbeat\noteskins\tools\Interlude.Noteskins.fsproj", "{A61A0594-BA70-4740-ADB4-6FC20EA0B40F}"
 EndProject
@@ -42,7 +42,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CLIENT", "CLIENT", "{096FAB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SHARED", "SHARED", "{FAB19291-E70E-4978-B942-1E21123A7DE3}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Prelude.Playground", "prelude\playground\Prelude.Playground.fsproj", "{8B323AA1-6313-4B0C-8C22-19A84DF83C1E}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Prelude.Playground", "prelude\playground\Prelude.Playground.fsproj", "{8B323AA1-6313-4B0C-8C22-19A84DF83C1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

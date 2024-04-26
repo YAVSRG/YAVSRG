@@ -14,7 +14,7 @@ let main argv =
     if argv.Length > 0 then
         ctx.Evaluate io (String.concat " " argv)
     else
-        printfn "== Interlude Tools CLI =="
+        printfn "== YAVSRG CLI Tools =="
         repl io ctx
 
     0
