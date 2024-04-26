@@ -1,8 +1,8 @@
-﻿ namespace Interlude.Tools
+﻿ namespace YAVSRG.CLI
  
  open Percyqaz.Shell
- open Interlude.Tools.Utils
- open Interlude.Tools.Features
+ open YAVSRG.CLI.Utils
+ open YAVSRG.CLI.Features
 
  module Commands =
 

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Tools
+﻿namespace YAVSRG.CLI
 
 module Utils =
     open System.IO

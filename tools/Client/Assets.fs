@@ -1,9 +1,9 @@
-﻿namespace Interlude.Tools.Features
+﻿namespace YAVSRG.CLI.Features
 
 open System.IO
 open System.IO.Compression
 open Prelude.Content.Noteskins
-open Interlude.Tools
+open YAVSRG.CLI
 
 module Assets =
 

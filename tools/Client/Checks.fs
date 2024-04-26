@@ -1,11 +1,11 @@
-﻿namespace Interlude.Tools
+﻿namespace YAVSRG.CLI
 
 open System
 open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
 open Prelude.Gameplay.Mods
-open Interlude.Tools.Utils
+open YAVSRG.CLI.Utils
 
 module Check =
 

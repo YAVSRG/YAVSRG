@@ -1,9 +1,9 @@
-﻿namespace Interlude.Tools.Features
+﻿namespace YAVSRG.CLI.Features
 
 open System.Text.RegularExpressions
 open System.IO
 open Percyqaz.Data.Markdown
-open Interlude.Tools.Utils
+open YAVSRG.CLI.Utils
 
 module Site =
 

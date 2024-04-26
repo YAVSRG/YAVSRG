@@ -1,8 +1,8 @@
-﻿namespace Interlude.Tools.Features
+﻿namespace YAVSRG.CLI.Features
 
 open System.IO
 open System.IO.Compression
-open Interlude.Tools.Utils
+open YAVSRG.CLI.Utils
 
 module Releases =
 
