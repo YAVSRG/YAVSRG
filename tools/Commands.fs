@@ -66,6 +66,7 @@ module Commands =
             )
 
             .WithCommand("debug_run", "Build and run the game in debug mode", Play.debug_run)
-            .WithCommand("update", "Update local git repo to the latest stable tagged release", Play.update)
+            .WithCommand("update", "Update user copy of Interlude to the latest release", Play.update)
+            .WithCommand("play", "Play Interlude! Build it if not already built", Play.play)
 
             .WithCommand("exit", "Closes the YAVSRG command line", (fun () -> System.Environment.Exit(0)))
