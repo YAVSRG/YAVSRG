@@ -747,7 +747,7 @@ type Storage(storage: StorageType) =
                     for col in 0 .. config.Columns - 1 do
                         File.Delete(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
 
-                this.WriteTextureConfig({ config with Mode = Loose }, name, path)
+                this.WriteTextureConfig({ config with Mode = Grid }, name, path)
             | Grid -> ()
 
     member private this.MutateGridTexture((col, row), action, name: string, [<ParamArray>] path: string array) : bool =
