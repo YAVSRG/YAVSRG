@@ -267,7 +267,7 @@ type Storage(storage: StorageType) =
 
     // Texture loading
 
-    member private this.GetTextureConfig(name: string, [<ParamArray>] path: string array) =
+    member this.GetTextureConfig(name: string, [<ParamArray>] path: string array) =
         let id = String.concat "/" path + "/" + name
 
         if not (texture_config_cache.ContainsKey id) then

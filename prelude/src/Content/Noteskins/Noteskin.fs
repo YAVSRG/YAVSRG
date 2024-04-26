@@ -99,6 +99,8 @@ type Noteskin(storage) as this =
     member this.GetTexture(name: string) : TextureLoadResult =
         this.LoadTexture(name, NoteskinTextureRules.get this.Config name)
 
+    member this.TextureFileMode(name: string) = this.GetTextureConfig(name).Mode
+
     member this.RequiredTextures =
         NoteskinTextureRules.list ()
         |> Seq.filter (NoteskinTextureRules.get this.Config >> _.IsRequired)
