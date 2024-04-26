@@ -11,7 +11,7 @@ module Wiki =
 
     [<Json.AutoCodec>]
     type WikiPage =
-        { 
+        {
             Title: string
             Folder: string
             Filename: string
@@ -29,7 +29,8 @@ module Wiki =
                 let header =
                     split.[1].Split("\n")
                     |> Array.map (fun line ->
-                        let parts = line.Split(":", System.StringSplitOptions.TrimEntries) in (parts.[0], parts.[1]))
+                        let parts = line.Split(":", System.StringSplitOptions.TrimEntries) in (parts.[0], parts.[1])
+                    )
                     |> Map.ofSeq
 
                 if not (header.ContainsKey "title") then
@@ -42,9 +43,11 @@ module Wiki =
             with err ->
                 failwithf "Problem parsing header of file: %s (%O)" path err
 
-        { Title = header_info.["title"]
-          Folder = header_info.["folder"]
-          Filename = Path.GetFileNameWithoutExtension(path) }
+        {
+            Title = header_info.["title"]
+            Folder = header_info.["folder"]
+            Filename = Path.GetFileNameWithoutExtension(path)
+        }
 
     let generate_toc () =
         let wiki_pages =

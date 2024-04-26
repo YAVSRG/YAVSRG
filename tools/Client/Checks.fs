@@ -23,10 +23,12 @@ module Check =
 
         mapping
 
-    let check_linecounts() =
+    let check_linecounts () =
         for filename, file_contents in walk_fs_files YAVSRG_PATH do
             let lines = file_contents.Split('\n').Length
-            if lines > 300 then printfn "%s has %i lines" filename lines
+
+            if lines > 300 then
+                printfn "%s has %i lines" filename lines
 
     let locale_check (file: string) (cli_fix_issues: bool) =
         let locale = load_locale file
@@ -87,9 +89,11 @@ module Check =
             for m in [ "auto"; "pacemaker" ] do
                 find (sprintf "mod.%s.name" m) "Mods"
                 find (sprintf "mod.%s.desc" m) "Mods"
+
             for m in Mods.AVAILABLE_MODS.Keys do
                 find (sprintf "mod.%s.name" m) "Mods"
                 find (sprintf "mod.%s.desc" m) "Mods"
+
                 if Mods.AVAILABLE_MODS.[m].RandomSeed |> not then
                     for i in 1 .. Mods.AVAILABLE_MODS.[m].States - 1 do
                         find (sprintf "mod.%s.%i.name" m i) "Mods"
@@ -113,69 +117,74 @@ module Check =
                 locale.Remove m |> ignore
             else
                 printfn "'%s' is missing!\nFound in %s" m sources.[m]
+
                 if cli_fix_issues then
                     printf "Enter a value: (Leave blank to skip, enter a space to deliberately leave empty)\n> "
+
                     match Console.ReadLine() with
                     | "" -> ()
-                    | new_value -> 
-                        new_locale.Add(m, new_value.Trim())
+                    | new_value -> new_locale.Add(m, new_value.Trim())
 
         for m in locale.Keys do
             printfn "Unused locale key: %s" m
+
             if cli_fix_issues then
                 printfn "Remove it? [Y/N]"
+
                 match Console.ReadLine().ToLower() with
                 | "y" -> new_locale.Remove(m) |> ignore
                 | _ -> ()
 
         if cli_fix_issues then
-            new_locale.Keys 
-            |> Seq.sort 
+            new_locale.Keys
+            |> Seq.sort
             |> Seq.map (fun key -> sprintf "%s=%s" key (new_locale.[key].Replace("\n", "\\n")))
-            |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt"), contents)
+            |> fun contents ->
+                File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt"), contents)
 
     let locale_rename (file: string) (before: string) =
         let locale = load_locale file
+
         let to_rename =
-            locale.Keys |> Seq.where (fun key -> key.StartsWith(before + ".")) |> Array.ofSeq
+            locale.Keys
+            |> Seq.where (fun key -> key.StartsWith(before + "."))
+            |> Array.ofSeq
+
         printfn "This will rename %i keys:" to_rename.Length
+
         for key in to_rename |> Array.truncate 5 do
             printfn "  %s" key
-        if to_rename.Length > 5 then printfn "  ..."
+
+        if to_rename.Length > 5 then
+            printfn "  ..."
+
         printf "Rename to > "
         let after = Console.ReadLine()
 
         let replaces (reg: string) (fmt: Printf.StringFormat<string -> string -> string>) (input: string) : string =
             let mutable result = input
-            for m in Regex(reg.Trim()).Matches(input) do    
+
+            for m in Regex(reg.Trim()).Matches(input) do
                 if m.Groups.[2].Value.StartsWith(before) then
                     let replace_from = m.Groups.[0].Value
-                    let replace_with = sprintf fmt m.Groups.[1].Value (after + m.Groups.[2].Value.Substring(before.Length))
+
+                    let replace_with =
+                        sprintf fmt m.Groups.[1].Value (after + m.Groups.[2].Value.Substring(before.Length))
+
                     result <- result.Replace(replace_from, replace_with)
+
             result
-                
+
         for filename, file_contents in walk_fs_files INTERLUDE_SOURCE_PATH do
             let replaced_contents =
                 file_contents
-                |> replaces 
-                    """ ([^%])%"([a-z\-_\.]*)" """
-                    "%s%%\"%s\""
-                |> replaces 
-                    """ (%> )"([a-z\-_\.]*)" """
-                    "%s\"%s\""
-                |> replaces 
-                    """ PageSetting\((\s*)"([a-z\-_\.]*[^\.])" """
-                    "PageSetting(%s\"%s\""
-                |> replaces 
-                    """ PageButton\((\s*)"([a-z\-_\.]*[^\.])" """
-                    "PageButton(%s\"%s\""
-                |> replaces 
-                    """ PageButton(\s*.Once\(\s*)"([a-z\-_\.]*[^\.])" """
-                    "PageButton%s\"%s\""
-                |> replaces 
-                    """ Tooltip(\s*).Info\("([a-z\-_\.]*)" """
-                    "Tooltip%s.Info(\"%s\""
-            
+                |> replaces """ ([^%])%"([a-z\-_\.]*)" """ "%s%%\"%s\""
+                |> replaces """ (%> )"([a-z\-_\.]*)" """ "%s\"%s\""
+                |> replaces """ PageSetting\((\s*)"([a-z\-_\.]*[^\.])" """ "PageSetting(%s\"%s\""
+                |> replaces """ PageButton\((\s*)"([a-z\-_\.]*[^\.])" """ "PageButton(%s\"%s\""
+                |> replaces """ PageButton(\s*.Once\(\s*)"([a-z\-_\.]*[^\.])" """ "PageButton%s\"%s\""
+                |> replaces """ Tooltip(\s*).Info\("([a-z\-_\.]*)" """ "Tooltip%s.Info(\"%s\""
+
             if replaced_contents <> file_contents then
                 File.WriteAllText(filename, replaced_contents)
 
@@ -183,10 +192,9 @@ module Check =
             locale.[after + key.Substring(before.Length)] <- locale.[key]
             locale.Remove(key) |> ignore
 
-        locale.Keys 
-        |> Seq.sort 
+        locale.Keys
+        |> Seq.sort
         |> Seq.map (fun key -> sprintf "%s=%s" key (locale.[key].Replace("\n", "\\n")))
         |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt"), contents)
 
-    let format_all_code () =
-        exec "fantomas" "."
+    let format_all_code () = exec "fantomas" "."

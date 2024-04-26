@@ -63,10 +63,14 @@ module Noteskins =
                     |> Seq.tryHead
                     |> (function
                     | Some _ -> printfn "Couldn't fix all these issues automatically. Go fix it manually then rerun"
-                    | None -> printfn "Fixed all validation issues automatically. Rerun this tool with the fixed version")
+                    | None ->
+                        printfn "Fixed all validation issues automatically. Rerun this tool with the fixed version")
                 else
 
-                generate_preview (ns, Path.Combine(NOTESKINS_ROOT, "Previews", (Path.ChangeExtension(filename, ".png"))))
+                generate_preview (
+                    ns,
+                    Path.Combine(NOTESKINS_ROOT, "Previews", (Path.ChangeExtension(filename, ".png")))
+                )
 
                 let r, new_skin_added =
                     NoteskinRepo.add

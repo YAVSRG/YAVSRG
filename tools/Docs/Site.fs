@@ -59,10 +59,12 @@ module Site =
     //// WIKI GENERATOR
 
     type private WikiPage =
-        { Title: string
-          Folder: string
-          Html: string
-          Filename: string }
+        {
+            Title: string
+            Folder: string
+            Html: string
+            Filename: string
+        }
 
     let private parse_wiki_file (path: string) =
         let text = File.ReadAllText(path).Replace("\r", "")
@@ -76,7 +78,8 @@ module Site =
                 let header =
                     split.[1].Split("\n")
                     |> Array.map (fun line ->
-                        let parts = line.Split(":", System.StringSplitOptions.TrimEntries) in (parts.[0], parts.[1]))
+                        let parts = line.Split(":", System.StringSplitOptions.TrimEntries) in (parts.[0], parts.[1])
+                    )
                     |> Map.ofSeq
 
                 if not (header.ContainsKey "title") then
@@ -95,15 +98,19 @@ module Site =
             |> Array.map (sprintf "<div class=\"frame text-2xl container flex flex-col mx-auto p-4\">%s</div>")
             |> String.concat ""
 
-        { Title = header_info.["title"]
-          Folder = header_info.["folder"]
-          Html = html
-          Filename = Path.GetFileNameWithoutExtension(path) }
+        {
+            Title = header_info.["title"]
+            Folder = header_info.["folder"]
+            Html = html
+            Filename = Path.GetFileNameWithoutExtension(path)
+        }
 
-    let generate_site() =
+    let generate_site () =
 
         let template = File.ReadAllText(Path.Combine(SITE_PATH, "templates", "page.html"))
-        let changelog_template = File.ReadAllText(Path.Combine(SITE_PATH, "templates", "changelog.html"))
+
+        let changelog_template =
+            File.ReadAllText(Path.Combine(SITE_PATH, "templates", "changelog.html"))
 
         let build_page (file: string) (title: string) (content: string) =
             template.Replace("{{title}}", title).Replace("{{content}}", content)
@@ -117,7 +124,7 @@ module Site =
 
             changelog_template.Replace("{{title}}", title).Replace("{{content}}", content)
             |> fun t -> File.WriteAllText(file, t)
-        
+
         Markdown.Parse(File.ReadAllText(Path.Combine(SITE_PATH, "templates", "terms_of_service.md")))
         |> MarkdownToHtml.render_document
         |> build_page (Path.Combine(SITE_PATH, "files", "terms_of_service.html")) "Terms of Service"
@@ -148,7 +155,8 @@ module Site =
                 folder
                 (pages
                  |> Seq.map (fun page ->
-                     sprintf "<li class=\"\"><a href=\"%s\">%s</a></li>" (page.Filename + ".html") page.Title)
+                     sprintf "<li class=\"\"><a href=\"%s\">%s</a></li>" (page.Filename + ".html") page.Title
+                 )
                  |> String.concat "")
 
         let wiki_sidebar_content =
@@ -159,13 +167,15 @@ module Site =
             |> sprintf
                 "<div class=\"frame text-2xl container flex flex-col mx-auto p-4\"><h1 class=\"text-3xl\">Table of contents</h1>%s</div>"
 
-        let wiki_template = File.ReadAllText(Path.Combine(SITE_PATH, "templates", "wiki.html"))
+        let wiki_template =
+            File.ReadAllText(Path.Combine(SITE_PATH, "templates", "wiki.html"))
 
         for page in wiki_pages do
             wiki_template
                 .Replace("{{title}}", sprintf "%s - Interlude Wiki" page.Title)
                 .Replace("{{content}}", page.Html)
-            |> fun t -> File.WriteAllText(Path.Combine(SITE_PATH, "files", "interlude", "wiki", page.Filename + ".html"), t)
+            |> fun t ->
+                File.WriteAllText(Path.Combine(SITE_PATH, "files", "interlude", "wiki", page.Filename + ".html"), t)
 
         let content =
             File
