@@ -15,7 +15,6 @@
     <Compile Include="Features\Archive\Maintenance.fs" />
     <Compile Include="Features\Archive\Backbot.fs" />
     <Compile Include="Features\Archive\Archive.fs" />
-    <Compile Include="Features\Tables.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

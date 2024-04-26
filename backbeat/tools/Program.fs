@@ -3,6 +3,8 @@ open Percyqaz.Shell.Shell
 open Backbeat.Features
 open Backbeat.Features.Archive
 
+// todo: merge all this stuff into YAVSRG.CLI
+
 let ctx = ShellContext.Empty |> Archive.register |> Rulesets.register
 
 [<EntryPoint>]
