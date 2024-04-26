@@ -13,6 +13,7 @@ module Utils =
     let YAVSRG_PATH = PathHelper.Path()
     let TOOLS_PATH = Path.Combine(YAVSRG_PATH, "tools")
     let ASSETS_PATH = Path.Combine(YAVSRG_PATH, "interlude", "assets")
+    let SITE_PATH = Path.Combine(YAVSRG_PATH, "site")
 
     let BUILD_RESOURCES_PATH =
         Path.Combine(YAVSRG_PATH, "interlude", "src", "Resources")
