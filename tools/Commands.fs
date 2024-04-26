@@ -10,8 +10,8 @@ module Commands =
         Version.publish ()
         Wiki.generate_toc ()
         Site.generate_site ()
-        exec "git" "add ../interlude/docs"
-        exec "git" "add ../site"
+        exec "git" "add interlude/docs"
+        exec "git" "add site"
         exec "git" "commit -m \"📘 Update site changelog & wiki\""
         exec "git" "push"
 
