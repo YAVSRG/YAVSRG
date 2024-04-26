@@ -15,57 +15,61 @@ Various player guides, including a wiki, are built into the game to help you get
 You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in your browser!
 
 **On Windows** - Download the latest release [from the website](https://www.yavsrg.net), extract it and play!  
-**On macOS** - Build instructions for developers below! If you aren't a developer, ask for help [in the Discord](https://discord.gg/tA22tWR) instead  
-**On Linux** - Build instructions for developers below! If you aren't a developer, ask for help [in the Discord](https://discord.gg/tA22tWR) instead  
+**On macOS and Linux** - You currently must build the game from source, I've made this quick and easy, see below
 
-On non-Windows platforms you could also try running the Windows build in WINE or Proton.
-
-<h2 align="center">🧱 Building Interlude <code style="color: red; font-size: 20px">&lt;for developers only&gt;</code></h2>
+<h2 align="center">🧱 Building Interlude</h2>
 
 > [!Note]
 >
 > If you just want to play the game on Windows, **you do *not* need to do this**, instead get the game by downloading the latest release from the site
 
-Cloning the codebase to your machine requires [Git](https://git-scm.com/downloads), and building requires [the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
-Follow the install instructions for your platform
+1. Cloning the codebase to your machine requires [Git](https://git-scm.com/downloads), and building requires [the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
+Follow the install instructions for both of these for your platform
 
-To check out the codebase on your machine:
+2. To set up the codebase on your machine, run these commands:
 ```bash
-# navigate to somewhere you like to store code
-git clone https://github.com/YAVSRG/YAVSRG.git --recurse-submodules
+# Navigate to somewhere you want to store the interlude codebase
+git clone https://github.com/YAVSRG/YAVSRG.git
+cd YAVSRG/scripts
+chmod +x ./setup_repo.sh
+./setup_repo.sh
+chmod +x ./setup_cli.sh
+./setup_cli.sh
 ```
-If you forgot to use `--recurse-submodules` when you cloned, you can manually initialise the submodules:
-```
-git submodule update --init libraries/Percyqaz.Common
-git submodule update --init libraries/Percyqaz.Data
-git submodule update --init libraries/Percyqaz.Shell
-```
+The steps above should set up the `yavsrg` CLI command. Try running `yavsrg version` and seeing a version number.  
+**If this hasn't worked and you are stuck, get assistance from me in [the discord](https://discord.gg/tA22tWR)**
 
-To build and run the game, run the build script:
-```bash
-cd scripts
-chmod +x interlude_run.sh
-./interlude_run.sh
-# On first startup, the game will tell you that you need the correct bass.dll/dynlib/so for your platform placed in ./interlude/src/bin/Debug/net8.0
-# Look for it here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib
-# If your platform isn't there contact me in the Discord or search online for it
-```
+3. Run `yavsrg play` to build and play the latest version.  
+   From now on `yavsrg play` will launch the game when you want to play.  
+    To update your game when a new version comes out, run `yavsrg update`.
 
-To create a distributable zip file of the game, run the toolchain project:
-```bash
-cd interlude/tools
-dotnet run -- release_win64
-cd ../releases
-# interlude_win64.zip is now in the current directory
-# these are the same build artifacts used in the release pipeline
-```
+<h2 align="center">🧱 Building Interlude <code style="color: red; font-size: 20px">&lt;for developers only&gt;</code></h2>
+
+> [!Note]
+>
+> If the setup guide for non-developers on Linux/macOS didn't work, please **do not try these steps** and instead get assistance in [the discord](https://discord.gg/tA22tWR) if all you want to do is play.
+
+The `yavsrg update` command will checkout and build the latest release, if you are a developer you will want to build what is on your local branch instead.
+
+Use `yavsrg debug_run` to build and test the current branch, or [go and look inside at what it does](https://github.com/YAVSRG/YAVSRG/blob/main/tools/Client/Play.fs) and use an IDE feature accordingly.
+
+On first startup via `yavsrg debug_run`, the game will tell you that you need the correct bass.dll/dynlib/so for your platform placed in YAVSRG/interlude/src/bin/Debug/net8.0  
+Look for it here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib  
+If your platform isn't there contact me in the discord or search online for it
+
+If you open YAVSRG.sln in [Visual Studio 2022](https://visualstudio.microsoft.com/vs/community/), setting Interlude as the active project will let you simply build and run with F5 which is my current workflow.
+
+While Interlude stores all its data in the same folder as the exe by default, you can change that to a specific location - In YAVSRG/interlude/src/bin/Debug/net8.0/config.json you can edit `WorkingDirectory` to whatever is convenient
+
+I use `"C:/Interlude/dev"` on Windows  
+If you previously built Interlude as a non-developer, I recommend setting it to `"../../../../../GAME"` so both builds share data
 
 <h2 align="center">🤝 Contributing</h2>
 
-Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, you name it
+Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, etc. I'm active a lot in there
 
 Pull requests are very welcome!
-If you spot a bug, typo or other minor change and have a quick fix, just go right ahead and PR it.
+If you spot a bug, typo or other minor change and have a quick fix, feel free to submit a PR.
 If you want to work on a feature please check with me first via [Discord](https://discord.gg/tA22tWR)
 
 > [!Warning]
