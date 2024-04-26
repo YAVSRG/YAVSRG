@@ -6,6 +6,6 @@
 **/bin
 **/obj
 .vscode/settings.json
-
+**/nupkg
 .fake
 /.vscode/launch.json

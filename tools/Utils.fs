@@ -8,10 +8,10 @@ module Utils =
 
     type PathHelper() =
         static member Path([<CallerFilePath; Optional; DefaultParameterValue("")>] path: string) : string =
-            Path.Combine(path, "..", "..", "..") |> Path.GetFullPath
+            Path.Combine(path, "..", "..") |> Path.GetFullPath
 
     let YAVSRG_PATH = PathHelper.Path()
-    let TOOLS_PATH = Path.Combine(YAVSRG_PATH, "interlude", "tools")
+    let TOOLS_PATH = Path.Combine(YAVSRG_PATH, "tools")
     let ASSETS_PATH = Path.Combine(YAVSRG_PATH, "interlude", "assets")
 
     let BUILD_RESOURCES_PATH =
