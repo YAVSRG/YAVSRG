@@ -59,57 +59,32 @@ type ScoreChartContextMenu(cc: CachedChart) as this =
 type RulesetSwitcher(setting: Setting<string>) =
     inherit Container(NodeType.None)
 
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.BorderTop(min d.Height 500.0f).Margin(Style.PADDING, 0.0f).Translate(0.0f, -10.0f))
+
     override this.Init(parent: Widget) =
         this
-        |* InlaidButton(
+        |+ InlaidButton(
             (fun () -> Rulesets.current.Name),
             (fun () -> this.ToggleDropdown()),
             "",
             Hotkey = "ruleset_switch",
             HoverText = "Switch ruleset"
         )
+        |* dropdown_wrapper
 
         base.Init parent
 
     member this.ToggleDropdown() =
-        match this.Dropdown with
-        | Some _ -> this.Dropdown <- None
-        | _ ->
+        dropdown_wrapper.Toggle(fun () ->
             let rulesets = Rulesets.list ()
-
-            let d =
-                Dropdown
-                    {
-                        Items = rulesets |> Seq.map (fun (id, rs) -> id, rs.Name)
-                        ColorFunc = K Colors.text
-                        OnClose = fun () -> this.Dropdown <- None
-                        Setting = setting
-                    }
-
-            d.Position <-
-                Position
-                    .BorderTop(min d.Height 500.0f)
-                    .Margin(Style.PADDING, 0.0f)
-                    .Translate(0.0f, -10.0f)
-
-            d.Init this
-            this.Dropdown <- Some d
-
-    member val Dropdown: Dropdown<string> option = None with get, set
-
-    override this.Draw() =
-        base.Draw()
-
-        match this.Dropdown with
-        | Some d -> d.Draw()
-        | None -> ()
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        match this.Dropdown with
-        | Some d -> d.Update(elapsed_ms, moved)
-        | None -> ()
+            Dropdown
+                {
+                    Items = rulesets |> Seq.map (fun (id, rs) -> id, rs.Name)
+                    ColorFunc = K Colors.text
+                    OnClose = dropdown_wrapper.Dismiss
+                    Setting = setting
+                }
+        )
 
 type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> unit) as this
     =

@@ -574,6 +574,41 @@ type PositionerInfo(ctx: PositionerContext) =
     let TOP_POSITION : Position = { Left = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Top = 0.0f %- 1.0f; Bottom = 0.0f %+ 60.0f }
     let BOTTOM_POSITION : Position = { Left = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Top = 1.0f %- 60.0f; Bottom = 1.0f %+ 1.0f }
 
+    let dropdown_wrapper = 
+        DropdownWrapper(fun d ->
+            match d with
+            | :? DropdownMenu ->
+                if bottom then 
+                    { 
+                        Left = 1.0f %- 370.0f
+                        Top = 0.0f %- (10.0f + d.Height)
+                        Right = 1.0f %- 30.0f
+                        Bottom = 0.0f %- 10.0f
+                    }
+                else
+                    {
+                        Left = 1.0f %- 370.0f
+                        Top = 1.0f %+ 60.0f
+                        Right = 1.0f %- 30.0f
+                        Bottom = 1.0f %+ (60.0f + d.Height)
+                    }
+            | _ ->
+                if bottom then 
+                    { 
+                        Left = 0.0f %+ 30.0f
+                        Top = 0.0f %- (10.0f + d.Height)
+                        Right = 0.0f %+ 370.0f
+                        Bottom = 0.0f %- 10.0f
+                    }
+                else
+                    {
+                        Left = 0.0f %+ 30.0f
+                        Top = 1.0f %+ 10.0f
+                        Right = 0.0f %+ 370.0f
+                        Bottom = 1.0f %+ (10.0f + d.Height)
+                    }
+        )
+
     override this.Init(parent) =
         NavigationContainer.Row<Button>()
         |+ Button(
@@ -613,91 +648,53 @@ type PositionerInfo(ctx: PositionerContext) =
         )
         |> this.Add
 
+        this |* dropdown_wrapper
+
         this.Position <- BOTTOM_POSITION
         base.Init parent
 
     member private this.ToggleElementDropdown() =
-        match dropdown with
-        | Some _ -> dropdown <- None
-        | _ ->
-            let d =
-                Dropdown
-                    {
-                        Items = [
-                            HUDElement.Combo
-                            HUDElement.SkipButton
-                            HUDElement.ProgressMeter
-                            HUDElement.Accuracy
-                            HUDElement.TimingDisplay
-                            HUDElement.JudgementCounter
-                            HUDElement.JudgementMeter
-                            HUDElement.EarlyLateMeter
-                            HUDElement.RateModMeter
-                            HUDElement.BPMMeter
-                            HUDElement.Pacemaker
-                        ] |> List.map (fun e -> e, HUDElement.name e)
-                        ColorFunc = K Colors.text
-                        OnClose = fun () -> dropdown <- None
-                        Setting =
-                            Setting.make
-                                (fun v -> ctx.Select v)
-                                (fun () -> ctx.Selected)
-                    }
-
-            d.Position <- 
-                if bottom then 
-                    { 
-                        Left = 0.0f %+ 30.0f
-                        Top = 0.0f %- (10.0f + d.Height)
-                        Right = 0.0f %+ 370.0f
-                        Bottom = 0.0f %- 10.0f
-                    }
-                else
-                    {
-                        Left = 0.0f %+ 30.0f
-                        Top = 1.0f %+ 10.0f
-                        Right = 0.0f %+ 370.0f
-                        Bottom = 1.0f %+ (10.0f + d.Height)
-                    }
-            d.Init this
-            dropdown <- Some d
+        dropdown_wrapper.Toggle(fun () ->
+            Dropdown
+                {
+                    Items = [
+                        HUDElement.Combo
+                        HUDElement.SkipButton
+                        HUDElement.ProgressMeter
+                        HUDElement.Accuracy
+                        HUDElement.TimingDisplay
+                        HUDElement.JudgementCounter
+                        HUDElement.JudgementMeter
+                        HUDElement.EarlyLateMeter
+                        HUDElement.RateModMeter
+                        HUDElement.BPMMeter
+                        HUDElement.Pacemaker
+                    ] |> List.map (fun e -> e, HUDElement.name e)
+                    ColorFunc = K Colors.text
+                    OnClose = fun () -> dropdown <- None
+                    Setting =
+                        Setting.make
+                            (fun v -> ctx.Select v)
+                            (fun () -> ctx.Selected)
+                }
+        )
 
     member private this.ToggleAnchorDropdown() =
-        match dropdown with
-        | Some _ -> dropdown <- None
-        | _ ->
-            let d =
-                DropdownMenu
-                    {
-                        Items = [
-                            (fun () -> ctx.ChangePositionRelative(true, Alignment.CENTER)), %"hud.editor.relative_to.playfield_center"
-                            (fun () -> ctx.ChangePositionRelative(true, Alignment.LEFT)), %"hud.editor.relative_to.playfield_left"
-                            (fun () -> ctx.ChangePositionRelative(true, Alignment.RIGHT)), %"hud.editor.relative_to.playfield_right"
-                            (fun () -> ctx.ChangePositionRelative(false, Alignment.CENTER)), %"hud.editor.relative_to.screen_center"
-                            (fun () -> ctx.ChangePositionRelative(false, Alignment.LEFT)), %"hud.editor.relative_to.screen_left"
-                            (fun () -> ctx.ChangePositionRelative(false, Alignment.RIGHT)), %"hud.editor.relative_to.screen_right"
-                        ]
-                        OnClose = fun () -> dropdown <- None
-                    }
-
-            d.Position <- 
-                if bottom then 
-                    { 
-                        Left = 1.0f %- 370.0f
-                        Top = 0.0f %- (10.0f + d.Height)
-                        Right = 1.0f %- 30.0f
-                        Bottom = 0.0f %- 10.0f
-                    }
-                else
-                    {
-                        Left = 1.0f %- 370.0f
-                        Top = 1.0f %+ 60.0f
-                        Right = 1.0f %- 30.0f
-                        Bottom = 1.0f %+ (60.0f + d.Height)
-                    }
-            d.Init this
-            d.Add (Text(%"hud.editor.relative_to", Position = Position.BorderTop 40.0f))
-            dropdown <- Some d
+        dropdown_wrapper.Toggle(fun () ->
+            DropdownMenu
+                {
+                    Items = [
+                        (fun () -> ctx.ChangePositionRelative(true, Alignment.CENTER)), %"hud.editor.relative_to.playfield_center"
+                        (fun () -> ctx.ChangePositionRelative(true, Alignment.LEFT)), %"hud.editor.relative_to.playfield_left"
+                        (fun () -> ctx.ChangePositionRelative(true, Alignment.RIGHT)), %"hud.editor.relative_to.playfield_right"
+                        (fun () -> ctx.ChangePositionRelative(false, Alignment.CENTER)), %"hud.editor.relative_to.screen_center"
+                        (fun () -> ctx.ChangePositionRelative(false, Alignment.LEFT)), %"hud.editor.relative_to.screen_left"
+                        (fun () -> ctx.ChangePositionRelative(false, Alignment.RIGHT)), %"hud.editor.relative_to.screen_right"
+                    ]
+                    OnClose = dropdown_wrapper.Dismiss
+                }
+            |+ Text(%"hud.editor.relative_to", Position = Position.BorderTop 40.0f)
+        )
 
     override this.Update(elapsed_ms, moved) =
         let mutable moved = moved
@@ -720,18 +717,7 @@ type PositionerInfo(ctx: PositionerContext) =
                 moved <- true
                 this.Position <- BOTTOM_POSITION
 
-        match dropdown with
-        | Some d -> d.Update(elapsed_ms, moved)
-        | None -> ()
-
         base.Update(elapsed_ms, moved)
-
-    override this.Draw() =
-        base.Draw()
-        
-        match dropdown with
-        | Some d -> d.Draw()
-        | None -> ()
 
 module HUDEditor =
 

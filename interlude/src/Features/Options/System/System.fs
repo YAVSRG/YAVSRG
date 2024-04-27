@@ -12,48 +12,31 @@ open Interlude.UI.Menu
 type private WindowedResolution(setting: Setting<int * int>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f))
+
     override this.Init(parent) =
         this
         |+ Text((fun () -> let w, h = setting.Value in sprintf "%ix%i" w h), Align = Alignment.LEFT)
-        |* Clickable.Focus this
+        |+ Clickable.Focus this
+        |* dropdown_wrapper
 
         base.Init parent
 
     member this.ToggleDropdown() =
-        match this.Dropdown with
-        | Some _ -> this.Dropdown <- None
-        | _ ->
-            let d =
-                Dropdown
-                    {
-                        Items = WindowResolution.presets |> Seq.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
-                        ColorFunc = K Colors.text
-                        OnClose = fun () -> this.Dropdown <- None
-                        Setting = setting
-                    }
-
-            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
-            d.Init this
-            this.Dropdown <- Some d
-
-    member val Dropdown: Dropdown<int * int> option = None with get, set
-
-    override this.Draw() =
-        base.Draw()
-
-        match this.Dropdown with
-        | Some d -> d.Draw()
-        | None -> ()
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        match this.Dropdown with
-        | Some d -> d.Update(elapsed_ms, moved)
-        | None -> ()
+        dropdown_wrapper.Toggle(fun () ->
+            Dropdown
+                {
+                    Items = WindowResolution.presets |> Seq.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
+                    ColorFunc = K Colors.text
+                    OnClose = dropdown_wrapper.Dismiss
+                    Setting = setting
+                }
+        )
 
 type private VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> FullscreenVideoMode array) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
+
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(560.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f))
 
     override this.Init(parent) =
         this
@@ -61,46 +44,25 @@ type private VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit 
             (fun () -> let mode = setting.Value in sprintf "%ix%i@%ihz" mode.Width mode.Height mode.RefreshRate),
             Align = Alignment.LEFT
         )
-        |* Clickable.Focus this
+        |+ Clickable.Focus this
+        |* dropdown_wrapper
 
         base.Init parent
 
     member this.ToggleDropdown() =
-        match this.Dropdown with
-        | Some _ -> this.Dropdown <- None
-        | _ ->
-            let d =
-                Dropdown
-                    {
-                        Items =
-                            modes_thunk ()
-                            |> Seq.map (fun mode ->
-                                mode, sprintf "%ix%i@%ihz" mode.Width mode.Height mode.RefreshRate
-                            )
-                        ColorFunc = K Colors.text
-                        OnClose = fun () -> this.Dropdown <- None
-                        Setting = setting
-                    }
-
-            d.Position <- Position.SliceTop(560.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
-            d.Init this
-            this.Dropdown <- Some d
-
-    member val Dropdown: Dropdown<FullscreenVideoMode> option = None with get, set
-
-    override this.Draw() =
-        base.Draw()
-
-        match this.Dropdown with
-        | Some d -> d.Draw()
-        | None -> ()
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        match this.Dropdown with
-        | Some d -> d.Update(elapsed_ms, moved)
-        | None -> ()
+        dropdown_wrapper.Toggle(fun () ->
+            Dropdown
+                {
+                    Items =
+                        modes_thunk ()
+                        |> Seq.map (fun mode ->
+                            mode, sprintf "%ix%i@%ihz" mode.Width mode.Height mode.RefreshRate
+                        )
+                    ColorFunc = K Colors.text
+                    OnClose = dropdown_wrapper.Dismiss
+                    Setting = setting
+                }
+        )
 
 type SystemPage() as this =
     inherit Page()

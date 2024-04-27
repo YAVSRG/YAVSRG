@@ -10,7 +10,7 @@ module private Dropdown =
 
     let ITEMSIZE = 55.0f
 
-    type Item(label: string, color: Color * Color, onclick: unit -> unit) as this =
+    type Item(label: string, color: Color * Color, onclick: unit -> unit) =
         inherit
             Container(
                 NodeType.Button(fun () ->
@@ -19,9 +19,11 @@ module private Dropdown =
                 )
             )
 
-        do
-            this |+ Clickable.Focus(this, Floating = true)
+        override this.Init(parent) =
+            this 
+            |+ Clickable.Focus(this, Floating = true)
             |* Text(label, Align = Alignment.LEFT, Position = Position.Margin(10.0f, 5.0f), Color = K color)
+            base.Init parent
 
         override this.OnFocus(by_mouse: bool) =
             base.OnFocus by_mouse
@@ -41,9 +43,9 @@ type DropdownOptions<'T when 'T: equality> =
         OnClose: unit -> unit
     }
 
+/// Represents a dropdown menu where items represent different values for one setting, supports one value being pre-selected
 type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
-    inherit
-        FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
+    inherit FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 
@@ -91,12 +93,10 @@ type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
     member private this.Items = flow
 
     member this.Place(x, y, width) =
-        this.Position <- Position.Box(0.0f, 0.0f, x, y, width, this.Height)
+        this.Position <- Position.Box(0.0f, 0.0f, x, y, width, (this :> IHeight).Height)
 
-    // todo: use IHeight interface
-    member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE
-
-// todo: dropdown holder component you can attach to any container, is a swap container that swaps between dropdown / dummy
+    interface IHeight with
+        member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE
 
 type DropdownMenuOptions =
     {
@@ -104,9 +104,9 @@ type DropdownMenuOptions =
         OnClose: unit -> unit
     }
 
+/// Represents a dropdown where each item represents a menu option
 type DropdownMenu(options: DropdownMenuOptions) as this =
-    inherit
-        FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
+    inherit FrameContainer(NodeType.Container(fun _ -> Some this.Items), Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
     let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE, Floating = true)
 
@@ -147,6 +147,26 @@ type DropdownMenu(options: DropdownMenuOptions) as this =
     member private this.Items = flow
 
     member this.Place(x, y, width) =
-        this.Position <- Position.Box(0.0f, 0.0f, x, y, width, this.Height)
+        this.Position <- Position.Box(0.0f, 0.0f, x, y, width, (this :> IHeight).Height)
+        
+    interface IHeight with
+        member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE
 
-    member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE
+type DropdownWrapper(positioning: IHeight -> Position) =
+    inherit SwapContainer()
+
+    let mutable shown = false
+
+    member this.Show<'T when 'T :> Widget and 'T :> IHeight>(d: 'T) =
+        shown <- true
+        d.Position <- positioning (d :> IHeight)
+        this.Current <- d
+
+    member this.Dismiss() =
+        if shown then
+            this.Current <- Dummy()
+            shown <- false
+
+    member this.Toggle(thunk: unit -> 'T) =
+        if shown then this.Dismiss()
+        else this.Show(thunk())

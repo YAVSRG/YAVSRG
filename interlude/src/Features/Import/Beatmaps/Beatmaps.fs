@@ -206,6 +206,8 @@ type private SortingDropdown
     let mutable display_value =
         Seq.find (fun (id, _) -> id = setting.Value) options |> snd
 
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f))
+
     override this.Init(parent: Widget) =
         this
         |+ StylishButton(
@@ -215,7 +217,7 @@ type private SortingDropdown
             Hotkey = bind,
             Position = Position.SliceLeft 120.0f
         )
-        |* StylishButton(
+        |+ StylishButton(
             (fun () -> reverse.Value <- not reverse.Value),
             (fun () ->
                 sprintf
@@ -230,45 +232,24 @@ type private SortingDropdown
             TiltRight = false,
             Position = Position.TrimLeft 145.0f
         )
+        |* dropdown_wrapper
 
         base.Init parent
 
     member this.ToggleDropdown() =
-        match this.Dropdown with
-        | Some _ -> this.Dropdown <- None
-        | _ ->
-            let d =
-                Dropdown
-                    {
-                        Items = options
-                        ColorFunc = K Colors.text
-                        OnClose = fun () -> this.Dropdown <- None
-                        Setting =
-                            setting
-                            |> Setting.trigger (fun v ->
-                                display_value <- Seq.find (fun (id, _) -> id = v) options |> snd
-                            )
-                    }
-
-            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f)
-            d.Init this
-            this.Dropdown <- Some d
-
-    member val Dropdown: Dropdown<string> option = None with get, set
-
-    override this.Draw() =
-        base.Draw()
-
-        match this.Dropdown with
-        | Some d -> d.Draw()
-        | None -> ()
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        match this.Dropdown with
-        | Some d -> d.Update(elapsed_ms, moved)
-        | None -> ()
+        dropdown_wrapper.Toggle(fun () ->
+            Dropdown
+                {
+                    Items = options
+                    ColorFunc = K Colors.text
+                    OnClose = dropdown_wrapper.Dismiss
+                    Setting =
+                        setting
+                        |> Setting.trigger (fun v ->
+                            display_value <- Seq.find (fun (id, _) -> id = v) options |> snd
+                        )
+                }
+        )
 
 module Beatmaps =
 

@@ -10,10 +10,16 @@ open Interlude.Features.Online
 open Interlude.Features.Online.Players
 open Interlude.Features.Multiplayer
 
-type NetworkStatus() =
-    inherit StaticWidget(NodeType.None)
+type NetworkStatus() as this =
+    inherit Container(NodeType.None)
 
     let retry_timer = Animation.Delay(10000.0)
+
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height + this.Bounds.Height).TrimTop(this.Bounds.Height).Margin(Style.PADDING, 0.0f))
+
+    override this.Init(parent) =
+        this |* dropdown_wrapper
+        base.Init parent
 
     override this.Draw() =
         let area = this.Bounds.Shrink(30.0f, 0.0f).TrimBottom(15.0f)
@@ -44,9 +50,7 @@ type NetworkStatus() =
                 Alignment.CENTER
             )
 
-        match this.Dropdown with
-        | Some d -> d.Draw()
-        | None -> ()
+        base.Draw()
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -57,10 +61,6 @@ type NetworkStatus() =
             if retry_timer.Complete then
                 retry_timer.Reset()
                 Network.connect ()
-
-        match this.Dropdown with
-        | Some d -> d.Update(elapsed_ms, moved)
-        | None -> ()
 
         if Mouse.hover this.Bounds && Mouse.left_click () then
             Selection.clear ()
@@ -99,23 +99,11 @@ type NetworkStatus() =
             ]
 
     member this.ToggleDropdown() =
-        match this.Dropdown with
-        | Some _ -> this.Dropdown <- None
-        | None ->
-            let d =
-                DropdownMenu
-                    {
-                        Items = this.MenuItems
-                        OnClose = (fun () -> this.Dropdown <- None)
-                    }
+        dropdown_wrapper.Toggle(fun () ->
+            DropdownMenu
+                {
+                    Items = this.MenuItems
+                    OnClose = dropdown_wrapper.Dismiss
+                }
+        )
 
-            d.Position <-
-                Position
-                    .SliceTop(d.Height + this.Bounds.Height)
-                    .TrimTop(this.Bounds.Height)
-                    .Margin(Style.PADDING, 0.0f)
-
-            d.Init this
-            this.Dropdown <- Some d
-
-    member val Dropdown: DropdownMenu option = None with get, set
