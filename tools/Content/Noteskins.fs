@@ -1,9 +1,9 @@
 ﻿namespace YAVSRG.CLI.Features
 
 open System.IO
-open Prelude.Content
-open Prelude.Content.Noteskins
-open Prelude.Content.Noteskins.Repo
+open Prelude.Skinning
+open Prelude.Skinning.Noteskins
+open Prelude.Skinning.Noteskins.Repo
 open Prelude
 open SixLabors.ImageSharp
 open YAVSRG.CLI.Utils

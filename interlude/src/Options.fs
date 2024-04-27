@@ -11,7 +11,7 @@ open Prelude
 open Prelude.Gameplay.Mods
 open Prelude.Data.Library.Sorting
 open Prelude.Data.Library
-open Prelude.Content.Noteskins
+open Prelude.Skinning.Noteskins
 open Interlude
 
 module Options =

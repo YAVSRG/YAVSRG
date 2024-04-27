@@ -1,10 +1,10 @@
-﻿namespace Prelude.Content.Noteskins
+﻿namespace Prelude.Skinning.Noteskins
 
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Charts.Processing
-open Prelude.Content
+open Prelude.Skinning
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]

@@ -2,8 +2,8 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Prelude.Content
-open Prelude.Content.Noteskins
+open Prelude.Skinning
+open Prelude.Skinning.Noteskins
 open Interlude.UI
 open Interlude.UI.Menu
 

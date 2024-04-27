@@ -7,8 +7,8 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Content
-open Prelude.Content.Noteskins
+open Prelude.Skinning
+open Prelude.Skinning.Noteskins
 open Interlude
 
 module Noteskins =

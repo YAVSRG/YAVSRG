@@ -1,4 +1,4 @@
-﻿namespace Prelude.Content.Noteskins
+﻿namespace Prelude.Skinning.Noteskins
 
 open Percyqaz.Data
 open Prelude

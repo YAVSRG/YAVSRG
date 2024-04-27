@@ -1,10 +1,10 @@
-﻿namespace Prelude.Content.Noteskins
+﻿namespace Prelude.Skinning.Noteskins
 
 open System.IO
 open System.IO.Compression
 open Percyqaz.Common
 open Percyqaz.Data
-open Prelude.Content
+open Prelude.Skinning
 
 module NoteskinExplosionMigration =
 

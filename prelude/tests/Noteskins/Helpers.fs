@@ -4,7 +4,7 @@ open System.IO
 open System.IO.Compression
 open SixLabors.ImageSharp
 open Prelude
-open Prelude.Content.Noteskins
+open Prelude.Skinning.Noteskins
 
 module Helpers =
 

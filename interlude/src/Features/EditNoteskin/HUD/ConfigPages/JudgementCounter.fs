@@ -6,7 +6,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay
-open Prelude.Content.Noteskins
+open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu

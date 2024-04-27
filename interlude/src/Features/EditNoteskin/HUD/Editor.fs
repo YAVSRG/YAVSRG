@@ -9,7 +9,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Gameplay
-open Prelude.Content.Noteskins
+open Prelude.Skinning.Noteskins
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content

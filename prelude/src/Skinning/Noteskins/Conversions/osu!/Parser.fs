@@ -1,4 +1,4 @@
-﻿namespace Prelude.Content.Noteskins.Conversion
+﻿namespace Prelude.Skinning.Noteskins.Conversion
 
 open Prelude
 
