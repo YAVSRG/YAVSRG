@@ -256,13 +256,16 @@ module Backbeat =
 
                             let header = Archive.make_chart_header (chart, song)
                             let! message = http_client.GetAsync("https://cdn.yavsrg.net/" + hash) |> Async.AwaitTask
-                            use stream = message.Content.ReadAsStream()
-                            use br = new System.IO.BinaryReader(stream)
 
-                            match Chart.read_headless chart.Keys header "" br with
-                            | Some chart ->
-                                cache.[hash] <- chart
-                                return Some chart
-                            | None -> return None
+                            if message.IsSuccessStatusCode then
+                                use stream = message.Content.ReadAsStream()
+                                use br = new System.IO.BinaryReader(stream)
+
+                                match Chart.read_headless chart.Keys header "" br with
+                                | Some chart ->
+                                    cache.[hash] <- chart
+                                    return Some chart
+                                | None -> return None
+                            else return None
                     }
             }
