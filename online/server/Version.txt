@@ -1,1 +1,1 @@
-﻿Patch to lobby packet order
+﻿Update to support newer mods server-side
