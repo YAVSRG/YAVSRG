@@ -1,14 +1,16 @@
-﻿namespace Backbeat.Features
+﻿namespace YAVSRG.CLI.Features
 
 open System.IO
 open System.Collections.Generic
 open Prelude
 open Prelude.Gameplay
-open Backbeat.Utils
+open YAVSRG.CLI.Utils
 
 module Rulesets =
 
-    let defaultRulesets =
+    let RULESETS_PATH = Path.Combine(YAVSRG_PATH, "backbeat", "rulesets")
+
+    let DEFAULT_RULESETS =
         List.map
             (fun od -> (sprintf "osu-od-%.0f" od, PrefabRulesets.Osu.create od))
             [ 0.0f; 1.0f; 2.0f; 3.0f; 4.0f; 5.0f; 6.0f; 7.0f; 8.0f; 9.0f; 10.0f ]
@@ -21,16 +23,13 @@ module Rulesets =
             [ PrefabRulesets.Ex_Score.mizu ]
         @ [ "noodles", PrefabRulesets.Noodles.RULESET ]
 
-    let main_rulesets =
-        [ "osu-od-5"; "osu-od-8"; "sc-j4"; "sc-j5"; "wife-j4"; "xs-sdvx" ]
-
-    let compile_rulesets () =
+    let generate_index () =
         let data: PrefabRulesets.Repo =
             {
                 Rulesets = Dictionary<string, Ruleset>()
             }
 
-        for (name, rs) in defaultRulesets do
+        for (name, rs) in DEFAULT_RULESETS do
             data.Rulesets.Add(name, rs)
 
         for file in Directory.GetFiles(RULESETS_PATH) do
@@ -46,8 +45,3 @@ module Rulesets =
 
         JSON.ToFile (Path.Combine(RULESETS_PATH, "rulesets.json"), true) data
         printfn "Done."
-
-    open Percyqaz.Shell
-
-    let register (ctx: ShellContext) =
-        ctx.WithCommand("compile_rulesets", "Compile ruleset repository", compile_rulesets)

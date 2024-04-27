@@ -5,8 +5,7 @@ open Backbeat.Features.Archive
 
 // todo: merge all this stuff into YAVSRG.CLI
 
-let ctx = ShellContext.Empty |> Archive.register |> Rulesets.register
-
+let ctx = ShellContext.Empty |> Archive.register
 [<EntryPoint>]
 let main argv =
     use logging = Backbeat.Utils.init ()

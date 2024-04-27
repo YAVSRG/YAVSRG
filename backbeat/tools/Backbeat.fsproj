@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
-    <Compile Include="Features\Rulesets\Rulesets.fs" />
     <Compile Include="Features\Archive\Storage.fs" />
     <Compile Include="Features\Archive\Upload.fs" />
     <Compile Include="Features\Archive\Packs.fs" />

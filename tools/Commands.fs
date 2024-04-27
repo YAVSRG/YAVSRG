@@ -18,22 +18,9 @@ module Commands =
     let register (ctx: ShellContext) =
         ctx
             .WithCommand("locale_check", "Check locale for mistakes", (fun () -> Check.locale_check "en_GB" false))
-            .WithCommand(
-                "locale_fix",
-                "Tool to automatically add locale keys",
-                (fun () -> Check.locale_check "en_GB" true)
-            )
-            .WithCommand(
-                "locale_rename",
-                "Tool to rename locale keys/namespaces",
-                "replaced_key",
-                (fun arg -> Check.locale_rename "en_GB" arg)
-            )
-            .WithCommand(
-                "check_linecounts",
-                "Check for particularly large source code files",
-                (fun () -> Check.check_linecounts ())
-            )
+            .WithCommand("locale_fix", "Tool to automatically add locale keys", (fun () -> Check.locale_check "en_GB" true))
+            .WithCommand("locale_rename", "Tool to rename locale keys/namespaces", "replaced_key", (fun arg -> Check.locale_rename "en_GB" arg))
+            .WithCommand("check_linecounts", "Check for particularly large source code files", (fun () -> Check.check_linecounts ()))
             .WithCommand("format", "Format all source code files with Fantomas", (fun () -> Check.format_all_code ()))
 
             .WithCommand("version", "Displays the current version of Interlude", Version.version)
@@ -52,18 +39,11 @@ module Commands =
             .WithCommand("server_gen_cert", "Generate certificate for local server testing", Server.generate_certs)
             .WithCommand("server_run", "Runs the game server locally in docker", Server.run_in_docker)
             .WithCommand("server_test_domain", "Generate markdown wiki table of contents", Server.run_domain_tests)
-            .WithCommand(
-                "server_test_full",
-                "Run entire suite of tests against server while it's running",
-                Server.run_all_tests
-            )
+            .WithCommand("server_test_full", "Run entire suite of tests against server while it's running", Server.run_all_tests)
             .WithCommand("down_detector", "Ping several services Interlude depends on for status", Server.down_detector)
 
-            .WithCommand(
-                "noteskins_update",
-                "Update the noteskins repo based on noteskins in the folder",
-                Noteskins.generate_index
-            )
+            .WithCommand("noteskins_update", "Update the noteskins repo based on noteskins in the folder", Noteskins.generate_index)
+            .WithCommand("rulesets_update", "Update the rulesets repo based on rulesets in the folder", Rulesets.generate_index)
 
             .WithCommand("debug_run", "Build and run the game in debug mode", Play.debug_run)
             .WithCommand("update", "Update user copy of Interlude to the latest release", Play.update)
