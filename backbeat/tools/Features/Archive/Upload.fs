@@ -16,6 +16,8 @@ type Chart = Prelude.Charts.Chart
 [<AutoOpen>]
 module Upload =
 
+    let BUCKET_ID = "c44023fe407a500583900717"
+
     let client =
         let c = new BackblazeClient() in
         c.Connect(config.S3ApiKeyID, config.S3ApiKey) |> ignore
@@ -30,7 +32,7 @@ module Upload =
 
             task {
                 // todo: stuff when file count goes over 10k
-                let request = ListFileNamesRequest("c44023fe407a500583900717", MaxFileCount = 10000)
+                let request = ListFileNamesRequest(BUCKET_ID, MaxFileCount = 10000)
                 let! files = client.Files.ListNamesAsync(request)
 
                 for f in files.Response.Files do
@@ -64,17 +66,16 @@ module Upload =
                     let exists = existing_files.ContainsKey hash
 
                     if not exists then
+                        add_existing_file hash
                         use ms = new MemoryStream()
                         use bw = new BinaryWriter(ms)
 
                         Chart.write_headless chart bw
                         bw.Flush()
 
-                        let! response = client.UploadAsync("c44023fe407a500583900717", hash, ms)
+                        let! response = client.UploadAsync(BUCKET_ID, hash, ms)
                         response.EnsureSuccessStatusCode() |> ignore
                         Logging.Info(sprintf "Uploaded %s" chart.Header.Title)
-
-                        add_existing_file hash
                 }
                 |> Async.AwaitTask
 
@@ -84,9 +85,10 @@ module Upload =
                     let exists = existing_files.ContainsKey audio_hash
 
                     if not exists then
+                        add_existing_file audio_hash
                         let! response =
                             client.UploadAsync(
-                                "c44023fe407a500583900717",
+                                BUCKET_ID,
                                 audio_hash,
                                 File.OpenRead (Cache.audio_path chart backbeat_cache).Value
                             )
@@ -100,7 +102,6 @@ module Upload =
                                 (float response.Response.ContentLength / 1000000.0)
                         )
 
-                        add_existing_file audio_hash
                 }
                 |> Async.AwaitTask
 
@@ -110,9 +111,10 @@ module Upload =
                     let exists = existing_files.ContainsKey bg_hash
 
                     if not exists then
+                        add_existing_file bg_hash
                         let! response =
                             client.UploadAsync(
-                                "c44023fe407a500583900717",
+                                BUCKET_ID,
                                 bg_hash,
                                 File.OpenRead (Cache.background_path chart backbeat_cache).Value
                             )
@@ -123,7 +125,6 @@ module Upload =
                             sprintf "Uploaded %s (%.1fMB)" bg_hash (float response.Response.ContentLength / 1000000.0)
                         )
 
-                        add_existing_file bg_hash
                 }
                 |> Async.AwaitTask
             ]
