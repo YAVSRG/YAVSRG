@@ -56,6 +56,9 @@ module Types =
 
     module TimeArray =
 
+        let filter (f: 'T -> bool) (arr: TimeItem<'T> array) =
+            Array.filter (fun { Time = _; Data = d } -> f d) arr
+
         let map (c: 'T -> 'U) (arr: TimeItem<'T> array) =
             Array.map (fun { Time = time; Data = d } -> { Time = time; Data = c d }) arr
 

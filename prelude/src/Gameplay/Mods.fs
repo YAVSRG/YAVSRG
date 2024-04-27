@@ -86,8 +86,16 @@ module Mods =
             "noln",
             { Mod.Default with
                 Status = ModStatus.Unranked
+                States = 4
                 Exclusions = [ "inverse" ]
-                Apply = fun _ mc -> NoLN.apply mc
+                Apply = 
+                    fun state mc -> 
+                        match state with
+                        | 0 -> NoLN.apply mc
+                        | 1 -> NoLN.apply_shorter_than 1.0f<beat> mc
+                        | 2 -> NoLN.apply_shorter_than 0.5f<beat>  mc
+                        | 3 -> NoLN.apply_shorter_than 0.25f<beat> mc
+                        | _ -> failwith "impossible"
             }
 
             "inverse",
