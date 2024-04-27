@@ -75,16 +75,7 @@ type RulesetSwitcher(setting: Setting<string>) =
         base.Init parent
 
     member this.ToggleDropdown() =
-        dropdown_wrapper.Toggle(fun () ->
-            let rulesets = Rulesets.list ()
-            Dropdown
-                {
-                    Items = rulesets |> Seq.map (fun (id, rs) -> id, rs.Name)
-                    ColorFunc = K Colors.text
-                    OnClose = dropdown_wrapper.Dismiss
-                    Setting = setting
-                }
-        )
+        Rulesets.make_dropdown setting dropdown_wrapper
 
 type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> unit) as this
     =

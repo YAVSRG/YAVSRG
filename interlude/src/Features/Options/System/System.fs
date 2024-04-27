@@ -28,7 +28,6 @@ type private WindowedResolution(setting: Setting<int * int>) as this =
                 {
                     Items = WindowResolution.presets |> Seq.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
                     ColorFunc = K Colors.text
-                    OnClose = dropdown_wrapper.Dismiss
                     Setting = setting
                 }
         )
@@ -59,7 +58,6 @@ type private VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit 
                             mode, sprintf "%ix%i@%ihz" mode.Width mode.Height mode.RefreshRate
                         )
                     ColorFunc = K Colors.text
-                    OnClose = dropdown_wrapper.Dismiss
                     Setting = setting
                 }
         )

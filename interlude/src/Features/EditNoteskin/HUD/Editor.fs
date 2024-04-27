@@ -569,7 +569,6 @@ type PositionerInfo(ctx: PositionerContext) =
     inherit FrameContainer(NodeType.None, Fill = K Colors.shadow_2.O3, Border = K Colors.cyan_accent)
 
     let mutable bottom = true
-    let mutable dropdown: Widget option = None
 
     let TOP_POSITION : Position = { Left = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Top = 0.0f %- 1.0f; Bottom = 0.0f %+ 60.0f }
     let BOTTOM_POSITION : Position = { Left = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Top = 1.0f %- 60.0f; Bottom = 1.0f %+ 1.0f }
@@ -671,7 +670,6 @@ type PositionerInfo(ctx: PositionerContext) =
                         HUDElement.Pacemaker
                     ] |> List.map (fun e -> e, HUDElement.name e)
                     ColorFunc = K Colors.text
-                    OnClose = fun () -> dropdown <- None
                     Setting =
                         Setting.make
                             (fun v -> ctx.Select v)
@@ -691,7 +689,6 @@ type PositionerInfo(ctx: PositionerContext) =
                         (fun () -> ctx.ChangePositionRelative(false, Alignment.LEFT)), %"hud.editor.relative_to.screen_left"
                         (fun () -> ctx.ChangePositionRelative(false, Alignment.RIGHT)), %"hud.editor.relative_to.screen_right"
                     ]
-                    OnClose = dropdown_wrapper.Dismiss
                 }
             |+ Text(%"hud.editor.relative_to", Position = Position.BorderTop 40.0f)
         )

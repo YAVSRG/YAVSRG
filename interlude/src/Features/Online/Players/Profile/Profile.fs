@@ -38,9 +38,7 @@ type private Profile() =
 
     let rerender (container: WebRequestContainer<_>) (data: Players.Profile.View.Response) =
         let color_picker =
-            SwapContainer(
-                Position = Position.TrimRight(40.0f).TrimTop(70.0f).SliceRight(300.0f).SliceTop(500.0f)
-            )
+            DropdownWrapper(fun d -> Position.TrimRight(40.0f).TrimTop(70.0f).SliceRight(300.0f).SliceTop(500.0f))
 
         let has_colors = data.Badges |> Seq.exists (fun b -> not (List.isEmpty b.Colors))
         
@@ -65,11 +63,10 @@ type private Profile() =
                     {
                         Items = badges |> Seq.map (fun (label, color) -> color, label)
                         ColorFunc = fun c -> Color.FromArgb c, Colors.shadow_2
-                        OnClose = fun () -> color_picker.Current <- (Dummy())
                         Setting = Setting.make save_color (fun () -> data.Color)
                     }
 
-            color_picker.Current <- dropdown
+            color_picker.Show dropdown
             dropdown.Focus false
 
         let remove_friend() =

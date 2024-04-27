@@ -242,7 +242,6 @@ type private SortingDropdown
                 {
                     Items = options
                     ColorFunc = K Colors.text
-                    OnClose = dropdown_wrapper.Dismiss
                     Setting =
                         setting
                         |> Setting.trigger (fun v ->

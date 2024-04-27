@@ -103,7 +103,6 @@ type NetworkStatus() as this =
             DropdownMenu
                 {
                     Items = this.MenuItems
-                    OnClose = dropdown_wrapper.Dismiss
                 }
         )
 
