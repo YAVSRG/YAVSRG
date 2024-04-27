@@ -8,7 +8,6 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Data.Library.Collections
-open Prelude.Charts.Processing.Patterns
 open Prelude.Data
 
 // todo: make into separate Grouping, Filtering and Sorting modules
@@ -117,6 +116,16 @@ module Sorting =
         match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
         | Some report -> report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
         | None -> false
+    
+    let private below_ln_percent (threshold: float) (cc: CachedChart, ctx: LibraryViewContext) =
+        match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
+        | Some report -> report.LNPercent < float32 threshold
+        | None -> false
+
+    let private above_ln_percent (threshold: float) (cc: CachedChart, ctx: LibraryViewContext) =
+        match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
+        | Some report -> report.LNPercent > float32 threshold
+        | None -> false
 
     let private compare_by (f: CachedChart -> IComparable) =
         fun a b -> f(fst a).CompareTo <| f (fst b)
@@ -200,21 +209,33 @@ module Sorting =
                 (function
                 | Impossible -> false
                 | String str -> s.Contains str
+
                 | Equals("k", n)
                 | Equals("key", n)
                 | Equals("keys", n) -> cc.Keys.ToString() = n
+
                 | Equals("c", str)
                 | Equals("comment", str) -> has_comment str (cc, ctx)
+
                 | Equals("p", str) -> has_pattern str (cc, ctx)
                 | Equals("pattern", str) -> has_pattern str (cc, ctx)
+
                 | MoreThan("d", d)
                 | MoreThan("diff", d) -> cc.Physical > d
                 | LessThan("d", d)
                 | LessThan("diff", d) -> cc.Physical < d
+
                 | MoreThan("l", l)
                 | MoreThan("length", l) -> float (cc.Length / 1000.0f<ms>) > l
                 | LessThan("l", l)
                 | LessThan("length", l) -> float (cc.Length / 1000.0f<ms>) < l
+
+                | LessThan("ln", pc)
+                | LessThan("holds", pc)
+                | LessThan("lns", pc) -> below_ln_percent pc (cc, ctx)
+                | MoreThan("ln", pc)
+                | MoreThan("holds", pc)
+                | MoreThan("lns", pc) -> above_ln_percent pc (cc, ctx)
                 | _ -> true)
                 filter
 
