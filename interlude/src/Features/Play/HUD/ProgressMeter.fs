@@ -11,34 +11,44 @@ open Interlude.Features.Play
 
 module ProgressMeter =
 
+    let private PIE_SEGMENTS = 30
+    let private PIE_SEGMENTS_F = float32 PIE_SEGMENTS
+    let private SECTOR_ANGLE = 2.0f * MathF.PI / PIE_SEGMENTS_F
+
     let draw_pie (bounds: Rect, color_fg: Color, color_bg: Color, progress: float32) =
         let x, y = bounds.Center
         let r = (min bounds.Width bounds.Height) * 0.5f
-        let angle = MathF.PI / 15.0f
 
         let outer i =
-            let angle = float32 i * angle
+            let angle = float32 i * SECTOR_ANGLE
             let struct (a, b) = MathF.SinCos(angle)
             (x + r * a, y - r * b)
 
-        let inner i =
-            let angle = float32 i * angle
+        let inner_exact (i: float32) =
+            let angle = i * SECTOR_ANGLE
             let struct (a, b) = MathF.SinCos(angle)
             (x + (r - 4f) * a, y - (r - 4f) * b)
 
-        for i = 0 to 29 do
+        let inner (i: int32) = inner_exact (float32 i)
+
+        for i = 1 to PIE_SEGMENTS do
             Draw.untextured_quad
-                (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
+                (Quad.createv (x, y) (x, y) (inner (i - 1)) (inner i))
                 color_bg.AsQuad
 
             Draw.untextured_quad
-                (Quad.createv (inner i) (outer i) (outer (i + 1)) (inner (i + 1)))
+                (Quad.createv (inner (i - 1)) (outer (i - 1)) (outer i) (inner i))
                 Colors.white.O2.AsQuad
 
-        for i = 0 to progress * 29.9f |> floor |> int do
+        let progress_rounded_down = progress * (PIE_SEGMENTS_F - 0.1f) |> floor |> int
+        for i = 1 to progress_rounded_down do
             Draw.untextured_quad
-                (Quad.createv (x, y) (x, y) (inner i) (inner (i + 1)))
+                (Quad.createv (x, y) (x, y) (inner (i - 1)) (inner i))
                 color_fg.AsQuad
+        
+        Draw.untextured_quad
+            (Quad.createv (x, y) (x, y) (inner progress_rounded_down) (inner_exact (progress * PIE_SEGMENTS_F)))
+            color_fg.AsQuad
 
     let draw_percent_progress_centered(texture: Sprite, bounds: Rect, color: Color, progress: float32, spacing: float32, percent_spacing: float32) =
         let progress_text = sprintf "%.0f%%" (progress * 100.0f)
