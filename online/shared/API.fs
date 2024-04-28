@@ -134,6 +134,28 @@ module API =
                 , ignore
             )
 
+        let internal get_async<'T> (route: string, callback: 'T option -> unit) : Async<unit> =
+            queue.RequestAsync(
+                fun client ->
+                    async {
+                        try
+                            let! response = client.GetAsync(route) |> Async.AwaitTask
+
+                            if response.IsSuccessStatusCode then
+                                match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                                | Ok res -> callback (Some res)
+                                | Error err ->
+                                    Logging.Error(sprintf "Error getting %s: %s" route err.Message)
+                                    callback None
+                            else
+                                callback None
+                        with
+                        | :? Http.HttpRequestException
+                        | :? OperationCanceledException
+                        | :? AggregateException -> callback None
+                    }
+            )
+
         let internal post_return<'T, 'U> (route: string, request: 'T, callback: 'U option -> unit) =
             queue.Request(
                 fun client ->

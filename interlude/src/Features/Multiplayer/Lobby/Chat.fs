@@ -58,7 +58,7 @@ type Chat(lobby: Lobby) =
         if replays.Keys.Count > 0 then
             add_msg (
                 Text(
-                    sprintf "== Results for %s ==" SelectedChart.chart.Value.Title,
+                    sprintf "== Results for %s ==" lobby.Chart.Value.Title,
                     Color = K Colors.text,
                     Align = Alignment.CENTER
                 )

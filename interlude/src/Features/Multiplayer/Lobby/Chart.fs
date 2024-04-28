@@ -13,6 +13,7 @@ open Interlude.Web.Shared
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Import
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Online
@@ -36,22 +37,63 @@ type MultiplayerChartContextMenu(cc: CachedChart) as this =
     override this.Title = cc.Title
     override this.OnClose() = ()
 
-module SelectedChart =
+module LobbyChart =
 
-    let mutable chart = None
+    let mutable private last_seen_lobby_chart : LobbyChart option = None
+    let mutable private last_seen_loaded_chart : Chart.LoadedChartInfo option = None
+    let mutable private is_loading = false
 
-    let selected () =
-        match Chart.CACHE_DATA, chart with
-        | Some cc, Some chart -> cc.Hash = chart.Hash
-        | _ -> false
+    let info_if_selected() : Chart.LoadedChartInfo option =
+        match last_seen_loaded_chart, last_seen_lobby_chart with
+        | Some real_chart, Some expected_chart ->
+            if real_chart.CacheInfo.Hash = expected_chart.Hash then
+                Some real_chart
+            else None
+        | _ -> None
 
-    let loaded () = selected () && Chart.WITH_MODS.IsSome
+    let is_loaded_or_loading() =
+        if is_loading then true else info_if_selected().IsSome
 
-    let ensure_selected () =
-        match chart with
+    let attempt_match_lobby_chart (lobby: Lobby) =
+        last_seen_lobby_chart <- lobby.Chart
+        match lobby.Chart with
         | None -> ()
         | Some chart ->
-            if selected () then
+
+        match info_if_selected() with
+        | Some _ ->
+            rate.Set chart.Rate
+
+            selected_mods.Set(
+                chart.Mods
+                |> Map.ofArray
+                |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
+            )
+        | None ->
+            match Cache.by_hash chart.Hash Content.Cache with
+            | None ->
+                is_loading <- true
+                Logging.Debug("Multiplayer chart not found, downloading")
+                download_chart_by_hash.Request((chart.Hash, "Multiplayer"),
+                    function
+                    | false -> 
+                        Logging.Debug("Multiplayer chart not found on the server either")
+                        Network.lobby.Value.ReportMissingChart()
+                        is_loading <- false
+                    | true ->
+                        let newly_installed = (Cache.by_hash chart.Hash Content.Cache).Value
+                        sync
+                        <| fun () ->
+                        Chart.change (newly_installed, LibraryContext.None, true)
+                        rate.Set chart.Rate
+                        selected_mods.Set(
+                            chart.Mods
+                            |> Map.ofArray
+                            |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
+                        )
+                )
+            | Some cc ->
+                Chart.change (cc, LibraryContext.None, true)
                 rate.Set chart.Rate
 
                 selected_mods.Set(
@@ -59,25 +101,19 @@ module SelectedChart =
                     |> Map.ofArray
                     |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
                 )
-            else
-                match Cache.by_hash chart.Hash Content.Cache with
-                | None ->
-                    Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash)
-                    Network.lobby.Value.ReportMissingChart()
-                | Some cc ->
-                    Chart.change (cc, LibraryContext.None, true)
-                    rate.Set chart.Rate
 
-                    selected_mods.Set(
-                        chart.Mods
-                        |> Map.ofArray
-                        |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
-                    )
+    let on_screen_enter(lobby: Lobby) =
+        Chart.if_loaded (fun info ->
+            is_loading <- false
+            last_seen_loaded_chart <- Some info
+        )
+        attempt_match_lobby_chart lobby
 
-    let switch (c: LobbyChart option) =
-
-        chart <- c
-        ensure_selected ()
+    do 
+        Chart.on_chart_change_finished.Add(fun info ->
+            is_loading <- false
+            last_seen_loaded_chart <- Some info
+        )
 
 type SelectedChart(lobby: Lobby) =
     inherit Container(NodeType.None)
@@ -87,7 +123,7 @@ type SelectedChart(lobby: Lobby) =
         this
         |+ Text(
             (fun () ->
-                match SelectedChart.chart with
+                match lobby.Chart with
                 | Some c -> c.Title
                 | None -> %"lobby.no_song_selected"
             ),
@@ -96,7 +132,7 @@ type SelectedChart(lobby: Lobby) =
         )
         |+ Text(
             (fun () ->
-                match SelectedChart.chart with
+                match lobby.Chart with
                 | Some c -> c.Artist + "  •  " + c.Creator
                 | None -> ""
             ),
@@ -106,10 +142,9 @@ type SelectedChart(lobby: Lobby) =
         )
         |+ Text(
             (fun () ->
-                if SelectedChart.loaded () then
-                    Chart.CACHE_DATA.Value.DifficultyName
-                else
-                    "???"
+                match LobbyChart.info_if_selected() with
+                | Some info -> info.CacheInfo.DifficultyName
+                | None -> "???"
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
@@ -118,47 +153,52 @@ type SelectedChart(lobby: Lobby) =
 
         |+ Text(
             (fun () ->
-                if SelectedChart.loaded () then
-                    sprintf "%s %.2f" Icons.STAR Chart.RATING.Value.Physical
-                else
-                    ""
+                match LobbyChart.info_if_selected() with
+                | Some info -> sprintf "%s %.2f" Icons.STAR info.Rating.Physical
+                | None -> ""
             ),
             Align = Alignment.LEFT,
             Position = Position.TrimTop(100.0f).SliceTop(60.0f)
         )
         |+ Text(
-            (fun () -> if SelectedChart.loaded () then Chart.FMT_DURATION else ""),
+            (fun () -> 
+                match LobbyChart.info_if_selected() with
+                | Some info -> info.DurationString
+                | None -> ""
+            ),
             Align = Alignment.CENTER,
             Position = Position.TrimTop(100.0f).SliceTop(60.0f)
         )
         |+ Text(
-            (fun () -> if SelectedChart.loaded () then Chart.FMT_BPM else ""),
+            (fun () -> 
+                match LobbyChart.info_if_selected() with
+                | Some info -> info.BpmString
+                | None -> ""
+            ),
             Align = Alignment.RIGHT,
             Position = Position.TrimTop(100.0f).SliceTop(60.0f)
         )
         |+ Text(
-            (fun () ->
-                if SelectedChart.loaded () then
-                    Mods.format (rate.Value, selected_mods.Value, false)
-                else
-                    ""
+            (fun () -> 
+                match LobbyChart.info_if_selected() with
+                | Some _ -> Mods.format (rate.Value, selected_mods.Value, false)
+                | None -> ""
             ),
             Align = Alignment.LEFT,
             Position = Position.TrimTop(160.0f).SliceTop(40.0f)
         )
         |+ Text(
-            (fun () ->
-                if SelectedChart.loaded () then
-                    Chart.FMT_NOTECOUNTS.Value
-                else
-                    ""
+            (fun () -> 
+                match LobbyChart.info_if_selected() with
+                | Some info -> info.NotecountsString
+                | None -> ""
             ),
             Align = Alignment.RIGHT,
             Position = Position.TrimTop(160.0f).SliceTop(40.0f)
         )
         |+ Text(
             (fun () ->
-                if SelectedChart.loaded () || SelectedChart.chart.IsNone then
+                if LobbyChart.is_loaded_or_loading() then
                     ""
                 else
                     %"lobby.missing_chart"
@@ -174,7 +214,7 @@ type SelectedChart(lobby: Lobby) =
 
         |+ Conditional(
             (fun () -> 
-                SelectedChart.loaded ()
+                LobbyChart.info_if_selected().IsSome
                 && not lobby.GameInProgress
                 && lobby.ReadyStatus = ReadyFlag.NotReady
             ),
@@ -197,20 +237,21 @@ type SelectedChart(lobby: Lobby) =
 
         |+ Conditional(
             (fun () ->
-                SelectedChart.loaded ()
+                LobbyChart.info_if_selected().IsSome
                 && lobby.GameInProgress
             ),
             StylishButton(
                 (fun () ->
                     match lobby.Replays |> Seq.tryHead with
                     | Some (KeyValue (username, replay_info)) ->
-                        Chart.if_loaded
-                        <| fun info -> //todo: store info in sync with selected chart in SelectedChart
+                        match LobbyChart.info_if_selected() with
+                        | Some info -> 
                             Screen.change_new
                                 (fun () -> SpectateScreen.spectate_screen (info, username, replay_info, lobby))
                                 Screen.Type.Replay
                                 Transitions.Flags.Default
                             |> ignore
+                        | None -> ()
                     | None -> Logging.Debug("Couldn't find anyone with replay data to spectate")
                 ),
                 K(sprintf "%s %s" Icons.EYE (%"lobby.spectate")),
@@ -225,17 +266,17 @@ type SelectedChart(lobby: Lobby) =
 
         |+ Conditional(
             (fun () ->
-                SelectedChart.loaded ()
+                LobbyChart.info_if_selected().IsSome
                 && not Song.loading
                 && not lobby.GameInProgress
             ),
 
             StylishButton(
                 (fun () ->
-                    Network.lobby.Value.SetReadyStatus (
-                        match Network.lobby.Value.ReadyStatus with
+                    lobby.SetReadyStatus (
+                        match lobby.ReadyStatus with
                         | ReadyFlag.NotReady ->
-                            if Network.lobby.Value.Spectate then
+                            if lobby.Spectate then
                                 ReadyFlag.Spectate
                             else
                                 ReadyFlag.Play
@@ -243,16 +284,13 @@ type SelectedChart(lobby: Lobby) =
                     )
                 ),
                 (fun () ->
-                    match Network.lobby with
-                    | Some l ->
-                        match l.ReadyStatus with
-                        | ReadyFlag.NotReady ->
-                            if Network.lobby.Value.Spectate then
-                                sprintf "%s %s" Icons.EYE (%"lobby.ready")
-                            else
-                                sprintf "%s %s" Icons.CHECK (%"lobby.ready")
-                        | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
-                    | None -> "!"
+                    match lobby.ReadyStatus with
+                    | ReadyFlag.NotReady ->
+                        if lobby.Spectate then
+                            sprintf "%s %s" Icons.EYE (%"lobby.ready")
+                        else
+                            sprintf "%s %s" Icons.CHECK (%"lobby.ready")
+                    | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
                 ),
                 !%Palette.DARK_100,
                 TiltRight = false,
@@ -293,29 +331,30 @@ type SelectedChart(lobby: Lobby) =
 
         lobby.OnChartChanged.Add(fun () ->
             if Screen.current_type = Screen.Type.Lobby then
-                SelectedChart.switch lobby.Chart
+                LobbyChart.attempt_match_lobby_chart lobby
         )
 
         base.Init parent
 
     override this.Draw() =
+        let is_loaded = LobbyChart.is_loaded_or_loading()
         Draw.rect
             (this.Bounds.SliceTop(70.0f))
-            (if SelectedChart.loaded () then
+            (if is_loaded then
                  (!*Palette.DARK).O4a 180
              else
                  Color.FromArgb(180, 100, 100, 100))
 
         Draw.rect
             (this.Bounds.SliceTop(100.0f).SliceBottom(30.0f))
-            (if SelectedChart.loaded () then
+            (if is_loaded then
                  (!*Palette.DARKER).O4a 180
              else
                  Color.FromArgb(180, 50, 50, 50))
 
         Draw.rect
             (this.Bounds.SliceTop(100.0f).SliceLeft(5.0f))
-            (if SelectedChart.loaded () then
+            (if is_loaded then
                  !*Palette.MAIN
              else
                  Colors.white)

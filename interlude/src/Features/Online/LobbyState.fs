@@ -138,7 +138,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
     member val YouAreHost: bool = false with get, set
     member val Spectate: bool = false with get, set
     member val ReadyStatus: ReadyFlag = ReadyFlag.NotReady with get, set
-    member val Chart: LobbyChart option  = None with get, set
+    member val Chart: LobbyChart option = None with get, set
     member val GameInProgress: bool = false with get, set
     member val Countdown: bool = false with get, set
 

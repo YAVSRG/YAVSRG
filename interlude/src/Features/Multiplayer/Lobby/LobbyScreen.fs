@@ -220,7 +220,7 @@ type LobbyScreen() =
 
     override this.OnEnter(_) =
         match Network.lobby with
-        | Some lobby -> SelectedChart.switch lobby.Chart
+        | Some lobby -> LobbyChart.on_screen_enter lobby
         | None -> ()
 
         Song.on_finish <- SongFinishAction.LoopFromPreview

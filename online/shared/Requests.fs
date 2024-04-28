@@ -43,6 +43,9 @@ module Charts =
         let get (chart: string, callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE + "?chart=" + chart, callback)
 
+        let get_async (chart: string, callback: Response option -> unit) =
+            Client.get_async<Response> (snd ROUTE + "?chart=" + chart, callback)
+
     module Scores =
 
         /// requires login token as Authorization header
