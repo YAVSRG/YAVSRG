@@ -12,7 +12,7 @@ open Interlude.Features.Online
 
 #nowarn "3370"
 
-type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: bool) as this =
+type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: bool) =
     inherit Screen()
 
     let personal_bests = ref pbs
@@ -51,7 +51,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         previous_personal_bests := None
         graph.Refresh()
 
-    do
+    override this.Init(parent) =
         this
         |+ Results(
             grade,
@@ -88,8 +88,12 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
                 }
         )
         |* Confetti()
+        ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
+        base.Init parent
 
-    override this.Update(elapsed_ms, moved) = base.Update(elapsed_ms, moved)
+    override this.Update(elapsed_ms, moved) = 
+        ScoreScreenHelpers.animation_queue.Update elapsed_ms
+        base.Update(elapsed_ms, moved)
 
     override this.OnEnter prev =
         Toolbar.hide ()

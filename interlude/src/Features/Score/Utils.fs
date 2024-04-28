@@ -4,6 +4,7 @@ open Prelude
 open Prelude.Charts.Processing
 open Prelude.Gameplay
 open Prelude.Data
+open Percyqaz.Flux.UI
 
 type ScoreScreenStats =
     {
@@ -116,3 +117,5 @@ module ScoreScreenHelpers =
     let mutable watch_replay: ScoreInfo * ColoredChart -> unit = ignore
 
     let mutable continue_endless_mode: unit -> bool = fun () -> false
+
+    let animation_queue = Animation.Sequence()

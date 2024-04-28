@@ -43,6 +43,8 @@ type Accuracy
     let new_record = sprintf "%s %s" Icons.AWARD (%"score.new_record")
     let mutable hover = false
 
+    let glint_animation = Animation.Delay(375.0)
+
     override this.Init(parent) =
         this
         |* Text(
@@ -51,7 +53,9 @@ type Accuracy
             Position = Position.Margin(10.0f, 0.0f).TrimBottom(LOWER_SIZE)
         )
 
+        if (!improvements).Grade <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
         base.Init parent
+
 
     override this.Update(elapsed_ms, moved) =
         hover <- Mouse.hover this.Bounds
@@ -63,6 +67,8 @@ type Accuracy
         let grade_color = score_info.Ruleset.GradeColor (!grade).Grade
         Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) grade_color.O1
         Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) grade_color.O2
+
+        Glint.draw (float32 (glint_animation.Elapsed / glint_animation.Interval)) this.Bounds
 
         Text.fill_b (
             Style.font,
@@ -127,6 +133,8 @@ type Lamp
     let LOWER_SIZE = 40.0f
     let new_record = sprintf "%s %s" Icons.AWARD (%"score.new_record")
 
+    let glint_animation = Animation.Delay(375.0)
+
     override this.Init(parent) =
         this
         |* Text(
@@ -135,6 +143,8 @@ type Lamp
             Position = Position.Margin(10.0f, 0.0f).TrimBottom(LOWER_SIZE)
         )
 
+        if (!improvements).Lamp <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
+
         base.Init parent
 
     override this.Draw() =
@@ -142,6 +152,8 @@ type Lamp
         Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
         Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O1
         Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O2
+
+        Glint.draw (float32 (glint_animation.Elapsed / glint_animation.Interval)) this.Bounds
 
         let text, color =
             match (!improvements).Lamp with
