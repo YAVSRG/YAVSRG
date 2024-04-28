@@ -218,9 +218,9 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
             // release animations
             if ex.IsRelease then
 
-                let percent_remaining = (1.0f - (now - ex.Time) / release_duration) |> min 1.0f
+                let percent_remaining = (1.0f - (now - ex.Time) / release_duration) |> min 1.0f |> max 0.0f
 
-                if percent_remaining < 0.0f then
+                if percent_remaining <= 0.0f then
                     ()
                 else
 

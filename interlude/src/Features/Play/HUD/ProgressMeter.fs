@@ -146,7 +146,7 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
             Text.fill_b (
                 Style.font,
                 text,
-                this.Bounds.BorderBottom(40.0f),
+                this.Bounds.SliceBottom(this.Bounds.Width * noteskin_options.ProgressMeterLabelSize),
                 Colors.text_subheading,
                 Alignment.CENTER
             )

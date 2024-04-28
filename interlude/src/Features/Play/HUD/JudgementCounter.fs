@@ -127,7 +127,7 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                         (Sprite.pick_texture (0, texture_index) texture)
             | None ->
                 Draw.rect (r.SliceLeft(5.0f)) j.Color
-                Text.fill_b (Style.font, j.Name, r.Shrink(5.0f), (Color.White, Color.Black), Alignment.LEFT)
+                Text.fill_b (Style.font, j.Name, r.Shrink(10.0f, 5.0f), (Color.White, Color.Black), Alignment.LEFT)
 
             if noteskin_options.JudgementCounterUseFont then
                 JudgementCounter.draw_count_right_aligned(font, r.Shrink(5.0f), Color.White, state.Scoring.State.Judgements.[i], noteskin_options.JudgementCounterFontSpacing)
