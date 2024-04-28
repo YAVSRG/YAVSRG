@@ -64,10 +64,8 @@ You can search for keywords in comments by typing `comment="keywords here"` or `
 
 Hitting the 'random chart' button (hotkey `R`) will select a random chart from the visible charts.
 
-There is an **under-construction feature** you can turn on under Advanced settings in the Options menu - When enabled the random chart is not so random.  
-Instead an algorithm will try to find similar charts (by patterns, length, difficulty, etc) and switch to one of those.
-
-A future feature plan is to greatly improve on this algorithm, and introduce an **endless mode**, where right after finishing a song, you get a couple of suggestions and immediately go into one of those instead of the full level select process.
+Under Options > Advanced Settings you can enable Random Suggestions to get a 'recommended' chart instead of a random one.  
+In this case an algorithm will try to find similar charts (by patterns, length, difficulty, etc) and switch to one of those.
 
 ::::
 
