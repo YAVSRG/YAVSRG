@@ -1,15 +1,21 @@
-0.7.20.1
+0.7.20.2
 ====
 
-Patch update as an excuse for me to test out my new CI tools and make sure I didn't break anything
+Various tiny quality of life improvements  
+The ingame wiki has also been updated to reflect newer information
 
-# Bug fixes
-- Swapped to Mino for osu! beatmap downloads as chimu.moe is down
-- Fixed osu! skin import list not scrolling when you have many
+# New features
+- No holds mod now has alternate modes that remove LNs shorter than a certain length
+- In multiplayer, charts you don't have will automatically download if available server-side
+- You can filter by LN% in level select by typing `ln>0.5`, `ln<0.8`, etc
 
 # Improvements
-In the 'Textures' tab of the noteskin editor, you can now toggle between textures stored as a grid or as loose files  
-This is to suit your preference depending on how you like to edit/distribute images  
+- Ruleset selector now groups rulesets of the same type as a submenu to reduce scrolling
+- Progress meter now fills in smoothly instead of in segments
+- Added a glint effect on the score screen when you set a personal best
 
-In future I plan on enforcing grid textures for zipped .isks as they load faster and it's easier to copy paste a texture as a single grid from them
+# Bug fixes
+- Fixed a visual bug with the label of the progress meter
+- Fixed a visual bug with the judgement counter
+- Fixed a rare crash to do with explosion animations
 
