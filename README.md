@@ -26,7 +26,7 @@ You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in
 1. Cloning the codebase to your machine requires [Git](https://git-scm.com/downloads), and building requires [the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
 Follow the install instructions for both of these for your platform
 
-2. To set up the codebase on your machine, run these commands:
+2. To set up the codebase on your machine, run these commands in your terminal:
 ```bash
 # Navigate to somewhere you want to store the interlude codebase
 git clone https://github.com/YAVSRG/YAVSRG.git
@@ -36,12 +36,15 @@ chmod +x ./setup_repo.sh
 chmod +x ./setup_cli.sh
 ./setup_cli.sh
 ```
-The steps above should set up the `yavsrg` CLI command. Try running `yavsrg version` and seeing a version number.  
+The steps above should set up the `yavsrg` CLI command. Try running `yavsrg version`, you should see a version number output in the terminal.  
 **If this hasn't worked and you are stuck, get assistance from me in [the discord](https://discord.gg/tA22tWR)**
 
 3. Run `yavsrg play` to build and play the latest version.  
    From now on `yavsrg play` will launch the game when you want to play.  
     To update your game when a new version comes out, run `yavsrg update`.
+	
+To later uninstall the `yavsrg` command line tool, run `dotnet tool uninstall --global yavsrg.cli`  
+After that you can delete the entire YAVSRG folder to entirely remove the game and all data from your system.
 
 <h2 align="center">🧱 Building Interlude <code style="color: red; font-size: 20px">&lt;for developers only&gt;</code></h2>
 
