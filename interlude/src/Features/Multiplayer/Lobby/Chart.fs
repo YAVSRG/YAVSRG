@@ -80,8 +80,10 @@ module LobbyChart =
                         Logging.Debug("Multiplayer chart not found on the server either")
                         Network.lobby.Value.ReportMissingChart()
                         is_loading <- false
+                        Notifications.error(%"notification.multiplayer_chart_not_found.title", %"notification.multiplayer_chart_not_found.body")
                     | true ->
                         let newly_installed = (Cache.by_hash chart.Hash Content.Cache).Value
+                        Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
                         sync
                         <| fun () ->
                         Chart.change (newly_installed, LibraryContext.None, true)

@@ -94,8 +94,8 @@ type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
                         label,
                         options.ColorFunc value,
                         fun () ->
-                            options.Setting.Set value
                             Selection.up false
+                            options.Setting.Set value
                     )
 
                 if value = options.Setting.Value then
@@ -134,8 +134,8 @@ type DropdownMenu(options: DropdownMenuOptions) as this =
                         label,
                         Colors.text,
                         fun () ->
-                            action ()
                             Selection.up false
+                            action ()
                     )
         }
         |> ScrollContainer

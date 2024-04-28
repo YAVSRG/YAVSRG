@@ -126,9 +126,7 @@ module SpectateScreen =
                     info,
                     ignore,
                     (fun () -> currently_spectating),
-                    fun () ->
-                        if Network.lobby.IsSome then
-                            cycle_spectator this
+                    fun () -> cycle_spectator this
                 )
 
             override this.OnEnter(prev) =
