@@ -45,6 +45,7 @@ module LoadingIndicator =
         let animation = Animation.Counter(1500.0)
         let fade = Animation.Fade 0.0f
 
+        // todo: move to Animations.fs
         let draw (bounds: Rect) (a: float32) (length: float32) (color: Color) =
             let perimeter = (bounds.Width + bounds.Height) * 2.0f
             let a = a % 1.0f
@@ -216,35 +217,3 @@ type NewAndShiny() =
             Draw.untextured_quad (Quad.createv (x, y) (x, y) (vec i) (vec (i + 1))) Colors.red_accent.AsQuad
 
         Text.fill_b (Style.font, this.Icon, Rect.Box(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)
-
-module Glint =
-
-    let draw (percent: float32) (bounds: Rect) =
-        if percent <= 0.0f || percent >= 1.0f then () else
-
-        let stripe_width = bounds.Height * 0.35f
-        let travel_distance = bounds.Width + stripe_width * 4.5f
-        
-        let start = bounds.Left - stripe_width * 4.5f + travel_distance * percent
-
-        Stencil.start_stencilling false
-        Draw.rect bounds Color.Transparent
-
-        Stencil.start_drawing ()
-
-        Draw.untextured_quad
-        <| Quad.createv
-            (start + stripe_width, bounds.Top)
-            (start + stripe_width * 3.0f, bounds.Top)
-            (start + stripe_width * 2.0f, bounds.Bottom)
-            (start, bounds.Bottom)
-        <| Colors.white.O4a(26).AsQuad
-        
-        Draw.untextured_quad
-        <| Quad.createv
-            (start + 3.5f * stripe_width, bounds.Top)
-            (start + 4.5f * stripe_width, bounds.Top)
-            (start + 3.5f * stripe_width, bounds.Bottom)
-            (start + 2.5f * stripe_width, bounds.Bottom)
-        <| Colors.white.O4a(26).AsQuad 
-        Stencil.finish()
