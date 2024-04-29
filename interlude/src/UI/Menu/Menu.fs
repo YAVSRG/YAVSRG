@@ -53,7 +53,9 @@ type Page() as this =
 
     member this.Show(returning: bool) =
         this.Position <- Position.Default
-        if no_easing then this.SnapPosition(); no_easing <- false
+        if no_easing then 
+            this.SnapPosition()
+            no_easing <- false
 
         Selection.clamp_to this
 

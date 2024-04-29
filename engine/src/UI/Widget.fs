@@ -155,8 +155,6 @@ type Container(node_type) =
 type private SlideablePosition(pos: Position) =
     let mutable pos = pos
 
-    let mutable snapped_last_frame = false
-
     let left_offset = Animation.Fade(fst pos.Left)
     let left_anchor = Animation.Fade(snd pos.Left)
     let top_offset = Animation.Fade(fst pos.Top)
@@ -179,7 +177,7 @@ type private SlideablePosition(pos: Position) =
                 bottom_anchor
             ]
 
-    member this.Moving = left_offset.Moving || (if snapped_last_frame then snapped_last_frame <- false; true else false)
+    member this.Moving = left_offset.Moving
 
     member this.Position
         with get () =
@@ -213,7 +211,6 @@ type private SlideablePosition(pos: Position) =
         right_anchor.Snap()
         bottom_offset.Snap()
         bottom_anchor.Snap()
-        snapped_last_frame <- true
 
     member this.Update(elapsed_ms) =
         if this.Moving then
@@ -224,6 +221,7 @@ type SlideContainer(node_type) =
 
     let pos = SlideablePosition(Position.Default)
     let children = ResizeArray<Widget>()
+    let mutable snapped_last_frame = false
 
     override this.Position
         with set (value) =
@@ -236,9 +234,7 @@ type SlideContainer(node_type) =
 
     member this.SnapPosition() =
         pos.Snap()
-
-        if this.Initialised then
-            this.UpdateBounds()
+        snapped_last_frame <- true
 
     member private this.UpdateBounds() =
         this.Bounds <- Position.calculate pos.Position this.Parent.Bounds
@@ -250,7 +246,7 @@ type SlideContainer(node_type) =
 
     override this.Update(elapsed_ms, moved) =
         pos.Update elapsed_ms
-        let moved = moved || pos.Moving
+        let moved = moved || pos.Moving || (if snapped_last_frame then snapped_last_frame <- false; true else false)
 
         if moved then
             this.UpdateBounds()
