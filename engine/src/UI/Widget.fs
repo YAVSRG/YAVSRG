@@ -155,6 +155,8 @@ type Container(node_type) =
 type private SlideablePosition(pos: Position) =
     let mutable pos = pos
 
+    let mutable snapped_last_frame = false
+
     let left_offset = Animation.Fade(fst pos.Left)
     let left_anchor = Animation.Fade(snd pos.Left)
     let top_offset = Animation.Fade(fst pos.Top)
@@ -177,7 +179,7 @@ type private SlideablePosition(pos: Position) =
                 bottom_anchor
             ]
 
-    member this.Moving = left_offset.Moving
+    member this.Moving = left_offset.Moving || (if snapped_last_frame then snapped_last_frame <- false; true else false)
 
     member this.Position
         with get () =
@@ -211,6 +213,7 @@ type private SlideablePosition(pos: Position) =
         right_anchor.Snap()
         bottom_offset.Snap()
         bottom_anchor.Snap()
+        snapped_last_frame <- true
 
     member this.Update(elapsed_ms) =
         if this.Moving then

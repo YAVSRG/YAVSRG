@@ -8,11 +8,27 @@ open Percyqaz.Flux.Input
 open Prelude
 open Interlude.UI
 
+[<RequireQualifiedAccess>]
+type PageEasing =
+    | Up
+    | Down
+    | Left 
+    | Right
+    | None
+    member this.Reverse =
+        match this with
+        | Up -> Down
+        | Down -> Up
+        | Left -> Right
+        | Right -> Left
+        | None -> None
+
 [<AbstractClass>]
 type Page() as this =
     inherit SlideContainer(NodeType.Container(fun _ -> this._content))
 
     let mutable is_current = false
+    let mutable no_easing = false
     let mutable content: Widget option = None
 
     member private this._content = content |> Option.map (fun x -> x :> ISelection)
@@ -35,8 +51,10 @@ type Page() as this =
 
         base.Update(elapsed_ms, moved)
 
-    member this.View(returning: bool) =
+    member this.Show(returning: bool) =
         this.Position <- Position.Default
+        if no_easing then this.SnapPosition(); no_easing <- false
+
         Selection.clamp_to this
 
         if returning then
@@ -45,21 +63,42 @@ type Page() as this =
         content.Value.Focus false
         is_current <- true
 
-    member this.MoveDown() =
-        this.Position <-
-            { Position.Default with
-                Top = 1.0f %+ 0.0f
-                Bottom = 2.0f %+ 0.0f
-            }
-
-        is_current <- false
-
-    member this.MoveUp() =
-        this.Position <-
-            { Position.Default with
-                Top = -1.0f %+ 0.0f
-                Bottom = 0.0f %+ 0.0f
-            }
+    member this.Hide(dir: PageEasing) =
+        match dir with
+        | PageEasing.Up ->
+            this.Position <-
+                { Position.Default with
+                    Top = -1.0f %+ 0.0f
+                    Bottom = 0.0f %+ 0.0f
+                }
+        | PageEasing.Down ->
+            this.Position <-
+                { Position.Default with
+                    Top = 1.0f %+ 0.0f
+                    Bottom = 2.0f %+ 0.0f
+                }
+        | PageEasing.Left ->
+            this.Position <-
+                { Position.Default with
+                    Left = -1.0f %+ 0.0f
+                    Right = 0.0f %+ 0.0f
+                }
+        | PageEasing.Right ->
+            this.Position <-
+                { Position.Default with
+                    Left = 1.0f %+ 0.0f
+                    Right = 2.0f %+ 0.0f
+                }
+        | PageEasing.None ->
+            this.Position <-
+                {
+                    Left = -1.0f %+ 0.0f
+                    Top = -1.0f %+ 0.0f
+                    Right = 0.0f %+ 0.0f
+                    Bottom = 0.0f %+ 0.0f
+                }
+            this.SnapPosition()
+            no_easing <- true
 
         is_current <- false
 
@@ -67,9 +106,13 @@ type Page() as this =
         if content.IsNone then
             failwithf "Call Content() to provide page content"
 
-        this.MoveDown()
+        this.Hide(this.Direction.Reverse)
         base.Init parent
-        this.View(false)
+        this.Show(false)
+
+    abstract member Direction : PageEasing
+    default this.Direction = PageEasing.Up
+        
 
 and Menu(top_level: Page) as this =
     inherit Dialog()
@@ -123,7 +166,7 @@ and Menu(top_level: Page) as this =
         stack.[n] <- Some page
 
         if n > 0 then
-            stack.[n - 1].Value.MoveUp()
+            stack.[n - 1].Value.Hide(page.Direction)
 
     static member Back() =
         match _instance with
@@ -141,10 +184,10 @@ and Menu(top_level: Page) as this =
         let n = List.length namestack
         let page = stack.[n].Value
         page.OnClose()
-        page.MoveDown()
+        page.Hide(page.Direction.Reverse)
 
         if n > 0 then
-            stack.[n - 1].Value.View(true)
+            stack.[n - 1].Value.Show(true)
 
     member private this.Exit() =
         while namestack <> [] do
