@@ -234,7 +234,8 @@ type SlideContainer(node_type) =
 
     member this.SnapPosition() =
         pos.Snap()
-        snapped_last_frame <- true
+        if this.Initialised then
+            snapped_last_frame <- true
 
     member private this.UpdateBounds() =
         this.Bounds <- Position.calculate pos.Position this.Parent.Bounds

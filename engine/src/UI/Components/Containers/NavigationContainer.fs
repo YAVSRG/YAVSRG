@@ -83,14 +83,14 @@ module NavigationContainer =
         abstract member Navigate: unit -> unit
 
         override this.Draw() =
-            for c in children do
-                c.Draw()
+            for i = children.Count - 1 downto 0 do
+                children.[i].Draw()
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
 
-            for i = children.Count - 1 downto 0 do
-                children.[i].Update(elapsed_ms, moved)
+            for c in children do
+                c.Update(elapsed_ms, moved)
 
             if this.Focused && children.Count > 0 then
                 this.Navigate()

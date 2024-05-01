@@ -134,6 +134,36 @@ type SystemPage() as this =
 
         this.Content(
             page_container()
+            |+ PageButton(
+                "system.performance",
+                (fun () -> PerformanceSettingsPage().Show())
+            )
+                .Pos(0)
+                .Tooltip(Tooltip.Info("system.performance"))
+
+            |+ PageSetting(
+                "system.windowmode",
+                Selector.FromEnum(
+                    config.WindowMode
+                    |> Setting.trigger window_mode_change
+                    |> Setting.trigger mark_changed
+                )
+            )
+                .Pos(3)
+                .Tooltip(Tooltip.Info("system.windowmode"))
+            |+ resolution_or_monitor
+            |+ Conditional(
+                (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
+                PageSetting(
+                    "system.videomode",
+                    VideoMode(
+                        config.FullscreenVideoMode |> Setting.trigger mark_changed,
+                        get_current_supported_video_modes
+                    )
+                )
+                    .Pos(7)
+                    .Tooltip(Tooltip.Info("system.videomode"))
+            )
             |+ PageSetting(
                 "system.audiovolume",
                 Slider.Percent(
@@ -170,37 +200,6 @@ type SystemPage() as this =
             |+ PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
                 .Pos(19)
                 .Tooltip(Tooltip.Info("system.hotkeys"))
-
-            |+ PageButton(
-                "system.performance",
-                (fun () -> PerformanceSettingsPage().Show())
-            )
-                .Pos(0)
-                .Tooltip(Tooltip.Info("system.performance"))
-
-            |+ PageSetting(
-                "system.windowmode",
-                Selector.FromEnum(
-                    config.WindowMode
-                    |> Setting.trigger window_mode_change
-                    |> Setting.trigger mark_changed
-                )
-            )
-                .Pos(3)
-                .Tooltip(Tooltip.Info("system.windowmode"))
-            |+ resolution_or_monitor
-            |+ Conditional(
-                (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
-                PageSetting(
-                    "system.videomode",
-                    VideoMode(
-                        config.FullscreenVideoMode |> Setting.trigger mark_changed,
-                        get_current_supported_video_modes
-                    )
-                )
-                    .Pos(7)
-                    .Tooltip(Tooltip.Info("system.videomode"))
-            )
         )
 
         this.Add(
