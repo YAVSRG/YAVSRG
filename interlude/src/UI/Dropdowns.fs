@@ -35,15 +35,35 @@ module private Dropdown =
 
             base.Draw()
 
-type DropdownWrapper(positioning: IHeight -> Position) =
-    inherit SwapContainer()
+type DropdownWrapper(positioning: IHeight -> Position) as this =
+    inherit StaticWidget(NodeType.Container(fun () -> this.Current))
 
-    let mutable shown = false
+    let mutable current : Widget option = None
+    let mutable swapped_last_frame = false
+
+    member private this.Current = current |> Option.map (fun x -> x :> ISelection)
+
+    override this.Init(parent) =
+        base.Init parent
+        current |> Option.iter (fun dropdown -> dropdown.Init this)
+
+    override this.Draw() = current |> Option.iter (fun dropdown -> dropdown.Draw())
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if shown then
+        let moved =
+            if swapped_last_frame then
+                swapped_last_frame <- false
+                true
+            else
+                moved
+
+        match current with
+        | None -> ()
+        | Some dropdown ->
+            dropdown.Update(elapsed_ms, moved)
+
             if
                 (%%"exit").Tapped()
                 || not this.Focused
@@ -52,22 +72,22 @@ type DropdownWrapper(positioning: IHeight -> Position) =
             then
                 this.Dismiss()
 
-            if Mouse.hover this.Bounds then
+            if Mouse.hover dropdown.Bounds then
                 Input.finish_frame_events ()
 
-    member this.Show<'T when 'T :> Widget and 'T :> IHeight>(d: 'T) =
-        shown <- true
-        d.Position <- positioning (d :> IHeight)
-        this.Current <- d
-        if not d.Focused then d.Focus false
+    member this.Show<'T when 'T :> Widget and 'T :> IHeight>(dropdown: 'T) =
+        dropdown.Position <- positioning (dropdown :> IHeight)
+        current <- Some dropdown
+        if this.Initialised then
+            if not dropdown.Initialised then
+                dropdown.Init this
+        swapped_last_frame <- true
+        if not dropdown.Focused then dropdown.Focus false
 
-    member this.Dismiss() =
-        if shown then
-            this.Current <- Dummy()
-            shown <- false
+    member this.Dismiss() = current <- None
 
     member this.Toggle(thunk: unit -> 'T) =
-        if shown then this.Dismiss()
+        if current.IsSome then this.Dismiss()
         else this.Show(thunk())
 
 /// Represents a dropdown menu where items represent different values for one setting, supports one value being pre-selected

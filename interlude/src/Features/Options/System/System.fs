@@ -179,7 +179,7 @@ type SystemPage() as this =
                 "system.audiodevice",
                 Selector(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
             )
-                .Pos(12, 2, PageWidth.Full)
+                .Pos(12)
                 .Tooltip(Tooltip.Info("system.audiodevice"))
 
             |+ PageSetting(

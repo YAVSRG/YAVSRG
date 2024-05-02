@@ -38,6 +38,7 @@ and [<RequireQualifiedAccess>] NodeType =
 module Selection =
 
     let mutable private current_tree: ISelection list = []
+    let mutable private focused_by_mouse: bool = false
     let mutable private leaf_is_selected: bool = false
     let mutable private current_clamp_tree: ISelection list = []
 
@@ -78,7 +79,7 @@ module Selection =
         let mutable difference_found = false
 
         while not (difference_found || xs.IsEmpty || ys.IsEmpty) do
-            if xs.Head = ys.Head then
+            if xs.Head = ys.Head && by_mouse = focused_by_mouse then
                 xs <- List.tail xs
                 ys <- List.tail ys
             else
@@ -89,6 +90,7 @@ module Selection =
 
         for y in ys do
             y.OnFocus by_mouse
+        focused_by_mouse <- by_mouse
 
     let rec private focus_tree (by_mouse: bool) (tree: ISelection list) =
 
@@ -164,6 +166,7 @@ module Selection =
             | head :: rest ->
                 head.OnUnfocus by_mouse
                 current_tree <- rest
+                focused_by_mouse <- by_mouse
 
                 match List.tryHead rest with
                 | Some h ->

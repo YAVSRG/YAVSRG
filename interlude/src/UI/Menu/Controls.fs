@@ -119,31 +119,20 @@ type Slider(setting: Setting.Bounded<float32>) as this =
 
         base.Draw()
 
-type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
+type Checkbox(setting: Setting<bool>) =
     inherit Container(NodeType.Leaf)
 
-    let mutable index =
-        items
-        |> Array.tryFindIndex (fun (v, _) -> Object.Equals(v, setting.Value))
-        |> Option.defaultValue 0
-
-    let fd () =
-        index <- (index + 1) % items.Length
-        setting.Value <- fst items.[index]
-        Style.click.Play()
-
-    let bk () =
-        index <- (index + items.Length - 1) % items.Length
-        setting.Value <- fst items.[index]
+    let toggle () =
+        setting.Value <- not setting.Value
         Style.click.Play()
 
     override this.Init(parent: Widget) =
         this 
-        |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
+        |+ Text((fun () -> if setting.Value then Icons.CHECK_CIRCLE else Icons.CIRCLE), Align = Alignment.LEFT)
         |* Clickable(
             (fun () ->
                 this.Select true
-                fd ()
+                toggle ()
             ),
             OnHover =
                 fun b ->
@@ -163,22 +152,49 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"left").Tapped() then
-                bk ()
-            elif (%%"right").Tapped() then
-                fd ()
-            elif (%%"up").Tapped() then
-                fd ()
-            elif (%%"down").Tapped() then
-                bk ()
+            if (%%"left").Tapped() || (%%"right").Tapped() || (%%"up").Tapped() || (%%"down").Tapped() then
+                toggle ()
 
+type Selector<'T when 'T : equality>(items: ('T * string) array, setting: Setting<'T>) as this =
+    inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
+
+    let dropdown_wrapper = DropdownWrapper(fun d ->
+        let height = min d.Height (Viewport.vheight - this.Bounds.Bottom - Style.PADDING * 2.0f)
+        Position.BorderBottom(height + 2.0f * Style.PADDING).Margin(Style.PADDING)
+    )
+
+    let wrapped_setting = 
+        let current_value = setting.Value
+        match items |> Array.tryFind (fun (v, _) -> v = current_value) with
+        | Some v -> v
+        | None -> items.[0]
+        |> Setting.simple
+        |> Setting.trigger (fun (v, _) -> setting.Set v)
+
+    override this.Init(parent) =
+        this
+        |+ Text((fun () -> snd wrapped_setting.Value), Align = Alignment.LEFT)
+        |+ Clickable.Focus this
+        |* dropdown_wrapper
+
+        base.Init parent
+
+    member this.ToggleDropdown() =
+        dropdown_wrapper.Toggle(fun () ->
+            Dropdown
+                {
+                    Items = items |> Array.map (fun (v, label) -> ((v, label), label))
+                    ColorFunc = K Colors.text
+                    Setting = wrapped_setting
+                }
+        )
+    
     static member FromEnum(setting: Setting<'T>) =
         let names = Enum.GetNames(typeof<'T>)
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
         Selector(Array.zip values names, setting)
-
-    static member FromBool(setting: Setting<bool>) =
-        Selector<bool>([| false, Icons.CIRCLE; true, Icons.CHECK_CIRCLE |], setting)
+    
+    static member FromBool(setting: Setting<bool>) = Checkbox(setting)
 
 type PageSetting(name, widget: Widget) as this =
     inherit Container(NodeType.Container(fun _ -> Some this.Child))
