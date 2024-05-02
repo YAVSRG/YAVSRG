@@ -42,7 +42,7 @@ type ComboPage(on_close: unit -> unit) as this =
     do
         this.Content(
             page_container()
-            |+ PageSetting("hud.combo.lampcolors", Selector<_>.FromBool lamp_colors)
+            |+ PageSetting("hud.combo.lampcolors", Checkbox lamp_colors)
                 .Pos(0)
                 .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
             |+ ([
@@ -52,7 +52,7 @@ type ComboPage(on_close: unit -> unit) as this =
                 PageSetting("hud.combo.growth", Slider(growth_amount))
                     .Pos(4)
                     .Tooltip(Tooltip.Info("hud.combo.growth"))
-                PageSetting("hud.generic.use_font", Selector<_>.FromBool(use_font))
+                PageSetting("hud.generic.use_font", Checkbox use_font)
                     .Pos(7)
                     .Tooltip(Tooltip.Info("hud.generic.use_font"))
                 Conditional(use_font.Get,

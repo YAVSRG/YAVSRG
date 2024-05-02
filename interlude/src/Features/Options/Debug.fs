@@ -17,7 +17,7 @@ type DebugPage() as this =
     let themes = PageSetting("themes.theme", Dummy())
 
     let refresh () =
-        themes.Child <- Selector(Themes.list (), options.Theme)
+        themes.Child <- SelectDropdown(Themes.list (), options.Theme)
 
     let try_edit_theme () =
         let theme = Content.Theme

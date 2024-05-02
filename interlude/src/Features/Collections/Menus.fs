@@ -20,7 +20,7 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) as this 
         this.Content(
             page_container()
             |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(0)
-            |+ PageSetting("collections.edit.icon", Selector(CreateFolderPage.Icons, icon))
+            |+ PageSetting("collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, icon))
                 .Pos(3)
             |+ PageButton(
                 "confirm.yes",
@@ -57,7 +57,7 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) as thi
         this.Content(
             page_container()
             |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(0)
-            |+ PageSetting("collections.edit.icon", Selector(CreatePlaylistPage.Icons, icon))
+            |+ PageSetting("collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, icon))
                 .Pos(3)
             |+ PageButton(
                 "confirm.yes",
@@ -93,7 +93,7 @@ type EditFolderPage(name: string, folder: Folder) as this =
         let content =
             page_container()
             |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(0)
-            |+ PageSetting("collections.edit.icon", Selector(CreateFolderPage.Icons, folder.Icon))
+            |+ PageSetting("collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, folder.Icon))
                 .Pos(2)
             |+ PageButton(
                 "collections.edit.delete",
@@ -135,7 +135,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) as this =
         let content =
             page_container()
             |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(0)
-            |+ PageSetting("collections.edit.icon", Selector(CreatePlaylistPage.Icons, playlist.Icon))
+            |+ PageSetting("collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, playlist.Icon))
                 .Pos(2)
             |+ PageButton(
                 "collections.edit.delete",

@@ -37,7 +37,7 @@ type EndlessModeMenu(info: Chart.LoadedChartInfo) as this =
         |+ PageButton.Once("levelselect.endless_mode.start", start)
             .Pos(3)
         |+ PageSetting("levelselect.endless_mode.priority", 
-            Selector<_>(
+            SelectDropdown<_>(
                 [|
                     SuggestionPriority.Variety, %"levelselect.endless_mode.priority.variety"
                     SuggestionPriority.Consistency, %"levelselect.endless_mode.priority.consistency"

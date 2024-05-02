@@ -40,7 +40,7 @@ type GameplayPage() as this =
         |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Tooltip(Tooltip.Info("gameplay.hitposition"))
             .Pos(3)
-        |+ PageSetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll)
+        |+ PageSetting("gameplay.upscroll", Checkbox options.Upscroll)
             .Tooltip(Tooltip.Info("gameplay.upscroll"))
             .Pos(5)
         |+ PageSetting("gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
@@ -67,8 +67,7 @@ type GameplayPage() as this =
             .Pos(16)
         |+ PageSetting(
             "generic.keymode",
-            Selector<_>
-                .FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
+            SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
         )
             .Pos(19)
         |+ PageSetting("gameplay.keybinds", binds)

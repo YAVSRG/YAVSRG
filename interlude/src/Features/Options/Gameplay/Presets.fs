@@ -72,7 +72,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) as 
         |+ PageTextEntry("gameplay.preset.name", name).Pos(0)
         |+ PageSetting(
             "gameplay.preset.mode",
-            Selector<PresetMode>(
+            SelectDropdown<PresetMode>(
                 [|
                     PresetMode.Unlocked, %"gameplay.preset.mode.unlocked"
                     PresetMode.Locked, %"gameplay.preset.mode.locked"

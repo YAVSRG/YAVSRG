@@ -96,7 +96,7 @@ type SystemPage() as this =
     let monitor_select =
         PageSetting(
             "system.monitor",
-            Selector(
+            SelectDropdown(
                 monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                 config.Display
                 |> Setting.trigger (fun _ ->
@@ -143,7 +143,7 @@ type SystemPage() as this =
 
             |+ PageSetting(
                 "system.windowmode",
-                Selector.FromEnum(
+                SelectDropdown.FromEnum(
                     config.WindowMode
                     |> Setting.trigger window_mode_change
                     |> Setting.trigger mark_changed
@@ -177,7 +177,7 @@ type SystemPage() as this =
 
             |+ PageSetting(
                 "system.audiodevice",
-                Selector(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
+                SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
             )
                 .Pos(12)
                 .Tooltip(Tooltip.Info("system.audiodevice"))

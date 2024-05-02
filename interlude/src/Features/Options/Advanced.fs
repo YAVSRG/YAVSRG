@@ -12,18 +12,18 @@ type AdvancedPage() as this =
 
     do
         page_container ()
-        |+ PageSetting("advanced.enableconsole", Selector<_>.FromBool options.EnableConsole)
+        |+ PageSetting("advanced.enableconsole", Checkbox options.EnableConsole)
             .Pos(0)
-        |+ PageSetting("advanced.confirmexit", Selector<_>.FromBool options.ConfirmExit)
+        |+ PageSetting("advanced.confirmexit", Checkbox options.ConfirmExit)
             .Pos(2)
             .Tooltip(Tooltip.Info("advanced.confirmexit"))
-        |+ PageSetting("advanced.holdtogiveup", Selector<_>.FromBool options.HoldToGiveUp)
+        |+ PageSetting("advanced.holdtogiveup", Checkbox options.HoldToGiveUp)
             .Pos(4)
             .Tooltip(Tooltip.Info("advanced.holdtogiveup"))
-        |+ PageSetting("advanced.vanishingnotes", Selector<_>.FromBool options.VanishingNotes)
+        |+ PageSetting("advanced.vanishingnotes", Checkbox options.VanishingNotes)
             .Pos(6)
             .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
-        |+ PageSetting("advanced.autocalibrateoffset", Selector<_>.FromBool options.AutoCalibrateOffset)
+        |+ PageSetting("advanced.autocalibrateoffset", Checkbox options.AutoCalibrateOffset)
             .Pos(8)
             .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
         |+ PageButton
@@ -48,7 +48,7 @@ type AdvancedPage() as this =
             )
             .Pos(10)
             .Tooltip(Tooltip.Info("advanced.buildpatterncache"))
-        |+ PageSetting("advanced.advancedrecommendations", Selector<_>.FromBool options.AdvancedRecommendations)
+        |+ PageSetting("advanced.advancedrecommendations", Checkbox options.AdvancedRecommendations)
             .Pos(12)
             .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
         |> this.Content

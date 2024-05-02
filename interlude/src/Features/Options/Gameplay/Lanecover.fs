@@ -13,7 +13,7 @@ type LanecoverPage() as this =
 
     do
         page_container()
-        |+ PageSetting("gameplay.lanecover.enabled", Selector<_>.FromBool options.LaneCover.Enabled)
+        |+ PageSetting("gameplay.lanecover.enabled", Checkbox options.LaneCover.Enabled)
             .Pos(0)
         |+ PageSetting("gameplay.lanecover.hidden", Slider.Percent(options.LaneCover.Hidden))
             .Tooltip(Tooltip.Info("gameplay.lanecover.hidden"))

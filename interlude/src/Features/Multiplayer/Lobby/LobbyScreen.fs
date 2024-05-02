@@ -29,10 +29,10 @@ type LobbySettingsPage(lobby: Lobby) as this =
     do
         page_container()
         |+ PageTextEntry("lobby.name", name).Pos(0)
-        |+ PageSetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation))
+        |+ PageSetting("lobby.host_rotation", Checkbox host_rotation)
             .Pos(3)
             .Tooltip(Tooltip.Info("lobby.host_rotation"))
-        |+ PageSetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown))
+        |+ PageSetting("lobby.auto_countdown", Checkbox auto_countdown)
             .Pos(5)
             .Tooltip(Tooltip.Info("lobby.auto_countdown"))
         |> this.Content

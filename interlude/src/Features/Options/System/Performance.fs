@@ -23,7 +23,7 @@ type PerformanceSettingsPage() as this =
             page_container()
             |+ PageSetting(
                 "system.framelimit",
-                Selector.FromEnum(config.RenderMode |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config)))
+                SelectDropdown.FromEnum(config.RenderMode |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config)))
             )
                 .Pos(0)
                 .Tooltip(Tooltip.Info("system.framelimit"))
@@ -38,7 +38,7 @@ type PerformanceSettingsPage() as this =
             |+ Conditional(
                 (fun () -> config.RenderMode.Value = FrameLimit.Smart),
                 PageSetting("system.performance.antijitter", 
-                    Selector<_>.FromBool(
+                    Checkbox(
                         config.SmartCapAntiJitter
                         |> Setting.trigger (fun v -> anti_jitter <- v)
                     )
@@ -64,7 +64,7 @@ type PerformanceSettingsPage() as this =
             |+ Conditional(
                 (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.WindowMode.Value = WindowType.Fullscreen),
                 PageSetting("system.performance.frame_multiplier", 
-                    Selector([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
+                    SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
                 )
                     .Pos(7)
             )

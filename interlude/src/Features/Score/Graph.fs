@@ -20,9 +20,9 @@ type ScoreGraphSettingsPage() as this =
     do
         this.Content(
             page_container()
-            |+ PageSetting("score.graph.settings.graph_mode", Selector<_>.FromEnum options.ScoreGraphMode)
+            |+ PageSetting("score.graph.settings.graph_mode", SelectDropdown.FromEnum options.ScoreGraphMode)
                 .Pos(0)
-            |+ PageSetting("score.graph.settings.only_releases", Selector<_>.FromBool GraphSettings.only_releases)
+            |+ PageSetting("score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
                 .Pos(3)
         )
 

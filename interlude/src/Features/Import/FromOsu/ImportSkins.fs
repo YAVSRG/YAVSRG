@@ -23,11 +23,11 @@ module ImportSkins =
 
         override this.Init(parent: Widget) =
             page_container()
-            |+ PageSetting("osu_skin_import.keymode", Selector<Keymode>.FromEnum(keymode))
+            |+ PageSetting("osu_skin_import.keymode", SelectDropdown.FromEnum(keymode))
                 .Pos(0)
             |+ Conditional(
                 (fun () -> keymode.Value = Keymode.``4K``),
-                PageSetting("osu_skin_import.isarrows", Selector<_>.FromBool(is_arrows))
+                PageSetting("osu_skin_import.isarrows", Checkbox is_arrows)
                     .Pos(2)
             )
             |+ 
@@ -35,7 +35,7 @@ module ImportSkins =
                 | Some folder ->
                     [
                         Text([folder] %> "osu_skin_import.delete_prompt", Align = Alignment.LEFT, Position = pretty_pos(5, 2, PageWidth.Full).Margin(Style.PADDING))
-                        PageSetting("osu_skin_import.delete_existing", Selector<_>.FromBool(delete_existing)).Pos(7)
+                        PageSetting("osu_skin_import.delete_existing", Checkbox delete_existing).Pos(7)
                     ]
                 | None -> []
             |+ PageButton

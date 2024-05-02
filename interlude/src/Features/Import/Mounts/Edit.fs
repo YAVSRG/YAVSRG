@@ -17,7 +17,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
 
     do
         page_container()
-        |+ PageSetting("mount.importatstartup", Selector<_>.FromBool import_on_startup)
+        |+ PageSetting("mount.importatstartup", Checkbox import_on_startup)
             .Pos(0)
             .Tooltip(Tooltip.Info("mount.importatstartup"))
         |+ PageButton

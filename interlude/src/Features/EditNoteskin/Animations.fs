@@ -99,7 +99,7 @@ type AnimationSettingsPage() as this =
     do
         let general_tab =
             NavigationContainer.Column<Widget>(WrapNavigation = false)
-            |+ PageSetting("noteskins.animations.enablecolumnlight", Selector<_>.FromBool enable_column_light)
+            |+ PageSetting("noteskins.animations.enablecolumnlight", Checkbox enable_column_light)
                 .Tooltip(Tooltip.Info("noteskins.animations.enablecolumnlight"))
                 .Pos(0)
             |+ PageSetting(
@@ -111,7 +111,7 @@ type AnimationSettingsPage() as this =
             |+ PageSetting("noteskins.animations.animationtime", Slider(note_animation_time |> Setting.f32, Step = 1f))
                 .Tooltip(Tooltip.Info("noteskins.animations.animationtime"))
                 .Pos(5)
-            |+ PageSetting("noteskins.animations.enableexplosions", Selector<_>.FromBool enable_explosions)
+            |+ PageSetting("noteskins.animations.enableexplosions", Checkbox enable_explosions)
                 .Tooltip(Tooltip.Info("noteskins.animations.enableexplosions"))
                 .Pos(8)
 
@@ -125,7 +125,7 @@ type AnimationSettingsPage() as this =
                 .Pos(0)
             |+ PageSetting(
                 "noteskins.animations.explosioncolors",
-                Selector(
+                SelectDropdown(
                     [| ExplosionColors.Note, "Note"; ExplosionColors.Judgements, "Judgements" |],
                     explosion_colors_note
                 )
@@ -138,7 +138,7 @@ type AnimationSettingsPage() as this =
             |+ PageSetting("noteskins.animations.explosionscale", Slider.Percent(explosion_scale_note))
                 .Tooltip(Tooltip.Info("noteskins.animations.explosionscale"))
                 .Pos(6)
-            |+ PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_note)
+            |+ PageSetting("noteskins.animations.usebuiltinanimation", Checkbox explosion_builtin_note)
                 .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
                 .Pos(8)
             |+ Conditional(
@@ -167,7 +167,7 @@ type AnimationSettingsPage() as this =
                 .Pos(0)
             |+ PageSetting(
                 "noteskins.animations.explosioncolors",
-                Selector(
+                SelectDropdown(
                     [| ExplosionColors.Note, "Note"; ExplosionColors.Judgements, "Judgements" |],
                     explosion_colors_hold
                 )
@@ -180,12 +180,12 @@ type AnimationSettingsPage() as this =
             |+ PageSetting("noteskins.animations.explosionscale", Slider.Percent(explosion_scale_hold))
                 .Tooltip(Tooltip.Info("noteskins.animations.explosionscale"))
                 .Pos(6)
-            |+ PageSetting("noteskins.animations.usereleaseanimation", Selector<_>.FromBool explosion_hold_use_release)
+            |+ PageSetting("noteskins.animations.usereleaseanimation", Checkbox explosion_hold_use_release)
                 .Tooltip(Tooltip.Info("noteskins.animations.usereleaseanimation"))
                 .Pos(8)
             |+ Conditional(
                 explosion_hold_use_release.Get,
-                PageSetting("noteskins.animations.usebuiltinanimation", Selector<_>.FromBool explosion_builtin_release)
+                PageSetting("noteskins.animations.usebuiltinanimation", Checkbox explosion_builtin_release)
                     .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
                     .Pos(10)
             )

@@ -124,25 +124,23 @@ type ColorSettingsPage() as this =
             page_container()
             |+ PageSetting(
                 "noteskins.edit.globalcolors",
-                Selector<_>
-                    .FromBool(
-                        Setting.make
-                            (fun v -> note_colors <- { note_colors with UseGlobalColors = v })
-                            (fun () -> note_colors.UseGlobalColors)
-                        |> Setting.trigger (ignore >> refresh_colors)
-                    )
+                Checkbox(
+                    Setting.make
+                        (fun v -> note_colors <- { note_colors with UseGlobalColors = v })
+                        (fun () -> note_colors.UseGlobalColors)
+                    |> Setting.trigger (ignore >> refresh_colors)
+                )
             )
                 .Pos(0)
                 .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
             |+ PageSetting(
                 "generic.keymode",
-                Selector<Keymode>
-                    .FromEnum(keymode |> Setting.trigger (ignore >> refresh_colors))
+                SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> refresh_colors))
             )
                 .Pos(2)
             |+ PageSetting(
                 "noteskins.edit.colorstyle",
-                Selector.FromEnum(
+                SelectDropdown.FromEnum(
                     Setting.make (fun v -> note_colors <- { note_colors with Style = v }) (fun () -> note_colors.Style)
                     |> Setting.trigger (ignore >> refresh_colors)
                 )

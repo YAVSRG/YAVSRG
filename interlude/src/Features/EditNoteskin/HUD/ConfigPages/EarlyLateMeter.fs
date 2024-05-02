@@ -38,7 +38,7 @@ type EarlyLateMeterPage(on_close: unit -> unit) as this =
                 PageSetting("hud.earlylatemeter.duration", Slider(duration, Step = 5f))
                     .Pos(0)
                     .Tooltip(Tooltip.Info("hud.earlylatemeter.duration")) :> Widget
-                PageSetting("hud.earlylatemeter.usetexture", Selector<_>.FromBool(use_texture))
+                PageSetting("hud.earlylatemeter.usetexture", Checkbox use_texture)
                     .Pos(2)
                     .Tooltip(Tooltip.Info("hud.earlylatemeter.usetexture"))
                 Conditional(use_texture.Get, 

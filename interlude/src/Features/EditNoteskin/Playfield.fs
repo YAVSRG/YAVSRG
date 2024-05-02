@@ -123,7 +123,7 @@ type PlayfieldSettingsPage() as this =
         |+ PageSetting("noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
             .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
             .Pos(2)
-        |+ PageSetting("noteskins.edit.usestagetextures", Selector<_>.FromBool use_stage_textures)
+        |+ PageSetting("noteskins.edit.usestagetextures", Checkbox use_stage_textures)
             .Tooltip(Tooltip.Info("noteskins.edit.usestagetextures"))
             .Pos(4)
         |+ PageSetting("noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true))
@@ -135,10 +135,10 @@ type PlayfieldSettingsPage() as this =
         |+ PageSetting("noteskins.edit.columnwidth", Slider(column_width, Step = 1f))
             .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
             .Pos(12)
-        |+ PageSetting("noteskins.edit.fillcolumngaps", Selector<_>.FromBool(fill_gaps))
+        |+ PageSetting("noteskins.edit.fillcolumngaps", Checkbox fill_gaps)
             .Tooltip(Tooltip.Info("noteskins.edit.fillcolumngaps"))
             .Pos(14)
-        |+ PageSetting("noteskins.edit.useadvancedcolumnspacing", Selector<_>.FromBool(use_advanced_column_spacing))
+        |+ PageSetting("noteskins.edit.useadvancedcolumnspacing", Checkbox use_advanced_column_spacing)
             .Tooltip(Tooltip.Info("noteskins.edit.useadvancedcolumnspacing"))
             .Pos(16)
         |+ Conditional(
@@ -151,8 +151,7 @@ type PlayfieldSettingsPage() as this =
             (fun () -> use_advanced_column_spacing.Value),
             PageSetting(
                 "generic.keymode",
-                Selector<Keymode>
-                    .FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
+                SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
             )
                 .Pos(18)
         )

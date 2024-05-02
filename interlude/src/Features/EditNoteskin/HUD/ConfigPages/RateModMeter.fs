@@ -34,7 +34,7 @@ type RateModMeterPage(on_close: unit -> unit) as this =
     do
         this.Content(
             page_container()
-            |+ PageSetting("hud.ratemodmeter.showmods", Selector<_>.FromBool(show_mods))
+            |+ PageSetting("hud.ratemodmeter.showmods", Checkbox show_mods)
                 .Pos(0)
                 .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
             |>> Container

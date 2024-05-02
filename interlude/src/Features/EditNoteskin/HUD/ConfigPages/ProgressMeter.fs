@@ -80,7 +80,7 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
     do
         this.Content(
             page_container()
-            |+ PageSetting("hud.progressmeter.label", Selector<ProgressMeterLabel>.FromEnum(label))
+            |+ PageSetting("hud.progressmeter.label", SelectDropdown.FromEnum(label))
                 .Pos(0)
             |+ ([
                 PageSetting("hud.progressmeter.label_size", Slider.Percent(label_size))
@@ -90,7 +90,7 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
                     .Pos(4, 3)
                 PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
                     .Pos(7, 3)
-                PageSetting("hud.generic.use_font", Selector<_>.FromBool(use_font))
+                PageSetting("hud.generic.use_font", Checkbox use_font)
                     .Pos(10)
                     .Tooltip(Tooltip.Info("hud.generic.use_font")) :> Widget
                 Conditional(use_font.Get,

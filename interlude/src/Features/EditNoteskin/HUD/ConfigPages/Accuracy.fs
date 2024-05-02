@@ -50,14 +50,14 @@ type AccuracyPage(on_close: unit -> unit) as this =
     do
         this.Content(
             page_container()
-            |+ PageSetting("hud.accuracy.gradecolors", Selector<_>.FromBool grade_colors)
+            |+ PageSetting("hud.accuracy.gradecolors", Checkbox grade_colors)
                 .Pos(0)
                 .Tooltip(Tooltip.Info("hud.accuracy.gradecolors"))
-            |+ PageSetting("hud.accuracy.showname", Selector<_>.FromBool show_name)
+            |+ PageSetting("hud.accuracy.showname", Checkbox show_name)
                 .Pos(2)
                 .Tooltip(Tooltip.Info("hud.accuracy.showname"))
             |+ ([
-                PageSetting("hud.generic.use_font", Selector<_>.FromBool(use_font))
+                PageSetting("hud.generic.use_font", Checkbox use_font)
                     .Pos(7)
                     .Tooltip(Tooltip.Info("hud.generic.use_font")) :> Widget
                 Conditional(use_font.Get,

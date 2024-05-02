@@ -49,13 +49,13 @@ type TimingDisplayPage(on_close: unit -> unit) as this =
     do
         this.Content(
             page_container()
-            |+ PageSetting("hud.timingdisplay.showguide", Selector<_>.FromBool show_guide)
+            |+ PageSetting("hud.timingdisplay.showguide", Checkbox show_guide)
                 .Pos(0)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.showguide"))
-            |+ PageSetting("hud.timingdisplay.shownonjudgements", Selector<_>.FromBool show_non_judgements)
+            |+ PageSetting("hud.timingdisplay.shownonjudgements", Checkbox show_non_judgements)
                 .Pos(2)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.shownonjudgements"))
-            |+ PageSetting("hud.timingdisplay.halfscalereleases", Selector<_>.FromBool half_scale_releases)
+            |+ PageSetting("hud.timingdisplay.halfscalereleases", Checkbox half_scale_releases)
                 .Pos(4)
                 .Tooltip(Tooltip.Info("hud.timingdisplay.halfscalereleases"))
             |+ PageSetting("hud.timingdisplay.thickness", Slider(thickness, Step = 1f))

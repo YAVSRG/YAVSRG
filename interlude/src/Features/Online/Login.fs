@@ -44,7 +44,7 @@ type RegisterPage(discord_tag) as this =
                 .Pos(14)
             |+ PageButton("register.privacy_policy", (fun () -> open_url ("https://yavsrg.net/privacy_policy")))
                 .Pos(16)
-            |+ PageSetting("register.confirm_terms_of_service", Selector<_>.FromBool agree_tos)
+            |+ PageSetting("register.confirm_terms_of_service", Checkbox agree_tos)
                 .Pos(18)
             |+ submit_button.Pos(21)
         )

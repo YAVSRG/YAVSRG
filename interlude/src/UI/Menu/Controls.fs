@@ -155,7 +155,7 @@ type Checkbox(setting: Setting<bool>) =
             if (%%"left").Tapped() || (%%"right").Tapped() || (%%"up").Tapped() || (%%"down").Tapped() then
                 toggle ()
 
-type Selector<'T when 'T : equality>(items: ('T * string) array, setting: Setting<'T>) as this =
+type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: Setting<'T>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
     let dropdown_wrapper = DropdownWrapper(fun d ->
@@ -192,9 +192,7 @@ type Selector<'T when 'T : equality>(items: ('T * string) array, setting: Settin
     static member FromEnum(setting: Setting<'T>) =
         let names = Enum.GetNames(typeof<'T>)
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
-        Selector(Array.zip values names, setting)
-    
-    static member FromBool(setting: Setting<bool>) = Checkbox(setting)
+        SelectDropdown(Array.zip values names, setting)
 
 type PageSetting(name, widget: Widget) as this =
     inherit Container(NodeType.Container(fun _ -> Some this.Child))

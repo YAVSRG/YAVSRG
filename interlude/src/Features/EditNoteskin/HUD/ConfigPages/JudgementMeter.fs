@@ -132,13 +132,13 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
             page_container()
             |+ PageSetting(
                 "hud.judgementmeter.ignoreperfectjudgements",
-                Selector<_>.FromBool(ignore_perfect_judgements)
+                Checkbox ignore_perfect_judgements
             )
                 .Pos(0)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.ignoreperfectjudgements"))
             |+ PageSetting(
                 "hud.judgementmeter.prioritiselowerjudgements",
-                Selector<_>.FromBool(prioritise_lower_judgements)
+                Checkbox prioritise_lower_judgements
             )
                 .Pos(2)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
@@ -150,14 +150,14 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
                 ) :> Widget
                 PageSetting(
                     "hud.judgementmeter.usetexture",
-                    Selector<_>.FromBool(use_texture)
+                    Checkbox use_texture
                 )
                     .Pos(6)
                     .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
                 Conditional(use_texture.Get,
                     PageSetting(
                         "hud.judgementmeter.useanimation",
-                        Selector<_>.FromBool(use_animation)
+                        Checkbox use_animation
                     )
                         .Pos(8)
                         .Tooltip(Tooltip.Info("hud.judgementmeter.useanimation"))
