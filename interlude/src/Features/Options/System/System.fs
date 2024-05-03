@@ -8,6 +8,7 @@ open Prelude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.OptionsMenu
 
 type private WindowedResolution(setting: Setting<int * int>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
@@ -62,7 +63,8 @@ type private VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit 
                 }
         )
 
-module SystemSettings =
+[<AutoOpen>]
+module private Monitors =
 
     let monitors = Window.get_monitors ()
 
@@ -98,32 +100,6 @@ module SystemSettings =
         if wm = WindowType.Fullscreen then
             select_fullscreen_size ()
 
-    // settings
-
-    let performance_settings_button =
-        PageButton(
-            "system.performance",
-            (fun () -> PerformanceSettingsPage().Show())
-        )
-            .Tooltip(Tooltip.Info("system.performance"))
-
-    let monitor_select (setting: Setting<int>) =
-        PageSetting(
-            "system.monitor",
-            SelectDropdown(
-                monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
-                setting |> Setting.trigger (fun _ -> select_fullscreen_size ())
-            )
-        )
-            .Tooltip(Tooltip.Info("system.monitor"))
-
-    let windowed_resolution_select (setting: Setting<int * int>) =
-        PageSetting(
-            "system.windowresolution",
-            WindowedResolution(setting)
-        )
-            .Tooltip(Tooltip.Info("system.windowresolution"))
-
 type SystemPage() as this =
     inherit Page()
 
@@ -131,96 +107,207 @@ type SystemPage() as this =
     let mark_changed = fun (_: 'T) -> has_changed <- true
 
     do
-        SystemSettings.window_mode_changed config.WindowMode.Value
+        window_mode_changed config.WindowMode.Value
 
-        this.Content(
-            page_container()
-            |+ PageButton(
-                "system.performance",
-                (fun () -> PerformanceSettingsPage().Show())
-            )
-                .Tooltip(Tooltip.Info("system.performance"))
-                .Pos(0)
-
-            |+ PageSetting(
-                "system.windowmode",
-                SelectDropdown.FromEnum(
-                    config.WindowMode
-                    |> Setting.trigger mark_changed
-                    |> Setting.trigger SystemSettings.window_mode_changed
-                )
-            )
-                .Tooltip(Tooltip.Info("system.windowmode"))
-                .Pos(3)
-            |+ Conditional(
-                (fun () -> config.WindowMode.Value = WindowType.Windowed),
-                SystemSettings.windowed_resolution_select(config.WindowResolution |> Setting.trigger mark_changed).Pos(5)
-            )
-            |+ Conditional(
-                (fun () -> config.WindowMode.Value <> WindowType.Windowed),
-                SystemSettings.monitor_select(config.Display |> Setting.trigger (fun _ -> mark_changed ())).Pos(5)
-            )
-            |+ Conditional(
-                (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
-                PageSetting(
-                    "system.videomode",
-                    VideoMode(
-                        config.FullscreenVideoMode |> Setting.trigger mark_changed,
-                        SystemSettings.get_current_supported_video_modes
-                    )
-                )
-                    .Tooltip(Tooltip.Info("system.videomode"))
-                    .Pos(7)
-            )
-            |+ PageSetting(
-                "system.audiovolume",
-                Slider.Percent(
-                    options.AudioVolume
-                    |> Setting.trigger (fun v -> Devices.change_volume (v, v))
-                    |> Setting.f32
-                )
-            )
-                .Tooltip(Tooltip.Info("system.audiovolume"))
-                .Pos(10)
-
-            |+ PageSetting(
-                "system.audiodevice",
-                SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
-            )
-                .Tooltip(Tooltip.Info("system.audiodevice"))
-                .Pos(12)
-
-            |+ PageSetting(
-                "system.audiooffset",
-                { new Slider(options.AudioOffset, Step = 1f) with
-                    override this.OnDeselected(by_mouse: bool) =
-                        base.OnDeselected by_mouse
-                        Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
-                }
-            )
-                .Tooltip(Tooltip.Info("system.audiooffset"))
-                .Pos(14)
-
-            |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
-                .Tooltip(Tooltip.Info("system.visualoffset"))
-                .Pos(17)
-
-            |+ PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-                .Tooltip(Tooltip.Info("system.hotkeys"))
-                .Pos(19)
+        page_container()
+        |+ PageButton(
+            "system.performance",
+            (fun () -> PerformanceSettingsPage().Show())
         )
+            .Tooltip(Tooltip.Info("system.performance"))
+            .Pos(0)
 
-        this.Add(
-            Conditional(
-                (fun () -> has_changed),
-                Callout.frame
-                    (Callout.Small.Icon(Icons.AIRPLAY).Title(%"system.window_changes_hint"))
-                    (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
+        |+ PageSetting(
+            "system.windowmode",
+            SelectDropdown.FromEnum(
+                config.WindowMode
+                |> Setting.trigger mark_changed
+                |> Setting.trigger window_mode_changed
             )
         )
+            .Tooltip(Tooltip.Info("system.windowmode"))
+            .Pos(3)
+        |+ Conditional(
+            (fun () -> config.WindowMode.Value = WindowType.Windowed),
+            PageSetting(
+                "system.windowresolution",
+                WindowedResolution(config.WindowResolution |> Setting.trigger mark_changed)
+            )
+                .Tooltip(Tooltip.Info("system.windowresolution"))
+                .Pos(5)
+        )
+        |+ Conditional(
+            (fun () -> config.WindowMode.Value <> WindowType.Windowed),
+            PageSetting(
+                "system.monitor",
+                SelectDropdown(
+                    monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
+                    config.Display 
+                    |> Setting.trigger (fun _ -> select_fullscreen_size (); mark_changed())
+                )
+            )
+                .Tooltip(Tooltip.Info("system.monitor"))
+                .Pos(5)
+        )
+        |+ Conditional(
+            (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
+            PageSetting(
+                "system.videomode",
+                VideoMode(
+                    config.FullscreenVideoMode |> Setting.trigger mark_changed,
+                    get_current_supported_video_modes
+                )
+            )
+                .Tooltip(Tooltip.Info("system.videomode"))
+        )
+                .Pos(7)
+        |+ PageSetting(
+            "system.audiovolume",
+            Slider.Percent(
+                options.AudioVolume
+                |> Setting.trigger (fun v -> Devices.change_volume (v, v))
+                |> Setting.f32
+            )
+        )
+            .Tooltip(Tooltip.Info("system.audiovolume"))
+            .Pos(10)
+
+        |+ PageSetting(
+            "system.audiodevice",
+            SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
+        )
+            .Tooltip(Tooltip.Info("system.audiodevice"))
+            .Pos(12)
+
+        |+ PageSetting(
+            "system.audiooffset",
+            { new Slider(options.AudioOffset, Step = 1f) with
+                override this.OnDeselected(by_mouse: bool) =
+                    base.OnDeselected by_mouse
+                    Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
+            }
+        )
+            .Tooltip(Tooltip.Info("system.audiooffset"))
+            .Pos(14)
+
+        |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
+            .Tooltip(Tooltip.Info("system.visualoffset"))
+            .Pos(17)
+
+        |+ PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
+            .Tooltip(Tooltip.Info("system.hotkeys"))
+            .Pos(19)
+        |>> Container
+        |+ Conditional(
+            (fun () -> has_changed),
+            Callout.frame
+                (Callout.Small.Icon(Icons.AIRPLAY).Title(%"system.window_changes_hint"))
+                (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
+        )
+        |> this.Content
 
     override this.OnClose() =
         Window.sync (Window.DisableResize)
         if has_changed then Window.sync (Window.ApplyConfig config)
 
     override this.Title = %"system.name"
+
+module System =
+
+    let search_settings (tokens: string array) : SearchResult seq =
+        seq {
+            if token_match tokens [|%"system.performance.name"|] then
+                yield PageButton(
+                    "system.performance",
+                    (fun () -> PerformanceSettingsPage().Show())
+                )
+                    .Tooltip(Tooltip.Info("system.performance"))
+                , 2, 2, PageWidth.Normal
+            if token_match tokens [|%"system.windowmode.name"; %"system.windowresolution.name"; %"system.monitor.name"; %"system.videomode.name"|] then
+                yield! [
+                    PageSetting(
+                        "system.windowmode",
+                        SelectDropdown.FromEnum(
+                            config.WindowMode
+                            |> Setting.trigger window_mode_changed
+                            |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config))
+                        )
+                    )
+                        .Tooltip(Tooltip.Info("system.windowmode")) :> Widget
+                    , 2, 2, PageWidth.Normal
+                    Conditional(
+                        (fun () -> config.WindowMode.Value = WindowType.Windowed),
+                        PageSetting(
+                            "system.windowresolution",
+                            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config)))
+                        )
+                            .Tooltip(Tooltip.Info("system.windowresolution"))
+                    )
+                    , 2, 0, PageWidth.Normal
+                    Conditional(
+                        (fun () -> config.WindowMode.Value <> WindowType.Windowed),
+                        PageSetting(
+                            "system.monitor",
+                            SelectDropdown(
+                                monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
+                                config.Display 
+                                |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.sync (Window.ApplyConfig config))
+                            )
+                        )
+                            .Tooltip(Tooltip.Info("system.monitor"))
+                    )
+                    , 2, 2, PageWidth.Normal
+                    Conditional(
+                        (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
+                        PageSetting(
+                            "system.videomode",
+                            VideoMode(
+                                config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config)),
+                                get_current_supported_video_modes
+                            )
+                        )
+                            .Tooltip(Tooltip.Info("system.videomode"))
+                    )
+                    , 2, 2, PageWidth.Normal
+                ]
+            if token_match tokens [|%"system.audiovolume.name"|] then
+                yield PageSetting(
+                    "system.audiovolume",
+                    Slider.Percent(
+                        options.AudioVolume
+                        |> Setting.trigger (fun v -> Devices.change_volume (v, v))
+                        |> Setting.f32
+                    )
+                )
+                    .Tooltip(Tooltip.Info("system.audiovolume"))
+                , 2, 2, PageWidth.Normal
+            if token_match tokens [|%"system.audiodevice.name"|] then
+                yield PageSetting(
+                    "system.audiodevice",
+                    SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
+                )
+                    .Tooltip(Tooltip.Info("system.audiodevice"))
+                , 2, 2, PageWidth.Normal
+                
+            if token_match tokens [|%"system.audiooffset.name"|] then
+                yield PageSetting(
+                    "system.audiooffset",
+                    { new Slider(options.AudioOffset, Step = 1f) with
+                        override this.OnDeselected(by_mouse: bool) =
+                            base.OnDeselected by_mouse
+                            Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
+                    }
+                )
+                    .Tooltip(Tooltip.Info("system.audiooffset"))
+                , 2, 2, PageWidth.Normal
+            
+            if token_match tokens [|%"system.visualoffset.name"|] then
+                yield PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
+                    .Tooltip(Tooltip.Info("system.visualoffset"))
+                , 2, 2, PageWidth.Normal
+                
+            if token_match tokens [|%"system.hotkeys.name"|] then
+                yield PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
+                    .Tooltip(Tooltip.Info("system.hotkeys"))
+                , 2, 2, PageWidth.Normal
+        }

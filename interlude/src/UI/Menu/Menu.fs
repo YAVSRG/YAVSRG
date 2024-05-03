@@ -41,6 +41,7 @@ type Page() as this =
     abstract member OnReturnTo: unit -> unit
     default this.OnReturnTo() = ()
 
+    // todo: make this an abstract method that generates the content instead of a must-call
     member this.Content(w: Widget) =
         this.Add(w)
         content <- Some w
