@@ -47,18 +47,18 @@ type PacemakerOptionsPage() as this =
         this.Content(
             page_container()
             |+ PageSetting("gameplay.pacemaker.saveunderpace", Checkbox options.SaveScoreIfUnderPace)
-                .Pos(0)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
+                .Pos(0)
             |+ PageSetting("gameplay.pacemaker.onlysavenewrecords", Checkbox options.OnlySaveNewRecords)
-                .Pos(2)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker.onlysavenewrecords"))
+                .Pos(2)
             |+ PageSetting("gameplay.pacemaker.type",
                 SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy.name"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp.name" |], mode)
             )
                 .Pos(5)
             |+ PageSetting("gameplay.pacemaker.use_personal_best", Checkbox use_personal_best)
-                .Pos(7)
                 .Tooltip(Tooltip.Info("gameplay.pacemaker.use_personal_best"))
+                .Pos(7)
             |+ Conditional((fun () -> mode.Value = PacemakerMode.Accuracy),
                 PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)) 
                     .Pos(9)

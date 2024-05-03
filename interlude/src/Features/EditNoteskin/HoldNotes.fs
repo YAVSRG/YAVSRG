@@ -28,17 +28,17 @@ type HoldNoteSettingsPage() as this =
         this.Content(
             page_container()
             |+ PageSetting("noteskins.edit.holdnotetrim", Slider(hold_note_trim))
-                .Pos(0)
                 .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
+                .Pos(0)
             |+ PageSetting("noteskins.edit.usetailtexture", Checkbox use_tail_texture)
-                .Pos(3)
                 .Tooltip(Tooltip.Info("noteskins.edit.usetailtexture"))
+                .Pos(3)
             |+ PageSetting("noteskins.edit.flipholdtail", Checkbox flip_hold_tail)
-                .Pos(5)
                 .Tooltip(Tooltip.Info("noteskins.edit.flipholdtail"))
+                .Pos(5)
             |+ PageSetting("noteskins.edit.droppedholdcolor", ColorPicker(dropped_color, true))
-                .Pos(8, 3)
                 .Tooltip(Tooltip.Info("noteskins.edit.droppedholdcolor"))
+                .Pos(8, 3)
         )
 
     override this.Draw() =

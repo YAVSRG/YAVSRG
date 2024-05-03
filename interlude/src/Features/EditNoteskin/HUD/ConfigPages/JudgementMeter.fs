@@ -134,38 +134,38 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
                 "hud.judgementmeter.ignoreperfectjudgements",
                 Checkbox ignore_perfect_judgements
             )
-                .Pos(0)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.ignoreperfectjudgements"))
+                .Pos(0)
             |+ PageSetting(
                 "hud.judgementmeter.prioritiselowerjudgements",
                 Checkbox prioritise_lower_judgements
             )
-                .Pos(2)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
+                .Pos(2)
             |+ ([
                 Conditional((fun () -> not use_texture.Value || use_animation.Value),
                     PageSetting("hud.judgementmeter.duration", Slider(duration, Step = 5f))
-                        .Pos(4)
                         .Tooltip(Tooltip.Info("hud.judgementmeter.duration"))
+                        .Pos(4)
                 ) :> Widget
                 PageSetting(
                     "hud.judgementmeter.usetexture",
                     Checkbox use_texture
                 )
-                    .Pos(6)
                     .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
+                    .Pos(6)
                 Conditional(use_texture.Get,
                     PageSetting(
                         "hud.judgementmeter.useanimation",
                         Checkbox use_animation
                     )
-                        .Pos(8)
                         .Tooltip(Tooltip.Info("hud.judgementmeter.useanimation"))
+                        .Pos(8)
                 )
                 Conditional(use_texture.Get,
                     PageSetting("hud.judgementmeter.frametime", Slider(frame_time, Step = 5f))
-                        .Pos(10)
                         .Tooltip(Tooltip.Info("hud.judgementmeter.frametime"))
+                        .Pos(10)
                 )
                 Conditional(use_texture.Get,
                     FlowContainer.Vertical<Widget>(PRETTYHEIGHT)

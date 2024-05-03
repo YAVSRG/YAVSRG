@@ -25,8 +25,8 @@ type PerformanceSettingsPage() as this =
                 "system.framelimit",
                 SelectDropdown.FromEnum(config.RenderMode |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config)))
             )
-                .Pos(0)
                 .Tooltip(Tooltip.Info("system.framelimit"))
+                .Pos(0)
             |+ Conditional(
                 (fun () -> config.RenderMode.Value = FrameLimit.Unlimited),
                 Text(%"system.framelimit.unlimited_warning", 
@@ -43,8 +43,8 @@ type PerformanceSettingsPage() as this =
                         |> Setting.trigger (fun v -> anti_jitter <- v)
                     )
                 )
-                    .Pos(2)
                     .Tooltip(Tooltip.Info("system.performance.antijitter"))
+                    .Pos(2)
             )
             |+ Conditional(
                 (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen),

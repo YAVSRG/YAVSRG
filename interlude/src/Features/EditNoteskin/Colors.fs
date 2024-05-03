@@ -131,11 +131,11 @@ type ColorSettingsPage() as this =
                     |> Setting.trigger (ignore >> refresh_colors)
                 )
             )
-                .Pos(0)
                 .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
+                .Pos(0)
             |+ PageSetting(
                 "generic.keymode",
-                SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> refresh_colors))
+                Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_colors))
             )
                 .Pos(2)
             |+ PageSetting(
@@ -145,8 +145,8 @@ type ColorSettingsPage() as this =
                     |> Setting.trigger (ignore >> refresh_colors)
                 )
             )
-                .Pos(5)
                 .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
+                .Pos(5)
             |+ PageSetting("noteskins.edit.notecolors", colors)
                 .Pos(8, 3, PageWidth.Full)
         )

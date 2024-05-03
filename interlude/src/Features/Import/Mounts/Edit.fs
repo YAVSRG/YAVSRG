@@ -18,8 +18,8 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
     do
         page_container()
         |+ PageSetting("mount.importatstartup", Checkbox import_on_startup)
-            .Pos(0)
             .Tooltip(Tooltip.Info("mount.importatstartup"))
+            .Pos(0)
         |+ PageButton
             .Once(
                 "mount.import",
@@ -27,8 +27,8 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                     import <- true
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
             )
-            .Pos(3)
             .Tooltip(Tooltip.Info("mount.import"))
+            .Pos(3)
         |+ PageButton
             .Once(
                 "mount.importall",
@@ -37,8 +37,8 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                     mount.LastImported <- System.DateTime.UnixEpoch
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
             )
-            .Pos(5)
             .Tooltip(Tooltip.Info("mount.importall"))
+            .Pos(5)
         |+
             if
                 game = MountedGameType.Osu
@@ -63,8 +63,8 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                             ""
                         )
                 )
+                    .Tooltip(Tooltip.Info("mount.import_osu_scores"))
                     .Pos(8)
-                    .Tooltip(Tooltip.Info("mount.import_osu_scores")) :> Widget
             else
                 Dummy()
         |+
@@ -75,8 +75,8 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                     "mount.import_osu_skins",
                     fun () -> FromOsu.ImportSkins.OsuSkinsListPage().Show()
                 )
+                    .Tooltip(Tooltip.Info("mount.import_osu_skins"))
                     .Pos(10)
-                    .Tooltip(Tooltip.Info("mount.import_osu_skins")) :> Widget
             else
                 Dummy()
         |> this.Content

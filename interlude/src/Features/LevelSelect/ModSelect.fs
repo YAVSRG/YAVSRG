@@ -110,8 +110,8 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
             Slider(rate |> Setting.map id (fun v -> round (v / 0.05f) * 0.05f), 
             Format = sprintf "%.02fx")
         )
-            .Pos(0)
             .Tooltip(Tooltip.Info("gameplay.rate"))
+            .Pos(0)
         |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i", 
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
@@ -124,8 +124,8 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         |+ mod_grid
 
         |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
-            .Pos(17)
             .Tooltip(Tooltip.Info("gameplay.pacemaker"))
+            .Pos(17)
 
         |> this.Content
 

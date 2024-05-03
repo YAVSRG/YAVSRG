@@ -99,8 +99,8 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
             "hud.judgementcounter.usetextures",
             Checkbox use_texture
         )
-            .Pos(0)
             .Tooltip(Tooltip.Info("hud.judgementcounter.usetextures"))
+            .Pos(0)
         |+ Conditional(use_texture.Get,
             FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
             |+ seq {
@@ -210,50 +210,50 @@ type JudgementCounterPage(on_close: unit -> unit) =
     override this.Init(parent) =
         page_container()
         |+ PageSetting("hud.judgementcounter.animationtime", Slider(animation_time |> Setting.f32, Step = 5f))
-            .Pos(0)
             .Tooltip(Tooltip.Info("hud.judgementcounter.animationtime"))
+            .Pos(0)
         |+ PageSetting("hud.judgementcounter.showratio", Checkbox show_ratio)
-            .Pos(2)
             .Tooltip(Tooltip.Info("hud.judgementcounter.showratio"))
+            .Pos(2)
         |+ ([
             PageSetting("hud.generic.use_font", Checkbox use_font)
+                .Tooltip(Tooltip.Info("hud.generic.use_font"))
                 .Pos(4)
-                .Tooltip(Tooltip.Info("hud.generic.use_font")) :> Widget
             Conditional(use_font.Get,
                 PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
-                    .Pos(6)
                     .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+                    .Pos(6)
             )
             Conditional(use_font.Get,
                 PageSetting("hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
-                    .Pos(8)
                     .Tooltip(Tooltip.Info("hud.generic.dot_spacing"))
+                    .Pos(8)
             )
             Conditional(use_font.Get,
                 PageSetting("hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
-                    .Pos(10)
                     .Tooltip(Tooltip.Info("hud.generic.colon_spacing"))
+                    .Pos(10)
             )
             PageButton("hud.judgementcounter.textures", 
                 fun () -> JudgementCounterDisplayPage(use_texture, display, ruleset).Show())
                 .Pos(12)
             PageSetting("hud.judgementcounter.usebackground", Checkbox use_background)
-                .Pos(14)
                 .Tooltip(Tooltip.Info("hud.judgementcounter.usebackground"))
+                .Pos(14)
             Conditional(use_background.Get, 
                 PageSetting("hud.judgementcounter.backgroundscale", Slider.Percent(background_scale))
-                    .Pos(16)
                     .Tooltip(Tooltip.Info("hud.judgementcounter.backgroundscale"))
+                    .Pos(16)
             )
             Conditional(use_background.Get, 
                 PageSetting("hud.judgementcounter.background_offset_x", Slider.Percent(background_offset_x))
-                    .Pos(18)
                     .Tooltip(Tooltip.Info("hud.judgementcounter.background_offset_x"))
+                    .Pos(18)
             )
             Conditional(use_background.Get, 
                 PageSetting("hud.judgementcounter.background_offset_y", Slider.Percent(background_offset_y))
-                    .Pos(20)
                     .Tooltip(Tooltip.Info("hud.judgementcounter.background_offset_y"))
+                    .Pos(20)
             )
         ] |> or_require_noteskin)
         |>> Container

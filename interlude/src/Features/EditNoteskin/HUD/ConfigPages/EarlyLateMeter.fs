@@ -36,35 +36,35 @@ type EarlyLateMeterPage(on_close: unit -> unit) as this =
             page_container()
             |+ ([
                 PageSetting("hud.earlylatemeter.duration", Slider(duration, Step = 5f))
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.duration"))
                     .Pos(0)
-                    .Tooltip(Tooltip.Info("hud.earlylatemeter.duration")) :> Widget
                 PageSetting("hud.earlylatemeter.usetexture", Checkbox use_texture)
-                    .Pos(2)
                     .Tooltip(Tooltip.Info("hud.earlylatemeter.usetexture"))
+                    .Pos(2)
                 Conditional(use_texture.Get, 
                     PageSetting("hud.earlylatemeter.frametime", Slider(frame_time, Step = 5f))
-                        .Pos(4)
                         .Tooltip(Tooltip.Info("hud.earlylatemeter.frametime"))
+                        .Pos(4)
                 )
                 Conditional(use_texture.Get >> not, 
                     PageTextEntry("hud.earlylatemeter.earlytext", early_text)
-                        .Pos(4)
                         .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext"))
+                        .Pos(4)
                 )
                 Conditional(use_texture.Get >> not, 
                     PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
-                        .Pos(6, 3)
                         .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
+                        .Pos(6, 3)
                 )
                 Conditional(use_texture.Get >> not, 
                     PageTextEntry("hud.earlylatemeter.latetext", late_text)
-                        .Pos(9)
                         .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
+                        .Pos(9)
                 )
                 Conditional(use_texture.Get >> not, 
                     PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
-                        .Pos(11, 3)
                         .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
+                        .Pos(11, 3)
                 )
                 ] |> or_require_noteskin)
             |>> Container

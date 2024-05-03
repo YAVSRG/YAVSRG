@@ -62,11 +62,7 @@ type private VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit 
                 }
         )
 
-type SystemPage() as this =
-    inherit Page()
-
-    let mutable has_changed = false
-    let mark_changed = fun (_: 'T) -> has_changed <- true
+module SystemSettings =
 
     let monitors = Window.get_monitors ()
 
@@ -84,7 +80,7 @@ type SystemPage() as this =
         else
             reported_modes
 
-    let pick_suitable_video_mode () =
+    let select_fullscreen_size () =
         try
             let supported_video_modes = get_current_supported_video_modes ()
 
@@ -93,44 +89,49 @@ type SystemPage() as this =
         with err ->
             Logging.Debug("Error setting fullscreen video mode - Possibly invalid display selected", err)
 
-    let monitor_select =
+    let window_mode_changed (wm: WindowType) =
+        if wm = WindowType.Windowed then
+            Window.sync (Window.EnableResize config.WindowResolution.Set)
+        else
+            Window.sync (Window.DisableResize)
+
+        if wm = WindowType.Fullscreen then
+            select_fullscreen_size ()
+
+    // settings
+
+    let performance_settings_button =
+        PageButton(
+            "system.performance",
+            (fun () -> PerformanceSettingsPage().Show())
+        )
+            .Tooltip(Tooltip.Info("system.performance"))
+
+    let monitor_select (setting: Setting<int>) =
         PageSetting(
             "system.monitor",
             SelectDropdown(
                 monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
-                config.Display
-                |> Setting.trigger (fun _ ->
-                    mark_changed ()
-                    pick_suitable_video_mode ()
-                )
+                setting |> Setting.trigger (fun _ -> select_fullscreen_size ())
             )
         )
-            .Pos(5)
             .Tooltip(Tooltip.Info("system.monitor"))
 
-    let windowed_resolution_select =
+    let windowed_resolution_select (setting: Setting<int * int>) =
         PageSetting(
             "system.windowresolution",
-            WindowedResolution(config.WindowResolution |> Setting.trigger mark_changed)
+            WindowedResolution(setting)
         )
-            .Pos(5)
             .Tooltip(Tooltip.Info("system.windowresolution"))
 
-    let resolution_or_monitor = SwapContainer()
+type SystemPage() as this =
+    inherit Page()
 
-    let window_mode_change (wm) =
-        if wm = WindowType.Windowed then
-            resolution_or_monitor.Current <- windowed_resolution_select
-            Window.sync (Window.EnableResize config.WindowResolution.Set)
-        else
-            resolution_or_monitor.Current <- monitor_select
-            Window.sync (Window.DisableResize)
-
-        if wm = WindowType.Fullscreen then
-            pick_suitable_video_mode ()
+    let mutable has_changed = false
+    let mark_changed = fun (_: 'T) -> has_changed <- true
 
     do
-        window_mode_change (config.WindowMode.Value)
+        SystemSettings.window_mode_changed config.WindowMode.Value
 
         this.Content(
             page_container()
@@ -138,31 +139,38 @@ type SystemPage() as this =
                 "system.performance",
                 (fun () -> PerformanceSettingsPage().Show())
             )
-                .Pos(0)
                 .Tooltip(Tooltip.Info("system.performance"))
+                .Pos(0)
 
             |+ PageSetting(
                 "system.windowmode",
                 SelectDropdown.FromEnum(
                     config.WindowMode
-                    |> Setting.trigger window_mode_change
                     |> Setting.trigger mark_changed
+                    |> Setting.trigger SystemSettings.window_mode_changed
                 )
             )
-                .Pos(3)
                 .Tooltip(Tooltip.Info("system.windowmode"))
-            |+ resolution_or_monitor
+                .Pos(3)
+            |+ Conditional(
+                (fun () -> config.WindowMode.Value = WindowType.Windowed),
+                SystemSettings.windowed_resolution_select(config.WindowResolution |> Setting.trigger mark_changed).Pos(5)
+            )
+            |+ Conditional(
+                (fun () -> config.WindowMode.Value <> WindowType.Windowed),
+                SystemSettings.monitor_select(config.Display |> Setting.trigger (fun _ -> mark_changed ())).Pos(5)
+            )
             |+ Conditional(
                 (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
                 PageSetting(
                     "system.videomode",
                     VideoMode(
                         config.FullscreenVideoMode |> Setting.trigger mark_changed,
-                        get_current_supported_video_modes
+                        SystemSettings.get_current_supported_video_modes
                     )
                 )
-                    .Pos(7)
                     .Tooltip(Tooltip.Info("system.videomode"))
+                    .Pos(7)
             )
             |+ PageSetting(
                 "system.audiovolume",
@@ -172,15 +180,15 @@ type SystemPage() as this =
                     |> Setting.f32
                 )
             )
-                .Pos(10)
                 .Tooltip(Tooltip.Info("system.audiovolume"))
+                .Pos(10)
 
             |+ PageSetting(
                 "system.audiodevice",
                 SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
             )
-                .Pos(12)
                 .Tooltip(Tooltip.Info("system.audiodevice"))
+                .Pos(12)
 
             |+ PageSetting(
                 "system.audiooffset",
@@ -190,16 +198,16 @@ type SystemPage() as this =
                         Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
                 }
             )
-                .Pos(14)
                 .Tooltip(Tooltip.Info("system.audiooffset"))
+                .Pos(14)
 
             |+ PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
-                .Pos(17)
                 .Tooltip(Tooltip.Info("system.visualoffset"))
+                .Pos(17)
 
             |+ PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-                .Pos(19)
                 .Tooltip(Tooltip.Info("system.hotkeys"))
+                .Pos(19)
         )
 
         this.Add(
@@ -213,6 +221,6 @@ type SystemPage() as this =
 
     override this.OnClose() =
         Window.sync (Window.DisableResize)
-        Window.sync (Window.ApplyConfig config)
+        if has_changed then Window.sync (Window.ApplyConfig config)
 
     override this.Title = %"system.name"

@@ -155,6 +155,64 @@ type Checkbox(setting: Setting<bool>) =
             if (%%"left").Tapped() || (%%"right").Tapped() || (%%"up").Tapped() || (%%"down").Tapped() then
                 toggle ()
 
+type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
+    inherit Container(NodeType.Leaf)
+
+    let mutable index =
+        items
+        |> Array.tryFindIndex (fun (v, _) -> Object.Equals(v, setting.Value))
+        |> Option.defaultValue 0
+
+    let fd () =
+        index <- (index + 1) % items.Length
+        setting.Value <- fst items.[index]
+        Style.click.Play()
+
+    let bk () =
+        index <- (index + items.Length - 1) % items.Length
+        setting.Value <- fst items.[index]
+        Style.click.Play()
+
+    override this.Init(parent: Widget) =
+        this 
+        |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
+        |* Clickable(
+            (fun () ->
+                this.Select true
+                fd ()
+            ),
+            OnHover =
+                fun b ->
+                    if b && not this.Focused then
+                        this.Focus true
+                    elif not b && this.FocusedByMouse then
+                        Selection.up true
+        )
+
+        base.Init parent
+
+    override this.OnFocus(by_mouse: bool) =
+        base.OnFocus by_mouse
+        Style.hover.Play()
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if this.Selected then
+            if (%%"left").Tapped() then
+                bk ()
+            elif (%%"right").Tapped() then
+                fd ()
+            elif (%%"up").Tapped() then
+                fd ()
+            elif (%%"down").Tapped() then
+                bk ()
+
+    static member FromEnum(setting: Setting<'T>) =
+        let names = Enum.GetNames(typeof<'T>)
+        let values = Enum.GetValues(typeof<'T>) :?> 'T array
+        Selector(Array.zip values names, setting)
+
 type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: Setting<'T>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
@@ -211,18 +269,6 @@ type PageSetting(name, widget: Widget) as this =
 
                 if old_widget.Focused then
                     w.Focus false
-
-    member this.Pos(y: int) : PageSetting =
-        this.Position <- pretty_pos (y, 2, PageWidth.Normal)
-        this
-
-    member this.Pos(y: int, h: int) : PageSetting =
-        this.Position <- pretty_pos (y, h, PageWidth.Normal)
-        this
-
-    member this.Pos(y: int, h: int, width: PageWidth) : PageSetting =
-        this.Position <- pretty_pos (y, h, width)
-        this
 
     override this.Init(parent) =
         this
@@ -298,18 +344,6 @@ type PageButton(name, action) as this =
             Draw.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
-
-    member this.Pos(y: int) : PageButton =
-        this.Position <- pretty_pos (y, 2, PageWidth.Normal)
-        this
-
-    member this.Pos(y: int, h: int) : PageButton =
-        this.Position <- pretty_pos (y, h, PageWidth.Normal)
-        this
-
-    member this.Pos(y: int, h: int, width: PageWidth) : PageButton =
-        this.Position <- pretty_pos (y, h, width)
-        this
 
     member val Enabled = true with get, set
 

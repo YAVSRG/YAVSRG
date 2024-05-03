@@ -32,6 +32,20 @@ module PageLayout =
             Position.Row(float32 start * 0.5f * PRETTYHEIGHT, float32 height * 0.5f * PRETTYHEIGHT)
         | PageWidth.Custom w ->
             Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PRETTYHEIGHT, w, float32 height * 0.5f * PRETTYHEIGHT)
+
+    type Widget with
+
+        member this.Pos(y: int) =
+            this.Position <- pretty_pos (y, 2, PageWidth.Normal)
+            this
+
+        member this.Pos(y: int, h: int) =
+            this.Position <- pretty_pos (y, h, PageWidth.Normal)
+            this
+
+        member this.Pos(y: int, h: int, width: PageWidth) =
+            this.Position <- pretty_pos (y, h, width)
+            this
             
 type Tooltip(content: Callout) =
     inherit StaticWidget(NodeType.None)

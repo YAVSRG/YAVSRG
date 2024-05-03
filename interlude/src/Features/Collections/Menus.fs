@@ -256,14 +256,14 @@ type SelectCollectionPage
                 "collections.create_folder",
                 (fun () -> CreateFolderPage(if select_on_create then on_select else ignore).Show())
             )
-                .Pos(0)
                 .Tooltip(Tooltip.Info("collections.create_folder"))
+                .Pos(0)
             |+ PageButton(
                 "collections.create_playlist",
                 (fun () -> CreatePlaylistPage(if select_on_create then on_select else ignore).Show())
             )
-                .Pos(2)
                 .Tooltip(Tooltip.Info("collections.create_playlist"))
+                .Pos(2)
             |+ ScrollContainer(grid, Position = pretty_pos(5, PAGE_BOTTOM - 5, PageWidth.Full))
         )
 

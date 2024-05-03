@@ -41,8 +41,8 @@ type ScoreContextMenu(score_info: ScoreInfo) as this =
                 Icon = Icons.FLAG,
                 Enabled = Network.lobby.IsNone
             )
-                .Pos(4)
                 .Tooltip(Tooltip.Info("score.challenge"))
+                .Pos(4)
         )
 
     override this.Title =

@@ -52,17 +52,17 @@ type DebugPage() as this =
 
                     Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
             )
-            .Pos(0)
             .Tooltip(Tooltip.Info("debug.rebuildcache"))
+            .Pos(0)
         |+ themes
-            .Pos(3)
             .Tooltip(Tooltip.Info("themes.theme"))
+            .Pos(3)
         |+ PageButton("themes.edittheme", try_edit_theme)
-            .Pos(5)
             .Tooltip(Tooltip.Info("themes.edittheme"))
+            .Pos(5)
         |+ PageButton("themes.showthemesfolder", (fun () -> open_directory (get_game_folder "Themes")))
-            .Pos(7)
             .Tooltip(Tooltip.Info("themes.showthemesfolder"))
+            .Pos(7)
         |> this.Content
 
     override this.Title = %"debug.name"

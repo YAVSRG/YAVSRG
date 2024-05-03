@@ -151,7 +151,7 @@ type PlayfieldSettingsPage() as this =
             (fun () -> use_advanced_column_spacing.Value),
             PageSetting(
                 "generic.keymode",
-                SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
+                Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
             )
                 .Pos(18)
         )
@@ -159,8 +159,8 @@ type PlayfieldSettingsPage() as this =
         |+ Conditional(
             (fun () -> use_advanced_column_spacing.Value),
             PageSetting("noteskins.edit.advancedcolumnspacing", _spacings)
-                .Pos(20, 2, PageWidth.Full)
                 .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
+                .Pos(20, 2, PageWidth.Full)
         )
         |> this.Content
 

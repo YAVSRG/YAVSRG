@@ -23,7 +23,7 @@ module ImportSkins =
 
         override this.Init(parent: Widget) =
             page_container()
-            |+ PageSetting("osu_skin_import.keymode", SelectDropdown.FromEnum(keymode))
+            |+ PageSetting("osu_skin_import.keymode", Selector.FromEnum(keymode))
                 .Pos(0)
             |+ Conditional(
                 (fun () -> keymode.Value = Keymode.``4K``),

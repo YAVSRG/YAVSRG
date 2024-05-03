@@ -20,23 +20,21 @@ type GameplayPage() as this =
 
     do
         page_container()
-        |+ (let column_width = Interlude.Content.Content.NoteskinConfig.ColumnWidth
-
-            PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
-                .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
-                .Pos(0)
-            |+ Text(
-                (fun () ->
-                    [
-                        (options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
-                        (options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
-                        "C" + (60000.0f * options.ScrollSpeed.Value / column_width).ToString("F0")
-                    ]
-                    %> "gameplay.scrollspeed.info"
-                ),
-                Align = Alignment.CENTER,
-                Position = Position.TrimLeft(PRETTYTEXTWIDTH).Margin(5.0f, -30.0f).SliceBottom(35.0f)
-            ))
+        |+ PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
+            .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
+            .Pos(0)
+        |+ Text(
+            (fun () ->
+                [
+                    (options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
+                    (options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
+                    "C" + (60000.0f * options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.ColumnWidth).ToString("F0")
+                ]
+                %> "gameplay.scrollspeed.info"
+            ),
+            Align = Alignment.CENTER,
+            Position = pretty_pos(2, 1, PageWidth.Normal).TrimLeft(PRETTYTEXTWIDTH)
+        )
         |+ PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Tooltip(Tooltip.Info("gameplay.hitposition"))
             .Pos(3)
@@ -67,7 +65,7 @@ type GameplayPage() as this =
             .Pos(16)
         |+ PageSetting(
             "generic.keymode",
-            SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
+            Selector.FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
         )
             .Pos(19)
         |+ PageSetting("gameplay.keybinds", binds)
