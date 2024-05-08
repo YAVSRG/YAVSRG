@@ -84,7 +84,7 @@ module LobbyChart =
                     | true ->
                         let newly_installed = (Cache.by_hash chart.Hash Content.Cache).Value
                         Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
-                        sync
+                        defer
                         <| fun () ->
                         Chart.change (newly_installed, LibraryContext.None, true)
                         rate.Set chart.Rate

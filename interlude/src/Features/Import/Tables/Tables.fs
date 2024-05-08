@@ -83,7 +83,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 online_table.Id,
                 function
                 | Some charts ->
-                    sync (fun () ->
+                    defer (fun () ->
                         let table =
                             {
                                 Id = online_table.Id
@@ -104,7 +104,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 | None ->
                     Logging.Error("Error getting charts for table")
                     // error toast
-                    sync (fun () -> status <- current_status)
+                    defer (fun () -> status <- current_status)
             )
         | TableStatus.Installing -> ()
         | TableStatus.Installed ->
@@ -124,7 +124,7 @@ module Tables =
                 function
                 | Some tables ->
                     for table in tables.Tables do
-                        sync (fun () -> flow.Add(TableCard(table)))
+                        defer (fun () -> flow.Add(TableCard(table)))
                 | None -> Logging.Error("Error getting online tables list")
             )
 

@@ -384,7 +384,7 @@ module Beatmaps =
                     Setting.simple "",
                     (fun (f: Filter) ->
                         filter <- f
-                        sync (fun () -> begin_search filter)
+                        defer (fun () -> begin_search filter)
                     ),
                     Position = Position.SliceTop 60.0f
                 )

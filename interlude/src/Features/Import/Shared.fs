@@ -71,7 +71,7 @@ module Import =
 
         match path with
         | OsuSkinFolder -> 
-            sync 
+            defer 
             <| fun () -> 
                 Menu.Exit()
                 FromOsu.ImportSkins.import_osu_noteskin path
@@ -87,7 +87,7 @@ module Import =
             let id = Path.GetFileNameWithoutExtension(path)
             let target = Path.Combine(get_game_folder "Downloads", id)
             ZipFile.ExtractToDirectory(path, target)
-            sync 
+            defer 
             <| fun () -> 
                 Menu.Exit()
                 FromOsu.ImportSkins.import_osu_noteskin target
@@ -96,7 +96,7 @@ module Import =
         | Unknown -> // Treat it as a chart/pack/library import
 
             if Directory.Exists path && Path.GetFileName path = "Songs" then
-                sync
+                defer
                 <| fun () ->
                     Menu.Exit()
                     ConfirmUnlinkedSongsImport(path).Show()
@@ -107,7 +107,7 @@ module Import =
                 fun success ->
                     if success then
                         Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")
-                        sync <| fun () -> charts_updated_ev.Trigger()
+                        defer <| fun () -> charts_updated_ev.Trigger()
                     else
                         Notifications.error (%"notification.import_failure", "")
             )

@@ -7,14 +7,17 @@ open Percyqaz.Flux.Utils
 module Root =
     let internal ROOT_ANIMATION = Animation.Group()
 
-    let sync (action: unit -> unit) =
+    /// Defers an action to the next update cycle of the UI thread
+    /// Used for deferring an action to the main thread from code in other threads
+    /// Also used for deferring an action until after the frame where doing it inline would be incorrect
+    let defer (action: unit -> unit) =
         ROOT_ANIMATION.Add(Animation.Action action)
 
-    let sync_forever (action: unit -> unit) =
+    let add_to_update_loop (action: unit -> unit) =
         ROOT_ANIMATION.Add(Animation.ActionLoop action)
 
     let inline ensure_ui_thread action =
-        if is_ui_thread () then action () else sync action
+        if is_ui_thread () then action () else defer action
 
 [<AbstractClass>]
 type Root() =

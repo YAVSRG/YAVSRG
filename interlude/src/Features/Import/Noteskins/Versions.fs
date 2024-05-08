@@ -85,7 +85,7 @@ type NoteskinVersionCard(group: NoteskinGroup, version: NoteskinVersion) as this
                 (version.Download, target, ignore),
                 fun success ->
                     if success then
-                        sync Noteskins.load
+                        defer Noteskins.load
                         Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_noteskin", group.Name)
                         status <- Installed
                     else
@@ -146,7 +146,7 @@ type NoteskinGroupPage(group: NoteskinGroup) =
             ImageServices.get_cached_image.Request(
                 version.Preview,
                 function
-                | Some img -> sync (fun () -> nc.LoadPreview img)
+                | Some img -> defer (fun () -> nc.LoadPreview img)
                 | None -> Logging.Warn("Failed to load noteskin preview", version.Preview)
             )
 

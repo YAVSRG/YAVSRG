@@ -91,14 +91,14 @@ module Noteskins =
                 fun data ->
                     match data with
                     | Some(d: NoteskinRepo) ->
-                        sync (fun () ->
+                        defer (fun () ->
                             for ns in d.Noteskins do
                                 let nc = NoteskinGroupCard ns
 
                                 ImageServices.get_cached_image.Request(
                                     ns.Versions.[0].Preview,
                                     function
-                                    | Some img -> sync (fun () -> nc.LoadPreview img)
+                                    | Some img -> defer (fun () -> nc.LoadPreview img)
                                     | None -> Logging.Warn("Failed to load noteskin preview", ns.Versions.[0].Preview)
                                 )
 
@@ -107,7 +107,7 @@ module Noteskins =
                             loading <- false
                         )
                     | None ->
-                        sync (fun () ->
+                        defer (fun () ->
                             failed <- true
                             loading <- false
                         )

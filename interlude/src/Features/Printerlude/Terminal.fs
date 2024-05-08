@@ -112,7 +112,7 @@ module Terminal =
                 false,
                 fun () ->
                     if shown then
-                        sync add_input
+                        defer add_input
             )
 
         add_input ()

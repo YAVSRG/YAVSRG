@@ -148,7 +148,7 @@ type SuggestionsList(table: Table) =
                     Tables.Suggestions.List.get (
                         table.Id,
                         fun response ->
-                            sync
+                            defer
                             <| fun () ->
                                 match response with
                                 | Some result -> this.SetData result
@@ -162,7 +162,7 @@ type SuggestionsList(table: Table) =
                 for s in data.Suggestions do
                     fc.Add(Suggestion(table, s))
 
-                sync (fun () -> fc.Focus false)
+                defer (fun () -> fc.Focus false)
 
                 ScrollContainer(fc, Position = Position.Margin(100.0f, 200.0f), Margin = 5.0f)
         )

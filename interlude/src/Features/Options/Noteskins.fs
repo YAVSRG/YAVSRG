@@ -44,7 +44,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
             ns,
             function
             | Some(bmp, config) ->
-                sync (fun () ->
+                defer (fun () ->
                     preview <-
                         Some(
                             Sprite.upload_one

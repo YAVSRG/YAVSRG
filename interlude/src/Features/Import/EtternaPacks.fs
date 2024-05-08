@@ -210,12 +210,12 @@ module EtternaPacks =
                         let cards =
                             d.data.ToArray() |> Array.map (fun p -> EtternaPackCard(p.id, p.attributes))
 
-                        sync (fun () ->
+                        defer (fun () ->
                             flow |* cards
                             loading <- false
                         )
                     | None ->
-                        sync (fun () ->
+                        defer (fun () ->
                             failed <- true
                             loading <- false
                         )

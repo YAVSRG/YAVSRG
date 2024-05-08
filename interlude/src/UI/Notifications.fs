@@ -43,7 +43,7 @@ module Notifications =
                     if i.Duration <= 0.0 then
                         i.Fade.Target <- 0.0f
                 elif i.Fade.Value < 0.01f then
-                    sync (fun () -> displayed_notifications.Remove i |> ignore)
+                    defer (fun () -> displayed_notifications.Remove i |> ignore)
 
         override this.Draw() =
             let mutable y = this.Bounds.Top + 80.0f

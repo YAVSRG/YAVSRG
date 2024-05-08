@@ -246,16 +246,16 @@ module private TableDownloader =
         { new Async.Service<DownloaderState * string * Tables.Charts.ChartInfo, unit>() with
             override _.Handle((state: DownloaderState, table_name: string, chart: Tables.Charts.ChartInfo)) =
                 async {
-                    sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
+                    defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
 
                     match Cache.by_hash chart.Hash Content.Cache with
                     | Some cc ->
                         Cache.copy table_name cc Content.Cache
-                        sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
                         match! Cache.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Cache with
-                        | true -> sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
-                        | false -> sync (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
+                        | true -> defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        | false -> defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
 
                     return ()
                 }
@@ -493,7 +493,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
                 | Some charts ->
                     let state = DownloaderState(table, charts.Charts, download_service)
 
-                    sync (fun () ->
+                    defer (fun () ->
                         match existing_states.TryFind table.Id with
                         | Some state -> () // do nothing if they spam clicked the table button
                         | None ->

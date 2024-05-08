@@ -533,7 +533,7 @@ and PositionerContext =
             this.Positioners <- this.Positioners.Add(e, p)
 
             if this.Selected = e then
-                if p.Initialised then p.Focus true else sync(fun () -> p.Focus true)
+                if p.Initialised then p.Focus true else defer(fun () -> p.Focus true)
 
     member this.Select(e: HUDElement) =
         if this.Selected <> e then
@@ -620,7 +620,7 @@ type PositionerInfo(ctx: PositionerContext) =
             (fun () -> if (HUDElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE else Icons.CIRCLE),
             (fun () ->
                 Setting.app not (HUDElement.enabled_setting ctx.Selected)
-                sync (fun () -> ctx.Create ctx.Selected)
+                defer (fun () -> ctx.Create ctx.Selected)
             ),
             Disabled = (fun () -> HUDElement.can_toggle ctx.Selected |> not),
             Position = Position.Column(400.0f, 100.0f).Margin(10.0f, 5.0f)
@@ -629,7 +629,7 @@ type PositionerInfo(ctx: PositionerContext) =
             Icons.REFRESH_CW,
             (fun () ->
                 HUDElement.position_setting(ctx.Selected).Set(HUDElement.default_position ctx.Selected)
-                sync (fun () -> ctx.Create ctx.Selected)
+                defer (fun () -> ctx.Create ctx.Selected)
             ),
             Position = Position.Column(500.0f, 100.0f).Margin(10.0f, 5.0f)
         )

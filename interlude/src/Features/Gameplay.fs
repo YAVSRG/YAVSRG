@@ -347,7 +347,7 @@ module Gameplay =
         let color_this_chart (with_mods: ModdedChart) =
             NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
-        let init_window () = sync_forever chart_loader.Join
+        let init_window () = add_to_update_loop chart_loader.Join
 
     let collections_on_rate_changed (library_ctx: LibraryContext) (v: float32) =
         match library_ctx with
@@ -482,7 +482,7 @@ module Gameplay =
         // todo: remove the holes from this system by making a proper way to wait for song to load
         let rec retry_until_song_loaded (info: Chart.LoadedChartInfo) (action: Chart.LoadedChartInfo -> bool) =
             if not (action info) then
-                sync (fun () -> retry_until_song_loaded info action)
+                defer (fun () -> retry_until_song_loaded info action)
 
         let mutable private state: EndlessModeState option = None
 

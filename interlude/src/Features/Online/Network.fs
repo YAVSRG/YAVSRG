@@ -62,10 +62,10 @@ module Network =
         inherit Client(target_ip, 32767)
 
         override this.OnConnected() = 
-            sync <| fun () -> status <- Connected
+            defer <| fun () -> status <- Connected
 
         override this.OnDisconnected() =
-            sync 
+            defer 
             <| fun () -> 
                 status <-
                     if status = Connecting then
@@ -82,7 +82,7 @@ module Network =
             | Downstream.DISCONNECT reason ->
                 Logging.Info(sprintf "Disconnected from server: %s" reason)
 
-                sync
+                defer
                 <| fun () -> Notifications.error (%"notification.network.disconnected", reason)
             | Downstream.HANDSHAKE_SUCCESS ->
                 if credentials.Token <> "" then
@@ -94,18 +94,18 @@ module Network =
                     open_url url
             | Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag ->
                 Logging.Debug("Linking an account with: " + discord_tag)
-                sync <| fun () -> NetworkEvents.waiting_registration_ev.Trigger discord_tag
+                defer <| fun () -> NetworkEvents.waiting_registration_ev.Trigger discord_tag
             | Downstream.REGISTRATION_FAILED reason ->
                 Logging.Info(sprintf "Registration failed: %s" reason)
                 Notifications.error (%"notification.network.registrationfailed", reason)
-                sync <| fun () -> NetworkEvents.registration_failed_ev.Trigger reason
+                defer <| fun () -> NetworkEvents.registration_failed_ev.Trigger reason
             | Downstream.AUTH_TOKEN token ->
                 credentials.Token <- token
                 this.Send(Upstream.LOGIN credentials.Token)
             | Downstream.LOGIN_SUCCESS name ->
                 Logging.Info(sprintf "Logged in as %s" name)
 
-                sync
+                defer
                 <| fun () ->
                     credentials.Username <- name
                     status <- LoggedIn
@@ -120,7 +120,7 @@ module Network =
                 Logging.Info(sprintf "Login failed: %s" reason)
                 credentials.Token <- ""
 
-                sync
+                defer
                 <| fun () ->
                     if Screen.current_type <> Screen.Type.SplashScreen then
                         Notifications.error (%"notification.network.loginfailed", reason)
@@ -128,105 +128,105 @@ module Network =
                     NetworkEvents.login_failed_ev.Trigger reason
 
             | Downstream.LOBBY_LIST lobbies ->
-                sync
+                defer
                 <| fun () -> 
                     NetworkEvents.receive_lobby_list_ev.Trigger lobbies
             | Downstream.YOU_JOINED_LOBBY (players: (string * int32) array) ->
-                sync
+                defer
                 <| fun () ->
                     lobby <- Some <| Lobby(this, credentials.Username, players)
                     NetworkEvents.join_lobby_ev.Trigger(lobby.Value)
             | Downstream.INVITED_TO_LOBBY(by_user, lobby_id) ->
-                sync 
+                defer 
                 <| fun () ->
                     lobby_invites <- { InvitedBy = by_user; LobbyId = lobby_id; } :: lobby_invites
                     NetworkEvents.receive_invite_ev.Trigger(by_user, lobby_id)
 
             | Downstream.YOU_LEFT_LOBBY ->
-                sync
+                defer
                 <| fun () ->
                     lobby <- None
                     NetworkEvents.leave_lobby_ev.Trigger()
             | Downstream.YOU_ARE_HOST b -> 
-                sync 
+                defer 
                 <| fun () ->
                     lobby.Value.YouAreHost <- b
             | Downstream.PLAYER_JOINED_LOBBY(username, color) ->
-                sync
+                defer
                 <| fun () ->
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.PlayerJoined(username, color)
             | Downstream.PLAYER_LEFT_LOBBY username ->
-                sync
+                defer
                 <| fun () ->
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.PlayerLeft(username)
             | Downstream.SELECT_CHART lc ->
-                sync
+                defer
                 <| fun () ->
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.ChartSelected(lc)
             | Downstream.LOBBY_SETTINGS settings ->
-                sync
+                defer
                 <| fun () ->
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.UpdateSettings(settings)
             | Downstream.LOBBY_EVENT(kind, data) -> 
-                sync 
+                defer 
                 <| fun () -> 
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.LobbyEvent(kind, data)
             | Downstream.SYSTEM_MESSAGE msg ->
                 Logging.Info(sprintf "[NETWORK] %s" msg)
-                sync 
+                defer 
                 <| fun () -> 
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.SystemMessage(msg)
             | Downstream.CHAT(sender, msg) ->
-                sync 
+                defer 
                 <| fun () -> 
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.ChatMessage(sender, msg)
             | Downstream.PLAYER_STATUS(username, status) ->
-                sync
+                defer
                 <| fun () ->
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.PlayerStatus(username, status)
             | Downstream.COUNTDOWN(reason, seconds) ->
-                sync 
+                defer 
                 <| fun () -> 
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.StartCountdown(reason, seconds)
 
             | Downstream.GAME_COUNTDOWN b -> 
-                sync 
+                defer 
                 <| fun () -> 
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.Countdown <- b
             | Downstream.GAME_START ->
-                sync 
+                defer 
                 <| fun () -> 
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.GameStart()
             | Downstream.GAME_END ->
-                sync 
+                defer 
                 <| fun () -> 
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.GameEnd()
             | Downstream.PLAY_DATA(username, data) ->
-                sync 
+                defer 
                 <| fun () -> 
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
@@ -277,7 +277,7 @@ module Network =
 
     let disconnect () =
         if lobby.IsSome then
-            sync NetworkEvents.leave_lobby_ev.Trigger
+            defer NetworkEvents.leave_lobby_ev.Trigger
 
         lobby <- None
         client.Disconnect()

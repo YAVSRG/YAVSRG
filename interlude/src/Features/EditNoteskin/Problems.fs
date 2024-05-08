@@ -41,7 +41,7 @@ module Problems =
 
         let rec refresh () =
             problems_list.Clear()
-            problems_loader.Request(noteskin, problems_list, fun () -> sync refresh)
+            problems_loader.Request(noteskin, problems_list, fun () -> defer refresh)
 
         ScrollContainer(
             problems_list,

@@ -19,7 +19,7 @@ type private Profile() =
                 Players.Profile.View.get (
                     p,
                     fun response ->
-                        sync
+                        defer
                         <| fun () ->
                             match response with
                             | Some result -> container.SetData result
@@ -27,7 +27,7 @@ type private Profile() =
                 )
             | None ->
                 Players.Profile.View.get_me (fun response ->
-                    sync
+                    defer
                     <| fun () ->
                         match response with
                         | Some result -> container.SetData result
@@ -54,7 +54,7 @@ type private Profile() =
                 Players.Profile.Options.post (
                     { Color = color },
                     function
-                    | Some true -> sync <| fun () -> container.SetData({ data with Color = color })
+                    | Some true -> defer <| fun () -> container.SetData({ data with Color = color })
                     | _ -> Notifications.error (%"notification.network_action_failed", "")
                 )
 
@@ -74,7 +74,7 @@ type private Profile() =
                 data.Username,
                 function
                 | Some true ->
-                    sync
+                    defer
                     <| fun () ->
                         container.SetData(
                             { data with
@@ -92,7 +92,7 @@ type private Profile() =
                 { User = data.Username },
                 function
                 | Some true ->
-                    sync
+                    defer
                     <| fun () ->
                         container.SetData({ data with IsFriend = true })
                         Players.update_friends_list ()

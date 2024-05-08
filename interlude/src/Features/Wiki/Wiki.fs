@@ -137,7 +137,7 @@ module Wiki =
                 fun md ->
                     content <- Some md
                     loading <- false
-                    sync page_changed
+                    defer page_changed
             )
 
     do

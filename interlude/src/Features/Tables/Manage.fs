@@ -81,7 +81,7 @@ type ManageTablesPage(table_changed) as this =
 
                     table_changed ()
 
-                    sync refresh
+                    defer refresh
             )
 
         match Content.Table with

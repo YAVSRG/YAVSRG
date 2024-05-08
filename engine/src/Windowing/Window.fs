@@ -237,7 +237,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         if OperatingSystem.IsWindows() then
             FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor_ptr) (GLFW.GetWin32Monitor monitor_ptr)
 
-        sync
+        defer
         <| fun () ->
             render_thread.RenderModeChanged(
                 config.WindowMode.Value = WindowType.Fullscreen
@@ -262,7 +262,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
 
     override this.OnResize e =
         base.OnResize e
-        sync (fun () ->
+        defer (fun () ->
             if e.Height <> 0 && e.Width <> 0 then
                 if this.WindowBorder = WindowBorder.Resizable then
                     resize_callback (e.Width, e.Height)

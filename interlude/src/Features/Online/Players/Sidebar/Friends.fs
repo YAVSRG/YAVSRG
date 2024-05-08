@@ -14,7 +14,7 @@ type private FriendList() =
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
                     Friends.List.get (fun response ->
-                        sync
+                        defer
                         <| fun () ->
                             match response with
                             | Some result -> this.SetData result

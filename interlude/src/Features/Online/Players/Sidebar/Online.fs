@@ -12,7 +12,7 @@ type private OnlineList() =
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
                     Players.Online.get (fun response ->
-                        sync
+                        defer
                         <| fun () ->
                             match response with
                             | Some result -> this.SetData result

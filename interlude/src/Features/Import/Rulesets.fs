@@ -119,14 +119,14 @@ module Rulesets =
                 fun data ->
                     match data with
                     | Some(d: PrefabRulesets.Repo) ->
-                        sync (fun () ->
+                        defer (fun () ->
                             for id in d.Rulesets.Keys do
                                 grid.Add(RulesetCard(id, d.Rulesets.[id]))
 
                             loading <- false
                         )
                     | None ->
-                        sync (fun () ->
+                        defer (fun () ->
                             failed <- true
                             loading <- false
                         )

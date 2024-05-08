@@ -22,7 +22,7 @@ type private SearchList() =
                             Players.Search.get (
                                 query.Value,
                                 fun response ->
-                                    sync
+                                    defer
                                     <| fun () ->
                                         match response with
                                         | Some result -> this.SetData result
