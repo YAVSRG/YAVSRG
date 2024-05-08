@@ -11,11 +11,6 @@ module Alignment =
     let RIGHT = 1.0f
 
 [<Sealed>]
-type Dummy() =
-    inherit StaticWidget(NodeType.None)
-    override this.Draw() = ()
-
-[<Sealed>]
 type Text(text_func) =
     inherit StaticWidget(NodeType.None)
 
