@@ -93,9 +93,9 @@ module private Monitors =
 
     let window_mode_changed (wm: WindowType) =
         if wm = WindowType.Windowed then
-            Window.sync (Window.EnableResize config.WindowResolution.Set)
+            Window.defer (Window.EnableResize config.WindowResolution.Set)
         else
-            Window.sync (Window.DisableResize)
+            Window.defer (Window.DisableResize)
 
         if wm = WindowType.Fullscreen then
             select_fullscreen_size ()
@@ -207,8 +207,8 @@ type SystemPage() as this =
         |> this.Content
 
     override this.OnClose() =
-        Window.sync (Window.DisableResize)
-        if has_changed then Window.sync (Window.ApplyConfig config)
+        Window.defer (Window.DisableResize)
+        if has_changed then Window.defer (Window.ApplyConfig config)
 
     override this.Title = %"system.name"
 
@@ -230,7 +230,7 @@ module System =
                         SelectDropdown.FromEnum(
                             config.WindowMode
                             |> Setting.trigger window_mode_changed
-                            |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config))
+                            |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
                         )
                     )
                         .Tooltip(Tooltip.Info("system.windowmode")) :> Widget
@@ -239,7 +239,7 @@ module System =
                         (fun () -> config.WindowMode.Value = WindowType.Windowed),
                         PageSetting(
                             "system.windowresolution",
-                            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config)))
+                            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
                         )
                             .Tooltip(Tooltip.Info("system.windowresolution"))
                     )
@@ -251,7 +251,7 @@ module System =
                             SelectDropdown(
                                 monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                                 config.Display 
-                                |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.sync (Window.ApplyConfig config))
+                                |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
                             )
                         )
                             .Tooltip(Tooltip.Info("system.monitor"))
@@ -262,7 +262,7 @@ module System =
                         PageSetting(
                             "system.videomode",
                             VideoMode(
-                                config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config)),
+                                config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)),
                                 get_current_supported_video_modes
                             )
                         )

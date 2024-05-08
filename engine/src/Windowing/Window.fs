@@ -43,7 +43,7 @@ module Window =
         | EnableResize of callback: ((int * int) -> unit)
         | DisableResize
 
-    let sync (a: WindowAction) =
+    let defer (a: WindowAction) =
         lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ a ])
 
     let mutable internal _monitors: MonitorDetails list = []

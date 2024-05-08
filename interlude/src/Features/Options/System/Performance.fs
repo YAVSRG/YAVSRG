@@ -23,7 +23,7 @@ type PerformanceSettingsPage() as this =
             page_container()
             |+ PageSetting(
                 "system.framelimit",
-                SelectDropdown.FromEnum(config.RenderMode |> Setting.trigger (fun _ -> Window.sync (Window.ApplyConfig config)))
+                SelectDropdown.FromEnum(config.RenderMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
             )
                 .Tooltip(Tooltip.Info("system.framelimit"))
                 .Pos(0)
