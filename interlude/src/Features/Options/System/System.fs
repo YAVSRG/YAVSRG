@@ -306,7 +306,7 @@ module System =
                     .Tooltip(Tooltip.Info("system.visualoffset"))
                 , 2, 2, PageWidth.Normal
                 
-            if token_match tokens [|%"system.hotkeys.name"|] then
+            if token_match tokens [|%"system.hotkeys.name"; %"gameplay.keybinds.name"|] then
                 yield PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
                     .Tooltip(Tooltip.Info("system.hotkeys"))
                 , 2, 2, PageWidth.Normal
