@@ -10,7 +10,7 @@ open Interlude.UI.Menu
 open Interlude.Options
 open Interlude.Features.Play.HUD
 
-type ComboPage(on_close: unit -> unit) as this =
+type ComboPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -39,31 +39,30 @@ type ComboPage(on_close: unit -> unit) as this =
                     Text.fill (Style.font, "727", bounds, Color.White, Alignment.CENTER)
         }
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting("hud.combo.lampcolors", Checkbox lamp_colors)
-                .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
-                .Pos(0)
-            |+ ([
-                PageSetting("hud.combo.pop", Slider(pop_amount, Step = 1f))
-                    .Tooltip(Tooltip.Info("hud.combo.pop"))
-                    .Pos(2)
-                PageSetting("hud.combo.growth", Slider(growth_amount))
-                    .Tooltip(Tooltip.Info("hud.combo.growth"))
-                    .Pos(4)
-                PageSetting("hud.generic.use_font", Checkbox use_font)
-                    .Tooltip(Tooltip.Info("hud.generic.use_font"))
-                    .Pos(7)
-                Conditional(use_font.Get,
-                    PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
-                        .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
-                        .Pos(9)
-                )
-            ] |> or_require_noteskin)
-            |>> Container
-            |+ preview
-        )
+    override this.Content() =
+        page_container()
+        |+ PageSetting("hud.combo.lampcolors", Checkbox lamp_colors)
+            .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
+            .Pos(0)
+        |+ ([
+            PageSetting("hud.combo.pop", Slider(pop_amount, Step = 1f))
+                .Tooltip(Tooltip.Info("hud.combo.pop"))
+                .Pos(2)
+            PageSetting("hud.combo.growth", Slider(growth_amount))
+                .Tooltip(Tooltip.Info("hud.combo.growth"))
+                .Pos(4)
+            PageSetting("hud.generic.use_font", Checkbox use_font)
+                .Tooltip(Tooltip.Info("hud.generic.use_font"))
+                .Pos(7)
+            Conditional(use_font.Get,
+                PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
+                    .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+                    .Pos(9)
+            )
+        ] |> or_require_noteskin)
+        |>> Container
+        |+ preview
+        :> Widget
 
     override this.Title = %"hud.combo.name"
 

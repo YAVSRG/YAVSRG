@@ -11,7 +11,7 @@ open Interlude.UI.Menu
 open Interlude.Options
 
 // currently unused
-type SkipButtonPage(on_close: unit -> unit) as this =
+type SkipButtonPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -27,7 +27,7 @@ type SkipButtonPage(on_close: unit -> unit) as this =
                 Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
         }
 
-    do this.Content(preview)
+    override this.Content() = preview
 
     override this.Title = %"hud.skipbutton.name"
     override this.OnDestroy() = preview.Destroy()

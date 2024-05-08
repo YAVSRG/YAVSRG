@@ -93,7 +93,7 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
 type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: int option array, ruleset: Ruleset) =
     inherit Page()
 
-    override this.Init(parent) =
+    override this.Content() =
         page_container()
         |+ PageSetting(
             "hud.judgementcounter.usetextures",
@@ -110,8 +110,7 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
             |> ScrollContainer,
             Position = pretty_pos(2, PAGE_BOTTOM - 10, PageWidth.Normal)
         )
-        |> this.Content
-        base.Init parent
+        :> Widget
 
     override this.Title = %"hud.judgementcounter.textures.name"
     override this.OnClose() = ()
@@ -207,7 +206,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
                         )
         }
 
-    override this.Init(parent) =
+    override this.Content() =
         page_container()
         |+ PageSetting("hud.judgementcounter.animationtime", Slider(animation_time |> Setting.f32, Step = 5f))
             .Tooltip(Tooltip.Info("hud.judgementcounter.animationtime"))
@@ -258,8 +257,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
         ] |> or_require_noteskin)
         |>> Container
         |+ preview
-        |> this.Content
-        base.Init parent
+        :> Widget
 
     override this.Title = %"hud.judgementcounter.name"
 

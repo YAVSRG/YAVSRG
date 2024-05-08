@@ -6,12 +6,12 @@ open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.Features.EditNoteskin
 
-type LanecoverPage() as this =
+type LanecoverPage() =
     inherit Page()
 
     let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE 0.35f)
 
-    do
+    override this.Content() =
         page_container()
         |+ PageSetting("gameplay.lanecover.enabled", Checkbox options.LaneCover.Enabled)
             .Pos(0)
@@ -28,7 +28,7 @@ type LanecoverPage() as this =
             .Pos(9, 3)
         |>> Container
         |+ preview
-        |> this.Content
+        :> Widget
 
     override this.Title = %"gameplay.lanecover.name"
     override this.OnDestroy() = preview.Destroy()

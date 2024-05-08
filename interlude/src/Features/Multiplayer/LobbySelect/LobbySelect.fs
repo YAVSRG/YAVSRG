@@ -32,12 +32,11 @@ type LobbySelectPage() =
         NetworkEvents.receive_invite.Subscribe (fun _ -> invite_list.UpdateList()),
         NetworkEvents.join_lobby.Subscribe (fun lobby -> Menu.Exit(); Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore)
 
-    override this.Init(parent) =
+    override this.Content() =
         Container(NodeType.Leaf)
         |+ lobby_list
         |+ invite_list
-        |> this.Content
-        base.Init parent
+        :> Widget
 
     override this.Title = %"select_lobby.name"
     override this.OnClose() =

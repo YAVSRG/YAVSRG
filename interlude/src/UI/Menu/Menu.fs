@@ -25,13 +25,12 @@ type PageEasing =
 
 [<AbstractClass>]
 type Page() as this =
-    inherit SlideContainer(NodeType.Container(fun _ -> this._content))
+    inherit SlideContainer(NodeType.Container(fun _ -> Some this._content))
 
     let mutable is_current = false
-    let mutable no_easing = false
-    let mutable content: Widget option = None
+    let mutable content: Widget = Unchecked.defaultof<_>
 
-    member private this._content = content |> Option.map (fun x -> x :> ISelection)
+    member private this._content = content
 
     abstract member Title: string
     abstract member OnClose: unit -> unit
@@ -42,28 +41,30 @@ type Page() as this =
     default this.OnReturnTo() = ()
 
     // todo: make this an abstract method that generates the content instead of a must-call
-    member this.Content(w: Widget) =
-        this.Add(w)
-        content <- Some w
+    abstract member Content : unit -> Widget
 
     override this.Update(elapsed_ms, moved) =
-        if is_current && not content.Value.Focused then
+        if is_current && not content.Focused then
             Menu.Back()
 
         base.Update(elapsed_ms, moved)
 
-    member this.Show(returning: bool) =
-        this.Position <- Position.Default
-        if no_easing then 
+    member this.Show(dir: PageEasing, returning: bool) =
+        match dir with
+        | PageEasing.None ->
+            this.Position <- Position.Default
             this.SnapPosition()
-            no_easing <- false
+        | _ ->
+            this.Hide(dir.Reverse)
+            this.SnapPosition()
+            this.Position <- Position.Default
 
         Selection.clamp_to this
 
         if returning then
             this.OnReturnTo()
 
-        content.Value.Focus false
+        content.Focus false
         is_current <- true
 
     member this.Hide(dir: PageEasing) =
@@ -101,17 +102,16 @@ type Page() as this =
                     Bottom = 0.0f %+ 0.0f
                 }
             this.SnapPosition()
-            no_easing <- true
 
         is_current <- false
 
     override this.Init(parent: Widget) =
-        if content.IsNone then
-            failwithf "Call Content() to provide page content"
+        content <- this.Content()
+        this |* content
 
         this.Hide(this.Direction.Reverse)
         base.Init parent
-        this.Show(false)
+        this.Show(this.Direction, false)
 
     abstract member Direction : PageEasing
     default this.Direction = PageEasing.Up
@@ -190,7 +190,7 @@ and Menu(top_level: Page) as this =
         page.Hide(page.Direction.Reverse)
 
         if n > 0 then
-            stack.[n - 1].Value.Show(true)
+            stack.[n - 1].Value.Show(page.Direction.Reverse, true)
 
     member private this.Exit() =
         while namestack <> [] do
@@ -253,14 +253,12 @@ type Page with
 type ConfirmPage(prompt: string, yes: unit -> unit) =
     inherit Page()
 
-    override this.Init(parent) =
+    override this.Content() =
         page_container()
         |+ PageButton.Once("confirm.yes", fork Menu.Back yes).Pos(3)
         |+ PageButton.Once("confirm.no", Menu.Back).Pos(5)
         |+ Text(prompt, Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
-        |> this.Content
-
-        base.Init parent
+        :> Widget
 
     override this.Title = %"confirm"
     override this.OnClose() = ()

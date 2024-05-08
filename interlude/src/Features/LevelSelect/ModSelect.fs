@@ -69,10 +69,10 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
 
         base.Draw()
 
-type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit) as this =
+type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit) =
     inherit Page()
 
-    do
+    override this.Content() =
         let mod_grid =
             GridFlowContainer<Widget>(
                 100.0f,
@@ -126,8 +126,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
             .Tooltip(Tooltip.Info("gameplay.pacemaker"))
             .Pos(17)
-
-        |> this.Content
+        :> Widget
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

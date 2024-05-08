@@ -8,7 +8,7 @@ open Interlude.Content
 open Interlude.UI.Menu
 open Interlude.Options
 
-type EarlyLateMeterPage(on_close: unit -> unit) as this =
+type EarlyLateMeterPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -31,44 +31,42 @@ type EarlyLateMeterPage(on_close: unit -> unit) as this =
     let early_color = Setting.simple noteskin_options.EarlyLateMeterEarlyColor
     let late_color = Setting.simple noteskin_options.EarlyLateMeterLateColor
 
-    do
-        this.Content(
-            page_container()
-            |+ ([
-                PageSetting("hud.earlylatemeter.duration", Slider(duration, Step = 5f))
-                    .Tooltip(Tooltip.Info("hud.earlylatemeter.duration"))
-                    .Pos(0)
-                PageSetting("hud.earlylatemeter.usetexture", Checkbox use_texture)
-                    .Tooltip(Tooltip.Info("hud.earlylatemeter.usetexture"))
-                    .Pos(2)
-                Conditional(use_texture.Get, 
-                    PageSetting("hud.earlylatemeter.frametime", Slider(frame_time, Step = 5f))
-                        .Tooltip(Tooltip.Info("hud.earlylatemeter.frametime"))
-                        .Pos(4)
-                )
-                Conditional(use_texture.Get >> not, 
-                    PageTextEntry("hud.earlylatemeter.earlytext", early_text)
-                        .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext"))
-                        .Pos(4)
-                )
-                Conditional(use_texture.Get >> not, 
-                    PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
-                        .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
-                        .Pos(6, 3)
-                )
-                Conditional(use_texture.Get >> not, 
-                    PageTextEntry("hud.earlylatemeter.latetext", late_text)
-                        .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
-                        .Pos(9)
-                )
-                Conditional(use_texture.Get >> not, 
-                    PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
-                        .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
-                        .Pos(11, 3)
-                )
-                ] |> or_require_noteskin)
-            |>> Container
-        )
+    override this.Content() =
+        page_container()
+        |+ ([
+            PageSetting("hud.earlylatemeter.duration", Slider(duration, Step = 5f))
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.duration"))
+                .Pos(0)
+            PageSetting("hud.earlylatemeter.usetexture", Checkbox use_texture)
+                .Tooltip(Tooltip.Info("hud.earlylatemeter.usetexture"))
+                .Pos(2)
+            Conditional(use_texture.Get, 
+                PageSetting("hud.earlylatemeter.frametime", Slider(frame_time, Step = 5f))
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.frametime"))
+                    .Pos(4)
+            )
+            Conditional(use_texture.Get >> not, 
+                PageTextEntry("hud.earlylatemeter.earlytext", early_text)
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.earlytext"))
+                    .Pos(4)
+            )
+            Conditional(use_texture.Get >> not, 
+                PageSetting("hud.earlylatemeter.earlycolor", ColorPicker(early_color, false))
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.earlycolor"))
+                    .Pos(6, 3)
+            )
+            Conditional(use_texture.Get >> not, 
+                PageTextEntry("hud.earlylatemeter.latetext", late_text)
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.latetext"))
+                    .Pos(9)
+            )
+            Conditional(use_texture.Get >> not, 
+                PageSetting("hud.earlylatemeter.latecolor", ColorPicker(late_color, false))
+                    .Tooltip(Tooltip.Info("hud.earlylatemeter.latecolor"))
+                    .Pos(11, 3)
+            )
+            ] |> or_require_noteskin)
+        :> Widget
 
     override this.Title = %"hud.earlylatemeter.name"
 

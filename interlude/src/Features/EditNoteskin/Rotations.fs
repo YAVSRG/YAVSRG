@@ -84,7 +84,7 @@ type RotationPicker(rotation: Setting<float>) as this =
             elif (%%"right").Tapped() then
                 fd ()
 
-type RotationSettingsPage() as this =
+type RotationSettingsPage() =
     inherit Page()
 
     let data = Content.NoteskinConfig
@@ -120,32 +120,31 @@ type RotationSettingsPage() as this =
                 )
             )
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting("noteskins.edit.userotation", Checkbox use_rotation)
-                .Tooltip(Tooltip.Info("noteskins.edit.userotation"))
-                .Pos(0)
-            |+ PageSetting(
-                "generic.keymode",
-                Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_rotations))
-            )
-                .Pos(2)
-            |+ PageSetting("noteskins.edit.rotations", _rotations)
-                .Pos(5, 3, PageWidth.Full)
-            |+ PageSetting(
-                "noteskins.edit.receptorstyle",
-                SelectDropdown(
-                    [|
-                        ReceptorStyle.Rotate, %"noteskins.edit.receptorstyle.rotate"
-                        ReceptorStyle.Flip, %"noteskins.edit.receptorstyle.flip"
-                    |],
-                    receptor_style
-                )
-            )
-                .Tooltip(Tooltip.Info("noteskins.edit.receptorstyle"))
-                .Pos(8)
+    override this.Content() =
+        page_container()
+        |+ PageSetting("noteskins.edit.userotation", Checkbox use_rotation)
+            .Tooltip(Tooltip.Info("noteskins.edit.userotation"))
+            .Pos(0)
+        |+ PageSetting(
+            "generic.keymode",
+            Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_rotations))
         )
+            .Pos(2)
+        |+ PageSetting("noteskins.edit.rotations", _rotations)
+            .Pos(5, 3, PageWidth.Full)
+        |+ PageSetting(
+            "noteskins.edit.receptorstyle",
+            SelectDropdown(
+                [|
+                    ReceptorStyle.Rotate, %"noteskins.edit.receptorstyle.rotate"
+                    ReceptorStyle.Flip, %"noteskins.edit.receptorstyle.flip"
+                |],
+                receptor_style
+            )
+        )
+            .Tooltip(Tooltip.Info("noteskins.edit.receptorstyle"))
+            .Pos(8)
+        :> Widget
 
     override this.Title = %"noteskins.edit.rotations.name"
 

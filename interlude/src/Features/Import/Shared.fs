@@ -30,7 +30,7 @@ module Import =
                 .Title(%"unlinkedsongsimport.info.title")
                 .Body(%"unlinkedsongsimport.info.body")
 
-        override this.Init(parent) =
+        override this.Content() =
             page_container()
             |+ PageButton
                 .Once(
@@ -58,8 +58,7 @@ module Import =
                 )
                 .Pos(9)
             |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h))
-            |> this.Content
-            base.Init parent
+            :> Widget
 
         override this.Title = %"unlinkedsongsimport.name"
         override this.OnClose() = ()

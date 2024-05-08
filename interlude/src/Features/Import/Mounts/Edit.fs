@@ -8,14 +8,14 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 
-type private EditMountPage(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) as this =
+type private EditMountPage(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) =
     inherit Page()
 
     let mount = setting.Value.Value
     let import_on_startup = Setting.simple mount.ImportOnStartup
     let mutable import = false
 
-    do
+    override this.Content() =
         page_container()
         |+ PageSetting("mount.importatstartup", Checkbox import_on_startup)
             .Tooltip(Tooltip.Info("mount.importatstartup"))
@@ -79,7 +79,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                     .Pos(10)
             else
                 Dummy()
-        |> this.Content
+        :> Widget
 
     override this.Title = %"mount.name"
 

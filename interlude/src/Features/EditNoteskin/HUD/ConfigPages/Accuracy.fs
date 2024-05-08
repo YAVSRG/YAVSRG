@@ -10,7 +10,7 @@ open Interlude.UI.Menu
 open Interlude.Options
 open Interlude.Features.Play.HUD
 
-type AccuracyPage(on_close: unit -> unit) as this =
+type AccuracyPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -47,38 +47,37 @@ type AccuracyPage(on_close: unit -> unit) as this =
                     Text.fill (Style.font, "SC J4", bounds.SliceBottom(bounds.Height * 0.4f), Color.White, 0.5f)
         }
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting("hud.accuracy.gradecolors", Checkbox grade_colors)
-                .Tooltip(Tooltip.Info("hud.accuracy.gradecolors"))
-                .Pos(0)
-            |+ PageSetting("hud.accuracy.showname", Checkbox show_name)
-                .Tooltip(Tooltip.Info("hud.accuracy.showname"))
-                .Pos(2)
-            |+ ([
-                PageSetting("hud.generic.use_font", Checkbox use_font)
-                    .Tooltip(Tooltip.Info("hud.generic.use_font"))
-                    .Pos(7)
-                Conditional(use_font.Get,
-                    PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
-                        .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
-                        .Pos(9)
-                )
-                Conditional(use_font.Get,
-                    PageSetting("hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
-                        .Tooltip(Tooltip.Info("hud.generic.dot_spacing"))
-                        .Pos(11)
-                )
-                Conditional(use_font.Get,
-                    PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
-                        .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
-                        .Pos(13)
-                )
-            ] |> or_require_noteskin)
-            |>> Container
-            |+ preview
-        )
+    override this.Content() =
+        page_container()
+        |+ PageSetting("hud.accuracy.gradecolors", Checkbox grade_colors)
+            .Tooltip(Tooltip.Info("hud.accuracy.gradecolors"))
+            .Pos(0)
+        |+ PageSetting("hud.accuracy.showname", Checkbox show_name)
+            .Tooltip(Tooltip.Info("hud.accuracy.showname"))
+            .Pos(2)
+        |+ ([
+            PageSetting("hud.generic.use_font", Checkbox use_font)
+                .Tooltip(Tooltip.Info("hud.generic.use_font"))
+                .Pos(7)
+            Conditional(use_font.Get,
+                PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
+                    .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+                    .Pos(9)
+            )
+            Conditional(use_font.Get,
+                PageSetting("hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
+                    .Tooltip(Tooltip.Info("hud.generic.dot_spacing"))
+                    .Pos(11)
+            )
+            Conditional(use_font.Get,
+                PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
+                    .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
+                    .Pos(13)
+            )
+        ] |> or_require_noteskin)
+        |>> Container
+        |+ preview
+        :> Widget
 
     override this.Title = %"hud.accuracy.name"
 

@@ -275,7 +275,7 @@ type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
         base.Draw()
         items.Draw()
 
-type TextureEditPage(texture_id: string) as this =
+type TextureEditPage(texture_id: string) =
     inherit Page()
 
     let texture_rules = NoteskinTextureRules.get Content.NoteskinConfig texture_id
@@ -287,54 +287,53 @@ type TextureEditPage(texture_id: string) as this =
             Position = Position.Box(0.5f, 0.0f, -375.0f, 200.0f, 750.0f, 750.0f)
         )
 
-    do
+    override this.Content() =
         Content.Noteskin.SplitTexture(texture_id)
 
-        this.Content(
-            NavigationContainer.Column<Widget>()
-            |+ texture_editor
-            |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f, Position = Position.SliceRight(400.0f).Margin(50.0f))
-                |+ Button(
-                    Icons.ROTATE_CW + " Rotate clockwise"
-                    , fun () ->
-                        for (col, row) in texture_editor.SelectedTextures do
-                            Content.Noteskin.RotateClockwise((col, row), texture_id) |> ignore
+        NavigationContainer.Column<Widget>()
+        |+ texture_editor
+        |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f, Position = Position.SliceRight(400.0f).Margin(50.0f))
+            |+ Button(
+                Icons.ROTATE_CW + " Rotate clockwise"
+                , fun () ->
+                    for (col, row) in texture_editor.SelectedTextures do
+                        Content.Noteskin.RotateClockwise((col, row), texture_id) |> ignore
 
-                        Noteskins.reload_current ()
-                        texture_editor.Refresh()
-                    , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
-                )
-                |+ Button(
-                    Icons.ROTATE_CCW + " Rotate anticlockwise"
-                    , fun () ->
-                        for (col, row) in texture_editor.SelectedTextures do
-                            Content.Noteskin.RotateAnticlockwise((col, row), texture_id) |> ignore
+                    Noteskins.reload_current ()
+                    texture_editor.Refresh()
+                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
+            )
+            |+ Button(
+                Icons.ROTATE_CCW + " Rotate anticlockwise"
+                , fun () ->
+                    for (col, row) in texture_editor.SelectedTextures do
+                        Content.Noteskin.RotateAnticlockwise((col, row), texture_id) |> ignore
 
-                        Noteskins.reload_current ()
-                        texture_editor.Refresh()
-                    , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
-                )
-                |+ Button(
-                    Icons.CORNER_LEFT_UP + " Vertical flip"
-                    , fun () ->
-                        for (col, row) in texture_editor.SelectedTextures do
-                            Content.Noteskin.VerticalFlipTexture((col, row), texture_id) |> ignore
+                    Noteskins.reload_current ()
+                    texture_editor.Refresh()
+                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
+            )
+            |+ Button(
+                Icons.CORNER_LEFT_UP + " Vertical flip"
+                , fun () ->
+                    for (col, row) in texture_editor.SelectedTextures do
+                        Content.Noteskin.VerticalFlipTexture((col, row), texture_id) |> ignore
 
-                        Noteskins.reload_current ()
-                        texture_editor.Refresh()
-                    , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
-                )
-                |+ Button(
-                    Icons.CORNER_DOWN_LEFT + " Horizontal flip"
-                    , fun () ->
-                        for (col, row) in texture_editor.SelectedTextures do
-                            Content.Noteskin.HorizontalFlipTexture((col, row), texture_id) |> ignore
+                    Noteskins.reload_current ()
+                    texture_editor.Refresh()
+                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
+            )
+            |+ Button(
+                Icons.CORNER_DOWN_LEFT + " Horizontal flip"
+                , fun () ->
+                    for (col, row) in texture_editor.SelectedTextures do
+                        Content.Noteskin.HorizontalFlipTexture((col, row), texture_id) |> ignore
 
-                        Noteskins.reload_current ()
-                        texture_editor.Refresh()
-                    , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
-                ))
-        )
+                    Noteskins.reload_current ()
+                    texture_editor.Refresh()
+                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
+            ))
+        :> Widget
 
     override this.Title = "Texture: " + texture_id
     override this.OnClose() = ()

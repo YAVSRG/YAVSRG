@@ -17,7 +17,7 @@ open Interlude.Features.LevelSelect
 open Interlude.Features
 open Interlude.Features.Gameplay
 
-type LobbySettingsPage(lobby: Lobby) as this =
+type LobbySettingsPage(lobby: Lobby) =
     inherit Page()
 
     let settings = lobby.Settings
@@ -26,7 +26,7 @@ type LobbySettingsPage(lobby: Lobby) as this =
     let host_rotation = Setting.simple settings.HostRotation
     let auto_countdown = Setting.simple settings.AutomaticRoundCountdown
 
-    do
+    override this.Content() =
         page_container()
         |+ PageTextEntry("lobby.name", name).Pos(0)
         |+ PageSetting("lobby.host_rotation", Checkbox host_rotation)
@@ -35,7 +35,7 @@ type LobbySettingsPage(lobby: Lobby) as this =
         |+ PageSetting("lobby.auto_countdown", Checkbox auto_countdown)
             .Tooltip(Tooltip.Info("lobby.auto_countdown"))
             .Pos(5)
-        |> this.Content
+        :> Widget
 
     override this.Title = %"lobby.name"
 

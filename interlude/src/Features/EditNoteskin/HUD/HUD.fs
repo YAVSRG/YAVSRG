@@ -9,7 +9,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 
-type EditHUDPage() as this =
+type EditHUDPage() =
     inherit Page()
 
     // todo: remove this as it can no longer be seen ?
@@ -80,7 +80,7 @@ type EditHUDPage() as this =
             .Body(%"hud.noteskin_required.general")
             .Button(%"hud.noteskin_required.button", fun () -> Menu.Back(); Shared.choose_noteskins())
 
-    do
+    override this.Content() =
         NavigationContainer.Column<Widget>(Position = Position.Margin(100.0f, 200.0f))
         |+ (GridFlowContainer<Widget>(
                 PRETTYHEIGHT,
@@ -106,7 +106,7 @@ type EditHUDPage() as this =
             else
                 PageButton("hud.editor", open_hud_editor, Position = Position.SliceTop(PRETTYHEIGHT))
         )
-        |> this.Content
+        :> Widget
 
     override this.Title = %"hud.name"
     override this.OnClose() = ()

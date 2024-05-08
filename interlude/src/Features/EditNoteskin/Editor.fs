@@ -9,7 +9,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 
-type EditNoteskinPage(from_hotkey: bool) as this =
+type EditNoteskinPage(from_hotkey: bool) =
     inherit Page()
 
     let noteskin = Content.Noteskin
@@ -25,7 +25,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
         refresh_texture_grid()
         refresh_problems_list()
 
-    do
+    override this.Content() =
         refresh ()
 
         let general_tab =
@@ -177,7 +177,7 @@ type EditNoteskinPage(from_hotkey: bool) as this =
                     .Hotkey("edit_noteskin"))
                 (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
         )
-        |> this.Content
+        :> Widget
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

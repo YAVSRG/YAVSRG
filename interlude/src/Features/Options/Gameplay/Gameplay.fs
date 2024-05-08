@@ -11,7 +11,7 @@ open Interlude.Features.Pacemaker
 open Interlude.Features.EditNoteskin
 open Interlude.Features.OptionsMenu
 
-type GameplayPage() as this =
+type GameplayPage() =
     inherit Page()
 
     let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
@@ -19,7 +19,7 @@ type GameplayPage() as this =
     let binds = GameplayKeybinder(keymode)
     let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE 0.35f)
 
-    do
+    override this.Content() =
         page_container()
         |+ PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
             .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
@@ -77,7 +77,7 @@ type GameplayPage() as this =
         |+ Presets.preset_buttons 1 options.Preset1 preview.Refresh
         |+ Presets.preset_buttons 2 options.Preset2 preview.Refresh
         |+ Presets.preset_buttons 3 options.Preset3 preview.Refresh
-        |> this.Content
+        :> Widget
 
     override this.Title = %"gameplay.name"
     override this.OnDestroy() = preview.Destroy()

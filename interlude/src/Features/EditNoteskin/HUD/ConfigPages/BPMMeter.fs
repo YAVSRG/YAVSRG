@@ -10,7 +10,7 @@ open Interlude.UI.Menu
 open Interlude.Options
 
 // currently unused
-type BPMMeterPage(on_close: unit -> unit) as this =
+type BPMMeterPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -24,7 +24,7 @@ type BPMMeterPage(on_close: unit -> unit) as this =
                 Text.fill_b (Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER)
         }
 
-    do this.Content(preview)
+    override this.Content() = preview
 
     override this.Title = %"hud.bpmmeter.name"
     override this.OnDestroy() = preview.Destroy()

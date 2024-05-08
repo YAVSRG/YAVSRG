@@ -124,7 +124,7 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
 
         base.Draw()
 
-type NoteskinsPage() as this =
+type NoteskinsPage() =
     inherit Page()
 
     let preview = NoteskinPreview(NoteskinPreview.LEFT_HAND_SIDE 0.35f)
@@ -168,7 +168,7 @@ type NoteskinsPage() as this =
         for id, noteskin in Noteskins.list () do
             grid |* NoteskinButton(id, noteskin, preview.Refresh)
 
-    do
+    override this.Content() =
         refresh ()
 
         let left_side =
@@ -218,7 +218,7 @@ type NoteskinsPage() as this =
         NavigationContainer.Row<Widget>() 
         |+ left_side
         |+ right_side
-        |> this.Content
+        :> Widget
 
     override this.Title = %"noteskins.name"
 

@@ -52,7 +52,7 @@ type private TableButton(name, action) =
 
         base.Draw()
 
-type ManageTablesPage(table_changed) as this =
+type ManageTablesPage(table_changed) =
     inherit Page()
 
     let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
@@ -93,10 +93,9 @@ type ManageTablesPage(table_changed) as this =
         if container.Focused then
             container.Focus false
 
-    do
+    override this.Content() =
         refresh ()
-
-        this.Content(ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f)))
+        ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f))
 
     override this.Title = %"table.name"
     override this.OnClose() = ()

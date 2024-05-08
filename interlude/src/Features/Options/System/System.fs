@@ -100,13 +100,13 @@ module private Monitors =
         if wm = WindowType.Fullscreen then
             select_fullscreen_size ()
 
-type SystemPage() as this =
+type SystemPage() =
     inherit Page()
 
     let mutable has_changed = false
     let mark_changed = fun (_: 'T) -> has_changed <- true
 
-    do
+    override this.Content() =
         window_mode_changed config.WindowMode.Value
 
         page_container()
@@ -204,7 +204,7 @@ type SystemPage() as this =
                 (Callout.Small.Icon(Icons.AIRPLAY).Title(%"system.window_changes_hint"))
                 (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
         )
-        |> this.Content
+        :> Widget
 
     override this.OnClose() =
         Window.defer (Window.DisableResize)

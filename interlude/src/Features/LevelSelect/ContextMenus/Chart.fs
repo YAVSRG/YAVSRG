@@ -16,10 +16,10 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Play
 
-type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
+type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
     inherit Page()
 
-    do
+    override this.Content() =
         let content =
             FlowContainer.Vertical(PRETTYHEIGHT, Position = pretty_pos(0, PAGE_BOTTOM, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |+ PageButton(
@@ -147,7 +147,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 )
         | _ -> ()
 
-        this.Content content
+        content
 
     override this.Title = cc.Title
     override this.OnClose() = ()

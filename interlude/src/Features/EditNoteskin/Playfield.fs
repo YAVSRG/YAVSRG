@@ -68,7 +68,7 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
             elif (%%"right").Tapped() then
                 add 1.0f
 
-type PlayfieldSettingsPage() as this =
+type PlayfieldSettingsPage() =
     inherit Page()
 
     let data = Content.NoteskinConfig
@@ -115,7 +115,7 @@ type PlayfieldSettingsPage() as this =
                 )
             )
 
-    do
+    override this.Content() =
         page_container()
         |+ PageSetting("noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
             .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
@@ -162,7 +162,7 @@ type PlayfieldSettingsPage() as this =
                 .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
                 .Pos(20, 2, PageWidth.Full)
         )
-        |> this.Content
+        :> Widget
 
     override this.Draw() =
         base.Draw()

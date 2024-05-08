@@ -167,16 +167,16 @@ type SuggestionsList(table: Table) =
                 ScrollContainer(fc, Position = Position.Margin(100.0f, 200.0f), Margin = 5.0f)
         )
 
-type SuggestionsPage(table: Table) as this =
+type SuggestionsPage(table: Table) =
     inherit Page()
 
-    let sl = SuggestionsList(table)
+    let suggestions_list = SuggestionsList(table)
 
-    do this.Content(Container(NodeType.Leaf) |+ sl)
+    override this.Content() = suggestions_list |>> Container :> Widget
 
     override this.Title = %"table.suggestions.name"
     override this.OnClose() = ()
-    override this.OnReturnTo() = sl.Reload()
+    override this.OnReturnTo() = suggestions_list.Reload()
 
 type SuggestChartPage(table: Table, cc: CachedChart) =
     inherit

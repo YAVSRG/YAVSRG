@@ -10,7 +10,7 @@ open Interlude.UI.Menu
 open Interlude.Options
 open Interlude.Features.Play.HUD
 
-type ProgressMeterPage(on_close: unit -> unit) as this =
+type ProgressMeterPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -77,41 +77,40 @@ type ProgressMeterPage(on_close: unit -> unit) as this =
                     )
         }
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting("hud.progressmeter.label", SelectDropdown.FromEnum(label))
-                .Pos(0)
-            |+ ([
-                PageSetting("hud.progressmeter.label_size", Slider.Percent(label_size))
-                    .Tooltip(Tooltip.Info("hud.progressmeter.label_size"))
-                    .Pos(2)
-                PageSetting("hud.progressmeter.color", ColorPicker(color, true))
-                    .Pos(4, 3)
-                PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
-                    .Pos(7, 3)
-                PageSetting("hud.generic.use_font", Checkbox use_font)
-                    .Tooltip(Tooltip.Info("hud.generic.use_font"))
-                    .Pos(10)
-                Conditional(use_font.Get,
-                    PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
-                        .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
-                        .Pos(12)
-                )
-                Conditional(use_font.Get,
-                    PageSetting("hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
-                        .Tooltip(Tooltip.Info("hud.generic.colon_spacing"))
-                        .Pos(14)
-                )
-                Conditional(use_font.Get,
-                    PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
-                        .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
-                        .Pos(16)
-                )
-            ] |> or_require_noteskin)
-            |>> Container
-            |+ preview
-        )
+    override this.Content() =
+        page_container()
+        |+ PageSetting("hud.progressmeter.label", SelectDropdown.FromEnum(label))
+            .Pos(0)
+        |+ ([
+            PageSetting("hud.progressmeter.label_size", Slider.Percent(label_size))
+                .Tooltip(Tooltip.Info("hud.progressmeter.label_size"))
+                .Pos(2)
+            PageSetting("hud.progressmeter.color", ColorPicker(color, true))
+                .Pos(4, 3)
+            PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
+                .Pos(7, 3)
+            PageSetting("hud.generic.use_font", Checkbox use_font)
+                .Tooltip(Tooltip.Info("hud.generic.use_font"))
+                .Pos(10)
+            Conditional(use_font.Get,
+                PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
+                    .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+                    .Pos(12)
+            )
+            Conditional(use_font.Get,
+                PageSetting("hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
+                    .Tooltip(Tooltip.Info("hud.generic.colon_spacing"))
+                    .Pos(14)
+            )
+            Conditional(use_font.Get,
+                PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
+                    .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
+                    .Pos(16)
+            )
+        ] |> or_require_noteskin)
+        |>> Container
+        |+ preview
+        :> Widget
 
     override this.Title = %"hud.progressmeter.name"
 

@@ -85,7 +85,7 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
             elif (%%"right").Tapped() then
                 fd ()
 
-type ColorSettingsPage() as this =
+type ColorSettingsPage() =
     inherit Page()
 
     let data = Content.NoteskinConfig
@@ -119,37 +119,36 @@ type ColorSettingsPage() as this =
                 )
             )
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting(
-                "noteskins.edit.globalcolors",
-                Checkbox(
-                    Setting.make
-                        (fun v -> note_colors <- { note_colors with UseGlobalColors = v })
-                        (fun () -> note_colors.UseGlobalColors)
-                    |> Setting.trigger (ignore >> refresh_colors)
-                )
+    override this.Content() =
+        page_container()
+        |+ PageSetting(
+            "noteskins.edit.globalcolors",
+            Checkbox(
+                Setting.make
+                    (fun v -> note_colors <- { note_colors with UseGlobalColors = v })
+                    (fun () -> note_colors.UseGlobalColors)
+                |> Setting.trigger (ignore >> refresh_colors)
             )
-                .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
-                .Pos(0)
-            |+ PageSetting(
-                "generic.keymode",
-                Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_colors))
-            )
-                .Pos(2)
-            |+ PageSetting(
-                "noteskins.edit.colorstyle",
-                SelectDropdown.FromEnum(
-                    Setting.make (fun v -> note_colors <- { note_colors with Style = v }) (fun () -> note_colors.Style)
-                    |> Setting.trigger (ignore >> refresh_colors)
-                )
-            )
-                .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
-                .Pos(5)
-            |+ PageSetting("noteskins.edit.notecolors", colors)
-                .Pos(8, 3, PageWidth.Full)
         )
+            .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
+            .Pos(0)
+        |+ PageSetting(
+            "generic.keymode",
+            Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_colors))
+        )
+            .Pos(2)
+        |+ PageSetting(
+            "noteskins.edit.colorstyle",
+            SelectDropdown.FromEnum(
+                Setting.make (fun v -> note_colors <- { note_colors with Style = v }) (fun () -> note_colors.Style)
+                |> Setting.trigger (ignore >> refresh_colors)
+            )
+        )
+            .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
+            .Pos(5)
+        |+ PageSetting("noteskins.edit.notecolors", colors)
+            .Pos(8, 3, PageWidth.Full)
+        :> Widget
 
     override this.Title = %"noteskins.edit.colors.name"
 

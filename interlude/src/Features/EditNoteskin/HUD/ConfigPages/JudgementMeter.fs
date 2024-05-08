@@ -89,7 +89,7 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
             elif (%%"down").Tapped() then
                 bk ()
 
-type JudgementMeterPage(on_close: unit -> unit) as this =
+type JudgementMeterPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -127,57 +127,55 @@ type JudgementMeterPage(on_close: unit -> unit) as this =
             else
                 Array.create JUDGEMENT_COUNT JudgementDisplayType.Name
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting(
-                "hud.judgementmeter.ignoreperfectjudgements",
-                Checkbox ignore_perfect_judgements
-            )
-                .Tooltip(Tooltip.Info("hud.judgementmeter.ignoreperfectjudgements"))
-                .Pos(0)
-            |+ PageSetting(
-                "hud.judgementmeter.prioritiselowerjudgements",
-                Checkbox prioritise_lower_judgements
-            )
-                .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
-                .Pos(2)
-            |+ ([
-                Conditional((fun () -> not use_texture.Value || use_animation.Value),
-                    PageSetting("hud.judgementmeter.duration", Slider(duration, Step = 5f))
-                        .Tooltip(Tooltip.Info("hud.judgementmeter.duration"))
-                        .Pos(4)
-                ) :> Widget
-                PageSetting(
-                    "hud.judgementmeter.usetexture",
-                    Checkbox use_texture
-                )
-                    .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
-                    .Pos(6)
-                Conditional(use_texture.Get,
-                    PageSetting(
-                        "hud.judgementmeter.useanimation",
-                        Checkbox use_animation
-                    )
-                        .Tooltip(Tooltip.Info("hud.judgementmeter.useanimation"))
-                        .Pos(8)
-                )
-                Conditional(use_texture.Get,
-                    PageSetting("hud.judgementmeter.frametime", Slider(frame_time, Step = 5f))
-                        .Tooltip(Tooltip.Info("hud.judgementmeter.frametime"))
-                        .Pos(10)
-                )
-                Conditional(use_texture.Get,
-                    FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
-                    |+ seq {
-                        for i = 0 to ruleset.Judgements.Length - 1 do
-                            yield JudgementDisplayPicker(ruleset, i, judgement_display)
-                    }
-                    |> ScrollContainer,
-                    Position = pretty_pos(12, PAGE_BOTTOM - 10, PageWidth.Normal)
-                )] |> or_require_noteskin)
-            |>> Container
+    override this.Content() =
+        page_container()
+        |+ PageSetting(
+            "hud.judgementmeter.ignoreperfectjudgements",
+            Checkbox ignore_perfect_judgements
         )
+            .Tooltip(Tooltip.Info("hud.judgementmeter.ignoreperfectjudgements"))
+            .Pos(0)
+        |+ PageSetting(
+            "hud.judgementmeter.prioritiselowerjudgements",
+            Checkbox prioritise_lower_judgements
+        )
+            .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
+            .Pos(2)
+        |+ ([
+            Conditional((fun () -> not use_texture.Value || use_animation.Value),
+                PageSetting("hud.judgementmeter.duration", Slider(duration, Step = 5f))
+                    .Tooltip(Tooltip.Info("hud.judgementmeter.duration"))
+                    .Pos(4)
+            ) :> Widget
+            PageSetting(
+                "hud.judgementmeter.usetexture",
+                Checkbox use_texture
+            )
+                .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
+                .Pos(6)
+            Conditional(use_texture.Get,
+                PageSetting(
+                    "hud.judgementmeter.useanimation",
+                    Checkbox use_animation
+                )
+                    .Tooltip(Tooltip.Info("hud.judgementmeter.useanimation"))
+                    .Pos(8)
+            )
+            Conditional(use_texture.Get,
+                PageSetting("hud.judgementmeter.frametime", Slider(frame_time, Step = 5f))
+                    .Tooltip(Tooltip.Info("hud.judgementmeter.frametime"))
+                    .Pos(10)
+            )
+            Conditional(use_texture.Get,
+                FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+                |+ seq {
+                    for i = 0 to ruleset.Judgements.Length - 1 do
+                        yield JudgementDisplayPicker(ruleset, i, judgement_display)
+                }
+                |> ScrollContainer,
+                Position = pretty_pos(12, PAGE_BOTTOM - 10, PageWidth.Normal)
+            )] |> or_require_noteskin)
+        :> Widget
 
     override this.Title = %"hud.judgementmeter.name"
 

@@ -10,7 +10,7 @@ open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay
 
-type EndlessModeMenu(info: Chart.LoadedChartInfo) as this =
+type EndlessModeMenu(info: Chart.LoadedChartInfo) =
     inherit Page()
 
     let start() =
@@ -32,7 +32,7 @@ type EndlessModeMenu(info: Chart.LoadedChartInfo) as this =
             Endless.exit_endless_mode()
         Menu.Exit()
 
-    do
+    override this.Content() =
         page_container()
         |+ PageButton.Once("levelselect.endless_mode.start", start)
             .Pos(3)
@@ -46,7 +46,7 @@ type EndlessModeMenu(info: Chart.LoadedChartInfo) as this =
             )
         )
             .Pos(0)
-        |> this.Content
+        :> Widget
 
     override this.Title = %"levelselect.endless_mode.name"
     override this.OnClose() = ()

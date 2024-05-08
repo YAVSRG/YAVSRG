@@ -6,6 +6,8 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Interlude.UI
 
+// todo: rename to 'Help Mode' and make it a toggle overlay
+
 type private Tooltip =
     {
         Data: Callout

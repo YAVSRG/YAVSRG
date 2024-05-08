@@ -14,17 +14,16 @@ module GraphSettings =
 
     let only_releases = Setting.simple false
 
-type ScoreGraphSettingsPage() as this =
+type ScoreGraphSettingsPage() =
     inherit Page()
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting("score.graph.settings.graph_mode", SelectDropdown.FromEnum options.ScoreGraphMode)
-                .Pos(0)
-            |+ PageSetting("score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
-                .Pos(3)
-        )
+    override this.Content() = 
+        page_container()
+        |+ PageSetting("score.graph.settings.graph_mode", SelectDropdown.FromEnum options.ScoreGraphMode)
+            .Pos(0)
+        |+ PageSetting("score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
+            .Pos(3)
+        :> Widget
 
     override this.Title = %"score.graph.settings"
     override this.OnClose() = ()

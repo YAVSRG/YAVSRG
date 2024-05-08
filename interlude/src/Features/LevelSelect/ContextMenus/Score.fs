@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data
 open Prelude.Data.Library.Caching
@@ -11,39 +12,38 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Score
 
-type ScoreContextMenu(score_info: ScoreInfo) as this =
+type ScoreContextMenu(score_info: ScoreInfo) =
     inherit Page()
 
-    do
-        this.Content(
-            page_container()
-            |+ PageButton(
-                "score.delete",
-                (fun () -> ScoreContextMenu.ConfirmDeleteScore(score_info, true)),
-                Icon = Icons.TRASH
-            )
-                .Pos(0)
-            |+ PageButton(
-                "score.watch_replay",
-                (fun () ->
-                    ScoreScreenHelpers.watch_replay (score_info, Chart.color_this_chart (score_info.WithMods))
-                    Menu.Back()
-                ),
-                Icon = Icons.FILM
-            )
-                .Pos(2)
-            |+ PageButton(
-                "score.challenge",
-                (fun () ->
-                    LevelSelect.challenge_score score_info
-                    Menu.Back()
-                ),
-                Icon = Icons.FLAG,
-                Enabled = Network.lobby.IsNone
-            )
-                .Tooltip(Tooltip.Info("score.challenge"))
-                .Pos(4)
+    override this.Content() = 
+        page_container()
+        |+ PageButton(
+            "score.delete",
+            (fun () -> ScoreContextMenu.ConfirmDeleteScore(score_info, true)),
+            Icon = Icons.TRASH
         )
+            .Pos(0)
+        |+ PageButton(
+            "score.watch_replay",
+            (fun () ->
+                ScoreScreenHelpers.watch_replay (score_info, Chart.color_this_chart (score_info.WithMods))
+                Menu.Back()
+            ),
+            Icon = Icons.FILM
+        )
+            .Pos(2)
+        |+ PageButton(
+            "score.challenge",
+            (fun () ->
+                LevelSelect.challenge_score score_info
+                Menu.Back()
+            ),
+            Icon = Icons.FLAG,
+            Enabled = Network.lobby.IsNone
+        )
+            .Tooltip(Tooltip.Info("score.challenge"))
+            .Pos(4)
+        :> Widget
 
     override this.Title =
         sprintf "%s | %s" (score_info.Scoring.FormatAccuracy()) (score_info.Ruleset.LampName score_info.Lamp)

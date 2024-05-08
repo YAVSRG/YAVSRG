@@ -14,7 +14,7 @@ open Interlude.Features.Collections
 type PlaylistContextMenu(name: string, playlist: Playlist) =
     inherit Page()
 
-    override this.Init(parent) =
+    override this.Content() =
         page_container()
         |+ PageButton("collections.edit", (fun () -> EditPlaylistPage(name, playlist).Show()), Icon = Icons.EDIT_2)
             .Pos(0)
@@ -38,27 +38,23 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
                 Icon = Icons.SHUFFLE
             )
             .Pos(5)
-        |> this.Content
-
-        base.Init parent
+        :> Widget
 
     override this.Title = name
     override this.OnClose() = ()
 
-type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGroupContext) as this =
+type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGroupContext) =
     inherit Page()
 
-    do
-        let content =
-            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
-            |+ PageButton(
-                "group.delete",
-                (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)),
-                Icon = Icons.TRASH
-            )
-                .Tooltip(Tooltip.Info("group.delete"))
-
-        this.Content content
+    override this.Content() =
+        FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
+        |+ PageButton(
+            "group.delete",
+            (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)),
+            Icon = Icons.TRASH
+        )
+            .Tooltip(Tooltip.Info("group.delete"))
+        :> Widget
 
     override this.Title = name
     override this.OnClose() = ()

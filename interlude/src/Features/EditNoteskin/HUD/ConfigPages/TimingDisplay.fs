@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.UI.Menu
 open Interlude.Options
 
-type TimingDisplayPage(on_close: unit -> unit) as this =
+type TimingDisplayPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -46,30 +46,29 @@ type TimingDisplayPage(on_close: unit -> unit) as this =
                     Color.White
         }
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting("hud.timingdisplay.showguide", Checkbox show_guide)
-                .Tooltip(Tooltip.Info("hud.timingdisplay.showguide"))
-                .Pos(0)
-            |+ PageSetting("hud.timingdisplay.shownonjudgements", Checkbox show_non_judgements)
-                .Tooltip(Tooltip.Info("hud.timingdisplay.shownonjudgements"))
-                .Pos(2)
-            |+ PageSetting("hud.timingdisplay.halfscalereleases", Checkbox half_scale_releases)
-                .Tooltip(Tooltip.Info("hud.timingdisplay.halfscalereleases"))
-                .Pos(4)
-            |+ PageSetting("hud.timingdisplay.thickness", Slider(thickness, Step = 1f))
-                .Tooltip(Tooltip.Info("hud.timingdisplay.thickness"))
-                .Pos(6)
-            |+ PageSetting("hud.timingdisplay.releasesextraheight", Slider(release_thickness, Step = 1f))
-                .Tooltip(Tooltip.Info("hud.timingdisplay.releasesextraheight"))
-                .Pos(8)
-            |+ PageSetting("hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
-                .Tooltip(Tooltip.Info("hud.timingdisplay.animationtime"))
-                .Pos(10)
-            |>> Container
-            |+ preview
-        )
+    override this.Content() = 
+        page_container()
+        |+ PageSetting("hud.timingdisplay.showguide", Checkbox show_guide)
+            .Tooltip(Tooltip.Info("hud.timingdisplay.showguide"))
+            .Pos(0)
+        |+ PageSetting("hud.timingdisplay.shownonjudgements", Checkbox show_non_judgements)
+            .Tooltip(Tooltip.Info("hud.timingdisplay.shownonjudgements"))
+            .Pos(2)
+        |+ PageSetting("hud.timingdisplay.halfscalereleases", Checkbox half_scale_releases)
+            .Tooltip(Tooltip.Info("hud.timingdisplay.halfscalereleases"))
+            .Pos(4)
+        |+ PageSetting("hud.timingdisplay.thickness", Slider(thickness, Step = 1f))
+            .Tooltip(Tooltip.Info("hud.timingdisplay.thickness"))
+            .Pos(6)
+        |+ PageSetting("hud.timingdisplay.releasesextraheight", Slider(release_thickness, Step = 1f))
+            .Tooltip(Tooltip.Info("hud.timingdisplay.releasesextraheight"))
+            .Pos(8)
+        |+ PageSetting("hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
+            .Tooltip(Tooltip.Info("hud.timingdisplay.animationtime"))
+            .Pos(10)
+        |>> Container
+        |+ preview
+        :> Widget
 
     override this.Title = %"hud.timingdisplay.name"
     override this.OnDestroy() = preview.Destroy()

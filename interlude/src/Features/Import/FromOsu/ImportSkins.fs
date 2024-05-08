@@ -21,7 +21,7 @@ module ImportSkins =
         let is_arrows: Setting<bool> = Setting.simple false
         let delete_existing: Setting<bool> = Setting.simple false
 
-        override this.Init(parent: Widget) =
+        override this.Content() =
             page_container()
             |+ PageSetting("osu_skin_import.keymode", Selector.FromEnum(keymode))
                 .Pos(0)
@@ -69,9 +69,7 @@ module ImportSkins =
                     .Body(%"osu_skin_import.disclaimer.body")
                 )
                 (fun (w, h) -> pretty_pos(15, PAGE_BOTTOM - 15, PageWidth.Custom w))
-            |> this.Content
-
-            base.Init parent
+            :> Widget
 
         override this.Title = ini.General.Name
         override this.OnClose() = ()
@@ -109,7 +107,7 @@ module ImportSkins =
                 |> List.ofSeq
             else []
 
-        override this.Init(parent) =
+        override this.Content() =
             if List.isEmpty osu_skin_paths then
                 Container(NodeType.Leaf, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
                 |+ EmptyState(Icons.IMAGE, %"osu_skin_import.no_skins_found")
@@ -127,8 +125,6 @@ module ImportSkins =
                     },
                     Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
                 ) :> Widget
-            |> this.Content
-            base.Init(parent)
 
         override this.OnClose() = ()
         override this.Title = %"osu_skin_import.list_skins"

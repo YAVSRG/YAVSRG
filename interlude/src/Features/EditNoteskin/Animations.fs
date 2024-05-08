@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 
-type AnimationSettingsPage() as this =
+type AnimationSettingsPage() =
     inherit Page()
 
     let data = Content.NoteskinConfig
@@ -96,7 +96,7 @@ type AnimationSettingsPage() as this =
 
     let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount
 
-    do
+    override this.Content() =
         let general_tab =
             NavigationContainer.Column<Widget>(WrapNavigation = false)
             |+ PageSetting("noteskins.animations.enablecolumnlight", Checkbox enable_column_light)
@@ -225,7 +225,7 @@ type AnimationSettingsPage() as this =
         NavigationContainer.Column<Widget>()
         |+ tab_buttons
         |+ tabs
-        |> this.Content
+        :> Widget
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

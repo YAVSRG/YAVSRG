@@ -19,20 +19,18 @@ open Interlude.Features.Collections
 open Interlude.Features.Online
 open Interlude.Features.Play
 
-type MultiplayerChartContextMenu(cc: CachedChart) as this =
+type MultiplayerChartContextMenu(cc: CachedChart) =
     inherit Page()
 
-    do
-        let content =
-            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
+    override this.Content() =
+        FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
 
-            |+ PageButton(
-                "chart.add_to_collection",
-                (fun () -> AddToCollectionPage(cc).Show()),
-                Icon = Icons.FOLDER_PLUS
-            )
-
-        this.Content content
+        |+ PageButton(
+            "chart.add_to_collection",
+            (fun () -> AddToCollectionPage(cc).Show()),
+            Icon = Icons.FOLDER_PLUS
+        )
+        :> Widget
 
     override this.Title = cc.Title
     override this.OnClose() = ()

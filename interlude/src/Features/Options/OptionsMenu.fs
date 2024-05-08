@@ -51,7 +51,7 @@ module OptionsMenuRoot =
                 body
             )
 
-    type OptionsPage() as this =
+    type OptionsPage() =
         inherit Page()
 
         let button_size = Callout.measure (Callout.Normal.Title("Example")) |> snd
@@ -63,7 +63,7 @@ module OptionsMenuRoot =
                 .Body(%"options.ingame_help.hint")
                 .Hotkey("tooltip")
 
-        do
+        override this.Content() =
             let _, h = Callout.measure tooltip_hint
 
             GridFlowContainer<Widget>(
@@ -114,10 +114,8 @@ module OptionsMenuRoot =
                 )
             )
                 .Tooltip(Tooltip.Info("hud"))
-            |> this.Content
-
-            this
-            |* Callout.frame
+            |>> Container
+            |+ Callout.frame
                 (tooltip_hint)
                 (fun (w, h) ->
                     {
@@ -127,6 +125,7 @@ module OptionsMenuRoot =
                         Bottom = 0.5f %+ (h * 0.5f)
                     }
                 )
+            :> Widget
 
         override this.Title = %"options.name"
         override this.OnClose() = LevelSelect.refresh_all ()

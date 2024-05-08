@@ -463,8 +463,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
             |> Array.sortBy fst
         )
 
-    override this.Init(parent: Widget) =
-
+    override this.Content() =
         container.Filter <- _.Visible
         state.OnSelectedChanged <- fun () -> container.Filter <- _.Visible
 
@@ -477,8 +476,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
                 for chart in level_charts do
                     container.Add(Chart(chart, state))
 
-        this.Content(ScrollContainer(container, Margin = 10.0f, Position = Position.Margin(100.0f, 100.0f)))
-        base.Init parent
+        ScrollContainer(container, Margin = 10.0f, Position = Position.Margin(100.0f, 100.0f))
 
     override this.Title = table.Info.Name
     override this.OnClose() = ()

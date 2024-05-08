@@ -10,7 +10,7 @@ open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay
 
-type PacemakerOptionsPage() as this =
+type PacemakerOptionsPage() =
     inherit Page()
 
     let ruleset_id = Rulesets.current_hash
@@ -33,7 +33,7 @@ type PacemakerOptionsPage() as this =
 
     let use_personal_best = Setting.simple existing.UsePersonalBest
 
-    do
+    override this.Content() = 
         let lamps =
             seq {
                 let lamp_count = Rulesets.current.Grading.Lamps.Length
@@ -44,36 +44,35 @@ type PacemakerOptionsPage() as this =
             }
             |> Array.ofSeq
 
-        this.Content(
-            page_container()
-            |+ PageSetting("gameplay.pacemaker.saveunderpace", Checkbox options.SaveScoreIfUnderPace)
-                .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
-                .Pos(0)
-            |+ PageSetting("gameplay.pacemaker.onlysavenewrecords", Checkbox options.OnlySaveNewRecords)
-                .Tooltip(Tooltip.Info("gameplay.pacemaker.onlysavenewrecords"))
-                .Pos(2)
-            |+ PageSetting("gameplay.pacemaker.type",
-                SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy.name"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp.name" |], mode)
-            )
-                .Pos(5)
-            |+ PageSetting("gameplay.pacemaker.use_personal_best", Checkbox use_personal_best)
-                .Tooltip(Tooltip.Info("gameplay.pacemaker.use_personal_best"))
-                .Pos(7)
-            |+ Conditional((fun () -> mode.Value = PacemakerMode.Accuracy),
-                PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)) 
-                    .Pos(9)
-            )
-            |+ Conditional((fun () -> mode.Value = PacemakerMode.Lamp),
-                PageSetting("gameplay.pacemaker.lamp", SelectDropdown(lamps, lamp))
-                    .Pos(9)
-            )
-            |>> Container
-            |+ Text(
-                %"gameplay.pacemaker.hint",
-                Align = Alignment.CENTER,
-                Position = Position.SliceBottom(100.0f).TrimBottom(40.0f)
-            )
+        page_container()
+        |+ PageSetting("gameplay.pacemaker.saveunderpace", Checkbox options.SaveScoreIfUnderPace)
+            .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
+            .Pos(0)
+        |+ PageSetting("gameplay.pacemaker.onlysavenewrecords", Checkbox options.OnlySaveNewRecords)
+            .Tooltip(Tooltip.Info("gameplay.pacemaker.onlysavenewrecords"))
+            .Pos(2)
+        |+ PageSetting("gameplay.pacemaker.type",
+            SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy.name"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp.name" |], mode)
         )
+            .Pos(5)
+        |+ PageSetting("gameplay.pacemaker.use_personal_best", Checkbox use_personal_best)
+            .Tooltip(Tooltip.Info("gameplay.pacemaker.use_personal_best"))
+            .Pos(7)
+        |+ Conditional((fun () -> mode.Value = PacemakerMode.Accuracy),
+            PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)) 
+                .Pos(9)
+        )
+        |+ Conditional((fun () -> mode.Value = PacemakerMode.Lamp),
+            PageSetting("gameplay.pacemaker.lamp", SelectDropdown(lamps, lamp))
+                .Pos(9)
+        )
+        |>> Container
+        |+ Text(
+            %"gameplay.pacemaker.hint",
+            Align = Alignment.CENTER,
+            Position = Position.SliceBottom(100.0f).TrimBottom(40.0f)
+        )
+        :> Widget
 
     override this.Title = %"gameplay.pacemaker.name"
 

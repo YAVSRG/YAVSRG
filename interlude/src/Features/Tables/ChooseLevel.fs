@@ -46,7 +46,7 @@ type private LevelButton(name, action) =
 
         base.Draw()
 
-type SelectTableLevelPage(table: Table, action: int -> unit) as this =
+type SelectTableLevelPage(table: Table, action: int -> unit) =
     inherit Page()
 
     let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
@@ -60,10 +60,9 @@ type SelectTableLevelPage(table: Table, action: int -> unit) as this =
         if container.Focused then
             container.Focus false
 
-    do
+    override this.Content() =
         refresh ()
-
-        this.Content(ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f)))
+        ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f))
 
     override this.Title = %"table.name"
     override this.OnClose() = ()

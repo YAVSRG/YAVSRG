@@ -1,21 +1,22 @@
 ﻿namespace Interlude.Features.OptionsMenu.Themes
 
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Interlude.Content
 open Interlude.UI.Menu
 
-type EditThemePage() as this =
+type EditThemePage() =
     inherit Page()
 
     let data = Content.ThemeConfig
 
     let name = Setting.simple data.Name
 
-    do 
+    override this.Content() =
         page_container()
         |+ PageTextEntry("themes.edittheme.themename", name)
             .Pos(0)
-        |> this.Content
+        :> Widget
 
     override this.Title = data.Name
 

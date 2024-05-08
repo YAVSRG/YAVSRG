@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.UI.Menu
 open Interlude.Options
 
-type RateModMeterPage(on_close: unit -> unit) as this =
+type RateModMeterPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -31,15 +31,14 @@ type RateModMeterPage(on_close: unit -> unit) as this =
                 )
         }
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting("hud.ratemodmeter.showmods", Checkbox show_mods)
-                .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
-                .Pos(0)
-            |>> Container
-            |+ preview
-        )
+    override this.Content() =
+        page_container()
+        |+ PageSetting("hud.ratemodmeter.showmods", Checkbox show_mods)
+            .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
+            .Pos(0)
+        |>> Container
+        |+ preview
+        :> Widget
 
     override this.Title = %"hud.ratemodmeter.name"
     override this.OnDestroy() = preview.Destroy()

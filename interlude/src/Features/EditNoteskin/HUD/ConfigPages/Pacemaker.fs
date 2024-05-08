@@ -11,7 +11,7 @@ open Interlude.UI.Menu
 open Interlude.Options
 
 // currently unused
-type PacemakerPage(on_close: unit -> unit) as this =
+type PacemakerPage(on_close: unit -> unit) =
     inherit Page()
 
     let user_options = options.HUD.Value
@@ -25,7 +25,7 @@ type PacemakerPage(on_close: unit -> unit) as this =
                 Text.fill_b (Style.font, Icons.FLAG, bounds, Colors.text, Alignment.CENTER)
         }
 
-    do this.Content(preview)
+    override this.Content() = preview
 
     override this.Title = %"hud.pacemaker.name"
     override this.OnDestroy() = preview.Destroy()

@@ -16,10 +16,10 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Online
 
-type ScoreChartContextMenu(cc: CachedChart) as this =
+type ScoreChartContextMenu(cc: CachedChart) =
     inherit Page()
 
-    do
+    override this.Content() =
         let content =
             FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
 
@@ -51,7 +51,7 @@ type ScoreChartContextMenu(cc: CachedChart) as this =
                 )
         | _ -> ()
 
-        this.Content content
+        content
 
     override this.Title = cc.Title
     override this.OnClose() = ()

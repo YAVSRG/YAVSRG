@@ -41,7 +41,7 @@ type private PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
         if options.KeymodePreferredPresets.[keymode - 3] = Some preset_id then
             Draw.rect (this.Bounds.SliceBottom(5.0f)) Colors.yellow_accent
 
-type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) as this =
+type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
     inherit Page()
 
     let mutable delete = false
@@ -61,7 +61,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) as 
         Setting.simple preset.Mode
         |> Setting.trigger (fun mode -> delete_button.Enabled <- mode <> PresetMode.Locked)
 
-    do
+    override this.Content() =
         let keymode_preference =
             FlowContainer.LeftToRight<PresetKeymodeCheckbox>(100.0f, Spacing = 10.0f)
 
@@ -87,7 +87,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) as 
             .Tooltip(Tooltip.Info("gameplay.preset.keymode_preference"))
             .Pos(4, 2, PageWidth.Custom (PRETTYTEXTWIDTH + (keymode_preference :> IWidth).Width))
         |+ delete_button.Pos(6)
-        |> this.Content
+        :> Widget
 
     override this.Title = preset.Name
 

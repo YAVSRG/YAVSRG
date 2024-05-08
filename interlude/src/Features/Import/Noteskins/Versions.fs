@@ -136,8 +136,7 @@ type NoteskinVersionCard(group: NoteskinGroup, version: NoteskinVersion) as this
 type NoteskinGroupPage(group: NoteskinGroup) =
     inherit Page()
 
-    override this.Init(parent: Widget) =
-
+    override this.Content() =
         let flow = FlowContainer.Vertical<NoteskinVersionCard>(520.0f, Spacing = 30.0f)
 
         for version in group.Versions do
@@ -163,17 +162,14 @@ type NoteskinGroupPage(group: NoteskinGroup) =
                     Bottom = 1.0f %- 0.0f
                 }
         )
-        |> this.Content
-
-        this
-        |* Text(
+        |>> Container
+        |+ Text(
             "By " + group.Author,
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
             Position = Position.TrimTop(80.0f).SliceTop(50.0f).Margin(20.0f, 0.0f)
         )
-
-        base.Init parent
+        :> Widget
 
     override this.Title = group.Name
     override this.OnClose() = ()

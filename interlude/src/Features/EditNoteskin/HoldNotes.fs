@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
 
-type HoldNoteSettingsPage() as this =
+type HoldNoteSettingsPage() =
     inherit Page()
 
     let data = Content.NoteskinConfig
@@ -24,22 +24,21 @@ type HoldNoteSettingsPage() as this =
     let tail = Content.Texture "holdtail"
     let animation = Animation.Counter(data.AnimationFrameTime)
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting("noteskins.edit.holdnotetrim", Slider(hold_note_trim))
-                .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
-                .Pos(0)
-            |+ PageSetting("noteskins.edit.usetailtexture", Checkbox use_tail_texture)
-                .Tooltip(Tooltip.Info("noteskins.edit.usetailtexture"))
-                .Pos(3)
-            |+ PageSetting("noteskins.edit.flipholdtail", Checkbox flip_hold_tail)
-                .Tooltip(Tooltip.Info("noteskins.edit.flipholdtail"))
-                .Pos(5)
-            |+ PageSetting("noteskins.edit.droppedholdcolor", ColorPicker(dropped_color, true))
-                .Tooltip(Tooltip.Info("noteskins.edit.droppedholdcolor"))
-                .Pos(8, 3)
-        )
+    override this.Content() =
+        page_container()
+        |+ PageSetting("noteskins.edit.holdnotetrim", Slider(hold_note_trim))
+            .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
+            .Pos(0)
+        |+ PageSetting("noteskins.edit.usetailtexture", Checkbox use_tail_texture)
+            .Tooltip(Tooltip.Info("noteskins.edit.usetailtexture"))
+            .Pos(3)
+        |+ PageSetting("noteskins.edit.flipholdtail", Checkbox flip_hold_tail)
+            .Tooltip(Tooltip.Info("noteskins.edit.flipholdtail"))
+            .Pos(5)
+        |+ PageSetting("noteskins.edit.droppedholdcolor", ColorPicker(dropped_color, true))
+            .Tooltip(Tooltip.Info("noteskins.edit.droppedholdcolor"))
+            .Pos(8, 3)
+        :> Widget
 
     override this.Draw() =
         base.Draw()

@@ -56,10 +56,10 @@ type private Keybinder(hotkey: Hotkey) as this =
         base.OnDeselected by_mouse
         Input.remove_listener ()
 
-type HotkeysPage() as this =
+type HotkeysPage() =
     inherit Page()
 
-    do
+    override this.Content() = 
         let hotkey_editor hk =
             NavigationContainer.Row<Widget>()
             |+ Keybinder(hk, Position = Position.TrimRight PRETTYHEIGHT)
@@ -85,7 +85,7 @@ type HotkeysPage() as this =
                         .Tooltip(Tooltip.Info(sprintf "hotkeys.%s" hk))
                 )
 
-        this.Content scroll_container
+        scroll_container
 
     override this.Title = %"system.hotkeys.name"
     override this.OnClose() = ()

@@ -11,7 +11,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Themes
 
-type DebugPage() as this =
+type DebugPage() =
     inherit Page()
 
     let themes = PageSetting("themes.theme", Dummy())
@@ -36,7 +36,7 @@ type DebugPage() as this =
                 .Show()
         | Folder _ -> EditThemePage().Show()
 
-    do
+    override this.Content() =
         refresh ()
 
         page_container()
@@ -63,7 +63,7 @@ type DebugPage() as this =
         |+ PageButton("themes.showthemesfolder", (fun () -> open_directory (get_game_folder "Themes")))
             .Tooltip(Tooltip.Info("themes.showthemesfolder"))
             .Pos(7)
-        |> this.Content
+        :> Widget
 
     override this.Title = %"debug.name"
     override this.OnClose() = ()

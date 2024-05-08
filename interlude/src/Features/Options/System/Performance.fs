@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
 
-type PerformanceSettingsPage() as this =
+type PerformanceSettingsPage() =
     inherit Page()
 
     let mutable closed = false
@@ -18,57 +18,56 @@ type PerformanceSettingsPage() as this =
     let screen_tear_alignment = config.SmartCapTearlinePosition |> Setting.trigger (fun v -> tearline_position <- v) |> Setting.f32
     let framerate_multiplier = config.SmartCapFramerateMultiplier |> Setting.trigger (fun v -> framerate_multiplier <- v)
 
-    do
-        this.Content(
-            page_container()
-            |+ PageSetting(
-                "system.framelimit",
-                SelectDropdown.FromEnum(config.RenderMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
-            )
-                .Tooltip(Tooltip.Info("system.framelimit"))
-                .Pos(0)
-            |+ Conditional(
-                (fun () -> config.RenderMode.Value = FrameLimit.Unlimited),
-                Text(%"system.framelimit.unlimited_warning", 
-                    Color = K Colors.text_red,
-                    Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
-                    Align = Alignment.LEFT
-                )
-            )
-            |+ Conditional(
-                (fun () -> config.RenderMode.Value = FrameLimit.Smart),
-                PageSetting("system.performance.antijitter", 
-                    Checkbox(
-                        config.SmartCapAntiJitter
-                        |> Setting.trigger (fun v -> anti_jitter <- v)
-                    )
-                )
-                    .Tooltip(Tooltip.Info("system.performance.antijitter"))
-                    .Pos(2)
-            )
-            |+ Conditional(
-                (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen),
-                PageSetting("system.performance.screen_tear_alignment", 
-                    Slider.Percent(screen_tear_alignment)
-                )
-                    .Pos(4)
-            )
-            |+ Conditional(
-                (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen),
-                Text(%"system.performance.screen_tear_alignment.hint", 
-                    Color = K Colors.text,
-                    Position = pretty_pos(6, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
-                    Align = Alignment.LEFT
-                )
-            )
-            |+ Conditional(
-                (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.WindowMode.Value = WindowType.Fullscreen),
-                PageSetting("system.performance.frame_multiplier", 
-                    SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
-                )
-                    .Pos(7)
+    override this.Content() = 
+        page_container()
+        |+ PageSetting(
+            "system.framelimit",
+            SelectDropdown.FromEnum(config.RenderMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
+        )
+            .Tooltip(Tooltip.Info("system.framelimit"))
+            .Pos(0)
+        |+ Conditional(
+            (fun () -> config.RenderMode.Value = FrameLimit.Unlimited),
+            Text(%"system.framelimit.unlimited_warning", 
+                Color = K Colors.text_red,
+                Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
+                Align = Alignment.LEFT
             )
         )
+        |+ Conditional(
+            (fun () -> config.RenderMode.Value = FrameLimit.Smart),
+            PageSetting("system.performance.antijitter", 
+                Checkbox(
+                    config.SmartCapAntiJitter
+                    |> Setting.trigger (fun v -> anti_jitter <- v)
+                )
+            )
+                .Tooltip(Tooltip.Info("system.performance.antijitter"))
+                .Pos(2)
+        )
+        |+ Conditional(
+            (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen),
+            PageSetting("system.performance.screen_tear_alignment", 
+                Slider.Percent(screen_tear_alignment)
+            )
+                .Pos(4)
+        )
+        |+ Conditional(
+            (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen),
+            Text(%"system.performance.screen_tear_alignment.hint", 
+                Color = K Colors.text,
+                Position = pretty_pos(6, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
+                Align = Alignment.LEFT
+            )
+        )
+        |+ Conditional(
+            (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.WindowMode.Value = WindowType.Fullscreen),
+            PageSetting("system.performance.frame_multiplier", 
+                SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
+            )
+                .Pos(7)
+        )
+        :> Widget
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

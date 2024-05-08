@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.OptionsMenu.Advanced
 
+open Percyqaz.Flux.UI
 open Prelude.Data.Library.Caching
 open Prelude
 open Interlude.Options
@@ -7,10 +8,10 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 
-type AdvancedPage() as this =
+type AdvancedPage() =
     inherit Page()
 
-    do
+    override this.Content() =
         page_container ()
         |+ PageSetting("advanced.enableconsole", Checkbox options.EnableConsole)
             .Pos(0)
@@ -51,7 +52,7 @@ type AdvancedPage() as this =
         |+ PageSetting("advanced.advancedrecommendations", Checkbox options.AdvancedRecommendations)
             .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
             .Pos(12)
-        |> this.Content
+        :> Widget
 
     override this.Title = %"advanced.name"
     override this.OnClose() = ()
