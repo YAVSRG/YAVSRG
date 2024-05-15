@@ -6,6 +6,7 @@ open Prelude.Data
 open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Backbeat.Archive
+open Interlude.Web.Server
 open Interlude.Web.Server.Domain.Core
 
 module Backbeat =
@@ -262,10 +263,12 @@ module Backbeat =
                                 use br = new System.IO.BinaryReader(stream)
 
                                 match Chart.read_headless chart.Keys header "" br with
-                                | Some chart ->
+                                | Ok chart ->
                                     cache.[hash] <- chart
                                     return Some chart
-                                | None -> return None
+                                | Error reason -> 
+                                    Discord.debug_log (sprintf "CDN contains nonsense data for %s: %s" hash reason)
+                                    return None
                             else return None
                     }
             }

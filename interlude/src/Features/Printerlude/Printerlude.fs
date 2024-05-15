@@ -148,8 +148,8 @@ module Printerlude =
                                 | Some cc ->
 
                                 match Cache.load cc Content.Cache with
-                                | None -> ()
-                                | Some chart ->
+                                | Error reason -> ()
+                                | Ok chart ->
 
                                 let existing_bests = data.PersonalBests
                                 let mutable new_bests = existing_bests
@@ -171,7 +171,7 @@ module Printerlude =
             }
 
         let fix_personal_bests () =
-            personal_best_fixer.Request(Content.Rulesets.current_hash, ignore)
+            personal_best_fixer.Request(Rulesets.current_hash, ignore)
             Logging.Info("Queued a reprocess of personal bests")
 
         let register_commands (ctx: ShellContext) =

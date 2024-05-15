@@ -187,88 +187,12 @@ module Cache =
                         Directory.EnumerateDirectories cache.RootPath
                         |> Seq.filter (fun p -> Path.GetFileName p <> ".assets") do
 
-                        // backwards compatible stuff. move all loose folders
-                        for song in Directory.EnumerateDirectories folder do
-                            let moved_assets = Dictionary<string, string>() // relative file name -> hash
-
-                            for file in Directory.EnumerateFiles song do
-                                match Path.GetExtension(file).ToLower() with
-                                | ".yav" ->
-                                    match Chart.from_file file with
-                                    | Some c ->
-                                        try
-                                            let c =
-                                                { c with
-                                                    Header =
-                                                        { c.Header with
-                                                            BackgroundFile =
-                                                                match c.Header.BackgroundFile with
-                                                                | Relative s ->
-                                                                    if moved_assets.ContainsKey s then
-                                                                        Asset moved_assets.[s]
-                                                                    else
-                                                                        let path = (background_path c cache).Value
-
-                                                                        if not (File.Exists path) then
-                                                                            Missing
-                                                                        else
-                                                                            let hash = hash_asset path cache
-                                                                            moved_assets.[s] <- hash
-                                                                            Asset hash
-                                                                | Absolute s -> Absolute s
-                                                                | Asset s -> Asset s
-                                                                | Missing -> Missing
-
-                                                            AudioFile =
-                                                                match c.Header.AudioFile with
-                                                                | Relative s ->
-                                                                    if moved_assets.ContainsKey s then
-                                                                        Asset moved_assets.[s]
-                                                                    else
-                                                                        let path = (audio_path c cache).Value
-
-                                                                        if not (File.Exists path) then
-                                                                            Missing
-                                                                        else
-                                                                            let hash = hash_asset path cache
-                                                                            moved_assets.[s] <- hash
-                                                                            Asset hash
-                                                                | Absolute s -> Absolute s
-                                                                | Asset s -> Asset s
-                                                                | Missing -> Missing
-                                                        }
-                                                }
-
-                                            let entry, patterns =
-                                                create_entry (Path.GetFileName folder) (File.GetCreationTimeUtc file) c
-
-                                            let new_file = get_path entry cache
-                                            Chart.to_file c new_file
-                                            File.SetCreationTimeUtc(new_file, entry.DateAdded)
-                                            File.Delete file
-
-                                            cache.Entries.[entry.Key] <- entry
-                                            cache.Patterns.[entry.Hash] <- patterns
-                                            cache.Changed <- true
-                                        with err ->
-                                            Logging.Error(
-                                                sprintf "Error (likely assets) with caching a legacy yav file: %s" file,
-                                                err
-                                            )
-                                    | None -> ()
-                                | _ -> ()
-
-                            try
-                                Directory.Delete song
-                            with err ->
-                                Logging.Warn(sprintf "Error deleting should-be-empty folder: %s" song, err)
-
                         // current system. just very minor sanity checks then straight into cache
                         for file in Directory.EnumerateFiles folder do
                             match Path.GetExtension(file).ToLower() with
                             | ".yav" ->
                                 match Chart.from_file file with
-                                | Some c ->
+                                | Ok c ->
                                     let entry, patterns = create_entry (Path.GetFileName folder) (File.GetCreationTimeUtc file) c
 
                                     match c.Header.BackgroundFile with
@@ -308,7 +232,7 @@ module Cache =
                                         cache.Entries.[entry.Key] <- entry
                                         cache.Patterns.[entry.Hash] <- patterns
                                         cache.Changed <- true
-                                | None -> ()
+                                | Error reason -> Logging.Warn(sprintf "Couldn't cache %s: %s" file reason)
                             | _ -> ()
 
                     save cache
@@ -391,7 +315,9 @@ module Cache =
         if target.Entries.ContainsKey({ entry with Folder = folder }.Key) then
             ()
         else
-            let chart = (Chart.from_file (get_path entry source)).Value
+            match Chart.from_file (get_path entry source) with
+            | Error reason -> Logging.Error(sprintf "Could not read/copy chart %s: %s" entry.Hash reason)
+            | Ok chart ->
 
             let chart =
                 { chart with
@@ -456,7 +382,7 @@ module Cache =
             target.Patterns.[entry.Hash] <- patterns
             target.Changed <- true
 
-    let load (entry: CachedChart) (cache: Cache) = get_path entry cache |> Chart.from_file
+    let load (entry: CachedChart) (cache: Cache) : Result<Chart, string> = get_path entry cache |> Chart.from_file
 
     let by_key (key: string) (cache: Cache) : CachedChart option =
         let success, c = cache.Entries.TryGetValue key
@@ -493,10 +419,10 @@ module Cache =
                     for entry in cache.Entries.Values do
                         if not (cache.Patterns.ContainsKey entry.Hash) then
                             match load entry cache with
-                            | Some chart ->
+                            | Ok chart ->
                                 cache.Patterns.[entry.Hash] <- PatternSummary.generate_pattern_data 1.0f chart
                                 cache.Changed <- true
-                            | None -> ()
+                            | Error reason -> Logging.Warn(sprintf "Error caching patterns for %s: %s" entry.Hash reason)
                 }
         }
 
@@ -529,8 +455,10 @@ module Cache =
                     use br = new BinaryReader(stream)
 
                     match Chart.read_headless chart.Keys header "" br with
-                    | None -> return false
-                    | Some chart_data ->
+                    | Error reason ->
+                        Logging.Error(sprintf "CDN download invalid for %s: %s" hash reason)
+                        return false
+                    | Ok chart_data ->
 
                     let actual_hash = Chart.hash chart_data
 

@@ -59,7 +59,7 @@ module Endless =
 
                 printfn ""
                 match Cache.load next.Chart library.Cache with
-                | Some chart ->
+                | Ok chart ->
                     printfn "This is classed as: %A [%.2f]" (library.Cache.Patterns.[next.Chart.Hash].Category) (DifficultyRating.calculate 1.0f chart.Notes |> _.Physical)
-                | None -> ()
+                | Error reason -> ()
         

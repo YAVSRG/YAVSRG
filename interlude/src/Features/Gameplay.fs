@@ -154,7 +154,9 @@ module Gameplay =
                     | Load(cc, play_audio, rate, mods) ->
                         seq {
                             match Cache.load cc Content.Cache with
-                            | None ->
+                            | Error reason ->
+                                
+                                Logging.Error(sprintf "Couldn't load chart: %s" reason)
                                 // todo: set a proper error state to indicate this failed
                                 Background.load None
 
@@ -165,7 +167,7 @@ module Gameplay =
 
                                 yield
                                     fun () -> on_load_succeeded <- []
-                            | Some chart ->
+                            | Ok chart ->
 
                             Background.load (Cache.background_path chart Content.Cache)
 

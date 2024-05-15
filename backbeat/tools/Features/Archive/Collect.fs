@@ -157,7 +157,7 @@ module Collect =
     let slurp_folder (extra_sources: ChartSource list) (folder: string) =
         Directory.EnumerateFiles(Path.Combine(backbeat_cache.RootPath, folder))
         |> Seq.map Chart.from_file
-        |> Seq.iter (Option.iter (slurp_chart extra_sources))
+        |> Seq.iter (Result.toOption >> Option.iter (slurp_chart extra_sources))
 
         save ()
 

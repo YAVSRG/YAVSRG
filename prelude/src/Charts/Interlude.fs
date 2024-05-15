@@ -167,36 +167,37 @@ type Chart =
 
 module Chart =
 
-    let read_headless (keys: int) (header: ChartHeader) (source_path: string) (br: BinaryReader) =
-
-        let notes = TimeArray.read br (NoteRow.read keys)
-
-        let bpms =
-            TimeArray.read
-                br
-                (fun r ->
-                    {
-                        Meter = r.ReadInt32() * 1<beat>
-                        MsPerBeat = r.ReadSingle() * 1.0f<ms / beat>
-                    }
-                )
-
-        let sv = TimeArray.read br (fun r -> r.ReadSingle())
-
-        Some
-            {
-                Keys = keys
-                Header = header
-                Notes = notes
-                BPM = bpms
-                SV = sv
-
-                LoadedFromPath = source_path
-            }
-
-    let from_file filepath =
+    let read_headless (keys: int) (header: ChartHeader) (source_path: string) (br: BinaryReader) : Result<Chart, string> =
         try
-            use fs = new FileStream(filepath, FileMode.Open)
+            let notes = TimeArray.read br (NoteRow.read keys)
+
+            let bpms =
+                TimeArray.read
+                    br
+                    (fun r ->
+                        {
+                            Meter = r.ReadInt32() * 1<beat>
+                            MsPerBeat = r.ReadSingle() * 1.0f<ms / beat>
+                        }
+                    )
+
+            let sv = TimeArray.read br (fun r -> r.ReadSingle())
+
+            Ok
+                {
+                    Keys = keys
+                    Header = header
+                    Notes = notes
+                    BPM = bpms
+                    SV = sv
+
+                    LoadedFromPath = source_path
+                }
+        with err -> Error err.Message
+
+    let from_file (path: string) : Result<Chart, string> =
+        try
+            use fs = new FileStream(path, FileMode.Open)
             use br = new BinaryReader(fs)
             let keys = br.ReadByte() |> int
 
@@ -207,11 +208,9 @@ module Chart =
                     Logging.Error(sprintf "%O" err)
                     raise err
 
-            read_headless keys header filepath br
+            read_headless keys header path br
 
-        with err ->
-            Logging.Error(sprintf "Couldn't load chart from %s: %O" filepath err, err)
-            None
+        with err -> Error err.Message
 
     let write_headless (chart: Chart) (bw: BinaryWriter) =
         TimeArray.write chart.Notes bw (fun bw nr -> NoteRow.write bw nr)
