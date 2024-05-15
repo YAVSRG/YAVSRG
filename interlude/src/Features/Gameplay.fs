@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features
 
 open System
-open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
@@ -21,7 +20,6 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Online
-open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests
 
 module Gameplay =
@@ -166,9 +164,7 @@ module Gameplay =
                                 )
 
                                 yield
-                                    fun () ->
-                                        chart_change_finished.Trigger(create_loaded_chart_info ())
-                                        on_load_succeeded <- []
+                                    fun () -> on_load_succeeded <- []
                             | Some chart ->
 
                             Background.load (Cache.background_path chart Content.Cache)
