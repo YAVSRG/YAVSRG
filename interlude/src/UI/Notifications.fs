@@ -2,6 +2,7 @@
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude
 open Interlude.UI
 
@@ -34,6 +35,10 @@ module Notifications =
                     Rect.Box(this.Bounds.Right - width - 10.0f, y, width, height)
 
                 Callout.update (bounds.Left, bounds.Top, width, height, i.Data)
+
+                if Mouse.hover bounds then
+                    Input.finish_frame_events()
+
                 y <- y + (height + 15.0f) * i.Fade.Value
 
                 i.Duration <- i.Duration - elapsed_ms
@@ -55,11 +60,10 @@ module Notifications =
                 let bounds =
                     Rect.Box(this.Bounds.Right - width - 10.0f, y, width, height)
 
-                let border = bounds.Expand(5.0f)
-                Draw.rect (border.SliceLeft(5.0f)) (accent.O4a i.Fade.Alpha)
-                Draw.rect (border.SliceTop(5.0f)) (accent.O4a i.Fade.Alpha)
-                Draw.rect (border.SliceRight(5.0f)) (accent.O4a i.Fade.Alpha)
-                Draw.rect (border.SliceBottom(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (bounds.BorderLeft(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (bounds.BorderTopCorners(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (bounds.BorderRight(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (bounds.BorderBottomCorners(5.0f)) (accent.O4a i.Fade.Alpha)
                 Draw.rect bounds (Colors.shadow_2.O2a i.Fade.Alpha)
                 Draw.rect bounds (body.O3a i.Fade.Alpha)
 
