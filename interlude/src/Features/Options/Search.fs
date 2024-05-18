@@ -2,6 +2,8 @@
 
 open System
 open Percyqaz.Flux.UI
+open Prelude
+open Interlude.UI
 open Interlude.UI.Menu
 
 [<AutoOpen>]
@@ -12,12 +14,25 @@ module Search =
 
     type SearchResult = Widget * int * int * PageWidth
 
-    let search (search_func: string array -> SearchResult seq) (query: string) =
+    type SearchResultContainer(height, node_type) =
+        inherit Container(node_type)
+
+        interface IHeight with
+            member this.Height = height
+
+    let search (search_func: string array -> SearchResult seq) (query: string) : Widget =
         let tokens = query.Split(' ', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
         let mutable y = 0
-        page_container()
-        |+ seq {
-            for widget, height, spacing, width in search_func tokens do
-                yield widget.Pos(y, height, width)
-                y <- y + spacing
-        }
+        let results = search_func tokens
+        if Seq.isEmpty results then
+            EmptyState(Icons.SEARCH, %"options.search.no_results", Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        else
+            let content = 
+                NavigationContainer.Column<_>(WrapNavigation = false)
+                |+ seq {
+                    for widget, height, spacing, width in results do
+                        yield widget.Pos(y, height, width)
+                        y <- y + spacing
+                }
+                |>> (fun nt -> SearchResultContainer(float32 y * 0.5f * PRETTYHEIGHT, nt))
+            ScrollContainer(content, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
