@@ -198,8 +198,7 @@ module PracticeScreen =
                     Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsed_ms
 
                 if (%%"retry").Tapped() then
-                    if state.Paused.Value then
-                        restart this
+                    restart this
 
                 elif (%%"accept_suggestion").Tapped() then
                     if state.Paused.Value then
