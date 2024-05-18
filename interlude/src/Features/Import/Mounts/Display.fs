@@ -11,15 +11,15 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
 
     let create_button =
         Button(
-            sprintf "%s %s" Icons.LINK (%"imports.mount.create"),
-            (fun () -> CreateMountDialog(game, setting).Show()),
+            sprintf "%s %s" Icons.LINK (%"mount.create.name"),
+            (fun () -> CreateMountPage(game, setting).Show()),
             Position = Position.SliceBottom(60.0f).Margin 5.0f
         )
 
     let edit_buttons =
         NavigationContainer.Row<Button>(WrapNavigation = false, Position = Position.SliceBottom(60.0f).Margin 5.0f)
         |+ Button(
-            sprintf "%s %s" Icons.EDIT_2 (%"imports.mount.edit"),
+            sprintf "%s %s" Icons.EDIT_2 (%"mount.edit.name"),
             (fun () -> EditMountPage(game, setting).Show()),
             Position =
                 { Position.Default with
@@ -27,7 +27,7 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
                 }
         )
         |+ Button(
-            sprintf "%s %s" Icons.TRASH (%"imports.mount.delete"),
+            sprintf "%s %s" Icons.TRASH (%"mount.delete.name"),
             (fun () -> setting.Value <- None),
             Position =
                 { Position.Default with
@@ -55,8 +55,8 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
                         else
                             s.LastImported.ToString()
                     ]
-                    %> "imports.mount.lastimported"
-                | None -> %"imports.mount.notlinked"
+                    %> "mount.lastimported"
+                | None -> %"mount.notlinked"
             , Color = K Colors.text_subheading
             , Position = Position.SliceTop(145.0f).TrimTop(85.0f)
             , Align = Alignment.CENTER
