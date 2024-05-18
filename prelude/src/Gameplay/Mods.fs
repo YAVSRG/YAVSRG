@@ -87,7 +87,7 @@ module Mods =
             { Mod.Default with
                 Status = ModStatus.Unranked
                 States = 4
-                Exclusions = [ "inverse" ]
+                Exclusions = []
                 Apply = 
                     fun state mc -> 
                         match state with
@@ -101,9 +101,14 @@ module Mods =
             "inverse",
             { Mod.Default with
                 Status = ModStatus.Unranked
-                States = 1 // todo: in future support half-size/double-size gaps? code is already there
-                Exclusions = [ "noln" ]
-                Apply = fun s mc -> Inverse.apply (s > 0) mc
+                States = 3
+                Exclusions = []
+                Apply = fun state mc -> 
+                    match state with
+                    | 0 -> Inverse.apply 0.25f<beat> mc
+                    | 1 -> Inverse.apply 0.125f<beat> mc
+                    | 2 -> Inverse.apply 0.5f<beat> mc
+                    | _ -> failwith "impossible"
             }
 
             "more_notes",
@@ -156,7 +161,7 @@ module Mods =
         if (mods.ContainsKey id) then
             let state = mods.[id] + 1
 
-            if state = AVAILABLE_MODS.[id].States || AVAILABLE_MODS.[id].RandomSeed then
+            if state >= AVAILABLE_MODS.[id].States || AVAILABLE_MODS.[id].RandomSeed then
                 Map.remove id mods
             else
                 Map.add id state mods

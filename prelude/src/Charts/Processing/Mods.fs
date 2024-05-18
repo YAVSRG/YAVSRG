@@ -135,7 +135,7 @@ module Inverse =
         for { Data = d2 } in b do
             printfn "     ~ %s" (NoteRow.pretty_print d2)
 
-    let apply (halved: bool) (chart: ModdedChartInternal) : ModdedChartInternal * bool =
+    let apply (gap_size: float32<beat>) (chart: ModdedChartInternal) : ModdedChartInternal * bool =
 
         let output = chart.Notes |> TimeArray.map Array.copy |> ResizeArray
 
@@ -239,7 +239,7 @@ module Inverse =
             while bpm_index < 0
                   || (bpm_index + 1 < chart.BPM.Length && chart.BPM.[bpm_index + 1].Time < now) do
                 let msPerBeat = chart.BPM.[bpm_index + 1].Data.MsPerBeat
-                spacing <- msPerBeat * if halved then 0.125f<beat> else 0.25f<beat>
+                spacing <- msPerBeat * gap_size
                 bpm_index <- bpm_index + 1
 
         let mutable i = 0
