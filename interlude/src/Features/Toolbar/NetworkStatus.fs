@@ -55,7 +55,7 @@ type NetworkStatus() as this =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if Network.status = Network.NotConnected then
+        if Network.status = Network.NotConnected && not Network.kicked_no_reconnect then
             retry_timer.Update elapsed_ms
 
             if retry_timer.Complete then

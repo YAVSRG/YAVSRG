@@ -44,6 +44,7 @@ module Network =
         | Connected
         | LoggedIn
 
+    let mutable kicked_no_reconnect = false
     let mutable status = NotConnected
 
     let mutable lobby_invites: LobbyInvite list = []
@@ -81,7 +82,7 @@ module Network =
             match packet with
             | Downstream.DISCONNECT reason ->
                 Logging.Info(sprintf "Disconnected from server: %s" reason)
-
+                kicked_no_reconnect <- true
                 defer
                 <| fun () -> Notifications.error (%"notification.network.disconnected", reason)
             | Downstream.HANDSHAKE_SUCCESS ->
