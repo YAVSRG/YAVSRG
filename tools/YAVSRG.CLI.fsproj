@@ -24,6 +24,7 @@
     <Compile Include="Client\Play.fs" />
     <Compile Include="Server\Server.fs" />
     <Compile Include="Content\Config.fs" />
+    <Compile Include="Content\Charts\Metadata.fs" />
     <Compile Include="Content\Charts\Upload.fs" />
     <Compile Include="Content\Rulesets.fs" />
     <Compile Include="Content\Noteskins.fs" />
@@ -37,6 +38,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\libraries\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
+    <ProjectReference Include="..\online\shared\Interlude.Web.Shared.fsproj" />
     <ProjectReference Include="..\prelude\src\Prelude.fsproj" />
   </ItemGroup>
 

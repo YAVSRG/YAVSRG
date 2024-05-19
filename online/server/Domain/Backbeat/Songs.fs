@@ -540,7 +540,7 @@ module Songs =
 
     open System.Text.RegularExpressions
 
-    let search_songs (search_query: string) : (int64 * Song) array =
+    let search_songs (page_size: int64) (page: int) (search_query: string) : (int64 * Song) array =
         let stripped_query = Regex.Replace(search_query, @"[^a-zA-Z0-9\s]+", " ").Trim()
 
         if stripped_query = "" then
@@ -553,10 +553,15 @@ module Songs =
                 SELECT Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source FROM songs_fts
                 WHERE songs_fts MATCH '{stripped_query}'
                 ORDER BY rank DESC
-                LIMIT 20;
+                LIMIT @Limit
+                OFFSET @Offset;
                 """
-                    Parameters = []
-                    FillParameters = fun p () -> ()
+                    Parameters = [ "@Limit", SqliteType.Integer, 8; "@Offset", SqliteType.Integer, 8 ]
+                    FillParameters =
+                        (fun p _ ->
+                            p.Int64 page_size
+                            p.Int64(int64 page * page_size)
+                        )
                     Read =
                         (fun r ->
                             r.Int64,

@@ -46,6 +46,27 @@ module Charts =
         let get_async (chart: string, callback: Response option -> unit) =
             Client.get_async<Response> (snd ROUTE + "?chart=" + chart, callback)
 
+    /// requires login token as Authorization header
+    module Add =
+
+        let ROUTE = (POST, "/charts/add")
+
+        open Prelude.Backbeat.Archive
+
+        [<Json.AutoCodec>]
+        type Request =
+            {
+                ChartId: string
+                Chart: Chart
+                Song: Song
+            }
+
+        let post (request: Request, callback: bool option -> unit) =
+            Client.post<Request> (snd ROUTE, request, callback)
+
+        let post_async (request: Request, callback: bool option -> unit) =
+            Client.post_async<Request, bool> (snd ROUTE, request, callback)
+
     module Scores =
 
         /// requires login token as Authorization header

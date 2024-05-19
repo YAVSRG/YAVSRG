@@ -32,6 +32,7 @@
     <Compile Include="API\Auth\Dummy.fs" />
     <Compile Include="API\Auth\Discord.fs" />
     <Compile Include="API\Charts\Identify.fs" />
+    <Compile Include="API\Charts\Add.fs" />
     <Compile Include="API\Charts\Scores\Leaderboard.fs" />
     <Compile Include="API\Charts\Scores\Save.fs" />
     <Compile Include="API\Tables\Records.fs" />

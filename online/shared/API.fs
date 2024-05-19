@@ -191,6 +191,37 @@ module API =
         let internal post<'T> (route: string, request: 'T, callback: bool option -> unit) =
             post_return<'T, bool> (route, request, callback)
 
+        let internal post_async<'T, 'U> (route: string, request: 'T, callback: 'U option -> unit) =
+            queue.RequestAsync(
+                fun client ->
+                    async {
+                        try
+                            let! response =
+                                client.PostAsync(
+                                    route,
+                                    new Http.StringContent(
+                                        JSON.ToString request,
+                                        Text.Encoding.UTF8,
+                                        "application/json"
+                                    )
+                                )
+                                |> Async.AwaitTask
+
+                            if response.IsSuccessStatusCode then
+                                match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                                | Ok res -> callback (Some res)
+                                | Error err ->
+                                    Logging.Error(sprintf "Error reading post %s: %s" route err.Message)
+                                    callback None
+                            else
+                                callback None
+                        with
+                        | :? Http.HttpRequestException
+                        | :? OperationCanceledException
+                        | :? AggregateException -> callback None
+                    }
+            )
+
         let internal delete (route: string, callback: bool option -> unit) =
             queue.Request(
                 fun client ->

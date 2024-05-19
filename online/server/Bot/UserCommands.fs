@@ -49,10 +49,10 @@ module UserCommands =
                 match args with
 
                 | [] ->
-                    do! reply "Enter a search term, for example: $search PLANET//SHAPER artist:Camellia creator:Evening"
+                    do! reply "Enter a search term, for example: $search PLANET//SHAPER"
 
                 | query :: _ ->
-                    let matches = Backbeat.Songs.search_songs query
+                    let matches = Backbeat.Songs.search_songs 20L 0 query
 
                     if matches.Length = 0 then
                         do! reply "No matches found."

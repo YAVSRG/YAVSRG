@@ -86,7 +86,11 @@ type Song =
 
     member this.FormattedTitle = this.FormattedArtists + " - " + this.Title
 
-type Songs = Dictionary<SongId, Song>
+    member this.MergeWithIncoming(song: Song) =
+        { this with
+            Source = match this.Source with Some existing -> Some existing | None -> song.Source
+            Tags = List.distinct (this.Tags @ song.Tags)
+        }
 
 type StepmaniaPackId = int
 
@@ -124,7 +128,14 @@ type Chart =
     }
     member this.FormattedCreators = String.concat ", " this.Creators
 
-type Charts = Dictionary<ChartHash, Chart>
+    member this.MergeWithIncoming(chart: Chart) =
+        { this with
+            Subtitle = match this.Subtitle with Some existing -> Some existing | None -> chart.Subtitle
+            Tags = List.distinct (this.Tags @ chart.Tags)
+            Sources = List.distinct (this.Sources @ chart.Sources)
+            BackgroundHash = chart.BackgroundHash
+            AudioHash = chart.AudioHash
+        }
 
 module Archive =
 

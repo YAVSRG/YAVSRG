@@ -24,6 +24,9 @@ module Accept =
         async {
             let user_id, user = authorize headers
 
+            if not (user.Badges.Contains Badge.TABLE_EDITOR) then
+                raise PermissionDeniedException
+
             match JSON.FromString body with
             | Error e -> raise (BadRequestException None)
             | Ok(request: Request) ->
@@ -31,9 +34,6 @@ module Accept =
             match Backbeat.Tables.get request.TableId with
             | None -> raise NotFoundException
             | Some table ->
-
-            if not (user.Badges.Contains Badge.TABLE_EDITOR) then
-                raise PermissionDeniedException
 
             let chart_id = request.ChartId.ToUpper()
 

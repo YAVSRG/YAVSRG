@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Data.Library.Caching
+open Interlude.Web.Shared
 open YAVSRG.CLI
 
 [<AutoOpen>]
@@ -33,6 +34,15 @@ module Config =
             Logging.Error("Error loading settings (using default): ", e)
             Config.Default
 
-    do JSON.ToFile (BACKBEAT_SETTINGS_PATH, true) backbeat_config
+    [<Json.AutoCodec>]
+    type LoginCredentials = { Api: string; Token: string } with static member Default = { Api = "api.yavsrg.net"; Token = "" }
+
+    do 
+        try
+            JSON.ToFile (BACKBEAT_SETTINGS_PATH, true) backbeat_config
+            let credentials : LoginCredentials = JSON.FromFile(Path.Combine(backbeat_config.InterludePath, "Data", "login.json")) |> expect
+            API.Client.init("https://" + credentials.Api)
+            API.Client.authenticate(credentials.Token)
+        with err -> printfn "%O" err; failwith "Error initialising backbeat utils"
 
     let interlude_chart_cache = Cache.from_path (Path.Combine(backbeat_config.InterludePath, "Songs"))
