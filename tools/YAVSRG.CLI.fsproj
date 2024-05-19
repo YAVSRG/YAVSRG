@@ -23,10 +23,16 @@
     <Compile Include="Client\Assets.fs" />
     <Compile Include="Client\Play.fs" />
     <Compile Include="Server\Server.fs" />
+    <Compile Include="Content\Config.fs" />
+    <Compile Include="Content\Charts\Upload.fs" />
     <Compile Include="Content\Rulesets.fs" />
     <Compile Include="Content\Noteskins.fs" />
     <Compile Include="Commands.fs" />
     <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Backblaze.Client" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>

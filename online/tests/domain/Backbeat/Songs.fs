@@ -3,6 +3,7 @@
 open NUnit.Framework
 
 open Prelude
+open Prelude.Backbeat.Archive
 open Interlude.Web.Server.Domain.Backbeat
 
 module Songs =

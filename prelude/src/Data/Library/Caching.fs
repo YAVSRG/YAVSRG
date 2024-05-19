@@ -465,40 +465,40 @@ module Cache =
                     if actual_hash <> hash then
                         failwithf "Downloaded chart hash was '%s', expected '%s'" actual_hash hash
 
-                    if File.Exists(asset_path chart.BackgroundFile cache) |> not then
+                    if File.Exists(asset_path chart.BackgroundHash cache) |> not then
 
-                        let bg_path = Path.Combine(get_game_folder "Downloads", chart.BackgroundFile)
+                        let bg_path = Path.Combine(get_game_folder "Downloads", chart.BackgroundHash)
 
                         let! success =
                             download_file.RequestAsync(
-                                "https://cdn.yavsrg.net/assets/" + chart.BackgroundFile,
+                                "https://cdn.yavsrg.net/assets/" + chart.BackgroundHash,
                                 bg_path,
                                 ignore
                             )
 
                         let actual_bg_hash = hash_asset bg_path cache
 
-                        if chart.BackgroundFile <> actual_bg_hash then
+                        if chart.BackgroundHash <> actual_bg_hash then
                             failwithf
                                 "Downloaded background hash was '%s', expected '%s'"
                                 actual_bg_hash
-                                chart.BackgroundFile
+                                chart.BackgroundHash
 
-                    if File.Exists(asset_path chart.AudioFile cache) |> not then
+                    if File.Exists(asset_path chart.AudioHash cache) |> not then
 
-                        let audio_path = Path.Combine(get_game_folder "Downloads", chart.AudioFile)
+                        let audio_path = Path.Combine(get_game_folder "Downloads", chart.AudioHash)
 
                         let! success =
                             download_file.RequestAsync(
-                                "https://cdn.yavsrg.net/assets/" + chart.AudioFile,
+                                "https://cdn.yavsrg.net/assets/" + chart.AudioHash,
                                 audio_path,
                                 ignore
                             )
 
                         let actual_audio_hash = hash_asset audio_path cache
 
-                        if chart.AudioFile <> actual_audio_hash then
-                            failwithf "Downloaded audio hash was '%s', expected '%s'" actual_audio_hash chart.AudioFile
+                        if chart.AudioHash <> actual_audio_hash then
+                            failwithf "Downloaded audio hash was '%s', expected '%s'" actual_audio_hash chart.AudioHash
 
                     add_new folder [ chart_data ] cache
 

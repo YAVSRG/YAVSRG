@@ -98,50 +98,29 @@ type StepmaniaPack =
         Size: int64
     }
 
-type CommunityPackId = int
-
-[<Json.AutoCodec>]
-type CommunityPack =
-    {
-        Title: string
-        Description: string option
-        Mirrors: string list
-        Size: int64
-    }
-
-[<Json.AutoCodec>]
-type Packs =
-    {
-        Stepmania: Dictionary<StepmaniaPackId, StepmaniaPack>
-        Community: Dictionary<CommunityPackId, CommunityPack>
-    }
-
 [<Json.AutoCodec>]
 type ChartSource =
     | Osu of {| BeatmapId: int; BeatmapSetId: int |}
-    | Stepmania of StepmaniaPackId
-    | CommunityPack of {| PackId: CommunityPackId |}
+    | Stepmania of id: int
+    | CommunityPack of id: string
 
 type ChartHash = string
 
 [<Json.AutoCodec>]
 type Chart =
     {
-        SongId: SongId
-        /// Non-empty list of charter names
         Creators: string list
-        Keys: int
         DifficultyName: string
         Subtitle: string option
         Tags: string list
         Duration: Time
-        Notecount: int
-        BPM: (float32<ms / beat> * float32<ms / beat>)
         PreviewTime: Time
-        BackgroundFile: string // sha256 digest of background asset
-        AudioFile: string // sha256 digest of audio asset
+        Notecount: int
+        Keys: int
+        BPM: (float32<ms / beat> * float32<ms / beat>)
+        BackgroundHash: string
+        AudioHash: string
         Sources: ChartSource list
-        LastUpdated: DateTime
     }
     member this.FormattedCreators = String.concat ", " this.Creators
 
@@ -161,8 +140,8 @@ module Archive =
             Source = song.Source
             Tags = chart.Tags
             PreviewTime = chart.PreviewTime
-            BackgroundFile = Asset chart.BackgroundFile
-            AudioFile = Asset chart.AudioFile
+            BackgroundFile = Asset chart.BackgroundHash
+            AudioFile = Asset chart.AudioHash
             ChartSource =
                 match chart.Sources with
                 | Osu d :: _ -> Origin.Osu(d.BeatmapSetId, d.BeatmapId)

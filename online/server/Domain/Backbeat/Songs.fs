@@ -2,92 +2,9 @@
 
 open Prelude
 open Percyqaz.Common
-open Percyqaz.Data
 open Percyqaz.Data.Sqlite
-open Prelude
+open Prelude.Backbeat.Archive
 open Interlude.Web.Server
-
-// modelled after Prelude.Backbeat.Archive.Song
-// todo: modify those types to exactly match these and then share them
-type Song =
-    {
-        Artists: string list
-        OtherArtists: string list
-        Remixers: string list
-        Title: string
-        AlternativeTitles: string list
-        Source: string option
-        Tags: string list
-    }
-    static member OfPreludeSong(song: Prelude.Backbeat.Archive.Song) =
-        {
-            Artists = song.Artists
-            OtherArtists = song.OtherArtists
-            Remixers = song.Remixers
-            Title = song.Title
-            AlternativeTitles = song.AlternativeTitles
-            Source = song.Source
-            Tags = song.Tags
-        }
-
-    member this.FormattedArtists =
-        String.concat ", " this.Artists
-        + if this.OtherArtists <> [] then
-              " ft. " + String.concat ", " this.OtherArtists
-          else
-              ""
-
-    member this.FormattedTitle = this.FormattedArtists + " - " + this.Title
-
-[<Json.AutoCodec>]
-type ChartSource =
-    | Osu of {| BeatmapId: int; BeatmapSetId: int |}
-    | Stepmania of id: int
-    | CommunityPack of id: string
-
-type Chart =
-    {
-        Creators: string list
-        DifficultyName: string
-        Subtitle: string option
-        Tags: string list
-        Duration: Time
-        PreviewTime: Time
-        Notecount: int
-        Keys: int
-        BPM: (float32<ms / beat> * float32<ms / beat>)
-        BackgroundHash: string
-        AudioHash: string
-        Sources: ChartSource list
-    }
-    static member OfPreludeChart(chart: Prelude.Backbeat.Archive.Chart) =
-        {
-            Creators = chart.Creators
-            DifficultyName = chart.DifficultyName
-            Subtitle = chart.Subtitle
-            Tags = chart.Tags
-            Duration = chart.Duration
-            PreviewTime = chart.PreviewTime
-            Notecount = chart.Notecount
-            Keys = chart.Keys
-            BPM = chart.BPM
-            BackgroundHash = chart.BackgroundFile
-            AudioHash = chart.AudioFile
-            Sources =
-                chart.Sources
-                |> List.choose (
-                    function
-                    | Backbeat.Archive.ChartSource.CommunityPack _ -> None
-                    | Backbeat.Archive.ChartSource.Osu x ->
-                        ChartSource.Osu
-                            {|
-                                BeatmapId = x.BeatmapId
-                                BeatmapSetId = x.BeatmapSetId
-                            |}
-                        |> Some
-                    | Backbeat.Archive.ChartSource.Stepmania i -> ChartSource.Stepmania i |> Some
-                )
-        }
 
 module Songs =
 

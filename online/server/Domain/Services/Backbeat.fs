@@ -12,38 +12,9 @@ open Interlude.Web.Server.Domain.Core
 module Backbeat =
 
     let rulesets = Dictionary<string, Ruleset>()
-    let mutable songs = Songs()
-    let mutable charts = Charts()
-
-    let mutable packs =
-        {
-            Stepmania = new Dictionary<StepmaniaPackId, StepmaniaPack>()
-            Community = new Dictionary<CommunityPackId, CommunityPack>()
-        }
 
     let init () =
         async {
-            match!
-                WebServices.download_json_async
-                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/songs.json"
-            with
-            | None -> failwith "Failed to download backbeat songs"
-            | Some _songs ->
-
-            match!
-                WebServices.download_json_async
-                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/charts.json"
-            with
-            | None -> failwith "Failed to download backbeat charts"
-            | Some _charts ->
-
-            match!
-                WebServices.download_json_async
-                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/archive/packs.json"
-            with
-            | None -> failwith "Failed to download backbeat packs"
-            | Some _packs ->
-
             match!
                 WebServices.download_json_async
                     "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json"
@@ -51,11 +22,7 @@ module Backbeat =
             | None -> failwith "Failed to download backbeat rulesets"
             | Some(archive: PrefabRulesets.Repo) ->
 
-            packs <- _packs
-            charts <- _charts
-            songs <- _songs
-
-            Logging.Info(sprintf "Backbeat downloads complete, %i Charts and %i Songs" charts.Count songs.Count)
+            Logging.Info(sprintf "Backbeat downloads complete")
 
             for rs in archive.Rulesets.Values do
                 rulesets.[Ruleset.hash rs] <- rs
@@ -232,11 +199,9 @@ module Backbeat =
     //    // find a chart by hash
 
         let by_hash (hash: string) =
-            if charts.ContainsKey hash then
-                let c = charts.[hash]
-                Some(c, songs.[c.SongId])
-            else
-                None
+            match Domain.Backbeat.Songs.chart_and_song_by_id hash with
+            | Some (_, chart, song) -> Some (chart, song)
+            | None -> None
 
         open Prelude.Charts
 

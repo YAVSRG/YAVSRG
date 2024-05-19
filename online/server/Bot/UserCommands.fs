@@ -102,7 +102,7 @@ module UserCommands =
                                     String.concat
                                         "\n"
                                         (Array.map
-                                            (fun (_, song: Backbeat.Song) -> song.FormattedTitle.Replace("*", "\\*"))
+                                            (fun (_, song: Song) -> song.FormattedTitle.Replace("*", "\\*"))
                                             matches)
                                 )
                                 .WithColor(Color.Blue)

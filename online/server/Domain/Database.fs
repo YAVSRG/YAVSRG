@@ -56,27 +56,7 @@ module Migrations =
 
         Database.migrate
             "MoveBackbeatData"
-            (fun _ ->
-                let grouped_charts =
-                    Services.Backbeat.charts
-                    |> Seq.map (fun kv -> kv.Key, kv.Value)
-                    |> Seq.groupBy (fun (chart_id, chart) -> chart.SongId)
-
-                for (song_id, charts) in grouped_charts do
-                    let song = Services.Backbeat.songs.[song_id]
-                    let first_chart_id, first_chart = Seq.head charts
-
-                    let inserted_song_id =
-                        Songs.add_chart_song
-                            first_chart_id
-                            (Chart.OfPreludeChart first_chart)
-                            (Song.OfPreludeSong song)
-
-                    for remaining_chart_id, remaining_chart in Seq.tail charts do
-                        Songs.add_chart remaining_chart_id (Chart.OfPreludeChart remaining_chart) inserted_song_id
-
-                Logging.Debug("Finished migrating backbeat charts")
-            )
+            (fun _ -> Logging.Info("Old backbeat chart dump no longer exists to migrate data from"))
             db
 
 module Database =
