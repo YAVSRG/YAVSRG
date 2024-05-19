@@ -543,7 +543,7 @@ module Songs =
     let search_songs (page_size: int64) (page: int) (search_query: string) : (int64 * Song) array =
         let stripped_query = Regex.Replace(search_query, @"[^a-zA-Z0-9\s]+", " ").Trim()
 
-        if stripped_query = "" then
+        if stripped_query = "" || page_size < 1L || page < 0 then
             [||]
         else
             let db_query: Query<unit, int64 * Song> =

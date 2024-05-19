@@ -109,19 +109,41 @@ module Bot =
 
     let on_button_executed (comp: SocketMessageComponent) =
         task {
-            if comp.Channel.Id = ADMIN_CHANNEL_ID || comp.Channel.Id = MAIN_CHANNEL_ID then
-                let cmd =
-                    comp.Data.CustomId.Split(
-                        ' ',
-                        2,
-                        StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries
-                    )
-
+            let cmd =
+                comp.Data.CustomId.Split(
+                    ' ',
+                    2,
+                    StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries
+                )
+            if comp.Channel.Id = ADMIN_CHANNEL_ID then
                 match User.by_discord_id (comp.User.Id) with
                 | Some(id, user) ->
                     try
                         do!
-                            AdminCommands.interaction
+                            AdminInteractables.handle_interaction
+                                client
+                                (id, user)
+                                comp
+                                (cmd.[0].ToLower())
+                                (if cmd.Length > 1 then
+                                     cmd.[1]
+                                         .Split(
+                                             "$",
+                                             StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries
+                                         )
+                                     |> List.ofArray
+                                 else
+                                     [])
+                    with err ->
+                        Logging.Error(sprintf "Error handling button click '%s': %O" comp.Data.CustomId err)
+                        do! comp.Message.AddReactionAsync(Emoji.Parse(":alien:"))
+                | None -> ()
+            elif comp.Channel.Id = MAIN_CHANNEL_ID then
+                match User.by_discord_id (comp.User.Id) with
+                | Some(id, user) ->
+                    try
+                        do!
+                            UserInteractables.handle_interaction
                                 client
                                 (id, user)
                                 comp
@@ -209,3 +231,9 @@ module Bot =
 
         with err ->
             Logging.Critical(err.ToString(), err)
+
+    let create_admin_prompt (embed, components) : unit =
+        (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(embed = embed, components = components)
+        |> Async.AwaitTask
+        |> Async.Ignore
+        |> Async.RunSynchronously

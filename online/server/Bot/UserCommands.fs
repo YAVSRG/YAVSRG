@@ -44,70 +44,26 @@ module UserCommands =
                 }
 
             match command with
-            | "s"
             | "search" ->
                 match args with
 
                 | [] ->
                     do! reply "Enter a search term, for example: $search PLANET//SHAPER"
 
-                | query :: _ ->
-                    let matches = Backbeat.Songs.search_songs 20L 0 query
-
-                    if matches.Length = 0 then
-                        do! reply "No matches found."
-                    elif matches.Length = 1 then
-                        let song = snd matches.[0]
-
-                        let embed =
-                            EmbedBuilder(Title = song.Title)
-                                .AddField(
-                                    (if song.Artists.Length > 1 then "Artists" else "Artist"),
-                                    String.concat ", " song.Artists,
-                                    true
-                                )
-
-                        if song.OtherArtists <> [] then
-                            embed.AddField("Featuring", String.concat ", " song.OtherArtists, true)
-                            |> ignore
-
-                        if song.Remixers <> [] then
-                            embed.AddField("Remixed by", String.concat ", " song.Remixers, true) |> ignore
-
-                        if song.Tags <> [] then
-                            embed.AddField("Tags", String.concat ", " song.Tags) |> ignore
-
-                        if song.Source <> None then
-                            embed.AddField("Source", song.Source.Value) |> ignore
-
-                        embed.WithColor(Color.Blue) |> ignore
-
-                        //for chart in charts do
-                        //    embed.AddField(
-                        //        chart.DifficultyName + " by " + String.concat ", " chart.Creators,
-                        //        String.concat "  |  " (chart.Sources |> List.map Backbeat.Charts.format_source)
-                        //    )
-                        //    |> ignore
-
-                        do! reply_embed (embed.Build())
-                    else
-                        let embed =
-                            EmbedBuilder(
-                                Title =
-                                    match matches.Length with
-                                    | 20 -> "20+ matches found"
-                                    | i -> sprintf "%i matches found" i
-                            )
-                                .WithDescription(
-                                    String.concat
-                                        "\n"
-                                        (Array.map
-                                            (fun (_, song: Song) -> song.FormattedTitle.Replace("*", "\\*"))
-                                            matches)
-                                )
-                                .WithColor(Color.Blue)
-
-                        do! reply_embed (embed.Build())
+                | query :: [] ->
+                    let embed, components = UserInteractables.song_search query 0 false
+                    let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
+                    return ()
+                
+                | query :: page :: [] ->
+                    let embed, components = UserInteractables.song_search query (int page - 1) false
+                    let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
+                    return ()
+                
+                | query :: page :: _ ->
+                    let embed, components = UserInteractables.song_search query (int page - 1) true
+                    let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
+                    return ()
             | "fl"
             | "friends"
             | "friendlist" ->

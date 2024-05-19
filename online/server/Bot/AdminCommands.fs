@@ -16,46 +16,6 @@ module AdminCommands =
         else
             None
 
-    let user_list (page: int) =
-        let user_list = User.list (page)
-        let user_count = User.count()
-
-        let embed =
-            EmbedBuilder(Title = sprintf "All registered users (%i)" user_count)
-                .WithDescription(
-                    if user_list.Length = 0 then
-                        "Empty page :("
-                    else
-                        user_list
-                        |> Seq.map snd
-                        |> Seq.map (fun user -> user.Username)
-                        |> String.concat "\n"
-                )
-                .WithColor(Color.Blue)
-                .Build()
-
-        let components =
-            ComponentBuilder()
-                .AddRow(
-                    ActionRowBuilder()
-                        .WithButton(
-                            ButtonBuilder(Emote = Emoji.Parse(":arrow_left:"), CustomId = sprintf "users %i" (page - 1))
-                                .WithStyle(ButtonStyle.Secondary)
-                                .WithDisabled(page <= 0)
-                        )
-                        .WithButton(
-                            ButtonBuilder(
-                                Emote = Emoji.Parse(":arrow_right:"),
-                                CustomId = sprintf "users %i" (page + 1)
-                            )
-                                .WithStyle(ButtonStyle.Secondary)
-                                .WithDisabled(user_list.Length < 15)
-                        )
-                )
-                .Build()
-
-        embed, components
-
     // Requires user to exist, with the developer role
     let dispatch
         (client: DiscordSocketClient)
@@ -121,7 +81,7 @@ module AdminCommands =
                     | None -> do! reply "No user found."
 
             | "users" ->
-                let embed, components = user_list 0
+                let embed, components = AdminInteractables.user_list 0
                 let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
                 ()
 
@@ -182,28 +142,26 @@ module AdminCommands =
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
 
-            | _ -> ()
-        }
-
-    let interaction
-        (client: DiscordSocketClient)
-        (user_id: int64, user_info: User)
-        (context: SocketMessageComponent)
-        (command: string)
-        (args: string list)
-        =
-        task {
-            match command with
-            | "users" ->
+            | "search" ->
                 match args with
-                | page :: [] ->
-                    let embed, components = user_list (int page)
 
-                    do!
-                        context.UpdateAsync(fun msg ->
-                            msg.Embed <- embed
-                            msg.Components <- components
-                        )
-                | _ -> failwith "impossible"
+                | [] ->
+                    do! reply "Enter a search term, for example: $search PLANET//SHAPER"
+
+                | query :: [] ->
+                    let embed, components = UserInteractables.song_search query 0 false
+                    let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
+                    return ()
+                
+                | query :: page :: [] ->
+                    let embed, components = UserInteractables.song_search query (int page - 1) false
+                    let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
+                    return ()
+                
+                | query :: page :: _ ->
+                    let embed, components = UserInteractables.song_search query (int page - 1) true
+                    let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
+                    return ()
+
             | _ -> ()
         }

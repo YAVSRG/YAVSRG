@@ -126,7 +126,7 @@ module Upload =
                                 match! upload_chart_internal chart with
                                 | Ok (hash, new_files) ->
                                     if new_files > 0 then
-                                        Logging.Info(sprintf "CDN upload for %s [%s] successful, %i new files" chart.Header.Title hash new_files)
+                                        Logging.Info(sprintf "CDN upload for '%s' successful, %i new files" chart.Header.Title new_files)
                                     return Ok (hash, new_files)
                                 | err -> return err
                             }
@@ -240,9 +240,9 @@ module Upload =
                     match Cache.load cc interlude_chart_cache with
                     | Ok chart -> 
                         match! upload_chart chart with
-                        | Ok () -> Logging.Info(sprintf "Uploaded %s [%s]" cc.Title cc.Hash)
-                        | Error reason -> Logging.Warn(sprintf "Upload of %s failed: %s" cc.Title reason)
-                    | Error reason -> Logging.Error(sprintf "Loading %s from disk failed: %s" cc.Title reason)
+                        | Ok () -> Logging.Info(sprintf "Uploaded '%s'" cc.Title)
+                        | Error reason -> Logging.Warn(sprintf "Upload of '%s' failed: %s" cc.Title reason)
+                    | Error reason -> Logging.Error(sprintf "Loading '%s' from disk failed: %s" cc.Title reason)
                 }
         }
         |> fun upload_tasks -> Async.Parallel(upload_tasks, UPLOAD_POOL_CONCURRENCY)

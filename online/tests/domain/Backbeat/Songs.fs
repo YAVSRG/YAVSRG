@@ -216,16 +216,16 @@ module Songs =
     let Search () =
         Songs.add_chart_song "search" TEST_CHART TEST_SONG |> printfn "%A"
 
-        let camellia_results = Songs.search_songs "Camellia"
+        let camellia_results = Songs.search_songs 20L 0 "Camellia"
         printfn "%A" camellia_results
         Assert.Positive(camellia_results.Length)
-        Assert.Positive((Songs.search_songs "{{''Nanahira}}").Length)
-        Assert.Zero((Songs.search_songs "{{{{").Length)
+        Assert.Positive((Songs.search_songs 20L 0 "{{''Nanahira}}").Length)
+        Assert.Zero((Songs.search_songs 20L 0 "{{{{").Length)
 
     [<Test>]
     let Search_TrigramMatch () =
         Songs.add_chart_song "search_trigram" TEST_CHART TEST_SONG |> printfn "%A"
-        Assert.Positive((Songs.search_songs "ana").Length)
+        Assert.Positive((Songs.search_songs 20L 0 "ana").Length)
 
     [<Test>]
     let UpdateChartSongId () =

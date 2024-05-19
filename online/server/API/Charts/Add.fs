@@ -7,6 +7,7 @@ open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Backbeat
+open Interlude.Web.Server.Bot
 
 module Add =
 
@@ -40,9 +41,14 @@ module Add =
 
             match Songs.search_songs 2L 0 request.Song.FormattedTitle |> Array.tryExactlyOne with
             | Some (song_id, existing_song) ->
-                Songs.update_song song_id (existing_song.MergeWithIncoming request.Song) |> ignore
-                Songs.add_chart chart_id request.Chart song_id
-                Logging.Info(sprintf "Accepted new chart for existing song '%s'" existing_song.Title)
+                if existing_song.Title = request.Song.Title && existing_song.Artists = request.Song.Artists then
+                    Songs.update_song song_id (existing_song.MergeWithIncoming request.Song) |> ignore
+                    Songs.add_chart chart_id request.Chart song_id
+                    Logging.Info(sprintf "Accepted new chart for existing song '%s'" existing_song.Title)
+                else
+                    let new_id = Songs.add_chart_song chart_id request.Chart request.Song
+                    Bot.create_admin_prompt (AdminInteractables.do_songs_match (song_id, existing_song, new_id, request.Song))
+                    Logging.Info(sprintf "Accepted new chart for possibly new song '%s'" request.Song.Title)
             | None ->
                 Songs.add_chart_song chart_id request.Chart request.Song |> ignore
                 Logging.Info(sprintf "Accepted new chart for new song '%s'" request.Song.Title)
