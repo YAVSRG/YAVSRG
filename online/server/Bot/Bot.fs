@@ -117,7 +117,7 @@ module Bot =
                 )
             if comp.Channel.Id = ADMIN_CHANNEL_ID then
                 match User.by_discord_id (comp.User.Id) with
-                | Some(id, user) ->
+                | Some(id, user) when user.Badges.Contains(Badge.DEVELOPER) ->
                     try
                         do!
                             AdminInteractables.handle_interaction
@@ -137,7 +137,7 @@ module Bot =
                     with err ->
                         Logging.Error(sprintf "Error handling button click '%s': %O" comp.Data.CustomId err)
                         do! comp.Message.AddReactionAsync(Emoji.Parse(":alien:"))
-                | None -> ()
+                | _ -> ()
             elif comp.Channel.Id = MAIN_CHANNEL_ID then
                 match User.by_discord_id (comp.User.Id) with
                 | Some(id, user) ->

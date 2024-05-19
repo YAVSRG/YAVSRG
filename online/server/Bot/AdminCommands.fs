@@ -3,7 +3,7 @@
 open System
 open Discord
 open Discord.WebSocket
-open Interlude.Web.Server.Domain
+open Interlude.Web.Server.Domain.Backbeat
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 open Interlude.Web.Server.Online
@@ -162,6 +162,14 @@ module AdminCommands =
                     let embed, components = UserInteractables.song_search query (int page - 1) true
                     let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
                     return ()
+
+            | "merge_songs" ->
+                match args with
+                | duplicate :: original :: [] ->
+                    if Songs.merge_songs (int64 original) (int64 duplicate) then
+                        do! reply_emoji ":white_check_mark:"
+                    else do! reply_emoji ":x:"
+                | _ -> do! reply "Enter two song ids, for example: $merge <id of duplicate>$<id of original>"
 
             | _ -> ()
         }

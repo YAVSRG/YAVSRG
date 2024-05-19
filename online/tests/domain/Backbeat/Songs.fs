@@ -18,7 +18,7 @@ module Songs =
             Artists = [ random_text 5; random_text 5 ]
             OtherArtists = [ random_text 5; random_text 5 ]
             Remixers = [ random_text 5; random_text 5 ]
-            Title = random_text 10
+            Title = random_text 32
             AlternativeTitles = [ random_text 10 ]
             Source = if random.Next 2 = 1 then Some(random_text 10) else None
             Tags = [ random_text 4; random_text 4; random_text 4 ]
@@ -301,3 +301,110 @@ module Songs =
         Assert.AreEqual(None, Songs.song_by_id song_id_1)
         Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_1)
         Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_2)
+    
+    [<Test>]
+    let MergeSongs_MultipleChartsOnDuplicateSong () =
+        let chart_id_1 = "mergesongs3"
+        let chart_1 = generate_test_chart ()
+        let song_1 = generate_test_song ()
+
+        let chart_id_2 = "mergesongs4"
+        let chart_2 = generate_test_chart ()
+        let song_2 = generate_test_song ()
+
+        let chart_id_3 = "mergesongs5"
+        let chart_3 = generate_test_chart ()
+
+        let song_id_1 = Songs.add_chart_song chart_id_1 chart_1 song_1
+        let song_id_2 = Songs.add_chart_song chart_id_2 chart_2 song_2
+
+        Songs.add_chart chart_id_3 chart_3 song_id_1
+
+        Assert.AreNotEqual(None, Songs.song_by_id song_id_1)
+        Assert.True(Songs.merge_songs song_id_1 song_id_2)
+        Assert.AreEqual(None, Songs.song_by_id song_id_1)
+        Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_1)
+        Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_2)
+        Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_3)
+    
+    [<Test>]
+    let MergeSongs_RemovedFromFTS () =
+        let chart_id_1 = "mergesongs_fts"
+        let chart_1 = generate_test_chart ()
+        let song_1 = generate_test_song ()
+
+        let chart_id_2 = "mergesongs_fts2"
+        let chart_2 = generate_test_chart ()
+        let song_2 = generate_test_song ()
+
+        let song_id_1 = Songs.add_chart_song chart_id_1 chart_1 song_1
+        let song_id_2 = Songs.add_chart_song chart_id_2 chart_2 song_2
+
+        Assert.True(Songs.merge_songs song_id_1 song_id_2)
+        
+        let results = Songs.search_songs 20L 0 song_1.Title
+        printfn "%A" results
+        Assert.IsEmpty results
+
+    [<Test>]
+    let MergeSongs_DoesntExist () =
+        let song_id_1 = 999_333_666
+        let song_id_2 = 999_333_777
+        Assert.False(Songs.merge_songs song_id_1 song_id_2)
+
+    [<Test>]
+    let MergeSongs_WithSelf() =
+        let chart_id = "mergesongsself"
+        let chart = generate_test_chart ()
+        let song = generate_test_song ()
+        let song_id = Songs.add_chart_song chart_id chart song
+
+        Assert.False(Songs.merge_songs song_id song_id)
+
+    [<Test>]
+    let Delete() =
+        let chart_id = "delete"
+        let chart = generate_test_chart ()
+        let song = generate_test_song()
+        let song_id = Songs.add_chart_song chart_id chart song
+
+        Assert.True(Songs.delete_chart chart_id)
+        Assert.False(Songs.delete_chart chart_id)
+
+        Assert.AreEqual(None, Songs.chart_by_id "delete")
+        Assert.AreEqual(None, Songs.song_by_id song_id)
+
+    [<Test>]
+    let Delete_KeepsSongIfUsedElsewhere() =
+        let chart_id = "delete_song_in_use"
+        let chart = generate_test_chart ()
+        let song = generate_test_song()
+        let song_id = Songs.add_chart_song chart_id chart song
+
+        Songs.add_chart "delete_other_use" (generate_test_chart()) song_id
+
+        Assert.True(Songs.delete_chart chart_id)
+
+        Assert.AreEqual(None, Songs.chart_by_id "delete")
+        Assert.AreNotEqual(None, Songs.song_by_id song_id)
+
+    [<Test>]
+    let Delete_DeletesFromFTS() =
+        let chart_id = "delete_fts"
+        let chart = generate_test_chart ()
+        let song = generate_test_song()
+        let song_id = Songs.add_chart_song chart_id chart song
+        
+        let results_before = Songs.search_songs 20L 0 song.Title
+        printfn "%A" results_before
+
+        Assert.True(Songs.delete_chart chart_id)
+        let results = Songs.search_songs 20L 0 song.Title
+
+        printfn "%A" results
+
+        match results |> Array.tryFind (fun (id, _) -> id = song_id) with
+        | Some (_, found) -> 
+            printfn "Deleted song: %A\nbut found song: %A" song found
+            Assert.Fail()
+        | None -> Assert.Pass()

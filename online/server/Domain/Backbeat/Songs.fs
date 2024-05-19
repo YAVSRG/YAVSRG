@@ -344,12 +344,9 @@ module Songs =
                 """
             BEGIN TRANSACTION;
 
-            UPDATE charts
-            SET SongId = @NewId
-            WHERE SongId = @OldId;
+            UPDATE charts SET SongId = @NewId WHERE SongId = @OldId;
 
-            DELETE FROM songs
-            WHERE Id = @OldId;
+            DELETE FROM songs WHERE Id = @OldId;
 
             COMMIT;
             """
@@ -360,8 +357,12 @@ module Songs =
                     p.Int64 new_id
         }
 
-    let merge_songs (old_song_id: int64) (new_song_id: int64) : bool =
-        MERGE_SONGS.Execute (old_song_id, new_song_id) backbeat_db |> expect > 0
+    let merge_songs (duplicate_song_id: int64) (original_song_id: int64) : bool =
+        if duplicate_song_id = original_song_id then 
+            false 
+        else 
+            MERGE_SONGS.Execute (duplicate_song_id, original_song_id) backbeat_db
+            |> expect > 0
 
     let private UPDATE_CHART: NonQuery<string * Chart> =
         {
