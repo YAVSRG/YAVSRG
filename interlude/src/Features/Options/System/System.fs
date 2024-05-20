@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.System
+﻿namespace Interlude.Features.OptionsMenu.SystemSettings
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
@@ -8,9 +8,8 @@ open Prelude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features.OptionsMenu
 
-type private WindowedResolution(setting: Setting<int * int>) as this =
+type WindowedResolution(setting: Setting<int * int>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
     let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f))
@@ -33,7 +32,7 @@ type private WindowedResolution(setting: Setting<int * int>) as this =
                 }
         )
 
-type private VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> FullscreenVideoMode array) as this =
+type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> FullscreenVideoMode array) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
     let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(560.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f))
@@ -64,7 +63,7 @@ type private VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit 
         )
 
 [<AutoOpen>]
-module private Monitors =
+module Monitors =
 
     let monitors = Window.get_monitors ()
 
@@ -211,103 +210,3 @@ type SystemPage() =
         if has_changed then Window.defer (Window.ApplyConfig config)
 
     override this.Title = %"system"
-
-module System =
-
-    let search_settings (tokens: string array) : SearchResult seq =
-        seq {
-            if token_match tokens [|%"system.performance"|] then
-                yield PageButton(
-                    "system.performance",
-                    (fun () -> PerformanceSettingsPage().Show())
-                )
-                    .Tooltip(Tooltip.Info("system.performance"))
-                , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"system.windowmode"; %"system.windowresolution"; %"system.monitor"; %"system.videomode"|] then
-                yield! [
-                    PageSetting(
-                        "system.windowmode",
-                        SelectDropdown.FromEnum(
-                            config.WindowMode
-                            |> Setting.trigger window_mode_changed
-                            |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
-                        )
-                    )
-                        .Tooltip(Tooltip.Info("system.windowmode")) :> Widget
-                    , 2, 2, PageWidth.Normal
-                    Conditional(
-                        (fun () -> config.WindowMode.Value = WindowType.Windowed),
-                        PageSetting(
-                            "system.windowresolution",
-                            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
-                        )
-                            .Tooltip(Tooltip.Info("system.windowresolution"))
-                    )
-                    , 2, 0, PageWidth.Normal
-                    Conditional(
-                        (fun () -> config.WindowMode.Value <> WindowType.Windowed),
-                        PageSetting(
-                            "system.monitor",
-                            SelectDropdown(
-                                monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
-                                config.Display 
-                                |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
-                            )
-                        )
-                            .Tooltip(Tooltip.Info("system.monitor"))
-                    )
-                    , 2, 2, PageWidth.Normal
-                    Conditional(
-                        (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
-                        PageSetting(
-                            "system.videomode",
-                            VideoMode(
-                                config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)),
-                                get_current_supported_video_modes
-                            )
-                        )
-                            .Tooltip(Tooltip.Info("system.videomode"))
-                    )
-                    , 2, 2, PageWidth.Normal
-                ]
-            if token_match tokens [|%"system.audiovolume"|] then
-                yield PageSetting(
-                    "system.audiovolume",
-                    Slider.Percent(
-                        options.AudioVolume
-                        |> Setting.trigger (fun v -> Devices.change_volume (v, v))
-                        |> Setting.f32
-                    )
-                )
-                    .Tooltip(Tooltip.Info("system.audiovolume"))
-                , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"system.audiodevice"|] then
-                yield PageSetting(
-                    "system.audiodevice",
-                    SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
-                )
-                    .Tooltip(Tooltip.Info("system.audiodevice"))
-                , 2, 2, PageWidth.Normal
-                
-            if token_match tokens [|%"system.audiooffset"|] then
-                yield PageSetting(
-                    "system.audiooffset",
-                    { new Slider(options.AudioOffset, Step = 1f) with
-                        override this.OnDeselected(by_mouse: bool) =
-                            base.OnDeselected by_mouse
-                            Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
-                    }
-                )
-                    .Tooltip(Tooltip.Info("system.audiooffset"))
-                , 2, 2, PageWidth.Normal
-            
-            if token_match tokens [|%"system.visualoffset"|] then
-                yield PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
-                    .Tooltip(Tooltip.Info("system.visualoffset"))
-                , 2, 2, PageWidth.Normal
-                
-            if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
-                yield PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-                    .Tooltip(Tooltip.Info("system.hotkeys"))
-                , 2, 2, PageWidth.Normal
-        }

@@ -178,7 +178,6 @@
     <Compile Include="Features\EditNoteskin\Textures\TextureList.fs" />
     <Compile Include="Features\EditNoteskin\Problems.fs" />
     <Compile Include="Features\EditNoteskin\Editor.fs" />
-    <Compile Include="Features\Options\Search.fs" />
     <Compile Include="Features\Options\System\Hotkeys.fs" />
     <Compile Include="Features\Options\System\Performance.fs" />
     <Compile Include="Features\Options\System\System.fs" />
@@ -190,6 +189,9 @@
     <Compile Include="Features\Options\Noteskins.fs" />
     <Compile Include="Features\Options\Advanced.fs" />
     <Compile Include="Features\Options\Debug.fs" />
+    <Compile Include="Features\Options\Search\Core.fs" />
+    <Compile Include="Features\Options\Search\Settings.fs" />
+    <Compile Include="Features\Options\Search\Search.fs" />
     <Compile Include="Features\Options\OptionsMenu.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Create.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Invites.fs" />

@@ -9,6 +9,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.LevelSelect
 open Interlude.Features.EditNoteskin
+open Interlude.Features.OptionsMenu.Search
 open Interlude.Features.Gameplay
 
 module OptionsMenuRoot =
@@ -82,7 +83,7 @@ module OptionsMenuRoot =
                 )
                 |+ TileButton(
                     Callout.Normal.Icon(Icons.AIRPLAY).Title(%"system"),
-                    fun () -> System.SystemPage().Show()
+                    fun () -> SystemSettings.SystemPage().Show()
                 )
                 |+ TileButton(
                     Callout.Normal.Icon(Icons.SLIDERS).Title(%"gameplay"),
@@ -139,13 +140,8 @@ module OptionsMenuRoot =
                         if search_text.Value = "" then
                             search_results.Current <- menu_buttons
                         else
-                            search_results.Current <-
-                                search (fun x -> seq { 
-                                    yield! System.System.search_settings x
-                                    yield! Gameplay.Gameplay.search_settings x
-                                    yield! Advanced.Advanced.search_settings x
-                                }) search_text.Value
-                    , Position = Position.Margin(PRETTY_MARGIN_X * 2.0f, 50.0f).SliceTop(60.0f)
+                            search_results.Current <- SearchResults.get search_text.Value
+                    , Position = Position.Margin(PRETTY_MARGIN_X * 2.0f, 25.0f).SliceTop(60.0f)
                     ) with
                 override this.OnFocus by_mouse =
                     base.OnFocus by_mouse
