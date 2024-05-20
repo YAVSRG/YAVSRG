@@ -1,3 +1,8 @@
+0.7.20.4
+====
+
+Hotfix for names not displaying correctly on mod menu :)
+
 0.7.20.3
 ====
 
