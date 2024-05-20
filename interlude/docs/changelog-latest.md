@@ -1,21 +1,24 @@
-0.7.20.2
+0.7.20.3
 ====
 
-Various tiny quality of life improvements  
-The ingame wiki has also been updated to reflect newer information
-
-# New features
-- No holds mod now has alternate modes that remove LNs shorter than a certain length
-- In multiplayer, charts you don't have will automatically download if available server-side
-- You can filter by LN% in level select by typing `ln>0.5`, `ln<0.8`, etc
-
-# Improvements
-- Ruleset selector now groups rulesets of the same type as a submenu to reduce scrolling
-- Progress meter now fills in smoothly instead of in segments
-- Added a glint effect on the score screen when you set a personal best
+Bug fix update, enjoy
+I did a load of refactoring too
 
 # Bug fixes
-- Fixed a visual bug with the label of the progress meter
-- Fixed a visual bug with the judgement counter
-- Fixed a rare crash to do with explosion animations
+- Fixed a crash when a chart fails to load while no chart was currently loaded
+- Fixed not being able to retry in practice mode while playing
+- Fixed not being able to unpause replays when at the start of the song
+- Fixed visual issue with hit overlay on replays
+- Fixed being able to interact with/click on UI elements that are visually under notifications
+- Fixed some issues with dropdowns closing when hovering over another UI element behind it
+- Fixed accuracy 'glint' effect on score screen only playing if you went up a grade
+- Fixed game constantly reconnecting to server if out of date
+
+# Improvements
+- UI for setting up a mount of your osu!/Etterna/StepMania library is much better
+- Made local scores a bit more compact to make room for the future
+- Inverse mod has modes with different gap sizes
+- Inverse mod can be used with NoLN to produce FLN charts
+- Logo waveform looks better
+- Input overlay on replays now has visual indicator of what a perfect hit would be
 
