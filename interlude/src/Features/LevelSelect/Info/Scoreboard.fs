@@ -69,18 +69,15 @@ module Scoreboard =
             let text_subcolor =
                 fun () -> let a = fade.Alpha in (Colors.grey_1.O4a a, Colors.shadow_2.O4a a)
 
+            let upper = Position.SliceTop(47.5f).Margin(10.0f, 1f).Translate(0.0f, -2.0f)
+            let lower = Position.TrimTop(37.5f).Margin(10.0f, 1f).Translate(0.0f, -1.0f)
+
             this
             |+ Text(
                 fun () -> score_info.Scoring.FormatAccuracy()
                 , Color = text_color
                 , Align = Alignment.LEFT
-                , Position =
-                    {
-                        Left = 0.0f %+ 5.0f
-                        Top = 0.0f %+ 0.0f
-                        Right = 0.5f %+ 0.0f
-                        Bottom = 0.6f %+ 0.0f
-                    }
+                , Position = upper
             )
 
             |+ Text(
@@ -92,13 +89,7 @@ module Scoreboard =
                         score_info.Physical
                 , Color = text_subcolor
                 , Align = Alignment.LEFT
-                , Position =
-                    {
-                        Left = 0.0f %+ 5.0f
-                        Top = 0.6f %- 5.0f
-                        Right = 0.5f %+ 0.0f
-                        Bottom = 1.0f %- 2.0f
-                    }
+                , Position = lower
             )
 
             |+ Text(
@@ -111,26 +102,14 @@ module Scoreboard =
                 ),
                 Color = text_subcolor,
                 Align = Alignment.RIGHT,
-                Position =
-                    {
-                        Left = 0.5f %+ 0.0f
-                        Top = 0.6f %- 5.0f
-                        Right = 1.0f %- 5.0f
-                        Bottom = 1.0f %- 2.0f
-                    }
+                Position = lower
             )
 
             |+ Text(
                 score_info.ModString(),
                 Color = text_color,
                 Align = Alignment.RIGHT,
-                Position =
-                    {
-                        Left = 0.5f %+ 0.0f
-                        Top = 0.0f %+ 0.0f
-                        Right = 1.0f %- 5.0f
-                        Bottom = 0.6f %+ 0.0f
-                    }
+                Position = upper
             )
 
             |* Clickable.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
@@ -167,7 +146,7 @@ module Scoreboard =
             }
             override this.ToString() = "<scoreboard calculation>"
 
-        let container = FlowContainer.Vertical(75.0f, Spacing = Style.PADDING * 3.0f)
+        let container = FlowContainer.Vertical(70.0f, Spacing = Style.PADDING * 3.0f)
 
         let score_loader =
             { new Async.SwitchServiceSeq<Request, unit -> unit>() with
