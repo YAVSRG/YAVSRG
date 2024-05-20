@@ -109,6 +109,19 @@ type private HitOverlay
                     Rect
                         .Create(
                             playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
+                            y (ev.Time - delta * Gameplay.rate.Value),
+                            playfield.Bounds.Left
+                            + playfield.ColumnPositions.[ev.Column]
+                            + playfield.ColumnWidth,
+                            y (ev.Time - delta * Gameplay.rate.Value)
+                        )
+                        .Shrink((playfield.ColumnWidth - 5.0f) * 0.75f, -2.5f)
+                    |> scroll_direction_pos playfield.Bounds.Bottom
+                    |> fun a -> Draw.rect a Colors.grey_2.O2
+
+                    Rect
+                        .Create(
+                            playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
                             y ev.Time,
                             playfield.Bounds.Left
                             + playfield.ColumnPositions.[ev.Column]
