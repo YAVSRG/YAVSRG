@@ -113,7 +113,7 @@ type private HitOverlay
                             playfield.Bounds.Left
                             + playfield.ColumnPositions.[ev.Column]
                             + playfield.ColumnWidth,
-                            y (ev.Time - delta)
+                            y (ev.Time - delta * Gameplay.rate.Value)
                         )
                         .Shrink((playfield.ColumnWidth - 5.0f) * 0.5f, 0.0f)
                     |> scroll_direction_pos playfield.Bounds.Bottom
@@ -468,8 +468,8 @@ module ReplayScreen =
                             Transitions.Flags.Default
                         |> ignore
 
-                if (%%"skip").Tapped() && Song.time () > 0.0f<ms> then
-                    if Song.playing () then Song.pause () else Song.resume ()
+                if (%%"skip").Tapped() then
+                    if Song.playing () then (if Song.time () > 0.0f<ms> then Song.pause ()) else Song.resume ()
                 else
                     Gameplay.change_rate_hotkeys (fun change_by -> playback_speed.Value <- playback_speed.Value + change_by)
         }
