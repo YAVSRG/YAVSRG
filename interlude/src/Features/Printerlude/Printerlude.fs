@@ -14,37 +14,12 @@ open Prelude.Data
 open Prelude.Gameplay
 open Interlude
 open Interlude.Content
-open Interlude.Utils
 open Interlude.Features
 open Interlude.Web.Shared.Requests
 
 module Printerlude =
 
     let mutable private ctx: ShellContext = Unchecked.defaultof<_>
-
-    module private Themes =
-
-        let register_commands (ctx: ShellContext) =
-            ctx
-                .WithCommand(
-                    "themes_reload",
-                    "Reload the current theme and noteskin",
-                    fun () ->
-                        Themes.reload_current ()
-                        Noteskins.reload_current ()
-                )
-                .WithCommand(
-                    "noteskin_stitch",
-                    "Stitch a noteskin texture",
-                    "id",
-                    fun id -> Content.Noteskin.StitchTexture id
-                )
-                .WithCommand(
-                    "noteskin_split",
-                    "Split a noteskin texture",
-                    "id",
-                    fun id -> Content.Noteskin.SplitTexture id
-                )
 
     module private Utils =
 
@@ -86,7 +61,7 @@ module Printerlude =
 
         let private banner (hex: string) (emoji: string) =
             use banner =
-                Prelude.Data.ImageServices.generate_banner
+                ImageServices.generate_banner
                     {
                         BaseColor = Color.FromHex hex
                         Emoji = emoji.ToLower()
@@ -193,6 +168,7 @@ module Printerlude =
                 )
                 .WithIOCommand("timescale", "Sets the timescale of all UI animations, for testing", "speed", timescale)
                 .WithCommand("banner", "Generates a banner image (for testing)", "color", "emoji", banner)
+                .WithCommand("fake_update", "Fakes an update for testing the update UI button", fun () -> if Updates.latest_release.IsSome then Updates.update_available <- true)
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
                 .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
 
@@ -223,7 +199,6 @@ module Printerlude =
             ShellContext.Empty
             |> Utils.register_ipc_commands
             |> Utils.register_commands
-            |> Themes.register_commands
 
         Terminal.exec_command <- exec
 
