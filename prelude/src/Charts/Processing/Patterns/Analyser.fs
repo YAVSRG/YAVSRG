@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Charts.Processing.Patterns
 
+open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 
@@ -112,6 +113,11 @@ module Analysis =
             seq { 0 .. chart.Keys - 1 }
             |> Seq.filter (fun x -> row.[x] = NoteType.NORMAL || row.[x] = NoteType.HOLDHEAD)
             |> Array.ofSeq
+
+        if previous_row.Length = 0 then
+            Logging.Error(sprintf "First row of chart is empty, wtf?\n%A" chart.Header)
+            []
+        else
 
         let mutable previous_time = first_note
 
