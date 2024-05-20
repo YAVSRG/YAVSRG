@@ -53,7 +53,7 @@ type Accuracy
             Position = Position.Margin(10.0f, 0.0f).TrimBottom(LOWER_SIZE)
         )
 
-        if (!improvements).Grade <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
+        if (!improvements).Accuracy <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
         base.Init parent
 
 
