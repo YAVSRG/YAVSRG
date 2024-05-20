@@ -29,6 +29,14 @@ module Logo =
     let HIDDEN : Position = { Left = 0.0f %- 610.0f; Top = 0.5f %- 300.0f; Right = 0.0f %- 100.0f; Bottom = 0.5f %+ 300.0f }
     let MENU : Position = { Left = 0.0f %- 0.0f; Top = 0.5f %- 400.0f; Right = 0.0f %+ 800.0f; Bottom = 0.5f %+ 400.0f }
 
+    let WAVE_HEIGHT = 20.0f
+    let WAVE_SPEED = 0.002f
+    let WAVE_SCALE = 0.2f
+
+    let WAVE_HEIGHT_2 = 8.0f
+    let WAVE_SPEED_2 = -0.0057f
+    let WAVE_SCALE_2 = 0.73f
+
     type Display() =
         inherit SlideContainer(NodeType.None)
 
@@ -135,7 +143,6 @@ module Logo =
                     Draw.rect breathe_bounds Colors.cyan_accent
                     let rain = Content.Texture "rain"
                     let v = float32 counter.Time
-                    let q = breathe_bounds.AsQuad
 
                     let draw_tiling_rain (scale, x, y) color =
                         let stride = float32 rain.Width * scale
@@ -162,7 +169,9 @@ module Logo =
                             (seq { (i * 8) .. (i * 8 + 7) }
                              |> Seq.map (fun x -> Devices.waveform.[x])
                              |> Seq.sum)
-                            * 0.1f
+                            * 0.125f
+                            + MathF.Sin(v * WAVE_SPEED + float32 i * WAVE_SCALE) * WAVE_HEIGHT
+                            + MathF.Sin(v * WAVE_SPEED_2 + float32 i * WAVE_SCALE_2) * WAVE_HEIGHT_2
 
                         let i = float32 i
 
