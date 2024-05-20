@@ -1,1 +1,1 @@
-﻿Update to support newer mods server-side
+﻿New chart upload features + version bump
