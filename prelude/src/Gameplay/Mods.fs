@@ -149,8 +149,8 @@ module Mods =
 
     let name (id: string) (state: int option) =
         match state with
-        | Some i when i > 0 -> Localisation.localise (sprintf "mod.%s.%i.name" id i)
-        | _ -> Localisation.localise (sprintf "mod.%s.name" id)
+        | Some i when i > 0 -> Localisation.localise (sprintf "mod.%s.%i" id i)
+        | _ -> Localisation.localise (sprintf "mod.%s" id)
 
     let desc (id: string) (state: int option) =
         match state with
