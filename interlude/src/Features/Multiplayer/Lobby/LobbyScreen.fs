@@ -37,7 +37,7 @@ type LobbySettingsPage(lobby: Lobby) =
             .Pos(5)
         :> Widget
 
-    override this.Title = %"lobby.name"
+    override this.Title = %"lobby"
 
     override this.OnClose() =
         lobby.ChangeSettings
@@ -76,7 +76,7 @@ type LobbyUI(lobby: Lobby) =
         )
         |+ StylishButton(
             (fun () -> Chart.if_loaded <| fun info -> Preview(info, ignore).Show()),
-            K(sprintf "%s %s" Icons.EYE (%"levelselect.preview.name")),
+            K(sprintf "%s %s" Icons.EYE (%"levelselect.preview")),
             !%Palette.MAIN_100,
             TiltLeft = false,
             Hotkey = "preview",
@@ -88,7 +88,7 @@ type LobbyUI(lobby: Lobby) =
             .Tooltip(Tooltip.Info("levelselect.preview"))
         |+ StylishButton(
             ignore,
-            K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods.name")),
+            K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods")),
             !%Palette.DARK_100,
             Hotkey = "mods",
             Position =

@@ -220,7 +220,7 @@ type NoteskinsPage() =
         |+ right_side
         :> Widget
 
-    override this.Title = %"noteskins.name"
+    override this.Title = %"noteskins"
 
     override this.OnDestroy() =
         preview.Destroy()

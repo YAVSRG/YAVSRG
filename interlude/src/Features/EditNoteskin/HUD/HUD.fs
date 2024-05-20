@@ -108,5 +108,5 @@ type EditHUDPage() =
         )
         :> Widget
 
-    override this.Title = %"hud.name"
+    override this.Title = %"hud"
     override this.OnClose() = ()

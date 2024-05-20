@@ -298,7 +298,7 @@ type Leaderboard(display: Setting<Display>) as this =
         this
         |+ StylishButton(
             (fun () -> display.Set Display.Patterns),
-            K <| Localisation.localise "levelselect.info.leaderboard.name",
+            K <| %"levelselect.info.leaderboard",
             !%Palette.MAIN_100,
             Hotkey = "scoreboard_storage",
             TiltLeft = false,

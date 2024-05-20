@@ -28,7 +28,7 @@ type Patterns(display: Setting<Display>) =
         this
         |* StylishButton(
             (fun () -> display.Set Display.Local),
-            K <| Localisation.localise "levelselect.info.details.name",
+            K <| %"levelselect.info.details",
             !%Palette.MAIN_100,
             Hotkey = "scoreboard_storage",
             TiltLeft = false,

@@ -243,7 +243,7 @@ type private Tabs() =
     override this.Init(parent) =
         this
         |+ (FlowContainer.LeftToRight(200.0f, Position = Position.SliceTop(50.0f))
-            |+ button (%"stats.table.name", table)
+            |+ button (%"stats.table", table)
             |+ button ("Skillsets", skillsets)
             |+ button ("Goals", goals))
         |* swap

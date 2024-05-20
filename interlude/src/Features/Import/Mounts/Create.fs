@@ -55,7 +55,7 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
             |> Some
 
         page_container()
-        |+ PageButton( "", 
+        |+ PageButton("mount.create.use_detected_folder", 
             fun () -> on_file_drop.Value auto_detect_location
             , Enabled = folder_detected,
             Text = if folder_detected then %"mount.create.use_detected_folder" else %"mount.create.game_not_detected"
@@ -63,6 +63,6 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
         |+ Callout.frame info (fun (w, h) -> pretty_pos (0, 5, PageWidth.Custom w))
         :> Widget
 
-    override this.Title = %"mount.create.name"
+    override this.Title = %"mount.create"
 
     override this.OnClose() = on_file_drop <- None

@@ -53,13 +53,13 @@ type Toolbar() =
                 Position = Position.SliceTop(HEIGHT).TrimLeft(20.0f)
             )
             |+ InlaidButton(
-                %"menu.options.name",
+                %"menu.options",
                 (fun () -> if not Toolbar.hidden then OptionsMenuRoot.show ()),
                 Icons.SETTINGS
             )
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
             |+ (InlaidButton(
-                    %"menu.import.name",
+                    %"menu.import",
                     (fun () ->
                         if not Toolbar.hidden then
                             Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
@@ -76,7 +76,7 @@ type Toolbar() =
                 ))
                 .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
             |+ InlaidButton(
-                %"menu.wiki.name",
+                %"menu.wiki",
                 (fun () ->
                     if not Toolbar.hidden then
                         Wiki.show ()
@@ -87,7 +87,7 @@ type Toolbar() =
             )
                 .Tooltip(Tooltip.Info("menu.wiki").Hotkey("wiki"))
             |+ InlaidButton(
-                %"menu.stats.name",
+                %"menu.stats",
                 (fun () ->
                     if not Toolbar.hidden then
                         Screen.change_new StatsScreen Screen.Type.Stats Transitions.Flags.Default

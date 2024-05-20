@@ -146,7 +146,7 @@ type RotationSettingsPage() =
             .Pos(8)
         :> Widget
 
-    override this.Title = %"noteskins.edit.rotations.name"
+    override this.Title = %"noteskins.edit.rotations"
 
     override this.OnClose() =
         Noteskins.save_config

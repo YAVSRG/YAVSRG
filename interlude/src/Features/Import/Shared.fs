@@ -60,7 +60,7 @@ module Import =
             |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h))
             :> Widget
 
-        override this.Title = %"unlinkedsongsimport.name"
+        override this.Title = %"unlinkedsongsimport"
         override this.OnClose() = ()
 
     let handle_file_drop (path: string) =

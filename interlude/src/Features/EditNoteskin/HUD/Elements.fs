@@ -13,17 +13,17 @@ module HUDElement =
 
     let name (e: HUDElement) : string =
         match e with
-        | HUDElement.Accuracy -> %"hud.accuracy.name"
-        | HUDElement.TimingDisplay -> %"hud.timingdisplay.name"
-        | HUDElement.Combo -> %"hud.combo.name"
-        | HUDElement.SkipButton -> %"hud.skipbutton.name"
-        | HUDElement.JudgementMeter -> %"hud.judgementmeter.name"
-        | HUDElement.EarlyLateMeter -> %"hud.earlylatemeter.name"
-        | HUDElement.ProgressMeter -> %"hud.progressmeter.name"
-        | HUDElement.JudgementCounter -> %"hud.judgementcounter.name"
-        | HUDElement.RateModMeter -> %"hud.ratemodmeter.name"
-        | HUDElement.BPMMeter -> %"hud.bpmmeter.name"
-        | HUDElement.Pacemaker -> %"hud.pacemaker.name"
+        | HUDElement.Accuracy -> %"hud.accuracy"
+        | HUDElement.TimingDisplay -> %"hud.timingdisplay"
+        | HUDElement.Combo -> %"hud.combo"
+        | HUDElement.SkipButton -> %"hud.skipbutton"
+        | HUDElement.JudgementMeter -> %"hud.judgementmeter"
+        | HUDElement.EarlyLateMeter -> %"hud.earlylatemeter"
+        | HUDElement.ProgressMeter -> %"hud.progressmeter"
+        | HUDElement.JudgementCounter -> %"hud.judgementcounter"
+        | HUDElement.RateModMeter -> %"hud.ratemodmeter"
+        | HUDElement.BPMMeter -> %"hud.bpmmeter"
+        | HUDElement.Pacemaker -> %"hud.pacemaker"
 
     let tooltip (e: HUDElement) : string =
         match e with

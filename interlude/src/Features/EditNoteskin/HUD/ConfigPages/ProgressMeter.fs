@@ -112,7 +112,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
         |+ preview
         :> Widget
 
-    override this.Title = %"hud.progressmeter.name"
+    override this.Title = %"hud.progressmeter"
 
     override this.OnClose() =
         options.HUD.Set

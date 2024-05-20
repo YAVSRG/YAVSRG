@@ -60,7 +60,7 @@ module OptionsMenuRoot =
         let tooltip_hint =
             Callout.Normal
                 .Icon(Icons.INFO)
-                .Title(%"options.ingame_help.name")
+                .Title(%"options.ingame_help")
                 .Body(%"options.ingame_help.hint")
                 .Hotkey("tooltip")
 
@@ -81,27 +81,27 @@ module OptionsMenuRoot =
                         }
                 )
                 |+ TileButton(
-                    Callout.Normal.Icon(Icons.AIRPLAY).Title(%"system.name"),
+                    Callout.Normal.Icon(Icons.AIRPLAY).Title(%"system"),
                     fun () -> System.SystemPage().Show()
                 )
                 |+ TileButton(
-                    Callout.Normal.Icon(Icons.SLIDERS).Title(%"gameplay.name"),
+                    Callout.Normal.Icon(Icons.SLIDERS).Title(%"gameplay"),
                     fun () -> Gameplay.GameplayPage().Show()
                 )
                 |+ TileButton(
-                    Callout.Normal.Icon(Icons.IMAGE).Title(%"noteskins.name"),
+                    Callout.Normal.Icon(Icons.IMAGE).Title(%"noteskins"),
                     fun () -> Noteskins.NoteskinsPage().Show()
                 )
                     .Tooltip(Tooltip.Info("noteskins"))
                 |+ TileButton(
-                    Callout.Normal.Icon(Icons.TERMINAL).Title(%"debug.name"),
+                    Callout.Normal.Icon(Icons.TERMINAL).Title(%"debug"),
                     fun () -> Debug.DebugPage().Show()
                 )
                 |+ TileButton(
-                    Callout.Normal.Icon(Icons.HEART).Title(%"advanced.name"),
+                    Callout.Normal.Icon(Icons.HEART).Title(%"advanced"),
                     fun () -> Advanced.AdvancedPage().Show()
                 )
-                |+ TileButton(Callout.Normal.Icon(Icons.ZAP).Title(%"hud.name"), 
+                |+ TileButton(Callout.Normal.Icon(Icons.ZAP).Title(%"hud"), 
                     (fun () -> 
                         if Content.Noteskin.IsEmbedded then
                             EditHUDPage().Show()
@@ -153,7 +153,7 @@ module OptionsMenuRoot =
             }
             :> Widget
 
-        override this.Title = %"options.name"
+        override this.Title = %"options"
         override this.OnClose() = LevelSelect.refresh_all ()
 
     let show () = Menu.ShowPage OptionsPage

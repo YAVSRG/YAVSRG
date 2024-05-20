@@ -99,7 +99,7 @@ type HoldNoteSettingsPage() =
         base.Update(elapsed_ms, moved)
         animation.Update elapsed_ms
 
-    override this.Title = %"noteskins.edit.holdnotes.name"
+    override this.Title = %"noteskins.edit.holdnotes"
 
     override this.OnClose() =
         Noteskins.save_config

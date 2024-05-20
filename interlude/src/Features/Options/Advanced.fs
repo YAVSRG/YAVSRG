@@ -55,33 +55,33 @@ type AdvancedPage() =
             .Pos(12)
         :> Widget
 
-    override this.Title = %"advanced.name"
+    override this.Title = %"advanced"
     override this.OnClose() = ()
 
  module Advanced =
 
     let search_settings (tokens: string array) : SearchResult seq =
         seq {
-            if token_match tokens [|%"advanced.enableconsole.name"|] then
+            if token_match tokens [|%"advanced.enableconsole"|] then
                 yield PageSetting("advanced.enableconsole", Checkbox options.EnableConsole)
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"advanced.confirmexit.name"|] then
+            if token_match tokens [|%"advanced.confirmexit"|] then
                 yield PageSetting("advanced.confirmexit", Checkbox options.ConfirmExit)
                     .Tooltip(Tooltip.Info("advanced.confirmexit"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"advanced.holdtogiveup.name"|] then
+            if token_match tokens [|%"advanced.holdtogiveup"|] then
                 yield PageSetting("advanced.holdtogiveup", Checkbox options.HoldToGiveUp)
                     .Tooltip(Tooltip.Info("advanced.holdtogiveup"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"advanced.vanishingnotes.name"|] then
+            if token_match tokens [|%"advanced.vanishingnotes"|] then
                 yield PageSetting("advanced.vanishingnotes", Checkbox options.VanishingNotes)
                     .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"advanced.autocalibrateoffset.name"|] then
+            if token_match tokens [|%"advanced.autocalibrateoffset"|] then
                 yield PageSetting("advanced.autocalibrateoffset", Checkbox options.AutoCalibrateOffset)
                     .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"advanced.buildpatterncache.name"|] then
+            if token_match tokens [|%"advanced.buildpatterncache"|] then
                 yield PageButton.Once("advanced.buildpatterncache",
                     fun () ->
                         Cache.cache_patterns.Request(
@@ -102,7 +102,7 @@ type AdvancedPage() =
                 )
                     .Tooltip(Tooltip.Info("advanced.buildpatterncache"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"advanced.advancedrecommendations.name"|] then
+            if token_match tokens [|%"advanced.advancedrecommendations"|] then
                 yield PageSetting("advanced.advancedrecommendations", Checkbox options.AdvancedRecommendations)
                     .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
                 , 2, 2, PageWidth.Normal

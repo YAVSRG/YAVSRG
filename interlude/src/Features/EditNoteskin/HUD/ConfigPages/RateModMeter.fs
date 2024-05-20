@@ -40,7 +40,7 @@ type RateModMeterPage(on_close: unit -> unit) =
         |+ preview
         :> Widget
 
-    override this.Title = %"hud.ratemodmeter.name"
+    override this.Title = %"hud.ratemodmeter"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =

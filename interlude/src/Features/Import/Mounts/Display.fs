@@ -11,7 +11,7 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
 
     let create_button =
         Button(
-            sprintf "%s %s" Icons.LINK (%"mount.create.name"),
+            sprintf "%s %s" Icons.LINK (%"mount.create"),
             (fun () -> CreateMountPage(game, setting).Show()),
             Position = Position.SliceBottom(60.0f).Margin 5.0f
         )
@@ -19,7 +19,7 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
     let edit_buttons =
         NavigationContainer.Row<Button>(WrapNavigation = false, Position = Position.SliceBottom(60.0f).Margin 5.0f)
         |+ Button(
-            sprintf "%s %s" Icons.EDIT_2 (%"mount.edit.name"),
+            sprintf "%s %s" Icons.EDIT_2 (%"mount.edit"),
             (fun () -> EditMountPage(game, setting).Show()),
             Position =
                 { Position.Default with
@@ -27,7 +27,7 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
                 }
         )
         |+ Button(
-            sprintf "%s %s" Icons.TRASH (%"mount.delete.name"),
+            sprintf "%s %s" Icons.TRASH (%"mount.delete"),
             (fun () -> setting.Value <- None),
             Position =
                 { Position.Default with

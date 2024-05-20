@@ -117,7 +117,7 @@ type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: Sco
                 Hotkey = "context_menu"
             )
             |+ InlaidButton(
-                %"score.watch_replay.name",
+                %"score.watch_replay",
                 (fun () ->
                     ScoreScreenHelpers.watch_replay (score_info, Gameplay.Chart.color_this_chart (score_info.WithMods))
                 ),

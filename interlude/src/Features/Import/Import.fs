@@ -50,16 +50,16 @@ type private Sidebar() as this =
 
     let flow =
         FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(130.0f).Margin(10.0f))
-        |+ TabButton(Icons.LINK, %"imports.local.name", ImportScreen.container, Mounts.tab)
-        |+ TabButton(Icons.ARCHIVE, %"imports.etterna_packs.name", ImportScreen.container, EtternaPacks.tab)
-        |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.beatmaps.name", ImportScreen.container, Beatmaps.tab)
-        |+ TabButton(Icons.SIDEBAR, %"imports.tables.name", ImportScreen.container, Tables.tab)
-        |+ TabButton(Icons.IMAGE, %"imports.noteskins.name", ImportScreen.container, Noteskins.tab)
-        |+ TabButton(Icons.SLIDERS, %"imports.rulesets.name", ImportScreen.container, Rulesets.tab)
+        |+ TabButton(Icons.LINK, %"imports.local", ImportScreen.container, Mounts.tab)
+        |+ TabButton(Icons.ARCHIVE, %"imports.etterna_packs", ImportScreen.container, EtternaPacks.tab)
+        |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.beatmaps", ImportScreen.container, Beatmaps.tab)
+        |+ TabButton(Icons.SIDEBAR, %"imports.tables", ImportScreen.container, Tables.tab)
+        |+ TabButton(Icons.IMAGE, %"imports.noteskins", ImportScreen.container, Noteskins.tab)
+        |+ TabButton(Icons.SLIDERS, %"imports.rulesets", ImportScreen.container, Rulesets.tab)
 
     do
         this
-        |+ Text(%"menu.import.name", Position = Position.SliceTop(80.0f).Margin(20.0f, 10.0f))
+        |+ Text(%"menu.import", Position = Position.SliceTop(80.0f).Margin(20.0f, 10.0f))
         |+ Text(
             (fun () ->
                 if ImportScreen.something_in_progress () then

@@ -38,7 +38,7 @@ type LobbySelectPage() =
         |+ invite_list
         :> Widget
 
-    override this.Title = %"select_lobby.name"
+    override this.Title = %"select_lobby"
     override this.OnClose() =
         let a, b, c = subscribed_events
         a.Dispose()

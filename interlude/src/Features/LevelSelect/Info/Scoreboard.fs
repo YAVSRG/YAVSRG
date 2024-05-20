@@ -237,7 +237,7 @@ type Scoreboard(display: Setting<Display>) as this =
         this
         |+ StylishButton(
             (fun () -> display.Set Display.Online),
-            K <| Localisation.localise "levelselect.info.scoreboard.name",
+            K <| %"levelselect.info.scoreboard",
             !%Palette.MAIN_100,
             Hotkey = "scoreboard_storage",
             TiltLeft = false,

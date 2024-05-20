@@ -136,14 +136,14 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         else
             change_rate_hotkeys change_rate
 
-    override this.Title = %"mods.name"
+    override this.Title = %"mods"
     override this.OnClose() = on_close ()
 
 type ModSelect(change_rate: float32 -> unit, on_menu_close: unit -> unit) =
     inherit
         StylishButton(
             (fun () -> ModSelectPage(change_rate, on_menu_close).Show()),
-            K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods.name")),
+            K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods")),
             (fun () -> Palette.color (100, 0.5f, 0.0f)),
             Hotkey = "mods"
         )

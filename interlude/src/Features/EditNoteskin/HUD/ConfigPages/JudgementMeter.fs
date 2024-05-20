@@ -177,7 +177,7 @@ type JudgementMeterPage(on_close: unit -> unit) =
             )] |> or_require_noteskin)
         :> Widget
 
-    override this.Title = %"hud.judgementmeter.name"
+    override this.Title = %"hud.judgementmeter"
 
     override this.OnClose() =
         options.HUD.Set

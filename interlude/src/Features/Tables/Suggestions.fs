@@ -174,7 +174,7 @@ type SuggestionsPage(table: Table) =
 
     override this.Content() = suggestions_list |>> Container :> Widget
 
-    override this.Title = %"table.suggestions.name"
+    override this.Title = %"table.suggestions"
     override this.OnClose() = ()
     override this.OnReturnTo() = suggestions_list.Reload()
 

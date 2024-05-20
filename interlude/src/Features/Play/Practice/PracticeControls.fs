@@ -54,10 +54,10 @@ type SyncSuggestionControls(state: PracticeState) =
     inherit
         SlideoutContent(
             FlowContainer.Vertical<ModeButton>(40.0f, Position = Position.SliceLeft(250.0f))
-            |+ ModeButton(%"practice.localoffset.name", SyncMode.AUDIO_OFFSET, state)
-            |+ ModeButton(%"gameplay.hitposition.name", SyncMode.HIT_POSITION, state)
-            |+ ModeButton(%"gameplay.scrollspeed.name", SyncMode.SCROLL_SPEED, state)
-            |+ ModeButton(%"system.visualoffset.name", SyncMode.VISUAL_OFFSET, state),
+            |+ ModeButton(%"practice.localoffset", SyncMode.AUDIO_OFFSET, state)
+            |+ ModeButton(%"gameplay.hitposition", SyncMode.HIT_POSITION, state)
+            |+ ModeButton(%"gameplay.scrollspeed", SyncMode.SCROLL_SPEED, state)
+            |+ ModeButton(%"system.visualoffset", SyncMode.VISUAL_OFFSET, state),
             160.0f
         )
 

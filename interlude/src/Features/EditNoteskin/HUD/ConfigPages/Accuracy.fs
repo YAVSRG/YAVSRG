@@ -79,7 +79,7 @@ type AccuracyPage(on_close: unit -> unit) =
         |+ preview
         :> Widget
 
-    override this.Title = %"hud.accuracy.name"
+    override this.Title = %"hud.accuracy"
 
     override this.OnClose() =
         options.HUD.Set

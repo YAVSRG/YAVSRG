@@ -87,5 +87,5 @@ type HotkeysPage() =
 
         scroll_container
 
-    override this.Title = %"system.hotkeys.name"
+    override this.Title = %"system.hotkeys"
     override this.OnClose() = ()

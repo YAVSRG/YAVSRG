@@ -64,7 +64,7 @@ type ComboPage(on_close: unit -> unit) =
         |+ preview
         :> Widget
 
-    override this.Title = %"hud.combo.name"
+    override this.Title = %"hud.combo"
 
     override this.OnClose() =
         options.HUD.Set

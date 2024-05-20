@@ -210,20 +210,20 @@ type SystemPage() =
         Window.defer (Window.DisableResize)
         if has_changed then Window.defer (Window.ApplyConfig config)
 
-    override this.Title = %"system.name"
+    override this.Title = %"system"
 
 module System =
 
     let search_settings (tokens: string array) : SearchResult seq =
         seq {
-            if token_match tokens [|%"system.performance.name"|] then
+            if token_match tokens [|%"system.performance"|] then
                 yield PageButton(
                     "system.performance",
                     (fun () -> PerformanceSettingsPage().Show())
                 )
                     .Tooltip(Tooltip.Info("system.performance"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"system.windowmode.name"; %"system.windowresolution.name"; %"system.monitor.name"; %"system.videomode.name"|] then
+            if token_match tokens [|%"system.windowmode"; %"system.windowresolution"; %"system.monitor"; %"system.videomode"|] then
                 yield! [
                     PageSetting(
                         "system.windowmode",
@@ -270,7 +270,7 @@ module System =
                     )
                     , 2, 2, PageWidth.Normal
                 ]
-            if token_match tokens [|%"system.audiovolume.name"|] then
+            if token_match tokens [|%"system.audiovolume"|] then
                 yield PageSetting(
                     "system.audiovolume",
                     Slider.Percent(
@@ -281,7 +281,7 @@ module System =
                 )
                     .Tooltip(Tooltip.Info("system.audiovolume"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"system.audiodevice.name"|] then
+            if token_match tokens [|%"system.audiodevice"|] then
                 yield PageSetting(
                     "system.audiodevice",
                     SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
@@ -289,7 +289,7 @@ module System =
                     .Tooltip(Tooltip.Info("system.audiodevice"))
                 , 2, 2, PageWidth.Normal
                 
-            if token_match tokens [|%"system.audiooffset.name"|] then
+            if token_match tokens [|%"system.audiooffset"|] then
                 yield PageSetting(
                     "system.audiooffset",
                     { new Slider(options.AudioOffset, Step = 1f) with
@@ -301,12 +301,12 @@ module System =
                     .Tooltip(Tooltip.Info("system.audiooffset"))
                 , 2, 2, PageWidth.Normal
             
-            if token_match tokens [|%"system.visualoffset.name"|] then
+            if token_match tokens [|%"system.visualoffset"|] then
                 yield PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
                     .Tooltip(Tooltip.Info("system.visualoffset"))
                 , 2, 2, PageWidth.Normal
                 
-            if token_match tokens [|%"system.hotkeys.name"; %"gameplay.keybinds.name"|] then
+            if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
                 yield PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
                     .Tooltip(Tooltip.Info("system.hotkeys"))
                 , 2, 2, PageWidth.Normal

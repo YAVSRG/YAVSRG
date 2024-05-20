@@ -82,12 +82,12 @@ type MainMenuScreen() as this =
         Screen.change Screen.Type.LevelSelect Transitions.Flags.Default |> ignore
 
     let play =
-        MenuButton(play_action, %"menu.play.name", Position.Box(0.0f, 0.5f, -300.0f, -200.0f, 1500.0f, 100.0f))
+        MenuButton(play_action, %"menu.play", Position.Box(0.0f, 0.5f, -300.0f, -200.0f, 1500.0f, 100.0f))
 
     let options =
         MenuButton(
             OptionsMenuRoot.show,
-            %"menu.options.name",
+            %"menu.options",
             Position.Box(0.0f, 0.5f, -300.0f, -50.0f, 1430.0f, 100.0f)
         )
 
@@ -97,7 +97,7 @@ type MainMenuScreen() as this =
                 if Screen.back Transitions.Flags.UnderLogo then
                     Logo.move_center ()
             ),
-            %"menu.quit.name",
+            %"menu.quit",
             Position.Box(0.0f, 0.5f, -300.0f, 100.0f, 1360.0f, 100.0f)
         )
 

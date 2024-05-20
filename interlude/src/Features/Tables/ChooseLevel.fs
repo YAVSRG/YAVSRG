@@ -64,6 +64,6 @@ type SelectTableLevelPage(table: Table, action: int -> unit) =
         refresh ()
         ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f))
 
-    override this.Title = %"table.name"
+    override this.Title = %"table"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh ()

@@ -30,6 +30,6 @@ type LanecoverPage() =
         |+ preview
         :> Widget
 
-    override this.Title = %"gameplay.lanecover.name"
+    override this.Title = %"gameplay.lanecover"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = ()

@@ -48,5 +48,5 @@ type EndlessModeMenu(info: Chart.LoadedChartInfo) =
             .Pos(0)
         :> Widget
 
-    override this.Title = %"levelselect.endless_mode.name"
+    override this.Title = %"levelselect.endless_mode"
     override this.OnClose() = ()

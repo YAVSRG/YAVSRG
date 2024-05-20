@@ -32,5 +32,5 @@ type CreateLobbyPage() =
         |+ submit_button.Pos(3)
         :> Widget
 
-    override this.Title = %"create_lobby.name"
+    override this.Title = %"create_lobby"
     override this.OnClose() = ()

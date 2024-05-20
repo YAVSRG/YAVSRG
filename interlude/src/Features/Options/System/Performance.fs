@@ -90,4 +90,4 @@ type PerformanceSettingsPage() =
 
     override this.OnClose() = closed <- true
 
-    override this.Title = %"system.performance.name"
+    override this.Title = %"system.performance"

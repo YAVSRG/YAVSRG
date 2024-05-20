@@ -79,7 +79,7 @@ type GameplayPage() =
         |+ Presets.preset_buttons 3 options.Preset3 preview.Refresh
         :> Widget
 
-    override this.Title = %"gameplay.name"
+    override this.Title = %"gameplay"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = ()
 
@@ -87,7 +87,7 @@ module Gameplay =
 
     let search_settings (tokens: string array) : SearchResult seq =
         seq {
-            if token_match tokens [|%"gameplay.scrollspeed.name"|] then
+            if token_match tokens [|%"gameplay.scrollspeed"|] then
                 yield PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
                     .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
                 , 2, 2, PageWidth.Normal
@@ -102,27 +102,27 @@ module Gameplay =
                     ),
                     Align = Alignment.CENTER
                 ), 1, 1, PageWidth.Normal
-            if token_match tokens [|%"gameplay.hitposition.name"|] then
+            if token_match tokens [|%"gameplay.hitposition"|] then
                 yield PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
                     .Tooltip(Tooltip.Info("gameplay.hitposition"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"gameplay.upscroll.name"|] then
+            if token_match tokens [|%"gameplay.upscroll"|] then
                 yield PageSetting("gameplay.upscroll", Checkbox options.Upscroll)
                     .Tooltip(Tooltip.Info("gameplay.upscroll"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"gameplay.backgrounddim.name"|] then
+            if token_match tokens [|%"gameplay.backgrounddim"|] then
                 yield PageSetting("gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
                     .Tooltip(Tooltip.Info("gameplay.backgrounddim"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"gameplay.lanecover.name"|] then
+            if token_match tokens [|%"gameplay.lanecover"|] then
                 yield PageButton("gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
                     .Tooltip(Tooltip.Info("gameplay.lanecover"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"gameplay.pacemaker.name"|] then
+            if token_match tokens [|%"gameplay.pacemaker"|] then
                 yield PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
                     .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"system.hotkeys.name"; %"gameplay.keybinds.name"|] then
+            if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
                 let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
 
                 let binds = GameplayKeybinder(keymode)

@@ -109,7 +109,7 @@ type ChartInfo() as this =
 
         |+ StylishButton(
             (fun () -> Chart.when_loaded <| fun info -> Preview(info, change_rate).Show()),
-            K(sprintf "%s %s" Icons.EYE %"levelselect.preview.name"),
+            K(sprintf "%s %s" Icons.EYE %"levelselect.preview"),
             !%Palette.MAIN_100,
             Hotkey = "preview",
             TiltLeft = false,

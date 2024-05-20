@@ -27,7 +27,7 @@ type PacemakerPage(on_close: unit -> unit) =
 
     override this.Content() = preview
 
-    override this.Title = %"hud.pacemaker.name"
+    override this.Title = %"hud.pacemaker"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =

@@ -26,7 +26,7 @@ type BPMMeterPage(on_close: unit -> unit) =
 
     override this.Content() = preview
 
-    override this.Title = %"hud.bpmmeter.name"
+    override this.Title = %"hud.bpmmeter"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =

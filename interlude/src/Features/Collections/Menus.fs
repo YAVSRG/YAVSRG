@@ -35,7 +35,7 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) =
             .Pos(6)
         :> Widget
 
-    override this.Title = %"collections.create_folder.name"
+    override this.Title = %"collections.create_folder"
     override this.OnClose() = ()
 
     static member Icons =
@@ -71,7 +71,7 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) =
             .Pos(6)
         :> Widget
 
-    override this.Title = %"collections.create_playlist.name"
+    override this.Title = %"collections.create_playlist"
     override this.OnClose() = ()
 
     static member Icons =
@@ -260,7 +260,7 @@ type SelectCollectionPage
         |+ ScrollContainer(grid, Position = pretty_pos(5, PAGE_BOTTOM - 5, PageWidth.Full))
         :> Widget
 
-    override this.Title = %"collections.name"
+    override this.Title = %"collections"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh ()
 

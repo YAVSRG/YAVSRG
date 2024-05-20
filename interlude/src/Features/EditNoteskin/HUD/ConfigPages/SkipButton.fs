@@ -29,7 +29,7 @@ type SkipButtonPage(on_close: unit -> unit) =
 
     override this.Content() = preview
 
-    override this.Title = %"hud.skipbutton.name"
+    override this.Title = %"hud.skipbutton"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =

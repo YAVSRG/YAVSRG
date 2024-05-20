@@ -41,7 +41,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                         Menu.Back()
                 ),
                 Icon = Icons.FOLDER_MINUS,
-                Text = [ name ] %> "chart.remove_from_collection.name"
+                Text = [ name ] %> "chart.remove_from_collection"
             )
         | LibraryContext.Playlist(index, name, _) ->
             content
@@ -70,7 +70,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                         Menu.Back()
                 ),
                 Icon = Icons.FOLDER_MINUS,
-                Text = [ name ] %> "chart.remove_from_collection.name"
+                Text = [ name ] %> "chart.remove_from_collection"
             )
             |+ PageButton.Once(
                 "playlist.play",

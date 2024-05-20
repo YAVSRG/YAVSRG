@@ -65,5 +65,5 @@ type DebugPage() =
             .Pos(7)
         :> Widget
 
-    override this.Title = %"debug.name"
+    override this.Title = %"debug"
     override this.OnClose() = ()

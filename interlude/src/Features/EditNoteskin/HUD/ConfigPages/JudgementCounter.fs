@@ -112,7 +112,7 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
         )
         :> Widget
 
-    override this.Title = %"hud.judgementcounter.textures.name"
+    override this.Title = %"hud.judgementcounter.textures"
     override this.OnClose() = ()
 
 type JudgementCounterPage(on_close: unit -> unit) =
@@ -259,7 +259,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
         |+ preview
         :> Widget
 
-    override this.Title = %"hud.judgementcounter.name"
+    override this.Title = %"hud.judgementcounter"
 
     override this.OnClose() =
         options.HUD.Set

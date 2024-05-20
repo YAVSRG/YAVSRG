@@ -235,7 +235,7 @@ type PlayfieldSettingsPage() =
         )
         <| Colors.green_accent.O2
 
-    override this.Title = %"noteskins.edit.playfield.name"
+    override this.Title = %"noteskins.edit.playfield"
 
     override this.OnClose() =
         Noteskins.save_config

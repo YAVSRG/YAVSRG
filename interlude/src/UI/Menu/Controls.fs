@@ -273,7 +273,7 @@ type PageSetting(name, widget: Widget) as this =
     override this.Init(parent) =
         this
         |* Text(
-            K(%(sprintf "%s.name" name) + ":"),
+            K(%name + ":"),
             Color = (fun () -> (if widget.Focused then Colors.text_yellow_2 else Colors.text)),
             Align = Alignment.LEFT,
             Position =
@@ -310,7 +310,7 @@ type PageButton(name, action) as this =
         )
 
     member val Icon = "" with get, set
-    member val Text = %(sprintf "%s.name" name) with get, set
+    member val Text = %name with get, set
 
     override this.Init(parent: Widget) =
         this

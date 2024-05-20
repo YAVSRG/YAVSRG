@@ -48,7 +48,7 @@ type RegisterPage(discord_tag) =
         |+ submit_button.Pos(21)
         :> Widget
 
-    override this.Title = %"register.name"
+    override this.Title = %"register"
     override this.OnClose() = handler.Dispose()
 
 type LoginPage() =
@@ -87,7 +87,7 @@ type LoginPage() =
         )
         :> Widget
 
-    override this.Title = %"login.name"
+    override this.Title = %"login"
 
     override this.OnClose() =
         let a,b,c,d = subscribed_events

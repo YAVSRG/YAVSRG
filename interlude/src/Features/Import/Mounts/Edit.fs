@@ -81,7 +81,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                 Dummy()
         :> Widget
 
-    override this.Title = %"mount.name"
+    override this.Title = %"mount"
 
     override this.OnClose() =
         setting.Value <-

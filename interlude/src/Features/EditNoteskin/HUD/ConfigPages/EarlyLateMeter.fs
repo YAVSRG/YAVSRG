@@ -68,7 +68,7 @@ type EarlyLateMeterPage(on_close: unit -> unit) =
             ] |> or_require_noteskin)
         :> Widget
 
-    override this.Title = %"hud.earlylatemeter.name"
+    override this.Title = %"hud.earlylatemeter"
 
     override this.OnClose() =
         Noteskins.save_hud_config

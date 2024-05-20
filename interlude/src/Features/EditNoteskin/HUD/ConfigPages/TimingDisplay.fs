@@ -70,7 +70,7 @@ type TimingDisplayPage(on_close: unit -> unit) =
         |+ preview
         :> Widget
 
-    override this.Title = %"hud.timingdisplay.name"
+    override this.Title = %"hud.timingdisplay"
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =

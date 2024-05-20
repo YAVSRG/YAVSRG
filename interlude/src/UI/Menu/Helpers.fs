@@ -65,11 +65,11 @@ type Tooltip(content: Callout) =
 
     static member Info(feature: string) =
         Callout.Normal
-            .Title(%(sprintf "%s.name" feature))
+            .Title(%feature)
             .Body(%(sprintf "%s.tooltip" feature))
 
     static member Info(feature: string, hotkey: Hotkey) =
         Callout.Normal
-            .Title(%(sprintf "%s.name" feature))
+            .Title(%feature)
             .Body(%(sprintf "%s.tooltip" feature))
             .Hotkey(hotkey)

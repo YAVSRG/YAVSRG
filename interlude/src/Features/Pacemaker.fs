@@ -52,7 +52,7 @@ type PacemakerOptionsPage() =
             .Tooltip(Tooltip.Info("gameplay.pacemaker.onlysavenewrecords"))
             .Pos(2)
         |+ PageSetting("gameplay.pacemaker.type",
-            SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy.name"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp.name" |], mode)
+            SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp" |], mode)
         )
             .Pos(5)
         |+ PageSetting("gameplay.pacemaker.use_personal_best", Checkbox use_personal_best)
@@ -74,7 +74,7 @@ type PacemakerOptionsPage() =
         )
         :> Widget
 
-    override this.Title = %"gameplay.pacemaker.name"
+    override this.Title = %"gameplay.pacemaker"
 
     override this.OnClose() =
         options.Pacemaker.[ruleset_id] <-

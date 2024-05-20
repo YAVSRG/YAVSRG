@@ -83,7 +83,7 @@ type LibraryViewControls() =
     let manage_collections =
         StylishButton(
             (fun () -> Menu.ShowPage ManageCollectionsPage),
-            K(sprintf "%s %s" Icons.FOLDER (%"levelselect.collections.name")),
+            K(sprintf "%s %s" Icons.FOLDER (%"levelselect.collections")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         )
@@ -92,7 +92,7 @@ type LibraryViewControls() =
     let manage_tables =
         StylishButton(
             (fun () -> ManageTablesPage(LevelSelect.refresh_all).Show()),
-            K(sprintf "%s %s" Icons.EDIT_2 (%"levelselect.table.name")),
+            K(sprintf "%s %s" Icons.EDIT_2 (%"levelselect.table")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         )

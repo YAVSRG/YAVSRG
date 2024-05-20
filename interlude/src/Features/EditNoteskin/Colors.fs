@@ -31,7 +31,7 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
         this
         |+ Tooltip(
             Callout.Normal
-                .Title(sprintf "%s: %O" (%"noteskins.edit.notecolors.name") style)
+                .Title(sprintf "%s: %O" (%"noteskins.edit.notecolors") style)
                 .Body(%(sprintf "noteskins.edit.notecolors.%s.%i" (style.ToString().ToLower()) index))
         )
         |* Clickable(
@@ -150,7 +150,7 @@ type ColorSettingsPage() =
             .Pos(8, 3, PageWidth.Full)
         :> Widget
 
-    override this.Title = %"noteskins.edit.colors.name"
+    override this.Title = %"noteskins.edit.colors"
 
     override this.OnClose() =
         Noteskins.save_config

@@ -58,19 +58,19 @@ module Check =
                 find m (sprintf "%s (position %i)" filename position)
 
             for position, m in matches """ PageSetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do
-                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
+                find m (sprintf "%s (position %i)" filename position)
 
             for position, m in matches """ PageButton\(\s*"([a-z\-_\.]*)" """ file_contents do
-                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
+                find m (sprintf "%s (position %i)" filename position)
 
             for position, m in matches """ PageTextEntry\(\s*"([a-z\-_\.]*)" """ file_contents do
-                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
+                find m (sprintf "%s (position %i)" filename position)
 
             for position, m in matches """ PageButton\s*.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
-                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
+                find m (sprintf "%s (position %i)" filename position)
 
             for position, m in matches """ Tooltip\s*.Info\("([a-z\-_\.]*)" """ file_contents do
-                find (sprintf "%s.name" m) (sprintf "%s (position %i)" filename position)
+                find m (sprintf "%s (position %i)" filename position)
                 find (sprintf "%s.tooltip" m) (sprintf "%s (position %i)" filename position)
 
             for position, m in matches """ localise\s*"([a-z\-_\.]*)" """ file_contents do
@@ -83,20 +83,20 @@ module Check =
                 Seq.append
                     [ "exit"; "select"; "up"; "down"; "left"; "right" ]
                     (matches """ Hotkeys.register "([a-z0-9\-_\.]*)" """ file_contents |> Seq.map snd) do
-                find (sprintf "hotkeys.%s.name" m) "Hotkeys"
+                find (sprintf "hotkeys.%s" m) "Hotkeys"
                 find (sprintf "hotkeys.%s.tooltip" m) "Hotkeys"
 
             for m in [ "auto"; "pacemaker" ] do
-                find (sprintf "mod.%s.name" m) "Mods"
+                find (sprintf "mod.%s" m) "Mods"
                 find (sprintf "mod.%s.desc" m) "Mods"
 
             for m in Mods.AVAILABLE_MODS.Keys do
-                find (sprintf "mod.%s.name" m) "Mods"
+                find (sprintf "mod.%s" m) "Mods"
                 find (sprintf "mod.%s.desc" m) "Mods"
 
                 if Mods.AVAILABLE_MODS.[m].RandomSeed |> not then
                     for i in 1 .. Mods.AVAILABLE_MODS.[m].States - 1 do
-                        find (sprintf "mod.%s.%i.name" m i) "Mods"
+                        find (sprintf "mod.%s.%i" m i) "Mods"
                         find (sprintf "mod.%s.%i.desc" m i) "Mods"
 
             for i = 0 to 9 do
