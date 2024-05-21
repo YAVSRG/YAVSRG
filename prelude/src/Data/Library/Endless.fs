@@ -41,7 +41,7 @@ type ChartSuggestionContext =
 
 module Suggestion =
 
-    let mutable recommended_recently = Set.empty
+    let mutable recommended_already = Set.empty
 
     let private pattern_similarity (total_amount: ScaledTime) (base_patterns: PatternInfo) (other_patterns: PatternInfo) : float32 =
         let mutable similarity = 0.0f
@@ -63,8 +63,8 @@ module Suggestion =
         | None -> Seq.empty
         | Some patterns ->
 
-        recommended_recently <- Set.add base_chart.Hash recommended_recently
-        recommended_recently <- Set.add (base_chart.Title.ToLower()) recommended_recently
+        recommended_already <- Set.add base_chart.Hash recommended_already
+        recommended_already <- Set.add (base_chart.Title.ToLower()) recommended_already
 
         let min_difficulty = base_chart.Physical * 0.9
         let max_difficulty = base_chart.Physical * 1.1
@@ -83,8 +83,8 @@ module Suggestion =
             |> Seq.filter (fun x -> x.Keys = base_chart.Keys)
             |> Seq.filter (fun x -> x.Physical >= min_difficulty && x.Physical <= max_difficulty)
             |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
-            |> Seq.filter (fun x -> not (recommended_recently.Contains x.Hash))
-            |> Seq.filter (fun x -> not (recommended_recently.Contains (x.Title.ToLower())))
+            |> Seq.filter (fun x -> not (recommended_already.Contains x.Hash))
+            |> Seq.filter (fun x -> not (recommended_already.Contains (x.Title.ToLower())))
             |> Seq.choose (fun x -> match Cache.patterns_by_hash x.Hash ctx.Library.Cache with Some p -> Some (x, p) | None -> None)
             |> Seq.filter (fun (x, p) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
             |> Seq.filter (fun (x, p) -> now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > SEVEN_DAYS)
@@ -132,9 +132,9 @@ module Suggestion =
 
                 best_matches.[index]
 
-            recommended_recently <- Set.add cc.Hash recommended_recently
-            recommended_recently <- Set.add (cc.Title.ToLower()) recommended_recently
-
+            recommended_already <- Set.add cc.Hash recommended_already
+            recommended_already <- Set.add (cc.Title.ToLower()) recommended_already
+            
             Some (cc, rate)
 
     let get_random (filter_by: Filter) (ctx: LibraryViewContext) : CachedChart option =
@@ -145,7 +145,8 @@ module Suggestion =
             |> Array.ofSeq
 
         if charts.Length > 0 then
-            Some charts.[rand.Next charts.Length]
+            let result = charts.[rand.Next charts.Length]
+            Some result
         else
             None
 

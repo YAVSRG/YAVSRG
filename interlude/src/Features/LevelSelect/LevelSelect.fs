@@ -56,6 +56,7 @@ type LevelSelectScreen() =
 
             match Suggestion.get_suggestion ctx with
             | Some (cc, rate) ->
+                if not Transitions.active then SuggestionHistory.append()
                 Chart._rate.Value <- rate
                 TreeState.switch_chart (cc, LibraryContext.None, "")
                 refresh ()
@@ -71,10 +72,18 @@ type LevelSelectScreen() =
                 }
 
             match Suggestion.get_random LevelSelect.filter ctx with
-            | Some c ->
-                TreeState.switch_chart (c, LibraryContext.None, "")
+            | Some cc ->
+                if not Transitions.active then SuggestionHistory.append()
+                TreeState.switch_chart (cc, LibraryContext.None, "")
                 refresh ()
             | None -> ()
+
+    let previous_chart () =
+        match SuggestionHistory.previous() with
+        | Some cc -> 
+            TreeState.switch_chart (cc, LibraryContext.None, "")
+            refresh()
+        | None -> ()
 
     override this.Init(parent: Widget) =
         base.Init parent
@@ -250,6 +259,8 @@ type LevelSelectScreen() =
             Tree.top_of_group ()
         elif (%%"end").Tapped() then
             Tree.bottom_of_group ()
+        elif (%%"previous_random_chart").Tapped() then
+            previous_chart()
 
         Tree.update (this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsed_ms)
 

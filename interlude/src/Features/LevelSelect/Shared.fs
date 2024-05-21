@@ -9,6 +9,8 @@ open Interlude.Options
 open Interlude.Features.Pacemaker
 open Interlude.Features.Play
 open Interlude.Features.Online
+open Interlude.Features.Import
+open Interlude.Features.Collections
 open Interlude.Features.Gameplay
 
 module LevelSelect =
@@ -25,9 +27,9 @@ module LevelSelect =
     let mutable filter: Filter = []
 
     do
-        Interlude.Features.Import.Import.charts_updated.Add (fun () -> if Screen.current_type = Screen.Type.LevelSelect then refresh_all())
+        charts_updated.Add (fun () -> if Screen.current_type = Screen.Type.LevelSelect then refresh_all())
 
-        Interlude.Features.Collections.CollectionActions.collection_modified.Add(fun () ->
+        CollectionActions.collection_modified.Add(fun () ->
             if options.LibraryMode.Value = LibraryMode.Collections then
                 refresh_all ()
             else

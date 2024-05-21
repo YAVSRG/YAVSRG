@@ -64,9 +64,7 @@ module private TreeState =
     let GROUP_HEIGHT = 55.0f
 
     let switch_chart (cc, context, group_name) =
-        if Transitions.active then
-            ()
-        else
+        if not Transitions.active then
             Chart.change (cc, context, true)
             Selection.clear ()
             selected_chart <- cc.Key

@@ -473,6 +473,20 @@ module Gameplay =
         elif (%%"downrate").Tapped() then
             change_rate_by (-0.1f)
 
+    module SuggestionHistory =
+
+        let mutable private suggestion_history: CachedChart list = []
+
+        let append () = 
+            match Chart.CACHE_DATA with
+            | Some cc -> suggestion_history <- cc :: suggestion_history
+            | None -> ()
+        let previous () : CachedChart option =
+            match suggestion_history with
+            | x :: xs -> suggestion_history <- xs; Some x
+            | _ -> None
+        let has_previous() = (List.isEmpty >> not) suggestion_history
+
     module Endless =
 
         let priority = Setting.simple SuggestionPriority.Variety
@@ -493,6 +507,7 @@ module Gameplay =
             | Some endless_mode ->
                 match EndlessModeState.next endless_mode with
                 | Some next ->
+                    SuggestionHistory.append()
                     Chart._rate.Set next.Rate
                     Chart._selected_mods.Set next.Mods
                     Chart.change (next.Chart, LibraryContext.None, false)
