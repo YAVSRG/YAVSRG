@@ -36,7 +36,7 @@ module Upload =
     let private upload_chart_internal (chart: Chart) : Async<Result<string * int, string>> =
         match Chart.check chart with
         | Error msg -> async { return Error (sprintf "Chart is invalid: %s" msg) }
-        | Ok() ->
+        | Ok chart ->
 
         let chart_hash = Chart.hash chart
 

@@ -167,6 +167,78 @@ type Chart =
 
 module Chart =
 
+    let hash (chart: Chart) : string =
+        let h = SHA256.Create()
+        use ms = new MemoryStream()
+        use bw = new BinaryWriter(ms)
+
+        let offset = chart.FirstNote
+
+        bw.Write chart.Keys
+
+        for r in chart.Notes do
+            for nt in r.Data do
+                bw.Write(byte nt)
+
+        let mutable speed = 1.0
+
+        for { Time = o; Data = f } in chart.SV do
+            let f = float f
+
+            if speed <> f then
+                bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
+                bw.Write f
+                speed <- f
+
+        bw.Write((chart.LastNote - offset) * 0.01f |> float32 |> round |> int)
+
+        BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "")
+
+    let check (chart: Chart) : Result<Chart, string> =
+        try
+            if chart.Notes.Length = 0 then
+                failwith "Chart must have notes"
+
+            if chart.BPM.Length = 0 then
+                failwith "Chart must have at least one BPM marker"
+
+            let mutable lastTime = -Time.infinity
+            let mutable ln = 0us
+
+            for { Time = time; Data = nr } in chart.Notes do
+                if time <= lastTime then
+                    failwithf "Note row appears on or before the previous time (%f, %f)" time lastTime
+
+                lastTime <- time
+
+                for k = 0 to (chart.Keys - 1) do
+                    if nr.[k] = NoteType.HOLDHEAD then
+                        if Bitmask.has_key k ln then
+                            failwithf "Hold head appears inside hold at %f" time
+
+                        ln <- Bitmask.set_key k ln
+                    elif nr.[k] = NoteType.HOLDBODY then
+                        if Bitmask.has_key k ln |> not then
+                            failwithf "Hold middle appears with no head at %f" time
+                    elif nr.[k] = NoteType.NOTHING then
+                        if Bitmask.has_key k ln then
+                            failwithf "Hold middle should have been present at %f" time
+                    elif nr.[k] = NoteType.HOLDTAIL then
+                        if Bitmask.has_key k ln |> not then
+                            failwithf "Hold tail appears with no head at %f" time
+
+                        ln <- Bitmask.unset_key k ln
+
+                if NoteRow.is_empty nr then
+                    failwithf "Note row is useless/empty at %f" time
+
+            if ln <> 0us then
+                failwithf "Unterminated hold notes at end of chart at %f [%i]" lastTime ln
+
+            Ok chart
+        with err ->
+            Error err.Message
+
     let read_headless (keys: int) (header: ChartHeader) (source_path: string) (br: BinaryReader) : Result<Chart, string> =
         try
             let notes = TimeArray.read br (NoteRow.read keys)
@@ -183,16 +255,15 @@ module Chart =
 
             let sv = TimeArray.read br (fun r -> r.ReadSingle())
 
-            Ok
-                {
-                    Keys = keys
-                    Header = header
-                    Notes = notes
-                    BPM = bpms
-                    SV = sv
+            check {
+                Keys = keys
+                Header = header
+                Notes = notes
+                BPM = bpms
+                SV = sv
 
-                    LoadedFromPath = source_path
-                }
+                LoadedFromPath = source_path
+            }
         with err -> Error err.Message
 
     let from_file (path: string) : Result<Chart, string> =
@@ -282,78 +353,6 @@ module Chart =
                     speed <- f
 
             BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "")
-
-    let hash (chart: Chart) : string =
-        let h = SHA256.Create()
-        use ms = new MemoryStream()
-        use bw = new BinaryWriter(ms)
-
-        let offset = chart.FirstNote
-
-        bw.Write chart.Keys
-
-        for r in chart.Notes do
-            for nt in r.Data do
-                bw.Write(byte nt)
-
-        let mutable speed = 1.0
-
-        for { Time = o; Data = f } in chart.SV do
-            let f = float f
-
-            if speed <> f then
-                bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
-                bw.Write f
-                speed <- f
-
-        bw.Write((chart.LastNote - offset) * 0.01f |> float32 |> round |> int)
-
-        BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "")
-
-    let check (chart: Chart) : Result<unit, string> =
-        try
-            if chart.Notes.Length = 0 then
-                failwith "Chart must have notes"
-
-            if chart.BPM.Length = 0 then
-                failwith "Chart must have at least one BPM marker"
-
-            let mutable lastTime = -Time.infinity
-            let mutable ln = 0us
-
-            for { Time = time; Data = nr } in chart.Notes do
-                if time <= lastTime then
-                    failwithf "Note row appears on or before the previous time (%f, %f)" time lastTime
-
-                lastTime <- time
-
-                for k = 0 to (chart.Keys - 1) do
-                    if nr.[k] = NoteType.HOLDHEAD then
-                        if Bitmask.has_key k ln then
-                            failwithf "Hold head appears inside hold at %f" time
-
-                        ln <- Bitmask.set_key k ln
-                    elif nr.[k] = NoteType.HOLDBODY then
-                        if Bitmask.has_key k ln |> not then
-                            failwithf "Hold middle appears with no head at %f" time
-                    elif nr.[k] = NoteType.NOTHING then
-                        if Bitmask.has_key k ln then
-                            failwithf "Hold middle should have been present at %f" time
-                    elif nr.[k] = NoteType.HOLDTAIL then
-                        if Bitmask.has_key k ln |> not then
-                            failwithf "Hold tail appears with no head at %f" time
-
-                        ln <- Bitmask.unset_key k ln
-
-                if NoteRow.is_empty nr then
-                    failwithf "Note row is useless/empty at %f" time
-
-            if ln <> 0us then
-                failwithf "Unterminated hold notes at end of chart at %f [%i]" lastTime ln
-
-            Ok()
-        with err ->
-            Error err.Message
 
     let diff (left: Chart) (right: Chart) =
         let f (o: Time) : int = o * 0.01f |> float32 |> round |> int

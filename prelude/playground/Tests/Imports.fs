@@ -23,6 +23,6 @@ module Imports =
                             } do
                         match Chart.check chart with
                         | Error msg -> Logging.Error msg
-                        | Ok() -> ()
+                        | Ok chart -> ()
 
         Logging.Info "Complete!"
