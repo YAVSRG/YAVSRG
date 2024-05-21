@@ -6,6 +6,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data
 open Prelude.Data.Library.Caching
+open Prelude.Charts.Processing
 open Interlude
 open Interlude.Options
 open Interlude.Content
@@ -119,7 +120,7 @@ type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: Sco
             |+ InlaidButton(
                 %"score.watch_replay",
                 (fun () ->
-                    ScoreScreenHelpers.watch_replay (score_info, Gameplay.Chart.color_this_chart (score_info.WithMods))
+                    ScoreScreenHelpers.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
                 ),
                 Icons.FILM
             )

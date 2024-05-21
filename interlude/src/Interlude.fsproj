@@ -98,7 +98,9 @@
     <Compile Include="Features\Tables\Suggestions.fs" />
     <Compile Include="Features\Tables\Manage.fs" />
     <Compile Include="Features\Rulesets.fs" />
-    <Compile Include="Features\Gameplay.fs" />
+    <Compile Include="Features\Gameplay\SelectedChart.fs" />
+    <Compile Include="Features\Gameplay\ChangeChart.fs" />
+    <Compile Include="Features\Gameplay\Endless.fs" />
     <Compile Include="Features\Pacemaker.fs" />
     <Compile Include="Features\Collections\Actions.fs" />
     <Compile Include="Features\Collections\Menus.fs" />

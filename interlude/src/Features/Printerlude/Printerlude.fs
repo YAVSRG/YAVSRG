@@ -14,7 +14,8 @@ open Prelude.Data
 open Prelude.Gameplay
 open Interlude
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
+open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
 module Printerlude =
@@ -26,7 +27,7 @@ module Printerlude =
         let mutable cmp = None
 
         let cmp_1 () =
-            match Gameplay.Chart.CHART with
+            match SelectedChart.CHART with
             | None -> failwith "Select a chart"
             | Some c -> cmp <- Some c
 
@@ -35,7 +36,7 @@ module Printerlude =
             | None -> failwith "Use cmp_1 first"
             | Some cmp ->
 
-            match Gameplay.Chart.CHART with
+            match SelectedChart.CHART with
             | None -> failwith "Select a chart"
             | Some c -> Chart.diff cmp c
 
@@ -48,7 +49,7 @@ module Printerlude =
             io.WriteLine(sprintf "Entering warp speed (%.0f%%)" (UI.Screen.timescale * 100.0))
 
         let export_osz () =
-            match Gameplay.Chart.CHART with
+            match SelectedChart.CHART with
             | None -> failwith "No chart loaded to export"
             | Some c ->
                 try
@@ -161,8 +162,8 @@ module Printerlude =
                     "Switch to local development server",
                     "flag",
                     fun (io: IOContext) (b: bool) ->
-                        Online.Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
-                        Online.Network.credentials.Api <- (if b then "localhost" else "api.yavsrg.net")
+                        Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
+                        Network.credentials.Api <- (if b then "localhost" else "api.yavsrg.net")
                         Updates.restart_on_exit <- true
                         UI.Screen.exit <- true
                 )

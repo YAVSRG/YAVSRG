@@ -13,7 +13,7 @@ open Prelude.Gameplay
 open Interlude.Content
 open Interlude.UI
 open Interlude.Options
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
 open Interlude.Features.Online
 open Interlude.Features.Score
@@ -68,7 +68,7 @@ type private HitOverlay
             let draw_event (now: ChartTime) (ev: HitEvent<HitEventGuts>) =
                 let y t =
                     float32 options.HitPosition.Value
-                    + float32 (t - now) * (options.ScrollSpeed.Value / Gameplay.rate.Value)
+                    + float32 (t - now) * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
                     + playfield.ColumnWidth * 0.5f
 
                 let delta =
@@ -109,11 +109,11 @@ type private HitOverlay
                     Rect
                         .Create(
                             playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
-                            y (ev.Time - delta * Gameplay.rate.Value),
+                            y (ev.Time - delta * SelectedChart.rate.Value),
                             playfield.Bounds.Left
                             + playfield.ColumnPositions.[ev.Column]
                             + playfield.ColumnWidth,
-                            y (ev.Time - delta * Gameplay.rate.Value)
+                            y (ev.Time - delta * SelectedChart.rate.Value)
                         )
                         .Shrink((playfield.ColumnWidth - 5.0f) * 0.75f, -2.5f)
                     |> scroll_direction_pos playfield.Bounds.Bottom
@@ -126,7 +126,7 @@ type private HitOverlay
                             playfield.Bounds.Left
                             + playfield.ColumnPositions.[ev.Column]
                             + playfield.ColumnWidth,
-                            y (ev.Time - delta * Gameplay.rate.Value)
+                            y (ev.Time - delta * SelectedChart.rate.Value)
                         )
                         .Shrink((playfield.ColumnWidth - 5.0f) * 0.5f, 0.0f)
                     |> scroll_direction_pos playfield.Bounds.Bottom
@@ -148,7 +148,7 @@ type private HitOverlay
             let now =
                 state.CurrentChartTime()
                 + Performance.frame_compensation ()
-                + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
+                + options.VisualOffset.Value * 1.0f<ms> * SelectedChart.rate.Value
 
             while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
                 seek <- seek + 1
@@ -156,7 +156,7 @@ type private HitOverlay
             let until_time =
                 now
                 + (1080.0f<ms> + state.Ruleset.Accuracy.MissWindow)
-                  / (options.ScrollSpeed.Value / Gameplay.rate.Value)
+                  / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
 
             let mutable peek = seek
 
@@ -198,7 +198,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
             let draw_press (k, now: ChartTime, start: ChartTime, finish: ChartTime) =
                 let y t =
                     float32 options.HitPosition.Value
-                    + float32 (t - now) * (options.ScrollSpeed.Value / Gameplay.rate.Value)
+                    + float32 (t - now) * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
                     + playfield.ColumnWidth * 0.5f
 
                 Rect
@@ -215,7 +215,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
             let now =
                 state.CurrentChartTime()
                 + Performance.frame_compensation ()
-                + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
+                + options.VisualOffset.Value * 1.0f<ms> * SelectedChart.rate.Value
 
             while replay_data.Length - 1 > seek
                   && let struct (t, _) = replay_data.[seek + 1] in
@@ -223,7 +223,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
                 seek <- seek + 1
 
             let until_time =
-                now + 1080.0f<ms> / (options.ScrollSpeed.Value / Gameplay.rate.Value)
+                now + 1080.0f<ms> / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
 
             let mutable peek = seek
             let struct (t, b) = replay_data.[peek]
@@ -370,7 +370,7 @@ module ReplayScreen =
             | ReplayMode.Auto with_colors ->
                 StoredReplayProvider.AutoPlay(with_colors.Keys, with_colors.Source.Notes) :> IReplayProvider,
                 true,
-                Gameplay.rate.Value,
+                SelectedChart.rate.Value,
                 with_colors
             | ReplayMode.Replay(score_info, with_colors) ->
                 StoredReplayProvider(score_info.Replay) :> IReplayProvider, false, score_info.Rate, with_colors
@@ -456,12 +456,12 @@ module ReplayScreen =
                 )
 
             override this.OnEnter p =
-                DiscordRPC.playing ("Watching a replay", Gameplay.Chart.CACHE_DATA.Value.Title)
+                DiscordRPC.playing ("Watching a replay", SelectedChart.CACHE_DATA.Value.Title)
                 base.OnEnter p
 
             override this.OnExit p =
                 base.OnExit p
-                Song.change_rate Gameplay.rate.Value
+                Song.change_rate SelectedChart.rate.Value
 
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
@@ -484,5 +484,5 @@ module ReplayScreen =
                 if (%%"skip").Tapped() then
                     if Song.playing () then (if Song.time () > 0.0f<ms> then Song.pause ()) else Song.resume ()
                 else
-                    Gameplay.change_rate_hotkeys (fun change_by -> playback_speed.Value <- playback_speed.Value + change_by)
+                    Stuff.change_rate_hotkeys (fun change_by -> playback_speed.Value <- playback_speed.Value + change_by)
         }

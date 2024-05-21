@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data
 open Prelude.Data.Library.Caching
+open Prelude.Charts.Processing
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
@@ -26,7 +27,7 @@ type ScoreContextMenu(score_info: ScoreInfo) =
         |+ PageButton(
             "score.watch_replay",
             (fun () ->
-                ScoreScreenHelpers.watch_replay (score_info, Chart.color_this_chart (score_info.WithMods))
+                ScoreScreenHelpers.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
                 Menu.Back()
             ),
             Icon = Icons.FILM

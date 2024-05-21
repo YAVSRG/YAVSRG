@@ -7,7 +7,7 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.UI.Menu
 open Interlude.Options
 
@@ -73,7 +73,7 @@ type PlayfieldSettingsPage() =
 
     let data = Content.NoteskinConfig
 
-    let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
+    let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
     let align_anchor = Setting.percentf (fst data.PlayfieldAlignment)
     let align_offset = Setting.percentf (snd data.PlayfieldAlignment)

@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skinning.Noteskins
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
 type BPMMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) as this =
@@ -19,7 +19,7 @@ type BPMMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions
         this
         |* Text(
             (fun () ->
-                let ms_per_beat = bpms.[i].Data.MsPerBeat / Gameplay.rate.Value in
+                let ms_per_beat = bpms.[i].Data.MsPerBeat / SelectedChart.rate.Value in
                 sprintf "%.0f BPM" (60000.0f<ms / minute> / ms_per_beat)
             ),
             Color = K Colors.text_subheading,

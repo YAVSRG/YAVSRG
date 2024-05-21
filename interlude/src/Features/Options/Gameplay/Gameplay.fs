@@ -6,14 +6,14 @@ open Percyqaz.Flux.Audio
 open Prelude
 open Interlude.Options
 open Interlude.UI.Menu
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
 open Interlude.Features.EditNoteskin
 
 type GameplayPage() =
     inherit Page()
 
-    let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
+    let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
     let binds = GameplayKeybinder(keymode)
     let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE 0.35f)

@@ -7,7 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.UI.Menu
 
@@ -90,7 +90,7 @@ type RotationSettingsPage() =
     let data = Content.NoteskinConfig
     let use_rotation = Setting.simple data.UseRotation
 
-    let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
+    let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
     let receptor_style = Setting.simple data.ReceptorStyle
     let rotations = data.Rotations

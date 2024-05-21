@@ -13,9 +13,8 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.Web.Shared
-open Interlude.Features
 open Interlude.Features.Pacemaker
-open Interlude.Features.Gameplay.Chart
+open Interlude.Features.Gameplay
 open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Features.Score
@@ -30,7 +29,7 @@ module PlayScreenMultiplayer =
         let liveplay = LiveReplayProvider first_note
 
         let scoring =
-            Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+            Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
@@ -57,7 +56,7 @@ module PlayScreenMultiplayer =
 
                         PlayedBy = Data.ScorePlayedBy.You
                         TimePlayed = Timestamp.now ()
-                        Rate = Gameplay.rate.Value
+                        Rate = SelectedChart.rate.Value
 
                         Replay = replay_data
                         Scoring = scoring
@@ -123,6 +122,8 @@ module PlayScreenMultiplayer =
 
             override this.OnEnter(previous) =
                 Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
+                info.SaveData.LastPlayed <- Timestamp.now ()
+
                 base.OnEnter(previous)
 
             override this.OnExit(next) =
@@ -142,7 +143,7 @@ module PlayScreenMultiplayer =
                 DiscordRPC.playing_timed (
                     "Multiplayer",
                     info.CacheInfo.Title,
-                    info.CacheInfo.Length / Gameplay.rate.Value
+                    info.CacheInfo.Length / SelectedChart.rate.Value
                 )
 
             override this.Update(elapsed_ms, moved) =
@@ -180,12 +181,12 @@ module PlayScreenMultiplayer =
                     Screen.change_new
                         (fun () ->
                             let score_info =
-                                Gameplay.score_info_from_gameplay
+                                Stuff.score_info_from_gameplay
                                     info
                                     scoring
                                     ((liveplay :> IReplayProvider).GetFullReplay())
 
-                            (score_info, Gameplay.set_score true score_info info.SaveData, true)
+                            (score_info, Stuff.set_score true score_info info.SaveData, true)
                             |> ScoreScreen
                         )
                         Screen.Type.Score

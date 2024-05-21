@@ -68,7 +68,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
 
     override this.Selected =
         selected_chart = cc.Key
-        && (context = LibraryContext.None || Chart.LIBRARY_CTX = context)
+        && (context = LibraryContext.None || SelectedChart.LIBRARY_CTX = context)
 
     override this.Spacing = 5.0f
     member this.Chart = cc

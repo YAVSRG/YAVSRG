@@ -1,16 +1,14 @@
 ﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Flux.UI
-open Prelude.Charts
 open Prelude
 open Prelude.Data.Library.Endless
 open Prelude.Data.Library.Sorting
-open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay
 
-type EndlessModeMenu(info: Chart.LoadedChartInfo) =
+type EndlessModeMenu(info: LoadedChartInfo) =
     inherit Page()
 
     let start() =
@@ -19,9 +17,9 @@ type EndlessModeMenu(info: Chart.LoadedChartInfo) =
         <| EndlessModeState.create
             {
                 BaseDifficulty = info.Rating.Physical
-                BaseChart = info.CacheInfo, rate.Value
+                BaseChart = info.CacheInfo, SelectedChart.rate.Value
                 Filter = LevelSelect.filter |> Filter.except_keywords
-                Mods = selected_mods.Value
+                Mods = SelectedChart.selected_mods.Value
                 RulesetId = Rulesets.current_hash
                 Ruleset = Rulesets.current
                 Library = Content.Library

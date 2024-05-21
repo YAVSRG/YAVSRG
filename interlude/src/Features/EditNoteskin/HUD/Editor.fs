@@ -13,7 +13,7 @@ open Prelude.Skinning.Noteskins
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Play
 open Interlude.Features.Pacemaker
@@ -729,13 +729,13 @@ module HUDEditor =
         let mutable replay_data = replay_data
 
         let mutable scoring =
-            Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes Gameplay.rate.Value
+            Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
 
         let mutable time = -Time.infinity
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplayProvider.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)
-            scoring <- Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes Gameplay.rate.Value
+            scoring <- Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
             screen.State.ChangeScoring scoring
 
         { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with

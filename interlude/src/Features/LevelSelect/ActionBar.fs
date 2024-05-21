@@ -17,12 +17,12 @@ module Comments =
     let private text_entry =
         { new TextEntry(Setting.make
                             (fun s ->
-                                match Chart.SAVE_DATA with
+                                match SelectedChart.SAVE_DATA with
                                 | Some d -> d.Comment <- s
                                 | _ -> ()
                             )
                             (fun () ->
-                                match Chart.SAVE_DATA with
+                                match SelectedChart.SAVE_DATA with
                                 | Some d -> d.Comment
                                 | _ -> ""
                             ),
@@ -33,7 +33,7 @@ module Comments =
             override this.OnDeselected(by_mouse: bool) =
                 base.OnDeselected by_mouse
 
-                match Chart.SAVE_DATA with
+                match SelectedChart.SAVE_DATA with
                 | Some d -> d.Comment <- d.Comment.Trim()
                 | _ -> ()
 
@@ -51,7 +51,7 @@ module Comments =
             |+ text_entry)
         |+ Text(
             (fun () ->
-                match Chart.CACHE_DATA with
+                match SelectedChart.CACHE_DATA with
                 | Some c -> [ c.Title ] %> "levelselect.comments.label"
                 | _ -> ""
             ),
@@ -128,7 +128,7 @@ type ActionBar(random_chart) =
         |+ ActionButton(
             Icons.TARGET,
             (fun () ->
-                Chart.when_loaded
+                SelectedChart.when_loaded
                 <| fun info ->
                     Screen.change_new
                         (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))

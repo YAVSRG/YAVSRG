@@ -16,7 +16,7 @@ module CollectionActions =
         if
             match collection with
             | Folder c -> c.Add cc
-            | Playlist p -> p.Add(cc, rate.Value, selected_mods.Value)
+            | Playlist p -> p.Add(cc, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
         then
             collection_modified_ev.Trigger()
 
@@ -38,8 +38,8 @@ module CollectionActions =
 
             Notifications.action_feedback (Icons.FOLDER_MINUS, [ cc.Title; name ] %> "collections.removed", "")
 
-            if Some cc = Chart.CACHE_DATA then
-                Chart.LIBRARY_CTX <- LibraryContext.None
+            if Some cc = SelectedChart.CACHE_DATA then
+                SelectedChart.LIBRARY_CTX <- LibraryContext.None
 
             true
         else
@@ -49,8 +49,8 @@ module CollectionActions =
         match context with
         | LibraryContext.Playlist(index, id, data) ->
             if Content.Collections.GetPlaylist(id).Value.MoveChartUp index then
-                if Chart.LIBRARY_CTX = context then
-                    Chart.LIBRARY_CTX <- LibraryContext.Playlist(index - 1, id, data)
+                if SelectedChart.LIBRARY_CTX = context then
+                    SelectedChart.LIBRARY_CTX <- LibraryContext.Playlist(index - 1, id, data)
 
                 collection_modified_ev.Trigger()
                 true
@@ -62,8 +62,8 @@ module CollectionActions =
         match context with
         | LibraryContext.Playlist(index, id, data) ->
             if Content.Collections.GetPlaylist(id).Value.MoveChartDown index then
-                if Chart.LIBRARY_CTX = context then
-                    Chart.LIBRARY_CTX <- LibraryContext.Playlist(index + 1, id, data)
+                if SelectedChart.LIBRARY_CTX = context then
+                    SelectedChart.LIBRARY_CTX <- LibraryContext.Playlist(index + 1, id, data)
 
                 collection_modified_ev.Trigger()
                 true

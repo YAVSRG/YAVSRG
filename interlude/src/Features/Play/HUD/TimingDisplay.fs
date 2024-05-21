@@ -6,7 +6,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Skinning.Noteskins
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
 [<Struct>]
@@ -31,7 +31,7 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
         else
             1.0f
 
-    let animation_time = user_options.TimingDisplayFadeTime * Gameplay.rate.Value
+    let animation_time = user_options.TimingDisplayFadeTime * SelectedChart.rate.Value
 
     do
         state.SubscribeToHits(fun ev ->

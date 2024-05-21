@@ -22,11 +22,11 @@ type Jukebox() =
         this 
         |+ Button(Icons.SKIP_BACK, 
             (fun () -> 
-                match SuggestionHistory.previous() with
+                match Things.previous() with
                 | None -> ()
-                | Some cc -> Chart.change(cc, LibraryContext.None, true)
+                | Some cc -> SelectedChart.change(cc, LibraryContext.None, true)
             ),
-            Disabled = (SuggestionHistory.has_previous >> not),
+            Disabled = (Things.has_previous >> not),
             Position = Position.Margin(5.0f).SliceLeft(45.0f)
         )
         |+ Button(Icons.PAUSE, 
@@ -37,7 +37,7 @@ type Jukebox() =
             (fun () ->
                 let ctx : LibraryViewContext =
                     {
-                        Rate = rate.Value
+                        Rate = SelectedChart.rate.Value
                         RulesetId = Rulesets.current_hash
                         Ruleset = Rulesets.current
                         Library = Content.Library
@@ -47,8 +47,8 @@ type Jukebox() =
                 match Suggestion.get_random [] ctx with
                 | None -> ()
                 | Some cc ->
-                    SuggestionHistory.append()
-                    Chart.change(cc, LibraryContext.None, true)
+                    Things.add_current_chart_to_history()
+                    SelectedChart.change(cc, LibraryContext.None, true)
             ),
             Position = Position.Margin(5.0f).SliceLeft(45.0f).Translate(90.0f, 0.0f)
         )
@@ -60,7 +60,7 @@ type Jukebox() =
         base.Draw()
 
         let song_title = 
-            match Chart.CACHE_DATA with 
+            match SelectedChart.CACHE_DATA with 
             | Some cc -> cc.Artist + " - " + cc.Title
             | None -> %"jukebox.no_chart_selected"
 

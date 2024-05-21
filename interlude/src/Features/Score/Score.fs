@@ -7,7 +7,7 @@ open Prelude.Data
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Online
 
 #nowarn "3370"
@@ -28,10 +28,10 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
     let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.HitEvents
 
     let previous_personal_bests =
-        if Gameplay.Chart.SAVE_DATA.Value.PersonalBests.ContainsKey Rulesets.current_hash then
-            Some Gameplay.Chart.SAVE_DATA.Value.PersonalBests.[Rulesets.current_hash]
-        else
-            None
+        match SelectedChart.SAVE_DATA with
+        | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
+            Some d.PersonalBests.[Rulesets.current_hash]
+        | _ -> None
         |> ref
 
     let original_ruleset = options.SelectedRuleset.Value

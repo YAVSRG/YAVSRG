@@ -122,7 +122,7 @@ module PacemakerState =
                     c
             actual <= count
 
-    let create (info: Chart.LoadedChartInfo) (ctx: PacemakerCreationContext) =
+    let create (info: LoadedChartInfo) (ctx: PacemakerCreationContext) =
         match ctx with
         | PacemakerCreationContext.None -> PacemakerState.None
         | PacemakerCreationContext.FromScore score_info ->
@@ -144,7 +144,7 @@ module PacemakerState =
             | PacemakerMode.Accuracy -> 
 
                 if setting.UsePersonalBest then
-                    match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Accuracy) rate.Value with
+                    match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Accuracy) SelectedChart.rate.Value with
                     | Some best_accuracy ->
                         PacemakerState.Accuracy best_accuracy
                     | None -> PacemakerState.Accuracy setting.Accuracy
@@ -155,7 +155,7 @@ module PacemakerState =
                 
                 let lamp =
                     if setting.UsePersonalBest then
-                        match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Lamp) rate.Value with
+                        match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Lamp) SelectedChart.rate.Value with
                         | Some best_lamp -> best_lamp
                         | None -> setting.Lamp
                     else

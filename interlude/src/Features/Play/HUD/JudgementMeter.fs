@@ -24,7 +24,7 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
                 noteskin_options.JudgementMeterDuration
             else
                 noteskin_options.JudgementMeterFrameTime * float32 texture.Columns
-        ) * rate.Value * 1.0f<ms>
+        ) * SelectedChart.rate.Value * 1.0f<ms>
 
     do
         state.SubscribeToHits(fun ev ->

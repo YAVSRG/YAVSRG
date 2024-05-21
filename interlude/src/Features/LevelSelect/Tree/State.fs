@@ -52,20 +52,21 @@ module private TreeState =
         | Some b -> Colors.white.O2
 
     let get_pb (bests: PersonalBests<'T>) (color_func: 'T -> Color) (format: 'T -> string) =
-        match PersonalBests.get_best_above_with_rate rate.Value bests with
+        match PersonalBests.get_best_above_with_rate SelectedChart.rate.Value bests with
         | Some(v, r) -> Some(v, r, color_func v, format v)
         | None ->
 
-        match PersonalBests.get_best_below_with_rate rate.Value bests with
+        match PersonalBests.get_best_below_with_rate SelectedChart.rate.Value bests with
         | Some(v, r) -> Some(v, r, Colors.white.O2, format v)
         | None -> None
 
     let CHART_HEIGHT = 90.0f
     let GROUP_HEIGHT = 55.0f
 
+    // todo: react to the event of switching instead of doing stuff here
     let switch_chart (cc, context, group_name) =
         if not Transitions.active then
-            Chart.change (cc, context, true)
+            SelectedChart.change (cc, context, true)
             Selection.clear ()
             selected_chart <- cc.Key
             expanded_group <- group_name

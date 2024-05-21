@@ -83,20 +83,20 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
             )
             |+ ModSelector(
                 "auto",
-                (fun _ -> if autoplay then Some 0 else None),
-                (fun _ -> autoplay <- not autoplay)
+                (fun _ -> if SelectedChart.autoplay then Some 0 else None),
+                (fun _ -> SelectedChart.autoplay <- not SelectedChart.autoplay)
             )
             |+ seq {
                 for id in Mods.MENU_DISPLAY_ORDER do
                     yield ModSelector(
                         id,
                         (fun _ ->
-                            if selected_mods.Value.ContainsKey id then
-                                Some selected_mods.Value.[id]
+                            if SelectedChart.selected_mods.Value.ContainsKey id then
+                                Some SelectedChart.selected_mods.Value.[id]
                             else
                                 None
                         ),
-                        (fun _ -> Setting.app (Mods.cycle id) selected_mods)
+                        (fun _ -> Setting.app (Mods.cycle id) SelectedChart.selected_mods)
                     )
             }
             |+ ModSelector(
@@ -107,7 +107,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
 
         page_container()
         |+ PageSetting("gameplay.rate",
-            Slider(rate |> Setting.map id (fun v -> round (v / 0.05f) * 0.05f), 
+            Slider(SelectedChart.rate |> Setting.map id (fun v -> round (v / 0.05f) * 0.05f), 
             Format = sprintf "%.02fx")
         )
             .Tooltip(Tooltip.Info("gameplay.rate"))
@@ -132,9 +132,9 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         base.Update(elapsed_ms, moved)
 
         if (%%"autoplay").Tapped() then
-            autoplay <- not autoplay
+            SelectedChart.autoplay <- not SelectedChart.autoplay
         else
-            change_rate_hotkeys change_rate
+            Stuff.change_rate_hotkeys change_rate
 
     override this.Title = %"mods"
     override this.OnClose() = on_close ()
@@ -152,6 +152,6 @@ type ModSelect(change_rate: float32 -> unit, on_menu_close: unit -> unit) =
         base.Update(elapsed_ms, moved)
 
         if (%%"autoplay").Tapped() then
-            autoplay <- not autoplay
+            SelectedChart.autoplay <- not SelectedChart.autoplay
         else
-            change_rate_hotkeys change_rate
+            Stuff.change_rate_hotkeys change_rate

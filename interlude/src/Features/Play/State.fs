@@ -5,7 +5,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Gameplay
-open Interlude.Features.Gameplay.Chart
+open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
 
 type PlayState =

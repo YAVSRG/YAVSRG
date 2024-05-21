@@ -289,7 +289,7 @@ type Leaderboard(display: Setting<Display>) as this =
         ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(55.0f))
 
     do
-        Chart.on_chart_change_started.Add(fun info ->
+        SelectedChart.on_chart_change_started.Add(fun info ->
             if info.CacheInfo.Hash <> last_loading then
                 Loader.container.Iter(fun s -> s.FadeOut())
                 last_loading <- info.CacheInfo.Hash
@@ -379,10 +379,10 @@ type Leaderboard(display: Setting<Display>) as this =
         base.Update(elapsed_ms, moved)
         Loader.score_loader.Join()
 
-    member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
+    member this.OnChartUpdated(info: LoadedChartInfo) =
         if info.CacheInfo.Hash <> last_loaded || scoring <> Content.Rulesets.current_hash then
             last_loaded <- info.CacheInfo.Hash
             scoring <- Content.Rulesets.current_hash
             Loader.load state info.CacheInfo info.Chart
 
-    member this.Refresh() = Chart.when_loaded this.OnChartUpdated
+    member this.Refresh() = SelectedChart.when_loaded this.OnChartUpdated

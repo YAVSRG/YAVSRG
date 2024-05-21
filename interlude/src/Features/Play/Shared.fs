@@ -15,7 +15,7 @@ open Prelude.Skinning.Noteskins
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
 open Interlude.Features.Online
 open Interlude.Features.Play
@@ -38,7 +38,7 @@ module LocalAudioSync =
                 count <- count + 1.0f
             | _ -> ()
 
-        let mean = sum / count * Gameplay.rate.Value
+        let mean = sum / count * SelectedChart.rate.Value
 
         if count < 10.0f then
             save_data.Offset
@@ -182,7 +182,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         Dialog.close ()
         Background.dim (float32 options.BackgroundDim.Value)
         Toolbar.hide ()
-        Song.change_rate Gameplay.rate.Value
+        Song.change_rate SelectedChart.rate.Value
         Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
         Song.on_finish <- SongFinishAction.Wait
         Song.play_leadin ()

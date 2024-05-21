@@ -38,10 +38,10 @@ type MultiplayerChartContextMenu(cc: CachedChart) =
 module LobbyChart =
 
     let mutable private last_seen_lobby_chart : LobbyChart option = None
-    let mutable private last_seen_loaded_chart : Chart.LoadedChartInfo option = None
+    let mutable private last_seen_loaded_chart : LoadedChartInfo option = None
     let mutable private is_loading = false
 
-    let info_if_selected() : Chart.LoadedChartInfo option =
+    let info_if_selected() : LoadedChartInfo option =
         match last_seen_loaded_chart, last_seen_lobby_chart with
         | Some real_chart, Some expected_chart ->
             if real_chart.CacheInfo.Hash = expected_chart.Hash then
@@ -60,9 +60,9 @@ module LobbyChart =
 
         match info_if_selected() with
         | Some _ ->
-            rate.Set chart.Rate
+            SelectedChart.rate.Set chart.Rate
 
-            selected_mods.Set(
+            SelectedChart.selected_mods.Set(
                 chart.Mods
                 |> Map.ofArray
                 |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
@@ -84,33 +84,33 @@ module LobbyChart =
                         Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
                         defer
                         <| fun () ->
-                        Chart.change (newly_installed, LibraryContext.None, true)
-                        rate.Set chart.Rate
-                        selected_mods.Set(
+                        SelectedChart.change (newly_installed, LibraryContext.None, true)
+                        SelectedChart.rate.Set chart.Rate
+                        SelectedChart.selected_mods.Set(
                             chart.Mods
                             |> Map.ofArray
                             |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
                         )
                 )
             | Some cc ->
-                Chart.change (cc, LibraryContext.None, true)
-                rate.Set chart.Rate
+                SelectedChart.change (cc, LibraryContext.None, true)
+                SelectedChart.rate.Set chart.Rate
 
-                selected_mods.Set(
+                SelectedChart.selected_mods.Set(
                     chart.Mods
                     |> Map.ofArray
                     |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
                 )
 
     let on_screen_enter(lobby: Lobby) =
-        Chart.if_loaded (fun info ->
+        SelectedChart.if_loaded (fun info ->
             is_loading <- false
             last_seen_loaded_chart <- Some info
         )
         attempt_match_lobby_chart lobby
 
     do 
-        Chart.on_chart_change_finished.Add(fun info ->
+        SelectedChart.on_chart_change_finished.Add(fun info ->
             is_loading <- false
             last_seen_loaded_chart <- Some info
         )
@@ -181,7 +181,7 @@ type SelectedChart(lobby: Lobby) =
         |+ Text(
             (fun () -> 
                 match LobbyChart.info_if_selected() with
-                | Some _ -> Mods.format (rate.Value, selected_mods.Value, false)
+                | Some _ -> Mods.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, false)
                 | None -> ""
             ),
             Align = Alignment.LEFT,

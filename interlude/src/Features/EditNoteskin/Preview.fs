@@ -5,7 +5,7 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.UI
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
 type NoteskinPreview(position: Position) as this =
@@ -13,7 +13,7 @@ type NoteskinPreview(position: Position) as this =
 
     let fbo = FBO.create ()
 
-    let create_renderer (info: Gameplay.Chart.LoadedChartInfo) =
+    let create_renderer (info: LoadedChartInfo) =
         let playfield =
             Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
 
@@ -35,7 +35,7 @@ type NoteskinPreview(position: Position) as this =
     do
         fbo.Unbind()
 
-        Gameplay.Chart.if_loaded <| fun info -> renderer <- create_renderer info
+        SelectedChart.if_loaded <| fun info -> renderer <- create_renderer info
 
         this
         |* (bounds_placeholder
@@ -48,8 +48,8 @@ type NoteskinPreview(position: Position) as this =
     member this.PreviewBounds = bounds_placeholder.Bounds
 
     member this.Refresh() =
-        Gameplay.Chart.recolor ()
-        Gameplay.Chart.when_loaded <| fun info -> renderer <- create_renderer info
+        SelectedChart.recolor ()
+        SelectedChart.when_loaded <| fun info -> renderer <- create_renderer info
 
     override this.Update(elapsed_ms, moved) =
         this.Bounds <- Viewport.bounds

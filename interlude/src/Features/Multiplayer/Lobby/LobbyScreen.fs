@@ -75,7 +75,7 @@ type LobbyUI(lobby: Lobby) =
                 }
         )
         |+ StylishButton(
-            (fun () -> Chart.if_loaded <| fun info -> Preview(info, ignore).Show()),
+            (fun () -> SelectedChart.if_loaded <| fun info -> Preview(info, ignore).Show()),
             K(sprintf "%s %s" Icons.EYE (%"levelselect.preview")),
             !%Palette.MAIN_100,
             TiltLeft = false,
@@ -137,7 +137,7 @@ type LobbyUI(lobby: Lobby) =
                 Screen.current_type = Screen.Type.Lobby
                 && lobby.ReadyStatus = ReadyFlag.Play
             then
-                Chart.if_loaded
+                SelectedChart.if_loaded
                 <| fun info ->
                     if
                         Screen.change_new
@@ -152,11 +152,11 @@ type LobbyUI(lobby: Lobby) =
 
         lobby.OnPlayerStatusChanged.Add(fun (username, status) ->
             if status = LobbyPlayerStatus.Playing then
-                Chart.if_loaded
+                SelectedChart.if_loaded
                 <| fun info ->
 
                 let replay : OnlineReplayProvider = OnlineReplayProvider()
-                let scoring = Metrics.create Rulesets.current info.WithMods.Keys replay info.WithMods.Notes rate.Value
+                let scoring = Metrics.create Rulesets.current info.WithMods.Keys replay info.WithMods.Notes SelectedChart.rate.Value
                 let replay_info =
                     {
                         Replay = replay
@@ -175,7 +175,7 @@ type LobbyUI(lobby: Lobby) =
 
                                 PlayedBy = ScorePlayedBy.Username username
                                 TimePlayed = Timestamp.now ()
-                                Rate = rate.Value
+                                Rate = SelectedChart.rate.Value
 
                                 Replay = replay_data
                                 Scoring = scoring

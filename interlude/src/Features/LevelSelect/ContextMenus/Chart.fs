@@ -115,13 +115,13 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                 Icon = Icons.SHUFFLE
             )
 
-        if Some cc = Chart.CACHE_DATA then
+        if Some cc = SelectedChart.CACHE_DATA then
             content
             |* PageButton.Once(
                 "chart.practice",
                 (fun () -> 
                     Menu.Exit()
-                    Chart.when_loaded(fun info ->
+                    SelectedChart.when_loaded(fun info ->
                         Screen.change_new
                             (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
                             Screen.Type.Practice
@@ -132,7 +132,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                 Icon = Icons.TARGET
             )
 
-        match Content.Table, Chart.CHART with
+        match Content.Table, SelectedChart.CHART with
         | Some table, Some chart ->
             if
                 Network.status = Network.Status.LoggedIn

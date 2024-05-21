@@ -11,7 +11,7 @@ open Interlude.Features.Gameplay
 
 type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let duration = noteskin_options.EarlyLateMeterDuration * rate.Value * 1.0f<ms>
+    let duration = noteskin_options.EarlyLateMeterDuration * SelectedChart.rate.Value * 1.0f<ms>
     let mutable early = false
     let mutable time = -Time.infinity
 

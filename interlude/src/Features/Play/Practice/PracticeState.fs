@@ -6,7 +6,7 @@ open Prelude.Charts
 open Prelude.Data
 open Prelude.Gameplay
 open Interlude.Options
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
 [<RequireQualifiedAccess>]
@@ -55,7 +55,7 @@ module PracticeState =
                 count <- count + 1.0f
             | _ -> ()
 
-        let mean = sum / count * Gameplay.rate.Value
+        let mean = sum / count * SelectedChart.rate.Value
 
         let hit_position_suggestion =
             options.HitPosition.Value - mean * options.ScrollSpeed.Value * 1.0f< / ms>

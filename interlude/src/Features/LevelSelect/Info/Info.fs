@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
 open Interlude.Features
@@ -30,7 +29,7 @@ type ChartInfo() as this =
             if Transitions.active then
                 ()
             else
-                rate.Value <- rate.Value + change_rate_by
+                SelectedChart.rate.Value <- SelectedChart.rate.Value + change_rate_by
                 LevelSelect.refresh_details ()
 
         this
@@ -52,7 +51,7 @@ type ChartInfo() as this =
         )
 
         |+ Text(
-            (fun () -> Chart.FMT_BPM),
+            (fun () -> SelectedChart.FMT_BPM),
             Align = Alignment.CENTER,
             Position =
                 {
@@ -64,7 +63,7 @@ type ChartInfo() as this =
         )
 
         |+ Text(
-            (fun () -> Chart.FMT_DURATION),
+            (fun () -> SelectedChart.FMT_DURATION),
             Align = Alignment.RIGHT,
             Position =
                 {
@@ -97,7 +96,7 @@ type ChartInfo() as this =
                         Bottom = 1.0f %- 60.0f
                     }
             )
-            |+ Text((fun () -> Mods.format (rate.Value, selected_mods.Value, autoplay)), Align = Alignment.LEFT))
+            |+ Text((fun () -> Mods.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, SelectedChart.autoplay)), Align = Alignment.LEFT))
             .Tooltip(
                 Tooltip
                     .Info("levelselect.selected_mods")
@@ -108,7 +107,7 @@ type ChartInfo() as this =
             )
 
         |+ StylishButton(
-            (fun () -> Chart.when_loaded <| fun info -> Preview(info, change_rate).Show()),
+            (fun () -> SelectedChart.when_loaded <| fun info -> Preview(info, change_rate).Show()),
             K(sprintf "%s %s" Icons.EYE %"levelselect.preview"),
             !%Palette.MAIN_100,
             Hotkey = "preview",
@@ -154,10 +153,10 @@ type ChartInfo() as this =
 
         LevelSelect.on_refresh_all.Add this.Refresh
         LevelSelect.on_refresh_details.Add this.Refresh
-        Chart.on_chart_change_finished.Add this.OnChartUpdated
-        Chart.on_chart_update_finished.Add (fun info -> rating <- info.Rating.Physical; notecounts <- info.NotecountsString)
+        SelectedChart.on_chart_change_finished.Add this.OnChartUpdated
+        SelectedChart.on_chart_update_finished.Add (fun info -> rating <- info.Rating.Physical; notecounts <- info.NotecountsString)
 
-    member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
+    member this.OnChartUpdated(info: LoadedChartInfo) =
         match display.Value with
         | Display.Local -> scoreboard.OnChartUpdated(info)
         | Display.Online -> online.OnChartUpdated(info)
@@ -166,4 +165,4 @@ type ChartInfo() as this =
         rating <- info.Rating.Physical
         notecounts <- info.NotecountsString
 
-    member this.Refresh() = Chart.when_loaded this.OnChartUpdated
+    member this.Refresh() = SelectedChart.when_loaded this.OnChartUpdated

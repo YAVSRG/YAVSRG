@@ -3,12 +3,12 @@
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Charts.Processing.NoteColors
+open Prelude.Charts.Processing
 open Prelude.Gameplay
 open Prelude.Skinning.Noteskins
 open Interlude.Options
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
 [<Struct>]
@@ -47,21 +47,21 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
     let note_duration =
         if ns.NoteExplosionSettings.UseBuiltInAnimation then
-            float32 ns.NoteExplosionSettings.Duration * 1.0f<ms> * Gameplay.rate.Value
+            float32 ns.NoteExplosionSettings.Duration * 1.0f<ms> * SelectedChart.rate.Value
         else
             float32 ns.NoteExplosionSettings.AnimationFrameTime
             * float32 note_explosion.Columns
             * 1.0f<ms>
-            * Gameplay.rate.Value
+            * SelectedChart.rate.Value
 
     let release_duration =
         if ns.HoldExplosionSettings.UseBuiltInAnimation then
-            float32 ns.HoldExplosionSettings.Duration * 1.0f<ms> * Gameplay.rate.Value
+            float32 ns.HoldExplosionSettings.Duration * 1.0f<ms> * SelectedChart.rate.Value
         else
             float32 ns.HoldExplosionSettings.AnimationFrameTime
             * float32 release_explosion.Columns
             * 1.0f<ms>
-            * Gameplay.rate.Value
+            * SelectedChart.rate.Value
 
     let EXPLOSION_POOL_SIZE = 10
 
@@ -185,7 +185,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
                 let frame =
                     float32 (now - holding_since.[k])
-                    / Gameplay.rate.Value
+                    / SelectedChart.rate.Value
                     / float32 ns.HoldExplosionSettings.AnimationFrameTime
                     |> floor
                     |> int
@@ -226,7 +226,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
                     let frame =
                         float32 (now - ex.Time)
-                        / Gameplay.rate.Value
+                        / SelectedChart.rate.Value
                         / float32 ns.HoldExplosionSettings.AnimationFrameTime
                         |> floor
                         |> int
@@ -281,7 +281,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
                     let frame =
                         float32 (now - ex.Time)
-                        / Gameplay.rate.Value
+                        / SelectedChart.rate.Value
                         / float32 ns.NoteExplosionSettings.AnimationFrameTime
                         |> floor
                         |> int

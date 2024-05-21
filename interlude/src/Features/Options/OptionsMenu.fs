@@ -107,9 +107,9 @@ module OptionsMenuRoot =
                         if Content.Noteskin.IsEmbedded then
                             EditHUDPage().Show()
                         elif
-                            Chart.WITH_COLORS.IsSome
+                            SelectedChart.WITH_COLORS.IsSome
                             && Screen.change_new
-                                (fun () -> HUDEditor.edit_hud_screen (Chart.CHART.Value, Chart.WITH_COLORS.Value, fun () -> OptionsPage().Show()))
+                                (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> OptionsPage().Show()))
                                 Screen.Type.Practice
                                 Transitions.Flags.Default
                         then

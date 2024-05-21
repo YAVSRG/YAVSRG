@@ -9,8 +9,7 @@ open Prelude.Charts.Processing.Patterns
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
-open Interlude.Features
-open Interlude.Features.Gameplay.Chart
+open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
 type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
@@ -118,7 +117,7 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
         elif (%%"screenshot").Tapped() then
             Toolbar.take_screenshot ()
         else
-            Gameplay.change_rate_hotkeys change_rate
+            Stuff.change_rate_hotkeys change_rate
 
     override this.Close() =
         if dragging then

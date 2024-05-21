@@ -182,7 +182,7 @@ module Scoreboard =
                 member this.Handle(action) = action ()
             }
 
-        let load (info: Chart.LoadedChartInfo) =
+        let load (info: LoadedChartInfo) =
             score_loader.Request
                 {
                     RulesetId = Rulesets.current_hash
@@ -218,15 +218,15 @@ type Scoreboard(display: Setting<Display>) as this =
 
     let filterer () : ScoreCard -> bool =
         match filter.Value with
-        | Filter.CurrentRate -> (fun a -> a.Data.Rate = rate.Value)
-        | Filter.CurrentMods -> (fun a -> a.Data.Mods = selected_mods.Value)
+        | Filter.CurrentRate -> (fun a -> a.Data.Rate = SelectedChart.rate.Value)
+        | Filter.CurrentMods -> (fun a -> a.Data.Mods = SelectedChart.selected_mods.Value)
         | _ -> K true
 
     let scroll_container =
         ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(55.0f))
 
     do
-        Chart.on_chart_change_started.Add(fun info ->
+        SelectedChart.on_chart_change_started.Add(fun info ->
             if info.CacheInfo.Hash <> last_loading then
                 Loader.container.Iter(fun s -> s.FadeOut())
                 last_loading <- info.CacheInfo.Hash
@@ -306,7 +306,7 @@ type Scoreboard(display: Setting<Display>) as this =
         base.Update(elapsed_ms, moved)
         Loader.score_loader.Join()
 
-    member this.OnChartUpdated(info: Chart.LoadedChartInfo) =
+    member this.OnChartUpdated(info: LoadedChartInfo) =
         if
             (let v = info.SaveData.Scores.Length <> count in
              count <- info.SaveData.Scores.Length
@@ -321,4 +321,4 @@ type Scoreboard(display: Setting<Display>) as this =
 
         Loader.container.Filter <- filterer ()
 
-    member this.Refresh() = Chart.when_loaded this.OnChartUpdated
+    member this.Refresh() = SelectedChart.when_loaded this.OnChartUpdated

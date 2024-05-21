@@ -7,7 +7,7 @@ open Prelude.Data
 open Prelude.Data.Library.Caching
 open Interlude
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Stats
 open Interlude.Features.MainMenu
 open Interlude.Features.Import
@@ -18,6 +18,8 @@ open Interlude.Features.Printerlude
 open Interlude.Features.Toolbar
 open Interlude.Features.Online
 open Interlude.Features.Play
+open Interlude.Features.EditNoteskin
+open Interlude.Features.OptionsMenu
 
 module Startup =
     let MIGRATION_VERSION = 2
@@ -70,10 +72,10 @@ module Startup =
                         Screen.Type.Replay
                         Transitions.Flags.Default
                 then
-                    Gameplay.rate.Value <- score_info.Rate
+                    SelectedChart.rate.Value <- score_info.Rate
 
-        EditNoteskin.Shared.choose_noteskins <-
-            fun () -> OptionsMenu.Noteskins.NoteskinsPage().Show()
+        choose_noteskins <-
+            fun () -> Noteskins.NoteskinsPage().Show()
 
         Updates.check_for_updates ()
 
@@ -83,7 +85,7 @@ module Startup =
                 Content.init_window ()
                 DiscordRPC.init_window ()
                 migrate ()
-                Gameplay.init_window ()
+                SelectedChart.init_window ()
                 Network.init_window ()
                 Mounts.import_mounts_on_startup ()
                 base.Init()

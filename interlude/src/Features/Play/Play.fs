@@ -12,9 +12,8 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features
 open Interlude.Features.Pacemaker
-open Interlude.Features.Gameplay.Chart
+open Interlude.Features.Gameplay
 open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Features.Score
@@ -29,7 +28,7 @@ module PlayScreen =
         let liveplay = LiveReplayProvider first_note
 
         let scoring =
-            Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+            Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
@@ -137,10 +136,11 @@ module PlayScreen =
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then
                     Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
+                info.SaveData.LastPlayed <- Timestamp.now ()
 
                 base.OnEnter(previous)
 
-                DiscordRPC.playing_timed ("Playing", info.CacheInfo.Title, info.CacheInfo.Length / Gameplay.rate.Value)
+                DiscordRPC.playing_timed ("Playing", info.CacheInfo.Title, info.CacheInfo.Length / SelectedChart.rate.Value)
 
             override this.OnExit(next) =
                 if next = Screen.Type.Score then
@@ -185,12 +185,12 @@ module PlayScreen =
                     Screen.change_new
                         (fun () ->
                             let score_info =
-                                Gameplay.score_info_from_gameplay
+                                Stuff.score_info_from_gameplay
                                     info
                                     scoring
                                     ((liveplay :> IReplayProvider).GetFullReplay())
 
-                            (score_info, Gameplay.set_score (PacemakerState.pacemaker_met this.State.Scoring this.State.Pacemaker) score_info info.SaveData, true)
+                            (score_info, Stuff.set_score (PacemakerState.pacemaker_met this.State.Scoring this.State.Pacemaker) score_info info.SaveData, true)
                             |> ScoreScreen
                         )
                         Screen.Type.Score

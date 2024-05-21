@@ -36,38 +36,31 @@ module LevelSelect =
                 refresh_details ()
         )
 
-    let try_play (info: Chart.LoadedChartInfo) : bool =
-        if
-            Screen.change_new
-                (fun () ->
-                    PlayScreen.play_screen (
-                        info,
-                        if options.EnablePacemaker.Value then
-                            PacemakerCreationContext.FromUserSetting
-                        else
-                            PacemakerCreationContext.None
-                    )
+    let try_play (info: LoadedChartInfo) : bool =
+        Screen.change_new
+            (fun () ->
+                PlayScreen.play_screen (
+                    info,
+                    if options.EnablePacemaker.Value then
+                        PacemakerCreationContext.FromUserSetting
+                    else
+                        PacemakerCreationContext.None
                 )
-                Screen.Type.Play
-                Transitions.Flags.Default
-        then
-            // todo: move to play/multiplay screens?
-            info.SaveData.LastPlayed <- Timestamp.now ()
-            true
-        else
-            false
+            )
+            Screen.Type.Play
+            Transitions.Flags.Default
 
     let choose_this_chart () =
 
-        Chart.when_loaded
+        SelectedChart.when_loaded
         <| fun info ->
 
             match Network.lobby with
             | Some lobby ->
                 if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
-                    lobby.SelectChart (info.CacheInfo, rate.Value, selected_mods.Value)
+                    lobby.SelectChart (info.CacheInfo, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
             | None ->
-                if autoplay then
+                if SelectedChart.autoplay then
                     Screen.change_new
                         (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)
                         Screen.Type.Replay
@@ -77,7 +70,7 @@ module LevelSelect =
                 |> ignore
 
     let challenge_score (score_info: ScoreInfo) =
-        Chart.if_loaded
+        SelectedChart.if_loaded
         <| fun info ->
 
             if
@@ -86,7 +79,5 @@ module LevelSelect =
                     Screen.Type.Play
                     Transitions.Flags.Default
             then
-                // todo: move to play/multiplay screens?
-                info.SaveData.LastPlayed <- Timestamp.now ()
-                rate.Set score_info.Rate
-                selected_mods.Set score_info.Mods
+                SelectedChart.rate.Set score_info.Rate
+                SelectedChart.selected_mods.Set score_info.Mods

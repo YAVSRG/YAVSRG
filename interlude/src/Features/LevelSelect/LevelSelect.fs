@@ -36,17 +36,17 @@ type LevelSelectScreen() =
         )
 
     let refresh () =
-        Chart.if_loaded (fun info -> info_panel.OnChartUpdated(info))
+        SelectedChart.if_loaded (fun info -> info_panel.OnChartUpdated(info))
         Tree.refresh ()
 
     let random_chart () =
-        if options.AdvancedRecommendations.Value && Chart.RATING.IsSome then
+        if options.AdvancedRecommendations.Value && SelectedChart.RATING.IsSome then
             let ctx =
                 {
-                    BaseDifficulty = Chart.RATING.Value.Physical
-                    BaseChart = Chart.CACHE_DATA.Value, rate.Value
+                    BaseDifficulty = SelectedChart.RATING.Value.Physical
+                    BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
                     Filter = LevelSelect.filter |> Filter.except_keywords
-                    Mods = selected_mods.Value
+                    Mods = SelectedChart.selected_mods.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
                     Library = Content.Library
@@ -56,15 +56,15 @@ type LevelSelectScreen() =
 
             match Suggestion.get_suggestion ctx with
             | Some (cc, rate) ->
-                if not Transitions.active then SuggestionHistory.append()
-                Chart._rate.Value <- rate
+                if not Transitions.active then Things.add_current_chart_to_history()
+                SelectedChart._rate.Value <- rate
                 TreeState.switch_chart (cc, LibraryContext.None, "")
                 refresh ()
             | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
         else
             let ctx =
                 {
-                    Rate = rate.Value
+                    Rate = SelectedChart.rate.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
                     Library = Content.Library
@@ -73,13 +73,13 @@ type LevelSelectScreen() =
 
             match Suggestion.get_random LevelSelect.filter ctx with
             | Some cc ->
-                if not Transitions.active then SuggestionHistory.append()
+                if not Transitions.active then Things.add_current_chart_to_history()
                 TreeState.switch_chart (cc, LibraryContext.None, "")
                 refresh ()
             | None -> ()
 
     let previous_chart () =
-        match SuggestionHistory.previous() with
+        match Things.previous() with
         | Some cc -> 
             TreeState.switch_chart (cc, LibraryContext.None, "")
             refresh()
@@ -97,7 +97,7 @@ type LevelSelectScreen() =
         this
         |+ Text(
             (fun () ->
-                match Chart.CACHE_DATA with
+                match SelectedChart.CACHE_DATA with
                 | None -> ""
                 | Some c -> c.Title
             ),
@@ -113,7 +113,7 @@ type LevelSelectScreen() =
 
         |+ Text(
             (fun () ->
-                match Chart.CACHE_DATA with
+                match SelectedChart.CACHE_DATA with
                 | None -> ""
                 | Some c -> c.DifficultyName
             ),
@@ -191,10 +191,10 @@ type LevelSelectScreen() =
         )
             .Tooltip(Tooltip.Info("levelselect.play").Hotkey("select"))
         |+ Conditional(
-            (fun () -> match Chart.LIBRARY_CTX with LibraryContext.Playlist _ -> true | _ -> false),
+            (fun () -> match SelectedChart.LIBRARY_CTX with LibraryContext.Playlist _ -> true | _ -> false),
             StylishButton(
                 (fun () ->
-                    match Chart.LIBRARY_CTX with
+                    match SelectedChart.LIBRARY_CTX with
                     | LibraryContext.Playlist (_, name, _) ->
                         Endless.begin_endless_mode (
                             EndlessModeState.create_from_playlist
@@ -214,9 +214,9 @@ type LevelSelectScreen() =
             ).Tooltip(Tooltip.Info("playlist.play").Hotkey("endless_mode"))
         )
         |+ Conditional(
-            (fun () -> match Chart.LIBRARY_CTX with LibraryContext.Playlist _ -> false | _ -> true),
+            (fun () -> match SelectedChart.LIBRARY_CTX with LibraryContext.Playlist _ -> false | _ -> true),
             StylishButton(
-                (fun () -> Chart.if_loaded(fun info -> EndlessModeMenu(info).Show())),
+                (fun () -> SelectedChart.if_loaded(fun info -> EndlessModeMenu(info).Show())),
                 K (sprintf "%s %s" Icons.PLAY_CIRCLE %"levelselect.endless_mode"),
                 !%Palette.DARK.O2,
                 Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f),
@@ -226,7 +226,7 @@ type LevelSelectScreen() =
                 .Tooltip(Tooltip.Info("levelselect.endless_mode").Hotkey("endless_mode"))
         )
         |+ StylishButton(
-            (fun () -> Chart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),
+            (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),
             K Icons.LIST,
             !%Palette.MAIN.O2,
             Position = Position.SliceBottom(50.0f).SliceRight(60.0f).Translate(-650.0f, 0.0f)

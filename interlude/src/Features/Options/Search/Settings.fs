@@ -13,7 +13,7 @@ open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.SystemSettings
 open Interlude.Features.OptionsMenu.Gameplay
 open Interlude.Features.Pacemaker
-open Interlude.Features
+open Interlude.Features.Gameplay
 
 module Settings =
 
@@ -153,7 +153,7 @@ module Settings =
                     .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
                 , 2, 2, PageWidth.Normal
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
-                let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
+                let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
                 let binds = GameplayKeybinder(keymode)
                 yield PageSetting(

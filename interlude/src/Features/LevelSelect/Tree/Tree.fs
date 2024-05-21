@@ -24,7 +24,7 @@ module Tree =
         let library_groups =
             let ctx: LibraryViewContext =
                 {
-                    Rate = rate.Value
+                    Rate = SelectedChart.rate.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
                     ScoreDatabase = Content.Scores
@@ -64,11 +64,12 @@ module Tree =
             |> Seq.map (fun (index, group_name) ->
                 library_groups.[(index, group_name)].Charts
                 |> Seq.map (fun (cc, context) ->
-                    match Chart.CACHE_DATA with
+                    // todo: extract this into a callable function to react to chart changes with
+                    match SelectedChart.CACHE_DATA with
                     | None -> ()
-                    | Some c ->
-                        if c.Key = cc.Key && (context = LibraryContext.None || context = Chart.LIBRARY_CTX) then
-                            selected_chart <- c.Key
+                    | Some current_cc ->
+                        if current_cc.Key = cc.Key && (context = LibraryContext.None || context = SelectedChart.LIBRARY_CTX) then
+                            selected_chart <- current_cc.Key
                             selected_group <- group_name
 
                     let i = ChartItem(group_name, cc, context)
@@ -191,8 +192,8 @@ module Tree =
 
         if Dialog.exists () then
             ()
-        elif (%%"context_menu").Tapped() && Chart.CACHE_DATA.IsSome then
-            ChartContextMenu(Chart.CACHE_DATA.Value, Chart.LIBRARY_CTX).Show()
+        elif (%%"context_menu").Tapped() && SelectedChart.CACHE_DATA.IsSome then
+            ChartContextMenu(SelectedChart.CACHE_DATA.Value, SelectedChart.LIBRARY_CTX).Show()
         else
 
             if (%%"up").Tapped() && expanded_group <> "" then

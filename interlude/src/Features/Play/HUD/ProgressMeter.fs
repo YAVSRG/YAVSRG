@@ -6,7 +6,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
 module ProgressMeter =
@@ -123,7 +123,7 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
 
             match user_options.ProgressMeterLabel with
                 | ProgressMeterLabel.Countdown ->
-                    let time_left = (duration - now) / Gameplay.rate.Value |> max 0.0f<ms>
+                    let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms>
                     ProgressMeter.draw_countdown_centered (
                         font_texture,
                         this.Bounds.SliceBottom(this.Bounds.Width * noteskin_options.ProgressMeterLabelSize), 
@@ -148,7 +148,7 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
             let text =
                 match user_options.ProgressMeterLabel with
                 | ProgressMeterLabel.Countdown ->
-                    let time_left = (duration - now) / Gameplay.rate.Value |> max 0.0f<ms>
+                    let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms>
                     ProgressMeter.fmt_time_left time_left
                 | ProgressMeterLabel.Percentage -> sprintf "%.0f%%" (percent * 100.0f)
                 | _ -> ""

@@ -8,7 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
@@ -90,7 +90,7 @@ type ColorSettingsPage() =
 
     let data = Content.NoteskinConfig
 
-    let keymode: Setting<Keymode> = Setting.simple <| Gameplay.Chart.keymode ()
+    let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
     let mutable note_colors = data.NoteColors
 

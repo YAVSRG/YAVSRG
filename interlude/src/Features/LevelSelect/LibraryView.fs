@@ -175,11 +175,11 @@ type LibraryViewControls() =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if Chart.CACHE_DATA.IsSome then
+        if SelectedChart.CACHE_DATA.IsSome then
             if (%%"move_up_in_playlist").Tapped() then
-                CollectionActions.reorder_up Chart.LIBRARY_CTX |> ignore // todo: play sound effect
+                CollectionActions.reorder_up SelectedChart.LIBRARY_CTX |> ignore // todo: play sound effect
             elif (%%"move_down_in_playlist").Tapped() then
-                CollectionActions.reorder_down Chart.LIBRARY_CTX |> ignore
+                CollectionActions.reorder_down SelectedChart.LIBRARY_CTX |> ignore
 
             elif (%%"collections").Tapped() then
                 Menu.ShowPage ManageCollectionsPage

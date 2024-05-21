@@ -10,7 +10,8 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude
 open Interlude.Options
-open Interlude.Features
+open Interlude.Features.Gameplay
+open Interlude.Features.Import
 open Interlude.Features.Stats
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
@@ -26,6 +27,14 @@ type Toolbar() =
 
     let container = Container(NodeType.None)
     let volume = Volume(Position = Position.Margin(0.0f, HEIGHT))
+
+    let load_preset (i: int) =
+        if not Toolbar.hidden then
+            match Presets.load i with
+            | Some success_name ->
+                SelectedChart.recolor ()
+                Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
+            | None -> ()
 
     override this.Init(parent) =
         container
@@ -69,7 +78,7 @@ type Toolbar() =
                 |+ LoadingIndicator.Strip(
                     (fun () ->
                         Screen.current_type <> Screen.Type.Import
-                        && Import.ImportScreen.something_in_progress ()
+                        && ImportScreen.something_in_progress ()
                     ),
                     Position = Position.SliceBottom(15.0f).SliceTop(Style.PADDING)
                 ))
@@ -113,39 +122,12 @@ type Toolbar() =
                 if not Toolbar.hidden && not (Dialog.exists()) then
                     Themes.reload_current ()
                     Noteskins.reload_current ()
-                    Gameplay.Chart.recolor ()
+                    SelectedChart.recolor ()
                     Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_themes", "")
         )
-        |+ HotkeyAction(
-            "preset1",
-            fun () ->
-                if not Toolbar.hidden then
-                    match Presets.load 1 with
-                    | Some success_name ->
-                        Gameplay.Chart.recolor ()
-                        Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
-                    | None -> ()
-        )
-        |+ HotkeyAction(
-            "preset2",
-            fun () ->
-                if not Toolbar.hidden then
-                    match Presets.load 2 with
-                    | Some success_name ->
-                        Gameplay.Chart.recolor ()
-                        Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
-                    | None -> ()
-        )
-        |+ HotkeyAction(
-            "preset3",
-            fun () ->
-                if not Toolbar.hidden then
-                    match Presets.load 3 with
-                    | Some success_name ->
-                        Gameplay.Chart.recolor ()
-                        Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
-                    | None -> ()
-        )
+        |+ HotkeyAction("preset1", fun () -> load_preset 1)
+        |+ HotkeyAction("preset2", fun () -> load_preset 2)
+        |+ HotkeyAction("preset3", fun () -> load_preset 3)
         |+ Conditional(
             (fun () -> Updates.update_available),
             Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))

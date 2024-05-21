@@ -8,7 +8,7 @@ open Prelude.Skinning.Noteskins
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
-open Interlude.Features
+open Interlude.Features.Gameplay
 
 [<AutoOpen>]
 module Shared =
@@ -30,7 +30,7 @@ module Shared =
 type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
     inherit NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE scale)
 
-    let keycount = int (Gameplay.Chart.keymode ())
+    let keycount = int (SelectedChart.keymode ())
 
     override this.Draw() =
         base.Draw()
@@ -140,7 +140,7 @@ type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
 type ConfigPreviewNew(position: HUDPosition) =
     inherit StaticWidget(NodeType.None)
 
-    let keycount = int (Gameplay.Chart.keymode ())
+    let keycount = int (SelectedChart.keymode ())
     
     let width, height =
         let container =

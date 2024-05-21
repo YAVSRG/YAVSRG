@@ -9,9 +9,8 @@ open Prelude.Gameplay
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content
-open Interlude.Features
 open Interlude.Features.Pacemaker
-open Interlude.Features.Gameplay.Chart
+open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Stats
 open Interlude.Features.Play.HUD
@@ -79,7 +78,7 @@ module PracticeScreen =
         let mutable resume_from_current_place = false
 
         let last_allowed_practice_point =
-            info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * Gameplay.rate.Value
+            info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * SelectedChart.rate.Value
 
         let state: PracticeState =
             {
@@ -97,10 +96,10 @@ module PracticeScreen =
             liveplay <- LiveReplayProvider FIRST_NOTE
 
             scoring <-
-                Metrics.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes Gameplay.rate.Value
+                Metrics.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
 
             let ignore_notes_before_time =
-                state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * Gameplay.rate.Value
+                state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * SelectedChart.rate.Value
 
             let mutable i = 0
 
@@ -212,7 +211,7 @@ module PracticeScreen =
                     if (%%"skip").Tapped() then
                         resume this
                     else
-                        Gameplay.change_rate_hotkeys (fun change_by -> Gameplay.rate.Value <- Gameplay.rate.Value + change_by)
+                        Stuff.change_rate_hotkeys (fun change_by -> SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by)
 
                 elif not (liveplay :> IReplayProvider).Finished then
                     Input.pop_gameplay (

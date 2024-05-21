@@ -10,7 +10,7 @@ open Prelude.Charts.Processing
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.Options
-open Interlude.Features
+open Interlude.Features.Gameplay
 
 type private StageLeft() =
     inherit StaticWidget(NodeType.None)
@@ -147,7 +147,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             } =
             this.Bounds
 
-        let scale = options.ScrollSpeed.Value / Gameplay.rate.Value * 1.0f< / ms>
+        let scale = options.ScrollSpeed.Value / SelectedChart.rate.Value * 1.0f< / ms>
         let hitposition = float32 options.HitPosition.Value
 
         let playfield_height = bottom - top + (max 0.0f holdnote_trim)
@@ -155,7 +155,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let now =
             Song.time_with_offset ()
             + Performance.frame_compensation ()
-            + options.VisualOffset.Value * 1.0f<ms> * Gameplay.rate.Value
+            + options.VisualOffset.Value * 1.0f<ms> * SelectedChart.rate.Value
 
         if now < time then
             handle_seek_back_in_time ()
