@@ -134,7 +134,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         if (%%"autoplay").Tapped() then
             SelectedChart.autoplay <- not SelectedChart.autoplay
         else
-            Stuff.change_rate_hotkeys change_rate
+            SelectedChart.change_rate_hotkeys change_rate
 
     override this.Title = %"mods"
     override this.OnClose() = on_close ()
@@ -154,4 +154,4 @@ type ModSelect(change_rate: float32 -> unit, on_menu_close: unit -> unit) =
         if (%%"autoplay").Tapped() then
             SelectedChart.autoplay <- not SelectedChart.autoplay
         else
-            Stuff.change_rate_hotkeys change_rate
+            SelectedChart.change_rate_hotkeys change_rate

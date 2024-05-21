@@ -211,7 +211,7 @@ module PracticeScreen =
                     if (%%"skip").Tapped() then
                         resume this
                     else
-                        Stuff.change_rate_hotkeys (fun change_by -> SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by)
+                        SelectedChart.change_rate_hotkeys (fun change_by -> SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by)
 
                 elif not (liveplay :> IReplayProvider).Finished then
                     Input.pop_gameplay (

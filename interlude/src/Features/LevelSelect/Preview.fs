@@ -117,7 +117,7 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
         elif (%%"screenshot").Tapped() then
             Toolbar.take_screenshot ()
         else
-            Stuff.change_rate_hotkeys change_rate
+            SelectedChart.change_rate_hotkeys change_rate
 
     override this.Close() =
         if dragging then
