@@ -39,12 +39,11 @@ type Toolbar() =
             Align = Alignment.RIGHT,
             Position = Position.Box(1.0f, 1.0f, -305.0f, -HEIGHT * 0.5f, 300.0f, HEIGHT * 0.5f)
         )
-        |+ IconButton(
+        |+ InlaidButton(
             %"menu.back",
-            Icons.ARROW_LEFT_CIRCLE,
-            HEIGHT,
             (fun () -> Screen.back Transitions.Flags.UnderLogo |> ignore),
-            Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 160.0f, HEIGHT - 10.0f)
+            Icons.ARROW_LEFT_CIRCLE,
+            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, HEIGHT)
         )
         |+ (FlowContainer.LeftToRight(
                 180.0f,
@@ -150,6 +149,10 @@ type Toolbar() =
         |+ Conditional(
             (fun () -> Updates.update_available),
             Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
+        )
+        |+ Conditional(
+            (fun () -> Screen.current_type = Screen.Type.MainMenu || Screen.current_type = Screen.Type.Import),
+            Jukebox(Position = Position.Box(0.0f, 1.0f, 200.0f, -62.5f, 560.0f, 55.0f))
         )
         |* volume
 
