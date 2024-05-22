@@ -4,12 +4,9 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Prelude
-open Prelude.Data.Library.Sorting
-open Prelude.Data.Library.Collections
-open Prelude.Data.Library.Endless
 open Interlude.UI
 open Interlude.Features.Gameplay
-open Interlude.Content
+open Interlude.Features.LevelSelect
 
 type Jukebox() =
     inherit Container(NodeType.None)
@@ -21,12 +18,9 @@ type Jukebox() =
     override this.Init(parent) =
         this 
         |+ Button(Icons.SKIP_BACK, 
-            (fun () -> 
-                match Things.previous() with
-                | None -> ()
-                | Some cc -> SelectedChart.change(cc, LibraryContext.None, true)
-            ),
-            Disabled = (Things.has_previous >> not),
+            Suggestions.previous_chart,
+            Hotkey = "previous_random_chart",
+            Disabled = (Suggestions.has_previous >> not),
             Position = Position.Margin(5.0f).SliceLeft(45.0f)
         )
         |+ Button(Icons.PAUSE, 
@@ -34,22 +28,8 @@ type Jukebox() =
             Position = Position.Margin(5.0f).SliceLeft(45.0f).Translate(45.0f, 0.0f)
         )
         |* Button(Icons.SKIP_FORWARD,
-            (fun () ->
-                let ctx : LibraryViewContext =
-                    {
-                        Rate = SelectedChart.rate.Value
-                        RulesetId = Rulesets.current_hash
-                        Ruleset = Rulesets.current
-                        Library = Content.Library
-                        ScoreDatabase = Content.Scores
-                    }
-
-                match Suggestion.get_random [] ctx with
-                | None -> ()
-                | Some cc ->
-                    Things.add_current_chart_to_history()
-                    SelectedChart.change(cc, LibraryContext.None, true)
-            ),
+            Suggestions.random_chart,
+            Hotkey = "random_chart",
             Position = Position.Margin(5.0f).SliceLeft(45.0f).Translate(90.0f, 0.0f)
         )
         base.Init parent

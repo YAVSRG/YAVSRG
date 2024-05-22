@@ -13,7 +13,7 @@ type EndlessModeMenu(info: LoadedChartInfo) =
 
     let start() =
 
-        Endless.begin_endless_mode
+        Suggestions.begin_endless_mode
         <| EndlessModeState.create
             {
                 BaseDifficulty = info.Rating.Physical
@@ -24,10 +24,9 @@ type EndlessModeMenu(info: LoadedChartInfo) =
                 Ruleset = Rulesets.current
                 Library = Content.Library
                 ScoreDatabase = Content.Scores
-                Priority = Endless.priority.Value
+                Priority = Suggestions.endless_priority.Value
             }
-        if not (LevelSelect.try_play info) then
-            Endless.exit_endless_mode()
+        <| false
         Menu.Exit()
 
     override this.Content() =
@@ -40,7 +39,7 @@ type EndlessModeMenu(info: LoadedChartInfo) =
                     SuggestionPriority.Variety, %"levelselect.endless_mode.priority.variety"
                     SuggestionPriority.Consistency, %"levelselect.endless_mode.priority.consistency"
                 |],
-                Endless.priority
+                Suggestions.endless_priority
             )
         )
             .Pos(0)

@@ -72,6 +72,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
 
     override this.Spacing = 5.0f
     member this.Chart = cc
+    member this.Context = context
 
     member this.PlaylistDuration =
         match context with

@@ -58,6 +58,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     override this.Spacing = 20.0f
 
     member this.Items = items
+    member this.Name = name
     member this.Expanded = expanded_group = name
 
     member this.SelectFirst() = items.First().Select()

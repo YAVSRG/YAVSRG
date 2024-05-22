@@ -120,7 +120,7 @@ type private ActionButton(icon, action, active) =
             Alignment.CENTER
         )
 
-type ActionBar(random_chart) =
+type ActionBar() =
     inherit Container(NodeType.None)
 
     override this.Init parent =
@@ -143,9 +143,8 @@ type ActionBar(random_chart) =
             .Tooltip(Tooltip.Info("levelselect.practice_mode").Hotkey("practice_mode"))
         |+ ActionButton(
             Icons.REFRESH_CCW,
-            random_chart,
+            Suggestions.random_chart,
             (K false),
-            Hotkey = "random_chart",
             Position = Position.Column(70.0f, 60.0f)
         )
             .Tooltip(Tooltip.Info("levelselect.random_chart").Hotkey("random_chart"))

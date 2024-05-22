@@ -13,6 +13,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features
+open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Online
@@ -120,7 +121,7 @@ type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: Sco
             |+ InlaidButton(
                 %"score.watch_replay",
                 (fun () ->
-                    ScoreScreenHelpers.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
+                    Gameplay.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
                 ),
                 Icons.FILM
             )

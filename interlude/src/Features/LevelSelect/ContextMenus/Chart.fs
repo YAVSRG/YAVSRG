@@ -75,14 +75,12 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
             |+ PageButton.Once(
                 "playlist.play",
                 (fun () ->
-                    Endless.begin_endless_mode (
+                    Suggestions.begin_endless_mode (
                         EndlessModeState.create_from_playlist
                             0
                             (Content.Collections.GetPlaylist(name).Value)
                             Content.Library
-                    )
-
-                    Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                    ) true
                 ),
                 Icon = Icons.PLAY
             )
@@ -90,27 +88,23 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                 [PageButton.Once(
                     "playlist.play_from_here",
                     (fun () ->
-                        Endless.begin_endless_mode (
+                        Suggestions.begin_endless_mode (
                             EndlessModeState.create_from_playlist
                                 index
                                 (Content.Collections.GetPlaylist(name).Value)
                                 Content.Library
-                        )
-
-                        Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                        ) true
                     ),
                     Icon = Icons.PLAY
                 )] else []
             |* PageButton.Once(
                 "playlist.play_shuffled",
                 (fun () ->
-                    Endless.begin_endless_mode (
+                    Suggestions.begin_endless_mode (
                         EndlessModeState.create_from_playlist_shuffled
                             (Content.Collections.GetPlaylist(name).Value)
                             Content.Library
-                    )
-
-                    Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                    ) true
                 ),
                 Icon = Icons.SHUFFLE
             )

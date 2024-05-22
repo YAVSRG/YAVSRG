@@ -27,7 +27,7 @@ type ScoreContextMenu(score_info: ScoreInfo) =
         |+ PageButton(
             "score.watch_replay",
             (fun () ->
-                ScoreScreenHelpers.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
+                Gameplay.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
                 Menu.Back()
             ),
             Icon = Icons.FILM

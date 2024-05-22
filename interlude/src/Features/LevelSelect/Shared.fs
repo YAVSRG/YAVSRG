@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude.Charts.Processing
 open Prelude.Data
 open Prelude.Data.Library.Sorting
 open Interlude.UI
@@ -81,3 +82,15 @@ module LevelSelect =
             then
                 SelectedChart.rate.Set score_info.Rate
                 SelectedChart.selected_mods.Set score_info.Mods
+
+    let watch_replay (score_info: ScoreInfo, with_colors: ColoredChart) =
+        if
+            Screen.change_new
+                (fun () ->
+                    ReplayScreen.replay_screen (score_info.Chart, ReplayMode.Replay(score_info, with_colors))
+                    :> Screen.T
+                )
+                Screen.Type.Replay
+                Transitions.Flags.Default
+        then
+            SelectedChart.rate.Value <- score_info.Rate

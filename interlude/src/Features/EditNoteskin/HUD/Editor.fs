@@ -17,7 +17,6 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Play
 open Interlude.Features.Pacemaker
-open Interlude.Features.Score
 
 type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> unit, finish_drag: unit -> unit) =
     inherit StaticWidget(NodeType.None)
@@ -783,7 +782,7 @@ module HUDEditor =
                 if s <> Screen.Type.Play then on_exit ()
 
             override this.OnBack() =
-                if ScoreScreenHelpers.continue_endless_mode () then None
+                if Gameplay.continue_endless_mode () then None
                 else base.OnBack()
 
             override this.Update(elapsed_ms, moved) =

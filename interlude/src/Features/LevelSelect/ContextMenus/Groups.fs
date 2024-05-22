@@ -22,8 +22,7 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
             .Once(
                 "playlist.play",
                 (fun () ->
-                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist 0 playlist Content.Library)
-                    Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                    Suggestions.begin_endless_mode (EndlessModeState.create_from_playlist 0 playlist Content.Library) true
                 ),
                 Icon = Icons.PLAY
             )
@@ -32,8 +31,7 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
             .Once(
                 "playlist.play_shuffled",
                 (fun () ->
-                    Endless.begin_endless_mode (EndlessModeState.create_from_playlist_shuffled playlist Content.Library)
-                    Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                    Suggestions.begin_endless_mode (EndlessModeState.create_from_playlist_shuffled playlist Content.Library) true
                 ),
                 Icon = Icons.SHUFFLE
             )

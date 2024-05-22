@@ -185,12 +185,12 @@ module PlayScreen =
                     Screen.change_new
                         (fun () ->
                             let score_info =
-                                Stuff.score_info_from_gameplay
+                                Gameplay.score_info_from_gameplay
                                     info
                                     scoring
                                     ((liveplay :> IReplayProvider).GetFullReplay())
 
-                            (score_info, Stuff.set_score (PacemakerState.pacemaker_met this.State.Scoring this.State.Pacemaker) score_info info.SaveData, true)
+                            (score_info, Gameplay.set_score (PacemakerState.pacemaker_met this.State.Scoring this.State.Pacemaker) score_info info.SaveData, true)
                             |> ScoreScreen
                         )
                         Screen.Type.Score

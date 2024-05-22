@@ -99,8 +99,7 @@
     <Compile Include="Features\Tables\Manage.fs" />
     <Compile Include="Features\Rulesets.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />
-    <Compile Include="Features\Gameplay\ChangeChart.fs" />
-    <Compile Include="Features\Gameplay\Endless.fs" />
+    <Compile Include="Features\Gameplay\Helpers.fs" />
     <Compile Include="Features\Pacemaker.fs" />
     <Compile Include="Features\Collections\Actions.fs" />
     <Compile Include="Features\Collections\Menus.fs" />
@@ -138,6 +137,7 @@
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />
     <Compile Include="Features\Play\Practice\Practice.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
+    <Compile Include="Features\LevelSelect\Suggestions.fs" />
     <Compile Include="Features\LevelSelect\LibraryView.fs" />
     <Compile Include="Features\LevelSelect\ActionBar.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Chart.fs" />

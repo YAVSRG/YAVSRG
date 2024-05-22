@@ -54,10 +54,10 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit) =
 
     let HEIGHT = 60.0f
 
-    // chord density is notes per second but n simultaneous notes count for 1 instead of n
     let samples =
         int ((with_mods.LastNote - with_mods.FirstNote) / 1000.0f) |> max 10 |> min 400
 
+    // chord density is notes per second but n simultaneous notes count for 1 instead of n, aka 'chords per second'
     let note_density, chord_density = Analysis.nps_cps samples with_mods
 
     let note_density, chord_density =

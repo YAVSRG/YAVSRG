@@ -108,7 +108,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
     override this.OnBack() =
         if Network.lobby.IsSome then
             Some Screen.Type.Lobby
-        elif played_just_now && ScoreScreenHelpers.continue_endless_mode () then
+        elif played_just_now && Gameplay.continue_endless_mode () then
             None
         else
             Some Screen.Type.LevelSelect

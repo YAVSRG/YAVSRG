@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features.Gameplay
 
 open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Prelude.Charts.Processing
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay
@@ -12,7 +11,7 @@ open Interlude.Options
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
-module Stuff =
+module Gameplay =
 
     let score_info_from_gameplay
         (info: LoadedChartInfo)
@@ -76,18 +75,5 @@ module Stuff =
         else
             ImprovementFlags.None
 
-module Things =
-
-    let mutable private suggestion_history: CachedChart list = []
-
-    let add_current_chart_to_history () = 
-        match SelectedChart.CACHE_DATA with
-        | Some cc -> suggestion_history <- cc :: suggestion_history
-        | None -> ()
-
-    let previous () : CachedChart option =
-        match suggestion_history with
-        | x :: xs -> suggestion_history <- xs; Some x
-        | _ -> None
-
-    let has_previous() = (List.isEmpty >> not) suggestion_history
+    let mutable watch_replay: ScoreInfo * ColoredChart -> unit = ignore
+    let mutable continue_endless_mode: unit -> bool = fun () -> false

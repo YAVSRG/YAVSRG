@@ -79,7 +79,7 @@ module PlayScreenMultiplayer =
         )
 
         let send_replay_packet (now: Time) =
-            // todo: not need this any more (used to make sure the replay buffers to correct position)
+            // todo: make changes so this isn't needed any more (used to make sure the replay buffers to correct position)
             if not (liveplay :> IReplayProvider).Finished then
                 liveplay.Add(now, key_state)
 
@@ -181,12 +181,12 @@ module PlayScreenMultiplayer =
                     Screen.change_new
                         (fun () ->
                             let score_info =
-                                Stuff.score_info_from_gameplay
+                                Gameplay.score_info_from_gameplay
                                     info
                                     scoring
                                     ((liveplay :> IReplayProvider).GetFullReplay())
 
-                            (score_info, Stuff.set_score true score_info info.SaveData, true)
+                            (score_info, Gameplay.set_score true score_info info.SaveData, true)
                             |> ScoreScreen
                         )
                         Screen.Type.Score

@@ -19,6 +19,19 @@ module Tree =
     let mutable private last_item: ChartItem option = None
     let mutable is_empty = false
 
+    let private find_selected_chart_in_tree () =
+        match SelectedChart.CACHE_DATA with
+        | None -> ()
+        | Some current_cc ->
+
+        for group in groups do
+            for chart in group.Items do
+                if chart.Chart.Key = current_cc.Key && (chart.Context = LibraryContext.None || chart.Context = SelectedChart.LIBRARY_CTX) then
+                    selected_chart <- current_cc.Key
+                    selected_group <- group.Name
+                    expanded_group <- selected_group
+                    scroll_to <- ScrollTo.Chart
+
     let refresh () =
         // fetch groups
         let library_groups =
@@ -64,14 +77,6 @@ module Tree =
             |> Seq.map (fun (index, group_name) ->
                 library_groups.[(index, group_name)].Charts
                 |> Seq.map (fun (cc, context) ->
-                    // todo: extract this into a callable function to react to chart changes with
-                    match SelectedChart.CACHE_DATA with
-                    | None -> ()
-                    | Some current_cc ->
-                        if current_cc.Key = cc.Key && (context = LibraryContext.None || context = SelectedChart.LIBRARY_CTX) then
-                            selected_chart <- current_cc.Key
-                            selected_group <- group_name
-
                     let i = ChartItem(group_name, cc, context)
                     last_item <- Some i
                     i
@@ -82,15 +87,16 @@ module Tree =
             )
             |> List.ofSeq
 
+        find_selected_chart_in_tree()
+
         is_empty <- List.isEmpty groups
         cache_flag <- 0
-        expanded_group <- selected_group
-        scroll_to <- ScrollTo.Chart
         click_cooldown <- 500.0
 
     do
         LevelSelect.on_refresh_all.Add refresh
         LevelSelect.on_refresh_details.Add(fun () -> cache_flag <- cache_flag + 1)
+        SelectedChart.on_chart_change_started.Add(fun info -> if info.CacheInfo.Key <> selected_chart then find_selected_chart_in_tree())
 
     let previous () =
         match last_item with

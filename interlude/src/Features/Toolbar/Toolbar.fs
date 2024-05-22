@@ -132,10 +132,7 @@ type Toolbar() =
             (fun () -> Updates.update_available),
             Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
         )
-        |+ Conditional(
-            (fun () -> Screen.current_type = Screen.Type.MainMenu || Screen.current_type = Screen.Type.Import),
-            Jukebox(Position = Position.Box(0.0f, 1.0f, 200.0f, -62.5f, 560.0f, 55.0f))
-        )
+        |+ Jukebox(Position = Position.Box(0.0f, 1.0f, 200.0f, -62.5f, 560.0f, 55.0f))
         |* volume
 
         base.Init parent

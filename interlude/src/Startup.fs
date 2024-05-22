@@ -61,18 +61,8 @@ module Startup =
 
         Devices.change_volume (Options.options.AudioVolume.Value, Options.options.AudioVolume.Value)
 
-        ScoreScreenHelpers.watch_replay <-
-            fun (score_info: ScoreInfo, with_colors: ColoredChart) ->
-                if
-                    Screen.change_new
-                        (fun () ->
-                            ReplayScreen.replay_screen (score_info.Chart, ReplayMode.Replay(score_info, with_colors))
-                            :> Screen.T
-                        )
-                        Screen.Type.Replay
-                        Transitions.Flags.Default
-                then
-                    SelectedChart.rate.Value <- score_info.Rate
+        Gameplay.watch_replay <- LevelSelect.watch_replay
+        Gameplay.continue_endless_mode <- Suggestions.continue_endless_mode
 
         choose_noteskins <-
             fun () -> Noteskins.NoteskinsPage().Show()

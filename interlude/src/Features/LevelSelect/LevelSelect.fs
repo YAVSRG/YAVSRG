@@ -17,7 +17,6 @@ open Interlude.Features.Gameplay
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Online
-open Interlude.Features.Score
 
 type LevelSelectScreen() =
     inherit Screen()
@@ -39,57 +38,8 @@ type LevelSelectScreen() =
         SelectedChart.if_loaded (fun info -> info_panel.OnChartUpdated(info))
         Tree.refresh ()
 
-    let random_chart () =
-        if options.AdvancedRecommendations.Value && SelectedChart.RATING.IsSome then
-            let ctx =
-                {
-                    BaseDifficulty = SelectedChart.RATING.Value.Physical
-                    BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
-                    Filter = LevelSelect.filter |> Filter.except_keywords
-                    Mods = SelectedChart.selected_mods.Value
-                    RulesetId = Rulesets.current_hash
-                    Ruleset = Rulesets.current
-                    Library = Content.Library
-                    ScoreDatabase = Content.Scores
-                    Priority = Endless.priority.Value
-                }
-
-            match Suggestion.get_suggestion ctx with
-            | Some (cc, rate) ->
-                if not Transitions.active then Things.add_current_chart_to_history()
-                SelectedChart._rate.Value <- rate
-                TreeState.switch_chart (cc, LibraryContext.None, "")
-                refresh ()
-            | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
-        else
-            let ctx =
-                {
-                    Rate = SelectedChart.rate.Value
-                    RulesetId = Rulesets.current_hash
-                    Ruleset = Rulesets.current
-                    Library = Content.Library
-                    ScoreDatabase = Content.Scores
-                }
-
-            match Suggestion.get_random LevelSelect.filter ctx with
-            | Some cc ->
-                if not Transitions.active then Things.add_current_chart_to_history()
-                TreeState.switch_chart (cc, LibraryContext.None, "")
-                refresh ()
-            | None -> ()
-
-    let previous_chart () =
-        match Things.previous() with
-        | Some cc -> 
-            TreeState.switch_chart (cc, LibraryContext.None, "")
-            refresh()
-        | None -> ()
-
     override this.Init(parent: Widget) =
         base.Init parent
-
-        ScoreScreenHelpers.continue_endless_mode <-
-            fun () -> Endless.continue_endless_mode (fun info -> LevelSelect.try_play info)
 
         Setting.app (fun s -> if sorting_modes.ContainsKey s then s else "title") options.ChartSortMode
         Setting.app (fun s -> if grouping_modes.ContainsKey s then s else "pack") options.ChartGroupMode
@@ -170,7 +120,6 @@ type LevelSelectScreen() =
         )
 
         |+ ActionBar(
-            random_chart,
             Position =
                 {
                     Left = 1.0f %- 805.0f
@@ -196,14 +145,12 @@ type LevelSelectScreen() =
                 (fun () ->
                     match SelectedChart.LIBRARY_CTX with
                     | LibraryContext.Playlist (_, name, _) ->
-                        Endless.begin_endless_mode (
+                        Suggestions.begin_endless_mode (
                             EndlessModeState.create_from_playlist
                                 0
                                 (Content.Collections.GetPlaylist(name).Value)
                                 Content.Library
-                        )
-
-                        Endless.continue_endless_mode (fun info -> LevelSelect.try_play info) |> ignore
+                        ) true
                     | _ -> ()
                 ),
                 K (sprintf "%s %s" Icons.PLAY_CIRCLE %"playlist.play"),
@@ -259,8 +206,6 @@ type LevelSelectScreen() =
             Tree.top_of_group ()
         elif (%%"end").Tapped() then
             Tree.bottom_of_group ()
-        elif (%%"previous_random_chart").Tapped() then
-            previous_chart()
 
         Tree.update (this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsed_ms)
 
@@ -301,7 +246,7 @@ type LevelSelectScreen() =
         Comments.draw ()
 
     override this.OnEnter prev =
-        Endless.exit_endless_mode ()
+        Suggestions.exit_endless_mode ()
         Song.on_finish <- SongFinishAction.LoopFromPreview
 
         if Cache.recache_service.Status <> Async.ServiceStatus.Idle then
