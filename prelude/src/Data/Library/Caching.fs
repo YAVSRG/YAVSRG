@@ -62,6 +62,7 @@ type Cache =
         Patterns: ConcurrentDictionary<string, PatternInfo>
         mutable Changed: bool
     }
+    override this.ToString() = sprintf "<cache of %i entries> @ %s" this.Entries.Count this.RootPath
 
 module Cache =
 
