@@ -180,7 +180,14 @@ module SelectedChart =
                                     save_data.Offset,
                                     rate,
                                     (chart.Header.PreviewTime, chart.LastNote),
-                                    play_audio
+                                    (
+                                        if play_audio then
+                                            if Screen.current_type = Screen.Type.MainMenu then 
+                                                SongLoadAction.PlayFromBeginning 
+                                            else 
+                                                SongLoadAction.PlayFromPreview
+                                        else SongLoadAction.Wait
+                                    )
                                 )
 
                                 SAVE_DATA <- Some save_data

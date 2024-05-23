@@ -15,6 +15,7 @@ open Interlude.UI
 open Interlude.Features.Online
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
+open Interlude.Features.LevelSelect
 
 type private MenuButton(on_click, label: string, pos: Position) =
     inherit
@@ -164,7 +165,7 @@ type MainMenuScreen() as this =
         Logo.move_menu ()
         Background.dim 0.0f
         Toolbar.show ()
-        Song.on_finish <- SongFinishAction.LoopFromBeginning
+        Song.on_finish <- SongFinishAction.Custom Suggestions.random_chart
 
         button_sequence.Add
         <| Animation.seq

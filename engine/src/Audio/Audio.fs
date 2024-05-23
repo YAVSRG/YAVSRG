@@ -51,6 +51,13 @@ type SongFinishAction =
     | LoopFromPreview
     | LoopFromBeginning
     | Wait
+    | Custom of (unit -> unit)
+
+[<RequireQualifiedAccess>]
+type SongLoadAction =
+    | PlayFromPreview
+    | PlayFromBeginning
+    | Wait
 
 module Song =
 
@@ -149,25 +156,29 @@ module Song =
     let set_global_offset (offset) = _global_offset <- offset
 
     let private song_loader =
-        { new Async.SwitchService<string option * bool, Song * bool>() with
-            override this.Process((path, play_automatically)) =
+        { new Async.SwitchService<string option * SongLoadAction, Song * SongLoadAction>() with
+            override this.Process((path, after_load)) =
                 async {
                     return
                         match path with
-                        | Some p -> Song.FromFile p, play_automatically
-                        | None -> Song.Default, play_automatically
+                        | Some p -> Song.FromFile p, after_load
+                        | None -> Song.Default, after_load
                 }
 
-            override this.Handle((song, play_automatically)) =
+            override this.Handle((song, after_load: SongLoadAction)) =
                 loading <- false
                 now_playing <- song
                 change_rate rate
 
-                if play_automatically then
+                match after_load with
+                | SongLoadAction.PlayFromPreview ->
                     play_from preview_point
+                | SongLoadAction.PlayFromBeginning ->
+                    play_from 0.0f<ms>
+                | SongLoadAction.Wait -> ()
         }
 
-    let change (path: string option, offset: Time, new_rate: float32, (preview, chart_last_note), play_automatically) =
+    let change (path: string option, offset: Time, new_rate: float32, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) =
         let path_changed = path <> load_path
         load_path <- path
         preview_point <- preview
@@ -186,7 +197,7 @@ module Song =
 
             channel_playing <- false
             loading <- true
-            song_loader.Request(path, play_automatically)
+            song_loader.Request(path, after_load)
 
     let update () =
 
@@ -202,8 +213,6 @@ module Song =
 
             Bass.ChannelPlay now_playing.ID |> display_bass_error
         elif t > now_playing.Duration then
-            channel_playing <- false
-
             match on_finish with
             | SongFinishAction.LoopFromPreview ->
                 if t >= last_note then
@@ -212,6 +221,11 @@ module Song =
                 if t >= last_note then
                     play_from 0.0f<ms>
             | SongFinishAction.Wait -> ()
+            | SongFinishAction.Custom action ->
+                if channel_playing then
+                    action ()
+
+            channel_playing <- false
 
 type SoundEffect =
     {

@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Prelude
 open Prelude.Data
 open Prelude.Data.Library
@@ -99,6 +100,7 @@ type ImportScreen() as this =
     override this.OnEnter _ =
         sidebar.Focus false
         DiscordRPC.in_menus ("Importing new content")
+        Song.on_finish <- SongFinishAction.LoopFromBeginning
 
     override this.OnExit _ = ()
 
