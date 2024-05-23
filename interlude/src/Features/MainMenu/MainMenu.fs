@@ -165,7 +165,11 @@ type MainMenuScreen() as this =
         Logo.move_menu ()
         Background.dim 0.0f
         Toolbar.show ()
-        Song.on_finish <- SongFinishAction.Custom Suggestions.random_chart
+        Song.on_finish <- 
+            SongFinishAction.Custom (fun () -> 
+                Suggestions.random_chart()
+                splash_text <- choose_splash ()
+            )
 
         button_sequence.Add
         <| Animation.seq
