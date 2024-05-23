@@ -141,6 +141,9 @@ module Charts =
             let get (chart: string, ruleset: string, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + "?chart=" + chart + "&ruleset=" + escape ruleset, callback)
 
+            let get_async (chart: string, ruleset: string, callback: Response option -> unit) =
+                Client.get_async<Response> (snd ROUTE + "?chart=" + chart + "&ruleset=" + escape ruleset, callback)
+
 module Tables =
 
     /// requires login token as Authorization header
