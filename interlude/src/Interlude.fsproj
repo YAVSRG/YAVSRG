@@ -112,6 +112,9 @@
     <Compile Include="Features\Score\Confetti.fs" />
     <Compile Include="Features\Score\Score.fs" />
     <Compile Include="Features\Play\State.fs" />
+    <Compile Include="Features\Play\Lanecover.fs" />
+    <Compile Include="Features\Play\Explosions.fs" />
+    <Compile Include="Features\Play\ColumnLighting.fs" />
     <Compile Include="Features\Play\Playfield.fs" />
     <Compile Include="Features\Play\HUD\Accuracy.fs" />
     <Compile Include="Features\Play\HUD\TimingDisplay.fs" />
@@ -125,9 +128,6 @@
     <Compile Include="Features\Play\HUD\MultiplayerScoreTracker.fs" />
     <Compile Include="Features\Play\HUD\RateModMeter.fs" />
     <Compile Include="Features\Play\HUD\BPMMeter.fs" />
-    <Compile Include="Features\Play\LaneCover.fs" />
-    <Compile Include="Features\Play\Explosions.fs" />
-    <Compile Include="Features\Play\ColumnLighting.fs" />
     <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Play\Play.fs" />
     <Compile Include="Features\Play\PlayMultiplayer.fs" />

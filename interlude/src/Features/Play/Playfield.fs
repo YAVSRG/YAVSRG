@@ -147,10 +147,92 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             } =
             this.Bounds
 
+        // SETUP CONSTANTS AND DRAW METHODS
+
         let scale = options.ScrollSpeed.Value / SelectedChart.rate.Value * 1.0f< / ms>
         let hitposition = float32 options.HitPosition.Value
 
         let playfield_height = bottom - top + (max 0.0f holdnote_trim)
+        let receptor_aspect_ratio = receptor.AspectRatio
+
+        let inline draw_receptors() = 
+            for k in 0 .. (keys - 1) do
+                Draw.quad
+                    (Rect.Box(
+                        left + column_positions.[k],
+                        hitposition + note_height - note_height / receptor_aspect_ratio,
+                        column_width,
+                        note_height / receptor_aspect_ratio
+                     )
+                     |> scroll_direction_transform bottom
+                     |> _.AsQuad
+                     |> receptor_transform k)
+                    Color.White.AsQuad
+                    (Sprite.pick_texture
+                        (animation.Loops,
+                        k * 2 +
+                         if (state.Scoring.KeyState |> Bitmask.has_key k) then
+                             1
+                         else
+                             0)
+                        receptor)
+        
+        let inline draw_note (k, pos, color) =
+            Draw.quad
+                ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
+                  |> scroll_direction_transform bottom)
+                    .AsQuad
+                 |> rotation k)
+                Color.White.AsQuad
+                (Sprite.pick_texture (animation.Loops, color) note)
+
+        let inline draw_head (k: int, pos: float32, color: int, tint: Color) =
+            Draw.quad
+                ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
+                  |> scroll_direction_transform bottom)
+                    .AsQuad
+                 |> rotation k)
+                tint.AsQuad
+                (Sprite.pick_texture (animation.Loops, color) holdhead)
+
+        let inline draw_body (k: int, pos_a: float32, pos_b: float32, color: int, tint: Color) =
+            Draw.quad
+                ((Rect.Create(
+                    left + column_positions.[k],
+                    pos_a + note_height * 0.5f,
+                    left + column_positions.[k] + column_width,
+                    pos_b + note_height * 0.5f + 2.0f
+                  )
+                  |> scroll_direction_transform bottom)
+                    .AsQuad)
+                tint.AsQuad
+                (Sprite.pick_texture (animation.Loops, color) holdbody)
+
+        let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) =
+            let clip_percent = (clip - pos) / note_height
+
+            let quad_clip_correction (struct (lt, rt, rb, lb): Quad) =
+                if clip_percent > 0.0f then
+                    let height = rb.Y - rt.Y
+                    let correction = OpenTK.Mathematics.Vector2(0.0f, height * clip_percent)
+                    struct (lt + correction, rt + correction, rb, lb)
+                else struct (lt, rt, rb, lb)
+
+            Draw.quad
+                ((Rect.Create(
+                    left + column_positions.[k],
+                    max clip pos,
+                    left + column_positions.[k] + note_height,
+                    pos + note_height
+                  )
+                  |> scroll_direction_transform bottom)
+                    .AsQuad
+                 |> if useholdtail then id else rotation k)
+                tint.AsQuad
+                (Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
+                 |> fun x -> x.Transform(quad_clip_correction).Transform(hold_tail_flip))
+
+        // CALCULATE TIME + SV STUFF
 
         let now =
             Song.time_with_offset ()
@@ -211,11 +293,11 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let mutable sv_time = begin_time
         let begin_pos = column_pos
 
-        // draw column backdrops and receptors
+        // ACTUAL DRAWING STUFF
+
+        // draw playfield color
         if fill_column_gaps then
             Draw.rect this.Bounds playfield_color
-
-        let receptor_aspect_ratio = receptor.AspectRatio
 
         for k in 0 .. (keys - 1) do
             if not fill_column_gaps then
@@ -229,80 +311,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 else
                     HeadOffscreen holds_offscreen.[k]
 
-            Draw.quad // receptor
-                (Rect.Box(
-                    left + column_positions.[k],
-                    hitposition + note_height - note_height / receptor_aspect_ratio,
-                    column_width,
-                    note_height / receptor_aspect_ratio
-                 )
-                 |> scroll_direction_transform bottom
-                 |> _.AsQuad
-                 |> receptor_transform k)
-                Color.White.AsQuad
-                (Sprite.pick_texture
-                    (animation.Loops,
-                    k * 2 +
-                     if (state.Scoring.KeyState |> Bitmask.has_key k) then
-                         1
-                     else
-                         0)
-                    receptor)
-
-        let inline draw_note (k, pos, color) =
-            Draw.quad
-                ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
-                  |> scroll_direction_transform bottom)
-                    .AsQuad
-                 |> rotation k)
-                Color.White.AsQuad
-                (Sprite.pick_texture (animation.Loops, color) note)
-
-        let inline draw_head (k: int, pos: float32, color: int, tint: Color) =
-            Draw.quad
-                ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
-                  |> scroll_direction_transform bottom)
-                    .AsQuad
-                 |> rotation k)
-                tint.AsQuad
-                (Sprite.pick_texture (animation.Loops, color) holdhead)
-
-        let inline draw_body (k: int, pos_a: float32, pos_b: float32, color: int, tint: Color) =
-            Draw.quad
-                ((Rect.Create(
-                    left + column_positions.[k],
-                    pos_a + note_height * 0.5f,
-                    left + column_positions.[k] + column_width,
-                    pos_b + note_height * 0.5f + 2.0f
-                  )
-                  |> scroll_direction_transform bottom)
-                    .AsQuad)
-                tint.AsQuad
-                (Sprite.pick_texture (animation.Loops, color) holdbody)
-
-        let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) =
-            let clip_percent = (clip - pos) / note_height
-
-            let quad_clip_correction (struct (lt, rt, rb, lb): Quad) =
-                if clip_percent > 0.0f then
-                    let height = rb.Y - rt.Y
-                    let correction = OpenTK.Mathematics.Vector2(0.0f, height * clip_percent)
-                    struct (lt + correction, rt + correction, rb, lb)
-                else struct (lt, rt, rb, lb)
-
-            Draw.quad
-                ((Rect.Create(
-                    left + column_positions.[k],
-                    max clip pos,
-                    left + column_positions.[k] + note_height,
-                    pos + note_height
-                  )
-                  |> scroll_direction_transform bottom)
-                    .AsQuad
-                 |> if useholdtail then id else rotation k)
-                tint.AsQuad
-                (Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
-                 |> fun x -> x.Transform(quad_clip_correction).Transform(hold_tail_flip))
+        draw_receptors()
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
         // todo: also put a cap at -playfield_height when *negative sv comes into play
@@ -458,5 +467,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
                     hold_states.[k] <- NoHold
             | NoHold -> ()
+
+        if options.LaneCover.Enabled.Value && options.LaneCover.DrawUnderReceptors.Value then
+            Lanecover.draw(this.Bounds)
+            draw_receptors()
 
         base.Draw()

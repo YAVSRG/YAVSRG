@@ -169,7 +169,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         if noteskin_config.UseExplosions then
             playfield.Add(new Explosions(with_colors.Keys, noteskin_config, state))
 
-        playfield.Add(LaneCover())
+        playfield.Add(LanecoverOverReceptors())
 
         this.AddWidgets()
 

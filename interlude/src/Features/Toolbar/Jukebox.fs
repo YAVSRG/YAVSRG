@@ -37,6 +37,8 @@ type Jukebox() =
     override this.Draw() =
         Draw.rect this.Bounds (Colors.shadow_1.O2)
 
+        let carousel_bounds = this.Bounds.TrimLeft(155.0f).Shrink(Style.PADDING)
+
         base.Draw()
 
         let song_title = 
@@ -45,8 +47,6 @@ type Jukebox() =
             | None -> %"jukebox.no_chart_selected"
 
         let song_title_width = Text.measure(Style.font, song_title) * 25.0f
-
-        let carousel_bounds = this.Bounds.TrimLeft(135.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING)
 
         Stencil.start_stencilling false
         Draw.rect carousel_bounds Color.Transparent

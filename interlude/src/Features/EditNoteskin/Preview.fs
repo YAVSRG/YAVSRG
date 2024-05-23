@@ -17,7 +17,7 @@ type NoteskinPreview(position: Position) as this =
         let playfield =
             Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
 
-        playfield.Add(LaneCover())
+        playfield.Add(LanecoverOverReceptors())
 
         if this.Initialised then
             playfield.Init this

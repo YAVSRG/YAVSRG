@@ -62,10 +62,11 @@ module Options =
         | Instant = 0
         | EndOfSong = 1
 
-    [<Json.AutoCodec>]
+    [<Json.AutoCodec(false)>]
     type LaneCoverOptions =
         {
             Enabled: Setting<bool>
+            DrawUnderReceptors: Setting<bool>
             Sudden: Setting.Bounded<float32>
             Hidden: Setting.Bounded<float32>
             FadeLength: Setting.Bounded<float32>
@@ -77,6 +78,15 @@ module Options =
             this.Hidden.Value <- p.Hidden.Value
             this.FadeLength.Value <- p.FadeLength.Value
             this.Color.Value <- p.Color.Value
+        static member Default =
+            {
+                Enabled = Setting.simple false
+                DrawUnderReceptors = Setting.simple false
+                Sudden = Setting.percentf 0.0f
+                Hidden = Setting.percentf 0.45f
+                FadeLength = Setting.bounded 200f 0f 500f
+                Color = Setting.simple Color.Black
+            }
 
     [<Json.AutoCodec>]
     [<RequireQualifiedAccess>]
@@ -170,14 +180,7 @@ module Options =
                 HitLighting = Setting.simple false
                 Upscroll = Setting.simple false
                 BackgroundDim = Setting.percentf 0.5f
-                LaneCover =
-                    {
-                        Enabled = Setting.simple false
-                        Sudden = Setting.percentf 0.0f
-                        Hidden = Setting.percentf 0.45f
-                        FadeLength = Setting.bounded 200f 0f 500f
-                        Color = Setting.simple Color.Black
-                    }
+                LaneCover = LaneCoverOptions.Default
                 Noteskin = Content.Noteskins.selected_id
                 SelectedRuleset = Content.Rulesets.selected_id
                 FailCondition = Setting.simple FailType.EndOfSong

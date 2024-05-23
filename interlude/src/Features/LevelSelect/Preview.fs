@@ -32,7 +32,7 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
 
     let playfield =
         Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
-        |+ LaneCover()
+        |+ LanecoverOverReceptors()
 
     let volume = Volume()
     let mutable dragging = false
