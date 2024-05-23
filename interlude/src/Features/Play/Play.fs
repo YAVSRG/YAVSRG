@@ -46,11 +46,56 @@ module PlayScreen =
         let offset_setting = LocalAudioSync.offset_setting info.SaveData
 
         let retry () =
-            Screen.change_new
-                (fun () -> play_screen (info, pacemaker_ctx) :> Screen.T)
-                Screen.Type.Play
-                Transitions.Flags.Default
-            |> ignore
+            if
+                Screen.change_new
+                    (fun () -> play_screen (info, pacemaker_ctx) :> Screen.T)
+                    Screen.Type.Play
+                    Transitions.Flags.Default
+            then
+                Stats.session.PlaysRetried <- Stats.session.PlaysRetried + 1
+                
+        
+        let give_up () =
+            let is_giving_up_play = (Song.time() - first_note) * SelectedChart.rate.Value > 15000f<ms>
+
+            if 
+                if is_giving_up_play then
+                    liveplay.Finish()
+                    scoring.Update Time.infinity
+                    Screen.change_new
+                        (fun () ->
+                            let score_info =
+                                Gameplay.score_info_from_gameplay
+                                    info
+                                    scoring
+                                    ((liveplay :> IReplayProvider).GetFullReplay())
+                            ScoreScreen(score_info, ImprovementFlags.None, true)
+                        )
+                        Screen.Type.Score
+                        Transitions.Flags.Default
+                else
+                    Screen.back Transitions.Flags.Default
+            then
+                Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
+
+        let finish_play() =
+            liveplay.Finish()
+            if
+                Screen.change_new
+                    (fun () ->
+                        let score_info =
+                            Gameplay.score_info_from_gameplay
+                                info
+                                scoring
+                                ((liveplay :> IReplayProvider).GetFullReplay())
+
+                        (score_info, Gameplay.set_score (PacemakerState.pacemaker_met scoring pacemaker_state) score_info info.SaveData, true)
+                        |> ScoreScreen
+                    )
+                    Screen.Type.Score
+                    Transitions.Flags.Default
+            then
+                Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
 
         let offset_slideout (screen: IPlayScreen) =
 
@@ -116,9 +161,6 @@ module PlayScreen =
 
                 let offset_slideout = offset_slideout this
 
-                let give_up () =
-                    Screen.back Transitions.Flags.Default |> ignore
-
                 this
                 |+ HotkeyHoldAction(
                     "retry",
@@ -143,13 +185,6 @@ module PlayScreen =
                 DiscordRPC.playing_timed ("Playing", info.CacheInfo.Title, info.CacheInfo.Length / SelectedChart.rate.Value)
 
             override this.OnExit(next) =
-                if next = Screen.Type.Score then
-                    Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
-                elif next = Screen.Type.Play then
-                    Stats.session.PlaysRetried <- Stats.session.PlaysRetried + 1
-                else
-                    Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
-
                 if options.AutoCalibrateOffset.Value && recommended_offset = 0.0f then
                     LocalAudioSync.apply_automatic this.State info.SaveData
 
@@ -179,23 +214,7 @@ module PlayScreen =
 
                     this.State.Scoring.Update chart_time
 
-                if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
-                    liveplay.Finish()
-
-                    Screen.change_new
-                        (fun () ->
-                            let score_info =
-                                Gameplay.score_info_from_gameplay
-                                    info
-                                    scoring
-                                    ((liveplay :> IReplayProvider).GetFullReplay())
-
-                            (score_info, Gameplay.set_score (PacemakerState.pacemaker_met this.State.Scoring this.State.Pacemaker) score_info info.SaveData, true)
-                            |> ScoreScreen
-                        )
-                        Screen.Type.Score
-                        Transitions.Flags.Default
-                    |> ignore
+                if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then finish_play()
 
             override this.Draw() =
                 base.Draw()

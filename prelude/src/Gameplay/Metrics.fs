@@ -152,10 +152,21 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
         this.PollReplay chart_time // calls HandleKeyDown and HandleKeyUp appropriately
         this.HandlePassive chart_time
 
-        if this.Finished && snapshots.Count > 0 then
+    member private this.UpdateStateSnapshots(chart_time: ChartTime) =
+        let snapshot_target_count =
+            if chart_time > duration then 
+                ScoreMetricSnapshot.COUNT
+            else
+                (float32 ScoreMetricSnapshot.COUNT * chart_time) / duration
+                |> ceil
+                |> int
+                |> max 0
+                |> min ScoreMetricSnapshot.COUNT
+
+        while snapshots.Count < snapshot_target_count do
             snapshots.Add
                 {
-                    Time = snapshots.[snapshots.Count - 1].Time
+                    Time = float32 (snapshots.Count + 1) / float32 ScoreMetricSnapshot.COUNT * duration
                     PointsScored = this.State.PointsScored
                     MaxPointsScored = this.State.MaxPointsScored
                     Combo = this.State.CurrentCombo
@@ -165,23 +176,6 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
     member private this.HandlePassive(chart_time: ChartTime) =
         let now = first_note + chart_time
         let target = now - miss_window
-
-        let snapshot_target_count =
-            (float32 ScoreMetricSnapshot.COUNT * chart_time) / duration
-            |> ceil
-            |> int
-            |> max 0
-            |> min ScoreMetricSnapshot.COUNT
-
-        while snapshots.Count < snapshot_target_count do
-            snapshots.Add
-                {
-                    Time = chart_time
-                    PointsScored = this.State.PointsScored
-                    MaxPointsScored = this.State.MaxPointsScored
-                    Combo = this.State.CurrentCombo
-                    Lamp = Lamp.calculate ruleset.Grading.Lamps this.State
-                }
 
         while note_seek_passive < hit_data.Length
               && InternalScore.offsetOf hit_data.[note_seek_passive] <= target do
@@ -241,6 +235,8 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
                     | _ -> ()
 
             note_seek_passive <- note_seek_passive + 1
+
+        this.UpdateStateSnapshots(chart_time)
 
     override this.HandleKeyDown(chart_time: ChartTime, k: int) =
         this.HandlePassive chart_time
