@@ -89,6 +89,50 @@ module PlayScreenMultiplayer =
             lobby.SendReplayData(ms.ToArray())
             packet_count <- packet_count + 1
 
+        let give_up () =
+            let is_giving_up_play = (Song.time() - first_note) * SelectedChart.rate.Value > 15000f<ms>
+
+            if 
+                if is_giving_up_play then
+                    liveplay.Finish()
+                    scoring.Update Time.infinity
+                    Screen.change_new
+                        (fun () ->
+                            let score_info =
+                                Gameplay.score_info_from_gameplay
+                                    info
+                                    scoring
+                                    ((liveplay :> IReplayProvider).GetFullReplay())
+                            ScoreScreen(score_info, ImprovementFlags.None, true)
+                        )
+                        Screen.Type.Score
+                        Transitions.Flags.Default
+                else
+                    Screen.back Transitions.Flags.Default
+            then
+                Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
+
+        let finish_play(now: Time) =
+            liveplay.Finish()
+            send_replay_packet (now)
+            lobby.FinishPlaying()
+            if
+                Screen.change_new
+                    (fun () ->
+                        let score_info =
+                            Gameplay.score_info_from_gameplay
+                                info
+                                scoring
+                                ((liveplay :> IReplayProvider).GetFullReplay())
+
+                        (score_info, Gameplay.set_score true score_info info.SaveData, true)
+                        |> ScoreScreen
+                    )
+                    Screen.Type.Score
+                    Transitions.Flags.Default
+            then
+                Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
+
         { new IPlayScreen(info.Chart, info.WithColors, PacemakerState.None, scoring) with
             override this.AddWidgets() =
                 let user_options = options.HUD.Value
@@ -110,9 +154,6 @@ module PlayScreenMultiplayer =
                 add_widget noteskin_options.PacemakerPosition 
                     (fun (user_options, noteskin_options, state) -> MultiplayerScoreTracker(user_options, noteskin_options, state, lobby.Replays))
 
-                let give_up () =
-                    Screen.back Transitions.Flags.Default |> ignore
-
                 this
                 |* HotkeyHoldAction(
                     "exit",
@@ -127,11 +168,6 @@ module PlayScreenMultiplayer =
                 base.OnEnter(previous)
 
             override this.OnExit(next) =
-                if next = Screen.Type.Score then
-                    Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
-                else
-                    Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
-
                 if options.AutoCalibrateOffset.Value then
                     LocalAudioSync.apply_automatic this.State info.SaveData
 
@@ -173,23 +209,5 @@ module PlayScreenMultiplayer =
 
                     this.State.Scoring.Update chart_time
 
-                if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
-                    liveplay.Finish()
-                    send_replay_packet (now)
-                    lobby.FinishPlaying()
-
-                    Screen.change_new
-                        (fun () ->
-                            let score_info =
-                                Gameplay.score_info_from_gameplay
-                                    info
-                                    scoring
-                                    ((liveplay :> IReplayProvider).GetFullReplay())
-
-                            (score_info, Gameplay.set_score true score_info info.SaveData, true)
-                            |> ScoreScreen
-                        )
-                        Screen.Type.Score
-                        Transitions.Flags.Default
-                    |> ignore
+                if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then finish_play(now)
         }
