@@ -3,7 +3,6 @@
 open System
 open System.IO
 open System.Collections.Generic
-open System.Linq
 open Prelude
 open Prelude.Charts.Formats.Quaver
 open Prelude.Charts
@@ -135,45 +134,6 @@ module Quaver_To_Interlude =
         data.[current] <- data.[current] + end_time - t
         data
 
-    //let private convert_timing_points
-    //    (points: TimingPoint list)
-    //    (end_time: Time)
-    //    : TimeArray<BPM> * TimeArray<float32> =
-    //    let most_common_bpm =
-    //        (find_bpm_durations points end_time)
-    //            .OrderByDescending(fun p -> p.Value)
-    //            .First()
-    //            .Key
-
-    //    let add_sv_value (offset, new_speed) sv =
-    //        match sv with
-    //        | [] -> [ { Time = offset; Data = new_speed } ]
-    //        | { Time = time; Data = current_speed } :: s ->
-    //            if current_speed = new_speed then
-    //                sv
-    //            else
-    //                { Time = offset; Data = new_speed } :: sv
-
-    //    let (bpm, sv, _) =
-    //        let func
-    //            ((bpm, sv, scroll): (TimeItem<BPM> list * TimeItem<float32> list * float32))
-    //            (point: TimingPoint)
-    //            : (TimeItem<BPM> list * TimeItem<float32> list * float32) =
-    //            match point with
-    //            | (TimingPoint.BPM(offset, msPerBeat, meter, _, _)) ->
-    //                {
-    //                    Time = offset
-    //                    Data = { Meter = meter; MsPerBeat = msPerBeat }
-    //                }
-    //                :: bpm,
-    //                add_sv_value (offset, (most_common_bpm / msPerBeat)) sv,
-    //                most_common_bpm / msPerBeat
-    //            | (TimingPoint.SV(offset, value, _, _)) -> bpm, add_sv_value (offset, (value * scroll)) sv, scroll
-
-    //        List.fold func ([], [], 1.0f) points
-
-    //    bpm |> Array.ofList |> Array.rev, sv |> Array.ofList |> Array.rev
-
     let convert (b: QuaverChart) (action: ConversionAction) : Chart =
         let keys = b.Mode
 
@@ -221,7 +181,30 @@ module Quaver_To_Interlude =
 
         let snaps = convert_hit_objects b.HitObjects keys
 
-        let bpm, sv = failwith "nyi"//convert_timing_points b.Timing (TimeArray.last snaps).Value.Time
+        if not b.BPMDoesNotAffectScrollVelocity then
+            skip_conversion "BPMDoesNotAffectScrollVelocity: false is not currently supported"
+
+        let bpm : TimeArray<BPM> = 
+            b.TimingPoints 
+            |> Seq.map (fun tp -> 
+                { 
+                    Time = Time.of_number tp.StartTime
+                    Data =
+                        { 
+                            Meter = 4<beat>
+                            MsPerBeat = 60000.0f<ms/minute> / (tp.Bpm * 1.0f<beat/minute>)
+                        }
+                }
+            ) |> Array.ofSeq
+
+        let sv : TimeArray<SV> = 
+            b.SliderVelocities 
+            |> Seq.map (fun sv -> 
+                { 
+                    Time = Time.of_number sv.StartTime
+                    Data = sv.Multiplier
+                }
+            ) |> Array.ofSeq
 
         {
             Keys = keys

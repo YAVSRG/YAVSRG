@@ -40,12 +40,14 @@ module Utilities =
 
         match s with
         | ".sm"
+        | ".qua"
         | ".osu" -> Some s
         | _ -> None
 
     let (|ChartArchive|_|) (path: string) =
         match Path.GetExtension(path).ToLower() with
         | ".osz"
+        | ".qp"
         | ".zip" -> Some()
         | _ -> None
 

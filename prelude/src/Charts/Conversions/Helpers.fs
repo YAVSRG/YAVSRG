@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Charts.Formats.``osu!``
 open Prelude.Charts.Formats.StepMania
+open Prelude.Charts.Formats.Quaver
 
 [<AutoOpen>]
 module Helpers =
@@ -37,6 +38,22 @@ module Helpers =
 
             | Error msg ->
                 Logging.Debug(sprintf "Parse error in SM file %s" action.Source, msg)
+                []
+        
+        | ".qua" ->
+            match QuaverChart.from_file action.Source with
+            | Ok quaver_chart ->
+
+                try
+                    [ Quaver_To_Interlude.convert quaver_chart action ]
+                with
+                | :? ConversionSkipException -> []
+                | other_error ->
+                    Logging.Debug(sprintf "Error converting %s" action.Source, other_error)
+                    []
+
+            | Error msg ->
+                Logging.Debug(sprintf "Parse error in osu! file %s" action.Source, msg)
                 []
 
         | ".osu" ->

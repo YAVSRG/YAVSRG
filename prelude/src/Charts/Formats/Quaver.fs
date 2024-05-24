@@ -55,7 +55,7 @@ module Yaml =
     type ParsedYamlValue = String of string | Array of ResizeArray<ParsedYamlNestedObject>
     type ParsedYamlObject = Map<string, ParsedYamlValue>
 
-    let rec parse_nested_list (lines: string list) : ResizeArray<ParsedYamlNestedObject> * string list =
+    let rec private parse_nested_list (lines: string list) : ResizeArray<ParsedYamlNestedObject> * string list =
         let mutable lines_remaining = lines
         
         let mutable object : ParsedYamlNestedObject = Map.empty
@@ -180,26 +180,26 @@ module Yaml =
 
 module QuaverChart =
 
-    let timing_point_from_yaml (parsed: Yaml.ParsedYamlNestedObject) : QuaverTimingPoint =
+    let private timing_point_from_yaml (parsed: Yaml.ParsedYamlNestedObject) : QuaverTimingPoint =
         {
             StartTime = Yaml.get_nested_float_or "StartTime" 0.0f parsed
             Bpm = Yaml.get_nested_float_or "Bpm" 0.0f parsed
         }
 
-    let sv_from_yaml (parsed: Yaml.ParsedYamlNestedObject) : QuaverSliderVelocity =
+    let private sv_from_yaml (parsed: Yaml.ParsedYamlNestedObject) : QuaverSliderVelocity =
         {
             StartTime = Yaml.get_nested_float_or "StartTime" 0.0f parsed
             Multiplier = Yaml.get_nested_float_or "Multiplier" 0.0f parsed
         }
 
-    let object_from_yaml (parsed: Yaml.ParsedYamlNestedObject) : QuaverHitObject =
+    let private object_from_yaml (parsed: Yaml.ParsedYamlNestedObject) : QuaverHitObject =
         {
             StartTime = Yaml.get_nested_int_or "StartTime" 0 parsed
             Lane = Yaml.get_nested_int "Lane" parsed
             EndTime = Yaml.get_nested_int_or "EndTime" 0 parsed
         }
 
-    let from_yaml (parsed: Yaml.ParsedYamlObject) : QuaverChart =
+    let private from_yaml (parsed: Yaml.ParsedYamlObject) : QuaverChart =
         {
             AudioFile = Yaml.get_string "AudioFile" parsed
             SongPreviewTime = Yaml.get_int_or "SongPreviewTime" 0 parsed
