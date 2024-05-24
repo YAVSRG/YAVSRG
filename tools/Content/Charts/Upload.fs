@@ -184,6 +184,7 @@ module Upload =
                         | Osu(-1, 0) -> []
                         | Osu(set, id) -> [ Backbeat.Archive.ChartSource.Osu {| BeatmapSetId = set; BeatmapId = id |} ]
                         | Stepmania(id) -> [ Backbeat.Archive.ChartSource.Stepmania id ]
+                        | Quaver (set, id) -> [ Backbeat.Archive.ChartSource.Quaver {| MapsetId = set; MapId = id |} ]
                         | Unknown -> []
                     PreviewTime = chart.Header.PreviewTime
                     BackgroundHash = background_hash

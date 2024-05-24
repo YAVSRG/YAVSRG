@@ -11,7 +11,6 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Patterns
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
-open Prelude.Gameplay
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
@@ -19,8 +18,6 @@ open Prelude.Data
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
-open Interlude.Features.Online
-open Interlude.Web.Shared.Requests
 
 type LoadingChartInfo =
     {

@@ -44,7 +44,7 @@ module Types =
 
     module Time =
 
-        let inline ofFloat (f: ^T) = float32 f * 1.0f<ms>
+        let inline of_number (f: ^T) = float32 f * 1.0f<ms>
         let infinity = infinityf * 1.0f<ms>
 
         let abs (t: Time) = if t < 0.0f<ms> then -t else t

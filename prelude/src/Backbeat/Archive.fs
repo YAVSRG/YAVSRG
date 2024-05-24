@@ -105,6 +105,7 @@ type StepmaniaPack =
 [<Json.AutoCodec>]
 type ChartSource =
     | Osu of {| BeatmapId: int; BeatmapSetId: int |}
+    | Quaver of {| MapId: int; MapsetId: int |}
     | Stepmania of id: int
     | CommunityPack of id: string
 

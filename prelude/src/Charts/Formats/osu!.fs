@@ -360,14 +360,14 @@ module ``osu!`` =
         |>> fun ((offset, value, meter, sampleSet), (sampleIndex, volume, isBpm, effects)) ->
             if isBpm > 0 then
                 BPM(
-                    Time.ofFloat offset,
-                    Time.ofFloat value / 1.0f<beat>,
+                    Time.of_number offset,
+                    Time.of_number value / 1.0f<beat>,
                     meter * 1<beat>,
                     (enum sampleSet, sampleIndex, volume),
                     enum effects
                 )
             else
-                SV(Time.ofFloat offset, -100.0f / float32 value, (enum sampleSet, sampleIndex, volume), enum effects)
+                SV(Time.of_number offset, -100.0f / float32 value, (enum sampleSet, sampleIndex, volume), enum effects)
 
     let private parse_timing_points =
         pstring "[TimingPoints]" >>. newline >>. many (parse_timing_point .>> newline)
@@ -409,7 +409,7 @@ module ``osu!`` =
     let private parse_hit_object: Parser<HitObject, unit> =
         tuple4 (parse_point .>> comma) (parse_num .>> comma) (parse_int .>> comma) ((parse_int .>> comma) |>> enum)
         >>= (fun (pos, offset, objType, hitsound) ->
-            let offset = Time.ofFloat offset
+            let offset = Time.of_number offset
 
             match objType &&& 139 with
             | 1 -> parse_addition |>> fun addition -> HitCircle(pos, offset, hitsound, addition)
@@ -426,12 +426,12 @@ module ``osu!`` =
                 pipe2
                     (parse_num .>> comma)
                     parse_addition
-                    (fun endTime addition -> Spinner(offset, Time.ofFloat endTime, hitsound, addition))
+                    (fun endTime addition -> Spinner(offset, Time.of_number endTime, hitsound, addition))
             | 128 ->
                 pipe2
                     (parse_num .>> colon)
                     parse_addition
-                    (fun endTime addition -> HoldNote(pos, offset, Time.ofFloat endTime, hitsound, addition))
+                    (fun endTime addition -> HoldNote(pos, offset, Time.of_number endTime, hitsound, addition))
             | _ -> failwith "Unknown hitobject type"
         )
 
@@ -470,7 +470,7 @@ module ``osu!`` =
                       | None, Some x -> x, x
                       | Some x, Some y -> x, y
 
-                  let startTime, endTime = Time.ofFloat startTime, Time.ofFloat endTime
+                  let startTime, endTime = Time.of_number startTime, Time.of_number endTime
 
                   match eventType with
                   | "F" ->
@@ -522,7 +522,7 @@ module ``osu!`` =
               .>> pchar '\n')
              (parse_sprite_events (pchar '_' <|> pchar ' ')))
          |>> fun ((layer, origin, file, x), (y, frames, frameTime, loopType), events) ->
-             Animation(layer, origin, file, (x, y), frames, Time.ofFloat frameTime, loopType, events))
+             Animation(layer, origin, file, (x, y), frames, Time.of_number frameTime, loopType, events))
 
         <|> ((pstring "Sprite" <|> pstring "4")
              >>. comma
@@ -548,7 +548,7 @@ module ``osu!`` =
         <|> ((pstring "Sample")
              >>. comma
              >>. (tuple4 (parse_num .>> comma) (parse_name .>> comma |>> Layer.Parse) (parse_quote .>> comma) parse_int)
-             |>> fun (time, layer, file, volume) -> Sample(Time.ofFloat time, layer, file, volume))
+             |>> fun (time, layer, file, volume) -> Sample(Time.of_number time, layer, file, volume))
 
         <|> ((pstring "Video" <|> pstring "1")
              >>. comma
@@ -557,17 +557,17 @@ module ``osu!`` =
                  parse_quote
                  (opt (tuple2 (comma >>. parse_num) (comma >>. parse_num))
                   |>> Option.defaultValue (0.0, 0.0)))
-             |>> fun (time, file, (x, y)) -> Video(Time.ofFloat time, file, (x, y)))
+             |>> fun (time, file, (x, y)) -> Video(Time.of_number time, file, (x, y)))
 
         <|> ((pstring "Break" <|> pstring "2") >>. comma >>. (parse_num .>> comma)
              .>>. parse_num
-             |>> fun (time1, time2) -> Break(Time.ofFloat time1, Time.ofFloat time2))
+             |>> fun (time1, time2) -> Break(Time.of_number time1, Time.of_number time2))
 
         //I have no idea what this does and cannot for the life of me find any documentation on it
         <|> (pstring "3"
              >>. comma
              >>. (tuple4 (parse_num .>> comma) (parse_int .>> comma) (parse_int .>> comma) (parse_int))
-             |>> fun (time, r, g, b) -> BackgroundColorChange(Time.ofFloat time, r, g, b))
+             |>> fun (time, r, g, b) -> BackgroundColorChange(Time.of_number time, r, g, b))
 
     let private parse_events =
         pstring "[Events]"
@@ -735,7 +735,7 @@ module ``osu!`` =
                 match run (sepBy parse_num comma) value with
                 | Success(result, _, _) ->
                     { s with
-                        Bookmarks = result |> List.map Time.ofFloat
+                        Bookmarks = result |> List.map Time.of_number
                     }
                 | Failure(errorMsg, _, _) -> failwith errorMsg
             | "DistanceSpacing" ->

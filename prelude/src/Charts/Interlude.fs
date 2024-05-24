@@ -111,6 +111,7 @@ type MediaPath =
 type Origin =
     | Osu of beatmapsetid: int * beatmapid: int
     | Stepmania of packid: int
+    | Quaver of mapsetid: int * mapid: int
     | Unknown
 
 [<Json.AutoCodec(false)>]

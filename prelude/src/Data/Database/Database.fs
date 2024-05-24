@@ -213,7 +213,7 @@ module DbChartData =
             Read =
                 (fun r ->
                     {
-                        Offset = r.Float32 |> Time.ofFloat
+                        Offset = r.Float32 |> Time.of_number
                         LastPlayed = r.Int64
                         Comment = r.String
                         Breakpoints = r.Json JSON
@@ -332,7 +332,7 @@ module DbChartData =
                 (fun r ->
                     r.String,
                     {
-                        Offset = r.Float32 |> Time.ofFloat
+                        Offset = r.Float32 |> Time.of_number
                         LastPlayed = r.Int64
                         Comment = r.String
                         Breakpoints = r.Json JSON
