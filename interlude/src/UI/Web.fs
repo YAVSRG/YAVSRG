@@ -13,7 +13,7 @@ type private WebRequestState =
     | Loaded = 3
 
 type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: WebRequestContainer<'T> -> 'T -> Widget) as this =
-    inherit Container(NodeType.None)
+    inherit Container(NodeType.Container (fun () -> Some this.Content))
 
     let mutable status = WebRequestState.Loading
 
@@ -26,6 +26,8 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
             content.Init this
 
     let data = Setting.simple Unchecked.defaultof<'T> |> Setting.trigger rerender
+
+    member private this.Content = content
 
     member this.Offline() =
         require_ui_thread ()

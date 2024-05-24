@@ -172,7 +172,12 @@ type SuggestionsPage(table: Table) =
 
     let suggestions_list = SuggestionsList(table)
 
-    override this.Content() = suggestions_list |>> Container :> Widget
+    override this.Content() =
+        NavigationContainer.Column<Widget>()
+        |+ Button("", ignore, Position = Position.Box(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
+        |+ suggestions_list 
+        |>> Container
+        :> Widget
 
     override this.Title = %"table.suggestions"
     override this.OnClose() = ()
