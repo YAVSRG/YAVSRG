@@ -77,7 +77,7 @@ module Osu_To_Interlude =
 
             match last_row.Data.[column] with
             | NoteType.NOTHING -> last_row.Data.[column] <- NoteType.NORMAL
-            | _ -> () //Logging.Debug(sprintf "Skipped note because it's stacked with %A" stack)
+            | _ -> skip_conversion (sprintf "Stacked note at %f" time)
 
         let start_hold column time end_time =
             finish_holds time
@@ -100,7 +100,7 @@ module Osu_To_Interlude =
             | NoteType.NOTHING ->
                 last_row.Data.[column] <- NoteType.HOLDHEAD
                 holding_until.[column] <- Some end_time
-            | _ -> () //Logging.Debug(sprintf "Skipped hold because it's stacked with %A" stack)
+            | _ -> skip_conversion (sprintf "Stacked LN at %f" time)
 
         for object in objects |> List.sortBy (fun o -> o.Time) do
             match object with

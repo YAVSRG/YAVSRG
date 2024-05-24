@@ -73,7 +73,7 @@ module Quaver_To_Interlude =
 
             match last_row.Data.[column] with
             | NoteType.NOTHING -> last_row.Data.[column] <- NoteType.NORMAL
-            | _ -> ()
+            | _ -> skip_conversion (sprintf "Stacked note at %f" time)
 
         let start_hold column time end_time =
             finish_holds time
@@ -96,7 +96,7 @@ module Quaver_To_Interlude =
             | NoteType.NOTHING ->
                 last_row.Data.[column] <- NoteType.HOLDHEAD
                 holding_until.[column] <- Some end_time
-            | _ -> ()
+            | _ -> skip_conversion (sprintf "Stacked LN at %f" time)
 
         for object in objects |> List.sortBy (fun o -> o.StartTime) do
             if object.EndTime > object.StartTime then
