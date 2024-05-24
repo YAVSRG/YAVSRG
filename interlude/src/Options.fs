@@ -135,6 +135,7 @@ module Options =
             SelectedMods: Setting<ModState>
 
             OsuMount: Setting<Imports.MountedChartSource option>
+            QuaverMount: Setting<Imports.MountedChartSource option>
             StepmaniaMount: Setting<Imports.MountedChartSource option>
             EtternaMount: Setting<Imports.MountedChartSource option>
 
@@ -191,6 +192,7 @@ module Options =
                 SelectedMods = Setting.simple Map.empty
 
                 OsuMount = Setting.simple None
+                QuaverMount = Setting.simple None
                 StepmaniaMount = Setting.simple None
                 EtternaMount = Setting.simple None
 

@@ -19,6 +19,9 @@ module Imports =
     let ETTERNA_PACK_FOLDER =
         Path.Combine(Path.GetPathRoot Environment.CurrentDirectory, "Games", "Etterna", "Songs")
 
+    let QUAVER_SONG_FOLDER =
+        Path.Combine(Environment.GetFolderPath Environment.SpecialFolder.ProgramFilesX86, "Steam", "steamapps", "common", "Quaver", "Songs")
+
     [<Json.AutoCodec>]
     type MountedChartSourceType =
         | Pack of name: string

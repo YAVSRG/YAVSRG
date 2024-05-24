@@ -13,11 +13,11 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
         Button(
             sprintf "%s %s" Icons.LINK (%"mount.create"),
             (fun () -> CreateMountPage(game, setting).Show()),
-            Position = Position.SliceBottom(60.0f).Margin 5.0f
+            Position = Position.SliceBottom(50.0f).Margin 5.0f
         )
 
     let edit_buttons =
-        NavigationContainer.Row<Button>(WrapNavigation = false, Position = Position.SliceBottom(60.0f).Margin 5.0f)
+        NavigationContainer.Row<Button>(WrapNavigation = false, Position = Position.SliceBottom(50.0f).Margin 5.0f)
         |+ Button(
             sprintf "%s %s" Icons.EDIT_2 (%"mount.edit"),
             (fun () -> EditMountPage(game, setting).Show()),
@@ -40,9 +40,10 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
         |+ Text(
             match game with
             | MountedGameType.Osu -> "osu!mania"
+            | MountedGameType.Quaver -> "Quaver"
             | MountedGameType.Stepmania -> "Stepmania"
             | MountedGameType.Etterna -> "Etterna"
-            , Position = Position.SliceTop 80.0f
+            , Position = Position.Row(0.0f, 60.0f)
             , Align = Alignment.CENTER
         )
         |* Text(
@@ -58,7 +59,7 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
                     %> "mount.lastimported"
                 | None -> %"mount.notlinked"
             , Color = K Colors.text_subheading
-            , Position = Position.SliceTop(145.0f).TrimTop(85.0f)
+            , Position = Position.Row(60.0f, 40.0f)
             , Align = Alignment.CENTER
         )
 

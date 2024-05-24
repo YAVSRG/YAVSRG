@@ -143,5 +143,6 @@ type private DownloadStatus =
 [<RequireQualifiedAccess>]
 type private MountedGameType =
     | Osu
-    | Stepmania
+    | Quaver
     | Etterna
+    | Stepmania

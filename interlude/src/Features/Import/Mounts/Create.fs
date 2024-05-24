@@ -15,6 +15,7 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
     let auto_detect_location =
         match game with
         | MountedGameType.Osu -> Imports.OSU_SONG_FOLDER
+        | MountedGameType.Quaver -> Imports.QUAVER_SONG_FOLDER
         | MountedGameType.Stepmania -> Imports.STEPMANIA_PACK_FOLDER
         | MountedGameType.Etterna -> Imports.ETTERNA_PACK_FOLDER
     let folder_detected = System.IO.Directory.Exists auto_detect_location
@@ -25,6 +26,11 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
                 Callout.Normal
                     .Icon(Icons.DOWNLOAD)
                     .Title(%"mount.create.osu.prompt")
+                    .Body(%"mount.create.folder_hint")
+            | MountedGameType.Quaver -> 
+                Callout.Normal
+                    .Icon(Icons.DOWNLOAD)
+                    .Title(%"mount.create.quaver.prompt")
                     .Body(%"mount.create.folder_hint")
             | MountedGameType.Stepmania ->
                 Callout.Normal
@@ -43,6 +49,8 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
                 match game, path with
                 | MountedGameType.Osu, PackFolder -> setting.Value <- Imports.MountedChartSource.Pack("osu!", path) |> Some
                 | MountedGameType.Osu, _ -> Notifications.error (%"mount.create.osu.error", "")
+                | MountedGameType.Quaver, PackFolder -> setting.Value <- Imports.MountedChartSource.Pack("Quaver", path) |> Some
+                | MountedGameType.Quaver, _ -> Notifications.error (%"mount.create.quaver.error", "")
                 | MountedGameType.Stepmania, FolderOfPacks
                 | MountedGameType.Etterna, FolderOfPacks -> setting.Value <- Imports.MountedChartSource.Library path |> Some
                 | MountedGameType.Stepmania, _ -> Notifications.error (%"mount.create.stepmania.error", "")
