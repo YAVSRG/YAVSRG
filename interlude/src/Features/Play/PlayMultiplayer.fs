@@ -110,6 +110,7 @@ module PlayScreenMultiplayer =
                 else
                     Screen.back Transitions.Flags.Default
             then
+                lobby.AbandonPlaying()
                 Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
 
         let finish_play(now: Time) =
@@ -170,9 +171,6 @@ module PlayScreenMultiplayer =
             override this.OnExit(next) =
                 if options.AutoCalibrateOffset.Value then
                     LocalAudioSync.apply_automatic this.State info.SaveData
-
-                if next <> Screen.Type.Score then
-                    lobby.AbandonPlaying()
 
                 base.OnExit(next)
 
