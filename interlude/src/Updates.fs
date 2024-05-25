@@ -126,13 +126,22 @@ module Updates =
         if not update_available then
             failwith "No update available to install"
 
+
         if update_started then
             ()
         else
 
             update_started <- true
 
-            let download_url = latest_release.Value.assets.Head.browser_download_url
+            let asset_name =
+                // todo: other platforms eventually
+                "interlude-win64.zip"
+
+            match latest_release.Value.assets |> List.tryFind (fun asset -> asset.name.ToLower().StartsWith(asset_name)) with
+            | None -> Logging.Error("Update failed: The github release doesn't have a download for your platform. Report this to Percyqaz!")
+            | Some asset -> 
+
+            let download_url = asset.browser_download_url
             let path = get_interlude_location ()
             let zip_path = Path.Combine(path, "update.zip")
             let folder_path = Path.Combine(path, "update")
