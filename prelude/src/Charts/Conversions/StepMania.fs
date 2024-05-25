@@ -25,7 +25,7 @@ module StepMania_To_Interlude =
         let points = new List<TimeItem<BPM>>()
         let mutable ln: Bitmask = 0us
         let mutable now = start
-        let (_, b) = List.head bpms in
+        let (_, b) = List.head bpms
 
         points.Add(
             {
@@ -38,22 +38,23 @@ module StepMania_To_Interlude =
             }
         )
 
-        let mutable msPerBeat = 60000.0f<ms / minute> / b
+        let mutable ms_per_beat = 60000.0f<ms / minute> / b
+        if ms_per_beat < 0.0f<ms/beat> then skip_conversion "SM file has negative BPMs"
         bpms <- List.tail bpms
-        let mutable totalBeats = 0.0f<beat>
+        let mutable total_beats = 0.0f<beat>
         let mutable lo = 0.0f<beat>
         let mutable hi = 0.0f<beat>
         let mutable point_at_end_of_measure = false
 
         let convert_measure (m: string list) (lo: float32<beat>) (hi: float32<beat>) =
             let l = List.length m |> float32
-            let sep = msPerBeat * fmeter / l
+            let sep = ms_per_beat * fmeter / l
             let start = Math.Ceiling(lo * l / fmeter |> float) |> int
             let finish = Math.Ceiling(hi * l / fmeter |> float) |> int
-            let offset = float32 start * sep - lo * msPerBeat
+            let offset = float32 start * sep - lo * ms_per_beat
 
             for i in start .. (finish - 1) do
-                let beat = totalBeats + float32 i * fmeter / l
+                let beat = total_beats + float32 i * fmeter / l
 
                 while ((not (List.isEmpty stops)) && fst (List.head stops) <= beat) do
                     let (_, s) = List.head stops in
@@ -67,14 +68,18 @@ module StepMania_To_Interlude =
                     (fun k c ->
                         match c with
                         | '0' -> ()
-                        | '1' -> nr.[k] <- NoteType.NORMAL
+                        | '1' -> 
+                            if not (Bitmask.has_key k ln) then
+                                nr.[k] <- NoteType.NORMAL
                         | '2'
                         | '4' ->
-                            nr.[k] <- NoteType.HOLDHEAD
-                            ln <- Bitmask.set_key k ln
+                            if not (Bitmask.has_key k ln) then
+                                nr.[k] <- NoteType.HOLDHEAD
+                                ln <- Bitmask.set_key k ln
                         | '3' ->
-                            nr.[k] <- NoteType.HOLDTAIL
-                            ln <- Bitmask.unset_key k ln
+                            if Bitmask.has_key k ln then
+                                nr.[k] <- NoteType.HOLDTAIL
+                                ln <- Bitmask.unset_key k ln
                         | 'M'
                         | 'L'
                         | 'F' -> () // ignore mines, lifts, fakes
@@ -95,10 +100,10 @@ module StepMania_To_Interlude =
                 point_at_end_of_measure <- false
                 lo <- 0.0f<beat>
 
-                while ((not (List.isEmpty bpms)) && fst (List.head bpms) < totalBeats + fmeter) do
-                    hi <- fst (List.head bpms) - totalBeats
+                while ((not (List.isEmpty bpms)) && fst (List.head bpms) < total_beats + fmeter) do
+                    hi <- fst (List.head bpms) - total_beats
                     convert_measure m lo hi
-                    now <- now + msPerBeat * (hi - lo)
+                    now <- now + ms_per_beat * (hi - lo)
                     lo <- hi
                     point_at_end_of_measure <- true
                     let (_, b) = List.head bpms in
@@ -114,18 +119,19 @@ module StepMania_To_Interlude =
                         }
                     )
 
-                    msPerBeat <- 60000.0f<ms / minute> / b
+                    ms_per_beat <- 60000.0f<ms / minute> / b
+                    if ms_per_beat < 0.0f<ms/beat> then skip_conversion "SM file has negative BPMs"
                     bpms <- List.tail bpms
 
                 convert_measure m lo fmeter
-                now <- now + msPerBeat * (fmeter - lo)
-                totalBeats <- totalBeats + fmeter
+                now <- now + ms_per_beat * (fmeter - lo)
+                total_beats <- total_beats + fmeter
 
                 if point_at_end_of_measure then
                     points.Add(
                         {
                             Time = now
-                            Data = { Meter = meter; MsPerBeat = msPerBeat }
+                            Data = { Meter = meter; MsPerBeat = ms_per_beat }
                         }
                     )
             )
