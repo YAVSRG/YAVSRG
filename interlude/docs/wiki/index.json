@@ -30,6 +30,10 @@
         "Folder": "Migrating",
         "Title": "osu!mania"
     }, {
+        "Filename": "migrate_quaver",
+        "Folder": "Migrating",
+        "Title": "Quaver"
+    }, {
         "Filename": "migrate_sm_etterna",
         "Folder": "Migrating",
         "Title": "StepMania/Etterna"
