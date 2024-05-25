@@ -197,14 +197,20 @@ module Quaver_To_Interlude =
                 }
             ) |> Array.ofSeq
 
-        let sv : TimeArray<SV> = 
-            b.SliderVelocities 
-            |> Seq.map (fun sv -> 
-                { 
-                    Time = Time.of_number sv.StartTime
-                    Data = sv.Multiplier
-                }
-            ) |> Array.ofSeq
+        let sv : TimeArray<SV> =
+            seq {
+                if b.InitialScrollVelocity <> 1.0f then
+                    yield { Time = -10000.0f<ms>; Data = b.InitialScrollVelocity }
+                yield! 
+                    b.SliderVelocities 
+                    |> Seq.map (fun sv -> 
+                        { 
+                            Time = Time.of_number sv.StartTime
+                            Data = sv.Multiplier
+                        }
+                    )
+            }
+            |> Array.ofSeq
 
         {
             Keys = keys
