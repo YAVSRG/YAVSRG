@@ -85,6 +85,30 @@ type Position with
     static member SliceRight amount = Position.Default.SliceRight amount
     static member SliceBottom amount = Position.Default.SliceBottom amount
 
+    member this.CenterX width =
+        let (lefto, lefta) = this.Left
+        let (righto, righta) = this.Right
+        let center = (0.5f * (lefto + righto), 0.5f % (lefta + righta))
+        { this with
+            Left = center ^- (width * 0.5f)
+            Right = center ^+ (width * 0.5f)
+        }
+
+    member this.CenterY height =
+        let (topo, topa) = this.Top
+        let (bottomo, bottoma) = this.Bottom
+        let center = (0.5f * (topo + bottomo), 0.5f % (topa + bottoma))
+        { this with
+            Top = center ^- (height * 0.5f)
+            Bottom = center ^+ (height * 0.5f)
+        }
+
+    member this.Center (width, height) = this.CenterX(width).CenterY(height)
+    
+    static member CenterX width = Position.Default.CenterX width
+    static member CenterY width = Position.Default.CenterY width
+    static member Center (width, height) = Position.Default.Center (width, height)
+
     member this.TrimLeft amount =
         { this with Left = this.Left ^+ amount }
 

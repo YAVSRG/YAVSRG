@@ -26,6 +26,16 @@ module Search =
         let results = search_func tokens
         if Seq.isEmpty results then
             EmptyState(Icons.SEARCH, %"options.search.no_results", Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+            |>> Container
+            |+ Callout.frame
+                (
+                    Callout.Normal
+                        .Icon(Icons.SEARCH)
+                        .Title(%"options.search.no_results.title")
+                        .Body(%"options.search.no_results.body")
+                )
+                (fun (w, h) -> Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y * 2.0f).SliceBottom(h).CenterX(w))
+            :> Widget
         else
             let content = 
                 NavigationContainer.Column<_>(WrapNavigation = false)
