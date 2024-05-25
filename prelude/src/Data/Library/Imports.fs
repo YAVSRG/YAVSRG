@@ -172,7 +172,10 @@ module Imports =
                                 convert_song_folder.RequestAsync(
                                     Path.GetDirectoryName path,
                                     { ConversionOptions.Default with
-                                        PackName = if ext = ".osu" then "osu!" else "Singles"
+                                        PackName = 
+                                            if ext = ".osu" then "osu!" 
+                                            elif ext = ".qua" then "Quaver"
+                                            else "Singles"
                                     },
                                     library
                                 )
@@ -203,7 +206,10 @@ module Imports =
                                     path,
                                     { ConversionOptions.Default with
                                         MoveAssets = move_assets
-                                        PackName = if ext = ".osu" then "osu!" else "Singles"
+                                        PackName = 
+                                            if ext = ".osu" then "osu!" 
+                                            elif ext = ".qua" then "Quaver"
+                                            else "Singles"
                                     },
                                     library
                                 )
@@ -215,6 +221,8 @@ module Imports =
                                 | "Songs" ->
                                     if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then
                                         "osu!"
+                                    elif path |> Path.GetDirectoryName |> Path.GetFileName = "Quaver" then
+                                        "Quaver"
                                     else
                                         "Songs"
                                 | s -> s
