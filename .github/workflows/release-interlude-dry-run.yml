@@ -1,0 +1,35 @@
+name: Interlude Release Pipeline Dry-run
+
+on:
+  workflow_dispatch:
+  # for debug purposes
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Package Interlude
+      id: package
+      run: |
+        cd scripts
+        chmod +x ./setup_cli.sh
+        ./setup_cli.sh
+        yavsrg pack_win_x64
+        echo "VERSION=v$(yavsrg version)" >> $GITHUB_OUTPUT
+        
+    - name: Upload windows artifact
+      uses: actions/upload-artifact@v4
+      with:
+          name: interlude-win64
+          path: ./interlude/releases/interlude-win64.zip
