@@ -798,6 +798,7 @@ replay.input_overlay=Input overlay
 replay.playfield_dim=Playfield dim
 replay.title=Watching replay
 replay.title.autoplay=Autoplay
+rulesets.get_more_rulesets=Get more rulesets
 score.challenge=Challenge this score
 score.challenge.tooltip=Play the chart, using this score as a pacemaker.
 score.chart_actions=Chart actions

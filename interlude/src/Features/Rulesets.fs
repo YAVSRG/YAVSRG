@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.UI
 
 module Rulesets = Interlude.Content.Rulesets
@@ -21,8 +22,17 @@ module Rulesets =
                         let group_name = remove_bracket.Replace((snd arr.[0]).Name, "").Trim()
                         group_name, arr
                     )
+                    |> Array.ofSeq
                 let dropdown_items =
                     seq {
+                        if groups.Length = 1 && (snd groups.[0]).Length = 1 && Screen.current_type <> Screen.Type.Score then
+                            yield (
+                                (fun () -> 
+                                    Import.ImportScreen.switch_to_rulesets()
+                                    Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
+                                ),
+                                %"rulesets.get_more_rulesets"
+                            )
                         for name, items in groups do
                             if items.Length < 3 then
                                 for (id, rs) in items do
