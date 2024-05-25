@@ -300,7 +300,8 @@ type Scoreboard(display: Setting<Display>) as this =
                 else
                     Loader.container.Focus false
         )
-        |* Conditional((fun () -> count = 0), EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty"))
+        |* EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty")
+            .Conditional(fun () -> count = 0)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

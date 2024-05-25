@@ -59,21 +59,18 @@ type AccuracyPage(on_close: unit -> unit) =
             PageSetting("hud.generic.use_font", Checkbox use_font)
                 .Tooltip(Tooltip.Info("hud.generic.use_font"))
                 .Pos(7)
-            Conditional(use_font.Get,
-                PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
-                    .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
-                    .Pos(9)
-            )
-            Conditional(use_font.Get,
-                PageSetting("hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
-                    .Tooltip(Tooltip.Info("hud.generic.dot_spacing"))
-                    .Pos(11)
-            )
-            Conditional(use_font.Get,
-                PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
-                    .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
-                    .Pos(13)
-            )
+            PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
+                .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+                .Pos(9)
+                .Conditional(use_font.Get)
+            PageSetting("hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
+                .Tooltip(Tooltip.Info("hud.generic.dot_spacing"))
+                .Pos(11)
+                .Conditional(use_font.Get)
+            PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
+                .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
+                .Pos(13)
+                .Conditional(use_font.Get)
         ] |> or_require_noteskin)
         |>> Container
         |+ preview

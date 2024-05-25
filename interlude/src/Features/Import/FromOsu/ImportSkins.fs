@@ -25,11 +25,9 @@ module ImportSkins =
             page_container()
             |+ PageSetting("osu_skin_import.keymode", Selector.FromEnum(keymode))
                 .Pos(0)
-            |+ Conditional(
-                (fun () -> keymode.Value = Keymode.``4K``),
-                PageSetting("osu_skin_import.isarrows", Checkbox is_arrows)
-                    .Pos(2)
-            )
+            |+ PageSetting("osu_skin_import.isarrows", Checkbox is_arrows)
+                .Pos(2)
+                .Conditional(fun () -> keymode.Value = Keymode.``4K``)
             |+ 
                 match existing_folder with
                 | Some folder ->

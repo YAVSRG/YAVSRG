@@ -120,7 +120,7 @@ module Noteskins =
                     Position = Position.SliceTop 60.0f
                 )
                 |+ LoadingIndicator.Border(fun () -> loading))
-            |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to noteskins repository"))
+            |+ EmptyState(Icons.X, "Couldn't connect to noteskins repository").Conditional(fun () -> failed)
             |+ Text(%"imports.noteskins.hint_a", Position = Position.TrimLeft(300.0f).SliceBottom(100.0f).SliceTop(50.0f), Align = Alignment.RIGHT)
             |+ Text(%"imports.noteskins.hint_b", Position = Position.TrimLeft(300.0f).SliceBottom(50.0f), Align = Alignment.RIGHT)
             |+ Button(Icons.DOWNLOAD + " " + %"osu_skin_import.list_skins", 

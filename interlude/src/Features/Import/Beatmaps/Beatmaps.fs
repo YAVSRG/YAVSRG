@@ -422,10 +422,8 @@ module Beatmaps =
                     Right = 0.72f %- 25.0f
                 }
                 Colors.grey_2
-            |+ Conditional(
-                (fun () -> not loading && items.Count = 0),
-                EmptyState(Icons.SEARCH, %"imports.beatmaps.no_results", Position = Position.TrimTop(120.0f))
-            )
+            |+ EmptyState(Icons.SEARCH, %"imports.beatmaps.no_results", Position = Position.TrimTop(120.0f))
+                .Conditional(fun () -> not loading && items.Count = 0)
             |* SortingDropdown(
                 [
                     "plays", "Play count"

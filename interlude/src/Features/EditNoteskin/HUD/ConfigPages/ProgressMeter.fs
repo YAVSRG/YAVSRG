@@ -92,21 +92,18 @@ type ProgressMeterPage(on_close: unit -> unit) =
             PageSetting("hud.generic.use_font", Checkbox use_font)
                 .Tooltip(Tooltip.Info("hud.generic.use_font"))
                 .Pos(10)
-            Conditional(use_font.Get,
-                PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
-                    .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
-                    .Pos(12)
-            )
-            Conditional(use_font.Get,
-                PageSetting("hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
-                    .Tooltip(Tooltip.Info("hud.generic.colon_spacing"))
-                    .Pos(14)
-            )
-            Conditional(use_font.Get,
-                PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
-                    .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
-                    .Pos(16)
-            )
+            PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
+                .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+                .Pos(12)
+                .Conditional(use_font.Get)
+            PageSetting("hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
+                .Tooltip(Tooltip.Info("hud.generic.colon_spacing"))
+                .Pos(14)
+                .Conditional(use_font.Get)
+            PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
+                .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
+                .Pos(16)
+                .Conditional(use_font.Get)
         ] |> or_require_noteskin)
         |>> Container
         |+ preview

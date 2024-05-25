@@ -56,8 +56,8 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
             (fun () -> status = WebRequestState.Loading),
             Position = Position.SliceTop(Style.PADDING)
         )
-        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
-        |* Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.GLOBE, %"misc.server_error"))
+        |+ EmptyState(Icons.GLOBE, %"misc.offline").Conditional(fun () -> status = WebRequestState.Offline)
+        |* EmptyState(Icons.GLOBE, %"misc.server_error").Conditional(fun () -> status = WebRequestState.ServerError)
 
         base.Init parent
         content.Init this

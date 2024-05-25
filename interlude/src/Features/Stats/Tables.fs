@@ -65,9 +65,9 @@ type private Leaderboard() =
             status <- WebRequestState.Offline
 
         this
-        |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
-        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
-        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.GLOBE, %"misc.server_error"))
+        |+ LoadingState().Conditional(fun () -> status = WebRequestState.Loading)
+        |+ EmptyState(Icons.GLOBE, %"misc.offline").Conditional(fun () -> status = WebRequestState.Offline)
+        |+ EmptyState(Icons.GLOBE, %"misc.server_error").Conditional(fun () -> status = WebRequestState.ServerError)
         |* ScrollContainer(contents)
 
         base.Init parent
@@ -189,9 +189,9 @@ type private CompareFriend
             status <- WebRequestState.Offline
 
         this
-        |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
-        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
-        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.GLOBE, %"misc.server_error"))
+        |+ LoadingState().Conditional(fun () -> status = WebRequestState.Loading)
+        |+ EmptyState(Icons.GLOBE, %"misc.offline").Conditional(fun () -> status = WebRequestState.Offline)
+        |+ EmptyState(Icons.GLOBE, %"misc.server_error").Conditional(fun () -> status = WebRequestState.ServerError)
         |+ Text(
             "Comparing to " + name,
             Align = Alignment.RIGHT,
@@ -271,13 +271,11 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
             status <- WebRequestState.Offline
 
         this
-        |+ Conditional((fun () -> status = WebRequestState.Loading), LoadingState())
-        |+ Conditional((fun () -> status = WebRequestState.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
-        |+ Conditional((fun () -> status = WebRequestState.ServerError), EmptyState(Icons.GLOBE, %"misc.server_error"))
-        |+ Conditional(
-            (fun () -> status = WebRequestState.Loaded && friends.Value.Length = 0),
-            EmptyState(Icons.USERS, %"stats.table.friends.empty", Subtitle = %"stats.table.friends.empty.subtitle")
-        )
+        |+ LoadingState().Conditional(fun () -> status = WebRequestState.Loading)
+        |+ EmptyState(Icons.GLOBE, %"misc.offline").Conditional(fun () -> status = WebRequestState.Offline)
+        |+ EmptyState(Icons.GLOBE, %"misc.server_error").Conditional(fun () -> status = WebRequestState.ServerError)
+        |+ EmptyState(Icons.USERS, %"stats.table.friends.empty", Subtitle = %"stats.table.friends.empty.subtitle")
+            .Conditional(fun () -> status = WebRequestState.Loaded && friends.Value.Length = 0)
         |* swap
 
         base.Init parent

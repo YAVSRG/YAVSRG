@@ -414,7 +414,7 @@ module ReplayScreen =
                     if user_options.AccuracyEnabled then add_widget noteskin_options.AccuracyPosition Accuracy
                     if user_options.TimingDisplayEnabled then 
                         add_widget noteskin_options.TimingDisplayPosition 
-                            (fun x -> Conditional((fun () -> not state.ShowHitOverlay.Value), TimingDisplay x))
+                            (fun x -> TimingDisplay(x).Conditional(state.ShowHitOverlay.Get >> not))
                     if user_options.JudgementCounterEnabled then add_widget noteskin_options.JudgementCounterPosition JudgementCounter
                     if user_options.JudgementMeterEnabled then add_widget noteskin_options.JudgementMeterPosition JudgementMeter
                     if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter

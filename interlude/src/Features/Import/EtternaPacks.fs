@@ -228,7 +228,7 @@ module EtternaPacks =
                     Position = Position.SliceTop 60.0f
                 )
                 |+ LoadingIndicator.Border(fun () -> loading))
-            |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to EtternaOnline"))
+            |+ EmptyState(Icons.X, "Couldn't connect to EtternaOnline").Conditional(fun () -> failed)
             |+ Text(%"imports.disclaimer.etterna", Position = Position.SliceBottom 55.0f)
             |* scroll
 

@@ -58,14 +58,12 @@ type PacemakerOptionsPage() =
         |+ PageSetting("gameplay.pacemaker.use_personal_best", Checkbox use_personal_best)
             .Tooltip(Tooltip.Info("gameplay.pacemaker.use_personal_best"))
             .Pos(7)
-        |+ Conditional((fun () -> mode.Value = PacemakerMode.Accuracy),
-            PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)) 
-                .Pos(9)
-        )
-        |+ Conditional((fun () -> mode.Value = PacemakerMode.Lamp),
-            PageSetting("gameplay.pacemaker.lamp", SelectDropdown(lamps, lamp))
-                .Pos(9)
-        )
+        |+ PageSetting("gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)) 
+            .Pos(9)
+            .Conditional(fun () -> mode.Value = PacemakerMode.Accuracy)
+        |+ PageSetting("gameplay.pacemaker.lamp", SelectDropdown(lamps, lamp))
+            .Pos(9)
+            .Conditional(fun () -> mode.Value = PacemakerMode.Lamp)
         |>> Container
         |+ Text(
             %"gameplay.pacemaker.hint",

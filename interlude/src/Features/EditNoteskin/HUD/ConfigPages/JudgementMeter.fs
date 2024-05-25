@@ -142,30 +142,25 @@ type JudgementMeterPage(on_close: unit -> unit) =
             .Tooltip(Tooltip.Info("hud.judgementmeter.prioritiselowerjudgements"))
             .Pos(2)
         |+ ([
-            Conditional((fun () -> not use_texture.Value || use_animation.Value),
-                PageSetting("hud.judgementmeter.duration", Slider(duration, Step = 5f))
-                    .Tooltip(Tooltip.Info("hud.judgementmeter.duration"))
-                    .Pos(4)
-            ) :> Widget
-            PageSetting(
-                "hud.judgementmeter.usetexture",
-                Checkbox use_texture
-            )
+            PageSetting("hud.judgementmeter.duration", Slider(duration, Step = 5f))
+                .Tooltip(Tooltip.Info("hud.judgementmeter.duration"))
+                .Pos(4)
+                .Conditional(fun () -> not use_texture.Value || use_animation.Value)
+            :> Widget
+            PageSetting("hud.judgementmeter.usetexture", Checkbox use_texture)
                 .Tooltip(Tooltip.Info("hud.judgementmeter.usetexture"))
                 .Pos(6)
-            Conditional(use_texture.Get,
-                PageSetting(
-                    "hud.judgementmeter.useanimation",
-                    Checkbox use_animation
-                )
-                    .Tooltip(Tooltip.Info("hud.judgementmeter.useanimation"))
-                    .Pos(8)
+            PageSetting(
+                "hud.judgementmeter.useanimation",
+                Checkbox use_animation
             )
-            Conditional(use_texture.Get,
-                PageSetting("hud.judgementmeter.frametime", Slider(frame_time, Step = 5f))
-                    .Tooltip(Tooltip.Info("hud.judgementmeter.frametime"))
-                    .Pos(10)
-            )
+                .Tooltip(Tooltip.Info("hud.judgementmeter.useanimation"))
+                .Pos(8)
+                .Conditional(use_texture.Get)
+            PageSetting("hud.judgementmeter.frametime", Slider(frame_time, Step = 5f))
+                .Tooltip(Tooltip.Info("hud.judgementmeter.frametime"))
+                .Pos(10)
+                .Conditional(use_texture.Get)
             Conditional(use_texture.Get,
                 FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
                 |+ seq {

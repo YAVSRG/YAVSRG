@@ -81,10 +81,8 @@ type LoginPage() =
         page_container()
         |+ PageButton("login.login_with_discord", login).Pos(0)
         |+ PageButton("login.register_with_discord", register).Pos(3)
-        |+ Conditional(
-            (fun () -> waiting_for_browser),
-            Callout.frame info (fun (w, h) -> Position.Row(400.0f, h))
-        )
+        |+ (Callout.frame info (fun (w, h) -> Position.Row(400.0f, h)))
+            .Conditional(fun () -> waiting_for_browser)
         :> Widget
 
     override this.Title = %"login"

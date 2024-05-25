@@ -33,9 +33,9 @@ type ChartInfo() as this =
                 LevelSelect.refresh_details ()
 
         this
-        |+ Conditional((fun () -> display.Value = Display.Local), scoreboard)
-        |+ Conditional((fun () -> display.Value = Display.Online), online)
-        |+ Conditional((fun () -> display.Value = Display.Patterns), patterns)
+        |+ scoreboard.Conditional(fun () -> display.Value = Display.Local)
+        |+ online.Conditional(fun () -> display.Value = Display.Online)
+        |+ patterns.Conditional(fun () -> display.Value = Display.Patterns)
 
         |+ Text(
             (fun () -> sprintf "%s %.2f" Icons.STAR rating),

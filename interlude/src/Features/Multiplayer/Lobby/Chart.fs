@@ -212,122 +212,111 @@ type SelectedChart(lobby: Lobby) =
             , Position = Position.SliceTop(100.0f)
         )
 
-        |+ Conditional(
-            (fun () -> 
+        |+ StylishButton(
+            (fun () -> lobby.Spectate <- not lobby.Spectate),
+            (fun () ->
+                if lobby.Spectate then
+                    sprintf "%s %s" Icons.EYE (%"lobby.spectator")
+                else
+                    sprintf "%s %s" Icons.PLAY (%"lobby.player")
+            ),
+            !%Palette.MAIN_100,
+            Position =
+                { Position.SliceBottom(50.0f) with
+                    Right = 0.5f %- 25.0f
+                }
+        )
+            .Conditional(fun () -> 
                 LobbyChart.info_if_selected().IsSome
                 && not lobby.GameInProgress
                 && lobby.ReadyStatus = ReadyFlag.NotReady
-            ),
-
-            StylishButton(
-                (fun () -> lobby.Spectate <- not lobby.Spectate),
-                (fun () ->
-                    if lobby.Spectate then
-                        sprintf "%s %s" Icons.EYE (%"lobby.spectator")
-                    else
-                        sprintf "%s %s" Icons.PLAY (%"lobby.player")
-                ),
-                !%Palette.MAIN_100,
-                Position =
-                    { Position.SliceBottom(50.0f) with
-                        Right = 0.5f %- 25.0f
-                    }
             )
-        )
 
-        |+ Conditional(
+        |+ StylishButton(
             (fun () ->
+                match lobby.Replays |> Seq.tryHead with
+                | Some (KeyValue (username, replay_info)) ->
+                    match LobbyChart.info_if_selected() with
+                    | Some info -> 
+                        Screen.change_new
+                            (fun () -> SpectateScreen.spectate_screen (info, username, replay_info, lobby))
+                            Screen.Type.Replay
+                            Transitions.Flags.Default
+                        |> ignore
+                    | None -> ()
+                | None -> Logging.Debug("Couldn't find anyone with replay data to spectate")
+            ),
+            K(sprintf "%s %s" Icons.EYE (%"lobby.spectate")),
+            !%Palette.DARK_100,
+            TiltRight = false,
+            Position =
+                { Position.SliceBottom(50.0f) with
+                    Left = 0.5f %- 0.0f
+                }
+        )
+            .Conditional(fun () ->
                 LobbyChart.info_if_selected().IsSome
                 && lobby.GameInProgress
-            ),
-            StylishButton(
-                (fun () ->
-                    match lobby.Replays |> Seq.tryHead with
-                    | Some (KeyValue (username, replay_info)) ->
-                        match LobbyChart.info_if_selected() with
-                        | Some info -> 
-                            Screen.change_new
-                                (fun () -> SpectateScreen.spectate_screen (info, username, replay_info, lobby))
-                                Screen.Type.Replay
-                                Transitions.Flags.Default
-                            |> ignore
-                        | None -> ()
-                    | None -> Logging.Debug("Couldn't find anyone with replay data to spectate")
-                ),
-                K(sprintf "%s %s" Icons.EYE (%"lobby.spectate")),
-                !%Palette.DARK_100,
-                TiltRight = false,
-                Position =
-                    { Position.SliceBottom(50.0f) with
-                        Left = 0.5f %- 0.0f
-                    }
             )
-        )
 
-        |+ Conditional(
+        |+ StylishButton(
             (fun () ->
-                LobbyChart.info_if_selected().IsSome
-                && not Song.loading
-                && not lobby.GameInProgress
-            ),
-
-            StylishButton(
-                (fun () ->
-                    lobby.SetReadyStatus (
-                        match lobby.ReadyStatus with
-                        | ReadyFlag.NotReady ->
-                            if lobby.Spectate then
-                                ReadyFlag.Spectate
-                            else
-                                ReadyFlag.Play
-                        | _ -> ReadyFlag.NotReady
-                    )
-                ),
-                (fun () ->
+                lobby.SetReadyStatus (
                     match lobby.ReadyStatus with
                     | ReadyFlag.NotReady ->
                         if lobby.Spectate then
-                            sprintf "%s %s" Icons.EYE (%"lobby.ready")
+                            ReadyFlag.Spectate
                         else
-                            sprintf "%s %s" Icons.CHECK (%"lobby.ready")
-                    | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
-                ),
-                !%Palette.DARK_100,
-                TiltRight = false,
-                Position =
-                    { Position.SliceBottom(50.0f) with
-                        Left = 0.5f %- 0.0f
-                    }
-            )
-        )
-
-        |* Conditional(
+                            ReadyFlag.Play
+                    | _ -> ReadyFlag.NotReady
+                )
+            ),
             (fun () ->
+                match lobby.ReadyStatus with
+                | ReadyFlag.NotReady ->
+                    if lobby.Spectate then
+                        sprintf "%s %s" Icons.EYE (%"lobby.ready")
+                    else
+                        sprintf "%s %s" Icons.CHECK (%"lobby.ready")
+                | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
+            ),
+            !%Palette.DARK_100,
+            TiltRight = false,
+            Position =
+                { Position.SliceBottom(50.0f) with
+                    Left = 0.5f %- 0.0f
+                }
+        )
+            .Conditional(fun () ->
+                LobbyChart.info_if_selected().IsSome
+                && not Song.loading
+                && not lobby.GameInProgress
+            )
+
+        |* StylishButton(
+            (fun () ->
+                if lobby.Countdown then
+                    lobby.CancelRound()
+                else
+                    lobby.StartRound()
+            ),
+            (fun () ->
+                if lobby.Countdown then
+                    sprintf "%s %s" Icons.SLASH (%"lobby.cancel_game")
+                else
+                    sprintf "%s %s" Icons.PLAY (%"lobby.start_game")
+            ),
+            !%Palette.MAIN_100,
+            Position =
+                { Position.SliceBottom(50.0f) with
+                    Right = 0.5f %- 25.0f
+                }
+        )
+            .Conditional(fun () ->
                 lobby.YouAreHost
                 && lobby.ReadyStatus <> ReadyFlag.NotReady
                 && not lobby.GameInProgress
-            ),
-
-            StylishButton(
-                (fun () ->
-                    if lobby.Countdown then
-                        lobby.CancelRound()
-                    else
-                        lobby.StartRound()
-                ),
-                (fun () ->
-                    if lobby.Countdown then
-                        sprintf "%s %s" Icons.SLASH (%"lobby.cancel_game")
-                    else
-                        sprintf "%s %s" Icons.PLAY (%"lobby.start_game")
-                ),
-                !%Palette.MAIN_100,
-                Position =
-                    { Position.SliceBottom(50.0f) with
-                        Right = 0.5f %- 25.0f
-                    }
             )
-        )
 
         lobby.OnChartChanged.Add(fun () ->
             if Screen.current_type = Screen.Type.Lobby then

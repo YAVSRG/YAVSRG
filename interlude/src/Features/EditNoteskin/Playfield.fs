@@ -141,27 +141,20 @@ type PlayfieldSettingsPage() =
         |+ PageSetting("noteskins.edit.useadvancedcolumnspacing", Checkbox use_advanced_column_spacing)
             .Tooltip(Tooltip.Info("noteskins.edit.useadvancedcolumnspacing"))
             .Pos(16)
-        |+ Conditional(
-            (fun () -> not use_advanced_column_spacing.Value),
-            PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
-                .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
-                .Pos(18)
-        )
-        |+ Conditional(
-            (fun () -> use_advanced_column_spacing.Value),
-            PageSetting(
+        |+ PageSetting("noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
+            .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
+            .Pos(18)
+            .Conditional(use_advanced_column_spacing.Get >> not)
+        |+ PageSetting(
                 "generic.keymode",
                 Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
             )
-                .Pos(18)
-        )
-
-        |+ Conditional(
-            (fun () -> use_advanced_column_spacing.Value),
-            PageSetting("noteskins.edit.advancedcolumnspacing", _spacings)
-                .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
-                .Pos(20, 2, PageWidth.Full)
-        )
+            .Pos(18)
+            .Conditional(use_advanced_column_spacing.Get)
+        |+ PageSetting("noteskins.edit.advancedcolumnspacing", _spacings)
+            .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
+            .Pos(20, 2, PageWidth.Full)
+            .Conditional(use_advanced_column_spacing.Get)
         :> Widget
 
     override this.Draw() =

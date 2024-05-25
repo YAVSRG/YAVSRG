@@ -56,10 +56,8 @@ type LobbyList() =
     override this.Init(parent) =
         this
         |+ ScrollContainer(list_container, Position = Position.Margin(0.0f, 80.0f), Margin = Style.PADDING)
-        |+ Conditional(
-            (fun () -> no_lobbies),
-            EmptyState(Icons.USERS, %"lobby_list.none", Subtitle = %"lobby_list.none.subtitle")
-        )
+        |+ EmptyState(Icons.USERS, %"lobby_list.none", Subtitle = %"lobby_list.none.subtitle")
+            .Conditional(fun () -> no_lobbies)
         |+ IconButton(
             %"lobby_list.create",
             Icons.PLUS_CIRCLE,

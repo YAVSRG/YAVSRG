@@ -40,38 +40,32 @@ module Settings =
                     )
                 )
                     .Tooltip(Tooltip.Info("system.windowmode")) :> Widget
-                yield Conditional(
-                    (fun () -> config.WindowMode.Value = WindowType.Windowed),
-                    PageSetting(
-                        "system.windowresolution",
-                        WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
-                    )
-                        .Tooltip(Tooltip.Info("system.windowresolution"))
+                yield PageSetting(
+                    "system.windowresolution",
+                    WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
                 )
+                    .Tooltip(Tooltip.Info("system.windowresolution"))
+                    .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
                 , 2, 0, PageWidth.Normal
-                yield Conditional(
-                    (fun () -> config.WindowMode.Value <> WindowType.Windowed),
-                    PageSetting(
-                        "system.monitor",
-                        SelectDropdown(
-                            monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
-                            config.Display 
-                            |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
-                        )
+                yield PageSetting(
+                    "system.monitor",
+                    SelectDropdown(
+                        monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
+                        config.Display 
+                        |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
                     )
-                        .Tooltip(Tooltip.Info("system.monitor"))
                 )
-                yield Conditional(
-                    (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
-                    PageSetting(
-                        "system.videomode",
-                        VideoMode(
-                            config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)),
-                            get_current_supported_video_modes
-                        )
+                    .Tooltip(Tooltip.Info("system.monitor"))
+                    .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
+                yield PageSetting(
+                    "system.videomode",
+                    VideoMode(
+                        config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)),
+                        get_current_supported_video_modes
                     )
-                        .Tooltip(Tooltip.Info("system.videomode"))
                 )
+                    .Tooltip(Tooltip.Info("system.videomode"))
+                    .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
             if token_match tokens [|%"system.audiovolume"|] then
                 yield PageSetting(
                     "system.audiovolume",

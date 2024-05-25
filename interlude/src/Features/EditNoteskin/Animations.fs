@@ -141,21 +141,17 @@ type AnimationSettingsPage() =
             |+ PageSetting("noteskins.animations.usebuiltinanimation", Checkbox explosion_builtin_note)
                 .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
                 .Pos(8)
-            |+ Conditional(
-                explosion_builtin_note.Get,
-                PageSetting(
-                    "noteskins.animations.explosionduration",
-                    Slider(explosion_duration_note |> Setting.f32, Step = 1f)
-                )
-                    .Tooltip(Tooltip.Info("noteskins.animations.explosionduration"))
-                    .Pos(10)
+            |+ PageSetting(
+                "noteskins.animations.explosionduration",
+                Slider(explosion_duration_note |> Setting.f32, Step = 1f)
             )
-            |+ Conditional(
-                explosion_builtin_note.Get,
-                PageSetting("noteskins.animations.explosionexpand", Slider.Percent(explosion_expand_note))
-                    .Tooltip(Tooltip.Info("noteskins.animations.explosionexpand"))
-                    .Pos(12)
-            )
+                .Tooltip(Tooltip.Info("noteskins.animations.explosionduration"))
+                .Pos(10)
+                .Conditional(explosion_builtin_note.Get)
+            |+ PageSetting("noteskins.animations.explosionexpand", Slider.Percent(explosion_expand_note))
+                .Tooltip(Tooltip.Info("noteskins.animations.explosionexpand"))
+                .Pos(12)
+                .Conditional(explosion_builtin_note.Get)
 
         let hold_explosion_tab =
             NavigationContainer.Column<Widget>(WrapNavigation = false)
@@ -183,27 +179,21 @@ type AnimationSettingsPage() =
             |+ PageSetting("noteskins.animations.usereleaseanimation", Checkbox explosion_hold_use_release)
                 .Tooltip(Tooltip.Info("noteskins.animations.usereleaseanimation"))
                 .Pos(8)
-            |+ Conditional(
-                explosion_hold_use_release.Get,
-                PageSetting("noteskins.animations.usebuiltinanimation", Checkbox explosion_builtin_release)
-                    .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
-                    .Pos(10)
+            |+ PageSetting("noteskins.animations.usebuiltinanimation", Checkbox explosion_builtin_release)
+                .Tooltip(Tooltip.Info("noteskins.animations.usebuiltinanimation"))
+                .Pos(10)
+                .Conditional(explosion_hold_use_release.Get)
+            |+ PageSetting(
+                "noteskins.animations.explosionduration",
+                Slider(explosion_duration_hold |> Setting.f32, Step = 1f)
             )
-            |+ Conditional(
-                (fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value),
-                PageSetting(
-                    "noteskins.animations.explosionduration",
-                    Slider(explosion_duration_hold |> Setting.f32, Step = 1f)
-                )
-                    .Tooltip(Tooltip.Info("noteskins.animations.explosionduration"))
-                    .Pos(12)
-            )
-            |+ Conditional(
-                (fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value),
-                PageSetting("noteskins.animations.explosionexpand", Slider.Percent(explosion_expand_hold))
-                    .Tooltip(Tooltip.Info("noteskins.animations.explosionexpand"))
-                    .Pos(14)
-            )
+                .Tooltip(Tooltip.Info("noteskins.animations.explosionduration"))
+                .Pos(12)
+                .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
+            |+ PageSetting("noteskins.animations.explosionexpand", Slider.Percent(explosion_expand_hold))
+                .Tooltip(Tooltip.Info("noteskins.animations.explosionexpand"))
+                .Pos(14)
+                .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
 
         let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).TrimTop(100.0f))
 

@@ -168,15 +168,13 @@ type EditNoteskinPage(from_hotkey: bool) =
         )
         |>> Container
         |+ preview
-        |+ Conditional(
-            (fun () -> not from_hotkey),
-            Callout.frame
+        |+ (Callout.frame
                 (Callout.Small
                     .Icon(Icons.INFO)
                     .Title(%"noteskins.edit.hotkey_hint")
                     .Hotkey("edit_noteskin"))
                 (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
-        )
+            ).Conditional(fun () -> not from_hotkey)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =

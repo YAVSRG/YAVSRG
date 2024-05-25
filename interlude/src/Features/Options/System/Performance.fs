@@ -26,47 +26,37 @@ type PerformanceSettingsPage() =
         )
             .Tooltip(Tooltip.Info("system.framelimit"))
             .Pos(0)
-        |+ Conditional(
-            (fun () -> config.RenderMode.Value = FrameLimit.Unlimited),
-            Text(%"system.framelimit.unlimited_warning", 
-                Color = K Colors.text_red,
-                Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
-                Align = Alignment.LEFT
+        |+ Text(%"system.framelimit.unlimited_warning", 
+            Color = K Colors.text_red,
+            Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
+            Align = Alignment.LEFT
+        )
+            .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Unlimited)
+        |+ PageSetting("system.performance.antijitter", 
+            Checkbox(
+                config.SmartCapAntiJitter
+                |> Setting.trigger (fun v -> anti_jitter <- v)
             )
         )
-        |+ Conditional(
-            (fun () -> config.RenderMode.Value = FrameLimit.Smart),
-            PageSetting("system.performance.antijitter", 
-                Checkbox(
-                    config.SmartCapAntiJitter
-                    |> Setting.trigger (fun v -> anti_jitter <- v)
-                )
-            )
-                .Tooltip(Tooltip.Info("system.performance.antijitter"))
-                .Pos(2)
+            .Tooltip(Tooltip.Info("system.performance.antijitter"))
+            .Pos(2)
+            .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart)
+        |+ PageSetting("system.performance.screen_tear_alignment", 
+            Slider.Percent(screen_tear_alignment)
         )
-        |+ Conditional(
-            (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen),
-            PageSetting("system.performance.screen_tear_alignment", 
-                Slider.Percent(screen_tear_alignment)
-            )
-                .Pos(4)
+            .Pos(4)
+            .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen)
+        |+ Text(%"system.performance.screen_tear_alignment.hint", 
+            Color = K Colors.text,
+            Position = pretty_pos(6, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
+            Align = Alignment.LEFT
         )
-        |+ Conditional(
-            (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen),
-            Text(%"system.performance.screen_tear_alignment.hint", 
-                Color = K Colors.text,
-                Position = pretty_pos(6, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
-                Align = Alignment.LEFT
-            )
+            .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen)
+        |+ PageSetting("system.performance.frame_multiplier", 
+            SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
         )
-        |+ Conditional(
-            (fun () -> config.RenderMode.Value = FrameLimit.Smart && config.WindowMode.Value = WindowType.Fullscreen),
-            PageSetting("system.performance.frame_multiplier", 
-                SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
-            )
-                .Pos(7)
-        )
+            .Pos(7)
+            .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart && config.WindowMode.Value = WindowType.Fullscreen)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =

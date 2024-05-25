@@ -131,40 +131,34 @@ type SystemPage() =
         )
             .Tooltip(Tooltip.Info("system.windowmode"))
             .Pos(3)
-        |+ Conditional(
-            (fun () -> config.WindowMode.Value = WindowType.Windowed),
-            PageSetting(
-                "system.windowresolution",
-                WindowedResolution(config.WindowResolution |> Setting.trigger mark_changed)
-            )
-                .Tooltip(Tooltip.Info("system.windowresolution"))
-                .Pos(5)
+        |+ PageSetting(
+            "system.windowresolution",
+            WindowedResolution(config.WindowResolution |> Setting.trigger mark_changed)
         )
-        |+ Conditional(
-            (fun () -> config.WindowMode.Value <> WindowType.Windowed),
-            PageSetting(
-                "system.monitor",
-                SelectDropdown(
-                    monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
-                    config.Display 
-                    |> Setting.trigger (fun _ -> select_fullscreen_size (); mark_changed())
-                )
+            .Tooltip(Tooltip.Info("system.windowresolution"))
+            .Pos(5)
+            .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
+        |+ PageSetting(
+            "system.monitor",
+            SelectDropdown(
+                monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
+                config.Display 
+                |> Setting.trigger (fun _ -> select_fullscreen_size (); mark_changed())
             )
-                .Tooltip(Tooltip.Info("system.monitor"))
-                .Pos(5)
         )
-        |+ Conditional(
-            (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
-            PageSetting(
-                "system.videomode",
-                VideoMode(
-                    config.FullscreenVideoMode |> Setting.trigger mark_changed,
-                    get_current_supported_video_modes
-                )
+            .Tooltip(Tooltip.Info("system.monitor"))
+            .Pos(5)
+            .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
+        |+ PageSetting(
+            "system.videomode",
+            VideoMode(
+                config.FullscreenVideoMode |> Setting.trigger mark_changed,
+                get_current_supported_video_modes
             )
-                .Tooltip(Tooltip.Info("system.videomode"))
         )
-                .Pos(7)
+            .Tooltip(Tooltip.Info("system.videomode"))
+            .Pos(7)
+            .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
         |+ PageSetting(
             "system.audiovolume",
             Slider.Percent(
@@ -202,12 +196,10 @@ type SystemPage() =
             .Tooltip(Tooltip.Info("system.hotkeys"))
             .Pos(19)
         |>> Container
-        |+ Conditional(
-            (fun () -> has_changed),
-            Callout.frame
+        |+ (Callout.frame
                 (Callout.Small.Icon(Icons.AIRPLAY).Title(%"system.window_changes_hint"))
                 (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
-        )
+            ).Conditional(fun () -> has_changed)
         :> Widget
 
     override this.OnClose() =

@@ -52,11 +52,12 @@ type LobbyUI(lobby: Lobby) =
 
     override this.Init(parent) =
         this
-        |+ Conditional(
-            (fun () -> lobby.YouAreHost),
-            Button(Icons.SETTINGS, (fun () -> LobbySettingsPage(lobby).Show())),
+        |+ Button(
+            Icons.SETTINGS, 
+            (fun () -> LobbySettingsPage(lobby).Show()),
             Position = Position.SliceTop(90.0f).Margin(10.0f).SliceRight(70.0f)
         )
+            .Conditional(fun () -> lobby.YouAreHost)
         |+ Text(
             (fun () -> lobby.Settings.Name),
             Align = Alignment.CENTER,

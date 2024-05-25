@@ -128,10 +128,8 @@ type Toolbar() =
         |+ HotkeyAction("preset1", fun () -> load_preset 1)
         |+ HotkeyAction("preset2", fun () -> load_preset 2)
         |+ HotkeyAction("preset3", fun () -> load_preset 3)
-        |+ Conditional(
-            (fun () -> Updates.update_available),
-            Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
-        )
+        |+ Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
+            .Conditional(fun () -> Updates.update_available)
         |+ Jukebox(Position = Position.Box(0.0f, 1.0f, 200.0f, -62.5f, 560.0f, 55.0f))
         |* volume
 

@@ -139,7 +139,7 @@ module Rulesets =
                     Position = Position.SliceTop 60.0f
                 )
                 |+ LoadingIndicator.Border(fun () -> loading))
-            |+ Conditional((fun () -> failed), EmptyState(Icons.X, "Couldn't connect to rulesets repository"))
+            |+ EmptyState(Icons.X, "Couldn't connect to rulesets repository").Conditional(fun () -> failed)
             |* scroll
 
             base.Init parent

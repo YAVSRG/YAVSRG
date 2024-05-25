@@ -350,19 +350,16 @@ type Leaderboard(display: Setting<Display>) =
                 else
                     Loader.container.Focus false
         )
-        |+ Conditional(
-            (fun () -> Loader.state.Value = State.EmptyLeaderboard),
-            EmptyState(
-                Icons.FLAG,
-                %"levelselect.info.leaderboard.empty",
-                Subtitle = %"levelselect.info.leaderboard.empty.subtitle"
-            )
+        |+ EmptyState(
+            Icons.FLAG,
+            %"levelselect.info.leaderboard.empty",
+            Subtitle = %"levelselect.info.leaderboard.empty.subtitle"
         )
-        |+ Conditional(
-            (fun () -> Loader.state.Value = State.NoLeaderboard),
-            EmptyState(Icons.CLOUD_OFF, %"levelselect.info.leaderboard.unavailable")
-        )
-        |* Conditional((fun () -> Loader.state.Value = State.Offline), EmptyState(Icons.GLOBE, %"misc.offline"))
+            .Conditional(fun () -> Loader.state.Value = State.EmptyLeaderboard)
+        |+ EmptyState(Icons.CLOUD_OFF, %"levelselect.info.leaderboard.unavailable")
+            .Conditional(fun () -> Loader.state.Value = State.NoLeaderboard)
+        |* EmptyState(Icons.GLOBE, %"misc.offline")
+            .Conditional(fun () -> Loader.state.Value = State.Offline)
         base.Init parent
 
     override this.Update(elapsed_ms, moved) =

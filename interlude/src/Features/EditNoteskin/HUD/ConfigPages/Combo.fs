@@ -54,11 +54,10 @@ type ComboPage(on_close: unit -> unit) =
             PageSetting("hud.generic.use_font", Checkbox use_font)
                 .Tooltip(Tooltip.Info("hud.generic.use_font"))
                 .Pos(7)
-            Conditional(use_font.Get,
-                PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
-                    .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
-                    .Pos(9)
-            )
+            PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
+                .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+                .Pos(9)
+                .Conditional(use_font.Get)
         ] |> or_require_noteskin)
         |>> Container
         |+ preview
