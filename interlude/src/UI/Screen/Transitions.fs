@@ -16,7 +16,6 @@ module Transitions =
     type Flags =
         | Default = 0
         | UnderLogo = 1
-        | GiveUp = 2
 
     let mutable flags = Flags.Default
     let mutable active = false
@@ -39,8 +38,6 @@ module Transitions =
         Stencil.start_drawing ()
         Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
         Stencil.finish ()
-        if flags &&& Flags.GiveUp = Flags.GiveUp then
-            Text.fill_b(Style.font, "Gave up", bounds.Shrink(bounds.Width * 0.25f, bounds.Height * 0.25f), Colors.text_red_2, 0.5f)
 
     // setup
 
