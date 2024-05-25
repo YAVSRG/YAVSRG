@@ -174,8 +174,6 @@ module Cache =
         | Asset s -> Path.Combine(cache.RootPath, ".assets", s.Substring(0, 2), s) |> Some
         | Missing -> None
 
-    /// Behold the beauty of this codebase
-    /// Yes Fantomas keeps it in this format and it was originally written like this
     let recache_service =
         { new Async.Service<Cache, unit>() with
             override this.Handle(cache: Cache) =
@@ -233,7 +231,12 @@ module Cache =
                                         cache.Entries.[entry.Key] <- entry
                                         cache.Patterns.[entry.Hash] <- patterns
                                         cache.Changed <- true
-                                | Error reason -> Logging.Warn(sprintf "Couldn't cache %s: %s" file reason)
+                                | Error reason -> 
+                                    try
+                                        File.Delete(file)
+                                        Logging.Info(sprintf "Deleted %s because it was likely corrupt/invalid (%s)" file reason)
+                                    with err ->
+                                        Logging.Info(sprintf "%s could be corrupt/invalid (%s), but deleting it failed" file reason, err)
                             | _ -> ()
 
                     save cache
