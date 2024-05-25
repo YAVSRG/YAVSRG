@@ -4,6 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
@@ -197,7 +198,7 @@ module Scoreboard =
 
 open Scoreboard
 
-type Scoreboard(display: Setting<Display>) as this =
+type Scoreboard(display: Setting<Display>) =
     inherit Container(NodeType.None)
 
     let mutable count = -1
@@ -223,9 +224,9 @@ type Scoreboard(display: Setting<Display>) as this =
         | _ -> K true
 
     let scroll_container =
-        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(55.0f))
+        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(50.0f).TrimBottom(125.0f))
 
-    do
+    override this.Init(parent) =
         SelectedChart.on_chart_change_started.Add(fun info ->
             if info.CacheInfo.Hash <> last_loading then
                 Loader.container.Iter(fun s -> s.FadeOut())
@@ -302,6 +303,40 @@ type Scoreboard(display: Setting<Display>) as this =
         )
         |* EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty")
             .Conditional(fun () -> count = 0)
+        base.Init parent
+
+    override this.Draw() =
+        base.Draw()
+
+        match SelectedChart.PATTERNS with
+        | None -> ()
+        | Some info ->
+
+        let category = info.Category
+
+        Text.fill_b (
+            Style.font,
+            category.Category,
+            this.Bounds.TrimBottom(65.0f).SliceBottom(60.0f).Shrink(20.0f, 0.0f),
+            Colors.text,
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            String.concat ", " category.MajorFeatures,
+            this.Bounds.TrimBottom(30.0f).SliceBottom(40.0f).Shrink(20.0f, 0.0f),
+            Colors.text_subheading,
+            Alignment.LEFT
+        )
+        
+        Text.fill_b (
+            Style.font,
+            String.concat ", " category.MinorFeatures,
+            this.Bounds.SliceBottom(30.0f).Shrink(20.0f, 0.0f),
+            Colors.text_greyout,
+            Alignment.LEFT
+        )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

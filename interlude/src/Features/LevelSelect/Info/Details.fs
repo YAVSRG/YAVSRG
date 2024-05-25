@@ -113,7 +113,7 @@ type Patterns(display: Setting<Display>) =
         Text.fill_b (
             Style.font,
             category.Category,
-            this.Bounds.TrimBottom(75.0f).SliceBottom(60.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.TrimBottom(65.0f).SliceBottom(60.0f).Shrink(20.0f, 0.0f),
             Colors.text,
             Alignment.LEFT
         )
@@ -121,7 +121,7 @@ type Patterns(display: Setting<Display>) =
         Text.fill_b (
             Style.font,
             String.concat ", " category.MajorFeatures,
-            this.Bounds.TrimBottom(40.0f).SliceBottom(40.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.TrimBottom(30.0f).SliceBottom(40.0f).Shrink(20.0f, 0.0f),
             Colors.text_subheading,
             Alignment.LEFT
         )
@@ -129,7 +129,7 @@ type Patterns(display: Setting<Display>) =
         Text.fill_b (
             Style.font,
             String.concat ", " category.MinorFeatures,
-            this.Bounds.TrimBottom(10.0f).SliceBottom(30.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.SliceBottom(30.0f).Shrink(20.0f, 0.0f),
             Colors.text_greyout,
             Alignment.LEFT
         )
