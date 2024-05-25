@@ -79,6 +79,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
     let rotation = Noteskins.note_rotation keys
 
+    let mutable has_negative_sv = false
     let mutable time = -Time.infinity
 
     let handle_seek_back_in_time () =
@@ -271,6 +272,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             sv_seek <- sv_seek + 1
 
         let mutable sv_value = if sv_seek > 0 then sv.[sv_seek - 1].Data else 1.0f
+        if sv_value < 0.0f then has_negative_sv <- true
         let mutable sv_peek = sv_seek
 
         // calculation of where to start drawing from (for vanishing notes this depends on sv between begin_time and now)
@@ -315,7 +317,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
         // todo: also put a cap at -playfield_height when *negative sv comes into play
-        while column_pos < playfield_height && note_peek < chart.Notes.Length do
+        while (column_pos < playfield_height || (has_negative_sv && note_peek - note_seek < 50)) && note_peek < chart.Notes.Length do
 
             let { Time = t; Data = nr } = chart.Notes.[note_peek]
             let color = chart.Colors.[note_peek].Data
@@ -325,6 +327,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 column_pos <- column_pos + scale * sv_value * (t2 - sv_time)
                 sv_time <- t2
                 sv_value <- v
+                if sv_value < 0.0f then has_negative_sv <- true
                 sv_peek <- sv_peek + 1
 
             // render notes
