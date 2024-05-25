@@ -26,10 +26,24 @@ jobs:
         chmod +x ./setup_cli.sh
         ./setup_cli.sh
         yavsrg pack_win_x64
+        yavsrg pack_linux_x64
+        yavsrg pack_osx_arm64
         echo "VERSION=v$(yavsrg version)" >> $GITHUB_OUTPUT
         
     - name: Upload windows artifact
       uses: actions/upload-artifact@v4
       with:
-          name: interlude-win64
-          path: ./interlude/releases/interlude-win64.zip
+          name: Interlude-win64
+          path: ./interlude/releases/Interlude-win64.zip
+          
+    - name: Upload macos artifact
+      uses: actions/upload-artifact@v4
+      with:
+          name: Interlude-osx-arm64
+          path: ./interlude/releases/Interlude-osx-arm64.zip
+          
+    - name: Upload linux artifact
+      uses: actions/upload-artifact@v4
+      with:
+          name: Interlude-linux-x64
+          path: ./interlude/releases/Interlude-linux-x64.zip
