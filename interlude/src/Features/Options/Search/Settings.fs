@@ -18,7 +18,7 @@ open Interlude.Features.Gameplay
 module Settings =
 
     let search_system_settings (tokens: string array) : SearchResult seq =
-        mseq {
+        results {
             if token_match tokens [|%"system.performance"|] then
                 yield PageButton(
                     "system.performance",
@@ -104,11 +104,10 @@ module Settings =
         }
 
     let search_gameplay_settings (tokens: string array) : SearchResult seq =
-        seq {
+        results {
             if token_match tokens [|%"gameplay.scrollspeed"|] then
                 yield PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
                     .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
-                , 2, 2, PageWidth.Normal
                 yield Text(
                     (fun () ->
                         [
@@ -123,23 +122,18 @@ module Settings =
             if token_match tokens [|%"gameplay.hitposition"|] then
                 yield PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
                     .Tooltip(Tooltip.Info("gameplay.hitposition"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"gameplay.upscroll"|] then
                 yield PageSetting("gameplay.upscroll", Checkbox options.Upscroll)
                     .Tooltip(Tooltip.Info("gameplay.upscroll"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"gameplay.backgrounddim"|] then
                 yield PageSetting("gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
                     .Tooltip(Tooltip.Info("gameplay.backgrounddim"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"gameplay.lanecover"|] then
                 yield PageButton("gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
                     .Tooltip(Tooltip.Info("gameplay.lanecover"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"gameplay.pacemaker"|] then
                 yield PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
                     .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
                 let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
@@ -148,34 +142,27 @@ module Settings =
                     "generic.keymode",
                     Selector.FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
                 )
-                , 2, 2, PageWidth.Normal
                 yield PageSetting("gameplay.keybinds", binds)
                     .Tooltip(Tooltip.Info("gameplay.keybinds"))
-                    .Pos(21, 2, PageWidth.Full)
-                , 2, 2, PageWidth.Normal
+                , 2, 2, PageWidth.Full
         }
 
     let search_advanced_settings (tokens: string array) : SearchResult seq =
-        seq {
+        results {
             if token_match tokens [|%"advanced.enableconsole"|] then
                 yield PageSetting("advanced.enableconsole", Checkbox options.EnableConsole)
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"advanced.confirmexit"|] then
                 yield PageSetting("advanced.confirmexit", Checkbox options.ConfirmExit)
                     .Tooltip(Tooltip.Info("advanced.confirmexit"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"advanced.holdtogiveup"|] then
                 yield PageSetting("advanced.holdtogiveup", Checkbox options.HoldToGiveUp)
                     .Tooltip(Tooltip.Info("advanced.holdtogiveup"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"advanced.vanishingnotes"|] then
                 yield PageSetting("advanced.vanishingnotes", Checkbox options.VanishingNotes)
                     .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"advanced.autocalibrateoffset"|] then
                 yield PageSetting("advanced.autocalibrateoffset", Checkbox options.AutoCalibrateOffset)
                     .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"advanced.buildpatterncache"|] then
                 yield PageButton.Once("advanced.buildpatterncache",
                     fun () ->
@@ -196,9 +183,7 @@ module Settings =
                         )
                 )
                     .Tooltip(Tooltip.Info("advanced.buildpatterncache"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"advanced.advancedrecommendations"|] then
                 yield PageSetting("advanced.advancedrecommendations", Checkbox options.AdvancedRecommendations)
                     .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
-                , 2, 2, PageWidth.Normal
         }

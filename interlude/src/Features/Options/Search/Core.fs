@@ -22,7 +22,7 @@ module Search =
         member inline _.YieldFrom(v) : SearchResult seq = v
         member inline _.Delay(f) : SearchResult seq = Seq.delay f
         member inline _.Combine(a, b) : SearchResult seq = Seq.concat [a; b]
-    let mseq = SearchResultBuilder()
+    let results = SearchResultBuilder()
 
     type SearchResultContainer(height, node_type) =
         inherit Container(node_type)

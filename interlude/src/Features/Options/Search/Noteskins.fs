@@ -14,13 +14,12 @@ open Interlude.Features.Gameplay
 module Noteskins =
 
     let search_noteskin_settings (tokens: string array) : SearchResult seq =
-        seq {
+        results {
             if token_match tokens [|%"noteskins"|] then
                 yield PageButton(
                     "noteskins",
                     (fun () -> NoteskinsPage().Show())
                 )
-                , 2, 2, PageWidth.Normal
 
                 if not Content.Noteskin.IsEmbedded then
                     yield PageButton(
@@ -28,7 +27,6 @@ module Noteskins =
                         (fun () -> EditNoteskinPage(false).Show())
                     )
                         .Tooltip(Tooltip.Info("noteskins.edit"))
-                    , 2, 2, PageWidth.Normal
 
                 if not (Suggestions.in_endless_mode()) then
                     yield PageButton(
@@ -40,14 +38,12 @@ module Noteskins =
                                 ImportScreen.switch_to_noteskins ()
                         )
                     )
-                    , 2, 2, PageWidth.Normal
 
                 yield PageButton(
                     "noteskins.open_folder",
                     (fun () -> open_directory (get_game_folder "Noteskins"))
                 )
                     .Tooltip(Tooltip.Info("noteskins.open_folder"))
-                , 2, 2, PageWidth.Normal
 
             if token_match tokens [|%"hud"|] || token_match tokens (HUDElement.FULL_LIST |> Seq.map HUDElement.name |> Array.ofSeq) then
                 yield PageButton(
@@ -66,5 +62,4 @@ module Noteskins =
                     )
                 )
                     .Tooltip(Tooltip.Info("hud"))
-                , 2, 2, PageWidth.Normal
         }
