@@ -14,6 +14,16 @@ module Search =
 
     type SearchResult = Widget * int * int * PageWidth
 
+    type SearchResultBuilder() = 
+        member inline _.Zero() : SearchResult seq = Seq.empty
+        member inline _.For(en, f) : SearchResult seq = Seq.collect f en
+        member inline _.Yield((a, b, c, d): #Widget * int * int * PageWidth) : SearchResult seq = Seq.singleton (a :> Widget, b, c, d)
+        member inline _.Yield(v: Widget) : SearchResult seq = Seq.singleton (v, 2, 2, PageWidth.Normal)
+        member inline _.YieldFrom(v) : SearchResult seq = v
+        member inline _.Delay(f) : SearchResult seq = Seq.delay f
+        member inline _.Combine(a, b) : SearchResult seq = Seq.concat [a; b]
+    let mseq = SearchResultBuilder()
+
     type SearchResultContainer(height, node_type) =
         inherit Container(node_type)
 

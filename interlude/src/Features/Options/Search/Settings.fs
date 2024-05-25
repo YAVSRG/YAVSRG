@@ -18,66 +18,60 @@ open Interlude.Features.Gameplay
 module Settings =
 
     let search_system_settings (tokens: string array) : SearchResult seq =
-        seq {
+        mseq {
             if token_match tokens [|%"system.performance"|] then
                 yield PageButton(
                     "system.performance",
                     (fun () -> PerformanceSettingsPage().Show())
                 )
                     .Tooltip(Tooltip.Info("system.performance"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"system.windowmode"; %"system.windowresolution"; %"system.monitor"; %"system.videomode"; %"system.windowmode.windowed"; %"system.windowmode.borderless"; %"system.windowmode.fullscreen"|] then
-                yield! [
+                yield PageSetting(
+                    "system.windowmode",
+                    SelectDropdown(
+                        [|
+                            WindowType.Windowed, %"system.windowmode.windowed"
+                            WindowType.Borderless, %"system.windowmode.borderless"
+                            WindowType.Fullscreen, %"system.windowmode.fullscreen"
+                        |],
+                        config.WindowMode
+                        |> Setting.trigger window_mode_changed
+                        |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
+                    )
+                )
+                    .Tooltip(Tooltip.Info("system.windowmode")) :> Widget
+                yield Conditional(
+                    (fun () -> config.WindowMode.Value = WindowType.Windowed),
                     PageSetting(
-                        "system.windowmode",
+                        "system.windowresolution",
+                        WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
+                    )
+                        .Tooltip(Tooltip.Info("system.windowresolution"))
+                )
+                , 2, 0, PageWidth.Normal
+                yield Conditional(
+                    (fun () -> config.WindowMode.Value <> WindowType.Windowed),
+                    PageSetting(
+                        "system.monitor",
                         SelectDropdown(
-                            [|
-                                WindowType.Windowed, %"system.windowmode.windowed"
-                                WindowType.Borderless, %"system.windowmode.borderless"
-                                WindowType.Fullscreen, %"system.windowmode.fullscreen"
-                            |],
-                            config.WindowMode
-                            |> Setting.trigger window_mode_changed
-                            |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
+                            monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
+                            config.Display 
+                            |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
                         )
                     )
-                        .Tooltip(Tooltip.Info("system.windowmode")) :> Widget
-                    , 2, 2, PageWidth.Normal
-                    Conditional(
-                        (fun () -> config.WindowMode.Value = WindowType.Windowed),
-                        PageSetting(
-                            "system.windowresolution",
-                            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
+                        .Tooltip(Tooltip.Info("system.monitor"))
+                )
+                yield Conditional(
+                    (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
+                    PageSetting(
+                        "system.videomode",
+                        VideoMode(
+                            config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)),
+                            get_current_supported_video_modes
                         )
-                            .Tooltip(Tooltip.Info("system.windowresolution"))
                     )
-                    , 2, 0, PageWidth.Normal
-                    Conditional(
-                        (fun () -> config.WindowMode.Value <> WindowType.Windowed),
-                        PageSetting(
-                            "system.monitor",
-                            SelectDropdown(
-                                monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
-                                config.Display 
-                                |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
-                            )
-                        )
-                            .Tooltip(Tooltip.Info("system.monitor"))
-                    )
-                    , 2, 2, PageWidth.Normal
-                    Conditional(
-                        (fun () -> config.WindowMode.Value = WindowType.Fullscreen),
-                        PageSetting(
-                            "system.videomode",
-                            VideoMode(
-                                config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)),
-                                get_current_supported_video_modes
-                            )
-                        )
-                            .Tooltip(Tooltip.Info("system.videomode"))
-                    )
-                    , 2, 2, PageWidth.Normal
-                ]
+                        .Tooltip(Tooltip.Info("system.videomode"))
+                )
             if token_match tokens [|%"system.audiovolume"|] then
                 yield PageSetting(
                     "system.audiovolume",
@@ -88,14 +82,12 @@ module Settings =
                     )
                 )
                     .Tooltip(Tooltip.Info("system.audiovolume"))
-                , 2, 2, PageWidth.Normal
             if token_match tokens [|%"system.audiodevice"|] then
                 yield PageSetting(
                     "system.audiodevice",
                     SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
                 )
                     .Tooltip(Tooltip.Info("system.audiodevice"))
-                , 2, 2, PageWidth.Normal
                 
             if token_match tokens [|%"system.audiooffset"|] then
                 yield PageSetting(
@@ -107,17 +99,14 @@ module Settings =
                     }
                 )
                     .Tooltip(Tooltip.Info("system.audiooffset"))
-                , 2, 2, PageWidth.Normal
             
             if token_match tokens [|%"system.visualoffset"|] then
                 yield PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
                     .Tooltip(Tooltip.Info("system.visualoffset"))
-                , 2, 2, PageWidth.Normal
                 
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
                 yield PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
                     .Tooltip(Tooltip.Info("system.hotkeys"))
-                , 2, 2, PageWidth.Normal
         }
 
     let search_gameplay_settings (tokens: string array) : SearchResult seq =
@@ -131,7 +120,7 @@ module Settings =
                         [
                             (options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
                             (options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
-                            "C" + (60000.0f * options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.ColumnWidth).ToString("F0")
+                            "C" + (60000.0f * options.ScrollSpeed.Value / Content.NoteskinConfig.ColumnWidth).ToString("F0")
                         ]
                         %> "gameplay.scrollspeed.info"
                     ),
