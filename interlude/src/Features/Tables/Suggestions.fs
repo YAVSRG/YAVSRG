@@ -11,6 +11,18 @@ open Interlude.UI.Menu
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
+// todo: redo this whole thing keeping it simple instead of trying to design a whole fancy UI for it
+(*
+top level page:
+ - "suggest this chart" button
+ - list of suggestions by chart title and vote count
+click a suggestion:
+ - details about the chart
+ - vote breakdowns by level (clickable to confirm)
+ - button to suggest another level
+ - button to playtest
+*)
+
 type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
     inherit FrameContainer(NodeType.Leaf)
 

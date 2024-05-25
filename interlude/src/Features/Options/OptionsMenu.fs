@@ -134,19 +134,19 @@ module OptionsMenuRoot =
 
             NavigationContainer.Column<Widget>()
             |+ search_results
-            //|+ { new SearchBox(
-            //        search_text, 
-            //        fun () ->
-            //            if search_text.Value = "" then
-            //                search_results.Current <- menu_buttons
-            //            else
-            //                search_results.Current <- SearchResults.get search_text.Value
-            //        , Position = Position.Margin(PRETTY_MARGIN_X * 2.0f, 25.0f).SliceTop(60.0f)
-            //        ) with
-            //    override this.OnFocus by_mouse =
-            //        base.OnFocus by_mouse
-            //        if not by_mouse then defer (fun () -> this.Select false)
-            //}
+            |+ { new SearchBox(
+                    search_text, 
+                    fun () ->
+                        if search_text.Value = "" then
+                            search_results.Current <- menu_buttons
+                        else
+                            search_results.Current <- SearchResults.get search_text.Value
+                    , Position = Position.Margin(PRETTY_MARGIN_X * 2.0f, 25.0f).SliceTop(60.0f)
+                    ) with
+                override this.OnFocus by_mouse =
+                    base.OnFocus by_mouse
+                    if not by_mouse then defer (fun () -> this.Select false)
+            }
             :> Widget
 
         override this.Title = %"options"

@@ -23,12 +23,12 @@ type EditHUDPage() =
         then
             Menu.Exit()
 
-    let hud_configuration (e: HUDElement) =
-        let is_enabled = HUDElement.enabled_setting e
+    let hud_configuration (elem: HUDElement) =
+        let is_enabled = HUDElement.enabled_setting elem
 
         let body =
             NavigationContainer.Row<Widget>(WrapNavigation = false)
-            |+ if HUDElement.can_toggle e then
+            |+ if HUDElement.can_toggle elem then
                    [
                        Button(
                            (fun () ->
@@ -43,25 +43,25 @@ type EditHUDPage() =
                    ]
                else
                    []
-            |+ if HUDElement.can_configure e then 
+            |+ if HUDElement.can_configure elem then 
                     [
                         Button(
                             Icons.SETTINGS + " " + %"hud.editor.options",
-                            (fun () -> HUDElement.show_menu e ignore),
+                            (fun () -> HUDElement.show_menu elem ignore),
                             Position = Position.TrimLeft(PRETTYTEXTWIDTH + 100.0f).Margin(Style.PADDING)
                         )
                     ]
                 else 
                     []
             |+ Text(
-                HUDElement.name e,
+                HUDElement.name elem,
                 Align = Alignment.LEFT,
                 Position = Position.SliceLeft(PRETTYTEXTWIDTH).Margin(Style.PADDING)
             )
             |+ Tooltip(
                 Callout.Normal
-                    .Title(HUDElement.name e)
-                    .Body(HUDElement.tooltip e)
+                    .Title(HUDElement.name elem)
+                    .Body(HUDElement.tooltip elem)
             )
 
         { new Container(NodeType.Container(K(Some body))) with
@@ -89,17 +89,7 @@ type EditHUDPage() =
                 Position = Position.TrimTop(PRETTYHEIGHT + 50.0f),
                 WrapNavigation = false
             )
-            |+ hud_configuration HUDElement.Accuracy
-            |+ hud_configuration HUDElement.TimingDisplay
-            |+ hud_configuration HUDElement.Combo
-            |+ hud_configuration HUDElement.SkipButton
-            |+ hud_configuration HUDElement.ProgressMeter
-            |+ hud_configuration HUDElement.Pacemaker
-            |+ hud_configuration HUDElement.JudgementCounter
-            |+ hud_configuration HUDElement.JudgementMeter
-            |+ hud_configuration HUDElement.EarlyLateMeter
-            |+ hud_configuration HUDElement.RateModMeter
-            |+ hud_configuration HUDElement.BPMMeter
+            |+ seq { for elem in HUDElement.FULL_LIST do yield hud_configuration elem }
         )
         |+ (if Interlude.Content.Content.Noteskin.IsEmbedded then
                 Callout.frame noteskin_required (fun (w, h) -> Position.Box(0.0f, -0.15f, 0.0f, 0.0f, w, h)) :> Widget

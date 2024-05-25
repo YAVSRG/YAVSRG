@@ -427,7 +427,7 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
             if hover && Mouse.left_click () then
                 dragging_from <- Some(Mouse.pos ())
                 this.Select true
-            elif hover && Mouse.right_click () then
+            elif hover && Mouse.right_click () && HUDElement.can_configure elem then
                 HUDElement.show_menu elem (fun () -> ctx.Create elem)
 
         base.Update(elapsed_ms, moved)
@@ -655,19 +655,7 @@ type PositionerInfo(ctx: PositionerContext) =
         dropdown_wrapper.Toggle(fun () ->
             Dropdown
                 {
-                    Items = [
-                        HUDElement.Combo
-                        HUDElement.SkipButton
-                        HUDElement.ProgressMeter
-                        HUDElement.Accuracy
-                        HUDElement.TimingDisplay
-                        HUDElement.JudgementCounter
-                        HUDElement.JudgementMeter
-                        HUDElement.EarlyLateMeter
-                        HUDElement.RateModMeter
-                        HUDElement.BPMMeter
-                        HUDElement.Pacemaker
-                    ] |> List.map (fun e -> e, HUDElement.name e)
+                    Items = HUDElement.FULL_LIST |> List.map (fun e -> e, HUDElement.name e)
                     ColorFunc = K Colors.text
                     Setting =
                         Setting.make
@@ -749,19 +737,7 @@ module HUDEditor =
                         Positioners = Map.empty
                     }
 
-                [
-                    HUDElement.Combo
-                    HUDElement.SkipButton
-                    HUDElement.ProgressMeter
-                    HUDElement.Accuracy
-                    HUDElement.TimingDisplay
-                    HUDElement.JudgementCounter
-                    HUDElement.JudgementMeter
-                    HUDElement.EarlyLateMeter
-                    HUDElement.RateModMeter
-                    HUDElement.BPMMeter
-                    HUDElement.Pacemaker
-                ]
+                HUDElement.FULL_LIST
                 |> Seq.iter ctx.Create
 
                 this 

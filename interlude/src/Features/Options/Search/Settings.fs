@@ -26,11 +26,16 @@ module Settings =
                 )
                     .Tooltip(Tooltip.Info("system.performance"))
                 , 2, 2, PageWidth.Normal
-            if token_match tokens [|%"system.windowmode"; %"system.windowresolution"; %"system.monitor"; %"system.videomode"|] then
+            if token_match tokens [|%"system.windowmode"; %"system.windowresolution"; %"system.monitor"; %"system.videomode"; %"system.windowmode.windowed"; %"system.windowmode.borderless"; %"system.windowmode.fullscreen"|] then
                 yield! [
                     PageSetting(
                         "system.windowmode",
-                        SelectDropdown.FromEnum(
+                        SelectDropdown(
+                            [|
+                                WindowType.Windowed, %"system.windowmode.windowed"
+                                WindowType.Borderless, %"system.windowmode.borderless"
+                                WindowType.Fullscreen, %"system.windowmode.fullscreen"
+                            |],
                             config.WindowMode
                             |> Setting.trigger window_mode_changed
                             |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))

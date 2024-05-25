@@ -17,6 +17,20 @@ type HUDElement =
     | RateModMeter
     | BPMMeter
     | Pacemaker
+    static member FULL_LIST = 
+        [
+            Accuracy
+            TimingDisplay
+            Combo
+            SkipButton
+            JudgementMeter
+            EarlyLateMeter
+            ProgressMeter
+            JudgementCounter
+            RateModMeter
+            BPMMeter
+            Pacemaker
+        ]
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]

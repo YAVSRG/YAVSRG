@@ -42,6 +42,8 @@ module Suggestions =
 
     let exit_endless_mode () = state <- None
 
+    let in_endless_mode () : bool = state.IsSome
+
     let continue_endless_mode () : bool =
         match state with
         | Some endless_mode ->

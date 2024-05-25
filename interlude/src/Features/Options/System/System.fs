@@ -118,7 +118,12 @@ type SystemPage() =
 
         |+ PageSetting(
             "system.windowmode",
-            SelectDropdown.FromEnum(
+            SelectDropdown(
+                [|
+                    WindowType.Windowed, %"system.windowmode.windowed"
+                    WindowType.Borderless, %"system.windowmode.borderless"
+                    WindowType.Fullscreen, %"system.windowmode.fullscreen"
+                |],
                 config.WindowMode
                 |> Setting.trigger mark_changed
                 |> Setting.trigger window_mode_changed
