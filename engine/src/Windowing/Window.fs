@@ -296,7 +296,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 )
 
             this.ProcessInputEvents()
-            GLFW.WaitEvents()
+            GLFW.WaitEventsTimeout(1.0)
             InputThread.poll (this.KeyboardState, this.MouseState)
 
         this.OnUnload()
