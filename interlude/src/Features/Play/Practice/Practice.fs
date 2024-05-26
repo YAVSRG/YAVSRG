@@ -212,8 +212,7 @@ module PracticeScreen =
                         SelectedChart.change_rate_hotkeys (fun change_by -> SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by)
 
                 elif not (liveplay :> IReplayProvider).Finished then
-                    Input.pop_gameplay (
-                        binds,
+                    Input.pop_gameplay now binds (
                         fun column time is_release ->
                             if is_release then
                                 input_key_state <- Bitmask.unset_key column input_key_state

@@ -78,14 +78,10 @@ module PlayScreenMultiplayer =
             | _ -> ()
         )
 
-        let send_replay_packet (now: Time) =
-            // todo: make changes so this isn't needed any more (used to make sure the replay buffers to correct position)
-            if not (liveplay :> IReplayProvider).Finished then
-                liveplay.Add(now, key_state)
-
+        let send_replay_packet (chart_time: ChartTime) =
             use ms = new MemoryStream()
             use bw = new BinaryWriter(ms)
-            liveplay.ExportLiveBlock bw
+            liveplay.ExportLiveBlock (chart_time, bw)
             lobby.SendReplayData(ms.ToArray())
             packet_count <- packet_count + 1
 
@@ -113,9 +109,9 @@ module PlayScreenMultiplayer =
                 lobby.AbandonPlaying()
                 Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
 
-        let finish_play(now: Time) =
+        let finish_play(chart_time: ChartTime) =
             liveplay.Finish()
-            send_replay_packet (now)
+            send_replay_packet chart_time
             lobby.FinishPlaying()
             if
                 Screen.change_new
@@ -184,28 +180,24 @@ module PlayScreenMultiplayer =
                 Stats.session.PlayTime <- Stats.session.PlayTime + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
-                let chart_time = now - first_note
+                let chart_time : ChartTime = now - first_note
 
                 if not (liveplay :> IReplayProvider).Finished then
 
-                    Input.pop_gameplay (
-                        binds,
+                    Input.pop_gameplay now binds (
                         fun column time is_release ->
-                            if time > now then
-                                Logging.Debug("Received input event from the future")
+                            if is_release then
+                                key_state <- Bitmask.unset_key column key_state
                             else
-                                if is_release then
-                                    key_state <- Bitmask.unset_key column key_state
-                                else
-                                    key_state <- Bitmask.set_key column key_state
+                                key_state <- Bitmask.set_key column key_state
 
-                                liveplay.Add(time, key_state)
+                            liveplay.Add(time, key_state)
                     )
 
                     if chart_time / MULTIPLAYER_REPLAY_DELAY_MS / 1.0f<ms> |> floor |> int > packet_count then
-                        send_replay_packet (now)
+                        send_replay_packet chart_time
 
                     this.State.Scoring.Update chart_time
 
-                if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then finish_play(now)
+                if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then finish_play chart_time
         }

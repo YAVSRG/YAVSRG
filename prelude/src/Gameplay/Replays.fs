@@ -244,11 +244,29 @@ type StoredReplayProvider(data: ReplayData) =
     static member WavingAutoPlay(keys, notes) =
         Replay.auto_replay_waving keys notes |> StoredReplayProvider
 
-type LiveReplayProvider(firstNote: Time) =
+type LiveReplayProvider(first_note: Time) =
     let mutable i = 0
     let mutable finished = false
     let mutable export = 0
     let buffer = ResizeArray<ReplayRow>()
+
+    let mutable last_time = -Time.infinity
+
+    member this.Add(time, bitmap) =
+        if finished then invalidOp "Live play is declared as over; cannot append to replay"
+        if time - first_note < last_time then failwith "Input timestamps go backwards"
+
+        last_time <- time - first_note
+        buffer.Add(struct (last_time, bitmap))
+    
+    member this.AddMultiplayerMarker(time, bitmap) =
+        if finished then invalidOp "Live play is declared as over; cannot append to replay"
+        if time - first_note >= last_time then
+            last_time <- time - first_note
+            buffer.Add(struct (last_time, bitmap))
+
+        last_time <- time - first_note
+        buffer.Add(struct (last_time, bitmap))
 
     interface IReplayProvider with
         member this.Finished = finished
@@ -265,24 +283,16 @@ type LiveReplayProvider(firstNote: Time) =
             buffer.[i - 1]
 
         member this.GetFullReplay() =
-            if finished then
-                buffer.ToArray()
-            else
-                invalidOp "Live play is not declared as over, we don't have the full replay yet!"
-
-    member this.Add(time, bitmap) =
-        if not finished then
-            buffer.Add(struct (time - firstNote, bitmap))
-        else
-            invalidOp "Live play is declared as over; cannot append to replay"
+            if not finished then invalidOp "Live play is not declared as over, we don't have the full replay yet!"
+            buffer.ToArray()
 
     member this.Finish() =
-        if not finished then
-            finished <- true
-        else
-            invalidOp "Live play is already declared as over; cannot do so again"
+        if finished then invalidOp "Live play is already declared as over; cannot do so again"
+        finished <- true
 
-    member this.ExportLiveBlock(bw: BinaryWriter) =
+    member this.ExportLiveBlock(chart_time: ChartTime, bw: BinaryWriter) =
+        bw.Write(float32 chart_time)
+
         while export < buffer.Count do
             let struct (time, bitmap) = buffer.[export]
 
@@ -326,10 +336,9 @@ type OnlineReplayProvider() =
         else
 
             try
+                current_chart_time <- br.ReadSingle() * 1.0f<ms>
                 while not (br.BaseStream.Position = br.BaseStream.Length) do
-                    let t = br.ReadSingle() * 1.0f<ms>
-                    buffer.Add(struct (t, br.ReadUInt16()))
-                    current_chart_time <- t
+                    buffer.Add(struct (br.ReadSingle() * 1.0f<ms>, br.ReadUInt16()))
             with err ->
                 Logging.Error("Error while receiving online replay data", err)
 

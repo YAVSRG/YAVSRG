@@ -191,10 +191,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
 
     override this.Draw() =
 
-        if not enable.Value then
-            ()
-        else
-
+        if enable.Value then
             let draw_press (k, now: ChartTime, start: ChartTime, finish: ChartTime) =
                 let y t =
                     float32 options.HitPosition.Value

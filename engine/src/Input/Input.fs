@@ -239,14 +239,14 @@ module Input =
         events_this_frame <- f events_this_frame
         out
 
-    let pop_gameplay (binds: Bind array, callback: int -> Time -> bool -> unit) =
-        let bmatch bind target =
+    let pop_gameplay (now: Time) (binds: Bind array) (callback: int -> Time -> bool -> unit) =
+        let bind_match bind target =
             match bind, target with
             | Key(k, _), Key(K, _) when k = K -> true
             | Mouse b, Mouse B when b = B -> true
             | _ -> false
 
-        let rec f evs =
+        let rec pop_inputs_matching_binds evs =
             match evs with
             | [] -> []
             | struct (b, t, time) :: xs ->
@@ -254,15 +254,15 @@ module Input =
                 let mutable matched = false
 
                 while i < binds.Length && not matched do
-                    if bmatch binds.[i] b then
-                        callback i time (t <> InputEvType.Press)
+                    if bind_match binds.[i] b then
+                        if time <= now then callback i time (t <> InputEvType.Press)
                         matched <- true
 
                     i <- i + 1
 
-                if matched then f xs else struct (b, t, time) :: (f xs)
+                if matched then pop_inputs_matching_binds xs else struct (b, t, time) :: (pop_inputs_matching_binds xs)
 
-        events_this_frame <- f events_this_frame
+        events_this_frame <- pop_inputs_matching_binds events_this_frame
 
     let pop_any (t: InputEvType) =
         let mutable out = ValueNone

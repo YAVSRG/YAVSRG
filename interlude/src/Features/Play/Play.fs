@@ -132,6 +132,7 @@ module PlayScreen =
                     (fun (w, h) -> Position.SliceRight(w)),
                 OnOpen =
                     (fun () ->
+                        liveplay.Finish()
                         Song.pause ()
                         recommended_offset <- LocalAudioSync.get_automatic screen.State info.SaveData |> float32
                         offset_slider.Select false
@@ -197,19 +198,14 @@ module PlayScreen =
                 let chart_time = now - first_note
 
                 if not (liveplay :> IReplayProvider).Finished then
-                    // feed keyboard input into the replay provider
-                    Input.pop_gameplay (
-                        binds,
+                    Input.pop_gameplay now binds (
                         fun column time is_release ->
-                            if time > now then
-                                Logging.Debug("Received input event from the future")
+                            if is_release then
+                                key_state <- Bitmask.unset_key column key_state
                             else
-                                if is_release then
-                                    key_state <- Bitmask.unset_key column key_state
-                                else
-                                    key_state <- Bitmask.set_key column key_state
+                                key_state <- Bitmask.set_key column key_state
 
-                                liveplay.Add(time, key_state)
+                            liveplay.Add(time, key_state)
                     )
 
                     this.State.Scoring.Update chart_time
