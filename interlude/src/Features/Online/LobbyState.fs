@@ -159,7 +159,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
     member this.CancelRound() = client.Send(Upstream.CANCEL_GAME)
     member this.StartPlaying() = client.Send(Upstream.BEGIN_PLAYING)
     member this.StartSpectating() = client.Send(Upstream.BEGIN_SPECTATING)
-    member this.SendReplayData data = client.Send(Upstream.PLAY_DATA data)
+    member this.SendReplayData (timestamp: float32, data: byte array) = client.Send(Upstream.PLAY_DATA (timestamp, data))
     member this.FinishPlaying() = client.Send(Upstream.FINISH_PLAYING false)
     member this.AbandonPlaying() = client.Send(Upstream.FINISH_PLAYING true)
     member this.SelectChart (cc: CachedChart, rate: float32, mods: ModState) =

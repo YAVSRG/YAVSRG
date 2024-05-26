@@ -81,8 +81,8 @@ module PlayScreenMultiplayer =
         let send_replay_packet (chart_time: ChartTime) =
             use ms = new MemoryStream()
             use bw = new BinaryWriter(ms)
-            liveplay.ExportLiveBlock (chart_time, bw)
-            lobby.SendReplayData(ms.ToArray())
+            liveplay.ExportLiveBlock bw
+            lobby.SendReplayData(float32 chart_time, ms.ToArray())
             packet_count <- packet_count + 1
 
         let give_up () =

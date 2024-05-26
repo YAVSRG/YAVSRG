@@ -33,7 +33,7 @@ module Online =
             | Upstream.MISSING_CHART -> Lobby.MissingChart(id).Do
 
             | Upstream.BEGIN_PLAYING -> Lobby.BeginPlaying(id).Do
-            | Upstream.PLAY_DATA data -> Lobby.PlayData(id, data).Do
+            | Upstream.PLAY_DATA (timestamp, data) -> Lobby.PlayData(id, timestamp, data).Do
             | Upstream.BEGIN_SPECTATING -> Lobby.BeginSpectating(id).Do
             | Upstream.FINISH_PLAYING abandoned -> Lobby.FinishPlaying(id, abandoned).Do
 

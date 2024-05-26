@@ -226,7 +226,7 @@ module Network =
                     match lobby with
                     | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
                     | Some lobby -> lobby.GameEnd()
-            | Downstream.PLAY_DATA(username, data) ->
+            | Downstream.PLAY_DATA(username, timestamp, data) ->
                 defer 
                 <| fun () -> 
                     match lobby with
@@ -237,7 +237,7 @@ module Network =
                         | Some replay_info ->
                             use ms = new MemoryStream(data)
                             use br = new BinaryReader(ms)
-                            (replay_info.Replay :?> Gameplay.OnlineReplayProvider).ImportLiveBlock br
+                            (replay_info.Replay :?> Gameplay.OnlineReplayProvider).ImportLiveBlock(Time.of_number timestamp, br)
 
     let client = new NetworkClient()
 

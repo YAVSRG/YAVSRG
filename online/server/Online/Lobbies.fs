@@ -27,6 +27,7 @@ type Player =
     {
         Username: string
         mutable Status: LobbyPlayerStatus
+        mutable CurrentChartTime: float32
         mutable CurrentPlayBuffer: MemoryStream
         mutable PlayPacketsReceived: int
         mutable PlayComplete: bool
@@ -35,6 +36,7 @@ type Player =
         {
             Username = name
             Status = LobbyPlayerStatus.NotReady
+            CurrentChartTime = -10000f
             CurrentPlayBuffer = new MemoryStream([||], false)
             PlayPacketsReceived = 0
             PlayComplete = false
@@ -48,13 +50,13 @@ type Player =
 
     member this.FinishPlay() = this.PlayComplete <- true
 
-    member this.ReceivePlayPacket(id: PlayerId, data: byte array) =
+    member this.ReceivePlayPacket(id: PlayerId, timestamp: float32, data: byte array) =
         if this.Status <> LobbyPlayerStatus.Playing || this.PlayComplete then
             malice id "Sent play packet while not playing"
         elif data.Length % 6 > 0 then
-            // todo: check 4 bytes every 6 for a monotone increasing value? otherwise flag as garbage and kick player
             malice id "Sending garbage data"
         else
+            this.CurrentChartTime <- timestamp
             this.CurrentPlayBuffer.Write(data, 0, data.Length)
             this.PlayPacketsReceived <- this.PlayPacketsReceived + 1
 
@@ -64,7 +66,7 @@ type Player =
             then
                 malice id "Too much data sent too often"
 
-    member this.GetReplay() = this.CurrentPlayBuffer.ToArray()
+    member this.GetReplay() = this.CurrentChartTime, this.CurrentPlayBuffer.ToArray()
 
 type Lobby =
     {
@@ -110,7 +112,7 @@ module Lobby =
         | BeginPlaying of player: PlayerId
         | FinishPlaying of player: PlayerId * abandoned: bool
         | BeginSpectating of player: PlayerId
-        | PlayData of player: PlayerId * data: byte array
+        | PlayData of player: PlayerId * timestamp: float32 * data: byte array
         | Settings of player: PlayerId * settings: LobbySettings
         | ChangeHost of player: PlayerId * newhost: string
         | MissingChart of player: PlayerId
@@ -561,36 +563,35 @@ module Lobby =
                             if needs_catchup then
                                 for p in lobby.Players.Values do
                                     if p.Status = LobbyPlayerStatus.Playing && p.PlayPacketsReceived > 0 then
-                                        // 65532 is a multiple of 6 and less than the max packet size of 65535
-                                        let PACKET_SIZE = 65532
+                                        // 65532 is a multiple of 6, less than the max packet size of 65535, with room for username + timestamp in the packet too
+                                        let PACKET_SIZE = 64536
 
-                                        let data = p.GetReplay()
+                                        let timestamp, data = p.GetReplay()
                                         let mutable offset = 0
 
                                         while data.Length - offset > PACKET_SIZE do
                                             let sub_data = Array.zeroCreate PACKET_SIZE
                                             Buffer.BlockCopy(data, offset, sub_data, 0, PACKET_SIZE)
                                             offset <- offset + PACKET_SIZE
-                                            Server.send (player, Downstream.PLAY_DATA(p.Username, sub_data))
+                                            Server.send (player, Downstream.PLAY_DATA(p.Username, timestamp, sub_data))
 
                                         if offset > 0 then
                                             let remaining_data = Array.zeroCreate (data.Length - offset)
                                             Buffer.BlockCopy(data, offset, remaining_data, 0, remaining_data.Length)
-                                            Server.send (player, Downstream.PLAY_DATA(p.Username, remaining_data))
+                                            Server.send (player, Downstream.PLAY_DATA(p.Username, timestamp, remaining_data))
                                         else
-                                            Server.send (player, Downstream.PLAY_DATA(p.Username, data))
+                                            Server.send (player, Downstream.PLAY_DATA(p.Username, timestamp, data))
 
 
 
-                        | PlayData(player, data) ->
+                        | PlayData(player, timestamp, data) ->
                             let username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
                             if not lobby.GameRunning then
                                 user_error player "Replay data sent but game is not running"
 
-
-                            lobby.Players.[player].ReceivePlayPacket(player, data)
+                            lobby.Players.[player].ReceivePlayPacket(player, timestamp, data)
 
                             for p in lobby.Players.Keys do
                                 if
@@ -599,7 +600,7 @@ module Lobby =
                                         || lobby.Players.[p].Status = LobbyPlayerStatus.AbandonedPlay
                                         || lobby.Players.[p].Status = LobbyPlayerStatus.Spectating)
                                 then
-                                    Server.send (p, Downstream.PLAY_DATA(username, data))
+                                    Server.send (p, Downstream.PLAY_DATA(username, timestamp, data))
 
 
 

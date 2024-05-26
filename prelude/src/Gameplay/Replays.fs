@@ -290,9 +290,7 @@ type LiveReplayProvider(first_note: Time) =
         if finished then invalidOp "Live play is already declared as over; cannot do so again"
         finished <- true
 
-    member this.ExportLiveBlock(chart_time: ChartTime, bw: BinaryWriter) =
-        bw.Write(float32 chart_time)
-
+    member this.ExportLiveBlock(bw: BinaryWriter) =
         while export < buffer.Count do
             let struct (time, bitmap) = buffer.[export]
 
@@ -330,13 +328,14 @@ type OnlineReplayProvider() =
             else
                 invalidOp "Online play is not declared as over, we don't have the full replay yet!"
 
-    member this.ImportLiveBlock(br: BinaryReader) =
+    member this.ImportLiveBlock(timestamp: float32<ms>, br: BinaryReader) =
         if finished then
             invalidOp "Online play is declared as over; cannot append to replay"
+        elif timestamp < current_chart_time then
+            failwith "Timestamp for replay data went backwards"
         else
-
+            current_chart_time <- timestamp
             try
-                current_chart_time <- br.ReadSingle() * 1.0f<ms>
                 while not (br.BaseStream.Position = br.BaseStream.Length) do
                     buffer.Add(struct (br.ReadSingle() * 1.0f<ms>, br.ReadUInt16()))
             with err ->

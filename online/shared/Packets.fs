@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 13uy
+    let PROTOCOL_VERSION = 14uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 1
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -136,7 +136,7 @@ module Packets =
         | MISSING_CHART
 
         | BEGIN_PLAYING
-        | PLAY_DATA of byte array
+        | PLAY_DATA of timestamp: float32 * byte array
         | BEGIN_SPECTATING
         | FINISH_PLAYING of abandoned: bool
 
@@ -179,7 +179,7 @@ module Packets =
                     if length > PLAY_PACKET_THRESHOLD_PER_SECOND * MULTIPLAYER_REPLAY_DELAY_SECONDS then
                         failwithf "Excessive replay data being sent to server"
 
-                    PLAY_DATA(br.ReadBytes(length))
+                    PLAY_DATA(br.ReadSingle(), br.ReadBytes(length))
                 | 0x33uy -> FINISH_PLAYING(br.ReadBoolean())
 
                 | 0x40uy -> TRANSFER_HOST(br.ReadString())
@@ -238,7 +238,8 @@ module Packets =
 
                 | BEGIN_PLAYING -> 0x30uy
                 | BEGIN_SPECTATING -> 0x31uy
-                | PLAY_DATA data ->
+                | PLAY_DATA (timestamp, data) ->
+                    bw.Write timestamp
                     bw.Write data
                     0x32uy
                 | FINISH_PLAYING abandon ->
@@ -292,7 +293,7 @@ module Packets =
 
         | GAME_COUNTDOWN of bool // todo: become countdown_stopped
         | GAME_START
-        | PLAY_DATA of username: string * data: byte array
+        | PLAY_DATA of username: string * timestamp: float32 * data: byte array
         | GAME_END
 
         static member Read(kind: byte, data: byte array) : Downstream =
@@ -330,7 +331,7 @@ module Packets =
                 | 0x30uy -> GAME_COUNTDOWN(br.ReadBoolean())
                 | 0x31uy -> GAME_START
                 | 0x32uy ->
-                    PLAY_DATA(br.ReadString(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
+                    PLAY_DATA(br.ReadString(), br.ReadSingle(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
                 | 0x33uy -> GAME_END
 
                 | _ -> failwithf "Unknown packet type: %i" kind
@@ -430,8 +431,9 @@ module Packets =
                     bw.Write b
                     0x30uy
                 | GAME_START -> 0x31uy
-                | PLAY_DATA(username, data) ->
+                | PLAY_DATA(username, timestamp, data) ->
                     bw.Write username
+                    bw.Write timestamp
                     bw.Write data
                     0x32uy
                 | GAME_END -> 0x33uy
