@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Web.Server.Domain.Core
 
 open System
+open System.Security.Cryptography
 open Percyqaz.Common
 open Prelude
 open Percyqaz.Data.Sqlite
@@ -55,7 +56,9 @@ module User =
                 ]
         }
 
-    let generate_auth_token () = Guid.NewGuid().ToString("N")
+    let generate_auth_token () =
+        RandomNumberGenerator.GetBytes(27)
+        |> Convert.ToBase64String
 
     let create (username, discord_id) =
         {
