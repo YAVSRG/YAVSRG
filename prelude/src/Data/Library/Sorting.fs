@@ -127,6 +127,11 @@ module Sorting =
         | Some report -> report.LNPercent > float32 threshold
         | None -> false
 
+    let private has_sv (cc: CachedChart, ctx: LibraryViewContext) =
+        match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
+        | Some report -> report.SVAmount > 2000.0f<ms>
+        | None -> false
+
     let private compare_by (f: CachedChart -> IComparable) =
         fun a b -> f(fst a).CompareTo <| f (fst b)
 
@@ -159,6 +164,7 @@ module Sorting =
         | LessThan of string * float
         | MoreThan of string * float
         | String of string
+        | Tag of string
         | Impossible
 
     type Filter = FilterPart list
@@ -167,7 +173,7 @@ module Sorting =
 
         let except_keywords = List.filter (function String _ -> false | Impossible -> false | _ -> true)
 
-        let private string = " =<>\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLower()
+        let private string = " =<>#\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLower()
 
         let private quoted_string =
             between (pchar '"') (pchar '"') ("\"" |> isNoneOf |> many1Satisfy)
@@ -180,9 +186,10 @@ module Sorting =
 
         let private less = string .>>. (pchar '<' >>. pfloat) |>> LessThan
         let private more = string .>>. (pchar '>' >>. pfloat) |>> MoreThan
+        let private tag = pchar '#' >>. string |>> Tag
 
         let private filter =
-            sepBy (attempt equals <|> attempt less <|> attempt more <|> quoted <|> word) spaces1
+            sepBy (attempt equals <|> attempt less <|> attempt more <|> attempt tag <|> quoted <|> word) spaces1
             .>> spaces
 
         let parse (str: string) =
@@ -216,6 +223,8 @@ module Sorting =
 
                 | Equals("c", str)
                 | Equals("comment", str) -> has_comment str (cc, ctx)
+                | Tag "c"
+                | Tag "comment" -> has_comment "" (cc, ctx)
 
                 | Equals("p", str) -> has_pattern str (cc, ctx)
                 | Equals("pattern", str) -> has_pattern str (cc, ctx)
@@ -236,6 +245,11 @@ module Sorting =
                 | MoreThan("ln", pc)
                 | MoreThan("holds", pc)
                 | MoreThan("lns", pc) -> above_ln_percent pc (cc, ctx)
+
+                | Tag "nosv"
+                | Tag "nsv" -> not (has_sv (cc, ctx))
+                | Tag "sv" -> has_sv (cc, ctx)
+
                 | _ -> true)
                 filter
 
