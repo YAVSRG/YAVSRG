@@ -20,7 +20,7 @@ type Jukebox() =
         |+ Button(Icons.SKIP_BACK, 
             Suggestions.previous_chart,
             Hotkey = "previous_random_chart",
-            Disabled = (Suggestions.has_previous >> not),
+            Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby || not (Suggestions.has_previous())),
             Position = Position.Margin(5.0f).SliceLeft(45.0f)
         )
         |+ Button(Icons.PAUSE, 
@@ -30,6 +30,7 @@ type Jukebox() =
         |* Button(Icons.SKIP_FORWARD,
             Suggestions.random_chart,
             Hotkey = "random_chart",
+            Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby),
             Position = Position.Margin(5.0f).SliceLeft(45.0f).Translate(90.0f, 0.0f)
         )
         base.Init parent
