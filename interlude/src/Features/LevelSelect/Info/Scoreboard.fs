@@ -231,6 +231,7 @@ type Scoreboard(display: Setting<Display>) =
             if info.CacheInfo.Hash <> last_loading then
                 Loader.container.Iter(fun s -> s.FadeOut())
                 last_loading <- info.CacheInfo.Hash
+                last_loaded <- ""
         )
 
         Loader.container.Sort <- sorter ()

@@ -126,14 +126,18 @@ module SelectedChart =
             WithColors = WITH_COLORS.Value
         }
 
-    let private chart_change_finished = Event<LoadedChartInfo>()
-    let on_chart_change_finished = chart_change_finished.Publish
 
     let private chart_update_finished = Event<LoadedChartInfo>()
     let on_chart_update_finished = chart_update_finished.Publish
 
     let private chart_change_started = Event<LoadingChartInfo>()
     let on_chart_change_started = chart_change_started.Publish
+
+    let private chart_change_finished = Event<LoadedChartInfo>()
+    let on_chart_change_finished = chart_change_finished.Publish
+
+    let private chart_change_failed = Event<unit>()
+    let on_chart_change_failed = chart_change_failed.Publish
 
     let mutable private on_load_succeeded = []
 
@@ -152,7 +156,6 @@ module SelectedChart =
                         | Error reason ->
                                 
                             Logging.Error(sprintf "Couldn't load chart: %s" reason)
-                            // todo: set a proper error state to indicate this failed
                             Background.load None
 
                             Notifications.error (
@@ -161,7 +164,9 @@ module SelectedChart =
                             )
 
                             yield
-                                fun () -> on_load_succeeded <- []
+                                fun () -> 
+                                    on_load_succeeded <- []
+                                    chart_change_failed.Trigger ()
                         | Ok chart ->
 
                         Background.load (Cache.background_path chart Content.Cache)
