@@ -29,12 +29,11 @@ type Toolbar() =
     let volume = Volume(Position = Position.Margin(0.0f, HEIGHT))
 
     let load_preset (i: int) =
-        if not Toolbar.hidden then
-            match Presets.load i with
-            | Some success_name ->
-                SelectedChart.recolor ()
-                Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
-            | None -> ()
+        match Presets.load i with
+        | Some success_name ->
+            SelectedChart.recolor ()
+            Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
+        | None -> ()
 
     override this.Init(parent) =
         container
@@ -62,15 +61,14 @@ type Toolbar() =
             )
             |+ InlaidButton(
                 %"menu.options",
-                (fun () -> if not Toolbar.hidden then OptionsMenuRoot.show ()),
+                OptionsMenuRoot.show,
                 Icons.SETTINGS
             )
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
             |+ (InlaidButton(
                     %"menu.import",
                     (fun () ->
-                        if not Toolbar.hidden then
-                            Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
+                        Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
                     ),
                     Icons.DOWNLOAD,
                     Hotkey = "import"
@@ -85,10 +83,7 @@ type Toolbar() =
                 .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
             |+ InlaidButton(
                 %"menu.wiki",
-                (fun () ->
-                    if not Toolbar.hidden then
-                        Wiki.show ()
-                ),
+                Wiki.show,
                 Icons.BOOK,
                 HoverIcon = Icons.BOOK_OPEN,
                 Hotkey = "wiki"
@@ -97,9 +92,8 @@ type Toolbar() =
             |+ InlaidButton(
                 %"menu.stats",
                 (fun () ->
-                    if not Toolbar.hidden then
-                        Screen.change_new StatsScreen Screen.Type.Stats Transitions.Flags.Default
-                        |> ignore
+                    Screen.change_new StatsScreen Screen.Type.Stats Transitions.Flags.Default
+                    |> ignore
                 ),
                 Icons.TRENDING_UP
             )
@@ -109,8 +103,7 @@ type Toolbar() =
             "edit_noteskin",
             fun () ->
                 if
-                    not Toolbar.hidden
-                    && Screen.current_type <> Screen.Type.Play
+                    Screen.current_type <> Screen.Type.Play
                     && Screen.current_type <> Screen.Type.Replay
                     && (not Content.Noteskin.IsEmbedded)
                 then
@@ -119,7 +112,7 @@ type Toolbar() =
         |+ HotkeyAction(
             "reload_themes",
             fun () ->
-                if not Toolbar.hidden && not (Dialog.exists()) then
+                if not (Dialog.exists()) then
                     Themes.reload_current ()
                     Noteskins.reload_current ()
                     SelectedChart.recolor ()
@@ -216,8 +209,11 @@ type Toolbar() =
                     this.Parent.Bounds
                 else
                     this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
-
-        container.Update(elapsed_ms, moved)
+                    
+        if Toolbar.hidden then
+            volume.Update(elapsed_ms, moved)
+        else
+            container.Update(elapsed_ms, moved)
 
     override this.Position
         with set _ = failwith "Position can not be set for toolbar"
