@@ -19,13 +19,13 @@ module Settings =
 
     let search_system_settings (tokens: string array) : SearchResult seq =
         results {
-            if token_match tokens [|%"system.performance"|] then
+            if token_match tokens [|%"system.performance"; %"search_keywords.performance"|] then
                 yield PageButton(
                     "system.performance",
                     (fun () -> PerformanceSettingsPage().Show())
                 )
                     .Tooltip(Tooltip.Info("system.performance"))
-            if token_match tokens [|%"system.windowmode"; %"system.windowresolution"; %"system.monitor"; %"system.videomode"; %"system.windowmode.windowed"; %"system.windowmode.borderless"; %"system.windowmode.fullscreen"|] then
+            if token_match tokens [|%"system.windowmode"; %"system.windowresolution"; %"system.monitor"; %"system.videomode"; %"system.windowmode.windowed"; %"system.windowmode.borderless"; %"system.windowmode.fullscreen"; %"search_keywords.monitor"|] then
                 yield PageSetting(
                     "system.windowmode",
                     SelectDropdown(

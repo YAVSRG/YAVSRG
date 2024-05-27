@@ -893,3 +893,5 @@ wiki.contents=Table of contents
 wiki.home=Home
 wiki.openinbrowser=Open in browser
 search_keywords.binds=keybinds rebind keymap binding keybinding keyboard shortcut
+search_keywords.monitor=monitor
+search_keywords.performance=lagspike latency frames fps stutter anti-jitter vsync
