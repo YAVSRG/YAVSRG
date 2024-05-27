@@ -1,1 +1,1 @@
-﻿New chart upload features + version bump
+﻿Version bump for multiplayer protocol change
