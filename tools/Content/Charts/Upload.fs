@@ -18,6 +18,10 @@ module Upload =
     let UPLOAD_POOL_CONCURRENCY = 10
     let private BUCKET_ID = "c44023fe407a500583900717"
 
+    //let sw = System.Diagnostics.Stopwatch.StartNew()
+    //let tic () = sw.Elapsed.TotalMilliseconds
+    //let toc (label: string) (start: float) = printfn "%s took %.0fms" label (tic() - start)
+
     let private backblaze_client =
         try
             let c = new BackblazeClient() in
@@ -33,7 +37,7 @@ module Upload =
         let reply = cdn_httpclient.Send(req)
         reply.IsSuccessStatusCode
 
-    let private upload_chart_internal (chart: Chart) : Async<Result<string * int, string>> =
+    let private upload_chart_to_cdn (chart: Chart) : Async<Result<string * int, string>> =
         match Chart.check chart with
         | Error msg -> async { return Error (sprintf "Chart is invalid: %s" msg) }
         | Ok chart ->
@@ -45,7 +49,7 @@ module Upload =
             let upload_notes =
                 task {
                         let file_name = chart_hash
-
+                        
                         let exists = check_cdn_file_exists file_name
 
                         if not exists then
@@ -65,7 +69,7 @@ module Upload =
             let upload_audio =
                 task {
                         let file_name = "assets/" + audio_hash
-
+                        
                         let exists = check_cdn_file_exists file_name
 
                         if not exists then
@@ -115,38 +119,6 @@ module Upload =
             }
         | _ ->  async { return Error "Chart is not part of cache/not using hashed assets mode" }
 
-    let private mass_upload_pooler =
-        let sub_services =
-            Array.init
-                UPLOAD_POOL_CONCURRENCY
-                (fun i ->
-                    { new Async.Service<Chart, Result<string * int, string>>() with
-                        override this.Handle(chart) =
-                            async {
-                                match! upload_chart_internal chart with
-                                | Ok (hash, new_files) ->
-                                    if new_files > 0 then
-                                        Logging.Info(sprintf "CDN upload for '%s' successful, %i new files" chart.Header.Title new_files)
-                                    return Ok (hash, new_files)
-                                | err -> return err
-                            }
-                    }
-                )
-
-        let mutable i = 0
-
-        { new Async.Service<Chart, Result<string * int, string>>() with
-            override this.Handle(r) =
-                async {
-                    let! result = sub_services.[i].RequestAsync(r)
-                    i <- (i + 1) % sub_services.Length
-                    return result
-                }
-        }
-
-    /// A sequence of these should be called using Async.Parallel (... sequence ...) UPLOAD_POOL_CONCURRENCY
-    let upload_chart_to_cdn (chart: Chart) : Async<Result<string * int, string>> = mass_upload_pooler.RequestAsync(chart)
-
     let create_backbeat_data (chart: Chart) : Result<BackbeatChart * BackbeatSong, string> =
         if chart.Header.AudioFile = Missing then
             Error "Missing audio file"
@@ -159,6 +131,10 @@ module Upload =
             let duration = chart.LastNote - chart.FirstNote
             if duration < 30000.0f<ms> then
                 Error "Chart is too short"
+            else
+
+            if chart.Header.ChartSource = Unknown then
+                Error "Chart has no source"
             else
 
             Ok (
@@ -227,6 +203,9 @@ module Upload =
             match! upload_chart_to_cdn chart with
             | Error reason -> return Error reason
             | Ok (hash, files_changed) ->
+
+            if files_changed > 0 then
+                Logging.Info(sprintf "Uploaded %i new files for '%s'" files_changed chart.Header.Title)
 
             match! upload_chart_to_backbeat (hash, bb_chart, bb_song) with
             | Error reason -> return Error reason

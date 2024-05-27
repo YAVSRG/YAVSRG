@@ -102,6 +102,7 @@ module API =
 
         let init (base_address: string) =
             client.BaseAddress <- new Uri(base_address)
+            client.Timeout = TimeSpan.FromSeconds(5.0)
 
         let authenticate (token: string) =
             client.DefaultRequestHeaders.Authorization <- new Http.Headers.AuthenticationHeaderValue("Bearer", token)
