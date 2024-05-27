@@ -41,7 +41,7 @@ module Background =
                             | Some bmp ->
 
                             let col =
-                                if Content.ThemeConfig.OverrideAccentColor then
+                                if Content.ThemeConfig.AlwaysUseDefaultAccentColor then
                                     Content.ThemeConfig.DefaultAccentColor
                                 else
                                     let vibrance (c: Color) =
@@ -96,7 +96,7 @@ module Background =
 
     let load (path: string option) =
         List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background
-        loader.Request(path)
+        loader.Request(if Content.ThemeConfig.AlwaysUseDefaultBackground then None else path)
 
     let update elapsed_ms =
 

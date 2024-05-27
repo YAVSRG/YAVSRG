@@ -84,7 +84,7 @@ module Themes =
                 | Some stream -> SoundEffect.FromStream(id, stream) |> Sounds.add id
                 | None -> failwithf "Failed to load sound '%s' from *default" id
 
-        if current_config.OverrideAccentColor then
+        if current_config.AlwaysUseDefaultAccentColor then
             Palette.accent_color.Target <- current_config.DefaultAccentColor
 
         for font in DEFAULT.GetFonts() do

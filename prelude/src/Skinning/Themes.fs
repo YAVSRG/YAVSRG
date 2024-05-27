@@ -16,37 +16,23 @@ open Prelude.Skinning
 type ThemeConfig =
     {
         Name: string
-        PBColors: Color array
         Font: string
         DefaultAccentColor: Color
-        OverrideAccentColor: bool
+        AlwaysUseDefaultAccentColor: bool
+        AlwaysUseDefaultBackground: bool
         CursorSize: float32
     }
     static member Default: ThemeConfig =
         {
             Name = "Unnamed Theme"
-            PBColors =
-                [|
-                    Color.Transparent
-                    Color.FromArgb(160, 255, 160)
-                    Color.FromArgb(160, 255, 255)
-                    Color.FromArgb(255, 160, 80)
-                |]
             Font = "Interlude"
             DefaultAccentColor = Color.FromArgb(0, 160, 200)
-            OverrideAccentColor = false
+            AlwaysUseDefaultAccentColor = false
+            AlwaysUseDefaultBackground = false
             CursorSize = 50.0f
         }
 
-    member this.Validate: ThemeConfig =
-        { this with
-            PBColors =
-                if this.PBColors.Length <> 4 then
-                    Logging.Debug "Problem with theme: PBColors should have exactly 4 colors"
-                    ThemeConfig.Default.PBColors
-                else
-                    this.PBColors
-        }
+    member this.Validate: ThemeConfig = this
 
 type Theme(storage) as this =
     inherit Storage(storage)
