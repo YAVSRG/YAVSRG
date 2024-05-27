@@ -892,3 +892,4 @@ wiki.close=Close
 wiki.contents=Table of contents
 wiki.home=Home
 wiki.openinbrowser=Open in browser
+search_keywords.binds=keybinds rebind keymap binding keybinding keyboard shortcut

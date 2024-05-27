@@ -134,7 +134,7 @@ module Settings =
             if token_match tokens [|%"gameplay.pacemaker"|] then
                 yield PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
                     .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
-            if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
+            if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"; %"search_keywords.binds"|] then
                 let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
                 let binds = GameplayKeybinder(keymode)
