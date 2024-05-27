@@ -29,19 +29,20 @@ type RowInfo =
         Density: float32
     }
 
-module Analysis =
-
+module Density =
     let private DENSITY_SENTITIVITY = -4f
 
-    let private density_step (time: Time) (d: float32) =
+    let step (time: Time) (d: float32) =
         let seconds = time / 1000f<ms>
         d * System.MathF.Exp(DENSITY_SENTITIVITY * seconds)
 
-    let private density_hit (time: Time) (d: float32) =
+    let note (time: Time) (d: float32) =
         let seconds = time / 1000f<ms>
 
-        density_step time d
+        step time d
         + (1.0f - System.MathF.Exp(DENSITY_SENTITIVITY * seconds)) / seconds
+
+module Analysis =
 
     let density_data (rate: float32) (chart: Chart) =
         let column_densities = Array.zeroCreate chart.Keys
@@ -51,7 +52,7 @@ module Analysis =
             for { Time = t; Data = row } in chart.Notes do
                 for k = 0 to chart.Keys - 1 do
                     if row.[k] = NoteType.NORMAL || row.[k] = NoteType.HOLDHEAD then
-                        column_densities.[k] <- density_hit ((t - column_sinces.[k]) / rate) column_densities.[k]
+                        column_densities.[k] <- Density.note ((t - column_sinces.[k]) / rate) column_densities.[k]
                         column_sinces.[k] <- t
 
                 yield Array.max column_densities
