@@ -1,13 +1,18 @@
-0.7.21.1
+0.7.21.2
 ====
 
-Patch update to resolve some reported bugs with chart conversions
-Also this is me double checking that my auto-update rollout system is fixed after what happened earlier today
+Another bug fix update to solve some fairly big bugs  
+Big enough that I want to release it sooner, with another feature update probably on Tuesday
 
-# Bug fixes
-- Fixed certain badly formatted .sm files from converting as corrupt .yav files (and for Newson, a recache will clean out any of your existing broken files)
-- Fixed flickering visual issues when rendering Quaver files with negative SV
-- Fixed InitialScrollVelocity being ignored when converting Quaver files
+# Bugs fixed
+- Improved security of account login tokens
+- Drastically reduced CPU usage of the game engine in general (related to inputs)
+- Fixed an issue in multiplayer that would mess up replay data + updated the multiplayer protocol with a better solution
+- Fixed being able to use the jukebox to change songs from the multiplayer lobby screen
+- Fixed being able to use the jukebox to change songs while playing (crashing the game)
+- Fixed one last visual bug with local/online scores being blank depending on how you switch around the tabs
 
-Thanks again to people quick to the draw on playtesting the Quaver conversion, let me know if there are other issues
+# Improvements
+- You can now use `#sv` and `#nsv` in the search bar to respectively find SV and non-SV charts
+- Gameplay binds and hotkeys now show up in search if you type 'keybinds' along with a few other related keywords
 
