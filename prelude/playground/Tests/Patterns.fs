@@ -24,7 +24,7 @@ module Patterns =
         let mutable chordstream = PatternStats.create()
         let mutable jack = PatternStats.create()
 
-        let observe pattern_type (bpm: float32, density, accuracy) time =
+        let observe pattern_type (bpm: float32, density, accuracy, time) =
             if time > 5000.0f<ms> then
 
                 let scaled_density =
@@ -34,11 +34,11 @@ module Patterns =
 
                 match pattern_type with 
                 | Patterns.CorePatternType.Jack ->
-                    jack <- jack |> PatternStats.add_observation (bpm, scaled_density, accuracy) time
+                    jack <- jack |> PatternStats.add_observation (bpm, scaled_density, accuracy, time)
                 | Patterns.CorePatternType.Chordstream ->
-                    chordstream <- chordstream |> PatternStats.add_observation (bpm, scaled_density, accuracy) time
+                    chordstream <- chordstream |> PatternStats.add_observation (bpm, scaled_density, accuracy, time)
                 | Patterns.CorePatternType.Stream ->
-                    stream <- stream |> PatternStats.add_observation (bpm, scaled_density, accuracy) time
+                    stream <- stream |> PatternStats.add_observation (bpm, scaled_density, accuracy, time)
 
         for cc_key in library.Cache.Entries.Keys do
             let cc = library.Cache.Entries.[cc_key]
@@ -51,31 +51,34 @@ module Patterns =
                     | true, res ->
                         for p in res.Patterns do
                             let time = res.Patterns |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 > p.Density50) |> Seq.sumBy (_.Amount)
-                            observe p.Pattern (float32 p.BPM * rate, p.Density50, acc) (Time.of_number (time / rate))
+                            observe p.Pattern (float32 p.BPM * rate, p.Density50, acc, Time.of_number (time / rate))
                     | false, _ -> ()
                 | None -> ()
             | None -> ()
             
-        for k in stream.Keys |> Seq.sortDescending do
-            let (bpm, density, control) = k
+        for k in stream |> Seq.sortDescending do
+            let (bpm, density, control, time) = k
+            
             printfn "%iBPM STREAM (%.2f%%, %.2f%%): %.0fs" 
                 bpm 
                 (density * 100.0f) 
                 (control * 100.0) 
-                (stream.[k] / 1000.0f<ms>)
+                (time / 1000.0f<ms>)
 
-        for k in chordstream.Keys |> Seq.sortDescending do
-            let (bpm, density, control) = k
+        for k in chordstream |> Seq.sortDescending do
+            let (bpm, density, control, time) = k
+
             printfn "%iBPM CHORDSTREAM (%.2f%%, %.2f%%): %.0fs" 
                 bpm 
                 (density * 100.0f)
                 (control * 100.0)
-                (chordstream.[k] / 1000.0f<ms>)
+                (time / 1000.0f<ms>)
 
-        for k in jack.Keys |> Seq.sortDescending do
-            let (bpm, density, control) = k
+        for k in jack |> Seq.sortDescending do
+            let (bpm, density, control, time) = k
+
             printfn "%iBPM JACK (%.2f%%, %.2f%%): %.0fs"
                 bpm
                 (density * 100.0f)
                 (control * 100.0)
-                (jack.[k] / 1000.0f<ms>)
+                (time / 1000.0f<ms>)
