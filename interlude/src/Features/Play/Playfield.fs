@@ -39,6 +39,8 @@ type private HoldRenderState =
 type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinConfig, vanishing_notes: bool) as this =
     inherit Container(NodeType.None)
 
+    let NEGATIVE_SV_ROW_COUNT = 150
+
     let keys = chart.Keys
 
     let column_width = noteskin_config.ColumnWidth
@@ -317,7 +319,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
         // todo: also put a cap at -playfield_height when *negative sv comes into play
-        while (column_pos < playfield_height || (has_negative_sv && note_peek - note_seek < 50)) && note_peek < chart.Notes.Length do
+        while (column_pos < playfield_height || (has_negative_sv && note_peek - note_seek < NEGATIVE_SV_ROW_COUNT)) && note_peek < chart.Notes.Length do
 
             let { Time = t; Data = nr } = chart.Notes.[note_peek]
             let color = chart.Colors.[note_peek].Data
