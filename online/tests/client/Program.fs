@@ -74,9 +74,9 @@ type TestClient(i: int) =
             Logging.Info(sprintf "%i left lobby" i)
             status <- LoggedIn
         | Downstream.SYSTEM_MESSAGE s -> Logging.Info(sprintf "@~> %i: %s" i s)
-        | Downstream.PLAY_DATA("Percyqaz", data) ->
+        | Downstream.PLAY_DATA("Percyqaz", ts, data) ->
             if ready_to_play then
-                this.Send(Upstream.PLAY_DATA data)
+                this.Send(Upstream.PLAY_DATA (ts, data))
         | _ -> ()
 
 let clients = Array.init NUMBER_OF_CLIENTS TestClient

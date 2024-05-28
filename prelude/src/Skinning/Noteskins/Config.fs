@@ -39,7 +39,7 @@ type NoteExplosionConfig =
 [<Json.AutoCodec(false)>]
 type HoldExplosionConfig =
     {
-        // todo: second scale, frametime, colors for release explosion
+        // todo: second scale, frametime, colors for release explosion IF people ask for it
         Scale: float32
         AnimationFrameTime: float
         Colors: ExplosionColors

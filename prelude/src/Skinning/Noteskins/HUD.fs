@@ -38,11 +38,15 @@ type JudgementDisplayType =
     | Name
     | Texture of int
 
-[<RequireQualifiedAccess>]
 type ProgressMeterLabel =
     | None = 0
     | Countdown = 1
     | Percentage = 2
+
+type TimingDisplayMovingAverageType =
+    | None = 0
+    | Arrow = 1
+    | ReplaceBars = 2
 
 [<Json.AutoCodec(false)>]
 type HUDUserOptions =
@@ -58,6 +62,8 @@ type HUDUserOptions =
         TimingDisplayShowNonJudgements: bool
         TimingDisplayReleasesExtraHeight: float32
         TimingDisplayHalfScaleReleases: bool
+        TimingDisplayMovingAverageType: TimingDisplayMovingAverageType
+        TimingDisplayMovingAverageSensitivity: float32
 
         ComboEnabled: bool
         ComboLampColors: bool
@@ -95,6 +101,8 @@ type HUDUserOptions =
             TimingDisplayShowNonJudgements = true
             TimingDisplayReleasesExtraHeight = 5.0f
             TimingDisplayHalfScaleReleases = true
+            TimingDisplayMovingAverageType = TimingDisplayMovingAverageType.None
+            TimingDisplayMovingAverageSensitivity = 0.75f
 
             ComboEnabled = true
             ComboLampColors = true
@@ -149,6 +157,7 @@ type HUDNoteskinOptions =
         AccuracyPercentExtraSpacing: float32
 
         TimingDisplayPosition: HUDPosition
+        TimingDisplayMovingAverageColor: Color
 
         ComboPosition: HUDPosition
         ComboGrowth: float32
@@ -222,6 +231,7 @@ type HUDNoteskinOptions =
                     Right = 300.0f, 0.5f
                     Bottom = 25.0f, 0.5f
                 }
+            TimingDisplayMovingAverageColor = Color.Aqua
 
             ComboPosition =
                 {

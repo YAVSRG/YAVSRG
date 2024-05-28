@@ -33,6 +33,10 @@ type TimingDisplayPage(on_close: unit -> unit) =
         Setting.simple user_options.TimingDisplayFadeTime
         |> Setting.bound 100.0f 2000.0f
 
+    let moving_average_type = Setting.simple user_options.TimingDisplayMovingAverageType
+    let moving_average_sensitivity = Setting.simple user_options.TimingDisplayMovingAverageSensitivity |> Setting.bound 0.01f 0.5f
+    let moving_average_color = Setting.simple noteskin_options.TimingDisplayMovingAverageColor
+
     let preview =
         { new ConfigPreview(0.35f, pos) with
             override this.DrawComponent(bounds) =
@@ -66,6 +70,29 @@ type TimingDisplayPage(on_close: unit -> unit) =
         |+ PageSetting("hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
             .Tooltip(Tooltip.Info("hud.timingdisplay.animationtime"))
             .Pos(10)
+        |+ PageSetting("hud.timingdisplay.moving_average_type", 
+            SelectDropdown(
+                [|
+                    TimingDisplayMovingAverageType.None, %"hud.timingdisplay.moving_average_type.none"
+                    TimingDisplayMovingAverageType.Arrow, %"hud.timingdisplay.moving_average_type.arrow"
+                    TimingDisplayMovingAverageType.ReplaceBars, %"hud.timingdisplay.moving_average_type.replace_bars"
+                |],
+                moving_average_type
+            )
+        )
+            .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_type"))
+            .Pos(12)
+        |+ PageSetting("hud.timingdisplay.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
+            .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_sensitivity"))
+            .Pos(14)
+            .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
+        |+ ([
+            PageSetting("hud.timingdisplay.moving_average_color", ColorPicker(moving_average_color, true))
+                .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_color"))
+                .Pos(16, 3)
+                .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
+            :> Widget
+        ] |> or_require_noteskin)
         |>> Container
         |+ preview
         :> Widget
@@ -81,6 +108,12 @@ type TimingDisplayPage(on_close: unit -> unit) =
                 TimingDisplayThickness = thickness.Value
                 TimingDisplayReleasesExtraHeight = release_thickness.Value
                 TimingDisplayFadeTime = animation_time.Value
+                TimingDisplayMovingAverageType = moving_average_type.Value
+                TimingDisplayMovingAverageSensitivity = moving_average_sensitivity.Value
+            }
+        Noteskins.save_hud_config
+            { Content.NoteskinConfig.HUD with
+                TimingDisplayMovingAverageColor = moving_average_color.Value
             }
 
         on_close ()

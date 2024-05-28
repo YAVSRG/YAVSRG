@@ -32,30 +32,52 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
             1.0f
 
     let animation_time = user_options.TimingDisplayFadeTime * SelectedChart.rate.Value
+    let moving_average = Animation.Fade(0.0f)
 
     do
-        state.SubscribeToHits(fun ev ->
-            match ev.Guts with
-            | Hit e ->
-                hits.Add
-                    {
-                        Time = ev.Time
-                        Position = e.Delta / state.Scoring.MissWindow * w * 0.5f
-                        IsRelease = false
-                        Judgement = e.Judgement
-                    }
-            | Release e ->
-                hits.Add
-                    {
-                        Time = ev.Time
-                        Position = e.Delta / state.Scoring.MissWindow * w * ln_mult
-                        IsRelease = true
-                        Judgement = e.Judgement
-                    }
-        )
+        if user_options.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.None then
+            state.SubscribeToHits(fun ev ->
+                match ev.Guts with
+                | Hit e ->
+                    if not e.Missed then
+                        moving_average.Target <- 
+                            Percyqaz.Flux.Utils.lerp 
+                                user_options.TimingDisplayMovingAverageSensitivity
+                                moving_average.Target 
+                                (e.Delta / state.Scoring.MissWindow * w * 0.5f)
+                | Release e ->
+                    if not e.Missed then
+                        moving_average.Target <- 
+                            Percyqaz.Flux.Utils.lerp 
+                                user_options.TimingDisplayMovingAverageSensitivity
+                                moving_average.Target 
+                                (e.Delta / state.Scoring.MissWindow * w * ln_mult)
+            )
+        if user_options.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.ReplaceBars then
+            state.SubscribeToHits(fun ev ->
+                match ev.Guts with
+                | Hit e ->
+                    hits.Add
+                        {
+                            Time = ev.Time
+                            Position = e.Delta / state.Scoring.MissWindow * w * 0.5f
+                            IsRelease = false
+                            Judgement = e.Judgement
+                        }
+                | Release e ->
+                    hits.Add
+                        {
+                            Time = ev.Time
+                            Position = e.Delta / state.Scoring.MissWindow * w * ln_mult
+                            IsRelease = true
+                            Judgement = e.Judgement
+                        }
+            )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
+
+        moving_average.Update elapsed_ms
 
         if w = 0.0f || moved then
             w <- this.Bounds.Width
@@ -84,6 +106,29 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
                 Color.White
 
         let now = state.CurrentChartTime()
+
+        match user_options.TimingDisplayMovingAverageType with
+        | TimingDisplayMovingAverageType.ReplaceBars ->
+            let r = 
+                Rect.Create(
+                    centre + moving_average.Value - user_options.TimingDisplayThickness,
+                    this.Bounds.Top,
+                    centre + moving_average.Value + user_options.TimingDisplayThickness,
+                    this.Bounds.Bottom
+                )
+            Draw.rect r noteskin_options.TimingDisplayMovingAverageColor
+        | TimingDisplayMovingAverageType.Arrow ->
+            let arrow_height = this.Bounds.Height * 0.5f
+            Draw.untextured_quad 
+                (
+                    Quad.createv 
+                        (centre + moving_average.Value, this.Bounds.Top - 10.0f)
+                        (centre + moving_average.Value - arrow_height, this.Bounds.Top - 10.0f - arrow_height)
+                        (centre + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height)
+                        (centre + moving_average.Value, this.Bounds.Top - 10.0f)
+                )
+                noteskin_options.TimingDisplayMovingAverageColor.AsQuad
+        | _ -> ()
 
         for hit in hits do
             let r =
