@@ -86,7 +86,7 @@ module PlayScreenMultiplayer =
             packet_count <- packet_count + 1
 
         let give_up () =
-            let is_giving_up_play = (Song.time() - first_note) * SelectedChart.rate.Value > 15000f<ms>
+            let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) * SelectedChart.rate.Value > 15000f<ms>
 
             if 
                 if is_giving_up_play then
