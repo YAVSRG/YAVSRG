@@ -26,7 +26,7 @@ type Toolbar() =
     let mutable collapsed_by_user = false
 
     let container = Container(NodeType.None)
-    let volume = Volume(Position = Position.Margin(0.0f, HEIGHT))
+    let volume_when_collapsed = Volume(Position = Position.Margin(0.0f, HEIGHT))
 
     let load_preset (i: int) =
         match Presets.load i with
@@ -124,7 +124,7 @@ type Toolbar() =
         |+ Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
             .Conditional(fun () -> Updates.update_available)
         |+ Jukebox(Position = Position.Box(0.0f, 1.0f, 200.0f, -62.5f, 560.0f, 55.0f))
-        |* volume
+        |* Volume(Position = Position.Margin(0.0f, HEIGHT))
 
         base.Init parent
 
@@ -140,11 +140,12 @@ type Toolbar() =
             else
                 this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
 
+        volume_when_collapsed.Init this
         container.Init this
 
     override this.Draw() =
         if Toolbar.hidden then
-            volume.Draw()
+            volume_when_collapsed.Draw()
         else
             let {
                     Rect.Left = l
@@ -211,7 +212,7 @@ type Toolbar() =
                     this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
                     
         if Toolbar.hidden then
-            volume.Update(elapsed_ms, moved)
+            volume_when_collapsed.Update(elapsed_ms, moved)
         else
             container.Update(elapsed_ms, moved)
 

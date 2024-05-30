@@ -303,6 +303,7 @@ module Options =
             Hotkeys.register "start" (mk Keys.Home)
             Hotkeys.register "end" (mk Keys.End)
             Hotkeys.register "endless_mode" (shift Keys.E)
+            Hotkeys.register "pause_music" (Mouse MouseButton.Middle)
 
             Hotkeys.register "import" (ctrl Keys.I)
             Hotkeys.register "options" (ctrl Keys.O)

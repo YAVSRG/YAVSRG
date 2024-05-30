@@ -25,6 +25,7 @@ type Jukebox() =
         )
         |+ Button(Icons.PAUSE, 
             (fun () -> if Song.playing() then Song.pause() else Song.resume()),
+            Hotkey = "pause_music",
             Position = Position.Margin(5.0f).SliceLeft(45.0f).Translate(45.0f, 0.0f)
         )
         |* Button(Icons.SKIP_FORWARD,
