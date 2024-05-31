@@ -31,6 +31,26 @@ module LinkHandler =
         if not handled then
             open_url url
 
+type private SpanRenderingContext =
+    {
+        LineLength: float32
+        mutable X: float32
+        mutable Y: float32
+        mutable CurrentLineHeight: float32
+    }
+    member this.RemainingSpaceOnLine = this.LineLength - this.X
+    member this.Advance(width, height) : bool =
+        if width <= this.RemainingSpaceOnLine then
+            this.X <- this.X + width
+            this.CurrentLineHeight <- max this.CurrentLineHeight height
+            true
+        else
+            false
+    member this.StartNewLine() =
+        this.X <- 0.0f
+        this.Y <- this.Y + this.CurrentLineHeight
+        this.CurrentLineHeight <- 0.0f
+
 module private Span =
 
     let fragment (text: string, colors: Color * Color, background: Color option) =
@@ -75,7 +95,7 @@ module private Span =
                 Background = Color.Transparent
             }
 
-    let create_fragment (max_width: float32) (text: string) (settings: Settings) =
+    let create_fragment (ctx: SpanRenderingContext) (text: string) (settings: Settings) =
         let fg =
             if settings.Strong then
                 Colors.green_accent
@@ -101,7 +121,7 @@ module private Span =
         let mutable width = (Text.measure (Style.font, text)) * settings.Size
         let height = settings.Size / 0.6f
 
-        while width > max_width && text.Contains(' ') do
+        while width > ctx.RemainingSpaceOnLine && text.Contains(' ') do
             let i = text.LastIndexOf(' ')
             remaining_text <- text.Substring(i) + remaining_text
             text <- text.Substring(0, i)
@@ -197,62 +217,42 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
     inherit IParagraph()
 
     let MARGIN = 15.0f
-    let max_width = max_width - MARGIN
+    let ctx = 
+        {
+            LineLength = max_width - MARGIN * 2.0f
+            X = 0.0f
+            Y = 0.0f
+            CurrentLineHeight = 0.0f
+        }
     let mutable height = 0.0f
 
     do
-        let mutable x = MARGIN
-        let mutable y = 0.0f
-        let mutable line_height = 0.0f
-
-        let new_line () =
-            x <- MARGIN
-            y <- y + line_height
-            line_height <- 0.0f
-
         for (text, settings, info) in Span.get_fragments settings spans do
             match info with
-            | Span.FragmentInfo.Linebreak -> new_line ()
+            | Span.FragmentInfo.Linebreak -> ctx.Advance(0.0f, Span.SIZE) |> ignore; ctx.StartNewLine()
             | Span.FragmentInfo.Image url ->
-                let img = Image(max_width - x, text, url)
-                line_height <- max line_height img.Height
-                img.Position <- Position.Box(0.0f, 0.0f, x, y, img.Width, img.Height)
+                let img = Image(ctx.RemainingSpaceOnLine, text, url)
+                img.Position <- Position.Box(0.0f, 0.0f, ctx.X, ctx.Y, img.Width, img.Height)
                 this |* img
-                new_line ()
+                ctx.Advance(img.Width, img.Height) |> ignore
+                ctx.StartNewLine()
             | Span.FragmentInfo.Normal ->
 
-            let fragment, (width, height), remaining =
-                Span.create_fragment (max_width - x) text settings
-
-            line_height <- max line_height height
-
-            if width + x > max_width then
-                new_line ()
-
-            fragment.Position <- Position.Box(0.0f, 0.0f, x, y, width, height)
-            x <- x + width
-            this.Add fragment
-
-            let mutable _remaining = remaining
+            let mutable _remaining = text
 
             while _remaining <> "" do
-                new_line ()
-
                 let fragment, (width, height), remaining =
-                    Span.create_fragment (max_width - x) _remaining settings
-
-                line_height <- max line_height height
-
-                if width + x > max_width then
-                    new_line ()
-
-                fragment.Position <- Position.Box(0.0f, 0.0f, x, y, width, height)
+                    Span.create_fragment ctx _remaining settings
+                if ctx.Advance(width, height) then
+                    fragment.Position <- Position.Box(0.0f, 0.0f, MARGIN + ctx.X - width, ctx.Y, width, height)
+                else
+                    ctx.StartNewLine()
+                    fragment.Position <- Position.Box(0.0f, 0.0f, MARGIN + ctx.X, ctx.Y, width, height)
                 this.Add fragment
-                x <- x + width
                 _remaining <- remaining
 
-        new_line ()
-        height <- y
+        ctx.StartNewLine()
+        height <- ctx.Y
 
     override this.Width = max_width
     override this.Height = height
@@ -331,8 +331,8 @@ type private Paragraphs(nested: bool, max_width: float32, paragraphs: IParagraph
 
 module Heading =
 
-    let MARGIN_X = 12.0f
-    let MARGIN_Y = 12.0f
+    let MARGIN_X = 10.0f
+    let MARGIN_Y = 10.0f
 
     let rec extract_text (body: MarkdownSpan list) =
         match body.Head with

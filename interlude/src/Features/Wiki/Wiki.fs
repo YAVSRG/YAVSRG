@@ -114,7 +114,9 @@ module Wiki =
                                     sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/changelog.md" "githubusercontent"
                                 )
                             with
-                            | Some md -> Cache.changelog_content <- Some [| Markdown.Parse md |]
+                            | Some md ->
+                                let version_split_regex = System.Text.RegularExpressions.Regex(@"\s(?=[\.0-9]+\s+====)")
+                                Cache.changelog_content <- version_split_regex.Split(md) |> Array.map Markdown.Parse |> Some
                             | None -> ()
 
                         return Cache.changelog_content |> Option.defaultValue [||]
@@ -272,7 +274,7 @@ module Wiki =
                     y <- y + 400.0f + spacing
             | None -> con.Add(LoadingState())
 
-            con._Size <- y - spacing
+            con._Size <- y - spacing + Style.PADDING * 2.0f
             flow <- ScrollContainer(con, Margin = Style.PADDING, Position = Position.CenterX(max_width).Margin(-Style.PADDING, 80.0f))
 
             flow.Init this
