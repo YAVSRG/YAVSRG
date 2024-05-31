@@ -417,14 +417,6 @@ module Backbot =
         //        Logging.Info(sprintf "%s -> %s" song.Title suggestion.Title)
         //        songs.[song_id] <- suggestion
 
-    let private rehome_song_id (old_id: string, new_id: string) =
-        failwith "functionality to be removed"
-        //for chart_id in charts.Keys do
-        //    let chart = charts.[chart_id]
-
-        //    if chart.SongId = old_id then
-        //        charts.[chart_id] <- { chart with SongId = new_id }
-
     //type Song_Deduplication = { Title: string; Artists: string list }
 
     //let correct_duplicate_songs () =

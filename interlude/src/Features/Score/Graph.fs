@@ -19,7 +19,15 @@ type ScoreGraphSettingsPage() =
 
     override this.Content() = 
         page_container()
-        |+ PageSetting("score.graph.settings.graph_mode", SelectDropdown.FromEnum options.ScoreGraphMode)
+        |+ PageSetting("score.graph.settings.graph_mode", 
+            SelectDropdown(
+                [|
+                    ScoreGraphMode.None, %"score.graph.settings.graph_mode.none"
+                    ScoreGraphMode.Combo, %"score.graph.settings.graph_mode.combo"
+                |],
+                options.ScoreGraphMode
+            )
+        )
             .Pos(0)
         |+ PageSetting("score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
             .Pos(3)
@@ -113,8 +121,8 @@ type ScoreGraph(score_info: ScoreInfo) =
                 Draw.rect (Rect.Box(x - HTHICKNESS, this.Bounds.Top + y - HTHICKNESS, THICKNESS, THICKNESS)) col
 
         // early/late
-        Text.draw (Style.font, "Early", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 33.0f, Colors.white.O3)
-        Text.draw (Style.font, "Late", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 3.0f, Colors.white.O3)
+        Text.draw (Style.font, %"score.graph.early", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 33.0f, Colors.white.O3)
+        Text.draw (Style.font, %"score.graph.late", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 3.0f, Colors.white.O3)
 
         fbo.Unbind()
 

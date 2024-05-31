@@ -139,7 +139,12 @@ type ColorSettingsPage() =
             .Pos(2)
         |+ PageSetting(
             "noteskins.edit.colorstyle",
-            SelectDropdown.FromEnum(
+            SelectDropdown(
+                [|
+                    ColorScheme.Column, %"noteskins.edit.colorstyle.column"
+                    ColorScheme.Chord, %"noteskins.edit.colorstyle.chord"
+                    ColorScheme.DDR, %"noteskins.edit.colorstyle.ddr"
+                |],
                 Setting.make (fun v -> note_colors <- { note_colors with Style = v }) (fun () -> note_colors.Style)
                 |> Setting.trigger (ignore >> refresh_colors)
             )

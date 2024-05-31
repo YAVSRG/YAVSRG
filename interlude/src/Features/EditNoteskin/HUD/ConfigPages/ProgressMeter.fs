@@ -79,7 +79,16 @@ type ProgressMeterPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting("hud.progressmeter.label", SelectDropdown.FromEnum(label))
+        |+ PageSetting("hud.progressmeter.label", 
+            SelectDropdown(
+                [|
+                    ProgressMeterLabel.None, %"hud.progressmeter.label.none"
+                    ProgressMeterLabel.Countdown, %"hud.progressmeter.label.countdown"
+                    ProgressMeterLabel.Percentage, %"hud.progressmeter.label.percentage"
+                |],
+                label
+            )
+        )
             .Pos(0)
         |+ ([
             PageSetting("hud.progressmeter.label_size", Slider.Percent(label_size))
