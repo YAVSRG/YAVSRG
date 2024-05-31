@@ -52,7 +52,7 @@ module private Span =
                 base.Draw()
         }
 
-    let SIZE = 22.0f
+    let SIZE = 25.0f
 
     type Settings =
         {
@@ -148,6 +148,12 @@ type IParagraph() =
 
     abstract member Width: float32
     abstract member Height: float32
+
+    interface IHeight with
+        override this.Height = this.Height
+
+    interface IWidth with
+        override this.Width = this.Width
 
 type private Image(width, title, url) as this =
     inherit IParagraph()
@@ -315,14 +321,18 @@ type private Paragraphs(nested: bool, max_width: float32, paragraphs: IParagraph
     override this.Draw() =
         if this.VisibleBounds.Visible then
             if not nested then
-                Draw.rect this.Bounds Colors.cyan.O2
+                Draw.rect (this.Bounds.BorderBottomCorners(Style.PADDING)) Colors.cyan_accent
+                Draw.rect (this.Bounds.BorderTopCorners(Style.PADDING)) Colors.cyan_accent
+                Draw.rect (this.Bounds.BorderLeft(Style.PADDING)) Colors.cyan_accent
+                Draw.rect (this.Bounds.BorderRight(Style.PADDING)) Colors.cyan_accent
+                Draw.rect this.Bounds Colors.cyan.O3
 
             base.Draw()
 
 module Heading =
 
-    let MARGIN_X = 13.0f
-    let MARGIN_Y = 10.0f
+    let MARGIN_X = 12.0f
+    let MARGIN_Y = 12.0f
 
     let rec extract_text (body: MarkdownSpan list) =
         match body.Head with
@@ -343,7 +353,7 @@ type private Heading(max_width, size, body: MarkdownSpan list) as this =
             max_width - Heading.MARGIN_X * 2.0f,
             body,
             { Span.Settings.Default with
-                Size = Span.SIZE + 2.0f * System.MathF.Pow(4.0f - float32 size, 2.0f)
+                Size = Span.SIZE + 1.0f * System.MathF.Pow(4.0f - float32 size, 2.0f)
             }
         )
 
@@ -370,8 +380,7 @@ type private Heading(max_width, size, body: MarkdownSpan list) as this =
 
     override this.Draw() =
         if this.VisibleBounds.Visible then
-            Draw.rect this.Bounds Colors.cyan
-            Draw.rect (this.Bounds.SliceBottom(5.0f)) Colors.cyan_accent
+            Draw.rect (this.Bounds.Shrink(Style.PADDING * 2.0f)) Colors.black.O2
             base.Draw()
 
 type HorizontalRule(max_width) =

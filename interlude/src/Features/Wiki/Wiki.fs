@@ -273,7 +273,7 @@ module Wiki =
             | None -> con.Add(LoadingState())
 
             con._Size <- y - spacing
-            flow <- ScrollContainer(con, Position = Position.Margin((Viewport.vwidth - 1400.0f) * 0.5f, 80.0f))
+            flow <- ScrollContainer(con, Margin = Style.PADDING, Position = Position.CenterX(max_width).Margin(-Style.PADDING, 80.0f))
 
             flow.Init this
 
