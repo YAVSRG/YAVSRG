@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Search
+namespace Interlude.Features.OptionsMenu.Search
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -160,9 +160,9 @@ module Settings =
             if token_match tokens [|%"advanced.vanishingnotes"|] then
                 yield PageSetting("advanced.vanishingnotes", Checkbox options.VanishingNotes)
                     .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
-            if token_match tokens [|%"advanced.autocalibrateoffset"|] then
-                yield PageSetting("advanced.autocalibrateoffset", Checkbox options.AutoCalibrateOffset)
-                    .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
+            if token_match tokens [|%"advanced.automatic_offset"|] then
+                yield PageSetting("advanced.automatic_offset", Checkbox options.AutoCalibrateOffset)
+                    .Tooltip(Tooltip.Info("advanced.automatic_offset"))
             if token_match tokens [|%"advanced.buildpatterncache"|] then
                 yield PageButton.Once("advanced.buildpatterncache",
                     fun () ->

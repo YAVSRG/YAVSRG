@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Advanced
+namespace Interlude.Features.OptionsMenu.Advanced
 
 open Percyqaz.Flux.UI
 open Prelude.Data.Library.Caching
@@ -25,8 +25,8 @@ type AdvancedPage() =
         |+ PageSetting("advanced.vanishingnotes", Checkbox options.VanishingNotes)
             .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
             .Pos(6)
-        |+ PageSetting("advanced.autocalibrateoffset", Checkbox options.AutoCalibrateOffset)
-            .Tooltip(Tooltip.Info("advanced.autocalibrateoffset"))
+        |+ PageSetting("advanced.automatic_offset", Checkbox options.AutoCalibrateOffset)
+            .Tooltip(Tooltip.Info("advanced.automatic_offset"))
             .Pos(8)
         |+ PageButton
             .Once(

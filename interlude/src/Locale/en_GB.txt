@@ -1,8 +1,8 @@
 advanced=Advanced
 advanced.advancedrecommendations=Random suggestions
 advanced.advancedrecommendations.tooltip=When enabled, the "Random chart" button on level select isn't purely random.\nInstead, it suggests charts similar to the currently selected one.
-advanced.autocalibrateoffset=Automatic offset
-advanced.autocalibrateoffset.tooltip=When enabled, local offset is automatically adjusted for charts whenever you play.\nYou can play the intro and retry a couple times to get most charts perfectly synchronised.
+advanced.automatic_offset=Automatic offset
+advanced.automatic_offset.tooltip=When enabled, local offset is automatically adjusted for charts whenever you play.\nYou can play the intro and retry a couple times to get most charts perfectly synchronised.
 advanced.buildpatterncache=Cache patterns
 advanced.buildpatterncache.tooltip=Calculates what patterns are in your charts and caches them.\nThis enables experimental features like grouping/searching by pattern, as well as Random suggestions.
 advanced.confirmexit=Confirm exit

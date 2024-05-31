@@ -147,7 +147,7 @@ module Check =
 
         let to_rename =
             locale.Keys
-            |> Seq.where (fun key -> key.StartsWith(before + "."))
+            |> Seq.where (fun key -> key.StartsWith before)
             |> Array.ofSeq
 
         printfn "This will rename %i keys:" to_rename.Length
