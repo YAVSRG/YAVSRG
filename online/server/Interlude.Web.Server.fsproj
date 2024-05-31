@@ -37,6 +37,9 @@
     <Compile Include="API\Charts\Add.fs" />
     <Compile Include="API\Charts\Scores\Leaderboard.fs" />
     <Compile Include="API\Charts\Scores\Save.fs" />
+    <Compile Include="API\Songs\Search.fs" />
+    <Compile Include="API\Songs\Scan.fs" />
+    <Compile Include="API\Songs\Update.fs" />
     <Compile Include="API\Tables\Records.fs" />
     <Compile Include="API\Tables\Leaderboard.fs" />
     <Compile Include="API\Tables\List.fs" />

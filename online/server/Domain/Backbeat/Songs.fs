@@ -539,6 +539,36 @@ module Songs =
             |> expect > 0
         | _ -> false
 
+    let private SCAN_SONGS: Query<int64, int64 * Song> =
+        {
+            SQL =
+                """
+            SELECT Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source, Tags
+            FROM songs
+            ORDER BY Id ASC
+            LIMIT 1000
+            OFFSET @Offset;
+            """
+            Parameters = [ "@Offset", SqliteType.Integer, 8 ]
+            FillParameters = fun p page -> p.Int64 (1000L * page)
+            Read =
+                (fun r ->
+                    r.Int64,
+                    {
+                        Artists = r.Json JSON
+                        OtherArtists = r.Json JSON
+                        Remixers = r.Json JSON
+                        Title = r.String
+                        AlternativeTitles = r.Json JSON
+                        Source = r.StringOption
+                        Tags = r.Json JSON
+                    }
+                )
+        }
+
+    let scan_songs (page: int64) : (int64 * Song) array =
+        SCAN_SONGS.Execute page backbeat_db |> expect
+
     open System.Text.RegularExpressions
 
     let search_songs (page_size: int64) (page: int) (search_query: string) : (int64 * Song) array =

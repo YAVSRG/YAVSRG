@@ -28,6 +28,10 @@ module API =
         add_endpoint Charts.Scores.Save.ROUTE Charts.Scores.Save.handle
         add_endpoint Charts.Scores.Leaderboard.ROUTE Charts.Scores.Leaderboard.handle
 
+        add_endpoint Songs.Search.ROUTE Songs.Search.handle
+        add_endpoint Songs.Scan.ROUTE Songs.Scan.handle
+        add_endpoint Songs.Update.ROUTE Songs.Update.handle
+
         add_endpoint Tables.Records.ROUTE Tables.Records.handle
         add_endpoint Tables.Leaderboard.ROUTE Tables.Leaderboard.handle
         add_endpoint Tables.List.ROUTE Tables.List.handle

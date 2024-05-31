@@ -143,6 +143,61 @@ module Charts =
 
             let get_async (chart: string, ruleset: string, callback: Response option -> unit) =
                 Client.get_async<Response> (snd ROUTE + "?chart=" + chart + "&ruleset=" + escape ruleset, callback)
+                
+module Songs =
+    
+    open Prelude.Backbeat.Archive
+
+    /// url parameters:
+    ///  query - search query to find songs for
+    module Search =
+
+        let ROUTE = (GET, "/songs/search")
+
+        [<Json.AutoCodec>]
+        type Result = 
+            { 
+                SongId: int64
+                Song: Song
+                //Charts: Map<string, Chart> 
+            }
+
+        [<Json.AutoCodec>]
+        type Response = { Results: Result array }
+
+        let get (query: string, callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE + "?query=" + query, callback)
+    
+    /// requires login token as Authorization header
+    /// url parameters:
+    ///  page - page number to fetch
+    module Scan =
+
+        let ROUTE = (GET, "/songs/scan")
+        
+        [<Json.AutoCodec>]
+        type Result = { SongId: int64; Song: Song }
+
+        [<Json.AutoCodec>]
+        type Response = { Results: Result array; HasNextPage: bool }
+
+        let get (page: int, callback: Response option -> unit) =
+            Client.get (snd ROUTE + "?page=" + page.ToString(), callback)
+
+    /// requires login token as Authorization header
+    module Update =
+
+        let ROUTE = (POST, "/songs/update")
+
+        [<Json.AutoCodec>]
+        type Request =
+            {
+                SongId: int64
+                Song: Song
+            }
+
+        let post (request: Request, callback: bool option -> unit) =
+            Client.post<Request> (snd ROUTE, request, callback)
 
 module Tables =
 

@@ -57,8 +57,6 @@ type VerifiedArtists =
 
         d
 
-type SongId = string
-
 [<Json.AutoCodec>]
 type Song =
     {
