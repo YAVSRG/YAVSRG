@@ -48,16 +48,6 @@ module Printerlude =
             UI.Screen.timescale <- System.Math.Clamp(v, 0.01, 10.0)
             io.WriteLine(sprintf "Entering warp speed (%.0f%%)" (UI.Screen.timescale * 100.0))
 
-        let export_osz () =
-            match SelectedChart.CHART with
-            | None -> failwith "No chart loaded to export"
-            | Some c ->
-                try
-                    create_osz c Content.Cache (get_game_folder "Exports")
-                    Logging.Info "Exported."
-                with err ->
-                    Logging.Error("Error while exporting as osz", err)
-
         open SixLabors.ImageSharp
 
         let private banner (hex: string) (emoji: string) =
@@ -154,7 +144,6 @@ module Printerlude =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> UI.Screen.exit <- true))
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
-                .WithCommand("export_osz", "Export current chart as osz", export_osz)
                 .WithCommand("fix_personal_bests", "Fix personal best display values", fix_personal_bests)
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
                 .WithIOCommand(

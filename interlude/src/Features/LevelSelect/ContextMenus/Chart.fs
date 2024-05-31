@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.LevelSelect
 
+open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Charts
 open Prelude.Backbeat
@@ -7,6 +8,7 @@ open Prelude
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
+open Prelude.Data.``osu!``
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
@@ -111,7 +113,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
 
         if Some cc = SelectedChart.CACHE_DATA then
             content
-            |* PageButton.Once(
+            |+ PageButton.Once(
                 "chart.practice",
                 (fun () -> 
                     Menu.Exit()
@@ -124,6 +126,22 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                     )
                 ),
                 Icon = Icons.TARGET
+            )
+            |* PageButton.Once(
+                "chart.export_osz",
+                (fun () ->
+                    match SelectedChart.CHART with
+                    | None -> ()
+                    | Some c ->
+                        match create_osz c Content.Cache (get_game_folder "Exports") with
+                        | Ok () ->
+                            open_directory (get_game_folder "Exports")
+                            Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
+                        | Error err ->
+                            Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
+                            Logging.Error(sprintf "Error exporting '%s' as osz" c.Header.Title, err)
+                ),
+                Icon = Icons.UPLOAD
             )
 
         match Content.Table, SelectedChart.CHART with
