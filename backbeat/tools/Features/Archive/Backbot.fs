@@ -1,8 +1,5 @@
 ﻿namespace Backbeat.Features.Archive
 
-open System
-open System.Linq
-open FParsec
 open Percyqaz.Common
 open Prelude.Backbeat.Archive
 

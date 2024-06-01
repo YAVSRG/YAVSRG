@@ -1,19 +1,4 @@
-﻿open Percyqaz.Shell
-open Percyqaz.Shell.Shell
-open Backbeat.Features.Archive
-
-// todo: merge all this stuff into YAVSRG.CLI
-
-let ctx = ShellContext.Empty |> Archive.register
-[<EntryPoint>]
+﻿[<EntryPoint>]
 let main argv =
-    use logging = Backbeat.Utils.init ()
-    let io = IOContext.Console
-
-    if argv.Length > 0 then
-        ctx.Evaluate io (String.concat " " argv)
-    else
-        printfn "== Backbeat CLI =="
-        repl io ctx
-
+    printfn "this project is deprecated in favour of YAVSRG.CLI"
     0
