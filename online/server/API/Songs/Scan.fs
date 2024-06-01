@@ -25,7 +25,7 @@ module Scan =
 
             require_query_parameter query_params "page"
 
-            let ok, page = System.Int32.TryParse(query_params.["page"].[0])
+            let ok, page = System.Int32.TryParse(query_params.["page"].[0], System.Globalization.CultureInfo.InvariantCulture)
             if not ok || page < 0 then
                 raise (BadRequestException(Some "'page' must be a non-negative integer"))
 

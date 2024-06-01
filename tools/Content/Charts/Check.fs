@@ -12,7 +12,7 @@ module Check =
             Requests.Songs.Scan.get(
                 p,
                 function
-                | None -> Logging.Error("Error scanning all backbeat songs")
+                | None -> Logging.Error("Error scanning backbeat songs")
                 | Some response ->
                     response.Results |> Seq.map (fun result -> result.SongId, result.Song) |> Seq.iter callback
                     if response.HasNextPage then loop (p + 1)
@@ -21,4 +21,15 @@ module Check =
 
     let test () =
         printfn "%s" interlude_chart_cache.RootPath
-        scan_all_charts (printfn "%A")
+        scan_all_charts (fun (id, song) ->
+            let fixed_song =
+                { song with 
+                    Title = Metadata.prune_song_title song.Title
+                    //Tags = Metadata.prune_tags song.Tags
+                }
+                |> Metadata.extract_better_metadata
+                |> Metadata.correct_artist_typos
+            if song <> fixed_song then
+                printfn "SUGGESTION FOUND\n%A\n<->\n%A\n\n" song fixed_song
+                System.Console.ReadLine() |> ignore
+        )
