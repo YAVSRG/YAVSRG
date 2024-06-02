@@ -146,5 +146,3 @@ module Maintenance =
 
     //        Logging.Info(sprintf "Added %s, Is Japanese: %b" name is_japanese)
     //        save ()
-
-    open Prelude.Data.Library.Caching

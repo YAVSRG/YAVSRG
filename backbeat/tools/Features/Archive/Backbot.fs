@@ -10,7 +10,7 @@ module Backbot =
             if a <> b then
                 Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
 
-        Logging.Info(sprintf "Backbot has a suggestion for '%s' that needs your approval" id)
+        Logging.Info(sprintf "Backbot has a suggestion for '%i' that needs your approval" id)
         diff "Artists" before.Artists after.Artists
         diff "Performers" before.OtherArtists after.OtherArtists
         diff "Remixers" before.Remixers after.Remixers
@@ -98,13 +98,3 @@ module Backbot =
     //            Logging.Info(sprintf "%s could be a duplicate title" ded.Title)
     //        else
     //            titles <- Set.add ded.Title titles
-
-    //let correct_song_ids () =
-    //    failwith "functionality removed, songs now have numerical ids"
-
-    //let run (user_oversight) =
-    //    correct_meta (user_oversight)
-    //    correct_artists ()
-    //    correct_titles ()
-    //    correct_duplicate_songs ()
-    //    correct_song_ids ()
