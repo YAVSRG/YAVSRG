@@ -147,6 +147,7 @@ module PlayScreenMultiplayer =
                 if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter
                 if user_options.RateModMeterEnabled then add_widget noteskin_options.RateModMeterPosition RateModMeter
                 if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
+                if user_options.InputMeterEnabled then add_widget noteskin_options.InputMeterPosition InputMeter
                 // todo: better positioning + ability to isolate and test this component
                 add_widget noteskin_options.PacemakerPosition 
                     (fun (user_options, noteskin_options, state) -> MultiplayerScoreTracker(user_options, noteskin_options, state, lobby.Replays))

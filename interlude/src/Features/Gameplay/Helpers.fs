@@ -11,6 +11,8 @@ open Interlude.Options
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
+// todo: consider making 'Gameplay' folder into some kind of State management folder, outside of Features
+
 module Gameplay =
 
     let score_info_from_gameplay

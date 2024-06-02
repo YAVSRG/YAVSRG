@@ -17,6 +17,7 @@ type HUDElement =
     | RateModMeter
     | BPMMeter
     | Pacemaker
+    | InputMeter
     static member FULL_LIST = 
         [
             Accuracy
@@ -30,6 +31,7 @@ type HUDElement =
             RateModMeter
             BPMMeter
             Pacemaker
+            InputMeter
         ]
 
 [<RequireQualifiedAccess>]
@@ -87,6 +89,8 @@ type HUDUserOptions =
         RateModMeterShowMods: bool
 
         BPMMeterEnabled: bool
+
+        InputMeterEnabled: bool
     }
     static member Default =
         {
@@ -126,6 +130,8 @@ type HUDUserOptions =
             RateModMeterShowMods = true
 
             BPMMeterEnabled = false
+
+            InputMeterEnabled = false
         }
 
 [<Json.AutoCodec(false)>]
@@ -207,6 +213,8 @@ type HUDNoteskinOptions =
         RateModMeterPosition: HUDPosition
 
         BPMMeterPosition: HUDPosition
+
+        InputMeterPosition: HUDPosition
     }
     static member Default =
         {
@@ -355,6 +363,15 @@ type HUDNoteskinOptions =
                     Top = -40.0f, 1.0f
                     Right = 100.0f, 0.5f
                     Bottom = -10.0f, 1.0f
+                }
+
+            InputMeterPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = 20.0f, 1.0f
+                    Top = -580.0f, 1.0f
+                    Right = 440.0f, 1.0f
+                    Bottom = -20.0f, 1.0f
                 }
         }
 

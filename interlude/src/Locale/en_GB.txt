@@ -282,6 +282,7 @@ hud.generic.percent_spacing=Percent spacing
 hud.generic.percent_spacing.tooltip=Change this to adjust the spacing of the percent character compared with digits.
 hud.generic.use_font=Custom font
 hud.generic.use_font.tooltip=Enable this to use a custom texture for the font on this element.
+hud.inputmeter=Input meter
 hud.judgementcounter=Judgement counter
 hud.judgementcounter.animationtime=Fade time
 hud.judgementcounter.animationtime.tooltip=This is the time in milliseconds for the "flash" when getting a judgement to fade.

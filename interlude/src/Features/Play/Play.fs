@@ -159,6 +159,7 @@ module PlayScreen =
                 if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter
                 if user_options.RateModMeterEnabled then add_widget noteskin_options.RateModMeterPosition RateModMeter
                 if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
+                if user_options.InputMeterEnabled then add_widget noteskin_options.InputMeterPosition InputMeter
 
                 let offset_slideout = offset_slideout this
 

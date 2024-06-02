@@ -128,6 +128,7 @@
     <Compile Include="Features\Play\HUD\MultiplayerScoreTracker.fs" />
     <Compile Include="Features\Play\HUD\RateModMeter.fs" />
     <Compile Include="Features\Play\HUD\BPMMeter.fs" />
+    <Compile Include="Features\Play\HUD\InputMeter.fs" />
     <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Play\Play.fs" />
     <Compile Include="Features\Play\PlayMultiplayer.fs" />
@@ -168,6 +169,7 @@
     <Compile Include="Features\EditNoteskin\HUD\ConfigPages\JudgementCounter.fs" />
     <Compile Include="Features\EditNoteskin\HUD\ConfigPages\RateModMeter.fs" />
     <Compile Include="Features\EditNoteskin\HUD\ConfigPages\BPMMeter.fs" />
+    <Compile Include="Features\EditNoteskin\HUD\ConfigPages\InputMeter.fs" />
     <Compile Include="Features\EditNoteskin\HUD\Elements.fs" />
     <Compile Include="Features\EditNoteskin\HUD\Editor.fs" />
     <Compile Include="Features\EditNoteskin\HUD\HUD.fs" />

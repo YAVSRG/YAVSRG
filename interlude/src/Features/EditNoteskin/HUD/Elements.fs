@@ -24,6 +24,7 @@ module HUDElement =
         | HUDElement.RateModMeter -> %"hud.ratemodmeter"
         | HUDElement.BPMMeter -> %"hud.bpmmeter"
         | HUDElement.Pacemaker -> %"hud.pacemaker"
+        | HUDElement.InputMeter -> %"hud.inputmeter"
 
     let tooltip (e: HUDElement) : string =
         match e with
@@ -38,6 +39,7 @@ module HUDElement =
         | HUDElement.RateModMeter -> %"hud.ratemodmeter.tooltip"
         | HUDElement.BPMMeter -> %"hud.bpmmeter.tooltip"
         | HUDElement.Pacemaker -> %"hud.pacemaker.tooltip"
+        | HUDElement.InputMeter -> %"hud.inputmeter.tooltip"
 
     let can_configure (e: HUDElement) =
         match e with
@@ -66,6 +68,7 @@ module HUDElement =
         | HUDElement.RateModMeter -> cast RateModMeter
         | HUDElement.BPMMeter -> cast BPMMeter
         | HUDElement.Pacemaker -> cast Pacemaker
+        | HUDElement.InputMeter -> cast InputMeter
 
     let enabled_setting (e: HUDElement) : Setting<bool> =
         match e with
@@ -159,6 +162,15 @@ module HUDElement =
                         }
                 )
                 (fun () -> options.HUD.Value.BPMMeterEnabled)
+        | HUDElement.InputMeter ->
+            Setting.make
+                (fun v ->
+                    options.HUD.Set
+                        { options.HUD.Value with
+                            InputMeterEnabled = v
+                        }
+                )
+                (fun () -> options.HUD.Value.InputMeterEnabled)
         | HUDElement.Pacemaker -> // pacemaker cannot be toggled by the user like a setting, it is on depending on gameplay state
             Setting.make (fun _ -> ()) (fun () -> true)
 
@@ -254,6 +266,15 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.BPMMeterPosition)
+        | HUDElement.InputMeter ->
+            Setting.make
+                (fun v ->
+                    Noteskins.save_hud_config
+                        { Content.NoteskinConfig.HUD with
+                            InputMeterPosition = v
+                        }
+                )
+                (fun () -> Content.NoteskinConfig.HUD.InputMeterPosition)
         | HUDElement.Pacemaker ->
             Setting.make
                 (fun v ->
@@ -278,6 +299,7 @@ module HUDElement =
         | HUDElement.JudgementCounter -> all_defaults.JudgementCounterPosition
         | HUDElement.RateModMeter -> all_defaults.RateModMeterPosition
         | HUDElement.BPMMeter -> all_defaults.BPMMeterPosition
+        | HUDElement.InputMeter -> all_defaults.InputMeterPosition
         | HUDElement.Pacemaker -> all_defaults.PacemakerPosition
 
     let show_menu (e: HUDElement) (on_close: unit -> unit) =
@@ -292,4 +314,5 @@ module HUDElement =
         | HUDElement.JudgementCounter -> JudgementCounterPage(on_close).Show()
         | HUDElement.RateModMeter -> RateModMeterPage(on_close).Show()
         | HUDElement.BPMMeter -> BPMMeterPage(on_close).Show()
+        | HUDElement.InputMeter -> InputMeterPage(on_close).Show()
         | HUDElement.Pacemaker -> PacemakerPage(on_close).Show()
