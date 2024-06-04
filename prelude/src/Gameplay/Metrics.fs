@@ -114,6 +114,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
     member this.MissWindow = ruleset.Accuracy.MissWindow
     member this.ScaledMissWindow = miss_window
     member this.Ruleset = ruleset
+    member this.ReplayRecentEvents() = replay.EnumerateRecentEvents()
 
     member this.HoldState (index: int) (k: int) =
         let state, i = hold_states.[k]

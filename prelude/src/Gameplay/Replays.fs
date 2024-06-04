@@ -217,6 +217,10 @@ type IReplayProvider =
     // get the underlying data
     abstract member GetFullReplay: unit -> ReplayData
 
+    // walk backwards through recent inputs (for rendering input meter hud element)
+    // sequence is only guaranteed to be valid for the frame it is used it, it should not be stored or reused once the underlying replay has been modified
+    abstract member EnumerateRecentEvents: unit -> ReplayRow seq
+
 type StoredReplayProvider(data: ReplayData) =
     let mutable i = 0
 
@@ -235,6 +239,14 @@ type StoredReplayProvider(data: ReplayData) =
             data.[i - 1]
 
         member this.GetFullReplay() = data
+
+        member this.EnumerateRecentEvents() =
+            seq {
+                let mutable j = i - 1
+                while j >= 0 do
+                    yield data.[j]
+                    j <- j - 1
+            }
 
     new(data: string) = StoredReplayProvider(Replay.decompress_string data)
 
@@ -285,6 +297,14 @@ type LiveReplayProvider(first_note: Time) =
         member this.GetFullReplay() =
             if not finished then invalidOp "Live play is not declared as over, we don't have the full replay yet!"
             buffer.ToArray()
+        
+        member this.EnumerateRecentEvents() =
+            seq {
+                let mutable j = buffer.Count - 1
+                while j >= 0 do
+                    yield buffer.[j]
+                    j <- j - 1
+            }
 
     member this.Finish() =
         if finished then invalidOp "Live play is already declared as over; cannot do so again"
@@ -327,6 +347,14 @@ type OnlineReplayProvider() =
                 buffer.ToArray()
             else
                 invalidOp "Online play is not declared as over, we don't have the full replay yet!"
+        
+        member this.EnumerateRecentEvents() =
+            seq {
+                let mutable j = i - 1
+                while j >= 0 do
+                    yield buffer.[j]
+                    j <- j - 1
+            }
 
     member this.ImportLiveBlock(timestamp: float32<ms>, br: BinaryReader) =
         if finished then
