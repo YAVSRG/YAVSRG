@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Backbeat
+open Prelude.Backbeat.Archive
 open Prelude.Data.Library.Caching
 open Prelude
 open Interlude.UI
@@ -11,19 +12,51 @@ open Interlude.UI.Menu
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
-// todo: redo this whole thing keeping it simple instead of trying to design a whole fancy UI for it
-(*
-top level page:
- - "suggest this chart" button
- - list of suggestions by chart title and vote count
-click a suggestion:
- - details about the chart
- - vote breakdowns by level (clickable to confirm)
- - button to suggest another level
- - button to playtest
-*)
+type Suggestion =
+    {
+        ChartId: string
+        Votes: Map<int, int>
+        BackbeatInfo: (Chart * Song) option
+        LocalChart: CachedChart option
+    }
 
-type Suggestion(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
+type ViewSuggestionPage(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
+    inherit Page()
+
+    override this.Content() =
+        let matching_local_chart = Cache.by_hash suggestion.ChartId Interlude.Content.Content.Cache
+
+        page_container()
+        |+ PageButton("table.suggestions.playtest", ignore)
+            .Pos(6)
+        |+ PageButton("table.suggestions.vote_another_level", ignore)
+            .Pos(8)
+        // conditional on having permission
+        |+ PageButton("table.suggestions.accept", ignore)
+            .Pos(10)
+        |+ PageButton("table.suggestions.reject", ignore)
+            .Pos(12)
+        |+ seq {
+            match suggestion.BackbeatInfo with
+            | Some (server_chart, server_song) ->
+                yield Text(server_song.FormattedTitle, Position = pretty_pos(0, 2, PageWidth.Full))
+                yield Text(server_chart.DifficultyName, Color = K Colors.text_subheading, Position = pretty_pos(2, 1, PageWidth.Full))
+                yield Text(server_chart.FormattedCreators, Color = K Colors.text_subheading, Position = pretty_pos(3, 1, PageWidth.Full))
+            | None ->
+
+            match matching_local_chart with
+            | Some local_cc ->
+                yield Text(local_cc.Artist + " - " + local_cc.Title, Position = pretty_pos(0, 2, PageWidth.Full))
+                yield Text(local_cc.DifficultyName, Color = K Colors.text_subheading, Position = pretty_pos(2, 1, PageWidth.Full))
+                yield Text(local_cc.Creator, Color = K Colors.text_subheading, Position = pretty_pos(3, 1, PageWidth.Full))
+            | None ->
+                yield Text(%"table.suggestions.info_missing", Color = K Colors.text_red_2, Position = pretty_pos(0, 2, PageWidth.Full))
+        } :> Widget
+
+    override this.Title = %"table.suggestion"
+    override this.OnClose() = ()
+
+type SuggestionCard(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
     inherit FrameContainer(NodeType.Leaf)
 
     let mutable height = 100.0f
@@ -169,10 +202,10 @@ type SuggestionsList(table: Table) =
                 else
                     this.Offline()
             , fun _ data ->
-                let fc = DynamicFlowContainer.Vertical<Suggestion>(Spacing = 30.0f)
+                let fc = DynamicFlowContainer.Vertical<SuggestionCard>(Spacing = 30.0f)
 
                 for s in data.Suggestions do
-                    fc.Add(Suggestion(table, s))
+                    fc.Add(SuggestionCard(table, s))
 
                 defer (fun () -> fc.Focus false)
 
