@@ -10,7 +10,7 @@ open Prelude.Charts.Formats.Quaver
 [<AutoOpen>]
 module Helpers =
 
-    let convert_chart_file (action: ConversionAction) : Chart list =
+    let convert_chart_file (action: ConversionAction) : Result<Chart, SkippedConversion> list =
         match Path.GetExtension(action.Source).ToLower() with
         | ".sm" ->
             let set_pack_source =
@@ -28,48 +28,32 @@ module Helpers =
             match stepmania_data_from_file action.Source with
             | Ok data ->
 
-                try
-                    StepMania_To_Interlude.convert data action |> List.map set_pack_source
-                with
-                | :? ConversionSkipException -> []
-                | other_error ->
-                    Logging.Debug(sprintf "Error converting %s" action.Source, other_error)
-                    []
+                StepMania_To_Interlude.convert data action
+                |> List.map (Result.map set_pack_source)
 
             | Error msg ->
                 Logging.Debug(sprintf "Parse error in SM file %s" action.Source, msg)
-                []
+                [ Error (action.Source, "Failed to parse this file") ]
         
         | ".qua" ->
             match QuaverChart.from_file action.Source with
             | Ok quaver_chart ->
 
-                try
-                    [ Quaver_To_Interlude.convert quaver_chart action ]
-                with
-                | :? ConversionSkipException -> []
-                | other_error ->
-                    Logging.Debug(sprintf "Error converting %s" action.Source, other_error)
-                    []
+                [ Quaver_To_Interlude.convert quaver_chart action ]
 
             | Error msg ->
                 Logging.Debug(sprintf "Parse error in osu! file %s" action.Source, msg)
-                []
+                [ Error (action.Source, "Failed to parse this file") ]
 
         | ".osu" ->
             match beatmap_from_file action.Source with
+            | Ok beatmap when beatmap.General.Mode <> GameMode.Mania -> []
             | Ok beatmap ->
 
-                try
-                    [ Osu_To_Interlude.convert beatmap action ]
-                with
-                | :? ConversionSkipException -> []
-                | other_error ->
-                    Logging.Debug(sprintf "Error converting %s" action.Source, other_error)
-                    []
+                [ Osu_To_Interlude.convert beatmap action ]
 
             | Error msg ->
                 Logging.Debug(sprintf "Parse error in osu! file %s" action.Source, msg)
-                []
+                [ Error (action.Source, "Failed to parse this file") ]
 
         | _ -> []

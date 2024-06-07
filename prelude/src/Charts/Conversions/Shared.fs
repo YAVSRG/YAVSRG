@@ -24,6 +24,19 @@ type ConversionAction =
         Source: string
     }
 
+type SkippedConversion = string * string
+type ConversionResult =
+    {
+        ConvertedCharts: int
+        SkippedCharts: SkippedConversion list
+    }
+    static member Empty = { ConvertedCharts = 0; SkippedCharts = [] }
+    static member Combine (res1: ConversionResult) (res2: ConversionResult) =
+        {
+            ConvertedCharts = res1.ConvertedCharts + res2.ConvertedCharts
+            SkippedCharts = res1.SkippedCharts @ res2.SkippedCharts
+        }
+
 exception ConversionSkipException of msg: string
 
 (*

@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Collections.Generic
+open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Formats.Quaver
 open Prelude.Charts
@@ -112,7 +113,7 @@ module Quaver_To_Interlude =
         (end_time: Time)
         : Dictionary<float32<ms / beat>, Time> =
         if List.isEmpty points then
-            failwith "no bpm point"
+            skip_conversion "Chart has no BPM points set"
 
         let point = List.head points
 
@@ -134,98 +135,108 @@ module Quaver_To_Interlude =
         data.[current] <- data.[current] + end_time - t
         data
 
-    let convert (b: QuaverChart) (action: ConversionAction) : Chart =
-        let keys = b.Mode
+    let convert (b: QuaverChart) (action: ConversionAction) : Result<Chart, SkippedConversion> =
+        try
+            let keys = b.Mode
 
-        if b.HitObjects.Length < 20 then
-            skip_conversion "Beatmap has very few or no notes"
+            if b.HitObjects.Length < 20 then
+                skip_conversion "Chart has less than 20 notes"
 
-        let path = Path.GetDirectoryName action.Source
+            let path = Path.GetDirectoryName action.Source
 
-        let header =
-            {
-                Title = b.Title
-                TitleNative = None
-                Artist = b.Artist
-                ArtistNative = None
-                Creator = b.Creator
-                DiffName = b.DifficultyName
-                Subtitle = None
-                Source = if b.Source.Length > 0 then Some b.Source else None
-                Tags = b.Tags
+            let header =
+                {
+                    Title = b.Title
+                    TitleNative = None
+                    Artist = b.Artist
+                    ArtistNative = None
+                    Creator = b.Creator
+                    DiffName = b.DifficultyName
+                    Subtitle = None
+                    Source = if b.Source.Length > 0 then Some b.Source else None
+                    Tags = b.Tags
 
-                PreviewTime = Time.of_number b.SongPreviewTime
-                BackgroundFile =
-                    let requested_file = b.BackgroundFile
+                    PreviewTime = Time.of_number b.SongPreviewTime
+                    BackgroundFile =
+                        let requested_file = b.BackgroundFile
 
-                    if File.Exists(Path.Combine(path, requested_file)) then
-                        if action.Config.MoveAssets then
-                            Relative requested_file
+                        if File.Exists(Path.Combine(path, requested_file)) then
+                            if action.Config.MoveAssets then
+                                Relative requested_file
+                            else
+                                Absolute(Path.Combine(path, requested_file))
                         else
-                            Absolute(Path.Combine(path, requested_file))
-                    else
-                        Missing
-                AudioFile =
-                    let requested_file = b.AudioFile
+                            Missing
+                    AudioFile =
+                        let requested_file = b.AudioFile
 
-                    if File.Exists(Path.Combine(path, requested_file)) then
-                        if action.Config.MoveAssets then
-                            Relative requested_file
+                        if File.Exists(Path.Combine(path, requested_file)) then
+                            if action.Config.MoveAssets then
+                                Relative requested_file
+                            else
+                                Absolute(Path.Combine(path, requested_file))
                         else
-                            Absolute(Path.Combine(path, requested_file))
-                    else
-                        Missing
+                            Missing
 
-                ChartSource = Quaver(b.MapSetId, b.MapId)
-            }
-
-        let snaps = convert_hit_objects b.HitObjects keys
-
-        if not b.BPMDoesNotAffectScrollVelocity then
-            skip_conversion "BPMDoesNotAffectScrollVelocity: false is not currently supported"
-
-        let bpm : TimeArray<BPM> = 
-            b.TimingPoints 
-            |> Seq.map (fun tp -> 
-                { 
-                    Time = Time.of_number tp.StartTime
-                    Data =
-                        { 
-                            Meter = 4<beat>
-                            MsPerBeat = 60000.0f<ms/minute> / (tp.Bpm * 1.0f<beat/minute>)
-                        }
+                    ChartSource = Quaver(b.MapSetId, b.MapId)
                 }
-            ) |> Array.ofSeq
 
-        let sv : TimeArray<SV> =
-            seq {
-                if b.InitialScrollVelocity <> 1.0f then
-                    yield { Time = -10000.0f<ms>; Data = b.InitialScrollVelocity }
-                yield! 
-                    b.SliderVelocities 
-                    |> Seq.map (fun sv -> 
-                        { 
-                            Time = Time.of_number sv.StartTime
-                            Data = sv.Multiplier
-                        }
+            let snaps = convert_hit_objects b.HitObjects keys
+
+            if b.HasScratchKey then
+                skip_conversion "HasScratchKey: true is not currently supported"
+
+            if not b.BPMDoesNotAffectScrollVelocity then
+                skip_conversion "BPMDoesNotAffectScrollVelocity: false is not currently supported"
+
+            let bpm : TimeArray<BPM> = 
+                b.TimingPoints 
+                |> Seq.map (fun tp -> 
+                    { 
+                        Time = Time.of_number tp.StartTime
+                        Data =
+                            { 
+                                Meter = 4<beat>
+                                MsPerBeat = 60000.0f<ms/minute> / (tp.Bpm * 1.0f<beat/minute>)
+                            }
+                    }
+                ) |> Array.ofSeq
+
+            let sv : TimeArray<SV> =
+                seq {
+                    if b.InitialScrollVelocity <> 1.0f then
+                        yield { Time = -10000.0f<ms>; Data = b.InitialScrollVelocity }
+                    yield! 
+                        b.SliderVelocities 
+                        |> Seq.map (fun sv -> 
+                            { 
+                                Time = Time.of_number sv.StartTime
+                                Data = sv.Multiplier
+                            }
+                        )
+                }
+                |> Array.ofSeq
+
+            Ok {
+                Keys = keys
+                Header = header
+                Notes = snaps
+                BPM = bpm
+                SV = sv
+
+                LoadedFromPath =
+                    Path.Combine(
+                        path,
+                        String.Join(
+                            "_",
+                            (b.Title + " [" + b.DifficultyName + "].yav")
+                                .Split(Path.GetInvalidFileNameChars())
+                        )
                     )
             }
-            |> Array.ofSeq
-
-        {
-            Keys = keys
-            Header = header
-            Notes = snaps
-            BPM = bpm
-            SV = sv
-
-            LoadedFromPath =
-                Path.Combine(
-                    path,
-                    String.Join(
-                        "_",
-                        (b.Title + " [" + b.DifficultyName + "].yav")
-                            .Split(Path.GetInvalidFileNameChars())
-                    )
-                )
-        }
+        with
+        | :? ConversionSkipException as skip_reason -> 
+            Error (action.Source, skip_reason.msg)
+        | other_error ->
+            Logging.Debug(sprintf "Unexpected error converting %s" action.Source, other_error)
+            Error (action.Source, other_error.Message)

@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Collections.Generic
+open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Formats.StepMania
 open Prelude.Charts
@@ -83,7 +84,7 @@ module StepMania_To_Interlude =
                         | 'M'
                         | 'L'
                         | 'F' -> () // ignore mines, lifts, fakes
-                        | _ -> failwith ("unknown note type " + c.ToString())
+                        | _ -> skip_conversion (sprintf "Unknown note type '%c'" c)
                     )
                     m.[i]
 
@@ -139,7 +140,7 @@ module StepMania_To_Interlude =
 
         (states |> Array.ofSeq, points |> Array.ofSeq)
 
-    let convert (sm: StepManiaData) (action: ConversionAction) =
+    let convert (sm: StepManiaData) (action: ConversionAction) : Result<Chart, SkippedConversion> list =
 
         let path = Path.GetDirectoryName action.Source
 
@@ -228,81 +229,88 @@ module StepMania_To_Interlude =
             else
                 ""
 
-        let convert_difficulty (i: int) (diff: ChartData) : Chart =
-            let keys = diff.STEPSTYPE.Keycount
-            let title = metadata_fallback [ sm.TITLETRANSLIT; sm.TITLE ]
-            let artist = metadata_fallback [ sm.ARTISTTRANSLIT; sm.ARTIST ]
+        let convert_difficulty (i: int) (diff: ChartData) : Result<Chart, SkippedConversion> =
+            try
+                let keys = diff.STEPSTYPE.Keycount
+                let title = metadata_fallback [ sm.TITLETRANSLIT; sm.TITLE ]
+                let artist = metadata_fallback [ sm.ARTISTTRANSLIT; sm.ARTIST ]
 
-            let header =
-                {
-                    Title = title
-                    TitleNative =
-                        match metadata_fallback_opt [ sm.TITLETRANSLIT ] with
-                        | Some t when t = title -> None
-                        | x -> x
-                    Artist = artist
-                    ArtistNative =
-                        match metadata_fallback_opt [ sm.ARTISTTRANSLIT ] with
-                        | Some t when t = artist -> None
-                        | x -> x
-                    Creator = metadata_fallback [ find_author (); sm.CREDIT; diff.CREDIT ]
-                    DiffName = sprintf "%O %O %O" diff.STEPSTYPE diff.DIFFICULTY diff.METER
-                    Subtitle = metadata_fallback_opt [ sm.SUBTITLETRANSLIT; sm.SUBTITLE ]
-                    Tags =
-                        sm.GENRE.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries)
-                        |> List.ofArray
-                    Source = None
+                let header =
+                    {
+                        Title = title
+                        TitleNative =
+                            match metadata_fallback_opt [ sm.TITLETRANSLIT ] with
+                            | Some t when t = title -> None
+                            | x -> x
+                        Artist = artist
+                        ArtistNative =
+                            match metadata_fallback_opt [ sm.ARTISTTRANSLIT ] with
+                            | Some t when t = artist -> None
+                            | x -> x
+                        Creator = metadata_fallback [ find_author (); sm.CREDIT; diff.CREDIT ]
+                        DiffName = sprintf "%O %O %O" diff.STEPSTYPE diff.DIFFICULTY diff.METER
+                        Subtitle = metadata_fallback_opt [ sm.SUBTITLETRANSLIT; sm.SUBTITLE ]
+                        Tags =
+                            sm.GENRE.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries)
+                            |> List.ofArray
+                        Source = None
 
-                    PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
-                    AudioFile =
-                        match find_audio () with
-                        | Some file ->
-                            if action.Config.MoveAssets then
-                                Relative file
-                            else
-                                Absolute(Path.Combine(path, file))
-                        | None ->
-                            //Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
-                            Missing
-                    BackgroundFile =
-                        match find_background () with
-                        | Some file ->
-                            if action.Config.MoveAssets then
-                                Relative file
-                            else
-                                Absolute(Path.Combine(path, file))
-                        | None ->
-                            //Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
-                            Missing
+                        PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
+                        AudioFile =
+                            match find_audio () with
+                            | Some file ->
+                                if action.Config.MoveAssets then
+                                    Relative file
+                                else
+                                    Absolute(Path.Combine(path, file))
+                            | None ->
+                                //Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
+                                Missing
+                        BackgroundFile =
+                            match find_background () with
+                            | Some file ->
+                                if action.Config.MoveAssets then
+                                    Relative file
+                                else
+                                    Absolute(Path.Combine(path, file))
+                            | None ->
+                                //Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
+                                Missing
 
-                    ChartSource = Unknown
+                        ChartSource = Unknown
+                    }
+
+                let filepath =
+                    Path.Combine(
+                        path,
+                        diff.STEPSTYPE.ToString()
+                        + " "
+                        + diff.METER.ToString()
+                        + " ["
+                        + (string i)
+                        + "].yav"
+                    )
+
+                let (notes, bpm) =
+                    convert_measures keys diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
+
+                if notes.Length = 0 then
+                    skip_conversion "StepMania chart has no notes"
+
+                Ok {
+                    Keys = keys
+                    Header = header
+                    Notes = notes
+                    BPM = bpm
+                    SV = [||]
+
+                    LoadedFromPath = filepath
                 }
-
-            let filepath =
-                Path.Combine(
-                    path,
-                    diff.STEPSTYPE.ToString()
-                    + " "
-                    + diff.METER.ToString()
-                    + " ["
-                    + (string i)
-                    + "].yav"
-                )
-
-            let (notes, bpm) =
-                convert_measures keys diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
-
-            if notes.Length = 0 then
-                skip_conversion "StepMania chart has no notes"
-
-            {
-                Keys = keys
-                Header = header
-                Notes = notes
-                BPM = bpm
-                SV = [||]
-
-                LoadedFromPath = filepath
-            }
+            with
+            | :? ConversionSkipException as skip_reason -> 
+                Error (action.Source, skip_reason.msg)
+            | other_error ->
+                Logging.Debug(sprintf "Unexpected error converting %s" action.Source, other_error)
+                Error (action.Source, other_error.Message)
 
         sm.Charts |> List.mapi convert_difficulty

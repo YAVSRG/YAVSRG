@@ -244,7 +244,7 @@ module Cache =
         }
 
     // For charts being imported from someplace outside of any cache
-    let add_new (folder: string) (charts: Chart list) (cache: Cache) =
+    let add_new (folder: string) (charts: Chart seq) (cache: Cache) =
         let moved_assets = Dictionary<string, string>()
         let now = DateTime.UtcNow
 

@@ -68,13 +68,20 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
                     if completed then
                         Imports.convert_stepmania_pack_zip.Request(
                             (target, id, Content.Library),
-                            fun b ->
-                                if b then
-                                    charts_updated_ev.Trigger()
-
-                                Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_pack", data.name)
+                            function
+                            | Some result ->
+                                Notifications.task_feedback (
+                                    Icons.DOWNLOAD, 
+                                    %"notification.install_pack",
+                                    [data.name; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_pack.body"
+                                )
+                                defer charts_updated_ev.Trigger
+                                status <- Installed
                                 File.Delete target
-                                status <- if b then Installed else DownloadFailed
+                            | None ->
+                                Notifications.error (%"notification.install_pack_failed", data.name)
+                                status <- DownloadFailed
+                                File.Delete target
                         )
                     else
                         status <- DownloadFailed

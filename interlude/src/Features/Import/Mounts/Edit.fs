@@ -93,5 +93,11 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
         if import then
             Imports.import_mounted_source.Request(
                 (setting.Value.Value, Content.Library),
-                fun () -> Notifications.task_feedback (Icons.FOLDER_PLUS, %"notification.import_success", "")
+                fun result ->
+                    Notifications.task_feedback (
+                        Icons.CHECK, 
+                        %"notification.import_success",
+                        [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
+                    )
+                    defer charts_updated_ev.Trigger
             )

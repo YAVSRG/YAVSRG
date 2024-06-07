@@ -46,12 +46,16 @@ module Import =
                     fun () ->
                         Imports.auto_convert.Request(
                             (path, false, Content.Library),
-                            fun success ->
-                                if success then
-                                    Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")
-                                    charts_updated_ev.Trigger()
-                                else
-                                    Notifications.error (%"notification.import_failure", "")
+                            function
+                            | Some result ->
+                                Notifications.task_feedback (
+                                    Icons.CHECK, 
+                                    %"notification.import_success",
+                                    [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
+                                )
+                                defer charts_updated_ev.Trigger
+                            | None ->
+                                Notifications.error (%"notification.import_failed", "")
                         )
 
                         Menu.Back()
@@ -103,12 +107,16 @@ module Import =
 
             Imports.auto_convert.Request(
                 (path, false, Content.Library),
-                fun success ->
-                    if success then
-                        Notifications.action_feedback (Icons.CHECK, %"notification.import_success", "")
-                        defer <| fun () -> charts_updated_ev.Trigger()
-                    else
-                        Notifications.error (%"notification.import_failure", "")
+                function
+                | Some result ->
+                    Notifications.task_feedback (
+                        Icons.CHECK, 
+                        %"notification.import_success",
+                        [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
+                    )
+                    defer charts_updated_ev.Trigger
+                | None ->
+                    Notifications.error (%"notification.import_failed", "")
             )
 
     let download_chart_by_hash =

@@ -89,19 +89,16 @@ module ImportScores =
                 Path.Combine(m.SourceFolder, beatmap_data.FolderName, beatmap_data.Filename)
 
             match
-                try
-                    match beatmap_from_file osu_file with
-                    | Ok beatmap ->
-                        Osu_To_Interlude.convert
-                            beatmap
-                            {
-                                Config = ConversionOptions.Default
-                                Source = osu_file
-                            }
-                        |> Some
-                    | Error _ -> None
-                with _ ->
-                    None
+                match beatmap_from_file osu_file with
+                | Ok beatmap ->
+                    Osu_To_Interlude.convert
+                        beatmap
+                        {
+                            Config = ConversionOptions.Default
+                            Source = osu_file
+                        }
+                    |> Result.toOption
+                | Error _ -> None
             with
             | None -> ()
             | Some chart ->

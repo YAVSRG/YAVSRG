@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open System.Linq
+open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Formats.``osu!``
 open Prelude.Charts
@@ -117,7 +118,7 @@ module Osu_To_Interlude =
         (end_time: Time)
         : Dictionary<float32<ms / beat>, Time> =
         if List.isEmpty points then
-            failwith "no bpm point"
+            skip_conversion "Beatmap has no BPM points set"
 
         match List.head points with
         | TimingPoint.BPM(offset, mspb, _, _, _) ->
@@ -182,96 +183,103 @@ module Osu_To_Interlude =
 
         bpm |> Array.ofList |> Array.rev, sv |> Array.ofList |> Array.rev
 
-    let convert (b: Beatmap) (action: ConversionAction) : Chart =
-        let keys = b.Difficulty.CircleSize |> int
+    let convert (b: Beatmap) (action: ConversionAction) : Result<Chart, SkippedConversion> =
+        try
+            let keys = b.Difficulty.CircleSize |> int
 
-        if b.General.Mode <> GameMode.Mania then
-            skip_conversion "Beatmap is not osu!mania gamemode"
+            if b.General.Mode <> GameMode.Mania then
+                skip_conversion "Beatmap is not osu!mania gamemode"
 
-        if keys < 3 || keys > 10 then
-            skip_conversion "Keymode not supported"
+            if keys < 3 || keys > 10 then
+                skip_conversion "Keymode not supported"
 
-        if detect_rate_mod(b.Metadata.Version).IsSome then
-            skip_conversion "Skipping rate modded beatmap"
+            if detect_rate_mod(b.Metadata.Version).IsSome then
+                skip_conversion "Skipping rate modded beatmap"
 
-        if b.Objects.Length < 20 then
-            skip_conversion "Beatmap has very few or no notes"
+            if b.Objects.Length < 20 then
+                skip_conversion "Beatmap has less than 20 notes"
 
-        let path = Path.GetDirectoryName action.Source
+            let path = Path.GetDirectoryName action.Source
 
-        let rec find_background_file e =
-            match e with
-            | (Background(bg, _)) :: _ -> bg
-            | _ :: es -> find_background_file es
-            | [] -> ""
+            let rec find_background_file e =
+                match e with
+                | (Background(bg, _)) :: _ -> bg
+                | _ :: es -> find_background_file es
+                | [] -> ""
 
-        let header =
-            {
-                Title = b.Metadata.Title.Trim()
-                TitleNative =
-                    let t = b.Metadata.TitleUnicode.Trim() in
+            let header =
+                {
+                    Title = b.Metadata.Title.Trim()
+                    TitleNative =
+                        let t = b.Metadata.TitleUnicode.Trim() in
 
-                    if t.Length > 0 && t <> b.Metadata.Title.Trim() then
-                        Some t
-                    else
-                        None
-                Artist = b.Metadata.Artist.Trim()
-                ArtistNative =
-                    let t = b.Metadata.ArtistUnicode.Trim() in
-
-                    if t.Length > 0 && t <> b.Metadata.Artist.Trim() then
-                        Some t
-                    else
-                        None
-                Creator = b.Metadata.Creator
-                DiffName = b.Metadata.Version
-                Subtitle = None
-                Source = let t = b.Metadata.Source.Trim() in if t.Length > 0 then Some t else None
-                Tags = b.Metadata.Tags
-
-                PreviewTime = float32 b.General.PreviewTime * 1.0f<ms>
-                BackgroundFile =
-                    let r = find_background_file b.Events
-
-                    if File.Exists(Path.Combine(path, r)) then
-                        if action.Config.MoveAssets then
-                            Relative r
+                        if t.Length > 0 && t <> b.Metadata.Title.Trim() then
+                            Some t
                         else
-                            Absolute(Path.Combine(path, r))
-                    else
-                        Missing
-                AudioFile =
-                    let r = b.General.AudioFilename
+                            None
+                    Artist = b.Metadata.Artist.Trim()
+                    ArtistNative =
+                        let t = b.Metadata.ArtistUnicode.Trim() in
 
-                    if File.Exists(Path.Combine(path, r)) then
-                        if action.Config.MoveAssets then
-                            Relative r
+                        if t.Length > 0 && t <> b.Metadata.Artist.Trim() then
+                            Some t
                         else
-                            Absolute(Path.Combine(path, r))
-                    else
-                        Missing
+                            None
+                    Creator = b.Metadata.Creator
+                    DiffName = b.Metadata.Version
+                    Subtitle = None
+                    Source = let t = b.Metadata.Source.Trim() in if t.Length > 0 then Some t else None
+                    Tags = b.Metadata.Tags
 
-                ChartSource = Osu(b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
-            }
+                    PreviewTime = float32 b.General.PreviewTime * 1.0f<ms>
+                    BackgroundFile =
+                        let r = find_background_file b.Events
 
-        let snaps = convert_hit_objects b.Objects keys
+                        if File.Exists(Path.Combine(path, r)) then
+                            if action.Config.MoveAssets then
+                                Relative r
+                            else
+                                Absolute(Path.Combine(path, r))
+                        else
+                            Missing
+                    AudioFile =
+                        let r = b.General.AudioFilename
 
-        let bpm, sv = convert_timing_points b.Timing (TimeArray.last snaps).Value.Time
+                        if File.Exists(Path.Combine(path, r)) then
+                            if action.Config.MoveAssets then
+                                Relative r
+                            else
+                                Absolute(Path.Combine(path, r))
+                        else
+                            Missing
 
-        {
-            Keys = keys
-            Header = header
-            Notes = snaps
-            BPM = bpm
-            SV = sv
+                    ChartSource = Osu(b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
+                }
 
-            LoadedFromPath =
-                Path.Combine(
-                    path,
-                    String.Join(
-                        "_",
-                        (b.Metadata.Title + " [" + b.Metadata.Version + "].yav")
-                            .Split(Path.GetInvalidFileNameChars())
+            let snaps = convert_hit_objects b.Objects keys
+
+            let bpm, sv = convert_timing_points b.Timing (TimeArray.last snaps).Value.Time
+
+            Ok {
+                Keys = keys
+                Header = header
+                Notes = snaps
+                BPM = bpm
+                SV = sv
+
+                LoadedFromPath =
+                    Path.Combine(
+                        path,
+                        String.Join(
+                            "_",
+                            (b.Metadata.Title + " [" + b.Metadata.Version + "].yav")
+                                .Split(Path.GetInvalidFileNameChars())
+                        )
                     )
-                )
-        }
+            }
+        with
+        | :? ConversionSkipException as skip_reason -> 
+            Error (action.Source, skip_reason.msg)
+        | other_error ->
+            Logging.Debug(sprintf "Unexpected error converting %s" action.Source, other_error)
+            Error (action.Source, other_error.Message)
