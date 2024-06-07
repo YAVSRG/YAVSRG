@@ -23,3 +23,15 @@ You don't have to care about them - in PRs I can just squash with an emoji commi
 🎓 = Localisation changes
 🏷️ = Releases
 💚 = Community content & Automated commits
+
+### Development principles
+
+**Relatively speaking, the developer experience doesn't matter**  
+Users don't care how pretty the codebase is as long as the game works, contributors who are "users" of the codebase are far fewer than players who are "users" of the compiled output.  
+The YAVSRG codebase is kept in a state that is good enough for me and that I'm happy maintaining, but the code isn't gonna be ultra clean/perfectly engineered/optimised for reading.
+If more people become regular contributors then more accomodations will be made for them.
+
+**You choose, you lose (AKA less is more)**  
+Too much choice leads to a worse experience. Users often pick what I think is the wrong option for them, or stick to what is familiar.
+One-size-fits-all systems are simpler to test, simpler to maintain and simpler to use and I prefer to lean towards this when designing new features.
+Only make something optional if there are existing users that want it off and you agree with and understand why they want it that way.
