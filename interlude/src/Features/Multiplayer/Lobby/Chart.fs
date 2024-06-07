@@ -26,7 +26,7 @@ type MultiplayerChartContextMenu(cc: CachedChart) =
         FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
 
         |+ PageButton(
-            "chart.add_to_collection",
+            %"chart.add_to_collection",
             (fun () -> AddToCollectionPage(cc).Show()),
             Icon = Icons.FOLDER_PLUS
         )

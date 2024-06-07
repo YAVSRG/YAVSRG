@@ -122,7 +122,7 @@ type ColorSettingsPage() =
     override this.Content() =
         page_container()
         |+ PageSetting(
-            "noteskins.edit.globalcolors",
+            %"noteskins.edit.globalcolors",
             Checkbox(
                 Setting.make
                     (fun v -> note_colors <- { note_colors with UseGlobalColors = v })
@@ -133,12 +133,12 @@ type ColorSettingsPage() =
             .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
             .Pos(0)
         |+ PageSetting(
-            "generic.keymode",
+            %"generic.keymode",
             Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_colors))
         )
             .Pos(2)
         |+ PageSetting(
-            "noteskins.edit.colorstyle",
+            %"noteskins.edit.colorstyle",
             SelectDropdown(
                 [|
                     ColorScheme.Column, %"noteskins.edit.colorstyle.column"
@@ -151,7 +151,7 @@ type ColorSettingsPage() =
         )
             .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
             .Pos(5)
-        |+ PageSetting("noteskins.edit.notecolors", colors)
+        |+ PageSetting(%"noteskins.edit.notecolors", colors)
             .Pos(8, 3, PageWidth.Full)
         :> Widget
 

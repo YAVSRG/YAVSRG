@@ -15,7 +15,7 @@ type CreateLobbyPage() =
 
     let submit_button =
         PageButton(
-            "confirm.yes",
+            %"confirm.yes",
             (fun () ->
                 submit ()
                 Menu.Back()
@@ -25,7 +25,7 @@ type CreateLobbyPage() =
     override this.Content() = 
         page_container()
         |+ PageTextEntry(
-            "create_lobby.name",
+            %"create_lobby.name",
             name |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0)
         )
             .Pos(0)

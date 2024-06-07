@@ -34,7 +34,7 @@ module Import =
             page_container()
             |+ PageButton
                 .Once(
-                    "unlinkedsongsimport.link_intended",
+                    %"unlinkedsongsimport.link_intended",
                     fun () ->
                         Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
                         Menu.Back()
@@ -42,7 +42,7 @@ module Import =
                 .Pos(6)
             |+ PageButton
                 .Once(
-                    "unlinkedsongsimport.confirm",
+                    %"unlinkedsongsimport.confirm",
                     fun () ->
                         Imports.auto_convert.Request(
                             (path, false, Content.Library),

@@ -72,7 +72,7 @@ type HotkeysPage() =
 
         container.Add(
             PageButton(
-                "system.hotkeys.reset",
+                %"system.hotkeys.reset",
                 (fun () -> ConfirmPage(%"system.hotkeys.reset.confirm", Hotkeys.reset_all).Show()),
                 Icon = Icons.REFRESH_CCW
             )

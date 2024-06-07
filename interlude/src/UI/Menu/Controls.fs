@@ -252,7 +252,7 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
         SelectDropdown(Array.zip values names, setting)
 
-type PageSetting(name, widget: Widget) as this =
+type PageSetting(localised_text, widget: Widget) as this =
     inherit Container(NodeType.Container(fun _ -> Some this.Child))
 
     let mutable widget = widget
@@ -273,7 +273,7 @@ type PageSetting(name, widget: Widget) as this =
     override this.Init(parent) =
         this
         |* Text(
-            K(%name + ":"),
+            localised_text + ":",
             Color = (fun () -> (if widget.Focused then Colors.text_yellow_2 else Colors.text)),
             Align = Alignment.LEFT,
             Position =
@@ -299,7 +299,7 @@ type PageSetting(name, widget: Widget) as this =
         base.Update(elapsed_ms, moved)
         widget.Update(elapsed_ms, moved)
 
-type PageButton(name, action) as this =
+type PageButton(localised_text, action) as this =
     inherit
         Container(
             NodeType.Button(fun _ ->
@@ -310,16 +310,15 @@ type PageButton(name, action) as this =
         )
 
     member val Icon = "" with get, set
-    member val Text = %name with get, set
 
     override this.Init(parent: Widget) =
         this
         |+ Text(
             K(
                 if this.Icon <> "" then
-                    sprintf "%s %s  >" this.Icon this.Text
+                    sprintf "%s %s  >" this.Icon localised_text
                 else
-                    sprintf "%s  >" this.Text
+                    sprintf "%s  >" localised_text
             ),
             Color =
                 (fun () ->
@@ -347,12 +346,12 @@ type PageButton(name, action) as this =
 
     member val Enabled = true with get, set
 
-    static member Once(name, action) =
+    static member Once(localised_text, action) =
         let mutable ref = Unchecked.defaultof<PageButton>
 
         let button =
             PageButton(
-                name,
+                localised_text,
                 fun () ->
                     if ref.Enabled then
                         action ()

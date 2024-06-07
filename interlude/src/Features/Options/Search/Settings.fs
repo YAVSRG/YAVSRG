@@ -21,13 +21,13 @@ module Settings =
         results {
             if token_match tokens [|%"system.performance"; %"search_keywords.performance"|] then
                 yield PageButton(
-                    "system.performance",
+                    %"system.performance",
                     (fun () -> PerformanceSettingsPage().Show())
                 )
                     .Tooltip(Tooltip.Info("system.performance"))
             if token_match tokens [|%"system.windowmode"; %"system.windowresolution"; %"system.monitor"; %"system.videomode"; %"system.windowmode.windowed"; %"system.windowmode.borderless"; %"system.windowmode.fullscreen"; %"search_keywords.monitor"|] then
                 yield PageSetting(
-                    "system.windowmode",
+                    %"system.windowmode",
                     SelectDropdown(
                         [|
                             WindowType.Windowed, %"system.windowmode.windowed"
@@ -41,14 +41,14 @@ module Settings =
                 )
                     .Tooltip(Tooltip.Info("system.windowmode")) :> Widget
                 yield PageSetting(
-                    "system.windowresolution",
+                    %"system.windowresolution",
                     WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
                 )
                     .Tooltip(Tooltip.Info("system.windowresolution"))
                     .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
                 , 2, 0, PageWidth.Normal
                 yield PageSetting(
-                    "system.monitor",
+                    %"system.monitor",
                     SelectDropdown(
                         monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                         config.Display 
@@ -58,7 +58,7 @@ module Settings =
                     .Tooltip(Tooltip.Info("system.monitor"))
                     .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
                 yield PageSetting(
-                    "system.videomode",
+                    %"system.videomode",
                     VideoMode(
                         config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)),
                         get_current_supported_video_modes
@@ -68,7 +68,7 @@ module Settings =
                     .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
             if token_match tokens [|%"system.audiovolume"|] then
                 yield PageSetting(
-                    "system.audiovolume",
+                    %"system.audiovolume",
                     Slider.Percent(
                         options.AudioVolume
                         |> Setting.trigger (fun v -> Devices.change_volume (v, v))
@@ -78,14 +78,14 @@ module Settings =
                     .Tooltip(Tooltip.Info("system.audiovolume"))
             if token_match tokens [|%"system.audiodevice"|] then
                 yield PageSetting(
-                    "system.audiodevice",
+                    %"system.audiodevice",
                     SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
                 )
                     .Tooltip(Tooltip.Info("system.audiodevice"))
                 
             if token_match tokens [|%"system.audiooffset"|] then
                 yield PageSetting(
-                    "system.audiooffset",
+                    %"system.audiooffset",
                     { new Slider(options.AudioOffset, Step = 1f) with
                         override this.OnDeselected(by_mouse: bool) =
                             base.OnDeselected by_mouse
@@ -95,18 +95,18 @@ module Settings =
                     .Tooltip(Tooltip.Info("system.audiooffset"))
             
             if token_match tokens [|%"system.visualoffset"|] then
-                yield PageSetting("system.visualoffset", Slider(options.VisualOffset, Step = 1f))
+                yield PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))
                     .Tooltip(Tooltip.Info("system.visualoffset"))
                 
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
-                yield PageButton("system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
+                yield PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
                     .Tooltip(Tooltip.Info("system.hotkeys"))
         }
 
     let search_gameplay_settings (tokens: string array) : SearchResult seq =
         results {
             if token_match tokens [|%"gameplay.scrollspeed"|] then
-                yield PageSetting("gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
+                yield PageSetting(%"gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
                     .Tooltip(Tooltip.Info("gameplay.scrollspeed"))
                 yield Text(
                     (fun () ->
@@ -120,29 +120,29 @@ module Settings =
                     Align = Alignment.CENTER
                 ), 1, 1, PageWidth.Normal
             if token_match tokens [|%"gameplay.hitposition"|] then
-                yield PageSetting("gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
+                yield PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
                     .Tooltip(Tooltip.Info("gameplay.hitposition"))
             if token_match tokens [|%"gameplay.upscroll"|] then
-                yield PageSetting("gameplay.upscroll", Checkbox options.Upscroll)
+                yield PageSetting(%"gameplay.upscroll", Checkbox options.Upscroll)
                     .Tooltip(Tooltip.Info("gameplay.upscroll"))
             if token_match tokens [|%"gameplay.backgrounddim"|] then
-                yield PageSetting("gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
+                yield PageSetting(%"gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
                     .Tooltip(Tooltip.Info("gameplay.backgrounddim"))
             if token_match tokens [|%"gameplay.lanecover"|] then
-                yield PageButton("gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
+                yield PageButton(%"gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
                     .Tooltip(Tooltip.Info("gameplay.lanecover"))
             if token_match tokens [|%"gameplay.pacemaker"|] then
-                yield PageButton("gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
+                yield PageButton(%"gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
                     .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"; %"search_keywords.binds"|] then
                 let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
                 let binds = GameplayKeybinder(keymode)
                 yield PageSetting(
-                    "generic.keymode",
+                    %"generic.keymode",
                     Selector.FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
                 )
-                yield PageSetting("gameplay.keybinds", binds)
+                yield PageSetting(%"gameplay.keybinds", binds)
                     .Tooltip(Tooltip.Info("gameplay.keybinds"))
                 , 2, 2, PageWidth.Full
         }
@@ -150,21 +150,21 @@ module Settings =
     let search_advanced_settings (tokens: string array) : SearchResult seq =
         results {
             if token_match tokens [|%"advanced.enableconsole"|] then
-                yield PageSetting("advanced.enableconsole", Checkbox options.EnableConsole)
+                yield PageSetting(%"advanced.enableconsole", Checkbox options.EnableConsole)
             if token_match tokens [|%"advanced.confirmexit"|] then
-                yield PageSetting("advanced.confirmexit", Checkbox options.ConfirmExit)
+                yield PageSetting(%"advanced.confirmexit", Checkbox options.ConfirmExit)
                     .Tooltip(Tooltip.Info("advanced.confirmexit"))
             if token_match tokens [|%"advanced.holdtogiveup"|] then
-                yield PageSetting("advanced.holdtogiveup", Checkbox options.HoldToGiveUp)
+                yield PageSetting(%"advanced.holdtogiveup", Checkbox options.HoldToGiveUp)
                     .Tooltip(Tooltip.Info("advanced.holdtogiveup"))
             if token_match tokens [|%"advanced.vanishingnotes"|] then
-                yield PageSetting("advanced.vanishingnotes", Checkbox options.VanishingNotes)
+                yield PageSetting(%"advanced.vanishingnotes", Checkbox options.VanishingNotes)
                     .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
             if token_match tokens [|%"advanced.automatic_offset"|] then
-                yield PageSetting("advanced.automatic_offset", Checkbox options.AutoCalibrateOffset)
+                yield PageSetting(%"advanced.automatic_offset", Checkbox options.AutoCalibrateOffset)
                     .Tooltip(Tooltip.Info("advanced.automatic_offset"))
             if token_match tokens [|%"advanced.buildpatterncache"|] then
-                yield PageButton.Once("advanced.buildpatterncache",
+                yield PageButton.Once(%"advanced.buildpatterncache",
                     fun () ->
                         Cache.cache_patterns.Request(
                             (Content.Cache, true),
@@ -184,6 +184,6 @@ module Settings =
                 )
                     .Tooltip(Tooltip.Info("advanced.buildpatterncache"))
             if token_match tokens [|%"advanced.advancedrecommendations"|] then
-                yield PageSetting("advanced.advancedrecommendations", Checkbox options.AdvancedRecommendations)
+                yield PageSetting(%"advanced.advancedrecommendations", Checkbox options.AdvancedRecommendations)
                     .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
         }

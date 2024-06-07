@@ -21,7 +21,7 @@ type PerformanceSettingsPage() =
     override this.Content() = 
         page_container()
         |+ PageSetting(
-            "system.framelimit",
+            %"system.framelimit",
             SelectDropdown(
                 [|
                     FrameLimit.Unlimited, %"system.framelimit.unlimited"
@@ -38,7 +38,7 @@ type PerformanceSettingsPage() =
             Align = Alignment.LEFT
         )
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Unlimited)
-        |+ PageSetting("system.performance.antijitter", 
+        |+ PageSetting(%"system.performance.antijitter", 
             Checkbox(
                 config.SmartCapAntiJitter
                 |> Setting.trigger (fun v -> anti_jitter <- v)
@@ -47,7 +47,7 @@ type PerformanceSettingsPage() =
             .Tooltip(Tooltip.Info("system.performance.antijitter"))
             .Pos(2)
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart)
-        |+ PageSetting("system.performance.screen_tear_alignment", 
+        |+ PageSetting(%"system.performance.screen_tear_alignment", 
             Slider.Percent(screen_tear_alignment)
         )
             .Pos(4)
@@ -58,7 +58,7 @@ type PerformanceSettingsPage() =
             Align = Alignment.LEFT
         )
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen)
-        |+ PageSetting("system.performance.frame_multiplier", 
+        |+ PageSetting(%"system.performance.frame_multiplier", 
             SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
         )
             .Pos(7)

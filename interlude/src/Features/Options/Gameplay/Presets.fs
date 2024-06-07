@@ -48,7 +48,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
 
     let delete_button =
         PageButton(
-            "gameplay.preset.delete",
+            %"gameplay.preset.delete",
             fun () ->
                 delete <- true
                 Menu.Back()
@@ -69,9 +69,9 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
             keymode_preference.Add(PresetKeymodeCheckbox(preset_id, keymode))
 
         page_container()
-        |+ PageTextEntry("gameplay.preset.name", name).Pos(0)
+        |+ PageTextEntry(%"gameplay.preset.name", name).Pos(0)
         |+ PageSetting(
-            "gameplay.preset.mode",
+            %"gameplay.preset.mode",
             SelectDropdown<PresetMode>(
                 [|
                     PresetMode.Unlocked, %"gameplay.preset.mode.unlocked"
@@ -83,7 +83,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
         )
             .Tooltip(Tooltip.Info("gameplay.preset.mode"))
             .Pos(2)
-        |+ PageSetting("gameplay.preset.keymode_preference", keymode_preference)
+        |+ PageSetting(%"gameplay.preset.keymode_preference", keymode_preference)
             .Tooltip(Tooltip.Info("gameplay.preset.keymode_preference"))
             .Pos(4, 2, PageWidth.Custom (PRETTYTEXTWIDTH + (keymode_preference :> IWidth).Width))
         |+ delete_button.Pos(6)

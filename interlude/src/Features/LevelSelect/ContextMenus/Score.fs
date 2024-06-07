@@ -11,7 +11,6 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
-open Interlude.Features.Score
 
 type ScoreContextMenu(score_info: ScoreInfo) =
     inherit Page()
@@ -19,13 +18,13 @@ type ScoreContextMenu(score_info: ScoreInfo) =
     override this.Content() = 
         page_container()
         |+ PageButton(
-            "score.delete",
+            %"score.delete",
             (fun () -> ScoreContextMenu.ConfirmDeleteScore(score_info, true)),
             Icon = Icons.TRASH
         )
             .Pos(0)
         |+ PageButton(
-            "score.watch_replay",
+            %"score.watch_replay",
             (fun () ->
                 Gameplay.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
                 Menu.Back()
@@ -34,7 +33,7 @@ type ScoreContextMenu(score_info: ScoreInfo) =
         )
             .Pos(2)
         |+ PageButton(
-            "score.challenge",
+            %"score.challenge",
             (fun () ->
                 LevelSelect.challenge_score score_info
                 Menu.Back()

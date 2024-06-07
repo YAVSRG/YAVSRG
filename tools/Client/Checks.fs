@@ -57,18 +57,6 @@ module Check =
             for position, m in matches """ %> "([a-z\-_\.]*)" """ file_contents do
                 find m (sprintf "%s (position %i)" filename position)
 
-            for position, m in matches """ PageSetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do
-                find m (sprintf "%s (position %i)" filename position)
-
-            for position, m in matches """ PageButton\(\s*"([a-z\-_\.]*)" """ file_contents do
-                find m (sprintf "%s (position %i)" filename position)
-
-            for position, m in matches """ PageTextEntry\(\s*"([a-z\-_\.]*)" """ file_contents do
-                find m (sprintf "%s (position %i)" filename position)
-
-            for position, m in matches """ PageButton\s*.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
-                find m (sprintf "%s (position %i)" filename position)
-
             for position, m in matches """ Tooltip\s*.Info\("([a-z\-_\.]*)" """ file_contents do
                 find m (sprintf "%s (position %i)" filename position)
                 find (sprintf "%s.tooltip" m) (sprintf "%s (position %i)" filename position)
@@ -180,9 +168,6 @@ module Check =
                 file_contents
                 |> replaces """ ([^%])%"([a-z\-_\.]*)" """ "%s%%\"%s\""
                 |> replaces """ (%> )"([a-z\-_\.]*)" """ "%s\"%s\""
-                |> replaces """ PageSetting\((\s*)"([a-z\-_\.]*[^\.])" """ "PageSetting(%s\"%s\""
-                |> replaces """ PageButton\((\s*)"([a-z\-_\.]*[^\.])" """ "PageButton(%s\"%s\""
-                |> replaces """ PageButton(\s*.Once\(\s*)"([a-z\-_\.]*[^\.])" """ "PageButton%s\"%s\""
                 |> replaces """ Tooltip(\s*).Info\("([a-z\-_\.]*)" """ "Tooltip%s.Info(\"%s\""
 
             if replaced_contents <> file_contents then

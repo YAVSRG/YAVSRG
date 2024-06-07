@@ -52,25 +52,25 @@ type TimingDisplayPage(on_close: unit -> unit) =
 
     override this.Content() = 
         page_container()
-        |+ PageSetting("hud.timingdisplay.showguide", Checkbox show_guide)
+        |+ PageSetting(%"hud.timingdisplay.showguide", Checkbox show_guide)
             .Tooltip(Tooltip.Info("hud.timingdisplay.showguide"))
             .Pos(0)
-        |+ PageSetting("hud.timingdisplay.shownonjudgements", Checkbox show_non_judgements)
+        |+ PageSetting(%"hud.timingdisplay.shownonjudgements", Checkbox show_non_judgements)
             .Tooltip(Tooltip.Info("hud.timingdisplay.shownonjudgements"))
             .Pos(2)
-        |+ PageSetting("hud.timingdisplay.halfscalereleases", Checkbox half_scale_releases)
+        |+ PageSetting(%"hud.timingdisplay.halfscalereleases", Checkbox half_scale_releases)
             .Tooltip(Tooltip.Info("hud.timingdisplay.halfscalereleases"))
             .Pos(4)
-        |+ PageSetting("hud.timingdisplay.thickness", Slider(thickness, Step = 1f))
+        |+ PageSetting(%"hud.timingdisplay.thickness", Slider(thickness, Step = 1f))
             .Tooltip(Tooltip.Info("hud.timingdisplay.thickness"))
             .Pos(6)
-        |+ PageSetting("hud.timingdisplay.releasesextraheight", Slider(release_thickness, Step = 1f))
+        |+ PageSetting(%"hud.timingdisplay.releasesextraheight", Slider(release_thickness, Step = 1f))
             .Tooltip(Tooltip.Info("hud.timingdisplay.releasesextraheight"))
             .Pos(8)
-        |+ PageSetting("hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
+        |+ PageSetting(%"hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
             .Tooltip(Tooltip.Info("hud.timingdisplay.animationtime"))
             .Pos(10)
-        |+ PageSetting("hud.timingdisplay.moving_average_type", 
+        |+ PageSetting(%"hud.timingdisplay.moving_average_type", 
             SelectDropdown(
                 [|
                     TimingDisplayMovingAverageType.None, %"hud.timingdisplay.moving_average_type.none"
@@ -82,12 +82,12 @@ type TimingDisplayPage(on_close: unit -> unit) =
         )
             .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_type"))
             .Pos(12)
-        |+ PageSetting("hud.timingdisplay.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
+        |+ PageSetting(%"hud.timingdisplay.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
             .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_sensitivity"))
             .Pos(14)
             .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
         |+ ([
-            PageSetting("hud.timingdisplay.moving_average_color", ColorPicker(moving_average_color, true))
+            PageSetting(%"hud.timingdisplay.moving_average_color", ColorPicker(moving_average_color, true))
                 .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_color"))
                 .Pos(16, 3)
                 .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)

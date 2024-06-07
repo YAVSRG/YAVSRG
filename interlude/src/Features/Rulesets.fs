@@ -7,7 +7,7 @@ open Interlude.UI
 
 module Rulesets = Interlude.Content.Rulesets
 
-// todo: move this UI folder and put a ruleset editor in the options menu rulesets page
+// todo: move this to UI folder and put a ruleset editor in the options menu rulesets page
 module Rulesets =
 
     let make_dropdown (setting: Setting<string>) (w: DropdownWrapper) =

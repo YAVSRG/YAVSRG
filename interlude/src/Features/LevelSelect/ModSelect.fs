@@ -106,7 +106,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
             )
 
         page_container()
-        |+ PageSetting("gameplay.rate",
+        |+ PageSetting(%"gameplay.rate",
             Slider(SelectedChart.rate |> Setting.map id (fun v -> round (v / 0.05f) * 0.05f), 
             Format = sprintf "%.02fx")
         )
@@ -123,7 +123,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
 
         |+ mod_grid
 
-        |+ PageButton("gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
+        |+ PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
             .Tooltip(Tooltip.Info("gameplay.pacemaker"))
             .Pos(17)
         :> Widget

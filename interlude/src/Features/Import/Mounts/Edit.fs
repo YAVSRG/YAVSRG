@@ -17,12 +17,12 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
 
     override this.Content() =
         page_container()
-        |+ PageSetting("mount.importatstartup", Checkbox import_on_startup)
+        |+ PageSetting(%"mount.importatstartup", Checkbox import_on_startup)
             .Tooltip(Tooltip.Info("mount.importatstartup"))
             .Pos(0)
         |+ PageButton
             .Once(
-                "mount.import",
+                %"mount.import",
                 fun () ->
                     import <- true
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
@@ -31,7 +31,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
             .Pos(3)
         |+ PageButton
             .Once(
-                "mount.importall",
+                %"mount.importall",
                 fun () ->
                     import <- true
                     mount.LastImported <- System.DateTime.UnixEpoch
@@ -45,7 +45,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                 && mount.LastImported <> System.DateTime.UnixEpoch
             then
                 PageButton.Once(
-                    "mount.import_osu_scores",
+                    %"mount.import_osu_scores",
                     fun () ->
                         FromOsu.ImportScores.import_osu_scores_service.Request(
                             (),
@@ -72,7 +72,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                 game = MountedGameType.Osu
             then
                 PageButton(
-                    "mount.import_osu_skins",
+                    %"mount.import_osu_skins",
                     fun () -> FromOsu.ImportSkins.OsuSkinsListPage().Show()
                 )
                     .Tooltip(Tooltip.Info("mount.import_osu_skins"))

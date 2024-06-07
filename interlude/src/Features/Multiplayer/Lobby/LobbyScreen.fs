@@ -28,11 +28,11 @@ type LobbySettingsPage(lobby: Lobby) =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry("lobby.name", name).Pos(0)
-        |+ PageSetting("lobby.host_rotation", Checkbox host_rotation)
+        |+ PageTextEntry(%"lobby.name", name).Pos(0)
+        |+ PageSetting(%"lobby.host_rotation", Checkbox host_rotation)
             .Tooltip(Tooltip.Info("lobby.host_rotation"))
             .Pos(3)
-        |+ PageSetting("lobby.auto_countdown", Checkbox auto_countdown)
+        |+ PageSetting(%"lobby.auto_countdown", Checkbox auto_countdown)
             .Tooltip(Tooltip.Info("lobby.auto_countdown"))
             .Pos(5)
         :> Widget

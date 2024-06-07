@@ -13,20 +13,20 @@ type LanecoverPage() =
 
     override this.Content() =
         page_container()
-        |+ PageSetting("gameplay.lanecover.enabled", Checkbox options.LaneCover.Enabled)
+        |+ PageSetting(%"gameplay.lanecover.enabled", Checkbox options.LaneCover.Enabled)
             .Pos(0)
-        |+ PageSetting("gameplay.lanecover.draw_under_receptors", Checkbox options.LaneCover.DrawUnderReceptors)
+        |+ PageSetting(%"gameplay.lanecover.draw_under_receptors", Checkbox options.LaneCover.DrawUnderReceptors)
             .Pos(2)
-        |+ PageSetting("gameplay.lanecover.hidden", Slider.Percent(options.LaneCover.Hidden))
+        |+ PageSetting(%"gameplay.lanecover.hidden", Slider.Percent(options.LaneCover.Hidden))
             .Tooltip(Tooltip.Info("gameplay.lanecover.hidden"))
             .Pos(5)
-        |+ PageSetting("gameplay.lanecover.sudden", Slider.Percent(options.LaneCover.Sudden))
+        |+ PageSetting(%"gameplay.lanecover.sudden", Slider.Percent(options.LaneCover.Sudden))
             .Tooltip(Tooltip.Info("gameplay.lanecover.sudden"))
             .Pos(7)
-        |+ PageSetting("gameplay.lanecover.fadelength", Slider(options.LaneCover.FadeLength, Step = 5.0f))
+        |+ PageSetting(%"gameplay.lanecover.fadelength", Slider(options.LaneCover.FadeLength, Step = 5.0f))
             .Tooltip(Tooltip.Info("gameplay.lanecover.fadelength"))
             .Pos(9)
-        |+ PageSetting("gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true))
+        |+ PageSetting(%"gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true))
             .Pos(11, 3)
         |>> Container
         |+ preview

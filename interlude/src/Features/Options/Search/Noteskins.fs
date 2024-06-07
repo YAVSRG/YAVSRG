@@ -17,20 +17,20 @@ module Noteskins =
         results {
             if token_match tokens [|%"noteskins"|] then
                 yield PageButton(
-                    "noteskins",
+                    %"noteskins",
                     (fun () -> NoteskinsPage().Show())
                 )
 
                 if not Content.Noteskin.IsEmbedded then
                     yield PageButton(
-                        "noteskins.edit",
+                        %"noteskins.edit",
                         (fun () -> EditNoteskinPage(false).Show())
                     )
                         .Tooltip(Tooltip.Info("noteskins.edit"))
 
                 if not (Suggestions.in_endless_mode()) then
                     yield PageButton(
-                        "noteskins.get_more",
+                        %"noteskins.get_more",
                         (fun () ->
                             Menu.Exit()
 
@@ -40,14 +40,14 @@ module Noteskins =
                     )
 
                 yield PageButton(
-                    "noteskins.open_folder",
+                    %"noteskins.open_folder",
                     (fun () -> open_directory (get_game_folder "Noteskins"))
                 )
                     .Tooltip(Tooltip.Info("noteskins.open_folder"))
 
             if token_match tokens [|%"hud"|] || token_match tokens (HUDElement.FULL_LIST |> Seq.map HUDElement.name |> Array.ofSeq) then
                 yield PageButton(
-                    "hud",
+                    %"hud",
                     (fun () ->
                         if Content.Noteskin.IsEmbedded then
                             EditHUDPage().Show()

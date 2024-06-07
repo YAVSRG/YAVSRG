@@ -18,11 +18,11 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) =
 
     override this.Content() = 
         page_container()
-        |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(0)
-        |+ PageSetting("collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, icon))
+        |+ PageTextEntry(%"collections.edit.folder_name", new_name).Pos(0)
+        |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, icon))
             .Pos(3)
         |+ PageButton(
-            "confirm.yes",
+            %"confirm.yes",
             (fun () ->
                 match Content.Collections.CreateFolder(new_name.Value, icon.Value) with
                 | Some folder ->
@@ -54,11 +54,11 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(0)
-        |+ PageSetting("collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, icon))
+        |+ PageTextEntry(%"collections.edit.playlist_name", new_name).Pos(0)
+        |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, icon))
             .Pos(3)
         |+ PageButton(
-            "confirm.yes",
+            %"confirm.yes",
             (fun () ->
                 match Content.Collections.CreatePlaylist(new_name.Value, icon.Value) with
                 | Some playlist ->
@@ -89,11 +89,11 @@ type EditFolderPage(name: string, folder: Folder) =
 
     override this.Content() = 
         page_container()
-        |+ PageTextEntry("collections.edit.folder_name", new_name).Pos(0)
-        |+ PageSetting("collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, folder.Icon))
+        |+ PageTextEntry(%"collections.edit.folder_name", new_name).Pos(0)
+        |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, folder.Icon))
             .Pos(2)
         |+ PageButton(
-            "collections.edit.delete",
+            %"collections.edit.delete",
             (fun () ->
                 ConfirmPage(
                     [ name ] %> "misc.confirmdelete",
@@ -129,11 +129,11 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry("collections.edit.playlist_name", new_name).Pos(0)
-        |+ PageSetting("collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, playlist.Icon))
+        |+ PageTextEntry(%"collections.edit.playlist_name", new_name).Pos(0)
+        |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, playlist.Icon))
             .Pos(2)
         |+ PageButton(
-            "collections.edit.delete",
+            %"collections.edit.delete",
             (fun () ->
                 ConfirmPage(
                     [ name ] %> "misc.confirmdelete",
@@ -246,13 +246,13 @@ type SelectCollectionPage
 
         page_container()
         |+ PageButton(
-            "collections.create_folder",
+            %"collections.create_folder",
             (fun () -> CreateFolderPage(if select_on_create then on_select else ignore).Show())
         )
             .Tooltip(Tooltip.Info("collections.create_folder"))
             .Pos(0)
         |+ PageButton(
-            "collections.create_playlist",
+            %"collections.create_playlist",
             (fun () -> CreatePlaylistPage(if select_on_create then on_select else ignore).Show())
         )
             .Tooltip(Tooltip.Info("collections.create_playlist"))

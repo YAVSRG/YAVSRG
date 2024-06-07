@@ -23,9 +23,9 @@ module ImportSkins =
 
         override this.Content() =
             page_container()
-            |+ PageSetting("osu_skin_import.keymode", Selector.FromEnum(keymode))
+            |+ PageSetting(%"osu_skin_import.keymode", Selector.FromEnum(keymode))
                 .Pos(0)
-            |+ PageSetting("osu_skin_import.isarrows", Checkbox is_arrows)
+            |+ PageSetting(%"osu_skin_import.isarrows", Checkbox is_arrows)
                 .Pos(2)
                 .Conditional(fun () -> keymode.Value = Keymode.``4K``)
             |+ 
@@ -33,12 +33,12 @@ module ImportSkins =
                 | Some folder ->
                     [
                         Text([folder] %> "osu_skin_import.delete_prompt", Align = Alignment.LEFT, Position = pretty_pos(5, 2, PageWidth.Full).Margin(Style.PADDING))
-                        PageSetting("osu_skin_import.delete_existing", Checkbox delete_existing).Pos(7)
+                        PageSetting(%"osu_skin_import.delete_existing", Checkbox delete_existing).Pos(7)
                     ]
                 | None -> []
             |+ PageButton
                 .Once(
-                    "osu_skin_import.confirm",
+                    %"osu_skin_import.confirm",
                     fun () ->
                         try
                             OsuSkinConverter.convert
@@ -115,10 +115,9 @@ module ImportSkins =
                     FlowContainer.Vertical<_>(PRETTYHEIGHT)
                     |+ seq {
                         for path in osu_skin_paths do
-                            yield PageButton(System.String.Empty, 
-                                fun () ->
-                                    import_osu_noteskin(path)
-                                , Text = Path.GetFileName(path)
+                            yield PageButton(
+                                Path.GetFileName(path), 
+                                fun () -> import_osu_noteskin(path)
                             )
                     },
                     Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)

@@ -30,10 +30,10 @@ type EditNoteskinPage(from_hotkey: bool) =
 
         let general_tab =
             NavigationContainer.Column<Widget>(WrapNavigation = false)
-            |+ PageTextEntry("noteskins.edit.noteskinname", name)
+            |+ PageTextEntry(%"noteskins.edit.noteskinname", name)
                 .Pos(3)
             |+ PageButton(
-                "noteskins.edit.playfield",
+                %"noteskins.edit.playfield",
                 fun () ->
                     { new PlayfieldSettingsPage() with
                         override this.OnClose() =
@@ -45,7 +45,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                 .Tooltip(Tooltip.Info("noteskins.edit.playfield"))
                 .Pos(6)
             |+ PageButton(
-                "noteskins.edit.holdnotes",
+                %"noteskins.edit.holdnotes",
                 fun () ->
                     { new HoldNoteSettingsPage() with
                         override this.OnClose() =
@@ -57,7 +57,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                 .Tooltip(Tooltip.Info("noteskins.edit.holdnotes"))
                 .Pos(8)
             |+ PageButton(
-                "noteskins.edit.colors",
+                %"noteskins.edit.colors",
                 fun () ->
                     { new ColorSettingsPage() with
                         override this.OnClose() =
@@ -69,7 +69,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                 .Tooltip(Tooltip.Info("noteskins.edit.colors"))
                 .Pos(10)
             |+ PageButton(
-                "noteskins.edit.rotations",
+                %"noteskins.edit.rotations",
                 fun () ->
                     { new RotationSettingsPage() with
                         override this.OnClose() =
@@ -81,7 +81,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                 .Tooltip(Tooltip.Info("noteskins.edit.rotations"))
                 .Pos(12)
             |+ PageButton(
-                "noteskins.animations",
+                %"noteskins.animations",
                 fun () ->
                     { new AnimationSettingsPage() with
                         override this.OnClose() =
@@ -93,7 +93,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                 .Tooltip(Tooltip.Info("noteskins.animations"))
                 .Pos(14)
             |+ PageButton(
-                "hud",
+                %"hud",
                 fun () ->
                     if
                         SelectedChart.WITH_COLORS.IsSome
@@ -133,7 +133,7 @@ type EditNoteskinPage(from_hotkey: bool) =
         |+ (
             NavigationContainer.Column<Widget>(Position = Position.TrimLeft(PRETTYWIDTH + PRETTY_MARGIN_X).Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT * 3.0f))
             |+ PageButton(
-                "noteskins.edit.export",
+                %"noteskins.edit.export",
                 (fun () ->
                     if not (Noteskins.export_current ()) then
                         Notifications.error (
@@ -146,7 +146,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                 .Tooltip(Tooltip.Info("noteskins.edit.export"))
                 .Pos(0, 2, PageWidth.Full)
             |+ PageButton(
-                "noteskins.edit.open_folder",
+                %"noteskins.edit.open_folder",
                 (fun () ->
                     Noteskins.open_current_folder () |> ignore
                 ),
@@ -154,7 +154,7 @@ type EditNoteskinPage(from_hotkey: bool) =
             )
                 .Pos(2, 2, PageWidth.Full)
             |+ PageButton(
-                "noteskins.edit.delete",
+                %"noteskins.edit.delete",
                 (fun () ->
                     ConfirmPage([name.Value] %> "noteskins.edit.delete.confirm",
                         fun () ->

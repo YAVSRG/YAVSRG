@@ -25,11 +25,11 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
         let content =
             FlowContainer.Vertical(PRETTYHEIGHT, Position = pretty_pos(0, PAGE_BOTTOM, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |+ PageButton(
-                "chart.add_to_collection",
+                %"chart.add_to_collection",
                 (fun () -> AddToCollectionPage(cc).Show()),
                 Icon = Icons.FOLDER_PLUS
             )
-            |+ PageButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.TRASH)
+            |+ PageButton(%"chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.TRASH)
 
         match context with
         | LibraryContext.None
@@ -37,18 +37,17 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
         | LibraryContext.Folder name ->
             content
             |* PageButton(
-                "chart.remove_from_collection",
+                [ name ] %> "chart.remove_from_collection",
                 (fun () ->
                     if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, cc, context) then
                         Menu.Back()
                 ),
-                Icon = Icons.FOLDER_MINUS,
-                Text = [ name ] %> "chart.remove_from_collection"
+                Icon = Icons.FOLDER_MINUS
             )
         | LibraryContext.Playlist(index, name, _) ->
             content
             |+ PageButton(
-                "chart.move_up_in_playlist",
+                %"chart.move_up_in_playlist",
                 (fun () ->
                     if CollectionActions.reorder_up context then
                         Menu.Back()
@@ -57,7 +56,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                 Enabled = (index > 0)
             )
             |+ PageButton(
-                "chart.move_down_in_playlist",
+                %"chart.move_down_in_playlist",
                 (fun () ->
                     if CollectionActions.reorder_down context then
                         Menu.Back()
@@ -66,16 +65,15 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                 Enabled = (index + 1 < Content.Collections.GetPlaylist(name).Value.Charts.Count)
             )
             |+ PageButton(
-                "chart.remove_from_collection",
+                [ name ] %> "chart.remove_from_collection",
                 (fun () ->
                     if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, cc, context) then
                         Menu.Back()
                 ),
-                Icon = Icons.FOLDER_MINUS,
-                Text = [ name ] %> "chart.remove_from_collection"
+                Icon = Icons.FOLDER_MINUS
             )
             |+ PageButton.Once(
-                "playlist.play",
+                %"playlist.play",
                 (fun () ->
                     Suggestions.begin_endless_mode (
                         EndlessModeState.create_from_playlist
@@ -88,7 +86,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
             )
             |+ if index > 0 then 
                 [PageButton.Once(
-                    "playlist.play_from_here",
+                    %"playlist.play_from_here",
                     (fun () ->
                         Suggestions.begin_endless_mode (
                             EndlessModeState.create_from_playlist
@@ -100,7 +98,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                     Icon = Icons.PLAY
                 )] else []
             |* PageButton.Once(
-                "playlist.play_shuffled",
+                %"playlist.play_shuffled",
                 (fun () ->
                     Suggestions.begin_endless_mode (
                         EndlessModeState.create_from_playlist_shuffled
@@ -114,7 +112,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
         if Some cc = SelectedChart.CACHE_DATA then
             content
             |+ PageButton.Once(
-                "chart.practice",
+                %"chart.practice",
                 (fun () -> 
                     Menu.Exit()
                     SelectedChart.when_loaded(fun info ->
@@ -128,7 +126,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                 Icon = Icons.TARGET
             )
             |* PageButton.Once(
-                "chart.export_osz",
+                %"chart.export_osz",
                 (fun () ->
                     match SelectedChart.CHART with
                     | None -> ()
@@ -153,7 +151,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
             then
                 content
                 |* PageButton(
-                    "chart.suggest_for_table",
+                    %"chart.suggest_for_table",
                     (fun () -> SuggestChartPage(table, cc).Show()),
                     Icon = Icons.SIDEBAR
                 )

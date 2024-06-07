@@ -14,7 +14,7 @@ open Interlude.Features.OptionsMenu.Themes
 type DebugPage() =
     inherit Page()
 
-    let themes = PageSetting("themes.theme", Dummy())
+    let themes = PageSetting(%"themes.theme", Dummy())
 
     let refresh () =
         themes.Child <- SelectDropdown(Themes.list (), options.Theme)
@@ -42,7 +42,7 @@ type DebugPage() =
         page_container()
         |+ PageButton
             .Once(
-                "debug.rebuildcache",
+                %"debug.rebuildcache",
                 fun () ->
                     Caching.Cache.recache_service.Request(
                         Content.Cache,
@@ -57,10 +57,10 @@ type DebugPage() =
         |+ themes
             .Tooltip(Tooltip.Info("themes.theme"))
             .Pos(3)
-        |+ PageButton("themes.edittheme", try_edit_theme)
+        |+ PageButton(%"themes.edittheme", try_edit_theme)
             .Tooltip(Tooltip.Info("themes.edittheme"))
             .Pos(5)
-        |+ PageButton("themes.showthemesfolder", (fun () -> open_directory (get_game_folder "Themes")))
+        |+ PageButton(%"themes.showthemesfolder", (fun () -> open_directory (get_game_folder "Themes")))
             .Tooltip(Tooltip.Info("themes.showthemesfolder"))
             .Pos(7)
         :> Widget

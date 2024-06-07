@@ -27,14 +27,14 @@ type ViewSuggestionPage(table: Table, suggestion: Tables.Suggestions.List.Sugges
         let matching_local_chart = Cache.by_hash suggestion.ChartId Interlude.Content.Content.Cache
 
         page_container()
-        |+ PageButton("table.suggestions.playtest", ignore)
+        |+ PageButton(%"table.suggestions.playtest", ignore)
             .Pos(6)
-        |+ PageButton("table.suggestions.vote_another_level", ignore)
+        |+ PageButton(%"table.suggestions.vote_another_level", ignore)
             .Pos(8)
         // conditional on having permission
-        |+ PageButton("table.suggestions.accept", ignore)
+        |+ PageButton(%"table.suggestions.accept", ignore)
             .Pos(10)
-        |+ PageButton("table.suggestions.reject", ignore)
+        |+ PageButton(%"table.suggestions.reject", ignore)
             .Pos(12)
         |+ seq {
             match suggestion.BackbeatInfo with

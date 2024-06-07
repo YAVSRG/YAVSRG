@@ -19,7 +19,7 @@ type ScoreGraphSettingsPage() =
 
     override this.Content() = 
         page_container()
-        |+ PageSetting("score.graph.settings.graph_mode", 
+        |+ PageSetting(%"score.graph.settings.graph_mode", 
             SelectDropdown(
                 [|
                     ScoreGraphMode.None, %"score.graph.settings.graph_mode.none"
@@ -29,7 +29,7 @@ type ScoreGraphSettingsPage() =
             )
         )
             .Pos(0)
-        |+ PageSetting("score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
+        |+ PageSetting(%"score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
             .Pos(3)
         :> Widget
 

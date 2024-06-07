@@ -62,7 +62,7 @@ type ManageTablesPage(table_changed) =
 
         container
         |+ PageButton(
-            "tables.install",
+            %"tables.install",
             (fun () ->
                 Menu.Exit()
                 Interlude.Features.Import.ImportScreen.switch_to_tables ()
@@ -87,7 +87,7 @@ type ManageTablesPage(table_changed) =
         match Content.Table with
         | Some table ->
             container |+ Dummy()
-            |* PageButton("table.suggestions", (fun () -> SuggestionsPage(table).Show()))
+            |* PageButton(%"table.suggestions", (fun () -> SuggestionsPage(table).Show()))
         | None -> ()
 
         if container.Focused then

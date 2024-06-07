@@ -79,7 +79,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting("hud.progressmeter.label", 
+        |+ PageSetting(%"hud.progressmeter.label", 
             SelectDropdown(
                 [|
                     ProgressMeterLabel.None, %"hud.progressmeter.label.none"
@@ -91,25 +91,25 @@ type ProgressMeterPage(on_close: unit -> unit) =
         )
             .Pos(0)
         |+ ([
-            PageSetting("hud.progressmeter.label_size", Slider.Percent(label_size))
+            PageSetting(%"hud.progressmeter.label_size", Slider.Percent(label_size))
                 .Tooltip(Tooltip.Info("hud.progressmeter.label_size"))
                 .Pos(2)
-            PageSetting("hud.progressmeter.color", ColorPicker(color, true))
+            PageSetting(%"hud.progressmeter.color", ColorPicker(color, true))
                 .Pos(4, 3)
-            PageSetting("hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
+            PageSetting(%"hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
                 .Pos(7, 3)
-            PageSetting("hud.generic.use_font", Checkbox use_font)
+            PageSetting(%"hud.generic.use_font", Checkbox use_font)
                 .Tooltip(Tooltip.Info("hud.generic.use_font"))
                 .Pos(10)
-            PageSetting("hud.generic.font_spacing", Slider.Percent(font_spacing))
+            PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
                 .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
                 .Pos(12)
                 .Conditional(use_font.Get)
-            PageSetting("hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
+            PageSetting(%"hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
                 .Tooltip(Tooltip.Info("hud.generic.colon_spacing"))
                 .Pos(14)
                 .Conditional(use_font.Get)
-            PageSetting("hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
+            PageSetting(%"hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
                 .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
                 .Pos(16)
                 .Conditional(use_font.Get)

@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.Content
 open Interlude.UI.Menu
 
@@ -14,7 +15,7 @@ type EditThemePage() =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry("themes.edittheme.themename", name)
+        |+ PageTextEntry(%"themes.edittheme.themename", name)
             .Pos(0)
         :> Widget
 

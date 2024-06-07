@@ -173,7 +173,7 @@ type NoteskinsPage() =
 
         let left_side =
             NavigationContainer.Column<Widget>(Position = { Position.Default with Right = 0.35f %+ PRETTY_MARGIN_X }.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
-            |+ PageButton("noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
+            |+ PageButton(%"noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
                 .Tooltip(Tooltip.Info("noteskins.edit"))
                 .Pos(PAGE_BOTTOM - 4, 2, PageWidth.Full)
             |+ Text(
@@ -203,7 +203,7 @@ type NoteskinsPage() =
             )
             |+ (GridFlowContainer(PRETTYHEIGHT, 2, WrapNavigation = false, Position = Position.SliceTop(PRETTYHEIGHT))
                 |+ PageButton(
-                    "noteskins.get_more",
+                    %"noteskins.get_more",
                     (fun () ->
                         Menu.Exit()
 
@@ -211,7 +211,7 @@ type NoteskinsPage() =
                             ImportScreen.switch_to_noteskins ()
                     )
                 )
-                |+ PageButton("noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
+                |+ PageButton(%"noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
                     .Tooltip(Tooltip.Info("noteskins.open_folder")))
             |+ ScrollContainer(grid, Position = Position.TrimTop(PRETTYHEIGHT * 1.5f))
 

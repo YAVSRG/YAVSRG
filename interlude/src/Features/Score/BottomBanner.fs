@@ -26,12 +26,12 @@ type ScoreChartContextMenu(cc: CachedChart) =
             FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
 
             |+ PageButton(
-                "chart.add_to_collection",
+                %"chart.add_to_collection",
                 (fun () -> AddToCollectionPage(cc).Show()),
                 Icon = Icons.FOLDER_PLUS
             )
             |+ PageButton(
-                "chart.delete",
+                %"chart.delete",
                 fun () -> 
                     let chart_name = sprintf "%s [%s]" cc.Title cc.DifficultyName
                     ConfirmPage(
@@ -47,7 +47,7 @@ type ScoreChartContextMenu(cc: CachedChart) =
             if Network.status = Network.Status.LoggedIn && cc.Keys = table.Info.Keymode then
                 content
                 |* PageButton(
-                    "chart.suggest_for_table",
+                    %"chart.suggest_for_table",
                     (fun () -> SuggestChartPage(table, cc).Show()),
                     Icon = Icons.SIDEBAR
                 )

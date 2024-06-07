@@ -122,18 +122,18 @@ type RotationSettingsPage() =
 
     override this.Content() =
         page_container()
-        |+ PageSetting("noteskins.edit.userotation", Checkbox use_rotation)
+        |+ PageSetting(%"noteskins.edit.userotation", Checkbox use_rotation)
             .Tooltip(Tooltip.Info("noteskins.edit.userotation"))
             .Pos(0)
         |+ PageSetting(
-            "generic.keymode",
+            %"generic.keymode",
             Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_rotations))
         )
             .Pos(2)
-        |+ PageSetting("noteskins.edit.rotations", _rotations)
+        |+ PageSetting(%"noteskins.edit.rotations", _rotations)
             .Pos(5, 3, PageWidth.Full)
         |+ PageSetting(
-            "noteskins.edit.receptorstyle",
+            %"noteskins.edit.receptorstyle",
             SelectDropdown(
                 [|
                     ReceptorStyle.Rotate, %"noteskins.edit.receptorstyle.rotate"

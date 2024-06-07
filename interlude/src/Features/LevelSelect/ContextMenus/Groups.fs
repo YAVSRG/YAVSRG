@@ -16,11 +16,11 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
 
     override this.Content() =
         page_container()
-        |+ PageButton("collections.edit", (fun () -> EditPlaylistPage(name, playlist).Show()), Icon = Icons.EDIT_2)
+        |+ PageButton(%"collections.edit", (fun () -> EditPlaylistPage(name, playlist).Show()), Icon = Icons.EDIT_2)
             .Pos(0)
         |+ PageButton
             .Once(
-                "playlist.play",
+                %"playlist.play",
                 (fun () ->
                     Suggestions.begin_endless_mode (EndlessModeState.create_from_playlist 0 playlist Content.Library) true
                 ),
@@ -29,7 +29,7 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
             .Pos(3)
         |+ PageButton
             .Once(
-                "playlist.play_shuffled",
+                %"playlist.play_shuffled",
                 (fun () ->
                     Suggestions.begin_endless_mode (EndlessModeState.create_from_playlist_shuffled playlist Content.Library) true
                 ),
@@ -47,7 +47,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
     override this.Content() =
         FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
         |+ PageButton(
-            "group.delete",
+            %"group.delete",
             (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)),
             Icon = Icons.TRASH
         )

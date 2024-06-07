@@ -94,7 +94,7 @@ type EditHUDPage() =
         |+ (if Interlude.Content.Content.Noteskin.IsEmbedded then
                 Callout.frame noteskin_required (fun (w, h) -> Position.Box(0.0f, -0.15f, 0.0f, 0.0f, w, h)) :> Widget
             else
-                PageButton("hud.editor", open_hud_editor, Position = Position.SliceTop(PRETTYHEIGHT))
+                PageButton(%"hud.editor", open_hud_editor, Position = Position.SliceTop(PRETTYHEIGHT))
         )
         :> Widget
 
