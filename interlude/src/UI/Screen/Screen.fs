@@ -15,10 +15,14 @@ module Toolbar =
     let HEIGHT = 70.0f
     let slideout_amount = Animation.Fade 1.0f
     let mutable hidden = false
+    let mutable cursor_hidden = false
     let mutable was_hidden = false
 
     let hide () = hidden <- true
     let show () = hidden <- false
+
+    let hide_cursor() = cursor_hidden <- true
+    let show_cursor() = cursor_hidden <- false
 
     let moving () =
         was_hidden <> hidden || slideout_amount.Moving
@@ -204,7 +208,7 @@ module Screen =
             Dialog.display.Draw()
             Tooltip.display.Draw()
 
-            if current_type <> Type.Play || Dialog.exists () then
+            if not Toolbar.cursor_hidden || Dialog.exists () then
                 Notifications.display.Draw()
                 let x, y = Mouse.pos ()
 

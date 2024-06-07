@@ -162,20 +162,22 @@ module PlayScreenMultiplayer =
             override this.OnEnter(previous) =
                 Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
                 info.SaveData.LastPlayed <- Timestamp.now ()
+                Toolbar.hide_cursor ()
 
                 base.OnEnter(previous)
-
-            override this.OnExit(next) =
-                if options.AutoCalibrateOffset.Value then
-                    LocalAudioSync.apply_automatic this.State info.SaveData
-
-                base.OnExit(next)
 
                 DiscordRPC.playing_timed (
                     "Multiplayer",
                     info.CacheInfo.Title,
                     info.CacheInfo.Length / SelectedChart.rate.Value
                 )
+
+            override this.OnExit(next) =
+                if options.AutoCalibrateOffset.Value then
+                    LocalAudioSync.apply_automatic this.State info.SaveData
+
+                Toolbar.show_cursor ()
+                base.OnExit(next)
 
             override this.Update(elapsed_ms, moved) =
                 Stats.session.PlayTime <- Stats.session.PlayTime + elapsed_ms

@@ -57,6 +57,7 @@ module PracticeScreen =
                 show <- true
                 slideout.Open()
                 this.Position <- Position.Default
+                Toolbar.show_cursor ()
             elif not state.Paused.Value && show then
                 show <- false
                 slideout.Close()
@@ -65,6 +66,7 @@ module PracticeScreen =
                     { Position.Default with
                         Bottom = 1.0f %+ 100.0f
                     }
+                Toolbar.hide_cursor ()
 
             if show && not sync_controls.Focused then
                 Screen.back Transitions.Flags.Default |> ignore

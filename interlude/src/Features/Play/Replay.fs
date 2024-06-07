@@ -343,6 +343,7 @@ module ReplayScreen =
                 slideout.Open()
                 this.Position <- Position.Default
                 show_timeout <- 1500.0
+                Toolbar.show_cursor ()
 
             elif show then
                 show_timeout <- show_timeout - elapsed_ms
@@ -356,6 +357,7 @@ module ReplayScreen =
                         { Position.Default with
                             Bottom = 1.0f %+ 100.0f
                         }
+                    Toolbar.hide_cursor ()
 
             if show && not replay_controls.Focused then
                 Screen.back Transitions.Flags.Default |> ignore

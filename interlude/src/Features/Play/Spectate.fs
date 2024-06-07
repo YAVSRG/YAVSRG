@@ -57,6 +57,7 @@ module SpectateScreen =
                 show <- true
                 this.Position <- Position.Default
                 show_timeout <- 1500.0
+                Toolbar.show_cursor ()
             elif show then
                 show_timeout <- show_timeout - elapsed_ms
 
@@ -68,6 +69,7 @@ module SpectateScreen =
                             Top = 0.0f %- 300.0f
                             Bottom = 1.0f %+ 100.0f
                         }
+                    Toolbar.hide_cursor ()
 
     let spectate_screen (info: LoadedChartInfo, username: string, replay_info: LobbyPlayerReplayInfo, lobby: Lobby) =
 
