@@ -183,14 +183,14 @@ module Imports =
                 }
         }
 
-    let private debug_log_skipped (result: ConversionResult) =
+    let private log_skipped (result: ConversionResult) =
         let skipped = result.SkippedCharts.Length
         if skipped > 0 then
             let dump =
                 result.SkippedCharts
                 |> Seq.map (fun (path, reason) -> sprintf "%s -> %s" path reason)
                 |> String.concat "\n "
-            Logging.Debug(sprintf "Successful import of %i file(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump)
+            Logging.Info(sprintf "Successful import of %i file(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump)
 
     let rec private auto_detect_import (path: string, move_assets: bool, library: Library) : Async<ConversionResult option> =
         async {
@@ -209,7 +209,7 @@ module Imports =
                             },
                             library
                         )
-                    debug_log_skipped result
+                    log_skipped result
                     return Some result
                 | ChartArchive ->
                     let dir = Path.ChangeExtension(path, null)
@@ -243,7 +243,7 @@ module Imports =
                             },
                             library
                         )
-                    debug_log_skipped result
+                    log_skipped result
                     return Some result
                 | PackFolder ->
                     let packname =
@@ -266,7 +266,7 @@ module Imports =
                             },
                             library
                         )
-                    debug_log_skipped result
+                    log_skipped result
                     return Some result
                 | FolderOfPacks ->
                     let mutable results = ConversionResult.Empty
@@ -282,7 +282,7 @@ module Imports =
                             )
                         results <- ConversionResult.Combine result results
                         
-                    debug_log_skipped results
+                    log_skipped results
                     return Some results
                 | _ ->
                     Logging.Warn(sprintf "%s: No importable folder structure detected" path)

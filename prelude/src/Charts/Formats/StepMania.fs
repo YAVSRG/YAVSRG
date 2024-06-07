@@ -77,23 +77,31 @@ module StepMania =
             CREDIT: string
         }
 
-    let private comment = optional (pstring "//" >>. restOfLine true >>. spaces)
+    let private comment = optional (skipString "//" >>. skipRestOfLine true >>. spaces)
 
-    let private parse_text =
-        spaces
-        >>. (manyChars (noneOf ":;" <|> (previousCharSatisfies (isAnyOf "\\") >>. anyChar)))
+    let private text = 
+        let normal_char = noneOf ":;"
+        let escaped_char = skipChar '\\' >>. anyChar
+        manyChars (notFollowedBy (newline .>> skipChar '#') >>. (escaped_char <|> normal_char)) |>> fun s -> s.Trim()
 
     let private parse_key_value =
-        comment >>. (pchar '#') >>. parse_text .>> pchar ':'
-        .>>. (sepBy parse_text (pchar ':'))
-        .>> pchar ';'
+        comment >>. (skipChar '#') >>. text .>> skipChar ':'
+        .>>. (sepBy text (skipChar ':'))
+        .>> (skipChar ';' <|> skipRestOfLine true)
         .>> spaces
 
     let private parse_header: Parser<Header, unit> = many parse_key_value .>> eof
+    
+    let private parse_note_row = many ((many1Chars (anyOf "01234MLF")) .>> spaces)
+
+    let private parse_measures =
+        (optional (spaces >>. comment .>> spaces))
+        >>. (sepBy parse_note_row (pchar ',' .>> spaces .>> (optional (comment .>> spaces))))
+        .>> eof
 
     (*
         Parsing for retrieving specific useful data from the file
-        Some common tags have been omitted due to having no relevance to this project or poor documentation
+        Some common tags have been omitted due to having no relevance or poor documentation
     *)
 
     type StepManiaData =
@@ -157,12 +165,6 @@ module StepMania =
     let private parse_pairs =
         (sepBy (pfloat .>> pchar '=' .>>. pfloat .>> spaces) (pchar ',') .>> eof)
 
-    let private parse_measure = many ((many1Chars (anyOf "01234MLF")) .>> spaces)
-
-    let private parse_measures =
-        (optional (spaces >>. comment .>> spaces))
-        >>. (sepBy parse_measure (pchar ',' .>> spaces .>> (optional (comment .>> spaces))))
-        .>> eof
     //https://github.com/etternagame/etterna/blob/master/src/Etterna/Singletons/GameManager.cpp
     let private parse_chart_type t =
         match t with
@@ -228,7 +230,6 @@ module StepMania =
                 }
             | "SELECTABLE", [ "YES" ] -> { s with SELECTABLE = true }
             | "SELECTABLE", [ "NO" ] -> { s with SELECTABLE = false }
-            //Version, Origin, Warps, Delays, TimeSignatures TBI
             | "NOTES", [ chartType; author; difficultyType; footMeter; groove; noteData ] ->
                 match run parse_measures noteData with
                 | Success(parsedNotes, _, _) ->
