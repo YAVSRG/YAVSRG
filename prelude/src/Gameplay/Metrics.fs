@@ -91,6 +91,11 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
     let on_hit_ev = Event<HitEvent<HitEventGuts>>()
     let on_hit = on_hit_ev.Publish
 
+    let osu_cbrush_cancel =
+        match ruleset.Accuracy.HoldNoteBehaviour with
+        | HoldNoteBehaviour.Osu _ -> true
+        | _ -> false
+
     member this.OnHit = on_hit
 
     member val State =
@@ -249,49 +254,59 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
         let mutable i = note_seek_active
         let mutable cbrush_absorb_delta = miss_window
-        let mutable earliest_note = -1
-        let mutable earliest_delta = miss_window
+        let mutable matching_note_index = -1
+        let mutable matching_note_delta = miss_window
         let target = now + miss_window
 
         while i < hit_data.Length && InternalScore.offsetOf hit_data.[i] <= target do
             let struct (t, deltas, status) = hit_data.[i]
-            let d = now - t
+            let delta = now - t
 
+            // Find unhit note that is closer than the current candidate
             if (status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED) then
-                if (Time.abs earliest_delta > Time.abs d) then
-                    earliest_note <- i
-                    earliest_delta <- d
+                if (Time.abs matching_note_delta > Time.abs delta) then
+                    matching_note_index <- i
+                    matching_note_delta <- delta
 
-                if Time.abs earliest_delta < ruleset.Accuracy.CbrushWindow then
+                // If new candidate is within cbrush window, stop looking resulting in earliest match being used
+                // Otherwise keep looking for something closer and allow this note to be missed
+                if Time.abs matching_note_delta < ruleset.Accuracy.CbrushWindow then
                     i <- hit_data.Length
-            // Detect a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
+            // Osu's naive version of cbrush cancelling
+            elif 
+                osu_cbrush_cancel
+                && status.[k] = HitStatus.HIT_ACCEPTED
+                && t > now
+            then
+                cbrush_absorb_delta <- -1.0f<ms>
+            // Find hit note that got hit earlier than the cbrush window, and track how close it is
             elif
                 status.[k] = HitStatus.HIT_ACCEPTED
                 && deltas.[k] < -ruleset.Accuracy.CbrushWindow
             then
-                if (Time.abs cbrush_absorb_delta > Time.abs d) then
-                    cbrush_absorb_delta <- d
+                if (Time.abs cbrush_absorb_delta > Time.abs delta) then
+                    cbrush_absorb_delta <- delta
 
             i <- i + 1
 
-        if earliest_note >= 0 then
-            let struct (_, deltas, status) = hit_data.[earliest_note]
-            // If user's hit is closer to a note hit extremely early than any other note, swallow it
-            if Time.abs cbrush_absorb_delta >= Time.abs earliest_delta then
+        if matching_note_index >= 0 then
+            let struct (_, deltas, status) = hit_data.[matching_note_index]
+            // If fumbled note detected is closer than hit candidate, swallow the hit
+            if Time.abs cbrush_absorb_delta >= Time.abs matching_note_delta then
                 let is_hold_head = status.[k] <> HitStatus.HIT_REQUIRED
                 status.[k] <- HitStatus.HIT_ACCEPTED
-                deltas.[k] <- earliest_delta / rate
+                deltas.[k] <- matching_note_delta / rate
 
                 this._HandleEvent
                     {
-                        Index = earliest_note
+                        Index = matching_note_index
                         Time = chart_time
                         Column = k
                         Guts = Hit_(deltas.[k], is_hold_head, false)
                     }
                 // Begin tracking if it's a hold note
                 if is_hold_head then
-                    hold_states.[k] <- Holding, earliest_note
+                    hold_states.[k] <- Holding, matching_note_index
         else // If no note to hit, but a hold note head was missed, pressing key marks it dropped instead
             hold_states.[k] <-
                 match hold_states.[k] with
