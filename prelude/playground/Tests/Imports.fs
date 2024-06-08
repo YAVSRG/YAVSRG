@@ -21,8 +21,11 @@ module Imports =
                                 Source = file
                                 Config = ConversionOptions.Default
                             } do
-                        match Chart.check chart with
-                        | Error msg -> Logging.Error msg
-                        | Ok chart -> ()
+                        match chart with
+                        | Ok chart ->
+                            match Chart.check chart with
+                            | Error msg -> Logging.Error msg
+                            | Ok chart -> ()
+                        | Error skipped_reason -> printfn "%A" skipped_reason
 
         Logging.Info "Complete!"

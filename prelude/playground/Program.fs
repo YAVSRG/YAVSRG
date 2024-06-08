@@ -6,7 +6,7 @@ open Prelude.Test
 // Maybe it will become its own repo of fsx files
 
 let your_script_here () =
-    Patterns.run()
+    OsuScoreMigration.replay_writer()
 
 [<EntryPoint>]
 let main argv =

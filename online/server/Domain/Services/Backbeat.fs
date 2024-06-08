@@ -20,7 +20,7 @@ module Backbeat =
                     "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json"
             with
             | None -> failwith "Failed to download backbeat rulesets"
-            | Some(archive: PrefabRulesets.Repo) ->
+            | Some(archive: RulesetRepo) ->
 
             Logging.Info(sprintf "Backbeat downloads complete")
 

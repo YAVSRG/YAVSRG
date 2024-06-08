@@ -466,9 +466,9 @@ type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
                     let headJudgement = head_judgements.[ev.Column]
 
                     match config.Accuracy.HoldNoteBehaviour with
-                    | HoldNoteBehaviour.Osu od ->
+                    | HoldNoteBehaviour.Osu windows ->
                         let judgement =
-                            RulesetUtils.osu_ln_judgement od head_deltas.[ev.Column] delta overhold dropped
+                            RulesetUtils.osu_ln_judgement windows head_deltas.[ev.Column] delta overhold dropped
 
                         this.State.Add(point_func delta judgement, 1.0, judgement)
 
@@ -577,5 +577,5 @@ module Metrics =
     open Prelude.Charts.Processing
 
     let create_dummy (chart: ModdedChart) : ScoreMetric =
-        let ruleset = PrefabRulesets.SC.create 4
+        let ruleset = PremadeRulesets.SC.create 4
         create ruleset chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f

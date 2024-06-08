@@ -3,11 +3,12 @@
 open NUnit.Framework
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.PremadeRulesets
 open Helpers
 
 module ``osu OD8`` =
 
-    let RULESET = PrefabRulesets.Osu.create 8.0f
+    let RULESET = ``osu!``.create 8.0f ``osu!``.NoMod
 
     [<Test>]
     let TapNote () =

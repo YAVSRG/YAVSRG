@@ -10,13 +10,14 @@ open Prelude.Charts.Formats.``osu!``
 open Prelude.Data.``osu!``
 open Prelude.Data.Library
 open Prelude.Gameplay
+open Prelude.Gameplay.PremadeRulesets
 open SevenZip.Compression
 
 module OsuScoreMigration =
 
     let do_stuff (chart: Chart, replay: ReplayData, rate: float32, score_data: OsuScoreDatabase_Score) =
         let metric =
-            Metrics.run (PrefabRulesets.Osu.create 8.0f) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
+            Metrics.run (``osu!``.create 8.0f ``osu!``.NoMod) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
 
         let sum =
             300.0
@@ -63,45 +64,6 @@ module OsuScoreMigration =
 
             Console.ReadLine() |> ignore
 
-    let replay_generator (head_offset: int) (tail_offset: int) (hash: string) : OsuScoreDatabase_Score =
-        let raw =
-            sprintf
-                "0|256|500|0,0|256|500|0,-1000|0|1|0,%i|1|1|0,%i|0|1|0,-12345|0|0|32767"
-                (1000 + head_offset)
-                (500 + tail_offset - head_offset)
-            |> Text.Encoding.UTF8.GetBytes
-
-        use input = new MemoryStream(raw)
-        use output = new MemoryStream()
-
-        let encode = new LZMA.Encoder()
-        encode.WriteCoderProperties(output)
-        output.Write(BitConverter.GetBytes(input.Length), 0, 8)
-        encode.Code(input, output, input.Length, -1, null)
-        output.Flush()
-
-        {
-            Mode = 3uy
-            Version = 20220216
-            BeatmapHash = hash
-            Player = "Percyqaz"
-            ReplayHash = hash
-            Count300 = 0s
-            Count100 = 0s
-            Count50 = 0s
-            CountGeki = 0s
-            CountKatu = 0s
-            CountMiss = 0s
-            Score = 1000001
-            MaxCombo = 727s
-            PerfectCombo = true
-            ModsUsed = Mods.None
-            LifeBarGraph = ""
-            Timestamp = DateTime.UtcNow.ToFileTimeUtc()
-            CompressedReplayBytes = Some <| output.ToArray()
-            OnlineScoreID = 0
-        }
-
     let import_scores () =
 
         Logging.Info "Reading osu database ..."
@@ -125,8 +87,7 @@ module OsuScoreMigration =
             let chart =
                 try
                     beatmap_from_file osu_file
-                    |> Result.toOption
-                    |> Option.get
+                    |> expect
                     |> fun b ->
                         Osu_To_Interlude.convert
                             b
@@ -134,6 +95,7 @@ module OsuScoreMigration =
                                 Config = ConversionOptions.Default
                                 Source = osu_file
                             }
+                    |> expect
                     |> Some
                 with _ ->
                     None
@@ -207,6 +169,45 @@ module OsuScoreMigration =
 
         Console.ReadLine() |> ignore
 
+    let replay_generator (head_offset: int) (tail_offset: int) (mods: Mods) (hash: string) : OsuScoreDatabase_Score =
+        let raw =
+            sprintf
+                "0|256|500|0,0|256|500|0,-1000|0|1|0,%i|1|1|0,%i|0|1|0,-12345|0|0|32767"
+                (1000 + head_offset)
+                (500 + tail_offset - head_offset)
+            |> Text.Encoding.UTF8.GetBytes
+
+        use input = new MemoryStream(raw)
+        use output = new MemoryStream()
+
+        let encode = new LZMA.Encoder()
+        encode.WriteCoderProperties(output)
+        output.Write(BitConverter.GetBytes(input.Length), 0, 8)
+        encode.Code(input, output, input.Length, -1, null)
+        output.Flush()
+
+        {
+            Mode = 3uy
+            Version = 20220216
+            BeatmapHash = hash
+            Player = "Percyqaz"
+            ReplayHash = hash
+            Count300 = 0s
+            Count100 = 0s
+            Count50 = 0s
+            CountGeki = 0s
+            CountKatu = 0s
+            CountMiss = 0s
+            Score = 1000001
+            MaxCombo = 727s
+            PerfectCombo = true
+            ModsUsed = mods
+            LifeBarGraph = ""
+            Timestamp = DateTime.UtcNow.ToFileTimeUtc()
+            CompressedReplayBytes = Some <| output.ToArray()
+            OnlineScoreID = 0
+        }
+
     let replay_writer () =
 
         Logging.Info "Reading osu database ..."
@@ -223,19 +224,19 @@ module OsuScoreMigration =
         | Some b ->
 
             while true do
-                printf "enter first offset> "
+                printf "enter offset> "
                 let first_offset = Console.ReadLine() |> int
-                printf "enter second offset> "
-                let offset = Console.ReadLine() |> int
+                printf "enter mod> "
+                let mods = Console.ReadLine().ToLower()
 
-                let r = replay_generator first_offset offset b.Hash
+                let r = replay_generator first_offset 1000 (match mods with "ez" -> Mods.Easy | "hr" -> Mods.HardRock | _ -> Mods.None) b.Hash
                 use fs = File.Open("replay.osr", FileMode.Create)
                 use bw = new BinaryWriter(fs)
                 r.Write bw
                 bw.Flush()
                 bw.Close()
 
-                System.Diagnostics.Process
+                Diagnostics.Process
                     .Start(new Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true))
                     .WaitForExit()
         | None -> printfn "didnt find the map"

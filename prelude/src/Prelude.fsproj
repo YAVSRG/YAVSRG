@@ -41,6 +41,7 @@
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\Replays.fs" />
     <Compile Include="Gameplay\Rulesets.fs" />
+    <Compile Include="Gameplay\PremadeRulesets.fs" />
     <Compile Include="Gameplay\Metrics.fs" />
     <Compile Include="Gameplay\Performance.fs" />
     <Compile Include="Gameplay\PersonalBests.fs" />
@@ -54,6 +55,7 @@
     <Compile Include="Skinning\Noteskins\Conversions\Helpers.fs" />
     <Compile Include="Skinning\Noteskins\Conversions\osu!\Parser.fs" />
     <Compile Include="Skinning\Noteskins\Conversions\osu!\Converter.fs" />
+    <Compile Include="Backbeat\Rulesets.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
     <Compile Include="Data\Database\Database.fs" />

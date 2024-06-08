@@ -5,11 +5,12 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.PremadeRulesets
 
 module Rulesets =
 
     let private DEFAULT_ID = "sc-j4"
-    let private DEFAULT = PrefabRulesets.SC.create 4
+    let private DEFAULT = SC.create 4
 
     let mutable private initialised = false
     let private loaded = Dictionary<string, Ruleset>()

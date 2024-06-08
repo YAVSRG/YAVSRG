@@ -3,11 +3,12 @@
 open NUnit.Framework
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.PremadeRulesets
 open Helpers
 
 module ``SC J4`` =
 
-    let RULESET = PrefabRulesets.SC.create 4
+    let RULESET = SC.create 4
 
     [<Test>]
     let TapNote () =

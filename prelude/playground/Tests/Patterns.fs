@@ -17,7 +17,7 @@ module Patterns =
         let library = Library.load()
         let score_db = ScoreDatabase.create true (Database.from_file "Data/scores.db")
 
-        let sc_j4 = PrefabRulesets.SC.create 4
+        let sc_j4 = PremadeRulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
         let mutable stream = PatternStats.create()

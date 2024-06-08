@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Gameplay
+open Prelude.Backbeat
 open Prelude.Data
 open Prelude.Data.Library.Sorting
 open Interlude.UI
@@ -118,7 +119,7 @@ module Rulesets =
                 sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json" "githubusercontent",
                 fun data ->
                     match data with
-                    | Some(d: PrefabRulesets.Repo) ->
+                    | Some(d: RulesetRepo) ->
                         defer (fun () ->
                             for id in d.Rulesets.Keys do
                                 grid.Add(RulesetCard(id, d.Rulesets.[id]))
