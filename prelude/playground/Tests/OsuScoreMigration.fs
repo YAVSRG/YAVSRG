@@ -169,12 +169,26 @@ module OsuScoreMigration =
 
         Console.ReadLine() |> ignore
 
-    let replay_generator (head_offset: int) (tail_offset: int) (mods: Mods) (hash: string) : OsuScoreDatabase_Score =
+    let replay_generator (mods: Mods) (hash: string) : OsuScoreDatabase_Score =
+        let inputs : (int * int) seq =
+            seq {
+                yield -31, -8
+                yield -1, 2
+                yield 31, 36
+            }
+        let input_as_replay_string =
+            let mutable previous_time = -1000
+            inputs 
+            |> Seq.map (fun (press, release) -> 
+                let t = previous_time
+                previous_time <- release
+                sprintf "%i|1|1|0,%i|0|1|0" (press - t) (release - press)
+            )
+            |> String.concat ","
         let raw =
             sprintf
-                "0|256|500|0,0|256|500|0,-1000|0|1|0,%i|1|1|0,%i|0|1|0,-12345|0|0|32767"
-                (1000 + head_offset)
-                (500 + tail_offset - head_offset)
+                "0|256|500|0,0|256|500|0,-1000|0|1|0,%s,-12345|0|0|32767"
+                input_as_replay_string
             |> Text.Encoding.UTF8.GetBytes
 
         use input = new MemoryStream(raw)
@@ -192,7 +206,7 @@ module OsuScoreMigration =
             BeatmapHash = hash
             Player = "Percyqaz"
             ReplayHash = hash
-            Count300 = 0s
+            Count300 = 1s
             Count100 = 0s
             Count50 = 0s
             CountGeki = 0s
@@ -223,25 +237,18 @@ module OsuScoreMigration =
         with
         | Some b ->
 
-            while true do
-                printf "enter offset> "
-                let first_offset = Console.ReadLine() |> int
-                printf "enter mod> "
-                let mods = Console.ReadLine().ToLower()
+            let r = replay_generator Mods.None b.Hash
+            use fs = File.Open("replay.osr", FileMode.Create)
+            use bw = new BinaryWriter(fs)
+            r.Write bw
+            bw.Flush()
+            bw.Close()
 
-                let r = replay_generator first_offset 1000 (match mods with "ez" -> Mods.Easy | "hr" -> Mods.HardRock | _ -> Mods.None) b.Hash
-                use fs = File.Open("replay.osr", FileMode.Create)
-                use bw = new BinaryWriter(fs)
-                r.Write bw
-                bw.Flush()
-                bw.Close()
+            Diagnostics.Process
+                .Start(new Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true))
+                .WaitForExit()
 
-                Diagnostics.Process
-                    .Start(new Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true))
-                    .WaitForExit()
         | None -> printfn "didnt find the map"
-
-        Console.ReadLine() |> ignore
 
     let main () =
         Logging.Info "Reading osu database ..."

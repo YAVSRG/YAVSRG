@@ -131,3 +131,73 @@ module ``osu OD8`` =
         Assert.AreEqual(0, result.CurrentCombo)
         Assert.AreEqual(1, result.ComboBreaks)
         Assert.AreEqual(1, result.Judgements.[5])
+    
+    [<Test>]
+    let CbrushHitEating_ControlScenario () =
+        let notes = ChartBuilder(4).Note(10.0f<ms>).Note(20.0f<ms>).Note(30.0f<ms>).Build()
+        let replay = 
+            ReplayBuilder()
+                .KeyDown(10.0f<ms>, 0).KeyUp(15.0f<ms>, 0)
+                .KeyDown(20.0f<ms>, 0).KeyUp(25.0f<ms>, 0)
+                .KeyDown(30.0f<ms>, 0).KeyUp(35.0f<ms>, 0)
+                .Build()
+        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let result = scoring.State
+
+        printfn "%A" result
+
+        Assert.AreEqual(3, result.Judgements.[0])
+        Assert.AreEqual(3, result.CurrentCombo)
+        Assert.AreEqual(0, result.ComboBreaks)
+    
+    [<Test>]
+    let CbrushHitEating_EdgeScenario_NoEffect () =
+        let notes = ChartBuilder(4).Note(10.0f<ms>).Note(20.0f<ms>).Note(30.0f<ms>).Build()
+        let replay = 
+            ReplayBuilder()
+                .KeyDown(0.0f<ms>, 0).KeyUp(5.0f<ms>, 0)
+                .KeyDown(10.0f<ms>, 0).KeyUp(15.0f<ms>, 0)
+                .KeyDown(20.0f<ms>, 0).KeyUp(25.0f<ms>, 0)
+                .Build()
+        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let result = scoring.State
+
+        printfn "%A" result
+
+        Assert.AreEqual(3, result.Judgements.[0])
+        Assert.AreEqual(3, result.CurrentCombo)
+        Assert.AreEqual(0, result.ComboBreaks)
+    
+    [<Test>]
+    let CbrushHitEating_EdgeScenario_HasEffect () =
+        let notes = ChartBuilder(4).Note(10.0f<ms>).Note(20.0f<ms>).Note(30.0f<ms>).Build()
+        let replay = 
+            ReplayBuilder()
+                .KeyDown(0.0f<ms>, 0).KeyUp(5.0f<ms>, 0)
+                .KeyDown(9.0f<ms>, 0).KeyUp(15.0f<ms>, 0)
+                .KeyDown(20.0f<ms>, 0).KeyUp(25.0f<ms>, 0)
+                .Build()
+        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let result = scoring.State
+
+        printfn "%A" result
+
+        Assert.AreNotEqual(3, result.Judgements.[0])
+        Assert.AreEqual(3, result.Judgements.[5])
+
+    [<Test>]
+    let CbrushHitEating_ExpectedScenario_HasEffect () =
+        let notes = ChartBuilder(4).Note(10.0f<ms>).Note(20.0f<ms>).Note(30.0f<ms>).Build()
+        let replay = 
+            ReplayBuilder()
+                .KeyDown(0.0f<ms>, 0).KeyUp(5.0f<ms>, 0)
+                .KeyDown(5.0f<ms>, 0).KeyUp(15.0f<ms>, 0)
+                .KeyDown(15.0f<ms>, 0).KeyUp(25.0f<ms>, 0)
+                .Build()
+        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let result = scoring.State
+
+        printfn "%A" result
+
+        Assert.AreNotEqual(3, result.Judgements.[0])
+        Assert.AreEqual(3, result.Judgements.[5])
