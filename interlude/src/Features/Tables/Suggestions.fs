@@ -2,15 +2,46 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude.Backbeat
 open Prelude.Backbeat.Archive
 open Prelude.Data.Library.Caching
 open Prelude
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Gameplay
 open Interlude.Features.Online
+open Interlude.Features.Import
 open Interlude.Web.Shared.Requests
+
+type SuggestChartPage(table: Table, chart_id: string) =
+    inherit
+        SelectTableLevelPage(
+            table,
+            fun level ->
+                Tables.Suggestions.Vote.post (
+                    {
+                        ChartId = chart_id
+                        TableId = table.Id
+                        Level = level
+                    },
+                    function
+                    | Some Tables.Suggestions.Vote.Response.Ok ->
+                        Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                    | Some Tables.Suggestions.Vote.Response.OkDetailsRequired ->
+                        // todo: send backbeat addition request with suggestion
+                        Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                    | Some Tables.Suggestions.Vote.Response.Rejected ->
+                        Notifications.action_feedback (
+                            Icons.X_CIRCLE,
+                            "Suggestion rejected!",
+                            "This chart has already previously been rejected"
+                        )
+                    | None -> Notifications.error ("Error sending suggestion", "")
+                )
+
+                Menu.Back()
+        )
 
 type Suggestion =
     {
@@ -19,171 +50,165 @@ type Suggestion =
         BackbeatInfo: (Chart * Song) option
         LocalChart: CachedChart option
     }
+    member this.SongTitle =
+        match this.BackbeatInfo with
+        | Some (_, song) -> song.Title
+        | None ->
 
-type ViewSuggestionPage(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
+        match this.LocalChart with
+        | Some cc -> cc.Title
+        | None ->
+
+        "???"
+    member this.FormattedTitle =
+        match this.BackbeatInfo with
+        | Some (_, song) -> song.FormattedTitle
+        | None ->
+
+        match this.LocalChart with
+        | Some cc -> cc.Artist + " - " + cc.Title
+        | None ->
+
+        "???"
+
+type RejectSuggestionPage(table: Table, suggestion: Suggestion) =
     inherit Page()
 
-    override this.Content() =
-        let matching_local_chart = Cache.by_hash suggestion.ChartId Interlude.Content.Content.Cache
+    let reason = Setting.simple ""
 
+    let reject() =
+        Tables.Suggestions.Reject.post (
+            ({
+                TableId = table.Id
+                ChartId = suggestion.ChartId
+                Reason = reason.Value
+            }
+            : Tables.Suggestions.Reject.Request),
+            function
+            | Some true ->
+                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion rejected!", "")
+                Menu.Back(); Menu.Back()
+            | _ -> Notifications.error ("Error rejecting suggestion", "")
+        )
+
+    override this.Content() =
         page_container()
-        |+ PageButton(%"table.suggestions.playtest", ignore)
+        |+ PageTextEntry(%"table.suggestions.reject_reason", reason).Pos(0)
+        |+ PageButton.Once(%"table.suggestions.reject", reject).Pos(3)
+        :> Widget
+
+    override this.Title = suggestion.SongTitle
+    override this.OnClose() = ()
+
+type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
+    inherit Page()
+
+    let accept_level (level: int) =
+        Tables.Suggestions.Accept.post (
+            ({
+                TableId = table.Id
+                ChartId = suggestion.ChartId
+                Level = level
+            }
+            : Tables.Suggestions.Accept.Request),
+            function
+            | Some true ->
+                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion applied!", "")
+            | _ -> Notifications.error ("Error applying suggestion", "")
+        )
+        Menu.Back()
+
+    let change_vote (level: int) =
+        Tables.Suggestions.Vote.post (
+            {
+                ChartId = suggestion.ChartId
+                TableId = table.Id
+                Level = level
+            },
+            function
+            | Some Tables.Suggestions.Vote.Response.Ok ->
+                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+            | Some Tables.Suggestions.Vote.Response.OkDetailsRequired ->
+                // todo: send backbeat addition request with suggestion
+                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+            | Some Tables.Suggestions.Vote.Response.Rejected ->
+                Notifications.action_feedback (
+                    Icons.X_CIRCLE,
+                    "Suggestion rejected!",
+                    "This chart has already previously been rejected"
+                )
+            | None -> Notifications.error ("Error sending suggestion", "")
+        )
+
+        Menu.Back()
+        
+
+    let mutable still_open = true
+    let playtest_suggestion () =
+        match suggestion.LocalChart with
+        | Some cc ->
+            SelectedChart.change(cc, Data.Library.Collections.LibraryContext.None, true)
+            Menu.Exit()
+        | None ->
+
+        download_chart_by_hash.Request(
+            (suggestion.ChartId, table.Id),
+            function
+            | true -> 
+                Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", "")
+                defer (fun () ->
+                    if still_open then
+                        match Cache.by_hash suggestion.ChartId Content.Cache with
+                        | Some cc ->
+                            SelectedChart.change(cc, Data.Library.Collections.LibraryContext.None, true)
+                            Menu.Exit()
+                        | None -> ()
+                )
+            | false ->
+                Notifications.error(%"notification.install_song_failed", "")
+        )
+
+    override this.Content() =
+        page_container()
+        |+ PageButton.Once(%"table.suggestions.playtest", playtest_suggestion, Icon = Icons.PLAY, Enabled = (suggestion.LocalChart.IsSome || suggestion.BackbeatInfo.IsSome))
             .Pos(6)
-        |+ PageButton(%"table.suggestions.vote_another_level", ignore)
+        |+ PageButton(
+            %"table.suggestions.vote_another_level", 
+            (fun () -> SuggestChartPage(table, suggestion.ChartId).Show()),
+            Icon = Icons.EDIT_2
+        )
             .Pos(8)
-        // conditional on having permission
-        |+ PageButton(%"table.suggestions.accept", ignore)
+        |+ PageButton(%"table.suggestions.accept", (fun () -> SelectTableLevelPage(table, accept_level).Show()), Icon = Icons.CHECK, Enabled = suggestion.BackbeatInfo.IsSome)
+            .Conditional(fun () -> Network.credentials.Username = "Percyqaz") // todo: add permission check instead of temporary check
             .Pos(10)
-        |+ PageButton(%"table.suggestions.reject", ignore)
+        |+ PageButton(%"table.suggestions.reject", (fun () -> RejectSuggestionPage(table, suggestion).Show()), Icon = Icons.X)
+            .Conditional(fun () -> Network.credentials.Username = "Percyqaz")
             .Pos(12)
         |+ seq {
+            let vote_text =
+                suggestion.Votes
+                |> Map.toSeq
+                |> Seq.map (fun (level, count) -> sprintf "%s (%i)" (table.Info.LevelName level) count)
+                |> String.concat ", "
             match suggestion.BackbeatInfo with
             | Some (server_chart, server_song) ->
-                yield Text(server_song.FormattedTitle, Position = pretty_pos(0, 2, PageWidth.Full))
-                yield Text(server_chart.DifficultyName, Color = K Colors.text_subheading, Position = pretty_pos(2, 1, PageWidth.Full))
-                yield Text(server_chart.FormattedCreators, Color = K Colors.text_subheading, Position = pretty_pos(3, 1, PageWidth.Full))
+                yield Text(server_song.FormattedTitle, Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
+                yield Text(server_chart.DifficultyName + "  •  " + server_chart.FormattedCreators, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = pretty_pos(2, 1, PageWidth.Full))
+                yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = pretty_pos(3, 1, PageWidth.Full))
             | None ->
 
-            match matching_local_chart with
+            match suggestion.LocalChart with
             | Some local_cc ->
-                yield Text(local_cc.Artist + " - " + local_cc.Title, Position = pretty_pos(0, 2, PageWidth.Full))
-                yield Text(local_cc.DifficultyName, Color = K Colors.text_subheading, Position = pretty_pos(2, 1, PageWidth.Full))
-                yield Text(local_cc.Creator, Color = K Colors.text_subheading, Position = pretty_pos(3, 1, PageWidth.Full))
+                yield Text(local_cc.Artist + " - " + local_cc.Title, Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
+                yield Text(local_cc.DifficultyName + "  •  " + local_cc.Creator, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = pretty_pos(2, 1, PageWidth.Full))
+                yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = pretty_pos(3, 1, PageWidth.Full))
             | None ->
-                yield Text(%"table.suggestions.info_missing", Color = K Colors.text_red_2, Position = pretty_pos(0, 2, PageWidth.Full))
+                yield Text(%"table.suggestions.info_missing", Align = Alignment.LEFT, Color = K Colors.text_red_2, Position = pretty_pos(0, 2, PageWidth.Full))
+                yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = pretty_pos(2, 1, PageWidth.Full))
         } :> Widget
 
     override this.Title = %"table.suggestion"
-    override this.OnClose() = ()
-
-type SuggestionCard(table: Table, suggestion: Tables.Suggestions.List.Suggestion) =
-    inherit FrameContainer(NodeType.Leaf)
-
-    let mutable height = 100.0f
-
-    // todo: tooltip on hover
-    let button (icon: string, action) =
-        { new Button(icon, action, Position = Position.TrimRight(20.0f).SliceRight(60.0f)) with
-            override this.Draw() =
-                Draw.rect this.Bounds Colors.black.O2
-                base.Draw()
-        }
-
-    let vote_row (level: int) =
-        let container =
-            Container(NodeType.None, Position = Position.Row(height, 40.0f))
-            |+ Text(
-                sprintf "Level %02i - %i Votes" level (suggestion.Votes.[level]),
-                Position = Position.Margin(10.0f, 0.0f),
-                Align = Alignment.LEFT
-            )
-
-        match suggestion.BackbeatInfo with
-        | Some(chart, song) ->
-            container
-            |* button (
-                Icons.CHECK,
-                fun () ->
-                    ConfirmPage(
-                        sprintf "Add %s to level %i?" song.Title level,
-                        fun () ->
-                            Tables.Suggestions.Accept.post (
-                                ({
-                                    TableId = table.Id
-                                    ChartId = suggestion.ChartId
-                                    Level = level
-                                }
-                                : Tables.Suggestions.Accept.Request),
-                                function
-                                | Some true ->
-                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion applied!", "")
-                                | _ -> Notifications.error ("Error applying suggestion", "")
-                            )
-                    )
-                        .Show()
-            )
-        | None -> ()
-
-        container
-
-    let actions =
-        let fc =
-            FlowContainer.RightToLeft(60.0f, Spacing = 20.0f, Position = Position.SliceTop(40.0f).TrimRight(20.0f))
-
-        // todo: playtesting button
-        // todo: delete button
-
-        fc.Add(
-            button (
-                Icons.EDIT_2,
-                fun () ->
-                    SelectTableLevelPage(
-                        table,
-                        fun level ->
-                            Tables.Suggestions.Vote.post (
-                                ({
-                                    ChartId = suggestion.ChartId
-                                    TableId = table.Id
-                                    Level = level
-                                }
-                                : Tables.Suggestions.Vote.Request),
-                                function
-                                | Some Tables.Suggestions.Vote.Response.Ok ->
-                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                                | Some Tables.Suggestions.Vote.Response.OkDetailsRequired ->
-                                    // todo: send backbeat addition request with suggestion
-                                    Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                                | Some Tables.Suggestions.Vote.Response.Rejected ->
-                                    Notifications.action_feedback (
-                                        Icons.X_CIRCLE,
-                                        "Suggestion rejected!",
-                                        "This chart has already previously been rejected"
-                                    )
-                                | None -> Notifications.error ("Error sending suggestion", "")
-                            )
-
-                            Menu.Back()
-                    )
-                        .Show()
-            )
-        )
-
-        fc
-
-    override this.Init(parent: Widget) =
-        this
-        |+ Text(
-            match suggestion.BackbeatInfo with
-            | Some(chart, song) -> song.Title
-            | None -> "???"
-            , Position = Position.Row(0.0f, 40.0f).Margin(10.0f, 0.0f)
-            , Align = Alignment.LEFT
-        )
-        |+ Text(
-            match suggestion.BackbeatInfo with
-            | Some(chart, song) -> sprintf "%s  •  %s" song.FormattedArtists chart.FormattedCreators
-            | None -> "Metadata missing"
-            , Position = Position.Row(40.0f, 30.0f).Margin(10.0f, 0.0f)
-            , Align = Alignment.LEFT
-        )
-        |+ Text(
-            match suggestion.BackbeatInfo with
-            | Some(chart, song) -> chart.DifficultyName
-            | None -> "???"
-            , Position = Position.Row(70.0f, 30.0f).Margin(10.0f, 0.0f)
-            , Align = Alignment.LEFT
-            , Color = K Colors.text_greyout
-        )
-        |* actions
-
-        for level in suggestion.Votes.Keys do
-            this |* vote_row level
-            height <- height + 40.0f
-
-        base.Init parent
-
-    interface IHeight with
-        member this.Height = height
+    override this.OnClose() = still_open <- false
 
 type SuggestionsList(table: Table) =
     inherit
@@ -202,10 +227,17 @@ type SuggestionsList(table: Table) =
                 else
                     this.Offline()
             , fun _ data ->
-                let fc = DynamicFlowContainer.Vertical<SuggestionCard>(Spacing = 30.0f)
+                let fc = FlowContainer.Vertical<PageButton>(PRETTYHEIGHT, Spacing = 5.0f)
 
-                for s in data.Suggestions do
-                    fc.Add(SuggestionCard(table, s))
+                for server_suggestion in data.Suggestions do
+                    let suggestion =
+                        {
+                            ChartId = server_suggestion.ChartId
+                            Votes = server_suggestion.Votes
+                            BackbeatInfo = server_suggestion.BackbeatInfo
+                            LocalChart = Cache.by_hash server_suggestion.ChartId Interlude.Content.Content.Cache
+                        }
+                    fc.Add(PageButton(suggestion.FormattedTitle, fun () -> ViewSuggestionPage(table, suggestion).Show()))
 
                 defer (fun () -> fc.Focus false)
 
@@ -227,32 +259,3 @@ type SuggestionsPage(table: Table) =
     override this.Title = %"table.suggestions"
     override this.OnClose() = ()
     override this.OnReturnTo() = suggestions_list.Reload()
-
-type SuggestChartPage(table: Table, cc: CachedChart) =
-    inherit
-        SelectTableLevelPage(
-            table,
-            fun level ->
-                Tables.Suggestions.Vote.post (
-                    {
-                        ChartId = cc.Hash
-                        TableId = table.Id
-                        Level = level
-                    },
-                    function
-                    | Some Tables.Suggestions.Vote.Response.Ok ->
-                        Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                    | Some Tables.Suggestions.Vote.Response.OkDetailsRequired ->
-                        // todo: send backbeat addition request with suggestion
-                        Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-                    | Some Tables.Suggestions.Vote.Response.Rejected ->
-                        Notifications.action_feedback (
-                            Icons.X_CIRCLE,
-                            "Suggestion rejected!",
-                            "This chart has already previously been rejected"
-                        )
-                    | None -> Notifications.error ("Error sending suggestion", "")
-                )
-
-                Menu.Back()
-        )

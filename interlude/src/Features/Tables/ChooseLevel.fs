@@ -1,8 +1,6 @@
 namespace Interlude.Features.Tables
 
-open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Backbeat
 open Interlude.UI

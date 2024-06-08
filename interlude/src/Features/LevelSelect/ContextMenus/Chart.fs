@@ -152,7 +152,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                 content
                 |* PageButton(
                     %"chart.suggest_for_table",
-                    (fun () -> SuggestChartPage(table, cc).Show()),
+                    (fun () -> SuggestChartPage(table, cc.Hash).Show()),
                     Icon = Icons.SIDEBAR
                 )
         | _ -> ()
