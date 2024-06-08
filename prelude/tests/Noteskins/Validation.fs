@@ -174,7 +174,7 @@ module Validation =
                 .AddImageFile("holdbody.png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead.png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail.png", ONEPIXELIMAGE)
-                .AddJsonFile("receptor.json", { Columns = 16; Rows = 3; Mode = Grid })
+                .AddJsonFile("receptor.json", { Columns = 16; Rows = 21; Mode = Grid })
                 .AddImageFile("receptor.png", receptor_grid_bmp)
                 .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
                 .Build()
