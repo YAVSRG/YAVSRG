@@ -31,8 +31,6 @@ type EndlessModeMenu(info: LoadedChartInfo) =
 
     override this.Content() =
         page_container()
-        |+ PageButton.Once(%"levelselect.endless_mode.start", start)
-            .Pos(3)
         |+ PageSetting(%"levelselect.endless_mode.priority", 
             SelectDropdown<_>(
                 [|
@@ -43,6 +41,8 @@ type EndlessModeMenu(info: LoadedChartInfo) =
             )
         )
             .Pos(0)
+        |+ PageButton.Once(%"levelselect.endless_mode.start", start)
+            .Pos(3)
         :> Widget
 
     override this.Title = %"levelselect.endless_mode"
