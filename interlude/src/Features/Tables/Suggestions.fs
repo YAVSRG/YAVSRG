@@ -27,17 +27,17 @@ type SuggestChartPage(table: Table, chart_id: string) =
                     },
                     function
                     | Some Tables.Suggestions.Vote.Response.Ok ->
-                        Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                        Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.suggestion.send_success.title", "")
                     | Some Tables.Suggestions.Vote.Response.OkDetailsRequired ->
                         // todo: send backbeat addition request with suggestion
-                        Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
+                        Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.suggestion.send_success.title", "")
                     | Some Tables.Suggestions.Vote.Response.Rejected ->
                         Notifications.action_feedback (
                             Icons.X_CIRCLE,
-                            "Suggestion rejected!",
-                            "This chart has already previously been rejected"
+                            %"notification.suggestion.rejected.title",
+                            %"notification.suggestion.rejected.body"
                         )
-                    | None -> Notifications.error ("Error sending suggestion", "")
+                    | None -> Notifications.error (%"notification.suggestion.server_error.title", "")
                 )
 
                 Menu.Back()
@@ -86,9 +86,9 @@ type RejectSuggestionPage(table: Table, suggestion: Suggestion) =
             : Tables.Suggestions.Reject.Request),
             function
             | Some true ->
-                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion rejected!", "")
+                Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.suggestion.rejected.title", "")
                 Menu.Back(); Menu.Back()
-            | _ -> Notifications.error ("Error rejecting suggestion", "")
+            | _ -> Notifications.error (%"notification.suggestion.server_error.title", "")
         )
 
     override this.Content() =
@@ -113,33 +113,9 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             : Tables.Suggestions.Accept.Request),
             function
             | Some true ->
-                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion applied!", "")
-            | _ -> Notifications.error ("Error applying suggestion", "")
+                Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.suggestion.apply_success.title", "")
+            | _ -> Notifications.error (%"notification.suggestion.server_error.title", "")
         )
-        Menu.Back()
-
-    let change_vote (level: int) =
-        Tables.Suggestions.Vote.post (
-            {
-                ChartId = suggestion.ChartId
-                TableId = table.Id
-                Level = level
-            },
-            function
-            | Some Tables.Suggestions.Vote.Response.Ok ->
-                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-            | Some Tables.Suggestions.Vote.Response.OkDetailsRequired ->
-                // todo: send backbeat addition request with suggestion
-                Notifications.action_feedback (Icons.FOLDER_PLUS, "Suggestion sent!", "")
-            | Some Tables.Suggestions.Vote.Response.Rejected ->
-                Notifications.action_feedback (
-                    Icons.X_CIRCLE,
-                    "Suggestion rejected!",
-                    "This chart has already previously been rejected"
-                )
-            | None -> Notifications.error ("Error sending suggestion", "")
-        )
-
         Menu.Back()
         
 
