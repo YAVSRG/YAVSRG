@@ -79,7 +79,7 @@ module Rulesets =
 
     let exists = loaded.ContainsKey
 
-    let install_or_update (new_id, ruleset) =
+    let install_or_update (new_id: string) (ruleset: Ruleset) =
         loaded.Remove new_id |> ignore
         loaded.Add(new_id, ruleset)
 

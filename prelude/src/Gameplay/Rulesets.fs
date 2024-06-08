@@ -69,6 +69,7 @@ type AccuracyPoints =
             this
         | _ -> this
 
+[<Json.AutoCodec>]
 type OsuLnWindows =
     {
         Window320: Time
@@ -119,7 +120,7 @@ type HoldNoteBehaviour =
                 last_time <- time
 
             JudgeReleases d
-        | _ -> this
+        | _ -> this // todo: validate osu windows
 
 /// Grades are awarded at the end of a score as a summarising "rank" of how well you did
 /// They typically follow lettering systems similar to academic exam grades

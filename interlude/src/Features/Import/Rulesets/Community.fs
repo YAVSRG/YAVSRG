@@ -41,7 +41,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
         else
             NotInstalled
 
-    do
+    override this.Init(parent) =
         this
         |+ Text(ruleset.Name, Align = Alignment.LEFT, Position = Position.SliceTop(50.0f).Margin(10.0f, Style.PADDING))
         |+ Text(
@@ -50,6 +50,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
             Position = Position.TrimTop(40.0f).Margin(10.0f, Style.PADDING)
         )
         |* Clickable.Focus this
+        base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -63,12 +64,12 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
                 .ConfirmPage(
                     "Update this ruleset? (If you made changes yourself, they will be lost)",
                     fun () ->
-                        Rulesets.install_or_update (id, ruleset)
+                        Rulesets.install_or_update id ruleset
                         status <- UpToDate
                 )
                 .Show()
         | NotInstalled ->
-            Rulesets.install_or_update (id, ruleset)
+            Rulesets.install_or_update id ruleset
             status <- UpToDate
 
     override this.Draw() =
@@ -100,53 +101,50 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
                 | _ -> true)
                 filter
 
-module Rulesets =
+type RulesetSearch() as this =
+    inherit Container(NodeType.Container(fun _ -> Some this.Items))
 
-    type RulesetSearch() as this =
-        inherit Container(NodeType.Container(fun _ -> Some this.Items))
+    let grid =
+        GridFlowContainer<RulesetCard>(80.0f, 2, Spacing = (15.0f, 15.0f), WrapNavigation = false)
 
-        let grid =
-            GridFlowContainer<RulesetCard>(80.0f, 2, Spacing = (15.0f, 15.0f), WrapNavigation = false)
+    let scroll =
+        ScrollContainer(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f))
 
-        let scroll =
-            ScrollContainer(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f))
+    let mutable loading = true
+    let mutable failed = false
 
-        let mutable loading = true
-        let mutable failed = false
+    override this.Init(parent) =
+        WebServices.download_json (
+            sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json" "githubusercontent",
+            fun data ->
+                match data with
+                | Some(d: RulesetRepo) ->
+                    defer (fun () ->
+                        for id in d.Rulesets.Keys do
+                            grid.Add(RulesetCard(id, d.Rulesets.[id]))
 
-        override this.Init(parent) =
-            WebServices.download_json (
-                sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json" "githubusercontent",
-                fun data ->
-                    match data with
-                    | Some(d: RulesetRepo) ->
-                        defer (fun () ->
-                            for id in d.Rulesets.Keys do
-                                grid.Add(RulesetCard(id, d.Rulesets.[id]))
+                        loading <- false
+                    )
+                | None ->
+                    defer (fun () ->
+                        failed <- true
+                        loading <- false
+                    )
+        )
 
-                            loading <- false
-                        )
-                    | None ->
-                        defer (fun () ->
-                            failed <- true
-                            loading <- false
-                        )
+        this
+        |+ (SearchBox(
+                Setting.simple "",
+                (fun (f: Filter) -> grid.Filter <- RulesetCard.Filter f),
+                Position = Position.SliceTop 60.0f
             )
+            |+ LoadingIndicator.Border(fun () -> loading))
+        |+ EmptyState(Icons.X, "Couldn't connect to rulesets repository").Conditional(fun () -> failed)
+        //|+ HotkeyAction("skip", fun () -> OsuRulesetPage().Show())
+        |* scroll
 
-            this
-            |+ (SearchBox(
-                    Setting.simple "",
-                    (fun (f: Filter) -> grid.Filter <- RulesetCard.Filter f),
-                    Position = Position.SliceTop 60.0f
-                )
-                |+ LoadingIndicator.Border(fun () -> loading))
-            |+ EmptyState(Icons.X, "Couldn't connect to rulesets repository").Conditional(fun () -> failed)
-            |* scroll
+        base.Init parent
 
-            base.Init parent
+    override this.Focusable = grid.Focusable
 
-        override this.Focusable = grid.Focusable
-
-        member this.Items = grid
-
-    let tab = RulesetSearch()
+    member this.Items = grid

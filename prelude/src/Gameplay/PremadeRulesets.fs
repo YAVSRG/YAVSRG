@@ -281,7 +281,7 @@ module ``osu!`` =
     let private gates_from_windows ((ma, pf, gr, gd, bd, _): Time * Time * Time * Time * Time * Time) =
         [ -bd, 5; -gd, 4; -gr, 3; -pf, 2; -ma, 1; ma, 0; pf, 1; gr, 2; gd, 3; bd, 4 ]
 
-    let ln_windows (od: float32) (mode: Mode) =
+    let private ln_windows (od: float32) (mode: Mode) =
         let (ma, pf, gr, gd, bd, _) = windows od mode
         {
             Window320 = floor (ma * 1.2f</ms>) * 1.0f<ms> + 0.5f<ms>
@@ -306,7 +306,7 @@ module ``osu!`` =
 
     let create (od: float32) (mode: Mode) : Ruleset =
         {
-            Name = sprintf "osu! (OD%.1f)" od
+            Name = sprintf "osu! (OD%.1f%s)" od (match mode with NoMod -> "" | Easy -> " +EZ" | HardRock -> " +HR")
             Description = "Simulates osu!'s scoring system"
             Judgements =
                 [|
