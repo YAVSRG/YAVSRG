@@ -97,24 +97,16 @@ module Printerlude =
             )
 
         let private personal_best_fixer =
-            { new Async.Service<string, unit>() with
-                override this.Handle(ruleset_id) =
+            { new Async.Service<string * Ruleset, unit>() with
+                override this.Handle((ruleset_id, ruleset)) =
                     async {
-                        match Rulesets.by_hash ruleset_id with
-                        | None -> ()
-                        | Some ruleset ->
-
-                        for hash in Content.Cache.Entries.Keys |> Seq.toArray do
-                            let data = ScoreDatabase.get hash Content.Scores
+                        for cc in Content.Cache.Entries.Values |> Seq.toArray do
+                            let data = ScoreDatabase.get cc.Hash Content.Scores
 
                             if not data.Scores.IsEmpty then
-
-                                match Cache.by_hash hash Content.Cache with
-                                | None -> ()
-                                | Some cc ->
-
                                 match Cache.load cc Content.Cache with
-                                | Error reason -> ()
+                                | Error reason ->
+                                    Logging.Debug(sprintf "Couldn't load %s for pb processing: %s" cc.Key reason)
                                 | Ok chart ->
 
                                 let existing_bests = data.PersonalBests
@@ -123,8 +115,8 @@ module Printerlude =
                                 for score in data.Scores do
                                     let score_info = ScoreInfo.from_score cc chart ruleset score
 
-                                    if data.PersonalBests.ContainsKey ruleset_id then
-                                        let ruleset_bests, _ = Bests.update score_info data.PersonalBests.[ruleset_id]
+                                    if new_bests.ContainsKey ruleset_id then
+                                        let ruleset_bests, _ = Bests.update score_info new_bests.[ruleset_id]
                                         new_bests <- Map.add ruleset_id ruleset_bests new_bests
                                     else
                                         new_bests <- Map.add ruleset_id (Bests.create score_info) new_bests
@@ -137,7 +129,7 @@ module Printerlude =
             }
 
         let fix_personal_bests () =
-            personal_best_fixer.Request(Rulesets.current_hash, ignore)
+            personal_best_fixer.Request((Rulesets.current_hash, Rulesets.current), ignore)
             Logging.Info("Queued a reprocess of personal bests")
 
         let register_commands (ctx: ShellContext) =
