@@ -49,7 +49,7 @@ type Toolbar() =
         )
         |+ InlaidButton(
             %"menu.back",
-            (fun () -> Screen.back Transitions.Flags.UnderLogo |> ignore),
+            (fun () -> Screen.back Transitions.UnderLogo |> ignore),
             Icons.ARROW_LEFT_CIRCLE,
             Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, HEIGHT)
         )
@@ -68,7 +68,7 @@ type Toolbar() =
             |+ (InlaidButton(
                     %"menu.import",
                     (fun () ->
-                        Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
+                        Screen.change Screen.Type.Import Transitions.Default |> ignore
                     ),
                     Icons.DOWNLOAD,
                     Hotkey = "import"
@@ -92,7 +92,7 @@ type Toolbar() =
             |+ InlaidButton(
                 %"menu.stats",
                 (fun () ->
-                    Screen.change_new StatsScreen Screen.Type.Stats Transitions.Flags.Default
+                    Screen.change_new StatsScreen Screen.Type.Stats Transitions.Default
                     |> ignore
                 ),
                 Icons.TRENDING_UP

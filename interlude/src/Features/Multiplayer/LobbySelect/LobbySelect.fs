@@ -30,7 +30,7 @@ type LobbySelectPage() =
     let subscribed_events =
         NetworkEvents.receive_lobby_list.Subscribe (fun lobbies -> lobby_list.UpdateList lobbies),
         NetworkEvents.receive_invite.Subscribe (fun _ -> invite_list.UpdateList()),
-        NetworkEvents.join_lobby.Subscribe (fun lobby -> Menu.Exit(); Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore)
+        NetworkEvents.join_lobby.Subscribe (fun lobby -> Menu.Exit(); Screen.change Screen.Type.Lobby Transitions.Default |> ignore)
 
     override this.Content() =
         Container(NodeType.Leaf)

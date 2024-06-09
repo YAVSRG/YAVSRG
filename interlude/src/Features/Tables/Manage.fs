@@ -66,7 +66,7 @@ type ManageTablesPage(table_changed) =
             (fun () ->
                 Menu.Exit()
                 Interlude.Features.Import.ImportScreen.switch_to_tables ()
-                Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
+                Screen.change Screen.Type.Import Transitions.Default |> ignore
             ),
             Icon = Icons.DOWNLOAD
         )

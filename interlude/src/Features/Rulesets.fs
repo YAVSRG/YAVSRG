@@ -29,7 +29,7 @@ module Rulesets =
                             yield (
                                 (fun () -> 
                                     Import.ImportScreen.switch_to_rulesets()
-                                    Screen.change Screen.Type.Import Transitions.Flags.Default |> ignore
+                                    Screen.change Screen.Type.Import Transitions.Default |> ignore
                                 ),
                                 %"rulesets.get_more_rulesets"
                             )

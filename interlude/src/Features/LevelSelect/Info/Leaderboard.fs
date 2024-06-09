@@ -54,7 +54,7 @@ module Leaderboard =
                         Screen.change_new
                             (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
                             Screen.Type.Score
-                            Transitions.Flags.Default
+                            Transitions.Gameplay
                         |> ignore
                     )
                 )

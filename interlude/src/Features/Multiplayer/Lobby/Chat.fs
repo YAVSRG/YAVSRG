@@ -104,7 +104,7 @@ type Chat(lobby: Lobby) =
                             Screen.change_new
                                 (fun () -> ScoreScreen(data, ImprovementFlags.None, false) :> Screen)
                                 Screen.Type.Score
-                                Transitions.Flags.Default
+                                Transitions.Gameplay
                             |> ignore
                         ),
                         OnHover =

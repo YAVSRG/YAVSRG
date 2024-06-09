@@ -69,7 +69,7 @@ module PracticeScreen =
                 Toolbar.hide_cursor ()
 
             if show && not sync_controls.Focused then
-                Screen.back Transitions.Flags.Default |> ignore
+                Screen.back Transitions.Default |> ignore
 
     let practice_screen (info: LoadedChartInfo, start_at: Time) =
 

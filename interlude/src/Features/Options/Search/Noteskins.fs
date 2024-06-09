@@ -34,7 +34,7 @@ module Noteskins =
                         (fun () ->
                             Menu.Exit()
 
-                            if Screen.change Screen.Type.Import Transitions.Flags.Default then
+                            if Screen.change Screen.Type.Import Transitions.Default then
                                 ImportScreen.switch_to_noteskins ()
                         )
                     )
@@ -56,7 +56,7 @@ module Noteskins =
                             && Screen.change_new
                                 (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, ignore))
                                 Screen.Type.Practice
-                                Transitions.Flags.Default
+                                Transitions.Default
                         then
                             Menu.Exit()
                     )

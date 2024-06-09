@@ -22,13 +22,12 @@ module Suggestions =
         | None -> ()
 
     let previous_chart () =
-        if Transitions.active then () else
-
-        match history with
-        | cc :: xs -> 
-            history <- xs
-            SelectedChart.change(cc, LibraryContext.None, true)
-        | _ -> ()
+        if not (Transitions.in_progress()) then
+            match history with
+            | cc :: xs -> 
+                history <- xs
+                SelectedChart.change(cc, LibraryContext.None, true)
+            | _ -> ()
 
     let has_previous() = (List.isEmpty >> not) history
 
@@ -70,40 +69,39 @@ module Suggestions =
             SelectedChart.if_loaded (fun info -> if not (LevelSelect.try_play info) then exit_endless_mode())
 
     let random_chart () =
-        if Transitions.active then () else
+        if not (Transitions.in_progress()) then
+            if options.AdvancedRecommendations.Value && SelectedChart.RATING.IsSome then
+                let ctx =
+                    {
+                        BaseDifficulty = SelectedChart.RATING.Value.Physical
+                        BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
+                        Filter = LevelSelect.filter |> Filter.except_keywords
+                        Mods = SelectedChart.selected_mods.Value
+                        RulesetId = Rulesets.current_hash
+                        Ruleset = Rulesets.current
+                        Library = Content.Library
+                        ScoreDatabase = Content.Scores
+                        Priority = endless_priority.Value
+                    }
 
-        if options.AdvancedRecommendations.Value && SelectedChart.RATING.IsSome then
-            let ctx =
-                {
-                    BaseDifficulty = SelectedChart.RATING.Value.Physical
-                    BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
-                    Filter = LevelSelect.filter |> Filter.except_keywords
-                    Mods = SelectedChart.selected_mods.Value
-                    RulesetId = Rulesets.current_hash
-                    Ruleset = Rulesets.current
-                    Library = Content.Library
-                    ScoreDatabase = Content.Scores
-                    Priority = endless_priority.Value
-                }
+                match Suggestion.get_suggestion ctx with
+                | Some (cc, rate) ->
+                    add_current_chart_to_history()
+                    SelectedChart._rate.Value <- rate
+                    SelectedChart.change(cc, LibraryContext.None, true)
+                | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
+            else
+                let ctx =
+                    {
+                        Rate = SelectedChart.rate.Value
+                        RulesetId = Rulesets.current_hash
+                        Ruleset = Rulesets.current
+                        Library = Content.Library
+                        ScoreDatabase = Content.Scores
+                    }
 
-            match Suggestion.get_suggestion ctx with
-            | Some (cc, rate) ->
-                add_current_chart_to_history()
-                SelectedChart._rate.Value <- rate
-                SelectedChart.change(cc, LibraryContext.None, true)
-            | None -> Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
-        else
-            let ctx =
-                {
-                    Rate = SelectedChart.rate.Value
-                    RulesetId = Rulesets.current_hash
-                    Ruleset = Rulesets.current
-                    Library = Content.Library
-                    ScoreDatabase = Content.Scores
-                }
-
-            match Suggestion.get_random LevelSelect.filter ctx with
-            | Some cc ->
-                add_current_chart_to_history()
-                SelectedChart.change(cc, LibraryContext.None, true)
-            | None -> ()
+                match Suggestion.get_random LevelSelect.filter ctx with
+                | Some cc ->
+                    add_current_chart_to_history()
+                    SelectedChart.change(cc, LibraryContext.None, true)
+                | None -> ()

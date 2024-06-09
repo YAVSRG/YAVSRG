@@ -119,7 +119,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                         Screen.change_new
                             (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
                             Screen.Type.Practice
-                            Transitions.Flags.Default
+                            Transitions.Default
                         |> ignore
                     )
                 ),

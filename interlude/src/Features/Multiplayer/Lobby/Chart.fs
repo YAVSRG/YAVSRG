@@ -208,7 +208,7 @@ type SelectedChart(lobby: Lobby) =
         )
 
         |+ Clickable(
-            fun () -> if lobby.YouAreHost then Screen.change Screen.Type.LevelSelect Transitions.Flags.Default |> ignore
+            fun () -> if lobby.YouAreHost then Screen.change Screen.Type.LevelSelect Transitions.Default |> ignore
             , Position = Position.SliceTop(100.0f)
         )
 
@@ -241,7 +241,7 @@ type SelectedChart(lobby: Lobby) =
                         Screen.change_new
                             (fun () -> SpectateScreen.spectate_screen (info, username, replay_info, lobby))
                             Screen.Type.Replay
-                            Transitions.Flags.Default
+                            Transitions.Default
                         |> ignore
                     | None -> ()
                 | None -> Logging.Debug("Couldn't find anyone with replay data to spectate")

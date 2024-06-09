@@ -118,11 +118,11 @@ module Screen =
 
     let screen_container = ScreenContainer()
 
-    let change_new (thunk: unit -> #T) (screen_type: Type) (flags: Transitions.Flags) : bool =
+    let change_new (thunk: unit -> #T) (screen_type: Type) (transition_type: Transitions.Transition) : bool =
         if
             not Song.loading
             && (screen_type <> current_type || screen_type = Type.Play)
-            && not Transitions.active
+            && not (Transitions.in_progress())
         then
             Transitions.animate (
                 (fun () ->
@@ -138,7 +138,7 @@ module Screen =
                     current_type <- screen_type
                     current <- s
                 ),
-                flags
+                transition_type
             )
             |> animations.Add
 
@@ -146,12 +146,12 @@ module Screen =
         else
             false
 
-    let change (screen_type: Type) (flags: Transitions.Flags) =
-        change_new (K screens.[int screen_type]) screen_type flags
+    let change (screen_type: Type) (transition_type: Transitions.Transition) =
+        change_new (K screens.[int screen_type]) screen_type transition_type
 
-    let back (flags: Transitions.Flags) : bool =
+    let back (transition_type: Transitions.Transition) : bool =
         match current.OnBack() with
-        | Some t -> change t flags
+        | Some t -> change t transition_type
         | None -> false
 
     type ScreenRoot(toolbar: Widget) =
@@ -183,7 +183,7 @@ module Screen =
             screen_container.Update(elapsed_ms, moved)
 
             if (%%"exit").Tapped() then
-                back Transitions.Flags.UnderLogo |> ignore
+                back Transitions.UnderLogo |> ignore
 
             if exit then
                 this.ShouldExit <- true
@@ -199,11 +199,13 @@ module Screen =
             logo.Draw()
             toolbar.Draw()
 
-            if Transitions.active then
-                Transitions.draw this.Bounds
+            match Transitions.current with
+            | Some transition_type ->
+                Transitions.draw transition_type this.Bounds
 
-                if (Transitions.flags &&& Transitions.Flags.UnderLogo = Transitions.Flags.UnderLogo) then
+                if transition_type = Transitions.UnderLogo then
                     logo.Draw()
+            | None -> ()
 
             Dialog.display.Draw()
             Tooltip.display.Draw()

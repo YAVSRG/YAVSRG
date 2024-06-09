@@ -207,7 +207,7 @@ type NoteskinsPage() =
                     (fun () ->
                         Menu.Exit()
 
-                        if Screen.change Screen.Type.Import Transitions.Flags.Default then
+                        if Screen.change Screen.Type.Import Transitions.Default then
                             ImportScreen.switch_to_noteskins ()
                     )
                 )

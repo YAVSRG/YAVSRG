@@ -49,7 +49,7 @@ module LevelSelect =
                 )
             )
             Screen.Type.Play
-            Transitions.Flags.Default
+            Transitions.Gameplay
 
     let choose_this_chart () =
 
@@ -58,14 +58,14 @@ module LevelSelect =
 
             match Network.lobby with
             | Some lobby ->
-                if Screen.change Screen.Type.Lobby Transitions.Flags.Default then
+                if Screen.change Screen.Type.Lobby Transitions.Default then
                     lobby.SelectChart (info.CacheInfo, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
             | None ->
                 if SelectedChart.autoplay then
                     Screen.change_new
                         (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)
                         Screen.Type.Replay
-                        Transitions.Flags.Default
+                        Transitions.Default
                 else
                     try_play info
                 |> ignore
@@ -78,7 +78,7 @@ module LevelSelect =
                 Screen.change_new
                     (fun () -> PlayScreen.play_screen (info, PacemakerCreationContext.FromScore score_info))
                     Screen.Type.Play
-                    Transitions.Flags.Default
+                    Transitions.Gameplay
             then
                 SelectedChart.rate.Set score_info.Rate
                 SelectedChart.selected_mods.Set score_info.Mods
@@ -91,6 +91,6 @@ module LevelSelect =
                     :> Screen.T
                 )
                 Screen.Type.Replay
-                Transitions.Flags.Default
+                Transitions.Default
         then
             SelectedChart.rate.Value <- score_info.Rate

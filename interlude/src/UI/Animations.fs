@@ -125,7 +125,7 @@ module Bubble =
         let tail = float32 (Math.Pow(pos, 2.0)) * (r2 - r1) + r1
         Wedge.draw (new Vector2(x, y)) tail head 0.0 (Math.PI * 2.0) col
 
-module DiamondWipe =
+module DiamondsWipe =
 
     let draw inbound amount (bounds: Rect) =
         let SCALE = 150.0f
@@ -161,7 +161,101 @@ module DiamondWipe =
                 draw_diamond (SCALE * float32 x) (SCALE * float32 y)
                 draw_diamond (0.5f * SCALE + SCALE * float32 x) (0.5f * SCALE + SCALE * float32 y)
 
-module StripeWipe =
+module TriangleWipe =
+
+    let draw_upward (inbound: bool) (amount: float32) (bounds: Rect) =
+        let height = bounds.Height
+        let center = bounds.CenterX
+        
+        let y = if inbound then bounds.Bottom - amount * height * 2.0f else bounds.Bottom - (1.0f - amount) * height * 2.0f 
+
+        if inbound then
+
+            Draw.untextured_quad 
+                (Quad.createv
+                    (bounds.Left, y + height * 2.0f)
+                    (bounds.Left, y + height)
+                    (center, y)
+                    (center, y + height * 2.0f)
+                )
+                Color.Transparent.AsQuad
+            
+            Draw.untextured_quad 
+                (Quad.createv
+                    (bounds.Right, y + height * 2.0f)
+                    (bounds.Right, y + height)
+                    (center, y)
+                    (center, y + height * 2.0f)
+                )
+                Color.Transparent.AsQuad
+
+        else
+
+            Draw.untextured_quad 
+                (Quad.createv
+                    (bounds.Left, y - height)
+                    (bounds.Left, y + height)
+                    (center, y)
+                    (center, y - height)
+                )
+                Color.Transparent.AsQuad
+            
+            Draw.untextured_quad 
+                (Quad.createv
+                    (bounds.Right, y - height)
+                    (bounds.Right, y + height)
+                    (center, y)
+                    (center, y - height)
+                )
+                Color.Transparent.AsQuad
+        
+    let draw_downward (inbound: bool) (amount: float32) (bounds: Rect) =
+        let height = bounds.Height
+        let center = bounds.CenterX
+        
+        let y = if inbound then bounds.Top + amount * height * 2.0f else bounds.Top + (1.0f - amount) * height * 2.0f 
+
+        if inbound then
+
+            Draw.untextured_quad 
+                (Quad.createv
+                    (bounds.Left, y - height * 2.0f)
+                    (bounds.Left, y - height)
+                    (center, y)
+                    (center, y - height * 2.0f)
+                )
+                Color.Transparent.AsQuad
+            
+            Draw.untextured_quad 
+                (Quad.createv
+                    (bounds.Right, y - height * 2.0f)
+                    (bounds.Right, y - height)
+                    (center, y)
+                    (center, y - height * 2.0f)
+                )
+                Color.Transparent.AsQuad
+
+        else
+
+            Draw.untextured_quad 
+                (Quad.createv
+                    (bounds.Left, y + height)
+                    (bounds.Left, y - height)
+                    (center, y)
+                    (center, y + height)
+                )
+                Color.Transparent.AsQuad
+            
+            Draw.untextured_quad 
+                (Quad.createv
+                    (bounds.Right, y + height)
+                    (bounds.Right, y - height)
+                    (center, y)
+                    (center, y + height)
+                )
+                Color.Transparent.AsQuad
+
+module StripesWipe =
 
     let draw inbound amount (bounds: Rect) =
         let SCALE = 100.0f

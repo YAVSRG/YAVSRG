@@ -27,7 +27,7 @@ type LoadingScreen() =
             animation.Add(Animation.Delay 1200.0)
 
             animation.Add(
-                Animation.Action(fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo |> ignore)
+                Animation.Action(fun () -> Screen.change Screen.Type.MainMenu Transitions.UnderLogo |> ignore)
             )
         | _ ->
             closing <- true
@@ -35,7 +35,7 @@ type LoadingScreen() =
             animation.Add(Animation.Delay 1000.0)
             animation.Add(Animation.Action(fun () -> audio_fade.Target <- 0.0f))
             animation.Add(Animation.Delay 1200.0)
-            animation.Add(Animation.Action(fun () -> Screen.back Transitions.Flags.Default |> ignore))
+            animation.Add(Animation.Action(fun () -> Screen.back Transitions.Default |> ignore))
 
     override this.OnExit _ =
         if not closing then

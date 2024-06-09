@@ -26,7 +26,7 @@ type ChartInfo() as this =
 
     do
         let change_rate change_rate_by =
-            if Transitions.active then
+            if Transitions.in_progress() then
                 ()
             else
                 SelectedChart.rate.Value <- SelectedChart.rate.Value + change_rate_by

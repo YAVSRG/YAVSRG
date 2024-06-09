@@ -144,7 +144,7 @@ type LobbyUI(lobby: Lobby) =
                         Screen.change_new
                             (fun () -> PlayScreenMultiplayer.multiplayer_screen(info, lobby))
                             Screen.Type.Play
-                            Transitions.Flags.Default
+                            Transitions.Gameplay
                         |> not
                     then
                         Logging.Warn("Missed the start of the lobby song because you were changing screen")
@@ -198,7 +198,7 @@ type LobbyUI(lobby: Lobby) =
                         Screen.change_new
                             (fun () -> SpectateScreen.spectate_screen (info, username, replay_info, lobby))
                             Screen.Type.Replay
-                            Transitions.Flags.Default
+                            Transitions.Default
                         |> not
                     then
                         Logging.Warn("Missed the start of spectating because you were changing screen")
@@ -243,5 +243,5 @@ type LobbyScreen() =
 
     override this.Update(elapsed_ms, moved) =
         match Network.lobby with
-        | None -> if not Transitions.active then Screen.back Transitions.Flags.Default |> ignore
+        | None -> if not (Transitions.in_progress()) then Screen.back Transitions.Default |> ignore
         | Some _ -> base.Update(elapsed_ms, moved)

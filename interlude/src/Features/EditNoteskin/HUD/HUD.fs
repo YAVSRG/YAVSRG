@@ -19,7 +19,7 @@ type EditHUDPage() =
             && Screen.change_new
                 (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> EditHUDPage().Show()))
                 Screen.Type.Practice
-                Transitions.Flags.Default
+                Transitions.Default
         then
             Menu.Exit()
 

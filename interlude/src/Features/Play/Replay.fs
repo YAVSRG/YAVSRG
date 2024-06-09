@@ -360,7 +360,7 @@ module ReplayScreen =
                     Toolbar.hide_cursor ()
 
             if show && not replay_controls.Focused then
-                Screen.back Transitions.Flags.Default |> ignore
+                Screen.back Transitions.Default |> ignore
 
     let replay_screen (chart: Chart, mode: ReplayMode) =
 
@@ -473,12 +473,12 @@ module ReplayScreen =
 
                 if replay_data.Finished then
                     match mode with
-                    | ReplayMode.Auto _ -> Screen.back Transitions.Flags.Default |> ignore
+                    | ReplayMode.Auto _ -> Screen.back Transitions.FailedGameplay |> ignore
                     | ReplayMode.Replay(score_info, _) ->
                         Screen.change_new
                             (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
                             Screen.Type.Score
-                            Transitions.Flags.Default
+                            Transitions.Gameplay
                         |> ignore
 
                 if (%%"skip").Tapped() then

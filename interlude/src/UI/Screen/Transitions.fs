@@ -8,17 +8,17 @@ open Interlude.UI
 
 module Transitions =
 
-    let private DURATION = 500.0
-
-    let private in_timer = Animation.Delay DURATION
-    let private out_timer = Animation.Delay DURATION
-
-    type Flags =
-        | Default = 0
-        | UnderLogo = 1
-
-    let mutable flags = Flags.Default
-    let mutable active = false
+    type Transition =
+        | Default
+        | UnderLogo
+        | Gameplay
+        | FailedGameplay
+        member this.Duration =
+            match this with
+            | Default
+            | UnderLogo -> 500.0
+            | Gameplay
+            | FailedGameplay -> 350.0
 
     let private fancy_transition inbound amount bounds =
         let amount = if inbound then amount else 2.0f - amount
@@ -32,38 +32,60 @@ module Transitions =
         Bubble.draw (1600.0f, 600.0f) 80.0f 120.0f Color.White 1.0f 1.3f amount
         Bubble.draw (1400.0f, 700.0f) 50.0f 75.0f Color.White 1.4f 1.7f amount
 
-    let private draw_internal flags inbound amount bounds =
+    let private draw_internal (t: Transition) inbound amount bounds =
         Stencil.start_stencilling false
-        DiamondWipe.draw inbound amount bounds
-        Stencil.start_drawing ()
-        Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+        match t with
+        | Default
+        | UnderLogo ->
+            DiamondsWipe.draw inbound amount bounds
+            Stencil.start_drawing ()
+            Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+
+        | Gameplay ->
+            TriangleWipe.draw_downward inbound amount bounds
+            Stencil.start_drawing ()
+            Background.draw (bounds, Palette.color (255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
+
+        | FailedGameplay ->
+            TriangleWipe.draw_upward inbound amount bounds
+            Stencil.start_drawing ()
+            Background.draw (bounds, Palette.color (255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
+
         Stencil.finish ()
 
-    // setup
+    let private in_timer = Animation.Delay 500.0
+    let private out_timer = Animation.Delay 500.0
 
-    let draw (bounds: Rect) =
-        if active then
-            let inbound = in_timer.Elapsed < DURATION
+    let mutable current : Transition option = None
 
-            let amount =
-                Math.Clamp(
-                    (if inbound then
-                         in_timer.Elapsed / DURATION
-                     else
-                         1.0 - (out_timer.Elapsed / DURATION)),
-                    0.0,
-                    1.0
-                )
-                |> float32
+    let in_progress () = current.IsSome
 
-            draw_internal flags inbound amount bounds
+    let draw (transition_type: Transition) (bounds: Rect) =
+        let inbound = not in_timer.Complete
 
-    let animate (func: unit -> unit, _flags: Flags) : Animation =
-        if active then
+        let amount =
+            Math.Clamp(
+                (if inbound then
+                        in_timer.Elapsed / in_timer.Interval
+                    else
+                        1.0 - (out_timer.Elapsed / in_timer.Interval)),
+                0.0,
+                1.0
+            )
+            |> float32
+
+        draw_internal transition_type inbound amount bounds
+
+    let animate (func: unit -> unit, kind: Transition) : Animation =
+
+        match current with
+        | Some _ -> 
             failwith "Should not be called while a transition is already in progress"
+        | None ->
 
-        active <- true
-        flags <- _flags
+        current <- Some kind
+        in_timer.Interval <- kind.Duration
+        out_timer.Interval <- kind.Duration
 
         Animation.seq
             [
@@ -76,6 +98,6 @@ module Transitions =
                 Animation.Action(fun () ->
                     in_timer.Reset()
                     out_timer.Reset()
-                    active <- false
+                    current <- None
                 )
             ]

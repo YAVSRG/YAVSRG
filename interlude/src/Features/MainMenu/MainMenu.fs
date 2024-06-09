@@ -80,7 +80,7 @@ type MainMenuScreen() as this =
     inherit Screen.T()
 
     let play_action () =
-        Screen.change Screen.Type.LevelSelect Transitions.Flags.Default |> ignore
+        Screen.change Screen.Type.LevelSelect Transitions.Default |> ignore
 
     let play =
         MenuButton(play_action, %"menu.play", Position.Box(0.0f, 0.5f, -300.0f, -200.0f, 1500.0f, 100.0f))
@@ -95,7 +95,7 @@ type MainMenuScreen() as this =
     let quit =
         MenuButton(
             (fun () ->
-                if Screen.back Transitions.Flags.UnderLogo then
+                if Screen.back Transitions.UnderLogo then
                     Logo.move_center ()
             ),
             %"menu.quit",
@@ -205,7 +205,7 @@ type MainMenuScreen() as this =
                     %"menu.exit_prompt",
                     fun () ->
                         confirmed_exit <- true
-                        Screen.back Transitions.Flags.UnderLogo |> ignore
+                        Screen.back Transitions.UnderLogo |> ignore
                 )
                 .Show()
 

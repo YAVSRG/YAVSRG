@@ -65,7 +65,7 @@ module private TreeState =
 
     // todo: react to the event of switching instead of doing stuff here
     let switch_chart (cc, context, group_name) =
-        if not Transitions.active then
+        if not (Transitions.in_progress()) then
             SelectedChart.change (cc, context, true)
             Selection.clear ()
             selected_chart <- cc.Key

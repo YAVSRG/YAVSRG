@@ -102,9 +102,9 @@ module PlayScreenMultiplayer =
                             ScoreScreen(score_info, ImprovementFlags.None, true)
                         )
                         Screen.Type.Score
-                        Transitions.Flags.Default
+                        Transitions.FailedGameplay
                 else
-                    Screen.back Transitions.Flags.Default
+                    Screen.back Transitions.FailedGameplay
             then
                 lobby.AbandonPlaying()
                 Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
@@ -126,7 +126,7 @@ module PlayScreenMultiplayer =
                         |> ScoreScreen
                     )
                     Screen.Type.Score
-                    Transitions.Flags.Default
+                    Transitions.Gameplay
             then
                 Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
 

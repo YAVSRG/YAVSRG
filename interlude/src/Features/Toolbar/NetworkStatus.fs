@@ -91,7 +91,7 @@ type NetworkStatus() as this =
             [
                 fun () ->
                     match Network.lobby with
-                    | Some l ->  Screen.change Screen.Type.Lobby Transitions.Flags.Default |> ignore
+                    | Some l ->  Screen.change Screen.Type.Lobby Transitions.Default |> ignore
                     | None -> LobbySelectPage().Show()
                 , Icons.USERS + " " + %"network.multiplayer"
                 (fun () -> PlayerListPage().Show()), Icons.SEARCH + " " + %"network.players"
