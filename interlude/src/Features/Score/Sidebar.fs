@@ -25,13 +25,14 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     override this.Init(parent) =
         this
         |+ Text(
-            sprintf "%s  %iK Results" Icons.BAR_CHART score_info.Chart.Keys,
-            Position = Position.SliceTop(90.0f).Margin(10.0f, 0.0f),
+            (fun () -> sprintf "%s  %iK  •  %s" Icons.BAR_CHART score_info.Chart.Keys score_info.Ruleset.Name),
+            Position = Position.SliceTop(80.0f).Margin(10.0f, 0.0f),
             Align = Alignment.CENTER
         )
         |+ Text(
-            (fun () -> sprintf "%s %s  •  %s" Icons.ZAP mod_string score_info.Ruleset.Name),
-            Position = Position.TrimTop(90.0f).SliceTop(70.0f),
+            sprintf "%s  %s" Icons.ZAP mod_string,
+            Position = Position.TrimTop(80.0f).SliceTop(80.0f).Margin(10.0f, 0.0f),
+            Color = K Colors.text_subheading,
             Align = Alignment.CENTER
         )
         |+ Text(
