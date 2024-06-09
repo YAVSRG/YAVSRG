@@ -226,7 +226,9 @@ module FlowContainer =
                 this.SelectFocusedChild()
 
         interface IHeight with
-            member this.Height = content_height
+            member this.Height = 
+                if this.Initialised then content_height
+                else float32 this.Count * item_height + (float32 this.Count - 1.0f) * (this.Spacing)
 
         interface IResize with
             member this.OnSizeChanged
@@ -264,7 +266,9 @@ module FlowContainer =
                 this.SelectFocusedChild()
 
         interface IWidth with
-            member this.Width = content_width
+            member this.Width = 
+                if this.Initialised then content_width
+                else float32 this.Count * item_width + (float32 this.Count - 1.0f) * (this.Spacing)
 
         interface IResize with
             member this.OnSizeChanged
@@ -309,7 +313,9 @@ module FlowContainer =
                 this.SelectFocusedChild()
 
         interface IWidth with
-            member this.Width = content_width
+            member this.Width = 
+                if this.Initialised then content_width
+                else float32 this.Count * item_width + (float32 this.Count - 1.0f) * (this.Spacing)
 
         interface IResize with
             member this.OnSizeChanged
