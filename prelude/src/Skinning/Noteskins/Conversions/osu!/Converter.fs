@@ -80,11 +80,20 @@ module private Image =
         else
             image
 
-    let pad_to_square (width: int) (image: Bitmap) : Bitmap = pad (width, width) image
+    let pad_to_square (target_width: int) (image: Bitmap) : Bitmap = pad (target_width, target_width) image
 
-    let stretch_to_square (width: int) (image: Bitmap) : Bitmap =
-        assert (image.Width = width)
-        image.Mutate(fun img -> img.Resize(width, width) |> ignore)
+    let upscale_to_square (target_width: int) (image: Bitmap) : Bitmap =
+        assert(image.Width <= target_width)
+        assert(image.Height <= target_width)
+        if image.Height > image.Width then
+            image.Mutate(fun img -> img.Resize(0, target_width) |> ignore)
+        else
+            image.Mutate(fun img -> img.Resize(target_width, 0) |> ignore)
+        pad_to_square target_width image
+
+    let stretch_to_square (target_width: int) (image: Bitmap) : Bitmap =
+        assert (image.Width = target_width)
+        image.Mutate(fun img -> img.Resize(target_width, target_width) |> ignore)
         image
 
     let rotate (rotate_mode: RotateMode) (image: Bitmap) : Bitmap =
@@ -131,13 +140,16 @@ module OsuSkinConverter =
     let convert_element_textures (target: string) (element_name: string) (images: Bitmap list list) =
         let animation_frames = List.map List.length images |> List.max
         let colors = List.length images
-        let width = images.Head.Head.Width
+
+        let max_width = images |> List.map (List.map _.Width >> List.max) |> List.max
+        let max_height = images |> List.map (List.map _.Height >> List.max) |> List.max
+        let size = max max_width max_height
 
         for row = 0 to (colors - 1) do
             for column = 0 to (animation_frames - 1) do
                 let image = let r = images.[row] in r[column % r.Length]
 
-                let square_image = Image.pad_to_square width image
+                let square_image = Image.upscale_to_square size image
                 square_image.Save(Path.Combine(target, sprintf "%s-%i-%i.png" element_name row column))
                 square_image.Dispose()
 
