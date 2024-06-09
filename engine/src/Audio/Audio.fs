@@ -7,7 +7,7 @@ open Percyqaz.Common
 
 [<AutoOpen>]
 module private Helpers =
-    let display_bass_error b = () //if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString(), Environment.StackTrace)
+    let display_bass_error b = () // if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString(), Environment.StackTrace)
 
     let mutable internal current_device = -1
 
@@ -25,8 +25,7 @@ type Song =
         }
 
     static member FromFile(file: string) =
-        //let ID = Bass.CreateStream(file, int64 0, int64 0, BassFlags.Decode); //loads file
-        let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan)
+        let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan (* ||| BassFlags.Decode *))
 
         if ID = 0 then
             Logging.Error("Couldn't load audio track from " + file, Bass.LastError)
@@ -36,7 +35,7 @@ type Song =
             let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength ID) * 1000.0
             let Frequency = d.Frequency
             Bass.ChannelSetDevice(ID, current_device) |> display_bass_error
-            //let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
+            (* let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource) *)
             {
                 ID = ID
                 Frequency = Frequency
@@ -145,7 +144,8 @@ module Song =
         let rate_changed = rate <> new_rate
         let time = time ()
         rate <- new_rate
-        //if (true) then Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0) |> display_bass_error
+        (* Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0)
+        |> display_bass_error *)
         Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency * rate)
         |> display_bass_error
 
