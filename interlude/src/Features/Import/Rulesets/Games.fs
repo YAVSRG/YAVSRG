@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.PremadeRulesets
-open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
 
@@ -44,5 +43,73 @@ type OsuRulesetPage() =
         |+ PageButton.Once(%"ruleset.create", create).Pos(5)
         :> Widget
 
-    override this.Title = %"confirm"
+    override this.Title = %"ruleset.create.osu"
+    override this.OnClose() = ()
+
+type WifeRulesetPage() =
+    inherit Page()
+
+    let judge = Setting.simple 4
+
+    let create () =
+        let ruleset_id = 
+            sprintf "wife-j%i" judge.Value
+        Rulesets.install_or_update ruleset_id (Wife3.create judge.Value)
+        Menu.Back()
+
+    override this.Content() =
+        page_container()
+        |+ PageSetting(%"ruleset.wife_judge",
+            SelectDropdown(
+                [| 
+                    2, "2"
+                    3, "3"
+                    4, "4"
+                    5, "5"
+                    6, "6"
+                    7, "7"
+                    8, "8"
+                    9, "JUSTICE"
+                |], 
+                judge
+            )
+        ).Pos(0)
+        |+ PageButton.Once(%"ruleset.create", create).Pos(3)
+        :> Widget
+
+    override this.Title = %"ruleset.create.wife"
+    override this.OnClose() = ()
+
+type SCRulesetPage() =
+    inherit Page()
+
+    let judge = Setting.simple 4
+
+    let create () =
+        let ruleset_id = 
+            sprintf "sc-j%i" judge.Value
+        Rulesets.install_or_update ruleset_id (SC.create judge.Value)
+        Menu.Back()
+
+    override this.Content() =
+        page_container()
+        |+ PageSetting(%"ruleset.sc_judge",
+            SelectDropdown(
+                [| 
+                    2, "2"
+                    3, "3"
+                    4, "4"
+                    5, "5"
+                    6, "6"
+                    7, "7"
+                    8, "8"
+                    9, "9"
+                |], 
+                judge
+            )
+        ).Pos(0)
+        |+ PageButton.Once(%"ruleset.create", create).Pos(3)
+        :> Widget
+
+    override this.Title = %"ruleset.create.sc"
     override this.OnClose() = ()
