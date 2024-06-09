@@ -139,6 +139,7 @@ module SpectateScreen =
             override this.OnExit(next) =
                 base.OnExit(next)
                 Song.resume ()
+                Toolbar.show_cursor ()
 
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
