@@ -43,7 +43,7 @@ module HUDElement =
 
     let can_configure (e: HUDElement) =
         match e with
-        | HUDElement.SkipButton -> false
+        | HUDElement.SkipButton -> not Content.Noteskin.IsEmbedded
         | HUDElement.BPMMeter -> false
         | HUDElement.Pacemaker -> false
         | _ -> true

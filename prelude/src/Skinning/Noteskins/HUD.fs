@@ -91,6 +91,7 @@ type HUDUserOptions =
         BPMMeterEnabled: bool
 
         InputMeterEnabled: bool
+        InputMeterScrollSpeed: float32
     }
     static member Default =
         {
@@ -132,6 +133,7 @@ type HUDUserOptions =
             BPMMeterEnabled = false
 
             InputMeterEnabled = false
+            InputMeterScrollSpeed = 1.5f
         }
 
 [<Json.AutoCodec(false)>]

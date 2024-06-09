@@ -7,7 +7,7 @@ open Prelude.Skinning.Noteskins
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type BPMMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) as this =
+type BPMMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
     inherit Container(NodeType.None)
 
     let first_note = state.WithColors.FirstNote
@@ -15,7 +15,7 @@ type BPMMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions
     let bpms = state.WithColors.BPM
     let mutable last_seen_time = -Time.infinity
 
-    do
+    override this.Init(parent) =
         this
         |* Text(
             (fun () ->
@@ -25,6 +25,7 @@ type BPMMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER
         )
+        base.Init parent
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
