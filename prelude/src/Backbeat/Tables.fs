@@ -63,7 +63,7 @@ module Table =
             Some
                 {
                     Id = id
-                    LastUpdated = DateTimeOffset.op_Implicit(File.GetLastAccessTime path).ToUnixTimeMilliseconds()
+                    LastUpdated = DateTimeOffset.op_Implicit(File.GetLastWriteTime path).ToUnixTimeMilliseconds()
                     Info = file.Info
                     Charts = file.Charts
                 }

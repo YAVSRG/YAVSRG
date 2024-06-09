@@ -26,6 +26,7 @@ module Tables =
 
     let install_or_update (table: Table) =
         Table.save table
+        loaded.[table.Id] <- table
 
         if _selected_id.Value = Some table.Id then
             current <- Some table
