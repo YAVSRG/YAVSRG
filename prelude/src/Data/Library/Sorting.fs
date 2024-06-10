@@ -5,6 +5,7 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
+open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Data.Library.Collections
@@ -129,7 +130,7 @@ module Sorting =
 
     let private has_sv (cc: CachedChart, ctx: LibraryViewContext) =
         match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
-        | Some report -> report.SVAmount > 2000.0f<ms>
+        | Some report -> report.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD
         | None -> false
 
     let private compare_by (f: CachedChart -> IComparable) =

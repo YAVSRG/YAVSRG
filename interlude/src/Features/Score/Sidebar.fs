@@ -20,7 +20,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         let c =  score_info.Patterns.Category
         c.Category,
         String.concat ", " c.MajorFeatures |> (function "" -> "--" | x -> x),
-        String.concat ", " (List.truncate 3 c.MinorFeatures) |> (function "" -> "--" | x -> x)
+        String.concat ", " c.MinorFeatures |> (function "" -> "--" | x -> x)
 
     override this.Init(parent) =
         this

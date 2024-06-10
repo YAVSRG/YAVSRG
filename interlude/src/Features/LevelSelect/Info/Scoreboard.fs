@@ -333,7 +333,7 @@ type Scoreboard(display: Setting<Display>) =
         
         Text.fill_b (
             Style.font,
-            String.concat ", " (Seq.truncate 3 category.MinorFeatures),
+            String.concat ", " category.MinorFeatures,
             this.Bounds.SliceBottom(30.0f).Shrink(20.0f, 0.0f),
             Colors.text_greyout,
             Alignment.LEFT

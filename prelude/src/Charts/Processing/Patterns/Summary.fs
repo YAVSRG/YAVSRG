@@ -254,6 +254,8 @@ module PatternSummary =
         }
         static member Default = { Category = "Unknown"; MajorFeatures = []; MinorFeatures = [] }
 
+    let SV_AMOUNT_THRESHOLD = 2000.0f<ms>
+
     // todo: make into a union for easier reasoning
     type private CategoryFragment =
         {
@@ -300,7 +302,7 @@ module PatternSummary =
             (f.BPM.IsNone && this.BPM.IsSome)
             || (f.Specific.IsNone && this.Specific.IsSome)
 
-    let private categorise_chart (keys: int) (patterns: PatternBreakdown list) : ChartCategorisation =
+    let private categorise_chart (keys: int) (patterns: PatternBreakdown list) (sv_amount: Time) : ChartCategorisation =
 
         let total = 0.01f<ms/rate> + (patterns |> List.sumBy (fun e -> e.Amount))
         let average_density = (patterns |> List.sumBy (fun e -> e.Density50 * e.Amount)) / total
@@ -455,9 +457,9 @@ module PatternSummary =
                     | _ -> "Jack"
 
         {
-            Category = category
+            Category = category + if sv_amount > SV_AMOUNT_THRESHOLD then " + SV" else ""
             MajorFeatures = major |> List.map (fun x -> x.ToString())
-            MinorFeatures = minor |> List.map (fun x -> x.ToString())
+            MinorFeatures = minor |> List.map (fun x -> x.ToString()) |> List.truncate 3
         }
 
     [<Json.AutoCodec>]
@@ -492,12 +494,13 @@ module PatternSummary =
             )
 
         let patterns = breakdown |> List.filter (is_useless >> not)
+        let sv_amount = sv_time chart
 
         {
             Patterns = patterns
             LNPercent = ln_percent chart
-            SVAmount = sv_time chart
-            Category = categorise_chart chart.Keys patterns
+            SVAmount = sv_amount
+            Category = categorise_chart chart.Keys patterns sv_amount
         }
 
     let cached (f: 'A -> 'B -> 'C) : 'A -> 'B -> 'C =
