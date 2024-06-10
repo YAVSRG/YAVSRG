@@ -14,7 +14,7 @@ type MultiplayerScoreTracker(user_options: HUDUserOptions, noteskin_options: HUD
     inherit StaticWidget(NodeType.None)
 
     override this.Draw() =
-        let x = this.Bounds.Right + 100.0f
+        let x = this.Bounds.CenterX
         let mutable y = this.Bounds.Top
 
         replays

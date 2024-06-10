@@ -217,6 +217,8 @@ type HUDNoteskinOptions =
         BPMMeterPosition: HUDPosition
 
         InputMeterPosition: HUDPosition
+
+        MultiplayerScoreTrackerPosition: HUDPosition
     }
     static member Default =
         {
@@ -374,6 +376,15 @@ type HUDNoteskinOptions =
                     Top = -580.0f, 1.0f
                     Right = 440.0f, 1.0f
                     Bottom = -20.0f, 1.0f
+                }
+
+            MultiplayerScoreTrackerPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = 50.0f, 1.0f
+                    Top = -185.0f, 0.5f
+                    Right = 250.0f, 1.0f
+                    Bottom = -150.0f, 0.5f
                 }
         }
 
