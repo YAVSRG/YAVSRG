@@ -11,14 +11,14 @@ module Transitions =
     type Transition =
         | Default
         | UnderLogo
-        | Gameplay
-        | FailedGameplay
+        | EnterGameplay
+        | LeaveGameplay
         member this.Duration =
             match this with
             | Default
             | UnderLogo -> 500.0
-            | Gameplay
-            | FailedGameplay -> 350.0
+            | EnterGameplay
+            | LeaveGameplay -> 350.0
 
     let private fancy_transition inbound amount bounds =
         let amount = if inbound then amount else 2.0f - amount
@@ -41,12 +41,12 @@ module Transitions =
             Stencil.start_drawing ()
             Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
 
-        | Gameplay ->
+        | EnterGameplay ->
             TriangleWipe.draw_downward inbound amount bounds
             Stencil.start_drawing ()
             Background.draw (bounds, Palette.color (255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
 
-        | FailedGameplay ->
+        | LeaveGameplay ->
             TriangleWipe.draw_upward inbound amount bounds
             Stencil.start_drawing ()
             Background.draw (bounds, Palette.color (255.0f * amount |> int, 0.3f, 0.5f), 1.0f)

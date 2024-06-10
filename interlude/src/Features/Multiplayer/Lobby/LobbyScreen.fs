@@ -144,7 +144,7 @@ type LobbyUI(lobby: Lobby) =
                         Screen.change_new
                             (fun () -> PlayScreenMultiplayer.multiplayer_screen(info, lobby))
                             Screen.Type.Play
-                            Transitions.Gameplay
+                            Transitions.EnterGameplay
                         |> not
                     then
                         Logging.Warn("Missed the start of the lobby song because you were changing screen")

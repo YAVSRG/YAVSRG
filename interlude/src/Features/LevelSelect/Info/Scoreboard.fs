@@ -40,7 +40,7 @@ module Scoreboard =
                         Screen.change_new
                             (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
                             Screen.Type.Score
-                            Transitions.Gameplay
+                            Transitions.EnterGameplay
                         |> ignore
                     )
                 )

@@ -49,7 +49,7 @@ module LevelSelect =
                 )
             )
             Screen.Type.Play
-            Transitions.Gameplay
+            Transitions.EnterGameplay
 
     let choose_this_chart () =
 
@@ -78,7 +78,7 @@ module LevelSelect =
                 Screen.change_new
                     (fun () -> PlayScreen.play_screen (info, PacemakerCreationContext.FromScore score_info))
                     Screen.Type.Play
-                    Transitions.Gameplay
+                    Transitions.EnterGameplay
             then
                 SelectedChart.rate.Set score_info.Rate
                 SelectedChart.selected_mods.Set score_info.Mods

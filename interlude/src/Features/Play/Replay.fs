@@ -476,12 +476,12 @@ module ReplayScreen =
 
                 if replay_data.Finished then
                     match mode with
-                    | ReplayMode.Auto _ -> Screen.back Transitions.FailedGameplay |> ignore
+                    | ReplayMode.Auto _ -> Screen.back Transitions.LeaveGameplay |> ignore
                     | ReplayMode.Replay(score_info, _) ->
                         Screen.change_new
                             (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
                             Screen.Type.Score
-                            Transitions.Gameplay
+                            Transitions.EnterGameplay
                         |> ignore
 
                 if (%%"skip").Tapped() then

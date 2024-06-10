@@ -50,7 +50,7 @@ module PlayScreen =
                 Screen.change_new
                     (fun () -> play_screen (info, pacemaker_ctx) :> Screen.T)
                     Screen.Type.Play
-                    Transitions.Gameplay
+                    Transitions.EnterGameplay
             then
                 Stats.session.PlaysRetried <- Stats.session.PlaysRetried + 1
                 
@@ -72,9 +72,9 @@ module PlayScreen =
                             ScoreScreen(score_info, ImprovementFlags.None, true)
                         )
                         Screen.Type.Score
-                        Transitions.FailedGameplay
+                        Transitions.LeaveGameplay
                 else
-                    Screen.back Transitions.FailedGameplay
+                    Screen.back Transitions.LeaveGameplay
             then
                 Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
 
@@ -93,7 +93,7 @@ module PlayScreen =
                         |> ScoreScreen
                     )
                     Screen.Type.Score
-                    Transitions.Gameplay
+                    Transitions.EnterGameplay
             then
                 Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
 
