@@ -268,7 +268,7 @@ module OsuSkinConverter =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i)
                 |> Seq.map (fun id -> match TextureFile.find(id, source) with Some f -> f | None -> failwithf "Couldn't find font image '%s'" id)
-                |> Seq.map (_.Load >> _.Image) // todo: 2x fix
+                |> Seq.map (_.Load >> _.Image) // todo: handle mismatched 2x and 1x images
                 |> Array.ofSeq
 
             let max_width = images |> Seq.map _.Width |> Seq.max
@@ -315,7 +315,7 @@ module OsuSkinConverter =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i)
                 |> Seq.map (fun id -> match TextureFile.find(id, source) with Some f -> f | None -> failwithf "Couldn't find font image '%s'" id)
-                |> Seq.map (_.Load >> _.Image) // todo: 2x fix
+                |> Seq.map (_.Load >> _.Image) // todo: handle mismatched 2x and 1x images
                 |> Array.ofSeq
 
             let max_width = images |> Seq.map _.Width |> Seq.max

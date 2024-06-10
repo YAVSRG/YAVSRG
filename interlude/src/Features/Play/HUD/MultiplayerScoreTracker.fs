@@ -9,7 +9,7 @@ open Interlude
 open Interlude.Features.Online
 open Interlude.Features.Play
 
-// todo: give this thing its own placement config + config on your username color vs other peoples
+// todo: config on your username color vs other peoples
 type MultiplayerScoreTracker(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState, replays: Dictionary<string, LobbyPlayerReplayInfo>) =
     inherit StaticWidget(NodeType.None)
 

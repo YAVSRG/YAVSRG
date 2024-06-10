@@ -404,4 +404,3 @@ type HUDNoteskinOptions =
 
 // todo: song info
 // todo: real time clock
-// todo: multiplayer player list
