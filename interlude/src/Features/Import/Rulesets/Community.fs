@@ -140,7 +140,6 @@ type RulesetSearch() as this =
             )
             |+ LoadingIndicator.Border(fun () -> loading))
         |+ EmptyState(Icons.X, "Couldn't connect to rulesets repository").Conditional(fun () -> failed)
-        //|+ HotkeyAction("skip", fun () -> OsuRulesetPage().Show())
         |* scroll
 
         base.Init parent
