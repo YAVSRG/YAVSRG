@@ -50,7 +50,6 @@ module Utilities =
 
     let (|ChartFile|_|) (path: string) =
         let s = Path.GetExtension(path).ToLower()
-
         match s with
         | ".sm"
         | ".qua"
@@ -58,10 +57,11 @@ module Utilities =
         | _ -> None
 
     let (|ChartArchive|_|) (path: string) =
-        match Path.GetExtension(path).ToLower() with
+        let s = Path.GetExtension(path).ToLower()
+        match s with
         | ".osz"
         | ".qp"
-        | ".zip" -> Some()
+        | ".zip" -> Some s
         | _ -> None
 
     let (|SongFolder|_|) (path: string) =
@@ -96,5 +96,19 @@ module Utilities =
                 | _ -> true
             )
             |> fun b -> if b then None else Some()
+        else
+            None
+            
+    let (|FolderOfOszs|_|) (path: string) =
+        if Directory.Exists path then
+            if
+                Directory.EnumerateFiles path
+                |> Seq.exists (fun x ->
+                    match x with
+                    | ChartArchive ".osz" -> true
+                    | _ -> false
+                )
+            then Some()
+            else None
         else
             None

@@ -102,6 +102,40 @@ module Imports =
                 }
         }
 
+    let convert_folder_of_oszs = 
+        { new Async.Service<string * Library, ConversionResult>() with
+            override this.Handle((folder_of_oszs, library)) =
+                async {
+                    let config =
+                        { ConversionOptions.Default with
+                            MoveAssets = true
+                            PackName = Path.GetFileName folder_of_oszs
+                        }
+                    let mutable results = ConversionResult.Empty
+                    for osz in Directory.EnumerateFiles folder_of_oszs do
+                        match osz with
+                        | ChartArchive ".osz" ->
+                            let extracted_folder = Path.ChangeExtension(osz, null).TrimEnd(' ', '.')
+                            if
+                                Directory.Exists(extracted_folder)
+                                && Directory.EnumerateFileSystemEntries(extracted_folder) |> Seq.isEmpty |> not
+                            then
+                                Logging.Error(sprintf "Can't extract osz to %s because that folder exists already" extracted_folder)
+                                results <- { results with SkippedCharts = (osz, "Extraction failed") :: results.SkippedCharts }
+                            else
+                                try
+                                    ZipFile.ExtractToDirectory(osz, extracted_folder)
+                                    let! result = convert_song_folder.RequestAsync(extracted_folder, config, library)
+                                    Directory.Delete(extracted_folder, true)
+                                    results <- ConversionResult.Combine result results
+                                with err ->
+                                    Logging.Error(sprintf "Unexpected error in %s" extracted_folder, err)
+                                    results <- { results with SkippedCharts = (extracted_folder, sprintf "Unexpected error: %s" err.Message) :: results.SkippedCharts }
+                        | _ -> ()
+                    return results
+                }
+        }
+
     let import_mounted_source =
         { new Async.Service<MountedChartSource * Library, ConversionResult>() with
             override this.Handle((source, library)) =
@@ -144,7 +178,7 @@ module Imports =
         { new Async.Service<string * int * Library, ConversionResult option>() with
             override this.Handle((path, pack_id, library)) =
                 async {
-                    let dir = Path.ChangeExtension(path, null)
+                    let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
                     if
                         Directory.Exists(dir)
@@ -211,14 +245,14 @@ module Imports =
                         )
                     log_skipped result
                     return Some result
-                | ChartArchive ->
-                    let dir = Path.ChangeExtension(path, null)
+                | ChartArchive ext ->
+                    let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
                     if
                         Directory.Exists(dir)
                         && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
                     then
-                        Logging.Error(sprintf "Can't extract zip to %s because that folder exists already" dir)
+                        Logging.Error(sprintf "Can't extract %s to %s because that folder exists already" ext dir)
                         return None
                     else
                         ZipFile.ExtractToDirectory(path, dir)
@@ -241,6 +275,14 @@ module Imports =
                                     elif ext = ".qua" then "Quaver"
                                     else "Singles"
                             },
+                            library
+                        )
+                    log_skipped result
+                    return Some result
+                | FolderOfOszs ->
+                    let! result =
+                        convert_folder_of_oszs.RequestAsync(
+                            path,
                             library
                         )
                     log_skipped result

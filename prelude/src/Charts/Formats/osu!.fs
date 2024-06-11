@@ -955,17 +955,23 @@ module ``osu!`` =
     open System.IO
 
     let beatmap_from_file path : Result<Beatmap, string> =
-        match runParserOnFile parse_beatmap () path Encoding.UTF8 with
-        | Success(result, _, _) -> Result.Ok result
-        | Failure(error_message, _, _) -> Result.Error error_message
+        try
+            match runParserOnFile parse_beatmap () path Encoding.UTF8 with
+            | Success(result, _, _) -> Result.Ok result
+            | Failure(error_message, _, _) -> Result.Error error_message
+        with
+        | :? IOException as exn -> Result.Error exn.Message
 
     let beatmap_to_file path beatmap =
         File.WriteAllText(path, beatmap_to_string beatmap)
 
     let storyboard_from_file path : Result<Storyboard, string> =
-        match runParserOnFile parse_events () path Encoding.UTF8 with
-        | Success(result, _, _) -> Result.Ok result
-        | Failure(error_msg, _, _) -> Result.Error error_msg
+        try
+            match runParserOnFile parse_events () path Encoding.UTF8 with
+            | Success(result, _, _) -> Result.Ok result
+            | Failure(error_msg, _, _) -> Result.Error error_msg
+        with
+        | :? IOException as exn -> Result.Error exn.Message
 
     let storyboard_to_file path events =
         File.WriteAllText(path, storyboard_to_string events + "\n\n")
