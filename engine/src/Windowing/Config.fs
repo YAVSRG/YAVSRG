@@ -48,6 +48,7 @@ type Config =
         SmartCapTearlinePosition: Setting.Bounded<float>
         Display: Setting<int>
         AudioDevice: Setting<int>
+        InputCPUSaver: Setting<bool>
     }
     static member Default =
         {
@@ -68,4 +69,5 @@ type Config =
             SmartCapTearlinePosition = Setting.percent 0.85
             Display = Setting.simple 0
             AudioDevice = Setting.simple -1
+            InputCPUSaver = Setting.simple false
         }

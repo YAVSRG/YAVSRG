@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.Windowing
 
 open System
+open System.Threading
 open FSharp.NativeInterop
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.Common
@@ -69,6 +70,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
     let mutable resize_callback = fun (w, h) -> ()
     let mutable refresh_rate = 60
     let mutable was_fullscreen = false
+    let mutable input_cpu_saver = false
 
     do
         base.Title <- title
@@ -83,6 +85,8 @@ type Window(config: Config, title: string, ui_root: Root) as this =
     member this.ApplyConfig(config: Config) =
 
         let monitor_list = Monitors.GetMonitors()
+
+        input_cpu_saver <- config.InputCPUSaver.Value
 
         Window._monitors <-
             monitor_list
@@ -282,6 +286,9 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         this.Context.MakeNoneCurrent()
         render_thread.Start()
 
+        if input_cpu_saver && OperatingSystem.IsWindows() then
+            Thread.CurrentThread.Priority <- ThreadPriority.Highest
+
         while not (GLFW.WindowShouldClose this.WindowPtr) do
             lock
                 (Window.LOCK_OBJ)
@@ -296,7 +303,10 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 )
 
             this.ProcessInputEvents()
-            GLFW.PollEvents()
+            if input_cpu_saver then
+                GLFW.WaitEventsTimeout(0.5)
+            else
+                GLFW.PollEvents()
             InputThread.poll (this.KeyboardState, this.MouseState)
 
         this.OnUnload()
