@@ -10,7 +10,7 @@ module private Dropdown =
 
     let ITEMSIZE = 55.0f
 
-    type Item(label: string, color: Color * Color, onclick: unit -> unit) =
+    type Item(label: string, is_odd: bool, color: Color * Color, onclick: unit -> unit) =
         inherit
             Container(
                 NodeType.Button(fun () ->
@@ -30,6 +30,8 @@ module private Dropdown =
             Style.hover.Play()
 
         override this.Draw() =
+            if is_odd then
+                Draw.rect this.Bounds (Colors.shadow_1.O1a 100)
             if this.Focused then
                 Draw.rect this.Bounds (!*Palette.HOVER)
 
@@ -108,10 +110,11 @@ type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
 
         flow
         |+ seq {
-            for (value, label) in options.Items do
+            for i, (value, label) in Seq.indexed options.Items do
                 let item =
                     Dropdown.Item(
                         label,
+                        i % 2 = 1,
                         options.ColorFunc value,
                         fun () ->
                             Selection.up false
@@ -148,10 +151,11 @@ type DropdownMenu(options: DropdownMenuOptions) as this =
     override this.Init(parent: Widget) =
         flow
         |+ seq {
-            for (action, label) in options.Items do
+            for i, (action, label) in Seq.indexed options.Items do
                 yield
                     Dropdown.Item(
                         label,
+                        i % 2 = 1,
                         Colors.text,
                         fun () ->
                             Selection.up false

@@ -60,7 +60,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
             step <- value
             decimal_places <- max 0 (int (MathF.Ceiling(- MathF.Log10(step))))
 
-    member val Format = (fun x -> x.ToString()) with get, set
+    member val Format : float32 -> string = (fun x -> x.ToString("n" + decimal_places.ToString())) with get, set
 
     static member Percent(setting) =
         Slider(setting, Format = (fun x -> sprintf "%.0f%%" (x * 100.0f)))
