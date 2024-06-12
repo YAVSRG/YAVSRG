@@ -91,10 +91,10 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
     let on_hit_ev = Event<HitEvent<HitEventGuts>>()
     let on_hit = on_hit_ev.Publish
 
-    let osu_cbrush_cancel =
-        match ruleset.Accuracy.HoldNoteBehaviour with
-        | HoldNoteBehaviour.Osu _ -> true
-        | _ -> false
+    //let osu_cbrush_cancel =
+    //    match ruleset.Accuracy.HoldNoteBehaviour with
+    //    | HoldNoteBehaviour.Osu _ -> true
+    //    | _ -> false
 
     member this.OnHit = on_hit
 
@@ -272,13 +272,13 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
                 // Otherwise keep looking for something closer and allow this note to be missed
                 if Time.abs matching_note_delta < ruleset.Accuracy.CbrushWindow then
                     i <- hit_data.Length
-            // Osu's naive version of cbrush cancelling
-            elif 
-                osu_cbrush_cancel
-                && status.[k] = HitStatus.HIT_ACCEPTED
-                && t > now
-            then
-                cbrush_absorb_delta <- -1.0f<ms>
+            // Osu's naive version of cbrush cancelling <-- added for tests and then removed
+            //elif 
+            //    osu_cbrush_cancel
+            //    && status.[k] = HitStatus.HIT_ACCEPTED
+            //    && t > now
+            //then
+            //    cbrush_absorb_delta <- -1.0f<ms>
             // Find hit note that got hit earlier than the cbrush window, and track how close it is
             elif
                 status.[k] = HitStatus.HIT_ACCEPTED
