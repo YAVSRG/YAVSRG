@@ -1,6 +1,8 @@
 ﻿namespace Prelude.Charts.Formats
 
+open System.IO
 open FParsec
+open Percyqaz.Common
 open Prelude
 
 //https://github.com/stepmania/stepmania/wiki/sm
@@ -73,7 +75,7 @@ module StepMania =
             DESCRIPTION: string
             CHARTSTYLE: string
             DIFFICULTY: DifficultyType
-            METER: int
+            METER: string
             CREDIT: string
         }
 
@@ -87,7 +89,7 @@ module StepMania =
     let private parse_key_value =
         comment >>. (skipChar '#') >>. text .>> skipChar ':'
         .>>. (sepBy text (skipChar ':'))
-        .>> (skipChar ';' <|> skipRestOfLine true)
+        .>> (optional (skipChar ';') >>. skipRestOfLine true)
         .>> spaces
 
     let private parse_header: Parser<Header, unit> = many parse_key_value .>> eof
@@ -242,7 +244,7 @@ module StepMania =
                                 DESCRIPTION = ""
                                 CHARTSTYLE = ""
                                 DIFFICULTY = DifficultyType.Parse(difficultyType, true)
-                                METER = int footMeter
+                                METER = footMeter
                                 CREDIT = author
                             }
                             :: s.Charts
@@ -255,6 +257,9 @@ module StepMania =
     let private parse_stepmania_file = parse_header |>> read_stepmania_data
 
     let stepmania_data_from_file path : Result<StepManiaData, string> =
-        match runParserOnFile parse_stepmania_file () path System.Text.Encoding.UTF8 with
-        | Success(result, _, _) -> Result.Ok result
-        | Failure(error_message, _, _) -> Result.Error error_message
+        try
+            match runParserOnFile parse_stepmania_file () path System.Text.Encoding.UTF8 with
+            | Success(result, _, _) -> Result.Ok result
+            | Failure(error_message, _, _) -> Result.Error error_message
+        with
+        | :? IOException as exn -> Result.Error exn.Message

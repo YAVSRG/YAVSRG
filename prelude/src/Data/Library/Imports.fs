@@ -62,7 +62,11 @@ module Imports =
                             function
                             | ChartFile _ as file ->
                                 let action = { Config = config; Source = file }
-                                convert_chart_file action
+                                try
+                                    convert_chart_file action
+                                with err ->
+                                    Logging.Error(sprintf "Unhandled exception converting %s" file, err)
+                                    []
                             | _ -> []
                         )
                         |> Seq.map (
