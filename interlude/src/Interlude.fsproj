@@ -85,7 +85,8 @@
     <Compile Include="Features\Import\Mounts\Edit.fs" />
     <Compile Include="Features\Import\Mounts\Display.fs" />
     <Compile Include="Features\Import\Mounts\Mounts.fs" />
-    <Compile Include="Features\Import\EtternaPacks.fs" />
+    <Compile Include="Features\Import\EtternaPacks\EtternaOnline.fs" />
+    <Compile Include="Features\Import\EtternaPacks\EtternaPacks.fs" />
     <Compile Include="Features\Import\Beatmaps\NeriNyan.fs" />
     <Compile Include="Features\Import\Beatmaps\Beatmaps.fs" />
     <Compile Include="Features\Import\Noteskins\Versions.fs" />

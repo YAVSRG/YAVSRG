@@ -2,7 +2,6 @@
 
 open System.IO
 open Percyqaz.Common
-open Percyqaz.Data
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
@@ -12,25 +11,7 @@ open Prelude.Data
 open Interlude.Content
 open Interlude.UI
 
-[<Json.AutoCodec>]
-type EtternaOnlinePackAttributes =
-    {
-        name: string
-        average: float
-        download: string
-        mirror: string
-        size: int64
-    }
-
-[<Json.AutoCodec>]
-type EtternaOnlinePack =
-    {
-        ``type``: string
-        id: int
-        attributes: EtternaOnlinePackAttributes
-    }
-
-type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
+type EtternaPackCard(data: EtternaOnlinePack) as this =
     inherit
         FrameContainer(
             NodeType.Button(fun () ->
@@ -67,7 +48,7 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
                 fun completed ->
                     if completed then
                         Imports.convert_stepmania_pack_zip.Request(
-                            (target, id, Content.Library),
+                            (target, data.id, Content.Library),
                             function
                             | Some result ->
                                 Notifications.task_feedback (
@@ -103,7 +84,7 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
                 }
         )
         |+ Text(
-            (sprintf "%.1fMB" (float data.size / 1000000.0)),
+            data.size,
             Align = Alignment.RIGHT,
             Position =
                 {
@@ -129,7 +110,7 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
                 }
         )
         |+ Text(
-            (sprintf "Average difficulty (MSD): %.2f" data.average),
+            (sprintf "Average difficulty (MSD): %.2f" data.overall),
             Align = Alignment.LEFT,
             Position =
                 {
@@ -141,7 +122,7 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
         )
         |+ Button(
             Icons.EXTERNAL_LINK
-            , fun () -> open_url (sprintf "https://etternaonline.com/pack/%i" id)
+            , fun () -> open_url (sprintf "https://beta.etternaonline.com/packs/%i" data.id)
             , Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f)
         )
         |* Button(Icons.DOWNLOAD, download, Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
@@ -177,22 +158,6 @@ type EtternaPackCard(id: int, data: EtternaOnlinePackAttributes) as this =
 
 module EtternaPacks =
 
-    // todo: automated test to ping EO and see if the cert is expired
-    //let allow_expired_etternaonline_cert () =
-    //    ServicePointManager.ServerCertificateValidationCallback <-
-    //        RemoteCertificateValidationCallback(fun _ cert _ sslPolicyErrors ->
-    //            if sslPolicyErrors = SslPolicyErrors.None then
-    //                true
-    //            else
-    //                let cert_string = cert.GetCertHashString().ToUpper()
-
-    //                Logging.Debug(
-    //                    sprintf "Expired certificate: %s (expired on %s)" cert_string (cert.GetExpirationDateString())
-    //                )
-
-    //                cert_string = "56726C10C603AFE9C338966ABC303D161072FEE5"
-    //        )
-
     type EtternaPackSearch() as this =
         inherit Container(NodeType.Container(fun _ -> Some this.Items))
 
@@ -207,15 +172,12 @@ module EtternaPacks =
         override this.Init(parent) =
 
             WebServices.download_json (
-                "https://api.etternaonline.com/v2/packs/",
+                "https://api.beta.etternaonline.com/api/packs?page=1&limit=36&sort=-popularity",
                 fun data ->
                     match data with
-                    | Some(d:
-                        {|
-                            data: ResizeArray<EtternaOnlinePack>
-                        |}) ->
+                    | Some(d: EtternaOnlineApiResponse) ->
                         let cards =
-                            d.data.ToArray() |> Array.map (fun p -> EtternaPackCard(p.id, p.attributes))
+                            d.data |> Seq.map (fun p -> EtternaPackCard(p))
 
                         defer (fun () ->
                             flow |* cards
