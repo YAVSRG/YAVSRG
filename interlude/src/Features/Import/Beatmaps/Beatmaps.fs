@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+namespace Interlude.Features.Import
 
 open System
 open System.Text.RegularExpressions
@@ -396,7 +396,7 @@ module Beatmaps =
                     Position = Position.SliceTop 60.0f
                 )
                 |+ LoadingIndicator.Border(fun () -> loading))
-            |+ Text(%"imports.disclaimer.osu", Position = Position.SliceBottom 55.0f)
+            |+ Text(%"imports.osu.disclaimer", Position = Position.SliceBottom 55.0f)
             |+ scroll
             |+ (let r =
                     status_button
@@ -429,7 +429,7 @@ module Beatmaps =
                     Right = 0.72f %- 25.0f
                 }
                 Colors.grey_2
-            |+ EmptyState(Icons.SEARCH, %"imports.beatmaps.no_results", Position = Position.TrimTop(120.0f))
+            |+ EmptyState(Icons.SEARCH, %"imports.osu.no_results", Position = Position.TrimTop(120.0f))
                 .Conditional(fun () -> not loading && items.Count = 0)
             |* SortingDropdown(
                 [

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+namespace Interlude.Features.Import
 
 open System.IO
 open Percyqaz.Common
@@ -244,7 +244,7 @@ module EtternaPacks =
                     Position = Position.SliceTop 60.0f
                 )
                 |+ LoadingIndicator.Border(fun () -> loading))
-            |+ Text(%"imports.disclaimer.etterna", Position = Position.SliceBottom 55.0f)
+            |+ Text(%"imports.etterna.disclaimer", Position = Position.SliceBottom 55.0f)
             |+ scroll
             |+ EmptyState(Icons.X, "Couldn't connect to EtternaOnline").Conditional(fun () -> failed)
             |* EmptyState(Icons.SEARCH, %"imports.etterna.no_results", Position = Position.TrimTop(120.0f))

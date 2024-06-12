@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+namespace Interlude.Features.Import
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -52,8 +52,8 @@ type private Sidebar() as this =
     let flow =
         FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(130.0f).Margin(10.0f))
         |+ TabButton(Icons.LINK, %"imports.local", ImportScreen.container, Mounts.tab)
-        |+ TabButton(Icons.ARCHIVE, %"imports.etterna_packs", ImportScreen.container, EtternaPacks.tab)
-        |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.beatmaps", ImportScreen.container, Beatmaps.tab)
+        |+ TabButton(Icons.ARCHIVE, %"imports.etterna", ImportScreen.container, EtternaPacks.tab)
+        |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.osu", ImportScreen.container, Beatmaps.tab)
         |+ TabButton(Icons.SIDEBAR, %"imports.tables", ImportScreen.container, Tables.tab)
         |+ TabButton(Icons.IMAGE, %"imports.noteskins", ImportScreen.container, Noteskins.tab)
         |+ TabButton(Icons.SLIDERS, %"imports.rulesets", ImportScreen.container, Rulesets.tab)
