@@ -1,4 +1,4 @@
-namespace Interlude.Features.Import.FromOsu
+namespace Interlude.Features.Import.osu
 
 open System.IO
 open System.Text.RegularExpressions
@@ -12,7 +12,7 @@ open Interlude.UI.Menu
 open Interlude.Options
 open Interlude.Content
 
-module ImportSkins =
+module Skins =
 
     type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, target_path: string, existing_folder: string option) =
         inherit Page()

@@ -124,7 +124,7 @@ module Noteskins =
             |+ Text(%"imports.noteskins.hint_a", Position = Position.TrimLeft(300.0f).SliceBottom(100.0f).SliceTop(50.0f), Align = Alignment.RIGHT)
             |+ Text(%"imports.noteskins.hint_b", Position = Position.TrimLeft(300.0f).SliceBottom(50.0f), Align = Alignment.RIGHT)
             |+ Button(Icons.DOWNLOAD + " " + %"osu_skin_import.list_skins", 
-                (fun () -> FromOsu.ImportSkins.OsuSkinsListPage().Show()),
+                (fun () -> osu.Skins.OsuSkinsListPage().Show()),
                 Position = Position.SliceLeft(300.0f).SliceBottom(70.0f).Translate(0.0f, -15.0f)
             )
             |* scroll

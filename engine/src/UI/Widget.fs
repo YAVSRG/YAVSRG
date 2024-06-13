@@ -116,6 +116,7 @@ type Overlay(node_type: NodeType) =
             this.VisibleBounds <- Viewport.bounds
 
 [<Sealed>]
-type Dummy() =
-    inherit StaticWidget(NodeType.None)
+type Dummy(nt) =
+    inherit StaticWidget(nt)
+    new() = Dummy(NodeType.None)
     override this.Draw() = ()

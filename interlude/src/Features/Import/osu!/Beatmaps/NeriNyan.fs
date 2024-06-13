@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+﻿namespace Interlude.Features.Import.osu
 
 open Percyqaz.Data
 

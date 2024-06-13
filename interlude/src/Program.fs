@@ -46,7 +46,7 @@ let launch (instance: int) =
             AppDomain.CurrentDomain.ProcessExit.Add(fun args -> Startup.deinit true crash_splash)
         )
 
-        Window.on_file_drop.Add(Import.Import.handle_file_drop)
+        Window.on_file_drop.Add(Import.FileDrop.handle)
 
         use icon_stream = Utils.get_resource_stream ("icon.png")
         let icon = Bitmap.from_stream true icon_stream

@@ -1,15 +1,12 @@
 ﻿namespace Interlude.Features.OptionsMenu.Debug
 
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning
 open Prelude.Data.Library
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features.OptionsMenu.Themes
 
 type DebugPage() =
     inherit Page()
@@ -18,23 +15,6 @@ type DebugPage() =
 
     let refresh () =
         themes.Child <- SelectDropdown(Themes.list (), options.Theme)
-
-    let try_edit_theme () =
-        let theme = Content.Theme
-
-        match theme.Source with
-        | Embedded _ ->
-            ConfirmPage(
-                [ theme.Config.Name ] %> "themes.confirmextractdefault",
-                (fun () ->
-                    if Themes.create_new (theme.Config.Name + "_extracted") then
-                        ()
-                    else
-                        Logging.Error "Theme folder already exists"
-                )
-            )
-                .Show()
-        | Folder _ -> EditThemePage().Show()
 
     override this.Content() =
         refresh ()
@@ -57,12 +37,9 @@ type DebugPage() =
         |+ themes
             .Tooltip(Tooltip.Info("themes.theme"))
             .Pos(3)
-        |+ PageButton(%"themes.edittheme", try_edit_theme)
-            .Tooltip(Tooltip.Info("themes.edittheme"))
-            .Pos(5)
         |+ PageButton(%"themes.showthemesfolder", (fun () -> open_directory (get_game_folder "Themes")))
             .Tooltip(Tooltip.Info("themes.showthemesfolder"))
-            .Pos(7)
+            .Pos(5)
         :> Widget
 
     override this.Title = %"debug"

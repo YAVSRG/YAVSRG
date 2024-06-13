@@ -11,6 +11,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Stats
 open Interlude.Features.MainMenu
 open Interlude.Features.Import
+open Interlude.Features.Import.Mounts
 open Interlude.Features.Score
 open Interlude.Features.LevelSelect
 open Interlude.Features.Multiplayer
@@ -77,7 +78,7 @@ module Startup =
                 migrate ()
                 SelectedChart.init_window ()
                 Network.init_window ()
-                Mounts.import_mounts_on_startup ()
+                Mounts.init_window ()
                 base.Init()
         }
 

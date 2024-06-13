@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+﻿namespace Interlude.Features.Import.Mounts
 
 open System.IO
 open Percyqaz.Common
@@ -11,7 +11,7 @@ open Interlude.UI
 
 module Mounts =
 
-    let import_mounts_on_startup () =
+    let init_window () =
         match options.OsuMount.Value with
         | Some mount ->
             if Directory.Exists mount.SourceFolder then

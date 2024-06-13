@@ -1,4 +1,4 @@
-namespace Interlude.Features.Import
+namespace Interlude.Features.Import.osu
 
 open System
 open System.Text.RegularExpressions
@@ -13,6 +13,13 @@ open Prelude.Data.Library.Sorting
 open Prelude.Data
 open Interlude.Content
 open Interlude.UI
+open Interlude.Features.Import
+
+type private BeatmapDownloadStatus =
+    | NotDownloaded
+    | Downloading
+    | Installed
+    | DownloadFailed
 
 type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
     inherit

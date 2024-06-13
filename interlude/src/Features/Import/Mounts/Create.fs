@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+﻿namespace Interlude.Features.Import.Mounts
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -8,6 +8,7 @@ open Prelude.Data.Library
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Import
 
 type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) =
     inherit Page()

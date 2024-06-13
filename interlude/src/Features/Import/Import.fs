@@ -13,7 +13,7 @@ open Interlude.Features.Online
 module ImportScreen =
 
     let container =
-        SwapContainer(Mounts.tab, Position = Position.TrimLeft(400.0f).Margin(50.0f, 20.0f))
+        SwapContainer(Mounts.Mounts.tab, Position = Position.TrimLeft(400.0f).Margin(50.0f, 20.0f))
 
     let switch_to_noteskins () = container.Current <- Noteskins.tab
     let switch_to_rulesets () = container.Current <- Rulesets.tab
@@ -24,7 +24,7 @@ module ImportScreen =
         || Imports.auto_convert.Status <> Async.ServiceStatus.Idle
         || Caching.Cache.recache_service.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
-        || FromOsu.ImportScores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
+        || osu.Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
 type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
     inherit Container(NodeType.Container(fun _ -> Some this.Button))
@@ -51,9 +51,9 @@ type private Sidebar() as this =
 
     let flow =
         FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(130.0f).Margin(10.0f))
-        |+ TabButton(Icons.LINK, %"imports.local", ImportScreen.container, Mounts.tab)
+        |+ TabButton(Icons.LINK, %"imports.local", ImportScreen.container, Mounts.Mounts.tab)
         |+ TabButton(Icons.ARCHIVE, %"imports.etterna", ImportScreen.container, EtternaPacks.tab)
-        |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.osu", ImportScreen.container, Beatmaps.tab)
+        |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.osu", ImportScreen.container, osu.Beatmaps.tab)
         |+ TabButton(Icons.SIDEBAR, %"imports.tables", ImportScreen.container, Tables.tab)
         |+ TabButton(Icons.IMAGE, %"imports.noteskins", ImportScreen.container, Noteskins.tab)
         |+ TabButton(Icons.SLIDERS, %"imports.rulesets", ImportScreen.container, Rulesets.tab)

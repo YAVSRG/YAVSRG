@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+﻿namespace Interlude.Features.Import.Mounts
 
 open Percyqaz.Common
 open Prelude
@@ -7,6 +7,7 @@ open Percyqaz.Flux.UI
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Import
 
 type private EditMountPage(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) =
     inherit Page()
@@ -47,7 +48,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                 PageButton.Once(
                     %"mount.import_osu_scores",
                     fun () ->
-                        FromOsu.ImportScores.import_osu_scores_service.Request(
+                        osu.Scores.import_osu_scores_service.Request(
                             (),
                             fun () ->
                                 Notifications.task_feedback (
@@ -73,7 +74,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
             then
                 PageButton(
                     %"mount.import_osu_skins",
-                    fun () -> FromOsu.ImportSkins.OsuSkinsListPage().Show()
+                    fun () -> osu.Skins.OsuSkinsListPage().Show()
                 )
                     .Tooltip(Tooltip.Info("mount.import_osu_skins"))
                     .Pos(10)

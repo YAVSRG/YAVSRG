@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import.FromOsu
+﻿namespace Interlude.Features.Import.osu
 
 open System
 open System.IO
@@ -14,7 +14,7 @@ open Prelude.Data.Library.Caching
 open Interlude.Options
 open Interlude.Content
 
-module ImportScores =
+module Scores =
 
     let private import_osu_scores () =
         match options.OsuMount.Value with
