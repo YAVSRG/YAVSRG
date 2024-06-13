@@ -26,6 +26,7 @@ type GameplayPage() =
         |+ Text(
             (fun () ->
                 [
+                    ((1080.0f - options.HitPosition.Value) / options.ScrollSpeed.Value).ToString("F0")
                     (options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
                     (options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
                     "C" + (60000.0f * options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.ColumnWidth).ToString("F0")

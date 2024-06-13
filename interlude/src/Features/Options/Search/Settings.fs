@@ -111,6 +111,7 @@ module Settings =
                 yield Text(
                     (fun () ->
                         [
+                            ((1080.0f - options.HitPosition.Value) / options.ScrollSpeed.Value).ToString("F0")
                             (options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
                             (options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
                             "C" + (60000.0f * options.ScrollSpeed.Value / Content.NoteskinConfig.ColumnWidth).ToString("F0")
@@ -118,7 +119,7 @@ module Settings =
                         %> "gameplay.scrollspeed.info"
                     ),
                     Align = Alignment.CENTER
-                ), 1, 1, PageWidth.Normal
+                ), 1, 1, PageWidth.Custom (PRETTYTEXTWIDTH + PRETTYWIDTH)
             if token_match tokens [|%"gameplay.hitposition"|] then
                 yield PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
                     .Tooltip(Tooltip.Info("gameplay.hitposition"))

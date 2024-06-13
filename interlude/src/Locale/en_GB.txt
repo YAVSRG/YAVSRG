@@ -89,7 +89,7 @@ gameplay.rate.hotkey_hint_i=You can adjust rates with %0 and %1, for smaller ste
 gameplay.rate.hotkey_hint_ii=Rates can be changed without opening this menu, and also while practicing a song or watching a replay
 gameplay.rate.tooltip=Change this to speed up or slow down a song!\nUseful for practicing or challenging yourself.
 gameplay.scrollspeed=Scroll speed
-gameplay.scrollspeed.info=%0 on osu! = %1 on Quaver = %2 on Etterna*
+gameplay.scrollspeed.info=%0ms = %1 on osu! = %2 on Quaver = %3 on Etterna*
 gameplay.scrollspeed.tooltip=Controls the scroll speed of notes.\nIt's a linear scale, 100% = 1 pixel scrolled per millisecond.\n\n*Etterna scroll speed equivalent is only correct if your columns are the same width.
 gameplay.upscroll=Upscroll
 gameplay.upscroll.tooltip=Set this to true if you want notes to scroll upwards instead of downwards.
@@ -425,6 +425,7 @@ levelselect.info.mode=Score source
 levelselect.info.mode.tooltip=Cycle through what gets displayed here.
 levelselect.info.scoreboard=Local scores
 levelselect.info.scoreboard.empty=No local scores
+levelselect.info.scoreboard.empty.subtitle=But you could set one now..
 levelselect.info.scoreboard.filter=Score filter
 levelselect.info.scoreboard.filter.currentmods=Current mods
 levelselect.info.scoreboard.filter.currentrate=Current rate
