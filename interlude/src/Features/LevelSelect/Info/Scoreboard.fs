@@ -302,7 +302,7 @@ type Scoreboard(display: Setting<Display>) =
                 else
                     Loader.container.Focus false
         )
-        |* EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty")
+        |* EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty", Subtitle = %"levelselect.info.scoreboard.empty.subtitle")
             .Conditional(fun () -> count = 0)
         base.Init parent
 
