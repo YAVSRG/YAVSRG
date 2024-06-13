@@ -40,8 +40,9 @@ type Page() as this =
     abstract member OnReturnTo: unit -> unit
     default this.OnReturnTo() = ()
 
-    // todo: make this an abstract method that generates the content instead of a must-call
     abstract member Content : unit -> Widget
+    abstract member Header : unit -> Widget
+    default this.Header() = PageHeaderBase()
 
     override this.Update(elapsed_ms, moved) =
         if is_current && not content.Focused then
@@ -107,7 +108,9 @@ type Page() as this =
 
     override this.Init(parent: Widget) =
         content <- this.Content()
-        this |* content
+        this
+        |+ this.Header()
+        |* content
 
         this.Hide(this.Direction.Reverse)
         base.Init parent
@@ -115,8 +118,31 @@ type Page() as this =
 
     abstract member Direction : PageEasing
     default this.Direction = PageEasing.Up
-        
 
+and PageHeaderBase() =
+    inherit StaticWidget(NodeType.None)
+
+    let titles = Menu.PageTitles() |> List.rev |> Array.ofList
+
+    let GAP_BETWEEN_BOXES = 70.0f
+
+    override this.Init parent =
+        this.Position <- Position.Row(40.0f, 60.0f)
+        base.Init parent
+
+    override this.Draw() =
+        let mutable x = this.Bounds.Left + PRETTY_MARGIN_X
+        let mutable first = true
+        for t in titles do
+            let width = Text.measure (Style.font, t) * this.Bounds.Height * 0.6f
+            let bounds = Rect.Box(x, this.Bounds.Top, width, this.Bounds.Height)
+            Draw.rect (bounds.Expand(Style.PADDING * 2.0f, Style.PADDING)) Colors.shadow_2.O2
+            Text.fill_b (Style.font, t, bounds, Colors.text, Alignment.CENTER)
+            x <- x + width + GAP_BETWEEN_BOXES
+            if not first then
+                Text.fill_b (Style.font, Icons.ARROW_RIGHT, bounds.BorderLeft GAP_BETWEEN_BOXES, Colors.text_greyout, Alignment.CENTER)
+            first <- false
+        
 and Menu(top_level: Page) as this =
     inherit Dialog()
 
@@ -126,7 +152,6 @@ and Menu(top_level: Page) as this =
     // Everything past the current page could be Some from an old backed out page
     let stack: Page option array = Array.create MAX_PAGE_DEPTH None
     let mutable namestack = []
-    let mutable name = ""
 
     let back_button =
         IconButton(
@@ -138,7 +163,6 @@ and Menu(top_level: Page) as this =
         )
 
     let volume = Volume()
-
     let exit_key = HotkeyHoldAction("exit", (fun () -> Selection.up false), Menu.Exit)
 
     static let mutable _instance = None
@@ -155,12 +179,9 @@ and Menu(top_level: Page) as this =
         | Some instance -> instance.ShowPage(page ())
 
     member private this.ShowPage(page: Page) =
-
-        page.Init this
-
         let n = List.length namestack
         namestack <- page.Title :: namestack
-        name <- String.Join(" > ", List.rev namestack)
+        page.Init this
 
         match stack.[n] with
         | None -> ()
@@ -183,7 +204,6 @@ and Menu(top_level: Page) as this =
 
     member private this.Back() =
         namestack <- List.tail namestack
-        name <- String.Join(" > ", List.rev namestack)
         let n = List.length namestack
         let page = stack.[n].Value
         page.OnClose()
@@ -211,8 +231,6 @@ and Menu(top_level: Page) as this =
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
             stack.[i].Value.Draw()
             i <- i + 1
-
-        Text.fill_b (Style.font, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Colors.text, 0.0f)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -244,6 +262,12 @@ and Menu(top_level: Page) as this =
         base.Close()
         Selection.unclamp ()
         _instance <- None
+
+    member private this.PageTitles() = namestack
+    static member PageTitles() = 
+        match _instance with
+        | None -> []
+        | Some menu -> menu.PageTitles()
 
 type Page with
     member this.Show() = Menu.ShowPage this
