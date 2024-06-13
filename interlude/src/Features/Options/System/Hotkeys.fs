@@ -81,7 +81,7 @@ type HotkeysPage() =
         for hk in Hotkeys.hotkeys.Keys do
             if hk <> "none" then
                 container.Add(
-                    PageSetting(sprintf "hotkeys.%s" hk, hotkey_editor hk)
+                    PageSetting(%(sprintf "hotkeys.%s" hk), hotkey_editor hk)
                         .Tooltip(Tooltip.Info(sprintf "hotkeys.%s" hk))
                 )
 
