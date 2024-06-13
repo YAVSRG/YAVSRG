@@ -12,6 +12,12 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
 
+type private NoteskinDownloadStatus =
+    | NotDownloaded
+    | Downloading
+    | Installed
+    | DownloadFailed
+
 type NoteskinVersionCard(group: NoteskinGroup, version: NoteskinVersion) as this =
     inherit
         FrameContainer(

@@ -1,4 +1,4 @@
-namespace Interlude.Features.Import
+namespace Interlude.Features.Import.Etterna
 
 open System.IO
 open Percyqaz.Common
@@ -10,6 +10,13 @@ open Prelude.Data.Library.Sorting
 open Prelude.Data
 open Interlude.Content
 open Interlude.UI
+open Interlude.Features.Import
+
+type private PackDownloadStatus =
+    | NotDownloaded
+    | Downloading
+    | Installed
+    | DownloadFailed
 
 type EtternaPackCard(data: EtternaOnlinePack) as this =
     inherit
@@ -156,7 +163,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                 | _ -> true)
                 filter
 
-module EtternaPacks =
+module Packs =
 
     type EtternaPackSearch() as this =
         inherit Container(NodeType.Container(fun _ -> Some this.Items))

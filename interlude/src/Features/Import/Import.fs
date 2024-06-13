@@ -52,7 +52,7 @@ type private Sidebar() as this =
     let flow =
         FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(130.0f).Margin(10.0f))
         |+ TabButton(Icons.LINK, %"imports.local", ImportScreen.container, Mounts.Mounts.tab)
-        |+ TabButton(Icons.ARCHIVE, %"imports.etterna", ImportScreen.container, EtternaPacks.tab)
+        |+ TabButton(Icons.ARCHIVE, %"imports.etterna", ImportScreen.container, Etterna.Packs.tab)
         |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.osu", ImportScreen.container, osu.Beatmaps.tab)
         |+ TabButton(Icons.SIDEBAR, %"imports.tables", ImportScreen.container, Tables.tab)
         |+ TabButton(Icons.IMAGE, %"imports.noteskins", ImportScreen.container, Noteskins.tab)

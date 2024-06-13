@@ -14,7 +14,7 @@ module Import =
     let charts_updated_ev = Event<unit>()
     let charts_updated = charts_updated_ev.Publish
 
-    let download_chart_by_hash =
+    let download_missing_chart =
         { new Async.Service<string * string, bool>() with
             override _.Handle((chart_id, folder_name)) =
                 async {
@@ -36,9 +36,3 @@ module Import =
                     return! Cache.cdn_download folder_name chart_id (found.Chart, found.Song) Content.Cache
                 }
         }
-
-type private DownloadStatus =
-    | NotDownloaded
-    | Downloading
-    | Installed
-    | DownloadFailed

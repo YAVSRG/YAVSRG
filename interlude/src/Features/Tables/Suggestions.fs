@@ -127,7 +127,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             Menu.Exit()
         | None ->
 
-        download_chart_by_hash.Request(
+        download_missing_chart.Request(
             (suggestion.ChartId, table.Id),
             function
             | true -> 
