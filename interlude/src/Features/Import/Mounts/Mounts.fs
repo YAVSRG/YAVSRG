@@ -65,7 +65,7 @@ module Mounts =
         | None -> ()
 
     let tab =
-        NavigationContainer.Column<Widget>()
+        NavigationContainer.Column()
         |+ MountControl(MountedGameType.Osu, options.OsuMount, Position = Position.Row(100.0f, 150.0f).Margin(200.0f, 0.0f))
         |+ MountControl(MountedGameType.Quaver, options.QuaverMount, Position = Position.Row(270.0f, 150.0f).Margin(200.0f, 0.0f))
         |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount, Position = Position.Row(440.0f, 150.0f).Margin(200.0f, 0.0f))

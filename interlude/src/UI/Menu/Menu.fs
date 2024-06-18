@@ -107,7 +107,7 @@ type Page() as this =
         is_current <- false
 
     override this.Init(parent: Widget) =
-        content <- (NavigationContainer.Column<Widget>() |+ this.Content() |+ this.Header())
+        content <- (NavigationContainer.Column() |+ this.Content() |+ this.Header())
         this |* content
 
         this.Hide(this.Direction.Reverse)

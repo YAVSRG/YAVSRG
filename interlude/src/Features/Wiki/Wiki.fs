@@ -175,7 +175,7 @@ module Wiki =
         let mutable flow = Unchecked.defaultof<ScrollContainer<WikiContent>>
 
         let buttons =
-            NavigationContainer.Row<Widget>(
+            NavigationContainer.Row(
                 Position = Position.SliceTop(70.0f).Margin((Viewport.vwidth - 1400.0f) * 0.5f, 10.0f)
             )
             |+ Button(

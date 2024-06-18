@@ -73,7 +73,7 @@ type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
 
     let mutable sprite = Unchecked.defaultof<Sprite>
     let mutable selected: bool array array = [||]
-    let mutable items: NavigationContainer.Grid<Widget> = Unchecked.defaultof<_>
+    let mutable items: NavigationContainer.Grid = Unchecked.defaultof<_>
 
     member this.Refresh() =
         sprite <- Content.Texture texture_id
@@ -99,7 +99,7 @@ type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
                 Position = Position.Box(0.5f, 0.0f, -grid_width * 0.5f, 0.0f, grid_width, this.Bounds.Height)
             )
 
-        let grid = NavigationContainer.Grid<Widget>(WrapNavigation = false, Floating = true)
+        let grid = NavigationContainer.Grid(WrapNavigation = false, Floating = true)
 
         for r = 0 to sprite.Rows - 1 do
             for c = 0 to sprite.Columns - 1 do
@@ -290,7 +290,7 @@ type TextureEditPage(texture_id: string) =
     override this.Content() =
         Content.Noteskin.SplitTexture(texture_id)
 
-        NavigationContainer.Column<Widget>()
+        NavigationContainer.Column()
         |+ texture_editor
         |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f, Position = Position.SliceRight(400.0f).Margin(50.0f))
             |+ Button(

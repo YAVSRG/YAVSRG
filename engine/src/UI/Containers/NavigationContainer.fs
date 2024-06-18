@@ -10,16 +10,16 @@ open Percyqaz.Flux.Utils
 module NavigationContainer =
 
     [<AbstractClass>]
-    type Base<'T when 'T :> Widget>() as this =
+    type Base() as this =
         inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map (fun x -> x :> ISelection)))
 
-        let children = ResizeArray<'T>()
+        let children = ResizeArray<Widget>()
         let mutable last_selected = 0
 
         member val WrapNavigation = true with get, set
 
         member private this.WhoIsFocused: int option =
-            Seq.tryFindIndex (fun (c: 'T) -> c.Focused) children
+            Seq.tryFindIndex (fun (c: Widget) -> c.Focused) children
 
         member private this.WhoShouldFocus: Widget option =
             if children.Count = 0 then
@@ -95,7 +95,7 @@ module NavigationContainer =
             if this.Focused && children.Count > 0 then
                 this.Navigate()
 
-        member this.Add(child: 'T) =
+        member this.Add(child: Widget) =
             require_ui_thread ()
             children.Add child
 
@@ -112,20 +112,20 @@ module NavigationContainer =
             require_ui_thread ()
             children.Clear()
 
-        static member (|+)(parent: #Base<'T>, child: 'T) =
+        static member (|+)(parent: #Base, child: Widget) =
             parent.Add child
             parent
 
-        static member (|+)(parent: #Base<'T>, children: 'T seq) =
+        static member (|+)(parent: #Base, children: Widget seq) =
             Seq.iter parent.Add children
             parent
 
-        static member (|*)(parent: #Base<'T>, child: 'T) = parent.Add child
-        static member (|*)(parent: #Base<'T>, children: 'T seq) = Seq.iter parent.Add children
+        static member (|*)(parent: #Base, child: Widget) = parent.Add child
+        static member (|*)(parent: #Base, children: Widget seq) = Seq.iter parent.Add children
 
     [<Sealed>]
-    type Column<'T when 'T :> Widget>() =
-        inherit Base<'T>()
+    type Column() =
+        inherit Base()
 
         override this.Navigate() =
             if this.CanPrevious() && (%%"up").Tapped() then
@@ -138,8 +138,8 @@ module NavigationContainer =
                 this.SelectFocusedChild()
 
     [<Sealed>]
-    type Row<'T when 'T :> Widget>() =
-        inherit Base<'T>()
+    type Row() =
+        inherit Base()
 
         override this.Navigate() =
             if this.CanPrevious() && (%%"left").Tapped() then
@@ -151,16 +151,16 @@ module NavigationContainer =
             if (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
-    type private GridSwitchItem<'T when 'T :> Widget> = { Widget: 'T; X: int; Y: int }
+    type private GridSwitchItem = { Widget: Widget; X: int; Y: int }
 
     [<Sealed>]
-    type Grid<'T when 'T :> Widget>() as this =
+    type Grid() as this =
         inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus))
 
         let mutable rows = 0
         let mutable columns = 0
         let mutable last_selected = 0
-        let children = ResizeArray<GridSwitchItem<'T>>()
+        let children = ResizeArray<GridSwitchItem>()
 
         member this.Clear() =
             children.Clear()
@@ -171,7 +171,7 @@ module NavigationContainer =
         member val WrapNavigation = true with get, set
 
         member private this.WhoIsFocused: int option =
-            Seq.tryFindIndex (fun (c: GridSwitchItem<'T>) -> c.Widget.Focused) children
+            Seq.tryFindIndex (fun (c: GridSwitchItem) -> c.Widget.Focused) children
 
         member private this.WhoShouldFocus: ISelection option =
             if children.Count = 0 then
@@ -193,7 +193,7 @@ module NavigationContainer =
 
                 let mutable found =
                     Seq.tryFindIndex
-                        (fun (item: GridSwitchItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable)
+                        (fun (item: GridSwitchItem) -> item.X = c.X && item.Y = p && item.Widget.Focusable)
                         children
 
                 while found.IsNone && p <> c.Y do
@@ -201,7 +201,7 @@ module NavigationContainer =
 
                     found <-
                         Seq.tryFindIndex
-                            (fun (item: GridSwitchItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable)
+                            (fun (item: GridSwitchItem) -> item.X = c.X && item.Y = p && item.Widget.Focusable)
                             children
 
                 match found with
@@ -219,7 +219,7 @@ module NavigationContainer =
 
                 let mutable found =
                     Seq.tryFindIndex
-                        (fun (item: GridSwitchItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable)
+                        (fun (item: GridSwitchItem) -> item.X = c.X && item.Y = p && item.Widget.Focusable)
                         children
 
                 while found.IsNone && p <> c.Y do
@@ -227,7 +227,7 @@ module NavigationContainer =
 
                     found <-
                         Seq.tryFindIndex
-                            (fun (item: GridSwitchItem<'T>) -> item.X = c.X && item.Y = p && item.Widget.Focusable)
+                            (fun (item: GridSwitchItem) -> item.X = c.X && item.Y = p && item.Widget.Focusable)
                             children
 
                 match found with
@@ -245,7 +245,7 @@ module NavigationContainer =
 
                 let mutable found =
                     Seq.tryFindIndex
-                        (fun (item: GridSwitchItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable)
+                        (fun (item: GridSwitchItem) -> item.X = p && item.Y = c.Y && item.Widget.Focusable)
                         children
 
                 while found.IsNone && p <> c.X do
@@ -253,7 +253,7 @@ module NavigationContainer =
 
                     found <-
                         Seq.tryFindIndex
-                            (fun (item: GridSwitchItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable)
+                            (fun (item: GridSwitchItem) -> item.X = p && item.Y = c.Y && item.Widget.Focusable)
                             children
 
                 match found with
@@ -271,7 +271,7 @@ module NavigationContainer =
 
                 let mutable found =
                     Seq.tryFindIndex
-                        (fun (item: GridSwitchItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable)
+                        (fun (item: GridSwitchItem) -> item.X = p && item.Y = c.Y && item.Widget.Focusable)
                         children
 
                 while found.IsNone && p <> c.X do
@@ -279,7 +279,7 @@ module NavigationContainer =
 
                     found <-
                         Seq.tryFindIndex
-                            (fun (item: GridSwitchItem<'T>) -> item.X = p && item.Y = c.Y && item.Widget.Focusable)
+                            (fun (item: GridSwitchItem) -> item.X = p && item.Y = c.Y && item.Widget.Focusable)
                             children
 
                 match found with
@@ -304,7 +304,7 @@ module NavigationContainer =
                 | Some i ->
                     let c = children.[i]
 
-                    children.Any(fun (item: GridSwitchItem<'T>) ->
+                    children.Any(fun (item: GridSwitchItem) ->
                         item.X = c.X && item.Y < c.Y && item.Widget.Focusable
                     )
                 | None -> false
@@ -318,7 +318,7 @@ module NavigationContainer =
                 | Some i ->
                     let c = children.[i]
 
-                    children.Any(fun (item: GridSwitchItem<'T>) ->
+                    children.Any(fun (item: GridSwitchItem) ->
                         item.X = c.X && item.Y > c.Y && item.Widget.Focusable
                     )
                 | None -> false
@@ -332,7 +332,7 @@ module NavigationContainer =
                 | Some i ->
                     let c = children.[i]
 
-                    children.Any(fun (item: GridSwitchItem<'T>) ->
+                    children.Any(fun (item: GridSwitchItem) ->
                         item.X < c.X && item.Y = c.Y && item.Widget.Focusable
                     )
                 | None -> false
@@ -346,7 +346,7 @@ module NavigationContainer =
                 | Some i ->
                     let c = children.[i]
 
-                    children.Any(fun (item: GridSwitchItem<'T>) ->
+                    children.Any(fun (item: GridSwitchItem) ->
                         item.X > c.X && item.Y = c.Y && item.Widget.Focusable
                     )
                 | None -> false

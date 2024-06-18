@@ -95,7 +95,7 @@ type ImportScreen() as this =
 
     let sidebar = Sidebar(Position = Position.SliceLeft(400.0f))
 
-    do this |* (NavigationContainer.Row<Widget>() |+ sidebar |+ ImportScreen.container)
+    do this |* (NavigationContainer.Row() |+ sidebar |+ ImportScreen.container)
 
     override this.OnEnter _ =
         sidebar.Focus false

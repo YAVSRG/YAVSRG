@@ -98,7 +98,7 @@ type AnimationSettingsPage() =
 
     override this.Content() =
         let general_tab =
-            NavigationContainer.Column<Widget>(WrapNavigation = false)
+            NavigationContainer.Column(WrapNavigation = false)
             |+ PageSetting(%"noteskins.animations.enablecolumnlight", Checkbox enable_column_light)
                 .Tooltip(Tooltip.Info("noteskins.animations.enablecolumnlight"))
                 .Pos(0)
@@ -116,7 +116,7 @@ type AnimationSettingsPage() =
                 .Pos(8)
 
         let note_explosion_tab =
-            NavigationContainer.Column<Widget>(WrapNavigation = false)
+            NavigationContainer.Column(WrapNavigation = false)
             |+ PageSetting(
                 %"noteskins.animations.explosionanimationtime",
                 Slider(explosion_frame_time_note |> Setting.f32, Step = 1f)
@@ -154,7 +154,7 @@ type AnimationSettingsPage() =
                 .Conditional(explosion_builtin_note.Get)
 
         let hold_explosion_tab =
-            NavigationContainer.Column<Widget>(WrapNavigation = false)
+            NavigationContainer.Column(WrapNavigation = false)
             |+ PageSetting(
                 %"noteskins.animations.explosionanimationtime",
                 Slider(explosion_frame_time_hold |> Setting.f32, Step = 1f)
@@ -212,7 +212,7 @@ type AnimationSettingsPage() =
 
         tab_buttons.Position <- pretty_pos(0, 2, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
 
-        NavigationContainer.Column<Widget>()
+        NavigationContainer.Column()
         |+ tab_buttons
         |+ tabs
         :> Widget

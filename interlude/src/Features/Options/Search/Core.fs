@@ -48,7 +48,7 @@ module Search =
             :> Widget
         else
             let content = 
-                NavigationContainer.Column<_>(WrapNavigation = false)
+                NavigationContainer.Column(WrapNavigation = false)
                 |+ seq {
                     for widget, height, spacing, width in results do
                         yield widget.Pos(y, height, width)

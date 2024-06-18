@@ -17,7 +17,7 @@ type private MountControl(game: MountedGameType, setting: Setting<Imports.Mounte
         )
 
     let edit_buttons =
-        NavigationContainer.Row<Button>(WrapNavigation = false, Position = Position.SliceBottom(50.0f).Margin 5.0f)
+        NavigationContainer.Row(WrapNavigation = false, Position = Position.SliceBottom(50.0f).Margin 5.0f)
         |+ Button(
             sprintf "%s %s" Icons.EDIT_2 (%"mount.edit"),
             (fun () -> EditMountPage(game, setting).Show()),

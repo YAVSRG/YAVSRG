@@ -608,7 +608,7 @@ type PositionerInfo(ctx: PositionerContext) =
         )
 
     override this.Init(parent) =
-        NavigationContainer.Row<Button>()
+        NavigationContainer.Row()
         |+ Button(
             (fun () -> HUDElement.name ctx.Selected),
             this.ToggleElementDropdown,

@@ -265,7 +265,7 @@ module ReplayScreen =
     let private controls (state: ReplayState) : SlideoutContent =
 
         let overlay_buttons =
-            NavigationContainer.Column<Button>(Position = Position.SliceLeft(400.0f))
+            NavigationContainer.Column(Position = Position.SliceLeft(400.0f))
             |+ Button(
                 (fun () ->
                     sprintf "%s %s"
@@ -297,7 +297,7 @@ module ReplayScreen =
                 Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceBottom(50.0f).Margin(5.0f)
             )
 
-        SlideoutContent(NavigationContainer.Row<Widget>() |+ overlay_buttons |+ dim_slider, 100.0f)
+        SlideoutContent(NavigationContainer.Row() |+ overlay_buttons |+ dim_slider, 100.0f)
         |+ Text(
             sprintf "%s %s" Icons.PLAY (if state.IsAuto then %"replay.title.autoplay" else %"replay.title"),
             Color = K Colors.text,

@@ -172,7 +172,7 @@ type NoteskinsPage() =
         refresh ()
 
         let left_side =
-            NavigationContainer.Column<Widget>(Position = { Position.Default with Right = 0.35f %+ PRETTY_MARGIN_X }.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+            NavigationContainer.Column(Position = { Position.Default with Right = 0.35f %+ PRETTY_MARGIN_X }.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |+ PageButton(%"noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
                 .Tooltip(Tooltip.Info("noteskins.edit"))
                 .Pos(PAGE_BOTTOM - 4, 2, PageWidth.Full)
@@ -192,7 +192,7 @@ type NoteskinsPage() =
             |+ preview
 
         let right_side =
-            NavigationContainer.Column<Widget>(
+            NavigationContainer.Column(
                 Position =
                     { Position.Default with
                         Left = 0.35f %+ 50.0f
@@ -215,7 +215,7 @@ type NoteskinsPage() =
                     .Tooltip(Tooltip.Info("noteskins.open_folder")))
             |+ ScrollContainer(grid, Position = Position.TrimTop(PRETTYHEIGHT * 1.5f))
 
-        NavigationContainer.Row<Widget>() 
+        NavigationContainer.Row() 
         |+ left_side
         |+ right_side
         :> Widget

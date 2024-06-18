@@ -523,7 +523,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
 module Helpers =
 
     let page_container () =
-        NavigationContainer.Column<Widget>(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        NavigationContainer.Column(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
     let refreshable_row number cons =
         let r = NavigationContainer.Row()

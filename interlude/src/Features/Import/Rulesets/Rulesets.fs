@@ -6,7 +6,7 @@ open Percyqaz.Flux.UI
 module Rulesets =
 
     let tab =
-        NavigationContainer.Column<Widget>()
+        NavigationContainer.Column()
         |+ (
             GridFlowContainer(50.0f, 3, Position = Position.Row(70.0f, 50.0f))
             |+ Button(%"ruleset.create.sc", fun () -> SCRulesetPage().Show())

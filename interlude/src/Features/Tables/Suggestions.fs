@@ -226,7 +226,7 @@ type SuggestionsPage(table: Table) =
     let suggestions_list = SuggestionsList(table)
 
     override this.Content() =
-        NavigationContainer.Column<Widget>()
+        NavigationContainer.Column()
         |+ Button("", ignore, Position = Position.Box(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
         |+ suggestions_list 
         |>> Container

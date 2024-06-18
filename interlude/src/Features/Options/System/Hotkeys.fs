@@ -61,7 +61,7 @@ type HotkeysPage() =
 
     override this.Content() = 
         let hotkey_editor hk =
-            NavigationContainer.Row<Widget>()
+            NavigationContainer.Row()
             |+ Keybinder(hk, Position = Position.TrimRight PRETTYHEIGHT)
             |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hk), Position = Position.SliceRight PRETTYHEIGHT)
 

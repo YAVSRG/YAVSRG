@@ -27,7 +27,7 @@ type EditHUDPage() =
         let is_enabled = HUDElement.enabled_setting elem
 
         let body =
-            NavigationContainer.Row<Widget>(WrapNavigation = false)
+            NavigationContainer.Row(WrapNavigation = false)
             |+ if HUDElement.can_toggle elem then
                    [
                        Button(
@@ -81,7 +81,7 @@ type EditHUDPage() =
             .Button(%"hud.noteskin_required.button", fun () -> Menu.Back(); Shared.choose_noteskins())
 
     override this.Content() =
-        NavigationContainer.Column<Widget>(Position = Position.Margin(100.0f, 200.0f))
+        NavigationContainer.Column(Position = Position.Margin(100.0f, 200.0f))
         |+ (GridFlowContainer<Widget>(
                 PRETTYHEIGHT,
                 2,

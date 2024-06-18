@@ -29,7 +29,7 @@ type EditNoteskinPage(from_hotkey: bool) =
         refresh ()
 
         let general_tab =
-            NavigationContainer.Column<Widget>(WrapNavigation = false)
+            NavigationContainer.Column(WrapNavigation = false)
             |+ PageTextEntry(%"noteskins.edit.noteskinname", name)
                 .Pos(3)
             |+ PageButton(
@@ -126,12 +126,12 @@ type EditNoteskinPage(from_hotkey: bool) =
 
         NavigationContainer.Row()
         |+ (
-            NavigationContainer.Column<Widget>()
+            NavigationContainer.Column()
             |+ tab_buttons
             |+ tabs
         )
         |+ (
-            NavigationContainer.Column<Widget>(Position = Position.TrimLeft(PRETTYWIDTH + PRETTY_MARGIN_X).Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT * 3.0f))
+            NavigationContainer.Column(Position = Position.TrimLeft(PRETTYWIDTH + PRETTY_MARGIN_X).Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT * 3.0f))
             |+ PageButton(
                 %"noteskins.edit.export",
                 (fun () ->
