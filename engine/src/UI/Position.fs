@@ -106,7 +106,7 @@ type Position with
     member this.Center (width, height) = this.CenterX(width).CenterY(height)
     
     static member CenterX width = Position.Default.CenterX width
-    static member CenterY width = Position.Default.CenterY width
+    static member CenterY height = Position.Default.CenterY height
     static member Center (width, height) = Position.Default.Center (width, height)
 
     member this.TrimLeft amount =
