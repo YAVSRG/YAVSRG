@@ -116,6 +116,10 @@ type SystemPage() =
             .Tooltip(Tooltip.Info("system.performance"))
             .Pos(0)
 
+        |+ PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
+            .Tooltip(Tooltip.Info("system.hotkeys"))
+            .Pos(2)
+
         |+ PageSetting(
             %"system.windowmode",
             SelectDropdown(
@@ -130,13 +134,13 @@ type SystemPage() =
             )
         )
             .Tooltip(Tooltip.Info("system.windowmode"))
-            .Pos(3)
+            .Pos(5)
         |+ PageSetting(
             %"system.windowresolution",
             WindowedResolution(config.WindowResolution |> Setting.trigger mark_changed)
         )
             .Tooltip(Tooltip.Info("system.windowresolution"))
-            .Pos(5)
+            .Pos(7)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
         |+ PageSetting(
             %"system.monitor",
@@ -147,7 +151,7 @@ type SystemPage() =
             )
         )
             .Tooltip(Tooltip.Info("system.monitor"))
-            .Pos(5)
+            .Pos(7)
             .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
         |+ PageSetting(
             %"system.videomode",
@@ -157,7 +161,7 @@ type SystemPage() =
             )
         )
             .Tooltip(Tooltip.Info("system.videomode"))
-            .Pos(7)
+            .Pos(9)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
         |+ PageSetting(
             %"system.audiovolume",
@@ -168,14 +172,14 @@ type SystemPage() =
             )
         )
             .Tooltip(Tooltip.Info("system.audiovolume"))
-            .Pos(10)
+            .Pos(12)
 
         |+ PageSetting(
             %"system.audiodevice",
             SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
         )
             .Tooltip(Tooltip.Info("system.audiodevice"))
-            .Pos(12)
+            .Pos(14)
 
         |+ PageSetting(
             %"system.audiooffset",
@@ -186,15 +190,15 @@ type SystemPage() =
             }
         )
             .Tooltip(Tooltip.Info("system.audiooffset"))
-            .Pos(14)
+            .Pos(16)
+        |+ PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
+            .Tooltip(Tooltip.Info("system.automatic_offset"))
+            .Pos(18)
 
         |+ PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))
             .Tooltip(Tooltip.Info("system.visualoffset"))
-            .Pos(17)
+            .Pos(21)
 
-        |+ PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-            .Tooltip(Tooltip.Info("system.hotkeys"))
-            .Pos(19)
         |>> Container
         |+ (Callout.frame
                 (Callout.Small.Icon(Icons.AIRPLAY).Title(%"system.window_changes_hint"))

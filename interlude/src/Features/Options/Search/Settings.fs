@@ -101,6 +101,17 @@ module Settings =
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
                 yield PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
                     .Tooltip(Tooltip.Info("system.hotkeys"))
+
+            if token_match tokens [|%"system.automatic_offset"|] then
+                yield PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
+                    .Tooltip(Tooltip.Info("system.automatic_offset"))
+
+            if token_match tokens [|%"system.confirm_exit"|] then
+                yield PageSetting(%"system.confirm_exit", Checkbox options.ConfirmExit)
+                    .Tooltip(Tooltip.Info("system.confirm_exit"))
+
+            if token_match tokens [|%"system.enable_console"|] then
+                yield PageSetting(%"system.enable_console", Checkbox options.EnableConsole)
         }
 
     let search_gameplay_settings (tokens: string array) : SearchResult seq =
@@ -146,26 +157,20 @@ module Settings =
                 yield PageSetting(%"gameplay.keybinds", binds)
                     .Tooltip(Tooltip.Info("gameplay.keybinds"))
                 , 2, 2, PageWidth.Full
+            
+            if token_match tokens [|%"gameplay.hold_to_give_up"|] then
+                yield PageSetting(%"gameplay.hold_to_give_up", Checkbox options.HoldToGiveUp)
+                    .Tooltip(Tooltip.Info("gameplay.hold_to_give_up"))
+
+            if token_match tokens [|%"gameplay.hide_hit_notes"|] then
+                yield PageSetting(%"gameplay.hide_hit_notes", Checkbox options.VanishingNotes)
+                    .Tooltip(Tooltip.Info("gameplay.hide_hit_notes"))
         }
 
     let search_advanced_settings (tokens: string array) : SearchResult seq =
         results {
-            if token_match tokens [|%"advanced.enableconsole"|] then
-                yield PageSetting(%"advanced.enableconsole", Checkbox options.EnableConsole)
-            if token_match tokens [|%"advanced.confirmexit"|] then
-                yield PageSetting(%"advanced.confirmexit", Checkbox options.ConfirmExit)
-                    .Tooltip(Tooltip.Info("advanced.confirmexit"))
-            if token_match tokens [|%"advanced.holdtogiveup"|] then
-                yield PageSetting(%"advanced.holdtogiveup", Checkbox options.HoldToGiveUp)
-                    .Tooltip(Tooltip.Info("advanced.holdtogiveup"))
-            if token_match tokens [|%"advanced.vanishingnotes"|] then
-                yield PageSetting(%"advanced.vanishingnotes", Checkbox options.VanishingNotes)
-                    .Tooltip(Tooltip.Info("advanced.vanishingnotes"))
-            if token_match tokens [|%"advanced.automatic_offset"|] then
-                yield PageSetting(%"advanced.automatic_offset", Checkbox options.AutoCalibrateOffset)
-                    .Tooltip(Tooltip.Info("advanced.automatic_offset"))
-            if token_match tokens [|%"advanced.buildpatterncache"|] then
-                yield PageButton.Once(%"advanced.buildpatterncache",
+            if token_match tokens [|%"library.recache_patterns"|] then
+                yield PageButton.Once(%"library.recache_patterns",
                     fun () ->
                         Cache.cache_patterns.Request(
                             (Content.Cache, true),
@@ -183,8 +188,5 @@ module Settings =
                             %"notification.pattern_cache_started.body"
                         )
                 )
-                    .Tooltip(Tooltip.Info("advanced.buildpatterncache"))
-            if token_match tokens [|%"advanced.advancedrecommendations"|] then
-                yield PageSetting(%"advanced.advancedrecommendations", Checkbox options.AdvancedRecommendations)
-                    .Tooltip(Tooltip.Info("advanced.advancedrecommendations"))
+                    .Tooltip(Tooltip.Info("library.recache_patterns"))
         }

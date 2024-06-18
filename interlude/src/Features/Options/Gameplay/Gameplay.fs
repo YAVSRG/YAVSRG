@@ -45,18 +45,11 @@ type GameplayPage() =
         |+ PageSetting(%"gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
             .Tooltip(Tooltip.Info("gameplay.backgrounddim"))
             .Pos(7)
-        |+ PageSetting(
-            %"system.audiooffset",
-            { new Slider(options.AudioOffset, Step = 1f) with
-                override this.OnDeselected(by_mouse: bool) =
-                    base.OnDeselected by_mouse
-                    Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
-            }
-        )
-            .Tooltip(Tooltip.Info("system.audiooffset"))
+        |+ PageSetting(%"gameplay.hold_to_give_up", Checkbox options.HoldToGiveUp)
+            .Tooltip(Tooltip.Info("gameplay.hold_to_give_up"))
             .Pos(9)
-        |+ PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))
-            .Tooltip(Tooltip.Info("system.visualoffset"))
+        |+ PageSetting(%"gameplay.hide_hit_notes", Checkbox options.VanishingNotes)
+            .Tooltip(Tooltip.Info("gameplay.hide_hit_notes"))
             .Pos(11)
         |+ PageButton(%"gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
             .Tooltip(Tooltip.Info("gameplay.lanecover"))

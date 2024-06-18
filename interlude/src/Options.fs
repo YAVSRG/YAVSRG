@@ -163,7 +163,6 @@ module Options =
 
             VanishingNotes: Setting<bool>
             AutoCalibrateOffset: Setting<bool>
-            AdvancedRecommendations: Setting<bool>
             ScoreGraphMode: Setting<ScoreGraphMode>
             ConfirmExit: Setting<bool>
             HoldToGiveUp: Setting<bool>
@@ -275,7 +274,6 @@ module Options =
 
                 VanishingNotes = Setting.simple true
                 AutoCalibrateOffset = Setting.simple false
-                AdvancedRecommendations = Setting.simple true
                 ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
                 ConfirmExit = Setting.simple true
                 HoldToGiveUp = Setting.simple false

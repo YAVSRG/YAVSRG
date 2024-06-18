@@ -70,7 +70,7 @@ module Suggestions =
 
     let random_chart () =
         if not (Transitions.in_progress()) then
-            if options.AdvancedRecommendations.Value && SelectedChart.RATING.IsSome then
+            if SelectedChart.RATING.IsSome then
                 let ctx =
                     {
                         BaseDifficulty = SelectedChart.RATING.Value.Physical
