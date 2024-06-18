@@ -1,19 +1,31 @@
-namespace Interlude.Features.OptionsMenu.Advanced
+namespace Interlude.Features.OptionsMenu.Library
 
 open Percyqaz.Flux.UI
 open Prelude.Data.Library.Caching
 open Prelude
-open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features.OptionsMenu
 
-type AdvancedPage() =
+type LibraryPage() =
     inherit Page()
 
     override this.Content() =
         page_container ()
+        |+ PageButton
+            .Once(
+                %"library.recache_charts",
+                fun () ->
+                    Cache.recache_service.Request(
+                        Content.Cache,
+                        fun () ->
+                            Notifications.task_feedback (Icons.FOLDER, %"notification.recache_complete", "")
+                    )
+
+                    Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
+            )
+            .Tooltip(Tooltip.Info("library.recache_charts"))
+            .Pos(0)
         |+ PageButton
             .Once(
                 %"library.recache_patterns",
@@ -35,8 +47,8 @@ type AdvancedPage() =
                     )
             )
             .Tooltip(Tooltip.Info("library.recache_patterns"))
-            .Pos(10)
+            .Pos(2)
         :> Widget
 
-    override this.Title = %"advanced"
+    override this.Title = %"library"
     override this.OnClose() = ()

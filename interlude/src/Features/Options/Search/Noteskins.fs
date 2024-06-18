@@ -62,4 +62,14 @@ module Noteskins =
                     )
                 )
                     .Tooltip(Tooltip.Info("hud"))
+
+            if token_match tokens [|%"themes.theme"; %"themes.showthemesfolder"|] then
+                yield PageSetting(%"themes.theme", 
+                    SelectDropdown(Themes.list (), Interlude.Options.options.Theme)
+                )
+                yield PageButton(
+                    %"themes.showthemesfolder", 
+                    (fun () -> open_directory (get_game_folder "Themes"))
+                )
+                    .Tooltip(Tooltip.Info("themes.showthemesfolder"))
         }

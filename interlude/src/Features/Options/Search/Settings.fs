@@ -167,10 +167,11 @@ module Settings =
                     .Tooltip(Tooltip.Info("gameplay.hide_hit_notes"))
         }
 
-    let search_advanced_settings (tokens: string array) : SearchResult seq =
+    let search_library_settings (tokens: string array) : SearchResult seq =
         results {
             if token_match tokens [|%"library.recache_patterns"|] then
-                yield PageButton.Once(%"library.recache_patterns",
+                yield PageButton.Once(
+                    %"library.recache_patterns",
                     fun () ->
                         Cache.cache_patterns.Request(
                             (Content.Cache, true),
@@ -189,4 +190,17 @@ module Settings =
                         )
                 )
                     .Tooltip(Tooltip.Info("library.recache_patterns"))
+            if token_match tokens [|%"library.recache_charts"|] then
+                yield PageButton.Once(
+                    %"library.recache_charts",
+                    fun () ->
+                        Cache.recache_service.Request(
+                            Content.Cache,
+                            fun () ->
+                                Notifications.task_feedback (Icons.FOLDER, %"notification.recache_complete", "")
+                        )
+
+                        Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
+                )
+                    .Tooltip(Tooltip.Info("library.recache_charts"))
         }

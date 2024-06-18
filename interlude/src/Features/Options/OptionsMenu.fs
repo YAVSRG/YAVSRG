@@ -71,8 +71,8 @@ module OptionsMenuRoot =
                 fun () -> Gameplay.GameplayPage().Show()
             )
             |+ TileButton(
-                sprintf "%s %s" Icons.ARCHIVE ("Library"),
-                fun () -> Advanced.AdvancedPage().Show()
+                sprintf "%s %s" Icons.ARCHIVE (%"library"),
+                fun () -> Library.LibraryPage().Show()
             )
             |+ TileButton(
                 sprintf "%s %s" Icons.IMAGE (%"noteskins"),

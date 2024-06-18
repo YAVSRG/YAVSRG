@@ -10,6 +10,6 @@ module SearchResults =
                 yield! Settings.search_system_settings tokens
                 yield! Settings.search_gameplay_settings tokens
                 yield! Noteskins.search_noteskin_settings tokens
-                yield! Settings.search_advanced_settings tokens
+                yield! Settings.search_library_settings tokens
             }
         ) query
