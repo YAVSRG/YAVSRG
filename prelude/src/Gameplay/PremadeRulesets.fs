@@ -440,6 +440,18 @@ module ``osu!`` =
 
 module SC =
 
+    let private miss_penalty_points (judge: int) =
+        match judge with
+        | 2 -> -4.0
+        | 3 -> -6.0
+        | 4 -> -10.0
+        | 5 -> -16.0
+        | 6 -> -26.0
+        | 7 -> -47.0
+        | 8 -> -100.0
+        | 9 -> -200.0
+        | _ -> -10.0
+
     let create (judge: int) =
         {
             Name = sprintf "SC (J%i)" judge
@@ -482,7 +494,9 @@ module SC =
                     MissWindow = 180.0f<ms>
                     CbrushWindow = 90.0f<ms>
                     Timegates = DP.windows judge false
-                    Points = AccuracyPoints.Weights(10.0, [| 10.0; 9.0; 5.0; -5.0; -10.0; -10.0 |])
+                    Points = 
+                        let miss_penalty = miss_penalty_points judge
+                        AccuracyPoints.Weights(10.0, [| 10.0; 9.0; 5.0; -5.0; miss_penalty; miss_penalty |])
                     HoldNoteBehaviour =
                         HoldNoteBehaviour.Normal
                             {|
