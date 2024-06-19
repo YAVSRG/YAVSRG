@@ -99,4 +99,4 @@ type ManageTablesPage(table_changed) =
 
     override this.Title = %"table"
     override this.OnClose() = ()
-    override this.OnReturnTo() = refresh ()
+    override this.OnReturnFromNestedPage() = refresh ()

@@ -26,4 +26,4 @@ type SelectTableLevelPage(table: Table, action: int -> unit) =
 
     override this.Title = %"table"
     override this.OnClose() = ()
-    override this.OnReturnTo() = refresh ()
+    override this.OnReturnFromNestedPage() = refresh ()

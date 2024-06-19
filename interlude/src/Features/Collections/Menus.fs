@@ -262,7 +262,7 @@ type SelectCollectionPage
 
     override this.Title = %"collections"
     override this.OnClose() = ()
-    override this.OnReturnTo() = refresh ()
+    override this.OnReturnFromNestedPage() = refresh ()
 
 type ManageCollectionsPage() =
     inherit

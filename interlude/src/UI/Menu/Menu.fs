@@ -37,8 +37,11 @@ type Page() as this =
     abstract member OnDestroy: unit -> unit
     default this.OnDestroy() = ()
 
-    abstract member OnReturnTo: unit -> unit
-    default this.OnReturnTo() = ()
+    abstract member OnReturnFromNestedPage: unit -> unit
+    default this.OnReturnFromNestedPage() = ()
+
+    abstract member OnEnterNestedPage: unit -> unit
+    default this.OnEnterNestedPage() = ()
 
     abstract member Content : unit -> Widget
     abstract member Header : unit -> Widget
@@ -50,7 +53,7 @@ type Page() as this =
 
         base.Update(elapsed_ms, moved)
 
-    member this.Show(dir: PageEasing, returning: bool) =
+    member this.Show(dir: PageEasing) =
         match dir with
         | PageEasing.None ->
             this.Position <- Position.Default
@@ -61,9 +64,6 @@ type Page() as this =
             this.Position <- Position.Default
 
         Selection.clamp_to this
-
-        if returning then
-            this.OnReturnTo()
 
         content.Focus false
         is_current <- true
@@ -112,7 +112,7 @@ type Page() as this =
 
         this.Hide(this.Direction.Reverse)
         base.Init parent
-        this.Show(this.Direction, false)
+        this.Show(this.Direction)
 
     abstract member Direction : PageEasing
     default this.Direction = PageEasing.Up
@@ -189,6 +189,7 @@ and Menu(top_level: Page) as this =
 
         if n > 0 then
             stack.[n - 1].Value.Hide(page.Direction)
+            stack.[n - 1].Value.OnEnterNestedPage()
 
     static member Back() =
         match _instance with
@@ -208,7 +209,8 @@ and Menu(top_level: Page) as this =
         page.Hide(page.Direction.Reverse)
 
         if n > 0 then
-            stack.[n - 1].Value.Show(page.Direction.Reverse, true)
+            stack.[n - 1].Value.Show(page.Direction.Reverse)
+            stack.[n - 1].Value.OnReturnFromNestedPage()
 
     member private this.Exit() =
         while namestack <> [] do

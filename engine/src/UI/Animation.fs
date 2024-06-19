@@ -120,7 +120,7 @@ module Animation =
         let mutable elapsed = 0.0
         let mutable frameskip = false
         member val Interval = total_ms with get, set
-        member this.Elapsed = min elapsed this.Interval
+        member this.Time = min elapsed this.Interval
         member this.FrameSkip() = frameskip <- true
         member this.Reset() = elapsed <- 0.0
 

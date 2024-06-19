@@ -260,7 +260,7 @@ type AnimationSettingsPage() =
 
             let percent_remaining =
                 if explosion_builtin_note.Value then
-                    1.0 - (t_note_ex.Elapsed / explosion_duration_note.Value)
+                    1.0 - (t_note_ex.Time / explosion_duration_note.Value)
                     |> min 1.0
                     |> max 0.0
                     |> float32
@@ -297,7 +297,7 @@ type AnimationSettingsPage() =
                     if holding then
                         1.0f
                     else
-                        1.0 - (t_hold_ex.Elapsed / explosion_duration_hold.Value)
+                        1.0 - (t_hold_ex.Time / explosion_duration_hold.Value)
                         |> min 1.0
                         |> max 0.0
                         |> float32
@@ -318,7 +318,7 @@ type AnimationSettingsPage() =
 
                 let percent_remaining =
                     if explosion_builtin_release.Value then
-                        1.0 - (t_hold_ex.Elapsed / explosion_duration_hold.Value)
+                        1.0 - (t_hold_ex.Time / explosion_duration_hold.Value)
                         |> min 1.0
                         |> max 0.0
                         |> float32
@@ -362,7 +362,7 @@ type AnimationSettingsPage() =
                 if holding then
                     1.0f
                 else
-                    1.0 - (t_columnlight.Elapsed / t_columnlight.Interval)
+                    1.0 - (t_columnlight.Time / t_columnlight.Interval)
                     |> min 1.0
                     |> max 0.0
                     |> float32

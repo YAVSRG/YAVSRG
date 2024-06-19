@@ -184,9 +184,9 @@ type EditNoteskinPage(from_hotkey: bool) =
     override this.Title = data.Name
     override this.OnDestroy() = preview.Destroy()
 
-    override this.OnReturnTo() =
+    override this.OnReturnFromNestedPage() =
         refresh ()
-        base.OnReturnTo()
+        base.OnReturnFromNestedPage()
 
     override this.OnClose() =
         Noteskins.save_config

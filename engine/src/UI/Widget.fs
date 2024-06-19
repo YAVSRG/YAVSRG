@@ -98,23 +98,6 @@ type StaticWidget(node_type) =
         base.Init parent
         this.UpdateBounds()
 
-[<AbstractClass>]
-type Overlay(node_type: NodeType) =
-    inherit Widget(node_type)
-
-    override this.Position
-        with set _ = failwith "Position can not be set for overlay components"
-
-    override this.Init(parent: Widget) =
-        base.Init parent
-        this.Bounds <- Viewport.bounds
-        this.VisibleBounds <- Viewport.bounds
-
-    override this.Update(elapsed_ms, moved) =
-        if moved then
-            this.Bounds <- Viewport.bounds
-            this.VisibleBounds <- Viewport.bounds
-
 [<Sealed>]
 type Dummy(nt) =
     inherit StaticWidget(nt)

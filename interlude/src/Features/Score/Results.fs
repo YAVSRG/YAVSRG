@@ -68,7 +68,7 @@ type Accuracy
         Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) grade_color.O1
         Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) grade_color.O2
 
-        Glint.draw (float32 (glint_animation.Elapsed / glint_animation.Interval)) this.Bounds
+        Glint.draw_stencilled (float32 (glint_animation.Time / glint_animation.Interval)) this.Bounds Glint.COLOR
 
         Text.fill_b (
             Style.font,
@@ -153,7 +153,7 @@ type Lamp
         Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O1
         Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O2
 
-        Glint.draw (float32 (glint_animation.Elapsed / glint_animation.Interval)) this.Bounds
+        Glint.draw_stencilled (float32 (glint_animation.Time / glint_animation.Interval)) this.Bounds Glint.COLOR
 
         let text, color =
             match (!improvements).Lamp with

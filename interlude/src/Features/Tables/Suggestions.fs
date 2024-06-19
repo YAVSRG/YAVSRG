@@ -234,4 +234,4 @@ type SuggestionsPage(table: Table) =
 
     override this.Title = %"table.suggestions"
     override this.OnClose() = ()
-    override this.OnReturnTo() = suggestions_list.Reload()
+    override this.OnReturnFromNestedPage() = suggestions_list.Reload()

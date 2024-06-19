@@ -43,6 +43,13 @@ module OptionsMenuRoot =
 
             Text.fill_b (Style.font, label, this.Bounds.SliceTop(60.0f).Shrink(Style.PADDING * 2.0f), Colors.text, Alignment.CENTER)
 
+    [<RequireQualifiedAccess>]
+    type HeaderState =
+        | In
+        | Shown
+        | Out
+        | Hidden
+
     type OptionsHeader(search_callback: string -> unit) as this =
         inherit Container(NodeType.Container(fun () -> Some this.Buttons))
 
@@ -54,7 +61,10 @@ module OptionsMenuRoot =
             { new SearchBox(
                     search_text, 
                     (fun () -> search_callback search_text.Value),
-                    Position = Position.CenterY(60.0f).Margin(PRETTY_MARGIN_X, 0.0f).SliceRight(600.0f)) with
+                    Position = Position.CenterY(60.0f).Margin(PRETTY_MARGIN_X, 0.0f).SliceRight(600.0f),
+                    Fill = K Colors.cyan.O3,
+                    Border = K Colors.cyan_accent,
+                    TextColor = K Colors.text_cyan) with
                 override this.OnFocus by_mouse =
                     base.OnFocus by_mouse
                     if not by_mouse then defer (fun () -> this.Select false)
@@ -79,6 +89,9 @@ module OptionsMenuRoot =
                 fun () -> Noteskins.NoteskinsPage().Show()
             )
 
+        let transition_timer = Animation.Delay(400.0)
+        let mutable transition = HeaderState.In
+
         member private this.Buttons = tab_buttons
         
         override this.Init(parent) =
@@ -88,10 +101,60 @@ module OptionsMenuRoot =
             |* tab_buttons
             base.Init parent
 
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            match transition with
+            | HeaderState.In ->
+                if transition_timer.Complete then transition <- HeaderState.Shown
+                transition_timer.Update elapsed_ms
+            | HeaderState.Out ->
+                if transition_timer.Complete then transition <- HeaderState.Hidden
+                transition_timer.Update elapsed_ms
+            | _ -> ()
+
         override this.Draw() =
-            Draw.rect this.Bounds Colors.shadow_2.O2
-            Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.black
-            base.Draw()
+            match transition with
+            | HeaderState.In ->
+                Stencil.start_stencilling false
+                let pc = (transition_timer.Time / transition_timer.Interval |> float32)
+                let pc2 = pc * pc
+                StripeWipe.draw_left_to_right 0.0f pc (this.Bounds.Expand(0.0f, Style.PADDING)) Color.Transparent
+
+                Stencil.start_drawing()
+                Draw.rect this.Bounds Colors.shadow_2.O2
+                Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.black
+                base.Draw()
+                StripeWipe.draw_left_to_right (pc2 - 0.05f) pc this.Bounds Colors.cyan
+
+                Stencil.finish()
+
+            | HeaderState.Out ->
+                Stencil.start_stencilling false
+                let pc = (transition_timer.Time / transition_timer.Interval |> float32)
+                let pc2 = (2.0f - pc) * pc
+                StripeWipe.draw_left_to_right pc 1.0f (this.Bounds.Expand(0.0f, Style.PADDING)) Color.Transparent
+
+                Stencil.start_drawing()
+                Draw.rect this.Bounds Colors.shadow_2.O2
+                Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.black
+                base.Draw()
+                StripeWipe.draw_left_to_right (pc - 0.05f) pc2 this.Bounds Colors.cyan
+
+                Stencil.finish()
+
+            | HeaderState.Shown ->
+                Draw.rect this.Bounds Colors.shadow_2.O2
+                Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.black
+                base.Draw()
+
+            | HeaderState.Hidden -> ()
+
+        member this.Hide() =
+            transition_timer.Reset()
+            transition <- HeaderState.Out
+        member this.Show() =
+            transition_timer.Reset()
+            transition <- HeaderState.In
 
     and OptionsPage() =
         inherit Page()
@@ -127,7 +190,7 @@ module OptionsMenuRoot =
 
         let page_body = SwapContainer(options_home_page)
 
-        override this.Header() =
+        let header = 
             OptionsHeader(
                 fun (search_text: string) ->
                     if search_text = "" then
@@ -136,9 +199,14 @@ module OptionsMenuRoot =
                         page_body.Current <- SearchResults.get search_text
             )
 
+        override this.Header() =
+            header |> OverlayContainer :> Widget
+
         override this.Content() = page_body
 
         override this.Title = sprintf "%s %s" Icons.SETTINGS (%"options")
-        override this.OnClose() = ()
+        override this.OnClose() = header.Hide()
+        override this.OnEnterNestedPage() = header.Hide()
+        override this.OnReturnFromNestedPage() = header.Show()
 
     let show () = Menu.ShowPage OptionsPage

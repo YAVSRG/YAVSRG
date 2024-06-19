@@ -29,18 +29,16 @@ module Beam =
 
 module Glint =
 
-    let draw (percent: float32) (bounds: Rect) =
+    let COLOR = Colors.white.O4a(26)
+    let RECIPROCAL_GRADIENT = 0.35f
+
+    let draw (percent: float32) (bounds: Rect) (color: Color) =
         if percent <= 0.0f || percent >= 1.0f then () else
 
-        let stripe_width = bounds.Height * 0.35f
+        let stripe_width = bounds.Height * RECIPROCAL_GRADIENT
         let travel_distance = bounds.Width + stripe_width * 4.5f
         
         let start = bounds.Left - stripe_width * 4.5f + travel_distance * percent
-
-        Stencil.start_stencilling false
-        Draw.rect bounds Color.Transparent
-
-        Stencil.start_drawing ()
 
         Draw.untextured_quad
         <| Quad.createv
@@ -48,7 +46,7 @@ module Glint =
             (start + stripe_width * 3.0f, bounds.Top)
             (start + stripe_width * 2.0f, bounds.Bottom)
             (start, bounds.Bottom)
-        <| Colors.white.O4a(26).AsQuad
+        <| color.AsQuad
         
         Draw.untextured_quad
         <| Quad.createv
@@ -56,7 +54,18 @@ module Glint =
             (start + 4.5f * stripe_width, bounds.Top)
             (start + 3.5f * stripe_width, bounds.Bottom)
             (start + 2.5f * stripe_width, bounds.Bottom)
-        <| Colors.white.O4a(26).AsQuad 
+        <| color.AsQuad
+
+    let draw_stencilled (percent: float32) (bounds: Rect) (color: Color) =
+        if percent <= 0.0f || percent >= 1.0f then () else
+
+        Stencil.start_stencilling false
+        Draw.rect bounds Color.Transparent
+
+        Stencil.start_drawing ()
+
+        draw percent bounds color
+
         Stencil.finish()
 
     let spot_draw (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) =
@@ -127,8 +136,9 @@ module Bubble =
 
 module DiamondsWipe =
 
-    let draw inbound amount (bounds: Rect) =
-        let SCALE = 150.0f
+    let SCALE = 150.0f
+
+    let draw (inbound: bool) (amount: float32) (bounds: Rect) =
         let width = bounds.Width
         let height = bounds.Height
 
@@ -255,46 +265,22 @@ module TriangleWipe =
                 )
                 Color.Transparent.AsQuad
 
-module StripesWipe =
+module StripeWipe =
+        
+    let RECIPROCAL_GRADIENT = 0.35f
 
-    let draw inbound amount (bounds: Rect) =
-        let SCALE = 100.0f
+    let draw_left_to_right (left: float32) (right: float32) (bounds: Rect) (color: Color) =
+        let stripe_width = bounds.Height * RECIPROCAL_GRADIENT
+        let travel_distance = bounds.Width + stripe_width * 2.0f
+        
+        let left = bounds.Left - stripe_width + travel_distance * left
+        let right = bounds.Left - stripe_width + travel_distance * right
 
-        let number_of_stripes =
-            MathF.Ceiling((Viewport.vwidth + Viewport.vheight) / SCALE) |> int
-
-        let stripe_size (stripe_no: int) =
-            let lo = float32 stripe_no / float32 number_of_stripes
-            let region = float32 (number_of_stripes - stripe_no) / float32 number_of_stripes
-
-            if inbound then
-                Math.Clamp((amount - lo) / region, 0.0f, 1.0f)
-            else
-                1.0f - Math.Clamp(((1.0f - amount) - lo) / region, 0.0f, 1.0f)
-
-        let draw_stripe n =
-            let h = Viewport.vheight
-            let f = stripe_size n
-            let x = -h + float32 n * SCALE
-
-            let v = new Vector2(h, -h) * f
-
-            if n % 2 = 0 then
-                Draw.untextured_quad
-                    (Quad.create
-                     <| new Vector2(x, h) + v
-                     <| new Vector2(x + SCALE, h) + v
-                     <| new Vector2(x + SCALE, h)
-                     <| new Vector2(x, h))
-                    Color.Transparent.AsQuad
-            else
-                Draw.untextured_quad
-                    (Quad.create
-                     <| new Vector2(x + h, 0.0f)
-                     <| new Vector2(x + h + SCALE, 0.0f)
-                     <| new Vector2(x + h + SCALE, 0.0f) - v
-                     <| new Vector2(x + h, 0.0f) - v)
-                    Color.Transparent.AsQuad
-
-        for i = 0 to number_of_stripes - 1 do
-            draw_stripe i
+        Draw.untextured_quad
+            (Quad.createv
+                (left + stripe_width, bounds.Top)
+                (right, bounds.Top)
+                (right - stripe_width, bounds.Bottom)
+                (left, bounds.Bottom)
+            )
+            color.AsQuad

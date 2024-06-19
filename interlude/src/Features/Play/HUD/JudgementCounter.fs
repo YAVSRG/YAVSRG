@@ -115,7 +115,7 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                     r
                     (Color.FromArgb(
                         127
-                        - max 0 (int (127.0 * judgement_animations.[i].Elapsed / judgement_animations.[i].Interval)),
+                        - max 0 (int (127.0 * judgement_animations.[i].Time / judgement_animations.[i].Interval)),
                         j.Color
                     ))
 

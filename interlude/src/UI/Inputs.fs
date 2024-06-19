@@ -84,14 +84,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
             s |> Setting.trigger (fun _ -> this.StartSearch()),
             "search",
             true,
-            Position = Position.Margin(10.0f, 0.0f),
-            ColorFunc =
-                fun () ->
-                    (if this.TextEntry.Selected then
-                         Colors.white
-                     else
-                         !*Palette.LIGHT),
-                    !*Palette.DARKER
+            Position = Position.Margin(10.0f, 0.0f)
         )
 
     member val DebounceTime = 400L with get, set
@@ -102,20 +95,32 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
 
     member private this.TextEntry: TextEntry = text_entry
 
+    member val TextColor : unit -> Color * Color = fun () -> !*Palette.LIGHT, !*Palette.DARKER with get, set
+
     override this.Init(parent) =
+        text_entry.ColorFunc <-
+            fun () ->
+                let fg, bg = this.TextColor()
+                if this.TextEntry.Selected then
+                    Colors.white, bg
+                else
+                    fg, bg
+
         this.Fill <-
+            let existing = this.Fill
             fun () ->
                 if this.TextEntry.Selected then
                     Colors.yellow_accent.O1
                 else
-                    !*Palette.DARK
+                    existing()
 
         this.Border <-
+            let existing = this.Border
             fun () ->
                 if this.TextEntry.Selected then
                     Colors.yellow_accent
                 else
-                    !*Palette.LIGHT
+                    existing()
 
         this |+ text_entry
         |* Text(

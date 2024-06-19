@@ -66,9 +66,9 @@ module Transitions =
         let amount =
             Math.Clamp(
                 (if inbound then
-                        in_timer.Elapsed / in_timer.Interval
+                        in_timer.Time / in_timer.Interval
                     else
-                        1.0 - (out_timer.Elapsed / in_timer.Interval)),
+                        1.0 - (out_timer.Time / in_timer.Interval)),
                 0.0,
                 1.0
             )

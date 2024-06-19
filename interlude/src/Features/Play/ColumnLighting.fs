@@ -54,7 +54,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
         let draw_column k (s: Animation.Delay) =
             if not s.Complete then
                 let percent_remaining =
-                    1.0f - float32 (s.Elapsed / s.Interval) |> min 1.0f |> max 0.0f
+                    1.0f - float32 (s.Time / s.Interval) |> min 1.0f |> max 0.0f
 
                 let a = 255.0f * percent_remaining |> int
 
