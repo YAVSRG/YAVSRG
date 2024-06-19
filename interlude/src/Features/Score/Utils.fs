@@ -19,8 +19,10 @@ type ScoreScreenStats =
         ReleaseEarlyPercent: float
 
         JudgementCount: int
+        MA: string
+        PA: string
     }
-    static member Generate(events: HitEvent<HitEventGuts> seq) =
+    static member Generate (judgements: int array) (events: HitEvent<HitEventGuts> seq) =
         let inc (x: int ref) = x.Value <- x.Value + 1
         let (++) (x: Time ref) (t: Time) = x.Value <- x.Value + t
 
@@ -108,6 +110,16 @@ type ScoreScreenStats =
             ReleaseEarlyPercent = float early_releases.Value / float releases.Value
 
             JudgementCount = taps.Value + releases.Value - 2
+
+            MA =
+                let mv = if judgements.Length > 0 then judgements.[0] else 0
+                let pf = if judgements.Length > 1 then judgements.[1] else 0
+                if pf = 0 then sprintf "%.2f:0" (float mv) else sprintf "%.2f:1" (float mv / float pf)
+            
+            PA =
+                let pf = if judgements.Length > 1 then judgements.[1] else 0
+                let gr = if judgements.Length > 2 then judgements.[2] else 0
+                if gr = 0 then sprintf "%.2f:0" (float pf) else sprintf "%.2f:1" (float pf / float gr)
         }
 
 module ScoreScreenHelpers =

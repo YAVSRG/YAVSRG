@@ -25,7 +25,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         ref
         <| Lamp.calculate_with_target score_info.Ruleset.Grading.Lamps score_info.Scoring.State
 
-    let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.HitEvents
+    let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents
 
     let previous_personal_bests =
         match SelectedChart.SAVE_DATA with
@@ -47,7 +47,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         lamp
         := Lamp.calculate_with_target score_info.Ruleset.Grading.Lamps score_info.Scoring.State
 
-        stats := ScoreScreenStats.Generate score_info.Scoring.HitEvents
+        stats := ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents
         previous_personal_bests := None
         graph.Refresh()
 

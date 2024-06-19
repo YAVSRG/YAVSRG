@@ -73,9 +73,9 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             Position = Position.TrimTop(600.0f).SliceTop(40.0f).Margin(10.0f, 0.0f)
         )
         |* Text(
-            (fun () -> sprintf "M: %.1fms | SD: %.1fms" (!stats).TapMean (!stats).TapStandardDeviation),
+            (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.1fms  •  SD: %.1fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
             Position = Position.TrimTop(600.0f).SliceTop(40.0f).Margin(10.0f, 0.0f),
-            Align = Alignment.RIGHT
+            Align = Alignment.CENTER
         )
 
         this
