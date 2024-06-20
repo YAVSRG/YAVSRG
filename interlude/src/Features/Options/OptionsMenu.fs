@@ -87,7 +87,7 @@ type OptionsMenuPage() =
     override this.Content() = page_body
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"options")
-    override this.OnClose() = header.Hide()
+    override this.OnClose() = on_destroy_current_tab(); header.Hide()
     override this.OnEnterNestedPage() = header.Hide()
     override this.OnReturnFromNestedPage() = header.Show()
 

@@ -27,8 +27,12 @@ type PageEasing =
 type Page() as this =
     inherit SlideContainer(NodeType.Container(fun _ -> Some this._content))
 
+    let EASING_SCALE = 0.1f
+
     let mutable is_current = false
     let mutable content: Widget = Unchecked.defaultof<_>
+
+    let fade = Animation.Fade(0.0f, Target = 1.0f)
 
     member private this._content = content
 
@@ -50,8 +54,20 @@ type Page() as this =
     override this.Update(elapsed_ms, moved) =
         if is_current && not content.Focused then
             Menu.Back()
+        fade.Update elapsed_ms
+        if fade.Value > 0.01f then
+            base.Update(elapsed_ms, moved)
 
-        base.Update(elapsed_ms, moved)
+    override this.Draw() =
+        if fade.Value < 0.01f then
+            ()
+        elif fade.Value > 0.99f then
+            base.Draw()
+        else
+            Alpha.set_multiplier fade.Value
+            base.Draw()
+            Alpha.reset_multiplier()
+
 
     member this.Show(dir: PageEasing) =
         match dir with
@@ -62,6 +78,7 @@ type Page() as this =
             this.Hide(dir.Reverse)
             this.SnapPosition()
             this.Position <- Position.Default
+        fade.Target <- 1.0f
 
         Selection.clamp_to this
 
@@ -73,36 +90,29 @@ type Page() as this =
         | PageEasing.Up ->
             this.Position <-
                 { Position.Default with
-                    Top = -1.0f %+ 0.0f
-                    Bottom = 0.0f %+ 0.0f
+                    Top = (0.0f - EASING_SCALE) %+ 0.0f
+                    Bottom = (1.0f - EASING_SCALE) %+ 0.0f
                 }
         | PageEasing.Down ->
             this.Position <-
                 { Position.Default with
-                    Top = 1.0f %+ 0.0f
-                    Bottom = 2.0f %+ 0.0f
+                    Top = (0.0f + EASING_SCALE) %+ 0.0f
+                    Bottom = (1.0f + EASING_SCALE) %+ 0.0f
                 }
         | PageEasing.Left ->
             this.Position <-
                 { Position.Default with
-                    Left = -1.0f %+ 0.0f
-                    Right = 0.0f %+ 0.0f
+                    Left = (0.0f - EASING_SCALE) %+ 0.0f
+                    Right = (1.0f - EASING_SCALE) %+ 0.0f
                 }
         | PageEasing.Right ->
             this.Position <-
                 { Position.Default with
-                    Left = 1.0f %+ 0.0f
-                    Right = 2.0f %+ 0.0f
+                    Left = (0.0f + EASING_SCALE) %+ 0.0f
+                    Right = (1.0f + EASING_SCALE) %+ 0.0f
                 }
-        | PageEasing.None ->
-            this.Position <-
-                {
-                    Left = -1.0f %+ 0.0f
-                    Top = -1.0f %+ 0.0f
-                    Right = 0.0f %+ 0.0f
-                    Bottom = 0.0f %+ 0.0f
-                }
-            this.SnapPosition()
+        | PageEasing.None -> ()
+        fade.Target <- 0.0f
 
         is_current <- false
 

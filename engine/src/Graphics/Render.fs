@@ -262,6 +262,7 @@ module Render =
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
         Shader.on Shader.main
+        Alpha.reset_multiplier()
 
     open SixLabors.ImageSharp
     open SixLabors.ImageSharp.Processing

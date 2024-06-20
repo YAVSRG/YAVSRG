@@ -141,3 +141,11 @@ module Stencil =
             Shader.set_uniform_i32 ("alphaMasking", 0) Shader.main
         else
             GL.StencilFunc(StencilFunction.Lequal, depth, 0xFF)
+
+module Alpha =
+
+    let set_multiplier (m: float32) =
+        Batch.draw()
+        Shader.set_uniform_f32 ("alphaMult", m) Shader.main
+
+    let reset_multiplier() = set_multiplier 1.0f
