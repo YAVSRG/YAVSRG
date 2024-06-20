@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI.Menu
 
-open System
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -32,7 +31,7 @@ type Page() as this =
     let mutable is_current = false
     let mutable content: Widget = Unchecked.defaultof<_>
 
-    let fade = Animation.Fade(0.0f, Target = 1.0f)
+    member val Opacity = Animation.Fade(0.0f, Target = 1.0f) with get
 
     member private this._content = content
 
@@ -54,20 +53,9 @@ type Page() as this =
     override this.Update(elapsed_ms, moved) =
         if is_current && not content.Focused then
             Menu.Back()
-        fade.Update elapsed_ms
-        if fade.Value > 0.01f then
+        this.Opacity.Update elapsed_ms
+        if this.Opacity.Value > 0.01f then
             base.Update(elapsed_ms, moved)
-
-    override this.Draw() =
-        if fade.Value < 0.01f then
-            ()
-        elif fade.Value > 0.99f then
-            base.Draw()
-        else
-            Alpha.set_multiplier fade.Value
-            base.Draw()
-            Alpha.reset_multiplier()
-
 
     member this.Show(dir: PageEasing) =
         match dir with
@@ -78,7 +66,7 @@ type Page() as this =
             this.Hide(dir.Reverse)
             this.SnapPosition()
             this.Position <- Position.Default
-        fade.Target <- 1.0f
+        this.Opacity.Target <- 1.0f
 
         Selection.clamp_to this
 
@@ -112,7 +100,7 @@ type Page() as this =
                     Right = (1.0f + EASING_SCALE) %+ 0.0f
                 }
         | PageEasing.None -> ()
-        fade.Target <- 0.0f
+        this.Opacity.Target <- 0.0f
 
         is_current <- false
 
@@ -239,7 +227,14 @@ and Menu(top_level: Page) as this =
         let mutable i = 0
 
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
-            stack.[i].Value.Draw()
+            let a = stack.[i].Value.Opacity.Alpha
+            if a < 1 then ()
+            elif a < 255 then
+                let before_alpha = Alpha.change_multiplier stack.[i].Value.Opacity.Value
+                stack.[i].Value.Draw()
+                Alpha.change_multiplier before_alpha |> ignore
+            else
+                stack.[i].Value.Draw()
             i <- i + 1
 
     override this.Update(elapsed_ms, moved) =

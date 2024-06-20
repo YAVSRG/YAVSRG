@@ -12,19 +12,17 @@ type LobbySelectPage() =
     let lobby_list = 
         LobbyList(
             Position =
-                { Position.Default with
-                    Right = 0.7f %+ 0.0f
+                { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with
+                    Right = 0.7f %- (PRETTY_MARGIN_X * 0.5f)
                 }
-                    .Margin(200.0f, 100.0f)
         )
 
     let invite_list =
         InviteList(
             Position =
-                { Position.Default with
-                    Left = 0.7f %+ 0.0f
+                { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with
+                    Left = 0.7f %+ (PRETTY_MARGIN_X * 0.5f)
                 }
-                    .Margin(100.0f, 100.0f)
         )
 
     let subscribed_events =

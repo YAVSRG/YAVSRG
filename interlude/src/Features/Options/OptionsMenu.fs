@@ -1,11 +1,13 @@
 ﻿namespace Interlude.Features.OptionsMenu
 
+open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Stats
 open Interlude.Features.EditNoteskin
 open Interlude.Features.Gameplay
 
@@ -22,9 +24,10 @@ type OptionsMenuPage() =
     let options_home_page =
         NavigationContainer.Column(WrapNavigation = false, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
         |+ Dummy(NodeType.Leaf)
-        |+ Text("Welcome back", Align = Alignment.LEFT).Pos(0, 4, PageWidth.Normal)
-        |+ Text("More stuff coming to this page soon", Color = K Colors.text_subheading, Align = Alignment.LEFT).Pos(4, 2, PageWidth.Normal)
+        |+ Text((fun () -> DateTime.Now.ToShortTimeString()), Align = Alignment.LEFT).Pos(0, 3, PageWidth.Normal)
+        |+ Text((fun () -> [Stats.format_short_time Stats.session.GameTime; Stats.format_short_time Stats.session.PlayTime] %> "score.session_time"), Color = K Colors.text_subheading, Align = Alignment.LEFT).Pos(3, 2, PageWidth.Normal)
         |+ Callout.frame help_mode_info (fun (w, h) -> Position.SliceBottom(h).SliceLeft(w))
+        // future quick actions: edit noteskin, edit hud, open wiki, view changelog, view stats, import stuff
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.ZAP (%"hud"),
             200.0f,
@@ -80,6 +83,10 @@ type OptionsMenuPage() =
 
     let header = 
         OptionsMenuHeader(content_setting)
+
+    override this.Init(parent) =
+        base.Init parent
+        header.Focus false
 
     override this.Header() =
         header |> OverlayContainer :> Widget
