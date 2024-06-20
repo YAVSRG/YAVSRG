@@ -61,7 +61,7 @@ type Toolbar() =
             )
             |+ InlaidButton(
                 %"menu.options",
-                OptionsMenuRoot.show,
+                OptionsMenuPage.Show,
                 Icons.SETTINGS
             )
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
@@ -194,7 +194,7 @@ type Toolbar() =
             Toolbar.take_screenshot()
         
         if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"options").Tapped() then
-            OptionsMenuRoot.show()
+            OptionsMenuPage.Show()
 
         Terminal.update ()
 

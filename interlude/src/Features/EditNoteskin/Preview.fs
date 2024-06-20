@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.EditNoteskin
 
+open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
@@ -26,8 +27,10 @@ type NoteskinPreview(position: Position) as this =
 
     let mutable renderer: Widget = Dummy()
 
+    let mutable expand = false
+
     let bounds_placeholder =
-        Container(
+        SlideContainer(
             NodeType.None,
             Position = position
         )
@@ -55,6 +58,15 @@ type NoteskinPreview(position: Position) as this =
         this.Bounds <- Viewport.bounds
         renderer.Update(elapsed_ms, moved)
         base.Update(elapsed_ms, moved)
+        if (Mouse.hover bounds_placeholder.Bounds && Mouse.left_click()) || (%%"preview").Tapped() then
+            expand <- not expand
+            bounds_placeholder.Position <- if expand then Position.Default else position
+        elif expand && (%%"exit").Tapped() then
+            expand <- false
+            bounds_placeholder.Position <- position
+        elif expand then
+            Input.finish_frame_events()
+        bounds_placeholder.Update(elapsed_ms, moved)
 
     override this.Draw() =
         fbo.Bind true
@@ -82,6 +94,7 @@ type NoteskinPreview(position: Position) as this =
             Right = 0.0f %+ (50.0f + w)
             Bottom = 0.5f %+ (h * 0.5f)
         }
+
     static member RIGHT_HAND_SIDE (scale: float32) : Position =
         let w = Viewport.vwidth * scale
         let h = Viewport.vheight * scale

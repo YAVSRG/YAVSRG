@@ -100,11 +100,10 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     override this.Init(parent) =
         text_entry.ColorFunc <-
             fun () ->
-                let fg, bg = this.TextColor()
                 if this.TextEntry.Selected then
-                    Colors.white, bg
+                    Colors.white, Colors.shadow_2
                 else
-                    fg, bg
+                    this.TextColor()
 
         this.Fill <-
             let existing = this.Fill
