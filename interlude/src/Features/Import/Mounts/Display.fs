@@ -6,7 +6,7 @@ open Prelude
 open Prelude.Data.Library
 open Interlude.UI
 
-type private MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) as this =
+type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) as this =
     inherit FrameContainer(NodeType.Container(fun _ -> Some this.VisibleButtons))
 
     let create_button =

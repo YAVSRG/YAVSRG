@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.Import.Mounts
 
 [<RequireQualifiedAccess>]
-type private MountedGameType =
+type MountedGameType =
     | Osu
     | Quaver
     | Etterna

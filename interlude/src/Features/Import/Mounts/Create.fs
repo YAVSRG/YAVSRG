@@ -60,7 +60,7 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
                 if setting.Value.IsSome then
                     Imports.import_mounted_source.Request((setting.Value.Value, Content.Library), ignore)
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
-                    Menu.Exit()
+                    Menu.Back()
             |> Some
 
         page_container()
