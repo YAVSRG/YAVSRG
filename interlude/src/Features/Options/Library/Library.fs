@@ -6,12 +6,19 @@ open Prelude
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Collections
 
 type LibraryPage() =
     inherit Page()
 
     override this.Content() =
         page_container ()
+        |+ PageButton(
+            %"library.collections",
+            fun () -> ManageCollectionsPage().Show()
+        )
+            .Tooltip(Tooltip.Info("library.collections"))
+            .Pos(0)
         |+ PageButton
             .Once(
                 %"library.recache_charts",
@@ -25,7 +32,7 @@ type LibraryPage() =
                     Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
             )
             .Tooltip(Tooltip.Info("library.recache_charts"))
-            .Pos(0)
+            .Pos(3)
         |+ PageButton
             .Once(
                 %"library.recache_patterns",
@@ -47,7 +54,7 @@ type LibraryPage() =
                     )
             )
             .Tooltip(Tooltip.Info("library.recache_patterns"))
-            .Pos(2)
+            .Pos(5)
         :> Widget
 
     override this.Title = %"library"

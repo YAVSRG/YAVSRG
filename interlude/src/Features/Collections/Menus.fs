@@ -260,7 +260,7 @@ type SelectCollectionPage
         |+ ScrollContainer(grid, Position = pretty_pos(5, PAGE_BOTTOM - 5, PageWidth.Full))
         :> Widget
 
-    override this.Title = %"collections"
+    override this.Title = sprintf "%s %s" Icons.FOLDER (%"collections")
     override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = refresh ()
 

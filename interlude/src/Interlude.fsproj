@@ -102,10 +102,11 @@
     <Compile Include="Features\Rulesets.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />
     <Compile Include="Features\Gameplay\Helpers.fs" />
+    <Compile Include="Features\Pacemaker\State.fs" />
+    <Compile Include="Features\Pacemaker\Menus.fs" />
 	  <Compile Include="Features\Tables\ChooseLevel.fs" />
 	  <Compile Include="Features\Tables\Suggestions.fs" />
 	  <Compile Include="Features\Tables\Manage.fs" />
-    <Compile Include="Features\Pacemaker.fs" />
     <Compile Include="Features\Collections\Actions.fs" />
     <Compile Include="Features\Collections\Menus.fs" />
     <Compile Include="Features\Score\Utils.fs" />

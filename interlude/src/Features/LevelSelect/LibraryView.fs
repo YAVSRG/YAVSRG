@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.LevelSelect
+namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -83,11 +83,11 @@ type LibraryViewControls() =
     let manage_collections =
         StylishButton(
             (fun () -> Menu.ShowPage ManageCollectionsPage),
-            K(sprintf "%s %s" Icons.FOLDER (%"levelselect.collections")),
+            K(sprintf "%s %s" Icons.FOLDER (%"library.collections")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         )
-            .Tooltip(Tooltip.Info("levelselect.collections", "group_mode"))
+            .Tooltip(Tooltip.Info("library.collections", "group_mode"))
 
     let manage_tables =
         StylishButton(

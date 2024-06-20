@@ -40,7 +40,8 @@ type private OptionsMenuButton(label: string, width: float32, on_click: unit -> 
 
         let text_color =
             if this.Focused then Colors.text_yellow_2
-            else Colors.text
+            elif is_selected then Colors.text
+            else Colors.text_subheading
 
         Draw.rect this.Bounds color
         Draw.rect (this.Bounds.BorderBottom Style.PADDING) trim_color
@@ -112,16 +113,16 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
             (fun () -> current_tab.Value = OptionsMenuTab.Gameplay)
         )
         |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.ARCHIVE (%"library"),
-            200.0f,
-            (fun () -> current_tab.Set OptionsMenuTab.Library),
-            (fun () -> current_tab.Value = OptionsMenuTab.Library)
-        )
-        |+ OptionsMenuButton(
             sprintf "%s %s" Icons.IMAGE (%"noteskins"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Noteskins),
             (fun () -> current_tab.Value = OptionsMenuTab.Noteskins)
+        )
+        |+ OptionsMenuButton(
+            sprintf "%s %s" Icons.ARCHIVE (%"library"),
+            200.0f,
+            (fun () -> current_tab.Set OptionsMenuTab.Library),
+            (fun () -> current_tab.Value = OptionsMenuTab.Library)
         )
 
     let transition_timer = Animation.Delay(400.0)

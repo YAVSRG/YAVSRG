@@ -136,7 +136,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         else
             SelectedChart.change_rate_hotkeys change_rate
 
-    override this.Title = %"mods"
+    override this.Title = sprintf "%s %s" Icons.ZAP (%"mods")
     override this.OnClose() = on_close ()
 
 type ModSelect(change_rate: float32 -> unit, on_menu_close: unit -> unit) =
