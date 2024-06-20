@@ -41,8 +41,8 @@ module Hotkeys =
 
     let import (d: Dictionary<string, Bind>) =
         for k in d.Keys do
-            ignore (hotkeys.Remove k)
-            hotkeys.Add(k, d.[k])
+            if (hotkeys.Remove k) then
+                hotkeys.Add(k, d.[k])
 
         hotkeys
 
