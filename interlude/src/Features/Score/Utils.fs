@@ -114,12 +114,12 @@ type ScoreScreenStats =
             MA =
                 let mv = if judgements.Length > 0 then judgements.[0] else 0
                 let pf = if judgements.Length > 1 then judgements.[1] else 0
-                if pf = 0 then sprintf "%.2f:0" (float mv) else sprintf "%.2f:1" (float mv / float pf)
+                if pf = 0 then sprintf "%.1f:0" (float mv) else sprintf "%.1f:1" (float mv / float pf)
             
             PA =
                 let pf = if judgements.Length > 1 then judgements.[1] else 0
                 let gr = if judgements.Length > 2 then judgements.[2] else 0
-                if gr = 0 then sprintf "%.2f:0" (float pf) else sprintf "%.2f:1" (float pf / float gr)
+                if gr = 0 then sprintf "%.1f:0" (float pf) else sprintf "%.1f:1" (float pf / float gr)
         }
 
 module ScoreScreenHelpers =

@@ -158,7 +158,7 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                 let (mv, pf) = ratio
                 Text.fill_b (
                     Style.font,
-                    (if pf = 0 then sprintf "%.2f:0" (float mv) else sprintf "%.2f:1" (float mv / float pf)),
+                    (if pf = 0 then sprintf "%.1f:0" (float mv) else sprintf "%.1f:1" (float mv / float pf)),
                     r.Shrink(5.0f),
                     (Color.White, Color.Black),
                     Alignment.CENTER
