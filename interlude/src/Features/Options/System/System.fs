@@ -102,9 +102,6 @@ module Monitors =
 type SystemPage() =
     inherit Page()
 
-    let mutable has_changed = false
-    let mark_changed = fun (_: 'T) -> has_changed <- true
-
     override this.Content() =
         window_mode_changed config.WindowMode.Value
 
@@ -129,15 +126,15 @@ type SystemPage() =
                     WindowType.Fullscreen, %"system.windowmode.fullscreen"
                 |],
                 config.WindowMode
-                |> Setting.trigger mark_changed
                 |> Setting.trigger window_mode_changed
+                |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
             )
         )
             .Tooltip(Tooltip.Info("system.windowmode"))
             .Pos(5)
         |+ PageSetting(
             %"system.windowresolution",
-            WindowedResolution(config.WindowResolution |> Setting.trigger mark_changed)
+            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
         )
             .Tooltip(Tooltip.Info("system.windowresolution"))
             .Pos(7)
@@ -147,7 +144,7 @@ type SystemPage() =
             SelectDropdown(
                 monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                 config.Display 
-                |> Setting.trigger (fun _ -> select_fullscreen_size (); mark_changed())
+                |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
             )
         )
             .Tooltip(Tooltip.Info("system.monitor"))
@@ -156,7 +153,7 @@ type SystemPage() =
         |+ PageSetting(
             %"system.videomode",
             VideoMode(
-                config.FullscreenVideoMode |> Setting.trigger mark_changed,
+                config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)),
                 get_current_supported_video_modes
             )
         )
@@ -198,16 +195,9 @@ type SystemPage() =
         |+ PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))
             .Tooltip(Tooltip.Info("system.visualoffset"))
             .Pos(21)
-
-        |>> Container
-        |+ (Callout.frame
-                (Callout.Small.Icon(Icons.AIRPLAY).Title(%"system.window_changes_hint"))
-                (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
-            ).Conditional(fun () -> has_changed)
         :> Widget
 
     override this.OnClose() =
         Window.defer (Window.DisableResize)
-        if has_changed then Window.defer (Window.ApplyConfig config)
 
     override this.Title = %"system"

@@ -61,7 +61,7 @@ type OptionsMenuPage() =
                     page_body.Current <- options_home_page
                 | OptionsMenuTab.System ->
                     let p = SystemSettings.SystemPage()
-                    on_destroy_current_tab <- p.OnDestroy
+                    on_destroy_current_tab <- p.OnClose
                     page_body.Current <- p.Content()
                 | OptionsMenuTab.Gameplay ->
                     let p = Gameplay.GameplayPage()
