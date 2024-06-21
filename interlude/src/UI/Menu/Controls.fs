@@ -246,6 +246,10 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
                     Setting = wrapped_setting
                 }
         )
+
+    override this.OnFocus(by_mouse: bool) =
+        base.OnFocus by_mouse
+        if not by_mouse then Style.hover.Play()
     
     static member FromEnum(setting: Setting<'T>) =
         let names = Enum.GetNames(typeof<'T>)
