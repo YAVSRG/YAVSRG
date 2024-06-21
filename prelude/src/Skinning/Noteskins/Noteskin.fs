@@ -71,7 +71,6 @@ module NoteskinExplosionMigration =
             }
         | None -> config
 
-// todo: noteskin create function that can return Error instead of constuctor throwing exception
 type Noteskin(storage) as this =
     inherit Storage(storage)
 
@@ -110,8 +109,9 @@ type Noteskin(storage) as this =
             for texture_id in NoteskinTextureRules.list () do
                 yield! this.ValidateTexture(texture_id, NoteskinTextureRules.get this.Config texture_id)
         }
-
+        
     static member FromZipStream(stream: Stream) =
         new Noteskin(Embedded(new ZipArchive(stream)))
 
+    // todo: make this a result return type instead of throwing exceptions
     static member FromPath(path: string) = new Noteskin(Folder path)

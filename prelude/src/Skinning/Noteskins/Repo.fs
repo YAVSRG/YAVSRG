@@ -9,18 +9,19 @@ open Prelude.Skinning.Noteskins
 
 module NoteskinPreview =
 
+    let private WIDTH = 640
+    let private HEIGHT = 480
+
+    let private NOTE_SIZE = 120
+    let private COLUMN_START = (WIDTH - NOTE_SIZE * 4) / 2
+    let private HITPOSITION = HEIGHT - NOTE_SIZE
+
     let private get_texture (id: string) (ns: Noteskin) =
         match ns.GetTexture id with
         | TextureOk(a, b) -> a, b
         | _ -> failwithf "Failed to get texture '%s' for noteskin '%s'" id ns.Config.Name
 
     let render (ns: Noteskin) : Bitmap =
-        let WIDTH = 640
-        let HEIGHT = 480
-
-        let NOTE_SIZE = 120
-        let COLUMN_START = (WIDTH - NOTE_SIZE * 4) / 2
-        let HITPOSITION = HEIGHT - NOTE_SIZE
 
         let img: Bitmap = new Bitmap(WIDTH, HEIGHT)
 
@@ -120,6 +121,14 @@ module NoteskinPreview =
 
         img
 
+    let render_thumbnail (ns: Noteskin) =
+        let bmp, config = get_texture "note" ns
+        let size = min (bmp.Width / config.Columns) NOTE_SIZE
+        let thumbnail = new Bitmap(bmp.Width / config.Columns, bmp.Height / config.Rows)
+        thumbnail.Mutate(fun i -> i.DrawImage(bmp, Point(0, 0), 1.0f) |> ignore)
+        thumbnail.Mutate(fun i -> i.Resize(Size(size, size)) |> ignore)
+        thumbnail
+
 [<Json.AutoCodec>]
 type NoteskinVersion =
     {
@@ -128,13 +137,13 @@ type NoteskinVersion =
         Preview: string
         Download: string
     }
-
+        
 [<Json.AutoCodec>]
 type NoteskinGroup =
     {
         Name: string
-        Author: string
         Versions: NoteskinVersion list
+        Thumbnail: string
     }
 
 [<Json.AutoCodec>]
@@ -150,6 +159,7 @@ module NoteskinRepo =
         (noteskin_info: NoteskinConfig)
         (download_link: string)
         (preview_image_link: string)
+        (thumbnail_image_link: string)
         (repo: NoteskinRepo)
         : NoteskinRepo * bool =
 
@@ -158,7 +168,7 @@ module NoteskinRepo =
 
         let editor = noteskin_info.Editor |> Option.map (_.Trim())
 
-        match repo.Noteskins |> List.tryFind (fun x -> x.Name = name && x.Author = author) with
+        match repo.Noteskins |> List.tryFind (fun x -> x.Name = name) with
         | Some existing_group ->
             let new_group, new_skin_was_added =
                 match
@@ -175,6 +185,7 @@ module NoteskinRepo =
                                 Download = download_link
                             }
                             :: (existing_group.Versions |> List.except [ existing ])
+
                     },
                     false
                 | None ->
@@ -199,7 +210,6 @@ module NoteskinRepo =
                 Noteskins =
                     {
                         Name = name
-                        Author = author
                         Versions =
                             [
                                 {
@@ -209,6 +219,7 @@ module NoteskinRepo =
                                     Download = download_link
                                 }
                             ]
+                        Thumbnail = thumbnail_image_link
                     }
                     :: repo.Noteskins
             },

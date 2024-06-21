@@ -17,6 +17,10 @@ module Noteskins =
         use img = NoteskinPreview.render ns
         img.SaveAsPng target_file
 
+    let private generate_thumbnail (ns: Noteskin, target_file: string) =
+        use img = NoteskinPreview.render_thumbnail ns
+        img.SaveAsPng target_file
+
     let generate_index () =
 
         let existing_skins =
@@ -72,6 +76,11 @@ module Noteskins =
                     Path.Combine(NOTESKINS_ROOT, "Previews", (Path.ChangeExtension(filename, ".png")))
                 )
 
+                generate_thumbnail (
+                    ns,
+                    Path.Combine(NOTESKINS_ROOT, "Previews", (ns.Config.Name.Trim('.', ' ') + "__thumbnail.png"))
+                )
+
                 let r, new_skin_added =
                     NoteskinRepo.add
                         ns.Config
@@ -79,6 +88,9 @@ module Noteskins =
                         (sprintf
                             "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/%s"
                             (Path.ChangeExtension(filename, ".png")))
+                        (sprintf
+                            "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/%s"
+                            (ns.Config.Name.Trim('.', ' ') + "__thumbnail.png"))
                         updated_repo
 
                 updated_repo <- r
