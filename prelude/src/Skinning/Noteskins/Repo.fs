@@ -133,6 +133,7 @@ module NoteskinPreview =
 type NoteskinVersion =
     {
         Version: string
+        Author: string
         Editor: string option
         Preview: string
         Download: string
@@ -180,6 +181,7 @@ module NoteskinRepo =
                         Versions =
                             {
                                 Version = version
+                                Author = author
                                 Editor = editor
                                 Preview = preview_image_link
                                 Download = download_link
@@ -193,6 +195,7 @@ module NoteskinRepo =
                         Versions =
                             {
                                 Version = version
+                                Author = author
                                 Editor = editor
                                 Preview = preview_image_link
                                 Download = download_link
@@ -214,6 +217,7 @@ module NoteskinRepo =
                             [
                                 {
                                     Version = version
+                                    Author = author
                                     Editor = editor
                                     Preview = preview_image_link
                                     Download = download_link
