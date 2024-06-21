@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.OptionsMenu.SystemSettings
 
+open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
@@ -60,12 +61,36 @@ type HotkeysPage() =
     inherit Page()
 
     override this.Content() = 
-        let hotkey_editor hk =
-            NavigationContainer.Row()
-            |+ Keybinder(hk, Position = Position.TrimRight PRETTYHEIGHT)
-            |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hk), Position = Position.SliceRight PRETTYHEIGHT)
+        let search_text = Setting.simple ""
 
         let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+
+        let search_box =
+            { new SearchBox(
+                    search_text, 
+                    (fun () ->
+                        if search_text.Value = "" then
+                            container.Filter <- K true
+                        else
+                            let query = search_text.Value
+                            container.Filter <-
+                            function
+                            | :? PageSetting as p -> p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
+                            | _ -> false
+                    ),
+                    Position = Position.Row(40.0f, 60.0f).Margin(PRETTY_MARGIN_X, 0.0f).SliceRight(500.0f),
+                    Fill = K Colors.cyan.O3,
+                    Border = K Colors.cyan_accent,
+                    TextColor = K Colors.text_cyan) with
+                override this.OnFocus by_mouse =
+                    base.OnFocus by_mouse
+                    if not by_mouse then defer (fun () -> this.Select false)
+            }
+
+        let hotkey_editor (hotkey: Hotkey) =
+            NavigationContainer.Row()
+            |+ Keybinder(hotkey, Position = Position.TrimRight PRETTYHEIGHT)
+            |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey), Position = Position.SliceRight PRETTYHEIGHT)
 
         let scroll_container =
             ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f))
@@ -85,7 +110,10 @@ type HotkeysPage() =
                         .Tooltip(Tooltip.Info(sprintf "hotkeys.%s" hk))
                 )
 
-        scroll_container
+        NavigationContainer.Column()
+        |+ scroll_container
+        |+ search_box
+        :> Widget
 
     override this.Title = %"system.hotkeys"
     override this.OnClose() = ()

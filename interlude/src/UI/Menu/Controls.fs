@@ -274,6 +274,8 @@ type PageSetting(localised_text, widget: Widget) as this =
                 if old_widget.Focused then
                     w.Focus false
 
+    member this.Label = localised_text
+
     override this.Init(parent) =
         this
         |* Text(
