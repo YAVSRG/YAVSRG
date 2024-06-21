@@ -72,28 +72,13 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
 
     let HEIGHT = 100.0f
 
-    let search_text = Setting.simple ""
-
-    let search_box =
-        { new SearchBox(
-                search_text, 
-                (fun () ->
-                    if search_text.Value = "" then
-                        current_tab.Set OptionsMenuTab.Home
-                    else
-                        current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get search_text.Value)
-                ),
-                Position = Position.CenterY(60.0f).Margin(PRETTY_MARGIN_X, 0.0f).SliceRight(600.0f),
-                Fill = K Colors.cyan.O3,
-                Border = K Colors.cyan_accent,
-                TextColor = K Colors.text_cyan) with
-            override this.OnFocus by_mouse =
-                base.OnFocus by_mouse
-                if not by_mouse then defer (fun () -> this.Select false)
-        }
+    let scaled_margins =
+        let pc = (PRETTY_MARGIN_X - 5.0f) / 480.0f
+        let offset = 5.0f - pc * 1440.0f
+        { Position.Default with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
 
     let tab_buttons =
-        DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = Position.SliceBottom(60.0f).Margin(PRETTY_MARGIN_X, 0.0f))
+        DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.SliceBottom(60.0f))
         |+ OptionsMenuButton(
             Icons.HOME,
             60.0f,
@@ -124,6 +109,26 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
             (fun () -> current_tab.Set OptionsMenuTab.Library),
             (fun () -> current_tab.Value = OptionsMenuTab.Library)
         )
+
+    let search_text = Setting.simple ""
+
+    let search_box =
+        { new SearchBox(
+                search_text, 
+                (fun () ->
+                    if search_text.Value = "" then
+                        current_tab.Set OptionsMenuTab.Home
+                    else
+                        current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get search_text.Value)
+                ),
+                Position = { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }.CenterY(60.0f).TrimLeft(900.0f).Margin(Style.PADDING, 0.0f),
+                Fill = K Colors.cyan.O3,
+                Border = K Colors.cyan_accent,
+                TextColor = K Colors.text_cyan) with
+            override this.OnFocus by_mouse =
+                base.OnFocus by_mouse
+                if not by_mouse then defer (fun () -> this.Select false)
+        }
 
     let transition_timer = Animation.Delay(400.0)
     let mutable transition = Transition.In
