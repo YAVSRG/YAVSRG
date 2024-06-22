@@ -72,6 +72,7 @@ type EditHUDPage() =
         }
         |+ body
 
+    // todo: untangle this when HUD is separate from noteskins
     let noteskin_required =
         Callout
             .Small

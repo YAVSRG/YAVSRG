@@ -227,3 +227,4 @@ type NoteskinsPage() =
         PreviewCleanup.clear ()
 
     override this.OnClose() = ()
+    override this.OnReturnFromNestedPage() = refresh()

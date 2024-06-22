@@ -9,6 +9,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay
+open Interlude.Features.Noteskins
 
 // todo: delete this when HUD and Noteskins separate from each other
 [<AutoOpen>]

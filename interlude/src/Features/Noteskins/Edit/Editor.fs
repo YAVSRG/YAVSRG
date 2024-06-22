@@ -8,6 +8,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
+open Interlude.Features.Noteskins
 
 type EditNoteskinPage(from_hotkey: bool) =
     inherit Page()
