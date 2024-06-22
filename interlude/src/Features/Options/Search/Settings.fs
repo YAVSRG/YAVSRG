@@ -14,6 +14,9 @@ open Interlude.Features.OptionsMenu.SystemSettings
 open Interlude.Features.OptionsMenu.Gameplay
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
+open Interlude.Features.Collections
+open Interlude.Features.Tables
+open Interlude.Features.LevelSelect
 
 module Settings =
 
@@ -169,6 +172,20 @@ module Settings =
 
     let search_library_settings (tokens: string array) : SearchResult seq =
         results {
+            if token_match tokens [|%"library.collections"|] then
+                yield PageButton(
+                    %"library.collections",
+                    (fun () -> ManageCollectionsPage().Show()),
+                    Icon = Icons.FOLDER
+                )
+                    .Tooltip(Tooltip.Info("library.collections"))
+            if token_match tokens [|%"library.tables"|] then
+                yield PageButton(
+                    %"library.tables",
+                    (fun () -> SelectTablePage(LevelSelect.refresh_all).Show()),
+                    Icon = Icons.SIDEBAR
+                )
+                    .Tooltip(Tooltip.Info("library.tables"))
             if token_match tokens [|%"library.recache_charts"|] then
                 yield PageButton.Once(
                     %"library.recache_charts",

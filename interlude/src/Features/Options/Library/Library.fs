@@ -18,13 +18,15 @@ type LibraryPage() =
         NavigationContainer.Column(WrapNavigation = false, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.5f %- 10.0f })
         |+ PageButton(
             %"library.collections",
-            fun () -> ManageCollectionsPage().Show()
+            (fun () -> ManageCollectionsPage().Show()),
+            Icon = Icons.FOLDER
         )
             .Tooltip(Tooltip.Info("library.collections"))
             .Pos(0, 2, PageWidth.Full)
         |+ PageButton(
             %"library.tables",
-            fun () -> SelectTablePage(LevelSelect.refresh_all).Show()
+            (fun () -> SelectTablePage(LevelSelect.refresh_all).Show()),
+            Icon = Icons.SIDEBAR
         )
             .Tooltip(Tooltip.Info("library.tables"))
             .Pos(2, 2, PageWidth.Full)
