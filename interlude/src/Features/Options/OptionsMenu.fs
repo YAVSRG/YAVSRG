@@ -50,6 +50,7 @@ type OptionsMenuPage() =
     let page_body = SwapContainer(options_home_page)
     let mutable current_tab = OptionsMenuTab.Home
     let mutable on_destroy_current_tab = ignore
+    let mutable on_return_current_tab = ignore
 
     let content_setting : Setting<OptionsMenuTab> = 
         Setting.make
@@ -59,25 +60,31 @@ type OptionsMenuPage() =
                 match new_tab with
                 | OptionsMenuTab.Home ->
                     on_destroy_current_tab <- ignore
+                    on_return_current_tab <- ignore
                     page_body.Current <- options_home_page
                 | OptionsMenuTab.System ->
                     let p = SystemSettings.SystemPage()
                     on_destroy_current_tab <- p.OnClose
+                    on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
                 | OptionsMenuTab.Gameplay ->
                     let p = Gameplay.GameplayPage()
                     on_destroy_current_tab <- p.OnDestroy
+                    on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
                 | OptionsMenuTab.Library ->
                     let p = Library.LibraryPage()
                     on_destroy_current_tab <- p.OnDestroy
+                    on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
                 | OptionsMenuTab.Noteskins ->
                     let p = SelectNoteskinsPage()
                     on_destroy_current_tab <- p.OnDestroy
+                    on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
                 | OptionsMenuTab.SearchResults contents ->
                     on_destroy_current_tab <- ignore
+                    on_return_current_tab <- ignore
                     page_body.Current <- contents
             )
             (fun () -> current_tab)
@@ -97,6 +104,6 @@ type OptionsMenuPage() =
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"options")
     override this.OnClose() = on_destroy_current_tab(); header.Hide()
     override this.OnEnterNestedPage() = header.Hide()
-    override this.OnReturnFromNestedPage() = header.Show()
+    override this.OnReturnFromNestedPage() = on_return_current_tab(); header.Show()
 
     static member Show() = Menu.ShowPage OptionsMenuPage
