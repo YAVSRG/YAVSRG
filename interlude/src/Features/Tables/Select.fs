@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Tables
+namespace Interlude.Features.Tables
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -9,6 +9,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Tables.Browser
 
 type private TableButton(name, action) =
     inherit
@@ -52,7 +53,7 @@ type private TableButton(name, action) =
 
         base.Draw()
 
-type ManageTablesPage(table_changed) =
+type SelectTablePage(refresh_table_view) =
     inherit Page()
 
     let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
@@ -62,12 +63,8 @@ type ManageTablesPage(table_changed) =
 
         container
         |+ PageButton(
-            %"tables.install",
-            (fun () ->
-                Menu.Exit()
-                Interlude.Features.Import.ImportScreen.switch_to_tables ()
-                Screen.change Screen.Type.Import Transitions.Default |> ignore
-            ),
+            %"tables.browser",
+            (fun () -> TableBrowserPage().Show()),
             Icon = Icons.DOWNLOAD
         )
         |* Dummy()
@@ -79,7 +76,8 @@ type ManageTablesPage(table_changed) =
                 fun () ->
                     options.Table.Set(Some e.Id)
 
-                    table_changed ()
+                    if options.LibraryMode.Value = Data.Library.Sorting.LibraryMode.Table && Screen.current_type = Screen.Type.LevelSelect then
+                        refresh_table_view()
 
                     defer refresh
             )
@@ -97,6 +95,6 @@ type ManageTablesPage(table_changed) =
         refresh ()
         ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f))
 
-    override this.Title = %"table"
+    override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"table")
     override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = refresh ()

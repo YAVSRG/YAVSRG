@@ -1,11 +1,13 @@
-﻿namespace Interlude.Features.Import
+namespace Interlude.Features.Tables.Browser
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Backbeat
 open Interlude.Web.Shared.Requests
 open Interlude.Content
 open Interlude.UI
+open Interlude.UI.Menu
 
 [<RequireQualifiedAccess>]
 type private TableStatus =
@@ -111,16 +113,14 @@ type TableCard(online_table: Tables.List.Table) as this =
             Tables.selected_id.Value <- Some existing.Value.Id
             TableDownloadMenu.LoadOrOpen(existing.Value)
 
-module Tables =
+type TableBrowserPage() =
+    inherit Page()
 
-    type TableList() as this =
-        inherit Container(NodeType.Container(fun _ -> Some this.Items))
+    let flow = FlowContainer.Vertical<TableCard>(200.0f, Spacing = 15.0f)
+    let scroll = ScrollContainer(flow, Margin = Style.PADDING, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
-        let flow = FlowContainer.Vertical<TableCard>(200.0f, Spacing = 15.0f)
-        let scroll = ScrollContainer(flow, Margin = Style.PADDING)
-
-        override this.Init(parent) =
-            Tables.List.get (
+    override this.Content() =
+        Tables.List.get (
                 function
                 | Some tables ->
                     for table in tables.Tables do
@@ -128,11 +128,10 @@ module Tables =
                 | None -> Logging.Error("Error getting online tables list")
             )
 
-            this |* scroll
-            base.Init parent
+        NavigationContainer.Column()
+        |+ Dummy(NodeType.Leaf)
+        |+ scroll
+        :> Widget
 
-        override this.Focusable = flow.Focusable
-
-        member this.Items = flow
-
-    let tab = TableList()
+    override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"tables.browser")
+    override this.OnClose() = ()

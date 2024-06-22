@@ -91,12 +91,12 @@ type LibraryViewControls() =
 
     let manage_tables =
         StylishButton(
-            (fun () -> ManageTablesPage(LevelSelect.refresh_all).Show()),
-            K(sprintf "%s %s" Icons.EDIT_2 (%"levelselect.table")),
+            (fun () -> SelectTablePage(LevelSelect.refresh_all).Show()),
+            K(sprintf "%s %s" Icons.EDIT_2 (%"library.tables")),
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         )
-            .Tooltip(Tooltip.Info("levelselect.table", "group_mode"))
+            .Tooltip(Tooltip.Info("library.tables", "group_mode"))
 
     let swap =
         SwapContainer(
@@ -184,7 +184,7 @@ type LibraryViewControls() =
             elif (%%"collections").Tapped() then
                 Menu.ShowPage ManageCollectionsPage
             elif (%%"table").Tapped() then
-                ManageTablesPage(LevelSelect.refresh_all).Show() // todo: only need to refresh if view is table
+                SelectTablePage(LevelSelect.refresh_all).Show()
             elif (%%"reverse_sort_mode").Tapped() then
                 Setting.app not options.ChartSortReverse
                 LevelSelect.refresh_all ()

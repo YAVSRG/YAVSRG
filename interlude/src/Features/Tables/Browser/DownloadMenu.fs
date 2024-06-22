@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Import
+﻿namespace Interlude.Features.Tables.Browser
 
 open System.Collections.Generic
 open Percyqaz.Common
@@ -13,7 +13,7 @@ open Interlude.UI.Menu
 
 #nowarn "40"
 
-module private TableDownloader =
+module TableDownloader =
 
     [<RequireQualifiedAccess>]
     type ChartStatus =
@@ -476,7 +476,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
                 for chart in level_charts do
                     container.Add(Chart(chart, state))
 
-        ScrollContainer(container, Margin = 10.0f, Position = Position.Margin(100.0f, 100.0f))
+        ScrollContainer(container, Margin = 10.0f, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
     override this.Title = table.Info.Name
     override this.OnClose() = ()

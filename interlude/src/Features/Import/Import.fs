@@ -16,13 +16,12 @@ module ImportScreen =
         SwapContainer(Mounts.Mounts.tab, Position = Position.TrimLeft(400.0f).Margin(50.0f, 20.0f))
 
     let switch_to_rulesets () = container.Current <- Rulesets.tab
-    let switch_to_tables () = container.Current <- Tables.tab
 
     let something_in_progress () =
         WebServices.download_file.Status <> Async.ServiceStatus.Idle
         || Imports.auto_convert.Status <> Async.ServiceStatus.Idle
         || Caching.Cache.recache_service.Status <> Async.ServiceStatus.Idle
-        || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
+        //|| TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || osu.Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
 type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
@@ -53,7 +52,6 @@ type private Sidebar() as this =
         |+ TabButton(Icons.LINK, %"imports.local", ImportScreen.container, Mounts.Mounts.tab)
         |+ TabButton(Icons.ARCHIVE, %"imports.etterna", ImportScreen.container, Etterna.Packs.tab)
         |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.osu", ImportScreen.container, osu.Beatmaps.tab)
-        |+ TabButton(Icons.SIDEBAR, %"imports.tables", ImportScreen.container, Tables.tab)
         |+ TabButton(Icons.SLIDERS, %"imports.rulesets", ImportScreen.container, Rulesets.tab)
 
     do
