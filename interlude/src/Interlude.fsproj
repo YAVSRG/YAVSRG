@@ -61,6 +61,7 @@
     <Compile Include="UI\Menu\Controls.fs" />
     <Compile Include="UI\Menu\Menu.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
+    <Compile Include="Features\Wiki\State.fs" />
     <Compile Include="Features\Wiki\Wiki.fs" />
     <Compile Include="Features\Online\DiscordRPC.fs" />
     <Compile Include="Features\Online\Credentials.fs" />

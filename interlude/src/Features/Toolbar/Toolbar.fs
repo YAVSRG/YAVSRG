@@ -83,7 +83,7 @@ type Toolbar() =
                 .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
             |+ InlaidButton(
                 %"menu.wiki",
-                Wiki.show,
+                WikiBrowser.Show,
                 Icons.BOOK,
                 HoverIcon = Icons.BOOK_OPEN,
                 Hotkey = "wiki"
