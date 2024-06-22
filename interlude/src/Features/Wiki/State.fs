@@ -36,7 +36,7 @@ module private WikiState =
     let mutable loading = false
     let mutable page_history = [ WikiIndex ]
     let mutable current_page = WikiIndex
-    let mutable content: MarkdownDocument array option = None
+    let mutable loaded_content: MarkdownDocument array option = None
     let mutable page_changed: unit -> unit = ignore
 
     let private page_loader =
@@ -134,7 +134,7 @@ module private WikiState =
             page_loader.Request(
                 res,
                 fun md ->
-                    content <- Some md
+                    loaded_content <- Some md
                     loading <- false
                     defer page_changed
             )

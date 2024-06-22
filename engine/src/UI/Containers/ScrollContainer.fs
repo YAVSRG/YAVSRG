@@ -47,9 +47,9 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
             let selected_bounds =
                 (child :?> Widget).Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
 
-            if selected_bounds.Bottom > this.Bounds.Bottom then
+            if selected_bounds.Bottom > this.Bounds.Bottom && selected_bounds.Top > this.Bounds.CenterX then
                 scroll_amt <- scroll_amt + selected_bounds.Bottom - this.Bounds.Bottom + Style.PADDING
-            elif this.Bounds.Top > selected_bounds.Top then
+            elif selected_bounds.Top < this.Bounds.Top && selected_bounds.Bottom < this.Bounds.CenterX then
                 scroll_amt <- scroll_amt - this.Bounds.Top + selected_bounds.Top - Style.PADDING
 
         let moved =
