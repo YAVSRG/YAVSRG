@@ -24,11 +24,14 @@ module Check =
         mapping
 
     let check_linecounts () =
+        let mutable loc = 0
         for filename, file_contents in walk_fs_files YAVSRG_PATH do
             let lines = file_contents.Split('\n').Length
 
             if lines > 300 then
                 printfn "%s has %i lines" filename lines
+            loc <- loc + lines
+        printfn "total %i lines of f#" loc
 
     let locale_check (file: string) (cli_fix_issues: bool) =
         let locale = load_locale file
