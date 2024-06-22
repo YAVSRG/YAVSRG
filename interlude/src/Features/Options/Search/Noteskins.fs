@@ -5,10 +5,9 @@ open Prelude.Skinning.Noteskins
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
-open Interlude.Features.Import
 open Interlude.Features.LevelSelect
-open Interlude.Features.OptionsMenu.Noteskins
-open Interlude.Features.EditNoteskin
+open Interlude.Features.Noteskins.Edit
+open Interlude.Features.Noteskins
 open Interlude.Features.Gameplay
 
 module Noteskins =
@@ -31,12 +30,7 @@ module Noteskins =
                 if not (Suggestions.in_endless_mode()) then
                     yield PageButton(
                         %"noteskins.get_more",
-                        (fun () ->
-                            Menu.Exit()
-
-                            if Screen.change Screen.Type.Import Transitions.Default then
-                                ImportScreen.switch_to_noteskins ()
-                        )
+                        (fun () -> NoteskinsBrowserPage().Show())
                     )
 
                 yield PageButton(

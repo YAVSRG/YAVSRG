@@ -15,7 +15,6 @@ module ImportScreen =
     let container =
         SwapContainer(Mounts.Mounts.tab, Position = Position.TrimLeft(400.0f).Margin(50.0f, 20.0f))
 
-    let switch_to_noteskins () = container.Current <- Noteskins.tab
     let switch_to_rulesets () = container.Current <- Rulesets.tab
     let switch_to_tables () = container.Current <- Tables.tab
 
@@ -55,7 +54,6 @@ type private Sidebar() as this =
         |+ TabButton(Icons.ARCHIVE, %"imports.etterna", ImportScreen.container, Etterna.Packs.tab)
         |+ TabButton(Icons.DOWNLOAD_CLOUD, %"imports.osu", ImportScreen.container, osu.Beatmaps.tab)
         |+ TabButton(Icons.SIDEBAR, %"imports.tables", ImportScreen.container, Tables.tab)
-        |+ TabButton(Icons.IMAGE, %"imports.noteskins", ImportScreen.container, Noteskins.tab)
         |+ TabButton(Icons.SLIDERS, %"imports.rulesets", ImportScreen.container, Rulesets.tab)
 
     do

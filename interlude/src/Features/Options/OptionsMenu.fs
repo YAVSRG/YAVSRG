@@ -8,7 +8,8 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Stats
-open Interlude.Features.EditNoteskin
+open Interlude.Features.Noteskins
+open Interlude.Features.Noteskins.Edit
 open Interlude.Features.Gameplay
 
 type OptionsMenuPage() =
@@ -72,7 +73,7 @@ type OptionsMenuPage() =
                     on_destroy_current_tab <- p.OnDestroy
                     page_body.Current <- p.Content()
                 | OptionsMenuTab.Noteskins ->
-                    let p = Noteskins.NoteskinsPage()
+                    let p = NoteskinsPage()
                     on_destroy_current_tab <- p.OnDestroy
                     page_body.Current <- p.Content()
                 | OptionsMenuTab.SearchResults contents ->

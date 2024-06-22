@@ -2,8 +2,6 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
-open Prelude.Charts.Processing
-open Prelude.Data
 open Prelude.Data.Library.Caching
 open Interlude
 open Interlude.Content
@@ -12,15 +10,13 @@ open Interlude.Features.Stats
 open Interlude.Features.MainMenu
 open Interlude.Features.Import
 open Interlude.Features.Import.Mounts
-open Interlude.Features.Score
 open Interlude.Features.LevelSelect
 open Interlude.Features.Multiplayer
 open Interlude.Features.Printerlude
 open Interlude.Features.Toolbar
 open Interlude.Features.Online
-open Interlude.Features.Play
-open Interlude.Features.EditNoteskin
-open Interlude.Features.OptionsMenu
+open Interlude.Features.Noteskins.Edit
+open Interlude.Features.Noteskins
 
 module Startup =
     let MIGRATION_VERSION = 2
@@ -66,7 +62,7 @@ module Startup =
         Gameplay.continue_endless_mode <- Suggestions.continue_endless_mode
 
         choose_noteskins <-
-            fun () -> Noteskins.NoteskinsPage().Show()
+            fun () -> NoteskinsPage().Show()
 
         Updates.check_for_updates ()
 

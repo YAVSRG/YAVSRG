@@ -4,7 +4,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
 open Interlude.UI.Menu
-open Interlude.Features.EditNoteskin
+open Interlude.Features.Noteskins.Edit
 
 type LanecoverPage() =
     inherit Page()
