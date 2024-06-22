@@ -136,6 +136,8 @@ type WikiBrowser() =
 
         container
 
+    override this.Footer() = Dummy()
+
     override this.OnClose() = ()
     override this.Title = %"menu.wiki"
 

@@ -47,8 +47,21 @@ type Page() as this =
     default this.OnEnterNestedPage() = ()
 
     abstract member Content : unit -> Widget
+
     abstract member Header : unit -> Widget
     default this.Header() = PageHeaderBase()
+
+    abstract member Footer : unit -> Widget
+    default this.Footer() =
+        IconButton(
+            %"menu.back",
+            Icons.ARROW_LEFT_CIRCLE,
+            60.0f,
+            Menu.Back,
+            Position = Position.Box(0.0f, 1.0f, 5.0f, -70.0f, 160.0f, 60.0f)
+        )
+        |> OverlayContainer
+        :> Widget
 
     override this.Update(elapsed_ms, moved) =
         if is_current && not content.Focused then
@@ -105,7 +118,7 @@ type Page() as this =
         is_current <- false
 
     override this.Init(parent: Widget) =
-        content <- (NavigationContainer.Column() |+ this.Content() |+ this.Header())
+        content <- (NavigationContainer.Column() |+ this.Content() |+ this.Footer() |+ this.Header())
         this |* content
 
         this.Hide(this.Direction.Reverse)
@@ -149,15 +162,6 @@ and Menu(top_level: Page) as this =
     let stack: Page option array = Array.create MAX_PAGE_DEPTH None
     let mutable namestack = []
     let mutable nest_level = 0
-
-    let back_button =
-        IconButton(
-            %"menu.back",
-            Icons.ARROW_LEFT_CIRCLE,
-            60.0f,
-            Menu.Back,
-            Position = Position.Box(0.0f, 1.0f, 5.0f, -70.0f, 160.0f, 60.0f)
-        )
 
     let volume = Volume()
     let exit_key = HotkeyHoldAction("exit", (fun () -> Selection.up false), Menu.Exit)
@@ -218,13 +222,11 @@ and Menu(top_level: Page) as this =
 
     override this.Init(parent) =
         base.Init parent
-        back_button.Init this
         volume.Init this
         exit_key.Init this
         this.ShowPage top_level
 
     override this.Draw() =
-        back_button.Draw()
         volume.Draw()
         let mutable i = 0
 
@@ -245,7 +247,6 @@ and Menu(top_level: Page) as this =
         if nest_level > 0 then
             stack.[nest_level - 1].Value.Update(elapsed_ms, moved)
 
-        back_button.Update(elapsed_ms, moved)
         volume.Update(elapsed_ms, moved)
 
         exit_key.Update(elapsed_ms, moved)
