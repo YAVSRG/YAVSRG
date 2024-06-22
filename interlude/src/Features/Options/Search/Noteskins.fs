@@ -7,6 +7,7 @@ open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.LevelSelect
 open Interlude.Features.Noteskins.Edit
+open Interlude.Features.Noteskins.Browser
 open Interlude.Features.Noteskins
 open Interlude.Features.Gameplay
 
@@ -17,7 +18,7 @@ module Noteskins =
             if token_match tokens [|%"noteskins"|] then
                 yield PageButton(
                     %"noteskins",
-                    (fun () -> NoteskinsPage().Show())
+                    (fun () -> SelectNoteskinsPage().Show())
                 )
 
                 if not Content.Noteskin.IsEmbedded then

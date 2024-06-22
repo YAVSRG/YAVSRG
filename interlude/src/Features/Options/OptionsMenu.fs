@@ -73,7 +73,7 @@ type OptionsMenuPage() =
                     on_destroy_current_tab <- p.OnDestroy
                     page_body.Current <- p.Content()
                 | OptionsMenuTab.Noteskins ->
-                    let p = NoteskinsPage()
+                    let p = SelectNoteskinsPage()
                     on_destroy_current_tab <- p.OnDestroy
                     page_body.Current <- p.Content()
                 | OptionsMenuTab.SearchResults contents ->

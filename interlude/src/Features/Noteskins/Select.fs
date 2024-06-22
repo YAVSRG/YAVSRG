@@ -12,16 +12,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Import
 open Interlude.Features.Noteskins.Edit
-
-module private PreviewCleanup =
-
-    let mutable private list = List.empty
-
-    let add (s: Sprite) = list <- s :: list
-
-    let clear () =
-        list |> List.iter (Sprite.destroy >> ignore)
-        list <- List.empty
+open Interlude.Features.Noteskins.Browser
 
 type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
     inherit
@@ -34,38 +25,9 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
             )
         )
 
-    let mutable preview: Sprite option = None
-    let preview_fade = Animation.Fade 0.0f
-
     member this.IsCurrent = Noteskins.selected_id.Value = id
 
     override this.Init(parent: Widget) =
-        Noteskins.preview_loader.Request(
-            ns,
-            function
-            | Some(bmp, config) ->
-                defer (fun () ->
-                    preview <-
-                        Some(
-                            Sprite.upload_one
-                                false
-                                true
-                                {
-                                    Label = "NOTESKIN_PREVIEW"
-                                    Image = bmp
-                                    Rows = config.Rows
-                                    Columns = config.Columns
-                                    DisposeImageAfter = true
-                                }
-                        )
-
-                    PreviewCleanup.add preview.Value
-                    bmp.Dispose()
-                    preview_fade.Target <- 1.0f
-                )
-            | None -> ()
-        )
-
         this
         |+ Text(
             K ns.Config.Name,
@@ -100,13 +62,31 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
             Align = Alignment.LEFT,
             Position = Position.TrimLeft(100.0f).Margin(7.5f, Style.PADDING).SliceBottom(30.0f)
         )
+        |+ { new Thumbnail(Position = Position.SliceLeft(100.0f).Margin(Style.PADDING)) with
+            override this.Load() =
+                Noteskins.preview_loader.Request(
+                    ns,
+                    function
+                    | Some(bmp, config) ->
+                        defer (fun () ->
+                            Sprite.upload_one
+                                false
+                                true
+                                {
+                                    Label = "NOTESKIN_PREVIEW"
+                                    Image = bmp
+                                    Rows = config.Rows
+                                    Columns = config.Columns
+                                    DisposeImageAfter = true
+                                }
+                            |> this.FinishLoading
+                        )
+                    | None -> ()
+                )
+        }
         |* Clickable.Focus this
 
         base.Init parent
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-        preview_fade.Update elapsed_ms
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -118,13 +98,9 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
         elif this.Focused then
             Draw.rect this.Bounds Colors.yellow_accent.O1
 
-        match preview with
-        | Some p -> Draw.sprite (this.Bounds.SliceLeft(100.0f).Shrink(5.0f)) (Colors.white.O4a preview_fade.Alpha) p
-        | None -> ()
-
         base.Draw()
 
-type NoteskinsPage() =
+type SelectNoteskinsPage() =
     inherit Page()
 
     let preview = NoteskinPreview(NoteskinPreview.LEFT_HAND_SIDE 0.35f)
@@ -222,9 +198,7 @@ type NoteskinsPage() =
 
     override this.Title = %"noteskins"
 
-    override this.OnDestroy() =
-        preview.Destroy()
-        PreviewCleanup.clear ()
+    override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = refresh()

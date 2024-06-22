@@ -62,7 +62,7 @@ module Startup =
         Gameplay.continue_endless_mode <- Suggestions.continue_endless_mode
 
         choose_noteskins <-
-            fun () -> NoteskinsPage().Show()
+            fun () -> SelectNoteskinsPage().Show()
 
         Updates.check_for_updates ()
 
