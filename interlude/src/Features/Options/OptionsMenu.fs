@@ -11,6 +11,7 @@ open Interlude.Features.Stats
 open Interlude.Features.Noteskins
 open Interlude.Features.Noteskins.Edit
 open Interlude.Features.Gameplay
+open Interlude.Features.Wiki
 
 type OptionsMenuPage() =
     inherit Page()
@@ -45,25 +46,28 @@ type OptionsMenuPage() =
             0.0f,
             (fun () -> 
                 if Content.Noteskin.IsEmbedded then
-                    EditNoteskinPage(false).Show()
-                else
                     SelectNoteskinsPage().Show()
+                else
+                    EditNoteskinPage(false).Show()
             )
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.BOOK_OPEN (%"menu.wiki"),
             0.0f,
-            (fun () -> ())
+            (fun () -> WikiBrowser.Show())
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.STAR (%"menu.changelog"),
             0.0f,
-            (fun () -> ())
+            (fun () -> WikiBrowser.ShowChangelog())
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.TRENDING_UP (%"menu.stats"),
             0.0f,
-            (fun () -> ())
+            (fun () ->
+                if Screen.change_new StatsScreen Screen.Type.Stats Transitions.Transition.Default then 
+                    Menu.Exit()
+            )
         )
         |>> (fun nt -> Container(nt, Position = { Position.Default with Left = 0.65f %+ 10.0f }))
         |+ Text("Quick actions", Position = Position.SliceTop(60.0f))

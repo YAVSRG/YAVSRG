@@ -141,9 +141,9 @@ type WikiBrowser() =
     override this.OnClose() = ()
     override this.Title = %"menu.wiki"
 
-    static member Show() = (WikiBrowser() :> Page).Show()
+    static member Show() = 
+        (WikiBrowser() :> Page).Show()
     
     static member ShowChangelog() = 
-        if current_page <> Changelog then
-            load_resource Changelog
+        load_resource Changelog
         (WikiBrowser() :> Page).Show()
