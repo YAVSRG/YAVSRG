@@ -61,18 +61,16 @@ type HotkeysPage() =
     inherit Page()
 
     override this.Content() = 
-        let search_text = Setting.simple ""
-
         let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
         let search_box =
             { new SearchBox(
-                    search_text, 
-                    (fun () ->
-                        if search_text.Value = "" then
+                    Setting.simple "", 
+                    (fun query ->
+                        if query = "" then
                             container.Filter <- K true
                         else
-                            let query = search_text.Value
+                            let query = query
                             container.Filter <-
                             function
                             | :? PageSetting as p -> p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)

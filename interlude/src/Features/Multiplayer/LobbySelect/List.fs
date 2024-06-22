@@ -74,7 +74,7 @@ type LobbyList() =
         )
         |* SearchBox(
             search_text,
-            (fun () -> list_container.Filter <- fun l -> l.Name.ToLower().Contains search_text.Value),
+            (fun (query: string) -> list_container.Filter <- fun l -> l.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)),
             Position = Position.SliceTop 60.0f
         )
         base.Init parent

@@ -52,7 +52,7 @@ type private SearchList() =
             )
 
         this
-        |+ SearchBox(query, searcher.Reload, Position = Position.TrimTop(5.0f).SliceTop(50.0f))
+        |+ SearchBox(query, (fun (_: string) -> searcher.Reload()), Position = Position.TrimTop(5.0f).SliceTop(50.0f))
         |* searcher
 
         base.Init parent

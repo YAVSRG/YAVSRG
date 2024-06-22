@@ -176,6 +176,11 @@ type NoteskinsPage() =
             |+ PageButton(%"noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
                 .Tooltip(Tooltip.Info("noteskins.edit"))
                 .Pos(PAGE_BOTTOM - 4, 2, PageWidth.Full)
+            |+ PageButton(%"osu_skin_import.list_skins", 
+                (fun () -> osu.Skins.OsuSkinsListPage().Show()), 
+                Icon = Icons.DOWNLOAD
+            )
+                .Pos(PAGE_BOTTOM - 2, 2, PageWidth.Full)
             |+ Text(
                 %"noteskins.current",
                 Position = pretty_pos(0, 1, PageWidth.Full).SliceTop(PRETTYHEIGHT * 0.65f),
@@ -204,12 +209,7 @@ type NoteskinsPage() =
             |+ (GridFlowContainer(PRETTYHEIGHT, 2, WrapNavigation = false, Position = Position.SliceTop(PRETTYHEIGHT))
                 |+ PageButton(
                     %"noteskins.get_more",
-                    (fun () ->
-                        Menu.Exit()
-
-                        if Screen.change Screen.Type.Import Transitions.Default then
-                            ImportScreen.switch_to_noteskins ()
-                    )
+                    (fun () -> InstallNoteskinsPage().Show())
                 )
                 |+ PageButton(%"noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
                     .Tooltip(Tooltip.Info("noteskins.open_folder")))

@@ -110,16 +110,14 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
             (fun () -> current_tab.Value = OptionsMenuTab.Library)
         )
 
-    let search_text = Setting.simple ""
-
     let search_box =
         { new SearchBox(
-                search_text, 
-                (fun () ->
-                    if search_text.Value = "" then
+                Setting.simple "", 
+                (fun query ->
+                    if query = "" then
                         current_tab.Set OptionsMenuTab.Home
                     else
-                        current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get search_text.Value)
+                        current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get query)
                 ),
                 Position = { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }.CenterY(60.0f).TrimLeft(900.0f).Margin(Style.PADDING, 0.0f),
                 Fill = K Colors.cyan.O3,

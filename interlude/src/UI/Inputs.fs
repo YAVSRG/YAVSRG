@@ -75,13 +75,13 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
         base.Update(elapsed_ms, moved)
         ticker.Update(elapsed_ms)
 
-type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
+type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
     inherit FrameContainer(NodeType.Container(fun _ -> Some this.TextEntry))
     let search_timer = new Diagnostics.Stopwatch()
 
     let text_entry =
         TextEntry(
-            s |> Setting.trigger (fun _ -> this.StartSearch()),
+            query_text |> Setting.trigger (fun _ -> this.StartSearch()),
             "search",
             true,
             Position = Position.Margin(10.0f, 0.0f)
@@ -89,7 +89,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
 
     member val DebounceTime = 400L with get, set
 
-    new(s: Setting<string>, callback: Filter -> unit) = SearchBox(s, (fun () -> callback (Filter.parse s.Value)))
+    new(query_text: Setting<string>, callback: Filter -> unit) = SearchBox(query_text, (fun (query: string) -> callback (Filter.parse query)))
 
     member private this.StartSearch() = search_timer.Restart()
 
@@ -124,7 +124,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
         this |+ text_entry
         |* Text(
             fun () ->
-                match s.Value with
+                match query_text.Value with
                 | "" -> Icons.SEARCH + " " + [ (%%"search").ToString() ] %> "misc.search"
                 | _ -> ""
             , Color = text_entry.ColorFunc
@@ -139,7 +139,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
 
         if search_timer.ElapsedMilliseconds > this.DebounceTime then
             search_timer.Reset()
-            callback ()
+            callback query_text.Value
         // eat a button press for some trigger happy users
         elif search_timer.IsRunning && (%%"select").Tapped() then
             ()

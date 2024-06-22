@@ -90,7 +90,6 @@
     <Compile Include="Features\Import\Mounts\Edit.fs" />
     <Compile Include="Features\Import\Mounts\Display.fs" />
     <Compile Include="Features\Import\Mounts\Mounts.fs" />
-    <Compile Include="Features\Import\Noteskins\Versions.fs" />
     <Compile Include="Features\Import\Noteskins\Noteskins.fs" />
     <Compile Include="Features\Import\Tables\DownloadMenu.fs" />
     <Compile Include="Features\Import\Tables\Tables.fs" />
