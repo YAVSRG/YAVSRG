@@ -148,6 +148,7 @@ and Menu(top_level: Page) as this =
     // Everything past the current page could be Some from an old backed out page
     let stack: Page option array = Array.create MAX_PAGE_DEPTH None
     let mutable namestack = []
+    let mutable nest_level = 0
 
     let back_button =
         IconButton(
@@ -175,19 +176,20 @@ and Menu(top_level: Page) as this =
         | Some instance -> instance.ShowPage(page ())
 
     member private this.ShowPage(page: Page) =
-        let n = List.length namestack
         namestack <- page.Title :: namestack
         page.Init this
 
-        match stack.[n] with
+        match stack.[nest_level] with
         | None -> ()
         | Some page -> page.OnDestroy()
 
-        stack.[n] <- Some page
+        stack.[nest_level] <- Some page
 
-        if n > 0 then
-            stack.[n - 1].Value.Hide(page.Direction)
-            stack.[n - 1].Value.OnEnterNestedPage()
+        if nest_level > 0 then
+            stack.[nest_level - 1].Value.Hide(page.Direction)
+            stack.[nest_level - 1].Value.OnEnterNestedPage()
+
+        nest_level <- nest_level + 1
 
     static member Back() =
         match _instance with
@@ -201,14 +203,14 @@ and Menu(top_level: Page) as this =
 
     member private this.Back() =
         namestack <- List.tail namestack
-        let n = List.length namestack
-        let page = stack.[n].Value
+        nest_level <- nest_level - 1
+        let page = stack.[nest_level].Value
         page.OnClose()
         page.Hide(page.Direction.Reverse)
 
-        if n > 0 then
-            stack.[n - 1].Value.Show(page.Direction.Reverse)
-            stack.[n - 1].Value.OnReturnFromNestedPage()
+        if nest_level > 0 then
+            stack.[nest_level - 1].Value.Show(page.Direction.Reverse)
+            stack.[nest_level - 1].Value.OnReturnFromNestedPage()
 
     member private this.Exit() =
         while namestack <> [] do
@@ -240,11 +242,25 @@ and Menu(top_level: Page) as this =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        let mutable i = 0
+        if nest_level > 0 then
+            stack.[nest_level - 1].Value.Update(elapsed_ms, moved)
 
-        while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
-            stack.[i].Value.Update(elapsed_ms, moved)
-            i <- i + 1
+        back_button.Update(elapsed_ms, moved)
+        volume.Update(elapsed_ms, moved)
+
+        exit_key.Update(elapsed_ms, moved)
+
+        if (%%"screenshot").Tapped() then
+            Toolbar.take_screenshot ()
+
+        Input.finish_frame_events()
+
+        do
+            let mutable i = 0
+
+            while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
+                if i <> nest_level - 1 then stack.[i].Value.Update(elapsed_ms, moved)
+                i <- i + 1
 
         if List.isEmpty namestack then
             let mutable i = 0
@@ -254,14 +270,6 @@ and Menu(top_level: Page) as this =
                 i <- i + 1
 
             this.Close()
-
-        back_button.Update(elapsed_ms, moved)
-        volume.Update(elapsed_ms, moved)
-
-        exit_key.Update(elapsed_ms, moved)
-
-        if (%%"screenshot").Tapped() then
-            Toolbar.take_screenshot ()
 
     override this.Close() =
         base.Close()
