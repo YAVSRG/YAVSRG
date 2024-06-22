@@ -246,9 +246,15 @@ module Noteskins =
         | Embedded _ -> false
         | Folder f ->
             selected_id.Value <- fst DEFAULTS.[0]
-            Directory.Delete(f, true)
-            load()
-            true
+            try
+                Directory.Delete(f, true)
+                load()
+                true
+            with
+            | :? IOException as err ->
+                Logging.Error("IO error while deleting noteskin", err)
+                false
+            | _ -> reraise()
 
     let export_current () =
         match current.Source with
