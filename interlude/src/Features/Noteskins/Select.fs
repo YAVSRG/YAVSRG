@@ -108,7 +108,7 @@ type SelectNoteskinsPage() =
     let grid =
         GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
-    let rec try_edit_noteskin () =
+    let rec edit_or_extract_noteskin () =
         let ns = Content.Noteskin
 
         if ns.IsEmbedded then
@@ -147,16 +147,36 @@ type SelectNoteskinsPage() =
     override this.Content() =
         refresh ()
 
-        let left_side =
-            NavigationContainer.Column(Position = { Position.Default with Right = 0.35f %+ PRETTY_MARGIN_X }.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
-            |+ PageButton(%"noteskins.edit", try_edit_noteskin, Icon = Icons.EDIT_2)
-                .Tooltip(Tooltip.Info("noteskins.edit"))
-                .Pos(PAGE_BOTTOM - 4, 2, PageWidth.Full)
-            |+ PageButton(%"osu_skin_import.list_skins", 
-                (fun () -> osu.Skins.OsuSkinsListPage().Show()), 
-                Icon = Icons.DOWNLOAD
+        let action_buttons =
+            NavigationContainer.Row(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT))
+            |+ OptionsMenuButton(
+                sprintf "%s %s" Icons.EDIT_2 (%"noteskins.edit"),
+                0.0f,
+                edit_or_extract_noteskin,
+                Position = { Position.Default with Right = 0.22f %+ 0.0f }
             )
-                .Pos(PAGE_BOTTOM - 2, 2, PageWidth.Full)
+            |+ OptionsMenuButton(
+                sprintf "%s %s" Icons.DOWNLOAD (%"noteskins.get_more"),
+                0.0f,
+                (fun () -> NoteskinsBrowserPage().Show()),
+                Position = { Position.Default with Left = 0.26f %+ 0.0f; Right = 0.48f %+ 0.0f }
+            )
+            |+ OptionsMenuButton(
+                %"osu_skin_import.list_skins",
+                0.0f,
+                (fun () -> osu.Skins.OsuSkinsListPage().Show()),
+                Position = { Position.Default with Left = 0.52f %+ 0.0f; Right = 0.74f %+ 0.0f }
+            )
+            |+ OptionsMenuButton(
+                 sprintf "%s %s" Icons.FOLDER (%"noteskins.open_folder"),
+                0.0f,
+                (fun () -> open_directory (get_game_folder "Noteskins")),
+                Position = { Position.Default with Left = 0.78f %+ 0.0f }
+            )
+                .Tooltip(Tooltip.Info("noteskins.open_folder"))
+
+        let left_info =
+            Container(NodeType.None, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |+ Text(
                 %"noteskins.current",
                 Position = pretty_pos(0, 1, PageWidth.Full).SliceTop(PRETTYHEIGHT * 0.65f),
@@ -169,31 +189,23 @@ type SelectNoteskinsPage() =
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )
-            |>> Container
-            |+ preview
 
-        let right_side =
-            NavigationContainer.Column(
-                Position =
+        let right_selection =
+            ScrollContainer(grid, 
+                Position = 
                     { Position.Default with
-                        Left = 0.35f %+ 50.0f
+                        Left = 0.35f %+ 10.0f
                     }
-                        .Margin(PRETTY_MARGIN_X, 0.0f)
-                        .TrimTop(150.0f)
-                        .TrimBottom(50.0f)
+                        .Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
+                        .TrimBottom(PRETTYHEIGHT + 20.0f)
             )
-            |+ (GridFlowContainer(PRETTYHEIGHT, 2, WrapNavigation = false, Position = Position.SliceTop(PRETTYHEIGHT))
-                |+ PageButton(
-                    %"noteskins.get_more",
-                    (fun () -> NoteskinsBrowserPage().Show())
-                )
-                |+ PageButton(%"noteskins.open_folder", (fun () -> open_directory (get_game_folder "Noteskins")))
-                    .Tooltip(Tooltip.Info("noteskins.open_folder")))
-            |+ ScrollContainer(grid, Position = Position.TrimTop(PRETTYHEIGHT * 1.5f))
 
-        NavigationContainer.Row() 
-        |+ left_side
-        |+ right_side
+        NavigationContainer.Column() 
+        |+ right_selection
+        |+ action_buttons
+        |>> Container
+        |+ left_info
+        |+ preview
         :> Widget
 
     override this.Title = %"noteskins"

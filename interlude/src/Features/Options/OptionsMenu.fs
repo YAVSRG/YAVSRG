@@ -16,22 +16,17 @@ type OptionsMenuPage() =
     inherit Page()
 
     let help_mode_info =
-        Callout.Normal
+        Callout.Small
             .Icon(Icons.INFO)
             .Title(%"options.ingame_help")
             .Body(%"options.ingame_help.hint")
             .Hotkey("tooltip")
-        
-    let options_home_page =
-        NavigationContainer.Column(WrapNavigation = false, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
-        |+ Dummy(NodeType.Leaf)
-        |+ Text((fun () -> DateTime.Now.ToShortTimeString()), Align = Alignment.LEFT).Pos(0, 3, PageWidth.Normal)
-        |+ Text((fun () -> [Stats.format_short_time Stats.session.GameTime; Stats.format_short_time Stats.session.PlayTime] %> "score.session_time"), Color = K Colors.text_subheading, Align = Alignment.LEFT).Pos(3, 2, PageWidth.Normal)
-        |+ Callout.frame help_mode_info (fun (w, h) -> Position.SliceBottom(h).SliceLeft(w))
-        // future quick actions: edit noteskin, edit hud, open wiki, view changelog, view stats, import stuff
+
+    let quick_actions =
+        FlowContainer.Vertical<OptionsMenuButton>(60.0f, Spacing = 15.0f, Position = Position.TrimTop(70.0f))
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.ZAP (%"hud"),
-            200.0f,
+            0.0f,
             (fun () -> 
                 if Content.Noteskin.IsEmbedded then
                     EditHUDPage().Show()
@@ -43,9 +38,42 @@ type OptionsMenuPage() =
                         Transitions.Default
                 then
                     Menu.Exit()
-            ),
-            K false
-        ).Pos(6)
+            )
+        )
+        |+ OptionsMenuButton(
+            sprintf "%s %s" Icons.IMAGE (%"noteskins.edit"),
+            0.0f,
+            (fun () -> 
+                if Content.Noteskin.IsEmbedded then
+                    EditNoteskinPage(false).Show()
+                else
+                    SelectNoteskinsPage().Show()
+            )
+        )
+        |+ OptionsMenuButton(
+            sprintf "%s %s" Icons.BOOK_OPEN (%"menu.wiki"),
+            0.0f,
+            (fun () -> ())
+        )
+        |+ OptionsMenuButton(
+            sprintf "%s %s" Icons.STAR (%"menu.changelog"),
+            0.0f,
+            (fun () -> ())
+        )
+        |+ OptionsMenuButton(
+            sprintf "%s %s" Icons.TRENDING_UP (%"menu.stats"),
+            0.0f,
+            (fun () -> ())
+        )
+        |>> (fun nt -> Container(nt, Position = { Position.Default with Left = 0.65f %+ 10.0f }))
+        |+ Text("Quick actions", Position = Position.SliceTop(60.0f))
+        
+    let options_home_page =
+        NavigationContainer.Column(WrapNavigation = false, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        |+ quick_actions
+        |+ Text((fun () -> DateTime.Now.ToShortTimeString()), Align = Alignment.LEFT).Pos(0, 3, PageWidth.Normal)
+        |+ Text((fun () -> [Stats.format_short_time Stats.session.GameTime; Stats.format_short_time Stats.session.PlayTime] %> "score.session_time"), Color = K Colors.text_subheading, Align = Alignment.LEFT).Pos(3, 2, PageWidth.Normal)
+        |+ Callout.frame help_mode_info (fun (w, h) -> Position.SliceBottom(h).SliceLeft(w))
 
     let page_body = SwapContainer(options_home_page)
     let mutable current_tab = OptionsMenuTab.Home

@@ -9,48 +9,6 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Search
 
-type private OptionsMenuButton(label: string, width: float32, on_click: unit -> unit, is_selected: unit -> bool) =
-    inherit
-        Container(
-            NodeType.Button(fun () ->
-                Style.click.Play()
-                on_click ()
-            )
-        )
-
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
-        Style.hover.Play()
-
-    override this.Init(parent) =
-        this |* Clickable.Focus this
-        base.Init(parent)
-
-    override this.Draw() =
-        let is_selected = is_selected()
-        let trim_color =
-            if is_selected then Colors.pink_accent
-            elif this.Focused then Colors.black
-            else Colors.shadow_1
-            
-        let color =
-            if is_selected then Colors.pink_accent.O2
-            elif this.Focused then Colors.shadow_2.O3
-            else Colors.shadow_2.O2
-
-        let text_color =
-            if this.Focused then Colors.text_yellow_2
-            elif is_selected then Colors.text
-            else Colors.text_subheading
-
-        Draw.rect this.Bounds color
-        Draw.rect (this.Bounds.BorderBottom Style.PADDING) trim_color
-
-        Text.fill_b (Style.font, label, this.Bounds.Shrink(Style.PADDING * 2.0f), text_color, Alignment.CENTER)
-
-    interface IWidth with
-        member this.Width = width
-
 [<RequireQualifiedAccess>]
 type private Transition =
     | In
@@ -83,31 +41,31 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
             Icons.HOME,
             60.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Home),
-            (fun () -> current_tab.Value = OptionsMenuTab.Home)
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Home)
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.AIRPLAY (%"system"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.System),
-            (fun () -> current_tab.Value = OptionsMenuTab.System)
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.System)
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.SLIDERS (%"gameplay"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Gameplay),
-            (fun () -> current_tab.Value = OptionsMenuTab.Gameplay)
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Gameplay)
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.IMAGE (%"noteskins"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Noteskins),
-            (fun () -> current_tab.Value = OptionsMenuTab.Noteskins)
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Noteskins)
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.ARCHIVE (%"library"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Library),
-            (fun () -> current_tab.Value = OptionsMenuTab.Library)
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Library)
         )
 
     let search_box =

@@ -525,6 +525,50 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             A <- (y - alpha_picker.Top) / alpha_picker.Height
             s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
 
+type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
+    inherit
+        Container(
+            NodeType.Button(fun () ->
+                Style.click.Play()
+                on_click ()
+            )
+        )
+
+    member val IsHighlighted = K false with get, set
+
+    override this.OnFocus(by_mouse: bool) =
+        base.OnFocus by_mouse
+        Style.hover.Play()
+
+    override this.Init(parent) =
+        this |* Clickable.Focus this
+        base.Init(parent)
+
+    override this.Draw() =
+        let is_highlighted = this.IsHighlighted()
+        let trim_color =
+            if is_highlighted then Colors.pink_accent
+            elif this.Focused then Colors.black
+            else Colors.shadow_1
+            
+        let color =
+            if is_highlighted then Colors.pink_accent.O2
+            elif this.Focused then Colors.shadow_2.O3
+            else Colors.shadow_2.O2
+
+        let text_color =
+            if this.Focused then Colors.text_yellow_2
+            elif is_highlighted then Colors.text
+            else Colors.text_subheading
+
+        Draw.rect this.Bounds color
+        Draw.rect (this.Bounds.BorderBottom Style.PADDING) trim_color
+
+        Text.fill_b (Style.font, label, this.Bounds.Shrink(Style.PADDING * 2.0f), text_color, Alignment.CENTER)
+
+    interface IWidth with
+        member this.Width = width
+
 [<AutoOpen>]
 module Helpers =
 
