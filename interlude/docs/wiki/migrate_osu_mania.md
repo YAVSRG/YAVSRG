@@ -12,7 +12,7 @@ If you encounter any bugs or things that don't look right, feel free to ask in t
 
 ## Step 1: Songs
 
-On the Import screen, there is a tool for linking your existing osu! Songs library to Interlude.  
+In Options > Library, there is a tool for linking your existing osu! Songs library to Interlude.  
 It will first try to auto detect the folder, but if that doesn't work you can just link by dropping your osu! **'Songs' folder** onto the Interlude window **when the menu asks you to.**
 
 By linking your libraries instead of fully importing them, audio files and background images are not copied, so the Interlude version of the song library should only be a few MB (saves on drive space if you play both).  
@@ -35,7 +35,7 @@ Again this will run in the background and may take a few minutes.
 
 ## Step 3: Noteskins
 
-On the Noteskins tab of the Import screen, there is a button to detect and import skins from osu!  
+In Options > Noteskins, there is a button to detect and import skins from osu!  
 The game will prompt you for which keymode to import, and then try its best to convert the skin to a matching Interlude noteskin.
 
 Alternatively, there are many noteskins available for download from the same screen - If you use a common skin it may already be there!

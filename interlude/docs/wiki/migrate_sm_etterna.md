@@ -12,7 +12,7 @@ If you encounter any bugs or things that don't look right, feel free to ask in t
 
 ## Step 1: Songs
 
-On the Import screen, there is a tool for linking your existing Songs library to Interlude.  
+In Options > Library, there is a tool for linking your existing Songs library to Interlude.  
 It will first try to auto detect the folder for the respective game, but if that doesn't work you can just link by dropping your **Songs folder** onto the Interlude window **when the menu asks you to.**
 
 By linking your libraries instead of fully importing them, audio files and background images are not copied, so the Interlude version of the song library should only be a few MB (saves on drive space if you play both).  
