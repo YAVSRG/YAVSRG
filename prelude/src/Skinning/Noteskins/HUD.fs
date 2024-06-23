@@ -61,6 +61,7 @@ type HUDUserOptions =
         TimingDisplayFadeTime: float32
         TimingDisplayThickness: float32
         TimingDisplayShowGuide: bool
+        TimingDisplayGuideThickness: float32
         TimingDisplayShowNonJudgements: bool
         TimingDisplayReleasesExtraHeight: float32
         TimingDisplayHalfScaleReleases: bool
@@ -103,6 +104,7 @@ type HUDUserOptions =
             TimingDisplayFadeTime = 1000.0f
             TimingDisplayThickness = 5.0f
             TimingDisplayShowGuide = true
+            TimingDisplayGuideThickness = 1.0f
             TimingDisplayShowNonJudgements = true
             TimingDisplayReleasesExtraHeight = 5.0f
             TimingDisplayHalfScaleReleases = true

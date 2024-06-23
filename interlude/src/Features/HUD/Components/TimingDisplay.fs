@@ -98,9 +98,9 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
         if user_options.TimingDisplayShowGuide then
             Draw.rect
                 (Rect.Create(
-                    centre - user_options.TimingDisplayThickness,
+                    centre - user_options.TimingDisplayThickness * user_options.TimingDisplayGuideThickness,
                     this.Bounds.Top,
-                    centre + user_options.TimingDisplayThickness,
+                    centre + user_options.TimingDisplayThickness * user_options.TimingDisplayGuideThickness,
                     this.Bounds.Bottom
                 ))
                 Color.White

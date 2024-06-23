@@ -18,6 +18,7 @@ type TimingDisplayPage(on_close: unit -> unit) =
     let pos = Setting.simple noteskin_options.TimingDisplayPosition
 
     let show_guide = Setting.simple user_options.TimingDisplayShowGuide
+    let guide_thickness = Setting.percentf user_options.TimingDisplayGuideThickness
     let show_non_judgements = Setting.simple user_options.TimingDisplayShowNonJudgements
 
     let thickness =
@@ -64,12 +65,16 @@ type TimingDisplayPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.timingdisplay.thickness", Slider(thickness, Step = 1f))
             .Tooltip(Tooltip.Info("hud.timingdisplay.thickness"))
             .Pos(6)
+        |+ PageSetting(%"hud.timingdisplay.guide_thickness", Slider.Percent(guide_thickness))
+            .Tooltip(Tooltip.Info("hud.timingdisplay.guide_thickness"))
+            .Pos(8)
+            .Conditional(show_guide.Get)
         |+ PageSetting(%"hud.timingdisplay.releasesextraheight", Slider(release_thickness, Step = 1f))
             .Tooltip(Tooltip.Info("hud.timingdisplay.releasesextraheight"))
-            .Pos(8)
+            .Pos(10)
         |+ PageSetting(%"hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
             .Tooltip(Tooltip.Info("hud.timingdisplay.animationtime"))
-            .Pos(10)
+            .Pos(12)
         |+ PageSetting(%"hud.timingdisplay.moving_average_type", 
             SelectDropdown(
                 [|
@@ -81,15 +86,15 @@ type TimingDisplayPage(on_close: unit -> unit) =
             )
         )
             .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_type"))
-            .Pos(12)
+            .Pos(14)
         |+ PageSetting(%"hud.timingdisplay.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
             .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_sensitivity"))
-            .Pos(14)
+            .Pos(16)
             .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
         |+ ([
             PageSetting(%"hud.timingdisplay.moving_average_color", ColorPicker(moving_average_color, true))
                 .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_color"))
-                .Pos(16, 3)
+                .Pos(18, 3)
                 .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
             :> Widget
         ] |> or_require_noteskin)
@@ -106,6 +111,7 @@ type TimingDisplayPage(on_close: unit -> unit) =
                 TimingDisplayShowGuide = show_guide.Value
                 TimingDisplayShowNonJudgements = show_non_judgements.Value
                 TimingDisplayThickness = thickness.Value
+                TimingDisplayGuideThickness = guide_thickness.Value
                 TimingDisplayReleasesExtraHeight = release_thickness.Value
                 TimingDisplayFadeTime = animation_time.Value
                 TimingDisplayMovingAverageType = moving_average_type.Value
