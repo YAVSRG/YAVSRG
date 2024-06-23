@@ -32,15 +32,8 @@ module Imports =
 type OptionsMenuPage() =
     inherit Page()
 
-    let help_mode_info =
-        Callout.Small
-            .Icon(Icons.INFO)
-            .Title(%"options.ingame_help")
-            .Body(%"options.ingame_help.hint")
-            .Hotkey("tooltip")
-
     let quick_actions =
-        NavigationContainer.Column()
+        NavigationContainer.Column(WrapNavigation = false, Position = { Position.Default with Left = 0.65f %+ 10.0f })
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.ZAP (%"hud"),
             0.0f,
@@ -116,28 +109,42 @@ type OptionsMenuPage() =
                 if Screen.change_new StatsScreen Screen.Type.Stats Transitions.Transition.Default then 
                     Menu.Exit()
             ),
-            Position = Position.Row(550.0f, 60.0f)
+            Position = Position.Row(535.0f, 60.0f)
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.BOOK_OPEN (%"menu.wiki"),
             0.0f,
             (fun () -> WikiBrowserPage.Show()),
-            Position = Position.Row(625.0f, 60.0f)
+            Position = Position.Row(610.0f, 60.0f)
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.STAR (%"menu.changelog"),
             0.0f,
             (fun () -> WikiBrowserPage.ShowChangelog()),
-            Position = Position.Row(700.0f, 60.0f)
+            Position = Position.Row(685.0f, 60.0f)
         )
-        |>> (fun nt -> Container(nt, Position = { Position.Default with Left = 0.65f %+ 10.0f }))
+    
+    let help_mode_info =
+        Callout.Small
+            .Icon(Icons.INFO)
+            .Title(%"options.ingame_help")
+            .Body(%"options.ingame_help.hint")
+            .Hotkey("tooltip")
+
+    let landing_panel =
+        FrameContainer(
+            NodeType.None, 
+            Fill = K Colors.shadow_2.O2,
+            Border = K Colors.cyan_accent.O2,
+            Position = { Position.Default with Right = 0.65f %- 60.0f }
+        )
+        |+ EmptyState(Icons.SETTINGS, %"menu.options", Subtitle = "Suggest in Discord what should go here")
+        |+ Callout.frame help_mode_info (fun (w, h) -> Position.CenterX(w).SliceBottom(h).Translate(0.0f, -65.0f))
         
     let options_home_page =
-        NavigationContainer.Column(WrapNavigation = false, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        NavigationContainer.Row(WrapNavigation = false, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
         |+ quick_actions
-        |+ Text((fun () -> DateTime.Now.ToShortTimeString()), Align = Alignment.LEFT).Pos(0, 3, PageWidth.Normal)
-        |+ Text((fun () -> [Stats.format_short_time Stats.session.GameTime; Stats.format_short_time Stats.session.PlayTime] %> "score.session_time"), Color = K Colors.text_subheading, Align = Alignment.LEFT).Pos(3, 2, PageWidth.Normal)
-        |+ Callout.frame help_mode_info (fun (w, h) -> Position.SliceBottom(h).SliceLeft(w))
+        |+ landing_panel
 
     let page_body = SwapContainer(options_home_page)
     let mutable current_tab = OptionsMenuTab.Home
