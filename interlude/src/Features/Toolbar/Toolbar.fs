@@ -11,12 +11,15 @@ open Interlude.UI.Menu
 open Interlude
 open Interlude.Options
 open Interlude.Features.Gameplay
-open Interlude.Features.Import
 open Interlude.Features.Stats
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 open Interlude.Features.Printerlude
 open Interlude.Features.Noteskins.Edit
+open Interlude.Features.Import.osu
+open Interlude.Features.Import.Etterna
+open Interlude.Features.Tables.Browser
+open Interlude.Features.Rulesets
 
 type Toolbar() =
     inherit Widget(NodeType.None)
@@ -34,6 +37,35 @@ type Toolbar() =
             SelectedChart.recolor ()
             Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
         | None -> ()
+
+    let import_button =
+        let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height).Translate(0.0f, HEIGHT).SliceLeft(370.0f))
+        let container = 
+            InlaidButton(
+                %"menu.import",
+                (fun () ->
+                    dropdown_wrapper.Toggle(fun () ->
+                        DropdownMenu
+                            {
+                                Items = 
+                                    [|
+                                        (fun () -> BeatmapBrowserPage().Show()), Icons.DOWNLOAD_CLOUD + " " + %"beatmap_browser"
+                                        (fun () -> EtternaPacksBrowserPage().Show()), Icons.DOWNLOAD_CLOUD + " " + %"etterna_pack_browser"
+                                        (fun () -> InstallRulesetsPage().Show()), Icons.SLIDERS + " " + %"imports.rulesets"
+                                        (fun () -> TableBrowserPage().Show()), Icons.SIDEBAR + " " + %"tables.browser"
+                                    |]
+                            }
+                    )
+                ),
+                Icons.DOWNLOAD,
+                Hotkey = "import"
+            )
+            |+ LoadingIndicator.Strip(
+                Imports.import_in_progress,
+                Position = Position.SliceBottom(15.0f).SliceTop(Style.PADDING)
+            )
+            |+ dropdown_wrapper
+        container.Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
 
     override this.Init(parent) =
         container
@@ -65,19 +97,7 @@ type Toolbar() =
                 Icons.SETTINGS
             )
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
-            |+ (InlaidButton(
-                    %"menu.import",
-                    (fun () ->
-                        () //Screen.change Screen.Type.Import Transitions.Default |> ignore
-                    ),
-                    Icons.DOWNLOAD,
-                    Hotkey = "import"
-                )
-                |+ LoadingIndicator.Strip(
-                    Imports.import_in_progress,
-                    Position = Position.SliceBottom(15.0f).SliceTop(Style.PADDING)
-                ))
-                .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
+            |+ import_button
             |+ InlaidButton(
                 %"menu.wiki",
                 WikiBrowserPage.Show,
