@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
-open Interlude.Features
+open Interlude.Features.Rulesets
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
@@ -135,8 +135,7 @@ type ChartInfo() as this =
         )
             .Tooltip(Tooltip.Info("levelselect.mods", "mods"))
 
-        |* Rulesets
-            .QuickSwitcher(
+        |* RulesetSwitcher(
                 options.SelectedRuleset |> Setting.trigger (ignore >> LevelSelect.refresh_all),
                 Position =
                     {

@@ -1,7 +1,5 @@
 ﻿namespace Prelude.Gameplay.PremadeRulesets
 
-open System
-open Percyqaz.Data
 open Prelude
 open Prelude.Gameplay
 
@@ -455,7 +453,7 @@ module SC =
     let create (judge: int) =
         {
             Name = sprintf "SC (J%i)" judge
-            Description = "The 'official' scoring system of Interlude, fine tuned for maximum fun"
+            Description = "The 'official' scoring system of Interlude, tuned for a balanced experience"
             Judgements =
                 [|
                     {

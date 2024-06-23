@@ -8,13 +8,18 @@ open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
 open Interlude.Features.Noteskins
+open Interlude.Features.Rulesets
 
 type GameplayPage() =
     inherit Page()
 
-    let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
+    let binds = 
+        let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
+        let binder = GameplayKeybinder(keymode, Position = Position.TrimLeft 100.0f)
+        NavigationContainer.Row()
+        |+ binder
+        |+ Selector.FromEnum(keymode |> Setting.trigger (ignore >> binder.OnKeymodeChanged), Position = Position.SliceLeft 100.0f)
 
-    let binds = GameplayKeybinder(keymode)
     let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE 0.35f)
 
     override this.Content() =
@@ -50,17 +55,15 @@ type GameplayPage() =
         |+ PageSetting(%"gameplay.hide_hit_notes", Checkbox options.VanishingNotes)
             .Tooltip(Tooltip.Info("gameplay.hide_hit_notes"))
             .Pos(11)
-        |+ PageButton(%"gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
+        |+ PageButton(%"gameplay.lanecover", (fun () -> LanecoverPage().Show()))
             .Tooltip(Tooltip.Info("gameplay.lanecover"))
             .Pos(14)
-        |+ PageButton(%"gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
+        |+ PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
             .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
             .Pos(16)
-        |+ PageSetting(
-            %"generic.keymode",
-            Selector.FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
-        )
-            .Pos(19)
+        |+ PageButton(%"gameplay.rulesets", (fun () -> InstallRulesetsPage().Show()))
+            .Tooltip(Tooltip.Info("gameplay.ruleset"))
+            .Pos(18)
         |+ PageSetting(%"gameplay.keybinds", binds)
             .Tooltip(Tooltip.Info("gameplay.keybinds"))
             .Pos(21, 2, PageWidth.Full)

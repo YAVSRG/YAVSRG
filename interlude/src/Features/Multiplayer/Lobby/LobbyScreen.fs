@@ -14,7 +14,7 @@ open Interlude.Options
 open Interlude.Features.Play
 open Interlude.Features.Online
 open Interlude.Features.LevelSelect
-open Interlude.Features
+open Interlude.Features.Rulesets
 open Interlude.Features.Gameplay
 
 type LobbySettingsPage(lobby: Lobby) =
@@ -99,8 +99,7 @@ type LobbyUI(lobby: Lobby) =
                 }
         )
             .Tooltip(Tooltip.Info("levelselect.mods"))
-        |+ Rulesets
-            .QuickSwitcher(
+        |+ RulesetSwitcher(
                 options.SelectedRuleset,
                 Position =
                     {

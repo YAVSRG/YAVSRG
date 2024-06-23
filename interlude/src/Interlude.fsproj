@@ -91,12 +91,13 @@
     <Compile Include="Features\Import\Mounts\Edit.fs" />
     <Compile Include="Features\Import\Mounts\Display.fs" />
     <Compile Include="Features\Import\Mounts\Mounts.fs" />
-    <Compile Include="Features\Import\Rulesets\Games.fs" />
-    <Compile Include="Features\Import\Rulesets\Community.fs" />
-    <Compile Include="Features\Import\Rulesets\Rulesets.fs" />
+    <Compile Include="Features\Rulesets\Edit\EditRuleset.fs" />
+    <Compile Include="Features\Rulesets\Browser\Community.fs" />
+    <Compile Include="Features\Rulesets\GameRulesets.fs" />
+    <Compile Include="Features\Rulesets\Rulesets.fs" />
     <Compile Include="Features\Import\FileDrop.fs" />
     <Compile Include="Features\Import\Import.fs" />
-    <Compile Include="Features\Rulesets.fs" />
+    <Compile Include="Features\Rulesets\QuickSwitch.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />
     <Compile Include="Features\Gameplay\Helpers.fs" />
     <Compile Include="Features\Tables\Browser\DownloadMenu.fs" />
@@ -235,8 +236,5 @@
     <ProjectReference Include="..\..\libraries\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
     <ProjectReference Include="..\..\online\shared\Interlude.Web.Shared.fsproj" />
     <ProjectReference Include="..\..\prelude\src\Prelude.fsproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Features\Import\Tables\" />
   </ItemGroup>
 </Project>

@@ -1,8 +1,9 @@
-﻿namespace Interlude.Features.Import
+﻿namespace Interlude.Features.Rulesets.Browser
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Data
@@ -139,7 +140,7 @@ type RulesetSearch() as this =
                 Position = Position.SliceTop 60.0f
             )
             |+ LoadingIndicator.Border(fun () -> loading))
-        |+ EmptyState(Icons.X, "Couldn't connect to rulesets repository").Conditional(fun () -> failed)
+        |+ EmptyState(Icons.X, %"rulesets.browser.error").Conditional(fun () -> failed)
         |* scroll
 
         base.Init parent

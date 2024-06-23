@@ -1,14 +1,12 @@
-﻿namespace Interlude.Features
+﻿namespace Interlude.Features.Rulesets
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
+open Interlude.Content
 
-module Rulesets = Interlude.Content.Rulesets
-
-// todo: move this to UI folder and put a ruleset editor in the options menu rulesets page
-module Rulesets =
+module RulesetSwitcher =
 
     let make_dropdown (setting: Setting<string>) (w: DropdownWrapper) =
         w.Toggle(fun () ->
@@ -25,12 +23,9 @@ module Rulesets =
                     |> Array.ofSeq
                 let dropdown_items =
                     seq {
-                        if groups.Length = 1 && (snd groups.[0]).Length = 1 && Screen.current_type <> Screen.Type.Score then
+                        if groups.Length = 1 && (snd groups.[0]).Length = 1 then
                             yield (
-                                (fun () -> 
-                                    Import.ImportScreen.switch_to_rulesets()
-                                    Screen.change Screen.Type.Import Transitions.Default |> ignore
-                                ),
+                                (fun () -> InstallRulesetsPage().Show()),
                                 %"rulesets.get_more_rulesets"
                             )
                         for name, items in groups do
@@ -48,23 +43,23 @@ module Rulesets =
                     }
             )
 
-    type QuickSwitcher(setting: Setting<string>) =
-        inherit Container(NodeType.None)
+type RulesetSwitcher(setting: Setting<string>) =
+    inherit Container(NodeType.None)
 
-        let dropdown_wrapper = DropdownWrapper(fun d -> Position.BorderTop(min d.Height 500.0f).Margin(Style.PADDING, 0.0f).Translate(0.0f, -Style.PADDING))
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.BorderTop(min d.Height 500.0f).Margin(Style.PADDING, 0.0f).Translate(0.0f, -Style.PADDING))
 
-        override this.Init(parent: Widget) =
-            this
-            |+ StylishButton(
-                (fun () -> this.ToggleDropdown()),
-                (fun () -> Rulesets.current.Name),
-                !%Palette.MAIN_100,
-                TiltRight = false,
-                Hotkey = "ruleset_switch"
-            )
-            |* dropdown_wrapper
+    override this.Init(parent: Widget) =
+        this
+        |+ StylishButton(
+            (fun () -> this.ToggleDropdown()),
+            (fun () -> Rulesets.current.Name),
+            !%Palette.MAIN_100,
+            TiltRight = false,
+            Hotkey = "ruleset_switch"
+        )
+        |* dropdown_wrapper
 
-            base.Init parent
+        base.Init parent
 
-        member this.ToggleDropdown() =
-            make_dropdown setting dropdown_wrapper
+    member this.ToggleDropdown() =
+        RulesetSwitcher.make_dropdown setting dropdown_wrapper

@@ -12,7 +12,7 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features
+open Interlude.Features.Rulesets
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Tables
@@ -77,7 +77,7 @@ type RulesetSwitcher(setting: Setting<string>) =
         base.Init parent
 
     member this.ToggleDropdown() =
-        Rulesets.make_dropdown setting dropdown_wrapper
+        RulesetSwitcher.make_dropdown setting dropdown_wrapper
 
 type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> unit) as this
     =
