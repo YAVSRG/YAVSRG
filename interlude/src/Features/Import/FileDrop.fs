@@ -5,13 +5,11 @@ open System.IO.Compression
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library.Caching
 open Prelude.Data.Library
 open Prelude.Skinning.Noteskins.Conversion
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
-open Interlude.Web.Shared.Requests
 
 type ConfirmUnlinkedSongsImport(path) =
     inherit Page()
@@ -27,9 +25,7 @@ type ConfirmUnlinkedSongsImport(path) =
         |+ PageButton
             .Once(
                 %"unlinkedsongsimport.link_intended",
-                fun () ->
-                    Screen.change Screen.Type.Import Transitions.Default |> ignore
-                    Menu.Back()
+                fun () -> Menu.Back() // todo: open the library options menu
             )
             .Pos(6)
         |+ PageButton

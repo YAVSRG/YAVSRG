@@ -120,7 +120,7 @@ type MainMenuScreen() as this =
         |+ options
         |+ quit
         |+ (StylishButton(
-            WikiBrowser.ShowChangelog,
+            WikiBrowserPage.ShowChangelog,
             K(Icons.STAR + " " + %"menu.changelog"),
             !%Palette.MAIN_100,
             TiltRight = false,
@@ -159,7 +159,7 @@ type MainMenuScreen() as this =
                     %"notification.pattern_cache_started.body"
                 )
             if first_launch then
-                WikiBrowser.Show()
+                WikiBrowserPage.Show()
 
         splash_text <- choose_splash ()
         Logo.move_menu ()

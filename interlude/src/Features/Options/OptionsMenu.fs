@@ -4,6 +4,9 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Data
+open Prelude.Data.Library
+open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
@@ -12,6 +15,19 @@ open Interlude.Features.Noteskins
 open Interlude.Features.Noteskins.Edit
 open Interlude.Features.Gameplay
 open Interlude.Features.Wiki
+open Interlude.Features.Import
+open Interlude.Features.Import.osu
+open Interlude.Features.Import.Etterna
+open Interlude.Features.Tables.Browser
+
+module Imports =
+    
+    let import_in_progress () =
+        WebServices.download_file.Status <> Async.ServiceStatus.Idle
+        || Imports.auto_convert.Status <> Async.ServiceStatus.Idle
+        || Cache.recache_service.Status <> Async.ServiceStatus.Idle
+        || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
+        || osu.Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
 type OptionsMenuPage() =
     inherit Page()
@@ -24,7 +40,7 @@ type OptionsMenuPage() =
             .Hotkey("tooltip")
 
     let quick_actions =
-        FlowContainer.Vertical<OptionsMenuButton>(60.0f, Spacing = 15.0f, Position = Position.TrimTop(70.0f))
+        NavigationContainer.Column()
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.ZAP (%"hud"),
             0.0f,
@@ -39,7 +55,8 @@ type OptionsMenuPage() =
                         Transitions.Default
                 then
                     Menu.Exit()
-            )
+            ),
+            Position = Position.Row(70.0f, 60.0f)
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.IMAGE (%"noteskins.edit"),
@@ -49,28 +66,71 @@ type OptionsMenuPage() =
                     SelectNoteskinsPage().Show()
                 else
                     EditNoteskinPage(false).Show()
-            )
+            ),
+            Position = Position.Row(145.0f, 60.0f)
+        )
+        |+ Text("Quick actions", Position = Position.SliceTop(60.0f))
+        
+        |+ Text(
+            (fun () ->
+                if Imports.import_in_progress () then
+                    %"imports.in_progress"
+                else
+                    %"imports.not_in_progress"
+            ),
+            Color =
+                (fun () ->
+                    if Imports.import_in_progress () then
+                        Colors.text_green
+                    else
+                        Colors.text_subheading
+                ),
+            Position = Position.Row(245.0f, 40.0f).Margin(20.0f, 0.0f)
+        )
+        |+ LoadingIndicator.Strip(
+            Imports.import_in_progress,
+            Position = Position.Row(285.0f, Style.PADDING).Margin(150.0f, 0.0f)
+        )
+        |+ Text(
+            sprintf "%i charts installed" Content.Library.Cache.Entries.Count,
+            Color = K Colors.text_subheading,
+            Position = Position.Row(300.0f, 30.0f).Margin(20.0f, 0.0f)
         )
         |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.BOOK_OPEN (%"menu.wiki"),
+            sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"imports.osu"),
             0.0f,
-            (fun () -> WikiBrowser.Show())
+            (fun () -> BeatmapBrowserPage().Show()),
+            Position = Position.Row(340.0f, 60.0f)
         )
         |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.STAR (%"menu.changelog"),
+            sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"imports.etterna"),
             0.0f,
-            (fun () -> WikiBrowser.ShowChangelog())
+            (fun () -> EtternaPacksBrowserPage().Show()),
+            Position = Position.Row(415.0f, 60.0f)
         )
+
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.TRENDING_UP (%"menu.stats"),
             0.0f,
             (fun () ->
                 if Screen.change_new StatsScreen Screen.Type.Stats Transitions.Transition.Default then 
                     Menu.Exit()
-            )
+            ),
+            Position = Position.Row(550.0f, 60.0f)
+        )
+        |+ OptionsMenuButton(
+            sprintf "%s %s" Icons.BOOK_OPEN (%"menu.wiki"),
+            0.0f,
+            (fun () -> WikiBrowserPage.Show()),
+            Position = Position.Row(625.0f, 60.0f)
+        )
+        |+ OptionsMenuButton(
+            sprintf "%s %s" Icons.STAR (%"menu.changelog"),
+            0.0f,
+            (fun () -> WikiBrowserPage.ShowChangelog()),
+            Position = Position.Row(700.0f, 60.0f)
         )
         |>> (fun nt -> Container(nt, Position = { Position.Default with Left = 0.65f %+ 10.0f }))
-        |+ Text("Quick actions", Position = Position.SliceTop(60.0f))
         
     let options_home_page =
         NavigationContainer.Column(WrapNavigation = false, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))

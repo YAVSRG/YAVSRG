@@ -48,14 +48,13 @@ module Screen =
     type Type =
         | SplashScreen = 0
         | MainMenu = 1
-        | Import = 2
-        | Lobby = 3
-        | LevelSelect = 4
-        | Play = 5
-        | Practice = 6
-        | Replay = 7
-        | Score = 8
-        | Stats = 9
+        | Lobby = 2
+        | LevelSelect = 3
+        | Play = 4
+        | Practice = 5
+        | Replay = 6
+        | Score = 7
+        | Stats = 8
 
     [<AbstractClass>]
     type T() =
@@ -75,9 +74,9 @@ module Screen =
     let private screens: T array = Array.zeroCreate 5
 
     let init_window (_screens: T array) =
-        assert (_screens.Length = 5)
+        assert (_screens.Length = 4)
 
-        for i = 0 to 4 do
+        for i = 0 to 3 do
             screens.[i] <- _screens.[i]
 
         current <- screens.[0]

@@ -68,22 +68,19 @@ type Toolbar() =
             |+ (InlaidButton(
                     %"menu.import",
                     (fun () ->
-                        Screen.change Screen.Type.Import Transitions.Default |> ignore
+                        () //Screen.change Screen.Type.Import Transitions.Default |> ignore
                     ),
                     Icons.DOWNLOAD,
                     Hotkey = "import"
                 )
                 |+ LoadingIndicator.Strip(
-                    (fun () ->
-                        Screen.current_type <> Screen.Type.Import
-                        && ImportScreen.something_in_progress ()
-                    ),
+                    Imports.import_in_progress,
                     Position = Position.SliceBottom(15.0f).SliceTop(Style.PADDING)
                 ))
                 .Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
             |+ InlaidButton(
                 %"menu.wiki",
-                WikiBrowser.Show,
+                WikiBrowserPage.Show,
                 Icons.BOOK,
                 HoverIcon = Icons.BOOK_OPEN,
                 Hotkey = "wiki"

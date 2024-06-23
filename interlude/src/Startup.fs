@@ -51,7 +51,6 @@ module Startup =
             [|
                 LoadingScreen()
                 MainMenuScreen()
-                ImportScreen()
                 LobbyScreen()
                 LevelSelectScreen()
             |]

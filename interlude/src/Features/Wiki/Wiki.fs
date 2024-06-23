@@ -16,7 +16,7 @@ type WikiContent(nt) =
     interface IHeight with
         member this.Height = this._Size
 
-type WikiBrowser() =
+type WikiBrowserPage() =
     inherit Page()
 
     let container = SwapContainer(Dummy(NodeType.Leaf))
@@ -142,8 +142,8 @@ type WikiBrowser() =
     override this.Title = %"menu.wiki"
 
     static member Show() = 
-        (WikiBrowser() :> Page).Show()
+        (WikiBrowserPage() :> Page).Show()
     
     static member ShowChangelog() = 
         load_resource Changelog
-        (WikiBrowser() :> Page).Show()
+        (WikiBrowserPage() :> Page).Show()
