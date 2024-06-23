@@ -87,18 +87,18 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
         else
             modes |> Seq.map (fun k -> sprintf "%iK" k) |> String.concat ", "
 
-    do
-
+    override this.Init(parent) =
         this
         |+ Frame(
             Fill = (fun () -> if this.Focused then fill.O3 else fill.O2),
             Border = fun () -> if this.Focused then Colors.white else border.O2
         )
+        //|+ Button(Icons.OPEN_IN_BROWSER,
+        //    fun () -> openUrl(sprintf "https://osu.ppy.sh/beatmapsets/%i" data.beatmapset_id)
+        //    ,
+        //    Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
         |* Clickable.Focus this
-    //|+ Button(Icons.OPEN_IN_BROWSER,
-    //    fun () -> openUrl(sprintf "https://osu.ppy.sh/beatmapsets/%i" data.beatmapset_id)
-    //    ,
-    //    Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
+        base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
