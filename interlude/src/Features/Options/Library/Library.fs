@@ -9,7 +9,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Collections
 open Interlude.Features.Tables
-open Interlude.Features.Import.Mounts
+open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
 type LibraryPage() =
     inherit Page()

@@ -8,8 +8,7 @@ open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Stats
 open Interlude.Features.MainMenu
-open Interlude.Features.Import
-open Interlude.Features.Import.Mounts
+open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
 open Interlude.Features.Multiplayer
 open Interlude.Features.Printerlude

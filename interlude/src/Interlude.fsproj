@@ -89,11 +89,11 @@
     <Compile Include="Features\Import\Etterna\Components.fs" />
     <Compile Include="Features\Import\Etterna\PackBrowser.fs" />
     <Compile Include="Features\Import\FileDrop.fs" />
-    <Compile Include="Features\Import\Mounts\Types.fs" />
-    <Compile Include="Features\Import\Mounts\Create.fs" />
-    <Compile Include="Features\Import\Mounts\Edit.fs" />
-    <Compile Include="Features\Import\Mounts\Display.fs" />
-    <Compile Include="Features\Import\Mounts\Mounts.fs" />
+    <Compile Include="Features\Mounts\Types.fs" />
+    <Compile Include="Features\Mounts\Create.fs" />
+    <Compile Include="Features\Mounts\Edit.fs" />
+    <Compile Include="Features\Mounts\Display.fs" />
+    <Compile Include="Features\Mounts\Mounts.fs" />
     <Compile Include="Features\Rulesets\Edit\EditRuleset.fs" />
     <Compile Include="Features\Rulesets\Browser\Community.fs" />
     <Compile Include="Features\Rulesets\GameRulesets.fs" />
