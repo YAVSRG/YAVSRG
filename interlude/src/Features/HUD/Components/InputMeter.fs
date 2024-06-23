@@ -7,13 +7,14 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Skinning.Noteskins
 open Interlude.Features.Play
+open Interlude.Features.Gameplay
 
 type InputMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState, should_show_inputs: unit -> bool) =
     inherit StaticWidget(NodeType.None)
 
     let fades = Array.init state.Chart.Keys (fun _ -> Animation.Delay(float noteskin_options.InputMeterKeyFadeTime |> max 0.5))
 
-    let SCROLL_SPEED = user_options.InputMeterScrollSpeed * 1.0f</ms>
+    let SCROLL_SPEED = user_options.InputMeterScrollSpeed * 1.0f</ms> / SelectedChart.rate.Value
 
     new(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) = InputMeter(user_options, noteskin_options, state, K true)
 
