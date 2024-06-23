@@ -72,7 +72,7 @@ module LobbyChart =
             | None ->
                 is_loading <- true
                 Logging.Debug("Multiplayer chart not found, downloading")
-                download_missing_chart.Request((chart.Hash, "Multiplayer"),
+                Backbeat.download_missing_chart.Request((chart.Hash, "Multiplayer"),
                     function
                     | false -> 
                         Logging.Debug("Multiplayer chart not found on the server either")

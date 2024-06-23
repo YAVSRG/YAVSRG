@@ -79,13 +79,14 @@
     <Compile Include="Features\Stats\Stats.fs" />
     <Compile Include="Features\Stats\Tables.fs" />
     <Compile Include="Features\Stats\Screen.fs" />
-    <Compile Include="Features\Import\Shared.fs" />
+    <Compile Include="Features\Import\Backbeat.fs" />
     <Compile Include="Features\Import\osu!\Skins.fs" />
     <Compile Include="Features\Import\osu!\Scores.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\NeriNyan.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\Beatmaps.fs" />
     <Compile Include="Features\Import\Etterna\EtternaOnline.fs" />
     <Compile Include="Features\Import\Etterna\Packs.fs" />
+    <Compile Include="Features\Import\FileDrop.fs" />
     <Compile Include="Features\Import\Mounts\Types.fs" />
     <Compile Include="Features\Import\Mounts\Create.fs" />
     <Compile Include="Features\Import\Mounts\Edit.fs" />
@@ -95,7 +96,6 @@
     <Compile Include="Features\Rulesets\Browser\Community.fs" />
     <Compile Include="Features\Rulesets\GameRulesets.fs" />
     <Compile Include="Features\Rulesets\Rulesets.fs" />
-    <Compile Include="Features\Import\FileDrop.fs" />
     <Compile Include="Features\Import\Import.fs" />
     <Compile Include="Features\Rulesets\QuickSwitch.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />

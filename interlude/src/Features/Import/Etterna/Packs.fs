@@ -63,7 +63,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                                     %"notification.install_pack",
                                     [data.name; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_pack.body"
                                 )
-                                defer charts_updated_ev.Trigger
+                                Content.TriggerChartAdded()
                                 status <- Installed
                                 File.Delete target
                             | None ->

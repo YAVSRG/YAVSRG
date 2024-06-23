@@ -13,7 +13,6 @@ open Prelude.Data.Library.Sorting
 open Prelude.Data
 open Interlude.Content
 open Interlude.UI
-open Interlude.Features.Import
 
 type private BeatmapDownloadStatus =
     | NotDownloaded
@@ -51,7 +50,7 @@ type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
                                     %"notification.install_song",
                                     [data.title; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_song.body"
                                 )
-                                defer charts_updated_ev.Trigger
+                                Content.TriggerChartAdded()
                                 status <- Installed
                                 File.Delete target
                             | None ->

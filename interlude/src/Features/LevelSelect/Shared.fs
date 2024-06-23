@@ -6,11 +6,11 @@ open Prelude.Charts.Processing
 open Prelude.Data
 open Prelude.Data.Library.Sorting
 open Interlude.UI
+open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Pacemaker
 open Interlude.Features.Play
 open Interlude.Features.Online
-open Interlude.Features.Import
 open Interlude.Features.Collections
 open Interlude.Features.Gameplay
 
@@ -28,7 +28,7 @@ module LevelSelect =
     let mutable filter: Filter = []
 
     do
-        charts_updated.Add (fun () -> if Screen.current_type = Screen.Type.LevelSelect then refresh_all())
+        Content.OnChartAdded.Add (fun () -> if Screen.current_type = Screen.Type.LevelSelect then refresh_all())
 
         CollectionActions.collection_modified.Add(fun () ->
             if options.LibraryMode.Value = LibraryMode.Collections then

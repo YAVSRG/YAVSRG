@@ -45,7 +45,7 @@ type ConfirmUnlinkedSongsImport(path) =
                                 %"notification.import_success",
                                 [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
                             )
-                            defer charts_updated_ev.Trigger
+                            Content.TriggerChartAdded()
                         | None ->
                             Notifications.error (%"notification.import_failed", "")
                     )
@@ -60,6 +60,8 @@ type ConfirmUnlinkedSongsImport(path) =
     override this.OnClose() = ()
 
 module FileDrop =
+
+    let mutable on_file_drop : (string -> unit) option = None
 
     let handle (path: string) =
         match on_file_drop with
@@ -108,7 +110,7 @@ module FileDrop =
                         %"notification.import_success",
                         [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
                     )
-                    defer charts_updated_ev.Trigger
+                    Content.TriggerChartAdded()
                 | None ->
                     Notifications.error (%"notification.import_failed", "")
             )

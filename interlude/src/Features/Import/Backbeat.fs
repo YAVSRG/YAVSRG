@@ -6,13 +6,7 @@ open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.Web.Shared.Requests
 
-[<AutoOpen>]
-module Import =
-
-    let mutable on_file_drop : (string -> unit) option = None
-
-    let charts_updated_ev = Event<unit>()
-    let charts_updated = charts_updated_ev.Publish
+module Backbeat =
 
     let download_missing_chart =
         { new Async.Service<string * string, bool>() with
@@ -33,6 +27,8 @@ module Import =
                     | None -> return false
                     | Some found ->
 
-                    return! Cache.cdn_download folder_name chart_id (found.Chart, found.Song) Content.Cache
+                    let! success = Cache.cdn_download folder_name chart_id (found.Chart, found.Song) Content.Cache
+                    if success then Content.TriggerChartAdded()
+                    return success
                 }
         }

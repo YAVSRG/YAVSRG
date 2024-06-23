@@ -100,5 +100,5 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                         %"notification.import_success",
                         [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
                     )
-                    defer charts_updated_ev.Trigger
+                    Content.TriggerChartAdded()
             )

@@ -21,3 +21,6 @@ module private Data =
         if not (isNull (score_db :> obj)) then
             ScoreDatabase.save_changes score_db
             Library.save library
+
+    let charts_updated_ev = Event<unit>()
+    let charts_updated = charts_updated_ev.Publish

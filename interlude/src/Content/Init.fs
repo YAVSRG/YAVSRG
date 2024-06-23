@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Content
 
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 
 type Content() =
 
@@ -26,3 +27,6 @@ type Content() =
     static member NoteskinConfig = Noteskins.current.Config
     static member Noteskin = Noteskins.current
     static member Texture(id: string) = Sprites.get id
+
+    static member OnChartAdded = Data.charts_updated
+    static member TriggerChartAdded() = ensure_ui_thread Data.charts_updated_ev.Trigger

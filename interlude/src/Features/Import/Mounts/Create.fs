@@ -45,7 +45,7 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
                     .Body(%"mount.create.folder_hint")
 
     override this.Content() =
-        on_file_drop <-
+        FileDrop.on_file_drop <-
             fun path ->
                 match game, path with
                 | MountedGameType.Osu, PackFolder -> setting.Value <- Imports.MountedChartSource.Pack("osu!", path) |> Some
@@ -66,7 +66,7 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
         page_container()
         |+ PageButton(
             (if folder_detected then %"mount.create.use_detected_folder" else %"mount.create.game_not_detected"), 
-            (fun () -> on_file_drop.Value auto_detect_location),
+            (fun () -> FileDrop.on_file_drop.Value auto_detect_location),
             Enabled = folder_detected
         ).Pos(6)
         |+ Callout.frame info (fun (w, h) -> pretty_pos (0, 5, PageWidth.Custom w))
@@ -74,4 +74,4 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
 
     override this.Title = %"mount.create"
 
-    override this.OnClose() = on_file_drop <- None
+    override this.OnClose() = FileDrop.on_file_drop <- None

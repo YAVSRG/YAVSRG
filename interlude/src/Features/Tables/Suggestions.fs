@@ -127,7 +127,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             Menu.Exit()
         | None ->
 
-        download_missing_chart.Request(
+        Backbeat.download_missing_chart.Request(
             (suggestion.ChartId, table.Id),
             function
             | true -> 
