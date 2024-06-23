@@ -10,13 +10,11 @@ open Prelude.Data
 open Interlude.UI
 open Interlude.UI.Menu
         
- type BeatmapsBrowser() as this =
-    inherit Container(NodeType.Container(fun _ -> Some this.Items))
+type BeatmapBrowserPage() =
+    inherit Page()
 
     let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
-
-    let scroll =
-        ScrollContainer(items, Margin = Style.PADDING, Position = Position.TrimTop(120.0f).TrimBottom(65.0f))
+    let scroll_container = ScrollContainer(items, Margin = Style.PADDING)
 
     let mutable filter: Filter = []
     let query_order = Setting.simple "updated"
@@ -132,27 +130,21 @@ open Interlude.UI.Menu
             Position = position
         )
 
-    override this.Focusable = items.Focusable
+    let search_results =
+        NavigationContainer.Column(Position = Position.TrimTop(140.0f).CenterX(1400.0f).TrimBottom(70.0f))
+        |+ Dummy(NodeType.Leaf)
+        |+ scroll_container
+        |>> Container
+        |+ EmptyState(Icons.SEARCH, %"imports.osu.no_results", Position = Position.TrimTop(135.0f))
+            .Conditional(fun () -> not loading && items.Count = 0)
+        :> Widget
 
-    override this.Init(parent) =
-        begin_search filter
-
-        this
-        |+ (SearchBox(
-                Setting.simple "",
-                (fun (f: Filter) ->
-                    filter <- f
-                    defer (fun () -> begin_search filter)
-                ),
-                Position = Position.SliceTop 60.0f
-            )
-            |+ LoadingIndicator.Border(fun () -> loading))
-        |+ Text(%"imports.osu.disclaimer", Position = Position.SliceBottom 55.0f)
-        |+ scroll
+    let header =
+        NavigationContainer.Row(Position = Position.SliceBottom(50.0f))
         |+ (let r =
                 status_button
                     "Ranked"
-                    { Position.TrimTop(65.0f).SliceTop(50.0f) with
+                    { Position.Default with
                         Right = 0.18f %- 25.0f
                     }
                     Colors.cyan
@@ -161,28 +153,27 @@ open Interlude.UI.Menu
             r)
         |+ status_button
             "Qualified"
-            { Position.TrimTop(65.0f).SliceTop(50.0f) with
+            { Position.Default with
                 Left = 0.18f %+ 0.0f
                 Right = 0.36f %- 25.0f
             }
             Colors.green
         |+ status_button
             "Loved"
-            { Position.TrimTop(65.0f).SliceTop(50.0f) with
+            { Position.Default with
                 Left = 0.36f %+ 0.0f
                 Right = 0.54f %- 25.0f
             }
             Colors.pink
         |+ status_button
             "Unranked"
-            { Position.TrimTop(65.0f).SliceTop(50.0f) with
+            { Position.Default with
                 Left = 0.54f %+ 0.0f
                 Right = 0.72f %- 25.0f
             }
             Colors.grey_2
-        |+ EmptyState(Icons.SEARCH, %"imports.osu.no_results", Position = Position.TrimTop(120.0f))
-            .Conditional(fun () -> not loading && items.Count = 0)
-        |* SortingDropdown(
+        // todo: this should not use accent color and should be keyboard navigatable
+        |+ SortingDropdown(
             [
                 "plays", "Play count"
                 "updated", "Date"
@@ -190,38 +181,46 @@ open Interlude.UI.Menu
                 "favourites", "Favourites"
             ],
             "Sort",
-            query_order |> Setting.trigger (fun _ -> begin_search filter),
-            descending_order |> Setting.trigger (fun _ -> begin_search filter),
+            query_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
+            descending_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
             "sort_mode",
             Position =
-                {
+                { Position.Default with
                     Left = 0.72f %+ 0.0f
-                    Top = 0.0f %+ 65.0f
-                    Right = 1.0f %- 0.0f
-                    Bottom = 0.0f %+ 115.0f
                 }
         )
+        |>> (fun nt -> Container(nt, Position = Position.Row(20.0f, 115.0f).CenterX(1400.0f)))
+        |+ (SearchBox(
+                Setting.simple "",
+                (fun (f: Filter) ->
+                    filter <- f
+                    defer (fun () -> begin_search filter)
+                ),
+                Position = Position.SliceTop 60.0f,
+                Fill = K Colors.cyan.O3,
+                Border = K Colors.cyan_accent,
+                TextColor = K Colors.text_cyan
+            )
+            |+ LoadingIndicator.Border(fun () -> loading)
+        )
 
-        base.Init parent
+    // page parts are rotated around to give correct draw order for the dropdowns in the header
+    override this.Content() = header
+
+    override this.Footer() =
+        begin_search filter
+        search_results
+
+    override this.Header() =
+        Text(%"imports.osu.disclaimer", Align = Alignment.CENTER, Position = Position.SliceBottom(55.0f).Translate(0.0f, -10.0f))
 
     override this.Update(elapsed_ms, moved) =
         json_downloader.Join()
         base.Update(elapsed_ms, moved)
 
-        if when_at_bottom.IsSome && scroll.PositionPercent > 0.9f then
+        if when_at_bottom.IsSome && scroll_container.PositionPercent > 0.9f then
             when_at_bottom.Value()
             when_at_bottom <- None
-
-    member private this.Items = items
-
-type BeatmapsBrowserPage() =
-    inherit Page()
-
-    override this.Content() =
-        NavigationContainer.Column(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
-        |+ Dummy(NodeType.Leaf)
-        |+ BeatmapsBrowser()
-        :> Widget
 
     override this.Title = %"imports.osu"
     override this.OnClose() = ()

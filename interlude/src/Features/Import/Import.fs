@@ -49,7 +49,7 @@ type private Sidebar() as this =
         FlowContainer.Vertical<Widget>(55.0f, Spacing = 5.0f, Position = Position.TrimTop(130.0f).Margin(10.0f))
         |+ TabButton(Icons.LINK, %"imports.local", ImportScreen.container, Mounts.Mounts.tab)
         |+ TabButton(Icons.ARCHIVE, %"imports.etterna", ImportScreen.container, Etterna.Packs.tab)
-        |+ Button(Icons.DOWNLOAD_CLOUD + " " + %"imports.osu", fun () -> osu.BeatmapsBrowserPage().Show())
+        |+ Button(Icons.DOWNLOAD_CLOUD + " " + %"imports.osu", fun () -> osu.BeatmapBrowserPage().Show())
 
     do
         this
