@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Interlude.UI.Menu
 open Interlude.Features.Rulesets.Browser
 
-type InstallRulesetsPage() =
+type AddRulesetsPage() =
     inherit Page()
 
     override this.Content() =

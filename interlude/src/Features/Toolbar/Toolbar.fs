@@ -51,7 +51,7 @@ type Toolbar() =
                                     [|
                                         (fun () -> BeatmapBrowserPage().Show()), Icons.DOWNLOAD_CLOUD + " " + %"beatmap_browser"
                                         (fun () -> EtternaPacksBrowserPage().Show()), Icons.DOWNLOAD_CLOUD + " " + %"etterna_pack_browser"
-                                        (fun () -> InstallRulesetsPage().Show()), Icons.SLIDERS + " " + %"imports.rulesets"
+                                        (fun () -> AddRulesetsPage().Show()), Icons.SLIDERS + " " + %"imports.rulesets"
                                         (fun () -> TableBrowserPage().Show()), Icons.SIDEBAR + " " + %"tables.browser"
                                     |]
                             }

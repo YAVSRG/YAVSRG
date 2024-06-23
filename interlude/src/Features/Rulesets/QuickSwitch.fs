@@ -23,11 +23,10 @@ module RulesetSwitcher =
                     |> Array.ofSeq
                 let dropdown_items =
                     seq {
-                        if groups.Length = 1 && (snd groups.[0]).Length = 1 then
-                            yield (
-                                (fun () -> InstallRulesetsPage().Show()),
-                                %"rulesets.get_more_rulesets"
-                            )
+                        yield (
+                            (fun () -> SelectRulesetPage().Show()),
+                            %"rulesets"
+                        )
                         for name, items in groups do
                             if items.Length < 3 then
                                 for (id, rs) in items do

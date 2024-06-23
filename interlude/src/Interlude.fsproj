@@ -97,7 +97,8 @@
     <Compile Include="Features\Rulesets\Edit\EditRuleset.fs" />
     <Compile Include="Features\Rulesets\Browser\Community.fs" />
     <Compile Include="Features\Rulesets\GameRulesets.fs" />
-    <Compile Include="Features\Rulesets\Rulesets.fs" />
+    <Compile Include="Features\Rulesets\Add.fs" />
+    <Compile Include="Features\Rulesets\Select.fs" />
     <Compile Include="Features\Rulesets\QuickSwitch.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />
     <Compile Include="Features\Gameplay\Helpers.fs" />
