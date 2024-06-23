@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins
+namespace Interlude.Features.Noteskins
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -156,13 +156,13 @@ type SelectNoteskinsPage() =
                 Position = { Position.Default with Right = 0.22f %+ 0.0f }
             )
             |+ OptionsMenuButton(
-                sprintf "%s %s" Icons.DOWNLOAD (%"noteskins.get_more"),
+                sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"noteskins.get_more"),
                 0.0f,
                 (fun () -> NoteskinsBrowserPage().Show()),
                 Position = { Position.Default with Left = 0.26f %+ 0.0f; Right = 0.48f %+ 0.0f }
             )
             |+ OptionsMenuButton(
-                %"osu_skin_import.list_skins",
+                sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"noteskins.import_from_osu"),
                 0.0f,
                 (fun () -> osu.Skins.OsuSkinsListPage().Show()),
                 Position = { Position.Default with Left = 0.52f %+ 0.0f; Right = 0.74f %+ 0.0f }

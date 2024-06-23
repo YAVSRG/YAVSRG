@@ -83,6 +83,7 @@
     <Compile Include="Features\Import\osu!\Skins.fs" />
     <Compile Include="Features\Import\osu!\Scores.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\NeriNyan.fs" />
+    <Compile Include="Features\Import\osu!\Beatmaps\Components.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\Beatmaps.fs" />
     <Compile Include="Features\Import\Etterna\EtternaOnline.fs" />
     <Compile Include="Features\Import\Etterna\Packs.fs" />
