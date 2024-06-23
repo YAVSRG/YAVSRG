@@ -26,15 +26,9 @@ type private TableButton(name, action) =
             K(sprintf "%s  >" name),
             Color =
                 (fun () ->
-                    ((if this.Focused then Colors.yellow_accent else Colors.white),
-                     (if
-                          (match Content.Table with
-                           | Some t -> t.Info.Name = name
-                           | None -> false)
-                      then
-                          Palette.color (255, 0.5f, 0.0f)
-                      else
-                          Colors.shadow_2))
+                    if this.Focused then Colors.text_yellow_2 
+                    elif (match Content.Table with Some t -> t.Info.Name = name | _ -> false) then Colors.text_pink_2 
+                    else Colors.text
                 ),
             Align = Alignment.LEFT,
             Position = Position.Margin Style.PADDING

@@ -9,17 +9,15 @@ type AddRulesetsPage() =
     inherit Page()
 
     override this.Content() =
-        NavigationContainer.Column(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
-        |+ (
-            GridFlowContainer(50.0f, 3, Position = Position.Row(70.0f, 50.0f))
-            |+ Button(%"rulesets.create.sc", fun () -> SCRulesetPage().Show())
-            |+ Button(%"rulesets.create.osu", fun () -> OsuRulesetPage().Show())
-            |+ Button(%"rulesets.create.wife", fun () -> WifeRulesetPage().Show())
-        )
-        |+ RulesetSearch(Position = Position.TrimTop(230.0f))
-        |+ Text("Game rulesets", Position = Position.SliceTop(60.0f), Align = Alignment.CENTER)
-        |+ Text("Community rulesets", Position = Position.Row(150.0f, 60.0f), Align = Alignment.CENTER)
+        page_container()
+        |+ PageButton(%"rulesets.create.sc", fun () -> SCRulesetPage().Show())
+            .Pos(0)
+        |+ PageButton(%"rulesets.create.osu", fun () -> OsuRulesetPage().Show())
+            .Pos(2)
+        |+ PageButton(%"rulesets.create.wife", fun () -> WifeRulesetPage().Show())
+            .Pos(4)
+        |+ RulesetSearch().Pos(7, PAGE_BOTTOM - 7)
         :> Widget
 
-    override this.Title = %"imports.rulesets"
+    override this.Title = %"rulesets.add"
     override this.OnClose() = ()

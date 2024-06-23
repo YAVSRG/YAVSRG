@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Toolbar
+namespace Interlude.Features.Toolbar
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
@@ -51,7 +51,7 @@ type Toolbar() =
                                     [|
                                         (fun () -> BeatmapBrowserPage().Show()), Icons.DOWNLOAD_CLOUD + " " + %"beatmap_browser"
                                         (fun () -> EtternaPacksBrowserPage().Show()), Icons.DOWNLOAD_CLOUD + " " + %"etterna_pack_browser"
-                                        (fun () -> AddRulesetsPage().Show()), Icons.SLIDERS + " " + %"imports.rulesets"
+                                        (fun () -> AddRulesetsPage().Show()), Icons.SLIDERS + " " + %"rulesets.add"
                                         (fun () -> TableBrowserPage().Show()), Icons.SIDEBAR + " " + %"tables.browser"
                                     |]
                             }

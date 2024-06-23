@@ -25,6 +25,7 @@ type OsuRulesetPage() =
                 )
         Rulesets.install_or_update ruleset_id (``osu!``.create od.Value mode.Value)
         Menu.Back()
+        Menu.Back()
 
     override this.Content() =
         page_container()
@@ -55,6 +56,7 @@ type WifeRulesetPage() =
         let ruleset_id = 
             sprintf "wife-j%i" judge.Value
         Rulesets.install_or_update ruleset_id (Wife3.create judge.Value)
+        Menu.Back()
         Menu.Back()
 
     override this.Content() =
@@ -89,6 +91,7 @@ type SCRulesetPage() =
         let ruleset_id = 
             sprintf "sc-j%i" judge.Value
         Rulesets.install_or_update ruleset_id (SC.create judge.Value)
+        Menu.Back()
         Menu.Back()
 
     override this.Content() =

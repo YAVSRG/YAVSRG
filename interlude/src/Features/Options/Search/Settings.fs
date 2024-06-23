@@ -13,10 +13,13 @@ open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.SystemSettings
 open Interlude.Features.OptionsMenu.Gameplay
 open Interlude.Features.Pacemaker
-open Interlude.Features.Gameplay
+open Interlude.Features.Rulesets
 open Interlude.Features.Collections
 open Interlude.Features.Tables
+open Interlude.Features.Tables.Browser
 open Interlude.Features.LevelSelect
+open Interlude.Features.Import.osu
+open Interlude.Features.Import.Etterna
 
 module Settings =
 
@@ -144,11 +147,15 @@ module Settings =
                 yield PageSetting(%"gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
                     .Tooltip(Tooltip.Info("gameplay.backgrounddim"))
             if token_match tokens [|%"gameplay.lanecover"|] then
-                yield PageButton(%"gameplay.lanecover", (fun () -> Menu.ShowPage LanecoverPage))
+                yield PageButton(%"gameplay.lanecover", (fun () -> LanecoverPage().Show()))
                     .Tooltip(Tooltip.Info("gameplay.lanecover"))
             if token_match tokens [|%"gameplay.pacemaker"|] then
-                yield PageButton(%"gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
-                    .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
+                yield PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
+            if token_match tokens [|%"rulesets"|] then
+                yield PageButton(%"rulesets", (fun () -> SelectRulesetPage().Show()))
+                    .Tooltip(Tooltip.Info("rulesets"))
+            if token_match tokens [|%"rulesets.add"|] then
+                yield PageButton(%"rulesets.add", (fun () -> AddRulesetsPage().Show()))
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"; %"search_keywords.binds"|] then
                 yield PageSetting(%"gameplay.keybinds", GameplayKeybinder.KeymodeAndKeybinder())
                     .Tooltip(Tooltip.Info("gameplay.keybinds"))
@@ -179,6 +186,21 @@ module Settings =
                     Icon = Icons.SIDEBAR
                 )
                     .Tooltip(Tooltip.Info("library.tables"))
+            if token_match tokens [|%"tables.browser"|] then
+                yield PageButton(
+                    %"tables.browser",
+                    (fun () -> TableBrowserPage().Show())
+                )
+            if token_match tokens [|%"etterna_pack_browser"|] then
+                yield PageButton(
+                    %"etterna_pack_browser",
+                    fun () -> EtternaPacksBrowserPage().Show()
+                )
+            if token_match tokens [|%"beatmap_browser"|] then
+                yield PageButton(
+                    %"beatmap_browser",
+                    fun () -> BeatmapBrowserPage().Show()
+                )
             if token_match tokens [|%"library.recache_charts"|] then
                 yield PageButton.Once(
                     %"library.recache_charts",

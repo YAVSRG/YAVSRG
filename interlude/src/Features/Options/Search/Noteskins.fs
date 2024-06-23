@@ -10,6 +10,7 @@ open Interlude.Features.Noteskins.Edit
 open Interlude.Features.Noteskins.Browser
 open Interlude.Features.Noteskins
 open Interlude.Features.Gameplay
+open Interlude.Features.Import.osu
 
 module Noteskins =
 
@@ -28,17 +29,22 @@ module Noteskins =
                     )
                         .Tooltip(Tooltip.Info("noteskins.edit"))
 
-                if not (Suggestions.in_endless_mode()) then
-                    yield PageButton(
-                        %"noteskins.get_more",
-                        (fun () -> NoteskinsBrowserPage().Show())
-                    )
+                yield PageButton(
+                    %"noteskins.get_more",
+                    (fun () -> NoteskinsBrowserPage().Show())
+                )
 
                 yield PageButton(
                     %"noteskins.open_folder",
                     (fun () -> open_directory (get_game_folder "Noteskins"))
                 )
                     .Tooltip(Tooltip.Info("noteskins.open_folder"))
+
+            if token_match tokens [|%"noteskins"; %"noteskins.import_from_osu"|] then
+                yield PageButton(
+                    %"noteskins.import_from_osu",
+                    (fun () -> Skins.OsuSkinsListPage().Show())
+                )
 
             if token_match tokens [|%"hud"|] || token_match tokens (HUDElement.FULL_LIST |> Seq.map HUDElement.name |> Array.ofSeq) then
                 yield PageButton(
