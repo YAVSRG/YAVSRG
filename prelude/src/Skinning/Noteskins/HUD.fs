@@ -217,6 +217,12 @@ type HUDNoteskinOptions =
         BPMMeterPosition: HUDPosition
 
         InputMeterPosition: HUDPosition
+        InputMeterKeyColor: Color
+        InputMeterKeyFadeTime: float32
+        InputMeterShowInputs: bool
+        InputMeterInputColor: Color
+        InputMeterInputFadeDistance: float32
+        InputMeterScrollDownwards: bool
 
         MultiplayerScoreTrackerPosition: HUDPosition
     }
@@ -377,6 +383,12 @@ type HUDNoteskinOptions =
                     Right = 440.0f, 1.0f
                     Bottom = -20.0f, 1.0f
                 }
+            InputMeterKeyColor = Color.FromArgb(127, 255, 255, 255)
+            InputMeterKeyFadeTime = 300.0f
+            InputMeterShowInputs = true
+            InputMeterInputColor = Color.FromArgb(127, 255, 255, 255)
+            InputMeterInputFadeDistance = 100.0f
+            InputMeterScrollDownwards = false
 
             MultiplayerScoreTrackerPosition =
                 {
