@@ -3,7 +3,10 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Interlude.Options
+open Interlude.UI.Menu
+open Interlude.Features.Gameplay
 
 type GameplayKeybinder(keymode: Setting<Keymode>) as this =
     inherit Container(NodeType.FocusTrap)
@@ -84,3 +87,17 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             |> String.concat ",  "
 
     member this.OnKeymodeChanged() = refresh_text ()
+
+    static member KeymodeAndKeybinder() =
+        let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
+        let binder = GameplayKeybinder(keymode, Position = Position.TrimLeft 100.0f)
+        binder.Add { new StaticWidget(NodeType.None) with
+            override this.Draw() = if binder.Focused then Draw.rect (this.Bounds.BorderBottom(Style.PADDING).SliceLeft(50.0f)) Colors.yellow_accent
+        }
+        let keymode_selector = Selector.FromEnum(keymode |> Setting.trigger (ignore >> binder.OnKeymodeChanged), Position = Position.SliceLeft 100.0f)
+        keymode_selector.Add { new StaticWidget(NodeType.None) with
+            override this.Draw() = if keymode_selector.Focused then Draw.rect (this.Bounds.BorderBottom(Style.PADDING).SliceLeft(50.0f)) Colors.yellow_accent
+        }
+        NavigationContainer.Row()
+        |+ binder
+        |+ keymode_selector

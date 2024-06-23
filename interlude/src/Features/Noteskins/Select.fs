@@ -200,7 +200,7 @@ type SelectNoteskinsPage() =
                         .TrimBottom(PRETTYHEIGHT + 20.0f)
             )
 
-        NavigationContainer.Column() 
+        NavigationContainer.Column(WrapNavigation = false) 
         |+ right_selection
         |+ action_buttons
         |>> Container

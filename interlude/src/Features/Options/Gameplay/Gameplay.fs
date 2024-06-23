@@ -13,13 +13,6 @@ open Interlude.Features.Rulesets
 type GameplayPage() =
     inherit Page()
 
-    let binds = 
-        let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
-        let binder = GameplayKeybinder(keymode, Position = Position.TrimLeft 100.0f)
-        NavigationContainer.Row()
-        |+ binder
-        |+ Selector.FromEnum(keymode |> Setting.trigger (ignore >> binder.OnKeymodeChanged), Position = Position.SliceLeft 100.0f)
-
     let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE 0.35f)
 
     override this.Content() =
@@ -61,10 +54,10 @@ type GameplayPage() =
         |+ PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
             .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
             .Pos(16)
-        |+ PageButton(%"gameplay.rulesets", (fun () -> InstallRulesetsPage().Show()))
-            .Tooltip(Tooltip.Info("gameplay.rulesets"))
+        |+ PageButton(%"rulesets", (fun () -> SelectRulesetPage().Show()))
+            .Tooltip(Tooltip.Info("rulesets"))
             .Pos(18)
-        |+ PageSetting(%"gameplay.keybinds", binds)
+        |+ PageSetting(%"gameplay.keybinds", GameplayKeybinder.KeymodeAndKeybinder())
             .Tooltip(Tooltip.Info("gameplay.keybinds"))
             .Pos(21, 2, PageWidth.Full)
         |>> Container

@@ -150,14 +150,7 @@ module Settings =
                 yield PageButton(%"gameplay.pacemaker", (fun () -> Menu.ShowPage PacemakerOptionsPage))
                     .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"; %"search_keywords.binds"|] then
-                let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
-
-                let binds = GameplayKeybinder(keymode)
-                yield PageSetting(
-                    %"generic.keymode",
-                    Selector.FromEnum(keymode |> Setting.trigger (ignore >> binds.OnKeymodeChanged))
-                )
-                yield PageSetting(%"gameplay.keybinds", binds)
+                yield PageSetting(%"gameplay.keybinds", GameplayKeybinder.KeymodeAndKeybinder())
                     .Tooltip(Tooltip.Info("gameplay.keybinds"))
                 , 2, 2, PageWidth.Full
             
