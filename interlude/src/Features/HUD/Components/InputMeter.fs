@@ -49,13 +49,13 @@ type InputMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptio
             let now = state.CurrentChartTime()
             let point (time: ChartTime) : float32 * Color = 
                 let time_ago = now - time
-                let offset = time_ago * SCROLL_SPEED
                 let height = this.Bounds.Height - box_height
+                let offset = time_ago * SCROLL_SPEED |> min height
                 
                 if noteskin_options.InputMeterScrollDownwards then 
-                    this.Bounds.Top + box_height + offset |> min this.Bounds.Bottom
+                    this.Bounds.Top + box_height + offset
                 else
-                    this.Bounds.Bottom - box_height - offset |> max this.Bounds.Top
+                    this.Bounds.Bottom - box_height - offset
                 ,
                 let mult = (height - offset) / noteskin_options.InputMeterInputFadeDistance |> min 1.0f
                 noteskin_options.InputMeterInputColor.O4a (255.0f * mult |> int |> min (int noteskin_options.InputMeterInputColor.A) |> max 0)
