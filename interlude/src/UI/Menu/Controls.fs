@@ -397,6 +397,10 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
     let mutable V = V
     let mutable A = if allow_alpha then float32 s.Value.A / 255.0f else 1.0f
 
+    let mutable dragging_sv = false
+    let mutable dragging_h = false
+    let mutable dragging_a = false
+
     let hex =
         Setting.simple (s.Value.ToHex())
         |> Setting.trigger (fun color ->
@@ -509,21 +513,33 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
                 .TrimLeft(230.0f)
                 .Shrink(5.0f)
 
-        if Mouse.hover saturation_value_picker && Mouse.held Mouse.LEFT then
+        if Mouse.hover saturation_value_picker && Mouse.left_click() then
+            dragging_sv <- true
+
+        if dragging_sv then
             let x, y = Mouse.pos ()
-            S <- (x - saturation_value_picker.Left) / saturation_value_picker.Width
-            V <- 1.0f - (y - saturation_value_picker.Top) / saturation_value_picker.Height
+            S <- (x - saturation_value_picker.Left) / saturation_value_picker.Width |> min 1.0f |> max 0.0f
+            V <- 1.0f - (y - saturation_value_picker.Top) / saturation_value_picker.Height |> min 1.0f |> max 0.0f
             s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
+            if not (Mouse.held Mouse.LEFT) then dragging_sv <- false
 
-        elif Mouse.hover hue_picker && Mouse.held Mouse.LEFT then
-            let y = Mouse.y ()
-            H <- (y - hue_picker.Top) / hue_picker.Height
-            s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
+        elif Mouse.hover hue_picker && Mouse.left_click() then
+            dragging_h <- true
 
-        elif Mouse.hover alpha_picker && Mouse.held Mouse.LEFT then
+        if dragging_h then
             let y = Mouse.y ()
-            A <- (y - alpha_picker.Top) / alpha_picker.Height
+            H <- (y - hue_picker.Top) / hue_picker.Height |> min 1.0f |> max 0.0f
             s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
+            if not (Mouse.held Mouse.LEFT) then dragging_h <- false
+
+        elif Mouse.hover alpha_picker && Mouse.left_click() then
+            dragging_a <- true
+
+        if dragging_a then
+            let y = Mouse.y ()
+            A <- (y - alpha_picker.Top) / alpha_picker.Height |> min 1.0f |> max 0.0f
+            s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
+            if not (Mouse.held Mouse.LEFT) then dragging_a <- false
 
 type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
     inherit
