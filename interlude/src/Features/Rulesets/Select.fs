@@ -62,10 +62,24 @@ type SelectRulesetPage() =
         |* Dummy()
 
         for id, ruleset in Rulesets.list () do
-            container
-            |* RulesetButton(
-                ruleset.Name,
-                fun () -> options.SelectedRuleset.Set id
+            container.Add(
+                NavigationContainer.Row()
+                |+ RulesetButton(
+                    ruleset.Name,
+                    (fun () -> options.SelectedRuleset.Set id),
+                    Position = Position.TrimRight 100.0f
+                )
+                |+ Button(
+                    Icons.TRASH,
+                    (fun () -> 
+                        ConfirmPage(
+                            [ruleset.Name] %> "rulesets.confirm_delete",
+                            fun () -> Rulesets.delete id |> ignore
+                        )
+                            .Show()
+                    ),
+                    Position = Position.SliceRight 100.0f
+                )
             )
 
         if container.Focused then
@@ -73,7 +87,7 @@ type SelectRulesetPage() =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f))
+        ScrollContainer(container, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
     override this.Title = sprintf "%s %s" Icons.SLIDERS (%"rulesets")
     override this.OnClose() = ()

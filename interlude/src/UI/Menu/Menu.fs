@@ -293,7 +293,7 @@ type ConfirmPage(prompt: string, yes: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageButton.Once(%"confirm.yes", fork Menu.Back yes).Pos(3)
+        |+ PageButton.Once(%"confirm.yes", fork yes Menu.Back).Pos(3)
         |+ PageButton.Once(%"confirm.no", Menu.Back).Pos(5)
         |+ Text(prompt, Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
         :> Widget

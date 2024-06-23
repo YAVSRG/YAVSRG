@@ -88,3 +88,14 @@ module Rulesets =
             current_hash <- Ruleset.hash current
 
         JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
+
+    let delete (id: string) =
+        if exists id then
+            try
+                File.Delete(Path.Combine(get_game_folder "Rulesets", id + ".ruleset"))
+                loaded.Remove id
+            with
+            | :? IOException as err ->
+                Logging.Error("IO error deleting ruleset", err)
+                false
+        else false
