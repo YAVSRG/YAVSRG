@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Rulesets
+namespace Interlude.Features.Rulesets
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -40,10 +40,10 @@ type OsuRulesetPage() =
                 mode
             )
         ).Pos(2)
-        |+ PageButton.Once(%"ruleset.create", create).Pos(5)
+        |+ PageButton.Once(%"rulesets.create", create).Pos(5)
         :> Widget
 
-    override this.Title = %"ruleset.create.osu"
+    override this.Title = %"rulesets.create.osu"
     override this.OnClose() = ()
 
 type WifeRulesetPage() =
@@ -74,10 +74,10 @@ type WifeRulesetPage() =
                 judge
             )
         ).Pos(0, 2, PageWidth.Custom (PRETTYTEXTWIDTH + 200.0f))
-        |+ PageButton.Once(%"ruleset.create", create).Pos(3)
+        |+ PageButton.Once(%"rulesets.create", create).Pos(3)
         :> Widget
 
-    override this.Title = %"ruleset.create.wife"
+    override this.Title = %"rulesets.create.wife"
     override this.OnClose() = ()
 
 type SCRulesetPage() =
@@ -108,8 +108,8 @@ type SCRulesetPage() =
                 judge
             )
         ).Pos(0, 2, PageWidth.Custom (PRETTYTEXTWIDTH + 200.0f))
-        |+ PageButton.Once(%"ruleset.create", create).Pos(3)
+        |+ PageButton.Once(%"rulesets.create", create).Pos(3)
         :> Widget
 
-    override this.Title = %"ruleset.create.sc"
+    override this.Title = %"rulesets.create.sc"
     override this.OnClose() = ()

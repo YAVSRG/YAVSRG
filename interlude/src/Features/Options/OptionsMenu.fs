@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu
+namespace Interlude.Features.OptionsMenu
 
 open System
 open Percyqaz.Common
@@ -97,13 +97,13 @@ type OptionsMenuPage() =
             Position = Position.Row(300.0f, 30.0f).Margin(20.0f, 0.0f)
         )
         |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"imports.osu"),
+            sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"beatmap_browser"),
             0.0f,
             (fun () -> BeatmapBrowserPage().Show()),
             Position = Position.Row(340.0f, 60.0f)
         )
         |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"imports.etterna"),
+            sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"etterna_pack_browser"),
             0.0f,
             (fun () -> EtternaPacksBrowserPage().Show()),
             Position = Position.Row(415.0f, 60.0f)

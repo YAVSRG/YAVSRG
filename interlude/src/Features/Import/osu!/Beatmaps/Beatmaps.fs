@@ -135,7 +135,7 @@ type BeatmapBrowserPage() =
         |+ Dummy(NodeType.Leaf)
         |+ scroll_container
         |>> Container
-        |+ EmptyState(Icons.SEARCH, %"imports.osu.no_results", Position = Position.TrimTop(135.0f))
+        |+ EmptyState(Icons.SEARCH, %"beatmap_browser.no_results", Position = Position.TrimTop(135.0f))
             .Conditional(fun () -> not loading && items.Count = 0)
         :> Widget
 
@@ -212,7 +212,7 @@ type BeatmapBrowserPage() =
         search_results
 
     override this.Header() =
-        Text(%"imports.osu.disclaimer", Align = Alignment.CENTER, Position = Position.SliceBottom(55.0f).Translate(0.0f, -10.0f))
+        Text(%"beatmap_browser.disclaimer", Align = Alignment.CENTER, Position = Position.SliceBottom(55.0f).Translate(0.0f, -10.0f))
 
     override this.Update(elapsed_ms, moved) =
         json_downloader.Join()
@@ -222,5 +222,5 @@ type BeatmapBrowserPage() =
             when_at_bottom.Value()
             when_at_bottom <- None
 
-    override this.Title = %"imports.osu"
+    override this.Title = %"beatmap_browser"
     override this.OnClose() = ()

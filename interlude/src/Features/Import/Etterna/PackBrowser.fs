@@ -85,9 +85,9 @@ type EtternaPacksBrowserPage() =
         NavigationContainer.Column(Position = Position.CenterX(1400.0f).TrimTop(90.0f).TrimBottom(70.0f))
         |+ Dummy(NodeType.Leaf)
         |+ scroll_container
-        |+ EmptyState(Icons.X, %"imports.etterna.error")
+        |+ EmptyState(Icons.X, %"etterna_pack_browser.error")
             .Conditional(fun () -> failed)
-        |+ EmptyState(Icons.SEARCH, %"imports.etterna.no_results", Position = Position.TrimTop(120.0f))
+        |+ EmptyState(Icons.SEARCH, %"etterna_pack_browser.no_results", Position = Position.TrimTop(120.0f))
             .Conditional(fun () -> not loading && items.Count = 0)
         :> Widget
 
@@ -104,7 +104,7 @@ type EtternaPacksBrowserPage() =
         :> Widget
 
     override this.Footer() =
-        Text(%"imports.etterna.disclaimer", Align = Alignment.CENTER, Position = Position.SliceBottom(55.0f).Translate(0.0f, -10.0f))
+        Text(%"etterna_pack_browser.disclaimer", Align = Alignment.CENTER, Position = Position.SliceBottom(55.0f).Translate(0.0f, -10.0f))
 
     override this.Update(elapsed_ms, moved) =
         json_downloader.Join()
@@ -114,5 +114,5 @@ type EtternaPacksBrowserPage() =
             when_at_bottom.Value()
             when_at_bottom <- None
 
-    override this.Title = %"imports.etterna"
+    override this.Title = %"etterna_pack_browser"
     override this.OnClose() = ()

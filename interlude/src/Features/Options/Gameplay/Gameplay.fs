@@ -62,7 +62,7 @@ type GameplayPage() =
             .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
             .Pos(16)
         |+ PageButton(%"gameplay.rulesets", (fun () -> InstallRulesetsPage().Show()))
-            .Tooltip(Tooltip.Info("gameplay.ruleset"))
+            .Tooltip(Tooltip.Info("gameplay.rulesets"))
             .Pos(18)
         |+ PageSetting(%"gameplay.keybinds", binds)
             .Tooltip(Tooltip.Info("gameplay.keybinds"))
