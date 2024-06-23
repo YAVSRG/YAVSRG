@@ -10,7 +10,7 @@ open Prelude.Data.Library.Sorting
 open Prelude.Data
 open Interlude.Content
 open Interlude.UI
-open Interlude.Features.Import
+open Interlude.UI.Menu
 
 type private PackDownloadStatus =
     | NotDownloaded
@@ -38,6 +38,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
     let mutable progress = 0.0f
 
     let mutable status =
+        // todo: more efficient way of checking if already installed without polling disk
         let path = Path.Combine(get_game_folder "Songs", data.name)
 
         if Directory.Exists path && not (Seq.isEmpty (Directory.EnumerateDirectories path)) then
@@ -163,110 +164,118 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                 | _ -> true)
                 filter
 
-module Packs =
+type EtternaPacksBrowser() as this =
+    inherit Container(NodeType.Container(fun _ -> Some this.Items))
 
-    type EtternaPackSearch() as this =
-        inherit Container(NodeType.Container(fun _ -> Some this.Items))
+    let items = FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
 
-        let items = FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
+    let scroll =
+        ScrollContainer(items, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
 
-        let scroll =
-            ScrollContainer(items, Margin = Style.PADDING, Position = Position.TrimTop(70.0f).TrimBottom(65.0f))
+    let mutable filter: Filter = []
+    let query_order = Setting.simple "popularity"
+    let descending_order = Setting.simple true
+    let mutable when_at_bottom: (unit -> unit) option = None
+    let mutable loading = false
+    let mutable failed = false
 
-        let mutable filter: Filter = []
-        let query_order = Setting.simple "popularity"
-        let descending_order = Setting.simple true
-        let mutable when_at_bottom: (unit -> unit) option = None
-        let mutable loading = false
-        let mutable failed = false
+    let json_downloader =
+        { new Async.SwitchService<string * (unit -> unit), EtternaOnlineApiResponse option * (unit -> unit)>() with
+            override this.Process((url, action_at_bottom)) =
+                async {
+                    match! WebServices.download_json_async<EtternaOnlineApiResponse>(url) with
+                    | Some data ->
+                        return Some data, action_at_bottom
+                    | None -> return None, action_at_bottom
+                }
 
-        let json_downloader =
-            { new Async.SwitchService<string * (unit -> unit), EtternaOnlineApiResponse option * (unit -> unit)>() with
-                override this.Process((url, action_at_bottom)) =
-                    async {
-                        match! WebServices.download_json_async<EtternaOnlineApiResponse>(url) with
-                        | Some data ->
-                            return Some data, action_at_bottom
-                        | None -> return None, action_at_bottom
-                    }
+            override this.Handle((data: EtternaOnlineApiResponse option, action_at_bottom)) =
+                match data with
+                | Some d ->
+                    for p in d.data do
+                        items.Add(EtternaPackCard p)
 
-                override this.Handle((data: EtternaOnlineApiResponse option, action_at_bottom)) =
-                    match data with
-                    | Some d ->
-                        for p in d.data do
-                            items.Add(EtternaPackCard p)
+                    if d.meta.current_page < d.meta.last_page then
+                        when_at_bottom <- Some action_at_bottom
 
-                        if d.meta.current_page < d.meta.last_page then
-                            when_at_bottom <- Some action_at_bottom
+                    loading <- false
+                | None -> 
+                    failed <- true
+                    loading <- false
+        }
 
-                        loading <- false
-                    | None -> 
-                        failed <- true
-                        loading <- false
-            }
+    let rec search (filter: Filter) (page: int) =
+        loading <- true
+        when_at_bottom <- None
+        let mutable search_string = ""
 
-        let rec search (filter: Filter) (page: int) =
-            loading <- true
-            when_at_bottom <- None
-            let mutable search_string = ""
+        let mutable invalid = false
 
-            let mutable invalid = false
+        List.iter
+            (function
+            | Impossible -> invalid <- true
+            | String s ->
+                search_string <-
+                    match search_string with
+                    | "" -> s
+                    | t -> search_string + " " + s
+            | _ -> ())
+            filter
 
-            List.iter
-                (function
-                | Impossible -> invalid <- true
-                | String s ->
-                    search_string <-
-                        match search_string with
-                        | "" -> s
-                        | t -> search_string + " " + s
-                | _ -> ())
-                filter
+        let url =
+            sprintf "https://api.beta.etternaonline.com/api/packs?page=%i&limit=36&sort=%s%s%s"
+                (page + 1)
+                (if descending_order.Value then "-" else "")
+                (query_order.Value)
+                (if search_string = "" then "" else "&filter[search]=" + System.Net.WebUtility.UrlEncode search_string)
 
-            let url =
-                sprintf "https://api.beta.etternaonline.com/api/packs?page=%i&limit=36&sort=%s%s%s"
-                    (page + 1)
-                    (if descending_order.Value then "-" else "")
-                    (query_order.Value)
-                    (if search_string = "" then "" else "&filter[search]=" + System.Net.WebUtility.UrlEncode search_string)
+        json_downloader.Request(url, (fun () -> search filter (page + 1)))
 
-            json_downloader.Request(url, (fun () -> search filter (page + 1)))
+    let begin_search (filter: Filter) =
+        search filter 0
+        items.Clear()
 
-        let begin_search (filter: Filter) =
-            search filter 0
-            items.Clear()
+    override this.Focusable = items.Focusable
 
-        override this.Focusable = items.Focusable
+    override this.Init(parent) =
+        begin_search filter
 
-        override this.Init(parent) =
-            begin_search filter
-
-            this
-            |+ (SearchBox(
-                    Setting.simple "",
-                    (fun (f: Filter) ->
-                        filter <- f
-                        defer (fun () -> begin_search filter)
-                    ),
-                    Position = Position.SliceTop 60.0f
-                )
-                |+ LoadingIndicator.Border(fun () -> loading))
-            |+ Text(%"imports.etterna.disclaimer", Position = Position.SliceBottom 55.0f)
-            |+ scroll
-            |+ EmptyState(Icons.X, "Couldn't connect to EtternaOnline").Conditional(fun () -> failed)
-            |* EmptyState(Icons.SEARCH, %"imports.etterna.no_results", Position = Position.TrimTop(120.0f))
-                .Conditional(fun () -> not loading && items.Count = 0)
+        this
+        |+ (SearchBox(
+                Setting.simple "",
+                (fun (f: Filter) ->
+                    filter <- f
+                    defer (fun () -> begin_search filter)
+                ),
+                Position = Position.SliceTop 60.0f
+            )
+            |+ LoadingIndicator.Border(fun () -> loading))
+        |+ Text(%"imports.etterna.disclaimer", Position = Position.SliceBottom 55.0f)
+        |+ scroll
+        |+ EmptyState(Icons.X, %"imports.etterna.error").Conditional(fun () -> failed)
+        |* EmptyState(Icons.SEARCH, %"imports.etterna.no_results", Position = Position.TrimTop(120.0f))
+            .Conditional(fun () -> not loading && items.Count = 0)
             
-            base.Init parent
+        base.Init parent
 
-        override this.Update(elapsed_ms, moved) =
-            json_downloader.Join()
-            base.Update(elapsed_ms, moved)
+    override this.Update(elapsed_ms, moved) =
+        json_downloader.Join()
+        base.Update(elapsed_ms, moved)
 
-            if when_at_bottom.IsSome && scroll.PositionPercent > 0.9f then
-                when_at_bottom.Value()
-                when_at_bottom <- None
+        if when_at_bottom.IsSome && scroll.PositionPercent > 0.9f then
+            when_at_bottom.Value()
+            when_at_bottom <- None
 
-        member private this.Items = items
+    member private this.Items = items
 
-    let tab = EtternaPackSearch()
+type EtternaPacksBrowserPage() =
+    inherit Page()
+
+    override this.Content() =
+        NavigationContainer.Column(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        |+ Dummy(NodeType.Leaf)
+        |+ EtternaPacksBrowser()
+        :> Widget
+
+    override this.Title = %"imports.etterna"
+    override this.OnClose() = ()
