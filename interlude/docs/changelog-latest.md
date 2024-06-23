@@ -1,28 +1,25 @@
-0.7.22
+0.7.23
 ====
 
-This update is pretty fire imo
+Major UI overhaul!  
+I have done about 1/3 of the changes I want to do, but releasing at this stage so you can tell me what you think so far
+
+Please report any bugs or suggestions in the Discord, and enjoy :)
+
+# UI overhauling done
+- You can search for hotkeys
+- New redesigned menus for importing osu! beatmaps, Etterna packs, rulesets, tables and noteskins
+- Import screen is gone and all these features are part of the options menu instead
+- Some other general changes to how menu pages animate and look
+- Ingame wiki and changelog are now menu "pages" and can be opened while already inside options menus
 
 # New features
-- Middle click to pause music on menus
-- Right click on charts to export as .osz
-- New 'Input meter' HUD element
-- SV indicator on pattern summaries
-- You can now batch-import a folder of .osz files (like coro's 7k megapacks once the .rar has been extracted)
+- Scroll speed now has an indicator of ms reaction time alongside game conversions
+- Score screen shows MA and PA ratios
+- Many more settings for the Input Meter HUD element
+- New 'Guide thickness' setting for the Timing Display HUD element
 
-# Changes and improvements
-- UI for the ingame wiki and changelog has been improved
-- Imports log which files were skipped and why
-- Cursor is hidden during practice mode and replay mode
-- Table suggestions UI has been improved
-- osu! rulesets have been changed to support decimal OD values, Hard Rock and Easy mods
-- Improved screen transition animations when entering/leaving gameplay
-
-# Bug fixes
-- Ingame Etterna downloads now point to the new beta site since the old one is now gone
-- Fixed several parse errors and bugs in imports, osu! and Etterna alike
-- Fixed mismatched note sizes when importing osu! skins
-- Fixed UI for selecting keymodes on presets being invisible
-- Fixed downloading an update to a table requiring game restart
-- Fixed endless mode dropdown not being usable with a mouse
+# Bug fixes and changes
+- Fixed localisation not working on hotkeys menu
+- Miss penalty for SC on judges other than 4 has been adjusted to scale with their difficulty
 
