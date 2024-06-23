@@ -47,8 +47,6 @@ type Bind =
         | Keys.KeyPad7 -> "N7"
         | Keys.KeyPad8 -> "N8"
         | Keys.KeyPad9 -> "N9"
-        | Keys.LeftBracket -> "("
-        | Keys.RightBracket -> ")"
         | Keys.LeftAlt -> "LAlt"
         | Keys.RightAlt -> "RAlt"
         | Keys.LeftSuper -> "LSuper"
