@@ -44,10 +44,13 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
                 this.Focus false
             else
                 Input.listen_to_next_key input_callback
+                Input.finish_frame_events()
 
             refresh_text ()
             Style.key.Play()
-        | _ -> Input.listen_to_next_key input_callback
+        | _ -> 
+            Input.listen_to_next_key input_callback
+            Input.finish_frame_events()
 
     do
         this
