@@ -57,7 +57,10 @@ type InputMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptio
                 else
                     this.Bounds.Bottom - box_height - offset
                 ,
-                let mult = (height - offset) / noteskin_options.InputMeterInputFadeDistance |> min 1.0f
+                let mult = 
+                    if noteskin_options.InputMeterInputFadeDistance > 0.0f then
+                        (height - offset) / noteskin_options.InputMeterInputFadeDistance |> min 1.0f
+                    else 1.0f
                 noteskin_options.InputMeterInputColor.O4a (255.0f * mult |> int |> min (int noteskin_options.InputMeterInputColor.A) |> max 0)
 
             let inline bar (k, timestamp, previous) =
