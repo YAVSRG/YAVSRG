@@ -69,6 +69,7 @@ module Song =
     let private timer = new Stopwatch()
     let mutable private timer_start = 0.0f<ms>
     let mutable private channel_playing = false
+    let mutable private paused = false
     let mutable private rate = 1.0f
     let mutable _local_offset = 0.0f<ms>
     let mutable private _global_offset = 0.0f<ms>
@@ -104,6 +105,7 @@ module Song =
             channel_playing <- false
 
         timer.Restart()
+        paused <- false
 
     let play_leadin () = play_from (-LEADIN_TIME * rate)
 
@@ -131,6 +133,7 @@ module Song =
             Bass.ChannelPause now_playing.ID |> display_bass_error
 
         timer.Stop()
+        paused <- true
 
     let resume () =
         let time = time ()
@@ -139,6 +142,7 @@ module Song =
             Bass.ChannelPlay now_playing.ID |> display_bass_error
 
         timer.Start()
+        paused <- false
 
     let change_rate (new_rate) =
         let rate_changed = rate <> new_rate
@@ -156,30 +160,29 @@ module Song =
     let set_global_offset (offset) = _global_offset <- offset
 
     let private song_loader =
-        { new Async.SwitchService<string option * SongLoadAction * bool, Song * SongLoadAction * bool>() with
-            override this.Process((path, after_load, song_playing)) =
+        { new Async.SwitchService<string option * SongLoadAction, Song * SongLoadAction>() with
+            override this.Process((path, after_load)) =
                 async {
                     return
                         match path with
-                        | Some p -> Song.FromFile p, after_load, song_playing
-                        | None -> Song.Default, after_load, song_playing
+                        | Some p -> Song.FromFile p, after_load
+                        | None -> Song.Default, after_load
                 }
 
-            override this.Handle((song, after_load: SongLoadAction, song_playing: bool)) =
+            override this.Handle((song, after_load: SongLoadAction)) =
                 loading <- false
                 now_playing <- song
                 change_rate rate
 
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
-                    (if song_playing then play_from else seek) preview_point
+                    (if paused then seek else play_from) preview_point
                 | SongLoadAction.PlayFromBeginning ->
-                    (if song_playing then play_from else seek) 0.0f<ms>
+                    (if paused then seek else play_from) 0.0f<ms>
                 | SongLoadAction.Wait -> ()
         }
 
     let change (path: string option, offset: Time, new_rate: float32, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) =
-        let song_was_playing = playing() || load_path = None
         let path_changed = path <> load_path
         load_path <- path
         preview_point <- preview
@@ -188,9 +191,6 @@ module Song =
         change_rate new_rate
 
         if path_changed then
-            if song_was_playing then
-                pause ()
-
             timer_start <- -infinityf * 1.0f<ms>
 
             if now_playing.ID <> 0 then
@@ -198,7 +198,7 @@ module Song =
 
             channel_playing <- false
             loading <- true
-            song_loader.Request(path, after_load, song_was_playing)
+            song_loader.Request(path, after_load)
 
     let update () =
 

@@ -27,7 +27,7 @@ type ConfirmUnlinkedSongsImport(path) =
                 %"unlinkedsongsimport.link_intended",
                 fun () -> Menu.Back() // todo: open the library options menu
             )
-            .Pos(6)
+            .Pos(8)
         |+ PageButton
             .Once(
                 %"unlinkedsongsimport.confirm",
@@ -48,8 +48,8 @@ type ConfirmUnlinkedSongsImport(path) =
 
                     Menu.Back()
             )
-            .Pos(9)
-        |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 100.0f, 200.0f, w, h))
+            .Pos(11)
+        |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 0.0f, -10.0f, w, h))
         :> Widget
 
     override this.Title = %"unlinkedsongsimport"
