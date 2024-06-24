@@ -44,7 +44,7 @@ type InputMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.inputmeter"
 
     override this.OnClose() =
-        HUDs.save_config 
+        HUD.save_config 
             { Content.HUD with
                 InputMeterScrollSpeed = scroll_speed.Value
                 InputMeterKeyFadeTime = key_fade_time.Value

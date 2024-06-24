@@ -251,7 +251,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
     override this.Title = %"hud.judgementcounter"
 
     override this.OnClose() =
-        HUDs.save_config 
+        HUD.save_config 
             { Content.HUD with
                 JudgementCounterFadeTime = animation_time.Value
                 JudgementCounterShowRatio = show_ratio.Value

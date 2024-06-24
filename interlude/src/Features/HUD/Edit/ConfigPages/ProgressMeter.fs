@@ -117,7 +117,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.progressmeter"
 
     override this.OnClose() =
-        HUDs.save_config 
+        HUD.save_config 
             { Content.HUD with
                 ProgressMeterLabel = label.Value
                 ProgressMeterColor = color.Value

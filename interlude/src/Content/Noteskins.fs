@@ -9,7 +9,6 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Skinning
 open Prelude.Skinning.Noteskins
-open Prelude.Skinning.HudLayouts
 open Interlude
 
 module Noteskins =
@@ -199,7 +198,7 @@ module Noteskins =
 
     let init_window () =
         load ()
-        Logging.Info(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count DEFAULTS.Length)
+        Logging.Debug(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count DEFAULTS.Length)
         initialised <- true
 
     let list () =

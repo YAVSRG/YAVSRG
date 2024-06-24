@@ -171,7 +171,7 @@ type JudgementMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.judgementmeter"
 
     override this.OnClose() =
-        HUDs.save_config 
+        HUD.save_config 
             { Content.HUD with
                 JudgementMeterIgnorePerfect = ignore_perfect_judgements.Value
                 JudgementMeterPrioritiseLower = prioritise_lower_judgements.Value

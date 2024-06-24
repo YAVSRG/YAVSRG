@@ -59,7 +59,7 @@ type EarlyLateMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.earlylatemeter"
 
     override this.OnClose() =
-        HUDs.save_config 
+        HUD.save_config 
             { Content.HUD with
                 EarlyLateMeterDuration = duration.Value
                 EarlyLateMeterUseTexture = use_texture.Value

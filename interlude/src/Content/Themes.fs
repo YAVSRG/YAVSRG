@@ -36,8 +36,6 @@ module Themes =
             with err ->
                 Logging.Error("  Failed to load theme '" + id + "'", err)
 
-        Logging.Info(sprintf "Loaded %i themes. (Including default)" loaded.Count)
-
     let save_config (new_config: ThemeConfig) =
         current.Config <- new_config
         current_config <- current.Config

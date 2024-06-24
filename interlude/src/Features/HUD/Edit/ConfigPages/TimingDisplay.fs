@@ -101,7 +101,7 @@ type TimingDisplayPage(on_close: unit -> unit) =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        HUDs.save_config
+        HUD.save_config
             { Content.HUD with
                 TimingDisplayShowGuide = show_guide.Value
                 TimingDisplayShowNonJudgements = show_non_judgements.Value

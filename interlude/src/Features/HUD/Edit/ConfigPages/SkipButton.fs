@@ -51,7 +51,7 @@ type SkipButtonPage(on_close: unit -> unit) =
     override this.Title = %"hud.skipbutton"
 
     override this.OnClose() =
-        HUDs.save_config 
+        HUD.save_config 
             { Content.HUD with
                 SkipButtonBackground = 
                     {

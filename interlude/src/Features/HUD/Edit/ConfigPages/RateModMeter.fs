@@ -41,7 +41,7 @@ type RateModMeterPage(on_close: unit -> unit) =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        HUDs.save_config 
+        HUD.save_config 
             { Content.HUD with
                 RateModMeterShowMods = show_mods.Value
             }

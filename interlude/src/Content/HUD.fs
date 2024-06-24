@@ -9,9 +9,8 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Skinning
 open Prelude.Skinning.HudLayouts
-open Interlude
 
-module HUDs =
+module HUD =
 
     type private LoadedHUD =
         {
@@ -88,7 +87,7 @@ module HUDs =
         member this.Inactive() =
             match this.Textures with
             | None -> ()
-            | Some (atlas, sprites) -> Texture.unclaim_texture_unit atlas
+            | Some (atlas, _) -> Texture.unclaim_texture_unit atlas
 
         interface IDisposable with
             member this.Dispose() =
@@ -194,7 +193,6 @@ module HUDs =
 
     let init_window () =
         load ()
-        Logging.Info(sprintf "Loaded %i HUD layouts" loaded.Count)
         initialised <- true
 
     let list () =

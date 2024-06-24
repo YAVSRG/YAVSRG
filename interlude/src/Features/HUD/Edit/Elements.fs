@@ -74,7 +74,7 @@ module HudElement =
         | HudElement.Accuracy ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             AccuracyEnabled = v
                         }
@@ -83,7 +83,7 @@ module HudElement =
         | HudElement.TimingDisplay ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             TimingDisplayEnabled = v
                         }
@@ -92,7 +92,7 @@ module HudElement =
         | HudElement.Combo ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             ComboEnabled = v
                         }
@@ -101,7 +101,7 @@ module HudElement =
         | HudElement.SkipButton ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             SkipButtonEnabled = v
                         }
@@ -110,7 +110,7 @@ module HudElement =
         | HudElement.JudgementMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             JudgementMeterEnabled = v
                         }
@@ -119,7 +119,7 @@ module HudElement =
         | HudElement.EarlyLateMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             EarlyLateMeterEnabled = v
                         }
@@ -128,7 +128,7 @@ module HudElement =
         | HudElement.ProgressMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             ProgressMeterEnabled = v
                         }
@@ -137,7 +137,7 @@ module HudElement =
         | HudElement.JudgementCounter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             JudgementCounterEnabled = v
                         }
@@ -146,7 +146,7 @@ module HudElement =
         | HudElement.RateModMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             RateModMeterEnabled = v
                         }
@@ -155,7 +155,7 @@ module HudElement =
         | HudElement.BPMMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             BPMMeterEnabled = v
                         }
@@ -164,7 +164,7 @@ module HudElement =
         | HudElement.InputMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             InputMeterEnabled = v
                         }
@@ -178,7 +178,7 @@ module HudElement =
         | HudElement.Accuracy ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             AccuracyPosition = v
                         }
@@ -187,7 +187,7 @@ module HudElement =
         | HudElement.TimingDisplay ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             TimingDisplayPosition = v
                         }
@@ -196,7 +196,7 @@ module HudElement =
         | HudElement.Combo ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             ComboPosition = v
                         }
@@ -205,7 +205,7 @@ module HudElement =
         | HudElement.SkipButton ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             SkipButtonPosition = v
                         }
@@ -214,7 +214,7 @@ module HudElement =
         | HudElement.JudgementMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             JudgementMeterPosition = v
                         }
@@ -223,7 +223,7 @@ module HudElement =
         | HudElement.EarlyLateMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             EarlyLateMeterPosition = v
                         }
@@ -232,7 +232,7 @@ module HudElement =
         | HudElement.ProgressMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             ProgressMeterPosition = v
                         }
@@ -241,7 +241,7 @@ module HudElement =
         | HudElement.JudgementCounter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             JudgementCounterPosition = v
                         }
@@ -250,7 +250,7 @@ module HudElement =
         | HudElement.RateModMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             RateModMeterPosition = v
                         }
@@ -259,7 +259,7 @@ module HudElement =
         | HudElement.BPMMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             BPMMeterPosition = v
                         }
@@ -268,7 +268,7 @@ module HudElement =
         | HudElement.InputMeter ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             InputMeterPosition = v
                         }
@@ -277,7 +277,7 @@ module HudElement =
         | HudElement.Pacemaker ->
             Setting.make
                 (fun v ->
-                    HUDs.save_config
+                    HUD.save_config
                         { Content.HUD with
                             PacemakerPosition = v
                         }
