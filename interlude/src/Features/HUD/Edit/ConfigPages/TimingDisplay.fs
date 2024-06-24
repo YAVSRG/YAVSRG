@@ -7,36 +7,34 @@ open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
-open Interlude.Options
 
 type TimingDisplayPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
-    let pos = Setting.simple noteskin_options.TimingDisplayPosition
+    let pos = Setting.simple config.TimingDisplayPosition
 
-    let show_guide = Setting.simple user_options.TimingDisplayShowGuide
-    let guide_thickness = Setting.percentf user_options.TimingDisplayGuideThickness
-    let show_non_judgements = Setting.simple user_options.TimingDisplayShowNonJudgements
+    let show_guide = Setting.simple config.TimingDisplayShowGuide
+    let guide_thickness = Setting.percentf config.TimingDisplayGuideThickness
+    let show_non_judgements = Setting.simple config.TimingDisplayShowNonJudgements
 
     let thickness =
-        Setting.simple user_options.TimingDisplayThickness |> Setting.bound 1.0f 25.0f
+        Setting.simple config.TimingDisplayThickness |> Setting.bound 1.0f 25.0f
 
     let release_thickness =
-        Setting.simple user_options.TimingDisplayReleasesExtraHeight
+        Setting.simple config.TimingDisplayReleasesExtraHeight
         |> Setting.bound 0.0f 20.0f
 
-    let half_scale_releases = Setting.simple user_options.TimingDisplayHalfScaleReleases
+    let half_scale_releases = Setting.simple config.TimingDisplayHalfScaleReleases
 
     let animation_time =
-        Setting.simple user_options.TimingDisplayFadeTime
+        Setting.simple config.TimingDisplayFadeTime
         |> Setting.bound 100.0f 2000.0f
 
-    let moving_average_type = Setting.simple user_options.TimingDisplayMovingAverageType
-    let moving_average_sensitivity = Setting.simple user_options.TimingDisplayMovingAverageSensitivity |> Setting.bound 0.01f 0.5f
-    let moving_average_color = Setting.simple noteskin_options.TimingDisplayMovingAverageColor
+    let moving_average_type = Setting.simple config.TimingDisplayMovingAverageType
+    let moving_average_sensitivity = Setting.simple config.TimingDisplayMovingAverageSensitivity |> Setting.bound 0.01f 0.5f
+    let moving_average_color = Setting.simple config.TimingDisplayMovingAverageColor
 
     let preview =
         { new ConfigPreview(0.35f, pos) with
@@ -106,8 +104,8 @@ type TimingDisplayPage(on_close: unit -> unit) =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        options.HUD.Set
-            { options.HUD.Value with
+        Noteskins.save_hud_config
+            { Content.NoteskinConfig.HUD with
                 TimingDisplayShowGuide = show_guide.Value
                 TimingDisplayShowNonJudgements = show_non_judgements.Value
                 TimingDisplayThickness = thickness.Value
@@ -116,9 +114,6 @@ type TimingDisplayPage(on_close: unit -> unit) =
                 TimingDisplayFadeTime = animation_time.Value
                 TimingDisplayMovingAverageType = moving_average_type.Value
                 TimingDisplayMovingAverageSensitivity = moving_average_sensitivity.Value
-            }
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
                 TimingDisplayMovingAverageColor = moving_average_color.Value
             }
 

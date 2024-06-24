@@ -9,9 +9,9 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
+type EarlyLateMeter(config: HUDConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let duration = noteskin_options.EarlyLateMeterDuration * SelectedChart.rate.Value * 1.0f<ms>
+    let duration = config.EarlyLateMeterDuration * SelectedChart.rate.Value * 1.0f<ms>
     let mutable early = false
     let mutable time = -Time.infinity
 
@@ -36,22 +36,22 @@ type EarlyLateMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
 
             if time_ago < duration then
 
-                if noteskin_options.EarlyLateMeterUseTexture then
+                if config.EarlyLateMeterUseTexture then
                     Draw.quad 
                         ((Sprite.fill this.Bounds texture).AsQuad)
                         Color.White.AsQuad
-                        (Sprite.pick_texture (float32 time_ago / noteskin_options.EarlyLateMeterFrameTime |> floor |> int, if early then 0 else 1) texture)
+                        (Sprite.pick_texture (float32 time_ago / config.EarlyLateMeterFrameTime |> floor |> int, if early then 0 else 1) texture)
                 else
                     Text.fill (
                         Style.font,
                         (if early then
-                             noteskin_options.EarlyLateMeterEarlyText
+                             config.EarlyLateMeterEarlyText
                          else
-                             noteskin_options.EarlyLateMeterLateText),
+                             config.EarlyLateMeterLateText),
                         this.Bounds,
                         (if early then
-                             noteskin_options.EarlyLateMeterEarlyColor
+                             config.EarlyLateMeterEarlyColor
                          else
-                             noteskin_options.EarlyLateMeterLateColor),
+                             config.EarlyLateMeterLateColor),
                         Alignment.CENTER
                     )

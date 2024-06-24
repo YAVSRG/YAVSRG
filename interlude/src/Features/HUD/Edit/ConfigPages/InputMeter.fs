@@ -6,22 +6,20 @@ open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
-open Interlude.Options
 
 type InputMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
-    let scroll_speed = Setting.bounded user_options.InputMeterScrollSpeed 0.5f 3.0f
-    let key_fade_time = Setting.bounded noteskin_options.InputMeterKeyFadeTime 0.0f 1000.0f
-    let key_color = Setting.simple noteskin_options.InputMeterKeyColor
+    let scroll_speed = Setting.bounded config.InputMeterScrollSpeed 0.5f 3.0f
+    let key_fade_time = Setting.bounded config.InputMeterKeyFadeTime 0.0f 1000.0f
+    let key_color = Setting.simple config.InputMeterKeyColor
 
-    let show_inputs = Setting.simple noteskin_options.InputMeterShowInputs
-    let input_color = Setting.simple noteskin_options.InputMeterInputColor
-    let input_fade_distance = Setting.bounded noteskin_options.InputMeterInputFadeDistance 0.0f 1000.0f
-    let scroll_downwards = Setting.simple noteskin_options.InputMeterScrollDownwards
+    let show_inputs = Setting.simple config.InputMeterShowInputs
+    let input_color = Setting.simple config.InputMeterInputColor
+    let input_fade_distance = Setting.bounded config.InputMeterInputFadeDistance 0.0f 1000.0f
+    let scroll_downwards = Setting.simple config.InputMeterScrollDownwards
     
     override this.Content() =
         page_container()
@@ -48,13 +46,9 @@ type InputMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.inputmeter"
 
     override this.OnClose() =
-        options.HUD.Set
-            { options.HUD.Value with
-                InputMeterScrollSpeed = scroll_speed.Value
-            }
-        
         Noteskins.save_hud_config 
             { Content.NoteskinConfig.HUD with
+                InputMeterScrollSpeed = scroll_speed.Value
                 InputMeterKeyFadeTime = key_fade_time.Value
                 InputMeterKeyColor = key_color.Value
                 InputMeterShowInputs = show_inputs.Value

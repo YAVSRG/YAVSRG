@@ -1,4 +1,5 @@
 ﻿namespace Interlude.Features.Noteskins.Edit
+
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -7,16 +8,14 @@ open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Options
 
 // currently unused
 type PacemakerPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
-    let pos = Setting.simple noteskin_options.PacemakerPosition
+    let pos = Setting.simple config.PacemakerPosition
 
     let preview =
         { new ConfigPreview(0.35f, pos) with

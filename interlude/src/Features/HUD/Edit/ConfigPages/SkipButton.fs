@@ -8,12 +8,10 @@ open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
-open Interlude.Options
 
 type SkipButtonPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
     let noteskin_options = Content.NoteskinConfig.HUD
 
     let use_background = Setting.simple noteskin_options.SkipButtonBackground.Enable

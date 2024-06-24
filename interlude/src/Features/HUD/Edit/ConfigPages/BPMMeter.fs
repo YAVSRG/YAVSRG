@@ -6,13 +6,11 @@ open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
-open Interlude.Options
 
 // currently unused
 type BPMMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
     let noteskin_options = Content.NoteskinConfig.HUD
 
     let pos = Setting.simple noteskin_options.BPMMeterPosition

@@ -7,31 +7,27 @@ open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
-open Interlude.Options
 open Interlude.Features.Play.HUD
 
 type ComboPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
-    let pos = Setting.simple noteskin_options.ComboPosition
-
-    let lamp_colors = Setting.simple user_options.ComboLampColors
+    let lamp_colors = Setting.simple config.ComboLampColors
 
     let pop_amount =
-        Setting.simple noteskin_options.ComboPop |> Setting.bound 0.0f 20.0f
+        Setting.simple config.ComboPop |> Setting.bound 0.0f 20.0f
 
     let growth_amount =
-        Setting.simple noteskin_options.ComboGrowth |> Setting.bound 0.0f 0.05f
+        Setting.simple config.ComboGrowth |> Setting.bound 0.0f 0.05f
 
-    let use_font = Setting.simple noteskin_options.ComboUseFont
-    let font_spacing = Setting.simple noteskin_options.ComboFontSpacing |> Setting.bound -1.0f 1.0f
+    let use_font = Setting.simple config.ComboUseFont
+    let font_spacing = Setting.simple config.ComboFontSpacing |> Setting.bound -1.0f 1.0f
 
     let texture = Content.Texture "combo-font"
     let preview =
-        { new ConfigPreviewNew(pos.Value) with
+        { new ConfigPreviewNew(config.ComboPosition) with
             override this.DrawComponent(bounds) =
                 if use_font.Value then
                     Combo.draw_combo_centered(texture, bounds, Color.White, 727, font_spacing.Value)
@@ -66,13 +62,9 @@ type ComboPage(on_close: unit -> unit) =
     override this.Title = %"hud.combo"
 
     override this.OnClose() =
-        options.HUD.Set
-            { options.HUD.Value with
-                ComboLampColors = lamp_colors.Value
-            }
-
         Noteskins.save_hud_config
             { Content.NoteskinConfig.HUD with
+                ComboLampColors = lamp_colors.Value
                 ComboPop = pop_amount.Value
                 ComboGrowth = growth_amount.Value
                 ComboUseFont = use_font.Value

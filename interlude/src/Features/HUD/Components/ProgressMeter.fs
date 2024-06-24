@@ -104,7 +104,7 @@ module ProgressMeter =
                 Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
+type ProgressMeter(config: HUDConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let duration =
@@ -117,36 +117,36 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
         let now = state.CurrentChartTime()
         let percent = now / duration |> max 0.0f |> min 1.0f
 
-        ProgressMeter.draw_pie(this.Bounds.SliceTop(this.Bounds.Width), noteskin_options.ProgressMeterColor, noteskin_options.ProgressMeterBackgroundColor, percent)
+        ProgressMeter.draw_pie(this.Bounds.SliceTop(this.Bounds.Width), config.ProgressMeterColor, config.ProgressMeterBackgroundColor, percent)
 
-        if noteskin_options.ProgressMeterUseFont then
+        if config.ProgressMeterUseFont then
 
-            match user_options.ProgressMeterLabel with
+            match config.ProgressMeterLabel with
                 | ProgressMeterLabel.Countdown ->
                     let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms>
                     ProgressMeter.draw_countdown_centered (
                         font_texture,
-                        this.Bounds.SliceBottom(this.Bounds.Width * noteskin_options.ProgressMeterLabelSize), 
+                        this.Bounds.SliceBottom(this.Bounds.Width * config.ProgressMeterLabelSize), 
                         Color.White,
                         time_left,
-                        noteskin_options.ProgressMeterFontSpacing,
-                        noteskin_options.ProgressMeterColonExtraSpacing
+                        config.ProgressMeterFontSpacing,
+                        config.ProgressMeterColonExtraSpacing
                     )
                 | ProgressMeterLabel.Percentage ->
                     ProgressMeter.draw_percent_progress_centered (
                         font_texture,
-                        this.Bounds.SliceBottom(this.Bounds.Width * noteskin_options.ProgressMeterLabelSize), 
+                        this.Bounds.SliceBottom(this.Bounds.Width * config.ProgressMeterLabelSize), 
                         Color.White,
                         percent,
-                        noteskin_options.ProgressMeterFontSpacing,
-                        noteskin_options.ProgressMeterPercentExtraSpacing
+                        config.ProgressMeterFontSpacing,
+                        config.ProgressMeterPercentExtraSpacing
                     )
                 | _ -> ()
 
         else
 
             let text =
-                match user_options.ProgressMeterLabel with
+                match config.ProgressMeterLabel with
                 | ProgressMeterLabel.Countdown ->
                     let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms>
                     ProgressMeter.fmt_time_left time_left
@@ -156,7 +156,7 @@ type ProgressMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
             Text.fill_b (
                 Style.font,
                 text,
-                this.Bounds.SliceBottom(this.Bounds.Width * noteskin_options.ProgressMeterLabelSize),
+                this.Bounds.SliceBottom(this.Bounds.Width * config.ProgressMeterLabelSize),
                 Colors.text_subheading,
                 Alignment.CENTER
             )

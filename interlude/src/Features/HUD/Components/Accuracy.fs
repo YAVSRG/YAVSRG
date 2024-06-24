@@ -38,14 +38,14 @@ module Accuracy =
                 Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-type Accuracy(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
+type Accuracy(config: HUDConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
     let grades = state.Ruleset.Grading.Grades
 
     let color =
         Animation.Color(
-            if user_options.AccuracyGradeColors then
+            if config.AccuracyGradeColors then
                 Array.last(grades).Color
             else
                 Color.White
@@ -54,13 +54,13 @@ type Accuracy(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions
     let font_texture = Content.Texture "accuracy-font"
 
     override this.Init(parent) =
-        if user_options.AccuracyGradeColors then
+        if config.AccuracyGradeColors then
             state.SubscribeToHits(fun _ ->
                 color.Target <- Grade.calculate grades state.Scoring.State |> state.Ruleset.GradeColor
             )
 
         
-        if not noteskin_options.AccuracyUseFont then
+        if not config.AccuracyUseFont then
             this
             |* Text(
                 (fun () -> state.Scoring.FormatAccuracy()),
@@ -72,7 +72,7 @@ type Accuracy(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions
                     }
             )
 
-        if user_options.AccuracyShowName then
+        if config.AccuracyShowName then
             this
             |* Text(
                 (fun () -> state.Scoring.Name),
@@ -87,16 +87,16 @@ type Accuracy(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions
 
     override this.Draw() =
         base.Draw()
-        if noteskin_options.AccuracyUseFont then
+        if config.AccuracyUseFont then
             let text_bounds = this.Bounds.SliceTop(this.Bounds.Height * 0.6f)
             Accuracy.draw_accuracy_centered(
                 font_texture,
                 text_bounds,
                 color.Value,
                 state.Scoring.Value,
-                noteskin_options.AccuracyFontSpacing,
-                noteskin_options.AccuracyDotExtraSpacing,
-                noteskin_options.AccuracyPercentExtraSpacing
+                config.AccuracyFontSpacing,
+                config.AccuracyDotExtraSpacing,
+                config.AccuracyPercentExtraSpacing
             )
 
     override this.Update(elapsed_ms, moved) =

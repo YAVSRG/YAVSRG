@@ -122,11 +122,11 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit) =
 module Utils =
 
     let inline add_widget
-        (screen: Screen, playfield: Playfield, state: PlayState, user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions)
+        (screen: Screen, playfield: Playfield, state: PlayState, config: HUDConfig)
         (pos: HUDPosition)
-        (constructor: HUDUserOptions * HUDNoteskinOptions * PlayState -> #Widget)
+        (constructor: HUDConfig * PlayState -> #Widget)
         =
-            let w = constructor (user_options, noteskin_options, state)
+            let w = constructor (config, state)
 
             w.Position <-
                 {

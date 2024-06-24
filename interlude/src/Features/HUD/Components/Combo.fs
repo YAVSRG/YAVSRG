@@ -30,7 +30,7 @@ module Combo =
             Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
             char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-type Combo(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
+type Combo(config: HUDConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let pop_animation = Animation.Fade(0.0f)
     let color = Animation.Color(Color.White)
@@ -42,12 +42,12 @@ type Combo(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, s
         state.SubscribeToHits(fun _ ->
             hits <- hits + 1
 
-            if (user_options.ComboLampColors && hits > 50) then
+            if (config.ComboLampColors && hits > 50) then
                 color.Target <-
                     Lamp.calculate state.Ruleset.Grading.Lamps state.Scoring.State
                     |> state.Ruleset.LampColor
 
-            pop_animation.Value <- noteskin_options.ComboPop
+            pop_animation.Value <- config.ComboPop
         )
 
     override this.Update(elapsed_ms, moved) =
@@ -60,11 +60,11 @@ type Combo(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, s
 
         let amt =
             pop_animation.Value
-            + (((combo, 1000) |> Math.Min |> float32) * noteskin_options.ComboGrowth)
+            + (((combo, 1000) |> Math.Min |> float32) * config.ComboGrowth)
 
         let bounds = this.Bounds.Expand amt
 
-        if noteskin_options.ComboUseFont then
-            Combo.draw_combo_centered(font_texture, bounds, color.Value, combo, noteskin_options.ComboFontSpacing)
+        if config.ComboUseFont then
+            Combo.draw_combo_centered(font_texture, bounds, color.Value, combo, config.ComboFontSpacing)
         else
             Text.fill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)

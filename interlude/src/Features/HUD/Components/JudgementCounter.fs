@@ -57,14 +57,14 @@ module JudgementCounter =
                 Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
         
-type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
+type JudgementCounter(config: HUDConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
     let judgement_animations =
-        Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(user_options.JudgementCounterFadeTime))
+        Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(config.JudgementCounterFadeTime))
 
     let texture = Content.Texture "judgement-counter-judgements"
-    let display : int option array = noteskin_options.GetJudgementCounterDisplay state.Ruleset
+    let display : int option array = config.GetJudgementCounterDisplay state.Ruleset
     let font = Content.Texture "judgement-counter-font"
 
     override this.Init(parent) =
@@ -78,7 +78,7 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                     judgement_animations[x.Judgement.Value].Reset()
         )
 
-        let background = noteskin_options.JudgementCounterBackground
+        let background = config.JudgementCounterBackground
         if background.Enable then
             let lo = (1.0f - background.Scale) * 0.5f
             let hi = 1.0f - lo
@@ -104,7 +104,7 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
 
     override this.Draw() =
         base.Draw()
-        let h = this.Bounds.Height / float32 (judgement_animations.Length + if user_options.JudgementCounterShowRatio then 1 else 0)
+        let h = this.Bounds.Height / float32 (judgement_animations.Length + if config.JudgementCounterShowRatio then 1 else 0)
         let mutable r = this.Bounds.SliceTop(h)
 
         for i = 0 to state.Ruleset.Judgements.Length - 1 do
@@ -129,8 +129,8 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
                 Draw.rect (r.SliceLeft(5.0f)) j.Color
                 Text.fill_b (Style.font, j.Name, r.Shrink(10.0f, 5.0f), (Color.White, Color.Black), Alignment.LEFT)
 
-            if noteskin_options.JudgementCounterUseFont then
-                JudgementCounter.draw_count_right_aligned(font, r.Shrink(5.0f), Color.White, state.Scoring.State.Judgements.[i], noteskin_options.JudgementCounterFontSpacing)
+            if config.JudgementCounterUseFont then
+                JudgementCounter.draw_count_right_aligned(font, r.Shrink(5.0f), Color.White, state.Scoring.State.Judgements.[i], config.JudgementCounterFontSpacing)
             else
                 Text.fill_b (
                     Style.font,
@@ -142,17 +142,17 @@ type JudgementCounter(user_options: HUDUserOptions, noteskin_options: HUDNoteski
 
             r <- r.Translate(0.0f, h)
 
-        if user_options.JudgementCounterShowRatio && state.Scoring.State.Judgements.Length > 1 then
+        if config.JudgementCounterShowRatio && state.Scoring.State.Judgements.Length > 1 then
             let ratio = state.Scoring.State.Judgements.[0], state.Scoring.State.Judgements.[1]
-            if noteskin_options.JudgementCounterUseFont then
+            if config.JudgementCounterUseFont then
                 JudgementCounter.draw_ratio_centered(
                     font,
                     r.Shrink(5.0f),
                     Color.White,
                     ratio,
-                    noteskin_options.JudgementCounterFontSpacing,
-                    noteskin_options.JudgementCounterDotExtraSpacing,
-                    noteskin_options.JudgementCounterColonExtraSpacing
+                    config.JudgementCounterFontSpacing,
+                    config.JudgementCounterDotExtraSpacing,
+                    config.JudgementCounterColonExtraSpacing
                 )
             else
                 let (mv, pf) = ratio

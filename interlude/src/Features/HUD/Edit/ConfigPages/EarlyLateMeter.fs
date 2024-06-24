@@ -6,30 +6,26 @@ open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
-open Interlude.Options
 
 type EarlyLateMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
-
-    let pos = Setting.simple noteskin_options.EarlyLateMeterPosition
+    let config = Content.NoteskinConfig.HUD
 
     let duration =
-        Setting.simple noteskin_options.EarlyLateMeterDuration
+        Setting.simple config.EarlyLateMeterDuration
         |> Setting.bound 100.0f 2000.0f
 
     let frame_time =
-        Setting.simple noteskin_options.EarlyLateMeterFrameTime
+        Setting.simple config.EarlyLateMeterFrameTime
         |> Setting.bound 2.0f 500.0f
 
-    let use_texture = Setting.simple noteskin_options.EarlyLateMeterUseTexture
+    let use_texture = Setting.simple config.EarlyLateMeterUseTexture
 
-    let early_text = Setting.simple noteskin_options.EarlyLateMeterEarlyText
-    let late_text = Setting.simple noteskin_options.EarlyLateMeterLateText
-    let early_color = Setting.simple noteskin_options.EarlyLateMeterEarlyColor
-    let late_color = Setting.simple noteskin_options.EarlyLateMeterLateColor
+    let early_text = Setting.simple config.EarlyLateMeterEarlyText
+    let late_text = Setting.simple config.EarlyLateMeterLateText
+    let early_color = Setting.simple config.EarlyLateMeterEarlyColor
+    let late_color = Setting.simple config.EarlyLateMeterLateColor
 
     override this.Content() =
         page_container()
@@ -68,7 +64,6 @@ type EarlyLateMeterPage(on_close: unit -> unit) =
     override this.OnClose() =
         Noteskins.save_hud_config
             { Content.NoteskinConfig.HUD with
-                EarlyLateMeterPosition = pos.Value
                 EarlyLateMeterDuration = duration.Value
                 EarlyLateMeterUseTexture = use_texture.Value
                 EarlyLateMeterEarlyText = early_text.Value

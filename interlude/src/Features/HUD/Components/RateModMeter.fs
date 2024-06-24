@@ -7,12 +7,12 @@ open Prelude.Skinning.Noteskins
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type RateModMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
+type RateModMeter(config: HUDConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
         let text =
-            if user_options.RateModMeterShowMods then
+            if config.RateModMeterShowMods then
                 Mods.format (SelectedChart.rate.Value, state.WithColors.ModsSelected, SelectedChart.autoplay)
             else
                 sprintf "%.2fx" SelectedChart.rate.Value

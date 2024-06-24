@@ -18,7 +18,7 @@ type private TimingDisplayHit =
         Judgement: JudgementId option
     }
 
-type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
+type TimingDisplay(config: HUDConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let hits = ResizeArray<TimingDisplayHit>()
     let mutable w = 0.0f
@@ -26,34 +26,34 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
     let mutable last_seen_time = -Time.infinity
 
     let ln_mult =
-        if user_options.TimingDisplayHalfScaleReleases then
+        if config.TimingDisplayHalfScaleReleases then
             0.5f
         else
             1.0f
 
-    let animation_time = user_options.TimingDisplayFadeTime * SelectedChart.rate.Value
+    let animation_time = config.TimingDisplayFadeTime * SelectedChart.rate.Value
     let moving_average = Animation.Fade(0.0f)
 
     do
-        if user_options.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.None then
+        if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.None then
             state.SubscribeToHits(fun ev ->
                 match ev.Guts with
                 | Hit e ->
                     if not e.Missed then
                         moving_average.Target <- 
                             Percyqaz.Flux.Utils.lerp 
-                                user_options.TimingDisplayMovingAverageSensitivity
+                                config.TimingDisplayMovingAverageSensitivity
                                 moving_average.Target 
                                 (e.Delta / state.Scoring.MissWindow * w * 0.5f)
                 | Release e ->
                     if not e.Missed then
                         moving_average.Target <- 
                             Percyqaz.Flux.Utils.lerp 
-                                user_options.TimingDisplayMovingAverageSensitivity
+                                config.TimingDisplayMovingAverageSensitivity
                                 moving_average.Target 
                                 (e.Delta / state.Scoring.MissWindow * w * ln_mult)
             )
-        if user_options.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.ReplaceBars then
+        if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.ReplaceBars then
             state.SubscribeToHits(fun ev ->
                 match ev.Guts with
                 | Hit e ->
@@ -95,28 +95,28 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
     override this.Draw() =
         let centre = this.Bounds.CenterX
 
-        if user_options.TimingDisplayShowGuide then
+        if config.TimingDisplayShowGuide then
             Draw.rect
                 (Rect.Create(
-                    centre - user_options.TimingDisplayThickness * user_options.TimingDisplayGuideThickness,
+                    centre - config.TimingDisplayThickness * config.TimingDisplayGuideThickness,
                     this.Bounds.Top,
-                    centre + user_options.TimingDisplayThickness * user_options.TimingDisplayGuideThickness,
+                    centre + config.TimingDisplayThickness * config.TimingDisplayGuideThickness,
                     this.Bounds.Bottom
                 ))
                 Color.White
 
         let now = state.CurrentChartTime()
 
-        match user_options.TimingDisplayMovingAverageType with
+        match config.TimingDisplayMovingAverageType with
         | TimingDisplayMovingAverageType.ReplaceBars ->
             let r = 
                 Rect.Create(
-                    centre + moving_average.Value - user_options.TimingDisplayThickness,
+                    centre + moving_average.Value - config.TimingDisplayThickness,
                     this.Bounds.Top,
-                    centre + moving_average.Value + user_options.TimingDisplayThickness,
+                    centre + moving_average.Value + config.TimingDisplayThickness,
                     this.Bounds.Bottom
                 )
-            Draw.rect r noteskin_options.TimingDisplayMovingAverageColor
+            Draw.rect r config.TimingDisplayMovingAverageColor
         | TimingDisplayMovingAverageType.Arrow ->
             let arrow_height = this.Bounds.Height * 0.5f
             Draw.untextured_quad 
@@ -127,15 +127,15 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
                         (centre + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height)
                         (centre + moving_average.Value, this.Bounds.Top - 10.0f)
                 )
-                noteskin_options.TimingDisplayMovingAverageColor.AsQuad
+                config.TimingDisplayMovingAverageColor.AsQuad
         | _ -> ()
 
         for hit in hits do
             let r =
                 Rect.Create(
-                    centre + hit.Position - user_options.TimingDisplayThickness,
+                    centre + hit.Position - config.TimingDisplayThickness,
                     this.Bounds.Top,
-                    centre + hit.Position + user_options.TimingDisplayThickness,
+                    centre + hit.Position + config.TimingDisplayThickness,
                     this.Bounds.Bottom
                 )
 
@@ -152,10 +152,10 @@ type TimingDisplay(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOp
                         state.Ruleset.JudgementColor j
                     )
 
-            if user_options.TimingDisplayShowNonJudgements || hit.Judgement.IsSome then
+            if config.TimingDisplayShowNonJudgements || hit.Judgement.IsSome then
                 Draw.rect
                     (if hit.IsRelease then
-                         r.Expand(0.0f, user_options.TimingDisplayReleasesExtraHeight)
+                         r.Expand(0.0f, config.TimingDisplayReleasesExtraHeight)
                      else
                          r)
                     c

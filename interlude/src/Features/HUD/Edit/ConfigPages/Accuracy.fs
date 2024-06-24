@@ -7,28 +7,24 @@ open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
-open Interlude.Options
 open Interlude.Features.Play.HUD
 
 type AccuracyPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
-    let pos = Setting.simple noteskin_options.AccuracyPosition
+    let grade_colors = Setting.simple config.AccuracyGradeColors
+    let show_name = Setting.simple config.AccuracyShowName
 
-    let grade_colors = Setting.simple user_options.AccuracyGradeColors
-    let show_name = Setting.simple user_options.AccuracyShowName
-
-    let use_font = Setting.simple noteskin_options.AccuracyUseFont
-    let font_spacing = Setting.simple noteskin_options.AccuracyFontSpacing |> Setting.bound -1.0f 1.0f
-    let font_dot_spacing = Setting.simple noteskin_options.AccuracyDotExtraSpacing |> Setting.bound -1.0f 1.0f
-    let font_percent_spacing = Setting.simple noteskin_options.AccuracyPercentExtraSpacing |> Setting.bound -1.0f 1.0f
+    let use_font = Setting.simple config.AccuracyUseFont
+    let font_spacing = Setting.simple config.AccuracyFontSpacing |> Setting.bound -1.0f 1.0f
+    let font_dot_spacing = Setting.simple config.AccuracyDotExtraSpacing |> Setting.bound -1.0f 1.0f
+    let font_percent_spacing = Setting.simple config.AccuracyPercentExtraSpacing |> Setting.bound -1.0f 1.0f
 
     let texture = Content.Texture "accuracy-font"
     let preview =
-        { new ConfigPreviewNew(pos.Value) with
+        { new ConfigPreviewNew(config.AccuracyPosition) with
             override this.DrawComponent(bounds) =
                 if use_font.Value then
                     Accuracy.draw_accuracy_centered(
@@ -79,15 +75,11 @@ type AccuracyPage(on_close: unit -> unit) =
     override this.Title = %"hud.accuracy"
 
     override this.OnClose() =
-        options.HUD.Set
-            { options.HUD.Value with
-                AccuracyGradeColors = grade_colors.Value
-                AccuracyShowName = show_name.Value
-            }
 
         Noteskins.save_hud_config
             { Content.NoteskinConfig.HUD with
-                AccuracyPosition = pos.Value
+                AccuracyGradeColors = grade_colors.Value
+                AccuracyShowName = show_name.Value
 
                 AccuracyUseFont = use_font.Value
                 AccuracyFontSpacing = font_spacing.Value

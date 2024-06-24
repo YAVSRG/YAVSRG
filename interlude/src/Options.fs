@@ -159,8 +159,6 @@ module Options =
             SelectedPreset: Setting<int option>
             KeymodePreferredPresets: int option array
 
-            HUD: Setting<HUDUserOptions>
-
             VanishingNotes: Setting<bool>
             AutoCalibrateOffset: Setting<bool>
             ScoreGraphMode: Setting<ScoreGraphMode>
@@ -269,8 +267,6 @@ module Options =
                 Preset3 = Setting.simple None
                 SelectedPreset = Setting.simple None
                 KeymodePreferredPresets = [| None; None; None; None; None; None; None; None |]
-
-                HUD = Setting.simple HUDUserOptions.Default
 
                 VanishingNotes = Setting.simple true
                 AutoCalibrateOffset = Setting.simple false

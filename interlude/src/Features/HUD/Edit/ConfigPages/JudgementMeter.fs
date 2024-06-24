@@ -10,7 +10,6 @@ open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Options
 
 type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType array) =
     inherit Container(NodeType.Leaf)
@@ -92,34 +91,33 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
 type JudgementMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
     let ignore_perfect_judgements =
-        Setting.simple user_options.JudgementMeterIgnorePerfect
+        Setting.simple config.JudgementMeterIgnorePerfect
 
     let prioritise_lower_judgements =
-        Setting.simple user_options.JudgementMeterPrioritiseLower
+        Setting.simple config.JudgementMeterPrioritiseLower
 
     let duration =
-        Setting.simple noteskin_options.JudgementMeterDuration
+        Setting.simple config.JudgementMeterDuration
         |> Setting.bound 100.0f 2000.0f
 
     let frame_time =
-        Setting.simple noteskin_options.JudgementMeterFrameTime
+        Setting.simple config.JudgementMeterFrameTime
         |> Setting.bound 2.0f 500.0f
 
     let use_animation =
-        Setting.simple noteskin_options.JudgementMeterUseBuiltInAnimation
+        Setting.simple config.JudgementMeterUseBuiltInAnimation
 
     let use_texture =
-        Setting.simple noteskin_options.JudgementMeterUseTexture
+        Setting.simple config.JudgementMeterUseTexture
 
     let texture = Content.Texture "judgements"
     let ruleset = Rulesets.current
     let JUDGEMENT_COUNT = ruleset.Judgements.Length
     let judgement_display = 
-        match noteskin_options.JudgementMeterCustomDisplay.TryFind JUDGEMENT_COUNT with
+        match config.JudgementMeterCustomDisplay.TryFind JUDGEMENT_COUNT with
         | Some existing -> Array.copy existing
         | None -> 
             if texture.Rows = JUDGEMENT_COUNT then
@@ -175,14 +173,10 @@ type JudgementMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.judgementmeter"
 
     override this.OnClose() =
-        options.HUD.Set
-            { options.HUD.Value with
-                JudgementMeterIgnorePerfect = ignore_perfect_judgements.Value
-                JudgementMeterPrioritiseLower = prioritise_lower_judgements.Value
-            }
-
         Noteskins.save_hud_config 
             { Content.NoteskinConfig.HUD with
+                JudgementMeterIgnorePerfect = ignore_perfect_judgements.Value
+                JudgementMeterPrioritiseLower = prioritise_lower_judgements.Value
                 JudgementMeterDuration = duration.Value
                 JudgementMeterFrameTime = frame_time.Value
                 JudgementMeterUseTexture = use_texture.Value

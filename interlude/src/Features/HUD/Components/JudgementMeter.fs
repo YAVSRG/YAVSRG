@@ -10,20 +10,20 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
+type JudgementMeter(config: HUDConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let mutable tier = 0
     let mutable time = -Time.infinity
 
     let texture = Content.Texture "judgements"
-    let display = noteskin_options.GetJudgementMeterDisplay state.Ruleset
-    let animated = not noteskin_options.JudgementMeterUseTexture || noteskin_options.JudgementMeterUseBuiltInAnimation
+    let display = config.GetJudgementMeterDisplay state.Ruleset
+    let animated = not config.JudgementMeterUseTexture || config.JudgementMeterUseBuiltInAnimation
     let duration = 
         (
             if animated then 
-                noteskin_options.JudgementMeterDuration
+                config.JudgementMeterDuration
             else
-                noteskin_options.JudgementMeterFrameTime * float32 texture.Columns
+                config.JudgementMeterFrameTime * float32 texture.Columns
         ) * SelectedChart.rate.Value * 1.0f<ms>
 
     do
@@ -35,12 +35,12 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
 
             if
                 judge.IsSome
-                && (not user_options.JudgementMeterIgnorePerfect || judge.Value > 0)
+                && (not config.JudgementMeterIgnorePerfect || judge.Value > 0)
             then
                 let j = judge.Value in
 
                 if
-                    not user_options.JudgementMeterPrioritiseLower
+                    not config.JudgementMeterPrioritiseLower
                     || j >= tier
                     || ev.Time - duration > time
                     || ev.Time < time
@@ -74,4 +74,4 @@ type JudgementMeter(user_options: HUDUserOptions, noteskin_options: HUDNoteskinO
                     Draw.quad 
                         ((Sprite.fill bounds texture).AsQuad)
                         (Color.White.O4a alpha).AsQuad
-                        (Sprite.pick_texture (float32 time_ago / noteskin_options.JudgementMeterFrameTime |> floor |> int, y) texture)
+                        (Sprite.pick_texture (float32 time_ago / config.JudgementMeterFrameTime |> floor |> int, y) texture)

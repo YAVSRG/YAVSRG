@@ -51,94 +51,6 @@ type TimingDisplayMovingAverageType =
     | ReplaceBars = 2
 
 [<Json.AutoCodec(false)>]
-type HUDUserOptions =
-    {
-        AccuracyEnabled: bool
-        AccuracyGradeColors: bool
-        AccuracyShowName: bool
-
-        TimingDisplayEnabled: bool
-        TimingDisplayFadeTime: float32
-        TimingDisplayThickness: float32
-        TimingDisplayShowGuide: bool
-        TimingDisplayGuideThickness: float32
-        TimingDisplayShowNonJudgements: bool
-        TimingDisplayReleasesExtraHeight: float32
-        TimingDisplayHalfScaleReleases: bool
-        TimingDisplayMovingAverageType: TimingDisplayMovingAverageType
-        TimingDisplayMovingAverageSensitivity: float32
-
-        ComboEnabled: bool
-        ComboLampColors: bool
-
-        SkipButtonEnabled: bool
-
-        JudgementMeterEnabled: bool
-        JudgementMeterIgnorePerfect: bool
-        JudgementMeterPrioritiseLower: bool
-
-        EarlyLateMeterEnabled: bool
-
-        ProgressMeterEnabled: bool
-        ProgressMeterLabel: ProgressMeterLabel
-
-        JudgementCounterEnabled: bool
-        JudgementCounterFadeTime: float
-        JudgementCounterShowRatio: bool
-
-        RateModMeterEnabled: bool
-        RateModMeterShowMods: bool
-
-        BPMMeterEnabled: bool
-
-        InputMeterEnabled: bool
-        InputMeterScrollSpeed: float32
-    }
-    static member Default =
-        {
-            AccuracyEnabled = true
-            AccuracyGradeColors = true
-            AccuracyShowName = true
-
-            TimingDisplayEnabled = true
-            TimingDisplayFadeTime = 1000.0f
-            TimingDisplayThickness = 5.0f
-            TimingDisplayShowGuide = true
-            TimingDisplayGuideThickness = 1.0f
-            TimingDisplayShowNonJudgements = true
-            TimingDisplayReleasesExtraHeight = 5.0f
-            TimingDisplayHalfScaleReleases = true
-            TimingDisplayMovingAverageType = TimingDisplayMovingAverageType.None
-            TimingDisplayMovingAverageSensitivity = 0.75f
-
-            ComboEnabled = true
-            ComboLampColors = true
-
-            SkipButtonEnabled = true
-
-            JudgementMeterEnabled = true
-            JudgementMeterIgnorePerfect = false
-            JudgementMeterPrioritiseLower = false
-
-            EarlyLateMeterEnabled = false
-
-            ProgressMeterEnabled = true
-            ProgressMeterLabel = ProgressMeterLabel.None
-
-            JudgementCounterEnabled = false
-            JudgementCounterFadeTime = 200.0
-            JudgementCounterShowRatio = false
-
-            RateModMeterEnabled = false
-            RateModMeterShowMods = true
-
-            BPMMeterEnabled = false
-
-            InputMeterEnabled = false
-            InputMeterScrollSpeed = 1.5f
-        }
-
-[<Json.AutoCodec(false)>]
 type HUDPosition =
     {
         RelativeToPlayfield: bool
@@ -158,33 +70,53 @@ type BackgroundTextureOptions =
     }
 
 [<Json.AutoCodec(false)>]
-type HUDNoteskinOptions =
+type HUDConfig =
     {
+        AccuracyEnabled: bool
         AccuracyPosition: HUDPosition
+        AccuracyGradeColors: bool
+        AccuracyShowName: bool
         AccuracyUseFont: bool
         AccuracyFontSpacing: float32
         AccuracyDotExtraSpacing: float32
         AccuracyPercentExtraSpacing: float32
 
+        TimingDisplayEnabled: bool
         TimingDisplayPosition: HUDPosition
+        TimingDisplayFadeTime: float32
+        TimingDisplayThickness: float32
+        TimingDisplayShowGuide: bool
+        TimingDisplayGuideThickness: float32
+        TimingDisplayShowNonJudgements: bool
+        TimingDisplayReleasesExtraHeight: float32
+        TimingDisplayHalfScaleReleases: bool
+        TimingDisplayMovingAverageType: TimingDisplayMovingAverageType
+        TimingDisplayMovingAverageSensitivity: float32
         TimingDisplayMovingAverageColor: Color
 
+        ComboEnabled: bool
         ComboPosition: HUDPosition
+        ComboLampColors: bool
         ComboGrowth: float32
         ComboPop: float32
         ComboUseFont: bool
         ComboFontSpacing: float32
 
+        SkipButtonEnabled: bool
         SkipButtonPosition: HUDPosition
         SkipButtonBackground: BackgroundTextureOptions
 
+        JudgementMeterEnabled: bool
         JudgementMeterPosition: HUDPosition
+        JudgementMeterIgnorePerfect: bool
+        JudgementMeterPrioritiseLower: bool
         JudgementMeterDuration: float32
         JudgementMeterFrameTime: float32
         JudgementMeterUseTexture: bool
         JudgementMeterUseBuiltInAnimation: bool
         JudgementMeterCustomDisplay: Map<int, JudgementDisplayType array>
 
+        EarlyLateMeterEnabled: bool
         EarlyLateMeterPosition: HUDPosition
         EarlyLateMeterDuration: float32
         EarlyLateMeterUseTexture: bool
@@ -194,7 +126,9 @@ type HUDNoteskinOptions =
         EarlyLateMeterEarlyColor: Color
         EarlyLateMeterLateColor: Color
 
+        ProgressMeterEnabled: bool
         ProgressMeterPosition: HUDPosition
+        ProgressMeterLabel: ProgressMeterLabel
         ProgressMeterColor: Color
         ProgressMeterBackgroundColor: Color
         ProgressMeterLabelSize: float32
@@ -205,7 +139,10 @@ type HUDNoteskinOptions =
 
         PacemakerPosition: HUDPosition
 
+        JudgementCounterEnabled: bool
         JudgementCounterPosition: HUDPosition
+        JudgementCounterFadeTime: float
+        JudgementCounterShowRatio: bool
         JudgementCounterBackground: BackgroundTextureOptions
         JudgementCounterUseFont: bool
         JudgementCounterFontSpacing: float32
@@ -214,11 +151,16 @@ type HUDNoteskinOptions =
         JudgementCounterUseJudgementTextures: bool
         JudgementCounterCustomDisplay: Map<int, int option array>
 
+        RateModMeterEnabled: bool
         RateModMeterPosition: HUDPosition
+        RateModMeterShowMods: bool
 
+        BPMMeterEnabled: bool
         BPMMeterPosition: HUDPosition
 
+        InputMeterEnabled: bool
         InputMeterPosition: HUDPosition
+        InputMeterScrollSpeed: float32
         InputMeterKeyColor: Color
         InputMeterKeyFadeTime: float32
         InputMeterShowInputs: bool
@@ -230,6 +172,7 @@ type HUDNoteskinOptions =
     }
     static member Default =
         {
+            AccuracyEnabled = true
             AccuracyPosition =
                 {
                     RelativeToPlayfield = true
@@ -238,11 +181,14 @@ type HUDNoteskinOptions =
                     Right = 100.0f, 0.5f
                     Bottom = 120.0f, 0.0f
                 }
+            AccuracyGradeColors = true
+            AccuracyShowName = true
             AccuracyUseFont = false
             AccuracyFontSpacing = 0.0f
             AccuracyDotExtraSpacing = 0.0f
             AccuracyPercentExtraSpacing = 0.0f
             
+            TimingDisplayEnabled = true
             TimingDisplayPosition =
                 {
                     RelativeToPlayfield = true
@@ -251,8 +197,18 @@ type HUDNoteskinOptions =
                     Right = 300.0f, 0.5f
                     Bottom = 25.0f, 0.5f
                 }
+            TimingDisplayFadeTime = 1000.0f
+            TimingDisplayThickness = 5.0f
+            TimingDisplayShowGuide = true
+            TimingDisplayGuideThickness = 1.0f
+            TimingDisplayShowNonJudgements = true
+            TimingDisplayReleasesExtraHeight = 5.0f
+            TimingDisplayHalfScaleReleases = true
+            TimingDisplayMovingAverageType = TimingDisplayMovingAverageType.None
+            TimingDisplayMovingAverageSensitivity = 0.75f
             TimingDisplayMovingAverageColor = Color.Aqua
 
+            ComboEnabled = true
             ComboPosition =
                 {
                     RelativeToPlayfield = true
@@ -261,11 +217,13 @@ type HUDNoteskinOptions =
                     Right = 100.0f, 0.5f
                     Bottom = -5.0f, 0.5f
                 }
+            ComboLampColors = true
             ComboGrowth = 0.01f
             ComboPop = 5.0f
             ComboUseFont = false
             ComboFontSpacing = 0.0f
 
+            SkipButtonEnabled = true
             SkipButtonPosition =
                 {
                     RelativeToPlayfield = true
@@ -281,7 +239,9 @@ type HUDNoteskinOptions =
                     AlignmentX = 0.5f
                     AlignmentY = 0.5f
                 }
+                
 
+            JudgementMeterEnabled = true
             JudgementMeterPosition = 
                 {
                     RelativeToPlayfield = true
@@ -290,12 +250,15 @@ type HUDNoteskinOptions =
                     Right = 128.0f, 0.5f
                     Bottom = -105.0f, 0.5f
                 }
+            JudgementMeterIgnorePerfect = false
+            JudgementMeterPrioritiseLower = false
             JudgementMeterUseTexture = false
             JudgementMeterUseBuiltInAnimation = true
             JudgementMeterDuration = 300.0f
             JudgementMeterFrameTime = 50f
             JudgementMeterCustomDisplay = Map.empty
 
+            EarlyLateMeterEnabled = false
             EarlyLateMeterPosition = 
                 {
                     RelativeToPlayfield = true
@@ -311,7 +274,8 @@ type HUDNoteskinOptions =
             EarlyLateMeterLateText = "Slow"
             EarlyLateMeterEarlyColor = Color.FromArgb(52, 79, 235)
             EarlyLateMeterLateColor = Color.FromArgb(235, 52, 52)
-
+            
+            ProgressMeterEnabled = true
             ProgressMeterPosition =
                 {
                     RelativeToPlayfield = true
@@ -320,6 +284,7 @@ type HUDNoteskinOptions =
                     Right = 180.0f, 0.5f
                     Bottom = 140.0f, 0.0f
                 }
+            ProgressMeterLabel = ProgressMeterLabel.None
             ProgressMeterColor = Color.FromArgb(100, 220, 220, 220)
             ProgressMeterBackgroundColor = Color.FromArgb(100, 20, 20, 20)
             ProgressMeterUseFont = false
@@ -337,6 +302,7 @@ type HUDNoteskinOptions =
                     Bottom = -150.0f, 0.5f
                 }
 
+            JudgementCounterEnabled = false
             JudgementCounterPosition = 
                 {
                     RelativeToPlayfield = false
@@ -345,6 +311,7 @@ type HUDNoteskinOptions =
                     Right = 220.0f, 0.0f
                     Bottom = -20.0f, 1.0f
                 }
+            JudgementCounterFadeTime = 200.0
             JudgementCounterBackground =
                 {
                     Enable = false
@@ -352,6 +319,7 @@ type HUDNoteskinOptions =
                     AlignmentX = 0.0f
                     AlignmentY = 0.0f
                 }
+            JudgementCounterShowRatio = false
             JudgementCounterUseFont = false
             JudgementCounterFontSpacing = 0.0f
             JudgementCounterDotExtraSpacing = 0.0f
@@ -359,6 +327,7 @@ type HUDNoteskinOptions =
             JudgementCounterUseJudgementTextures = false
             JudgementCounterCustomDisplay = Map.empty
 
+            RateModMeterEnabled = false
             RateModMeterPosition = 
                 {
                     RelativeToPlayfield = true
@@ -367,7 +336,9 @@ type HUDNoteskinOptions =
                     Right = 100.0f, 0.5f
                     Bottom = -40.0f, 1.0f
                 }
+            RateModMeterShowMods = true
                 
+            BPMMeterEnabled = false
             BPMMeterPosition = 
                 {
                     RelativeToPlayfield = true
@@ -377,6 +348,7 @@ type HUDNoteskinOptions =
                     Bottom = -10.0f, 1.0f
                 }
 
+            InputMeterEnabled = false
             InputMeterPosition =
                 {
                     RelativeToPlayfield = true
@@ -385,6 +357,7 @@ type HUDNoteskinOptions =
                     Right = 440.0f, 1.0f
                     Bottom = -20.0f, 1.0f
                 }
+            InputMeterScrollSpeed = 1.5f
             InputMeterKeyColor = Color.FromArgb(127, 255, 255, 255)
             InputMeterKeyFadeTime = 300.0f
             InputMeterShowInputs = true

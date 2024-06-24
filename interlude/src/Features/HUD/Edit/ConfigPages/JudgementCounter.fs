@@ -10,7 +10,6 @@ open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Options
 open Interlude.Features.Play.HUD
 
 type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
@@ -118,32 +117,31 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
 type JudgementCounterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
-    let pos = Setting.simple noteskin_options.JudgementCounterPosition
+    let pos = Setting.simple config.JudgementCounterPosition
 
     let animation_time =
-        Setting.simple user_options.JudgementCounterFadeTime
+        Setting.simple config.JudgementCounterFadeTime
         |> Setting.bound 100.0 1000.0
-    let show_ratio = Setting.simple user_options.JudgementCounterShowRatio
+    let show_ratio = Setting.simple config.JudgementCounterShowRatio
 
-    let use_background = Setting.simple noteskin_options.JudgementCounterBackground.Enable
-    let background_scale = Setting.simple noteskin_options.JudgementCounterBackground.Scale |> Setting.bound 0.5f 2.0f
-    let background_offset_x = Setting.percentf noteskin_options.JudgementCounterBackground.AlignmentX
-    let background_offset_y = Setting.percentf noteskin_options.JudgementCounterBackground.AlignmentY
+    let use_background = Setting.simple config.JudgementCounterBackground.Enable
+    let background_scale = Setting.simple config.JudgementCounterBackground.Scale |> Setting.bound 0.5f 2.0f
+    let background_offset_x = Setting.percentf config.JudgementCounterBackground.AlignmentX
+    let background_offset_y = Setting.percentf config.JudgementCounterBackground.AlignmentY
 
-    let use_font = Setting.simple noteskin_options.JudgementCounterUseFont
-    let font_spacing = Setting.simple noteskin_options.JudgementCounterFontSpacing |> Setting.bound -1.0f 1.0f
-    let font_dot_spacing = Setting.simple noteskin_options.JudgementCounterDotExtraSpacing |> Setting.bound -1.0f 1.0f
-    let font_colon_spacing = Setting.simple noteskin_options.JudgementCounterColonExtraSpacing |> Setting.bound -1.0f 1.0f
+    let use_font = Setting.simple config.JudgementCounterUseFont
+    let font_spacing = Setting.simple config.JudgementCounterFontSpacing |> Setting.bound -1.0f 1.0f
+    let font_dot_spacing = Setting.simple config.JudgementCounterDotExtraSpacing |> Setting.bound -1.0f 1.0f
+    let font_colon_spacing = Setting.simple config.JudgementCounterColonExtraSpacing |> Setting.bound -1.0f 1.0f
 
     let texture = Content.Texture "judgement-counter-judgements"
-    let use_texture = Setting.simple noteskin_options.JudgementCounterUseJudgementTextures
+    let use_texture = Setting.simple config.JudgementCounterUseJudgementTextures
     let ruleset = Rulesets.current
     let JUDGEMENT_COUNT = ruleset.Judgements.Length
     let display : int option array = 
-        match noteskin_options.JudgementCounterCustomDisplay.TryFind JUDGEMENT_COUNT with
+        match config.JudgementCounterCustomDisplay.TryFind JUDGEMENT_COUNT with
         | Some existing -> Array.copy existing
         | None -> 
             if texture.Rows = JUDGEMENT_COUNT then
@@ -256,14 +254,10 @@ type JudgementCounterPage(on_close: unit -> unit) =
     override this.Title = %"hud.judgementcounter"
 
     override this.OnClose() =
-        options.HUD.Set
-            { options.HUD.Value with
-                JudgementCounterFadeTime = animation_time.Value
-                JudgementCounterShowRatio = show_ratio.Value
-            }
-
         Noteskins.save_hud_config 
             { Content.NoteskinConfig.HUD with
+                JudgementCounterFadeTime = animation_time.Value
+                JudgementCounterShowRatio = show_ratio.Value
                 JudgementCounterBackground = 
                     {
                         Enable = use_background.Value

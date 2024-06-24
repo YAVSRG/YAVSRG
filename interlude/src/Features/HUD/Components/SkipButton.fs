@@ -11,7 +11,7 @@ open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Play
 
-type SkipButton(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptions, state: PlayState) =
+type SkipButton(config: HUDConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"
@@ -20,7 +20,7 @@ type SkipButton(user_options: HUDUserOptions, noteskin_options: HUDNoteskinOptio
     let first_note = state.WithColors.FirstNote
 
     override this.Init(parent) =
-        let background = noteskin_options.SkipButtonBackground
+        let background = config.SkipButtonBackground
         if background.Enable then
             let lo = (1.0f - background.Scale) * 0.5f
             let hi = 1.0f - lo

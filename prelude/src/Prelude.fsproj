@@ -48,7 +48,7 @@
     <Compile Include="Gameplay\Stats.fs" />
     <Compile Include="Skinning\Storage.fs" />
     <Compile Include="Skinning\Themes.fs" />
-    <Compile Include="Skinning\Noteskins\HUD.fs" />
+    <Compile Include="Skinning\HUD\Options.fs" />
     <Compile Include="Skinning\Noteskins\Config.fs" />
     <Compile Include="Skinning\Noteskins\Noteskin.fs" />
     <Compile Include="Skinning\Noteskins\Repo.fs" />

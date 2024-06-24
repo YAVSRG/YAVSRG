@@ -143,23 +143,22 @@ module PlayScreen =
 
         { new IPlayScreen(info.Chart, info.WithColors, pacemaker_state, scoring) with
             override this.AddWidgets() =
-                let user_options = options.HUD.Value
-                let noteskin_options = Content.NoteskinConfig.HUD
+                let hud_config = Content.NoteskinConfig.HUD
                 let inline add_widget position constructor =
-                    add_widget (this, this.Playfield, this.State, user_options, noteskin_options) position constructor
+                    add_widget (this, this.Playfield, this.State, hud_config) position constructor
 
-                if user_options.ComboEnabled then add_widget noteskin_options.ComboPosition Combo
-                if user_options.SkipButtonEnabled then add_widget noteskin_options.SkipButtonPosition SkipButton
-                if user_options.ProgressMeterEnabled then add_widget noteskin_options.ProgressMeterPosition ProgressMeter
-                if user_options.AccuracyEnabled then add_widget noteskin_options.AccuracyPosition Accuracy
-                if user_options.TimingDisplayEnabled then add_widget noteskin_options.TimingDisplayPosition TimingDisplay
-                if this.State.Pacemaker <> PacemakerState.None then add_widget noteskin_options.PacemakerPosition Pacemaker
-                if user_options.JudgementCounterEnabled then add_widget noteskin_options.JudgementCounterPosition JudgementCounter
-                if user_options.JudgementMeterEnabled then add_widget noteskin_options.JudgementMeterPosition JudgementMeter
-                if user_options.EarlyLateMeterEnabled then add_widget noteskin_options.EarlyLateMeterPosition EarlyLateMeter
-                if user_options.RateModMeterEnabled then add_widget noteskin_options.RateModMeterPosition RateModMeter
-                if user_options.BPMMeterEnabled then add_widget noteskin_options.BPMMeterPosition BPMMeter
-                if user_options.InputMeterEnabled then add_widget noteskin_options.InputMeterPosition InputMeter
+                if hud_config.ComboEnabled then add_widget hud_config.ComboPosition Combo
+                if hud_config.SkipButtonEnabled then add_widget hud_config.SkipButtonPosition SkipButton
+                if hud_config.ProgressMeterEnabled then add_widget hud_config.ProgressMeterPosition ProgressMeter
+                if hud_config.AccuracyEnabled then add_widget hud_config.AccuracyPosition Accuracy
+                if hud_config.TimingDisplayEnabled then add_widget hud_config.TimingDisplayPosition TimingDisplay
+                if this.State.Pacemaker <> PacemakerState.None then add_widget hud_config.PacemakerPosition Pacemaker
+                if hud_config.JudgementCounterEnabled then add_widget hud_config.JudgementCounterPosition JudgementCounter
+                if hud_config.JudgementMeterEnabled then add_widget hud_config.JudgementMeterPosition JudgementMeter
+                if hud_config.EarlyLateMeterEnabled then add_widget hud_config.EarlyLateMeterPosition EarlyLateMeter
+                if hud_config.RateModMeterEnabled then add_widget hud_config.RateModMeterPosition RateModMeter
+                if hud_config.BPMMeterEnabled then add_widget hud_config.BPMMeterPosition BPMMeter
+                if hud_config.InputMeterEnabled then add_widget hud_config.InputMeterPosition InputMeter
 
                 let offset_slideout = offset_slideout this
 

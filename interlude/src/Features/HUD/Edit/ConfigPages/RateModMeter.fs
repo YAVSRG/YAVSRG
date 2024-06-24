@@ -7,17 +7,15 @@ open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
-open Interlude.Options
 
 type RateModMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
-    let pos = Setting.simple noteskin_options.RateModMeterPosition
+    let pos = Setting.simple config.RateModMeterPosition
 
-    let show_mods = Setting.simple user_options.RateModMeterShowMods
+    let show_mods = Setting.simple config.RateModMeterShowMods
 
     let preview =
         { new ConfigPreview(0.35f, pos) with
@@ -44,8 +42,8 @@ type RateModMeterPage(on_close: unit -> unit) =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        options.HUD.Set
-            { options.HUD.Value with
+        Noteskins.save_hud_config
+            { Content.NoteskinConfig.HUD with
                 RateModMeterShowMods = show_mods.Value
             }
 

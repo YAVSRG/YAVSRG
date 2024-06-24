@@ -7,27 +7,25 @@ open Prelude
 open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
-open Interlude.Options
 open Interlude.Features.Play.HUD
 
 type ProgressMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let user_options = options.HUD.Value
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
-    let pos = Setting.simple noteskin_options.ProgressMeterPosition
+    let pos = Setting.simple config.ProgressMeterPosition
 
-    let color = Setting.simple noteskin_options.ProgressMeterColor
-    let background_color = Setting.simple noteskin_options.ProgressMeterBackgroundColor
-    let label = Setting.simple user_options.ProgressMeterLabel
+    let color = Setting.simple config.ProgressMeterColor
+    let background_color = Setting.simple config.ProgressMeterBackgroundColor
+    let label = Setting.simple config.ProgressMeterLabel
 
-    let label_size = Setting.percentf noteskin_options.ProgressMeterLabelSize
+    let label_size = Setting.percentf config.ProgressMeterLabelSize
 
-    let use_font = Setting.simple noteskin_options.ProgressMeterUseFont
-    let font_spacing = Setting.simple noteskin_options.ProgressMeterFontSpacing |> Setting.bound -1.0f 1.0f
-    let font_colon_spacing = Setting.simple noteskin_options.ProgressMeterColonExtraSpacing |> Setting.bound -1.0f 1.0f
-    let font_percent_spacing = Setting.simple noteskin_options.ProgressMeterPercentExtraSpacing |> Setting.bound -1.0f 1.0f
+    let use_font = Setting.simple config.ProgressMeterUseFont
+    let font_spacing = Setting.simple config.ProgressMeterFontSpacing |> Setting.bound -1.0f 1.0f
+    let font_colon_spacing = Setting.simple config.ProgressMeterColonExtraSpacing |> Setting.bound -1.0f 1.0f
+    let font_percent_spacing = Setting.simple config.ProgressMeterPercentExtraSpacing |> Setting.bound -1.0f 1.0f
 
     let font_texture = Content.Texture "progress-meter-font"
 
@@ -121,13 +119,9 @@ type ProgressMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.progressmeter"
 
     override this.OnClose() =
-        options.HUD.Set
-            { options.HUD.Value with
-                ProgressMeterLabel = label.Value
-            }
-
         Noteskins.save_hud_config
             { Content.NoteskinConfig.HUD with
+                ProgressMeterLabel = label.Value
                 ProgressMeterColor = color.Value
                 ProgressMeterBackgroundColor = background_color.Value
                 ProgressMeterLabelSize = label_size.Value
