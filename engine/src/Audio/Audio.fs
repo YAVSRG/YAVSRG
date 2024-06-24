@@ -64,6 +64,7 @@ module Song =
 
     let mutable load_path: string option = None
     let mutable loading = false
+    let mutable private song_was_playing = false
 
     let mutable now_playing: Song = Song.Default
     let private timer = new Stopwatch()
@@ -156,31 +157,32 @@ module Song =
     let set_global_offset (offset) = _global_offset <- offset
 
     let private song_loader =
-        { new Async.SwitchService<string option * SongLoadAction * bool, Song * SongLoadAction * bool>() with
-            override this.Process((path, after_load, song_playing)) =
+        { new Async.SwitchService<string option * SongLoadAction, Song * SongLoadAction>() with
+            override this.Process((path, after_load)) =
                 async {
                     return
                         match path with
-                        | Some p -> Song.FromFile p, after_load, song_playing
-                        | None -> Song.Default, after_load, song_playing
+                        | Some p -> Song.FromFile p, after_load
+                        | None -> Song.Default, after_load
                 }
 
-            override this.Handle((song, after_load: SongLoadAction, song_playing: bool)) =
+            override this.Handle((song, after_load: SongLoadAction)) =
                 loading <- false
                 now_playing <- song
                 change_rate rate
 
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
-                    (if song_playing then play_from else seek) preview_point
+                    (if song_was_playing then play_from else seek) preview_point
                 | SongLoadAction.PlayFromBeginning ->
-                    (if song_playing then play_from else seek) 0.0f<ms>
+                    (if song_was_playing then play_from else seek) 0.0f<ms>
                 | SongLoadAction.Wait -> ()
+                song_was_playing <- false
         }
 
     let change (path: string option, offset: Time, new_rate: float32, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) =
-        let song_was_playing = playing() || load_path = None
         let path_changed = path <> load_path
+        if path_changed then song_was_playing <- song_was_playing || playing() || load_path = None
         load_path <- path
         preview_point <- preview
         last_note <- chart_last_note
@@ -198,7 +200,7 @@ module Song =
 
             channel_playing <- false
             loading <- true
-            song_loader.Request(path, after_load, song_was_playing)
+            song_loader.Request(path, after_load)
 
     let update () =
 
