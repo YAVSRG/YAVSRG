@@ -13,6 +13,7 @@ type Content() =
         Rulesets.init_window ()
         Themes.init_window ()
         Noteskins.init_window ()
+        HUDs.init_window ()
 
     static member deinit() = Data.deinit ()
 

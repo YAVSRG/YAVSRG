@@ -2,6 +2,8 @@
 
 open System.IO
 open System.IO.Compression
+open Percyqaz.Common
+open Prelude
 open Prelude.Skinning
 
 type HudLayout(storage) as this =
@@ -21,9 +23,7 @@ type HudLayout(storage) as this =
     override this.ReloadFromDisk() =
         base.ReloadFromDisk()
         config <-
-            match
-                this.TryGetJson<HudConfig>(true, "hud.json")
-            with
+            match this.TryGetJson<HudConfig>(true, "hud.json") with
             | Some data -> data // todo: data.Validate method
             | _ -> failwith "hud.json was missing or didn't load properly"
 
@@ -47,3 +47,23 @@ type HudLayout(storage) as this =
 
     // todo: make this a result return type instead of throwing exceptions
     static member FromPath(path: string) = new HudLayout(Folder path)
+
+    /// Call when no HUD loaded successfully
+    static member CreateDefault(path: string) : HudLayout =
+        if not (Directory.Exists path) then
+            Directory.CreateDirectory path |> ignore
+
+        let config = Path.Combine(path, "hud.json")
+        if File.Exists config then
+            match JSON.FromFile(config) with
+            | Ok data -> Logging.Warn(sprintf "CreateDefault should not have been called with a working HUD already at %s" path)
+            | Error _ -> 
+
+            Logging.Critical("Your default HUD's hud.json doesn't parse! Did you make a typo?\nIn future, use the ingame editor to avoid formatting mistakes.")
+            Logging.Critical("If you want to FULLY reset your HUD file to defaults, type 'reset' now, otherwise go and fix it and then relaunch the game.")
+
+            if System.Console.ReadLine().Trim().ToLower() <> "reset" then
+                failwith "User chose to crash the game so they can fix their HUD config"
+            
+        JSON.ToFile(config, true) HudConfig.Default
+        HudLayout.FromPath path
