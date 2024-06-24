@@ -64,12 +64,12 @@ module Song =
 
     let mutable load_path: string option = None
     let mutable loading = false
-    let mutable private song_was_playing = false
 
     let mutable now_playing: Song = Song.Default
     let private timer = new Stopwatch()
     let mutable private timer_start = 0.0f<ms>
     let mutable private channel_playing = false
+    let mutable private paused = false
     let mutable private rate = 1.0f
     let mutable _local_offset = 0.0f<ms>
     let mutable private _global_offset = 0.0f<ms>
@@ -105,6 +105,7 @@ module Song =
             channel_playing <- false
 
         timer.Restart()
+        paused <- false
 
     let play_leadin () = play_from (-LEADIN_TIME * rate)
 
@@ -132,6 +133,7 @@ module Song =
             Bass.ChannelPause now_playing.ID |> display_bass_error
 
         timer.Stop()
+        paused <- true
 
     let resume () =
         let time = time ()
@@ -140,6 +142,7 @@ module Song =
             Bass.ChannelPlay now_playing.ID |> display_bass_error
 
         timer.Start()
+        paused <- false
 
     let change_rate (new_rate) =
         let rate_changed = rate <> new_rate
@@ -173,16 +176,14 @@ module Song =
 
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
-                    (if song_was_playing then play_from else seek) preview_point
+                    (if paused then seek else play_from) preview_point
                 | SongLoadAction.PlayFromBeginning ->
-                    (if song_was_playing then play_from else seek) 0.0f<ms>
+                    (if paused then seek else play_from) 0.0f<ms>
                 | SongLoadAction.Wait -> ()
-                song_was_playing <- false
         }
 
     let change (path: string option, offset: Time, new_rate: float32, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) =
         let path_changed = path <> load_path
-        if path_changed then song_was_playing <- song_was_playing || playing() || load_path = None
         load_path <- path
         preview_point <- preview
         last_note <- chart_last_note
@@ -190,9 +191,6 @@ module Song =
         change_rate new_rate
 
         if path_changed then
-            if song_was_playing then
-                pause ()
-
             timer_start <- -infinityf * 1.0f<ms>
 
             if now_playing.ID <> 0 then
