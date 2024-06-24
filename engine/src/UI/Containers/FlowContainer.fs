@@ -290,9 +290,9 @@ module FlowContainer =
                     c.Position <-
                         {
                             Left = 1.0f %- (r + this.ItemSize)
-                            Top = Position.min
+                            Top = Position.MIN
                             Right = 1.0f %- r
-                            Bottom = Position.max
+                            Bottom = Position.MAX
                         }
 
                     l <- r + this.ItemSize

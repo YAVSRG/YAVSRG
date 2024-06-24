@@ -16,8 +16,8 @@ module PositionOperators =
     let (^-) (x, percentage) offset = (x - offset, percentage)
 
 module Position =
-    let min = 0.0f %+ 0.0f
-    let max = 1.0f %+ 0.0f
+    let MIN = 0.0f %+ 0.0f
+    let MAX = 1.0f %+ 0.0f
 
     let calculate (pos: Position) (bounds: Percyqaz.Flux.Graphics.Rect) =
         let inline c (offset, percent) min max : float32 = min + percent * (max - min) + offset
@@ -33,10 +33,10 @@ module Position =
 type Position with
     static member Default =
         {
-            Left = Position.min
-            Top = Position.min
-            Right = Position.max
-            Bottom = Position.max
+            Left = Position.MIN
+            Top = Position.MIN
+            Right = Position.MAX
+            Bottom = Position.MAX
         }
 
     member this.Margin(x, y) =
@@ -84,30 +84,6 @@ type Position with
     static member SliceTop amount = Position.Default.SliceTop amount
     static member SliceRight amount = Position.Default.SliceRight amount
     static member SliceBottom amount = Position.Default.SliceBottom amount
-
-    member this.CenterX width =
-        let (lefto, lefta) = this.Left
-        let (righto, righta) = this.Right
-        let center = (0.5f * (lefto + righto), 0.5f % (lefta + righta))
-        { this with
-            Left = center ^- (width * 0.5f)
-            Right = center ^+ (width * 0.5f)
-        }
-
-    member this.CenterY height =
-        let (topo, topa) = this.Top
-        let (bottomo, bottoma) = this.Bottom
-        let center = (0.5f * (topo + bottomo), 0.5f % (topa + bottoma))
-        { this with
-            Top = center ^- (height * 0.5f)
-            Bottom = center ^+ (height * 0.5f)
-        }
-
-    member this.Center (width, height) = this.CenterX(width).CenterY(height)
-    
-    static member CenterX width = Position.Default.CenterX width
-    static member CenterY height = Position.Default.CenterY height
-    static member Center (width, height) = Position.Default.Center (width, height)
 
     member this.TrimLeft amount =
         { this with Left = this.Left ^+ amount }
@@ -180,20 +156,44 @@ type Position with
     static member BorderBottomCorners amount =
         Position.Default.BorderBottomCorners amount
 
+    member this.CenterX width =
+        let (lefto, lefta) = this.Left
+        let (righto, righta) = this.Right
+        let center = (0.5f * (lefto + righto), 0.5f % (lefta + righta))
+        { this with
+            Left = center ^- (width * 0.5f)
+            Right = center ^+ (width * 0.5f)
+        }
+
+    member this.CenterY height =
+        let (topo, topa) = this.Top
+        let (bottomo, bottoma) = this.Bottom
+        let center = (0.5f * (topo + bottomo), 0.5f % (topa + bottoma))
+        { this with
+            Top = center ^- (height * 0.5f)
+            Bottom = center ^+ (height * 0.5f)
+        }
+
+    member this.Center (width, height) = this.CenterX(width).CenterY(height)
+    
+    static member CenterX width = Position.Default.CenterX width
+    static member CenterY height = Position.Default.CenterY height
+    static member Center (width, height) = Position.Default.Center (width, height)
+
     static member Row(y, height) =
         {
-            Left = Position.min
+            Left = Position.MIN
             Top = 0.0f %+ y
-            Right = Position.max
+            Right = Position.MAX
             Bottom = 0.0f %+ (y + height)
         }
 
     static member Column(x, width) =
         {
             Left = 0.0f %+ x
-            Top = Position.min
+            Top = Position.MIN
             Right = 0.0f %+ (x + width)
-            Bottom = Position.max
+            Bottom = Position.MAX
         }
 
     static member Grid(l, t, r, b) =

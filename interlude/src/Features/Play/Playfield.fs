@@ -129,9 +129,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         this.Position <-
             {
                 Left = screen_align_percentage %- (width * playfield_align_percentage)
-                Top = Position.min
+                Top = Position.MIN
                 Right = screen_align_percentage %+ (width * (1.0f - playfield_align_percentage))
-                Bottom = Position.max
+                Bottom = Position.MAX
             }
 
     member this.ColumnWidth = column_width
