@@ -18,7 +18,7 @@ type private TimingDisplayHit =
         Judgement: JudgementId option
     }
 
-type TimingDisplay(config: HUDConfig, state: PlayState) =
+type TimingDisplay(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let hits = ResizeArray<TimingDisplayHit>()
     let mutable w = 0.0f

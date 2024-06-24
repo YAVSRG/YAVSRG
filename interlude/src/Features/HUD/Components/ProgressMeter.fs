@@ -104,7 +104,7 @@ module ProgressMeter =
                 Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-type ProgressMeter(config: HUDConfig, state: PlayState) =
+type ProgressMeter(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let duration =

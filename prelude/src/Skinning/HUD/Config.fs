@@ -7,7 +7,7 @@ open Prelude.Gameplay
 open Prelude.Skinning
 
 [<RequireQualifiedAccess>]
-type HUDElement =
+type HudElement =
     | Accuracy
     | TimingDisplay
     | Combo
@@ -53,7 +53,7 @@ type TimingDisplayMovingAverageType =
     | ReplaceBars = 2
 
 [<Json.AutoCodec(false)>]
-type HUDPosition =
+type HudPosition =
     {
         RelativeToPlayfield: bool
         Left: float32 * float32
@@ -72,10 +72,10 @@ type BackgroundTextureOptions =
     }
 
 [<Json.AutoCodec(false)>]
-type HUDConfig =
+type HudConfig =
     {
         AccuracyEnabled: bool
-        AccuracyPosition: HUDPosition
+        AccuracyPosition: HudPosition
         AccuracyGradeColors: bool
         AccuracyShowName: bool
         AccuracyUseFont: bool
@@ -84,7 +84,7 @@ type HUDConfig =
         AccuracyPercentExtraSpacing: float32
 
         TimingDisplayEnabled: bool
-        TimingDisplayPosition: HUDPosition
+        TimingDisplayPosition: HudPosition
         TimingDisplayFadeTime: float32
         TimingDisplayThickness: float32
         TimingDisplayShowGuide: bool
@@ -97,7 +97,7 @@ type HUDConfig =
         TimingDisplayMovingAverageColor: Color
 
         ComboEnabled: bool
-        ComboPosition: HUDPosition
+        ComboPosition: HudPosition
         ComboLampColors: bool
         ComboGrowth: float32
         ComboPop: float32
@@ -105,11 +105,11 @@ type HUDConfig =
         ComboFontSpacing: float32
 
         SkipButtonEnabled: bool
-        SkipButtonPosition: HUDPosition
+        SkipButtonPosition: HudPosition
         SkipButtonBackground: BackgroundTextureOptions
 
         JudgementMeterEnabled: bool
-        JudgementMeterPosition: HUDPosition
+        JudgementMeterPosition: HudPosition
         JudgementMeterIgnorePerfect: bool
         JudgementMeterPrioritiseLower: bool
         JudgementMeterDuration: float32
@@ -119,7 +119,7 @@ type HUDConfig =
         JudgementMeterCustomDisplay: Map<int, JudgementDisplayType array>
 
         EarlyLateMeterEnabled: bool
-        EarlyLateMeterPosition: HUDPosition
+        EarlyLateMeterPosition: HudPosition
         EarlyLateMeterDuration: float32
         EarlyLateMeterUseTexture: bool
         EarlyLateMeterFrameTime: float32
@@ -129,7 +129,7 @@ type HUDConfig =
         EarlyLateMeterLateColor: Color
 
         ProgressMeterEnabled: bool
-        ProgressMeterPosition: HUDPosition
+        ProgressMeterPosition: HudPosition
         ProgressMeterLabel: ProgressMeterLabel
         ProgressMeterColor: Color
         ProgressMeterBackgroundColor: Color
@@ -139,10 +139,10 @@ type HUDConfig =
         ProgressMeterColonExtraSpacing: float32
         ProgressMeterPercentExtraSpacing: float32
 
-        PacemakerPosition: HUDPosition
+        PacemakerPosition: HudPosition
 
         JudgementCounterEnabled: bool
-        JudgementCounterPosition: HUDPosition
+        JudgementCounterPosition: HudPosition
         JudgementCounterFadeTime: float
         JudgementCounterShowRatio: bool
         JudgementCounterBackground: BackgroundTextureOptions
@@ -154,14 +154,14 @@ type HUDConfig =
         JudgementCounterCustomDisplay: Map<int, int option array>
 
         RateModMeterEnabled: bool
-        RateModMeterPosition: HUDPosition
+        RateModMeterPosition: HudPosition
         RateModMeterShowMods: bool
 
         BPMMeterEnabled: bool
-        BPMMeterPosition: HUDPosition
+        BPMMeterPosition: HudPosition
 
         InputMeterEnabled: bool
-        InputMeterPosition: HUDPosition
+        InputMeterPosition: HudPosition
         InputMeterScrollSpeed: float32
         InputMeterKeyColor: Color
         InputMeterKeyFadeTime: float32
@@ -170,7 +170,7 @@ type HUDConfig =
         InputMeterInputFadeDistance: float32
         InputMeterScrollDownwards: bool
 
-        MultiplayerScoreTrackerPosition: HUDPosition
+        MultiplayerScoreTrackerPosition: HudPosition
     }
     static member Default =
         {
@@ -396,11 +396,11 @@ type HUDConfig =
 
 type HudTextureRules =
     {
-        IsRequired: HUDConfig -> bool
-        MustBeSquare: HUDConfig -> bool
-        MaxGridSize: HUDConfig -> int * int
+        IsRequired: HudConfig -> bool
+        MustBeSquare: HudConfig -> bool
+        MaxGridSize: HudConfig -> int * int
     }
-    member this.Evaluate(config: HUDConfig) : TextureRules =
+    member this.Evaluate(config: HudConfig) : TextureRules =
         {
             IsRequired = this.IsRequired config
             MustBeSquare = this.MustBeSquare config
@@ -475,6 +475,6 @@ module HudTextureRules =
                 }
             ]
 
-    let get (config: HUDConfig) (name: string) = TEXTURES.[name].Evaluate config
+    let get (config: HudConfig) (name: string) = TEXTURES.[name].Evaluate config
 
     let list () : string seq = TEXTURES.Keys :> string seq

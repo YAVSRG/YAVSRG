@@ -10,7 +10,7 @@ open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Play
 
-type SkipButton(config: HUDConfig, state: PlayState) =
+type SkipButton(config: HudConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"

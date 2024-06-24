@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type EarlyLateMeter(config: HUDConfig, state: PlayState) =
+type EarlyLateMeter(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let duration = config.EarlyLateMeterDuration * SelectedChart.rate.Value * 1.0f<ms>
     let mutable early = false

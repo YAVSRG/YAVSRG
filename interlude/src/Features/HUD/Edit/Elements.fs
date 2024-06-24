@@ -9,70 +9,70 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
 
-module HUDElement =
+module HudElement =
 
-    let name (e: HUDElement) : string =
+    let name (e: HudElement) : string =
         match e with
-        | HUDElement.Accuracy -> %"hud.accuracy"
-        | HUDElement.TimingDisplay -> %"hud.timingdisplay"
-        | HUDElement.Combo -> %"hud.combo"
-        | HUDElement.SkipButton -> %"hud.skipbutton"
-        | HUDElement.JudgementMeter -> %"hud.judgementmeter"
-        | HUDElement.EarlyLateMeter -> %"hud.earlylatemeter"
-        | HUDElement.ProgressMeter -> %"hud.progressmeter"
-        | HUDElement.JudgementCounter -> %"hud.judgementcounter"
-        | HUDElement.RateModMeter -> %"hud.ratemodmeter"
-        | HUDElement.BPMMeter -> %"hud.bpmmeter"
-        | HUDElement.Pacemaker -> %"hud.pacemaker"
-        | HUDElement.InputMeter -> %"hud.inputmeter"
+        | HudElement.Accuracy -> %"hud.accuracy"
+        | HudElement.TimingDisplay -> %"hud.timingdisplay"
+        | HudElement.Combo -> %"hud.combo"
+        | HudElement.SkipButton -> %"hud.skipbutton"
+        | HudElement.JudgementMeter -> %"hud.judgementmeter"
+        | HudElement.EarlyLateMeter -> %"hud.earlylatemeter"
+        | HudElement.ProgressMeter -> %"hud.progressmeter"
+        | HudElement.JudgementCounter -> %"hud.judgementcounter"
+        | HudElement.RateModMeter -> %"hud.ratemodmeter"
+        | HudElement.BPMMeter -> %"hud.bpmmeter"
+        | HudElement.Pacemaker -> %"hud.pacemaker"
+        | HudElement.InputMeter -> %"hud.inputmeter"
 
-    let tooltip (e: HUDElement) : string =
+    let tooltip (e: HudElement) : string =
         match e with
-        | HUDElement.Accuracy -> %"hud.accuracy.tooltip"
-        | HUDElement.TimingDisplay -> %"hud.timingdisplay.tooltip"
-        | HUDElement.Combo -> %"hud.combo.tooltip"
-        | HUDElement.SkipButton -> %"hud.skipbutton.tooltip"
-        | HUDElement.JudgementMeter -> %"hud.judgementmeter.tooltip"
-        | HUDElement.EarlyLateMeter -> %"hud.earlylatemeter.tooltip"
-        | HUDElement.ProgressMeter -> %"hud.progressmeter.tooltip"
-        | HUDElement.JudgementCounter -> %"hud.judgementcounter.tooltip"
-        | HUDElement.RateModMeter -> %"hud.ratemodmeter.tooltip"
-        | HUDElement.BPMMeter -> %"hud.bpmmeter.tooltip"
-        | HUDElement.Pacemaker -> %"hud.pacemaker.tooltip"
-        | HUDElement.InputMeter -> %"hud.inputmeter.tooltip"
+        | HudElement.Accuracy -> %"hud.accuracy.tooltip"
+        | HudElement.TimingDisplay -> %"hud.timingdisplay.tooltip"
+        | HudElement.Combo -> %"hud.combo.tooltip"
+        | HudElement.SkipButton -> %"hud.skipbutton.tooltip"
+        | HudElement.JudgementMeter -> %"hud.judgementmeter.tooltip"
+        | HudElement.EarlyLateMeter -> %"hud.earlylatemeter.tooltip"
+        | HudElement.ProgressMeter -> %"hud.progressmeter.tooltip"
+        | HudElement.JudgementCounter -> %"hud.judgementcounter.tooltip"
+        | HudElement.RateModMeter -> %"hud.ratemodmeter.tooltip"
+        | HudElement.BPMMeter -> %"hud.bpmmeter.tooltip"
+        | HudElement.Pacemaker -> %"hud.pacemaker.tooltip"
+        | HudElement.InputMeter -> %"hud.inputmeter.tooltip"
 
-    let can_configure (e: HUDElement) =
+    let can_configure (e: HudElement) =
         match e with
-        | HUDElement.SkipButton -> not Content.Noteskin.IsEmbedded
-        | HUDElement.BPMMeter -> false
-        | HUDElement.Pacemaker -> false
+        | HudElement.SkipButton -> not Content.Noteskin.IsEmbedded
+        | HudElement.BPMMeter -> false
+        | HudElement.Pacemaker -> false
         | _ -> true
     
-    let can_toggle (e: HUDElement) =
+    let can_toggle (e: HudElement) =
         match e with
-        | HUDElement.Pacemaker -> false
+        | HudElement.Pacemaker -> false
         | _ -> true
 
-    let constructor (e: HUDElement) : HUDConfig * PlayState -> Widget =
+    let constructor (e: HudElement) : HudConfig * PlayState -> Widget =
         let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
 
         match e with
-        | HUDElement.Accuracy -> cast Accuracy
-        | HUDElement.TimingDisplay -> cast TimingDisplay
-        | HUDElement.Combo -> cast Combo
-        | HUDElement.SkipButton -> cast SkipButton
-        | HUDElement.JudgementMeter -> cast JudgementMeter
-        | HUDElement.EarlyLateMeter -> cast EarlyLateMeter
-        | HUDElement.ProgressMeter -> cast ProgressMeter
-        | HUDElement.JudgementCounter -> cast JudgementCounter
-        | HUDElement.RateModMeter -> cast RateModMeter
-        | HUDElement.BPMMeter -> cast BPMMeter
-        | HUDElement.Pacemaker -> cast Pacemaker
-        | HUDElement.InputMeter -> cast InputMeter
+        | HudElement.Accuracy -> cast Accuracy
+        | HudElement.TimingDisplay -> cast TimingDisplay
+        | HudElement.Combo -> cast Combo
+        | HudElement.SkipButton -> cast SkipButton
+        | HudElement.JudgementMeter -> cast JudgementMeter
+        | HudElement.EarlyLateMeter -> cast EarlyLateMeter
+        | HudElement.ProgressMeter -> cast ProgressMeter
+        | HudElement.JudgementCounter -> cast JudgementCounter
+        | HudElement.RateModMeter -> cast RateModMeter
+        | HudElement.BPMMeter -> cast BPMMeter
+        | HudElement.Pacemaker -> cast Pacemaker
+        | HudElement.InputMeter -> cast InputMeter
 
-    let enabled_setting (e: HUDElement) : Setting<bool> =
+    let enabled_setting (e: HudElement) : Setting<bool> =
         match e with
-        | HUDElement.Accuracy ->
+        | HudElement.Accuracy ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -81,7 +81,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.AccuracyEnabled)
-        | HUDElement.TimingDisplay ->
+        | HudElement.TimingDisplay ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -90,7 +90,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.TimingDisplayEnabled)
-        | HUDElement.Combo ->
+        | HudElement.Combo ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -99,7 +99,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.ComboEnabled)
-        | HUDElement.SkipButton ->
+        | HudElement.SkipButton ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -108,7 +108,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.SkipButtonEnabled)
-        | HUDElement.JudgementMeter ->
+        | HudElement.JudgementMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -117,7 +117,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.JudgementMeterEnabled)
-        | HUDElement.EarlyLateMeter ->
+        | HudElement.EarlyLateMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -126,7 +126,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.EarlyLateMeterEnabled)
-        | HUDElement.ProgressMeter ->
+        | HudElement.ProgressMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -135,7 +135,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.ProgressMeterEnabled)
-        | HUDElement.JudgementCounter ->
+        | HudElement.JudgementCounter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -144,7 +144,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.JudgementCounterEnabled)
-        | HUDElement.RateModMeter ->
+        | HudElement.RateModMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -153,7 +153,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.RateModMeterEnabled)
-        | HUDElement.BPMMeter ->
+        | HudElement.BPMMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -162,7 +162,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.BPMMeterEnabled)
-        | HUDElement.InputMeter ->
+        | HudElement.InputMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -171,12 +171,12 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.InputMeterEnabled)
-        | HUDElement.Pacemaker -> // pacemaker cannot be toggled by the user like a setting, it is on depending on gameplay state
+        | HudElement.Pacemaker -> // pacemaker cannot be toggled by the user like a setting, it is on depending on gameplay state
             Setting.make (fun _ -> ()) (fun () -> true)
 
-    let position_setting (e: HUDElement) : Setting<HUDPosition> =
+    let position_setting (e: HudElement) : Setting<HudPosition> =
         match e with
-        | HUDElement.Accuracy ->
+        | HudElement.Accuracy ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -185,7 +185,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.AccuracyPosition)
-        | HUDElement.TimingDisplay ->
+        | HudElement.TimingDisplay ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -194,7 +194,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.TimingDisplayPosition)
-        | HUDElement.Combo ->
+        | HudElement.Combo ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -203,7 +203,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.ComboPosition)
-        | HUDElement.SkipButton ->
+        | HudElement.SkipButton ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -212,7 +212,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.SkipButtonPosition)
-        | HUDElement.JudgementMeter ->
+        | HudElement.JudgementMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -221,7 +221,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.JudgementMeterPosition)
-        | HUDElement.EarlyLateMeter ->
+        | HudElement.EarlyLateMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -230,7 +230,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.EarlyLateMeterPosition)
-        | HUDElement.ProgressMeter ->
+        | HudElement.ProgressMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -239,7 +239,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.ProgressMeterPosition)
-        | HUDElement.JudgementCounter ->
+        | HudElement.JudgementCounter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -248,7 +248,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.JudgementCounterPosition)
-        | HUDElement.RateModMeter ->
+        | HudElement.RateModMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -257,7 +257,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.RateModMeterPosition)
-        | HUDElement.BPMMeter ->
+        | HudElement.BPMMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -266,7 +266,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.BPMMeterPosition)
-        | HUDElement.InputMeter ->
+        | HudElement.InputMeter ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -275,7 +275,7 @@ module HUDElement =
                         }
                 )
                 (fun () -> Content.NoteskinConfig.HUD.InputMeterPosition)
-        | HUDElement.Pacemaker ->
+        | HudElement.Pacemaker ->
             Setting.make
                 (fun v ->
                     Noteskins.save_hud_config
@@ -285,34 +285,34 @@ module HUDElement =
                 )
                 (fun () -> Content.NoteskinConfig.HUD.PacemakerPosition)
 
-    let default_position (e: HUDElement) : HUDPosition =
-        let all_defaults = HUDConfig.Default
+    let default_position (e: HudElement) : HudPosition =
+        let all_defaults = HudConfig.Default
 
         match e with
-        | HUDElement.Accuracy -> all_defaults.AccuracyPosition
-        | HUDElement.TimingDisplay -> all_defaults.TimingDisplayPosition
-        | HUDElement.Combo -> all_defaults.ComboPosition
-        | HUDElement.SkipButton -> all_defaults.SkipButtonPosition
-        | HUDElement.JudgementMeter -> all_defaults.JudgementMeterPosition
-        | HUDElement.EarlyLateMeter -> all_defaults.EarlyLateMeterPosition
-        | HUDElement.ProgressMeter -> all_defaults.ProgressMeterPosition
-        | HUDElement.JudgementCounter -> all_defaults.JudgementCounterPosition
-        | HUDElement.RateModMeter -> all_defaults.RateModMeterPosition
-        | HUDElement.BPMMeter -> all_defaults.BPMMeterPosition
-        | HUDElement.InputMeter -> all_defaults.InputMeterPosition
-        | HUDElement.Pacemaker -> all_defaults.PacemakerPosition
+        | HudElement.Accuracy -> all_defaults.AccuracyPosition
+        | HudElement.TimingDisplay -> all_defaults.TimingDisplayPosition
+        | HudElement.Combo -> all_defaults.ComboPosition
+        | HudElement.SkipButton -> all_defaults.SkipButtonPosition
+        | HudElement.JudgementMeter -> all_defaults.JudgementMeterPosition
+        | HudElement.EarlyLateMeter -> all_defaults.EarlyLateMeterPosition
+        | HudElement.ProgressMeter -> all_defaults.ProgressMeterPosition
+        | HudElement.JudgementCounter -> all_defaults.JudgementCounterPosition
+        | HudElement.RateModMeter -> all_defaults.RateModMeterPosition
+        | HudElement.BPMMeter -> all_defaults.BPMMeterPosition
+        | HudElement.InputMeter -> all_defaults.InputMeterPosition
+        | HudElement.Pacemaker -> all_defaults.PacemakerPosition
 
-    let show_menu (e: HUDElement) (on_close: unit -> unit) =
+    let show_menu (e: HudElement) (on_close: unit -> unit) =
         match e with
-        | HUDElement.Accuracy -> AccuracyPage(on_close).Show()
-        | HUDElement.TimingDisplay -> TimingDisplayPage(on_close).Show()
-        | HUDElement.Combo -> ComboPage(on_close).Show()
-        | HUDElement.SkipButton -> SkipButtonPage(on_close).Show()
-        | HUDElement.JudgementMeter -> JudgementMeterPage(on_close).Show()
-        | HUDElement.EarlyLateMeter -> EarlyLateMeterPage(on_close).Show()
-        | HUDElement.ProgressMeter -> ProgressMeterPage(on_close).Show()
-        | HUDElement.JudgementCounter -> JudgementCounterPage(on_close).Show()
-        | HUDElement.RateModMeter -> RateModMeterPage(on_close).Show()
-        | HUDElement.BPMMeter -> BPMMeterPage(on_close).Show()
-        | HUDElement.InputMeter -> InputMeterPage(on_close).Show()
-        | HUDElement.Pacemaker -> PacemakerPage(on_close).Show()
+        | HudElement.Accuracy -> AccuracyPage(on_close).Show()
+        | HudElement.TimingDisplay -> TimingDisplayPage(on_close).Show()
+        | HudElement.Combo -> ComboPage(on_close).Show()
+        | HudElement.SkipButton -> SkipButtonPage(on_close).Show()
+        | HudElement.JudgementMeter -> JudgementMeterPage(on_close).Show()
+        | HudElement.EarlyLateMeter -> EarlyLateMeterPage(on_close).Show()
+        | HudElement.ProgressMeter -> ProgressMeterPage(on_close).Show()
+        | HudElement.JudgementCounter -> JudgementCounterPage(on_close).Show()
+        | HudElement.RateModMeter -> RateModMeterPage(on_close).Show()
+        | HudElement.BPMMeter -> BPMMeterPage(on_close).Show()
+        | HudElement.InputMeter -> InputMeterPage(on_close).Show()
+        | HudElement.Pacemaker -> PacemakerPage(on_close).Show()

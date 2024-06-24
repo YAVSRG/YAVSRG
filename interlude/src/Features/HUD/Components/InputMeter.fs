@@ -9,14 +9,14 @@ open Prelude.Skinning.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type InputMeter(config: HUDConfig, state: PlayState, should_show_inputs: unit -> bool) =
+type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit -> bool) =
     inherit StaticWidget(NodeType.None)
 
     let fades = Array.init state.Chart.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime |> max 0.5))
 
     let SCROLL_SPEED = config.InputMeterScrollSpeed * 1.0f</ms> / SelectedChart.rate.Value
 
-    new(config: HUDConfig, state: PlayState) = InputMeter(config, state, K true)
+    new(config: HudConfig, state: PlayState) = InputMeter(config, state, K true)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

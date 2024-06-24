@@ -7,7 +7,7 @@ open Prelude.Skinning
 type HudLayout(storage) as this =
     inherit Storage(storage)
 
-    let mutable config: HUDConfig = HUDConfig.Default
+    let mutable config: HudConfig = HudConfig.Default
 
     do
         this.ReloadFromDisk()
@@ -22,7 +22,7 @@ type HudLayout(storage) as this =
         base.ReloadFromDisk()
         config <-
             match
-                this.TryGetJson<HUDConfig>(true, "hud.json")
+                this.TryGetJson<HudConfig>(true, "hud.json")
             with
             | Some data -> data // todo: data.Validate method
             | _ -> failwith "hud.json was missing or didn't load properly"

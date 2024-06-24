@@ -45,7 +45,7 @@ module Noteskins =
                     (fun () -> Skins.OsuSkinsListPage().Show())
                 )
 
-            if token_match tokens [|%"hud"|] || token_match tokens (HUDElement.FULL_LIST |> Seq.map HUDElement.name |> Array.ofSeq) then
+            if token_match tokens [|%"hud"|] || token_match tokens (HudElement.FULL_LIST |> Seq.map HudElement.name |> Array.ofSeq) then
                 yield PageButton(
                     %"hud",
                     (fun () ->

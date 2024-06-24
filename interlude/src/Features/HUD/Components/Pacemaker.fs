@@ -10,7 +10,7 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Pacemaker
 
-type Pacemaker(config: HUDConfig, state: PlayState) =
+type Pacemaker(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let color = Animation.Color(Color.White)

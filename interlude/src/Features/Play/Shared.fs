@@ -123,9 +123,9 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit) =
 module Utils =
 
     let inline add_widget
-        (screen: Screen, playfield: Playfield, state: PlayState, config: HUDConfig)
-        (pos: HUDPosition)
-        (constructor: HUDConfig * PlayState -> #Widget)
+        (screen: Screen, playfield: Playfield, state: PlayState, config: HudConfig)
+        (pos: HudPosition)
+        (constructor: HudConfig * PlayState -> #Widget)
         =
             let w = constructor (config, state)
 

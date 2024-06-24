@@ -116,7 +116,7 @@ module Noteskins =
         if not current.IsEmbedded then
             current.Config <- new_config
 
-    let save_hud_config (new_hud: HUDConfig) =
+    let save_hud_config (new_hud: HudConfig) =
         current.Config <- { current.Config with HUD = new_hud }
 
     let reload_current () =

@@ -30,7 +30,7 @@ module Shared =
         else items
 
 [<AbstractClass>]
-type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
+type ConfigPreview(scale: float32, config: Setting<HudPosition>) =
     inherit NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE scale)
 
     let keycount = int (SelectedChart.keymode ())
@@ -140,7 +140,7 @@ type ConfigPreview(scale: float32, config: Setting<HUDPosition>) =
     abstract member DrawComponent: Rect -> unit
 
 [<AbstractClass>]
-type ConfigPreviewNew(position: HUDPosition) =
+type ConfigPreviewNew(position: HudPosition) =
     inherit StaticWidget(NodeType.None)
 
     let keycount = int (SelectedChart.keymode ())

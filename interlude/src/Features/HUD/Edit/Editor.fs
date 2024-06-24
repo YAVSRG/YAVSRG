@@ -54,7 +54,7 @@ type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> uni
             else
                 Draw.rect this.Bounds Colors.white.O1
 
-type Positioner(elem: HUDElement, ctx: PositionerContext) =
+type Positioner(elem: HudElement, ctx: PositionerContext) =
     inherit Container(NodeType.FocusTrap)
 
     let round (offset: float32, anchor: float32) =
@@ -73,9 +73,9 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
     let SMALL_RIGHT = (%%"right").WithModifiers(false, false, true)
 
     let child =
-        HUDElement.constructor elem (Content.NoteskinConfig.HUD, ctx.State)
+        HudElement.constructor elem (Content.NoteskinConfig.HUD, ctx.State)
 
-    let position = HUDElement.position_setting elem
+    let position = HudElement.position_setting elem
 
     let mutable new_unsaved_pos: Position = Position.Default
 
@@ -428,8 +428,8 @@ type Positioner(elem: HUDElement, ctx: PositionerContext) =
             if hover && Mouse.left_click () then
                 dragging_from <- Some(Mouse.pos ())
                 this.Select true
-            elif hover && Mouse.right_click () && HUDElement.can_configure elem then
-                HUDElement.show_menu elem (fun () -> ctx.Create elem)
+            elif hover && Mouse.right_click () && HudElement.can_configure elem then
+                HudElement.show_menu elem (fun () -> ctx.Create elem)
 
         base.Update(elapsed_ms, moved)
 
@@ -499,20 +499,20 @@ and PositionerContext =
         Screen: Container
         Playfield: Playfield
         State: PlayState
-        mutable Selected: HUDElement
-        mutable Positioners: Map<HUDElement, Positioner>
+        mutable Selected: HudElement
+        mutable Positioners: Map<HudElement, Positioner>
     }
-    member this.Create(e: HUDElement) =
+    member this.Create(e: HudElement) =
         match this.Positioners.TryFind e with
         | Some existing -> (this.Playfield.Remove existing || this.Screen.Remove existing) |> ignore
         | None -> ()
 
         Selection.clear ()
-        let enabled = HUDElement.enabled_setting e
+        let enabled = HudElement.enabled_setting e
 
         if enabled.Value then
 
-            let setting = HUDElement.position_setting e
+            let setting = HudElement.position_setting e
 
             let p = Positioner(e, this)
             let pos = setting.Value
@@ -535,7 +535,7 @@ and PositionerContext =
             if this.Selected = e then
                 if p.Initialised then p.Focus true else defer(fun () -> p.Focus true)
 
-    member this.Select(e: HUDElement) =
+    member this.Select(e: HudElement) =
         if this.Selected <> e then
             match this.Positioners.TryFind this.Selected with
             | Some _ -> Selection.clear()
@@ -548,7 +548,7 @@ and PositionerContext =
     member this.ChangePositionRelative(to_playfield: bool, anchor: float32) =
         match this.Positioners.TryFind this.Selected with
         | Some p ->
-            let setting = HUDElement.position_setting this.Selected
+            let setting = HudElement.position_setting this.Selected
             let current = setting.Value
 
             let bounds = p.Bounds
@@ -611,33 +611,33 @@ type PositionerInfo(ctx: PositionerContext) =
     override this.Init(parent) =
         NavigationContainer.Row()
         |+ Button(
-            (fun () -> HUDElement.name ctx.Selected),
+            (fun () -> HudElement.name ctx.Selected),
             this.ToggleElementDropdown,
             Hotkey = "context_menu",
             Position = Position.SliceLeft(400.0f).Margin(20.0f, 5.0f)
         )
         |+ Button(
-            (fun () -> if (HUDElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE else Icons.CIRCLE),
+            (fun () -> if (HudElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE else Icons.CIRCLE),
             (fun () ->
-                Setting.app not (HUDElement.enabled_setting ctx.Selected)
+                Setting.app not (HudElement.enabled_setting ctx.Selected)
                 defer (fun () -> ctx.Create ctx.Selected)
             ),
-            Disabled = (fun () -> HUDElement.can_toggle ctx.Selected |> not),
+            Disabled = (fun () -> HudElement.can_toggle ctx.Selected |> not),
             Position = Position.Column(400.0f, 100.0f).Margin(10.0f, 5.0f)
         )
         |+ Button(
             Icons.REFRESH_CW,
             (fun () ->
-                HUDElement.position_setting(ctx.Selected).Set(HUDElement.default_position ctx.Selected)
+                HudElement.position_setting(ctx.Selected).Set(HudElement.default_position ctx.Selected)
                 defer (fun () -> ctx.Create ctx.Selected)
             ),
             Position = Position.Column(500.0f, 100.0f).Margin(10.0f, 5.0f)
         )
         |+ Button(
             Icons.SETTINGS,
-            (fun () -> HUDElement.show_menu ctx.Selected (fun () -> ctx.Create ctx.Selected)),
+            (fun () -> HudElement.show_menu ctx.Selected (fun () -> ctx.Create ctx.Selected)),
             Hotkey = "options",
-            Disabled = (fun () -> HUDElement.can_configure ctx.Selected |> not),
+            Disabled = (fun () -> HudElement.can_configure ctx.Selected |> not),
             Position = Position.Column(600.0f, 100.0f).Margin(10.0f, 5.0f)
         )
         |+ Button(
@@ -656,7 +656,7 @@ type PositionerInfo(ctx: PositionerContext) =
         dropdown_wrapper.Toggle(fun () ->
             Dropdown
                 {
-                    Items = HUDElement.FULL_LIST |> List.map (fun e -> e, HUDElement.name e)
+                    Items = HudElement.FULL_LIST |> List.map (fun e -> e, HudElement.name e)
                     ColorFunc = K Colors.text
                     Setting =
                         Setting.make
@@ -734,11 +734,11 @@ module HUDEditor =
                         Screen = Container(NodeType.None)
                         Playfield = this.Playfield
                         State = this.State
-                        Selected = HUDElement.Accuracy
+                        Selected = HudElement.Accuracy
                         Positioners = Map.empty
                     }
 
-                HUDElement.FULL_LIST
+                HudElement.FULL_LIST
                 |> Seq.iter ctx.Create
 
                 this 

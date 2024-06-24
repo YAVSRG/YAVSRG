@@ -7,7 +7,7 @@ open Prelude.Skinning.HudLayouts
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type BPMMeter(config: HUDConfig, state: PlayState) =
+type BPMMeter(config: HudConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
     let first_note = state.WithColors.FirstNote

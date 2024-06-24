@@ -744,7 +744,7 @@ module OsuSkinConverter =
                 ReceptorStyle = if key_receptors then ReceptorStyle.Flip else ReceptorStyle.Rotate
 
                 HUD = 
-                    { HUDConfig.Default with
+                    { HudConfig.Default with
                         JudgementMeterFrameTime = 16.7f
                         JudgementMeterUseTexture = judgement_textures
                         JudgementMeterCustomDisplay =
