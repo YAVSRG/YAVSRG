@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+﻿namespace Interlude.Features.HUD.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio

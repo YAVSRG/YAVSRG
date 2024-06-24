@@ -148,7 +148,7 @@
     <Compile Include="Features\Play\Practice\Practice.fs" />
     <Compile Include="Features\Noteskins\Thumbnails.fs" />
     <Compile Include="Features\Noteskins\Preview.fs" />
-    <Compile Include="Features\Noteskins\Edit\Shared.fs" />
+    <Compile Include="Features\HUD\Edit\Shared.fs" />
     <Compile Include="Features\HUD\Edit\ConfigPages\Accuracy.fs" />
     <Compile Include="Features\HUD\Edit\ConfigPages\TimingDisplay.fs" />
     <Compile Include="Features\HUD\Edit\ConfigPages\JudgementMeter.fs" />
@@ -163,7 +163,6 @@
     <Compile Include="Features\HUD\Edit\ConfigPages\InputMeter.fs" />
     <Compile Include="Features\HUD\Edit\Elements.fs" />
     <Compile Include="Features\HUD\Edit\Editor.fs" />
-    <Compile Include="Features\HUD\Edit\HUD.fs" />
     <Compile Include="Features\Noteskins\Edit\Playfield.fs" />
     <Compile Include="Features\Noteskins\Edit\HoldNotes.fs" />
     <Compile Include="Features\Noteskins\Edit\Colors.fs" />

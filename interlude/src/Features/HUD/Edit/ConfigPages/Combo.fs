@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+﻿namespace Interlude.Features.HUD.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -39,21 +39,19 @@ type ComboPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.combo.lampcolors", Checkbox lamp_colors)
             .Tooltip(Tooltip.Info("hud.combo.lampcolors"))
             .Pos(0)
-        |+ ([
-            PageSetting(%"hud.combo.pop", Slider(pop_amount, Step = 1f))
-                .Tooltip(Tooltip.Info("hud.combo.pop"))
-                .Pos(2)
-            PageSetting(%"hud.combo.growth", Slider(growth_amount))
-                .Tooltip(Tooltip.Info("hud.combo.growth"))
-                .Pos(4)
-            PageSetting(%"hud.generic.use_font", Checkbox use_font)
-                .Tooltip(Tooltip.Info("hud.generic.use_font"))
-                .Pos(7)
-            PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
-                .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
-                .Pos(9)
-                .Conditional(use_font.Get)
-        ] |> or_require_noteskin)
+        |+ PageSetting(%"hud.combo.pop", Slider(pop_amount, Step = 1f))
+            .Tooltip(Tooltip.Info("hud.combo.pop"))
+            .Pos(2)
+        |+ PageSetting(%"hud.combo.growth", Slider(growth_amount))
+            .Tooltip(Tooltip.Info("hud.combo.growth"))
+            .Pos(4)
+        |+ PageSetting(%"hud.generic.use_font", Checkbox use_font)
+            .Tooltip(Tooltip.Info("hud.generic.use_font"))
+            .Pos(7)
+        |+ PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
+            .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+            .Pos(9)
+            .Conditional(use_font.Get)
         |>> Container
         |+ preview
         :> Widget

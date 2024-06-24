@@ -94,20 +94,6 @@ type EditNoteskinPage(from_hotkey: bool) =
             )
                 .Tooltip(Tooltip.Info("noteskins.animations"))
                 .Pos(14)
-            |+ PageButton(
-                %"hud",
-                fun () ->
-                    if
-                        SelectedChart.WITH_COLORS.IsSome
-                        && Screen.change_new
-                            (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> EditNoteskinPage(true).Show()))
-                            Screen.Type.Practice
-                            Transitions.Default
-                    then
-                        Menu.Exit()
-            )
-                .Tooltip(Tooltip.Info("hud"))
-                .Pos(16)
 
         let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 

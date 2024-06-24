@@ -1,4 +1,4 @@
-namespace Interlude.Features.Noteskins.Edit
+namespace Interlude.Features.HUD.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -24,22 +24,21 @@ type InputMeterPage(on_close: unit -> unit) =
         page_container()
         |+ PageSetting(%"hud.inputmeter.scroll_speed", Slider.Percent scroll_speed)
             .Pos(0)
-        |+ ([
-            PageSetting(%"hud.inputmeter.key_fade_time", Slider(key_fade_time, Step = 5f))
+        |+ PageSetting(%"hud.inputmeter.key_fade_time", Slider(key_fade_time, Step = 5f))
                 .Pos(2)
-            PageSetting(%"hud.inputmeter.key_color", ColorPicker(key_color, false))
-                .Pos(4, 3)
-            PageSetting(%"hud.inputmeter.scroll_downwards", Checkbox scroll_downwards)
-                .Pos(7)
-            PageSetting(%"hud.inputmeter.show_inputs", Checkbox show_inputs)
-                .Pos(9)
-            PageSetting(%"hud.inputmeter.input_color", ColorPicker(input_color, true))
-                .Pos(11, 3)
-                .Conditional(show_inputs.Get)
-            PageSetting(%"hud.inputmeter.input_fade_distance", Slider(input_fade_distance, Step = 5f))
-                .Pos(14)
-                .Conditional(show_inputs.Get)
-        ] |> or_require_noteskin)
+        |+ PageSetting(%"hud.inputmeter.key_color", ColorPicker(key_color, false))
+            .Pos(4, 3)
+        |+ PageSetting(%"hud.inputmeter.scroll_downwards", Checkbox scroll_downwards)
+            .Pos(7)
+        |+ PageSetting(%"hud.inputmeter.show_inputs", Checkbox show_inputs)
+            .Pos(9)
+        |+ PageSetting(%"hud.inputmeter.input_color", ColorPicker(input_color, true))
+            .Pos(11, 3)
+            .Conditional(show_inputs.Get)
+        |+ PageSetting(%"hud.inputmeter.input_fade_distance", Slider(input_fade_distance, Step = 5f))
+            .Pos(14)
+            .Conditional(show_inputs.Get)
+        
         :> Widget
 
     override this.Title = %"hud.inputmeter"

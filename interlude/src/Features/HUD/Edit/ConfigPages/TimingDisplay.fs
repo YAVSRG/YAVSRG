@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+﻿namespace Interlude.Features.HUD.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -89,13 +89,10 @@ type TimingDisplayPage(on_close: unit -> unit) =
             .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_sensitivity"))
             .Pos(16)
             .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
-        |+ ([
-            PageSetting(%"hud.timingdisplay.moving_average_color", ColorPicker(moving_average_color, true))
-                .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_color"))
-                .Pos(18, 3)
-                .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
-            :> Widget
-        ] |> or_require_noteskin)
+        |+ PageSetting(%"hud.timingdisplay.moving_average_color", ColorPicker(moving_average_color, true))
+            .Tooltip(Tooltip.Info("hud.timingdisplay.moving_average_color"))
+            .Pos(18, 3)
+            .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
         |>> Container
         |+ preview
         :> Widget

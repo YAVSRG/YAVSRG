@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+﻿namespace Interlude.Features.HUD.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -51,23 +51,21 @@ type AccuracyPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.accuracy.showname", Checkbox show_name)
             .Tooltip(Tooltip.Info("hud.accuracy.showname"))
             .Pos(2)
-        |+ ([
-            PageSetting(%"hud.generic.use_font", Checkbox use_font)
-                .Tooltip(Tooltip.Info("hud.generic.use_font"))
-                .Pos(7)
-            PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
-                .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
-                .Pos(9)
-                .Conditional(use_font.Get)
-            PageSetting(%"hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
-                .Tooltip(Tooltip.Info("hud.generic.dot_spacing"))
-                .Pos(11)
-                .Conditional(use_font.Get)
-            PageSetting(%"hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
-                .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
-                .Pos(13)
-                .Conditional(use_font.Get)
-        ] |> or_require_noteskin)
+        |+ PageSetting(%"hud.generic.use_font", Checkbox use_font)
+            .Tooltip(Tooltip.Info("hud.generic.use_font"))
+            .Pos(7)
+        |+ PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
+            .Tooltip(Tooltip.Info("hud.generic.font_spacing"))
+            .Pos(9)
+            .Conditional(use_font.Get)
+        |+ PageSetting(%"hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
+            .Tooltip(Tooltip.Info("hud.generic.dot_spacing"))
+            .Pos(11)
+            .Conditional(use_font.Get)
+        |+ PageSetting(%"hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
+            .Tooltip(Tooltip.Info("hud.generic.percent_spacing"))
+            .Pos(13)
+            .Conditional(use_font.Get)
         |>> Container
         |+ preview
         :> Widget

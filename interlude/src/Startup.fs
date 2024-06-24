@@ -14,8 +14,6 @@ open Interlude.Features.Multiplayer
 open Interlude.Features.Printerlude
 open Interlude.Features.Toolbar
 open Interlude.Features.Online
-open Interlude.Features.Noteskins.Edit
-open Interlude.Features.Noteskins
 
 module Startup =
     let MIGRATION_VERSION = 2
@@ -58,9 +56,6 @@ module Startup =
 
         Gameplay.watch_replay <- LevelSelect.watch_replay
         Gameplay.continue_endless_mode <- Suggestions.continue_endless_mode
-
-        choose_noteskins <-
-            fun () -> SelectNoteskinsPage().Show()
 
         Updates.check_for_updates ()
 

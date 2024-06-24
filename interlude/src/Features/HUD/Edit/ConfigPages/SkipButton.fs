@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+﻿namespace Interlude.Features.HUD.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -29,23 +29,21 @@ type SkipButtonPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ ([
-            PageSetting(%"hud.skipbutton.usebackground", Checkbox use_background)
-                .Tooltip(Tooltip.Info("hud.skipbutton.usebackground"))
-                .Pos(0)
-            PageSetting(%"hud.skipbutton.backgroundscale", Slider.Percent(background_scale))
-                .Tooltip(Tooltip.Info("hud.skipbutton.backgroundscale"))
-                .Pos(2)
-                .Conditional(use_background.Get)
-            PageSetting(%"hud.skipbutton.background_offset_x", Slider.Percent(background_offset_x))
-                .Tooltip(Tooltip.Info("hud.skipbutton.background_offset_x"))
-                .Pos(4)
-                .Conditional(use_background.Get)
-            PageSetting(%"hud.skipbutton.background_offset_y", Slider.Percent(background_offset_y))
-                .Tooltip(Tooltip.Info("hud.skipbutton.background_offset_y"))
-                .Pos(6)
-                .Conditional(use_background.Get)
-        ] |> or_require_noteskin)
+        |+ PageSetting(%"hud.skipbutton.usebackground", Checkbox use_background)
+            .Tooltip(Tooltip.Info("hud.skipbutton.usebackground"))
+            .Pos(0)
+        |+ PageSetting(%"hud.skipbutton.backgroundscale", Slider.Percent(background_scale))
+            .Tooltip(Tooltip.Info("hud.skipbutton.backgroundscale"))
+            .Pos(2)
+            .Conditional(use_background.Get)
+        |+ PageSetting(%"hud.skipbutton.background_offset_x", Slider.Percent(background_offset_x))
+            .Tooltip(Tooltip.Info("hud.skipbutton.background_offset_x"))
+            .Pos(4)
+            .Conditional(use_background.Get)
+        |+ PageSetting(%"hud.skipbutton.background_offset_y", Slider.Percent(background_offset_y))
+            .Tooltip(Tooltip.Info("hud.skipbutton.background_offset_y"))
+            .Pos(6)
+            .Conditional(use_background.Get)
         |>> Container
         |+ preview
         :> Widget

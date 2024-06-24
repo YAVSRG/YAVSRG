@@ -11,6 +11,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Stats
+open Interlude.Features.HUD.Edit
 open Interlude.Features.Noteskins
 open Interlude.Features.Noteskins.Edit
 open Interlude.Features.Gameplay
@@ -38,9 +39,7 @@ type OptionsMenuPage() =
             sprintf "%s %s" Icons.ZAP (%"hud"),
             0.0f,
             (fun () -> 
-                if Content.Noteskin.IsEmbedded then
-                    EditHUDPage().Show()
-                elif
+                if
                     SelectedChart.WITH_COLORS.IsSome
                     && Screen.change_new
                         (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> OptionsMenuPage.Show()))

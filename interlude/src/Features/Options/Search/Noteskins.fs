@@ -5,6 +5,7 @@ open Prelude.Skinning.HudLayouts
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
+open Interlude.Features.HUD.Edit
 open Interlude.Features.Noteskins.Edit
 open Interlude.Features.Noteskins.Browser
 open Interlude.Features.Noteskins
@@ -49,9 +50,7 @@ module Noteskins =
                 yield PageButton(
                     %"hud",
                     (fun () ->
-                        if Content.Noteskin.IsEmbedded then
-                            EditHUDPage().Show()
-                        elif
+                        if
                             SelectedChart.WITH_COLORS.IsSome
                             && Screen.change_new
                                 (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, ignore))

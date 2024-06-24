@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+﻿namespace Interlude.Features.HUD.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -6,28 +6,10 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Skinning.Noteskins
 open Prelude.Skinning.HudLayouts
-open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Noteskins
-
-// todo: delete this when HUD and Noteskins separate from each other
-[<AutoOpen>]
-module Shared =
-    let mutable choose_noteskins: unit -> unit = ignore
-
-    let private noteskin_required =
-        Callout
-            .Small
-            .Title(%"hud.noteskin_required.title")
-            .Body(%"hud.noteskin_required.element")
-            .Button(%"hud.noteskin_required.button", fun () -> Menu.Back(); Menu.Back(); choose_noteskins())
-
-    let or_require_noteskin (items: Widget list) : Widget list =
-        if Content.Noteskin.IsEmbedded then
-            [ Callout.frame noteskin_required (fun (w, h) -> Position.Box(0.0f, 1.0f, 100.0f, -200.0f - h, w, h)) ]
-        else items
 
 [<AbstractClass>]
 type ConfigPreview(scale: float32, config: Setting<HudPosition>) =
