@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
 open Interlude.Features.Play.HUD
@@ -12,7 +11,7 @@ open Interlude.Features.Play.HUD
 type ComboPage(on_close: unit -> unit) =
     inherit Page()
 
-    let config = Content.NoteskinConfig.HUD
+    let config = Content.HUD
 
     let lamp_colors = Setting.simple config.ComboLampColors
 
@@ -62,8 +61,8 @@ type ComboPage(on_close: unit -> unit) =
     override this.Title = %"hud.combo"
 
     override this.OnClose() =
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
+        HUDs.save_config 
+            { Content.HUD with
                 ComboLampColors = lamp_colors.Value
                 ComboPop = pop_amount.Value
                 ComboGrowth = growth_amount.Value

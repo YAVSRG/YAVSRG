@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Skinning.Noteskins
 open Prelude.Skinning.HudLayouts
 open Interlude.Content
 open Interlude.UI.Menu
@@ -12,7 +11,7 @@ open Interlude.UI.Menu
 type TimingDisplayPage(on_close: unit -> unit) =
     inherit Page()
 
-    let config = Content.NoteskinConfig.HUD
+    let config = Content.HUD
 
     let pos = Setting.simple config.TimingDisplayPosition
 
@@ -105,8 +104,8 @@ type TimingDisplayPage(on_close: unit -> unit) =
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
+        HUDs.save_config
+            { Content.HUD with
                 TimingDisplayShowGuide = show_guide.Value
                 TimingDisplayShowNonJudgements = show_non_judgements.Value
                 TimingDisplayThickness = thickness.Value

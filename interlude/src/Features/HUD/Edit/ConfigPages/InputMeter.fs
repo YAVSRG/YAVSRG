@@ -3,14 +3,13 @@ namespace Interlude.Features.Noteskins.Edit
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
 
 type InputMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let config = Content.NoteskinConfig.HUD
+    let config = Content.HUD
 
     let scroll_speed = Setting.bounded config.InputMeterScrollSpeed 0.5f 3.0f
     let key_fade_time = Setting.bounded config.InputMeterKeyFadeTime 0.0f 1000.0f
@@ -46,8 +45,8 @@ type InputMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.inputmeter"
 
     override this.OnClose() =
-        Noteskins.save_hud_config 
-            { Content.NoteskinConfig.HUD with
+        HUDs.save_config 
+            { Content.HUD with
                 InputMeterScrollSpeed = scroll_speed.Value
                 InputMeterKeyFadeTime = key_fade_time.Value
                 InputMeterKeyColor = key_color.Value

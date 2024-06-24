@@ -743,39 +743,40 @@ module OsuSkinConverter =
                 EnableColumnLight = columnlighting
                 ReceptorStyle = if key_receptors then ReceptorStyle.Flip else ReceptorStyle.Rotate
 
-                HUD = 
-                    { HudConfig.Default with
-                        JudgementMeterFrameTime = 16.7f
-                        JudgementMeterUseTexture = judgement_textures
-                        JudgementMeterCustomDisplay =
-                            if judgement_textures then 
-                                Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
-                            else Map.empty
+                // todo: sort this out
+                //HUD = 
+                //    { HudConfig.Default with
+                //        JudgementMeterFrameTime = 16.7f
+                //        JudgementMeterUseTexture = judgement_textures
+                //        JudgementMeterCustomDisplay =
+                //            if judgement_textures then 
+                //                Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
+                //            else Map.empty
 
-                        ComboUseFont = combo_font_spacing.IsSome
-                        ComboFontSpacing = combo_font_spacing |> Option.defaultValue 0.0f
+                //        ComboUseFont = combo_font_spacing.IsSome
+                //        ComboFontSpacing = combo_font_spacing |> Option.defaultValue 0.0f
 
-                        AccuracyUseFont = accuracy_font_info.IsSome
-                        AccuracyFontSpacing = accuracy_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                        AccuracyDotExtraSpacing = accuracy_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
-                        AccuracyPercentExtraSpacing = accuracy_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
+                //        AccuracyUseFont = accuracy_font_info.IsSome
+                //        AccuracyFontSpacing = accuracy_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
+                //        AccuracyDotExtraSpacing = accuracy_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
+                //        AccuracyPercentExtraSpacing = accuracy_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
 
-                        JudgementCounterUseFont = judgement_counter_font_info.IsSome
-                        JudgementCounterFontSpacing = judgement_counter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                        JudgementCounterDotExtraSpacing = judgement_counter_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
-                        JudgementCounterColonExtraSpacing = judgement_counter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
+                //        JudgementCounterUseFont = judgement_counter_font_info.IsSome
+                //        JudgementCounterFontSpacing = judgement_counter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
+                //        JudgementCounterDotExtraSpacing = judgement_counter_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
+                //        JudgementCounterColonExtraSpacing = judgement_counter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
                         
-                        JudgementCounterUseJudgementTextures = judgement_counter_textures
-                        JudgementCounterCustomDisplay =
-                            if judgement_counter_textures then 
-                                Map.ofSeq [6, Array.init 6 Some]
-                            else Map.empty
+                //        JudgementCounterUseJudgementTextures = judgement_counter_textures
+                //        JudgementCounterCustomDisplay =
+                //            if judgement_counter_textures then 
+                //                Map.ofSeq [6, Array.init 6 Some]
+                //            else Map.empty
 
-                        ProgressMeterUseFont = progress_meter_font_info.IsSome
-                        ProgressMeterFontSpacing = progress_meter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                        ProgressMeterColonExtraSpacing = progress_meter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
-                        ProgressMeterPercentExtraSpacing = progress_meter_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
-                    }
+                //        ProgressMeterUseFont = progress_meter_font_info.IsSome
+                //        ProgressMeterFontSpacing = progress_meter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
+                //        ProgressMeterColonExtraSpacing = progress_meter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
+                //        ProgressMeterPercentExtraSpacing = progress_meter_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
+                //    }
 
                 UseExplosions = note_explosions_scale.IsSome && hold_explosions_scale.IsSome
                 NoteExplosionSettings =

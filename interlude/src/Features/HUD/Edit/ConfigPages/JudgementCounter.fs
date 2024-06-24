@@ -6,7 +6,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay
-open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
@@ -117,7 +116,7 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
 type JudgementCounterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let config = Content.NoteskinConfig.HUD
+    let config = Content.HUD
 
     let pos = Setting.simple config.JudgementCounterPosition
 
@@ -254,8 +253,8 @@ type JudgementCounterPage(on_close: unit -> unit) =
     override this.Title = %"hud.judgementcounter"
 
     override this.OnClose() =
-        Noteskins.save_hud_config 
-            { Content.NoteskinConfig.HUD with
+        HUDs.save_config 
+            { Content.HUD with
                 JudgementCounterFadeTime = animation_time.Value
                 JudgementCounterShowRatio = show_ratio.Value
                 JudgementCounterBackground = 
@@ -271,7 +270,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
                 JudgementCounterColonExtraSpacing = font_colon_spacing.Value
 
                 JudgementCounterUseJudgementTextures = use_texture.Value
-                JudgementCounterCustomDisplay = Content.NoteskinConfig.HUD.JudgementCounterCustomDisplay.Add (JUDGEMENT_COUNT, display)
+                JudgementCounterCustomDisplay = Content.HUD.JudgementCounterCustomDisplay.Add (JUDGEMENT_COUNT, display)
             }
 
         on_close ()

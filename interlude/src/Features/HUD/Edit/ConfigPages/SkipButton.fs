@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Skinning.Noteskins
 open Prelude.Skinning.HudLayouts
 open Interlude.Content
 open Interlude.UI.Menu
@@ -13,7 +12,7 @@ open Interlude.UI.Menu
 type SkipButtonPage(on_close: unit -> unit) =
     inherit Page()
 
-    let config = Content.NoteskinConfig.HUD
+    let config = Content.HUD
 
     let use_background = Setting.simple config.SkipButtonBackground.Enable
     let background_scale = Setting.simple config.SkipButtonBackground.Scale |> Setting.bound 0.5f 2.0f
@@ -54,8 +53,8 @@ type SkipButtonPage(on_close: unit -> unit) =
     override this.Title = %"hud.skipbutton"
 
     override this.OnClose() =
-        Noteskins.save_hud_config 
-            { Content.NoteskinConfig.HUD with
+        HUDs.save_config 
+            { Content.HUD with
                 SkipButtonBackground = 
                     {
                         Enable = use_background.Value

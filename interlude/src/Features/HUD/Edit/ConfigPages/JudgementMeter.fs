@@ -6,7 +6,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay
-open Prelude.Skinning.Noteskins
 open Prelude.Skinning.HudLayouts
 open Interlude.Content
 open Interlude.UI
@@ -92,7 +91,7 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
 type JudgementMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let config = Content.NoteskinConfig.HUD
+    let config = Content.HUD
 
     let ignore_perfect_judgements =
         Setting.simple config.JudgementMeterIgnorePerfect
@@ -174,15 +173,15 @@ type JudgementMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.judgementmeter"
 
     override this.OnClose() =
-        Noteskins.save_hud_config 
-            { Content.NoteskinConfig.HUD with
+        HUDs.save_config 
+            { Content.HUD with
                 JudgementMeterIgnorePerfect = ignore_perfect_judgements.Value
                 JudgementMeterPrioritiseLower = prioritise_lower_judgements.Value
                 JudgementMeterDuration = duration.Value
                 JudgementMeterFrameTime = frame_time.Value
                 JudgementMeterUseTexture = use_texture.Value
                 JudgementMeterUseBuiltInAnimation = use_animation.Value
-                JudgementMeterCustomDisplay = Content.NoteskinConfig.HUD.JudgementMeterCustomDisplay.Add (JUDGEMENT_COUNT, judgement_display)
+                JudgementMeterCustomDisplay = Content.HUD.JudgementMeterCustomDisplay.Add (JUDGEMENT_COUNT, judgement_display)
             }
 
         on_close ()

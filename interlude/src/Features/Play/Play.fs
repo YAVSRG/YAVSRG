@@ -143,7 +143,7 @@ module PlayScreen =
 
         { new IPlayScreen(info.Chart, info.WithColors, pacemaker_state, scoring) with
             override this.AddWidgets() =
-                let hud_config = Content.NoteskinConfig.HUD
+                let hud_config = Content.HUD
                 let inline add_widget position constructor =
                     add_widget (this, this.Playfield, this.State, hud_config) position constructor
 

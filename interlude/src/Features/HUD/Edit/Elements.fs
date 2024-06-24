@@ -75,102 +75,102 @@ module HudElement =
         | HudElement.Accuracy ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             AccuracyEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.AccuracyEnabled)
+                (fun () -> Content.HUD.AccuracyEnabled)
         | HudElement.TimingDisplay ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             TimingDisplayEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.TimingDisplayEnabled)
+                (fun () -> Content.HUD.TimingDisplayEnabled)
         | HudElement.Combo ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             ComboEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.ComboEnabled)
+                (fun () -> Content.HUD.ComboEnabled)
         | HudElement.SkipButton ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             SkipButtonEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.SkipButtonEnabled)
+                (fun () -> Content.HUD.SkipButtonEnabled)
         | HudElement.JudgementMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             JudgementMeterEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.JudgementMeterEnabled)
+                (fun () -> Content.HUD.JudgementMeterEnabled)
         | HudElement.EarlyLateMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             EarlyLateMeterEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.EarlyLateMeterEnabled)
+                (fun () -> Content.HUD.EarlyLateMeterEnabled)
         | HudElement.ProgressMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             ProgressMeterEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.ProgressMeterEnabled)
+                (fun () -> Content.HUD.ProgressMeterEnabled)
         | HudElement.JudgementCounter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             JudgementCounterEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.JudgementCounterEnabled)
+                (fun () -> Content.HUD.JudgementCounterEnabled)
         | HudElement.RateModMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             RateModMeterEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.RateModMeterEnabled)
+                (fun () -> Content.HUD.RateModMeterEnabled)
         | HudElement.BPMMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             BPMMeterEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.BPMMeterEnabled)
+                (fun () -> Content.HUD.BPMMeterEnabled)
         | HudElement.InputMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             InputMeterEnabled = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.InputMeterEnabled)
+                (fun () -> Content.HUD.InputMeterEnabled)
         | HudElement.Pacemaker -> // pacemaker cannot be toggled by the user like a setting, it is on depending on gameplay state
             Setting.make (fun _ -> ()) (fun () -> true)
 
@@ -179,111 +179,111 @@ module HudElement =
         | HudElement.Accuracy ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             AccuracyPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.AccuracyPosition)
+                (fun () -> Content.HUD.AccuracyPosition)
         | HudElement.TimingDisplay ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             TimingDisplayPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.TimingDisplayPosition)
+                (fun () -> Content.HUD.TimingDisplayPosition)
         | HudElement.Combo ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             ComboPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.ComboPosition)
+                (fun () -> Content.HUD.ComboPosition)
         | HudElement.SkipButton ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             SkipButtonPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.SkipButtonPosition)
+                (fun () -> Content.HUD.SkipButtonPosition)
         | HudElement.JudgementMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             JudgementMeterPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.JudgementMeterPosition)
+                (fun () -> Content.HUD.JudgementMeterPosition)
         | HudElement.EarlyLateMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             EarlyLateMeterPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.EarlyLateMeterPosition)
+                (fun () -> Content.HUD.EarlyLateMeterPosition)
         | HudElement.ProgressMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             ProgressMeterPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.ProgressMeterPosition)
+                (fun () -> Content.HUD.ProgressMeterPosition)
         | HudElement.JudgementCounter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             JudgementCounterPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.JudgementCounterPosition)
+                (fun () -> Content.HUD.JudgementCounterPosition)
         | HudElement.RateModMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             RateModMeterPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.RateModMeterPosition)
+                (fun () -> Content.HUD.RateModMeterPosition)
         | HudElement.BPMMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             BPMMeterPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.BPMMeterPosition)
+                (fun () -> Content.HUD.BPMMeterPosition)
         | HudElement.InputMeter ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             InputMeterPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.InputMeterPosition)
+                (fun () -> Content.HUD.InputMeterPosition)
         | HudElement.Pacemaker ->
             Setting.make
                 (fun v ->
-                    Noteskins.save_hud_config
-                        { Content.NoteskinConfig.HUD with
+                    HUDs.save_config
+                        { Content.HUD with
                             PacemakerPosition = v
                         }
                 )
-                (fun () -> Content.NoteskinConfig.HUD.PacemakerPosition)
+                (fun () -> Content.HUD.PacemakerPosition)
 
     let default_position (e: HudElement) : HudPosition =
         let all_defaults = HudConfig.Default

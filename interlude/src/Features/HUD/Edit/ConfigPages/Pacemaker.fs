@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
@@ -13,7 +12,7 @@ open Interlude.UI.Menu
 type PacemakerPage(on_close: unit -> unit) =
     inherit Page()
 
-    let config = Content.NoteskinConfig.HUD
+    let config = Content.HUD
 
     let pos = Setting.simple config.PacemakerPosition
 

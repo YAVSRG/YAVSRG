@@ -73,7 +73,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
     let SMALL_RIGHT = (%%"right").WithModifiers(false, false, true)
 
     let child =
-        HudElement.constructor elem (Content.NoteskinConfig.HUD, ctx.State)
+        HudElement.constructor elem (Content.HUD, ctx.State)
 
     let position = HudElement.position_setting elem
 

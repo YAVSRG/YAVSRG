@@ -1,4 +1,5 @@
 namespace Interlude.Features.Noteskins.Edit
+
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
@@ -11,7 +12,7 @@ open Interlude.UI.Menu
 type BPMMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let noteskin_options = Content.HUD
 
     let pos = Setting.simple noteskin_options.BPMMeterPosition
 

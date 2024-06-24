@@ -137,7 +137,6 @@ type NoteskinConfig =
         ReceptorStyle: ReceptorStyle
 
         LinearSampling: bool
-        HUD: HudConfig
     }
     static member Default =
         {
@@ -188,7 +187,6 @@ type NoteskinConfig =
                 |]
             ReceptorStyle = ReceptorStyle.Rotate
             LinearSampling = true
-            HUD = HudConfig.Default
         }
 
     member this.Validate =

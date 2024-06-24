@@ -12,7 +12,7 @@ open Interlude.Features.Play.HUD
 type AccuracyPage(on_close: unit -> unit) =
     inherit Page()
 
-    let config = Content.NoteskinConfig.HUD
+    let config = Content.HUD
 
     let grade_colors = Setting.simple config.AccuracyGradeColors
     let show_name = Setting.simple config.AccuracyShowName
@@ -76,8 +76,8 @@ type AccuracyPage(on_close: unit -> unit) =
 
     override this.OnClose() =
 
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
+        HUDs.save_config
+            { Content.HUD with
                 AccuracyGradeColors = grade_colors.Value
                 AccuracyShowName = show_name.Value
 

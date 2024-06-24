@@ -3,14 +3,13 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI.Menu
 
 type EarlyLateMeterPage(on_close: unit -> unit) =
     inherit Page()
 
-    let config = Content.NoteskinConfig.HUD
+    let config = Content.HUD
 
     let duration =
         Setting.simple config.EarlyLateMeterDuration
@@ -62,8 +61,8 @@ type EarlyLateMeterPage(on_close: unit -> unit) =
     override this.Title = %"hud.earlylatemeter"
 
     override this.OnClose() =
-        Noteskins.save_hud_config
-            { Content.NoteskinConfig.HUD with
+        HUDs.save_config 
+            { Content.HUD with
                 EarlyLateMeterDuration = duration.Value
                 EarlyLateMeterUseTexture = use_texture.Value
                 EarlyLateMeterEarlyText = early_text.Value

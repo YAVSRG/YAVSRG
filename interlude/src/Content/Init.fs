@@ -27,6 +27,7 @@ type Content() =
     static member Theme = Themes.current
     static member NoteskinConfig = Noteskins.current.Config
     static member Noteskin = Noteskins.current
+    static member HUD = HUDs.current.Config
     static member Texture(id: string) = Sprites.get id
 
     static member OnChartAdded = Data.charts_updated
