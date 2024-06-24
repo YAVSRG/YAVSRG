@@ -2,11 +2,10 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.Noteskins
+open Prelude.Skinning.HudLayouts
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Play

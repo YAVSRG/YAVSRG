@@ -1,11 +1,10 @@
 ﻿namespace Interlude.Features.OptionsMenu.Search
 
 open Prelude
-open Prelude.Skinning.Noteskins
+open Prelude.Skinning.HudLayouts
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
-open Interlude.Features.LevelSelect
 open Interlude.Features.Noteskins.Edit
 open Interlude.Features.Noteskins.Browser
 open Interlude.Features.Noteskins

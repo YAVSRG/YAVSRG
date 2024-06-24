@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skinning.Noteskins.Conversion
+﻿namespace Prelude.Skinning.Conversions
 
 open System.IO
 

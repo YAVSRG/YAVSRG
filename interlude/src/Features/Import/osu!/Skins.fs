@@ -5,7 +5,7 @@ open System.Text.RegularExpressions
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.Noteskins.Conversion
+open Prelude.Skinning.Conversions
 open Prelude.Data.Library
 open Interlude.UI
 open Interlude.UI.Menu

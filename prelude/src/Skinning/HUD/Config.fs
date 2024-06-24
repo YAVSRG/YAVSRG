@@ -1,8 +1,10 @@
-﻿namespace Prelude.Skinning.Noteskins
+﻿namespace Prelude.Skinning.HudLayouts
 
+open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Gameplay
+open Prelude.Skinning
 
 [<RequireQualifiedAccess>]
 type HUDElement =
@@ -391,3 +393,88 @@ type HUDConfig =
 
 // todo: song info
 // todo: real time clock
+
+type HudTextureRules =
+    {
+        IsRequired: HUDConfig -> bool
+        MustBeSquare: HUDConfig -> bool
+        MaxGridSize: HUDConfig -> int * int
+    }
+    member this.Evaluate(config: HUDConfig) : TextureRules =
+        {
+            IsRequired = this.IsRequired config
+            MustBeSquare = this.MustBeSquare config
+            MaxGridSize = this.MaxGridSize config
+        }
+
+module HudTextureRules =
+
+    let DEFAULT =
+        {
+            IsRequired = K true
+            MustBeSquare = K true
+            MaxGridSize = K(16, 32)
+        }
+
+    let TEXTURES: Map<string, HudTextureRules> =
+        Map.ofList
+            [
+                "judgements",
+                {
+                    IsRequired = fun config -> config.JudgementMeterUseTexture
+                    MustBeSquare = K false
+                    MaxGridSize = K(16, 32)
+                }
+                "early-late",
+                {
+                    IsRequired = fun config -> config.EarlyLateMeterUseTexture
+                    MustBeSquare = K false
+                    MaxGridSize = K(2, 32)
+                }
+                "judgement-counter-bg",
+                {
+                    IsRequired = fun config -> config.JudgementCounterBackground.Enable
+                    MustBeSquare = K false
+                    MaxGridSize = K(1, 1)
+                }
+                "skip-button-bg",
+                {
+                    IsRequired = fun config -> config.SkipButtonBackground.Enable
+                    MustBeSquare = K false
+                    MaxGridSize = K(1, 1)
+                }
+                "judgement-counter-judgements",
+                {
+                    IsRequired = fun config -> config.JudgementCounterUseJudgementTextures
+                    MustBeSquare = K false
+                    MaxGridSize = K(16, 1)
+                }
+                "judgement-counter-font",
+                {
+                    IsRequired = fun config -> config.JudgementCounterUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(13, 1)
+                }
+                "combo-font",
+                {
+                    IsRequired = fun config -> config.ComboUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(13, 1)
+                }
+                "accuracy-font",
+                {
+                    IsRequired = fun config -> config.AccuracyUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(13, 1)
+                }
+                "progress-meter-font",
+                {
+                    IsRequired = fun config -> config.ProgressMeterUseFont
+                    MustBeSquare = K false
+                    MaxGridSize = K(13, 1)
+                }
+            ]
+
+    let get (config: HUDConfig) (name: string) = TEXTURES.[name].Evaluate config
+
+    let list () : string seq = TEXTURES.Keys :> string seq

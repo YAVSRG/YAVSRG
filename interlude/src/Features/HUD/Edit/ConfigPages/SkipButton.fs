@@ -6,25 +6,24 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Skinning.Noteskins
+open Prelude.Skinning.HudLayouts
 open Interlude.Content
 open Interlude.UI.Menu
 
 type SkipButtonPage(on_close: unit -> unit) =
     inherit Page()
 
-    let noteskin_options = Content.NoteskinConfig.HUD
+    let config = Content.NoteskinConfig.HUD
 
-    let use_background = Setting.simple noteskin_options.SkipButtonBackground.Enable
-    let background_scale = Setting.simple noteskin_options.SkipButtonBackground.Scale |> Setting.bound 0.5f 2.0f
-    let background_offset_x = Setting.percentf noteskin_options.SkipButtonBackground.AlignmentX
-    let background_offset_y = Setting.percentf noteskin_options.SkipButtonBackground.AlignmentY
-
-    let pos = Setting.simple noteskin_options.SkipButtonPosition
+    let use_background = Setting.simple config.SkipButtonBackground.Enable
+    let background_scale = Setting.simple config.SkipButtonBackground.Scale |> Setting.bound 0.5f 2.0f
+    let background_offset_x = Setting.percentf config.SkipButtonBackground.AlignmentX
+    let background_offset_y = Setting.percentf config.SkipButtonBackground.AlignmentY
 
     let preview_text = [ (%%"skip").ToString() ] %> "play.skiphint"
 
     let preview =
-        { new ConfigPreviewNew(pos.Value) with
+        { new ConfigPreviewNew(config.SkipButtonPosition) with
             override this.DrawComponent(bounds) =
                 Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
         }

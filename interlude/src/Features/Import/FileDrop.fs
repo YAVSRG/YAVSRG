@@ -6,7 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
-open Prelude.Skinning.Noteskins.Conversion
+open Prelude.Skinning.Conversions
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content

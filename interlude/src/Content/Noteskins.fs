@@ -9,6 +9,7 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Skinning
 open Prelude.Skinning.Noteskins
+open Prelude.Skinning.HudLayouts
 open Interlude
 
 module Noteskins =
