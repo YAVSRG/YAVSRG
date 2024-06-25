@@ -345,7 +345,7 @@ module OsuSkinConverter =
         with err ->
             Error err
 
-    let convert (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
+    let convert_to_noteskin (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
 
         if Directory.Exists target then
             failwith "a folder with this name already exists!"
@@ -384,14 +384,6 @@ module OsuSkinConverter =
         let mutable stage_textures = false
         let mutable key_receptors = false
         let mutable skip_tail_conversion = false
-
-        let mutable combo_font_spacing : float32 option = None
-        let mutable accuracy_font_info : ConvertedFont option = None
-        let mutable progress_meter_font_info : ConvertedFont option = None
-        let mutable judgement_counter_font_info : ConvertedFont option = None
-
-        let mutable judgement_textures = false
-        let mutable judgement_counter_textures = false
 
         let mutable note_explosions_scale = None
         let mutable hold_explosions_scale = None
@@ -543,6 +535,113 @@ module OsuSkinConverter =
             columnlighting <- true
         | None -> ()
 
+        // Convert explosions
+        try
+            let images = 
+                TextureFile.find_animation_frames (keymode_settings.LightingN, source)
+                |> List.map (_.Load >> _.Image)
+            
+            let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
+
+            for i, image in List.indexed images do
+                let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
+                padded.Save(Path.Combine(target, sprintf "noteexplosion-0-%i.png" i))
+                padded.Dispose()
+            
+
+            JSON.ToFile
+                (Path.Combine(target, "noteexplosion.json"), false)
+                {
+                    Rows = 1
+                    Columns = images.Length
+                    Mode = Loose
+                }
+            note_explosions_scale <- Some (480.0f / float32 max_dim)
+        with err ->
+            Logging.Warn("Error converting note explosions", err)
+        
+        try
+            let images = 
+                TextureFile.find_animation_frames (keymode_settings.LightingL, source)
+                |> List.map (_.Load >> _.Image)
+            
+            let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
+
+            for i, image in List.indexed images do
+                let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
+                padded.Save(Path.Combine(target, sprintf "holdexplosion-0-%i.png" i))
+                padded.Dispose()
+            
+
+            JSON.ToFile
+                (Path.Combine(target, "holdexplosion.json"), false)
+                {
+                    Rows = 1
+                    Columns = images.Length
+                    Mode = Loose
+                }
+            hold_explosions_scale <- Some (480.0f / float32 max_dim)
+        with err ->
+            Logging.Warn("Error converting hold explosions", err)
+
+        // Generate noteskin.json
+        let color_config: ColorConfig =
+            { ColorConfig.Default with
+                Style = ColorScheme.Column
+                UseGlobalColors = false
+            }
+
+        color_config.Colors.[keymode - 2] <- colors
+
+        let config: NoteskinConfig =
+            { NoteskinConfig.Default with
+                Name = ini.General.Name
+                Author = ini.General.Author
+                NoteColors = color_config
+                FlipHoldTail = flipholdtail
+                UseHoldTailTexture = useholdtail
+                HoldNoteTrim = if skip_tail_conversion then 1.5f else 0.0f
+                PlayfieldColor = keymode_settings.ColourΔ.[0]
+                ColumnWidth = 1080f / 512f * float32 keymode_settings.ColumnWidth.[0]
+                AnimationFrameTime = 1000.0 / 60.0
+                UseRotation = is_arrows
+                EnableStageTextures = stage_textures
+                EnableColumnLight = columnlighting
+                ReceptorStyle = if key_receptors then ReceptorStyle.Flip else ReceptorStyle.Rotate
+
+                UseExplosions = note_explosions_scale.IsSome && hold_explosions_scale.IsSome
+                NoteExplosionSettings =
+                    match note_explosions_scale with
+                    | None -> NoteExplosionConfig.Default
+                    | Some scale -> { NoteExplosionConfig.Default with UseBuiltInAnimation = false; Scale = scale }
+                HoldExplosionSettings = 
+                    match hold_explosions_scale with
+                    | None -> HoldExplosionConfig.Default
+                    | Some scale -> { HoldExplosionConfig.Default with Scale = scale }
+            }
+
+        JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config
+
+    let convert_to_hud (ini: SkinIni) (source: string) (target: string) (keymode: int) =
+
+        if Directory.Exists target then
+            failwith "a folder with this name already exists!"
+
+        Directory.CreateDirectory target |> ignore
+
+        let keymode_settings =
+            ini.Mania
+            |> List.tryFind (fun m -> m.Keys = keymode)
+            |> Option.defaultValue (SkinIni.Mania.Default keymode)
+
+        let mutable combo_font_spacing : float32 option = None
+        let mutable accuracy_font_info : ConvertedFont option = None
+        let mutable progress_meter_font_info : ConvertedFont option = None
+        let mutable judgement_counter_font_info : ConvertedFont option = None
+
+        let mutable judgement_textures = false
+        let mutable judgement_counter_textures = false
+
         // Convert judgement textures
         try
             let images =
@@ -669,124 +768,38 @@ module OsuSkinConverter =
         | Error err ->
             Logging.Warn("Error converting judgement counter font", err)
 
-        // Convert explosions
-        try
-            let images = 
-                TextureFile.find_animation_frames (keymode_settings.LightingN, source)
-                |> List.map (_.Load >> _.Image)
-            
-            let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
+        let config: HudConfig =
+            { HudConfig.Default with
+                JudgementMeterFrameTime = 16.7f
+                JudgementMeterUseTexture = judgement_textures
+                JudgementMeterCustomDisplay =
+                    if judgement_textures then 
+                        Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
+                    else Map.empty
 
-            for i, image in List.indexed images do
-                let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
-                padded.Save(Path.Combine(target, sprintf "noteexplosion-0-%i.png" i))
-                padded.Dispose()
-            
+                ComboUseFont = combo_font_spacing.IsSome
+                ComboFontSpacing = combo_font_spacing |> Option.defaultValue 0.0f
 
-            JSON.ToFile
-                (Path.Combine(target, "noteexplosion.json"), false)
-                {
-                    Rows = 1
-                    Columns = images.Length
-                    Mode = Loose
-                }
-            note_explosions_scale <- Some (480.0f / float32 max_dim)
-        with err ->
-            Logging.Warn("Error converting note explosions", err)
-        
-        try
-            let images = 
-                TextureFile.find_animation_frames (keymode_settings.LightingL, source)
-                |> List.map (_.Load >> _.Image)
-            
-            let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
+                AccuracyUseFont = accuracy_font_info.IsSome
+                AccuracyFontSpacing = accuracy_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
+                AccuracyDotExtraSpacing = accuracy_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
+                AccuracyPercentExtraSpacing = accuracy_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
 
-            for i, image in List.indexed images do
-                let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
-                padded.Save(Path.Combine(target, sprintf "holdexplosion-0-%i.png" i))
-                padded.Dispose()
-            
-
-            JSON.ToFile
-                (Path.Combine(target, "holdexplosion.json"), false)
-                {
-                    Rows = 1
-                    Columns = images.Length
-                    Mode = Loose
-                }
-            hold_explosions_scale <- Some (480.0f / float32 max_dim)
-        with err ->
-            Logging.Warn("Error converting hold explosions", err)
-
-        // Generate noteskin.json
-        let color_config: ColorConfig =
-            { ColorConfig.Default with
-                Style = ColorScheme.Column
-                UseGlobalColors = false
-            }
-
-        color_config.Colors.[keymode - 2] <- colors
-
-        let config: NoteskinConfig =
-            { NoteskinConfig.Default with
-                Name = ini.General.Name
-                Author = ini.General.Author
-                NoteColors = color_config
-                FlipHoldTail = flipholdtail
-                UseHoldTailTexture = useholdtail
-                HoldNoteTrim = if skip_tail_conversion then 1.5f else 0.0f
-                PlayfieldColor = keymode_settings.ColourΔ.[0]
-                ColumnWidth = 1080f / 512f * float32 keymode_settings.ColumnWidth.[0]
-                AnimationFrameTime = 1000.0 / 60.0
-                UseRotation = is_arrows
-                EnableStageTextures = stage_textures
-                EnableColumnLight = columnlighting
-                ReceptorStyle = if key_receptors then ReceptorStyle.Flip else ReceptorStyle.Rotate
-
-                // todo: sort this out
-                //HUD = 
-                //    { HudConfig.Default with
-                //        JudgementMeterFrameTime = 16.7f
-                //        JudgementMeterUseTexture = judgement_textures
-                //        JudgementMeterCustomDisplay =
-                //            if judgement_textures then 
-                //                Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
-                //            else Map.empty
-
-                //        ComboUseFont = combo_font_spacing.IsSome
-                //        ComboFontSpacing = combo_font_spacing |> Option.defaultValue 0.0f
-
-                //        AccuracyUseFont = accuracy_font_info.IsSome
-                //        AccuracyFontSpacing = accuracy_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                //        AccuracyDotExtraSpacing = accuracy_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
-                //        AccuracyPercentExtraSpacing = accuracy_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
-
-                //        JudgementCounterUseFont = judgement_counter_font_info.IsSome
-                //        JudgementCounterFontSpacing = judgement_counter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                //        JudgementCounterDotExtraSpacing = judgement_counter_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
-                //        JudgementCounterColonExtraSpacing = judgement_counter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
+                JudgementCounterUseFont = judgement_counter_font_info.IsSome
+                JudgementCounterFontSpacing = judgement_counter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
+                JudgementCounterDotExtraSpacing = judgement_counter_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
+                JudgementCounterColonExtraSpacing = judgement_counter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
                         
-                //        JudgementCounterUseJudgementTextures = judgement_counter_textures
-                //        JudgementCounterCustomDisplay =
-                //            if judgement_counter_textures then 
-                //                Map.ofSeq [6, Array.init 6 Some]
-                //            else Map.empty
+                JudgementCounterUseJudgementTextures = judgement_counter_textures
+                JudgementCounterCustomDisplay =
+                    if judgement_counter_textures then 
+                        Map.ofSeq [6, Array.init 6 Some]
+                    else Map.empty
 
-                //        ProgressMeterUseFont = progress_meter_font_info.IsSome
-                //        ProgressMeterFontSpacing = progress_meter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                //        ProgressMeterColonExtraSpacing = progress_meter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
-                //        ProgressMeterPercentExtraSpacing = progress_meter_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
-                //    }
-
-                UseExplosions = note_explosions_scale.IsSome && hold_explosions_scale.IsSome
-                NoteExplosionSettings =
-                    match note_explosions_scale with
-                    | None -> NoteExplosionConfig.Default
-                    | Some scale -> { NoteExplosionConfig.Default with UseBuiltInAnimation = false; Scale = scale }
-                HoldExplosionSettings = 
-                    match hold_explosions_scale with
-                    | None -> HoldExplosionConfig.Default
-                    | Some scale -> { HoldExplosionConfig.Default with Scale = scale }
+                ProgressMeterUseFont = progress_meter_font_info.IsSome
+                ProgressMeterFontSpacing = progress_meter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
+                ProgressMeterColonExtraSpacing = progress_meter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
+                ProgressMeterPercentExtraSpacing = progress_meter_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
             }
 
-        JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config
+        JSON.ToFile (Path.Combine(target, "hud.json"), false) config

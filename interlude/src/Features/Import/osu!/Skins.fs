@@ -14,7 +14,7 @@ open Interlude.Content
 
 module Skins =
 
-    type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, target_path: string, existing_folder: string option) =
+    type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, folder_name: string, existing_folder: string option) =
         inherit Page()
 
         let keymode: Setting<Keymode> = Setting.simple Keymode.``4K``
@@ -41,21 +41,40 @@ module Skins =
                     %"osu_skin_import.confirm",
                     fun () ->
                         try
-                            OsuSkinConverter.convert
+
+                            OsuSkinConverter.convert_to_noteskin
                                 ini
                                 source_path
-                                target_path
+                                (Path.Combine(get_game_folder "Noteskins", folder_name))
                                 (int keymode.Value)
                                 (keymode.Value = Keymode.``4K`` && is_arrows.Value)
+
+                            OsuSkinConverter.convert_to_hud
+                                ini
+                                source_path
+                                (Path.Combine(get_game_folder "HUDs", folder_name))
+                                (int keymode.Value)
+
                             if delete_existing.Value then 
                                 try
-                                    Directory.Delete(Path.Combine(get_game_folder "Noteskins", existing_folder.Value), true)
+                                    match existing_folder with
+                                    | Some old_name ->
+                                        let noteskin_path = Path.Combine(get_game_folder "Noteskins", old_name)
+                                        if Directory.Exists noteskin_path then
+                                            Directory.Delete(noteskin_path, true)
+
+                                        let hud_path = Path.Combine(get_game_folder "HUDs", old_name)
+                                        if Directory.Exists hud_path then
+                                            Directory.Delete(hud_path, true)
+                                    | None -> failwith "impossible"
                                 with err ->
-                                    Logging.Error("Error deleting old noteskin")
+                                    Logging.Error("Error deleting old noteskin + hud")
                             Noteskins.load ()
-                            Noteskins.selected_id.Set (Path.GetFileName(target_path))
+                            Noteskins.selected_id.Set folder_name
+                            HUD.load ()
+                            HUD.selected_id.Set folder_name
                         with err ->
-                            Logging.Error("Error while converting to noteskin", err)
+                            Logging.Error("Error while converting to noteskin + hud", err)
 
                         Menu.Exit()
                 )
@@ -74,6 +93,7 @@ module Skins =
 
     let import_osu_noteskin (path: string) =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
+        let timestamp = "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
 
         match OsuSkinConverter.check_before_convert path with
         | Ok ini ->
@@ -81,7 +101,7 @@ module Skins =
             ImportOsuNoteskinPage(
                 ini,
                 path,
-                Path.Combine(get_game_folder "Noteskins", id + "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")),
+                id + timestamp,
                 existing_id
             )
                 .Show()

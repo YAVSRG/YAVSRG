@@ -107,6 +107,7 @@ module Options =
             Upscroll: bool
             LaneCover: LaneCoverOptions
             Noteskin: string
+            HUD: string
         }
 
     [<Json.AutoCodec(false)>]
@@ -125,8 +126,9 @@ module Options =
             BackgroundDim: Setting.Bounded<float32>
             LaneCover: LaneCoverOptions
             Noteskin: Setting<string>
-
+            SelectedHUD: Setting<string>
             SelectedRuleset: Setting<string>
+
             FailCondition: Setting<FailType>
             Pacemaker: Dictionary<string, PacemakerSettings>
             EnablePacemaker: Setting<bool>
@@ -180,7 +182,9 @@ module Options =
                 BackgroundDim = Setting.percentf 0.5f
                 LaneCover = LaneCoverOptions.Default
                 Noteskin = Content.Noteskins.selected_id
+                SelectedHUD = Content.HUD.selected_id
                 SelectedRuleset = Content.Rulesets.selected_id
+
                 FailCondition = Setting.simple FailType.EndOfSong
                 Pacemaker = Dictionary<string, PacemakerSettings>()
                 EnablePacemaker = Setting.simple false
@@ -376,6 +380,7 @@ module Options =
                 Upscroll = options.Upscroll.Value
                 LaneCover = options.LaneCover
                 Noteskin = options.Noteskin.Value
+                HUD = options.SelectedHUD.Value
             }
 
         let save (preset: Preset) : Preset =
@@ -386,6 +391,7 @@ module Options =
                 Upscroll = options.Upscroll.Value
                 LaneCover = options.LaneCover
                 Noteskin = options.Noteskin.Value
+                HUD = options.Noteskin.Value
             }
 
         let load (id: int) =
@@ -415,6 +421,15 @@ module Options =
                         sprintf
                             "Noteskin '%s' used in this preset has been renamed or isn't available"
                             loaded_preset.Noteskin
+                    )
+
+                if Content.HUD.exists loaded_preset.HUD then
+                    options.SelectedHUD.Set loaded_preset.HUD
+                else
+                    Logging.Error(
+                        sprintf
+                            "HUD '%s' used in this preset has been renamed or isn't available"
+                            loaded_preset.HUD
                     )
 
                 Some loaded_preset.Name
