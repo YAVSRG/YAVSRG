@@ -113,5 +113,11 @@ type Noteskin(storage) as this =
     static member FromZipStream(stream: Stream) =
         new Noteskin(Embedded(new ZipArchive(stream)))
 
-    // todo: make this a result return type instead of throwing exceptions
-    static member FromPath(path: string) = new Noteskin(Folder path)
+    static member FromPath(path: string) =
+        try
+            new Noteskin(Folder path)
+            |> Ok
+        with err -> Error err
+
+    static member Exists(path: string) =
+        Directory.Exists path && File.Exists (Path.Combine(path, "noteskin.json"))

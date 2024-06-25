@@ -41,19 +41,12 @@ module Skins =
                     %"osu_skin_import.confirm",
                     fun () ->
                         try
-
                             OsuSkinConverter.convert_to_noteskin
                                 ini
                                 source_path
                                 (Path.Combine(get_game_folder "Noteskins", folder_name))
                                 (int keymode.Value)
                                 (keymode.Value = Keymode.``4K`` && is_arrows.Value)
-
-                            OsuSkinConverter.convert_to_hud
-                                ini
-                                source_path
-                                (Path.Combine(get_game_folder "HUDs", folder_name))
-                                (int keymode.Value)
 
                             if delete_existing.Value then 
                                 try
@@ -62,19 +55,15 @@ module Skins =
                                         let noteskin_path = Path.Combine(get_game_folder "Noteskins", old_name)
                                         if Directory.Exists noteskin_path then
                                             Directory.Delete(noteskin_path, true)
-
-                                        let hud_path = Path.Combine(get_game_folder "HUDs", old_name)
-                                        if Directory.Exists hud_path then
-                                            Directory.Delete(hud_path, true)
                                     | None -> failwith "impossible"
                                 with err ->
-                                    Logging.Error("Error deleting old noteskin + hud")
+                                    Logging.Error("Error deleting old noteskin")
                             Noteskins.load ()
-                            Noteskins.selected_id.Set folder_name
                             HUD.load ()
-                            HUD.selected_id.Set folder_name
+                            Noteskins.selected_id.Set folder_name
+                            HUD.selected_id.Set (HudIdentifier.InNoteskin folder_name)
                         with err ->
-                            Logging.Error("Error while converting to noteskin + hud", err)
+                            Logging.Error("Error while converting to noteskin", err)
 
                         Menu.Exit()
                 )

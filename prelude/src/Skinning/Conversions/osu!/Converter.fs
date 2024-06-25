@@ -345,6 +345,183 @@ module OsuSkinConverter =
         with err ->
             Error err
 
+    let private convert_to_hud (ini: SkinIni) (source: string) (target: string) (keymode: int) =
+
+        let keymode_settings =
+            ini.Mania
+            |> List.tryFind (fun m -> m.Keys = keymode)
+            |> Option.defaultValue (SkinIni.Mania.Default keymode)
+
+        let mutable combo_font_spacing : float32 option = None
+        let mutable accuracy_font_info : ConvertedFont option = None
+        let mutable progress_meter_font_info : ConvertedFont option = None
+        let mutable judgement_counter_font_info : ConvertedFont option = None
+
+        let mutable judgement_textures = false
+        let mutable judgement_counter_textures = false
+
+        // Convert judgement textures
+        try
+            let images =
+                [
+                    keymode_settings.Hit300g
+                    keymode_settings.Hit300
+                    keymode_settings.Hit200
+                    keymode_settings.Hit100
+                    keymode_settings.Hit50
+                    keymode_settings.Hit0
+                ]
+                |> List.map (fun x -> TextureFile.find_animation_frames (x, source))
+                |> TextureFile.load_animation_frames
+                // todo: scale up images to 2x where not
+                |> List.map (List.map _.Image)
+            let max_frames = images |> List.map (fun x -> x.Length) |> List.max
+            let max_width = images |> List.map (List.map _.Width >> List.max) |> List.max
+            let max_height = images |> List.map (List.map _.Height >> List.max) |> List.max
+
+            for row = 0 to images.Length - 1 do
+                for column = 0 to max_frames - 1 do
+                    let image = let r = images.[row] in r[column % r.Length]
+
+                    let padded = Image.pad (max_width, max_height) image
+                    padded.Save(Path.Combine(target, sprintf "judgements-%i-%i.png" row column))
+                    padded.Dispose()
+
+            JSON.ToFile
+                (Path.Combine(target, "judgements.json"), false)
+                {
+                    Rows = images.Length
+                    Columns = max_frames
+                    Mode = Loose
+                }
+            judgement_textures <- true
+        with err ->
+            Logging.Warn("Error converting judgement textures", err)
+
+        // Convert judgement counter textures
+        try
+            let images =
+                [
+                    "mania-hit300g"
+                    "mania-hit300"
+                    "mania-hit200"
+                    "mania-hit100"
+                    "mania-hit50"
+                    "mania-hit0"
+                ]
+                |> List.map (fun x -> TextureFile.find_animation_frames(x, source).Head.Load.Image)
+            let max_width = images |> List.map _.Width |> List.max
+            let max_height = images |> List.map _.Height |> List.max
+
+            for i, image in List.indexed images do
+                let padded = Image.pad (max_width, max_height) image
+                padded.Save(Path.Combine(target, sprintf "judgement-counter-judgements-%i-0.png" i))
+                padded.Dispose()
+
+            JSON.ToFile
+                (Path.Combine(target, "judgement-counter-judgements.json"), false)
+                {
+                    Rows = images.Length
+                    Columns = 1
+                    Mode = Loose
+                }
+            judgement_counter_textures <- true
+        with err ->
+            Logging.Warn("Error converting judgement counter judgement textures", err)
+
+        // Convert various fonts
+        match 
+            convert_font (
+                source,
+                target,
+                ini.Fonts.ComboPrefix,
+                ini.Fonts.ComboOverlap,
+                "combo-font"
+            )
+        with
+        | Ok spacing ->
+            combo_font_spacing <- Some spacing
+        | Error err ->
+            Logging.Warn("Error converting combo font", err)
+        
+        match 
+            convert_font_with_extras (
+                source,
+                target,
+                ini.Fonts.ScorePrefix,
+                ini.Fonts.ScoreOverlap,
+                "accuracy-font"
+            )
+        with
+        | Ok info ->
+            accuracy_font_info <- Some info
+        | Error err ->
+            Logging.Warn("Error converting accuracy font", err)
+        
+        match
+            convert_font_with_extras (
+                source,
+                target,
+                ini.Fonts.ScorePrefix,
+                ini.Fonts.ScoreOverlap,
+                "progress-meter-font"
+            )
+        with
+        | Ok info ->
+            progress_meter_font_info <- Some info
+        | Error err ->
+            Logging.Warn("Error converting progress meter font", err)
+
+        match 
+            convert_font_with_extras (
+                source,
+                target,
+                ini.Fonts.ScorePrefix,
+                ini.Fonts.ScoreOverlap,
+                "judgement-counter-font"
+            )
+        with
+        | Ok info ->
+            judgement_counter_font_info <- Some info
+        | Error err ->
+            Logging.Warn("Error converting judgement counter font", err)
+
+        let config: HudConfig =
+            { HudConfig.Default with
+                JudgementMeterFrameTime = 16.7f
+                JudgementMeterUseTexture = judgement_textures
+                JudgementMeterCustomDisplay =
+                    if judgement_textures then 
+                        Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
+                    else Map.empty
+
+                ComboUseFont = combo_font_spacing.IsSome
+                ComboFontSpacing = combo_font_spacing |> Option.defaultValue 0.0f
+
+                AccuracyUseFont = accuracy_font_info.IsSome
+                AccuracyFontSpacing = accuracy_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
+                AccuracyDotExtraSpacing = accuracy_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
+                AccuracyPercentExtraSpacing = accuracy_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
+
+                JudgementCounterUseFont = judgement_counter_font_info.IsSome
+                JudgementCounterFontSpacing = judgement_counter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
+                JudgementCounterDotExtraSpacing = judgement_counter_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
+                JudgementCounterColonExtraSpacing = judgement_counter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
+                        
+                JudgementCounterUseJudgementTextures = judgement_counter_textures
+                JudgementCounterCustomDisplay =
+                    if judgement_counter_textures then 
+                        Map.ofSeq [6, Array.init 6 Some]
+                    else Map.empty
+
+                ProgressMeterUseFont = progress_meter_font_info.IsSome
+                ProgressMeterFontSpacing = progress_meter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
+                ProgressMeterColonExtraSpacing = progress_meter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
+                ProgressMeterPercentExtraSpacing = progress_meter_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
+            }
+
+        JSON.ToFile (Path.Combine(target, "hud.json"), false) config
+
     let convert_to_noteskin (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
 
         if Directory.Exists target then
@@ -621,185 +798,4 @@ module OsuSkinConverter =
             }
 
         JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config
-
-    let convert_to_hud (ini: SkinIni) (source: string) (target: string) (keymode: int) =
-
-        if Directory.Exists target then
-            failwith "a folder with this name already exists!"
-
-        Directory.CreateDirectory target |> ignore
-
-        let keymode_settings =
-            ini.Mania
-            |> List.tryFind (fun m -> m.Keys = keymode)
-            |> Option.defaultValue (SkinIni.Mania.Default keymode)
-
-        let mutable combo_font_spacing : float32 option = None
-        let mutable accuracy_font_info : ConvertedFont option = None
-        let mutable progress_meter_font_info : ConvertedFont option = None
-        let mutable judgement_counter_font_info : ConvertedFont option = None
-
-        let mutable judgement_textures = false
-        let mutable judgement_counter_textures = false
-
-        // Convert judgement textures
-        try
-            let images =
-                [
-                    keymode_settings.Hit300g
-                    keymode_settings.Hit300
-                    keymode_settings.Hit200
-                    keymode_settings.Hit100
-                    keymode_settings.Hit50
-                    keymode_settings.Hit0
-                ]
-                |> List.map (fun x -> TextureFile.find_animation_frames (x, source))
-                |> TextureFile.load_animation_frames
-                // todo: scale up images to 2x where not
-                |> List.map (List.map _.Image)
-            let max_frames = images |> List.map (fun x -> x.Length) |> List.max
-            let max_width = images |> List.map (List.map _.Width >> List.max) |> List.max
-            let max_height = images |> List.map (List.map _.Height >> List.max) |> List.max
-
-            for row = 0 to images.Length - 1 do
-                for column = 0 to max_frames - 1 do
-                    let image = let r = images.[row] in r[column % r.Length]
-
-                    let padded = Image.pad (max_width, max_height) image
-                    padded.Save(Path.Combine(target, sprintf "judgements-%i-%i.png" row column))
-                    padded.Dispose()
-
-            JSON.ToFile
-                (Path.Combine(target, "judgements.json"), false)
-                {
-                    Rows = images.Length
-                    Columns = max_frames
-                    Mode = Loose
-                }
-            judgement_textures <- true
-        with err ->
-            Logging.Warn("Error converting judgement textures", err)
-
-        // Convert judgement counter textures
-        try
-            let images =
-                [
-                    "mania-hit300g"
-                    "mania-hit300"
-                    "mania-hit200"
-                    "mania-hit100"
-                    "mania-hit50"
-                    "mania-hit0"
-                ]
-                |> List.map (fun x -> TextureFile.find_animation_frames(x, source).Head.Load.Image)
-            let max_width = images |> List.map _.Width |> List.max
-            let max_height = images |> List.map _.Height |> List.max
-
-            for i, image in List.indexed images do
-                let padded = Image.pad (max_width, max_height) image
-                padded.Save(Path.Combine(target, sprintf "judgement-counter-judgements-%i-0.png" i))
-                padded.Dispose()
-
-            JSON.ToFile
-                (Path.Combine(target, "judgement-counter-judgements.json"), false)
-                {
-                    Rows = images.Length
-                    Columns = 1
-                    Mode = Loose
-                }
-            judgement_counter_textures <- true
-        with err ->
-            Logging.Warn("Error converting judgement counter judgement textures", err)
-
-        // Convert various fonts
-        match 
-            convert_font (
-                source,
-                target,
-                ini.Fonts.ComboPrefix,
-                ini.Fonts.ComboOverlap,
-                "combo-font"
-            )
-        with
-        | Ok spacing ->
-            combo_font_spacing <- Some spacing
-        | Error err ->
-            Logging.Warn("Error converting combo font", err)
-        
-        match 
-            convert_font_with_extras (
-                source,
-                target,
-                ini.Fonts.ScorePrefix,
-                ini.Fonts.ScoreOverlap,
-                "accuracy-font"
-            )
-        with
-        | Ok info ->
-            accuracy_font_info <- Some info
-        | Error err ->
-            Logging.Warn("Error converting accuracy font", err)
-        
-        match
-            convert_font_with_extras (
-                source,
-                target,
-                ini.Fonts.ScorePrefix,
-                ini.Fonts.ScoreOverlap,
-                "progress-meter-font"
-            )
-        with
-        | Ok info ->
-            progress_meter_font_info <- Some info
-        | Error err ->
-            Logging.Warn("Error converting progress meter font", err)
-
-        match 
-            convert_font_with_extras (
-                source,
-                target,
-                ini.Fonts.ScorePrefix,
-                ini.Fonts.ScoreOverlap,
-                "judgement-counter-font"
-            )
-        with
-        | Ok info ->
-            judgement_counter_font_info <- Some info
-        | Error err ->
-            Logging.Warn("Error converting judgement counter font", err)
-
-        let config: HudConfig =
-            { HudConfig.Default with
-                JudgementMeterFrameTime = 16.7f
-                JudgementMeterUseTexture = judgement_textures
-                JudgementMeterCustomDisplay =
-                    if judgement_textures then 
-                        Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
-                    else Map.empty
-
-                ComboUseFont = combo_font_spacing.IsSome
-                ComboFontSpacing = combo_font_spacing |> Option.defaultValue 0.0f
-
-                AccuracyUseFont = accuracy_font_info.IsSome
-                AccuracyFontSpacing = accuracy_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                AccuracyDotExtraSpacing = accuracy_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
-                AccuracyPercentExtraSpacing = accuracy_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
-
-                JudgementCounterUseFont = judgement_counter_font_info.IsSome
-                JudgementCounterFontSpacing = judgement_counter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                JudgementCounterDotExtraSpacing = judgement_counter_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
-                JudgementCounterColonExtraSpacing = judgement_counter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
-                        
-                JudgementCounterUseJudgementTextures = judgement_counter_textures
-                JudgementCounterCustomDisplay =
-                    if judgement_counter_textures then 
-                        Map.ofSeq [6, Array.init 6 Some]
-                    else Map.empty
-
-                ProgressMeterUseFont = progress_meter_font_info.IsSome
-                ProgressMeterFontSpacing = progress_meter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                ProgressMeterColonExtraSpacing = progress_meter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
-                ProgressMeterPercentExtraSpacing = progress_meter_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
-            }
-
-        JSON.ToFile (Path.Combine(target, "hud.json"), false) config
+        convert_to_hud ini source target keymode

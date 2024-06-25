@@ -173,12 +173,10 @@ module Noteskins =
                 ZipFile.ExtractToDirectory(zip, Path.ChangeExtension(zip, null))
                 File.Delete zip
 
-        for source in Directory.EnumerateDirectories(get_game_folder "Noteskins") do
+        for source in Directory.EnumerateDirectories(get_game_folder "Noteskins") |> Seq.where Noteskin.Exists do
             let id = Path.GetFileName source
-
-            try
-                let ns = Noteskin.FromPath source
-
+            match Noteskin.FromPath source with
+            | Ok ns ->
                 loaded.Add(
                     id,
                     {
@@ -186,7 +184,7 @@ module Noteskins =
                         Textures = None
                     }
                 )
-            with err ->
+            | Error err ->
                 Logging.Error("  Failed to load noteskin '" + id + "'", err)
         
         if not (loaded.ContainsKey _selected_id.Value) then

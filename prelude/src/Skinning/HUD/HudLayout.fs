@@ -45,8 +45,14 @@ type HudLayout(storage) as this =
     static member FromZipStream(stream: Stream) =
         new HudLayout(Embedded(new ZipArchive(stream)))
 
-    // todo: make this a result return type instead of throwing exceptions
-    static member FromPath(path: string) = new HudLayout(Folder path)
+    static member FromPath(path: string) =
+        try
+            new HudLayout(Folder path)
+            |> Ok
+        with err -> Error err
+
+    static member Exists(path: string) =
+        Directory.Exists path && File.Exists (Path.Combine(path, "hud.json"))
 
     /// Call when no HUD loaded successfully
     static member CreateDefault(path: string) : HudLayout =
@@ -66,4 +72,8 @@ type HudLayout(storage) as this =
                 failwith "User chose to crash the game so they can fix their HUD config"
             
         JSON.ToFile(config, true) HudConfig.Default
-        HudLayout.FromPath path
+        match HudLayout.FromPath path with
+        | Ok hud -> hud
+        | Error err -> 
+            Logging.Critical("Something terrible has happened while creating default HUD", err)
+            raise err

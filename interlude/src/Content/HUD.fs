@@ -5,10 +5,21 @@ open System.IO
 open System.IO.Compression
 open System.Collections.Generic
 open Percyqaz.Common
+open Percyqaz.Data
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Skinning
 open Prelude.Skinning.HudLayouts
+
+[<Json.AutoCodec>]
+[<RequireQualifiedAccess>]
+type HudIdentifier =
+    | InNoteskin of folder_name: string
+    | HUD of folder_name: string
+    override this.ToString() =
+        match this with
+        | InNoteskin f -> sprintf ":%s" f
+        | HUD f -> f
 
 module HUD =
 
@@ -98,10 +109,10 @@ module HUD =
                     sprites |> Array.iter (snd >> Sprite.destroy >> ignore)
                 | None -> ()
 
-    let private DEFAULT_FOLDER = "User"
+    let private DEFAULT_FOLDER = HudIdentifier.HUD "User"
 
     let mutable private initialised = false
-    let private loaded = new Dictionary<string, LoadedHUD>()
+    let private loaded = new Dictionary<HudIdentifier, LoadedHUD>()
     let private _selected_id = Setting.simple <| DEFAULT_FOLDER
     let mutable current = Unchecked.defaultof<HudLayout>
 
@@ -120,7 +131,7 @@ module HUD =
                     let old_id = _selected_id.Value
 
                     if not (loaded.ContainsKey new_id) then
-                        Logging.Warn("HUD '" + new_id + "' not found, switching to default")
+                        Logging.Warn("HUD '" + new_id.ToString() + "' not found, switching to default")
                         _selected_id.Value <- DEFAULT_FOLDER
                     else
                         _selected_id.Value <- new_id
@@ -157,35 +168,52 @@ module HUD =
                 ZipFile.ExtractToDirectory(zip, Path.ChangeExtension(zip, null))
                 File.Delete zip
 
-        for source in Directory.EnumerateDirectories(get_game_folder "HUDs") do
-            let id = Path.GetFileName source
+        for source in Directory.EnumerateDirectories(get_game_folder "HUDs") |> Seq.where HudLayout.Exists do
+            let id = Path.GetFileName source |> HudIdentifier.HUD
 
-            try
-                let ns = HudLayout.FromPath source
+            match HudLayout.FromPath source with
+            | Ok hud ->
 
                 loaded.Add(
                     id,
                     {
-                        Name = id
-                        HUD = ns
+                        Name = id.ToString()
+                        HUD = hud
                         Textures = None
                     }
                 )
-            with err ->
-                Logging.Error("  Failed to load HUD '" + id + "'", err)
+            | Error err ->
+                Logging.Error("  Failed to load HUD '" + id.ToString() + "'", err)
+        
+        for source in Directory.EnumerateDirectories(get_game_folder "Noteskins") |> Seq.where HudLayout.Exists do
+            let id = Path.GetFileName source |> HudIdentifier.InNoteskin
+
+            match HudLayout.FromPath source with
+            | Ok hud ->
+
+                loaded.Add(
+                    id,
+                    {
+                        Name = id.ToString()
+                        HUD = hud
+                        Textures = None
+                    }
+                )
+            | Error err ->
+                Logging.Error("  Failed to load in-noteskin HUD '" + id.ToString() + "'", err)
 
         if not (loaded.ContainsKey DEFAULT_FOLDER) then
             loaded.Add(
                 DEFAULT_FOLDER,
                 {
-                    Name = DEFAULT_FOLDER
-                    HUD = HudLayout.CreateDefault(Path.Combine(get_game_folder "HUDs", DEFAULT_FOLDER))
+                    Name = DEFAULT_FOLDER.ToString()
+                    HUD = HudLayout.CreateDefault(Path.Combine(get_game_folder "HUDs", "User"))
                     Textures = None
                 }
             )
         
         if not (loaded.ContainsKey _selected_id.Value) then
-            Logging.Warn("HUD '" + _selected_id.Value + "' not found, switching to default")
+            Logging.Warn("HUD '" + _selected_id.Value.ToString() + "' not found, switching to default")
             _selected_id.Value <- DEFAULT_FOLDER
 
         current <- loaded.[_selected_id.Value].HUD
@@ -210,22 +238,22 @@ module HUD =
         | Embedded _ -> false
         | Folder f ->
             selected_id.Value <- DEFAULT_FOLDER
-            try
-                Directory.Delete(f, true)
-                load()
-                true
-            with
-            | :? IOException as err ->
-                Logging.Error("IO error while deleting HUD", err)
-                false
-            | _ -> reraise()
+            current.DeleteFile("hud.json")
+            load()
+            true
 
     let export_current () =
         match current.Source with
         | Embedded _ -> false
         | Folder f ->
             let name = Path.GetFileName f
-            let target = Path.Combine(get_game_folder "Exports", name + ".ihl")
+            let target = 
+                Path.Combine(
+                    get_game_folder "Exports", 
+                    match selected_id.Value with 
+                    | HudIdentifier.InNoteskin _ -> name + ".isk"
+                    | HudIdentifier.HUD _ -> name + ".ihl"
+                )
 
             if current.CompressToZip target then
                 open_directory (get_game_folder "Exports")

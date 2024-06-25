@@ -107,7 +107,7 @@ module Options =
             Upscroll: bool
             LaneCover: LaneCoverOptions
             Noteskin: string
-            HUD: string
+            HUD: Content.HudIdentifier
         }
 
     [<Json.AutoCodec(false)>]
@@ -126,7 +126,7 @@ module Options =
             BackgroundDim: Setting.Bounded<float32>
             LaneCover: LaneCoverOptions
             Noteskin: Setting<string>
-            SelectedHUD: Setting<string>
+            SelectedHUD: Setting<Content.HudIdentifier>
             SelectedRuleset: Setting<string>
 
             FailCondition: Setting<FailType>
@@ -391,7 +391,7 @@ module Options =
                 Upscroll = options.Upscroll.Value
                 LaneCover = options.LaneCover
                 Noteskin = options.Noteskin.Value
-                HUD = options.Noteskin.Value
+                HUD = options.SelectedHUD.Value
             }
 
         let load (id: int) =
@@ -428,7 +428,7 @@ module Options =
                 else
                     Logging.Error(
                         sprintf
-                            "HUD '%s' used in this preset has been renamed or isn't available"
+                            "HUD '%O' used in this preset has been renamed or isn't available"
                             loaded_preset.HUD
                     )
 
