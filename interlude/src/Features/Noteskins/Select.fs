@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.Noteskins
+open Prelude.Skinning
 open Interlude.Content
 open Interlude.Features.Online
 open Interlude.Options
@@ -14,23 +14,23 @@ open Interlude.Features.Import
 open Interlude.Features.Noteskins.Edit
 open Interlude.Features.Noteskins.Browser
 
-type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
+type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun _ ->
-                if Noteskins.selected_id.Value <> id then
+                if Skins.selected_noteskin_id.Value <> id then
                     options.Noteskin.Set id
                     Style.click.Play()
                     on_switch ()
             )
         )
 
-    member this.IsCurrent = Noteskins.selected_id.Value = id
+    member this.IsCurrent = Skins.selected_noteskin_id.Value = id
 
     override this.Init(parent: Widget) =
         this
         |+ Text(
-            K ns.Config.Name,
+            K meta.Name,
             Color =
                 (fun () ->
                     if this.Focused then Colors.text_yellow_2
@@ -42,21 +42,9 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
         )
         |+ Text(
             K(
-                let has_other_versions =
-                    Noteskins.list ()
-                    |> Seq.map (snd >> _.Config)
-                    |> Seq.tryFind (fun cfg -> cfg.Name = ns.Config.Name && cfg.Version <> ns.Config.Version)
-                    |> Option.isSome
-
-                (if has_other_versions then
-                     sprintf "%s, By %s" ns.Config.Version ns.Config.Author
-                 else
-                     sprintf "By %s" ns.Config.Author)
-                + (
-                    match ns.Config.Editor with
-                    | Some e -> ", Edit by " + e
-                    | None -> ""
-                )
+                match meta.Editor with
+                | Some e -> [meta.Author; e] %> "noteskin.credit.edited"
+                | None -> [meta.Author] %> "noteskin.credit"
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
@@ -64,25 +52,9 @@ type private NoteskinButton(id: string, ns: Noteskin, on_switch: unit -> unit) =
         )
         |+ { new Thumbnail(Position = Position.SliceLeft(100.0f).Margin(Style.PADDING)) with
             override this.Load() =
-                Noteskins.preview_loader.Request(
-                    ns,
-                    function
-                    | Some(bmp, config) ->
-                        defer (fun () ->
-                            Sprite.upload_one
-                                false
-                                true
-                                {
-                                    Label = "NOTESKIN_PREVIEW"
-                                    Image = bmp
-                                    Rows = config.Rows
-                                    Columns = config.Columns
-                                    DisposeImageAfter = true
-                                }
-                            |> this.FinishLoading
-                        )
-                    | None -> ()
-                )
+                match Skins.get_icon id with
+                | Some sprite -> this.FinishLoading sprite
+                | None -> ()
         }
         |* Clickable.Focus this
 
@@ -109,14 +81,14 @@ type SelectNoteskinsPage() =
         GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
     let rec edit_or_extract_noteskin () =
-        let ns = Content.Noteskin
+        let noteskin = Content.Noteskin
 
-        if ns.IsEmbedded then
+        if noteskin.IsEmbedded then
             ConfirmPage(
-                [ ns.Config.Name ] %> "noteskins.confirm_extract_default",
+                %"noteskins.confirm_extract_default",
                 (fun () ->
                     if
-                        Noteskins.create_from_embedded (
+                        Skins.create_user_noteskin_from_default (
                             if Network.credentials.Username <> "" then
                                 Some Network.credentials.Username
                             else
@@ -125,7 +97,7 @@ type SelectNoteskinsPage() =
                     then
                         refresh ()
                     else
-                        Logging.Error "Noteskin folder already exists"
+                        Logging.Error "An editable skin has already been extracted"
                 )
             )
                 .Show()
@@ -141,8 +113,8 @@ type SelectNoteskinsPage() =
         grid.Clear()
         preview.Refresh()
 
-        for id, noteskin in Noteskins.list () do
-            grid |* NoteskinButton(id, noteskin, preview.Refresh)
+        for id, _, meta in Skins.list_noteskins () do
+            grid |* NoteskinButton(id, meta, preview.Refresh)
 
     override this.Content() =
         refresh ()
@@ -170,7 +142,7 @@ type SelectNoteskinsPage() =
             |+ OptionsMenuButton(
                  sprintf "%s %s" Icons.FOLDER (%"noteskins.open_folder"),
                 0.0f,
-                (fun () -> open_directory (get_game_folder "Noteskins")),
+                (fun () -> open_directory (get_game_folder "Skins")),
                 Position = { Position.Default with Left = 0.78f %+ 0.0f }
             )
                 .Tooltip(Tooltip.Info("noteskins.open_folder"))
@@ -184,7 +156,7 @@ type SelectNoteskinsPage() =
                 Align = Alignment.LEFT
             )
             |+ Text(
-                (fun () -> Content.NoteskinConfig.Name),
+                (fun () -> Content.NoteskinMeta.Name),
                 Position = pretty_pos (1, 3, PageWidth.Full),
                 Color = K Colors.text,
                 Align = Alignment.LEFT

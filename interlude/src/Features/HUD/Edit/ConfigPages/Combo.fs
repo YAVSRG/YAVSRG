@@ -59,7 +59,7 @@ type ComboPage(on_close: unit -> unit) =
     override this.Title = %"hud.combo"
 
     override this.OnClose() =
-        HUD.save_config 
+        Skins.save_hud_config 
             { Content.HUD with
                 ComboLampColors = lamp_colors.Value
                 ComboPop = pop_amount.Value

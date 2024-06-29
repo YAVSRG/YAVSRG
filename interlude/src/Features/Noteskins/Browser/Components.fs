@@ -6,7 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.Noteskins.Repo
+open Prelude.Skinning.Repo
 open Prelude.Data
 open Interlude.UI
 open Interlude.UI.Menu
@@ -35,10 +35,12 @@ type VersionDisplay(group: NoteskinGroup, version: NoteskinVersion) as this =
 
     let mutable status =
         if
-            Noteskins.list ()
-            |> Seq.map (snd >> _.Config)
-            |> Seq.tryFind (fun cfg -> cfg.Name = group.Name && cfg.Version = version.Version)
-            |> Option.isSome
+            false
+            // todo: check if installed
+            //Skins.list_noteskins ()
+            //|> Seq.map (snd >> _.Config)
+            //|> Seq.tryFind (fun cfg -> cfg.Name = group.Name && cfg.Version = version.Version)
+            //|> Option.isSome
         then
             Installed
         else
@@ -91,7 +93,7 @@ type VersionDisplay(group: NoteskinGroup, version: NoteskinVersion) as this =
 
                 let target =
                     Path.Combine(
-                        get_game_folder "Noteskins",
+                        get_game_folder "Skins",
                         Regex("[^a-zA-Z0-9_-]").Replace(title, "")
                         + ".isk"
                     )
@@ -100,7 +102,7 @@ type VersionDisplay(group: NoteskinGroup, version: NoteskinVersion) as this =
                     (version.Download, target, ignore),
                     fun success ->
                         if success then
-                            defer Noteskins.load
+                            defer Skins.load
                             Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_noteskin", group.Name)
                             status <- Installed
                         else

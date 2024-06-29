@@ -107,7 +107,7 @@ module Options =
             Upscroll: bool
             LaneCover: LaneCoverOptions
             Noteskin: string
-            HUD: Content.HudIdentifier
+            HUD: string
         }
 
     [<Json.AutoCodec(false)>]
@@ -126,7 +126,7 @@ module Options =
             BackgroundDim: Setting.Bounded<float32>
             LaneCover: LaneCoverOptions
             Noteskin: Setting<string>
-            SelectedHUD: Setting<Content.HudIdentifier>
+            SelectedHUD: Setting<string>
             SelectedRuleset: Setting<string>
 
             FailCondition: Setting<FailType>
@@ -181,8 +181,8 @@ module Options =
                 Upscroll = Setting.simple false
                 BackgroundDim = Setting.percentf 0.5f
                 LaneCover = LaneCoverOptions.Default
-                Noteskin = Content.Noteskins.selected_id
-                SelectedHUD = Content.HUD.selected_id
+                Noteskin = Content.Skins.selected_noteskin_id
+                SelectedHUD = Content.Skins.selected_hud_id
                 SelectedRuleset = Content.Rulesets.selected_id
 
                 FailCondition = Setting.simple FailType.EndOfSong
@@ -414,19 +414,19 @@ module Options =
                 options.Upscroll.Set loaded_preset.Upscroll
                 options.LaneCover.LoadPreset loaded_preset.LaneCover
 
-                if Content.Noteskins.exists loaded_preset.Noteskin then
+                if Content.Skins.noteskin_exists loaded_preset.Noteskin then
                     options.Noteskin.Set loaded_preset.Noteskin
                 else
-                    Logging.Error(
+                    Logging.Debug(
                         sprintf
                             "Noteskin '%s' used in this preset has been renamed or isn't available"
                             loaded_preset.Noteskin
                     )
 
-                if Content.HUD.exists loaded_preset.HUD then
+                if Content.Skins.hud_exists loaded_preset.HUD then
                     options.SelectedHUD.Set loaded_preset.HUD
                 else
-                    Logging.Error(
+                    Logging.Debug(
                         sprintf
                             "HUD '%O' used in this preset has been renamed or isn't available"
                             loaded_preset.HUD

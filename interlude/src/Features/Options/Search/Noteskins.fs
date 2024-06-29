@@ -36,7 +36,7 @@ module Noteskins =
 
                 yield PageButton(
                     %"noteskins.open_folder",
-                    (fun () -> open_directory (get_game_folder "Noteskins"))
+                    (fun () -> open_directory (get_game_folder "Skins"))
                 )
                     .Tooltip(Tooltip.Info("noteskins.open_folder"))
 

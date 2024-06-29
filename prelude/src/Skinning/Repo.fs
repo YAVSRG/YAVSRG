@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skinning.Noteskins.Repo
+﻿namespace Prelude.Skinning.Repo
 
 open Percyqaz.Data
 open Prelude
@@ -19,7 +19,7 @@ module NoteskinPreview =
     let private get_texture (id: string) (ns: Noteskin) =
         match ns.GetTexture id with
         | TextureOk(a, b) -> a, b
-        | _ -> failwithf "Failed to get texture '%s' for noteskin '%s'" id ns.Config.Name
+        | _ -> failwithf "Failed to get texture '%s'" id
 
     let render (ns: Noteskin) : Bitmap =
 
@@ -157,17 +157,18 @@ type NoteskinRepo =
 module NoteskinRepo =
 
     let add
-        (noteskin_info: NoteskinConfig)
+        (skin_meta: SkinMetadata)
+        (version: string)
         (download_link: string)
         (preview_image_link: string)
         (thumbnail_image_link: string)
         (repo: NoteskinRepo)
         : NoteskinRepo * bool =
 
-        let name, author, version =
-            noteskin_info.Name.Trim(), noteskin_info.Author.Trim(), noteskin_info.Version.Trim()
+        let name, author =
+            skin_meta.Name.Trim(), skin_meta.Author.Trim()
 
-        let editor = noteskin_info.Editor |> Option.map (_.Trim())
+        let editor = skin_meta.Editor |> Option.map (_.Trim())
 
         match repo.Noteskins |> List.tryFind (fun x -> x.Name = name) with
         | Some existing_group ->

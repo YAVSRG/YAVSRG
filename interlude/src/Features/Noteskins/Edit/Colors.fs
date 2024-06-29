@@ -158,7 +158,7 @@ type ColorSettingsPage() =
     override this.Title = %"noteskins.edit.colors"
 
     override this.OnClose() =
-        Noteskins.save_config
+        Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 NoteColors = note_colors
             }

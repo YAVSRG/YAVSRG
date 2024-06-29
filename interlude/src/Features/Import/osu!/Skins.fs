@@ -41,10 +41,10 @@ module Skins =
                     %"osu_skin_import.confirm",
                     fun () ->
                         try
-                            OsuSkinConverter.convert_to_noteskin
+                            OsuSkinConverter.convert_to_skin
                                 ini
                                 source_path
-                                (Path.Combine(get_game_folder "Noteskins", folder_name))
+                                (Path.Combine(get_game_folder "Skins", folder_name))
                                 (int keymode.Value)
                                 (keymode.Value = Keymode.``4K`` && is_arrows.Value)
 
@@ -52,18 +52,17 @@ module Skins =
                                 try
                                     match existing_folder with
                                     | Some old_name ->
-                                        let noteskin_path = Path.Combine(get_game_folder "Noteskins", old_name)
+                                        let noteskin_path = Path.Combine(get_game_folder "Skins", old_name)
                                         if Directory.Exists noteskin_path then
                                             Directory.Delete(noteskin_path, true)
                                     | None -> failwith "impossible"
                                 with err ->
-                                    Logging.Error("Error deleting old noteskin")
-                            Noteskins.load ()
-                            HUD.load ()
-                            Noteskins.selected_id.Set folder_name
-                            HUD.selected_id.Set (HudIdentifier.InNoteskin folder_name)
+                                    Logging.Error("Error deleting old skin")
+                            Skins.load ()
+                            Skins.selected_noteskin_id.Set folder_name
+                            Skins.selected_hud_id.Set folder_name
                         with err ->
-                            Logging.Error("Error while converting to noteskin", err)
+                            Logging.Error("Error while converting to skin", err)
 
                         Menu.Exit()
                 )
@@ -86,7 +85,7 @@ module Skins =
 
         match OsuSkinConverter.check_before_convert path with
         | Ok ini ->
-            let existing_id = Noteskins.list() |> Seq.map fst |> Seq.tryFind (fun x -> x.StartsWith id)
+            let existing_id = Skins.list_noteskins() |> Seq.map (fun (id, _, _) -> id) |> Seq.tryFind (fun x -> x.StartsWith id)
             ImportOsuNoteskinPage(
                 ini,
                 path,

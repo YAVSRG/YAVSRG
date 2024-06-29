@@ -12,8 +12,7 @@ type Content() =
         Tables.init_window ()
         Rulesets.init_window ()
         Themes.init_window ()
-        Noteskins.init_window ()
-        HUD.init_window ()
+        Skins.init_window ()
 
     static member deinit() = Data.deinit ()
 
@@ -25,9 +24,10 @@ type Content() =
     static member Table = Tables.current
     static member ThemeConfig = Themes.current_config
     static member Theme = Themes.current
-    static member NoteskinConfig = Noteskins.current.Config
-    static member Noteskin = Noteskins.current
-    static member HUD = HUD.current.Config
+    static member NoteskinConfig = Skins.current_noteskin.Config
+    static member Noteskin = Skins.current_noteskin
+    static member NoteskinMeta = Skins.current_noteskin_meta
+    static member HUD = Skins.current_hud.Config
     static member Texture(id: string) = Sprites.get id
 
     static member OnChartAdded = Data.charts_updated

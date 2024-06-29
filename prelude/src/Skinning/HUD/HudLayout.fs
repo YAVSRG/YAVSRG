@@ -53,27 +53,3 @@ type HudLayout(storage) as this =
 
     static member Exists(path: string) =
         Directory.Exists path && File.Exists (Path.Combine(path, "hud.json"))
-
-    /// Call when no HUD loaded successfully
-    static member CreateDefault(path: string) : HudLayout =
-        if not (Directory.Exists path) then
-            Directory.CreateDirectory path |> ignore
-
-        let config = Path.Combine(path, "hud.json")
-        if File.Exists config then
-            match JSON.FromFile(config) with
-            | Ok data -> Logging.Warn(sprintf "CreateDefault should not have been called with a working HUD already at %s" path)
-            | Error _ -> 
-
-            Logging.Critical("Your default HUD's hud.json doesn't parse! Did you make a typo?\nIn future, use the ingame editor to avoid formatting mistakes.")
-            Logging.Critical("If you want to FULLY reset your HUD file to defaults, type 'reset' now, otherwise go and fix it and then relaunch the game.")
-
-            if System.Console.ReadLine().Trim().ToLower() <> "reset" then
-                failwith "User chose to crash the game so they can fix their HUD config"
-            
-        JSON.ToFile(config, true) HudConfig.Default
-        match HudLayout.FromPath path with
-        | Ok hud -> hud
-        | Error err -> 
-            Logging.Critical("Something terrible has happened while creating default HUD", err)
-            raise err

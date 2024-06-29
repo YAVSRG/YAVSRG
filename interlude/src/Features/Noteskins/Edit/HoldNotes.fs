@@ -102,7 +102,7 @@ type HoldNoteSettingsPage() =
     override this.Title = %"noteskins.edit.holdnotes"
 
     override this.OnClose() =
-        Noteskins.save_config
+        Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 HoldNoteTrim = hold_note_trim.Value
                 UseHoldTailTexture = use_tail_texture.Value

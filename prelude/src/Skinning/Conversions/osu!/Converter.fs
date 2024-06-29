@@ -346,6 +346,11 @@ module OsuSkinConverter =
             Error err
 
     let private convert_to_hud (ini: SkinIni) (source: string) (target: string) (keymode: int) =
+    
+        if Directory.Exists target then
+            failwith "a folder with this name already exists!"
+
+        Directory.CreateDirectory target |> ignore
 
         let keymode_settings =
             ini.Mania
@@ -522,7 +527,7 @@ module OsuSkinConverter =
 
         JSON.ToFile (Path.Combine(target, "hud.json"), false) config
 
-    let convert_to_noteskin (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
+    let private convert_to_noteskin (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
 
         if Directory.Exists target then
             failwith "a folder with this name already exists!"
@@ -772,8 +777,6 @@ module OsuSkinConverter =
 
         let config: NoteskinConfig =
             { NoteskinConfig.Default with
-                Name = ini.General.Name
-                Author = ini.General.Author
                 NoteColors = color_config
                 FlipHoldTail = flipholdtail
                 UseHoldTailTexture = useholdtail
@@ -798,4 +801,14 @@ module OsuSkinConverter =
             }
 
         JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config
-        convert_to_hud ini source target keymode
+
+    let convert_to_skin (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
+        convert_to_noteskin ini source (Path.Combine(target, "Noteskin")) keymode is_arrows
+        convert_to_hud ini source (Path.Combine(target, "HUD")) keymode
+        JSON.ToFile
+            (Path.Combine(target, "skin.json"), false)
+            {
+                Name = ini.General.Name
+                Author = ini.General.Author
+                Editor = None
+            }

@@ -74,7 +74,7 @@ type AccuracyPage(on_close: unit -> unit) =
 
     override this.OnClose() =
 
-        HUD.save_config
+        Skins.save_hud_config
             { Content.HUD with
                 AccuracyGradeColors = grade_colors.Value
                 AccuracyShowName = show_name.Value

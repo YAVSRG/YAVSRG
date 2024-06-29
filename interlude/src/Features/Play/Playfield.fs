@@ -79,7 +79,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let holds_offscreen = Array.create keys -1
     let hold_states = Array.create keys NoHold
 
-    let rotation = Noteskins.note_rotation keys
+    let rotation = Skins.note_rotation keys
 
     let mutable has_negative_sv = false
     let mutable time = -Time.infinity

@@ -52,7 +52,8 @@
     <Compile Include="Skinning\HUD\HudLayout.fs" />
     <Compile Include="Skinning\Noteskins\Config.fs" />
     <Compile Include="Skinning\Noteskins\Noteskin.fs" />
-    <Compile Include="Skinning\Noteskins\Repo.fs" />
+    <Compile Include="Skinning\Skin.fs" />
+    <Compile Include="Skinning\Repo.fs" />
     <Compile Include="Skinning\Conversions\Helpers.fs" />
     <Compile Include="Skinning\Conversions\osu!\Parser.fs" />
     <Compile Include="Skinning\Conversions\osu!\Converter.fs" />

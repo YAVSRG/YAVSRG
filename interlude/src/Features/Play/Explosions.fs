@@ -94,7 +94,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
 
         explosion_pool_pointer <- (explosion_pool_pointer + 1) % EXPLOSION_POOL_SIZE
 
-    let rotation = Noteskins.note_rotation keys
+    let rotation = Skins.note_rotation keys
 
     let column_width = ns.ColumnWidth
 

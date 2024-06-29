@@ -27,12 +27,12 @@ module NoteskinExplosionMigration =
         }
 
     [<Json.AutoCodec(false)>]
-    type NoteskinMigrationModel = { Explosions: Explosions option }
+    type NoteskinMigrationModel = { Name: string; Explosions: Explosions option }
 
     let patch (model: NoteskinMigrationModel) (config: NoteskinConfig) =
         match model.Explosions with
         | Some explosions ->
-            Logging.Info(sprintf "Migrating noteskin '%s' to new explosions system" config.Name)
+            Logging.Info(sprintf "Migrating noteskin '%s' to new explosions system" model.Name)
 
             if explosions.ExplodeOnMiss then
                 Logging.Warn(
@@ -114,9 +114,7 @@ type Noteskin(storage) as this =
         new Noteskin(Embedded(new ZipArchive(stream)))
 
     static member FromPath(path: string) =
-        try
-            new Noteskin(Folder path)
-            |> Ok
+        try new Noteskin(Folder path) |> Ok
         with err -> Error err
 
     static member Exists(path: string) =

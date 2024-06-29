@@ -131,7 +131,8 @@ type Toolbar() =
             fun () ->
                 if not (Dialog.exists()) then
                     Themes.reload_current ()
-                    Noteskins.reload_current ()
+                    Skins.reload_current_noteskin()
+                    Skins.reload_current_hud()
                     SelectedChart.recolor ()
                     Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_themes", "")
         )

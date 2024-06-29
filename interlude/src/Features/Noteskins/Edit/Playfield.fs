@@ -231,7 +231,7 @@ type PlayfieldSettingsPage() =
     override this.Title = %"noteskins.edit.playfield"
 
     override this.OnClose() =
-        Noteskins.save_config
+        Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 ColumnWidth = column_width.Value
                 ColumnSpacing = column_spacing.Value

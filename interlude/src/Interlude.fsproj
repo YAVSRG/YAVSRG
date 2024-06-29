@@ -26,7 +26,7 @@
     </Content>
     <EmbeddedResource Include="Resources\icon.png" />
     <EmbeddedResource Include="Resources\defaultArrow.isk" />
-    <EmbeddedResource Include="Resources\defaultBar.isk" />
+    <EmbeddedResource Include="Resources\chocolate.zip" />
     <EmbeddedResource Include="Resources\defaultOrb.isk" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
@@ -37,8 +37,7 @@
     <Compile Include="Content\Sounds.fs" />
     <Compile Include="Content\Rulesets.fs" />
     <Compile Include="Content\Themes.fs" />
-    <Compile Include="Content\Noteskins.fs" />
-    <Compile Include="Content\HUD.fs" />
+    <Compile Include="Content\Skins.fs" />
     <Compile Include="Content\Tables.fs" />
     <Compile Include="Content\Data.fs" />
     <Compile Include="Content\Init.fs" />

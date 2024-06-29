@@ -149,7 +149,7 @@ type RotationSettingsPage() =
     override this.Title = %"noteskins.edit.rotations"
 
     override this.OnClose() =
-        Noteskins.save_config
+        Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 Rotations = rotations
                 UseRotation = use_rotation.Value

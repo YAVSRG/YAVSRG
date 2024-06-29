@@ -3,20 +3,18 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features.Gameplay
 open Interlude.Features.Noteskins
 open Interlude.Features.Noteskins.Edit
 
 type EditNoteskinPage(from_hotkey: bool) =
     inherit Page()
 
+    let noteskin_id = Skins.selected_noteskin_id.Value
     let noteskin = Content.Noteskin
-    let data = noteskin.Config
-    let name = Setting.simple data.Name
+    let meta = Content.NoteskinMeta
 
     let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE(0.35f).Translate(0.0f, -100.0f))
 
@@ -32,8 +30,6 @@ type EditNoteskinPage(from_hotkey: bool) =
 
         let general_tab =
             NavigationContainer.Column(WrapNavigation = false)
-            |+ PageTextEntry(%"noteskins.edit.noteskinname", name)
-                .Pos(3)
             |+ PageButton(
                 %"noteskins.edit.playfield",
                 fun () ->
@@ -123,7 +119,7 @@ type EditNoteskinPage(from_hotkey: bool) =
             |+ PageButton(
                 %"noteskins.edit.export",
                 (fun () ->
-                    if not (Noteskins.export_current ()) then
+                    if not (Skins.export_skin noteskin_id) then
                         Notifications.error (
                             %"notification.export_noteskin_failure.title",
                             %"notification.export_noteskin_failure.body"
@@ -136,7 +132,7 @@ type EditNoteskinPage(from_hotkey: bool) =
             |+ PageButton(
                 %"noteskins.edit.open_folder",
                 (fun () ->
-                    Noteskins.open_current_folder () |> ignore
+                    Skins.open_noteskin_folder noteskin_id |> ignore
                 ),
                 Icon = Icons.FOLDER
             )
@@ -144,9 +140,9 @@ type EditNoteskinPage(from_hotkey: bool) =
             |+ PageButton(
                 %"noteskins.edit.delete",
                 (fun () ->
-                    ConfirmPage([name.Value] %> "noteskins.edit.delete.confirm",
+                    ConfirmPage([meta.Name] %> "noteskins.edit.delete.confirm",
                         fun () ->
-                            if Noteskins.delete_current () then
+                            if Skins.delete_noteskin noteskin_id then
                                 Menu.Back()
                     ).Show()
                 ),
@@ -169,15 +165,11 @@ type EditNoteskinPage(from_hotkey: bool) =
         base.Update(elapsed_ms, moved)
         Problems.problems_loader.Join()
 
-    override this.Title = data.Name
+    override this.Title = meta.Name
     override this.OnDestroy() = preview.Destroy()
 
     override this.OnReturnFromNestedPage() =
         refresh ()
         base.OnReturnFromNestedPage()
 
-    override this.OnClose() =
-        Noteskins.save_config
-            { Content.NoteskinConfig with
-                Name = name.Value
-            }
+    override this.OnClose() = ()

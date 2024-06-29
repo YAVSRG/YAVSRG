@@ -384,7 +384,7 @@ type AnimationSettingsPage() =
     override this.Title = %"noteskins.animations"
 
     override this.OnClose() =
-        Noteskins.save_config
+        Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 EnableColumnLight = enable_column_light.Value
                 ColumnLightDuration = column_light_duration.Value
