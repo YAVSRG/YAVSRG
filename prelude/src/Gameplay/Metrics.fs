@@ -67,7 +67,7 @@ type ScoreMetricSnapshot =
         Combo: int
         Lamp: int
     }
-    static member COUNT = 100
+    static member COUNT = 200
 
 [<AbstractClass>]
 type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: float32) =
