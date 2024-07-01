@@ -28,7 +28,7 @@ type private OptionsMenuTab =
 type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Buttons))
 
-    let HEIGHT = 100.0f
+    let HEIGHT = 90.0f
 
     let scaled_margins =
         let pc = (PRETTY_MARGIN_X - 5.0f) / 480.0f
@@ -36,7 +36,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
         { Position.Default with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
 
     let tab_buttons =
-        DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.SliceBottom(60.0f))
+        DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.CenterY(60.0f))
         |+ OptionsMenuButton(
             Icons.HOME,
             60.0f,
@@ -119,8 +119,8 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
             StripeWipe.draw_left_to_right 0.0f pc (this.Bounds.Expand(0.0f, Style.PADDING)) Color.Transparent
 
             Stencil.start_drawing()
-            Draw.rect this.Bounds Colors.shadow_2.O2
-            Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.shadow_2.O3
+            Draw.rect this.Bounds Colors.shadow_2.O1
+            Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.cyan_accent.O2
             base.Draw()
             StripeWipe.draw_left_to_right (pc2 - 0.05f) pc this.Bounds Colors.cyan
 
@@ -133,16 +133,16 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
             StripeWipe.draw_left_to_right pc 1.0f (this.Bounds.Expand(0.0f, Style.PADDING)) Color.Transparent
 
             Stencil.start_drawing()
-            Draw.rect this.Bounds Colors.shadow_2.O2
-            Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.shadow_2.O3
+            Draw.rect this.Bounds Colors.shadow_2.O1
+            Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.cyan_accent.O2
             base.Draw()
             StripeWipe.draw_left_to_right (pc - 0.05f) pc2 this.Bounds Colors.cyan
 
             Stencil.finish()
 
         | Transition.Shown ->
-            Draw.rect this.Bounds Colors.shadow_2.O2
-            Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.shadow_2.O3
+            Draw.rect this.Bounds Colors.shadow_2.O1
+            Draw.rect (this.Bounds.BorderBottom Style.PADDING) Colors.cyan_accent.O2
             base.Draw()
 
         | Transition.Hidden -> ()
