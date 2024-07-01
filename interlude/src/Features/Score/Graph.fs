@@ -160,7 +160,7 @@ type ScoreGraph(score_info: ScoreInfo) =
                      100.0
                  else
                      100.0 * ss.PointsScored / ss.MaxPointsScored)
-                |> sprintf "%.2f%%",
+                |> sprintf "%.4f%%",
                 box.SliceTop(box_h * 0.5f).Expand(-20.0f, -5.0f),
                 Colors.text,
                 Alignment.LEFT
@@ -174,13 +174,13 @@ type ScoreGraph(score_info: ScoreInfo) =
                 Alignment.LEFT
             )
 
-            Text.draw (Style.font, %"score.graph.early", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 33.0f, Colors.white.O1)
-            Text.draw (Style.font, %"score.graph.late", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 3.0f, Colors.white.O1)
-            Text.draw_aligned (Style.font, duration, 16.0f, this.Bounds.Right - 5.0f, this.Bounds.Bottom - 33.0f, Colors.white.O1, Alignment.RIGHT)
+            Text.draw (Style.font, %"score.graph.early", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Bottom - 40.0f, Colors.white.O1)
+            Text.draw (Style.font, %"score.graph.late", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Top + 3.0f, Colors.white.O1)
+            Text.draw_aligned (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, Colors.white.O1, Alignment.RIGHT)
 
         else
-            Text.draw_b (Style.font, %"score.graph.early", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 33.0f, Colors.text)
-            Text.draw_b (Style.font, %"score.graph.late", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 3.0f, Colors.text)
-            Text.draw_aligned_b (Style.font, duration, 16.0f, this.Bounds.Right - 5.0f, this.Bounds.Bottom - 33.0f, Colors.text, Alignment.RIGHT)
+            Text.draw_b (Style.font, %"score.graph.early", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Bottom - 40.0f, Colors.text)
+            Text.draw_b (Style.font, %"score.graph.late", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Top + 3.0f, Colors.text)
+            Text.draw_aligned_b (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, Colors.text, Alignment.RIGHT)
 
     member this.Dispose() = fbo.Dispose()
