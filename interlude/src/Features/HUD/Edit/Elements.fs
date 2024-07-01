@@ -300,18 +300,3 @@ module HudElement =
         | HudElement.BPMMeter -> all_defaults.BPMMeterPosition
         | HudElement.InputMeter -> all_defaults.InputMeterPosition
         | HudElement.Pacemaker -> all_defaults.PacemakerPosition
-
-    let show_menu (e: HudElement) (on_close: unit -> unit) =
-        match e with
-        | HudElement.Accuracy -> AccuracyPage(on_close).Show()
-        | HudElement.TimingDisplay -> TimingDisplayPage(on_close).Show()
-        | HudElement.Combo -> ComboPage(on_close).Show()
-        | HudElement.SkipButton -> SkipButtonPage(on_close).Show()
-        | HudElement.JudgementMeter -> JudgementMeterPage(on_close).Show()
-        | HudElement.EarlyLateMeter -> EarlyLateMeterPage(on_close).Show()
-        | HudElement.ProgressMeter -> ProgressMeterPage(on_close).Show()
-        | HudElement.JudgementCounter -> JudgementCounterPage(on_close).Show()
-        | HudElement.RateModMeter -> RateModMeterPage(on_close).Show()
-        | HudElement.BPMMeter -> BPMMeterPage(on_close).Show()
-        | HudElement.InputMeter -> InputMeterPage(on_close).Show()
-        | HudElement.Pacemaker -> PacemakerPage(on_close).Show()

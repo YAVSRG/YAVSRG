@@ -4,21 +4,57 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
+open Prelude.Skinning.HudLayouts
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
+open Interlude.Features.HUD.Edit
 
 type NoteskinPreview(position: Position) as this =
     inherit Container(NodeType.None)
 
     let fbo = FBO.create ()
 
+    let construct_hud_element (state: PlayState) (elem: HudElement) (playfield: Container) (outside_playfield: Container) =
+        if (HudElement.enabled_setting elem).Value then
+            let pos = (HudElement.position_setting elem).Value
+            let w = HudElement.constructor elem (Content.HUD, state)
+            w.Position <-
+                {
+                    Left = pos.Left
+                    Top = pos.Top
+                    Right = pos.Right
+                    Bottom = pos.Bottom
+                }
+            if pos.RelativeToPlayfield then
+                playfield.Add w
+            else
+                outside_playfield.Add w
+
     let create_renderer (info: LoadedChartInfo) =
+        let state = PlayState.Dummy info
+        let noteskin_config = Content.NoteskinConfig
         let playfield =
-            Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
+            Playfield(info.WithColors, state, noteskin_config, false)
+        
+        if noteskin_config.EnableColumnLight then
+            playfield.Add(new ColumnLighting(info.WithColors.Keys, noteskin_config, state))
+
+        if noteskin_config.UseExplosions then
+            playfield.Add(new Explosions(info.WithColors.Keys, noteskin_config, state))
 
         playfield.Add(LanecoverOverReceptors())
+
+        for elem in HudElement.FULL_LIST do
+            construct_hud_element state elem playfield this
+
+        playfield.Add({ new StaticWidget(NodeType.None) with
+            override this.Draw() = ()
+            override this.Update(elapsed_ms, moved) =
+                base.Update(elapsed_ms, moved)
+                state.Scoring.Update (state.CurrentChartTime())
+        })
 
         if this.Initialised then
             playfield.Init this

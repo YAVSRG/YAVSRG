@@ -9,7 +9,6 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Gameplay
-open Prelude.Skinning.Noteskins
 open Prelude.Skinning.HudLayouts
 open Interlude.Options
 open Interlude.UI
@@ -18,6 +17,24 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Play
 open Interlude.Features.Pacemaker
+
+[<AutoOpen>]
+module private ElementMenus =
+
+    let show_menu (e: HudElement) (on_close: unit -> unit) =
+        match e with
+        | HudElement.Accuracy -> AccuracyPage(on_close).Show()
+        | HudElement.TimingDisplay -> TimingDisplayPage(on_close).Show()
+        | HudElement.Combo -> ComboPage(on_close).Show()
+        | HudElement.SkipButton -> SkipButtonPage(on_close).Show()
+        | HudElement.JudgementMeter -> JudgementMeterPage(on_close).Show()
+        | HudElement.EarlyLateMeter -> EarlyLateMeterPage(on_close).Show()
+        | HudElement.ProgressMeter -> ProgressMeterPage(on_close).Show()
+        | HudElement.JudgementCounter -> JudgementCounterPage(on_close).Show()
+        | HudElement.RateModMeter -> RateModMeterPage(on_close).Show()
+        | HudElement.BPMMeter -> BPMMeterPage(on_close).Show()
+        | HudElement.InputMeter -> InputMeterPage(on_close).Show()
+        | HudElement.Pacemaker -> PacemakerPage(on_close).Show()
 
 type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> unit, finish_drag: unit -> unit) =
     inherit StaticWidget(NodeType.None)
@@ -429,7 +446,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                 dragging_from <- Some(Mouse.pos ())
                 this.Select true
             elif hover && Mouse.right_click () && HudElement.can_configure elem then
-                HudElement.show_menu elem (fun () -> ctx.Create elem)
+                show_menu elem (fun () -> ctx.Create elem)
 
         base.Update(elapsed_ms, moved)
 
@@ -635,7 +652,7 @@ type PositionerInfo(ctx: PositionerContext) =
         )
         |+ Button(
             Icons.SETTINGS,
-            (fun () -> HudElement.show_menu ctx.Selected (fun () -> ctx.Create ctx.Selected)),
+            (fun () -> show_menu ctx.Selected (fun () -> ctx.Create ctx.Selected)),
             Hotkey = "options",
             Disabled = (fun () -> HudElement.can_configure ctx.Selected |> not),
             Position = Position.Column(600.0f, 100.0f).Margin(10.0f, 5.0f)

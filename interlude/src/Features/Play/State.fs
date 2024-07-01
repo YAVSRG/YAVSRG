@@ -5,6 +5,8 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Gameplay
+open Percyqaz.Flux.Audio
+open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
 
@@ -20,14 +22,17 @@ type PlayState =
     member this.Ruleset = this.Scoring.Ruleset
 
     static member Dummy(info: LoadedChartInfo) =
-        let s = Metrics.create_dummy info.WithMods
+        let replay_data: IReplayProvider = StoredReplayProvider.AutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
+        let ruleset = Rulesets.current
+        let scoring = Metrics.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
+        let first_note = info.WithMods.FirstNote
 
         {
             Chart = info.Chart
             WithColors = info.WithColors
-            Scoring = s
+            Scoring = scoring
             ScoringChanged = Event<unit>()
-            CurrentChartTime = fun () -> 0.0f<ms>
+            CurrentChartTime = fun () -> Song.time_with_offset () - first_note
             Pacemaker = PacemakerState.None
         }
 
