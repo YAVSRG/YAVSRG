@@ -1,5 +1,181 @@
 {
     "Noteskins": [{
+        "Name": "Wagemania",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Wagemania__thumbnail.png",
+        "Versions": [{
+            "Author": "Wagg",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Wagemania_Orbs.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Wagemania_Orbs.png",
+            "Version": "Orbs"
+        }]
+    }, {
+        "Name": "Wafles",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Wafles__thumbnail.png",
+        "Versions": [{
+            "Author": "Wafles",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Wafles_Arrows.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Wafles_Arrows.png",
+            "Version": "Arrows"
+        }]
+    }, {
+        "Name": "Waffle",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle__thumbnail.png",
+        "Versions": [{
+            "Author": "Lifly",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V5.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V5.png",
+            "Version": "V5"
+        }, {
+            "Author": "Lifly",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V4.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V4.png",
+            "Version": "V4"
+        }, {
+            "Author": "Lifly",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V3_Bars.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V3_Bars.png",
+            "Version": "V3_Bars"
+        }, {
+            "Author": "Lifly",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V3.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V3.png",
+            "Version": "V3"
+        }, {
+            "Author": "Lifly",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V2.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V2.png",
+            "Version": "V2"
+        }, {
+            "Author": "Lifly",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V1.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Waffle_V1.png",
+            "Version": "V1"
+        }]
+    }, {
+        "Name": "SavArrows",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/SavArrows__thumbnail.png",
+        "Versions": [{
+            "Author": "Sav",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/SavArrows_V1.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/SavArrows_V1.png",
+            "Version": "V1"
+        }]
+    }, {
+        "Name": "Purple Rain",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Purple Rain__thumbnail.png",
+        "Versions": [{
+            "Author": "Percyqaz",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Purple Rain_Bars.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Purple Rain_Bars.png",
+            "Version": "Bars"
+        }]
+    }, {
+        "Name": "NewArrowSkin",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/NewArrowSkin__thumbnail.png",
+        "Versions": [{
+            "Author": "Janko",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/NewArrowSkin_Arrows.isk",
+            "Editor": "Anas",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/NewArrowSkin_Arrows.png",
+            "Version": "Arrows"
+        }]
+    }, {
+        "Name": "MultiplyByZero",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/MultiplyByZero__thumbnail.png",
+        "Versions": [{
+            "Author": "Unknown",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/MultiplyByZero_Orbs.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/MultiplyByZero_Orbs.png",
+            "Version": "Orbs"
+        }]
+    }, {
+        "Name": "Loki",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Loki__thumbnail.png",
+        "Versions": [{
+            "Author": "Sprrumnk",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Loki_Bars.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Loki_Bars.png",
+            "Version": "Bars"
+        }, {
+            "Author": "Sprrumnk",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Loki_Arrows.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Loki_Arrows.png",
+            "Version": "Arrows"
+        }]
+    }, {
+        "Name": "K1RA",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/K1RA__thumbnail.png",
+        "Versions": [{
+            "Author": "DJ K1RA",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/K1RA_Diamonds.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/K1RA_Diamonds.png",
+            "Version": "Diamonds"
+        }]
+    }, {
+        "Name": "Felopes",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Felopes__thumbnail.png",
+        "Versions": [{
+            "Author": "Felopes",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Felopes_Orbs.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Felopes_Orbs.png",
+            "Version": "Orbs"
+        }]
+    }, {
+        "Name": "Eliminate",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Eliminate__thumbnail.png",
+        "Versions": [{
+            "Author": "Eliminate & Others",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Eliminate_Orbs.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Eliminate_Orbs.png",
+            "Version": "Orbs"
+        }]
+    }, {
+        "Name": "DivideByZero",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/DivideByZero__thumbnail.png",
+        "Versions": [{
+            "Author": "MinaciousGrace",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/DivideByZero_Arrows.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/DivideByZero_Arrows.png",
+            "Version": "Arrows"
+        }]
+    }, {
+        "Name": "DefaultOrb",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/DefaultOrb__thumbnail.png",
+        "Versions": [{
+            "Author": "Percyqaz",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/DefaultOrb_Orbs.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/DefaultOrb_Orbs.png",
+            "Version": "Orbs"
+        }]
+    }, {
+        "Name": "Akai Haato",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Akai Haato__thumbnail.png",
+        "Versions": [{
+            "Author": "Jianshyy",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Akai Haato_Arrows.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Akai Haato_Arrows.png",
+            "Version": "Arrows"
+        }]
+    }, {
         "Name": "Funkin'",
         "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Funkin'__thumbnail.png",
         "Versions": [{
