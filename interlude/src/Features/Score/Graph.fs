@@ -45,6 +45,8 @@ type ScoreGraph(score_info: ScoreInfo) =
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
 
+    let duration = (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> Interlude.Utils.format_duration_ms
+
     do fbo.Unbind()
 
     member this.Refresh() = refresh <- true
@@ -120,9 +122,6 @@ type ScoreGraph(score_info: ScoreInfo) =
                 let x = this.Bounds.Left + 5.0f + ev.Time * hscale
                 Draw.rect (Rect.Box(x - HTHICKNESS, this.Bounds.Top + y - HTHICKNESS, THICKNESS, THICKNESS)) col
 
-        // early/late
-        Text.draw (Style.font, %"score.graph.early", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 33.0f, Colors.white.O3)
-        Text.draw (Style.font, %"score.graph.late", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 3.0f, Colors.white.O3)
 
         fbo.Unbind()
 
@@ -174,5 +173,14 @@ type ScoreGraph(score_info: ScoreInfo) =
                 Colors.text,
                 Alignment.LEFT
             )
+
+            Text.draw (Style.font, %"score.graph.early", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 33.0f, Colors.white.O1)
+            Text.draw (Style.font, %"score.graph.late", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 3.0f, Colors.white.O1)
+            Text.draw_aligned (Style.font, duration, 16.0f, this.Bounds.Right - 5.0f, this.Bounds.Bottom - 33.0f, Colors.white.O1, Alignment.RIGHT)
+
+        else
+            Text.draw_b (Style.font, %"score.graph.early", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 33.0f, Colors.text)
+            Text.draw_b (Style.font, %"score.graph.late", 16.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 3.0f, Colors.text)
+            Text.draw_aligned_b (Style.font, duration, 16.0f, this.Bounds.Right - 5.0f, this.Bounds.Bottom - 33.0f, Colors.text, Alignment.RIGHT)
 
     member this.Dispose() = fbo.Dispose()
